@@ -1,0 +1,7 @@
+<webscript> 
+  <shortname>Folder Listing Utility</shortname> 
+  <description>Sample demonstrating the listing of folder contents</description>
+  <url>/dir/{folderpath}?verbose={verbose?}</url> 
+  <format default="html">extension</format> 
+  <authentication>user</authentication> 
+</webscript>

@@ -1,0 +1,110 @@
+<model name="kb:contentmodel" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+	<description>Knowledge Base Content Model</description>
+	<author>alfresco_professional</author>
+	<version>1.0</version>
+
+	<imports>
+		<import uri="http://www.alfresco.org/model/dictionary/1.0"
+			prefix="d" />
+		<import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />
+	</imports>
+
+	<namespaces>
+		<namespace uri="http://www.example.org/knowledgebase"
+			prefix="kb" />
+	</namespaces>
+	<constraints>
+		<constraint name="kb:attachmenttype_constraint" type="LIST">
+			<parameter name="allowedValues">
+				<list>
+					<value>Patch</value>
+					<value>Sample</value>
+					<value>Documentation</value>
+				</list>
+			</parameter>
+		</constraint>
+		<constraint name="kb:status_constraint" type="LIST">
+			<parameter name="allowedValues">
+				<list>
+					<value>Draft</value>
+					<value>Pending Approval</value>
+					<value>Current</value>
+					<value>Archived</value>
+				</list>
+			</parameter>
+		</constraint>
+		<constraint name="kb:articletype_constraint" type="LIST">
+			<parameter name="allowedValues">
+				<list>
+					<value>Any</value>
+					<value>Article</value>
+					<value>FAQ</value>
+					<value>White Paper</value>
+				</list>
+			</parameter>
+		</constraint>
+	</constraints>
+	<types>
+		<type name="kb:attachment">
+			<title>Attachment</title>
+			<parent>cm:content</parent>
+			<properties>
+				<property name="kb:attachmenttype">
+					<title>Attachment Type</title>
+					<type>d:text</type>
+					<default>Sample</default>
+					<constraints>
+						<constraint ref="kb:attachmenttype_constraint" />
+					</constraints>
+				</property>
+			</properties>
+		</type>
+	</types>
+	<aspects>
+		<aspect name="kb:article">
+			<title>Knowledge Base Article</title>
+			<properties>
+				<property name="kb:articletype">
+					<title>Article Type</title>
+					<type>d:text</type>
+					<default>Article</default>
+					<constraints>
+						<constraint type="LIST">
+							<parameter name="allowedValues">
+								<list>
+									<value>Any</value>
+									<value>Article</value>
+									<value>FAQ</value>
+									<value>White Paper</value>
+								</list>
+							</parameter>
+						</constraint>
+					</constraints>
+				</property>
+			</properties>
+			<associations>
+				<child-association name="kb:artifacts">
+					<target>
+						<class>kb:attachment</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+
+					<duplicate>true</duplicate>
+				</child-association>
+				<association name="kb:related">
+					<title>Related Articles</title>
+					<source>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</source>
+					<target>
+						<class>kb:article</class>
+						<mandatory>false</mandatory>
+						<many>true</many>
+					</target>
+				</association>
+			</associations>
+		</aspect>
+	</aspects>
+</model>
