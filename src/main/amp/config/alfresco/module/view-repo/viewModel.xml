@@ -124,6 +124,13 @@
         </type>
         <type name="view:View">
             <parent>view:ModelElement</parent>
+            <properties>
+                <property name="view:noSection">
+                    <type>d:boolean</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
+            </properties>
             <associations>
                 <association name="view:views">
                     <source>

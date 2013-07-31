@@ -1,0 +1,80 @@
+<webscript> 
+  <shortname>Post View</shortname> 
+  <description>Handles posting of view from magicdraw</description>
+  <url>/views/{viewid}?force={force?}&amp;recurse={recurse?}&amp;doc={doc?}</url> 
+  <format default="json">any</format> 
+  <authentication>none</authentication> 
+  <transaction allow="readwrite">required</transaction>
+  <family>View Editor</family>
+  <args>
+  	<arg>
+  		<name>force</name>
+  		<description>Whether the view contents should replace what's currently in the sandbox, if false, a merge will be done instead</description>
+  	</arg>
+  	<arg>
+  		<name>recurse</name>
+  		<description>Whether posted content contains single view or all its children, if this is true, the view2view key is populated</description>
+  	</arg>
+  	<arg>
+  		<name>doc</name>
+  		<description>Whether the view being posted is a DocumentView</description>
+  	</arg>
+  	<arg>
+  		<name>viewid</name>
+  		<description>The MD ID of the view being posted</description>
+  	</arg>
+  	<arg>
+  		<name>posted content</name>
+  		<description>The request body of the post as json (pairs in parenthesis are conditional):
+  		{
+  			"views": [
+  				{
+  					"mdid": mdid, 
+  				 	"noSection": true/false, 
+  				 	"contains": [
+  				 		{
+  				 			"type": Paragraph", 
+  				 			"source": mdid/"text", 
+  				 			"useProperty": "DOCUMENTATION/NAME/DVALUE", 
+  				 			("text": text)
+  				 		} OR
+  				 		{
+  				 			"type": "Table", 
+  				 			"sources": [mdid, ...], 
+  				 			"title": title, 
+  				 			"body": [[{
+  				 				"source": mdid/"text", 
+  				 				"useProperty": "DOCUMENTATION/NAME/DVALUE", 
+  				 				("text": text), 
+  				 				("colspan": colspan), 
+  				 				("rowspan": rowspan)
+  				 			}, ...], ...], 
+  				 			"header": same as body, 
+  				 			"style": style
+  				 		}, ... 
+  				 	]
+  				}, ...
+  			],
+  			"view2view": {
+  				viewid: [viewid, ...], ...
+  			},
+  			"elements": [
+  				{
+  					"mdid": mdid, 
+  					("name": name), 
+  					"documentation": doc, 
+  					("type": "View/Comment/Property"), 
+  					("dvalue": dvalue)
+  				}, ...
+  			]
+  		}
+  		
+  		- "view2view" is only present if recurse is true
+  		- "text" is only present if source is "text"
+  		- "dvalue" is only present if type is "Property"
+  		- if "type" is not present, default is "NamedElement"
+  		- "name" will not be present if type is "Comment"
+  		</description>
+  	</arg>
+  </args>
+</webscript>
