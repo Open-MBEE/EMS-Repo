@@ -3,7 +3,7 @@
   <description>Handles posting of view from magicdraw</description>
   <url>/views/{viewid}?force={force?}&amp;recurse={recurse?}&amp;doc={doc?}</url> 
   <format default="json">any</format> 
-  <authentication>none</authentication> 
+  <authentication>user</authentication> 
   <transaction allow="readwrite">required</transaction>
   <family>View Editor</family>
   <args>

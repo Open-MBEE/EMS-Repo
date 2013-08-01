@@ -1,17 +1,20 @@
-var modelFolder = roothome.childByNamePath("/Sites/europa/vieweditor/model");
-var presentationFolder = roothome.childByNamePath("/Sites/europa/vieweditor/presentation");
+//var modelFolder = roothome.childByNamePath("/Sites/europa/vieweditor/model");
+//var presentationFolder = roothome.childByNamePath("/Sites/europa/vieweditor/presentation");
+var europaSite = siteService.getSite("europa").node;
+var modelFolder = europaSite.childByNamePath("/vieweditor/model");
+var presentationFolder = europaSite.childByNamePath("/vieweditor/presentation");
 
 function updateOrCreateModelElement(element, force) {
 	var modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + element.mdid + "']");
 	if (modelNode == null || modelNode.length == 0) {
 		if (element.type == "View")
-			modelNode = parent.createNode(element.name, "view:View");
+			modelNode = modelFolder.createNode(element.name, "view:View");
 		else if (element.type == "Property")
-			modelNode = parent.createNode(element.name, "view:Property");
+			modelNode = modelFolder.createNode(element.name, "view:Property");
 		else if (element.type == "Comment")
-			modelNode = parent.createNode("Comment", "view:Comment");
+			modelNode = modelFolder.createNode("Comment", "view:Comment");
 		else
-			modelNode = parent.createNode(element.name, "view:ModelElement");
+			modelNode = modelFolder.createNode(element.name, "view:ModelElement");
 	} else
 		modelNode = modelNode[0];
 
@@ -42,15 +45,14 @@ function updateOrCreateView(view) {
 	}
 	viewNode = viewNode[0];
 	var contains = viewNode.assocs["view:contains"];
-	for (var contain in contains) {
-		viewNode.removeAssociation(contains[contain], "view:contains");
-		contains[contain].remove();
+	for (var i = 0; i < contains.length; i++) {
+		viewNode.removeAssociation(contains[i], "view:contains");
+		contains[i].remove();
 	}
-	var i = 1;
-	for (var j in view.contains) {
-		var containedObject = createContainedElement(view.contains[j], i);
+
+	for (var i = 0; i < view.contains.length; i++) {
+		var containedObject = createContainedElement(view.contains[i], i+1);
 		viewNode.createAssociation(containedObject, "view:contains");
-		i++;
 	}
 	if (view.noSection != null && view.noSection != undefined)
 		viewNode.properties["view:noSection"] = view.noSection;
@@ -97,24 +99,27 @@ function createContainedElement(contained, i) {
 function main() {
 	//var europaSite = siteService.getSite("europa");
 	var postjson = jsonUtils.toObject(json);
-	var topview = modelFolder.childrenByXPath("*[@view:mdid='" + args['viewid'] + "']");
+	if (postjson == null || postjson == undefined)
+		return;
+	var viewid = url.extension
+	var topview = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
 	if (topview == null || topview.length == 0) {
-		if (args['doc'] == 'true') {
+		if (args.doc == 'true') {
 			topview = modelFolder.createNode("blah", "view:DocumentView");
 		} else {
 			topview = modelFolder.createNode("blah", "view:View");
 		}
-		topview.properties["view:mdid"] = args['viewid'];
+		topview.properties["view:mdid"] = viewid;
 		topview.save();
 	} 
-	var force = args['force'] == 'true' ? true : false;
-	for (var element in postjson.elements) {
-		updateOrCreateModelElement(postjson.elements[element], force);
+	var force = args.force == 'true' ? true : false;
+	for (var i = 0; i < postjson.elements.length; i++) {
+		updateOrCreateModelElement(postjson.elements[i], force);
 	}
-	for (var view in postjson.views) {
-		updateOrCreateView(postjson.views[view]);
+	for (var i = 0; i < postjson.views.length; i++) {
+		updateOrCreateView(postjson.views[i]);
 	}
-	if (args['recurse'] == 'true') {
+	if (args.recurse == 'true') {
 		updateViewHierarchy(postjson.view2view);
 	}	
 }
