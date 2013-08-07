@@ -1,0 +1,6 @@
+<webscript>
+  <shortname>Artifact Check</shortname>
+  <description>Checks if artifact exists</description>
+  <url>/artifacts/{id}?cs={cs?}&amp;extension={extension?}</url>
+  <authentication>user</authentication>
+</webscript>
