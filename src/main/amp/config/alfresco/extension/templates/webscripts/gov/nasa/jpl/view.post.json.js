@@ -1,3 +1,6 @@
+<import resource="classpath:alfresco/extension/js/json2.js">
+<import resource="classpath:alfresco/extension/js/json_parse.js">
+//<import resource="classpath:alfresco/extension/js/json2.js">
 //var modelFolder = roothome.childByNamePath("/Sites/europa/vieweditor/model");
 //var presentationFolder = roothome.childByNamePath("/Sites/europa/vieweditor/presentation");
 var europaSite = siteService.getSite("europa").node;
@@ -40,17 +43,17 @@ function updateOrCreateModelElement(element, force) {
 
 function updateOrCreateView(view) {
 	var viewNode = modelFolder.childrenByXPath("*[@view:mdid='" + view.mdid + "']");
-	if (viewNode == null || modelNode.length == 0) {
+	if (viewNode == null || viewNode.length == 0) {
 		return;
 	}
 	viewNode = viewNode[0];
 	var contains = viewNode.assocs["view:contains"];
-	for (var i = 0; i < contains.length; i++) {
+	for (var i in contains) {
 		viewNode.removeAssociation(contains[i], "view:contains");
 		contains[i].remove();
 	}
 
-	for (var i = 0; i < view.contains.length; i++) {
+	for (var i in view.contains) {
 		var containedObject = createContainedElement(view.contains[i], i+1);
 		viewNode.createAssociation(containedObject, "view:contains");
 	}
@@ -98,7 +101,8 @@ function createContainedElement(contained, i) {
 
 function main() {
 	//var europaSite = siteService.getSite("europa");
-	var postjson = jsonUtils.toObject(json);
+	//var postjson = jsonUtils.toObject(json);
+	var postjson = JSON.parse(json.toString());
 	if (postjson == null || postjson == undefined)
 		return;
 	var viewid = url.extension
@@ -113,10 +117,10 @@ function main() {
 		topview.save();
 	} 
 	var force = args.force == 'true' ? true : false;
-	for (var i = 0; i < postjson.elements.length; i++) {
+	for (var i in postjson.elements) {
 		updateOrCreateModelElement(postjson.elements[i], force);
 	}
-	for (var i = 0; i < postjson.views.length; i++) {
+	for (var i in postjson.views) {
 		updateOrCreateView(postjson.views[i]);
 	}
 	if (args.recurse == 'true') {
