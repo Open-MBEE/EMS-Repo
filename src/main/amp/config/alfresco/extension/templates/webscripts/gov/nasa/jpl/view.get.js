@@ -41,14 +41,21 @@ function handleView(view) {
 		}
 	}
 }
-var response = "NotFound";
-var topview = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
-if (topview == null || topview.length == 0) {
-	response = "NotFound";
-} else {
-	topview = topview[0];
-	handleView(topview);
-	response = jsonUtils.toJSONString(res);
+
+function main() {
+	var topview = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
+	if (topview == null || topview.length == 0) {
+		response = "NotFound";
+	} else {
+		topview = topview[0];
+		handleView(topview);
+	}
 }
 
+var response = "[]";
+main();
+
+if (res.length > 0) {
+	response = jsonUtils.toJSONString(res);
+}
 model['res'] = response;

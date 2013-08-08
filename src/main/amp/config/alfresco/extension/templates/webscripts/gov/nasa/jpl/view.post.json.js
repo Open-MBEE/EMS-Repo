@@ -148,23 +148,10 @@ function createContainedElement(contained, i, sources) {
 		pnode.properties["view:header"] = jsonUtils.toJSONString(contained.header);
 		pnode.properties["view:body"] = jsonUtils.toJSONString(contained.body);
 		pnode.properties["view:style"] = contained.style;
-		for (var i in contained.header) {
-			for (var j in contained.header[i]) {
-				var cell = contained.header[i][j];
-				if (cell['source'] != "text") {
-					if (sources.indexOf(cell['source']) < 0)
-						sources.push(cell.source);
-				}
-			}
-		}
-		for (var i in contained.body) {
-			for (var j in contained.header[i]) {
-				var cell = contained.header[i][j];
-				if (cell['source'] != "text") {
-					if (sources.indexOf(cell['source']) < 0)
-						sources.push(cell.source);
-				}
-			}
+		for (var i in contained.sources) {
+			var sourceid = contained.sources[i];
+			if (sources.indexOf(sourceid) < 0)
+				sources.push(sourceid);
 		}
 		pnode.save();
 		
