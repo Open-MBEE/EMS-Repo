@@ -83,12 +83,36 @@ function updateOrCreateView(view) {
 		viewNode.properties["view:noSection"] = view.noSection;
 	else
 		viewNode.properties["view:noSection"] = false;
+	viewNode.properties["view:containsJson"] = jsonUtils.toJSONString(view.contains);
 	viewNode.save();
 	return viewNode;
 }
 
 function updateViewHierarchy(views) {
-	
+	for (var pview in views) {
+		var cviews = views[pview];
+		var pviewnode = modelMapping[pview];
+		if (pviewnode == null || pviewnode == undefined) {
+			continue;
+		}
+		var oldchildren = pviewnode.assocs["view:views"];
+		for (var i in oldchildren) {
+			pviewnode.removeAssociation(oldchildren[i], "view:views");
+		}
+		for (var ci in cviews) {
+			var cvid = cviews[ci];
+			var cviewnode = modelMapping[cvid];
+			if (cviewnode == null || cviewnode == undefined) {
+				continue;
+			}
+			//var oldparents = cviewnode.sourceAssocs["view:views"];
+			cviewnode.properties["view:index"] = ci;
+			cviewnode.save();
+			pviewnode.createAssociation(cviewnode, "view:views");
+		}
+		pviewnode.properties["view:viewsJson"] = jsonUtils.toJSONString(cviews);
+		pviewnode.save();
+	}
 }
 
 function createContainedElement(contained, i) {
@@ -117,9 +141,11 @@ function createContainedElement(contained, i) {
 		pnode.save();
 		
 	}
-	var orderable = new Array(1);
-	orderable["view:index"] = i;
-	pnode.addAspect("view:Orderable", orderable);
+	pnode.properties["view:index"] = i;
+	//var orderable = new Array(1);
+	//orderable["view:index"] = i;
+	//pnode.addAspect("view:Orderable", orderable);
+	pnode.save();
 	return pnode;
 }
 
