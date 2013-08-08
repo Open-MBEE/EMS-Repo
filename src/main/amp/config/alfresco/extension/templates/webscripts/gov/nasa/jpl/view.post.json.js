@@ -7,25 +7,42 @@ var europaSite = siteService.getSite("europa").node;
 var modelFolder = europaSite.childByNamePath("/vieweditor/model");
 var presentationFolder = europaSite.childByNamePath("/vieweditor/presentation");
 
-function updateOrCreateModelElement(element, force) {
-	var modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + element.mdid + "']");
-	if (modelNode == null || modelNode.length == 0) {
-		if (element.type == "View")
-			modelNode = modelFolder.createNode(element.name, "view:View");
-		else if (element.type == "Property")
-			modelNode = modelFolder.createNode(element.name, "view:Property");
-		else if (element.type == "Comment")
-			modelNode = modelFolder.createNode("Comment", "view:Comment");
-		else
-			modelNode = modelFolder.createNode(element.name, "view:ModelElement");
-	} else
-		modelNode = modelNode[0];
+var modelMapping = {};
 
-	if (element.name != null && element.name != undefined && element.name != modelNode.properties["cm:name"])
+function guid() {
+    function _p8(s) {
+        var p = (Math.random().toString(16)+"000000000").substr(2,8);
+        return s ? "-" + p.substr(0,4) + "-" + p.substr(4,4) : p ;
+    }
+    return _p8() + _p8(true) + _p8(true) + _p8();
+}
+
+function updateOrCreateModelElement(element, force) {
+	var modelNode = modelMapping[element.mdid];
+	if (modelNode == null || modelNode == undefined) {
+		modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + element.mdid + "']");
+		if (modelNode == null || modelNode.length == 0) {
+			if (element.type == "View") {
+				modelNode = modelFolder.createNode(element.mdid, "view:View");
+				modelNode.properties["view:name"] = element.name;
+			} else if (element.type == "Property") {
+				modelNode = modelFolder.createNode(element.mdid, "view:Property");
+				modelNode.properties["view:name"] = element.name;
+			} else if (element.type == "Comment")
+				modelNode = modelFolder.createNode(element.mdid, "view:Comment");
+			else {
+				modelNode = modelFolder.createNode(element.mdid, "view:ModelElement");
+				modelNode.properties["view:name"] = element.name;
+			}
+		} else
+			modelNode = modelNode[0];
+	}
+
+	if (element.name != null && element.name != undefined && element.name != modelNode.properties["view:name"])
 		if (force)
-			modelNode.properties["cm:name"] = element.name;
+			modelNode.properties["view:name"] = element.name;
 		else
-			modelNode.properties["cm:name"] = modelNode.properties["cm:name"] + " - MERGED - " + element.name;
+			modelNode.properties["view:name"] = modelNode.properties["view:name"] + " - MERGED - " + element.name;
 	if (element.documentation != modelNode.properties["view:documentation"])
 		if (force)
 			modelNode.properties["view:documentation"] = element.documentation;
@@ -38,15 +55,20 @@ function updateOrCreateModelElement(element, force) {
 			modelNode.properties["view:dvalue"] = modelNode.properties["view:dvalue"] + " - MERGED - " + element.dvalue;
 	modelNode.properties["view:mdid"] = element.mdid;
 	modelNode.save();
+	modelMapping[element.mdid] = modelNode;
 	return modelNode;
 }
 
 function updateOrCreateView(view) {
-	var viewNode = modelFolder.childrenByXPath("*[@view:mdid='" + view.mdid + "']");
-	if (viewNode == null || viewNode.length == 0) {
-		return;
+	//var viewNode = modelFolder.childrenByXPath("*[@view:mdid='" + view.mdid + "']");
+	var viewNode = modelMapping[view.mdid];
+	if (viewNode == null || viewNode == undefined) {
+		viewNode = modelFolder.childrenByXPath("*[@view:mdid='" + view.mdid + "']");
+		if (viewNode == null || viewNode.length == 0) {
+			return;
+		}
+		viewNode = viewNode[0];
 	}
-	viewNode = viewNode[0];
 	var contains = viewNode.assocs["view:contains"];
 	for (var i in contains) {
 		viewNode.removeAssociation(contains[i], "view:contains");
@@ -72,21 +94,23 @@ function updateViewHierarchy(views) {
 function createContainedElement(contained, i) {
 	var pnode = null;
 	if (contained.type == "Paragraph") {
-		pnode = presentationFolder.createNode("blah", "view:Paragraph");
+		pnode = presentationFolder.createNode(guid(), "view:Paragraph");
 		if (contained.source == "text") {
-			tnode = presentationFolder.createNode("blah", "view:Text");
+			tnode = presentationFolder.createNode(guid(), "view:Text");
 			tnode.properties["view:text"] = contained.text;
 			tnode.save();
 			pnode.createAssociation(tnode, "view:source");
 		} else {
-			modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + contained.source + "']");
+			//modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + contained.source + "']");
+			modelNode = modelMapping[contained.source];
 			pnode.createAssociation(modelNode, "view:source");
 			pnode.properties["view:useProperty"] = contained.useProperty;
 			pnode.save();
 		}
 	
 	} else if (contained.type == "Table") {
-		pnode = presentationFolder.createNode(contained.title, "view:Table");
+		pnode = presentationFolder.createNode(guid(), "view:Table");
+		pnode.properties["view:title"] = contained.title;
 		pnode.properties["view:header"] = jsonUtils.toJSONString(contained.header);
 		pnode.properties["view:body"] = jsonUtils.toJSONString(contained.body);
 		pnode.properties["view:style"] = contained.style;
@@ -109,12 +133,13 @@ function main() {
 	var topview = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
 	if (topview == null || topview.length == 0) {
 		if (args.doc == 'true') {
-			topview = modelFolder.createNode("blah", "view:DocumentView");
+			topview = modelFolder.createNode(viewid, "view:DocumentView");
 		} else {
-			topview = modelFolder.createNode("blah", "view:View");
+			topview = modelFolder.createNode(viewid, "view:View");
 		}
 		topview.properties["view:mdid"] = viewid;
 		topview.save();
+		modelMapping[viewid] = topview;
 	} 
 	var force = args.force == 'true' ? true : false;
 	for (var i in postjson.elements) {
