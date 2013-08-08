@@ -8,6 +8,7 @@ var modelFolder = europaSite.childByNamePath("/vieweditor/model");
 var presentationFolder = europaSite.childByNamePath("/vieweditor/presentation");
 
 var modelMapping = {};
+var merged = [];
 
 function guid() {
     function _p8(s) {
@@ -38,21 +39,27 @@ function updateOrCreateModelElement(element, force) {
 			modelNode = modelNode[0];
 	}
 
-	if (element.name != null && element.name != undefined && element.name != modelNode.properties["view:name"])
+	if (element.name != null && element.name != undefined && element.name != modelNode.properties["view:name"]) {
 		if (force)
 			modelNode.properties["view:name"] = element.name;
 		else
 			modelNode.properties["view:name"] = modelNode.properties["view:name"] + " - MERGED - " + element.name;
-	if (element.documentation != modelNode.properties["view:documentation"])
+		merged.push({"mdid": element.mdid, "type": "name"})
+	}
+	if (element.documentation != modelNode.properties["view:documentation"]) {
 		if (force)
 			modelNode.properties["view:documentation"] = element.documentation;
 		else
 			modelNode.properties["view:documentation"] = modelNode.properties["view:documentation"] + " <p><strong><i> MERGED NEED RESOLUTION! </i></strong></p> " + element.documentation;
-	if (element.type == "Property" && element.dvalue != modelNode.properties["view:dvalue"])
+		merged.push({"mdid": element.mdid, "type": "doc"})
+	}
+	if (element.type == "Property" && element.dvalue != modelNode.properties["view:dvalue"]) {
 		if (force)
 			modelNode.properties["view:dvalue"] = element.dvalue;
 		else
 			modelNode.properties["view:dvalue"] = modelNode.properties["view:dvalue"] + " - MERGED - " + element.dvalue;
+		merged.push({"mdid": element.mdid, "type": "dvalue"})
+	}
 	modelNode.properties["view:mdid"] = element.mdid;
 	modelNode.save();
 	modelMapping[element.mdid] = modelNode;
@@ -180,3 +187,8 @@ function main() {
 }
 
 main();
+var response = "ok";
+if (merged.length > 0) {
+	response = jsonUtils.toJSONString(merged);
+}
+model['res'] = response;
