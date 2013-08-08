@@ -149,6 +149,11 @@
                     <mandatory>false</mandatory>
                     <index enabled="false"/>
                 </property>
+                <property name="view:sourcesJson">
+                	<type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
             </properties>
             <associations>
                 <association name="view:views">

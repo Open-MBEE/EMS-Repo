@@ -53,11 +53,11 @@ function updateOrCreateModelElement(element, force) {
 			modelNode.properties["view:documentation"] = modelNode.properties["view:documentation"] + " <p><strong><i> MERGED NEED RESOLUTION! </i></strong></p> " + element.documentation;
 		merged.push({"mdid": element.mdid, "type": "doc"})
 	}
-	if (element.type == "Property" && element.dvalue != modelNode.properties["view:dvalue"]) {
+	if (element.type == "Property" && element.dvalue != modelNode.properties["view:defaultValue"]) {
 		if (force)
-			modelNode.properties["view:dvalue"] = element.dvalue;
+			modelNode.properties["view:defaultValue"] = element.dvalue;
 		else
-			modelNode.properties["view:dvalue"] = modelNode.properties["view:dvalue"] + " - MERGED - " + element.dvalue;
+			modelNode.properties["view:defaultValue"] = modelNode.properties["view:defaultValue"] + " - MERGED - " + element.dvalue;
 		merged.push({"mdid": element.mdid, "type": "dvalue"})
 	}
 	modelNode.properties["view:mdid"] = element.mdid;
@@ -81,11 +81,12 @@ function updateOrCreateView(view) {
 		viewNode.removeAssociation(contains[i], "view:contains");
 		contains[i].remove();
 	}
-
+	var sources = [];
 	for (var i in view.contains) {
-		var containedObject = createContainedElement(view.contains[i], i+1);
+		var containedObject = createContainedElement(view.contains[i], i+1, sources);
 		viewNode.createAssociation(containedObject, "view:contains");
 	}
+	viewNode.properties["view:sourcesJson"] = jsonUtils.toJSONString(sources);
 	if (view.noSection != null && view.noSection != undefined)
 		viewNode.properties["view:noSection"] = view.noSection;
 	else
@@ -122,7 +123,7 @@ function updateViewHierarchy(views) {
 	}
 }
 
-function createContainedElement(contained, i) {
+function createContainedElement(contained, i, sources) {
 	var pnode = null;
 	if (contained.type == "Paragraph") {
 		pnode = presentationFolder.createNode(guid(), "view:Paragraph");
@@ -134,6 +135,8 @@ function createContainedElement(contained, i) {
 		} else {
 			//modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + contained.source + "']");
 			modelNode = modelMapping[contained.source];
+			if (sources.indexOf(modelNode.properties["view:mdid"]) < 0)
+				sources.push(modelNode.properties["view:mdid"]);
 			pnode.createAssociation(modelNode, "view:source");
 			pnode.properties["view:useProperty"] = contained.useProperty;
 			pnode.save();
@@ -145,6 +148,24 @@ function createContainedElement(contained, i) {
 		pnode.properties["view:header"] = jsonUtils.toJSONString(contained.header);
 		pnode.properties["view:body"] = jsonUtils.toJSONString(contained.body);
 		pnode.properties["view:style"] = contained.style;
+		for (var i in contained.header) {
+			for (var j in contained.header[i]) {
+				var cell = contained.header[i][j];
+				if (cell['source'] != "text") {
+					if (sources.indexOf(cell['source']) < 0)
+						sources.push(cell.source);
+				}
+			}
+		}
+		for (var i in contained.body) {
+			for (var j in contained.header[i]) {
+				var cell = contained.header[i][j];
+				if (cell['source'] != "text") {
+					if (sources.indexOf(cell['source']) < 0)
+						sources.push(cell.source);
+				}
+			}
+		}
 		pnode.save();
 		
 	}
