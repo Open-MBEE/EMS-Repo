@@ -2,6 +2,7 @@
 This project contains the content model and webscripts for accessing and modifying the alfresco repository. 
 
 Location of content model: src/main/amp/config/alfresco/module/view-repo/viewModel.xml
+
 This is registered by spring config in module-context.xml (which imports another spring config xml)
 
 Location of webscripts: src/main/amp/config/alfresco/extension/templates/webscripts
