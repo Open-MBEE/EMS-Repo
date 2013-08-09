@@ -20,6 +20,8 @@ To clean all data and artifacts
 
 Go to [http://localhost:8080/view-repo/](http://localhost:8080/view-repo/) for the alfresco explorer interface (it'll take a while to startup)
 
+Create a "europa" site under Sites, then a "/vieweditor/model" folder and "/vieweditor/presentation" folder, the view information will be created in these spaces.
+
 Test post view (post json data taken from the Bootcamp Example document in DocGen project):
 
     curl -H "Content-Type: application/json" --data @test-data/postview.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/views/_17_0_1_2_407019f_1340300322136_11866_17343?force=true&recurse=true&doc=true"
