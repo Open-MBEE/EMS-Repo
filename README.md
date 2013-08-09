@@ -29,7 +29,11 @@ Test post view (post json data taken from the Bootcamp Example document in DocGe
 Test get view
 
 	curl -u admin:admin "http://localhost:8080/view-repo/service/views/_17_0_1_2_407019f_1340300322136_11866_17343?recurse=true"
-	
+
+To open the javascript debugger: [http://localhost:8080/view-repo/service/api/javascript/debugger](http://localhost:8080/view-repo/service/api/javascript/debugger) (you may have to close and reopen to get it to step through on consecutive script calls)
+
+To refresh changes to scripts (they have to be updated in the "target/view-repo-war/WEB-INF/classes/alfresco/extension/..."): [http://localhost:8080/view-repo/service/index](http://localhost:8080/view-repo/service/index) hit refresh at the botton
+
 Maven archetype from [Alfresco Maven SDK](https://artifacts.alfresco.com/nexus/content/repositories/alfresco-docs/alfresco-lifecycle-aggregator/latest/index.html)
 
 Documentation links:
