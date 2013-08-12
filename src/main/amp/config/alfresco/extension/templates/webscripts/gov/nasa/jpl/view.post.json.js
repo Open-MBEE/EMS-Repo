@@ -1,6 +1,6 @@
 <import resource="classpath:alfresco/extension/js/json2.js">
-<import resource="classpath:alfresco/extension/js/json_parse.js">
-//<import resource="classpath:alfresco/extension/js/json2.js">
+<import resource="classpath:alfresco/extension/js/utils.js">
+
 //var modelFolder = roothome.childByNamePath("/Sites/europa/vieweditor/model");
 //var presentationFolder = roothome.childByNamePath("/Sites/europa/vieweditor/presentation");
 var europaSite = siteService.getSite("europa").node;
@@ -9,14 +9,6 @@ var presentationFolder = europaSite.childByNamePath("/vieweditor/presentation");
 
 var modelMapping = {};
 var merged = [];
-
-function guid() {
-    function _p8(s) {
-        var p = (Math.random().toString(16)+"000000000").substr(2,8);
-        return s ? "-" + p.substr(0,4) + "-" + p.substr(4,4) : p ;
-    }
-    return _p8() + _p8(true) + _p8(true) + _p8();
-}
 
 function updateOrCreateModelElement(element, force) {
 	var modelNode = modelMapping[element.mdid];
