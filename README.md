@@ -11,8 +11,10 @@ To build the amp file, do
 
     mvn package
     
-To run in embedded jetty container and H2 db,
+To run in embedded jetty container and H2 db, 
 
+	export MAVEN_OPTS='-Xms256m -Xmx1G -XX:PermSize=300m'
+	
     mvn integration-test -Pamp-to-war
     
 To clean all data and artifacts
