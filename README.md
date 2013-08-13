@@ -27,9 +27,17 @@ Test post view (post json data taken from the Bootcamp Example document in DocGe
 
     curl -H "Content-Type: application/json" --data @test-data/postview.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/views/_17_0_1_2_407019f_1340300322136_11866_17343?force=true&recurse=true&doc=true"
 
+Post DocGen Manual
+
+    curl -H "Content-Type: application/json" --data @test-data/docgenManual.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/views/_17_0_3_244e03eb_1333856871739_813876_16836?force=true&recurse=true&doc=true"
+
 Test get view
 
 	curl -u admin:admin "http://localhost:8080/view-repo/service/views/_17_0_1_2_407019f_1340300322136_11866_17343?recurse=true"
+
+Get DocGen Manual
+
+	curl -u admin:admin "http://localhost:8080/view-repo/service/views/_17_0_3_244e03eb_1333856871739_813876_16836?recurse=true"
 
 To open the javascript debugger: [http://localhost:8080/view-repo/service/api/javascript/debugger](http://localhost:8080/view-repo/service/api/javascript/debugger) (you may have to close and reopen to get it to step through on consecutive script calls)
 
