@@ -20,7 +20,8 @@ function updateOrCreateModelElement(element, force) {
 				modelNode.properties["view:name"] = element.name;
 			} else if (element.type == "Property") {
 				modelNode = modelFolder.createNode(element.mdid, "view:Property");
-				modelNode.properties["view:name"] = element.name;
+				if (element.name != undefined)
+					modelNode.properties["view:name"] = element.name;
 			} else if (element.type == "Comment")
 				modelNode = modelFolder.createNode(element.mdid, "view:Comment");
 			else {
