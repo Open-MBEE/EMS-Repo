@@ -1,6 +1,6 @@
 <webscript> 
   <shortname>Get View comments</shortname> 
-  <description>Return all comments referenced in the view
+  <description>Return all comments for the view
   {
   	"view2comemnt": {
   		viewid: [commentid, ...], ...
