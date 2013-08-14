@@ -13,15 +13,16 @@ var modelMapping = {};
 function updateOrCreateComment(comment) {
 	var commentNode = modelFolder.childrenByXPath("*[@view:mdid='" + comment.id + "']");
 	if (commentNode == null || commentNode == undefined || commentNode.length == 0) {
-		commentNode = modelFolder.createNode(element.id, "view:Comment");
+		commentNode = modelFolder.createNode(comment.id, "view:Comment");
+		commentNode.properties["view:mdid"] = comment.id;
 	} else
 		commentNode = commentNode[0];
-	commentNode.properties["view:documentation"] = element.body;
+	commentNode.properties["view:documentation"] = comment.body;
 	//modified and authur??
 	commentNode.properties["view:deleted"] = false;
 	commentNode.properties["view:committed"] = true;
 	commentNode.save();
-	modelMapping[element.id] = commentNode;
+	modelMapping[comment.id] = commentNode;
 }
 
 function doView(viewid, comments) {
@@ -40,7 +41,11 @@ function doView(viewid, comments) {
 	}
 	for (var i in comments) {
 		var commentNode = modelMapping[comments[i]];
-		viewnode.createAssociation(commentNode, "view:comments");
+		try {
+			viewnode.createAssociation(commentNode, "view:comments");
+		} catch(exception) {
+			//will throw exception when associaiton already exists
+		}
 	}
 }
 
