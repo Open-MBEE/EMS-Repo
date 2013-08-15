@@ -74,51 +74,73 @@ public class DocBookContentTransformer extends AbstractContentTransformer2 {
 
 	/**
 	 * Checks whether transformation is applicable
+	 * 
+	 * Convert both DocBook to PDF and Zip to PDF
 	 */
 	public boolean isTransformableMimetype(String sourceMimetype, String targetMimetype, TransformationOptions options)
 	{
-	     return (("text/xslfo".equals(sourceMimetype) || ("text/xml".equals(sourceMimetype))) 
+	     return (("text/xslfo".equals(sourceMimetype) || ("text/xml".equals(sourceMimetype)) || ("application/zip".equals(sourceMimetype))) 
 	    		 && ("application/pdf".equals(targetMimetype)));
 	}
 	
+	
+	/**
+	 * Method that is called by transformation service.
+	 * 
+	 * The input file can be either XML or ZIP.
+	 * 
+	 */
 	@Override
 	protected void transformInternal(ContentReader reader,
 			ContentWriter writer,
 			TransformationOptions options) throws Exception {
-		NodeRef sourceNR = options.getSourceNodeRef();
-		
-		String tmpDirName = TempFileProvider.getTempDir().getAbsolutePath();
-		String dbDirName = tmpDirName + File.separator + "docbook";
+		NodeRef sourceNR	= options.getSourceNodeRef();
+		String tmpDirName	= TempFileProvider.getTempDir().getAbsolutePath();
+		String dbDirName	= tmpDirName + File.separator + "docbook";
 		String imageDirName = tmpDirName + File.separator + "images";
-		String srcFilename = dbDirName + File.separator + (String) nodeService.getProperty(sourceNR, ContentModel.PROP_NAME);
 		
-		// Create directories for DB and images
-		if ( !(new File(dbDirName).mkdirs()) ) {
-			logger.error("Could not create Docbook temporary directory\n");
-		}
-		if ( !(new File(imageDirName).mkdirs()) ) {
-			logger.error("Could not create image temporary directory\n");
-		}
+		// actual file to transform
+		File srcFile ;
 		
-		// Create temporary files for transformation (need DocBook file and respective images)
-		File srcFile = new File(srcFilename);
-		reader.getContent(srcFile);
+		String srcPath = (String) nodeService.getProperty(sourceNR, ContentModel.PROP_NAME);
+
+		if (srcPath.indexOf(".zip") > 0) {
+			File zipFile = new File(tmpDirName + File.separator + srcPath);
+			reader.getContent(zipFile);
+			if (!unzip(zipFile)) {
+				return; // TODO throw exception
+			}
+			
+			srcFile = new File(dbDirName + File.separator + "out.xml");
+		} else {
+			// Create directories for DB and images
+			if ( !(new File(dbDirName).mkdirs()) ) {
+				logger.error("Could not create Docbook temporary directory\n");
+			}
+			if ( !(new File(imageDirName).mkdirs()) ) {
+				logger.error("Could not create image temporary directory\n");
+			}
+			
+			// Create temporary files for transformation (need DocBook file and respective images)
+			srcFile = new File(dbDirName + File.separator + srcPath);
+			reader.getContent(srcFile);
 		
-		// TODO: check image time information with temp file and replace if image has been updated more recently
-		for (String img: findImages(srcFile)) {
-			String imgFilename = imageDirName + File.separator + img;
-			File imgFile = new File(imgFilename);
-			if (!imgFile.exists()) {
-				ResultSet rs = findNodeRef(img);
-				ContentReader imgReader;
-				for (NodeRef nr: rs.getNodeRefs()) {
-					imgReader = contentService.getReader(nr, ContentModel.PROP_CONTENT);
-					imgReader.getContent(imgFile);		
-					break;
+			// TODO: check image time information with temp file and replace if image has been updated more recently
+			for (String img: findImages(srcFile)) {
+				String imgFilename = imageDirName + File.separator + img;
+				File imgFile = new File(imgFilename);
+				if (!imgFile.exists()) {
+					ResultSet rs = findNodeRef(img);
+					ContentReader imgReader;
+					for (NodeRef nr: rs.getNodeRefs()) {
+						imgReader = contentService.getReader(nr, ContentModel.PROP_CONTENT);
+						imgReader.getContent(imgFile);		
+						break;
+					}
 				}
 			}
 		}
-
+		
 		// do transformation then put result into writer
 		String targetFilename = doTransformation(srcFile);
 		File targetFile = new File(targetFilename);
@@ -133,6 +155,41 @@ public class DocBookContentTransformer extends AbstractContentTransformer2 {
 		targetFile.delete();
 	}
 
+	/**
+	 * Utility for unzipping a file
+	 * 
+	 * @param zipFile	File to unzip
+	 * @return			true if success
+	 */
+	private boolean unzip(File zipFile) {
+		RuntimeExec re = new RuntimeExec();
+		List<String> command = new ArrayList<String>();
+		
+		re.setProcessDirectory(TempFileProvider.getTempDir().getAbsolutePath());
+		
+		command.add("unzip");
+		command.add(zipFile.getName());
+		
+		re.setCommand(list2Array(command));
+		ExecutionResult result = re.execute();
+		
+		if (!result.getSuccess()) {
+			logger.error("Unzip failed\n");
+			return false;
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Helper method to convert a list to an array of specified type
+	 * @param list
+	 * @return
+	 */
+	private String[] list2Array(List<String> list) {
+		return Arrays.copyOf(list.toArray(), list.toArray().length, String[].class);
+	}
+	
 	/**
 	 * Helper to execute the command using RuntimeExec
 	 * 
@@ -153,7 +210,7 @@ public class DocBookContentTransformer extends AbstractContentTransformer2 {
 		command.add("-pdf");
 		command.add(target);
 		
-		re.setCommand(Arrays.copyOf(command.toArray(), command.toArray().length, String[].class));
+		re.setCommand(list2Array(command));
 		ExecutionResult result = re.execute();
 
 		if (!result.getSuccess()) {
