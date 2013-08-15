@@ -10,11 +10,18 @@ var presentationFolder = europaSite.childByNamePath("/vieweditor/presentation");
 var modelMapping = {};
 var merged = [];
 
+function updateViewHierarchy(views, nosections) {
+	
+}
+
 function main() {
 	var postjson = JSON.parse(json.toString());
 	if (postjson == null || postjson == undefined)
 		return;
 	var viewid = url.templateArgs.viewid;
+	var views = postjson.views;
+	var nosections = postjson.noSections;
+	updateViewHierarchy(views, nosections);
 	
 }
 
