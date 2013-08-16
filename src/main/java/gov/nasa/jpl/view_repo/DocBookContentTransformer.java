@@ -32,6 +32,9 @@ import org.apache.commons.logging.LogFactory;
  * Transformation that converts DocBook to PDF
  * 
  * TODO: Investigate how to add more properties to transformation so the XSL can be specified
+ * 
+ * TODO: Add in the HTML generation as well or create separate transformer
+ * 
  * @author cinyoung
  *
  */
@@ -110,8 +113,9 @@ public class DocBookContentTransformer extends AbstractContentTransformer2 {
 			if (!unzip(zipFile)) {
 				return; // TODO throw exception
 			}
-			
-			srcFile = new File(dbDirName + File.separator + "out.xml");
+			String zipDir = "docbook" + File.separator + zipFile.getName().substring(0, zipFile.getName().indexOf("."));
+			srcFile = new File(tmpDirName + File.separator + zipDir + File.separator + "out.xml");
+			System.out.println("ZIP DIR: " + srcFile.getAbsolutePath());
 		} else {
 			// Create directories for DB and images
 			if ( !(new File(dbDirName).mkdirs()) ) {
@@ -151,8 +155,8 @@ public class DocBookContentTransformer extends AbstractContentTransformer2 {
 		}
 		
 		// clean up (don't worry about images, as we can "cache" them)
-		srcFile.delete();
-		targetFile.delete();
+//		srcFile.delete();
+//		targetFile.delete();
 	}
 
 	/**
@@ -209,6 +213,10 @@ public class DocBookContentTransformer extends AbstractContentTransformer2 {
 		command.add(path + xsl);
 		command.add("-pdf");
 		command.add(target);
+
+		System.out.println("DO_TRANSFORM source: " + source);
+		System.out.println("DO_TRANSFORM target: " + target);
+		System.out.println("DO_TRANSFROM cmd: " + command);
 		
 		re.setCommand(list2Array(command));
 		ExecutionResult result = re.execute();
@@ -221,7 +229,7 @@ public class DocBookContentTransformer extends AbstractContentTransformer2 {
 	}
 	
 	/**
-	 * Utility function to find any image references
+	 * Utility function to find any image references inside of the DocBook
 	 * 
 	 * Currently format in DocBook of images is an imagedata tag with an ../images/{filename} value
 	 * 

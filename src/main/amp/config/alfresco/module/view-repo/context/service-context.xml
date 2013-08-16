@@ -55,9 +55,6 @@
       <property name="nodeService">
          <ref bean="NodeService" />
       </property>
-      <property name="fileFolderService">
-         <ref bean="FileFolderService" />
-      </property>
       <property name="searchService">
          <ref bean="SearchService" />
       </property>
