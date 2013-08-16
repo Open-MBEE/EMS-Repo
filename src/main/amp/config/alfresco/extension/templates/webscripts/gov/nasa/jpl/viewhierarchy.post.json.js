@@ -11,7 +11,32 @@ var modelMapping = {};
 var merged = [];
 
 function updateViewHierarchy(views, nosections) {
-	
+	for (var viewid in views) {
+		var viewNode = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
+		if (viewNode == null || viewNode.length == 0) {
+			continue;//should throw error
+		}
+		modelMapping[viewid] = viewNode[0];
+	}
+	for (var pview in views) {
+		var cviews = views[pview];
+		var pviewnode = modelMapping[pview];
+		var oldchildren = pviewnode.assocs["view:views"];
+		for (var i in oldchildren) {
+			pviewnode.removeAssociation(oldchildren[i], "view:views");
+		}
+		for (var ci in cviews) {
+			var cvid = cviews[ci];
+			var cviewnode = modelMapping[cvid];
+			cviewnode.properties["view:index"] = ci;
+			cviewnode.save();
+			pviewnode.createAssociation(cviewnode, "view:views");
+		}
+		pviewnode.properties["view:viewsJson"] = jsonUtils.toJSONString(cviews);
+		if (nosections.indexOf(pview) > 0)
+			pviewnode.properties["view:noSection"] = true;
+		pviewnode.save();
+	}
 }
 
 function main() {
