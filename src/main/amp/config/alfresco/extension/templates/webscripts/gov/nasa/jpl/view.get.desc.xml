@@ -10,7 +10,7 @@
   	}, ...	
   ]
   </description>
-  <url>/views/{viewid}?recurse={recurse?}</url> 
+  <url>/rest/views/{viewid}?recurse={recurse?}</url> 
   <format default="json">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readonly">required</transaction>

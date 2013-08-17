@@ -1,7 +1,7 @@
 <webscript> 
   <shortname>Post View</shortname> 
   <description>Handles posting of view from magicdraw</description>
-  <url>/views/{viewid}?force={force?}&amp;recurse={recurse?}&amp;doc={doc?}</url> 
+  <url>/rest/views/{viewid}?force={force?}&amp;recurse={recurse?}&amp;doc={doc?}</url> 
   <format default="json">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readwrite">required</transaction>

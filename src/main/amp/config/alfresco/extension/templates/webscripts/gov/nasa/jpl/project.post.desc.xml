@@ -1,7 +1,7 @@
 <webscript> 
   <shortname>Post project organization</shortname> 
   <description>Handles posting of project/volume/doc organization</description>
-  <url>/projects/{projectid}</url> 
+  <url>/rest/projects/{projectid}</url> 
   <format default="json">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readwrite">required</transaction>

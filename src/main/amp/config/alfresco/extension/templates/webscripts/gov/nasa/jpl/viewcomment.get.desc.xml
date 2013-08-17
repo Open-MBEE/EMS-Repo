@@ -18,7 +18,7 @@
   
   - new comments will have id that starts with 'comment'
   </description>
-  <url>/views/{viewid}/comments?recurse={recurse?}</url> 
+  <url>/rest/views/{viewid}/comments?recurse={recurse?}</url> 
   <format default="json">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readonly">required</transaction>

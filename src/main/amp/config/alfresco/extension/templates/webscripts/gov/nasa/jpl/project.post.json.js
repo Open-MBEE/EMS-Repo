@@ -107,8 +107,8 @@ function main() {
 		modelMapping[vid] = vnode;
 	}
 	for (var did in documents) {
-		var dnode = getOrCreateDocument(did);
-		modelMapping[did] = dnode;
+		var dnode = getOrCreateDocument(documents[did]);
+		modelMapping[documents[did]] = dnode;
 	}
 	volume2volume(v2v);
 	volume2document(v2d);

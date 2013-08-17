@@ -57,7 +57,7 @@ function main() {
 	for (var i in postjson.comments) {
 		updateOrCreateComment(postjson.comments[i]);
 	}
-	for (var viewid in postjson.views2comment) {
+	for (var viewid in postjson.view2comment) {
 		doView(viewid, postjson.view2comment[viewid]);
 	}
 }

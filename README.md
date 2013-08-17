@@ -25,29 +25,37 @@ Go to [http://localhost:8080/view-repo/](http://localhost:8080/view-repo/) for t
 
 Create a "europa" site under Sites, then a "/vieweditor/model" folder and "/vieweditor/presentation" folder, the view information will be created in these spaces.
 
-Test post view (post json data taken from the Bootcamp Example document in DocGen project):
+Post test view (post json data taken from the Bootcamp Example document in DocGen project):
 
-    curl -H "Content-Type: application/json" --data @test-data/postview.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/views/_17_0_1_2_407019f_1340300322136_11866_17343?force=true&recurse=true&doc=true"
+    curl -H "Content-Type: application/json" --data @test-data/postview.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/rest/views/_17_0_1_2_407019f_1340300322136_11866_17343?force=true&recurse=true&doc=true"
+
+Post view hierarchy:
+
+    curl -H "Content-Type: application/json" --data @test-data/postviewhierarchy.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/rest/views/_17_0_1_2_407019f_1340300322136_11866_17343/hierarchy"
 
 Post DocGen Manual
 
-    curl -H "Content-Type: application/json" --data @test-data/docgenManual.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/views/_17_0_3_244e03eb_1333856871739_813876_16836?force=true&recurse=true&doc=true"
+    curl -H "Content-Type: application/json" --data @test-data/docgenManual.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/rest/views/_17_0_3_244e03eb_1333856871739_813876_16836?force=true&recurse=true&doc=true"
 
 Post comments
 
-	curl -H "Content-Type: application/json" --data @test-data/postcomment.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/views/_17_0_1_2_407019f_1340300322136_11866_17343/comments?recurse=true"
+	curl -H "Content-Type: application/json" --data @test-data/postcomment.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/rest/views/_17_0_1_2_407019f_1340300322136_11866_17343/comments?recurse=true"
 
-Test get view
+Post Project organization
 
-	curl -u admin:admin "http://localhost:8080/view-repo/service/views/_17_0_1_2_407019f_1340300322136_11866_17343?recurse=true"
+	curl -H "Content-Type: application/json" --data @test-data/postproject.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/rest/projects/europa"
+	
+Get test view
+
+	curl -u admin:admin "http://localhost:8080/view-repo/service/rest/views/_17_0_1_2_407019f_1340300322136_11866_17343?recurse=true"
 
 Get DocGen Manual
 
-	curl -u admin:admin "http://localhost:8080/view-repo/service/views/_17_0_3_244e03eb_1333856871739_813876_16836?recurse=true"
+	curl -u admin:admin "http://localhost:8080/view-repo/service/rest/views/_17_0_3_244e03eb_1333856871739_813876_16836?recurse=true"
 
 Get comments
 
-	curl -u admin:admin "http://localhost:8080/view-repo/service/views/_17_0_1_2_407019f_1340300322136_11866_17343/comments?recurse=true"
+	curl -u admin:admin "http://localhost:8080/view-repo/service/rest/views/_17_0_1_2_407019f_1340300322136_11866_17343/comments?recurse=true"
 	
 To open the javascript debugger: [http://localhost:8080/view-repo/service/api/javascript/debugger](http://localhost:8080/view-repo/service/api/javascript/debugger) (you may have to close and reopen to get it to step through on consecutive script calls)
 
