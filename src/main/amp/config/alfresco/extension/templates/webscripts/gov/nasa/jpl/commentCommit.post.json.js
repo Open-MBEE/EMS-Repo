@@ -5,10 +5,8 @@
 //var presentationFolder = roothome.childByNamePath("/Sites/europa/vieweditor/presentation");
 var europaSite = siteService.getSite("europa").node;
 var modelFolder = europaSite.childByNamePath("/vieweditor/model");
-var presentationFolder = europaSite.childByNamePath("/vieweditor/presentation");
 
 var modelMapping = {};
-var merged = [];
 
 function main() {
 	var postjson = JSON.parse(json.toString());
@@ -30,8 +28,4 @@ function main() {
 }
 
 main();
-var response = "ok";
-if (merged.length > 0) {
-	response = jsonUtils.toJSONString(merged);
-}
-model['res'] = response;
+model['res'] = "ok";

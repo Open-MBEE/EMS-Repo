@@ -69,15 +69,16 @@ function updateOrCreateView(view) {
 		}
 		viewNode = viewNode[0];
 	}
-	var contains = viewNode.assocs["view:contains"];
-	for (var i in contains) {
-		viewNode.removeAssociation(contains[i], "view:contains");
-		contains[i].remove();
-	}
+	//var contains = viewNode.assocs["view:contains"];
+	//for (var i in contains) {
+	//	viewNode.removeAssociation(contains[i], "view:contains");
+	//	contains[i].remove();
+	//}
 	var sources = [];
 	for (var i in view.contains) {
-		var containedObject = createContainedElement(view.contains[i], i+1, sources);
-		viewNode.createAssociation(containedObject, "view:contains");
+		//var containedObject = createContainedElement(view.contains[i], i+1, sources);
+		createContainedElement(view.contains[i], i+1, sources);
+		//viewNode.createAssociation(containedObject, "view:contains");
 	}
 	viewNode.properties["view:sourcesJson"] = jsonUtils.toJSONString(sources);
 	if (view.noSection != null && view.noSection != undefined)
@@ -89,7 +90,7 @@ function updateOrCreateView(view) {
 	return viewNode;
 }
 
-function updateViewHierarchy(views) {
+/*function updateViewHierarchy(views) {
 	for (var pview in views) {
 		var cviews = views[pview];
 		var pviewnode = modelMapping[pview];
@@ -115,55 +116,53 @@ function updateViewHierarchy(views) {
 		pviewnode.save();
 	}
 }
-
+*/
 function createContainedElement(contained, i, sources) {
-	var pnode = null;
+	//var pnode = null;
 	if (contained.type == "Paragraph") {
-		pnode = presentationFolder.createNode(guid(), "view:Paragraph");
+		//pnode = presentationFolder.createNode(guid(), "view:Paragraph");
 		if (contained.source == "text") {
-			tnode = presentationFolder.createNode(guid(), "view:Text");
-			tnode.properties["view:text"] = contained.text;
-			tnode.save();
-			pnode.createAssociation(tnode, "view:source");
+		//	tnode = presentationFolder.createNode(guid(), "view:Text");
+		//	tnode.properties["view:text"] = contained.text;
+		//	tnode.save();
+		//	pnode.createAssociation(tnode, "view:source");
 		} else {
 			//modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + contained.source + "']");
 			modelNode = modelMapping[contained.source];
 			if (sources.indexOf(modelNode.properties["view:mdid"]) < 0)
 				sources.push(modelNode.properties["view:mdid"]);
-			pnode.createAssociation(modelNode, "view:source");
-			pnode.properties["view:useProperty"] = contained.useProperty;
-			pnode.save();
+			//pnode.createAssociation(modelNode, "view:source");
+			//pnode.properties["view:useProperty"] = contained.useProperty;
+			//pnode.save();
 		}
 	
 	} else if (contained.type == "Table") {
-		pnode = presentationFolder.createNode(guid(), "view:Table");
-		pnode.properties["view:title"] = contained.title;
-		pnode.properties["view:header"] = jsonUtils.toJSONString(contained.header);
-		pnode.properties["view:body"] = jsonUtils.toJSONString(contained.body);
-		pnode.properties["view:style"] = contained.style;
+		//pnode = presentationFolder.createNode(guid(), "view:Table");
+		//pnode.properties["view:title"] = contained.title;
+		//pnode.properties["view:header"] = jsonUtils.toJSONString(contained.header);
+		//pnode.properties["view:body"] = jsonUtils.toJSONString(contained.body);
+		//pnode.properties["view:style"] = contained.style;
 		for (var i in contained.sources) {
 			var sourceid = contained.sources[i];
 			if (sources.indexOf(sourceid) < 0)
 				sources.push(sourceid);
 		}
-		pnode.save();
+		//pnode.save();
 		
 	}
-	pnode.properties["view:index"] = i;
+	//pnode.properties["view:index"] = i;
 	//var orderable = new Array(1);
 	//orderable["view:index"] = i;
 	//pnode.addAspect("view:Orderable", orderable);
-	pnode.save();
-	return pnode;
+	//pnode.save();
+	//return pnode;
 }
 
 function main() {
-	//var europaSite = siteService.getSite("europa");
-	//var postjson = jsonUtils.toObject(json);
 	var postjson = JSON.parse(json.toString());
 	if (postjson == null || postjson == undefined)
 		return;
-	var viewid = url.extension
+	var viewid = url.templateArgs.viewid;
 	var topview = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
 	if (topview == null || topview.length == 0) {
 		if (args.doc == 'true') {
@@ -183,7 +182,7 @@ function main() {
 		updateOrCreateView(postjson.views[i]);
 	}
 	if (args.recurse == 'true') {
-		updateViewHierarchy(postjson.view2view);
+		updateViewHierarchy(modelMapping, postjson.view2view);
 	}	
 }
 

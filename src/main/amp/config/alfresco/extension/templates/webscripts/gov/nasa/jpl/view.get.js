@@ -45,17 +45,14 @@ function handleView(view) {
 function main() {
 	var topview = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
 	if (topview == null || topview.length == 0) {
-		response = "NotFound";
+		status.code = 404;
 	} else {
 		topview = topview[0];
 		handleView(topview);
 	}
 }
 
-var response = "[]";
+status.code = 200;
 main();
-
-if (res.length > 0) {
-	response = jsonUtils.toJSONString(res);
-}
+var	response = status.code == 200 ? jsonUtils.toJSONString(res) : "NotFound";
 model['res'] = response;

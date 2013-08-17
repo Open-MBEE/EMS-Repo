@@ -5,7 +5,6 @@
 //var presentationFolder = roothome.childByNamePath("/Sites/europa/vieweditor/presentation");
 var europaSite = siteService.getSite("europa").node;
 var modelFolder = europaSite.childByNamePath("/vieweditor/model");
-var presentationFolder = europaSite.childByNamePath("/vieweditor/presentation");
 
 var modelMapping = {};
 
@@ -27,8 +26,10 @@ function updateOrCreateComment(comment) {
 
 function doView(viewid, comments) {
 	var viewnode = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
-	if (viewnode == null || viewnode.length == 0)
+	if (viewnode == null || viewnode.length == 0) {
+		status.code = 404;
 		return;
+	}
 	viewnode = viewnode[0];
 	curcomments = viewnode.assocs["view:comments"];
 	for (var i in curcomments) {
@@ -60,6 +61,6 @@ function main() {
 		doView(viewid, postjson.view2comment[viewid]);
 	}
 }
-
+status.code = 200;
 main();
-model['res'] = "ok";
+model['res'] = status.code == 200 ? "ok" : "NotFound";

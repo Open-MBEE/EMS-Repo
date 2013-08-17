@@ -5,23 +5,25 @@
 //var presentationFolder = roothome.childByNamePath("/Sites/europa/vieweditor/presentation");
 var europaSite = siteService.getSite("europa").node;
 var modelFolder = europaSite.childByNamePath("/vieweditor/model");
-var presentationFolder = europaSite.childByNamePath("/vieweditor/presentation");
 
 var modelMapping = {};
 var merged = [];
 
-function getOrCreateVolume(vid, name) {
+function getOrCreateVolume(vid, name, roots) {
 	var vnode = modelFolder.childrenByXPath("*[@view:mdid='" + vid + "']");
 	if (vnode == null || vnode.length == 0) {
 		vnode = modelFolder.createNode(vid, "view:Volume");
 		vnode.properties["view:name"] = name;
 		vnode.properties["view:mdid"] = vid;
-		vnode.save();
 	} else {
 		vnode = vnode[0];
 		vnode.properties["view:name"] = name;
-		vnode.save();
 	}
+	if (roots.indexOf(vid) >= 0)
+		vnode.properties["view:rootVolume"] = true;
+	else
+		vnode.properties["view:rootVolume"] = false;
+	vnode.save();
 	return vnode;
 }
 
@@ -37,7 +39,7 @@ function getOrCreateDocument(did) {
 	return dnode;
 }
 
-function v2v(v2v) {
+function volume2volume(v2v) {
 	for (var pv in v2v) {
 		var cvs = v2v[pv];
 		var pvnode = modelMapping[pv];
@@ -56,7 +58,6 @@ function v2v(v2v) {
 			}
 			pvnode.createAssociation(cvnode, "view:volumes");
 		}
-		pvnode.save();
 	}
 }
 
@@ -68,21 +69,21 @@ function cleanDocument(dnode) {
 	}
 }
 
-function v2d(v2d) {
+function volume2document(v2d) {
 	for (var pv in v2d) {
-		var cvs = v2d[pv];
+		var cds = v2d[pv];
 		var pvnode = modelMapping[pv];
 		if (pvnode == null || pvnode == undefined) {
 			continue;
 		}
-		for (var ci in cvs) {
-			var cvid = cvs[ci];
-			var cvnode = modelMapping[cvid];
-			if (cvnode == null || cvnode == undefined) {
+		for (var ci in cds) {
+			var cdid = cds[ci];
+			var cdnode = modelMapping[cdid];
+			if (cdnode == null || cdnode == undefined) {
 				continue;
 			}
-			cleanDocument(dnode);
-			pvnode.createAssociation(cvnode, "view:documents");
+			cleanDocument(cdnode);
+			pvnode.createAssociation(cdnode, "view:documents");
 		}
 		pvnode.save();
 	}
@@ -99,24 +100,19 @@ function main() {
 	var documents = postjson.documents;
 	var v2v = postjson.volume2volumes;
 	var v2d = postjson.volume2documents;
+	var roots = postjson.projectVolumes;
 	
 	for (var vid in volumes) {
-		var vnode = getOrCreateVolume(vid, volumes[vid]);
+		var vnode = getOrCreateVolume(vid, volumes[vid], roots);
 		modelMapping[vid] = vnode;
 	}
-	
 	for (var did in documents) {
 		var dnode = getOrCreateDocument(did);
 		modelMapping[did] = dnode;
 	}
-	
-	v2v(v2v);
-	v2d(v2d);
+	volume2volume(v2v);
+	volume2document(v2d);
 }
 
 main();
-var response = "ok";
-if (merged.length > 0) {
-	response = jsonUtils.toJSONString(merged);
-}
-model['res'] = response;
+model['res'] = "ok";

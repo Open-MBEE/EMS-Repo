@@ -2,7 +2,6 @@
 
 var europaSite = siteService.getSite("europa").node;
 var modelFolder = europaSite.childByNamePath("/vieweditor/model");
-var res = [];
 
 var viewid = url.templateArgs.viewid;
 var recurse = args.recurse == 'true' ? true : false;
@@ -38,14 +37,14 @@ function handleView(viewnode) {
 function main() {
 	var topview = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
 	if (topview == null || topview.length == 0) {
-		response = "NotFound";
+		status.code  = 404;
 	} else {
 		topview = topview[0];
 		handleView(topview);
 	}
 }
-var response = ""
+
+status.code = 200;
 main();
-if (response != "NotFound")
-	response = jsonUtils.toJSONString({"comments": comments, "view2comment": view2comment});
+var	response = status.code == 200 ? jsonUtils.toJSONString({"comments": comments, "view2comment": view2comment}) : "NotFound";
 model['res'] = response;

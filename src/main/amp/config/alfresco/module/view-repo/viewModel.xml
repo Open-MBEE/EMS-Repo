@@ -103,7 +103,13 @@
          </type>
         <type name="view:Volume">
             <parent>view:ModelElement</parent>
-            <properties/>
+            <properties>
+            	<property name="view:rootVolume">
+                    <type>d:boolean</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
+            </properties>
             <associations>
             	<association name="view:volumes">
             		<source>
