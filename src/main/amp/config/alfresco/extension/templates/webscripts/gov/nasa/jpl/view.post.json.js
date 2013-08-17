@@ -60,7 +60,6 @@ function updateOrCreateModelElement(element, force) {
 }
 
 function updateOrCreateView(view) {
-	//var viewNode = modelFolder.childrenByXPath("*[@view:mdid='" + view.mdid + "']");
 	var viewNode = modelMapping[view.mdid];
 	if (viewNode == null || viewNode == undefined) {
 		viewNode = modelFolder.childrenByXPath("*[@view:mdid='" + view.mdid + "']");
@@ -69,16 +68,9 @@ function updateOrCreateView(view) {
 		}
 		viewNode = viewNode[0];
 	}
-	//var contains = viewNode.assocs["view:contains"];
-	//for (var i in contains) {
-	//	viewNode.removeAssociation(contains[i], "view:contains");
-	//	contains[i].remove();
-	//}
 	var sources = [];
 	for (var i in view.contains) {
-		//var containedObject = createContainedElement(view.contains[i], i+1, sources);
-		createContainedElement(view.contains[i], i+1, sources);
-		//viewNode.createAssociation(containedObject, "view:contains");
+		fillSources(view.contains[i], sources);
 	}
 	viewNode.properties["view:sourcesJson"] = jsonUtils.toJSONString(sources);
 	if (view.noSection != null && view.noSection != undefined)
@@ -90,72 +82,22 @@ function updateOrCreateView(view) {
 	return viewNode;
 }
 
-/*function updateViewHierarchy(views) {
-	for (var pview in views) {
-		var cviews = views[pview];
-		var pviewnode = modelMapping[pview];
-		if (pviewnode == null || pviewnode == undefined) {
-			continue;
-		}
-		var oldchildren = pviewnode.assocs["view:views"];
-		for (var i in oldchildren) {
-			pviewnode.removeAssociation(oldchildren[i], "view:views");
-		}
-		for (var ci in cviews) {
-			var cvid = cviews[ci];
-			var cviewnode = modelMapping[cvid];
-			if (cviewnode == null || cviewnode == undefined) {
-				continue;
-			}
-			//var oldparents = cviewnode.sourceAssocs["view:views"];
-			cviewnode.properties["view:index"] = ci;
-			cviewnode.save();
-			pviewnode.createAssociation(cviewnode, "view:views");
-		}
-		pviewnode.properties["view:viewsJson"] = jsonUtils.toJSONString(cviews);
-		pviewnode.save();
-	}
-}
-*/
-function createContainedElement(contained, i, sources) {
-	//var pnode = null;
+function fillSources(contained, sources) {
 	if (contained.type == "Paragraph") {
-		//pnode = presentationFolder.createNode(guid(), "view:Paragraph");
 		if (contained.source == "text") {
-		//	tnode = presentationFolder.createNode(guid(), "view:Text");
-		//	tnode.properties["view:text"] = contained.text;
-		//	tnode.save();
-		//	pnode.createAssociation(tnode, "view:source");
+	
 		} else {
-			//modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + contained.source + "']");
 			modelNode = modelMapping[contained.source];
 			if (sources.indexOf(modelNode.properties["view:mdid"]) < 0)
 				sources.push(modelNode.properties["view:mdid"]);
-			//pnode.createAssociation(modelNode, "view:source");
-			//pnode.properties["view:useProperty"] = contained.useProperty;
-			//pnode.save();
 		}
-	
 	} else if (contained.type == "Table") {
-		//pnode = presentationFolder.createNode(guid(), "view:Table");
-		//pnode.properties["view:title"] = contained.title;
-		//pnode.properties["view:header"] = jsonUtils.toJSONString(contained.header);
-		//pnode.properties["view:body"] = jsonUtils.toJSONString(contained.body);
-		//pnode.properties["view:style"] = contained.style;
 		for (var i in contained.sources) {
 			var sourceid = contained.sources[i];
 			if (sources.indexOf(sourceid) < 0)
 				sources.push(sourceid);
-		}
-		//pnode.save();
-		
+		}		
 	}
-	//pnode.properties["view:index"] = i;
-	//var orderable = new Array(1);
-	//orderable["view:index"] = i;
-	//pnode.addAspect("view:Orderable", orderable);
-	//pnode.save();
-	//return pnode;
 }
 
 function main() {

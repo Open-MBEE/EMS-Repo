@@ -89,8 +89,6 @@ function volume2document(v2d) {
 	}
 }
 
-
-
 function main() {
 	var postjson = JSON.parse(json.toString());
 	if (postjson == null || postjson == undefined)
