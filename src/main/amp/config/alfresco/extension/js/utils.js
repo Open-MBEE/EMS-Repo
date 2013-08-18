@@ -36,3 +36,12 @@ function updateViewHierarchy(modelMapping, views, nosections) {
 		pviewnode.save();
 	}
 }
+
+//clear all parent volume associations
+function cleanDocument(dnode) {
+	var pvs = dnode.sourceAssocs["view:documents"];
+	for (var i in pvs) {
+		var pv = pvs[i];
+		pv.removeAssociation(dnode, "view:documents");
+	}
+}

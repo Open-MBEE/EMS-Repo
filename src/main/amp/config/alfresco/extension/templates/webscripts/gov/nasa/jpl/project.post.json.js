@@ -61,14 +61,6 @@ function volume2volume(v2v) {
 	}
 }
 
-function cleanDocument(dnode) {
-	var pvs = dnode.sourceAssocs["view:documents"];
-	for (var i in pvs) {
-		var pv = pvs[i];
-		pv.removeAssociation(dnode, "view:documents");
-	}
-}
-
 function volume2document(v2d) {
 	for (var pv in v2d) {
 		var cds = v2d[pv];
