@@ -20,8 +20,10 @@ function handleView(viewnode) {
 		var commentdetail = {
 				"id": commentNode.properties["view:mdid"], 
 				"body": commentNode.properties["view:documentation"],
-				"deleted": commentNode.properties["view:deleted"]
-		};//modified and author?
+				"deleted": commentNode.properties["view:deleted"],
+				"author": commentNode.properties["view:author"],
+				"modified": commentNode.properties["view:lastModified"]
+		};
 		comments.push(commentdetail);
 	}
 	view2comment[viewnode.properties["view:mdid"]] = commentids;

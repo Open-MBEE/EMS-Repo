@@ -17,7 +17,8 @@ function updateOrCreateComment(comment) {
 	} else
 		commentNode = commentNode[0];
 	commentNode.properties["view:documentation"] = comment.body;
-	//modified and authur??
+	commentNode.properties["view:author"] = comment.author;
+	commentNode.properties["view:lastModified"] = comment.modified;
 	commentNode.properties["view:deleted"] = false;
 	commentNode.properties["view:committed"] = true;
 	commentNode.save();
