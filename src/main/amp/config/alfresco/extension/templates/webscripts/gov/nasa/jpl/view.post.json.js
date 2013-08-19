@@ -6,10 +6,10 @@
 var europaSite = siteService.getSite("europa").node;
 var modelFolder = europaSite.childByNamePath("/vieweditor/model");
 var presentationFolder = europaSite.childByNamePath("/vieweditor/presentation");
-
+var date = new Date();
 var modelMapping = {};
 var merged = [];
-
+var user = args.user;
 function updateOrCreateModelElement(element, force) {
 	var modelNode = modelMapping[element.mdid];
 	if (modelNode == null || modelNode == undefined) {
@@ -78,6 +78,8 @@ function updateOrCreateView(view) {
 	else
 		viewNode.properties["view:noSection"] = false;
 	viewNode.properties["view:containsJson"] = jsonUtils.toJSONString(view.contains);
+	viewNode.properties["view:author"] = user;
+	viewNode.properties["view:lastModified"] = date;
 	viewNode.save();
 	return viewNode;
 }

@@ -25,6 +25,16 @@
                         <tokenised>true</tokenised>
                     </index>
                 </property>
+                <property name="view:author">
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
+                <property name="view:lastModified">
+                    <type>d:datetime</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
                 <property name="view:mdid">
                     <type>d:text</type>
                     <mandatory enforced="true">true</mandatory>
@@ -57,16 +67,6 @@
                 </property>
                 <property name="view:deleted">
                     <type>d:boolean</type>
-                    <mandatory>false</mandatory>
-                    <index enabled="false"/>
-                </property>
-                <property name="view:author">
-                    <type>d:text</type>
-                    <mandatory>false</mandatory>
-                    <index enabled="false"/>
-                </property>
-                <property name="view:lastModified">
-                    <type>d:text</type>
                     <mandatory>false</mandatory>
                     <index enabled="false"/>
                 </property>

@@ -18,7 +18,8 @@ function updateOrCreateComment(comment) {
 		commentNode = commentNode[0];
 	commentNode.properties["view:documentation"] = comment.body;
 	commentNode.properties["view:author"] = comment.author;
-	commentNode.properties["view:lastModified"] = comment.modified;
+	var modified = utils.fromISO8601(comment.modified.replace(" ", "T") + ".000Z");
+	commentNode.properties["view:lastModified"] = modified;
 	commentNode.properties["view:deleted"] = false;
 	commentNode.properties["view:committed"] = true;
 	commentNode.save();

@@ -1,4 +1,5 @@
 <import resource="classpath:alfresco/extension/js/json2.js">
+<import resource="classpath:alfresco/extension/js/utils.js">
 
 var europaSite = siteService.getSite("europa").node;
 var modelFolder = europaSite.childByNamePath("/vieweditor/model");
@@ -22,7 +23,7 @@ function handleView(viewnode) {
 				"body": commentNode.properties["view:documentation"],
 				"deleted": commentNode.properties["view:deleted"],
 				"author": commentNode.properties["view:author"],
-				"modified": commentNode.properties["view:lastModified"]
+				"modified": dateToString(commentNode.properties["view:lastModified"])
 		};
 		comments.push(commentdetail);
 	}

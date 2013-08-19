@@ -45,3 +45,9 @@ function cleanDocument(dnode) {
 		pv.removeAssociation(dnode, "view:documents");
 	}
 }
+
+function dateToString(date) {
+	var s = utils.toISO8601(date);
+	s = s.replace("T", " ").substring(0, 19);
+	return s;
+}
