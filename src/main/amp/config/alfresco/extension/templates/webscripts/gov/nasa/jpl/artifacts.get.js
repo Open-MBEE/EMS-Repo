@@ -10,6 +10,8 @@ main();
  * Main function for executing logic
  */
 function main() {
+	var matchNode = undefined;
+	
 	//return not-found if file isn't matched
 	status.code=404;
 	
@@ -28,9 +30,9 @@ function main() {
 		if (extension != null) {
 			filename += extension;
 		}
-		searchForMatches(filename);
+		matchNode = searchForMatches(filename);
 	} else {
-		path += "Sites/";
+		path += "Artifacts/";
 		for (var ii = 0; ii < tokens.length - 1; ii++) {
 			path += tokens[ii] + "/";
 		}
@@ -38,23 +40,23 @@ function main() {
 		if (extension != null) {
 			filename += extension;
 		}
-		var node = companyhome.childByNamePath(path + filename);
-		if (node != null && checkCs(node, cs)) {
+		matchNode = companyhome.childByNamePath(path + filename);
+		if (matchNode != null && checkCs(node, cs)) {
 			status.code = 200;
 		}
 	}
 	
 	if (status.code == 200) {
 	  status.message = "File " + filename + " found";
+	  model.link = matchNode.getUrl();
 	} else {
 	  if (cs) {
 	    status.message = "File " + filename + " with cs=" + cs + " not found.";
 	  } else {
 	    status.message = "File " + filename + " not found";
 	  }
+	  status.redirect = true;
 	}
-	
-	status.redirect = true;
 }
 
 /**
@@ -63,17 +65,19 @@ function main() {
 function searchForMatches(filename) {
 	// check for name matches
 	var searchString = "@cm\\:name:" + filename;
+	var matchNode = undefined;
 
 	var results = search.luceneSearch(searchString);
 	if (results.length > 0) {
 	  for (result in results) {
-	    var r = results[result];
-	    if (checkCs(r, cs)) {
+	    matchNode = results[result];
+	    if (checkCs(matchNode, cs)) {
 	    	status.code = 200;
 	    	break;
 	    }
 	  }
 	}
+	return matchNode;
 }
 
 /**

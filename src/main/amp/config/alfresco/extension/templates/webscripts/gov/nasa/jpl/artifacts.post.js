@@ -1,6 +1,6 @@
 // everything is relative to Sites path
-var path = "Sites/";
-var extension = null;
+var path = "Artifacts/";
+var extension = "";
 var cs = null;
 var filename = undefined;
 var content = undefined;
@@ -10,7 +10,10 @@ main();
 function main() {
 	//Query parameters on URL as exposed as args dictionary)
 	if ("extension" in args) {
-	  extension = "." + args.extension;
+		if (args.extension.charAt(0) != ".") {
+			extension = ".";
+		}
+	  extension +=  args.extension;
 	}
 	if ("cs" in args) {
 	  cs = args.cs;
@@ -90,6 +93,9 @@ function mkdir(path)
       if (folder == null) 
       {
         var parentFolder = companyhome.childByNamePath(prevPath);
+        if (parentFolder == null) {
+        	parentFolder = companyhome;
+        }
         var newFolder = parentFolder.createFolder(relPath);
         newFolder.save();
         folder = newFolder;
