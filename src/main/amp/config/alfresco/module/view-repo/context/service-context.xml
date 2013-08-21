@@ -39,4 +39,33 @@
         </list>
       </property>
     </bean>
+    
+    <!-- add in the resource set for all the added modules -->
+     <bean id="actionResourceBundles" class="org.alfresco.i18n.ResourceBundleBootstrapComponent">
+      <property name="resourceBundles">
+         <list>
+    	    <value>alfresco.messages.action-config</value>
+    	 </list>
+      </property>
+   </bean>
+   
+   <bean id="transformer.Db2Pdf"
+         class="gov.nasa.jpl.view_repo.DocBookContentTransformer"
+         parent="baseContentTransformer">
+      <property name="nodeService">
+         <ref bean="NodeService" />
+      </property>
+      <property name="searchService">
+         <ref bean="SearchService" />
+      </property>
+      <property name="contentService">
+         <ref bean="ContentService" />
+      </property>
+    	<property name="path" value="/Users/cinyoung/workspaces/workspace/webapp/" />
+    	<property name="fop" value="fop-1.0/fop" />
+    	<property name="xsl" value="xsl/fo/mgss.xsl" />
+   </bean>
+
+   <!-- add in the DB transformation -->
+
 </beans>
