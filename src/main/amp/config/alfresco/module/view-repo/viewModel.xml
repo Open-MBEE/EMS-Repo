@@ -12,33 +12,9 @@
     </namespaces>
     <data-types/>
     <constraints/>
-    <types>
-        <type name="view:Source">
-            <parent>cm:content</parent>
-            <properties/>
-            <associations/>
-            <overrides/>
-            <mandatory-aspects/>
-        </type>
-        <type name="view:Text">
-            <parent>view:Source</parent>
-            <properties>
-                <property name="view:text">
-                    <type>d:text</type>
-                    <mandatory>true</mandatory>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>true</tokenised>
-                    </index>
-                </property>
-            </properties>
-            <associations/>
-            <overrides/>
-            <mandatory-aspects/>
-        </type>
+    <types>        
         <type name="view:ModelElement">
-            <parent>view:Source</parent>
+            <parent>cm:content</parent>
             <properties>
                 <property name="view:documentation">
                     <type>d:text</type>
@@ -49,10 +25,29 @@
                         <tokenised>true</tokenised>
                     </index>
                 </property>
+                <property name="view:author">
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
+                <property name="view:lastModified">
+                    <type>d:datetime</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
                 <property name="view:mdid">
                     <type>d:text</type>
                     <mandatory enforced="true">true</mandatory>
                     <index enabled="false"/>
+                </property>
+                <property name="view:name">
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="true">
+                    	<atomic>false</atomic>
+                    	<stored>false</stored>
+                    	<tokenised>true</tokenised>
+                    </index>
                 </property>
             </properties>
             <associations/>
@@ -65,7 +60,7 @@
         <type name="view:Comment">
             <parent>view:ModelElement</parent>
             <properties>
-                <property name="view:commit">
+                <property name="view:committed">
                     <type>d:boolean</type>
                     <mandatory>false</mandatory>
                     <index enabled="false"/>
@@ -94,7 +89,13 @@
          </type>
         <type name="view:Volume">
             <parent>view:ModelElement</parent>
-            <properties/>
+            <properties>
+            	<property name="view:rootVolume">
+                    <type>d:boolean</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
+            </properties>
             <associations>
             	<association name="view:volumes">
             		<source>
@@ -124,6 +125,28 @@
         </type>
         <type name="view:View">
             <parent>view:ModelElement</parent>
+            <properties>
+                <property name="view:noSection">
+                    <type>d:boolean</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
+                <property name="view:viewsJson">
+                	<type>d:text</type>
+                	<mandatory>false</mandatory>
+                	<index enabled="false"/>
+                </property>
+                <property name="view:containsJson">
+                	<type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
+                <property name="view:sourcesJson">
+                	<type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
+            </properties>
             <associations>
                 <association name="view:views">
                     <source>
@@ -143,17 +166,6 @@
                     </source>
                     <target>
                         <class>view:Comment</class>
-                        <mandatory>false</mandatory>
-                        <many>true</many>
-                    </target>
-                </association>
-                <association name="view:contains">
-                    <source>
-                        <mandatory>false</mandatory>
-                        <many>false</many>
-                    </source>
-                    <target>
-                        <class>view:PresentationElement</class>
                         <mandatory>false</mandatory>
                         <many>true</many>
                     </target>
@@ -189,66 +201,6 @@
             <overrides/>
             <mandatory-aspects/>
         </type>
-        <type name="view:PresentationElement">
-            <parent>cm:content</parent>
-            <properties>
-                <property name="view:useProperty">
-                    <type>d:text</type>
-                    <mandatory>false</mandatory>
-                    <index enabled="false"/>
-                </property>
-            </properties>
-            <associations>
-                <association name="view:source">
-                    <source>
-                        <mandatory>false</mandatory>
-                        <many>true</many>
-                    </source>
-                    <target>
-                        <class>view:Source</class>
-                        <mandatory>false</mandatory>
-                        <many>true</many>
-                    </target>
-                </association>
-            </associations>
-            <overrides/>
-            <mandatory-aspects>
-                <aspect>view:Orderable</aspect>
-            </mandatory-aspects>
-        </type>
-        <type name="view:Table">
-            <parent>view:PresentationElement</parent>
-            <properties>
-                <property name="view:body">
-                    <type>d:text</type>
-                    <mandatory>false</mandatory>
-                    <index enabled="false"/>
-                </property>
-                <property name="view:header">
-                    <type>d:text</type>
-                    <mandatory>false</mandatory>
-                    <index enabled="false"/>
-                </property>
-                <property name="view:style">
-                    <type>d:text</type>
-                    <mandatory>false</mandatory>
-                    <index enabled="false"/>
-                </property>                
-            </properties>
-            <associations/>
-            <overrides/>
-            <mandatory-aspects>
-                <aspect>view:Captioned</aspect>
-                <aspect>view:Titled</aspect>
-            </mandatory-aspects>
-        </type> 
-        <type name="view:Paragraph">
-            <parent>view:PresentationElement</parent>
-            <properties/>
-            <associations/>
-            <overrides/>
-            <mandatory-aspects/>
-        </type>        
     </types>
     <aspects>
         <aspect name="view:Orderable">
@@ -257,38 +209,6 @@
                     <type>d:int</type>
                     <mandatory>false</mandatory>
                     <index enabled="false"/>
-                </property>
-            </properties>
-            <associations/>
-            <overrides/>
-            <mandatory-aspects/>
-        </aspect>
-        <aspect name="view:Captioned">
-            <properties>
-                <property name="view:caption">
-                    <type>d:text</type>
-                    <mandatory>false</mandatory>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>true</tokenised>
-                    </index>
-                </property>
-            </properties>
-            <associations/>
-            <overrides/>
-            <mandatory-aspects/>
-        </aspect>
-        <aspect name="view:Titled">
-            <properties>
-                <property name="view:title">
-                    <type>d:text</type>
-                    <mandatory>false</mandatory>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>true</tokenised>
-                    </index>
                 </property>
             </properties>
             <associations/>

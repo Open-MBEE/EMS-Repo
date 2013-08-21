@@ -1,0 +1,38 @@
+<webscript> 
+  <shortname>Post View comments</shortname> 
+  <description>Handles posting of view comments from magicdraw</description>
+  <url>/rest/views/{viewid}/comments?recurse={recurse?}</url> 
+  <format default="json">any</format> 
+  <authentication>user</authentication> 
+  <transaction allow="readwrite">required</transaction>
+  <family>View Editor</family>
+  <args>
+  	<arg>
+  		<name>recurse</name>
+  		<description>Whether posted comments are for single view or all its children</description>
+  	</arg>
+  	<arg>
+  		<name>viewid</name>
+  		<description>The MD ID of the view whose comments being posted</description>
+  	</arg>
+  	<arg>
+  		<name>posted content</name>
+  		<description>The request body of the post as json (pairs in parenthesis are conditional):
+  		{
+  			"views2comment": 
+  			{
+  					"viewid": [commentid, ...], ...
+  			},
+  			"comments": [
+  				{
+  					"id": mdid, 
+  					"author": user, 
+  					"body": body, 
+  					"modified": datetime, 
+  				}, ...
+  			]
+  		}  	
+  		</description>
+  	</arg>
+  </args>
+</webscript>

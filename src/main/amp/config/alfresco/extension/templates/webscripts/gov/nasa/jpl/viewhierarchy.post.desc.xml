@@ -1,0 +1,28 @@
+<webscript> 
+  <shortname>Post View hierarchy</shortname> 
+  <description>Handles posting of view hierarchy from magicdraw</description>
+  <url>/rest/views/{viewid}/hierarchy</url> 
+  <format default="json">any</format> 
+  <authentication>user</authentication> 
+  <transaction allow="readwrite">required</transaction>
+  <family>View Editor</family>
+  <args>
+  	<arg>
+  		<name>viewid</name>
+  		<description>The MD ID of the view whose comments being posted</description>
+  	</arg>
+  	<arg>
+  		<name>posted content</name>
+  		<description>The request body of the post as json (pairs in parenthesis are conditional):
+  		{
+  			"views": 
+  			{
+  					viewid: [viewid, ...], ...
+  			},
+  			"noSections": [ mdid, ...]
+  				
+  		}  	
+  		</description>
+  	</arg>
+  </args>
+</webscript>
