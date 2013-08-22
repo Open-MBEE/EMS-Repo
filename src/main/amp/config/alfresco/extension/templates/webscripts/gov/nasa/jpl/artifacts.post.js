@@ -54,10 +54,13 @@ function main() {
 		if (upload == null) {
 			var node = mkdir(path);
 			upload = node.createFile(filename) ;
-			
-			// TODO: check for aspect and create if necessary
 		}
-	    
+
+		if (!upload.hasAspect("view:Checksummable")) {
+			upload.addAspect("view:Checksummable");
+		}
+		upload.properties.cs = cs;
+		
 		upload.properties.content.write(content);
 		upload.properties.content.setEncoding("UTF-8");
 		upload.properties.content.guessMimetype(filename);

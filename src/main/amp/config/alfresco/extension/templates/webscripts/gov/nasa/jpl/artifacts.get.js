@@ -1,6 +1,6 @@
 // lets get all the arguments
 var path = "";
-var extension = null;
+var extension = "";
 var cs = null;
 var filename = null;
 
@@ -17,7 +17,10 @@ function main() {
 	
 	//Query parameters on URL as exposed as args dictionary)
 	if ("extension" in args) {
-	  extension = "." + args.extension;
+		if (args.extension.charAt(0) != ".") {
+			extension = ".";
+		}
+	  extension += args.extension;
 	}
 	if ("cs" in args) {
 	  cs = args.cs;
@@ -41,7 +44,7 @@ function main() {
 			filename += extension;
 		}
 		matchNode = companyhome.childByNamePath(path + filename);
-		if (matchNode != null && checkCs(node, cs)) {
+		if (matchNode != null && checkCs(matchNode, cs)) {
 			status.code = 200;
 		}
 	}
@@ -55,8 +58,8 @@ function main() {
 	  } else {
 	    status.message = "File " + filename + " not found";
 	  }
-	  status.redirect = true;
 	}
+  status.redirect = true;
 }
 
 /**

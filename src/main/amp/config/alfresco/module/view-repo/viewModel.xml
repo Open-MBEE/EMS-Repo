@@ -215,5 +215,17 @@
             <overrides/>
             <mandatory-aspects/>
         </aspect>
+        <aspect name="view:Checksummable">
+            <properties>
+                <property name="view:cs">
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
+            </properties>
+            <associations/>
+            <overrides/>
+            <mandatory-aspects/>
+        </aspect>
     </aspects>
 </model>
