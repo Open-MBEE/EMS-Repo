@@ -1,3 +1,5 @@
+<import resource="classpath:alfresco/extension/js/artifact_utils.js">
+
 // lets get all the arguments
 var path = "";
 var extension = "";
@@ -16,12 +18,8 @@ function main() {
 	status.code=404;
 	
 	//Query parameters on URL as exposed as args dictionary)
-	if ("extension" in args) {
-		if (args.extension.charAt(0) != ".") {
-			extension = ".";
-		}
-	  extension += args.extension;
-	}
+	extension = getExtension(args);
+	
 	if ("cs" in args) {
 	  cs = args.cs;
 	}
@@ -33,7 +31,10 @@ function main() {
 		if (extension != null) {
 			filename += extension;
 		}
-		matchNode = searchForMatches(filename);
+		matchNode = searchForFile(filename);
+		if (checkCs(matchNode, cs)) {
+			status.code = 200;
+		}
 	} else {
 		path += "Artifacts/";
 		for (var ii = 0; ii < tokens.length - 1; ii++) {
@@ -59,28 +60,7 @@ function main() {
 	    status.message = "File " + filename + " not found";
 	  }
 	}
-  status.redirect = true;
-}
-
-/**
- * Utility function for global filename matching
- */
-function searchForMatches(filename) {
-	// check for name matches
-	var searchString = "@cm\\:name:" + filename;
-	var matchNode = undefined;
-
-	var results = search.luceneSearch(searchString);
-	if (results.length > 0) {
-	  for (result in results) {
-	    matchNode = results[result];
-	    if (checkCs(matchNode, cs)) {
-	    	status.code = 200;
-	    	break;
-	    }
-	  }
-	}
-	return matchNode;
+	status.redirect = true;
 }
 
 /**
