@@ -4,7 +4,6 @@
 var europaSite = siteService.getSite("europa").node;
 var modelFolder = europaSite.childByNamePath("/vieweditor/model");
 var date = new Date();
-var user = person?;
 
 function updateModelElement(element) {
 	var modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + element.mdid + "']");
