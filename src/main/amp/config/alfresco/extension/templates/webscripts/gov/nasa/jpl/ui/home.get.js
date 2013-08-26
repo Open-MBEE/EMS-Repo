@@ -47,7 +47,8 @@ var info = {
 	"volume2volumes": volume2volumes, 
 	"documents": documents, 
 	"volume2documents": volume2documents, 
-	"projectVolumes": projectVolumes
+	"projectVolumes": projectVolumes,
+	"name": "Europa"
 };
 
 var	response = status.code == 200 ? jsonUtils.toJSONString(info) : "NotFound";
