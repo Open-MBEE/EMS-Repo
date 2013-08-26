@@ -1,0 +1,66 @@
+<webscript> 
+  <shortname>Get View</shortname> 
+  <description>Return all elements referenced in the view
+		{
+			"rootView": mdid of top level view,
+  			"views": [
+  				{
+  					"mdid": mdid, 
+  				 	"noSection": true/false, 
+  				 	"author": user,
+  				 	"modified": ISO8601 formatted date,
+  				 	"contains": [
+  				 		{
+  				 			"type": Paragraph", 
+  				 			"source": mdid/"text", 
+  				 			"useProperty": "DOCUMENTATION/NAME/DVALUE", 
+  				 			("text": text)
+  				 		} OR
+  				 		{
+  				 			"type": "Table", 
+  				 			"sources": [mdid, ...], 
+  				 			"title": title, 
+  				 			"body": [[{
+  				 				"source": mdid/"text", 
+  				 				"useProperty": "DOCUMENTATION/NAME/DVALUE", 
+  				 				("text": text), 
+  				 				("colspan": colspan), 
+  				 				("rowspan": rowspan)
+  				 			}, ...], ...], 
+  				 			"header": same as body, 
+  				 			"style": style
+  				 		}, ... 
+  				 	],
+  				 	"comments": [
+  				 		{
+  				 			"author": author,
+  				 			"body": body,
+  				 			"modified": ISO8601 formatted date,
+  				 			"mdid": mdid
+  				 		}, ...
+  				 	]
+  				}, ...
+  			],
+  			"view2view": {
+  				viewid: [viewid, ...], ...
+  			},
+  			"elements": [
+  				{
+  					"mdid": mdid, 
+  					("name": name), 
+  					"documentation": doc, 
+  					("dvalue": dvalue)
+  				}, ...
+  			]
+  		}
+  		
+  		- "text" is only present if source is "text"
+  	
+  </description>
+  <url>/ui/views/{viewid}</url> 
+  <format default="html">any</format> 
+  <authentication>user</authentication> 
+  <transaction allow="readonly">required</transaction>
+  <family>View Editor</family>
+  
+</webscript>
