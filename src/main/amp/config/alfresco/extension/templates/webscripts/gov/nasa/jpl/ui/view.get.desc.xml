@@ -3,12 +3,13 @@
   <description>Return all elements referenced in the view
 		{
 			"rootView": mdid of top level view,
+			"user": current user's username,
   			"views": [
   				{
   					"mdid": mdid, 
   				 	"noSection": true/false, 
-  				 	"author": user,
-  				 	"modified": ISO8601 formatted date,
+  				 	"author": username (last editing user),
+  				 	"modified": ISO8601 formatted date string,
   				 	"contains": [
   				 		{
   				 			"type": Paragraph", 
@@ -33,9 +34,9 @@
   				 	],
   				 	"comments": [
   				 		{
-  				 			"author": author,
+  				 			"author": username,
   				 			"body": body,
-  				 			"modified": ISO8601 formatted date,
+  				 			"modified": ISO8601 formatted date string,
   				 			"mdid": mdid
   				 		}, ...
   				 	]
