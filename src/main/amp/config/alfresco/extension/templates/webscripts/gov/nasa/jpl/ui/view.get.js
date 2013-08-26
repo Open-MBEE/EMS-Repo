@@ -52,7 +52,7 @@ function handleView(view) {
 		var commentinfo = {};
 		commentinfo['author'] = comment.properties['view:author'];
 		commentinfo['modified'] = utils.toISO8601(comment.properties['view:lastModified']);
-		commentinfo['mdid'] = comment.properties["view:mdid"];
+		commentinfo['id'] = comment.properties["view:mdid"];
 		commentinfo['body'] = comment.properties['view:documentation'];
 		viewcomments.push(commentinfo);
 	}

@@ -37,7 +37,7 @@
   				 			"author": username,
   				 			"body": body,
   				 			"modified": ISO8601 formatted date string,
-  				 			"mdid": mdid
+  				 			"id": id
   				 		}, ...
   				 	]
   				}, ...
