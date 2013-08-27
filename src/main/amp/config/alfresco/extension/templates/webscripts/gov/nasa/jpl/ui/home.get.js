@@ -20,7 +20,7 @@ function handleVolume(volume) {
 	childrenDocuments = volume.assocs['view:documents'];
 	cds = [];
 	for (var i in childrenDocuments) {
-		var cd = childrenDocument[i];
+		var cd = childrenDocuments[i];
 		cds.push(cd.properties['view:mdid']);
 		documents[cd.properties['view:mdid']] = cd.properties['view:name'];
 	}

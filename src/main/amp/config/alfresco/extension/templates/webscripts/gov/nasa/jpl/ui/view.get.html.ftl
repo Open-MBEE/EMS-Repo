@@ -1,5 +1,7 @@
 <html>
 <body>
-${res}
+<script>
+var i = ${res};
+</script>
 </body>
 </html>
