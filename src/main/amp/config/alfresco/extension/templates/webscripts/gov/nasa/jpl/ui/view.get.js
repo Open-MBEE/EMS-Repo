@@ -96,7 +96,7 @@ info['views'] = views;
 info['rootView'] = viewid;
 info['user'] = person.properties['cm:userName'];
 
-var	response = status.code == 200 ? jsonUtils.toJSONString(info) : "NotFound";
+var	response = status.code == 200 ? toJson(info) : "NotFound";
 if (status.code != 200) {
 	status.redirect = true;
 	status.message = response;

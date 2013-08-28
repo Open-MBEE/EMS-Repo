@@ -51,3 +51,8 @@ function dateToString(date) {
 	s = s.replace("T", " ").substring(0, 19);
 	return s;
 }
+
+function toJson(o) {
+	var s = jsonUtils.toJSONString(o);
+	return s.replace("\\/", "/");
+}
