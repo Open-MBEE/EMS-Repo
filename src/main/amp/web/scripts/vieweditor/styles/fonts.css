@@ -1,0 +1,10 @@
+body {
+  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
+}
+
+.page, .page h1, .page h2, .page h3, .page h4, .page h5 {
+  font-family: 'PT Serif', Georgia, serif;
+}
+.navbar-brand, .page .inspector, .inspectors {
+  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
+}
