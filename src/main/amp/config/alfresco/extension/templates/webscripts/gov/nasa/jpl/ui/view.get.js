@@ -1,5 +1,6 @@
 <import resource="classpath:alfresco/extension/js/json2.js">
 <import resource="classpath:alfresco/extension/js/utils.js">
+<import resource="classpath:alfresco/extension/js/artifact_utils.js">
 
 var europaSite = siteService.getSite("europa").node;
 var modelFolder = europaSite.childByNamePath("/vieweditor/model");
@@ -13,7 +14,7 @@ var viewid = url.extension
 function addElement(modelNode) {
 	var info = {};
 	info['mdid'] = modelNode.properties["view:mdid"];
-	info['documentation'] = modelNode.properties["view:documentation"];
+	info['documentation'] = fixArtifactUrls(modelNode.properties["view:documentation"], false);
 	var name = modelNode.properties["view:name"];
 	if (name != null && name != undefined)
 		info['name'] = name;
@@ -41,7 +42,7 @@ function handleView(view) {
 	var viewinfo = {};
 	viewinfo['mdid'] = view.properties['view:mdid'];
 	viewinfo['noSection'] = view.properties['view:noSection'];
-	viewinfo['contains'] = JSON.parse(view.properties['view:containsJson']);
+	viewinfo['contains'] = JSON.parse(fixArtifactUrls(view.properties['view:containsJson'],true));
 	
 	var viewcomments = [];
 	var comments = view.assocs['view:comments'];

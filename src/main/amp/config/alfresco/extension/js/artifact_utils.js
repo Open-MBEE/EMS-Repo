@@ -15,20 +15,38 @@ function getExtension (args) {
 }
 
 /**
- * Utility for replacing image references with URLs in alfresco
- * @param content
+ * Utility for replacing all the artifact URLs in alfresco
+ * @param content	String whoes image references need to be updated
+ * @paran escape	True if returned string needs special escape characters
+ * @returns			String with updated references
  */
-function replaceArtifactUrl(content) {
-	var prefix = '/editor/images/docgen/'
-	var pattern= /\/editor\/images\/docgen\/.*?"/g;
+function fixArtifactUrls(content, escape) {
+	var result = content;
+	result = replaceArtifactUrl(result, '/staging/images/docgen/', /\/staging\/images\/docgen\/.*?"/g, escape);
+	result = replaceArtifactUrl(result, '\\/editor\\/images\\/docgen\\/', /\\\/editor\\\/images\\\/docgen\\\/.*?\\"/g, escape);
+	return result;
+}
 
+/**
+ * Utility for replacing image references with URLs in alfresco
+ * @param content	String whose image references need to be updated
+ * @param prefix	The string prefix to match for replacement
+ * @param pattern	Filename pattern to search for and replace
+ * @param escape	True if the returned string needs special escape characters (for use by JSON parser)
+ * @returns			String with updated references	
+ */
+function replaceArtifactUrl(content, prefix, pattern, escape) {
     var matches = content.match(pattern);
 	for (ii in matches) {
 		var match = matches[ii];
-		var filename = match.replace(prefix,'').replace('"','');
+		var filename = match.replace(prefix,'').replace('"','').replace('_latest','');
 		var node = searchForFile(filename);
 		if (node != null) {
-			content = content.replace(match, url.serviceContext + node.getUrl());
+			var nodeurl = String(node.getUrl());
+			if (escape) {
+				nodeurl = nodeurl.replace(/\//g, '\\\/');
+			}
+			content = content.replace(match, url.serviceContext + nodeurl);
 		}
 	}
 	
@@ -36,12 +54,12 @@ function replaceArtifactUrl(content) {
 }
 
 /**
- * Utility function for finding a the node for a specific file - need to qualify
- * this somehow
+ * Utility function for finding a the node for a specific file
+ * TODO: need to qualify this somehow if there are duplicates
  */
 function searchForFile(filename) {
-	// check for name matches
-	var searchString = "@cm\\:name:" + filename;
+	// check for name matches (make sure to remove any \ in the string (if they were escaped)
+	var searchString = "@cm\\:name:" + filename.replace(/\\/g, '');
 	var matchNode = undefined;
 
 	var results = search.luceneSearch(searchString);
