@@ -16,8 +16,8 @@ function getExtension (args) {
 
 /**
  * Utility for replacing all the artifact URLs in alfresco
- * @param content	String whoes image references need to be updated
- * @paran escape	True if returned string needs special escape characters
+ * @param content	String whose image references need to be updated
+ * @param escape	True if returned string needs special escape characters
  * @returns			String with updated references
  */
 function fixArtifactUrls(content, escape) {
