@@ -29,7 +29,7 @@ var pageData = {postview: ${res}};
 
 
 			<div class="pull-right">
-				<a href="vision.html"><img class="europa-icon" src="${url.context}/scripts/images/europa-icon.png" /></a>
+				<a href="vision.html"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
 			</div>
 
 			<form class="navbar-form navbar-right" action="">
