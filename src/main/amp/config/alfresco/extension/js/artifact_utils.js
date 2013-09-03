@@ -22,8 +22,8 @@ function getExtension (args) {
  */
 function fixArtifactUrls(content, escape) {
 	var result = content;
-	result = replaceArtifactUrl(result, '/staging/images/docgen/', /\/staging\/images\/docgen\/.*?"/g, escape);
-	result = replaceArtifactUrl(result, '\\/editor\\/images\\/docgen\\/', /\\\/editor\\\/images\\\/docgen\\\/.*?\\"/g, escape);
+	result = replaceArtifactUrl(result, 'src="/staging/images/docgen/', /src=\"\/staging\/images\/docgen\/.*?"/g, escape);
+	result = replaceArtifactUrl(result, 'src="\\/editor\\/images\\/docgen\\/', /src=\"\\\/editor\\\/images\\\/docgen\\\/.*?\\"/g, escape);
 	return result;
 }
 
@@ -42,11 +42,11 @@ function replaceArtifactUrl(content, prefix, pattern, escape) {
 		var filename = match.replace(prefix,'').replace('"','').replace('_latest','');
 		var node = searchForFile(filename);
 		if (node != null) {
-			var nodeurl = String(node.getUrl());
+			var nodeurl = 'src="' + url.context + String(node.getUrl()) + '"';
 			if (escape) {
-				nodeurl = nodeurl.replace(/\//g, '\\\/');
+				nodeurl = nodeurl.replace(/\//g, '\\\/').replace(/\"/g, '\\"');
 			}
-			content = content.replace(match, url.serviceContext + nodeurl);
+			content = content.replace(match, nodeurl);
 		}
 	}
 	
