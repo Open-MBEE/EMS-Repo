@@ -71,3 +71,49 @@ function searchForFile(filename) {
 	}
 	return matchNode;
 }
+
+
+function guessMimetype(filename) {
+	var mimetype;
+	var mimetypesByExtension = {
+		'bin':	'bin',
+		'txt':	'text/plain',
+		'css':	'text/css',
+		'csv':	'text/csv',
+		'js':	'text/javascript',
+		'xml':	'text/xml',
+		'html':	'text/html',
+		'xhtml':'application/xhtml+xml',
+		'pdf':	'application/pdf',
+		'json':	'application/json',
+		'docx':	'application/msword',
+		'xslx':	'application/vnd.ms-excel',
+		'pptx': 'application/vnd.ms-powerpoint',
+		'avi':	'video/x-msvideo',
+		'wmv':	'video/x-ms-wmv',
+		'mpeg':	'video/mpeg',
+		'mp4':	'video/mp4',
+		'gif':	'image/gif',
+		'jpg':	'image/jpeg',
+		'jpeg':	'image/jpeg',
+		'svg':	'image/svg+xml',
+		'png':	'image/png',
+		'tiff':	'image/tiff',
+		'zip': 	'application/zip',
+		'eps':	'application/eps'
+	};
+	
+	
+	if (filename != null && filename.length > 0) {
+		var index = filename.lastIndexOf('.');
+		if (index > -1 && (index < filename.length-1)) {
+			var extension = filename.substring(index+1).toLowerCase();
+			mimetype = mimetypesByExtension[extension];
+		}
+	}
+	
+	if (mimetype == undefined) {
+		mimetype = 'application/octet-stream';
+	}
+	return mimetype;
+}

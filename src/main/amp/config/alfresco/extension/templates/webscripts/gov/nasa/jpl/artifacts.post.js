@@ -1,3 +1,5 @@
+<import resource="classpath:alfresco/extension/js/artifact_utils.js">
+
 // everything is relative to Sites path
 var path = "Artifacts/";
 var extension = "";
@@ -63,10 +65,9 @@ function main() {
 		
 		upload.properties.content.write(content);
 		upload.properties.content.setEncoding("UTF-8");
-		upload.properties.content.guessMimetype(filename);
-		if (filename.indexOf(".svg") >= 0) {
-			upload.properties.content.mimetype = "image/svg+xml";
-		}
+//		upload.properties.content.guessMimetype(filename);
+		// TODO: figure out why built in guessMimetype doesn't work
+		upload.properties.content.mimetype = guessMimetype(filename);
 	  
 		upload.properties.title = filename;
 		upload.save();
