@@ -64,9 +64,11 @@ function main() {
 		upload.properties.content.write(content);
 		upload.properties.content.setEncoding("UTF-8");
 		upload.properties.content.guessMimetype(filename);
+		if (filename.indexOf(".svg") >= 0) {
+			upload.properties.content.mimetype = "image/svg+xml";
+		}
 	  
 		upload.properties.title = filename;
-//		upload.properties.description = description;
 		upload.save();
 	 
 		// setup model for response template
