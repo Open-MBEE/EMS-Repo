@@ -10,6 +10,7 @@ var views = [];
 var view2view = {};
 
 var viewid = url.extension
+var product = false;
 
 function addElement(modelNode) {
 	var info = {};
@@ -69,12 +70,14 @@ function handleView(view) {
 	viewinfo['modified'] = utils.toISO8601(view.properties['view:lastModified']);
 	views.push(viewinfo);
 	
-	view2view[view.properties['view:mdid']] = JSON.parse(view.properties['view:viewsJson']);
-	
-	var childViews = view.assocs["view:views"];
-	for (var i in childViews) {
-		handleView(childViews[i]);
+	if (!product) {
+		view2view[view.properties['view:mdid']] = JSON.parse(view.properties['view:viewsJson']);
+		var childViews = view.assocs["view:views"];
+		for (var i in childViews) {
+			handleView(childViews[i]);
+		}
 	}
+	return viewinfo;
 }
 
 function main() {
@@ -83,7 +86,26 @@ function main() {
 		status.code = 404;
 	} else {
 		topview = topview[0];
-		handleView(topview);
+		if (topview.properties["view:product"])
+			product = true;
+		if (product) {
+			view2view = JSON.parse(topview.properties["view:view2viewJson"]);
+			var noSections = JSON.parse(topview.properties["view:noSectionsJson"]);
+			for (var viewmdid in view2view) {
+				var view = modelFolder.childrenByXPath("*[@view:mdid='" + viewmdid + "']");
+				if (view == null || view.length == 0) {
+					status.code = 404;
+					return;
+				}
+				var viewinfo = handleView(view[0]);
+				if (noSections.indexOf(viewmdid) >= 0)
+					viewinfo.noSection = true;
+				else
+					viewinfo.noSection = false;
+			}
+		} else {
+			handleView(topview);
+		}
 	}
 }
 
