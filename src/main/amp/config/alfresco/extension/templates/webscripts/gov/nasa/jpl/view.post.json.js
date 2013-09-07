@@ -59,7 +59,7 @@ function updateOrCreateModelElement(element, force) {
 	return modelNode;
 }
 
-function updateOrCreateView(view) {
+function updateOrCreateView(view, ignoreNoSection) {
 	var viewNode = modelMapping[view.mdid];
 	if (viewNode == null || viewNode == undefined) {
 		viewNode = modelFolder.childrenByXPath("*[@view:mdid='" + view.mdid + "']");
@@ -73,7 +73,7 @@ function updateOrCreateView(view) {
 		fillSources(view.contains[i], sources);
 	}
 	viewNode.properties["view:sourcesJson"] = jsonUtils.toJSONString(sources);
-	if (view.noSection != null && view.noSection != undefined)
+	if (view.noSection != null && view.noSection != undefined && !ignoreNoSection)
 		viewNode.properties["view:noSection"] = view.noSection;
 	else
 		viewNode.properties["view:noSection"] = false;
@@ -108,9 +108,14 @@ function main() {
 		return;
 	var viewid = url.templateArgs.viewid;
 	var topview = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
+	var product = false;
 	if (topview == null || topview.length == 0) {
 		if (args.doc == 'true') {
 			topview = modelFolder.createNode(viewid, "view:DocumentView");
+			if (args.product == 'true') {
+				topview.properties["view:product"] = true;
+				product = true;
+			}
 		} else {
 			topview = modelFolder.createNode(viewid, "view:View");
 		}
@@ -123,11 +128,23 @@ function main() {
 		updateOrCreateModelElement(postjson.elements[i], force);
 	}
 	for (var i in postjson.views) {
-		updateOrCreateView(postjson.views[i]);
+		updateOrCreateView(postjson.views[i], product);
 	}
-	if (args.recurse == 'true') {
+	if (args.recurse == 'true' && !product) {
 		updateViewHierarchy(modelMapping, postjson.view2view);
 	}	
+	if (product) {
+		var noSections = [];
+		for (var i in postjson.views) {
+			var view = postjson.views[i];
+			if (view.noSection)
+				noSections.push(view.mdid);
+		}
+		topview.properties["view:view2viewJson"] = jsonUtils.toJSONString(postjson.view2view);
+		topview.properties["view:noSectionsJson"] = jsonUtils.toJSONString(noSections);
+		topview.save();
+	}
+	
 }
 
 main();
