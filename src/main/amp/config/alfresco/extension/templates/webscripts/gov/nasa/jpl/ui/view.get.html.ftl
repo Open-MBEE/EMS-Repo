@@ -1,51 +1,51 @@
 <html>
-	<head>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>memos</title>
-		<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
-		<link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet">
-		<link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet">
-		<link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
-		<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
-	
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>memos</title>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+    <link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet">
+    <link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet">
+    <link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
+  
 <script type="text/javascript">
 var pageData = {postview: ${res}};
 </script>
 
 </head>
 
-	<body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
+  <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
 <div id="main"></div>
 <script id="template" type="text/mustache">
 
-		<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-			<div class="navbar-header">
-					<a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
-			</div>
-			<ul class="nav navbar-nav">
-				<li><a href="index.html">dashboard</a></li>
-				<li><a href="about.html">about</a></li>
-			</ul>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="navbar-header">
+          <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
+      </div>
+      <ul class="nav navbar-nav">
+        <li><a href="index.html">dashboard</a></li>
+        <li><a href="about.html">about</a></li>
+      </ul>
 
 
-			<div class="pull-right">
-				<a href="vision.html"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
-			</div>
+      <div class="pull-right">
+        <a href="vision.html"><img class="europa-icon" src="images/europa-icon.png" /></a>
+      </div>
 
-			<form class="navbar-form navbar-right" action="">
-	      <div class="form-group">
-	        <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
-	          <option value="modeler">Modeler</option>
-	          <option value="reviewer">Reviewer</option>
-	          <option value="manager">Manager</option>
-	        </select>
-	      </div>
-	    </form>
+      <form class="navbar-form navbar-right" action="">
+        <div class="form-group">
+          <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
+            <option value="modeler">Modeler</option>
+            <option value="reviewer">Reviewer</option>
+            <option value="manager">Manager</option>
+          </select>
+        </div>
+      </form>
 
-		</nav>
+    </nav>
 
-		<div class="wrapper">
-			<div class="row split-view">
+    <div class="wrapper">
+      <div class="row split-view">
 
   <div class="col-xs-8">
     <div class="page-sections">
@@ -66,15 +66,15 @@ var pageData = {postview: ${res}};
           </div>
           <div class="btn-group pull-right">
             <button type="button" class="btn btn-default" proxy-click="cancelEditing">Cancel</button>
-            <button type="button" class="btn btn-primary" proxy-click="saveSection:{{ id }}">Save changes</button>
+            <button type="button" class="btn btn-primary" proxy-click="saveSection:section{{ id }}">Save changes</button>
           </div>
         </div>
-        <div class="section page" id="{{ id }}" contenteditable="true" proxy-dblclick="sectionDoubleClick">
+        <div class="section page" id="section{{ id }}" contenteditable="true" proxy-dblclick="sectionDoubleClick">
           {{{ content }}}
         </div>
         {{/editing}}
         {{^editing}}
-        <div class="section page" id="{{ id }}">
+        <div class="section page" id="section{{ id }}">
           {{{ content }}}
         </div>
         {{/editing}}
@@ -152,15 +152,15 @@ var pageData = {postview: ${res}};
 
 
 </div>
-		</div>
+    </div>
 
-		
-		
-		<!--  -->
-		
-		
-		
-	</script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
+    
+    
+    <!--  -->
+    
+    
+    
+  </script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery-ui.min.js"></script>
 <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery.hotkeys.js"></script>
@@ -186,12 +186,12 @@ var $ = context.$;
 // console.log("$ is currently", $);
 
 setTimeout(function() {
-	context.$('#editor').wysiwyg();	
+  context.$('#editor').wysiwyg(); 
 }, 500)
 
 app.on('togglePreview', function() {
-	// console.log("toggling preview...");
-	$('#markup-preview, #markup-editor').toggle();
+  // console.log("toggling preview...");
+  $('#markup-preview, #markup-editor').toggle();
 })
 
 app.on('editSection', function(e, sectionId) {
@@ -213,8 +213,6 @@ app.on('cancelEditing', function(e) {
 })
 
 app.on('saveSection', function(e, sectionId) {
-  console.log("ASDFADF");
-  console.log(e);
   e.original.preventDefault();
   app.set(e.keypath+'.content', context.document.getElementById(sectionId).innerHTML);
   app.set(e.keypath+'.editing', false);
@@ -243,9 +241,9 @@ app.on('insertReference', function() {
 // elementDetails.js
 
 app.on('elementDetails', function(evt) {
-	evt.original.preventDefault();
-	app.set('inspectedElement', app.get(evt.keypath));
-	evt.node.blur();
+  evt.original.preventDefault();
+  app.set('inspectedElement', app.get(evt.keypath));
+  evt.node.blur();
 })
 
 // inspectors.js
@@ -279,10 +277,59 @@ app.on('showReferencedElement', function(evt) {
 // how should we handle url patterns?
 // rdfa transclusion?
 
+var $ = context.$;
+
 var viewTree = {
 
 }
 
+
+
+var generateUpdates = function(node)
+{
+   var result = [];
+  $('.editable[property]', node).each(function(i,el)
+  {
+    //$('div[property]', editableNode).each(function(i,el)
+    //{
+      var existsInResults = false;
+      _.each(result, function(x)
+      {
+        if(x.mdid === el.id)
+        {
+          existsInResults = true;
+        }
+      });
+      if(existsInResults === false)
+      {
+        result.push({
+          mdid: el.id,
+          documentation: el.innerHTML
+        })
+      }
+    //});
+  });
+  return result;
+}
+
+var saveData = function(viewID, updates)
+{
+  var data = {'posted content': updates}
+  console.log("Write updates here", data);
+  var jsonData = JSON.stringify(updates);
+  var url = '${url.context}/service/ui/views/' + viewID;
+  $.ajax(
+    { 
+      type: "POST",
+      url: url,
+      data: jsonData,
+      contentType: "application/json; charset=UTF-8",
+      success: function(r) {
+        console.log("Success writing back");
+      }
+    })
+  .fail(function() { console.log("Error writing back"); });
+}
 
 var writeBackCache = function()
 {
@@ -292,19 +339,15 @@ var writeBackCache = function()
      viewData = vd;
    })
 
-   app.on('saveSection', function(e, sectionId) {
-     elementsToWriteback.push(sectionId);
-     console.log(app.get('viewsById')[sectionId])
+   app.on('saveSection', function(e, sectionId) {   
+     //console.log("realData SaveSection " + sectionId)
+     var section = context.document.getElementById(sectionId);
+
+     var updates = generateUpdates(section);
+     var viewId = sectionId.replace('section', '');
+     saveData(viewId, updates);
    })
 }();
-
-
-
-
-var writeback = function()
-{
-   elementsToWriteback = [];
-}
 
 var resolveValue = function(object, elements) {
   if (object.source === 'text') {
@@ -343,7 +386,7 @@ var addChildren = function(parentNode, childIds, view2view, views, elements) {
           var cell = c.header[0][hIdx];
           // TODO use the same resolver code here
           var value = resolveValue(cell, elements);
-          table += '<th colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + "' property='" + value.property + ' id=' + value.mdid +'">' + value.content + "</th>";
+          table += '<th colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '"' + "><div property='" + value.property + "' id='" + value.mdid +"'>" + value.content + "</div></th>";
         }
         table += "</tr>";
         table += "</thead>"
@@ -353,7 +396,7 @@ var addChildren = function(parentNode, childIds, view2view, views, elements) {
           for (var cIdx in c.body[rIdx]) {
             var cell = c.body[rIdx][cIdx];
             var value = resolveValue(cell, elements);
-            table += '<td colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + "' property='" + value.property + ' id=' + value.mdid +'">' + value.content + "</td>";
+            table += '<td colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '"' + "><div property='" + value.property + "' id='" + value.mdid +"'>" + value.content + "</div></td>";
           }
           table += "</tr>";
         }
@@ -363,7 +406,7 @@ var addChildren = function(parentNode, childIds, view2view, views, elements) {
       } else {
         var value = resolveValue(c, elements);
         if (value.editable) {
-          child.content += '<div class="editable" property="' + value.property + ' id=' + value.mdid +'">';
+          child.content += '<div class="editable" property="' + value.property + '" id="' + value.mdid +'">';
         } else {
           var ref = elements[value.mdid];
           if (ref) {
