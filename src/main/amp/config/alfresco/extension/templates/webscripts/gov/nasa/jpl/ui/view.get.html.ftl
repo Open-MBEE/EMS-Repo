@@ -166,6 +166,7 @@ var pageData = {postview: ${res}};
 <script src="${url.context}/scripts/vieweditor/vendor/jquery.hotkeys.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/bootstrap-wysiwyg.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery.tocify.min.js"></script>
+<script src="${url.context}/scripts/vieweditor/vendor/underscore.js"></script>
 <script type="text/javascript" src="${url.context}/scripts/vieweditor/vendor/Ractive.js"></script>
 <script type="text/javascript">var app = new Ractive({ el : "main", template : "#template", data : pageData });</script>
 <script type="text/javascript">
