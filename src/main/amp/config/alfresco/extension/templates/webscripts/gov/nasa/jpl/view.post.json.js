@@ -99,6 +99,12 @@ function fillSources(contained, sources) {
 			if (sources.indexOf(sourceid) < 0)
 				sources.push(sourceid);
 		}		
+	} else if (contained.type == "List") {
+		for (var i in contained.sources) {
+			var sourceid = contained.sources[i];
+			if (sources.indexOf(sourceid) < 0)
+				sources.push(sourceid);
+		}		
 	}
 }
 
