@@ -30,7 +30,36 @@
   				 			}, ...], ...], 
   				 			"header": same as body, 
   				 			"style": style
-  				 		}, ... 
+  				 		} //FUTURE TABLE (a cell can have multiple editable things in it, not supported yet)
+  				 		{
+  				 			"type": "Table", 
+  				 			"sources": [mdid, ...], 
+  				 			"title": title, 
+  				 			"body": [[{
+  				 				"content": [ //this allows multiple block elements in a cell
+  				 					{
+  				 						"type": "Paragraph"/"List"/"Table", //table in table probably not supported
+  				 						(see above...)
+  				 					}, ...
+  				 				],
+  				 				("colspan": colspan), 
+  				 				("rowspan": rowspan)
+  				 			}, ...], ...], 
+  				 			"header": same as body, 
+  				 			"style": style
+  				 		} //OR (List is not supported yet)
+  				 		{
+  				 			"type": "List",
+  				 			"sources": [mdid, ...],
+  				 			"list": [
+  				 				[{ //each list item can have multiple block elements, Table in a list may not be supported
+  				 					"type": "Paragraph"/"List"/"Table",
+  				 					(see above...)
+  				 				}, ...], ...
+  				 			],
+  				 			"bulleted": true/false,
+  				 			"ordered": true/false
+  				 		}, ...  
   				 	],
   				 	"comments": [
   				 		{

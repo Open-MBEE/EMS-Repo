@@ -1,0 +1,19 @@
+<webscript> 
+  <shortname>Create a snapshot</shortname> 
+  <description>Makes a snapshot of document, returns id of snapshot?</description>
+  <url>/ui/views/{viewid}/snapshot</url> 
+  <format default="json">any</format> 
+  <authentication>user</authentication> 
+  <transaction allow="readwrite">required</transaction>
+  <family>View Editor</family>
+  <args>
+  	
+  	<arg>
+  		<name>posted content</name>
+  		<description>The request body of the post as json: should be very similar to what's in view.get.desc.xml
+  		what about references to static html/pdf?
+  		
+  		</description>
+  	</arg>
+  </args>
+</webscript>
