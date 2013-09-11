@@ -4,13 +4,16 @@
 var europaSite = siteService.getSite("europa").node;
 var modelFolder = europaSite.childByNamePath("/vieweditor/model");
 var date = new Date();
+var modelElements = {}
 
 function updateModelElement(element) {
 	var modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + element.mdid + "']");
 	if (modelNode == null || modelNode.length == 0) {
 		return;
-	} else
+	} else {
 		modelNode = modelNode[0];
+		modelElements[element.mdid] = modelNode;
+	}
 
 	if (element.name != null && element.name != undefined && element.name != modelNode.properties["view:name"]) {
 		modelNode.properties["view:name"] = element.name;
@@ -34,7 +37,12 @@ function main() {
 	}
 	
 	var viewid = url.templateArgs.viewid;
-	var viewnode = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
+	var viewnode = null;
+	if (viewid in modelElements) {
+		viewnode = modelElements[viewid];
+	} else {
+		viewnode = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
+	}
 	viewnode.properties['author'] = person.properties['cm:userName'];
 	viewnode.properties['lastModified'] = date;
 	viewnode.save();
