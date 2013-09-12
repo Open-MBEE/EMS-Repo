@@ -81,6 +81,12 @@
   					"documentation": doc, 
   					("dvalue": dvalue)
   				}, ...
+  			],
+  			"snapshots": [
+  				{
+  					"id": id,
+  					"created": ISO8601 formatted date string
+  				}
   			]
   		}
   		

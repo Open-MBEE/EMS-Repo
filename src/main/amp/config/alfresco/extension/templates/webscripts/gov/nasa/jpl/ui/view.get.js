@@ -7,6 +7,7 @@ var elements = [];
 var seen = [];
 var views = [];
 var view2view = {};
+var snapshots = [];
 
 var viewid = url.extension
 var product = false;
@@ -79,6 +80,25 @@ function handleView(view) {
 	return viewinfo;
 }
 
+function getSnapshots(topview) {
+	var ss = topview.assocs["view:snapshots"];
+	for (var i in ss) {
+		utils.toISO8601(date);
+		var snapshot = ss[i];
+		snapshots.push({
+			"id": snapshot.properties["cm:name"], 
+			"created": utils.toISO8601(snapshot.properties["cm:created"])
+		});
+	}
+	snapshots.sort(function(a,b) {
+		if (a.created < b.created)
+			return -1;
+		if (a.created == b.created)
+			return 0;
+		return 1;
+	})
+}
+
 function main() {
 	var topview = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
 	if (topview == null || topview.length == 0) {
@@ -105,6 +125,7 @@ function main() {
 		} else {
 			handleView(topview);
 		}
+		getSnapshots(topview);
 	}
 }
 
@@ -117,6 +138,7 @@ info['view2view'] = view2view;
 info['views'] = views;
 info['rootView'] = viewid;
 info['user'] = person.properties['cm:userName'];
+info['snapshots'] = snapshots;
 
 var	response = status.code == 200 ? toJson(info) : "NotFound";
 if (status.code != 200) {
