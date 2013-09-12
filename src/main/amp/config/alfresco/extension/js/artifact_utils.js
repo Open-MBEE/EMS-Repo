@@ -24,6 +24,7 @@ function fixArtifactUrls(content, escape) {
 	var result = content;
 	result = replaceArtifactUrl(result, 'src="/staging/images/docgen/', /src=\"\/staging\/images\/docgen\/.*?"/g, escape);
 	result = replaceArtifactUrl(result, 'src="\\/editor\\/images\\/docgen\\/', /src=\"\\\/editor\\\/images\\\/docgen\\\/.*?\\"/g, escape);
+    result = replaceArtifactUrl(result, '\\/editor\\/images\\/docgen\\/', /\\\/editor\\\/images\\\/docgen\\\/.*?\\"/g, escape);
 	return result;
 }
 
@@ -42,7 +43,11 @@ function replaceArtifactUrl(content, prefix, pattern, escape) {
 		var filename = match.replace(prefix,'').replace('"','').replace('_latest','');
 		var node = searchForFile(filename);
 		if (node != null) {
-			var nodeurl = 'src="' + url.context + String(node.getUrl()) + '"';
+		    var nodeurl = '';
+		    if (prefix.indexOf('src') >= 0) {
+		        nodeurl = 'src="';
+		    }
+			nodeurl += url.context + String(node.getUrl()) + '"';
 			if (escape) {
 				nodeurl = nodeurl.replace(/\//g, '\\\/').replace(/\"/g, '\\"');
 			}
