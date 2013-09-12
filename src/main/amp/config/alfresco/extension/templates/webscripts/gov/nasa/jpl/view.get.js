@@ -1,7 +1,7 @@
 <import resource="classpath:alfresco/extension/js/json2.js">
 
-var europaSite = siteService.getSite("europa").node;
-var modelFolder = europaSite.childByNamePath("/vieweditor/model");
+//var europaSite = siteService.getSite("europa").node;
+var modelFolder = companyhome.childByNamePath("ViewEditor/model");
 var res = [];
 var seen = [];
 

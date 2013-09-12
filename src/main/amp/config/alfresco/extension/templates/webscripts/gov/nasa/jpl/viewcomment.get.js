@@ -1,8 +1,8 @@
 <import resource="classpath:alfresco/extension/js/json2.js">
 <import resource="classpath:alfresco/extension/js/utils.js">
 
-var europaSite = siteService.getSite("europa").node;
-var modelFolder = europaSite.childByNamePath("/vieweditor/model");
+//var europaSite = siteService.getSite("europa").node;
+var modelFolder = companyhome.childByNamePath("ViewEditor/model");
 
 var viewid = url.templateArgs.viewid;
 var recurse = args.recurse == 'true' ? true : false;

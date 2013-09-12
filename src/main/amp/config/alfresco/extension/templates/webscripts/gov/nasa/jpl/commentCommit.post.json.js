@@ -1,10 +1,8 @@
 <import resource="classpath:alfresco/extension/js/json2.js">
 <import resource="classpath:alfresco/extension/js/utils.js">
 
-//var modelFolder = roothome.childByNamePath("/Sites/europa/vieweditor/model");
-//var presentationFolder = roothome.childByNamePath("/Sites/europa/vieweditor/presentation");
-var europaSite = siteService.getSite("europa").node;
-var modelFolder = europaSite.childByNamePath("/vieweditor/model");
+//var europaSite = siteService.getSite("europa").node;
+var modelFolder = companyhome.childByNamePath("ViewEditor/model");
 
 var modelMapping = {};
 

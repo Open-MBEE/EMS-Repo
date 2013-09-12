@@ -38,8 +38,8 @@ function main() {
 
 status.code = 200;
 var project = url.extension;
-var europaSite = siteService.getSite(project).node;
-var modelFolder = europaSite.childByNamePath("/vieweditor/model");
+//var europaSite = siteService.getSite(project).node;
+var modelFolder = companyhome.childByNamePath("ViewEditor/model");
 
 main();
 var info = {

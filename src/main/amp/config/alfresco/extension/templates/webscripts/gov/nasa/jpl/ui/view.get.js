@@ -2,8 +2,7 @@
 <import resource="classpath:alfresco/extension/js/utils.js">
 <import resource="classpath:alfresco/extension/js/artifact_utils.js">
 
-var europaSite = siteService.getSite("europa").node;
-var modelFolder = europaSite.childByNamePath("/vieweditor/model");
+var modelFolder = companyhome.childByNamePath("ViewEditor/model");
 var elements = [];
 var seen = [];
 var views = [];

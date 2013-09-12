@@ -10,7 +10,7 @@
 	 		"projectVolumes": [volumeid,...]
 	 	}  	
   </description>
-  <url>/ui/{project}</url> 
+  <url>/ui/</url> 
   <format default="html">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readonly">required</transaction>
