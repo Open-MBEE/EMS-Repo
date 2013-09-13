@@ -10,7 +10,10 @@
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
   
 <script type="text/javascript">
-var pageData = {viewHierarchy: ${res}};
+var pageData = {
+  viewHierarchy: ${res},
+  baseUrl: "${url.context}/services/"
+};
 </script>
 
 </head>
@@ -196,8 +199,22 @@ app.on('toggleComments', function(evt, id) {
 });
 
 app.on('addComment', function(evt, mbid) {
-  app.get(evt.keypath+".viewData.comments").push({ author : 'You', body : app.get('newComment'), modified : new Date()});
-  // TODO post back new comment
+  var newCommentBody = app.get('newComment');
+  app.get(evt.keypath+".viewData.comments").push({ author : 'You', body : newCommentBody, modified : new Date()});
+
+  var url = (app.data.baseUrl || '') + "/ui/views/"+mbid+"/comment";
+  context.$.ajax(
+    { 
+      type: "POST",
+      url: url,
+      data: newCommentBody,
+      contentType: "text/plain; charset=UTF-8",
+      success: function(r) {
+        console.log("Success writing back");
+      }
+    })
+  .fail(function() { console.log("Error writing back"); });
+
   app.set('newComment','');
 });
 
