@@ -194,6 +194,7 @@ h1 {
 	opacity: 0;
 }
 */
+
 .section-wrapper {
 	margin-bottom: 15px;
 }
@@ -202,20 +203,13 @@ h1 {
 	opacity: 0.4;
 }
 */
-.section-wrapper .comments {
-  display: none;
-}
-
-.section-wrapper:hover .comments {
-  display: none;
-}
 
 /*.section-wrapper:hover .section-actions:hover {
 	opacity: 0.9;
 }
 */
 .section.page {
-	opacity: 0.8;
+	/*opacity: 0.8;*/
 	box-shadow: 0 0 5px #eee;
 }
 
@@ -284,4 +278,8 @@ h1 {
   box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
   margin: 10px 0;
   padding: 15px;
+}
+
+.comment-info {
+  color: #999;
 }
