@@ -21,7 +21,7 @@ function main() {
 	var view = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
 	if (view == null || view.length == 0)
 		return;
-	
+	view = view[0];
 	view.createAssociation(commentNode, "view:comments");
 }
 

@@ -10,7 +10,7 @@ var projectVolumes = [];
 function handleVolume(volume) {
 	volumes[volume.properties['view:mdid']] = volume.properties['view:name'];
 	childrenVolumes = volume.assocs['view:volumes'];
-	cvs = [];
+	var cvs = [];
 	for (var i in childrenVolumes) {
 		var cv = childrenVolumes[i];
 		cvs.push(cv.properties['view:mdid']);
@@ -19,7 +19,7 @@ function handleVolume(volume) {
 	volume2volumes[volume.properties['view:mdid']] = cvs;
 	
 	childrenDocuments = volume.assocs['view:documents'];
-	cds = [];
+	var cds = [];
 	for (var i in childrenDocuments) {
 		var cd = childrenDocuments[i];
 		cds.push(cd.properties['view:mdid']);

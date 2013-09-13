@@ -12,7 +12,7 @@
 <script type="text/javascript">
 var pageData = {
   viewHierarchy: ${res},
-  baseUrl: "${url.context}/services/"
+  baseUrl: "${url.context}/service/"
 };
 </script>
 
