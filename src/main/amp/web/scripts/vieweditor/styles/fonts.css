@@ -2,7 +2,7 @@ body {
   font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
 }
 
-.page-sections, .page-sections h1, .page-sections h2, .page-sections h3, .page-sections h4, .page-sections h5 {
+.page-sections, #the-document h1, #the-document h2, #the-document h3, #the-document h4, #the-document h5 {
   font-family: 'PT Serif', Georgia, serif;
 }
 .navbar-brand, .page .inspector, .inspectors {
