@@ -1,100 +1,112 @@
 <html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>memos</title>
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
-    <link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet">
-    <link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet">
-    <link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
-    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
-  
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>memos</title>
+		<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+		<link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet">
+		<link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet">
+		<link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
+		<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
+	
 <script type="text/javascript">
 var pageData = {postview: ${res}};
 </script>
 
 </head>
 
-  <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
+	<body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
 <div id="main"></div>
 <script id="template" type="text/mustache">
 
-    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="navbar-header">
-          <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
-      </div>
-      <ul class="nav navbar-nav">
-        <li><a href="index.html">dashboard</a></li>
-        <li><a href="about.html">about</a></li>
-      </ul>
+		<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+			<div class="navbar-header">
+					<a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
+			</div>
+			<ul class="nav navbar-nav">
+				<li><a href="index.html">dashboard</a></li>
+				<li><a href="about.html">about</a></li>
+			</ul>
 
 
-      <div class="pull-right">
-        <a href="vision.html"><img class="europa-icon" src="images/europa-icon.png" /></a>
-      </div>
+			<div class="pull-right">
+				<a href="vision.html"><img class="europa-icon" src="images/europa-icon.png" /></a>
+			</div>
 
-      <form class="navbar-form navbar-right" action="">
-        <div class="form-group">
-          <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
-            <option value="modeler">Modeler</option>
-            <option value="reviewer">Reviewer</option>
-            <option value="manager">Manager</option>
-          </select>
-        </div>
-      </form>
+			<form class="navbar-form navbar-right" action="">
+	      <div class="form-group">
+	        <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
+	          <option value="modeler">Modeler</option>
+	          <option value="reviewer">Reviewer</option>
+	          <option value="manager">Manager</option>
+	        </select>
+	      </div>
+	    </form>
 
-    </nav>
+		</nav>
 
-    <div class="wrapper">
-      <div class="row split-view">
+		<div class="wrapper">
+			<div class="row split-view">
 
-  <div class="col-xs-8">
-    <div class="page-sections">
-      {{#viewTree.children}}
-      <div class="section-wrapper">
-        <div class="section-actions pull-right btn-group">
-          {{^editing}}
-          <a href="#" class="btn btn-primary btn-sm">comment</a>
-          <a href="#" class="btn btn-primary btn-sm" proxy-click="editSection:{{ id }}">edit</a>
-          {{/editing}}
-        </div>
-        {{#editing}}
-        <div class="toolbar page">
-          <div class="btn-group">
-            <button type="button" class="btn btn-default" proxy-click="insertTable">Insert table</button>
-            <button type="button" class="btn btn-default" proxy-click="insertReference">Insert reference</button>
-            <!-- <button type="button" class="btn btn-default">Insert equation</button> -->
+<div class="col-xs-8">
+  <div id="the-document">
+    {{#viewTree.orderedChildren}}
+
+
+      <div class="page-sections">
+        {{#(depth == 0) }}
+            {{{("<h1>" +  name + "</h1>" )}}}
+        {{/(depth == 0) }}
+        {{^(depth == 0) }}
+          <div class="section-wrapper">
+            {{{("<h"+ depth + ">" +  name + "</h"+ depth + ">" )}}}
+            <div class="section-actions pull-right btn-group">
+              {{^editing}}
+              <a href="#" class="btn btn-primary btn-sm">comment</a>
+              <a href="#" class="btn btn-primary btn-sm" proxy-click="editSection:{{ id }}">edit</a>
+              {{/editing}}
+            </div>
+            {{#editing}}
+            <div class="toolbar page">
+              <div class="btn-group">
+                <button type="button" class="btn btn-default" proxy-click="insertTable">Insert table</button>
+                <button type="button" class="btn btn-default" proxy-click="insertReference">Insert reference</button>
+                <!-- <button type="button" class="btn btn-default">Insert equation</button> -->
+              </div>
+              <div class="btn-group pull-right">
+                <button type="button" class="btn btn-default" proxy-click="cancelEditing">Cancel</button>
+                <button type="button" class="btn btn-primary" proxy-click="saveSection:section{{ id }}">Save changes</button>
+              </div>
+            </div>
+            <div class="section page" id="section{{ id }}" contenteditable="true" proxy-dblclick="sectionDoubleClick">
+              {{{ content }}}
+            </div>
+            {{/editing}}
+            {{^editing}}
+            <div class="section page" id="section{{ id }}">
+              {{{ content }}}
+            </div>
+            {{/editing}}
+             <div class="comments">
+              {{#comments}}
+                {{#comments}}
+                  <div class="comment">{{ content }} &mdash; {{ author }}</div>
+                {{/comments}}
+              <div class="comment-form" style="display:none">
+                <br/>
+                <textarea value="{{ newComment }}"></textarea>
+                <br/><br/>
+                <a href="#" class="btn btn-primary" proxy-click="addComment">Add comment</a>
+              </div>
+              {{/comments}}
+            </div>
           </div>
-          <div class="btn-group pull-right">
-            <button type="button" class="btn btn-default" proxy-click="cancelEditing">Cancel</button>
-            <button type="button" class="btn btn-primary" proxy-click="saveSection:section{{ id }}">Save changes</button>
-          </div>
-        </div>
-        <div class="section page" id="section{{ id }}" contenteditable="true" proxy-dblclick="sectionDoubleClick">
-          {{{ content }}}
-        </div>
-        {{/editing}}
-        {{^editing}}
-        <div class="section page" id="section{{ id }}">
-          {{{ content }}}
-        </div>
-        {{/editing}}
-         <div class="comments">
-          {{#comments}}
-            {{#comments}}
-              <div class="comment">{{ content }} &mdash; {{ author }}</div>
-            {{/comments}}
-          <div class="comment-form" style="display:none">
-            <br/>
-            <textarea value="{{ newComment }}"></textarea>
-            <br/><br/>
-            <a href="#" class="btn btn-primary" proxy-click="addComment">Add comment</a>
-          </div>
-          {{/comments}}
-        </div>
+        {{/(depth == 0) }}
       </div>
-      {{/viewTree.children}}
-    </div>
+
+
+    {{/viewTree.orderedChildren}} 
   </div>
+ </div> 
 
   <div class="col-xs-4">
     <div class="toggled-inspectors inspectors affix page col-xs-4">
@@ -111,6 +123,7 @@ var pageData = {postview: ${res}};
           <dt>Author</dt><dd>Chris Delp</dd>
           <dt>Last modified</dt><dd>8/14/13 2:04pm</dd>
         </dl>
+        <button type="button" proxy-click="memoRendered">load toc</button>
         <div id="toc"></div>
       </div>
 
@@ -145,22 +158,26 @@ var pageData = {postview: ${res}};
           {{/postview.elements}}
         </ul>
       </div>
-
-
     </div>
   </div>
 
 
 </div>
-    </div>
 
-    
-    
-    <!--  -->
-    
-    
-    
-  </script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
+
+
+
+
+		</div>
+
+		
+		
+		<!--  -->
+		
+		
+		
+		
+	</script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery-ui.min.js"></script>
 <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery.hotkeys.js"></script>
@@ -187,12 +204,12 @@ var $ = context.$;
 // console.log("$ is currently", $);
 
 setTimeout(function() {
-  context.$('#editor').wysiwyg(); 
+	context.$('#editor').wysiwyg();	
 }, 500)
 
 app.on('togglePreview', function() {
-  // console.log("toggling preview...");
-  $('#markup-preview, #markup-editor').toggle();
+	// console.log("toggling preview...");
+	$('#markup-preview, #markup-editor').toggle();
 })
 
 app.on('editSection', function(e, sectionId) {
@@ -242,9 +259,9 @@ app.on('insertReference', function() {
 // elementDetails.js
 
 app.on('elementDetails', function(evt) {
-  evt.original.preventDefault();
-  app.set('inspectedElement', app.get(evt.keypath));
-  evt.node.blur();
+	evt.original.preventDefault();
+	app.set('inspectedElement', app.get(evt.keypath));
+	evt.node.blur();
 })
 
 // inspectors.js
@@ -279,12 +296,13 @@ app.on('showReferencedElement', function(evt) {
 // rdfa transclusion?
 
 var $ = context.$;
+var _ = context._;
+
+console.log("underscore", _);
 
 var viewTree = {
 
 }
-
-
 
 var generateUpdates = function(node)
 {
@@ -315,10 +333,10 @@ var generateUpdates = function(node)
 
 var saveData = function(viewID, updates)
 {
-  var data = {'posted content': updates}
-  console.log("Write updates here", data);
+  console.log("Write updates here", updates);
   var jsonData = JSON.stringify(updates);
   var url = '${url.context}/service/ui/views/' + viewID;
+  //var url = 'http://localhost:3000/echo';
   $.ajax(
     { 
       type: "POST",
@@ -365,15 +383,17 @@ var resolveValue = function(object, elements) {
 }
 
 
-var addChildren = function(parentNode, childIds, view2view, views, elements) {
+var addChildren = function(parentNode, childIds, view2view, views, elements, depth) {
   // console.log("iterating through", childIds);
   // return;
   for (var idx in childIds) {
     var id = isNaN(idx) ? idx : childIds[idx];
     // console.log("handing", id);
     var child = { id : id, children: [], viewData : app.get('viewsById')[id] };
+    child.name = app.get('elementsById')[id].name;
     // resolve referenced content
     child.content = "";
+    child.depth = depth;
 
     // console.log("contains:", child.viewData.contains);
     for (var cIdx in child.viewData.contains) {
@@ -422,14 +442,26 @@ var addChildren = function(parentNode, childIds, view2view, views, elements) {
     }
     
     if (view2view[id]) {
-      addChildren(child, view2view[id], view2view, views, elements)
+      addChildren(child, view2view[id], view2view, views, elements, depth+1)
     }
     parentNode.children.push(child);
     // console.log("added", child, " to parent ", parentNode);
   }
 }
 
-app.observe('postview', function(viewData) {
+
+var constructOrderedChildren = function(node)
+{
+  var result = [node];
+  _.each(node.children, function(c) {
+    //result.push(c);
+    //console.log("alex", result, constructOrderedChildren(c))
+    result = result.concat(constructOrderedChildren(c));
+  });
+  return result;
+}
+
+app.observe('docgenManual', function(viewData) {
   // index views by id
   var viewsById = {};
   for (var idx in viewData.views) {
@@ -451,8 +483,11 @@ app.observe('postview', function(viewData) {
   // TODO: Change addChildren to construct the parentNode content instead of the childrenNodes
   // Then we could just pass viewTree instead of tempTree
   var tempTree = {"children" : []};
-  addChildren(tempTree, [viewData.rootView], viewData.view2view, viewData.views, elementsById);
+  addChildren(tempTree, [viewData.rootView], viewData.view2view, viewData.views, elementsById, 0);
   viewTree = tempTree.children[0];
+  
+  viewTree.orderedChildren = constructOrderedChildren(viewTree);
+
   console.log("final view tree", viewTree); 
   app.set('viewTree', viewTree);
 })
@@ -647,7 +682,11 @@ app.observe('plan_sections', function(newText) {
 
 // toc.js
 
-context.$("#toc").tocify({ selectors: "h2, h3, h4", history : false, highlightOffset : 0 }).data("toc-tocify");
+app.on('memoRendered', function() {
+	console.log("memo rendered, setting up toc");
+	context.$("#toc").tocify({ selectors: "h1, h2, h3, h4", history : false, highlightOffset : 0, context: "#the-document" }).data("toc-tocify");	
+})
+
 </script>
 </body>
 </html>
