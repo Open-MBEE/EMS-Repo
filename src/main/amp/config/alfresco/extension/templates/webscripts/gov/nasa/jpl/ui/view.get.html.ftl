@@ -202,7 +202,7 @@ app.on('addComment', function(evt, mbid) {
   var newCommentBody = app.get('newComment');
   app.get(evt.keypath+".viewData.comments").push({ author : 'You', body : newCommentBody, modified : new Date()});
 
-  var url = (app.data.baseUrl || '') + "/ui/views/"+mbid+"/comment";
+  var url = (app.data.baseUrl || '') + "ui/views/"+mbid+"/comment";
   context.$.ajax(
     { 
       type: "POST",
