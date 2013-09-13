@@ -112,12 +112,13 @@ function main() {
 	var viewid = url.templateArgs.viewid;
 	var topview = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
 	var product = false;
+	if (args.product == 'true')
+		product = true;
 	if (topview == null || topview.length == 0) {
 		if (args.doc == 'true') {
 			topview = modelFolder.createNode(viewid, "view:DocumentView");
-			if (args.product == 'true') {
+			if (product) {
 				topview.properties["view:product"] = true;
-				product = true;
 			}
 		} else {
 			topview = modelFolder.createNode(viewid, "view:View");
@@ -125,7 +126,16 @@ function main() {
 		topview.properties["view:mdid"] = viewid;
 		topview.save();
 		modelMapping[viewid] = topview;
-	} 
+	} else {
+		topview = topview[0];
+		modelMapping[viewid] = topview;
+	}
+	if (topview.typeShort != "view:DocumentView" && args.doc == 'true') {
+		topview.specializeType("view:DocumentView");
+		if (product)
+			topview.properties["view:product"] = true;
+		topview.save();
+	}
 	var force = args.force == 'true' ? true : false;
 	for (var i in postjson.elements) {
 		updateOrCreateModelElement(postjson.elements[i], force);

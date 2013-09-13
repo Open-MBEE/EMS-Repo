@@ -14,6 +14,7 @@ function handleVolume(volume) {
 	for (var i in childrenVolumes) {
 		var cv = childrenVolumes[i];
 		cvs.push(cv.properties['view:mdid']);
+		handleVolume(cv);
 	}
 	volume2volumes[volume.properties['view:mdid']] = cvs;
 	
