@@ -18,7 +18,7 @@ var pageData = {
 
 </head>
 
-  <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
+ <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
 <div id="main"></div>
 <script id="template" type="text/mustache">
 
@@ -54,15 +54,19 @@ var pageData = {
 <div class="col-xs-8">
   <div id="the-document">
     {{#viewTree.orderedChildren}}
+      {{#(depth == 0) }}
+        {{{("<h1>" +  name + "</h1>" )}}}
+      {{/(depth == 0) }}
+      {{^(depth == 0) }}
+        {{{("<h"+ depth + ">" +  name + "</h"+ depth + ">" )}}}
+      {{/(depth == 0) }}
 
 
       <div class="page-sections">
-        {{#(depth == 0) }}
-            {{{("<h1>" +  name + "</h1>" )}}}
-        {{/(depth == 0) }}
+        
         {{^(depth == 0) }}
           <div class="section-wrapper">
-            {{{("<h"+ depth + ">" +  name + "</h"+ depth + ">" )}}}
+            
             <div class="section-actions pull-right btn-group no-print">
               {{^editing}}
               <button type="button" class="btn btn-primary btn-sm" proxy-click="toggleComments:comments-{{id}}">comments ({{( viewData.comments.length )}})</button>
@@ -180,6 +184,8 @@ var pageData = {
     
     
     
+    
+    
   </script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery-ui.min.js"></script>
 <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
@@ -192,6 +198,7 @@ var pageData = {
 <script type="text/javascript">
 var context = window;
 
+
 // comments.js
 
 app.on('toggleComments', function(evt, id) {
@@ -202,7 +209,7 @@ app.on('addComment', function(evt, mbid) {
   var newCommentBody = app.get('newComment');
   app.get(evt.keypath+".viewData.comments").push({ author : 'You', body : newCommentBody, modified : new Date()});
 
-  var url = (app.data.baseUrl || '') + "ui/views/"+mbid+"/comment";
+  var url = (app.data.baseUrl || '') + "/ui/views/"+mbid+"/comment";
   context.$.ajax(
     { 
       type: "POST",
@@ -757,7 +764,7 @@ app.observe('plan_sections', function(newText) {
 
 app.on('memoRendered', function() {
   console.log("memo rendered, setting up toc");
-  context.$("#toc").tocify({ selectors: "h1, h2, h3, h4", history : false, highlightOffset : 0, context: "#the-document" }).data("toc-tocify"); 
+  context.$("#toc").tocify({ selectors: "h1, h2, h3, h4", history : false, highlightOffset : 0, context: "#the-document", smoothScroll:false }).data("toc-tocify"); 
 })
 
 </script>
