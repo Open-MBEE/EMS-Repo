@@ -1,51 +1,52 @@
 <html>
-	<head>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>memos</title>
-		<link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
-		<link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet">
-		<link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet">
-		<link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
-		<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
-	
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>memos</title>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" media="screen">
+    <link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
+    <link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
+    <link href="${url.context}/scripts/vieweditor/styles/print.css" rel="stylesheet" media="print">
+    <link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
+  
 <script type="text/javascript">
-var pageData = {postview: ${res}};
+var pageData = {viewHierarchy: ${res}};
 </script>
 
 </head>
 
-	<body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
+  <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
 <div id="main"></div>
 <script id="template" type="text/mustache">
 
-		<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-			<div class="navbar-header">
-					<a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
-			</div>
-			<ul class="nav navbar-nav">
-				<li><a href="index.html">dashboard</a></li>
-				<li><a href="about.html">about</a></li>
-			</ul>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="navbar-header">
+          <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
+      </div>
+      <ul class="nav navbar-nav">
+        <li><a href="dashboard.html">dashboard</a></li>
+        <li><a href="about.html">about</a></li>
+      </ul>
 
 
-			<div class="pull-right">
-				<a href="vision.html"><img class="europa-icon" src="images/europa-icon.png" /></a>
-			</div>
+      <div class="pull-right">
+        <a href="vision.html"><img class="europa-icon" src="images/europa-icon.png" /></a>
+      </div>
 
-			<form class="navbar-form navbar-right" action="">
-	      <div class="form-group">
-	        <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
-	          <option value="modeler">Modeler</option>
-	          <option value="reviewer">Reviewer</option>
-	          <option value="manager">Manager</option>
-	        </select>
-	      </div>
-	    </form>
+      <form class="navbar-form navbar-right" action="">
+        <div class="form-group">
+          <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
+            <option value="modeler">Modeler</option>
+            <option value="reviewer">Reviewer</option>
+            <option value="manager">Manager</option>
+          </select>
+        </div>
+      </form>
 
-		</nav>
+    </nav>
 
-		<div class="wrapper">
-			<div class="row split-view">
+    <div class="wrapper">
+      <div class="row split-view">
 
 <div class="col-xs-8">
   <div id="the-document">
@@ -59,18 +60,16 @@ var pageData = {postview: ${res}};
         {{^(depth == 0) }}
           <div class="section-wrapper">
             {{{("<h"+ depth + ">" +  name + "</h"+ depth + ">" )}}}
-            <div class="section-actions pull-right btn-group">
+            <div class="section-actions pull-right btn-group no-print">
               {{^editing}}
-              <a href="#" class="btn btn-primary btn-sm">comment</a>
-              <a href="#" class="btn btn-primary btn-sm" proxy-click="editSection:{{ id }}">edit</a>
+              <button type="button" class="btn btn-primary btn-sm" proxy-click="toggleComments:comments-{{id}}">comments ({{( viewData.comments.length )}})</button>
+              <button type="button" href="#" class="btn btn-primary btn-sm" proxy-click="editSection:{{ id }}">edit</button>
               {{/editing}}
             </div>
             {{#editing}}
             <div class="toolbar page">
               <div class="btn-group">
-                <button type="button" class="btn btn-default" proxy-click="insertTable">Insert table</button>
-                <button type="button" class="btn btn-default" proxy-click="insertReference">Insert reference</button>
-                <!-- <button type="button" class="btn btn-default">Insert equation</button> -->
+                <button style="visibility:hidden" type="button" class="btn btn-default" proxy-click="insertTable">Insert table</button>
               </div>
               <div class="btn-group pull-right">
                 <button type="button" class="btn btn-default" proxy-click="cancelEditing">Cancel</button>
@@ -86,18 +85,24 @@ var pageData = {postview: ${res}};
               {{{ content }}}
             </div>
             {{/editing}}
-             <div class="comments">
-              {{#comments}}
-                {{#comments}}
-                  <div class="comment">{{ content }} &mdash; {{ author }}</div>
-                {{/comments}}
-              <div class="comment-form" style="display:none">
-                <br/>
-                <textarea value="{{ newComment }}"></textarea>
-                <br/><br/>
-                <a href="#" class="btn btn-primary" proxy-click="addComment">Add comment</a>
-              </div>
-              {{/comments}}
+             <div class="comments" id="comments-{{id}}" style="display:none">
+              <ul class="list-group">
+                {{#viewData.comments}}
+                    <li class="comment list-group-item">
+                      {{{ body }}}
+                      <div class="comment-info"><small>{{ author }}, {{ modified }}<small></div>
+                    </li>
+                {{/viewData.comments}}
+                <li class="list-group-item">
+                  <div class="comment-form">
+                    <br/>
+                    <textarea class="form-control" value="{{ newComment }}"></textarea>
+                    <br/>
+                    <button type="button" class="btn btn-primary" proxy-click="addComment:{{id}}">Add comment</button>
+                  </div>
+                </li>
+              </ul>
+
             </div>
           </div>
         {{/(depth == 0) }}
@@ -113,17 +118,18 @@ var pageData = {postview: ${res}};
 
       <select class="form-control" value="{{ currentInspector }}">
         <option value="document-info">Document info</option>
-        <option value="history">History</option>
-        <option value="references">References</option>
+        <!-- <option value="history">History</option> -->
+        <!-- <option value="references">References</option> -->
+        <option value="export">Export</option>
       </select>
 
       <div id="document-info" class="inspector">
         <h3>Document info</h3>
-        <dl>
+<!--         <dl>
           <dt>Author</dt><dd>Chris Delp</dd>
           <dt>Last modified</dt><dd>8/14/13 2:04pm</dd>
         </dl>
-        <button type="button" proxy-click="memoRendered">load toc</button>
+ -->        <button type="button" class="btn btn-default" proxy-click="memoRendered">load toc</button>
         <div id="toc"></div>
       </div>
 
@@ -134,30 +140,24 @@ var pageData = {postview: ${res}};
         </ul>
       </div>
 
-      <div id="comments" class="inspector">
-        <h3>Comments</h3>
-        <div class="comments">
-          {{#comments}}
-            {{#comments}}
-              <div class="comment">{{ content }} &mdash; {{ author }}</div>
-            {{/comments}}
-          <br/>
-          <textarea value="{{ newComment }}" class="form-control col-xs-3"></textarea>
-          <a href="#" class="btn btn-primary" proxy-click="addComment">Add comment</a>
-          {{/comments}}
-        </div>
-      </div>
-
-      <div id="references" class="inspector">
+<!--       <div id="references" class="inspector">
         <h3>References</h3>
         <ul>
-          {{#postview.elements}}
+          {{#viewHierarchy.elements}}
           <li>
              {{ name }}
           </li>
-          {{/postview.elements}}
+          {{/viewHierarchy.elements}}
         </ul>
       </div>
+ -->
+      <div id="export" class="inspector">
+        <h3>Export</h3>
+        <ul class="list-unstyled">
+          <li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>
+        </ul>
+      </div>
+
     </div>
   </div>
 
@@ -168,16 +168,16 @@ var pageData = {postview: ${res}};
 
 
 
-		</div>
+    </div>
 
-		
-		
-		<!--  -->
-		
-		
-		
-		
-	</script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
+    
+    
+    <!--  -->
+    
+    
+    
+    
+  </script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery-ui.min.js"></script>
 <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery.hotkeys.js"></script>
@@ -191,10 +191,14 @@ var context = window;
 
 // comments.js
 
-app.on('addComment', function(evt) {
-  app.get(evt.keypath).comments.push({ author : 'Jesse', content : app.get('newComment')});
+app.on('toggleComments', function(evt, id) {
+  context.$('#'+id).toggle();
+});
+
+app.on('addComment', function(evt, mbid) {
+  app.get(evt.keypath+".viewData.comments").push({ author : 'You', body : app.get('newComment'), modified : new Date()});
+  // TODO post back new comment
   app.set('newComment','');
-  evt.original.preventDefault();
 });
 
 // editor.js
@@ -204,12 +208,12 @@ var $ = context.$;
 // console.log("$ is currently", $);
 
 setTimeout(function() {
-	context.$('#editor').wysiwyg();	
+  context.$('#editor').wysiwyg(); 
 }, 500)
 
 app.on('togglePreview', function() {
-	// console.log("toggling preview...");
-	$('#markup-preview, #markup-editor').toggle();
+  // console.log("toggling preview...");
+  $('#markup-preview, #markup-editor').toggle();
 })
 
 app.on('editSection', function(e, sectionId) {
@@ -259,9 +263,9 @@ app.on('insertReference', function() {
 // elementDetails.js
 
 app.on('elementDetails', function(evt) {
-	evt.original.preventDefault();
-	app.set('inspectedElement', app.get(evt.keypath));
-	evt.node.blur();
+  evt.original.preventDefault();
+  app.set('inspectedElement', app.get(evt.keypath));
+  evt.node.blur();
 })
 
 // inspectors.js
@@ -283,6 +287,12 @@ app.on('showReferencedElement', function(evt) {
   app.set('currentInspector', 'references');
 })
 
+// print.js
+
+app.on('print', function() {
+  context.print();
+})
+
 // realData.js
 
 // TODO need more data:
@@ -297,8 +307,6 @@ app.on('showReferencedElement', function(evt) {
 
 var $ = context.$;
 var _ = context._;
-
-console.log("underscore", _);
 
 var viewTree = {
 
@@ -372,12 +380,12 @@ var resolveValue = function(object, elements) {
   if (object.source === 'text') {
     return { content : object.text, editable : false };
   } else {
-    console.log("resolving ", object.useProperty, " for ", object.source);
+    // console.log("resolving ", object.useProperty, " for ", object.source);
 
     var source = elements[object.source];
-    console.log(source);
+    // console.log(source);
     var referencedValue = source[object.useProperty.toLowerCase()];
-    console.log(referencedValue);
+    // console.log(referencedValue);
     return { content : referencedValue, editable : true, mdid :  source.mdid, property: object.useProperty };
   }
 }
@@ -461,14 +469,62 @@ var constructOrderedChildren = function(node)
   return result;
 }
 
-app.observe('docgenManual', function(viewData) {
+app.observe('home', function(homeData)
+ {
+  var homeTree = { name: homeData.name, children: [] };
+  _.each(homeData.projectVolumes, function(pv)
+  {
+    var child = {};
+    child.id = pv;
+    child.name = homeData.volumes[pv];
+    child.children = [];
+    homeTree.children.push(child);
+  }) 
+
+  var buildHomeTree = function(nodeList)
+  {
+    _.each(nodeList, function(node)
+    {
+      var childIds = [];
+      if(node.id in homeData.volume2volumes)
+      {
+        childIds = childIds.concat(homeData.volume2volumes[node.id])
+      }
+      if(node.id in homeData.volume2documents)
+      {
+        childIds = childIds.concat(homeData.volume2documents[node.id])
+      }
+      _.each(childIds, function(cid)
+      {
+        var child = {};
+        child.id = cid;
+        child.children = [];
+        if(cid in homeData.volumes)
+        {
+          child.name = homeData.volumes[cid];
+        }
+        if(cid in homeData.documents)
+        {
+          child.name = homeData.documents[cid];
+        }
+        node.children.push(child);
+      })
+      buildHomeTree(node.children)
+    })
+  }
+  buildHomeTree(homeTree.children)
+  console.log("final home tree", homeTree)
+  app.set('homeTree', homeTree)
+ })
+
+app.observe('viewHierarchy', function(viewData) {
   // index views by id
   var viewsById = {};
   for (var idx in viewData.views) {
     var view = viewData.views[idx];
     viewsById[view.mdid] = view;
   }
-  console.log('viewsById', viewsById);
+  // console.log('viewsById', viewsById);
   app.set('viewsById', viewsById);
   // index elements by id
   var elementsById = {};
@@ -479,7 +535,7 @@ app.observe('docgenManual', function(viewData) {
   app.set('elementsById', elementsById);
 
   // // app.set('debug', JSON.stringify(viewData));
-  console.log(viewData);
+  // console.log(viewData);
   // TODO: Change addChildren to construct the parentNode content instead of the childrenNodes
   // Then we could just pass viewTree instead of tempTree
   var tempTree = {"children" : []};
@@ -683,8 +739,8 @@ app.observe('plan_sections', function(newText) {
 // toc.js
 
 app.on('memoRendered', function() {
-	console.log("memo rendered, setting up toc");
-	context.$("#toc").tocify({ selectors: "h1, h2, h3, h4", history : false, highlightOffset : 0, context: "#the-document" }).data("toc-tocify");	
+  console.log("memo rendered, setting up toc");
+  context.$("#toc").tocify({ selectors: "h1, h2, h3, h4", history : false, highlightOffset : 0, context: "#the-document" }).data("toc-tocify"); 
 })
 
 </script>
