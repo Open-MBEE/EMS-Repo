@@ -1,20 +1,4 @@
 /**
- * Utility for getting extension from template args with only one leading "."
- * @param args
- * @returns {String}
- */
-function getExtension (args) {
-	var extension = "";
-	if ("extension" in args) {
-		if (args.extension.charAt(0) != ".") {
-			extension = ".";
-		}
-	}
-	extension += args.extension;
-	return extension;
-}
-
-/**
  * Utility for replacing all the artifact URLs in alfresco
  * @param content	String whose image references need to be updated
  * @param escape	True if returned string needs special escape characters
@@ -37,24 +21,27 @@ function fixArtifactUrls(content, escape) {
  * @returns			String with updated references	
  */
 function replaceArtifactUrl(content, prefix, pattern, escape) {
-    var matches = content.match(pattern);
-	for (ii in matches) {
-		var match = matches[ii];
-		var filename = match.replace(prefix,'').replace('"','').replace('_latest','');
-		var node = searchForFile(filename);
-		if (node != null) {
-		    var nodeurl = '';
-		    if (prefix.indexOf('src') >= 0) {
-		        nodeurl = 'src="';
-		    }
-			nodeurl += url.context + String(node.getUrl()) + '"';
-			if (escape) {
-				nodeurl = nodeurl.replace(/\//g, '\\\/').replace(/\"/g, '\\"');
-			}
-			content = content.replace(match, nodeurl);
-		}
-	}
-	
+    if (content != null) {
+        var matches = content.match(pattern);
+    	for (ii in matches) {
+    		var match = matches[ii];
+    		var filename = match.replace(prefix,'').replace('"','').replace('_latest','');
+    		var node = searchForFile(filename);
+            node = getLatestVersion(node);
+    		if (node != null) {
+    		    var nodeurl = '';
+    		    if (prefix.indexOf('src') >= 0) {
+    		        nodeurl = 'src="';
+    		    }
+    			nodeurl += url.context + String(node.getUrl()) + '"';
+    			if (escape) {
+    				nodeurl = nodeurl.replace(/\//g, '\\\/').replace(/\"/g, '\\"');
+    			}
+    			content = content.replace(match, nodeurl);
+    		}
+    	}
+    }
+    	
 	return content;
 }
 
@@ -63,21 +50,50 @@ function replaceArtifactUrl(content, prefix, pattern, escape) {
  * TODO: need to qualify this somehow if there are duplicates
  */
 function searchForFile(filename) {
-	// check for name matches (make sure to remove any \ in the string (if they were escaped)
-	var searchString = "@cm\\:name:" + filename.replace(/\\/g, '');
-	var matchNode = undefined;
-
-	var results = search.luceneSearch(searchString);
-	if (results.length > 0) {
-	  for (result in results) {
-	    matchNode = results[result];
-	    break;
-	  }
-	}
-	return matchNode;
+	filename = filename.replace(/\\/g, '');
+	return companyhome.childByNamePath('Artifacts/magicdraw/' + filename);
 }
 
 
+/**
+ * Gets the latest versioned node (PURL)
+ * @param node  Node to find the latest version URL for
+ * @returns     Node of the latest version
+ */
+function getLatestVersion(node) {
+    if (node != null) {
+        var versions = node.getVersionHistory();
+        if (versions != null && versions.length > 0) {
+            return versions[versions.length-1].node;
+        }
+    }    
+    return node;
+}
+
+
+/**
+ * Utility for getting extension from template args with only one leading "."
+ * @param args
+ * @returns {String}
+ */
+function getExtension (args) {
+    var extension = "";
+    if ("extension" in args) {
+        if (args.extension.charAt(0) != ".") {
+            extension = ".";
+        }
+    }
+    extension += args.extension;
+    return extension;
+}
+
+
+/**
+ * Guess the mimetype for the specified filename - rewrite of existing alfresco functionality
+ * that doesn't appear to work
+ * @param filename  Filename to guess mimetype for
+ * @returns         String of the mimetype of the file
+ */
 function guessMimetype(filename) {
 	var mimetype;
 	var mimetypesByExtension = {
