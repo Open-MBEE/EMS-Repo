@@ -7,12 +7,10 @@
   <transaction allow="readwrite">required</transaction>
   <family>View Editor</family>
   <args>
-  	<!--  there's a couple options we can use here
-  		1. post the json snapshot, i give back the snapshot id, then upload any static file (html currently, maybe pdf) with the id to be associated
-  		2. use multipart/form-data to post both, the json as a form field, and static file as form file in the same request -->
+
   	<arg>
-  		<name>posted content</name>
-  		<description>
+  		<name>posted content (request body)</name>
+  		<description>the row html of what's on client machine
   		</description>
   	</arg>
   </args>

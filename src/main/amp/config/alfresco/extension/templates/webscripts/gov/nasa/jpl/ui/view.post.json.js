@@ -7,7 +7,12 @@ var date = new Date();
 var modelElements = {}
 
 function updateModelElement(element) {
-	var modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + element.mdid + "']");
+	var modelNode = null;
+	if (element.mdid in modelElements) {
+		modelNode = [modelElements[element.mdid]];
+	} else {
+		modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + element.mdid + "']");
+    }
 	if (modelNode == null || modelNode.length == 0) {
 		return;
 	} else {
