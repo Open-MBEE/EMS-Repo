@@ -80,7 +80,8 @@ function getSnapshots(topview) {
 		snapshots.push({
 			"id": snapshot.properties["cm:name"], 
 			"created": utils.toISO8601(snapshot.properties["cm:created"]),
-			"url": url.context + snapshot.properties.url;
+			"url": url.context + snapshot.properties.url,
+			"creator": snapshot.properties["cm:creator"]
 		});
 	}
 	snapshots.sort(function(a,b) {

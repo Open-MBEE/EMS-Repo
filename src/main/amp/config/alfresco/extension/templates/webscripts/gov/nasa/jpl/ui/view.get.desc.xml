@@ -22,20 +22,6 @@
   				 			"sources": [mdid, ...], 
   				 			"title": title, 
   				 			"body": [[{
-  				 				"source": mdid/"text", 
-  				 				"useProperty": "DOCUMENTATION/NAME/DVALUE", 
-  				 				("text": text), 
-  				 				("colspan": colspan), 
-  				 				("rowspan": rowspan)
-  				 			}, ...], ...], 
-  				 			"header": same as body, 
-  				 			"style": style
-  				 		} //FUTURE TABLE (a cell can have multiple editable things in it, not supported yet)
-  				 		{
-  				 			"type": "Table", 
-  				 			"sources": [mdid, ...], 
-  				 			"title": title, 
-  				 			"body": [[{
   				 				"content": [ //this allows multiple block elements in a cell
   				 					{
   				 						"type": "Paragraph"/"List"/"Table", //table in table probably not supported
@@ -47,7 +33,7 @@
   				 			}, ...], ...], 
   				 			"header": same as body, 
   				 			"style": style
-  				 		} //OR (List is not supported yet)
+  				 		} OR
   				 		{
   				 			"type": "List",
   				 			"sources": [mdid, ...],
@@ -85,7 +71,9 @@
   			"snapshots": [
   				{
   					"id": id,
-  					"created": ISO8601 formatted date string
+  					"created": ISO8601 formatted date string,
+  					"url": url to snapshot (static html for now),
+  					"creator": creator name
   				}
   			]
   		}
