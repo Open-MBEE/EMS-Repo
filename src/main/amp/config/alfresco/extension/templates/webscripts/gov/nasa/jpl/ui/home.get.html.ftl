@@ -30,7 +30,7 @@ var pageData ={home: ${res}};
 
 
 			<div class="pull-right">
-				<a href="vision.html"><img class="europa-icon" src="images/europa-icon.png" /></a>
+				<a href="vision.html"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
 			</div>
 
 			<form class="navbar-form navbar-right" action="">
@@ -62,7 +62,7 @@ var pageData ={home: ${res}};
     </div>
 
     <!-- {{>doc_and_children}} -->
-      <li class="{{ .class }}"><a href="${url.context}/service/ui/views/{{id}}">{{name}}</a></li>
+      <li class="{{ .class }}"><a href="${url.context}/wcs/ui/views/{{id}}">{{name}}</a></li>
       <ul>
         {{#.children}}
           {{>doc_and_children}}

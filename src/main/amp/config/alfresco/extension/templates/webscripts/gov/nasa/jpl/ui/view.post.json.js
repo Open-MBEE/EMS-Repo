@@ -7,12 +7,12 @@ var date = new Date();
 var modelElements = {}
 
 function updateModelElement(element) {
-	var modelNode = null;
+	/*var modelNode = null;
 	if (element.mdid in modelElements) {
 		modelNode = [modelElements[element.mdid]];
-	} else {
+	} else {*/
 		modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + element.mdid + "']");
-    }
+   // }
 	if (modelNode == null || modelNode.length == 0) {
 		return;
 	} else {
@@ -23,7 +23,7 @@ function updateModelElement(element) {
 	if (element.name != null && element.name != undefined && element.name != modelNode.properties["view:name"]) {
 		modelNode.properties["view:name"] = element.name;
 	}
-	if (element.documentation != undefined && modelNode.properties["view:documentation"]) {
+	if (element.documentation != undefined && element.documentation != modelNode.properties["view:documentation"]) {
 		modelNode.properties["view:documentation"] = element.documentation;
 	}
 	if (element.dvalue != null && element.dvalue != undefined && element.dvalue != modelNode.properties["view:defaultValue"]) {

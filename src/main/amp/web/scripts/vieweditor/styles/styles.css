@@ -256,10 +256,10 @@ h1 {
   font-family: 'Courier New',monospace;
 }
 
-.inline-ref, .reference {
+/*.inline-ref, .reference {
   border-bottom: 2px solid #bada55;
 }
-
+*/
 .reference {
   display: inline;
 }
@@ -282,4 +282,41 @@ h1 {
 
 .comment-info {
   color: #999;
+}
+
+.placeholder {
+  color: #aaa;
+}
+
+.comment-editor {
+  margin-top: 10px;
+  height: auto;
+}
+
+.editable.reference {
+  background: aliceblue;
+}
+
+.not-editable.reference {
+  background: blue;
+}
+
+.blank.editable.reference {
+  min-width: 100px;
+  color: #aaa;
+  padding: 0 5px;
+}
+
+.author, .modified {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #aaa;
+}
+
+.author:after {
+  content:", ";
+}
+
+.section.page img {
+  max-width: 100%;
 }

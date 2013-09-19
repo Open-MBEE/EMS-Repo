@@ -13,7 +13,7 @@
 <script type="text/javascript">
 var pageData = {
   viewHierarchy: ${res},
-  baseUrl: "${url.context}/wcs/"
+  baseUrl: "${url.context}/wcs"
 };
 </script>
 
@@ -39,7 +39,7 @@ var pageData = {
 
 
       <div class="pull-right">
-        <a href="vision.html"><img class="europa-icon" src="images/europa-icon.png" /></a>
+        <a href="vision.html"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
       </div>
 
       <form class="navbar-form navbar-right" action="">
