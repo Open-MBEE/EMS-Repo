@@ -754,7 +754,7 @@ app.observe('home', function(homeData)
   app.set('homeTree', homeTree)
  })
 
-app.observe('viewHierarchy', logExceptions(function(viewData) {
+app.observe('viewHierarchy', function(viewData) {
   // index views by id
   var viewsById = {};
   for (var idx in viewData.views) {
@@ -785,7 +785,7 @@ app.observe('viewHierarchy', logExceptions(function(viewData) {
       app.fire('makeToc');
     }, 0);
   });
-}))
+})
 
 // rich-reference.js
 
