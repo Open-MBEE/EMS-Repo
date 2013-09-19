@@ -2,7 +2,7 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Editor</title>
-    <link rel="stylesheet" href="vendor/css/bootstrap.min.css" media="screen">
+    <link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/print.css" rel="stylesheet" media="print">
@@ -13,7 +13,7 @@
 <script type="text/javascript">
 var pageData = {
   viewHierarchy: ${res},
-  baseUrl: "${url.context}/service/"
+  baseUrl: "${url.context}/wcm/"
 };
 </script>
 
@@ -33,7 +33,7 @@ var pageData = {
         <li><a href="about.html">about</a></li>
         {{/environment.development}}
         {{^environment.development}}
-        <li><a href="${url.context}/service/ui/views">dashboard</a></li>
+        <li><a href="${url.context}/wcm/ui/">dashboard</a></li>
         {{/environment.development}}
       </ul>
 
