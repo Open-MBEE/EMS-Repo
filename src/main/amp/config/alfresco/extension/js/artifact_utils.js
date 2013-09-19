@@ -64,7 +64,7 @@ function getLatestVersion(node) {
     if (node != null) {
         var versions = node.getVersionHistory();
         if (versions != null && versions.length > 0) {
-            return versions[versions.length-1].node;
+            return versions[0].node;
         }
     }    
     return node;
