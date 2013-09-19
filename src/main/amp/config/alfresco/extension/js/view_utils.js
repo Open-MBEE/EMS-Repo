@@ -77,10 +77,15 @@ function getSnapshots(topview) {
 	for (var i in ss) {
 		utils.toISO8601(date);
 		var snapshot = ss[i];
+		var html = snapshot.assocs["view:html"];
+		if (html.length > 0)
+			html = html[0];
+		else
+			continue;
 		snapshots.push({
 			"id": snapshot.properties["cm:name"], 
 			"created": utils.toISO8601(snapshot.properties["cm:created"]),
-			"url": url.context + snapshot.properties.url,
+			"url": url.context + html.properties.url,
 			"creator": snapshot.properties["cm:creator"]
 		});
 	}

@@ -1,24 +1,25 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>memos</title>
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" media="screen">
+    <title>View Editor</title>
+    <link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/print.css" rel="stylesheet" media="print">
     <link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
+    <link href="${url.context}/scripts/vieweditor/styles/section-numbering.css" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
   
 <script type="text/javascript">
 var pageData = {
   viewHierarchy: ${res},
-  baseUrl: "${url.context}/service/"
+  baseUrl: "${url.context}/wcs/"
 };
 </script>
 
 </head>
 
- <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
+  <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
 <div id="main"></div>
 <script id="template" type="text/mustache">
 
@@ -27,8 +28,13 @@ var pageData = {
           <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
       </div>
       <ul class="nav navbar-nav">
+        {{#environment.development}}
         <li><a href="dashboard.html">dashboard</a></li>
         <li><a href="about.html">about</a></li>
+        {{/environment.development}}
+        {{^environment.development}}
+        <li><a href="${url.context}/wcs/ui/">dashboard</a></li>
+        {{/environment.development}}
       </ul>
 
 
@@ -54,15 +60,19 @@ var pageData = {
 <div class="col-xs-8">
   <div id="the-document">
     {{#viewTree.orderedChildren}}
-      {{#(depth == 0) }}
-        {{{("<h1>" +  name + "</h1>" )}}}
-      {{/(depth == 0) }}
-      {{^(depth == 0) }}
-        {{{("<h"+ depth + ">" +  name + "</h"+ depth + ">" )}}}
-      {{/(depth == 0) }}
 
+            {{#(depth == 0) }}
+              {{{("<h1><span class='"+class+" section-header editable' data-property='NAME' data-section-id='" + id + "'>" +  name + "</span></h1>" )}}}
+            {{/(depth == 0) }}
+            {{^(depth == 0) }}
+              {{{("<h"+ depth + " class='"+class+"'><span class='section-header' data-section-id='" + id + "'><span class='editable' data-property='NAME' data-mdid='" + id + "'>" +  name + "</span></span></h"+ depth + ">" )}}}
+            {{/(depth == 0) }}
 
-      <div class="page-sections">
+            <div class="author {{ class }}">Edited by <span class="author-name" data-mdid="{{id}}">{{ viewData.author }}</span></div>
+            <div class="modified {{ class }}" data-mdid="{{id}}">{{( viewData.modifiedFormatted )}}</div>
+      
+
+      <div class="page-sections {{ class }}">
         
         {{^(depth == 0) }}
           <div class="section-wrapper">
@@ -74,21 +84,26 @@ var pageData = {
               {{/editing}}
             </div>
             {{#editing}}
-            <div class="toolbar page">
+            <div class="toolbar page" data-role="editor-toolbar" data-target="#section{{ id }}">
               <div class="btn-group">
-                <button style="visibility:hidden" type="button" class="btn btn-default" proxy-click="insertTable">Insert table</button>
+                <a class="btn btn-default" data-edit="bold" title="" data-original-title="Bold (Ctrl/Cmd+B)"><span class="glyphicon glyphicon-bold"></span></a>
+                <a class="btn btn-default" data-edit="italic" title="" data-original-title="Italic (Ctrl/Cmd+I)"><span class="glyphicon glyphicon-italic"></span></a>
               </div>
+
+                <a class="btn btn-default" title="Insert picture (or just drag &amp; drop)" id="pictureBtn{{id}}"><i class="glyphicon glyphicon-picture"></i></a>
+                <input type="file" data-role="magic-overlay" data-target="#pictureBtn{{id}}" data-edit="insertImage">
+
               <div class="btn-group pull-right">
                 <button type="button" class="btn btn-default" proxy-click="cancelEditing">Cancel</button>
-                <button type="button" class="btn btn-primary" proxy-click="saveSection:section{{ id }}">Save changes</button>
+                <button type="button" class="btn btn-primary" proxy-click="saveSection:{{ id }}">Save changes</button>
               </div>
             </div>
-            <div class="section page" id="section{{ id }}" contenteditable="true" proxy-dblclick="sectionDoubleClick">
+            <div class="section page editing" data-section-id="{{ id }}" contenteditable="true" proxy-dblclick="sectionDoubleClick">
               {{{ content }}}
             </div>
             {{/editing}}
             {{^editing}}
-            <div class="section page" id="section{{ id }}">
+            <div class="section page" data-section-id="{{ id }}">
               {{{ content }}}
             </div>
             {{/editing}}
@@ -103,7 +118,15 @@ var pageData = {
                 <li class="list-group-item">
                   <div class="comment-form">
                     <br/>
-                    <textarea class="form-control" value="{{ newComment }}"></textarea>
+                    <!-- <textarea class="form-control" value="{{ newComment }}"></textarea> -->
+                    <div class="btn-group" data-role="editor-toolbar"
+        data-target="#comment-form-{{id}}">
+                      <a class="btn btn-default" data-edit="bold" title="" data-original-title="Bold (Ctrl/Cmd+B)"><b>b</b></a>
+                      <a class="btn btn-default" data-edit="italic" title="" data-original-title="Italic (Ctrl/Cmd+I)"><i>i</i></a>
+                    </div>
+
+                    <div id="comment-form-{{id}}" class="comment-editor form-control" contenteditable="true">
+                    </div>
                     <br/>
                     <button type="button" class="btn btn-primary" proxy-click="addComment:{{id}}">Add comment</button>
                   </div>
@@ -121,10 +144,10 @@ var pageData = {
  </div> 
 
   <div class="col-xs-4">
-    <div class="toggled-inspectors inspectors affix page col-xs-4">
+    <div class="toggled-inspectors inspectors affix page col-xs-4 no-print">
 
       <select class="form-control" value="{{ currentInspector }}">
-        <option value="document-info">Document info</option>
+        <option value="document-info">Table of Contents</option>
         <!-- <option value="history">History</option> -->
         <!-- <option value="references">References</option> -->
         <option value="export">Export</option>
@@ -136,7 +159,7 @@ var pageData = {
           <dt>Author</dt><dd>Chris Delp</dd>
           <dt>Last modified</dt><dd>8/14/13 2:04pm</dd>
         </dl>
- -->        <button type="button" class="btn btn-default" proxy-click="memoRendered">load toc</button>
+ -->    
         <div id="toc"></div>
       </div>
 
@@ -161,7 +184,9 @@ var pageData = {
       <div id="export" class="inspector">
         <h3>Export</h3>
         <ul class="list-unstyled">
-          <li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>
+          <li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>         
+          <li><button type="button" class="btn btn-default" proxy-click="printPreview">Print Preview</button></li>
+          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Snapshot</button></li>          
         </ul>
       </div>
 
@@ -184,8 +209,6 @@ var pageData = {
     
     
     
-    
-    
   </script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery-ui.min.js"></script>
 <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
@@ -198,42 +221,87 @@ var pageData = {
 <script type="text/javascript">
 var context = window;
 
+// backend.js
+
+// Provides handlers for:
+//  saveView
+//  saveComment
+
+var absoluteUrl = function(relativeUrl) {
+  return (app.data.baseUrl || '') + relativeUrl;
+}
+
+var ajaxWithHandlers = function(options, successMessage, errorMessage) {
+  $.ajax(options)
+    .done(function() { app.fire('message', 'success', successMessage); })
+    .fail(function(e) { app.fire('message', 'error', errorMessage); })
+}
+
+app.on('saveView', function(viewId, viewData) {
+  var jsonData = JSON.stringify(viewData);
+  var url = absoluteUrl('/ui/views/' + viewId);
+  ajaxWithHandlers({ 
+    type: "POST",
+    url: url,
+    data: jsonData,
+    contentType: "application/json; charset=UTF-8"
+  }, "Saved view", "Error saving view");
+})
+
+app.on('saveComment', function(evt, viewId, commentBody) {
+  var url = absoluteUrl("/ui/views/"+viewId+"/comment");
+  ajaxWithHandlers({ 
+    type: "POST",
+    url: url,
+    data: commentBody,
+    contentType: "text/plain; charset=UTF-8"
+  }, "Saved comment", "Error saving comment"); 
+})
+
+app.on('saveSnapshot', function(viewId, html) {
+  var url = absoluteUrl('/ui/views/' + viewId + '/snapshot');
+  ajaxWithHandlers({ 
+    type: "POST",
+    url: url,
+    data: html,
+    contentType: "application/json; charset=UTF-8"
+  }, "Saved Snapshot", "Error saving snapshot");
+})
 
 // comments.js
 
+app.placeholder = function($el, defaultText) {
+ $el.html('<div class="placeholder">'+defaultText+'</div>').click(function() {
+    $el.html('&nbsp;');
+    execCommand('selectAll');
+    $el.off('click');
+  });
+}
+
 app.on('toggleComments', function(evt, id) {
-  context.$('#'+id).toggle();
+  var comments = $('#'+id);
+  var commentField = comments.toggle().find('.comment-editor').wysiwyg();
+  app.placeholder(commentField, "Type your comment here");
 });
 
 app.on('addComment', function(evt, mbid) {
-  var newCommentBody = app.get('newComment');
-  app.get(evt.keypath+".viewData.comments").push({ author : 'You', body : newCommentBody, modified : new Date()});
+  var commentFieldId = "#comment-form-" + mbid;
+  var commentField = $(commentFieldId);
+  commentField.find('.placeholder').detach();
+  var newCommentBody = commentField.cleanHtml();
+  if (newCommentBody != "") {
+    app.get(evt.keypath+".viewData.comments").push({ author : 'You', body : newCommentBody, modified : new Date()});
 
-  var url = (app.data.baseUrl || '') + "/ui/views/"+mbid+"/comment";
-  context.$.ajax(
-    { 
-      type: "POST",
-      url: url,
-      data: newCommentBody,
-      contentType: "text/plain; charset=UTF-8",
-      success: function(r) {
-        console.log("Success writing back");
-      }
-    })
-  .fail(function() { console.log("Error writing back"); });
-
-  app.set('newComment','');
+    app.fire('saveComment', mbid, newCommentBody);
+  }
+  app.placeholder(commentField, "Type your comment here");
 });
 
 // editor.js
 
-var $ = context.$;
-
-// console.log("$ is currently", $);
-
-setTimeout(function() {
-  context.$('#editor').wysiwyg(); 
-}, 500)
+app.getSelectedNode = function() {
+  return document.selection ? document.selection.createRange().parentElement() : window.getSelection().anchorNode.parentNode;
+}
 
 app.on('togglePreview', function() {
   // console.log("toggling preview...");
@@ -241,14 +309,53 @@ app.on('togglePreview', function() {
 })
 
 app.on('editSection', function(e, sectionId) {
+
   e.original.preventDefault();
+
+
+  // app.set('oldData.'+sectionId, app.generateUpdates);
   // console.log("editing a section!", e, sectionId);
   // TODO turn editing off for all other sections
   app.set(e.keypath+'.editing', true);
+  var section = $("[data-section-id='" + sectionId + "']");
   // TODO make this work with multiple tables in a section
-  app.createLiveTable($('.rich-table'));
+  section.each(function(i,el) {
+    $(el).wysiwyg();
+  });
+  // TODO turn this listener off on save or cancel
+  section.on('keyup paste blur',function(evt) {
+    // we need to use the selection api because we're in a contenteditable
+    var editedElement = app.getSelectedNode();
+    var $el = $(editedElement);
+    var mdid = $el.attr('data-mdid');
+    var property = $el.attr('data-property');
+    var newValue = $(editedElement).html();
+    // TODO filter out html for name and dvalue?
+    // find others, set their values
+    $('[data-mdid='+mdid+'][data-property='+property+']').not($el).html(newValue);
+  })
+
+  // app.createLiveTable($('.rich-table'));
   // app.set(e.keypath+'.previousContent', app.get(e.keypath+'.content'));
   // console.log("saved current content to previous content", app.get('keypath'));
+
+  // handle placeholder text
+  // TODO remove this listener on cancel or save
+  section.click(function() {
+    var $el = $(app.getSelectedNode());
+    if ($el.is('.editable.reference.blank')) {
+      $el.html('&nbsp;');
+      $el.removeClass('blank');
+    }
+  });
+
+  // make sneaky overlay for image uploads
+  $('[data-role=magic-overlay]').each(function () {
+    var overlay = $(this), target = $(overlay.data('target')); 
+    overlay.css('opacity', 0).css('position', 'absolute').offset(target.offset()).width(target.outerWidth()).height(target.outerHeight());
+  });
+
+
 })
 
 app.on('cancelEditing', function(e) {
@@ -260,8 +367,17 @@ app.on('cancelEditing', function(e) {
 
 app.on('saveSection', function(e, sectionId) {
   e.original.preventDefault();
-  app.set(e.keypath+'.content', context.document.getElementById(sectionId).innerHTML);
+
+  $('.modified[data-mdid="' + sectionId+ '"]').text(app.formatDate(new Date()));
+  $('.author-name[data-mdid="' + sectionId+ '"]').text("You");
+
+
+  var section = $("[data-section-id='" + sectionId + "']");
+  //console.log("savesection", section);
+  app.set(e.keypath+'.name', section.filter(".section-header").html());
+  app.set(e.keypath+'.content', section.filter(".section").html());
   app.set(e.keypath+'.editing', false);
+  //console.log("survived");
 })
 
 app.on('insertTable', function(e) {
@@ -272,14 +388,14 @@ app.on('insertTable', function(e) {
   ];
 
   // var tableContent = '<table class="table table-bordered table-striped"><tr><td>your stuff here</td></tr></table>';
-  context.document.execCommand('insertHTML', false, '<div id="tableTest" class="rich-table">table goes here</div>');
+  document.execCommand('insertHTML', false, '<div id="tableTest" class="rich-table">table goes here</div>');
   var liveTable = app.createLiveTable($('#tableTest'), tableData);
   liveTable.set('editing', true);
 
 })
 
 app.on('insertReference', function() {
-  context.document.execCommand('insertHTML', false, '<div id="referenceTest" class="rich-reference">reference goes here</div>');
+  document.execCommand('insertHTML', false, '<div id="referenceTest" class="rich-reference">reference goes here</div>');
   var liveReference = app.createLiveReference($('#referenceTest'), {}, app.get('elements'));
   liveReference.set('editing', true);
 })
@@ -292,9 +408,39 @@ app.on('elementDetails', function(evt) {
   evt.node.blur();
 })
 
-// inspectors.js
+// export.js
 
-var $ = context.$;
+_.templateSettings = {
+  interpolate: /\{\{(.+?)\}\}/g
+};
+
+var snapshotHTML = function()
+{
+  var everything = $('#the-document').clone();
+  everything.find('.comments, .section-actions, .toolbar').remove();
+  var innerHtml = everything.html();
+  var fullPageTemplate = _.template(app.data.printPreviewTemplate);
+  return fullPageTemplate({ content : innerHtml, documentTitle : app.data.viewTree.name });
+}
+
+app.on('print', function() {
+  print();
+})
+
+app.on('printPreview', function() 
+{
+  var w = window.open('about:blank', 'printPreview');
+  var newDoc = w.document.open("text/html", "replace");
+  newDoc.write(snapshotHTML());
+  newDoc.close();
+})
+
+app.on('snapshot', function(e, id) 
+{
+  app.fire('saveSnapshot', id, snapshotHTML());
+})
+
+// inspectors.js
 
 app.set('currentInspector', 'document-info');
 
@@ -311,11 +457,14 @@ app.on('showReferencedElement', function(evt) {
   app.set('currentInspector', 'references');
 })
 
-// print.js
+// messages.js
 
-app.on('print', function() {
-  context.print();
-})
+app.on('message', function(type, message) {
+  if (app.data.environment.development) {
+    console.log('-- ', type, ': ', message);
+  }
+  // TODO show these in the ui somewhere
+});
 
 // realData.js
 
@@ -329,57 +478,83 @@ app.on('print', function() {
 // how should we handle url patterns?
 // rdfa transclusion?
 
-var $ = context.$;
-var _ = context._;
-
 var viewTree = {
 
 }
 
-var generateUpdates = function(node)
+app.formatDate = function(d)
 {
-   var result = [];
-  $('.editable[property]', node).each(function(i,el)
+  var m_names = new Array("Jan", "Feb", "Mar", 
+    "Apr", "May", "June", "July", "Aug", "Sept", 
+    "Oct", "Nov", "Dec");
+
+  var curr_date = d.getDate();
+  var sup = "";
+  if (curr_date == 1 || curr_date == 21 || curr_date ==31)
   {
-    //$('div[property]', editableNode).each(function(i,el)
-    //{
-      var existsInResults = false;
-      _.each(result, function(x)
-      {
-        if(x.mdid === el.id)
-        {
-          existsInResults = true;
-        }
-      });
-      if(existsInResults === false)
-      {
-        result.push({
-          mdid: el.id,
-          documentation: el.innerHTML
-        })
-      }
-    //});
-  });
-  return result;
+    sup = "st";
+  }
+  else if (curr_date == 2 || curr_date == 22)
+  {
+    sup = "nd";
+  }
+  else if (curr_date == 3 || curr_date == 23)
+  {
+    sup = "rd";
+  }
+  else
+  {
+    sup = "th";
+  }
+
+  var curr_hour = d.getHours();
+  if (curr_hour < 12)
+  {
+    a_p = "am";
+  }
+  else
+  {
+    a_p = "pm";
+  }
+  if (curr_hour == 0)
+  {
+    curr_hour = 12;
+  }
+  if (curr_hour > 12)
+  {
+    curr_hour = curr_hour - 12;
+  }
+
+  var curr_min = d.getMinutes();
+  var curr_month = d.getMonth();
+  var curr_year = d.getFullYear();
+
+  var formatted = m_names[curr_month] + " " + curr_date + sup +  " " + curr_year + " " + curr_hour + ":" + curr_min + a_p ;
+  return formatted;
 }
 
-var saveData = function(viewID, updates)
+var parseDate = function(dateString)
 {
-  console.log("Write updates here", updates);
-  var jsonData = JSON.stringify(updates);
-  var url = '${url.context}/service/ui/views/' + viewID;
-  //var url = 'http://localhost:3000/echo';
-  $.ajax(
-    { 
-      type: "POST",
-      url: url,
-      data: jsonData,
-      contentType: "application/json; charset=UTF-8",
-      success: function(r) {
-        console.log("Success writing back");
-      }
-    })
-  .fail(function() { console.log("Error writing back"); });
+  dateString = "2013-09-11T12:11:57.663-07:00";
+  var m = dateString.match(/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+).(\d+)-(\d+):00/);
+  var d = new Date(m[1], m[2]-1, m[3], m[4], m[5], m[6], m[7]);
+  var d = new Date(Date.UTC(m[1], m[2]-1, m[3], m[4], m[5], m[6], m[7]) + (3600 * 1000 * m[8]));
+  return d;
+}
+
+app.generateUpdates = function(section)
+{
+  var elements = {};
+  $('.editable[data-property]', section).each(function(i,el)
+  {
+      var mdid = $(el).attr('data-mdid');
+      var data = elements[mdid] || { mdid : mdid };
+      data[$(el).attr('data-property').toLowerCase()] = el.innerHTML;
+      // result.push(data);
+      elements[mdid] = data;
+  });
+  console.log("elements by id", elements);
+  return _.values(elements);
 }
 
 var writeBackCache = function()
@@ -391,27 +566,60 @@ var writeBackCache = function()
    })
 
    app.on('saveSection', function(e, sectionId) {   
-     //console.log("realData SaveSection " + sectionId)
-     var section = context.document.getElementById(sectionId);
-
-     var updates = generateUpdates(section);
-     var viewId = sectionId.replace('section', '');
-     saveData(viewId, updates);
+     var section = $("[data-section-id='" + sectionId + "']");
+     //console.log("saveSection", section);
+     //var section = document.getElementById(sectionId);
+     var updates = app.generateUpdates(section);
+     app.fire('saveView', sectionId, updates);
+     //console.log("survived");
    })
 }();
 
-var resolveValue = function(object, elements) {
-  if (object.source === 'text') {
+var resolveValue = function(object, elements, listProcessor) {
+  if (Array.isArray(object)) {
+    var valuesArray = _.map(object, function(obj) { return resolveValue(obj, elements) });
+    return listProcessor ? listProcessor(valuesArray) : _.pluck(valuesArray, 'content').join("  ");
+  } else if (object.source === 'text') {
     return { content : object.text, editable : false };
   } else {
-    // console.log("resolving ", object.useProperty, " for ", object.source);
-
+    // console.log("resolving ", object.useProperty, " for ", object.source, object);
     var source = elements[object.source];
     // console.log(source);
     var referencedValue = source[object.useProperty.toLowerCase()];
     // console.log(referencedValue);
     return { content : referencedValue, editable : true, mdid :  source.mdid, property: object.useProperty };
   }
+}
+
+var classAttr = function(classes) {
+  return 'class="' + classes.join(" ") + '"';
+}
+
+var renderEmbeddedValue = function(value, elements) {
+  var h = "";
+  var ref = elements[value.mdid];
+  var title = ref ? (ref.name || ref.mdid) +' ('+value.property.toLowerCase()+')' : '';
+  var classes = ['reference'];
+  if (!value.content || value.content === "") {
+    classes.push('blank')
+  }
+  if (value.editable) {
+    classes.push('editable');
+    // TODO use something other than id here, since the same reference can appear multiple times
+    h += '<div ' + classAttr(classes) + ' data-property="' + value.property + '" data-mdid="' + value.mdid +'" title="'+title+'">';
+  } else {
+    if (ref) {
+      classes.push('not-editable');
+      h += '<div ' + classAttr(classes) + ' contenteditable="false" title="'+title+'">';          
+    } else if (value.mdid && !ref) {
+      h += '<div class="missing">reference missing'
+    } else {
+      h += '<div class="literal" contenteditable="false">'
+    }
+  }
+  h += value.content || 'no content for ' + (ref.name || ref.id) + ' ' + value.property.toLowerCase();
+  h += '</div>';
+  return h;
 }
 
 
@@ -426,6 +634,8 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
     // resolve referenced content
     child.content = "";
     child.depth = depth;
+    child.class = child.viewData.noSection ? 'no-section' : '';
+    child.viewData.modifiedFormatted = app.formatDate(parseDate(child.viewData.modified));
 
     // console.log("contains:", child.viewData.contains);
     for (var cIdx in child.viewData.contains) {
@@ -437,9 +647,11 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
         table += "<tr>";
         for (var hIdx in c.header[0]) {
           var cell = c.header[0][hIdx];
-          // TODO use the same resolver code here
-          var value = resolveValue(cell, elements);
-          table += '<th colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '"' + "><div property='" + value.property + "' id='" + value.mdid +"'>" + value.content + "</div></th>";
+          var value = resolveValue(cell.content, elements, function(valueList) {
+            return _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) }).join("");
+          });
+          // console.log("header value", value)
+          table += '<th colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '">' + value + "</th>";
         }
         table += "</tr>";
         table += "</thead>"
@@ -448,28 +660,29 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
           table += "<tr>";
           for (var cIdx in c.body[rIdx]) {
             var cell = c.body[rIdx][cIdx];
-            var value = resolveValue(cell, elements);
-            table += '<td colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '"' + "><div property='" + value.property + "' id='" + value.mdid +"'>" + value.content + "</div></td>";
+            var value = resolveValue(cell.content, elements, function(valueList) {
+              return _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) }).join(", ");
+            });
+            // TODO need to pull out the renderer here so that we can do multiple divs in a cell
+            table += '<td colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '">' + value + "</td>";
           }
           table += "</tr>";
         }
         table += "</tbody>"
         table += "</table>"
         child.content += table;
+      } else if (c.type === 'List') {
+        // why is this a 2D array?
+        child.content += "<ul>";
+        _.each(c.list, function(listItem) {
+          child.content += resolveValue(listItem, elements, function(values) { 
+            return _.map(values, function(v) { return "<li>"+renderEmbeddedValue(v, elements)+"</li>"; }).join("");
+          })          
+        })
+        child.content += "</ul>";
       } else {
         var value = resolveValue(c, elements);
-        if (value.editable) {
-          child.content += '<div class="editable" property="' + value.property + '" id="' + value.mdid +'">';
-        } else {
-          var ref = elements[value.mdid];
-          if (ref) {
-            child.content += '<div class="reference" contenteditable="false" title="'+ref.name+' ('+c.useProperty.toLowerCase()+')'+'">';          
-          } else {
-            child.content += '<div class="missing">reference missing</div>'
-          }
-        }
-        child.content += value.content;
-        child.content += '</div>';
+        child.content += renderEmbeddedValue(value, elements);
       }
     }
     
@@ -537,7 +750,7 @@ app.observe('home', function(homeData)
     })
   }
   buildHomeTree(homeTree.children)
-  console.log("final home tree", homeTree)
+  // console.log("final home tree", homeTree)
   app.set('homeTree', homeTree)
  })
 
@@ -548,7 +761,6 @@ app.observe('viewHierarchy', function(viewData) {
     var view = viewData.views[idx];
     viewsById[view.mdid] = view;
   }
-  // console.log('viewsById', viewsById);
   app.set('viewsById', viewsById);
   // index elements by id
   var elementsById = {};
@@ -563,18 +775,19 @@ app.observe('viewHierarchy', function(viewData) {
   // TODO: Change addChildren to construct the parentNode content instead of the childrenNodes
   // Then we could just pass viewTree instead of tempTree
   var tempTree = {"children" : []};
+  console.log("tempTree", tempTree);
   addChildren(tempTree, [viewData.rootView], viewData.view2view, viewData.views, elementsById, 0);
-  viewTree = tempTree.children[0];
-  
+  viewTree = tempTree.children.length > 0 ? tempTree.children[0] : [];
   viewTree.orderedChildren = constructOrderedChildren(viewTree);
 
-  console.log("final view tree", viewTree); 
-  app.set('viewTree', viewTree);
+  app.set('viewTree', viewTree, function() {
+    setTimeout(function() { 
+      app.fire('makeToc');
+    }, 0);
+  });
 })
 
 // rich-reference.js
-
-var $ = context.$;
 
 var _keys = function(obj) {
   var keys = [];
@@ -646,8 +859,6 @@ app.createLiveReference = function($el, elementRef, elementList) {
 
 
 // rich-table.js
-
-var $ = context.$;
 
 // rich table editor
 app.createLiveTable = function($el, tableData) {
@@ -746,8 +957,6 @@ app.createLiveTable = function($el, tableData) {
 
 // sections.js
 
-var $ = context.$;
-
 app.observe('plan_sections', function(newText) {
   // console.log("new text", newText);
   var sections = [];
@@ -762,9 +971,8 @@ app.observe('plan_sections', function(newText) {
 
 // toc.js
 
-app.on('memoRendered', function() {
-  console.log("memo rendered, setting up toc");
-  context.$("#toc").tocify({ selectors: "h1, h2, h3, h4", history : false, highlightOffset : 0, context: "#the-document", smoothScroll:false }).data("toc-tocify"); 
+app.on('makeToc', function() {
+  $("#toc").tocify({ selectors: "h1, h2, h3, h4", history : false, highlightOffset : 0, context: "#the-document", smoothScroll:false }).data("toc-tocify"); 
 })
 
 </script>
