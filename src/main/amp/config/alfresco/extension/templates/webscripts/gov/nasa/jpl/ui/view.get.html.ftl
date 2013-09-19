@@ -13,7 +13,7 @@
 <script type="text/javascript">
 var pageData = {
   viewHierarchy: ${res},
-  baseUrl: "${url.context}/wcm/"
+  baseUrl: "${url.context}/wcs/"
 };
 </script>
 
@@ -33,7 +33,7 @@ var pageData = {
         <li><a href="about.html">about</a></li>
         {{/environment.development}}
         {{^environment.development}}
-        <li><a href="${url.context}/wcm/ui/">dashboard</a></li>
+        <li><a href="${url.context}/wcs/ui/">dashboard</a></li>
         {{/environment.development}}
       </ul>
 
