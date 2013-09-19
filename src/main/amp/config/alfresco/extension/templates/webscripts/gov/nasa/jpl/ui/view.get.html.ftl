@@ -581,11 +581,16 @@ var resolveValue = function(object, elements, listProcessor) {
     return listProcessor ? listProcessor(valuesArray) : _.pluck(valuesArray, 'content').join("  ");
   } else if (object.source === 'text') {
     return { content : object.text, editable : false };
+  } else if (object.type === 'List') {
+    return { content : '!! sublist !! ', editable : false };
   } else {
     // console.log("resolving ", object.useProperty, " for ", object.source, object);
     var source = elements[object.source];
     // console.log(source);
-    var referencedValue = source[object.useProperty.toLowerCase()];
+    if (object.useProperty)
+      var referencedValue = source[object.useProperty.toLowerCase()];
+    else
+      console.warn("!! no useProperty for", object);
     // console.log(referencedValue);
     return { content : referencedValue, editable : true, mdid :  source.mdid, property: object.useProperty };
   }
