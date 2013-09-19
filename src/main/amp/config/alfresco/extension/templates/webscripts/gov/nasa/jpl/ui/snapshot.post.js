@@ -64,10 +64,13 @@ function main() {
 	if (docsnapshot == null)
 		docsnapshot = snapshotFolder.createFolder(viewid);
 	var snapshotNode = docsnapshot.createNode(snapshotid, "view:Snapshot");
-	//snapshotNode.properties["view:productJson"] = toJson(info);
-	snapshotNode.properties.content.write(html);
-    snapshotNode.properties.content.setEncoding("UTF-8");
 	snapshotNode.save();
+	var htmlNode = docsnapshot.createFile(snapshotid + ".html");
+	//snapshotNode.properties["view:productJson"] = toJson(info);
+	htmlNode.content = html;
+    htmlNode.properties.content.setEncoding("UTF-8");
+	htmlNode.save();
+	snapshotNode.createAssociation(htmlNode, "view:html");
 	topview.createAssociation(snapshotNode, "view:snapshots");
 }
 
