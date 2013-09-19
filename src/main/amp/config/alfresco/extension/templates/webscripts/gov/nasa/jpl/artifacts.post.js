@@ -76,8 +76,9 @@ function main() {
         upload.save();
         
         // if only version, save dummy version so snapshots can reference
-        // versioned images
-        if (upload.getVersionHistory().length <= 0) {
+        // versioned images - need to check against 1 since if someone
+        // deleted previously a "dead" version is left in its place
+        if (upload.getVersionHistory().length <= 1) {
             upload.createVersion('creating the version history', false);
         }
      
