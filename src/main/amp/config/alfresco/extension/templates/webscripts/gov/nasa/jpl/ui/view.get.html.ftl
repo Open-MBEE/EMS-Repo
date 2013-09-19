@@ -460,7 +460,7 @@ app.on('showReferencedElement', function(evt) {
 // messages.js
 
 app.on('message', function(type, message) {
-  if (app.data.environment.development) {
+  if (app.data.environment && app.data.environment.development) {
     console.log('-- ', type, ': ', message);
   }
   // TODO show these in the ui somewhere
