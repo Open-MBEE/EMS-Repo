@@ -10,17 +10,25 @@ function main() {
 	var snapshotid = url.templateArgs.id;
 	var docid = url.templateArgs.viewid;
 	var node = snapshotFolder.childByNamePath(docid + "/" + snapshotid);
-	var topview = modelFolder.childByNamePath(docid);
-	if (node == null || topview == null) {
+	
+	if (node == null) {
 		status.code = 404;
 		return;
 	}
+	/*
+	var topview = modelFolder.childByNamePath(docid);
 	var jsonstring = node.properties["view:productJson"];
 	var res = JSON.parse(jsonstring);
 	getSnapsnots(topview);
 	res['snapshots'] = snapshots;
 	res['user'] = person.properties['cm:userName'];
 	res = toJson(res);
+	*/
+	var html = node.assocs["view:html"];
+	if (html.length > 0)
+		res = html[0].content;
+	else
+		status.code = 404;
 	
 }
 
