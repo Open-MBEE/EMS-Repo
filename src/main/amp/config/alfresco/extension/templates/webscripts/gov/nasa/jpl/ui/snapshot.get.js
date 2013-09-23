@@ -19,8 +19,7 @@ function main() {
 	var topview = modelFolder.childByNamePath(docid);
 	var jsonstring = node.properties["view:productJson"];
 	var res = JSON.parse(jsonstring);
-	getSnapsnots(topview);
-	res['snapshots'] = snapshots;
+	res['snapshots'] = getSnapsnots(topview);
 	res['user'] = person.properties['cm:userName'];
 	res = toJson(res);
 	*/

@@ -16,11 +16,10 @@ function main() {
 	var views = postjson.views;
 	var nosections = postjson.noSections;
 	
-	var viewNode = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
-	if (viewNode == null || viewNode.length == 0) {
+	var viewNode = modelFolder.childByNamePath(viewid);
+	if (viewNode == null) {
 		return; //should throw error
 	}
-	viewNode = viewNode[0];
 	if (viewNode.properties["view:product"]) {
 		viewNode.properties["view:view2viewJson"] = jsonUtils.toJSONString(views);
 		viewNode.properties["view:noSectionsJson"] = jsonUtils.toJSONString(nosections);
@@ -28,12 +27,12 @@ function main() {
 		return;
 	}
 
-	for (var viewid in views) {
-		viewNode = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
-		if (viewNode == null || viewNode.length == 0) {
+	for (var vid in views) {
+		var vNode = modelFolder.childByNamePath(vid);
+		if (vNode == null) {
 			continue;//should throw error
 		}
-		modelMapping[viewid] = viewNode[0];
+		modelMapping[vid] = vNode;
 	}
 	updateViewHierarchy(modelMapping, views, nosections);
 }

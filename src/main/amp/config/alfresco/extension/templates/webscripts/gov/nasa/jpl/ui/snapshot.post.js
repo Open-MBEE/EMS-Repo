@@ -11,11 +11,15 @@ var product = false;
 
 /* this was an old code where posting a snapshot means we recreate the json on server side and save it as a blob in the snapshot class, might be useful in future
 function main() {
-	var topview = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
-	if (topview == null || topview.length == 0) {
+	var topview = modelFolder.childByNamePath(viewid);
+	
+	var elements = [];
+	var seen = [];
+	var views = [];
+	var view2view = {};
+	if (topview == null) {
 		status.code = 404;
 	} else {
-		topview = topview[0];
 		if (topview.properties["view:product"])
 			product = true;
 		if (product) {

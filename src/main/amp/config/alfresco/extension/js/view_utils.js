@@ -1,10 +1,4 @@
-var elements = [];
-var seen = [];
-var views = [];
-var view2view = {};
-var snapshots = [];
-
-function addElement(modelNode) {
+function addElement(modelNode, seen, elements) {
 	var info = {};
 	info['mdid'] = modelNode.properties["view:mdid"];
 	info['documentation'] = fixArtifactUrls(modelNode.properties["view:documentation"], false);
@@ -19,17 +13,17 @@ function addElement(modelNode) {
 }
 
 
-function handleView(view) {
+function handleView(view, seen, elements, views, view2view) {
 	var sourcesJson = view.properties["view:sourcesJson"];
 	var sources = JSON.parse(sourcesJson);
 	for (var i in sources) {
 		var sourceid = sources[i];
-		var modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + sourceid + "']");
-		if (modelNode == null || modelNode == undefined)
+		var modelNode = modelFolder.childByNamePath(sourceid);
+		if (modelNode == null)
 			continue;
 		if (seen.indexOf(sourceid) >= 0)
 			continue;
-		addElement(modelNode[0]);
+		addElement(modelNode, seen, elements);
 	}
 	
 	var viewinfo = {};
@@ -66,13 +60,14 @@ function handleView(view) {
 		view2view[view.properties['view:mdid']] = JSON.parse(view.properties['view:viewsJson']);
 		var childViews = view.assocs["view:views"];
 		for (var i in childViews) {
-			handleView(childViews[i]);
+			handleView(childViews[i], seen, elements, views, view2view);
 		}
 	}
 	return viewinfo;
 }
 
 function getSnapshots(topview) {
+	var snapshots = [];
 	var ss = topview.assocs["view:snapshots"];
 	for (var i in ss) {
 		utils.toISO8601(date);
@@ -96,4 +91,5 @@ function getSnapshots(topview) {
 			return 0;
 		return 1;
 	})
+	return snapshots;
 }

@@ -7,16 +7,10 @@ var date = new Date();
 var modelElements = {}
 
 function updateModelElement(element) {
-	/*var modelNode = null;
-	if (element.mdid in modelElements) {
-		modelNode = [modelElements[element.mdid]];
-	} else {*/
-		modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + element.mdid + "']");
-   // }
-	if (modelNode == null || modelNode.length == 0) {
+	var	modelNode = modelFolder.childByNamePath(element.mdid);
+	if (modelNode == null) {
 		return;
 	} else {
-		modelNode = modelNode[0];
 		modelElements[element.mdid] = modelNode;
 	}
 
@@ -46,7 +40,7 @@ function main() {
 	if (viewid in modelElements) {
 		viewnode = modelElements[viewid];
 	} else {
-		viewnode = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
+		viewnode = modelFolder.childByNamePath(viewid);
 	}
 	viewnode.properties['author'] = person.properties['cm:userName'];
 	viewnode.properties['lastModified'] = date;

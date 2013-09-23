@@ -18,10 +18,9 @@ function main() {
 	commentNode.properties["view:committed"] = false;
 	commentNode.save();
 	
-	var view = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
-	if (view == null || view.length == 0)
+	var view = modelFolder.childByNamePath(viewid);
+	if (view == null)
 		return;
-	view = view[0];
 	view.createAssociation(commentNode, "view:comments");
 }
 

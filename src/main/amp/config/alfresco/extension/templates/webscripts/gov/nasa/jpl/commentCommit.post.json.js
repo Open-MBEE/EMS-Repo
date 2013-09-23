@@ -11,10 +11,9 @@ function main() {
 	if (postjson == null || postjson == undefined)
 		return;
 	for (var oldid in postjson) {
-		var comment = modelFolder.childrenByXPath("*[@view:mdid='" + oldid + "']");
-		if (comment == null || comment.length == 0)
+		var comment = modelFolder.childByNamePath(oldid);
+		if (comment == null)
 			continue; //error?
-		comment = comment[0];
 		if (oldid != postjson[oldid]) {
 			comment.properties["view:mdid"] = postjson[oldid];
 			comment.properties["cm:name"] = postjson[oldid];

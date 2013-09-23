@@ -4,49 +4,52 @@
 <import resource="classpath:alfresco/extension/js/view_utils.js">
 
 var modelFolder = companyhome.childByNamePath("ViewEditor/model");
-var viewid = url.extension
+var viewid = url.templateArgs.viewid;
 var product = false;
+var info = {};
+
+var elements = [];
+var seen = [];
+var views = [];
+var view2view = {};
 
 function main() {
-	var topview = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
-	if (topview == null || topview.length == 0) {
+	var topview = modelFolder.childByNamePath(viewid);
+	if (topview == null) {
 		status.code = 404;
 	} else {
-		topview = topview[0];
 		if (topview.properties["view:product"])
 			product = true;
 		if (product) {
 			view2view = JSON.parse(topview.properties["view:view2viewJson"]);
 			var noSections = JSON.parse(topview.properties["view:noSectionsJson"]);
 			for (var viewmdid in view2view) {
-				var view = modelFolder.childrenByXPath("*[@view:mdid='" + viewmdid + "']");
-				if (view == null || view.length == 0) {
+				var view = modelFolder.childByNamePath(viewmdid);
+				if (view == null) {
 					status.code = 404;
 					return;
 				}
-				var viewinfo = handleView(view[0]);
+				var viewinfo = handleView(view, seen, elements, views, view2view);
 				if (noSections.indexOf(viewmdid) >= 0)
 					viewinfo.noSection = true;
 				else
 					viewinfo.noSection = false;
 			}
 		} else {
-			handleView(topview);
+			handleView(topview, seen, elements, views, view2view);
 		}
-		getSnapshots(topview);
+		info['snapshots'] = getSnapshots(topview);
 	}
+	info['elements'] = elements;
+	info['view2view'] = view2view;
+	info['views'] = views;
+	info['rootView'] = viewid;
+	info['user'] = person.properties['cm:userName'];
 }
 
 status.code = 200;
 main();
 
-var info = {};
-info['elements'] = elements;
-info['view2view'] = view2view;
-info['views'] = views;
-info['rootView'] = viewid;
-info['user'] = person.properties['cm:userName'];
-info['snapshots'] = snapshots;
 
 var	response = status.code == 200 ? toJson(info) : "NotFound";
 if (status.code != 200) {

@@ -10,8 +10,8 @@ var user = args.user;
 function updateOrCreateModelElement(element, force) {
 	var modelNode = modelMapping[element.mdid];
 	if (modelNode == null || modelNode == undefined) {
-		modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + element.mdid + "']");
-		if (modelNode == null || modelNode.length == 0) {
+		modelNode = modelFolder.childByNamePath(element.mdid);
+		if (modelNode == null) {
 			if (element.type == "View") {
 				modelNode = modelFolder.createNode(element.mdid, "view:View");
 				modelNode.properties["view:name"] = element.name;
@@ -25,8 +25,7 @@ function updateOrCreateModelElement(element, force) {
 				modelNode = modelFolder.createNode(element.mdid, "view:ModelElement");
 				modelNode.properties["view:name"] = element.name;
 			}
-		} else
-			modelNode = modelNode[0];
+		}
 	}
 
 	if (element.name != null && element.name != undefined && element.name != modelNode.properties["view:name"]) {
@@ -59,11 +58,10 @@ function updateOrCreateModelElement(element, force) {
 function updateOrCreateView(view, ignoreNoSection) {
 	var viewNode = modelMapping[view.mdid];
 	if (viewNode == null || viewNode == undefined) {
-		viewNode = modelFolder.childrenByXPath("*[@view:mdid='" + view.mdid + "']");
-		if (viewNode == null || viewNode.length == 0) {
+		viewNode = modelFolder.childByNamePath(view.mdid);
+		if (viewNode == null) {
 			return;
 		}
-		viewNode = viewNode[0];
 	}
 	var sources = [];
 	for (var i in view.contains) {
@@ -110,11 +108,11 @@ function main() {
 	if (postjson == null || postjson == undefined)
 		return;
 	var viewid = url.templateArgs.viewid;
-	var topview = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
+	var topview = modelFolder.childByNamePath(viewid);
 	var product = false;
 	if (args.product == 'true')
 		product = true;
-	if (topview == null || topview.length == 0) {
+	if (topview == null) {
 		if (args.doc == 'true') {
 			topview = modelFolder.createNode(viewid, "view:DocumentView");
 			if (product) {
@@ -125,11 +123,9 @@ function main() {
 		}
 		topview.properties["view:mdid"] = viewid;
 		topview.save();
-		modelMapping[viewid] = topview;
-	} else {
-		topview = topview[0];
-		modelMapping[viewid] = topview;
 	}
+	modelMapping[viewid] = topview;
+	
 	if (topview.typeShort != "view:DocumentView" && args.doc == 'true') {
 		topview.specializeType("view:DocumentView");
 		if (product)

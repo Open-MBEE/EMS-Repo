@@ -5,7 +5,7 @@ var modelFolder = companyhome.childByNamePath("ViewEditor/model");
 var res = [];
 var seen = [];
 
-var viewid = url.extension
+var viewid = url.templateArgs.viewid
 var recurse = args.recurse == 'true' ? true : false;
 
 function add(modelNode) {
@@ -27,12 +27,12 @@ function handleView(view) {
 	var sources = JSON.parse(sourcesJson);
 	for (var i in sources) {
 		var sourceid = sources[i];
-		var modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + sourceid + "']");
-		if (modelNode == null || modelNode == undefined)
+		var modelNode = modelFolder.childByNamePath(sourceid);
+		if (modelNode == null)
 			continue;
 		if (seen.indexOf(sourceid) >= 0)
 			continue;
-		add(modelNode[0]);
+		add(modelNode);
 	}
 	if (recurse) {
 		var childViews = view.assocs["view:views"];
@@ -43,11 +43,10 @@ function handleView(view) {
 }
 
 function main() {
-	var topview = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
-	if (topview == null || topview.length == 0) {
+	var topview = modelFolder.childByNamePath(viewid);
+	if (topview == null) {
 		status.code = 404;
 	} else {
-		topview = topview[0];
 		handleView(topview);
 	}
 }
