@@ -64,151 +64,111 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/wcs" };
 		</div>
 
 		<div class="wrapper">
-			<div class="row split-view">
-
-<div class="col-xs-8">
-  <div id="the-document">
-    {{#viewTree.orderedChildren}}
-
-            {{#(depth == 0) }}
-              {{{("<h1><span class='"+class+" section-header editable' data-property='NAME' data-section-id='" + id + "'>" +  name + "</span></h1>" )}}}
-            {{/(depth == 0) }}
-            {{^(depth == 0) }}
-              {{{("<h"+ depth + " class='"+class+"'><span class='section-header' data-section-id='" + id + "'><span class='editable' data-property='NAME' data-mdid='" + id + "'>" +  name + "</span></span></h"+ depth + ">" )}}}
-            {{/(depth == 0) }}
-
-            <div class="author {{ class }}">Edited by <span class="author-name" data-mdid="{{id}}">{{ viewData.author }}</span></div>
-            <div class="modified {{ class }}" data-mdid="{{id}}">{{( viewData.modifiedFormatted )}}</div>
-      
-
-      <div class="page-sections {{ class }}">
-        
-        {{^(depth == 0) }}
-          <div class="section-wrapper">
-            
-            <div class="section-actions pull-right btn-group no-print">
-              {{^editing}}
-              <button type="button" class="btn btn-primary btn-sm" proxy-click="toggleComments:comments-{{id}}">comments ({{( viewData.comments.length )}})</button>
-              <button type="button" href="#" class="btn btn-primary btn-sm" proxy-click="editSection:{{ id }}">edit</button>
-              {{/editing}}
-            </div>
-            {{#editing}}
-            <div class="toolbar page" data-role="editor-toolbar" data-target="#section{{ id }}">
-              <div class="btn-group">
-                <a class="btn btn-default" data-edit="bold" title="" data-original-title="Bold (Ctrl/Cmd+B)"><span class="glyphicon glyphicon-bold"></span></a>
-                <a class="btn btn-default" data-edit="italic" title="" data-original-title="Italic (Ctrl/Cmd+I)"><span class="glyphicon glyphicon-italic"></span></a>
-              </div>
-
-                <a class="btn btn-default" title="Insert picture (or just drag &amp; drop)" id="pictureBtn{{id}}"><i class="glyphicon glyphicon-picture"></i></a>
-                <input type="file" data-role="magic-overlay" data-target="#pictureBtn{{id}}" data-edit="insertImage">
-
-              <div class="btn-group pull-right">
-                <button type="button" class="btn btn-default" proxy-click="cancelEditing">Cancel</button>
-                <button type="button" class="btn btn-primary" proxy-click="saveSection:{{ id }}">Save changes</button>
-              </div>
-            </div>
-            <div class="section page editing" data-section-id="{{ id }}" contenteditable="true" proxy-dblclick="sectionDoubleClick">
-              {{{ content }}}
-            </div>
-            {{/editing}}
-            {{^editing}}
-            <div class="section page" data-section-id="{{ id }}">
-              {{{ content }}}
-            </div>
-            {{/editing}}
-             <div class="comments" id="comments-{{id}}" style="display:none">
-              <ul class="list-group">
-                {{#viewData.comments}}
-                    <li class="comment list-group-item">
-                      {{{ body }}}
-                      <div class="comment-info"><small>{{ author }}, {{ modified }}<small></div>
-                    </li>
-                {{/viewData.comments}}
-                <li class="list-group-item">
-                  <div class="comment-form">
-                    <br/>
-                    <!-- <textarea class="form-control" value="{{ newComment }}"></textarea> -->
-                    <div class="btn-group" data-role="editor-toolbar"
-        data-target="#comment-form-{{id}}">
-                      <a class="btn btn-default" data-edit="bold" title="" data-original-title="Bold (Ctrl/Cmd+B)"><b>b</b></a>
-                      <a class="btn btn-default" data-edit="italic" title="" data-original-title="Italic (Ctrl/Cmd+I)"><i>i</i></a>
-                    </div>
-
-                    <div id="comment-form-{{id}}" class="comment-editor form-control" contenteditable="true">
-                    </div>
-                    <br/>
-                    <button type="button" class="btn btn-primary" proxy-click="addComment:{{id}}">Add comment</button>
-                  </div>
-                </li>
-              </ul>
-
-            </div>
-          </div>
-        {{/(depth == 0) }}
-      </div>
-
-
-    {{/viewTree.orderedChildren}} 
-  </div>
- </div> 
-
-  <div class="col-xs-4">
-    <div class="toggled-inspectors inspectors affix page col-xs-4 no-print">
-
-      <select class="form-control" value="{{ currentInspector }}">
-        <option value="document-info">Table of Contents</option>
-        <!-- <option value="history">History</option> -->
-        <!-- <option value="references">References</option> -->
-        <option value="export">Export</option>
-      </select>
-
-      <div id="document-info" class="inspector">
-        <h3>Document info</h3>
-<!--         <dl>
-          <dt>Author</dt><dd>Chris Delp</dd>
-          <dt>Last modified</dt><dd>8/14/13 2:04pm</dd>
-        </dl>
- -->    
-        <div id="toc"></div>
-      </div>
-
-      <div id="history" class="inspector">
-        <h3>History</h3>
-        <ul class="list-unstyled">
-          <li>v1 &mdash; Chris Delp</li>
-        </ul>
-      </div>
-
-<!--       <div id="references" class="inspector">
-        <h3>References</h3>
+			<div class="row">
+  
+  <div class="col-md-4">
+    
+    <div class="panel panel-default">
+      <div class="panel-heading">{{homeTree.name}}</div>
+      <div class="panel-body">
         <ul>
-          {{#viewHierarchy.elements}}
-          <li>
-             {{ name }}
-          </li>
-          {{/viewHierarchy.elements}}
+          {{#homeTree.children}}
+            {{>doc_and_children}}
+          {{/homeTree.children}}
         </ul>
       </div>
- -->
-      <div id="export" class="inspector">
-        <h3>Export</h3>
-        <ul class="list-unstyled">
-          <li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>         
-          <li><button type="button" class="btn btn-default" proxy-click="printPreview">Print Preview</button></li>
-          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Snapshot</button></li>          
-        </ul>
-      </div>
-
     </div>
+
+    <!-- {{>doc_and_children}} -->
+      {{^hidden}}
+        <li class="{{ .class }}">
+          {{#showLink}}
+          <a href="${url.context}/service/ui/views/{{id}}">{{name}}</a>
+          {{/showLink}}
+          {{^showLink}}
+          {{ name }}
+          {{/showLink}}
+        </li>
+        <ul>
+          {{#.children}}
+            {{>doc_and_children}}
+          {{/.children}}
+        </ul>
+      {{/hidden}}
+    <!-- {{/doc_and_children}} -->
+
+
+    {{#(settings.currentWorkspace != 'modeler')}}
+<!--       <div class="panel">
+        <div class="panel-heading">Tips and tricks</div>
+        <ul class="list-group">
+          <li class="list-group-item">
+            Things go here
+          </li>
+        </ul>
+      </div>
+ -->    {{/()}}
+
   </div>
 
+<!--   <div class="col-md-4">
+    
+    {{#(settings.currentWorkspace != 'reviewer')}}
+    <div class="panel">
+      <div class="panel-heading">My documents</div>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <small><span class="pull-right text-muted">yesterday at 4:22 pm</span></small>
+          <a href="plan.html">Europa System Engineering Management Plan</a>
+        </li>
+      </ul>
+    </div>
+    {{/()}}
+
+    <div class="panel">
+      <div class="panel-heading">Pending review</div>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <small><span class="pull-right text-muted">yesterday at 4:22 pm</span></small>
+          <a href="plan.html">Europa System Engineering Management Plan</a>
+        </li>
+      </ul>
+    </div>
+
+
+  </div>
+
+  <div class="col-md-4">
+    
+    {{#(settings.currentWorkspace === 'modeler')}}
+    <div class="panel">
+      <div class="panel-heading">Recent comments</div>
+      <ul class="list-group">
+          <li class="list-group-item">
+            <small><span class="pull-right text-muted">a few minutes ago</span></small>
+            <a href="plan.html">Some comment</a>
+          </li>
+          <li class="list-group-item">
+            <small><span class="pull-right text-muted">yesterday at 10:18 am</span></small>
+            <a href="plan.html">Another comment</a>
+          </li>
+      </ul>
+    </div>
+    {{/()}}
+
+    <div class="panel">
+      <div class="panel-heading">Recent changes</div>
+      <ul class="list-group">
+        <li class="list-group-item">
+          <small><span class="pull-right text-muted">yesterday at 4:22 pm</span></small>
+          <a href="plan.html">Europa System Engineering Management Plan</a>
+        </li>
+      </ul>
+    </div>
+
+  </div>
 
 </div>
-
-
-
-
-
 		</div>
 
 		
@@ -247,7 +207,12 @@ var absoluteUrl = function(relativeUrl) {
 var ajaxWithHandlers = function(options, successMessage, errorMessage) {
   $.ajax(options)
     .done(function() { app.fire('message', 'success', successMessage); })
-    .fail(function(e) { app.fire('message', 'error', errorMessage); })
+    .fail(function(e) { 
+      app.fire('message', 'error', errorMessage); 
+      if (console && console.log) {
+        console.log("ajax error:", e);
+      }
+    })
 }
 
 app.on('saveView', function(viewId, viewData) {
@@ -285,7 +250,7 @@ app.on('saveSnapshot', function(viewId, html) {
 
 var selectBlank = function($el) {
   $el.html('&nbsp;');
-  execCommand('selectAll');
+  // execCommand('selectAll');
   $el.off('click');
 }
 
@@ -303,6 +268,8 @@ app.on('toggleComments', function(evt, id) {
     // app.placeholder(commentField, "Type your comment here");
     commentField.focus();    
     selectBlank(commentField);
+  } else {
+    comments.hide();
   }
 });
 
@@ -431,6 +398,8 @@ app.on('elementDetails', function(evt) {
 })
 
 // export.js
+
+app.data.printPreviewTemplate = "\n<html>\n\t<head>\n\t\t<title>{{ documentTitle }}</title>\n\t\t<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>\n\t\t<style type=\"text/css\">\n\n\n\t\t  .no-section {\n\t\t    display: none;\n\t\t  }\n\n\t\t  .page-sections.no-section {\n\t\t    display: block;\n\t\t  }\n\n\t\t  .blank.reference {\n\t\t\t  display: none;\n\t\t\t}\n\n\t\t\t@page {\n\t\t\t  margin: 1cm;\n\t\t\t}\n\n\t\t\tbody {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t.page-sections, #the-document h1, #the-document h2, #the-document h3, #the-document h4, #the-document h5 {\n\t\t\t  font-family: 'PT Serif', Georgia, serif;\n\t\t\t}\n\t\t\t.navbar-brand, .page .inspector, .inspectors {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t#the-document {counter-reset: level1;}\n\t\t\t#toc:before, #toc:after {counter-reset: level1; content: \"\";}\n\t\t\t#toc h3:before{content: \"\"}\n\t\t\t \n\t\t\t#the-document h1, #toc > ul > li {counter-reset: level2;}\n\t\t\t#the-document h2, #toc > ul >  ul > li {counter-reset: level3;}\n\t\t\t#the-document h3, #toc > ul > ul > ul > li {counter-reset: level4;}\n\t\t\t#the-document h4, #toc > ul > ul > ul > ul > li {counter-reset: level5;}\n\t\t\t#the-document h5, #toc > ul > ul > ul > ul > ul > li {}\n\n\t\t\t#the-document h1:before,\n\t\t\t#toc > ul > li a:before {\n\t\t\t    content: counter(level1) \" \";\n\t\t\t    counter-increment: level1;\n\t\t\t}\n\t\t\t#the-document h2:before,\n\t\t\t#toc > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \" \";\n\t\t\t    counter-increment: level2;\n\t\t\t}\n\t\t\t#the-document h3:before,\n\t\t\t#toc > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \" \";\n\t\t\t    counter-increment: level3;\n\t\t\t}\n\t\t\t#the-document h4:before,\n\t\t\t#toc > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \" \";\n\t\t\t    counter-increment: level4;\n\t\t\t}\n\t\t\t#the-document h5:before,\n\t\t\t#toc > ul > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \".\" counter(level5) \" \";\n\t\t\t    counter-increment: level5;\n\t\t\t}\n\t\t</style>\n\t</head>\n\t<body>\n\t\t<div id=\"the-document\">\n\t\t\t{{ content }}\n\t\t</div>\n\t</body>\n</html>";
 
 _.templateSettings = {
   interpolate: /\{\{(.+?)\}\}/g
@@ -764,11 +733,13 @@ app.observe('home', function(homeData)
         }
         node.children.push(child);
       })
+      node.showLink = node.children.length == 0;
+      node.hidden = node.name === 'Unexported Document';
       buildHomeTree(node.children)
     })
   }
   buildHomeTree(homeTree.children)
-  // console.log("final home tree", homeTree)
+  console.log("final home tree", homeTree)
   app.set('homeTree', homeTree)
  })
 
