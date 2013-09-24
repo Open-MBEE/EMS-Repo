@@ -293,7 +293,7 @@ h1 {
   height: auto;
 }
 
-.editable.reference {
+.editable.reference, .editable.reference * {
   background: aliceblue;
 }
 
@@ -319,4 +319,16 @@ h1 {
 
 .section.page img {
   max-width: 100%;
+}
+
+#top-alert {
+  position: fixed;
+  width: 100%;
+  z-index: 100;
+  margin-top: -10px;
+  box-shadow: 0 0 5px rgba(0,0,0, .2);
+}
+
+.missing {
+  color: red;
 }

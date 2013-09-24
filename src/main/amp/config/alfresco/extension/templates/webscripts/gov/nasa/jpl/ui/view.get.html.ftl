@@ -1,61 +1,70 @@
 <html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Editor</title>
-    <link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
-    <link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
-    <link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
-    <link href="${url.context}/scripts/vieweditor/styles/print.css" rel="stylesheet" media="print">
-    <link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
-    <link href="${url.context}/scripts/vieweditor/styles/section-numbering.css" rel="stylesheet">
-    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
-  
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>View Editor</title>
+		<link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
+		<link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
+		<link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
+		<link href="${url.context}/scripts/vieweditor/styles/print.css" rel="stylesheet" media="print">
+		<link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
+		<link href="${url.context}/scripts/vieweditor/styles/section-numbering.css" rel="stylesheet">
+		<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
+	
 <script type="text/javascript">
-var pageData = {
-  viewHierarchy: ${res},
-  baseUrl: "${url.context}/wcs"
-};
+var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 </script>
 
 </head>
 
-  <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
+	<body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
 <div id="main"></div>
 <script id="template" type="text/mustache">
 
-    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="navbar-header">
-          <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
-      </div>
-      <ul class="nav navbar-nav">
-        {{#environment.development}}
-        <li><a href="dashboard.html">dashboard</a></li>
-        <li><a href="about.html">about</a></li>
-        {{/environment.development}}
-        {{^environment.development}}
-        <li><a href="${url.context}/wcs/ui/">dashboard</a></li>
-        {{/environment.development}}
-      </ul>
+		<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+			<div class="navbar-header">
+					{{#environment.development}}
+						<a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
+					{{/environment.development}}
+					{{^environment.development}}
+						<a class="navbar-brand" href="${url.context}">Europa View Editor {{ title }}</a>
+					{{/environment.development}}
+			</div>
+			<ul class="nav navbar-nav">
+				{{#environment.development}}
+				<li><a href="dashboard.html">dashboard</a></li>
+				<li><a href="about.html">about</a></li>
+				{{/environment.development}}
+				{{^environment.development}}
+				<li><a href="${url.context}/service/ui/views">dashboard</a></li>
+				{{/environment.development}}
+			</ul>
 
 
-      <div class="pull-right">
-        <a href="vision.html"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
-      </div>
+			<div class="pull-right">
+				<a href="vision.html"><img class="europa-icon" src="images/europa-icon.png" /></a>
+			</div>
 
-      <form class="navbar-form navbar-right" action="">
-        <div class="form-group">
-          <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
-            <option value="modeler">Modeler</option>
-            <option value="reviewer">Reviewer</option>
-            <option value="manager">Manager</option>
-          </select>
-        </div>
-      </form>
+			<!-- 
+			<form class="navbar-form navbar-right" action="">
+	      <div class="form-group">
+	        <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
+	          <option value="modeler">Modeler</option>
+	          <option value="reviewer">Reviewer</option>
+	          <option value="manager">Manager</option>
+	        </select>
+	      </div>
+	    </form>
+	  -->
 
-    </nav>
+		</nav>
 
-    <div class="wrapper">
-      <div class="row split-view">
+		<div id="top-alert" class="alert alert-danger alert-dismissable" style="display:none">
+		  <button type="button" class="close" proxy-click="hideErrorMessage" aria-hidden="true">&times;</button>
+		  <span class="message"></span>
+		</div>
+
+		<div class="wrapper">
+			<div class="row split-view">
 
 <div class="col-xs-8">
   <div id="the-document">
@@ -200,23 +209,27 @@ var pageData = {
 
 
 
-    </div>
+		</div>
 
-    
-    
-    <!--  -->
-    
-    
-    
-    
-  </script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
+		
+		
+		<!--  -->
+		
+		
+		
+		
+		
+		
+	</script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery-ui.min.js"></script>
 <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery.hotkeys.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/bootstrap-wysiwyg.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery.tocify.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/underscore.js"></script>
-<script type="text/javascript" src="${url.context}/scripts/vieweditor/vendor/Ractive.js"></script>
+<script src="${url.context}/scripts/vieweditor/vendor/moment.min.js"></script>
+<script src="${url.context}/scripts/vieweditor/vendor/bootstrap.min.js"></script>
+<script type="text/javascript" src="vendor/Ractive.js"></script>
 <script type="text/javascript">var app = new Ractive({ el : "main", template : "#template", data : pageData });</script>
 <script type="text/javascript">
 var context = window;
@@ -270,18 +283,27 @@ app.on('saveSnapshot', function(viewId, html) {
 
 // comments.js
 
+var selectBlank = function($el) {
+  $el.html('&nbsp;');
+  execCommand('selectAll');
+  $el.off('click');
+}
+
 app.placeholder = function($el, defaultText) {
  $el.html('<div class="placeholder">'+defaultText+'</div>').click(function() {
-    $el.html('&nbsp;');
-    execCommand('selectAll');
-    $el.off('click');
+    selectBlank($el);
   });
 }
 
 app.on('toggleComments', function(evt, id) {
   var comments = $('#'+id);
-  var commentField = comments.toggle().find('.comment-editor').wysiwyg();
-  app.placeholder(commentField, "Type your comment here");
+  var showing = !comments.is(':visible');
+  if (showing) {
+    var commentField = comments.toggle().find('.comment-editor').wysiwyg();
+    // app.placeholder(commentField, "Type your comment here");
+    commentField.focus();    
+    selectBlank(commentField);
+  }
 });
 
 app.on('addComment', function(evt, mbid) {
@@ -292,7 +314,7 @@ app.on('addComment', function(evt, mbid) {
   if (newCommentBody != "") {
     app.get(evt.keypath+".viewData.comments").push({ author : 'You', body : newCommentBody, modified : new Date()});
 
-    app.fire('saveComment', mbid, newCommentBody);
+    app.fire('saveComment', null, mbid, newCommentBody);
   }
   app.placeholder(commentField, "Type your comment here");
 });
@@ -304,8 +326,8 @@ app.getSelectedNode = function() {
 }
 
 app.on('togglePreview', function() {
-  // console.log("toggling preview...");
-  $('#markup-preview, #markup-editor').toggle();
+	// console.log("toggling preview...");
+	$('#markup-preview, #markup-editor').toggle();
 })
 
 app.on('editSection', function(e, sectionId) {
@@ -403,9 +425,9 @@ app.on('insertReference', function() {
 // elementDetails.js
 
 app.on('elementDetails', function(evt) {
-  evt.original.preventDefault();
-  app.set('inspectedElement', app.get(evt.keypath));
-  evt.node.blur();
+	evt.original.preventDefault();
+	app.set('inspectedElement', app.get(evt.keypath));
+	evt.node.blur();
 })
 
 // export.js
@@ -416,11 +438,11 @@ _.templateSettings = {
 
 var snapshotHTML = function()
 {
-  var everything = $('#the-document').clone();
-  everything.find('.comments, .section-actions, .toolbar').remove();
-  var innerHtml = everything.html();
-  var fullPageTemplate = _.template(app.data.printPreviewTemplate);
-  return fullPageTemplate({ content : innerHtml, documentTitle : app.data.viewTree.name });
+	var everything = $('#the-document').clone();
+	everything.find('.comments, .section-actions, .toolbar').remove();
+	var innerHtml = everything.html();
+	var fullPageTemplate = _.template(app.data.printPreviewTemplate);
+	return fullPageTemplate({ content : innerHtml, documentTitle : app.data.viewTree.name });
 }
 
 app.on('print', function() {
@@ -429,15 +451,17 @@ app.on('print', function() {
 
 app.on('printPreview', function() 
 {
-  var w = window.open('about:blank', 'printPreview');
-  var newDoc = w.document.open("text/html", "replace");
-  newDoc.write(snapshotHTML());
-  newDoc.close();
+	var w = window.open('about:blank', 'printPreview');
+	var newDoc = w.document.open("text/html", "replace");
+	console.log("writing print preview to new window");
+	newDoc.write(snapshotHTML());
+	newDoc.close();
+	console.log("closed new html stream");
 })
 
 app.on('snapshot', function(e, id) 
 {
-  app.fire('saveSnapshot', id, snapshotHTML());
+	app.fire('saveSnapshot', id, snapshotHTML());
 })
 
 // inspectors.js
@@ -460,11 +484,17 @@ app.on('showReferencedElement', function(evt) {
 // messages.js
 
 app.on('message', function(type, message) {
-  if (app.data.environment && app.data.environment.development) {
+  if (console && console.log) {
     console.log('-- ', type, ': ', message);
   }
-  // TODO show these in the ui somewhere
+  if (type === 'error') {
+    $('#top-alert').show().find('.message').html(message);
+  }
 });
+
+app.on('hideErrorMessage', function() {
+  $('#top-alert').hide();
+})
 
 // realData.js
 
@@ -484,62 +514,12 @@ var viewTree = {
 
 app.formatDate = function(d)
 {
-  var m_names = new Array("Jan", "Feb", "Mar", 
-    "Apr", "May", "June", "July", "Aug", "Sept", 
-    "Oct", "Nov", "Dec");
-
-  var curr_date = d.getDate();
-  var sup = "";
-  if (curr_date == 1 || curr_date == 21 || curr_date ==31)
-  {
-    sup = "st";
-  }
-  else if (curr_date == 2 || curr_date == 22)
-  {
-    sup = "nd";
-  }
-  else if (curr_date == 3 || curr_date == 23)
-  {
-    sup = "rd";
-  }
-  else
-  {
-    sup = "th";
-  }
-
-  var curr_hour = d.getHours();
-  if (curr_hour < 12)
-  {
-    a_p = "am";
-  }
-  else
-  {
-    a_p = "pm";
-  }
-  if (curr_hour == 0)
-  {
-    curr_hour = 12;
-  }
-  if (curr_hour > 12)
-  {
-    curr_hour = curr_hour - 12;
-  }
-
-  var curr_min = d.getMinutes();
-  var curr_month = d.getMonth();
-  var curr_year = d.getFullYear();
-
-  var formatted = m_names[curr_month] + " " + curr_date + sup +  " " + curr_year + " " + curr_hour + ":" + curr_min + a_p ;
-  return formatted;
+  return moment(d).format('D MMM YYYY, h:mm a');
 }
 
 var parseDate = function(dateString)
-{
-  dateString = "2013-09-11T12:11:57.663-07:00";
-  var m = dateString.match(/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+).(\d+)-(\d+):00/);
-  var d = new Date(m[1], m[2]-1, m[3], m[4], m[5], m[6], m[7]);
-  var d = new Date(Date.UTC(m[1], m[2]-1, m[3], m[4], m[5], m[6], m[7]) + (3600 * 1000 * m[8]));
-  return d;
+{  
+  return moment(dateString);
 }
 
 app.generateUpdates = function(section)
@@ -547,13 +527,18 @@ app.generateUpdates = function(section)
   var elements = {};
   $('.editable[data-property]', section).each(function(i,el)
   {
-      var mdid = $(el).attr('data-mdid');
+      var $el = $(el);
+      // ignore blanks
+      if ($el.hasClass('blank')) {
+        return;
+      }
+      var mdid = $el.attr('data-mdid');
       var data = elements[mdid] || { mdid : mdid };
-      data[$(el).attr('data-property').toLowerCase()] = el.innerHTML;
+      data[$el.attr('data-property').toLowerCase()] = el.innerHTML;
       // result.push(data);
       elements[mdid] = data;
   });
-  console.log("elements by id", elements);
+  // console.log("elements by id", elements);
   return _.values(elements);
 }
 
@@ -575,19 +560,49 @@ var writeBackCache = function()
    })
 }();
 
+var buildList = function(object, elements, html) {
+  if (!html) html = "";
+  var listTag = object.ordered ? 'ol' : 'ul';
+  html += '<'+listTag+'>';
+  // items is a 2D array. first depth is lists, second is multiple values per item
+  _.each(object.list, function(itemContents) {
+    var listItemContent = "";
+    // content can be made of multiple references
+    _.each(itemContents, function(item, i) {
+      if (item.type != 'List') {
+        var val = resolveValue(item, elements);
+        listItemContent += renderEmbeddedValue(val, elements) + " ";
+
+        // push out the list content if it's the last item
+        // or if the next item is a list
+        if (listItemContent != "" && (i === itemContents.length-1 || itemContents[i+1].type === 'List')) {
+          html += "<li>"+listItemContent+"</li>";
+          listItemContent = "";
+        }
+      } else {
+        html += buildList(item, elements);
+      }
+    })
+
+  })
+  html += '</'+listTag+'>';
+  return html;
+}
+
 var resolveValue = function(object, elements, listProcessor) {
   if (Array.isArray(object)) {
     var valuesArray = _.map(object, function(obj) { return resolveValue(obj, elements) });
     return listProcessor ? listProcessor(valuesArray) : _.pluck(valuesArray, 'content').join("  ");
   } else if (object.source === 'text') {
     return { content : object.text, editable : false };
-  } else if (object.type === 'List') {
-    return { content : '!! sublist !! ', editable : false };
+  // } else if (object.type === 'List') {
+  //   return { content : '!! sublist !! ', editable : false };
   } else {
     // console.log("resolving ", object.useProperty, " for ", object.source, object);
     var source = elements[object.source];
-    // console.log(source);
-    if (object.useProperty)
+    if (!source) {
+      return { content : 'reference missing', mdid : object.source };
+    } else if (object.useProperty)
       var referencedValue = source[object.useProperty.toLowerCase()];
     else
       console.warn("!! no useProperty for", object);
@@ -605,7 +620,8 @@ var renderEmbeddedValue = function(value, elements) {
   var ref = elements[value.mdid];
   var title = ref ? (ref.name || ref.mdid) +' ('+value.property.toLowerCase()+')' : '';
   var classes = ['reference'];
-  if (!value.content || value.content === "") {
+  var blankContent = !value.content || value.content === "" || value.content.match(/^\s+$/);
+  if (blankContent) {
     classes.push('blank')
   }
   if (value.editable) {
@@ -617,12 +633,12 @@ var renderEmbeddedValue = function(value, elements) {
       classes.push('not-editable');
       h += '<div ' + classAttr(classes) + ' contenteditable="false" title="'+title+'">';          
     } else if (value.mdid && !ref) {
-      h += '<div class="missing">reference missing'
+      h += '<div class="missing" contenteditable="false">';
     } else {
-      h += '<div class="literal" contenteditable="false">'
+      h += '<div class="literal" contenteditable="false">';
     }
   }
-  h += value.content || 'no content for ' + (ref.name || ref.id) + ' ' + value.property.toLowerCase();
+  h += blankContent ? 'no content for ' + (ref.name || ref.id) + ' ' + value.property.toLowerCase() : value.content;
   h += '</div>';
   return h;
 }
@@ -644,6 +660,7 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
 
     // console.log("contains:", child.viewData.contains);
     for (var cIdx in child.viewData.contains) {
+      
       var c = child.viewData.contains[cIdx];
       if (c.type == 'Table') {
         // console.log("skipping table...");
@@ -677,18 +694,14 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
         table += "</table>"
         child.content += table;
       } else if (c.type === 'List') {
-        // why is this a 2D array?
-        child.content += "<ul>";
-        _.each(c.list, function(listItem) {
-          child.content += resolveValue(listItem, elements, function(values) { 
-            return _.map(values, function(v) { return "<li>"+renderEmbeddedValue(v, elements)+"</li>"; }).join("");
-          })          
-        })
-        child.content += "</ul>";
+        child.content += buildList(c, elements);        
       } else {
+        
         var value = resolveValue(c, elements);
         child.content += renderEmbeddedValue(value, elements);
+        
       }
+      
     }
     
     if (view2view[id]) {
@@ -780,8 +793,9 @@ app.observe('viewHierarchy', function(viewData) {
   // TODO: Change addChildren to construct the parentNode content instead of the childrenNodes
   // Then we could just pass viewTree instead of tempTree
   var tempTree = {"children" : []};
-  console.log("tempTree", tempTree);
   addChildren(tempTree, [viewData.rootView], viewData.view2view, viewData.views, elementsById, 0);
+  // console.log("tempTree", tempTree);
+  
   viewTree = tempTree.children.length > 0 ? tempTree.children[0] : [];
   viewTree.orderedChildren = constructOrderedChildren(viewTree);
 
@@ -977,7 +991,7 @@ app.observe('plan_sections', function(newText) {
 // toc.js
 
 app.on('makeToc', function() {
-  $("#toc").tocify({ selectors: "h1, h2, h3, h4", history : false, highlightOffset : 0, context: "#the-document", smoothScroll:false }).data("toc-tocify"); 
+	$("#toc").tocify({ selectors: "h1, h2, h3, h4", history : false, highlightOffset : 0, context: "#the-document", smoothScroll:false }).data("toc-tocify");	
 })
 
 </script>
