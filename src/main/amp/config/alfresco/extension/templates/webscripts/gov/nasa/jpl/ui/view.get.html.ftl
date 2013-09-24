@@ -35,13 +35,13 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 				<li><a href="about.html">about</a></li>
 				{{/environment.development}}
 				{{^environment.development}}
-				<li><a href="${url.context}/service/ui/views">dashboard</a></li>
+				<li><a href="${url.context}/wcs/ui/views">dashboard</a></li>
 				{{/environment.development}}
 			</ul>
 
 
 			<div class="pull-right">
-				<a href="vision.html"><img class="europa-icon" src="images/europa-icon.png" /></a>
+				<a href="vision.html"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
 			</div>
 
 			<!-- 
@@ -229,7 +229,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 <script src="${url.context}/scripts/vieweditor/vendor/underscore.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/moment.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/bootstrap.min.js"></script>
-<script type="text/javascript" src="vendor/Ractive.js"></script>
+<script type="text/javascript" src="${url.context}/scripts/vieweditor/vendor/Ractive.js"></script>
 <script type="text/javascript">var app = new Ractive({ el : "main", template : "#template", data : pageData });</script>
 <script type="text/javascript">
 var context = window;
