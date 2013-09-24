@@ -247,7 +247,12 @@ var absoluteUrl = function(relativeUrl) {
 var ajaxWithHandlers = function(options, successMessage, errorMessage) {
   $.ajax(options)
     .done(function() { app.fire('message', 'success', successMessage); })
-    .fail(function(e) { app.fire('message', 'error', errorMessage); })
+    .fail(function(e) { 
+      app.fire('message', 'error', errorMessage); 
+      if (console && console.log) {
+        console.log("ajax error:", e);
+      }
+    })
 }
 
 app.on('saveView', function(viewId, viewData) {
@@ -764,6 +769,8 @@ app.observe('home', function(homeData)
         }
         node.children.push(child);
       })
+      node.showLink = node.children.length == 0;
+      node.hidden = node.name === 'Unexported Document';
       buildHomeTree(node.children)
     })
   }
