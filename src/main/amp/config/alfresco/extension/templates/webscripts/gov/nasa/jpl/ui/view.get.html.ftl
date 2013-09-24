@@ -26,7 +26,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 						<a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
 					{{/environment.development}}
 					{{^environment.development}}
-						<a class="navbar-brand" href="${url.context}">Europa View Editor {{ title }}</a>
+						<a class="navbar-brand" href="${url.context}/wcs/ui/">Europa View Editor {{ title }}</a>
 					{{/environment.development}}
 			</div>
 			<ul class="nav navbar-nav">
@@ -35,7 +35,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 				<li><a href="about.html">about</a></li>
 				{{/environment.development}}
 				{{^environment.development}}
-				<li><a href="${url.context}/wcs/ui/views">dashboard</a></li>
+				<li><a href="${url.context}/wcs/ui/">dashboard</a></li>
 				{{/environment.development}}
 			</ul>
 
