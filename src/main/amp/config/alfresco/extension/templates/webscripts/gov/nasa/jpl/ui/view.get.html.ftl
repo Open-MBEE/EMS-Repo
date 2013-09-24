@@ -197,6 +197,12 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
           <li><button type="button" class="btn btn-default" proxy-click="printPreview">Print Preview</button></li>
           <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Snapshot</button></li>          
         </ul>
+
+        <ul class="list-unstyled">
+        {{#snapshots}}
+          <li><a href="{{ url }}">{{ created }} &mdash; {{ creator }}</a></li>
+        {{/snapshots}}
+        </ul>
       </div>
 
     </div>
