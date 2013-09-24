@@ -571,7 +571,7 @@ var buildList = function(object, elements, html) {
     _.each(itemContents, function(item, i) {
       if (item.type != 'List') {
         var val = resolveValue(item, elements);
-        listItemContent += renderEmbeddedValue(val, elements) + " ";
+        listItemContent += '<div class="list-item">'+renderEmbeddedValue(val, elements) + "</div>";
 
         // push out the list content if it's the last item
         // or if the next item is a list
