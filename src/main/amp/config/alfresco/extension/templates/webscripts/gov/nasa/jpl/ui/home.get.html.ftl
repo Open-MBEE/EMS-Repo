@@ -11,7 +11,7 @@
 		<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
 	
 <script type="text/javascript">
-var pageData = { home: ${res} };
+var pageData = { home: ${res},  baseUrl: "${url.context}/wcs" };
 </script>
 
 </head>
