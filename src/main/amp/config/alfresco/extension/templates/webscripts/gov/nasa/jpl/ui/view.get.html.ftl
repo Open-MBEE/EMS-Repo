@@ -95,11 +95,11 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
             {{#editing}}
             <div class="toolbar page" data-role="editor-toolbar" data-target="#section{{ id }}">
               <div class="btn-group">
-                <a class="btn btn-default" data-edit="bold" title="" data-original-title="Bold (Ctrl/Cmd+B)"><span class="glyphicon glyphicon-bold"></span></a>
-                <a class="btn btn-default" data-edit="italic" title="" data-original-title="Italic (Ctrl/Cmd+I)"><span class="glyphicon glyphicon-italic"></span></a>
+                  <a class="btn btn-default" data-edit="bold" title="" data-original-title="Bold (Ctrl/Cmd+B)"><b>b</b></a>
+                  <a class="btn btn-default" data-edit="italic" title="" data-original-title="Italic (Ctrl/Cmd+I)"><i>i</i></a>
               </div>
 
-                <a class="btn btn-default" title="Insert picture (or just drag &amp; drop)" id="pictureBtn{{id}}"><i class="glyphicon glyphicon-picture"></i></a>
+                <a class="btn btn-default" title="Insert picture (or just drag &amp; drop)" id="pictureBtn{{id}}">img</a>
                 <input type="file" data-role="magic-overlay" data-target="#pictureBtn{{id}}" data-edit="insertImage">
 
               <div class="btn-group pull-right">
@@ -290,7 +290,7 @@ app.on('saveSnapshot', function(viewId, html) {
 
 var selectBlank = function($el) {
   $el.html('&nbsp;');
-  execCommand('selectAll');
+  // execCommand('selectAll');
   $el.off('click');
 }
 
@@ -308,6 +308,8 @@ app.on('toggleComments', function(evt, id) {
     // app.placeholder(commentField, "Type your comment here");
     commentField.focus();    
     selectBlank(commentField);
+  } else {
+    comments.hide();
   }
 });
 
@@ -436,6 +438,8 @@ app.on('elementDetails', function(evt) {
 })
 
 // export.js
+
+app.data.printPreviewTemplate = "\n<html>\n\t<head>\n\t\t<title>{{ documentTitle }}</title>\n\t\t<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>\n\t\t<style type=\"text/css\">\n\n\n\t\t  .no-section {\n\t\t    display: none;\n\t\t  }\n\n\t\t  .page-sections.no-section {\n\t\t    display: block;\n\t\t  }\n\n\t\t  .blank.reference {\n\t\t\t  display: none;\n\t\t\t}\n\n\t\t\t@page {\n\t\t\t  margin: 1cm;\n\t\t\t}\n\n\t\t\tbody {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t.page-sections, #the-document h1, #the-document h2, #the-document h3, #the-document h4, #the-document h5 {\n\t\t\t  font-family: 'PT Serif', Georgia, serif;\n\t\t\t}\n\t\t\t.navbar-brand, .page .inspector, .inspectors {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t#the-document {counter-reset: level1;}\n\t\t\t#toc:before, #toc:after {counter-reset: level1; content: \"\";}\n\t\t\t#toc h3:before{content: \"\"}\n\t\t\t \n\t\t\t#the-document h1, #toc > ul > li {counter-reset: level2;}\n\t\t\t#the-document h2, #toc > ul >  ul > li {counter-reset: level3;}\n\t\t\t#the-document h3, #toc > ul > ul > ul > li {counter-reset: level4;}\n\t\t\t#the-document h4, #toc > ul > ul > ul > ul > li {counter-reset: level5;}\n\t\t\t#the-document h5, #toc > ul > ul > ul > ul > ul > li {}\n\n\t\t\t#the-document h1:before,\n\t\t\t#toc > ul > li a:before {\n\t\t\t    content: counter(level1) \" \";\n\t\t\t    counter-increment: level1;\n\t\t\t}\n\t\t\t#the-document h2:before,\n\t\t\t#toc > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \" \";\n\t\t\t    counter-increment: level2;\n\t\t\t}\n\t\t\t#the-document h3:before,\n\t\t\t#toc > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \" \";\n\t\t\t    counter-increment: level3;\n\t\t\t}\n\t\t\t#the-document h4:before,\n\t\t\t#toc > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \" \";\n\t\t\t    counter-increment: level4;\n\t\t\t}\n\t\t\t#the-document h5:before,\n\t\t\t#toc > ul > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \".\" counter(level5) \" \";\n\t\t\t    counter-increment: level5;\n\t\t\t}\n\t\t</style>\n\t</head>\n\t<body>\n\t\t<div id=\"the-document\">\n\t\t\t{{ content }}\n\t\t</div>\n\t</body>\n</html>";
 
 _.templateSettings = {
   interpolate: /\{\{(.+?)\}\}/g
