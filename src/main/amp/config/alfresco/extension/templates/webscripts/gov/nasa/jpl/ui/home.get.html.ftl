@@ -83,7 +83,7 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/wcs" };
       {{^hidden}}
         <li class="{{ .class }}">
           {{#showLink}}
-          <a href="${url.context}/service/ui/views/{{id}}">{{name}}</a>
+          <a href="${url.context}/wcs/ui/views/{{id}}">{{name}}</a>
           {{/showLink}}
           {{^showLink}}
           {{ name }}

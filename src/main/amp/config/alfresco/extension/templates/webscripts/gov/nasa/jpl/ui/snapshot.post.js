@@ -86,4 +86,4 @@ main();
 if (status.code == 200)
 	model['res'] = jsonUtils.toJSONString(snapshoturl);
 else
-	model['res'] = "NotFound";
+	model['res'] = "\"NotFound\"";
