@@ -209,9 +209,9 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
         </ul>
 
         <ul class="list-unstyled">
-        {{#snapshots}}
-          <li><a href="{{ url }}">{{ created }} &mdash; {{ creator }}</a></li>
-        {{/snapshots}}
+        {{#viewHierarchy.snapshots}}
+          <li><a href="{{ url }}">{{ formattedDate }} &mdash; {{ creator }}</a></li>
+        {{/viewHierarchy.snapshots}}
         </ul>
       </div>
 
@@ -355,30 +355,16 @@ app.getSelectedNode = function() {
   return document.selection ? document.selection.createRange().parentElement() : window.getSelection().anchorNode.parentNode;
 }
 
-app.on('togglePreview', function() {
-	// console.log("toggling preview...");
-	$('#markup-preview, #markup-editor').toggle();
-})
-
 app.on('editSection', function(e, sectionId) {
 
   e.original.preventDefault();
-
-
-  // app.set('oldData.'+sectionId, app.generateUpdates);
-  // console.log("editing a section!", e, sectionId);
-  // TODO turn editing off for all other sections
+  // TODO turn editing off for all other sections?
   app.set(e.keypath+'.editing', true);
   var section = $("[data-section-id='" + sectionId + "']");
 
   var sectionHeader = section.filter('.section-header');
   sectionHeader.data('original-content', sectionHeader.html());
-  // TODO make this work with multiple tables in a section
-  // section.each(function(i,el) {
-  //   $(el).wysiwyg({
-  //     toolbarSelector: '[data-role=editor-toolbar][data-target="#section' + sectionId + '"]'
-  //   });
-  // });
+  // bind toolbar properly, no toolbar for section name
   section.filter('.section.page').wysiwyg({toolbarSelector: '[data-role=editor-toolbar][data-target="#section' + sectionId + '"]'});
   section.filter('span').wysiwyg({toolbarSelector : '#no-toolbar'});
   
@@ -394,10 +380,6 @@ app.on('editSection', function(e, sectionId) {
     // find others, set their values
     $('[data-mdid='+mdid+'][data-property='+property+']').not($el).html(newValue);
   })
-
-  // app.createLiveTable($('.rich-table'));
-  // app.set(e.keypath+'.previousContent', app.get(e.keypath+'.content'));
-  // console.log("saved current content to previous content", app.get('keypath'));
 
   // handle placeholder text
   // TODO remove this listener on cancel or save
@@ -836,6 +818,13 @@ app.observe('viewHierarchy', function(viewData) {
     elementsById[e.mdid] = e;
   }
   app.set('elementsById', elementsById);
+
+  // format snapshot dates
+  if (viewData.snapshots) {
+    _.each(viewData.snapshots, function(snapshot) {
+      snapshot.formattedDate = app.formatDate(snapshot.created);
+    })
+  }
 
   // // app.set('debug', JSON.stringify(viewData));
   // console.log(viewData);
