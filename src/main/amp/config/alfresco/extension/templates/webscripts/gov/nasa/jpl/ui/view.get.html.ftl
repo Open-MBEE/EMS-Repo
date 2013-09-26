@@ -117,7 +117,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
                 <button type="button" class="btn btn-primary" proxy-click="saveSection:{{ id }}">Save changes</button>
               </div>
             </div>
-            <div class="section page editing" data-section-id="{{ id }}" contenteditable="true" proxy-dblclick="sectionDoubleClick">
+            <div id="section{{ id }}" class="section page editing" data-section-id="{{ id }}" contenteditable="true" proxy-dblclick="sectionDoubleClick">
               {{{ content }}}
             </div>
             {{/editing}}
@@ -374,9 +374,14 @@ app.on('editSection', function(e, sectionId) {
   var sectionHeader = section.filter('.section-header');
   sectionHeader.data('original-content', sectionHeader.html());
   // TODO make this work with multiple tables in a section
-  section.each(function(i,el) {
-    $(el).wysiwyg();
-  });
+  // section.each(function(i,el) {
+  //   $(el).wysiwyg({
+  //     toolbarSelector: '[data-role=editor-toolbar][data-target="#section' + sectionId + '"]'
+  //   });
+  // });
+  section.filter('.section.page').wysiwyg({toolbarSelector: '[data-role=editor-toolbar][data-target="#section' + sectionId + '"]'});
+  section.filter('span').wysiwyg({toolbarSelector : '#no-toolbar'});
+  
   // TODO turn this listener off on save or cancel
   section.on('keyup paste blur',function(evt) {
     // we need to use the selection api because we're in a contenteditable
@@ -1136,7 +1141,7 @@ window.insertSvg = function() {
 // toc.js
 
 app.on('makeToc', function() {
-	$("#toc").tocify({ selectors: "h2, h3, h4", history : false, highlightOffset : 0, context: "#the-document", smoothScroll:false }).data("toc-tocify");	
+	$("#toc").tocify({ selectors: "h2, h3, h4, h5", history : false, highlightOffset : 0, context: "#the-document", smoothScroll:false }).data("toc-tocify");	
 })
 
 </script>
