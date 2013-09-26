@@ -99,8 +99,11 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
                   <a class="btn btn-default" data-edit="italic" title="" data-original-title="Italic (Ctrl/Cmd+I)"><i>i</i></a>
               </div>
 
+              <div class="btn-group">
                 <a class="btn btn-default" title="Insert picture (or just drag &amp; drop)" id="pictureBtn{{id}}">img</a>
                 <input type="file" data-role="magic-overlay" data-target="#pictureBtn{{id}}" data-edit="insertImage">
+                <button type="button" class="btn btn-default" title="Insert SVG" onclick="insertSvg();">svg</button>
+              </div>
 
               <div class="btn-group pull-right">
                 <button type="button" class="btn btn-default" proxy-click="cancelEditing">Cancel</button>
@@ -226,6 +229,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 		
 		
 		
+		
 	</script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery-ui.min.js"></script>
 <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
@@ -235,6 +239,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 <script src="${url.context}/scripts/vieweditor/vendor/underscore.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/moment.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/bootstrap.min.js"></script>
+<script src="${url.context}/scripts/vieweditor/vendor/svgedit/embedapi.js"></script>
 <script type="text/javascript" src="${url.context}/scripts/vieweditor/vendor/Ractive.js"></script>
 <script type="text/javascript">var app = new Ractive({ el : "main", template : "#template", data : pageData });</script>
 <script type="text/javascript">
@@ -390,6 +395,7 @@ app.on('editSection', function(e, sectionId) {
     overlay.css('opacity', 0).css('position', 'absolute').offset(target.offset()).width(target.outerWidth()).height(target.outerHeight());
   });
 
+  app.fire('initializeSvgEditor', section.filter('.page'));
 
 })
 
@@ -1004,6 +1010,107 @@ app.observe('plan_sections', function(newText) {
   // console.log("sections", sections)
   app.set('plan_sections_list', sections);
 })
+
+// svg.js
+
+window.initializeSvgHandler = function($el) {
+  // console.log("initializing svg edit handler for", $el);
+  $el.attr('contenteditable', false).click(function() {
+    // console.log("regular jquery click handler ", this);
+    // console.log("click event", evt);
+    var $svg = $(this);
+    $svg.after('<div class="editor" contenteditable="false"></div>');
+    var $editorContainer = $svg.next('.editor')
+    $editorContainer.append('<div class="mini-toolbar"><button class="btn btn-default btn-sm" onclick="deleteSvg(this)">delete</button><div class="pull-right btn-group"><button class="btn btn-default btn-sm" type="button" onclick="cancelSvg(this)">Cancel</button><button class="btn btn-default btn-sm" type="button" onclick="saveSvg(this)">Save</button></div></div>');
+    $editorContainer.append('<iframe src="${url.context}/scripts/vieweditor/vendor/svgedit/svg-editor.html" width="100%" height="600px" onload="init_embed(this)"></iframe>');
+    
+    // set initial content (innerHTML and outerHTML don't work with svgs)
+    var serializer = new XMLSerializer();
+    var svgString = serializer.serializeToString(this);
+
+    // save this as an attribute for later loading
+    $editorContainer.find('iframe').attr('data-original-svg', svgString);
+    // console.log("set initial svg to", svgString);
+    // console.log("set initial svg to", '<svg>'+$svg.html()+'</svg>', this);
+    $svg.hide();
+  });  
+  return $el;
+}
+
+var cancelEditing = function(container) {
+  $(container).remove();
+}
+
+window.saveSvg = function(btn) {
+  // console.log("clicked", btn);
+  var $editor = $(btn).closest('.editor');
+  // console.log("editor", $editor);
+  // console.log("frame", $editor.find('iframe'));
+  var canvas = $editor.find('iframe').data('canvas');
+  // console.log("canvas", canvas);
+  canvas.getSvgString()(function(data, error) {
+    if (error) {
+      app.fire('message', 'error', error);
+    } else {
+      // console.log("new svg data", data);
+      $editor.prev('svg').replaceWith(data);
+      initializeSvgHandler($editor.prev('svg'));
+      $editor.remove();
+    }
+  });
+}
+
+window.deleteSvg = function(btn) {
+  var $editor = $(btn).closest('.editor');
+  $editor.prev('svg').remove();
+  $editor.remove();
+}
+
+window.cancelSvg = function(btn) {
+  console.log("clicked", btn);
+  var $editor = $(btn).closest('.editor');
+  $editor.prev('svg').show();
+  $editor.remove();
+}
+
+window.init_embed = function(frame) {
+  var svgCanvas = new embedded_svg_edit(frame);
+  $(frame).data('canvas', svgCanvas);
+    
+  // Hide main button, as we will be controlling new/load/save etc from the host document
+  var doc;
+  doc = frame.contentDocument;
+  if (!doc)
+  {
+    doc = frame.contentWindow.document;
+  }
+    
+  var mainButton = doc.getElementById('main_button');
+  mainButton.style.display = 'none';
+
+  var originalSvg = $(frame).attr('data-original-svg');
+  // console.log("loading original svg content:", originalSvg);
+  svgCanvas.setSvgString($(frame).attr('data-original-svg'));
+}
+    
+app.on('initializeSvgEditor', function(el) {
+
+  initializeSvgHandler($(el).find('svg'));
+
+  // TODO strip contenteditable attribute before saving
+})
+
+// FIXME this wasn't getting triggered
+app.on('insertSvg', function() {
+  console.log("!! inserting svg !!");
+})
+
+window.insertSvg = function() {
+  document.execCommand('insertHTML', false, '<svg class="new-svg" width="640" height="480" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g><circle cx="0" cy="0" r="0" fill="white" /></g></svg>');
+  $svg = $('svg.new-svg').removeClass('new-svg');
+  // console.log("new svg element:", $svg);
+  initializeSvgHandler($svg).click(); // attach and trigger immediately
+} 
 
 // toc.js
 
