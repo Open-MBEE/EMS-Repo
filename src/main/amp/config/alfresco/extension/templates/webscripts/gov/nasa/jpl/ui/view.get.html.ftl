@@ -74,7 +74,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
               {{{("<h1><span class='"+class+" section-header editable' data-property='NAME' data-section-id='" + id + "'>" +  name + "</span></h1>" )}}}
             {{/(depth == 0) }}
             {{^(depth == 0) }}
-              {{{("<h"+ depth + " class='"+class+"'><span class='section-header' data-section-id='" + id + "'><span class='editable' data-property='NAME' data-mdid='" + id + "'>" +  name + "</span></span></h"+ depth + ">" )}}}
+              {{{("<h"+ (depth+1) + " class='"+class+"'><span class='section-header' data-section-id='" + id + "'><span class='editable' data-property='NAME' data-mdid='" + id + "'>" +  name + "</span></span></h"+ (depth+1) + ">" )}}}
             {{/(depth == 0) }}
 
             <div class="author {{ class }}">Edited by <span class="author-name" data-mdid="{{id}}">{{ viewData.author }}</span></div>
@@ -95,8 +95,15 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
             {{#editing}}
             <div class="toolbar page" data-role="editor-toolbar" data-target="#section{{ id }}">
               <div class="btn-group">
-                  <a class="btn btn-default" data-edit="bold" title="" data-original-title="Bold (Ctrl/Cmd+B)"><b>b</b></a>
-                  <a class="btn btn-default" data-edit="italic" title="" data-original-title="Italic (Ctrl/Cmd+I)"><i>i</i></a>
+                  <a class="btn btn-default" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><b>b</b></a>
+                  <a class="btn btn-default" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i>i</i></a>
+                  <a class="btn btn-default" data-edit="underline" title="Underline (Ctrl/Cmd+u)"><span style="text-decoration:underline">u</span></a>
+              </div>
+              <div class="btn-group">
+                  <a class="btn btn-default" data-edit="insertunorderedlist" title="Bullet list">&bull;</a>
+                  <a class="btn btn-default" data-edit="insertorderedlist" title="Bullet list">1.</a>
+                  <a class="btn btn-default" data-edit="indent" title="Indent (Tab)">&rarr;</a>
+                  <a class="btn btn-default" data-edit="outdent" title="Reduct Indent (Shift-Tab)">&larr;</a>
               </div>
 
               <div class="btn-group">
@@ -259,9 +266,14 @@ var ajaxWithHandlers = function(options, successMessage, errorMessage) {
   $.ajax(options)
     .done(function() { app.fire('message', 'success', successMessage); })
     .fail(function(e) { 
-      app.fire('message', 'error', errorMessage); 
-      if (console && console.log) {
-        console.log("ajax error:", e);
+      if (e && e.status && e.status === 200) {
+        // we got a 200 back, but json parsing might have failed
+        return;
+      } else {
+        app.fire('message', 'error', errorMessage); 
+        if (console && console.log) {
+          console.log("ajax error:", e);
+        }        
       }
     })
 }
@@ -358,6 +370,9 @@ app.on('editSection', function(e, sectionId) {
   // TODO turn editing off for all other sections
   app.set(e.keypath+'.editing', true);
   var section = $("[data-section-id='" + sectionId + "']");
+
+  var sectionHeader = section.filter('.section-header');
+  sectionHeader.data('original-content', sectionHeader.html());
   // TODO make this work with multiple tables in a section
   section.each(function(i,el) {
     $(el).wysiwyg();
@@ -401,9 +416,15 @@ app.on('editSection', function(e, sectionId) {
 
 app.on('cancelEditing', function(e) {
   e.original.preventDefault();
+  var sectionId = app.get(e.keypath+'.id');
   app.set(e.keypath+'.editing', false);
+  // console.log("canceling", sectionId);
+  var $sectionHeader = $('.section-header[data-section-id="'+sectionId+'"]');
+  // console.log("canceled editing for section header", $sectionHeader);
+  $sectionHeader.html($sectionHeader.data('original-content'));
+  $sectionHeader.attr('contenteditable', false);
   // app.set(e.keypath+'.content', app.get(e.keypath+'.previousContent'));
-  console.log("canceled", app.get(e.keypath));
+  // console.log("canceled", app.get(e.keypath));
 })
 
 app.on('saveSection', function(e, sectionId) {
@@ -451,7 +472,7 @@ app.on('elementDetails', function(evt) {
 
 // export.js
 
-app.data.printPreviewTemplate = "\n<html>\n\t<head>\n\t\t<title>{{ documentTitle }}</title>\n\t\t<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>\n\t\t<style type=\"text/css\">\n\n\n\t\t  .no-section {\n\t\t    display: none;\n\t\t  }\n\n\n\t\t  .author {\n\t\t    display: none;\n\t\t  }\n\n\n\t\t  .modified {\n\t\t    display: none;\n\t\t  }\n\n\t\t  .page-sections.no-section {\n\t\t    display: block;\n\t\t  }\n\n\t\t  .blank.reference {\n\t\t\t  display: none;\n\t\t\t}\n\n\t\t\t@page {\n\t\t\t  margin: 1cm;\n\t\t\t}\n\n\t\t\tbody {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t.page-sections, #the-document h1, #the-document h2, #the-document h3, #the-document h4, #the-document h5 {\n\t\t\t  font-family: 'PT Serif', Georgia, serif;\n\t\t\t}\n\t\t\t.navbar-brand, .page .inspector, .inspectors {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t#the-document {counter-reset: level1;}\n\t\t\t#toc:before, #toc:after {counter-reset: level1; content: \"\";}\n\t\t\t#toc h3:before{content: \"\"}\n\t\t\t \n\t\t\t#the-document h1, #toc > ul > li {counter-reset: level2;}\n\t\t\t#the-document h2, #toc > ul >  ul > li {counter-reset: level3;}\n\t\t\t#the-document h3, #toc > ul > ul > ul > li {counter-reset: level4;}\n\t\t\t#the-document h4, #toc > ul > ul > ul > ul > li {counter-reset: level5;}\n\t\t\t#the-document h5, #toc > ul > ul > ul > ul > ul > li {}\n\n\t\t\t#the-document h1:before,\n\t\t\t#toc > ul > li a:before {\n\t\t\t    content: counter(level1) \" \";\n\t\t\t    counter-increment: level1;\n\t\t\t}\n\t\t\t#the-document h2:before,\n\t\t\t#toc > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \" \";\n\t\t\t    counter-increment: level2;\n\t\t\t}\n\t\t\t#the-document h3:before,\n\t\t\t#toc > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \" \";\n\t\t\t    counter-increment: level3;\n\t\t\t}\n\t\t\t#the-document h4:before,\n\t\t\t#toc > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \" \";\n\t\t\t    counter-increment: level4;\n\t\t\t}\n\t\t\t#the-document h5:before,\n\t\t\t#toc > ul > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \".\" counter(level5) \" \";\n\t\t\t    counter-increment: level5;\n\t\t\t}\n\t\t</style>\n\t</head>\n\t<body>\n\t\t<div id=\"the-document\">\n\t\t\t{{ content }}\n\t\t</div>\n\t</body>\n</html>";
+app.data.printPreviewTemplate = "\n<html>\n\t<head>\n\t\t<title>{{ documentTitle }}</title>\n\t\t<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>\n\t\t<style type=\"text/css\">\n\n\n\t\t  .no-section {\n\t\t    display: none;\n\t\t  }\n\n\t\t  .page-sections.no-section {\n\t\t    display: block;\n\t\t  }\n\n\t\t  .blank.reference {\n\t\t\t  display: none;\n\t\t\t}\n\n\t\t\t@page {\n\t\t\t  margin: 1cm;\n\t\t\t}\n\n\t\t\tbody {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t.page-sections, #the-document h1, #the-document h2, #the-document h3, #the-document h4, #the-document h5 {\n\t\t\t  font-family: 'PT Serif', Georgia, serif;\n\t\t\t}\n\t\t\t.navbar-brand, .page .inspector, .inspectors {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t#the-document {counter-reset: level1;}\n\t\t\t#toc:before, #toc:after {counter-reset: level1; content: \"\";}\n\t\t\t#toc h3:before{content: \"\"}\n\t\t\t \n\t\t\t#the-document h2, #toc > ul > li {counter-reset: level2;}\n\t\t\t#the-document h3, #toc > ul >  ul > li {counter-reset: level3;}\n\t\t\t#the-document h4, #toc > ul > ul > ul > li {counter-reset: level4;}\n\t\t\t#the-document h5, #toc > ul > ul > ul > ul > li {counter-reset: level5;}\n\t\t\t#the-document h6, #toc > ul > ul > ul > ul > ul > li {}\n\n\t\t\t#the-document h2:before,\n\t\t\t#toc > ul > li a:before {\n\t\t\t    content: counter(level1) \" \";\n\t\t\t    counter-increment: level1;\n\t\t\t}\n\t\t\t#the-document h3:before,\n\t\t\t#toc > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \" \";\n\t\t\t    counter-increment: level2;\n\t\t\t}\n\t\t\t#the-document h4:before,\n\t\t\t#toc > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \" \";\n\t\t\t    counter-increment: level3;\n\t\t\t}\n\t\t\t#the-document h5:before,\n\t\t\t#toc > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \" \";\n\t\t\t    counter-increment: level4;\n\t\t\t}\n\t\t\t#the-document h6:before,\n\t\t\t#toc > ul > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \".\" counter(level5) \" \";\n\t\t\t    counter-increment: level5;\n\t\t\t}\n\t\t</style>\n\t</head>\n\t<body>\n\t\t<div id=\"the-document\">\n\t\t\t{{ content }}\n\t\t</div>\n\t</body>\n</html>";
 
 _.templateSettings = {
   interpolate: /\{\{(.+?)\}\}/g
@@ -1115,7 +1136,7 @@ window.insertSvg = function() {
 // toc.js
 
 app.on('makeToc', function() {
-	$("#toc").tocify({ selectors: "h1, h2, h3, h4", history : false, highlightOffset : 0, context: "#the-document", smoothScroll:false }).data("toc-tocify");	
+	$("#toc").tocify({ selectors: "h2, h3, h4", history : false, highlightOffset : 0, context: "#the-document", smoothScroll:false }).data("toc-tocify");	
 })
 
 </script>
