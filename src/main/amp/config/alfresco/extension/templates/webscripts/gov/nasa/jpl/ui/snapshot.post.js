@@ -56,7 +56,7 @@ function main() {
 	topview.createAssociation(snapshotNode, "view:snapshots");
 }
 */
-
+var snapshoturl = {};
 function main() {
 	var html = requestbody.content;
 	var topview = modelFolder.childByNamePath(viewid);
@@ -76,11 +76,14 @@ function main() {
 	htmlNode.save();
 	snapshotNode.createAssociation(htmlNode, "view:html");
 	topview.createAssociation(snapshotNode, "view:snapshots");
+	snapshoturl.url = url.context + htmlNode.url;
+	snapshoturl.creator = person.properties['cm:userName'];
+	snapshoturl.created = utils.toISO8601(htmlNode.properties["cm:created"]);
 }
 
 status.code = 200;
 main();
 if (status.code == 200)
-	model['res'] = snapshotid;
+	model['res'] = jsonUtils.toJSONString(snapshoturl);
 else
-	model['res'] = "NotFound";
+	model['res'] = "\"NotFound\"";

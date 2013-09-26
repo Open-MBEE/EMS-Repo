@@ -48,4 +48,4 @@ function main() {
 }
 
 main();
-model['res'] = "ok";
+model['res'] = "\"ok\"";

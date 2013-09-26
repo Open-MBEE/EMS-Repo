@@ -70,7 +70,7 @@ function getSnapshots(topview) {
 	var snapshots = [];
 	var ss = topview.assocs["view:snapshots"];
 	for (var i in ss) {
-		utils.toISO8601(date);
+		//utils.toISO8601(date);
 		var snapshot = ss[i];
 		var html = snapshot.assocs["view:html"];
 		if (html.length > 0)
@@ -80,7 +80,7 @@ function getSnapshots(topview) {
 		snapshots.push({
 			"id": snapshot.properties["cm:name"], 
 			"created": utils.toISO8601(snapshot.properties["cm:created"]),
-			"url": url.context + html.properties.url,
+			"url": url.context + html.url,
 			"creator": snapshot.properties["cm:creator"]
 		});
 	}
