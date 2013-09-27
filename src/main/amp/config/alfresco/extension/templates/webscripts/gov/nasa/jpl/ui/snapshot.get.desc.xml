@@ -1,0 +1,13 @@
+<webscript> 
+  <shortname>Get View</shortname> 
+  <description>Return all elements referenced in the view
+		see view.get.desc.xml for json returned
+  	
+  </description>
+  <url>/ui/views/{viewid}/snapshot/{id}</url> 
+  <format default="html">any</format> 
+  <authentication>user</authentication> 
+  <transaction allow="readonly">required</transaction>
+  <family>View Editor</family>
+  
+</webscript>
