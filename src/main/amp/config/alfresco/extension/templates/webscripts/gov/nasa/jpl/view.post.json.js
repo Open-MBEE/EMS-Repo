@@ -1,11 +1,8 @@
 <import resource="classpath:alfresco/extension/js/json2.js">
 <import resource="classpath:alfresco/extension/js/utils.js">
 
-//var modelFolder = roothome.childByNamePath("/Sites/europa/vieweditor/model");
-//var presentationFolder = roothome.childByNamePath("/Sites/europa/vieweditor/presentation");
-var europaSite = siteService.getSite("europa").node;
-var modelFolder = europaSite.childByNamePath("/vieweditor/model");
-var presentationFolder = europaSite.childByNamePath("/vieweditor/presentation");
+//var europaSite = siteService.getSite("europa").node;
+var modelFolder = companyhome.childByNamePath("ViewEditor/model");
 var date = new Date();
 var modelMapping = {};
 var merged = [];
@@ -13,8 +10,8 @@ var user = args.user;
 function updateOrCreateModelElement(element, force) {
 	var modelNode = modelMapping[element.mdid];
 	if (modelNode == null || modelNode == undefined) {
-		modelNode = modelFolder.childrenByXPath("*[@view:mdid='" + element.mdid + "']");
-		if (modelNode == null || modelNode.length == 0) {
+		modelNode = modelFolder.childByNamePath(element.mdid);
+		if (modelNode == null) {
 			if (element.type == "View") {
 				modelNode = modelFolder.createNode(element.mdid, "view:View");
 				modelNode.properties["view:name"] = element.name;
@@ -28,8 +25,7 @@ function updateOrCreateModelElement(element, force) {
 				modelNode = modelFolder.createNode(element.mdid, "view:ModelElement");
 				modelNode.properties["view:name"] = element.name;
 			}
-		} else
-			modelNode = modelNode[0];
+		}
 	}
 
 	if (element.name != null && element.name != undefined && element.name != modelNode.properties["view:name"]) {
@@ -59,21 +55,20 @@ function updateOrCreateModelElement(element, force) {
 	return modelNode;
 }
 
-function updateOrCreateView(view) {
+function updateOrCreateView(view, ignoreNoSection) {
 	var viewNode = modelMapping[view.mdid];
 	if (viewNode == null || viewNode == undefined) {
-		viewNode = modelFolder.childrenByXPath("*[@view:mdid='" + view.mdid + "']");
-		if (viewNode == null || viewNode.length == 0) {
+		viewNode = modelFolder.childByNamePath(view.mdid);
+		if (viewNode == null) {
 			return;
 		}
-		viewNode = viewNode[0];
 	}
 	var sources = [];
 	for (var i in view.contains) {
 		fillSources(view.contains[i], sources);
 	}
 	viewNode.properties["view:sourcesJson"] = jsonUtils.toJSONString(sources);
-	if (view.noSection != null && view.noSection != undefined)
+	if (view.noSection != null && view.noSection != undefined && !ignoreNoSection)
 		viewNode.properties["view:noSection"] = view.noSection;
 	else
 		viewNode.properties["view:noSection"] = false;
@@ -99,6 +94,12 @@ function fillSources(contained, sources) {
 			if (sources.indexOf(sourceid) < 0)
 				sources.push(sourceid);
 		}		
+	} else if (contained.type == "List") {
+		for (var i in contained.sources) {
+			var sourceid = contained.sources[i];
+			if (sources.indexOf(sourceid) < 0)
+				sources.push(sourceid);
+		}		
 	}
 }
 
@@ -107,27 +108,52 @@ function main() {
 	if (postjson == null || postjson == undefined)
 		return;
 	var viewid = url.templateArgs.viewid;
-	var topview = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
-	if (topview == null || topview.length == 0) {
+	var topview = modelFolder.childByNamePath(viewid);
+	var product = false;
+	if (args.product == 'true')
+		product = true;
+	if (topview == null) {
 		if (args.doc == 'true') {
 			topview = modelFolder.createNode(viewid, "view:DocumentView");
+			if (product) {
+				topview.properties["view:product"] = true;
+			}
 		} else {
 			topview = modelFolder.createNode(viewid, "view:View");
 		}
 		topview.properties["view:mdid"] = viewid;
 		topview.save();
-		modelMapping[viewid] = topview;
-	} 
+	}
+	modelMapping[viewid] = topview;
+	
+	if (topview.typeShort != "view:DocumentView" && args.doc == 'true') {
+		topview.specializeType("view:DocumentView");
+		if (product)
+			topview.properties["view:product"] = true;
+		topview.save();
+	}
 	var force = args.force == 'true' ? true : false;
 	for (var i in postjson.elements) {
 		updateOrCreateModelElement(postjson.elements[i], force);
 	}
 	for (var i in postjson.views) {
-		updateOrCreateView(postjson.views[i]);
+		updateOrCreateView(postjson.views[i], product);
 	}
-	if (args.recurse == 'true') {
+	if (args.recurse == 'true' && !product) {
 		updateViewHierarchy(modelMapping, postjson.view2view);
 	}	
+	if (product) {
+		var noSections = [];
+		for (var i in postjson.views) {
+			var view = postjson.views[i];
+			if (view.noSection)
+				noSections.push(view.mdid);
+		}
+		topview.properties["view:view2viewJson"] = jsonUtils.toJSONString(postjson.view2view);
+		topview.properties["view:noSectionsJson"] = jsonUtils.toJSONString(noSections);
+		topview.save();
+	}
+	
 }
 
 main();

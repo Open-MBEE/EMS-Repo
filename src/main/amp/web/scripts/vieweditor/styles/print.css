@@ -1,0 +1,24 @@
+.no-print, nav, .comments {
+  display: none;
+}
+
+@page {
+  margin: 1cm;
+}
+
+p a:after {
+  content: " (" attr(href) ")";
+  font-size: 90%;
+}
+
+.no-section {
+  display: none;
+}
+
+.page-sections.no-section {
+  display: block;
+}
+
+.blank.reference {
+  display: none;
+}

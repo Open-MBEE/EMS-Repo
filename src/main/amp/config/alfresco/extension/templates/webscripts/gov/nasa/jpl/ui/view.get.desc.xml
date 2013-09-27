@@ -1,0 +1,90 @@
+<webscript> 
+  <shortname>Get View</shortname> 
+  <description>Return all elements referenced in the view
+		{
+			"rootView": mdid of top level view,
+			"user": current user's username,
+  			"views": [
+  				{
+  					"mdid": mdid, 
+  				 	"noSection": true/false, 
+  				 	"author": username (last editing user),
+  				 	"modified": ISO8601 formatted date string,
+  				 	"contains": [
+  				 		{
+  				 			"type": Paragraph", 
+  				 			"source": mdid/"text", 
+  				 			"useProperty": "DOCUMENTATION/NAME/DVALUE", 
+  				 			("text": text)
+  				 		} OR
+  				 		{
+  				 			"type": "Table", 
+  				 			"sources": [mdid, ...], 
+  				 			"title": title, 
+  				 			"body": [[{
+  				 				"content": [ //this allows multiple block elements in a cell
+  				 					{
+  				 						"type": "Paragraph"/"List"/"Table", //table in table probably not supported
+  				 						(see above...)
+  				 					}, ...
+  				 				],
+  				 				("colspan": colspan), 
+  				 				("rowspan": rowspan)
+  				 			}, ...], ...], 
+  				 			"header": same as body, 
+  				 			"style": style
+  				 		} OR
+  				 		{
+  				 			"type": "List",
+  				 			"sources": [mdid, ...],
+  				 			"list": [
+  				 				[{ //each list item can have multiple block elements, Table in a list may not be supported
+  				 					"type": "Paragraph"/"List"/"Table",
+  				 					(see above...)
+  				 				}, ...], ...
+  				 			],
+  				 			"bulleted": true/false,
+  				 			"ordered": true/false
+  				 		}, ...  
+  				 	],
+  				 	"comments": [
+  				 		{
+  				 			"author": username,
+  				 			"body": body,
+  				 			"modified": ISO8601 formatted date string,
+  				 			"id": id
+  				 		}, ...
+  				 	]
+  				}, ...
+  			],
+  			"view2view": {
+  				viewid: [viewid, ...], ...
+  			},
+  			"elements": [
+  				{
+  					"mdid": mdid, 
+  					("name": name), 
+  					"documentation": doc, 
+  					("dvalue": dvalue)
+  				}, ...
+  			],
+  			"snapshots": [
+  				{
+  					"id": id,
+  					"created": ISO8601 formatted date string,
+  					"url": url to snapshot (static html for now),
+  					"creator": creator name
+  				}
+  			]
+  		}
+  		
+  		- "text" is only present if source is "text"
+  	
+  </description>
+  <url>/ui/views/{viewid}</url> 
+  <format default="html">any</format> 
+  <authentication>user</authentication> 
+  <transaction allow="readonly">required</transaction>
+  <family>View Editor</family>
+  
+</webscript>

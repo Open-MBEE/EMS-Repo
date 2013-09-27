@@ -1,8 +1,8 @@
 <import resource="classpath:alfresco/extension/js/json2.js">
 <import resource="classpath:alfresco/extension/js/utils.js">
 
-var europaSite = siteService.getSite("europa").node;
-var modelFolder = europaSite.childByNamePath("/vieweditor/model");
+//var europaSite = siteService.getSite("europa").node;
+var modelFolder = companyhome.childByNamePath("ViewEditor/model");
 
 var viewid = url.templateArgs.viewid;
 var recurse = args.recurse == 'true' ? true : false;
@@ -38,11 +38,10 @@ function handleView(viewnode) {
 }
 
 function main() {
-	var topview = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
-	if (topview == null || topview.length == 0) {
+	var topview = modelFolder.childByNamePath(viewid);
+	if (topview == null) {
 		status.code  = 404;
 	} else {
-		topview = topview[0];
 		handleView(topview);
 	}
 }

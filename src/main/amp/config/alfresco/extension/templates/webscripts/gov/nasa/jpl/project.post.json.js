@@ -1,22 +1,19 @@
 <import resource="classpath:alfresco/extension/js/json2.js">
 <import resource="classpath:alfresco/extension/js/utils.js">
 
-//var modelFolder = roothome.childByNamePath("/Sites/europa/vieweditor/model");
-//var presentationFolder = roothome.childByNamePath("/Sites/europa/vieweditor/presentation");
-var europaSite = siteService.getSite("europa").node;
-var modelFolder = europaSite.childByNamePath("/vieweditor/model");
+//var europaSite = siteService.getSite("europa").node;
+var modelFolder = companyhome.childByNamePath("ViewEditor/model");
 
 var modelMapping = {};
 var merged = [];
 
 function getOrCreateVolume(vid, name, roots) {
-	var vnode = modelFolder.childrenByXPath("*[@view:mdid='" + vid + "']");
-	if (vnode == null || vnode.length == 0) {
+	var vnode = modelFolder.childByNamePath(vid);
+	if (vnode == null) {
 		vnode = modelFolder.createNode(vid, "view:Volume");
 		vnode.properties["view:name"] = name;
 		vnode.properties["view:mdid"] = vid;
 	} else {
-		vnode = vnode[0];
 		vnode.properties["view:name"] = name;
 	}
 	if (roots.indexOf(vid) >= 0)
@@ -28,14 +25,13 @@ function getOrCreateVolume(vid, name, roots) {
 }
 
 function getOrCreateDocument(did) {
-	var dnode = modelFolder.childrenByXPath("*[@view:mdid='" + did + "']");
-	if (dnode == null || dnode.length == 0) {
+	var dnode = modelFolder.childByNamePath(did);
+	if (dnode == null) {
 		dnode = modelFolder.createNode(did, "view:DocumentView");
 		dnode.properties["view:mdid"] = did;
 		dnode.properties["view:name"] = "Unexported Document";
 		dnode.save();
-	} else
-		dnode = dnode[0];
+	} 
 	return dnode;
 }
 

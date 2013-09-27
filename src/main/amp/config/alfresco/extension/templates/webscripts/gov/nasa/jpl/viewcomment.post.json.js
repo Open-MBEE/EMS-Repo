@@ -1,21 +1,17 @@
 <import resource="classpath:alfresco/extension/js/json2.js">
 <import resource="classpath:alfresco/extension/js/utils.js">
 
-//var modelFolder = roothome.childByNamePath("/Sites/europa/vieweditor/model");
-//var presentationFolder = roothome.childByNamePath("/Sites/europa/vieweditor/presentation");
-var europaSite = siteService.getSite("europa").node;
-var modelFolder = europaSite.childByNamePath("/vieweditor/model");
+//var europaSite = siteService.getSite("europa").node;
+var modelFolder = companyhome.childByNamePath("ViewEditor/model");
 
 var modelMapping = {};
 
-
 function updateOrCreateComment(comment) {
-	var commentNode = modelFolder.childrenByXPath("*[@view:mdid='" + comment.id + "']");
-	if (commentNode == null || commentNode == undefined || commentNode.length == 0) {
+	var commentNode = modelFolder.childByNamePath(comment.id);
+	if (commentNode == null) {
 		commentNode = modelFolder.createNode(comment.id, "view:Comment");
 		commentNode.properties["view:mdid"] = comment.id;
-	} else
-		commentNode = commentNode[0];
+	}
 	commentNode.properties["view:documentation"] = comment.body;
 	commentNode.properties["view:author"] = comment.author;
 	var modified = utils.fromISO8601(comment.modified.replace(" ", "T") + ".000Z");
@@ -27,12 +23,11 @@ function updateOrCreateComment(comment) {
 }
 
 function doView(viewid, comments) {
-	var viewnode = modelFolder.childrenByXPath("*[@view:mdid='" + viewid + "']");
-	if (viewnode == null || viewnode.length == 0) {
+	var viewnode = modelFolder.childByNamePath(viewid);
+	if (viewnode == null) {
 		status.code = 404;
 		return;
 	}
-	viewnode = viewnode[0];
 	curcomments = viewnode.assocs["view:comments"];
 	for (var i in curcomments) {
 		var commentNode = curcomments[i];

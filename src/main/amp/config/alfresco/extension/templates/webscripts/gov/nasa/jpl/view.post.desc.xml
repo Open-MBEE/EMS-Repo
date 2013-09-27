@@ -1,7 +1,7 @@
 <webscript> 
   <shortname>Post View</shortname> 
   <description>Handles posting of view from magicdraw</description>
-  <url>/rest/views/{viewid}?force={force?}&amp;recurse={recurse?}&amp;doc={doc?}&amp;user={user}</url> 
+  <url>/rest/views/{viewid}?force={force?}&amp;recurse={recurse?}&amp;doc={doc?}&amp;product={product?}&amp;user={user}</url> 
   <format default="json">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readwrite">required</transaction>
@@ -20,6 +20,10 @@
   		<description>Whether the view being posted is a DocumentView</description>
   	</arg>
   	<arg>
+  		<name>product</name>
+  		<description>Whether the view being posted is a Product</description>
+  	</arg>
+  	<arg>
   		<name>viewid</name>
   		<description>The MD ID of the view being posted</description>
   	</arg>
@@ -33,11 +37,11 @@
   				 	"noSection": true/false, 
   				 	"contains": [
   				 		{
-  				 			"type": Paragraph", 
+  				 			"type": "Paragraph", 
   				 			"source": mdid/"text", 
   				 			"useProperty": "DOCUMENTATION/NAME/DVALUE", 
   				 			("text": text)
-  				 		} OR
+  				 		} //OR
   				 		{
   				 			"type": "Table", 
   				 			"sources": [mdid, ...], 
@@ -50,7 +54,36 @@
   				 				("rowspan": rowspan)
   				 			}, ...], ...], 
   				 			"header": same as body, 
+  				 			"style": style //this is here in case there's some specific style class associated
+  				 		} //FUTURE TABLE (a cell can have multiple editable things in it, not supported yet)
+  				 		{
+  				 			"type": "Table", 
+  				 			"sources": [mdid, ...], 
+  				 			"title": title, 
+  				 			"body": [[{
+  				 				"content": [ //this allows multiple block elements in a cell
+  				 					{
+  				 						"type": "Paragraph"/"List"/"Table", //table in table probably not supported
+  				 						(see above...)
+  				 					}, ...
+  				 				],
+  				 				("colspan": colspan), 
+  				 				("rowspan": rowspan)
+  				 			}, ...], ...], 
+  				 			"header": same as body, 
   				 			"style": style
+  				 		} //OR (List is not supported yet)
+  				 		{
+  				 			"type": "List",
+  				 			"sources": [mdid, ...],
+  				 			"list": [
+  				 				[{ //each list item can have multiple block elements
+  				 					"type": "Paragraph"/"List"/"Table",
+  				 					(see above...)
+  				 				}, ...], ...
+  				 			],
+  				 			"bulleted": true/false,
+  				 			"ordered": true/false
   				 		}, ... 
   				 	]
   				}, ...
