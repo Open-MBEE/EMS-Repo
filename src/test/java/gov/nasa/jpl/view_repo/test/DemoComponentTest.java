@@ -1,10 +1,18 @@
 package gov.nasa.jpl.view_repo.test;
 
 import static org.junit.Assert.assertEquals;
-
 import static org.junit.Assert.assertNotNull;
 
+import javax.jcr.LoginException;
+import javax.jcr.Node;
+import javax.jcr.NodeIterator;
+import javax.jcr.Repository;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.SimpleCredentials;
+
 import gov.nasa.jpl.view_repo.DemoComponent;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -72,6 +80,32 @@ public class DemoComponentTest {
         assertNotNull(childNodeCount);
         // There are 5 folders by default under Company Home
         assertEquals(5, childNodeCount);
+    }
+    
+    @Test
+    public void testJCR() {
+    	Repository repository = demoComponent.getRepository();
+    	Node node;
+    	
+    	SimpleCredentials credentials = new SimpleCredentials("admin", "admin".toCharArray());
+    	Session session;
+		try {
+			session = repository.login(credentials);
+	    	node = session.getRootNode();
+	    	
+	    	NodeIterator ni = node.getNodes();
+	    	while (ni.hasNext()) {
+	    		demoComponent.listChildren("\t", ni.nextNode());
+	    	}
+	    	
+	    	System.out.println("hello");
+		} catch (LoginException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (RepositoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
 }

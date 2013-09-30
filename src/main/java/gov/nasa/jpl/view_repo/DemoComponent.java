@@ -16,6 +16,11 @@
  */
 package gov.nasa.jpl.view_repo;
 
+import javax.jcr.Node;
+import javax.jcr.NodeIterator;
+import javax.jcr.Repository;
+import javax.jcr.RepositoryException;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.module.AbstractModuleComponent;
 import org.alfresco.repo.nodelocator.NodeLocatorService;
@@ -40,6 +45,8 @@ public class DemoComponent extends AbstractModuleComponent
     private NodeService nodeService;
     
     private NodeLocatorService nodeLocatorService;
+    
+    private Repository repository;
 
     public void setNodeService(NodeService nodeService) {
         this.nodeService = nodeService;
@@ -78,8 +85,23 @@ public class DemoComponent extends AbstractModuleComponent
      * @return
      */
     public NodeRef getCompanyHome()
-
     {
         return nodeLocatorService.getNode("companyhome", null, null);
     }
+
+	public Repository getRepository() {
+		return repository;
+	}
+
+	public void setRepository(Repository repository) {
+		this.repository = repository;
+	}
+
+	public void listChildren(String indent, Node node) throws RepositoryException {
+		System.out.println(indent + node.getName() ); 
+		NodeIterator ni = node.getNodes();
+		while(ni.hasNext()) {
+			listChildren(indent+"  ", ni.nextNode());
+		}
+	}
 }

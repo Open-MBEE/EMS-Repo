@@ -30,6 +30,7 @@
         <property name="appliesFromVersion" value="2.0" />
         <property name="nodeService" ref="NodeService" />
         <property name="nodeLocatorService" ref="nodeLocatorService" />
+        <property name="repository" ref="JCR.Repository" />
     </bean>
     
     <bean id="view-repo_dictionaryBootstrap" parent="dictionaryModelBootstrap" depends-on="dictionaryBootstrap">
