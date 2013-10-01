@@ -4,5 +4,4 @@
   <url>/demo</url>
   <authentication>user</authentication>
   <transaction allow="readwrite">required</transaction>
-  <format default="json">any</format>
 </webscript>

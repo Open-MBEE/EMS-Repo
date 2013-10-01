@@ -10,7 +10,8 @@
 		        $.ajax({
 		        	url: '${url.context}/wcs/demo',
 		        	type: 'POST',
-		        	data: JSON.stringify(expression);
+		        	data: expression,
+		        	contentType: 'text/plain; charset=UTF-8'
 		        }
 		        ).done(
 		        	function(data) {
