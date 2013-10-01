@@ -37,7 +37,7 @@
         <alfresco.client.war.version>4.2.c</alfresco.client.war.version>
         <!-- This controls which properties will be picked in src/test/properties for embedded run -->
         <env>local</env>
-        <maven.test.skip>true</maven.test.skip>
+        <maven.test.skip>false</maven.test.skip>
     </properties>
 
     <!-- Here we realize the connection with the Alfresco selected platform 

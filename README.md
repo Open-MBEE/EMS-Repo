@@ -15,7 +15,7 @@ To run in embedded jetty container and H2 db,
 
 	export MAVEN_OPTS='-Xms256m -Xmx1G -XX:PermSize=300m'
 	
-    mvn integration-test -Pamp-to-war
+    mvn integration-test -Pamp-to-war -Dmaven.test.skip=false
     
 To clean all data and artifacts
 
