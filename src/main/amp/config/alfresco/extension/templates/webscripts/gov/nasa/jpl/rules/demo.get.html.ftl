@@ -6,7 +6,6 @@
 		<script type="text/javascript">
 		$(document).ready(function() {
 		    $("#submit").click(function (event) {
-		    /*
 		        var expression = $("#input").val();
 		        $.ajax({
 		        	url: '${url.context}/wcs/demo',
@@ -18,12 +17,13 @@
 			          $("#output").val(data);
 					}
 				);
-				*/
+		    /*
 				$.post('${url.context}/wcs/demo?expression="' + expression + '"',
 				   {data: expression}, 
 				   function(data) {
 			          $("#output").val(data);
 				   });
+			*/
 		    });
 		});
 		</script>

@@ -7,13 +7,14 @@ This is registered by spring config in module-context.xml (which imports another
 
 Location of webscripts: src/main/amp/config/alfresco/extension/templates/webscripts
 
+# building, setting up maven, jrebel
 To build the amp file, do 
 
     mvn package
     
-To run in embedded jetty container and H2 db, 
+To run in embedded jetty container and H2 db, (with jrebel and remote debugging!), the javaagent should point to your licensed jrebel.jar, address should be a port you can attach a debugger to
 
-	export MAVEN_OPTS='-Xms256m -Xmx1G -XX:PermSize=300m'
+	export MAVEN_OPTS='-Xms256m -Xmx1G -XX:PermSize=300m -Xdebug -Xrunjdwp:transport=dt_socket,address=10000,server=y,suspend=n -javaagent:/Applications/jrebel/jrebel.jar'
 	
     mvn integration-test -Pamp-to-war -Dmaven.test.skip=false
     
@@ -21,9 +22,21 @@ To clean all data and artifacts
 
     mvn clean -Ppurge
 
+To update the target/view-repo-war manually
+
+	mvn package -Pamp-to-war
+	
+# Debug
+To attach an eclipse debugger, there's a view-repo.launch, you can use it to debug at the 10000 port, or change the debug config port if you didn't use 10000 in the maven opts
+
+Jrebel is monitoring the target/classes and src/main/amp/config dir for changes, and the src/main/amp/web for static file changes, make sure the eclipse build automatically is on, and usually any changes to java classes or spring configs will be reloaded automagically
+
+# Testing
 Go to [http://localhost:8080/view-repo/](http://localhost:8080/view-repo/) for the alfresco explorer interface (it'll take a while to startup)
 
 In the repository, create a "/ViewEditor/model" folder and "/ViewEditor/snapshots" folder, the view information will be created in these spaces.
+
+Use the view import/export from the latest dev release of mdk, or you can use curl commands below
 
 Post test view:
 

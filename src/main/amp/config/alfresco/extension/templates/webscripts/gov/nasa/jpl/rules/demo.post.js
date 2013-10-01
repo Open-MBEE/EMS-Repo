@@ -1,12 +1,12 @@
+<import resource="classpath:alfresco/extension/js/json2.js">
+<import resource="classpath:alfresco/extension/js/utils.js">
+
 var expression;
 
 main();
 
 function main() {
-    //Query parameters on URL as exposed as args dictionary)
-    if ("expression" in args) {
-        expression =  args.expression;
-    }
+    var expression = requestbody.getContent().toString();
     
     // ensure mandatory file attributes have been located
     if (expression == undefined)
