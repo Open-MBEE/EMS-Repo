@@ -23,7 +23,7 @@
     
     <!-- A simple module component that will be executed once -->
     <bean id="changeme.exampleComponent" class="gov.nasa.jpl.view_repo.DemoComponent" parent="module.baseComponent" >
-        <property name="moduleId" value="${project.artifactId}" />  <!-- See module.properties -->
+        <property name="moduleId" value="view-repo" />  <!-- See module.properties -->
         <property name="name" value="exampleComponent" />
         <property name="description" value="A demonstration component" />
         <property name="sinceVersion" value="2.0" />
@@ -36,7 +36,7 @@
     <bean id="view-repo_dictionaryBootstrap" parent="dictionaryModelBootstrap" depends-on="dictionaryBootstrap">
       <property name="models">
         <list>
-          <value>alfresco/module/${project.artifactId}/viewModel.xml</value>
+          <value>alfresco/module/view-repo/viewModel.xml</value>
         </list>
       </property>
     </bean>
@@ -69,4 +69,10 @@
 
    <!-- add in the DB transformation -->
 
+	<bean id="webscript.gov.nasa.jpl.javatest.get"
+		class="gov.nasa.jpl.view_repo.TestJavaWebScript"
+		parent="webscript">
+		<property name="nodeService" ref="NodeService" />
+        <property name="nodeLocatorService" ref="nodeLocatorService" /> 
+	</bean>
 </beans>
