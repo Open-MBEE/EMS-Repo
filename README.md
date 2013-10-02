@@ -7,6 +7,8 @@ This is registered by spring config in module-context.xml (which imports another
 
 Location of webscripts: src/main/amp/config/alfresco/extension/templates/webscripts
 
+Make sure your JAVA_HOME is set to a java 1.7 installation.
+
 To build the amp file, do 
 
     mvn package
@@ -20,6 +22,15 @@ To run in embedded jetty container and H2 db,
 To clean all data and artifacts
 
     mvn clean -Ppurge
+
+To execute JUnit tests and attach a debugger
+
+    mvn -Dmaven.surefire.debug -Dmaven.test.skip=false test
+    
+    Set a breakpoint in a test.
+    Run a Remote Java Application configuration with localhost for Host and 5005 for Port.
+    Follow DemoComponentTest.java and its entry in service-content.xml
+
 
 Go to [http://localhost:8080/view-repo/](http://localhost:8080/view-repo/) for the alfresco explorer interface (it'll take a while to startup)
 

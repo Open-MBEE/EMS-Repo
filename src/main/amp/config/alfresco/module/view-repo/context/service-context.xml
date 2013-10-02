@@ -69,4 +69,23 @@
 
    <!-- add in the DB transformation -->
 
+    <!-- A simple module component that will be executed once -->
+    <bean id="java_query" class="gov.nasa.jpl.view_repo.JavaQuery" parent="module.baseComponent" >
+        <property name="moduleId" value="fred" />  <!-- See module.properties -->
+        <property name="name" value="daComponent" />
+<!--         <property name="description" value="A demo component" /> -->
+<!--         <property name="sinceVersion" value="2.0" /> -->
+<!--         <property name="appliesFromVersion" value="2.0" /> -->
+        <property name="nodeService">
+           <ref bean="NodeService" />
+        </property>
+        <property name="searchService">
+           <ref bean="SearchService" />
+        </property>
+        <property name="contentService">
+           <ref bean="ContentService" />
+        </property>
+        <property name="nodeLocatorService" ref="nodeLocatorService" />
+    </bean>
+    
 </beans>
