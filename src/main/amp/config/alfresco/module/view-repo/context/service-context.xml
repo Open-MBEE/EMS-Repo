@@ -23,7 +23,7 @@
     
     <!-- A simple module component that will be executed once -->
     <bean id="changeme.exampleComponent" class="gov.nasa.jpl.view_repo.DemoComponent" parent="module.baseComponent" >
-        <property name="moduleId" value="${project.artifactId}" />  <!-- See module.properties -->
+        <property name="moduleId" value="view-repo" />  <!-- See module.properties -->
         <property name="name" value="exampleComponent" />
         <property name="description" value="A demonstration component" />
         <property name="sinceVersion" value="2.0" />
@@ -36,38 +36,17 @@
     <bean id="view-repo_dictionaryBootstrap" parent="dictionaryModelBootstrap" depends-on="dictionaryBootstrap">
       <property name="models">
         <list>
-          <value>alfresco/module/${project.artifactId}/viewModel.xml</value>
+          <value>alfresco/module/view-repo/viewModel.xml</value>
         </list>
       </property>
     </bean>
-    
-    <!-- add in the resource set for all the added modules -->
-     <bean id="actionResourceBundles" class="org.alfresco.i18n.ResourceBundleBootstrapComponent">
-      <property name="resourceBundles">
-         <list>
-    	    <value>alfresco.messages.action-config</value>
-    	 </list>
-      </property>
-   </bean>
-   
-   <bean id="transformer.Db2Pdf"
-         class="gov.nasa.jpl.view_repo.DocBookContentTransformer"
-         parent="baseContentTransformer">
-      <property name="nodeService">
-         <ref bean="NodeService" />
-      </property>
-      <property name="searchService">
-         <ref bean="SearchService" />
-      </property>
-      <property name="contentService">
-         <ref bean="ContentService" />
-      </property>
-    	<property name="path" value="/Users/cinyoung/workspaces/workspace/webapp/" />
-    	<property name="fop" value="fop-1.0/fop" />
-    	<property name="xsl" value="xsl/fo/mgss.xsl" />
-   </bean>
 
-   <!-- add in the DB transformation -->
+	<bean id="demoScript" parent="baseJavaScriptExtension" class="gov.nasa.jpl.view_repo.DemoJavascriptComponent">
+	    <property name="demoComponent" ref="changeme.exampleComponent"/>
+	    <property name="extensionName">
+	    	<value>demo</value>
+	    </property>
+	</bean>    
 
     <!-- A simple module component that will be executed once -->
     <bean id="java_query" class="gov.nasa.jpl.view_repo.JavaQuery" parent="module.baseComponent" >
@@ -88,4 +67,10 @@
         <property name="nodeLocatorService" ref="nodeLocatorService" />
     </bean>
     
+	<bean id="webscript.gov.nasa.jpl.javatest.get"
+		class="gov.nasa.jpl.view_repo.TestJavaWebScript"
+		parent="webscript">
+		<property name="nodeService" ref="NodeService" />
+        <property name="nodeLocatorService" ref="nodeLocatorService" /> 
+	</bean>
 </beans>

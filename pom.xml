@@ -37,7 +37,7 @@
         <alfresco.client.war.version>4.2.c</alfresco.client.war.version>
         <!-- This controls which properties will be picked in src/test/properties for embedded run -->
         <env>local</env>
-        <maven.test.skip>true</maven.test.skip>
+        <maven.test.skip>false</maven.test.skip>
     </properties>
 
     <!-- Here we realize the connection with the Alfresco selected platform 
@@ -74,6 +74,7 @@
         </dependency>
     </dependencies>
 
+	
     <!-- This repository is only needed to retrieve Alfresco parent POM. 
         NOTE: This can be removed when/if Alfresco will be on Maven Central 
         
@@ -96,4 +97,45 @@
             </snapshots>
         </repository>
     </repositories>
+
+  <build>
+		<plugins>
+        <plugin>
+          <groupId>org.zeroturnaround</groupId>
+          <artifactId>jrebel-maven-plugin</artifactId>
+          <version>1.1.5</version>
+          <executions>
+            <execution>
+              <id>generate-rebel-xml</id>
+              <phase>prepare-package</phase>
+              <goals>
+                <goal>generate</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <packaging>war</packaging>
+            <classpath>
+            	<fallback>default</fallback>
+            	<resources>
+            		<resource>
+            			<directory>src/main/amp/config</directory>
+            		</resource>
+            	</resources>
+            </classpath>
+            <war>
+            	<path>target/view-repo-war</path>
+            </war>
+            <web>
+            	<resources>
+            		<resource>
+            			<target>/</target>
+            			<directory>src/main/amp/web</directory>
+            		</resource>
+            	</resources>
+            </web>
+          </configuration>
+        </plugin>
+      </plugins>
+	</build>
 </project>
