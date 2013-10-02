@@ -32,6 +32,15 @@
         <property name="nodeLocatorService" ref="nodeLocatorService" />
         <property name="repository" ref="JCR.Repository" />
     </bean>
+    
+    <bean id="view-repo_dictionaryBootstrap" parent="dictionaryModelBootstrap" depends-on="dictionaryBootstrap">
+      <property name="models">
+        <list>
+          <value>alfresco/module/view-repo/viewModel.xml</value>
+        </list>
+      </property>
+    </bean>
+
 	<bean id="demoScript" parent="baseJavaScriptExtension" class="gov.nasa.jpl.view_repo.DemoJavascriptComponent">
 	    <property name="demoComponent" ref="changeme.exampleComponent"/>
 	    <property name="extensionName">
