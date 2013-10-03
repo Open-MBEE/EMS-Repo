@@ -7,7 +7,20 @@ This is registered by spring config in module-context.xml (which imports another
 
 Location of webscripts: src/main/amp/config/alfresco/extension/templates/webscripts
 
-Make sure your JAVA_HOME is set to a java 1.7 installation.
+Eclipse/Maven
+    Make sure your JAVA_HOME is set to a java 1.7 installation.
+
+    Install maven if you don't have it (mac & linux may have it pre-installed)
+
+    You might want to avoid yoxos.
+
+    For a fresh Eclipse Indigo for JavaEE installation, install new software: egit and maven (no need to add update site)
+
+    Make sure you have a local checkout of alfresco from git.
+
+    Import a maven project from the local ~/git/alfresco-view-repo
+
+    If there are errors and you can resolve them later, choose to resolve them later.  After importing, open the pom.xml, and use the second quick-fix choice for each error.
 
 # building, setting up maven, jrebel
 To build the amp file, do 
@@ -28,7 +41,8 @@ To execute JUnit tests and attach a debugger
 
     mvn -Dmaven.surefire.debug -Dmaven.test.skip=false test
     
-    Set a breakpoint in a test.
+	Put JUnit test java files in src/test/java
+    Set a breakpoint in a JUnit test.
     Run a Remote Java Application configuration with localhost for Host and 5005 for Port.
     Follow DemoComponentTest.java and its entry in service-content.xml
 
