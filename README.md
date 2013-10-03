@@ -19,6 +19,8 @@ Eclipse/Maven
     Make sure you have a local checkout of alfresco from git.
 
     Import a maven project from the local ~/git/alfresco-view-repo
+    
+    To connect the project to git, right-click the project in the Package Explorer and select Team->Share Project->Git.
 
     If there are errors and you can resolve them later, choose to resolve them later.  After importing, open the pom.xml, and use the second quick-fix choice for each error.
 
