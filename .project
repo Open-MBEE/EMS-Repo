@@ -26,4 +26,16 @@
 		<nature>org.eclipse.m2e.core.maven2Nature</nature>
 		<nature>org.zeroturnaround.eclipse.jrebelNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>src/main/thirdParty</name>
+			<type>2</type>
+			<location>C:/Users/bclement/workspaceYoxos/CSquery/thirdParty</location>
+		</link>
+		<link>
+			<name>src/main/java/gov/nasa/jpl/ae</name>
+			<type>2</type>
+			<location>C:/Users/bclement/workspaceYoxos/CSquery/src/gov/nasa/jpl/ae</location>
+		</link>
+	</linkedResources>
 </projectDescription>

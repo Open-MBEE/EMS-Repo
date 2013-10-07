@@ -5,6 +5,7 @@ package gov.nasa.jpl.view_repo.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import gov.nasa.jpl.ae.util.JavaEvaluator;
 import gov.nasa.jpl.view_repo.JavaQuery;
 
 import org.alfresco.model.ContentModel;
@@ -88,5 +89,13 @@ public class JavaQueryTest {
         assertNotNull( nodeName );
         assertEquals( nodeName, nodeName );
     }
-
+    
+    @Test
+    public void testJavaEvaluator() {
+        Object actualObj = JavaEvaluator.evaluate("Math.sqrt( 49 )");
+        Double actual = null;
+        if ( actualObj instanceof Double ) actual = (Double)actualObj;
+        Double expected = Math.sqrt( 49 );
+        assertEquals( expected, actual, 0.0001 );
+    }
 }

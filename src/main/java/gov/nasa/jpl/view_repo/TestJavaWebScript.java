@@ -28,7 +28,10 @@ public class TestJavaWebScript extends DeclarativeWebScript {
         this.nodeLocatorService = nodeLocatorService;
     }
     
-  
+    private String n() {
+        return "foo";
+    }
+    
     private String getReply() {
     	return "120";
     }
@@ -38,7 +41,7 @@ public class TestJavaWebScript extends DeclarativeWebScript {
 		Map<String, Object> model = new HashMap<String, Object>();
 		NodeRef root = nodeLocatorService.getNode("companyhome", null, null);
 		int count = nodeService.countChildAssocs(root, true);
-		model.put("reply", Integer.toString(count));
+		model.put("reply", n());//Integer.toString(count));
 		return model;
 	}
 }

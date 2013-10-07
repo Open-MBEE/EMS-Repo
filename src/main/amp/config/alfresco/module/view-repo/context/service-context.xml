@@ -41,12 +41,19 @@
       </property>
     </bean>
 
-	<bean id="demoScript" parent="baseJavaScriptExtension" class="gov.nasa.jpl.view_repo.DemoJavascriptComponent">
-	    <property name="demoComponent" ref="changeme.exampleComponent"/>
-	    <property name="extensionName">
-	    	<value>demo</value>
-	    </property>
-	</bean>    
+<!-- 	<bean id="demoScript" parent="baseJavaScriptExtension" class="gov.nasa.jpl.view_repo.DemoJavascriptComponent"> -->
+<!-- 	    <property name="demoComponent" ref="changeme.exampleComponent"/> -->
+<!-- 	    <property name="extensionName"> -->
+<!-- 	    	<value>demo</value> -->
+<!-- 	    </property> -->
+<!-- 	</bean>     -->
+
+    <bean id="demoQuery" parent="baseJavaScriptExtension" class="gov.nasa.jpl.view_repo.DemoJavaQuery">
+        <property name="demoComponent" ref="changeme.exampleComponent"/>
+        <property name="extensionName">
+            <value>demo</value>
+        </property>
+    </bean>    
 
     <!-- A simple module component that will be executed once -->
     <bean id="java_query" class="gov.nasa.jpl.view_repo.JavaQuery" parent="module.baseComponent" >
@@ -73,4 +80,12 @@
 		<property name="nodeService" ref="NodeService" />
         <property name="nodeLocatorService" ref="nodeLocatorService" /> 
 	</bean>
+
+    <bean id="webscript.gov.nasa.jpl.java_query.post"
+        class="gov.nasa.jpl.view_repo.JavaQueryPost"
+        parent="webscript">
+        <property name="nodeService" ref="NodeService" />
+        <property name="nodeLocatorService" ref="nodeLocatorService" /> 
+    </bean>
+
 </beans>

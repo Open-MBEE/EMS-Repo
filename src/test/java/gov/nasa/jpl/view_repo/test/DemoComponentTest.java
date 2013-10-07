@@ -20,6 +20,7 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.util.ApplicationContextHelper;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 
@@ -83,6 +84,7 @@ public class DemoComponentTest {
     }
     
     @Test
+    @Ignore
     public void testJCR() {
     	Repository repository = demoComponent.getRepository();
     	Node node;

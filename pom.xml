@@ -72,6 +72,26 @@
             <version>4.8.1</version>
             <scope>test</scope>
         </dependency>
+<!-- <dependency> -->
+<!--     <groupId>gov.nasa.jpl.ae</groupId> -->
+<!--     <artifactId>AE</artifactId> -->
+<!--     <version>1.0</version> -->
+<!-- </dependency> -->
+<!--         <dependency> -->
+<!--         	<groupId>AE</groupId> -->
+<!--         	<artifactId>AE</artifactId> -->
+<!--         	<version></version> -->
+<!--         	<scope>system</scope> -->
+<!--         	<systemPath>C:\Users\bclement\workspaceYoxos\CSQuery\</systemPath> -->
+<!--         </dependency> -->
+        <dependency>
+           <groupId>gov.nasa.jpl.ae</groupId>
+           <artifactId>AE</artifactId>
+           <version>1.0</version>
+           <scope>system</scope>
+           <type>jar</type>
+           <systemPath>${project.basedir}/lib/AE.jar</systemPath>
+        </dependency>
     </dependencies>
 
 	
@@ -96,10 +116,31 @@
                 <updatePolicy>daily</updatePolicy>
             </snapshots>
         </repository>
-    </repositories>
-
+<!--     <repository> -->
+<!--         <id>project.local</id> -->
+<!--         <name>project</name> -->
+<!--         <url>file:${project.basedir}/repo</url> -->
+<!--     </repository> -->
+</repositories>
   <build>
 		<plugins>
+<plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>build-helper-maven-plugin</artifactId>
+    <version>1.8</version>
+    <executions>
+        <execution>
+            <phase>gather-sources</phase>
+            <goals><goal>add-source</goal></goals>
+            <configuration>
+                <sources>
+                    <source>/CS/src/gov/nasa/jpl/ae</source>
+                    <source>/CS/src/thirdParty</source>
+                </sources>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
         <plugin>
           <groupId>org.zeroturnaround</groupId>
           <artifactId>jrebel-maven-plugin</artifactId>
@@ -137,5 +178,61 @@
           </configuration>
         </plugin>
       </plugins>
-	</build>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.alfresco.maven.plugin
+										</groupId>
+										<artifactId>
+											alfresco-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.0.2,)
+										</versionRange>
+										<goals>
+											<goal>set-version</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											build-helper-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.8,)
+										</versionRange>
+										<goals>
+											<goal>
+												add-test-resource
+											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+  </build>
 </project>
