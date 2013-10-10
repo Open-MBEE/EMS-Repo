@@ -7,45 +7,27 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import gov.nasa.jpl.ae.util.JavaEvaluator;
+import gov.nasa.jpl.ae.util.MoreToString;
+import gov.nasa.jpl.ae.util.Utils;
 import gov.nasa.jpl.view_repo.JavaQuery;
 
 import org.alfresco.model.ContentModel;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.util.ApplicationContextHelper;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.context.ApplicationContext;
 
 /**
  *
  */
 public class JavaQueryTest {
 
-    protected static ApplicationContext applicationContext;
     public static JavaQuery javaQueryComponent = null;
-    protected static final String ADMIN_USER_NAME = "admin";
-    public static Log log = LogFactory.getLog( JavaQuery.class );
 
     @BeforeClass
     public static void initAppContext() {
         // TODO: Make testing properly working without need for helpers
         // TODO: Provide this in an SDK base class
-        javaQueryComponent = null;
-        ApplicationContextHelper.setUseLazyLoading( false );
-        ApplicationContextHelper.setNoAutoStart( true );
-        String[] contextPath = new String[] { "classpath:alfresco/application-context.xml" };
-        applicationContext =
-                ApplicationContextHelper.getApplicationContext( contextPath  );
-        javaQueryComponent =
-                (JavaQuery)applicationContext.getBean( "java_query" );
-        javaQueryComponent.nodeService =
-                (NodeService)applicationContext.getBean( "NodeService" );
-        AuthenticationUtil.setFullyAuthenticatedUser( ADMIN_USER_NAME );
-        log.debug( "Sample test logging: Application Context properly loaded for JavaQuery" );
+        javaQueryComponent = JavaQuery.getInstance();
     }
 
     @Test
@@ -95,10 +77,54 @@ public class JavaQueryTest {
     }
     
     @Test
+    public void testXPath() {
+        System.out.println( "testXPath()" );
+        String[] queries = new String[] {
+          "//*",
+          "/*",
+          "*",
+          "Company Home",
+          "Company Home/Data Dictionary",
+          "/Company Home",
+          "/Company Home/Data Dictionary",
+          "Data Dictionary",
+          "/Data Dictionary",
+          "cm:Company Home",
+          "Company Home/cm:Data Dictionary",
+          "/cm:Company Home",
+          "/Company Home/cm:Data Dictionary",
+          "cm:Data Dictionary",
+          "/cm:Data Dictionary",
+          "cm:Company Home/cm:Data Dictionary",
+          "/cm:Company Home/cm:Data Dictionary"
+        };
+        NodeRef lastGoodNode = null; 
+        for ( String qString : queries ) {
+            NodeRef node = JavaQuery.get( qString );
+            System.out.println( "testXPath: get(" + qString + ") got node: "
+                                + node );
+            // NodeRef node = javaQueryComponent.getNode( theNodePath );//+ "/"
+            // + theNodeName );
+            if ( node == null ) continue;
+            String nodeName =
+                    (String)javaQueryComponent.nodeService.getProperty( node,
+                                                                        ContentModel.PROP_NAME );
+            System.out.println( "testGetName() got nodeName " + nodeName );
+            if ( lastGoodNode == null || !Utils.isNullOrEmpty( nodeName ) ) {
+                lastGoodNode = node;
+            }
+        }
+        assertNotNull( lastGoodNode );
+        System.out.println("testGetName() succeeded!");
+    }
+    
+    @Test
     public void testJavaEvaluatorSqrt() {
-        Object actualObj = JavaEvaluator.evaluate("Math.sqrt( 49 )");
+        String java = "Math.sqrt( 49 )";
+        Object actualObj = JavaEvaluator.evaluate(java);
         Double actual = null;
         if ( actualObj instanceof Double ) actual = (Double)actualObj;
+        System.out.println( "testJavaEvaluatorSqrt() evaluate(" + java + ") = " + MoreToString.Helper.toString( actualObj ) );
         Double expected = Math.sqrt( 49 );
         assertEquals( expected, actual, 0.0001 );
     }
@@ -108,6 +134,7 @@ public class JavaQueryTest {
         String java = "org.alfresco.model.ContentModel.class.getFields()";
         Object expected = org.alfresco.model.ContentModel.class.getFields();
         Object actualObj = JavaEvaluator.evaluate(java);
+        System.out.println( "testJavaEvaluatorGetFields() evaluate(" + java + ") = " + MoreToString.Helper.toString( actualObj ) );
         assertNotNull( actualObj );
         assertTrue( actualObj.equals( expected ) );
     }
@@ -117,6 +144,7 @@ public class JavaQueryTest {
         String java = "org.alfresco.model.ContentModel.PROP_NAME";
         Object expected = org.alfresco.model.ContentModel.PROP_NAME; 
         Object actualObj = JavaEvaluator.evaluate(java);
+        System.out.println( "testJavaEvaluatorConstant() evaluate(" + java + ") = " + MoreToString.Helper.toString( actualObj ) );
         assertNotNull( actualObj );
         assertTrue( actualObj.equals( expected ) );
     }
@@ -125,6 +153,16 @@ public class JavaQueryTest {
     public void testJavaEvaluatorClassRef() {
         String clsName = "gov.nasa.jpl.view_repo.JavaQuery";
         Object actualObj = JavaEvaluator.evaluate(clsName);
+        System.out.println( "testJavaEvaluatorClassRef() evaluate(" + clsName + ") = " + MoreToString.Helper.toString( actualObj ) );
+        assertNotNull( actualObj );
+        assertTrue( actualObj.toString().equals( clsName ) );
+    }
+    
+    @Test
+    public void testJavaEvaluatorGet() {
+        String clsName = "gov.nasa.jpl.view_repo.JavaQuery.get(\"*\")";
+        Object actualObj = JavaEvaluator.evaluate(clsName);
+        System.out.println( "testJavaEvaluatorGet() evaluate(" + clsName + ") = " + MoreToString.Helper.toString( actualObj ) );
         assertNotNull( actualObj );
         assertTrue( actualObj.toString().equals( clsName ) );
     }
@@ -133,6 +171,7 @@ public class JavaQueryTest {
     public void testJavaEvaluatorTestClassRef() {
         String clsName = "gov.nasa.jpl.view_repo.test.JavaQueryTest";
         Object actualObj = JavaEvaluator.evaluate(clsName);
+        System.out.println( "testJavaEvaluatorTestClassRef() evaluate(" + clsName + ") = " + MoreToString.Helper.toString( actualObj ) );
         assertNotNull( actualObj );
         assertTrue( actualObj.toString().equals( clsName ) );
     }

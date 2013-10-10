@@ -10,7 +10,6 @@ import static org.junit.Assert.assertNotNull;
 import gov.nasa.jpl.ae.util.Debug;
 import gov.nasa.jpl.ae.util.MoreToString;
 import gov.nasa.jpl.ae.util.Utils;
-import gov.nasa.jpl.view_repo.test.JavaQueryTest;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -23,8 +22,8 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.module.AbstractModuleComponent;
 import org.alfresco.repo.nodelocator.NodeLocatorService;
 import org.alfresco.repo.nodelocator.XPathNodeLocator;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.AssociationRef;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -34,6 +33,10 @@ import org.alfresco.service.namespace.DynamicNamespacePrefixResolver;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
+import org.alfresco.util.ApplicationContextHelper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.context.ApplicationContext;
 //import org.junit.Assert;
 
 // import org.apache.log4j.Logger;
@@ -44,8 +47,15 @@ import org.alfresco.service.namespace.RegexQNamePattern;
 public class JavaQuery extends AbstractModuleComponent
                        implements ModelInterface< NodeRef, String, Serializable, String, AssociationRef > {
 
-    public NodeService nodeService;
+    public static ApplicationContext applicationContext;
+    protected static JavaQuery instance;// = initAppContext();
+    protected static final String ADMIN_USER_NAME = "admin";
+    public static Log log = LogFactory.getLog( JavaQuery.class );
 
+    public static int anInt = 3;
+
+    public NodeService nodeService;
+    
     protected NodeLocatorService nodeLocatorService;
 
     protected ContentService contentService;
@@ -89,9 +99,9 @@ public class JavaQuery extends AbstractModuleComponent
                              + MoreToString.Helper.toString( store ) );
                 return store;
             } else {
-                Debug.outln( "getStoreRefByName(" + storeName
-                             + ") does not match store id = "
-                             + store.getIdentifier() );
+//                Debug.outln( "getStoreRefByName(" + storeName
+//                             + ") does not match store id = "
+//                             + store.getIdentifier() );
             }
         }
         Debug.outln( "getStoreRefByName(" + storeName + ") failed; stores = "
@@ -110,7 +120,7 @@ public class JavaQuery extends AbstractModuleComponent
         StoreRef storeRef = getStoreRefByName("SpacesStore");
         NodeRef rootNodeRef = nodeService.getRootNode( storeRef  );
         // Select all nodes below the context node
-        List< NodeRef > answer =  searchService.selectNodes(rootNodeRef, "*", null, namespacePrefixResolver, false);
+        List< NodeRef > answer =  searchService.selectNodes(rootNodeRef, string, null, namespacePrefixResolver, false);
         // Find all the property values for @alftest:animal    
         //List<Serializable> attributes = searchService.selectProperties(rootNodeRef, "//@alftest:animal", null, namespacePrefixResolver, false);
         if ( Utils.isNullOrEmpty( answer ) ) {
@@ -211,24 +221,47 @@ public class JavaQuery extends AbstractModuleComponent
         //JavaQueryTest.log.debug( "Test debug logging. Congratulation your AMP is working" );
         //JavaQueryTest.log.info( "This is only for information purposed. Better remove me from the log in Production" );
     }
+    
+    public static JavaQuery getInstance() {
+        if ( instance == null ) {
+            instance = JavaQuery.initAppContext();
+        }
+        return instance;
+    }
 
     public static Object get(String xpath, QName property) {
         System.out.println( "get(" + xpath + ", " + property + ")" );
         NodeRef node = get( xpath );
         assertNotNull( node );
         String nodeName =
-                (String)JavaQueryTest.javaQueryComponent.nodeService.getProperty( node,
-                                                                    ContentModel.PROP_NAME );
+           (String)getInstance().nodeService.getProperty( node,
+                                                          ContentModel.PROP_NAME );
         assertNotNull( nodeName );
         assertEquals( nodeName, nodeName );
         return nodeName;
     }
     public static NodeRef get(String xpath) {
-        if ( JavaQueryTest.javaQueryComponent == null ) {
-            JavaQueryTest.initAppContext();
-        }
-        NodeRef node = JavaQueryTest.javaQueryComponent.getNode( JavaQueryTest.theNodePath + "/" + JavaQueryTest.theNodeName );
+        NodeRef node = getInstance().getNode( xpath ); // ( JavaQueryTest.theNodePath + "/" + JavaQueryTest.theNodeName );
         return node;
     }
+
+    public static JavaQuery initAppContext() {
+        // TODO: Make testing properly working without need for helpers
+        // TODO: Provide this in an SDK base class
+        JavaQuery javaQueryComponent = null;
+        ApplicationContextHelper.setUseLazyLoading( false );
+        ApplicationContextHelper.setNoAutoStart( true );
+        String[] contextPath = new String[] { "classpath:alfresco/application-context.xml" };
+        applicationContext =
+                ApplicationContextHelper.getApplicationContext( contextPath );
+        javaQueryComponent =
+                (JavaQuery)applicationContext.getBean( "java_query" );
+        javaQueryComponent.nodeService =
+                (NodeService)applicationContext.getBean( "NodeService" );
+        AuthenticationUtil.setFullyAuthenticatedUser( ADMIN_USER_NAME );
+        log.debug( "Sample test logging: Application Context properly loaded for JavaQuery" );
+        return javaQueryComponent;
+    }
+
 
 }
