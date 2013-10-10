@@ -63,6 +63,7 @@ function handleView(view, seen, elements, views, view2view) {
 			handleView(childViews[i], seen, elements, views, view2view);
 		}
 	}
+	viewinfo['editable'] = true;
 	return viewinfo;
 }
 
