@@ -1,1 +1,1 @@
-mvn -Dmaven.test.skip=false test
+mvn -Drebel.log=true -Dmaven.test.skip=false test 

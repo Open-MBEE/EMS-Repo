@@ -19,6 +19,18 @@
 					}
 				);
 		    });
+            $("#junittest").click(function (event) {
+                var expression = $("#input").val();
+                var query = $("#input").val();
+                var reply = $("#output").val();
+                var dotest = "dojunittest";
+                $.ajax({
+                    url: '${url.context}/wcs/java_query',
+                    type: 'POST',
+                    data: dotest,
+                    contentType: 'text/plain; charset=UTF-8'
+                });
+            });
 		});
 		</script>
 	</head>
@@ -29,5 +41,9 @@
 		<br/>
 		<br/>
 		<textarea id="output" rows="40" cols="80"></textarea>
+        <br/>
+        <br/>
+        <br/>
+        <button type="submit" id="junittest">Run JUnit tests</button>
 	</body>
 </html>

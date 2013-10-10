@@ -5,6 +5,7 @@ package gov.nasa.jpl.view_repo.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import gov.nasa.jpl.ae.util.JavaEvaluator;
 import gov.nasa.jpl.view_repo.JavaQuery;
 
@@ -25,7 +26,7 @@ import org.springframework.context.ApplicationContext;
 public class JavaQueryTest {
 
     protected static ApplicationContext applicationContext;
-    private static JavaQuery javaQueryComponent = null;
+    public static JavaQuery javaQueryComponent = null;
     protected static final String ADMIN_USER_NAME = "admin";
     public static Log log = LogFactory.getLog( JavaQuery.class );
 
@@ -75,27 +76,64 @@ public class JavaQueryTest {
      * 11:46:16 -0700]
      */
     
-    private static String theNodePath = "/Data Dictionary/Space Templates/Software Engineering Project/Documentation/Samples";
-    private static String theNodeName = "system-overview.html";
+    //private static String theNodePath = "cm:Data Dictionary/cm:Space Templates/cm:Software Engineering Project/cm:Documentation/cm:Samples";
+    public static String theNodePath = "Data Dictionary";
+    public static String theNodeName = "system-overview.html";
     
     @Test
     public void testGetName() {
         System.out.println( "testGetName()" );
-        NodeRef node = javaQueryComponent.getNode( theNodePath + "/" + theNodeName );
+        NodeRef node = javaQueryComponent.getNode( theNodePath );//+ "/" + theNodeName );
         assertNotNull( node );
         String nodeName =
                 (String)javaQueryComponent.nodeService.getProperty( node,
                                                                     ContentModel.PROP_NAME );
+        System.out.println("testGetName() got nodeName " + nodeName);
         assertNotNull( nodeName );
         assertEquals( nodeName, nodeName );
+        System.out.println("testGetName() succeeded!");
     }
     
     @Test
-    public void testJavaEvaluator() {
+    public void testJavaEvaluatorSqrt() {
         Object actualObj = JavaEvaluator.evaluate("Math.sqrt( 49 )");
         Double actual = null;
         if ( actualObj instanceof Double ) actual = (Double)actualObj;
         Double expected = Math.sqrt( 49 );
         assertEquals( expected, actual, 0.0001 );
+    }
+    
+    @Test
+    public void testJavaEvaluatorGetFields() {
+        String java = "org.alfresco.model.ContentModel.class.getFields()";
+        Object expected = org.alfresco.model.ContentModel.class.getFields();
+        Object actualObj = JavaEvaluator.evaluate(java);
+        assertNotNull( actualObj );
+        assertTrue( actualObj.equals( expected ) );
+    }
+    
+    @Test
+    public void testJavaEvaluatorConstant() {
+        String java = "org.alfresco.model.ContentModel.PROP_NAME";
+        Object expected = org.alfresco.model.ContentModel.PROP_NAME; 
+        Object actualObj = JavaEvaluator.evaluate(java);
+        assertNotNull( actualObj );
+        assertTrue( actualObj.equals( expected ) );
+    }
+    
+    @Test
+    public void testJavaEvaluatorClassRef() {
+        String clsName = "gov.nasa.jpl.view_repo.JavaQuery";
+        Object actualObj = JavaEvaluator.evaluate(clsName);
+        assertNotNull( actualObj );
+        assertTrue( actualObj.toString().equals( clsName ) );
+    }
+    
+    @Test
+    public void testJavaEvaluatorTestClassRef() {
+        String clsName = "gov.nasa.jpl.view_repo.test.JavaQueryTest";
+        Object actualObj = JavaEvaluator.evaluate(clsName);
+        assertNotNull( actualObj );
+        assertTrue( actualObj.toString().equals( clsName ) );
     }
 }

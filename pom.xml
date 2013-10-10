@@ -65,6 +65,12 @@
             <groupId>${alfresco.groupId}</groupId>
             <artifactId>alfresco-repository</artifactId>
         </dependency>
+        <!-- needed for class loader problems -->
+		<dependency>
+		    <groupId>org.eclipse.core</groupId>
+		    <artifactId>org.eclipse.core.runtime</artifactId>
+		    <version>3.6.0.v20100505</version>
+		</dependency>
         <!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>

@@ -5,6 +5,13 @@ package gov.nasa.jpl.view_repo;
 
 // import AbstractContentTransformer2;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import gov.nasa.jpl.ae.util.Debug;
+import gov.nasa.jpl.ae.util.MoreToString;
+import gov.nasa.jpl.ae.util.Utils;
+import gov.nasa.jpl.view_repo.test.JavaQueryTest;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,11 +24,14 @@ import org.alfresco.repo.module.AbstractModuleComponent;
 import org.alfresco.repo.nodelocator.NodeLocatorService;
 import org.alfresco.repo.nodelocator.XPathNodeLocator;
 import org.alfresco.service.cmr.repository.AssociationRef;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.SearchService;
+import org.alfresco.service.namespace.DynamicNamespacePrefixResolver;
+import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
 //import org.junit.Assert;
@@ -72,16 +82,44 @@ public class JavaQuery extends AbstractModuleComponent
         List< StoreRef > stores = nodeService.getStores();
         if ( stores == null ) return null;
         for ( StoreRef store : stores ) {
-            if ( store != null & store.getIdentifier().trim().equals( storeName.trim() ) ) {
+            if ( store != null
+                 && store.getIdentifier().trim().equals( storeName.trim() ) ) {
+                Debug.outln( "getStoreRefByName(" + storeName
+                             + ") found store = "
+                             + MoreToString.Helper.toString( store ) );
                 return store;
+            } else {
+                Debug.outln( "getStoreRefByName(" + storeName
+                             + ") does not match store id = "
+                             + store.getIdentifier() );
             }
         }
+        Debug.outln( "getStoreRefByName(" + storeName + ") failed; stores = "
+                     + MoreToString.Helper.toString( stores ) );
         return null;
     }
     
     
     
     public NodeRef getNode( String string ) {
+     // A name space resolver is required - this could be the name space service
+        DynamicNamespacePrefixResolver namespacePrefixResolver = new DynamicNamespacePrefixResolver(null);
+        namespacePrefixResolver.registerNamespace( NamespaceService.ALFRESCO_PREFIX, NamespaceService.ALFRESCO_URI);
+//        namespacePrefixResolver.addDynamicNamespace(NamespaceService.ALFRESCO_TEST_PREFIX, NamespaceService.ALFRESCO_TEST_URI);
+
+        StoreRef storeRef = getStoreRefByName("SpacesStore");
+        NodeRef rootNodeRef = nodeService.getRootNode( storeRef  );
+        // Select all nodes below the context node
+        List< NodeRef > answer =  searchService.selectNodes(rootNodeRef, "*", null, namespacePrefixResolver, false);
+        // Find all the property values for @alftest:animal    
+        //List<Serializable> attributes = searchService.selectProperties(rootNodeRef, "//@alftest:animal", null, namespacePrefixResolver, false);
+        if ( Utils.isNullOrEmpty( answer ) ) {
+            return null;
+        }
+        return answer.get( 0 );
+    }
+
+    public NodeRef oldGetNode( String string ) {
         Map< String, Serializable > params = new TreeMap<String, Serializable>();
 //        //int pos = string.indexOf( '/' );
 //        String[] storePath = string.split( "/", 3 );
@@ -172,6 +210,25 @@ public class JavaQuery extends AbstractModuleComponent
         System.out.println( "JavaQuery has been executed (although it does nothing by itself)" );
         //JavaQueryTest.log.debug( "Test debug logging. Congratulation your AMP is working" );
         //JavaQueryTest.log.info( "This is only for information purposed. Better remove me from the log in Production" );
+    }
+
+    public static Object get(String xpath, QName property) {
+        System.out.println( "get(" + xpath + ", " + property + ")" );
+        NodeRef node = get( xpath );
+        assertNotNull( node );
+        String nodeName =
+                (String)JavaQueryTest.javaQueryComponent.nodeService.getProperty( node,
+                                                                    ContentModel.PROP_NAME );
+        assertNotNull( nodeName );
+        assertEquals( nodeName, nodeName );
+        return nodeName;
+    }
+    public static NodeRef get(String xpath) {
+        if ( JavaQueryTest.javaQueryComponent == null ) {
+            JavaQueryTest.initAppContext();
+        }
+        NodeRef node = JavaQueryTest.javaQueryComponent.getNode( JavaQueryTest.theNodePath + "/" + JavaQueryTest.theNodeName );
+        return node;
     }
 
 }
