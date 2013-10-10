@@ -79,6 +79,7 @@ function main() {
 	snapshoturl.url = url.context + htmlNode.url;
 	snapshoturl.creator = person.properties['cm:userName'];
 	snapshoturl.created = utils.toISO8601(htmlNode.properties["cm:created"]);
+	snapshoturl.id = snapshotid;
 }
 
 status.code = 200;
