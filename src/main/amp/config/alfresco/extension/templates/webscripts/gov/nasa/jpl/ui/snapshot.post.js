@@ -56,6 +56,17 @@ function main() {
 	snapshotNode.properties["view:productJson"] = toJson(info);
 	snapshotNode.save();
 	topview.createAssociation(snapshotNode, "view:snapshots");
+	
+	var html = requestbody.content;
+	var htmlNode = docsnapshot.createFile(snapshotid + ".html");
+	htmlNode.content = html;
+    htmlNode.properties.content.setEncoding("UTF-8");
+	htmlNode.save();
+	snapshotNode.createAssociation(htmlNode, "view:html");
+	snapshoturl.url = url.context + "wcs/ui/views/" + viewid + "/snapshots/" + snapshotid;
+	snapshoturl.creator = person.properties['cm:userName'];
+	snapshoturl.created = utils.toISO8601(htmlNode.properties["cm:created"]);
+	snapshoturl.id = snapshotid;
 }
 */
 var snapshoturl = {};
