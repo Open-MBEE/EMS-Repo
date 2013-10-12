@@ -8,7 +8,7 @@
 		    $("#submit").click(function (event) {
 		        var expression = $("#input").val();
 		        $.ajax({
-		        	url: '${url.context}/service/java_query',
+		        	url: '${url.context}/wcs/java_query',
 		        	type: 'POST',
 		        	data: expression,
 		        	contentType: 'text/plain; charset=UTF-8'
@@ -25,7 +25,7 @@
                 var reply = $("#output").val();
                 var dotest = "dojunittest";
                 $.ajax({
-                    url: '${url.context}/service/java_query',
+                    url: '${url.context}/wcs/java_query',
                     type: 'POST',
                     data: dotest,
                     contentType: 'text/plain; charset=UTF-8'

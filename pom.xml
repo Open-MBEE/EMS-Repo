@@ -75,7 +75,25 @@
 		    <groupId>org.springframework</groupId>
 		    <artifactId>spring-context</artifactId>
 		    <version>3.0.6.RELEASE</version>
-		</dependency>        <!-- Test dependencies -->
+		</dependency>
+		<!--  apache chemistry opencmis CLIENT -->
+<!--         <dependency> -->
+<!--             <groupId>org.apache.chemistry.opencmis</groupId> -->
+<!--             <artifactId>chemistry-opencmis-client-impl</artifactId> -->
+<!--             <version>${dependency.opencmis.version}</version> -->
+<!--         </dependency> -->
+		<dependency>
+		    <groupId>org.apache.chemistry.opencmis</groupId>
+		    <artifactId>chemistry-opencmis-client-impl</artifactId>
+		    <version>0.8.0</version>
+    	</dependency>
+        <!--  apache chemistry opencmis SERVER -->
+		<dependency>
+		    <groupId>org.apache.chemistry.opencmis</groupId>
+		    <artifactId>chemistry-opencmis-server-support</artifactId>
+		    <version>0.8.0</version>
+		</dependency>
+    	<!-- Test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
