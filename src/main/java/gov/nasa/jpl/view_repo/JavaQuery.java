@@ -15,6 +15,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,9 @@ import org.alfresco.repo.module.AbstractModuleComponent;
 import org.alfresco.repo.nodelocator.NodeLocatorService;
 import org.alfresco.repo.nodelocator.XPathNodeLocator;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.dictionary.DictionaryService;
+import org.alfresco.service.cmr.dictionary.PropertyDefinition;
+import org.alfresco.service.cmr.dictionary.TypeDefinition;
 import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -62,7 +66,7 @@ import org.springframework.context.ApplicationContext;
  * 
  */
 public class JavaQuery extends AbstractModuleComponent
-                       implements ModelInterface< NodeRef, String, Serializable, String, AssociationRef > {
+                       implements ModelInterface< NodeRef, String, Object, String, String, AssociationRef > {
 
     public static ApplicationContext applicationContext;
     protected static JavaQuery instance;// = initAppContext(); // only use this in unit test mode
@@ -78,6 +82,10 @@ public class JavaQuery extends AbstractModuleComponent
     protected ContentService contentService;
 
     protected SearchService searchService;
+    
+    protected DictionaryService dictionaryService;
+
+    //protected DictionaryLocatorService dictionaryLocatorService;
 
     public JavaQuery() {
         super();
@@ -99,6 +107,14 @@ public class JavaQuery extends AbstractModuleComponent
     public void setNodeLocatorService( NodeLocatorService nodeLocatorService ) {
         this.nodeLocatorService = nodeLocatorService;
     }
+
+    public void setDictionaryService( DictionaryService dictionaryService ) {
+        this.dictionaryService = dictionaryService;
+    }
+
+//    public void setDictionaryLocatorService( DictionaryLocatorService dictionaryLocatorService ) {
+//        this.dictionaryLocatorService = dictionaryLocatorService;
+//    }
 
     /**
      * Returns the NodeRef of "Company Home"
@@ -239,6 +255,34 @@ public class JavaQuery extends AbstractModuleComponent
         return nodes;
     }
 
+    public static String toString(List<QueryResult> results) {
+        //StringBuffer sb = new StringBuffer();
+        List<Map<?,?>> list = queryResultsToTable( results );
+        String s = MoreToString.Helper.toString( list );
+        return s;
+        //return sb.toString();
+    }
+    public static List<Map<?,?>> queryResultsToTable(List<QueryResult> results) {
+        ArrayList<Map< ?, ? >> list = new ArrayList<Map<?,?>>();
+        //Debug.outln("Results");
+        for (QueryResult result : results) {
+            LinkedHashMap<String, List<?>> map = new LinkedHashMap<String, List<?>>();
+            //Debug.outln("Properties: " + result.getProperties());
+            for (PropertyData<?> data: result.getProperties()) {
+                map.put( data.getQueryName(), data.getValues() );
+                //Debug.outln("  Query name:" + data.getQueryName());
+                //Debug.outln("      Values:" + data.getValues());
+            }
+            list.add( map );
+        }
+        return list;
+    }
+    public static List<Map<?,?>> cmisQueryToTable(String query) {
+        List<QueryResult> queryResults = cmisQuery( query );
+        List<Map<?,?>> queryResultsTable = queryResultsToTable( queryResults );
+        return queryResultsTable;
+    }
+    
     public static List<QueryResult> cmisQuery( String query ) {
         Map<String, String> parameter = new HashMap<String,String>();
 
@@ -279,14 +323,8 @@ public class JavaQuery extends AbstractModuleComponent
         //"SELECT cmis:name, cmis:objectId AS MyId from cmis:document where cmis:name =  'myfile.ext'", false);
         ItemIterable< QueryResult > resultsI = session.query(query, false);
         List<QueryResult> results = new ArrayList<QueryResult>();
-        Debug.outln("Results");
         for (QueryResult result : resultsI) {
             results.add( result );
-            Debug.outln("Properties: " + result.getProperties());
-            for (PropertyData<?> data: result.getProperties()) {
-                Debug.outln("  Query name:" + data.getQueryName());
-                Debug.outln("      Values:" + data.getValues());
-            }
         }
         Debug.outln("cmisQuery(" + query + ") returning " + results );
         return results;
@@ -324,7 +362,6 @@ public class JavaQuery extends AbstractModuleComponent
         sp.setLanguage( language );
         sp.setQuery( query );
         ResultSet results = null;
-        NodeRef node = null;
         List<NodeRef> nodeList = new ArrayList<NodeRef>();
         try {
             getInstance().searchService = getInstance().serviceRegistry.getSearchService();
@@ -376,6 +413,24 @@ public class JavaQuery extends AbstractModuleComponent
     // JUnit
 
     @Override
+    public NodeRef getObject( String identifier ) {
+        List<NodeRef> nodes = get( identifier );
+        if ( Utils.isNullOrEmpty( nodes ) ) {
+            Debug.errln( "CMIS getObject(): Could not find node " + identifier + "!" );
+            return null;
+        }
+        if ( nodes.size() > 1 ) {
+            Debug.errln( "CMIS getObject(): Got multiple objects for identifier " + identifier + "! Returning first of " + MoreToString.Helper.toString( nodes ) );
+        }
+        return nodes.get( 0 );
+    }
+
+    @Override
+    public String getObjectId( NodeRef object ) {
+        return object.getId();
+    }
+
+    @Override
     public String getName( NodeRef object ) {
         return (String)nodeService.getProperty( object, ContentModel.PROP_NAME );
     }
@@ -388,9 +443,31 @@ public class JavaQuery extends AbstractModuleComponent
     }
 
     @Override
-    public Collection< Serializable > getProperties( NodeRef object ) {
-        Map< QName, Serializable > propMap = nodeService.getProperties( object );
-        return propMap.values();
+    public Collection< Object > getTypeProperties( String typeName ) {
+        if ( typeName == null ) return null;
+        TypeDefinition type = getType(typeName);
+        Map< QName, PropertyDefinition > props = type.getProperties();
+        if ( props == null ) return null;
+        List<Object> propObjs = new ArrayList<Object>();
+        propObjs.addAll( props.values() );
+        return propObjs;
+    }
+
+    public TypeDefinition getType( String typeName ) {
+        if ( typeName == null ) return null;
+        QName typeQName = QName.createQName( typeName );
+        TypeDefinition type = dictionaryService.getType( typeQName );
+        return type;
+    }
+    
+    @Override
+    public Collection< Object > getProperties( NodeRef object ) {
+        Map< QName, Serializable > props = nodeService.getProperties( object );
+        if ( props == null ) return null;
+        //return props.values();
+        List<Object> propObjs = new ArrayList<Object>();
+        propObjs.addAll( props.values() );
+        return propObjs;
     }
 
     @Override
@@ -437,7 +514,7 @@ public class JavaQuery extends AbstractModuleComponent
         }
         return results;
     }
-
+    
     @Override
     public Collection< NodeRef > getRelated( NodeRef object,
                                              String relationshipName ) {
@@ -504,6 +581,15 @@ public class JavaQuery extends AbstractModuleComponent
                 (JavaQuery)applicationContext.getBean( "java_query" );
         javaQueryComponent.nodeService =
                 (NodeService)applicationContext.getBean( "NodeService" );
+        javaQueryComponent.nodeLocatorService =
+                (NodeLocatorService)applicationContext.getBean( "NodeLocatorService" );
+        javaQueryComponent.searchService =
+                (SearchService)applicationContext.getBean( "SearchService" );
+        javaQueryComponent.contentService =
+                (ContentService)applicationContext.getBean( "ContentService" );
+        javaQueryComponent.dictionaryService =
+                (DictionaryService)applicationContext.getBean( "DictionaryService" );
+        
         AuthenticationUtil.setFullyAuthenticatedUser( ADMIN_USER_NAME );
         log.debug( "Sample test logging: Application Context properly loaded for JavaQuery" );
         return javaQueryComponent;

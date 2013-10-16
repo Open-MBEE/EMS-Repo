@@ -72,6 +72,9 @@
            <ref bean="ContentService" />
         </property>
         <property name="nodeLocatorService" ref="nodeLocatorService" />
+        <property name="dictionaryService">
+           <ref bean="DictionaryService" />
+        </property>
     </bean>
     
 	<bean id="webscript.gov.nasa.jpl.javatest.get"

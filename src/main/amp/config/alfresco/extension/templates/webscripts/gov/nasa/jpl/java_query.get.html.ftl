@@ -44,6 +44,7 @@
         <br/>
         <br/>
         <br/>
-        <button type="submit" id="junittest">Run JUnit tests</button>
+        <button type="submit" id="junittest" disabled="disabled">Run JUnit tests</button>
+        <!-- Why doesn't "disabled" work??! -->
 	</body>
 </html>
