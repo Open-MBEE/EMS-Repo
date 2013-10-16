@@ -45,6 +45,7 @@ function main() {
 	info['views'] = views;
 	info['rootView'] = viewid;
 	info['user'] = person.properties['cm:userName'];
+	info['snapshot'] = false;
 }
 
 status.code = 200;

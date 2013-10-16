@@ -63,6 +63,10 @@ function handleView(view, seen, elements, views, view2view) {
 			handleView(childViews[i], seen, elements, views, view2view);
 		}
 	}
+	if (view.hasPermission("Write"))
+		viewinfo['editable'] = true;
+	else
+		viewinfo['editable'] = false;
 	return viewinfo;
 }
 

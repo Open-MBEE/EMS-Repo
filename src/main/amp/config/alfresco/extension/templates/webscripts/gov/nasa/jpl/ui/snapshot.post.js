@@ -17,6 +17,7 @@ function main() {
 	var seen = [];
 	var views = [];
 	var view2view = {};
+	
 	if (topview == null) {
 		status.code = 404;
 	} else {
@@ -26,19 +27,19 @@ function main() {
 			view2view = JSON.parse(topview.properties["view:view2viewJson"]);
 			var noSections = JSON.parse(topview.properties["view:noSectionsJson"]);
 			for (var viewmdid in view2view) {
-				var view = modelFolder.childrenByXPath("*[@view:mdid='" + viewmdid + "']");
-				if (view == null || view.length == 0) {
+				var view = modelFolder.childByNamePath(viewmdid);
+				if (view == null) {
 					status.code = 404;
 					return;
 				}
-				var viewinfo = handleView(view[0]);
+				var viewinfo = handleView(view, seen, elements, views, view2view);
 				if (noSections.indexOf(viewmdid) >= 0)
 					viewinfo.noSection = true;
 				else
 					viewinfo.noSection = false;
 			}
 		} else {
-			handleView(topview);
+			handleView(topview, seen, elements, views, view2view);
 		}
 	}
 	var info = {};
@@ -46,6 +47,7 @@ function main() {
 	info['view2view'] = view2view;
 	info['views'] = views;
 	info['rootView'] = viewid;
+	info['snapshot'] = true;
 	
 	var docsnapshot = snapshotFolder.childByNamePath(viewid);
 	if (docsnapshot == null)
@@ -54,6 +56,17 @@ function main() {
 	snapshotNode.properties["view:productJson"] = toJson(info);
 	snapshotNode.save();
 	topview.createAssociation(snapshotNode, "view:snapshots");
+	
+	var html = requestbody.content;
+	var htmlNode = docsnapshot.createFile(snapshotid + ".html");
+	htmlNode.content = html;
+    htmlNode.properties.content.setEncoding("UTF-8");
+	htmlNode.save();
+	snapshotNode.createAssociation(htmlNode, "view:html");
+	snapshoturl.url = url.context + "wcs/ui/views/" + viewid + "/snapshots/" + snapshotid;
+	snapshoturl.creator = person.properties['cm:userName'];
+	snapshoturl.created = utils.toISO8601(htmlNode.properties["cm:created"]);
+	snapshoturl.id = snapshotid;
 }
 */
 var snapshoturl = {};
@@ -79,6 +92,7 @@ function main() {
 	snapshoturl.url = url.context + htmlNode.url;
 	snapshoturl.creator = person.properties['cm:userName'];
 	snapshoturl.created = utils.toISO8601(htmlNode.properties["cm:created"]);
+	snapshoturl.id = snapshotid;
 }
 
 status.code = 200;

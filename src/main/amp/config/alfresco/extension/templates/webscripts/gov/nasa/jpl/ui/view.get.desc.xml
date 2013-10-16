@@ -6,6 +6,7 @@
 			"user": current user's username,
   			"views": [
   				{
+  					"editable": true/false;
   					"mdid": mdid, 
   				 	"noSection": true/false, 
   				 	"author": username (last editing user),
@@ -68,6 +69,7 @@
   					("dvalue": dvalue)
   				}, ...
   			],
+  			"snapshot": true/false;
   			"snapshots": [
   				{
   					"id": id,
