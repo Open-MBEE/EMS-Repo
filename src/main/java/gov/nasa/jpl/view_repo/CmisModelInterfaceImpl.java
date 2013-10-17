@@ -47,6 +47,11 @@ public class CmisModelInterfaceImpl
     public static final String LOCAL_BINDING = BindingType.LOCAL.value();
     public static final String ATOM_BINDING = BindingType.ATOMPUB.value();
     public static final String WEBSERVICES_BINDING = BindingType.WEBSERVICES.value();
+    public static final String JSON_BINDING = BindingType.BROWSER.value();
+    public static final String ATOMPUB_URL = "http://localhost:8080/view-repo/cmisatom";
+    // TODO fix these URLs
+    public static final String WEBSERVICES_URL = null; //"http://localhost:8080/view-repo/cmisatom";
+    public static final String JSON_URL = null; //"http://localhost:8080/view-repo/cmisatom";
 
 
     public CmisModelInterfaceImpl() {
@@ -76,7 +81,7 @@ public class CmisModelInterfaceImpl
 
             // Specify the connection settings
             parameter.put(SessionParameter.ATOMPUB_URL, "http://localhost:8080/view-repo/cmisatom");
-            parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
+            parameter.put(SessionParameter.BINDING_TYPE, bindingType);
 
             // Set the alfresco object factory
             parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
@@ -136,7 +141,7 @@ public class CmisModelInterfaceImpl
     public CmisObject getObjectByPath( String path ) {
         if ( path == null ) return null;
         //String path = "/User Homes/customer1/document.odt"
-        CmisObject object = session.getObjectByPath(path);
+        CmisObject object = getSession().getObjectByPath(path);
         return object;
     }
     
@@ -191,7 +196,7 @@ public class CmisModelInterfaceImpl
         if ( type == null ) return null;
         Map< String, PropertyDefinition< ? > > defs = type.getPropertyDefinitions();
         if ( defs == null ) return null;
-        Set< Object > set = new LinkedHashSet<>();
+        Set< Object > set = new LinkedHashSet< Object >();
         set.addAll( defs.values() );
         return set;
     }

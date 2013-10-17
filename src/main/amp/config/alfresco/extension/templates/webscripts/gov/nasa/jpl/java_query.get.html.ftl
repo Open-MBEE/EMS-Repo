@@ -40,11 +40,11 @@
 		<button type="submit" id="submit">Submit</button>
 		<br/>
 		<br/>
-		<textarea id="output" rows="40" cols="80"></textarea>
+		<textarea id="output" rows="40" cols="80" readonly="true"></textarea>
         <br/>
         <br/>
         <br/>
-        <button type="submit" id="junittest" disabled="disabled">Run JUnit tests</button>
+        <button type="submit" id="junittest" disabled>Run JUnit tests</button>
         <!-- Why doesn't "disabled" work??! -->
 	</body>
 </html>

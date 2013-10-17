@@ -123,7 +123,9 @@ public class JavaQuery extends AbstractModuleComponent
      */
     public NodeRef getCompanyHome()
     {
+
         return nodeLocatorService.getNode("companyhome", null, null);
+        
     }
 
     public StoreRef getStoreRefByName( String storeName ) {
@@ -285,6 +287,7 @@ public class JavaQuery extends AbstractModuleComponent
     
     public static List<QueryResult> cmisQuery( String query ) {
         Map<String, String> parameter = new HashMap<String,String>();
+        org.json.JSONObject hello = null;
 
         // Set the user credentials
         parameter.put(SessionParameter.USER, "admin");
