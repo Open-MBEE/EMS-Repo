@@ -16,23 +16,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<beans>
-    
-    <!-- A simple class that is initialized by Spring -->
-    <bean id="changeme.exampleBean" class="gov.nasa.jpl.view_repo.Demo" init-method="init" />
-    
-    <!-- A simple module component that will be executed once -->
-    <bean id="changeme.exampleComponent" class="gov.nasa.jpl.view_repo.DemoComponent" parent="module.baseComponent" >
-        <property name="moduleId" value="view-repo" />  <!-- See module.properties -->
-        <property name="name" value="exampleComponent" />
-        <property name="description" value="A demonstration component" />
-        <property name="sinceVersion" value="2.0" />
-        <property name="appliesFromVersion" value="2.0" />
-        <property name="nodeService" ref="NodeService" />
-        <property name="nodeLocatorService" ref="nodeLocatorService" />
-        <property name="repository" ref="JCR.Repository" />
-    </bean>
-    
+<beans>    
     <bean id="view-repo_dictionaryBootstrap" parent="dictionaryModelBootstrap" depends-on="dictionaryBootstrap">
       <property name="models">
         <list>
@@ -40,28 +24,11 @@
         </list>
       </property>
     </bean>
-
-<!-- 	<bean id="demoScript" parent="baseJavaScriptExtension" class="gov.nasa.jpl.view_repo.DemoJavascriptComponent"> -->
-<!-- 	    <property name="demoComponent" ref="changeme.exampleComponent"/> -->
-<!-- 	    <property name="extensionName"> -->
-<!-- 	    	<value>demo</value> -->
-<!-- 	    </property> -->
-<!-- 	</bean>     -->
-
-    <bean id="demoQuery" parent="baseJavaScriptExtension" class="gov.nasa.jpl.view_repo.DemoJavaQuery">
-        <property name="demoComponent" ref="changeme.exampleComponent"/>
-        <property name="extensionName">
-            <value>demo</value>
-        </property>
-    </bean>    
-
+ 
     <!-- A simple module component that will be executed once -->
     <bean id="java_query" class="gov.nasa.jpl.view_repo.JavaQuery" parent="module.baseComponent" >
-        <property name="moduleId" value="fred" />  <!-- See module.properties -->
+        <property name="moduleId" value="fred" /> 
         <property name="name" value="daComponent" />
-<!--         <property name="description" value="A demo component" /> -->
-<!--         <property name="sinceVersion" value="2.0" /> -->
-<!--         <property name="appliesFromVersion" value="2.0" /> -->
         <property name="nodeService">
            <ref bean="NodeService" />
         </property>
@@ -75,8 +42,8 @@
         <property name="dictionaryService">
            <ref bean="DictionaryService" />
         </property>
+ 		<property name="localConnectionManager" ref="webscripts.js.cmis.client"/>
     </bean>
-    
 	<bean id="webscript.gov.nasa.jpl.javatest.get"
 		class="gov.nasa.jpl.view_repo.TestJavaWebScript"
 		parent="webscript">

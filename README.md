@@ -24,6 +24,10 @@ Eclipse/Maven
 
     If there are errors and you can resolve them later, choose to resolve them later.  After importing, open the pom.xml, and use the second quick-fix choice for each error.
 
+    We're using a local library that needs to be included in your local Maven repository using the following command.
+    
+    	mvn install:install-file -Dfile=lib/AE.jar -DgroupId=gov.nasa.jpl -DartifactId=ae -Dversion=1.0 -Dpackaging=jar
+
 # building, setting up maven, jrebel
 To build the amp file, do 
 
