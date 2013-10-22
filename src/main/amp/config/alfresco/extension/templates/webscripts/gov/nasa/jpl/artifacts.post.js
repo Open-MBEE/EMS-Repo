@@ -7,8 +7,6 @@ var cs = null;
 var filename = undefined;
 var content = undefined;
 
-main();
-
 function main() {
     //Query parameters on URL as exposed as args dictionary)
     if ("extension" in args) {
@@ -119,4 +117,13 @@ function mkdir(path)
     }
     
     return folder;
+}
+
+
+
+if (UserUtil.hasWebScriptPermissions) {
+    main();
+} else {
+    status.code = 401;
+    status.redirect = true;
 }

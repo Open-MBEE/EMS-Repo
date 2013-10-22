@@ -6,8 +6,6 @@ var extension = "";
 var cs = null;
 var filename = null;
 
-main();
-
 /**
  * Main function for executing logic
  */
@@ -73,3 +71,13 @@ function checkCs(node, cs) {
 		return false;
 	}
 }
+
+
+
+if (UserUtil.hasWebScriptPermissions) {
+    main();
+} else {
+    status.code = 401;
+    status.redirect = true;
+}
+

@@ -156,9 +156,24 @@ function main() {
 	
 }
 
-main();
-var response = "ok";
-if (merged.length > 0) {
-	response = jsonUtils.toJSONString(merged);
+
+
+if (UserUtil.hasWebScriptPermissions()) {
+    status.code = 200;
+    main();
+} else {
+    status.code = 401;
+}
+
+var response;
+if (status.code == 200) {
+    response = "ok";
+    if (merged.length > 0) {
+        response = jsonUtils.toJSONString(merged);
+    }
+} else if (status.code == 401) {
+    response = "unauthorized";
+} else {
+    response = "NotFound";
 }
 model['res'] = response;

@@ -48,13 +48,26 @@ function main() {
 	info['snapshot'] = false;
 }
 
-status.code = 200;
-main();
+if (UserUtil.hasWebScriptPermissions()) {
+    status.code = 200;
+    main();
+} else {
+    status.code = 401;
+}
 
-
-var	response = status.code == 200 ? toJson(info) : "NotFound";
-if (status.code != 200) {
-	status.redirect = true;
-	status.message = response;
+var response;
+if (status.code == 200) {
+    response = toJson(info);
+} else {
+    switch(status.code) {
+    case 401:
+        response = "unauthorized";
+        break;
+    default:
+        response = "NotFound";
+        break;
+    }
+    status.redirect = true;
+    status.message = response;
 }
 model['res'] = response;

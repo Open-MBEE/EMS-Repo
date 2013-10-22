@@ -42,19 +42,34 @@ var project = url.extension;
 //var europaSite = siteService.getSite(project).node;
 var modelFolder = companyhome.childByNamePath("ViewEditor/model");
 
-main();
-var info = {
-	"volumes": volumes, 
-	"volume2volumes": volume2volumes, 
-	"documents": documents, 
-	"volume2documents": volume2documents, 
-	"projectVolumes": projectVolumes,
-	"name": "Europa"
-};
+if (UserUtil.hasWebScriptPermissions()) {
+    status.code = 200;
+    main();
+    var info = {
+        "volumes": volumes,
+        "volume2volumes": volume2volumes,
+        "documents": documents,
+        "volume2documents": volume2documents,
+        "projectVolumes": projectVolumes,
+        "name": "Europa"
+    };
+} else {
+    status.code = 401;
+}
 
-var	response = status.code == 200 ? jsonUtils.toJSONString(info) : "NotFound";
-if (status.code != 200) {
-	status.redirect = true;
-	status.message = response;
+var response;
+if (status.code == 200) {
+    response = jsonUtils.toJSONString(info);
+} else {
+    switch(status.code) {
+    case 401:
+        response = "unauthorized";
+        break;
+    default:
+        response = "NotFound";
+        break;
+    }
+    status.redirect = true;
+    status.message = response;
 }
 model['res'] = response;
