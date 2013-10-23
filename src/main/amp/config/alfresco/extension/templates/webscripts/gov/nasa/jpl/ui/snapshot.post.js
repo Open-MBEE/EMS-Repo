@@ -3,13 +3,13 @@
 <import resource="classpath:alfresco/extension/js/artifact_utils.js">
 <import resource="classpath:alfresco/extension/js/view_utils.js">
 
-var modelFolder = companyhome.childByNamePath("ViewEditor/model");
-var snapshotFolder = companyhome.childByNamePath("ViewEditor/snapshots");
+var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
+var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
 var snapshotid = guid();
 var viewid = url.templateArgs.viewid;
 var product = false;
-
-/* this was an old code where posting a snapshot means we recreate the json on server side and save it as a blob in the snapshot class, might be useful in future
+var snapshoturl = {};
+// this was an old code where posting a snapshot means we recreate the json on server side and save it as a blob in the snapshot class, might be useful in future
 function main() {
 	var topview = modelFolder.childByNamePath(viewid);
 	
@@ -20,6 +20,7 @@ function main() {
 	
 	if (topview == null) {
 		status.code = 404;
+		return;
 	} else {
 		if (topview.properties["view:product"])
 			product = true;
@@ -68,9 +69,9 @@ function main() {
 	snapshoturl.created = utils.toISO8601(htmlNode.properties["cm:created"]);
 	snapshoturl.id = snapshotid;
 }
-*/
-var snapshoturl = {};
-function main() {
+
+
+/*function main() {
 	var html = requestbody.content;
 	var topview = modelFolder.childByNamePath(viewid);
 	if (topview == null) {
@@ -93,7 +94,7 @@ function main() {
 	snapshoturl.creator = person.properties['cm:userName'];
 	snapshoturl.created = utils.toISO8601(htmlNode.properties["cm:created"]);
 	snapshoturl.id = snapshotid;
-}
+}*/
 
 if (UserUtil.hasWebScriptPermissions()) {
     status.code = 200;

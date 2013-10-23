@@ -3,7 +3,8 @@
 <import resource="classpath:alfresco/extension/js/artifact_utils.js">
 <import resource="classpath:alfresco/extension/js/view_utils.js">
 
-var modelFolder = companyhome.childByNamePath("ViewEditor/model");
+var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
+var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
 var viewid = url.templateArgs.viewid;
 var product = false;
 var info = {};

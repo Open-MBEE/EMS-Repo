@@ -1,7 +1,7 @@
 <import resource="classpath:alfresco/extension/js/artifact_utils.js">
 
 // everything is relative to Sites path
-var path = "Artifacts/";
+var path = "Sites/europa/Artifacts/";
 var extension = "";
 var cs = null;
 var filename = undefined;

@@ -34,7 +34,7 @@ function main() {
 			status.code = 200;
 		}
 	} else {
-		path += "Artifacts/";
+		path += "Sites/europa/Artifacts/";
 		for (var ii = 0; ii < tokens.length - 1; ii++) {
 			path += tokens[ii] + "/";
 		}

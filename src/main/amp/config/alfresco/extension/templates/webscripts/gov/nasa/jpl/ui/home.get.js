@@ -40,8 +40,8 @@ function main() {
 status.code = 200;
 var project = url.extension;
 //var europaSite = siteService.getSite(project).node;
-var modelFolder = companyhome.childByNamePath("ViewEditor/model");
-
+var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
+var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
 if (UserUtil.hasWebScriptPermissions()) {
     status.code = 200;
     main();
