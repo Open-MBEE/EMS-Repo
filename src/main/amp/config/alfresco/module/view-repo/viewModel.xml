@@ -38,7 +38,11 @@
                 <property name="view:mdid">
                     <type>d:text</type>
                     <mandatory enforced="true">true</mandatory>
-                    <index enabled="false"/>
+                    <index enabled="true">
+                    	<atomic>true</atomic>
+                    	<stored>false</stored>
+                    	<tokenised>false</tokenised>
+                    </index>
                 </property>
                 <property name="view:name"> <!-- cm:name has to be unique in a folder, where model names aren't, the id is used for cm:name -->
                     <type>d:text</type>
