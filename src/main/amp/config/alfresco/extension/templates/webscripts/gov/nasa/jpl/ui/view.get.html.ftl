@@ -1,85 +1,89 @@
 <html>
-	<head>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>View Editor</title>
-		<link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
-		<link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
-		<link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
-		<link href="${url.context}/scripts/vieweditor/styles/print.css" rel="stylesheet" media="print">
-		<link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
-		<link href="${url.context}/scripts/vieweditor/styles/section-numbering.css" rel="stylesheet">
-		<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
-	
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Editor</title>
+    <link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
+    <link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
+    <link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
+    <link href="${url.context}/scripts/vieweditor/styles/print.css" rel="stylesheet" media="print">
+    <link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
+    <link href="${url.context}/scripts/vieweditor/vendor/css/whhg.css" rel="stylesheet" >
+    <link href="${url.context}/scripts/vieweditor/styles/section-numbering.css" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
+  
 <script type="text/javascript">
 var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 </script>
 
 </head>
 
-	<body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
+  <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
 <div id="main"></div>
 <script id="template" type="text/mustache">
 
-		<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-			<div class="navbar-header">
-					{{#environment.development}}
-						<a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
-					{{/environment.development}}
-					{{^environment.development}}
-						<a class="navbar-brand" href="${url.context}/wcs/ui/">Europa View Editor {{ title }}</a>
-					{{/environment.development}}
-			</div>
-			<ul class="nav navbar-nav">
-				{{#environment.development}}
-				<li><a href="dashboard.html">dashboard</a></li>
-				<li><a href="about.html">about</a></li>
-				{{/environment.development}}
-				{{^environment.development}}
-				<li><a href="${url.context}/wcs/ui/">dashboard</a></li>
-				{{/environment.development}}
-			</ul>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="navbar-header">
+          {{#environment.development}}
+            <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
+          {{/environment.development}}
+          {{^environment.development}}
+            <a class="navbar-brand" href="${url.context}/wcs/ui/">Europa View Editor {{ title }}</a>
+          {{/environment.development}}
+      </div>
+      <ul class="nav navbar-nav">
+        {{#environment.development}}
+        <li><a href="dashboard.html">dashboard</a></li>
+        <li><a href="about.html">about</a></li>
+        {{/environment.development}}
+        {{^environment.development}}
+        <li><a href="${url.context}/wcs/ui/">dashboard</a></li>
+        {{/environment.development}}
+      </ul>
 
 
-			<div class="pull-right">
-				<a href="vision.html"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
-			</div>
+      <div class="pull-right">
+        <a href="vision.html"><img class="europa-icon" src="images/europa-icon.png" /></a>
+      </div>
 
-			<!-- 
-			<form class="navbar-form navbar-right" action="">
-	      <div class="form-group">
-	        <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
-	          <option value="modeler">Modeler</option>
-	          <option value="reviewer">Reviewer</option>
-	          <option value="manager">Manager</option>
-	        </select>
-	      </div>
-	    </form>
-	  -->
+      <!-- 
+      <form class="navbar-form navbar-right" action="">
+        <div class="form-group">
+          <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
+            <option value="modeler">Modeler</option>
+            <option value="reviewer">Reviewer</option>
+            <option value="manager">Manager</option>
+          </select>
+        </div>
+      </form>
+    -->
 
-		</nav>
+    </nav>
 
-		<div id="top-alert" class="alert alert-danger alert-dismissable" style="display:none">
-		  <button type="button" class="close" proxy-click="hideErrorMessage" aria-hidden="true">&times;</button>
-		  <span class="message"></span>
-		</div>
+    <div id="top-alert" class="alert alert-danger alert-dismissable" style="display:none">
+      <button type="button" class="close" proxy-click="hideErrorMessage" aria-hidden="true">&times;</button>
+      <span class="message"></span>
+    </div>
 
-		<div class="wrapper">
-			<div class="row split-view">
+    <div class="wrapper">
+      <div class="row split-view">
 
 <div class="col-xs-8">
   <div id="the-document">
+
     {{#viewTree.orderedChildren}}
 
+
+            <a name="{{id}}" style="display: block; position:relative; top:-60px; "></a>
             {{#(depth == 0) }}
               {{{("<h1><span class='"+class+" section-header editable' data-property='NAME' data-section-id='" + id + "'>" +  name + "</span></h1>" )}}}
             {{/(depth == 0) }}
             {{^(depth == 0) }}
               {{{("<h"+ (depth+1) + " class='"+class+"'><span class='section-header' data-section-id='" + id + "'><span class='editable' data-property='NAME' data-mdid='" + id + "'>" +  name + "</span></span></h"+ (depth+1) + ">" )}}}
             {{/(depth == 0) }}
-
+           
             <div class="author {{ class }}">Edited by <span class="author-name" data-mdid="{{id}}">{{ viewData.author }}</span></div>
             <div class="modified {{ class }}" data-mdid="{{id}}">{{( viewData.modifiedFormatted )}}</div>
-      
+             <a href="#{{id}}" title="permalink"><i class='glyphicon glyphicon-link'></i>&nbsp;</a>
 
       <div class="page-sections {{ class }}">
         
@@ -87,18 +91,56 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
           <div class="section-wrapper">
             
             <div class="section-actions pull-right btn-group no-print">
-              {{^editing}}
-              <button type="button" class="btn btn-primary btn-sm" proxy-click="toggleComments:comments-{{id}}">comments ({{( viewData.comments.length )}})</button>
-              <button type="button" href="#" class="btn btn-primary btn-sm" proxy-click="editSection:{{ id }}">edit</button>
-              {{/editing}}
+              {{^viewTree.snapshot}}
+                {{#viewData.editable}}
+                  {{^editing}}
+                    <button type="button" class="btn btn-primary btn-sm" proxy-click="toggleComments:comments-{{id}}">comments ({{( viewData.comments.length )}})</button>
+                    <button type="button" href="#" class="btn btn-primary btn-sm" proxy-click="editSection:{{ id }}">edit</button>
+                  {{/editing}}
+                {{/viewData.editable}}
+              {{/viewTree.snapshot}}
             </div>
             {{#editing}}
+
             <div class="toolbar page" data-role="editor-toolbar" data-target="#section{{ id }}">
               <div class="btn-group">
                   <a class="btn btn-default" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><b>b</b></a>
                   <a class="btn btn-default" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i>i</i></a>
                   <a class="btn btn-default" data-edit="underline" title="Underline (Ctrl/Cmd+u)"><span style="text-decoration:underline">u</span></a>
+                  <a class="btn btn-default" data-edit="strikethrough" title="Strike through"><span style="text-decoration:line-through">u</span></a>
+                  <a class="btn btn-default" data-edit="superscript" title="Superscript">x<sup>y</sup></a>
+                  <a class="btn btn-default" data-edit="subscript" title="Subscript">x<sub>y</sub></a>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                      <i class="glyphicon icon-ink">&nbsp;</i>
+                      <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><a data-edit="backcolor red"><i class="icon-tint"></i>Red</a></li>
+                      <li><a data-edit="backcolor limegreen"><i class="icon-tint"></i>Green</a></li>
+                      <li><a data-edit="backcolor blue"><i class="icon-tint"></i>Blue</a></li>
+                      <li><a data-edit="backcolor black"><i class="icon-tint"></i>Black</a></li>
+                      <li><a data-edit="backcolor transparent"><i class="icon-tint"></i>None</a></li>
+                    </ul>
+                  </div>
               </div>
+              
+              <div class="btn-group">
+                <a class="btn btn-default" data-edit="justifyleft" title="Align Left (Ctrl/Cmd+L)"><i class="glyphicon glyphicon-align-left"></i>&nbsp;</a>
+                <a class="btn btn-default" data-edit="justifycenter" title="Center (Ctrl/Cmd+E)"><i class="glyphicon glyphicon-align-center"></i>&nbsp;</a>
+                <a class="btn btn-default" data-edit="justifyright" title="Align Right (Ctrl/Cmd+R)"><i class="glyphicon glyphicon-align-right"></i>&nbsp;</a>
+                <a class="btn btn-default" data-edit="justifyfull" title="Justify (Ctrl/Cmd+J)"><i class="glyphicon glyphicon-align-justify"></i>&nbsp;</a>
+              </div>
+              <div class="btn-group">
+                <a class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Hyperlink"><i class="glyphicon glyphicon-link"></i>&nbsp;</a>
+                <div class="dropdown-menu input-append">
+                  <input class="span2" placeholder="URL" type="text" data-edit="createLink"/>
+                  <button class="btn" type="button">Add</button>
+                </div>
+                <a class="btn btn-default" data-edit="unlink" title="Remove Hyperlink"><i class="glyphicon icon-brokenlink"></i>&nbsp;</a>
+              </div>
+
+              <br/>
               <div class="btn-group">
                   <a class="btn btn-default" data-edit="insertunorderedlist" title="Bullet list">&bull;</a>
                   <a class="btn btn-default" data-edit="insertorderedlist" title="Bullet list">1.</a>
@@ -106,6 +148,17 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
                   <a class="btn btn-default" data-edit="outdent" title="Reduct Indent (Shift-Tab)">&larr;</a>
               </div>
 
+
+              <a class="btn btn-default" data-edit="undo" title="Undo"><i class="glyphicon icon-undo"></i>&nbsp;</a>
+              <a class="btn btn-default" data-edit="redo" title="Redo"><i class="glyphicon icon-repeat"></i>&nbsp;</a>
+              <div class="btn-group">
+                <a class="btn dropdown-toggle btn-default " data-toggle="dropdown" title="Hyperlink"><i class="glyphicon icon-fullborders"></i>&nbsp;</a>
+                <div class="dropdown-menu input-append">
+                  <input class="span2 tablerows" placeholder="Rows" type="text"/>
+                  <input class="span2 tablecols" placeholder="Cols" type="text"/>
+                  <button class="btn addtable" type="button">Add</button>
+                </div>               
+              </div>
               <div class="btn-group">
                 <a class="btn btn-default" title="Insert picture (or just drag &amp; drop)" id="pictureBtn{{id}}">img</a>
                 <input type="file" data-role="magic-overlay" data-target="#pictureBtn{{id}}" data-edit="insertImage">
@@ -163,7 +216,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
  </div> 
 
   <div class="col-xs-4">
-    <div class="toggled-inspectors inspectors affix page col-xs-4 no-print">
+    <div class="toggled-inspectors inspectors affix page col-xs-4 no-print" style="height:80%;">
 
       <select class="form-control" value="{{ currentInspector }}">
         <option value="document-info">Table of Contents</option>
@@ -225,19 +278,19 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 
 
 
-		</div>
+    </div>
 
-		
-		
-		<!--  -->
-		
-		
-		
-		
-		
-		
-		
-	</script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
+    
+    
+    <!--  -->
+    
+    
+    
+    
+    
+    
+    
+  </script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery-ui.min.js"></script>
 <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery.hotkeys.js"></script>
@@ -391,12 +444,41 @@ app.on('editSection', function(e, sectionId) {
     }
   });
 
+  var templateTable = function(rows, cols)
+  {
+    var result = "<table class='manualtable'>";
+    for(var x=0; x < rows; x++)
+    {
+      result += "<tr>";
+      for(var y = 0; y < cols; y++)
+      {
+        result += "<td>&nbsp;</td>";
+      }
+      result += "</tr>"
+    }
+    result += "</table>";
+    return result;
+  }
+
+  $(".addtable").click( function() {
+    //document.execCommand('enableInlineTableEditing', true);
+    var rows = parseInt($(".tablerows").val());
+    var cols = parseInt($(".tablecols").val());
+    document.execCommand("insertHTML", false, templateTable(rows, cols));
+  })
+
+  // Required so add link pop dialog doesn't disapear when user clicks in text box
+  $('.dropdown-menu input').click(function() {return false;})
+        .change(function () {$(this).parent('.dropdown-menu').siblings('.dropdown-toggle').dropdown('toggle');})
+        .keydown('esc', function () {this.value='';$(this).change();});
+
   // make sneaky overlay for image uploads
   $('[data-role=magic-overlay]').each(function () {
     var overlay = $(this), target = $(overlay.data('target')); 
     overlay.css('opacity', 0).css('position', 'absolute').offset(target.offset()).width(target.outerWidth()).height(target.outerHeight());
   });
 
+$('[data-toggle=dropdown]').dropdown();
   app.fire('initializeSvgEditor', section.filter('.page'));
 
 })
@@ -452,9 +534,9 @@ app.on('insertReference', function() {
 // elementDetails.js
 
 app.on('elementDetails', function(evt) {
-	evt.original.preventDefault();
-	app.set('inspectedElement', app.get(evt.keypath));
-	evt.node.blur();
+  evt.original.preventDefault();
+  app.set('inspectedElement', app.get(evt.keypath));
+  evt.node.blur();
 })
 
 // export.js
@@ -467,11 +549,11 @@ _.templateSettings = {
 
 var snapshotHTML = function()
 {
-	var everything = $('#the-document').clone();
-	everything.find('.comments, .section-actions, .toolbar').remove();
-	var innerHtml = everything.html();
-	var fullPageTemplate = _.template(app.data.printPreviewTemplate);
-	return fullPageTemplate({ content : innerHtml, documentTitle : app.data.viewTree.name });
+  var everything = $('#the-document').clone();
+  everything.find('.comments, .section-actions, .toolbar').remove();
+  var innerHtml = everything.html();
+  var fullPageTemplate = _.template(app.data.printPreviewTemplate);
+  return fullPageTemplate({ content : innerHtml, documentTitle : app.data.viewTree.name });
 }
 
 app.on('print', function() {
@@ -480,17 +562,17 @@ app.on('print', function() {
 
 app.on('printPreview', function() 
 {
-	var w = window.open('about:blank', 'printPreview');
-	var newDoc = w.document.open("text/html", "replace");
-	console.log("writing print preview to new window");
-	newDoc.write(snapshotHTML());
-	newDoc.close();
-	console.log("closed new html stream");
+  var w = window.open('about:blank', 'printPreview');
+  var newDoc = w.document.open("text/html", "replace");
+  console.log("writing print preview to new window");
+  newDoc.write(snapshotHTML());
+  newDoc.close();
+  console.log("closed new html stream");
 })
 
 app.on('snapshot', function(e, id) 
 {
-	app.fire('saveSnapshot', id, snapshotHTML());
+  app.fire('saveSnapshot', id, snapshotHTML());
 })
 
 // inspectors.js
@@ -834,8 +916,11 @@ app.observe('viewHierarchy', function(viewData) {
   addChildren(tempTree, [viewData.rootView], viewData.view2view, viewData.views, elementsById, 0);
   // console.log("tempTree", tempTree);
   
+
+
   viewTree = tempTree.children.length > 0 ? tempTree.children[0] : [];
   viewTree.orderedChildren = constructOrderedChildren(viewTree);
+  viewTree.snapshot = viewData.snapshot;
 
   app.set('viewTree', viewTree, function() {
     setTimeout(function() { 
@@ -1037,7 +1122,7 @@ window.initializeSvgHandler = function($el) {
     $svg.after('<div class="editor" contenteditable="false"></div>');
     var $editorContainer = $svg.next('.editor')
     $editorContainer.append('<div class="mini-toolbar"><button class="btn btn-default btn-sm" onclick="deleteSvg(this)">delete</button><div class="pull-right btn-group"><button class="btn btn-default btn-sm" type="button" onclick="cancelSvg(this)">Cancel</button><button class="btn btn-default btn-sm" type="button" onclick="saveSvg(this)">Save</button></div></div>');
-    $editorContainer.append('<iframe src="${url.context}/scripts/vieweditor/vendor/svgedit/svg-editor.html" width="100%" height="600px" onload="init_embed(this)"></iframe>');
+    $editorContainer.append('<iframe src="vendor/svgedit/svg-editor.html" width="100%" height="600px" onload="init_embed(this)"></iframe>');
     
     // set initial content (innerHTML and outerHTML don't work with svgs)
     var serializer = new XMLSerializer();
@@ -1130,7 +1215,7 @@ window.insertSvg = function() {
 // toc.js
 
 app.on('makeToc', function() {
-	$("#toc").tocify({ selectors: "h2, h3, h4, h5", history : false, highlightOffset : 0, context: "#the-document", smoothScroll:false }).data("toc-tocify");	
+  $("#toc").tocify({ selectors: "h2, h3, h4, h5", history : false, scrollTo: "60", hideEffect: "none", showEffect: "none", highlightOnScroll: true, highlightOffset : 0, context: "#the-document", smoothScroll:false, extendPage:false }).data("toc-tocify");  
 })
 
 </script>

@@ -160,6 +160,10 @@ h1 {
 	font-weight: bold;
 }
 
+#toc .active a {
+	color: blue;
+}
+
 .inspector #toc {
 	border: none;
 }
@@ -328,6 +332,13 @@ h1 {
   margin-top: -10px;
   box-shadow: 0 0 5px rgba(0,0,0, .2);
 }
+
+.manualtable table,th,td
+{
+	border:1px solid black;
+	padding: 2px;
+}
+
 
 .missing {
   color: red;
