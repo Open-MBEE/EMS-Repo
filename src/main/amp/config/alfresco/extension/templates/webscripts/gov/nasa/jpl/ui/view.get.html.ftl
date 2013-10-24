@@ -123,6 +123,98 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
                       <li><a data-edit="backcolor transparent"><i class="icon-tint"></i>None</a></li>
                     </ul>
                   </div>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                      &forall;
+                      <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                      <table>
+                        <tr>
+                          <td><a data-edit="insertHTML &forall; ">&forall;</a></td>
+                          <td><a data-edit="insertHTML &part; ">&part;</a></td>
+                          <td><a data-edit="insertHTML &empty; ">&empty;</a></td>
+                          <td><a data-edit="insertHTML &nabla; ">&nabla;</a></td>
+                          <td><a data-edit="insertHTML &isin; ">&isin;</a></td>
+                          <td><a data-edit="insertHTML &notin; ">&notin;</a></td>
+                          <td><a data-edit="insertHTML &ni; ">&ni;</a></td>
+                          <td><a data-edit="insertHTML &prod; ">&prod;</a></td>
+                          <td><a data-edit="insertHTML &sum; ">&sum;</a></td>  
+                          <td><a data-edit="insertHTML &minus; ">&minus;</a></td></tr><tr>
+                          <td><a data-edit="insertHTML &lowast; ">&lowast;</a></td>
+                          <td><a data-edit="insertHTML &radic; ">&radic;</a></td>
+                          <td><a data-edit="insertHTML &prop; ">&prop;</a></td>
+                          <td><a data-edit="insertHTML &infin; ">&infin;</a></td>
+                          <td><a data-edit="insertHTML &ang; ">&ang;</a></td>
+                          <td><a data-edit="insertHTML &and; ">&and;</a></td>
+                          <td><a data-edit="insertHTML &or; ">&or;</a></td>
+                          <td><a data-edit="insertHTML &cap; ">&cap;</a></td>
+                          <td><a data-edit="insertHTML &cup; ">&cup;</a></td>
+                          <td><a data-edit="insertHTML &int; ">&int;</a></td></tr><tr>
+                          <td><a data-edit="insertHTML &sim; ">&sim;</a></td>
+                          <td><a data-edit="insertHTML &cong; ">&cong;</a></td>
+                          <td><a data-edit="insertHTML &asymp; ">&asymp;</a></td>
+                          <td><a data-edit="insertHTML &ne; ">&ne;</a></td>
+                          <td><a data-edit="insertHTML &equiv; ">&equiv;</a></td>
+                          <td><a data-edit="insertHTML &le; ">&le;</a></td>
+                          <td><a data-edit="insertHTML &ge; ">&ge;</a></td>
+                          <td><a data-edit="insertHTML &sub; ">&sub;</a></td>
+                          <td><a data-edit="insertHTML &sup; ">&sup;</a></td>
+                          <td><a data-edit="insertHTML &nsub; ">&nsub;</a></td></tr><tr>
+                          <td><a data-edit="insertHTML &sube; ">&sube;</a></td>
+                          <td><a data-edit="insertHTML &supe; ">&supe;</a></td>
+                          <td><a data-edit="insertHTML &oplus; ">&oplus;</a></td>
+                          <td><a data-edit="insertHTML &otimes; ">&otimes;</a></td>
+                          <td><a data-edit="insertHTML &perp; ">&perp;</a></td>
+                          <td><a data-edit="insertHTML &sdot; ">&sdot;</a></td>
+                          <td><a data-edit="insertHTML &Gamma; ">&Gamma;</a></td>
+                          <td><a data-edit="insertHTML &Delta; ">&Delta;</a></td>
+                          <td><a data-edit="insertHTML &Theta; ">&Theta;</a></td>
+                          <td><a data-edit="insertHTML &Lambda; ">&Lambda;</a></td></tr><tr>
+                          <td><a data-edit="insertHTML &Xi; ">&Xi;</a></td>
+                          <td><a data-edit="insertHTML &Pi; ">&Pi;</a></td>
+                          <td><a data-edit="insertHTML &Rho; ">&Rho;</a></td>
+                          <td><a data-edit="insertHTML &Sigma; ">&Sigma;</a></td>
+                          <td><a data-edit="insertHTML &Phi; ">&Phi;</a></td>
+                          <td><a data-edit="insertHTML &Psi; ">&Psi;</a></td>
+                          <td><a data-edit="insertHTML &Omega; ">&Omega;</a></td>
+                          <td><a data-edit="insertHTML &alpha; ">&alpha;</a></td>
+                          <td><a data-edit="insertHTML &beta; ">&beta;</a></td>
+                          <td><a data-edit="insertHTML &gamma; ">&gamma;</a></td></tr><tr>
+                          <td><a data-edit="insertHTML &delta; ">&delta;</a></td>
+                          <td><a data-edit="insertHTML &epsilon; ">&epsilon;</a></td>
+                          <td><a data-edit="insertHTML &zeta; ">&zeta;</a></td>
+                          <td><a data-edit="insertHTML &eta; ">&eta;</a></td>
+                          <td><a data-edit="insertHTML &theta; ">&theta;</a></td>
+                          <td><a data-edit="insertHTML &iota; ">&iota;</a></td>
+                          <td><a data-edit="insertHTML &kappa; ">&kappa;</a></td>
+                          <td><a data-edit="insertHTML &lambda; ">&lambda;</a></td>
+                          <td><a data-edit="insertHTML &mu; ">&mu;</a></td>
+                          <td><a data-edit="insertHTML &nu; ">&nu;</a></td></tr><tr>
+                          <td><a data-edit="insertHTML &xi; ">&xi;</a></td>
+                          <td><a data-edit="insertHTML &omicron; ">&omicron;</a></td>
+                          <td><a data-edit="insertHTML &pi; ">&pi;</a></td>
+                          <td><a data-edit="insertHTML &rho; ">&rho;</a></td>
+                          <td><a data-edit="insertHTML &sigmaf; ">&sigmaf;</a></td>
+                          <td><a data-edit="insertHTML &sigma; ">&sigma;</a></td>
+                          <td><a data-edit="insertHTML &tau; ">&tau;</a></td>
+                          <td><a data-edit="insertHTML &upsilon; ">&upsilon;</a></td>
+                          <td><a data-edit="insertHTML &phi; ">&phi;</a></td>
+                          <td><a data-edit="insertHTML &chi; ">&chi;</a></td></tr><tr>
+                          <td><a data-edit="insertHTML &psi; ">&psi;</a></td>
+                          <td><a data-edit="insertHTML &omega; ">&omega;</a></td>
+                          <td><a data-edit="insertHTML &thetasym; ">&thetasym;</a></td>
+                          <td><a data-edit="insertHTML &upsih; ">&upsih;</a></td>
+                          <td><a data-edit="insertHTML &piv; ">&piv;</a></td>
+                          <td style="border-style:none;"></td>
+                          <td style="border-style:none;"></td>
+                          <td style="border-style:none;"></td>
+                          <td style="border-style:none;"></td>
+                          <td style="border-style:none;"></td>
+                        </tr>
+                      </table>
+                    </ul>
+                  </div>
               </div>
               
               <div class="btn-group">
@@ -258,13 +350,15 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
         <ul class="list-unstyled">
           <li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>         
           <li><button type="button" class="btn btn-default" proxy-click="printPreview">Print Preview</button></li>
-          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Snapshot</button></li>          
+          {{^viewTree.snapshot}}
+          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Snapshot</button></li>   
+          {{/viewTree.snapshot}}       
         </ul>
 
         <ul class="list-unstyled">
-        {{#viewHierarchy.snapshots}}
+        {{#viewTree.snapshots}}
           <li><a href="{{ url }}">{{ formattedDate }} &mdash; {{ creator }}</a></li>
-        {{/viewHierarchy.snapshots}}
+        {{/viewTree.snapshots}}
         </ul>
       </div>
 
@@ -358,8 +452,12 @@ app.on('saveSnapshot', function(viewId, html) {
     type: "POST",
     url: url,
     data: html,
-    contentType: "application/json; charset=UTF-8"
+    contentType: "application/json; charset=UTF-8",
+    success: function(result){
+      app.fire("snapshotSuccess", result);
+    }
   }, "Saved Snapshot", "Error saving snapshot");
+  
 })
 
 // comments.js
@@ -653,6 +751,13 @@ app.generateUpdates = function(section)
   return _.values(elements);
 }
 
+
+app.on('snapshotSuccess', function(snapshotResponse) {
+  snapshotResponse = JSON.parse(snapshotResponse);
+  snapshotResponse.formattedDate = app.formatDate(snapshotResponse.created);
+  viewTree.snapshots.push(snapshotResponse);
+})
+
 var writeBackCache = function()
 {
    var elementsToWriteback = [];
@@ -915,12 +1020,11 @@ app.observe('viewHierarchy', function(viewData) {
   var tempTree = {"children" : []};
   addChildren(tempTree, [viewData.rootView], viewData.view2view, viewData.views, elementsById, 0);
   // console.log("tempTree", tempTree);
-  
-
 
   viewTree = tempTree.children.length > 0 ? tempTree.children[0] : [];
   viewTree.orderedChildren = constructOrderedChildren(viewTree);
   viewTree.snapshot = viewData.snapshot;
+  viewTree.snapshots = viewData.snapshots;
 
   app.set('viewTree', viewTree, function() {
     setTimeout(function() { 
