@@ -64,7 +64,7 @@ function main() {
     htmlNode.properties.content.setEncoding("UTF-8");
 	htmlNode.save();
 	snapshotNode.createAssociation(htmlNode, "view:html");
-	snapshoturl.url = url.context + "wcs/ui/views/" + viewid + "/snapshots/" + snapshotid;
+	snapshoturl.url = url.context + "/wcs/ui/views/" + viewid + "/snapshots/" + snapshotid;
 	snapshoturl.creator = person.properties['cm:userName'];
 	snapshoturl.created = utils.toISO8601(htmlNode.properties["cm:created"]);
 	snapshoturl.id = snapshotid;
@@ -105,7 +105,7 @@ if (UserUtil.hasWebScriptPermissions()) {
 
 var response;
 if (status.code == 200) {
-    response = jsonUtils.toJSONString(snapshoturl);
+    response = toJson(snapshoturl);
 } else if (status.code == 401) {
     response = "unauthorized";
 } else {

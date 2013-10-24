@@ -42,7 +42,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 
 
       <div class="pull-right">
-        <a href="vision.html"><img class="europa-icon" src="images/europa-icon.png" /></a>
+        <a href="vision.html"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
       </div>
 
       <!-- 
@@ -83,7 +83,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
            
             <div class="author {{ class }}">Edited by <span class="author-name" data-mdid="{{id}}">{{ viewData.author }}</span></div>
             <div class="modified {{ class }}" data-mdid="{{id}}">{{( viewData.modifiedFormatted )}}</div>
-             <a href="${"#"}{{id}}" title="permalink"><i class='glyphicon glyphicon-link'></i>&nbsp;</a>
+             <a href="${'#'}{{id}}" title="permalink"><i class='glyphicon glyphicon-link'></i>&nbsp;</a>
 
       <div class="page-sections {{ class }}">
         
