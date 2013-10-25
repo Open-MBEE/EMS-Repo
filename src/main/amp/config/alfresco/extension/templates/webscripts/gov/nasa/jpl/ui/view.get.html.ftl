@@ -256,6 +256,8 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
                 <input type="file" data-role="magic-overlay" data-target="#pictureBtn{{id}}" data-edit="insertImage">
                 <button type="button" class="btn btn-default" title="Insert SVG" onclick="insertSvg();">svg</button>
               </div>
+              <a class="btn btn-default dummyButton" style="visibility:hidden" data-edit="insertHTML" title="dumb"></a>
+
 
               <div class="btn-group pull-right">
                 <button type="button" class="btn btn-default" proxy-click="cancelEditing">Cancel</button>
@@ -283,8 +285,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
                   <div class="comment-form">
                     <br/>
                     <!-- <textarea class="form-control" value="{{ newComment }}"></textarea> -->
-                    <div class="btn-group" data-role="editor-toolbar"
-        data-target="#comment-form-{{id}}">
+                    <div class="btn-group" data-role="editor-toolbar" data-target="#comment-form-{{id}}">
                       <a class="btn btn-default" data-edit="bold" title="" data-original-title="Bold (Ctrl/Cmd+B)"><b>b</b></a>
                       <a class="btn btn-default" data-edit="italic" title="" data-original-title="Italic (Ctrl/Cmd+I)"><i>i</i></a>
                     </div>
@@ -562,14 +563,19 @@ app.on('editSection', function(e, sectionId) {
     //document.execCommand('enableInlineTableEditing', true);
     var rows = parseInt($(".tablerows").val());
     var cols = parseInt($(".tablecols").val());
+    var dummyButton = $('[data-role=editor-toolbar][data-target="#section' + sectionId + '"]').find(".dummyButton");
+    dummyButton.click();
     document.execCommand("insertHTML", false, templateTable(rows, cols));
   })
 
   // Required so add link pop dialog doesn't disapear when user clicks in text box
-  $('.dropdown-menu input').click(function() {return false;})
-        .change(function () {$(this).parent('.dropdown-menu').siblings('.dropdown-toggle').dropdown('toggle');})
+  $('.dropdown-menu input')
+        .click(function() {return false;})
+        .change(function () {
+          //console.log($(this).parent('.dropdown-menu').siblings('.dropdown-toggle').len())
+          //$(this).parent('.dropdown-menu').siblings('.dropdown-toggle').dropdown('toggle');
+        })
         .keydown('esc', function () {this.value='';$(this).change();});
-
   // make sneaky overlay for image uploads
   $('[data-role=magic-overlay]').each(function () {
     var overlay = $(this), target = $(overlay.data('target')); 
