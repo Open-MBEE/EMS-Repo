@@ -1231,7 +1231,7 @@ window.initializeSvgHandler = function($el) {
     $svg.after('<div class="editor" contenteditable="false"></div>');
     var $editorContainer = $svg.next('.editor')
     $editorContainer.append('<div class="mini-toolbar"><button class="btn btn-default btn-sm" onclick="deleteSvg(this)">delete</button><div class="pull-right btn-group"><button class="btn btn-default btn-sm" type="button" onclick="cancelSvg(this)">Cancel</button><button class="btn btn-default btn-sm" type="button" onclick="saveSvg(this)">Save</button></div></div>');
-    $editorContainer.append('<iframe src="vendor/svgedit/svg-editor.html" width="100%" height="600px" onload="init_embed(this)"></iframe>');
+    $editorContainer.append('<iframe src="${url.context}/scripts/vieweditor/vendor/svgedit/svg-editor.html" width="100%" height="600px" onload="init_embed(this)"></iframe>');
     
     // set initial content (innerHTML and outerHTML don't work with svgs)
     var serializer = new XMLSerializer();
