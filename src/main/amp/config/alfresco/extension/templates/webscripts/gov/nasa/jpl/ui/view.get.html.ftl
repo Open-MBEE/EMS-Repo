@@ -92,9 +92,9 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
             
             <div class="section-actions pull-right btn-group no-print">
               {{^viewTree.snapshot}}
+                <button type="button" class="btn btn-primary btn-sm" proxy-click="toggleComments:comments-{{id}}">comments ({{( viewData.comments.length )}})</button>
                 {{#viewData.editable}}
                   {{^editing}}
-                    <button type="button" class="btn btn-primary btn-sm" proxy-click="toggleComments:comments-{{id}}">comments ({{( viewData.comments.length )}})</button>
                     <button type="button" href="#" class="btn btn-primary btn-sm" proxy-click="editSection:{{ id }}">edit</button>
                   {{/editing}}
                 {{/viewData.editable}}
