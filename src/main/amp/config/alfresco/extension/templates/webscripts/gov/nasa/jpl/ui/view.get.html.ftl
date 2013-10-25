@@ -346,7 +346,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
         </ul>
       </div>
  -->
-      <div id="export" class="inspector">
+      <div id="export" class="inspector" style="height:100%;">
         <h3>Export</h3>
         <ul class="list-unstyled">
           <li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>         
@@ -356,7 +356,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
           {{/viewTree.snapshot}}       
         </ul>
 
-        <ul class="list-unstyled">
+        <ul class="list-unstyled" style="display:block; height:50%; overflow-y: auto">
         {{#viewTree.snapshots}}
           <li><a href="{{ url }}">{{ formattedDate }} &mdash; {{ creator }}</a></li>
         {{/viewTree.snapshots}}
