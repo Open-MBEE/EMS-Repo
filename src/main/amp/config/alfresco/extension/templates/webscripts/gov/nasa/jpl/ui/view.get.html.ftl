@@ -256,7 +256,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
                 <input type="file" data-role="magic-overlay" data-target="#pictureBtn{{id}}" data-edit="insertImage">
                 <button type="button" class="btn btn-default" title="Insert SVG" onclick="insertSvg();">svg</button>
               </div>
-              <a class="btn btn-default dummyButton" style="visibility:hidden" data-edit="insertHTML" title="dumb"></a>
+              <a class="btn btn-default dummyButton" style="visibility:hidden" data-edit="insertHTML &nbsp;" title="dumb"></a>
 
 
               <div class="btn-group pull-right">
@@ -759,7 +759,10 @@ app.generateUpdates = function(section)
 
 
 app.on('snapshotSuccess', function(snapshotResponse) {
-  snapshotResponse = JSON.parse(snapshotResponse);
+  if(snapshotResponse.constructor.name === 'String')
+  {
+    snapshotResponse = JSON.parse(snapshotResponse);
+  }
   snapshotResponse.formattedDate = app.formatDate(snapshotResponse.created);
   viewTree.snapshots.push(snapshotResponse);
 })
