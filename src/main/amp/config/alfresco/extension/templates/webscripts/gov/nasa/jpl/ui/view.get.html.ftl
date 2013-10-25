@@ -318,14 +318,14 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
         <option value="export">Export</option>
       </select>
 
-      <div id="document-info" class="inspector">
+      <div id="document-info" class="inspector" style="height:100%;">
         <h3>Document info</h3>
 <!--         <dl>
           <dt>Author</dt><dd>Chris Delp</dd>
           <dt>Last modified</dt><dd>8/14/13 2:04pm</dd>
         </dl>
  -->    
-        <div id="toc"></div>
+        <div id="toc" style="height:100%;"></div>
       </div>
 
       <div id="history" class="inspector">
