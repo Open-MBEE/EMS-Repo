@@ -21,6 +21,7 @@ function main() {
 	res = JSON.parse(jsonstring);
 	res['snapshots'] = [];
 	res['user'] = person.properties['cm:userName'];
+	res['snapshoted'] = utils.toISO8601(node.properties['cm:created']);
 	res = toJson(res);
 	
 	/*var html = node.assocs["view:html"];
