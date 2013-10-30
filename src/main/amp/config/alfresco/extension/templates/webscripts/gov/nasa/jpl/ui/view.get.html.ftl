@@ -28,22 +28,27 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
           {{/environment.development}}
           {{^environment.development}}
             <a class="navbar-brand" href="${url.context}/wcs/ui/">Europa View Editor {{ title }}</a>
-          {{/environment.development}}
+          {{/environment.development}}  
       </div>
+
       <ul class="nav navbar-nav">
-        {{#environment.development}}
-        <li><a href="dashboard.html">dashboard</a></li>
-        <li><a href="about.html">about</a></li>
-        {{/environment.development}}
-        {{^environment.development}}
-        <li><a href="${url.context}/wcs/ui/">dashboard</a></li>
-        {{/environment.development}}
+        <li><a  href="${url.context}/share/page/">dashboard</a></li>
+      </ul>   
+        
+      <div class="pull-right">
+        <a href="#"><img class="europa-icon" src="images/europa-icon.png" /></a>
+      </div>
+
+      <ul class="nav navbar-nav pull-right">
+        <li><a href="${url.context}/navigate/logout">logout</a></li>
       </ul>
 
+      <ul class="nav navbar-nav pull-right">
+        {{#viewTree.snapshot}}
+          <li><a class="navbar-brand" href="#">Snapshot ({{viewTree.snapshoted}})</a></li>
+        {{/viewTree.snapshot}}
 
-      <div class="pull-right">
-        <a href="vision.html"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
-      </div>
+      </ul>
 
       <!-- 
       <form class="navbar-form navbar-right" action="">
@@ -358,7 +363,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 
         <ul class="list-unstyled" style="display:block; height:50%; overflow-y: auto">
         {{#viewTree.snapshots}}
-          <li><a href="{{ url }}">{{ formattedDate }} &mdash; {{ creator }}</a></li>
+          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} &mdash; {{ creator }}</a></li>
         {{/viewTree.snapshots}}
         </ul>
       </div>
@@ -1035,6 +1040,10 @@ app.observe('viewHierarchy', function(viewData) {
   viewTree = tempTree.children.length > 0 ? tempTree.children[0] : [];
   viewTree.orderedChildren = constructOrderedChildren(viewTree);
   viewTree.snapshot = viewData.snapshot;
+  if(viewTree.snapshot === true)
+  {
+    viewTree.snapshoted = app.formatDate(parseDate(viewData.snapshoted));
+  }
   viewTree.snapshots = viewData.snapshots;
 
   app.set('viewTree', viewTree, function() {
