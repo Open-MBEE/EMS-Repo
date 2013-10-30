@@ -13,8 +13,10 @@ function handleVolume(volume) {
 	var cvs = [];
 	for (var i in childrenVolumes) {
 		var cv = childrenVolumes[i];
-		cvs.push(cv.properties['view:mdid']);
-		handleVolume(cv);
+		if (cv.hasPermission("Read")) {
+    		cvs.push(cv.properties['view:mdid']);
+    		handleVolume(cv);
+		}
 	}
 	volume2volumes[volume.properties['view:mdid']] = cvs;
 	
@@ -22,8 +24,10 @@ function handleVolume(volume) {
 	var cds = [];
 	for (var i in childrenDocuments) {
 		var cd = childrenDocuments[i];
-		cds.push(cd.properties['view:mdid']);
-		documents[cd.properties['view:mdid']] = cd.properties['view:name'];
+		if (cd.hasPermission("Read")) {
+    		cds.push(cd.properties['view:mdid']);
+    		documents[cd.properties['view:mdid']] = cd.properties['view:name'];
+		}
 	}
 	volume2documents[volume.properties['view:mdid']] = cds;
 }
@@ -32,8 +36,10 @@ function main() {
 	var roots = modelFolder.childrenByXPath("*[@view:rootVolume='true']");
 	for (var i in roots) {
 		var root = roots[i];
-		projectVolumes.push(root.properties['view:mdid']);
-		handleVolume(root);
+		if (root.hasPermission("Read")) {
+    		projectVolumes.push(root.properties['view:mdid']);
+    		handleVolume(root);
+		}
 	}
 }
 
