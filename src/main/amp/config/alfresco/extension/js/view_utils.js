@@ -52,8 +52,8 @@ function handleView(view, seen, elements, views, view2view) {
 		return 1;
 	});
 	
-	viewinfo['author'] = view.properties['view:author'];
-	viewinfo['modified'] = utils.toISO8601(view.properties['view:lastModified']);
+	viewinfo['author'] = view.properties['cm:modifier'];
+	viewinfo['modified'] = utils.toISO8601(view.properties['cm:modified']);
 	views.push(viewinfo);
 	
 	if (!product) {
