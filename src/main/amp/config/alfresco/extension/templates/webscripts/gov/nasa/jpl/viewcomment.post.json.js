@@ -4,12 +4,13 @@
 //var europaSite = siteService.getSite("europa").node;
 var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
 var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
+var commentFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/comments");
 var modelMapping = {};
 
 function updateOrCreateComment(comment) {
-	var commentNode = modelFolder.childByNamePath(comment.id);
+	var commentNode = commentFolder.childByNamePath(comment.id);
 	if (commentNode == null) {
-		commentNode = modelFolder.createNode(comment.id, "view:Comment");
+		commentNode = commentFolder.createNode(comment.id, "view:Comment");
 		commentNode.properties["view:mdid"] = comment.id;
 	}
 	commentNode.properties["view:documentation"] = comment.body;
