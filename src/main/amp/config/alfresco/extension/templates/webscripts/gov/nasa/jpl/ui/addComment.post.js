@@ -4,12 +4,13 @@
 
 var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
 var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
+var commentFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/comments");
 
 var viewid = url.templateArgs.viewid;
 
 function main() {
 	var newid = "comment" + guid();
-	var	commentNode = modelFolder.createNode(newid, "view:Comment");
+	var	commentNode = commentFolder.createNode(newid, "view:Comment");
 	commentNode.properties["view:mdid"] = newid;
 
 	commentNode.properties["view:documentation"] = requestbody.content;
