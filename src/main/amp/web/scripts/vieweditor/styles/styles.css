@@ -26,6 +26,27 @@ nav {
   text-shadow: 0 0 3px rgba(0,0,0, .5);
 }
 
+.table tr:first-child th, .table tr:first-child th, .table thead:first-child tr:first-child th, .table caption+thead tr:first-child td, .table colgroup+thead tr:first-child td, .table thead:first-child tr:first-child td 
+{
+	border: 1px solid black;
+}
+
+.table {
+	width: auto;
+}
+
+ul.table-list  
+{
+	list-style: none;
+	list-style-type: none;
+	padding: 0px;
+	margin: 0px;
+}
+
+ul.table-list li
+{
+	padding-bottom: 10px;
+}
 
 .navbar-inverse {
   border-bottom: 2px solid #39648B;
