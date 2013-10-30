@@ -88,7 +88,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
       <div class="page-sections {{ class }}">
         
         {{^(depth == 0) }}
-          <div class="section-wrapper">
+          <div class="section-wrapper" style="overflow-x: auto">
             
             <div class="section-actions pull-right btn-group no-print">
               {{^viewTree.snapshot}}
@@ -904,7 +904,13 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
           for (var cIdx in c.body[rIdx]) {
             var cell = c.body[rIdx][cIdx];
             var value = resolveValue(cell.content, elements, function(valueList) {
-              return _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) }).join(", ");
+              var listOfElements = _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) });
+              var stringResult = "<ul class='table-list'>";
+              _.each(listOfElements, function(e){
+                stringResult += "<li>" + e + "</li>";
+              })
+              stringResult += "</ul>";
+              return stringResult;
             });
             // TODO need to pull out the renderer here so that we can do multiple divs in a cell
             table += '<td colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '">' + value + "</td>";
