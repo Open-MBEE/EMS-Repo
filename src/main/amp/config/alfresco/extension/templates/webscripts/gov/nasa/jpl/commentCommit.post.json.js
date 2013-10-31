@@ -4,7 +4,7 @@
 //var europaSite = siteService.getSite("europa").node;
 var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
 var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
-
+var commentFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/comments");
 var modelMapping = {};
 
 function main() {
@@ -12,7 +12,7 @@ function main() {
 	if (postjson == null || postjson == undefined)
 		return;
 	for (var oldid in postjson) {
-		var comment = modelFolder.childByNamePath(oldid);
+		var comment = commentFolder.childByNamePath(oldid);
 		if (comment == null)
 			continue; //error?
 		if (oldid != postjson[oldid]) {
