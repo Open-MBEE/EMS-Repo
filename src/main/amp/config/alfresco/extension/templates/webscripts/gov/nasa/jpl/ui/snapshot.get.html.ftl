@@ -28,22 +28,27 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
           {{/environment.development}}
           {{^environment.development}}
             <a class="navbar-brand" href="${url.context}/wcs/ui/">Europa View Editor {{ title }}</a>
-          {{/environment.development}}
+          {{/environment.development}}  
       </div>
+
       <ul class="nav navbar-nav">
-        {{#environment.development}}
-        <li><a href="dashboard.html">dashboard</a></li>
-        <li><a href="about.html">about</a></li>
-        {{/environment.development}}
-        {{^environment.development}}
-        <li><a href="${url.context}/wcs/ui/">dashboard</a></li>
-        {{/environment.development}}
+        <li><a  href="/share/page/">dashboard</a></li>
+      </ul>   
+        
+      <div class="pull-right">
+        <a href="#"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
+      </div>
+
+      <ul class="nav navbar-nav pull-right">
+        <li><a href="${url.context}/navigate/logout">logout</a></li>
       </ul>
 
+      <ul class="nav navbar-nav pull-right">
+        {{#viewTree.snapshot}}
+          <li><a class="navbar-brand" href="#">Snapshot ({{viewTree.snapshoted}})</a></li>
+        {{/viewTree.snapshot}}
 
-      <div class="pull-right">
-        <a href="vision.html"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
-      </div>
+      </ul>
 
       <!-- 
       <form class="navbar-form navbar-right" action="">
@@ -88,13 +93,13 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
       <div class="page-sections {{ class }}">
         
         {{^(depth == 0) }}
-          <div class="section-wrapper">
+          <div class="section-wrapper" style="overflow-x: auto">
             
             <div class="section-actions pull-right btn-group no-print">
               {{^viewTree.snapshot}}
+                <button type="button" class="btn btn-primary btn-sm" proxy-click="toggleComments:comments-{{id}}">comments ({{( viewData.comments.length )}})</button>
                 {{#viewData.editable}}
                   {{^editing}}
-                    <button type="button" class="btn btn-primary btn-sm" proxy-click="toggleComments:comments-{{id}}">comments ({{( viewData.comments.length )}})</button>
                     <button type="button" href="#" class="btn btn-primary btn-sm" proxy-click="editSection:{{ id }}">edit</button>
                   {{/editing}}
                 {{/viewData.editable}}
@@ -256,6 +261,8 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
                 <input type="file" data-role="magic-overlay" data-target="#pictureBtn{{id}}" data-edit="insertImage">
                 <button type="button" class="btn btn-default" title="Insert SVG" onclick="insertSvg();">svg</button>
               </div>
+              <a class="btn btn-default dummyButton" style="visibility:hidden" data-edit="insertHTML &nbsp;" title="dumb"></a>
+
 
               <div class="btn-group pull-right">
                 <button type="button" class="btn btn-default" proxy-click="cancelEditing">Cancel</button>
@@ -283,8 +290,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
                   <div class="comment-form">
                     <br/>
                     <!-- <textarea class="form-control" value="{{ newComment }}"></textarea> -->
-                    <div class="btn-group" data-role="editor-toolbar"
-        data-target="#comment-form-{{id}}">
+                    <div class="btn-group" data-role="editor-toolbar" data-target="#comment-form-{{id}}">
                       <a class="btn btn-default" data-edit="bold" title="" data-original-title="Bold (Ctrl/Cmd+B)"><b>b</b></a>
                       <a class="btn btn-default" data-edit="italic" title="" data-original-title="Italic (Ctrl/Cmd+I)"><i>i</i></a>
                     </div>
@@ -317,14 +323,14 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
         <option value="export">Export</option>
       </select>
 
-      <div id="document-info" class="inspector">
+      <div id="document-info" class="inspector" style="height:100%;">
         <h3>Document info</h3>
 <!--         <dl>
           <dt>Author</dt><dd>Chris Delp</dd>
           <dt>Last modified</dt><dd>8/14/13 2:04pm</dd>
         </dl>
  -->    
-        <div id="toc"></div>
+        <div id="toc" style="height:100%;"></div>
       </div>
 
       <div id="history" class="inspector">
@@ -345,7 +351,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
         </ul>
       </div>
  -->
-      <div id="export" class="inspector">
+      <div id="export" class="inspector" style="height:100%;">
         <h3>Export</h3>
         <ul class="list-unstyled">
           <li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>         
@@ -355,9 +361,9 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
           {{/viewTree.snapshot}}       
         </ul>
 
-        <ul class="list-unstyled">
+        <ul class="list-unstyled" style="display:block; height:50%; overflow-y: auto">
         {{#viewTree.snapshots}}
-          <li><a href="{{ url }}">{{ formattedDate }} &mdash; {{ creator }}</a></li>
+          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} &mdash; {{ creator }}</a></li>
         {{/viewTree.snapshots}}
         </ul>
       </div>
@@ -376,9 +382,6 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 
     
     
-    <!--  -->
-    
-    
     
     
     
@@ -386,7 +389,6 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
     
   </script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery-ui.min.js"></script>
-<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery.hotkeys.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/bootstrap-wysiwyg.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery.tocify.min.js"></script>
@@ -562,14 +564,19 @@ app.on('editSection', function(e, sectionId) {
     //document.execCommand('enableInlineTableEditing', true);
     var rows = parseInt($(".tablerows").val());
     var cols = parseInt($(".tablecols").val());
+    var dummyButton = $('[data-role=editor-toolbar][data-target="#section' + sectionId + '"]').find(".dummyButton");
+    dummyButton.click();
     document.execCommand("insertHTML", false, templateTable(rows, cols));
   })
 
   // Required so add link pop dialog doesn't disapear when user clicks in text box
-  $('.dropdown-menu input').click(function() {return false;})
-        .change(function () {$(this).parent('.dropdown-menu').siblings('.dropdown-toggle').dropdown('toggle');})
+  $('.dropdown-menu input')
+        .click(function() {return false;})
+        .change(function () {
+          //console.log($(this).parent('.dropdown-menu').siblings('.dropdown-toggle').len())
+          //$(this).parent('.dropdown-menu').siblings('.dropdown-toggle').dropdown('toggle');
+        })
         .keydown('esc', function () {this.value='';$(this).change();});
-
   // make sneaky overlay for image uploads
   $('[data-role=magic-overlay]').each(function () {
     var overlay = $(this), target = $(overlay.data('target')); 
@@ -753,7 +760,10 @@ app.generateUpdates = function(section)
 
 
 app.on('snapshotSuccess', function(snapshotResponse) {
-  snapshotResponse = JSON.parse(snapshotResponse);
+  if(snapshotResponse.constructor.name === 'String')
+  {
+    snapshotResponse = JSON.parse(snapshotResponse);
+  }
   snapshotResponse.formattedDate = app.formatDate(snapshotResponse.created);
   viewTree.snapshots.push(snapshotResponse);
 })
@@ -899,7 +909,13 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
           for (var cIdx in c.body[rIdx]) {
             var cell = c.body[rIdx][cIdx];
             var value = resolveValue(cell.content, elements, function(valueList) {
-              return _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) }).join(", ");
+              var listOfElements = _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) });
+              var stringResult = "<ul class='table-list'>";
+              _.each(listOfElements, function(e){
+                stringResult += "<li>" + e + "</li>";
+              })
+              stringResult += "</ul>";
+              return stringResult;
             });
             // TODO need to pull out the renderer here so that we can do multiple divs in a cell
             table += '<td colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '">' + value + "</td>";
@@ -1024,6 +1040,10 @@ app.observe('viewHierarchy', function(viewData) {
   viewTree = tempTree.children.length > 0 ? tempTree.children[0] : [];
   viewTree.orderedChildren = constructOrderedChildren(viewTree);
   viewTree.snapshot = viewData.snapshot;
+  if(viewTree.snapshot === true)
+  {
+    viewTree.snapshoted = app.formatDate(parseDate(viewData.snapshoted));
+  }
   viewTree.snapshots = viewData.snapshots;
 
   app.set('viewTree', viewTree, function() {
@@ -1226,7 +1246,7 @@ window.initializeSvgHandler = function($el) {
     $svg.after('<div class="editor" contenteditable="false"></div>');
     var $editorContainer = $svg.next('.editor')
     $editorContainer.append('<div class="mini-toolbar"><button class="btn btn-default btn-sm" onclick="deleteSvg(this)">delete</button><div class="pull-right btn-group"><button class="btn btn-default btn-sm" type="button" onclick="cancelSvg(this)">Cancel</button><button class="btn btn-default btn-sm" type="button" onclick="saveSvg(this)">Save</button></div></div>');
-    $editorContainer.append('<iframe src="vendor/svgedit/svg-editor.html" width="100%" height="600px" onload="init_embed(this)"></iframe>');
+    $editorContainer.append('<iframe src="${url.context}/scripts/vieweditor/vendor/svgedit/svg-editor.html" width="100%" height="600px" onload="init_embed(this)"></iframe>');
     
     // set initial content (innerHTML and outerHTML don't work with svgs)
     var serializer = new XMLSerializer();

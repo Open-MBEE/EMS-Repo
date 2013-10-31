@@ -32,11 +32,11 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
       </div>
 
       <ul class="nav navbar-nav">
-        <li><a  href="${url.context}/share/page/">dashboard</a></li>
+        <li><a  href="/share/page/">dashboard</a></li>
       </ul>   
         
       <div class="pull-right">
-        <a href="#"><img class="europa-icon" src="images/europa-icon.png" /></a>
+        <a href="#"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
       </div>
 
       <ul class="nav navbar-nav pull-right">
