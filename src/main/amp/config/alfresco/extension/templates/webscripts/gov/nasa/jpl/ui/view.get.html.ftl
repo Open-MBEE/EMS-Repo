@@ -63,6 +63,10 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
     -->
 
     </nav>
+    <div id="ie-alert" class="alert alert-warning alert-dismissable ie_warning">
+      <button type="button" class="close" proxy-click="hideIEMessage" aria-hidden="true">&times;</button>
+      <span class="message">Internet Explorer is not officially supported by View Editor.  Please use Firefox.</span>
+    </div>
 
     <div id="top-alert" class="alert alert-danger alert-dismissable" style="display:none">
       <button type="button" class="close" proxy-click="hideErrorMessage" aria-hidden="true">&times;</button>
@@ -396,6 +400,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 <script src="${url.context}/scripts/vieweditor/vendor/moment.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/bootstrap.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/svgedit/embedapi.js"></script>
+<script src="${url.context}/scripts/vieweditor/vendor/css_browser_selector.js"></script>
 <script type="text/javascript" src="${url.context}/scripts/vieweditor/vendor/Ractive.js"></script>
 <script type="text/javascript">var app = new Ractive({ el : "main", template : "#template", data : pageData });</script>
 <script type="text/javascript">
@@ -707,6 +712,10 @@ app.on('message', function(type, message) {
     $('#top-alert').show().find('.message').html(message);
   }
 });
+
+app.on('hideIEMessage', function() {
+  $('#ie-alert').hide(); 
+})
 
 app.on('hideErrorMessage', function() {
   $('#top-alert').hide();

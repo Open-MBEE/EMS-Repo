@@ -26,6 +26,17 @@ nav {
   text-shadow: 0 0 3px rgba(0,0,0, .5);
 }
 
+ div.ie_warning 
+ { 
+ 	display:none; 
+ }
+ 
+ /*.ie5 div.ie_warning, .ie7 div.ie_warning, .ie8 div.ie_warning, .gecko div.ie_warning */
+ .ie div.ie_warning
+ { 
+  	display:block; 
+ }
+
 .table tr:first-child th, .table tr:first-child th, .table thead:first-child tr:first-child th, .table caption+thead tr:first-child td, .table colgroup+thead tr:first-child td, .table thead:first-child tr:first-child td 
 {
 	border: 1px solid black;
@@ -318,8 +329,16 @@ h1 {
   height: auto;
 }
 
-.editable.reference, .editable.reference * {
-  background: aliceblue;
+[data-property=DOCUMENTATION].editable.reference, [data-property=DOCUMENTATION].editable.reference * {
+	background: lightgray;
+}
+
+[data-property=NAME].editable.reference, [data-property=NAME].editable.reference * {
+	background: lightblue;
+}
+
+[data-property=DVALUE].editable.reference, [data-property=DVALUE].editable.reference * {
+	background: lightgreen;
 }
 
 .not-editable.reference {
