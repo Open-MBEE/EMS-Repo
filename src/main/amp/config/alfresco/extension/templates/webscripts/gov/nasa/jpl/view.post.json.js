@@ -15,17 +15,19 @@ function updateOrCreateModelElement(element, force) {
 		if (modelNode == null) {
 			if (element.type == "View") {
 				modelNode = modelFolder.createNode(element.mdid, "view:View");
-				modelNode.properties["view:name"] = element.name;
+				setName(modelNode, element.name);
 			} else if (element.type == "Property") {
 				modelNode = modelFolder.createNode(element.mdid, "view:Property");
-				if (element.name != undefined)
-					modelNode.properties["view:name"] = element.name;
+				if (element.name != undefined) {
+					setName(modelNode, element.name);
+				}
 			} else if (element.type == "Comment")
 				modelNode = modelFolder.createNode(element.mdid, "view:Comment");
 			else {
 				modelNode = modelFolder.createNode(element.mdid, "view:ModelElement");
-				if (element.name != null || element.name != undefined)
-					modelNode.properties["view:name"] = element.name;
+				if (element.name != null || element.name != undefined) {
+					setName(modelNode, element.name);
+				}
 			}
 			modelNode.save();
 		}
@@ -33,9 +35,9 @@ function updateOrCreateModelElement(element, force) {
 
 	if (element.name != null && element.name != undefined && element.name != modelNode.properties["view:name"]) {
 		if (force)
-			modelNode.properties["view:name"] = element.name;
+			setName(modelNode, element.name);
 		else
-			modelNode.properties["view:name"] = modelNode.properties["view:name"] + " - MERGED - " + element.name;
+			setName(modelNode, modelNode.properties["view:name"] + " - MERGED - " + element.name);
 		merged.push({"mdid": element.mdid, "type": "name"})
 	}
 	if (element.documentation != modelNode.properties["view:documentation"]) {

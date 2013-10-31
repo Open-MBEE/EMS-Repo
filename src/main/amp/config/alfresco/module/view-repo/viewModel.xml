@@ -59,6 +59,7 @@
             <mandatory-aspects>
             	<aspect>cm:versionable</aspect>
             	<aspect>cm:taggable</aspect>
+            	<aspect>cm:titled</aspect>
            <!--   	<aspect>cm:lockable</aspect> -->
             </mandatory-aspects>
         </type>

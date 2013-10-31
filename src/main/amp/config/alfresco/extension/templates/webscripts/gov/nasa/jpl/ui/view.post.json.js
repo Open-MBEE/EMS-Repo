@@ -16,7 +16,7 @@ function updateModelElement(element) {
 	}
 
 	if (element.name != null && element.name != undefined && element.name != modelNode.properties["view:name"]) {
-		modelNode.properties["view:name"] = element.name;
+		setName(modelNode, element.name);
 	}
 	if (element.documentation != undefined && element.documentation != modelNode.properties["view:documentation"]) {
 		modelNode.properties["view:documentation"] = element.documentation;

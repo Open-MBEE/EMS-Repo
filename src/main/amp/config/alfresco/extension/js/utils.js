@@ -56,3 +56,8 @@ function toJson(o) {
 	var s = jsonUtils.toJSONString(o);
 	return s.replace("\\/", "/");
 }
+
+function setName(modelNode, name) {
+	modelNode.properties["view:name"] = name;
+	modelNode.properties["cm:title"] = name;
+}

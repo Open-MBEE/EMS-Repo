@@ -16,7 +16,7 @@ function main() {
 	if (dnode == null) {
 		dnode = modelFolder.createNode(docid, "view:DocumentView");
 		dnode.properties["view:mdid"] = docid;
-		dnode.properties["view:name"] = "Unexported Document";
+		setName(dnode, "Unexported Document");
 		dnode.save();
 	} 
 	if (vnode == null) {
