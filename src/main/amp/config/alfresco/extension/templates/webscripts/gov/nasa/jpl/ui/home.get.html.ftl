@@ -35,7 +35,7 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/wcs" };
 				<li><a href="about.html">about</a></li>
 				{{/environment.development}}
 				{{^environment.development}}
-				<li><a href="${url.context}/wcs/ui/">dashboard</a></li>
+				<li><a href="/share/page/">dashboard</a></li>
 				{{/environment.development}}
 			</ul>
 
