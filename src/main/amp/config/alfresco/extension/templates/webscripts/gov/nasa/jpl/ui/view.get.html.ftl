@@ -77,6 +77,17 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
       <div class="row split-view">
 
 <div class="col-xs-8">
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="width:1024px">
+    <div class="modal-content">
+      <div class="modal-body">
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
   <div id="the-document">
 
     {{#viewTree.orderedChildren}}
@@ -1246,104 +1257,138 @@ app.observe('plan_sections', function(newText) {
 
 // svg.js
 
-window.initializeSvgHandler = function($el) {
-  // console.log("initializing svg edit handler for", $el);
-  $el.attr('contenteditable', false).click(function() {
-    // console.log("regular jquery click handler ", this);
-    // console.log("click event", evt);
-    var $svg = $(this);
-    $svg.after('<div class="editor" contenteditable="false"></div>');
-    var $editorContainer = $svg.next('.editor')
-    $editorContainer.append('<div class="mini-toolbar"><button class="btn btn-default btn-sm" onclick="deleteSvg(this)">delete</button><div class="pull-right btn-group"><button class="btn btn-default btn-sm" type="button" onclick="cancelSvg(this)">Cancel</button><button class="btn btn-default btn-sm" type="button" onclick="saveSvg(this)">Save</button></div></div>');
-    $editorContainer.append('<iframe src="${url.context}/scripts/vieweditor/vendor/svgedit/svg-editor.html" width="100%" height="600px" onload="init_embed(this)"></iframe>');
-    
-    // set initial content (innerHTML and outerHTML don't work with svgs)
-    var serializer = new XMLSerializer();
-    var svgString = serializer.serializeToString(this);
 
-    // save this as an attribute for later loading
-    $editorContainer.find('iframe').attr('data-original-svg', svgString);
-    // console.log("set initial svg to", svgString);
-    // console.log("set initial svg to", '<svg>'+$svg.html()+'</svg>', this);
-    $svg.hide();
-  });  
-  return $el;
+// Note:  This code was cleaner but FF has a bug where getBBox only works on visible elements
+// so svg-edit cannot be initialized while the modal his hidden
+// Instead we have a complicated event chain to lazily initialize svg-edit on first use
+
+
+// Callback to signify svg edit dom elements have completed initialization
+window.editorOnLoad = function(arg)
+{
+  app.fire("svgEditInit");
 }
 
-var cancelEditing = function(container) {
-  $(container).remove();
-}
+// Create an object to manage the svg-editor
+window.svgEditManager = function()
+{
+  // State variables
+  var curDocSvg;
+  var curDeleteOnCancel;  // used to delete a new svg element if it's being created and user selects cancel
+  var svgCanvas = null;
+  var iframe = null;
 
-window.saveSvg = function(btn) {
-  // console.log("clicked", btn);
-  var $editor = $(btn).closest('.editor');
-  // console.log("editor", $editor);
-  // console.log("frame", $editor.find('iframe'));
-  var canvas = $editor.find('iframe').data('canvas');
-  // console.log("canvas", canvas);
-  canvas.getSvgString()(function(data, error) {
-    if (error) {
-      app.fire('message', 'error', error);
-    } else {
-      // console.log("new svg data", data);
-      $editor.prev('svg').replaceWith(data);
-      initializeSvgHandler($editor.prev('svg'));
-      $editor.remove();
+  // Setup svg editor html in modal
+  var editorContainer = null;
+  app.on("svgEditCreate", function() {
+    // If this is the first time, create the editor.  onload="editorOnLoad" will trigger a callback to run svgEditInit to finish our initialization.
+    // svgEditInit will trigger svgEditUpdateContent to update the content of the editor once fully initialized 
+    if(editorContainer === null) {
+      editorContainer = $(".modal-body").html("<div class='editor-container'></div>").find(".editor-container");
+      editorContainer.append('<div class="mini-toolbar"><button class="btn btn-default btn-sm" id="svgDelete">delete</button><div class="pull-right btn-group"><button class="btn btn-default btn-sm" id="svgCancel" type="button">Cancel</button><button class="btn btn-default btn-sm" type="button" id="svgSave">Save</button></div></div>');
+      editorContainer.append('<iframe id="svg-editor-iframe" src="vendor/svgedit/svg-editor.html" width="100%" onload="editorOnLoad(this)" height="600px"></iframe>');
+
+      // Helper
+      var cleanupAndExit = function() {
+        svgCanvas.clear();
+        $('#myModal').modal('hide');
+      }
+
+      // Setup save delete and cancel buttons
+      editorContainer.find("#svgCancel").click(function() {
+        if(curDeleteOnCancel === true)
+        {
+          curDocSvg.remove();
+        }
+        cleanupAndExit();
+      });
+
+      editorContainer.find("#svgDelete").click(function() {
+        curDocSvg.remove();
+        cleanupAndExit();
+      });
+
+      editorContainer.find("#svgSave").click(function() {
+        var canvas = editorContainer.find("iframe").data('canvas');
+        canvas.getSvgString()(function(data, error) {
+            if (error) {
+              app.fire('message', 'error', error);
+            } else {
+              var parent = curDocSvg.parent();    // get the parent before we replace
+              curDocSvg.replaceWith(data); 
+              curDocSvg = null; // null out reference since we replaced it
+              addSvgClickHandler(parent.find('svg'));
+              cleanupAndExit();   
+            }
+          });
+      });
+    } 
+    else {
+      // If the editor is already setup manually trigger content update
+      app.fire("svgEditUpdateContent");
     }
   });
-}
 
-window.deleteSvg = function(btn) {
-  var $editor = $(btn).closest('.editor');
-  $editor.prev('svg').remove();
-  $editor.remove();
-}
+  // Init svg canvas and update content
+  app.on("svgEditInit", function() {
+    iframe = editorContainer.find("#svg-editor-iframe");
+    svgCanvas = new embedded_svg_edit(iframe.get(0));
+    iframe.data('canvas', svgCanvas);
+    // Hide main button, as we will be controlling new/load/save etc from the host document
+    var doc;
+    doc = iframe.get(0).contentDocument;
+    if (!doc)
+    {
+      doc = iframe.get(0).contentWindow.document;
+    }      
+    var mainButton = doc.getElementById('main_button');
+    mainButton.style.display = 'none';
+    app.fire("svgEditUpdateContent");
+  });
 
-window.cancelSvg = function(btn) {
-  console.log("clicked", btn);
-  var $editor = $(btn).closest('.editor');
-  $editor.prev('svg').show();
-  $editor.remove();
-}
+  // Update the content of the editor
+  app.on("svgEditUpdateContent", function() {
+      var serializer = new XMLSerializer();
+      var svgString = serializer.serializeToString(curDocSvg.get(0));
+      svgCanvas.setSvgString(svgString);
+  });
 
-window.init_embed = function(frame) {
-  var svgCanvas = new embedded_svg_edit(frame);
-  $(frame).data('canvas', svgCanvas);
-    
-  // Hide main button, as we will be controlling new/load/save etc from the host document
-  var doc;
-  doc = frame.contentDocument;
-  if (!doc)
-  {
-    doc = frame.contentWindow.document;
+  return {
+    edit : function(docSvg, deleteOnCancel)
+    {
+      $('#myModal').modal('show'); // Note this has to happen in FF before svg-edit can be initialized, just to make things exciting
+      curDocSvg = docSvg;
+      curDeleteOnCancel = deleteOnCancel;
+      // Start event chain to lazily init svg-edit and update content
+      app.fire("svgEditCreate");     
+    }
   }
-    
-  var mainButton = doc.getElementById('main_button');
-  mainButton.style.display = 'none';
+  
+}();
 
-  var originalSvg = $(frame).attr('data-original-svg');
-  // console.log("loading original svg content:", originalSvg);
-  svgCanvas.setSvgString($(frame).attr('data-original-svg'));
-}
-    
+// This event gets called on the section element when the edit button is pressed
+// It will add a click handler to all svg elements to trigger the modal
 app.on('initializeSvgEditor', function(el) {
-
-  initializeSvgHandler($(el).find('svg'));
+  addSvgClickHandler($(el).find('svg'));
 
   // TODO strip contenteditable attribute before saving
 })
 
-// FIXME this wasn't getting triggered
-app.on('insertSvg', function() {
-  console.log("!! inserting svg !!");
-})
-
+// Called when svg button is pressed to insert new svg and open editor modal
 window.insertSvg = function() {
-  document.execCommand('insertHTML', false, '<svg class="new-svg" width="640" height="480" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g><circle cx="0" cy="0" r="0" fill="white" /></g></svg>');
-  $svg = $('svg.new-svg').removeClass('new-svg');
-  // console.log("new svg element:", $svg);
-  initializeSvgHandler($svg).click(); // attach and trigger immediately
+  document.execCommand('insertHTML', false,  '<svg class="new-svg" contenteditable="false" style="display: inline" width="640" height="480" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g></g></svg>');
+  var svg = $('svg.new-svg');
+  svg.removeAttr("class");    // jquery svg bug prevents simply svg.removeClass('new-svg');
+  svgEditManager.edit(svg, true);
 } 
+
+// Add a click handler to existing svg elements to trigger modal
+window.addSvgClickHandler = function(el) {
+  el.attr('contenteditable', false).click(function() {
+    svgEditManager.edit($(this), false);
+  });
+}
+
 
 // toc.js
 
