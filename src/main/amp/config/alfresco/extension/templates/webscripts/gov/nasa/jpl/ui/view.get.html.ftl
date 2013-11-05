@@ -40,7 +40,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
       </div>
 
       <ul class="nav navbar-nav pull-right">
-        <li><a href="${url.context}/navigate/logout">logout</a></li>
+       <!-- <li><a href="${url.context}/navigate/logout">logout</a></li> -->
       </ul>
 
       <ul class="nav navbar-nav pull-right">
@@ -1286,7 +1286,7 @@ window.svgEditManager = function()
     if(editorContainer === null) {
       editorContainer = $(".modal-body").html("<div class='editor-container'></div>").find(".editor-container");
       editorContainer.append('<div class="mini-toolbar"><button class="btn btn-default btn-sm" id="svgDelete">delete</button><div class="pull-right btn-group"><button class="btn btn-default btn-sm" id="svgCancel" type="button">Cancel</button><button class="btn btn-default btn-sm" type="button" id="svgSave">Save</button></div></div>');
-      editorContainer.append('<iframe id="svg-editor-iframe" src="vendor/svgedit/svg-editor.html" width="100%" onload="editorOnLoad(this)" height="600px"></iframe>');
+      editorContainer.append('<iframe id="svg-editor-iframe" src="${url.context}/scirpts/vieweditor/vendor/svgedit/svg-editor.html" width="100%" onload="editorOnLoad(this)" height="600px"></iframe>');
 
       // Helper
       var cleanupAndExit = function() {
