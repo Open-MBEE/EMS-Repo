@@ -38,17 +38,28 @@ public class UserUtil extends BaseProcessorExtension {
 	}	
 	
 	/**
+	 * 
 	 * Checks whether or not the currently authenticated user has permissions to the
 	 * statically specified site.
 	 * @return
 	 */
 	public static boolean hasWebScriptPermissions() {
+		return UserUtil.hasWebScriptPermissions(siteName);
+	}
+	
+	/**
+	 * Checks whether or not the currently authenticated user has permissions to the
+	 * specified site. 
+	 * 
+	 * @return
+	 */
+	public static boolean hasWebScriptPermissions(String site) {
 		if (ignore) {
 			return true;
 		} else {
 			String username = AuthenticationUtil.getFullyAuthenticatedUser();
 			String normalized = personService.getUserIdentifier(username);
-			return siteService.isMember(siteName, normalized);
+			return siteService.isMember(site, normalized);
 		}
 	}
 }
