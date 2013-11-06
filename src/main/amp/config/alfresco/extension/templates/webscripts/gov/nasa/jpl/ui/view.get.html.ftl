@@ -1356,11 +1356,14 @@ window.svgEditManager = function()
   return {
     edit : function(docSvg, deleteOnCancel)
     {
-      $('#myModal').modal('show'); // Note this has to happen in FF before svg-edit can be initialized, just to make things exciting
+      // Register handler to ensure we don't continue on event chain until modal is shown.  FF bug prevents us from doing init while hidden
+      $('#myModal').on('shown.bs.modal', function () {
+        $('#myModal').on('shown.bs.modal', function () {}); // unregister handler
+        app.fire("svgEditCreate");      // Start event chain to lazily init svg-edit and update content
+      })
       curDocSvg = docSvg;
       curDeleteOnCancel = deleteOnCancel;
-      // Start event chain to lazily init svg-edit and update content
-      app.fire("svgEditCreate");     
+      $('#myModal').modal('show'); // Note this has to happen in FF before svg-edit can be initialized, just to make things exciting
     }
   }
   
