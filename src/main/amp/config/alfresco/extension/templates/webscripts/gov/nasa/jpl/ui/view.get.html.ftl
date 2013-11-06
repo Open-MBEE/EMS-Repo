@@ -524,7 +524,45 @@ app.getSelectedNode = function() {
   return document.selection ? document.selection.createRange().parentElement() : window.getSelection().anchorNode.parentNode;
 }
 
+window.pageExitManager = function() 
+{
+  var numOpenEditors = 0;
+
+  var confirmOnPageExit = function (e) 
+  {
+      // If we haven't been passed the event get the window.event
+      e = e || window.event;
+
+      var message = 'There are ' + numOpenEditors + ' unsaved sections.';
+
+      // For IE6-8 and Firefox prior to version 4
+      if (e) 
+      {
+          e.returnValue = message;
+      }
+
+      // For Chrome, Safari, IE8+ and Opera 12+
+      return message;
+  };
+
+  return {
+    editorOpened : function() {
+      numOpenEditors += 1;
+      window.onbeforeunload = confirmOnPageExit;
+    },
+    editorClosed : function() {
+      numOpenEditors -= 1;
+      if(numOpenEditors == 0)
+      {
+        window.onbeforeunload = null;
+      }
+    }
+  }
+
+}();
+
 app.on('editSection', function(e, sectionId) {
+  window.pageExitManager.editorOpened();
 
   e.original.preventDefault();
   // TODO turn editing off for all other sections?
@@ -605,6 +643,7 @@ $('[data-toggle=dropdown]').dropdown();
 })
 
 app.on('cancelEditing', function(e) {
+  window.pageExitManager.editorClosed();
   e.original.preventDefault();
   var sectionId = app.get(e.keypath+'.id');
   app.set(e.keypath+'.editing', false);
@@ -618,6 +657,8 @@ app.on('cancelEditing', function(e) {
 })
 
 app.on('saveSection', function(e, sectionId) {
+  window.pageExitManager.editorClosed();
+
   e.original.preventDefault();
 
   $('.modified[data-mdid="' + sectionId+ '"]').text(app.formatDate(new Date()));
