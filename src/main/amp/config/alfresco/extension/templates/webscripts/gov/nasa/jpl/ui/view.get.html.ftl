@@ -274,7 +274,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
               <div class="btn-group">
                 <a class="btn btn-default" title="Insert picture (or just drag &amp; drop)" id="pictureBtn{{id}}">img</a>
                 <input type="file" data-role="magic-overlay" data-target="#pictureBtn{{id}}" data-edit="insertImage">
-                <button type="button" class="btn btn-default" title="Insert SVG" onclick="insertSvg();">svg</button>
+                <button type="button" class="btn btn-default" title="Insert SVG" onclick="insertSvg('{{id}}');">svg</button>
               </div>
               <a class="btn btn-default dummyButton" style="visibility:hidden" data-edit="insertHTML &nbsp;" title="dumb"></a>
 
@@ -1419,7 +1419,10 @@ app.on('initializeSvgEditor', function(el) {
 })
 
 // Called when svg button is pressed to insert new svg and open editor modal
-window.insertSvg = function() {
+window.insertSvg = function(sectionId) {
+  var dummyButton = $('[data-role=editor-toolbar][data-target="#section' + sectionId + '"]').find(".dummyButton");
+  dummyButton.click();
+
   document.execCommand('insertHTML', false,  '<svg class="new-svg" contenteditable="false" style="display: inline" width="640" height="480" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g></g></svg>');
   var svg = $('svg.new-svg');
   svg.removeAttr("class");    // jquery svg bug prevents simply svg.removeClass('new-svg');
