@@ -7,23 +7,63 @@ This is registered by spring config in module-context.xml (which imports another
 
 Location of webscripts: src/main/amp/config/alfresco/extension/templates/webscripts
 
+Eclipse/Maven
+    Make sure your JAVA_HOME is set to a java 1.7 installation.
+
+    Install maven if you don't have it (mac & linux may have it pre-installed)
+
+    You might want to avoid yoxos.
+
+    For a fresh Eclipse Indigo for JavaEE installation, install new software: egit and maven (no need to add update site)
+
+    Make sure you have a local checkout of alfresco from git.
+
+    Import a maven project from the local ~/git/alfresco-view-repo
+    
+    To connect the project to git, right-click the project in the Package Explorer and select Team->Share Project->Git.
+
+    If there are errors and you can resolve them later, choose to resolve them later.  After importing, open the pom.xml, and use the second quick-fix choice for each error.
+
+# building, setting up maven, jrebel
 To build the amp file, do 
 
     mvn package
     
-To run in embedded jetty container and H2 db, 
+To run in embedded jetty container and H2 db, (with jrebel and remote debugging!), the javaagent should point to your licensed jrebel.jar, address should be a port you can attach a debugger to
 
-	export MAVEN_OPTS='-Xms256m -Xmx1G -XX:PermSize=300m'
+	export MAVEN_OPTS='-Xms256m -Xmx1G -XX:PermSize=300m -Xdebug -Xrunjdwp:transport=dt_socket,address=10000,server=y,suspend=n -javaagent:/Applications/jrebel/jrebel.jar'
 	
-    mvn integration-test -Pamp-to-war
+    mvn integration-test -Pamp-to-war -Dmaven.test.skip=false
     
 To clean all data and artifacts
 
     mvn clean -Ppurge
 
+To execute JUnit tests and attach a debugger
+
+    mvn -Dmaven.surefire.debug -Dmaven.test.skip=false test
+    
+	Put JUnit test java files in src/test/java
+    Set a breakpoint in a JUnit test.
+    Run a Remote Java Application configuration with localhost for Host and 5005 for Port.
+    Follow DemoComponentTest.java and its entry in service-content.xml
+
+
+To update the target/view-repo-war manually
+
+	mvn package -Pamp-to-war
+	
+# Debug
+To attach an eclipse debugger, there's a view-repo.launch, you can use it to debug at the 10000 port, or change the debug config port if you didn't use 10000 in the maven opts
+
+Jrebel is monitoring the target/classes and src/main/amp/config dir for changes, and the src/main/amp/web for static file changes, make sure the eclipse build automatically is on, and usually any changes to java classes or spring configs will be reloaded automagically
+
+# Testing
 Go to [http://localhost:8080/view-repo/](http://localhost:8080/view-repo/) for the alfresco explorer interface (it'll take a while to startup)
 
 In the repository, create a "/ViewEditor/model" folder and "/ViewEditor/snapshots" folder, the view information will be created in these spaces.
+
+Use the view import/export from the latest dev release of mdk, or you can use curl commands below
 
 Post test view:
 

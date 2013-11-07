@@ -35,7 +35,7 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/wcs" };
 				<li><a href="about.html">about</a></li>
 				{{/environment.development}}
 				{{^environment.development}}
-				<li><a href="${url.context}/wcs/ui/">dashboard</a></li>
+				<li><a href="/share/page/">dashboard</a></li>
 				{{/environment.development}}
 			</ul>
 
@@ -182,7 +182,6 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/wcs" };
 		
 	</script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery-ui.min.js"></script>
-<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery.hotkeys.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/bootstrap-wysiwyg.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery.tocify.min.js"></script>

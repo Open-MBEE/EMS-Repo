@@ -2,7 +2,8 @@
 <import resource="classpath:alfresco/extension/js/utils.js">
 
 //var europaSite = siteService.getSite("europa").node;
-var modelFolder = companyhome.childByNamePath("ViewEditor/model");
+var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
+var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
 var date = new Date();
 var modelMapping = {};
 var merged = [];
@@ -14,25 +15,29 @@ function updateOrCreateModelElement(element, force) {
 		if (modelNode == null) {
 			if (element.type == "View") {
 				modelNode = modelFolder.createNode(element.mdid, "view:View");
-				modelNode.properties["view:name"] = element.name;
+				setName(modelNode, element.name);
 			} else if (element.type == "Property") {
 				modelNode = modelFolder.createNode(element.mdid, "view:Property");
-				if (element.name != undefined)
-					modelNode.properties["view:name"] = element.name;
+				if (element.name != undefined) {
+					setName(modelNode, element.name);
+				}
 			} else if (element.type == "Comment")
 				modelNode = modelFolder.createNode(element.mdid, "view:Comment");
 			else {
 				modelNode = modelFolder.createNode(element.mdid, "view:ModelElement");
-				modelNode.properties["view:name"] = element.name;
+				if (element.name != null || element.name != undefined) {
+					setName(modelNode, element.name);
+				}
 			}
+			modelNode.save();
 		}
 	}
 
 	if (element.name != null && element.name != undefined && element.name != modelNode.properties["view:name"]) {
 		if (force)
-			modelNode.properties["view:name"] = element.name;
+			setName(modelNode, element.name);
 		else
-			modelNode.properties["view:name"] = modelNode.properties["view:name"] + " - MERGED - " + element.name;
+			setName(modelNode, modelNode.properties["view:name"] + " - MERGED - " + element.name);
 		merged.push({"mdid": element.mdid, "type": "name"})
 	}
 	if (element.documentation != modelNode.properties["view:documentation"]) {
@@ -156,9 +161,24 @@ function main() {
 	
 }
 
-main();
-var response = "ok";
-if (merged.length > 0) {
-	response = jsonUtils.toJSONString(merged);
+
+
+if (UserUtil.hasWebScriptPermissions()) {
+    status.code = 200;
+    main();
+} else {
+    status.code = 401;
+}
+
+var response;
+if (status.code == 200) {
+    response = "ok";
+    if (merged.length > 0) {
+        response = jsonUtils.toJSONString(merged);
+    }
+} else if (status.code == 401) {
+    response = "unauthorized";
+} else {
+    response = "NotFound";
 }
 model['res'] = response;

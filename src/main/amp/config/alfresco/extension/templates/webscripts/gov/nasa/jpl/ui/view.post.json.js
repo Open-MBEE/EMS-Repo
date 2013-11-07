@@ -2,7 +2,8 @@
 <import resource="classpath:alfresco/extension/js/utils.js">
 
 //var europaSite = siteService.getSite("europa").node;
-var modelFolder = companyhome.childByNamePath("ViewEditor/model");
+var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
+var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
 var date = new Date();
 var modelElements = {}
 
@@ -15,7 +16,7 @@ function updateModelElement(element) {
 	}
 
 	if (element.name != null && element.name != undefined && element.name != modelNode.properties["view:name"]) {
-		modelNode.properties["view:name"] = element.name;
+		setName(modelNode, element.name);
 	}
 	if (element.documentation != undefined && element.documentation != modelNode.properties["view:documentation"]) {
 		modelNode.properties["view:documentation"] = element.documentation;
@@ -47,5 +48,19 @@ function main() {
 	viewnode.save();
 }
 
-main();
-model['res'] = "\"ok\"";
+if (UserUtil.hasWebScriptPermissions()) {
+    status.code = 200;
+    main();
+} else {
+    status.code = 401;
+}
+
+var response;
+if (status.code == 200) {
+    response = "ok";
+} else if (status.code == 401) {
+    response = "unauthorized";
+} else {
+    response = "NotFound";
+}
+model['res'] = response;

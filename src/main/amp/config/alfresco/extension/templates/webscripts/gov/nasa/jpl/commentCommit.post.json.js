@@ -2,8 +2,9 @@
 <import resource="classpath:alfresco/extension/js/utils.js">
 
 //var europaSite = siteService.getSite("europa").node;
-var modelFolder = companyhome.childByNamePath("ViewEditor/model");
-
+var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
+var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
+var commentFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/comments");
 var modelMapping = {};
 
 function main() {
@@ -11,7 +12,7 @@ function main() {
 	if (postjson == null || postjson == undefined)
 		return;
 	for (var oldid in postjson) {
-		var comment = modelFolder.childByNamePath(oldid);
+		var comment = commentFolder.childByNamePath(oldid);
 		if (comment == null)
 			continue; //error?
 		if (oldid != postjson[oldid]) {
@@ -24,5 +25,19 @@ function main() {
 	}	
 }
 
-main();
-model['res'] = "ok";
+if (UserUtil.hasWebScriptPermissions()) {
+    status.code = 200;
+    main();
+} else {
+    status.code = 401;
+}
+
+var response;
+if (status.code == 200) {
+    response = "ok";
+} else if (status.code == 401) {
+    response = "unauthorized";
+} else {
+    response = "NotFound";
+}
+model['res'] = response;

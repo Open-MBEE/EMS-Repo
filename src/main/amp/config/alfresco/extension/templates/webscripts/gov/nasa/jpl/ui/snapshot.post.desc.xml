@@ -1,6 +1,14 @@
 <webscript> 
   <shortname>Create a snapshot</shortname> 
-  <description>Makes a snapshot of document, returns id of snapshot</description>
+  <description>Makes a snapshot of document, returns id of snapshot
+  returns this json:
+  				{
+  					"id": id,
+  					"created": ISO8601 formatted date string,
+  					"url": url to snapshot (static html for now),
+  					"creator": creator name
+  				}
+  </description>
   <url>/ui/views/{viewid}/snapshot</url> 
   <format default="json">any</format> 
   <authentication>user</authentication> 

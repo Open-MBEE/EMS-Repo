@@ -3,7 +3,8 @@
 
 
 //var europaSite = siteService.getSite("europa").node;
-var modelFolder = companyhome.childByNamePath("ViewEditor/model");
+var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
+var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
 
 var modelMapping = {};
 
@@ -15,7 +16,7 @@ function main() {
 	if (dnode == null) {
 		dnode = modelFolder.createNode(docid, "view:DocumentView");
 		dnode.properties["view:mdid"] = docid;
-		dnode.properties["view:name"] = "Unexported Document";
+		setName(dnode, "Unexported Document");
 		dnode.save();
 	} 
 	if (vnode == null) {
@@ -25,9 +26,20 @@ function main() {
 	cleanDocument(dnode);
 	vnode.createAssociation(dnode, "view:documents");
 }
-status.code = 200;
-main();
-if (status.code == 200)
-	model['res'] = "ok";
-else
-	model['res'] = "NotFound";
+
+if (UserUtil.hasWebScriptPermissions()) {
+    status.code = 200;
+    main();
+} else {
+    status.code = 401;
+}
+
+var response;
+if (status.code == 200) {
+    response = "ok";
+} else if (status.code == 401) {
+    response = "unauthorized";
+} else {
+    response = "NotFound";
+}
+model['res'] = response;
