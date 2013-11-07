@@ -3,7 +3,8 @@
 <import resource="classpath:alfresco/extension/js/artifact_utils.js">
 <import resource="classpath:alfresco/extension/js/view_utils.js">
 
-var modelFolder = companyhome.childByNamePath("ViewEditor/model");
+var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
+var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
 var viewid = url.templateArgs.viewid;
 var product = false;
 var info = {};
@@ -45,15 +46,29 @@ function main() {
 	info['views'] = views;
 	info['rootView'] = viewid;
 	info['user'] = person.properties['cm:userName'];
+	info['snapshot'] = false;
 }
 
-status.code = 200;
-main();
+if (UserUtil.hasWebScriptPermissions()) {
+    status.code = 200;
+    main();
+} else {
+    status.code = 401;
+}
 
-
-var	response = status.code == 200 ? toJson(info) : "NotFound";
-if (status.code != 200) {
-	status.redirect = true;
-	status.message = response;
+var response;
+if (status.code == 200) {
+    response = toJson(info);
+} else {
+    switch(status.code) {
+    case 401:
+        response = "unauthorized";
+        break;
+    default:
+        response = "NotFound";
+        break;
+    }
+    status.redirect = true;
+    status.message = response;
 }
 model['res'] = response;

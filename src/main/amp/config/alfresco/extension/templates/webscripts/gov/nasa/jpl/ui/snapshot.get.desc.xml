@@ -2,9 +2,10 @@
   <shortname>Get View</shortname> 
   <description>Return all elements referenced in the view
 		see view.get.desc.xml for json returned
-  	
+  	    additional json key value returned:
+  	    	"snapshoted": ISO8601 formatted date string
   </description>
-  <url>/ui/views/{viewid}/snapshot/{id}</url> 
+  <url>/ui/views/{viewid}/snapshots/{id}</url> 
   <format default="html">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readonly">required</transaction>

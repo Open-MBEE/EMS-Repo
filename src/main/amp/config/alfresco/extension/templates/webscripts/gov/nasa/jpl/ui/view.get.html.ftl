@@ -1,104 +1,258 @@
 <html>
-	<head>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>View Editor</title>
-		<link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
-		<link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
-		<link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
-		<link href="${url.context}/scripts/vieweditor/styles/print.css" rel="stylesheet" media="print">
-		<link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
-		<link href="${url.context}/scripts/vieweditor/styles/section-numbering.css" rel="stylesheet">
-		<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
-	
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Editor</title>
+    <link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
+    <link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
+    <link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
+    <link href="${url.context}/scripts/vieweditor/styles/print.css" rel="stylesheet" media="print">
+    <link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
+    <link href="${url.context}/scripts/vieweditor/vendor/css/whhg.css" rel="stylesheet" >
+    <link href="${url.context}/scripts/vieweditor/styles/section-numbering.css" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
+  
 <script type="text/javascript">
 var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 </script>
 
 </head>
 
-	<body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
+  <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
 <div id="main"></div>
 <script id="template" type="text/mustache">
 
-		<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-			<div class="navbar-header">
-					{{#environment.development}}
-						<a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
-					{{/environment.development}}
-					{{^environment.development}}
-						<a class="navbar-brand" href="${url.context}/wcs/ui/">Europa View Editor {{ title }}</a>
-					{{/environment.development}}
-			</div>
-			<ul class="nav navbar-nav">
-				{{#environment.development}}
-				<li><a href="dashboard.html">dashboard</a></li>
-				<li><a href="about.html">about</a></li>
-				{{/environment.development}}
-				{{^environment.development}}
-				<li><a href="${url.context}/wcs/ui/">dashboard</a></li>
-				{{/environment.development}}
-			</ul>
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="navbar-header">
+          {{#environment.development}}
+            <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
+          {{/environment.development}}
+          {{^environment.development}}
+            <a class="navbar-brand" href="${url.context}/wcs/ui/">Europa View Editor {{ title }}</a>
+          {{/environment.development}}  
+      </div>
 
+      <ul class="nav navbar-nav">
+        <li><a  href="/share/page/">dashboard</a></li>
+      </ul>   
+        
+      <div class="pull-right">
+        <a href="#"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
+      </div>
 
-			<div class="pull-right">
-				<a href="vision.html"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
-			</div>
+      <ul class="nav navbar-nav pull-right">
+       <!-- <li><a href="${url.context}/navigate/logout">logout</a></li> -->
+      </ul>
 
-			<!-- 
-			<form class="navbar-form navbar-right" action="">
-	      <div class="form-group">
-	        <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
-	          <option value="modeler">Modeler</option>
-	          <option value="reviewer">Reviewer</option>
-	          <option value="manager">Manager</option>
-	        </select>
-	      </div>
-	    </form>
-	  -->
+      <ul class="nav navbar-nav pull-right">
+        {{#viewTree.snapshot}}
+          <li><a class="navbar-brand" href="#">Snapshot ({{viewTree.snapshoted}})</a></li>
+        {{/viewTree.snapshot}}
 
-		</nav>
+      </ul>
 
-		<div id="top-alert" class="alert alert-danger alert-dismissable" style="display:none">
-		  <button type="button" class="close" proxy-click="hideErrorMessage" aria-hidden="true">&times;</button>
-		  <span class="message"></span>
-		</div>
+      <!-- 
+      <form class="navbar-form navbar-right" action="">
+        <div class="form-group">
+          <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
+            <option value="modeler">Modeler</option>
+            <option value="reviewer">Reviewer</option>
+            <option value="manager">Manager</option>
+          </select>
+        </div>
+      </form>
+    -->
 
-		<div class="wrapper">
-			<div class="row split-view">
+    </nav>
+    <div id="ie-alert" class="alert alert-warning alert-dismissable ie_warning">
+      <button type="button" class="close" proxy-click="hideIEMessage" aria-hidden="true">&times;</button>
+      <span class="message">Internet Explorer is not officially supported by View Editor.  Please use Firefox.</span>
+    </div>
+
+    <div id="top-alert" class="alert alert-danger alert-dismissable" style="display:none">
+      <button type="button" class="close" proxy-click="hideErrorMessage" aria-hidden="true">&times;</button>
+      <span class="message"></span>
+    </div>
+
+    <div class="wrapper">
+      <div class="row split-view">
 
 <div class="col-xs-8">
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="width:1024px">
+    <div class="modal-content">
+      <div class="modal-body">
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
   <div id="the-document">
+
     {{#viewTree.orderedChildren}}
 
+
+            <a name="{{id}}" style="display: block; position:relative; top:-60px; "></a>
             {{#(depth == 0) }}
               {{{("<h1><span class='"+class+" section-header editable' data-property='NAME' data-section-id='" + id + "'>" +  name + "</span></h1>" )}}}
             {{/(depth == 0) }}
             {{^(depth == 0) }}
               {{{("<h"+ (depth+1) + " class='"+class+"'><span class='section-header' data-section-id='" + id + "'><span class='editable' data-property='NAME' data-mdid='" + id + "'>" +  name + "</span></span></h"+ (depth+1) + ">" )}}}
             {{/(depth == 0) }}
-
+           
             <div class="author {{ class }}">Edited by <span class="author-name" data-mdid="{{id}}">{{ viewData.author }}</span></div>
             <div class="modified {{ class }}" data-mdid="{{id}}">{{( viewData.modifiedFormatted )}}</div>
-      
+             <a href="${'#'}{{id}}" title="permalink"><i class='glyphicon glyphicon-link'></i>&nbsp;</a>
 
       <div class="page-sections {{ class }}">
         
         {{^(depth == 0) }}
-          <div class="section-wrapper">
+          <div class="section-wrapper" style="overflow-x: auto">
             
             <div class="section-actions pull-right btn-group no-print">
-              {{^editing}}
-              <button type="button" class="btn btn-primary btn-sm" proxy-click="toggleComments:comments-{{id}}">comments ({{( viewData.comments.length )}})</button>
-              <button type="button" href="#" class="btn btn-primary btn-sm" proxy-click="editSection:{{ id }}">edit</button>
-              {{/editing}}
+              {{^viewTree.snapshot}}
+                <button type="button" class="btn btn-primary btn-sm" proxy-click="toggleComments:comments-{{id}}">comments ({{( viewData.comments.length )}})</button>
+                {{#viewData.editable}}
+                  {{^editing}}
+                    <button type="button" href="#" class="btn btn-primary btn-sm" proxy-click="editSection:{{ id }}">edit</button>
+                  {{/editing}}
+                {{/viewData.editable}}
+              {{/viewTree.snapshot}}
             </div>
             {{#editing}}
+
             <div class="toolbar page" data-role="editor-toolbar" data-target="#section{{ id }}">
               <div class="btn-group">
                   <a class="btn btn-default" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><b>b</b></a>
                   <a class="btn btn-default" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i>i</i></a>
                   <a class="btn btn-default" data-edit="underline" title="Underline (Ctrl/Cmd+u)"><span style="text-decoration:underline">u</span></a>
+                  <a class="btn btn-default" data-edit="strikethrough" title="Strike through"><span style="text-decoration:line-through">u</span></a>
+                  <a class="btn btn-default" data-edit="superscript" title="Superscript">x<sup>y</sup></a>
+                  <a class="btn btn-default" data-edit="subscript" title="Subscript">x<sub>y</sub></a>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                      <i class="glyphicon icon-ink">&nbsp;</i>
+                      <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><a data-edit="backcolor red"><i class="icon-tint"></i>Red</a></li>
+                      <li><a data-edit="backcolor limegreen"><i class="icon-tint"></i>Green</a></li>
+                      <li><a data-edit="backcolor blue"><i class="icon-tint"></i>Blue</a></li>
+                      <li><a data-edit="backcolor black"><i class="icon-tint"></i>Black</a></li>
+                      <li><a data-edit="backcolor transparent"><i class="icon-tint"></i>None</a></li>
+                    </ul>
+                  </div>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                      &forall;
+                      <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                      <table>
+                        <tr>
+                          <td><a data-edit="insertHTML &forall; ">&forall;</a></td>
+                          <td><a data-edit="insertHTML &part; ">&part;</a></td>
+                          <td><a data-edit="insertHTML &empty; ">&empty;</a></td>
+                          <td><a data-edit="insertHTML &nabla; ">&nabla;</a></td>
+                          <td><a data-edit="insertHTML &isin; ">&isin;</a></td>
+                          <td><a data-edit="insertHTML &notin; ">&notin;</a></td>
+                          <td><a data-edit="insertHTML &ni; ">&ni;</a></td>
+                          <td><a data-edit="insertHTML &prod; ">&prod;</a></td>
+                          <td><a data-edit="insertHTML &sum; ">&sum;</a></td>  
+                          <td><a data-edit="insertHTML &minus; ">&minus;</a></td></tr><tr>
+                          <td><a data-edit="insertHTML &lowast; ">&lowast;</a></td>
+                          <td><a data-edit="insertHTML &radic; ">&radic;</a></td>
+                          <td><a data-edit="insertHTML &prop; ">&prop;</a></td>
+                          <td><a data-edit="insertHTML &infin; ">&infin;</a></td>
+                          <td><a data-edit="insertHTML &ang; ">&ang;</a></td>
+                          <td><a data-edit="insertHTML &and; ">&and;</a></td>
+                          <td><a data-edit="insertHTML &or; ">&or;</a></td>
+                          <td><a data-edit="insertHTML &cap; ">&cap;</a></td>
+                          <td><a data-edit="insertHTML &cup; ">&cup;</a></td>
+                          <td><a data-edit="insertHTML &int; ">&int;</a></td></tr><tr>
+                          <td><a data-edit="insertHTML &sim; ">&sim;</a></td>
+                          <td><a data-edit="insertHTML &cong; ">&cong;</a></td>
+                          <td><a data-edit="insertHTML &asymp; ">&asymp;</a></td>
+                          <td><a data-edit="insertHTML &ne; ">&ne;</a></td>
+                          <td><a data-edit="insertHTML &equiv; ">&equiv;</a></td>
+                          <td><a data-edit="insertHTML &le; ">&le;</a></td>
+                          <td><a data-edit="insertHTML &ge; ">&ge;</a></td>
+                          <td><a data-edit="insertHTML &sub; ">&sub;</a></td>
+                          <td><a data-edit="insertHTML &sup; ">&sup;</a></td>
+                          <td><a data-edit="insertHTML &nsub; ">&nsub;</a></td></tr><tr>
+                          <td><a data-edit="insertHTML &sube; ">&sube;</a></td>
+                          <td><a data-edit="insertHTML &supe; ">&supe;</a></td>
+                          <td><a data-edit="insertHTML &oplus; ">&oplus;</a></td>
+                          <td><a data-edit="insertHTML &otimes; ">&otimes;</a></td>
+                          <td><a data-edit="insertHTML &perp; ">&perp;</a></td>
+                          <td><a data-edit="insertHTML &sdot; ">&sdot;</a></td>
+                          <td><a data-edit="insertHTML &Gamma; ">&Gamma;</a></td>
+                          <td><a data-edit="insertHTML &Delta; ">&Delta;</a></td>
+                          <td><a data-edit="insertHTML &Theta; ">&Theta;</a></td>
+                          <td><a data-edit="insertHTML &Lambda; ">&Lambda;</a></td></tr><tr>
+                          <td><a data-edit="insertHTML &Xi; ">&Xi;</a></td>
+                          <td><a data-edit="insertHTML &Pi; ">&Pi;</a></td>
+                          <td><a data-edit="insertHTML &Rho; ">&Rho;</a></td>
+                          <td><a data-edit="insertHTML &Sigma; ">&Sigma;</a></td>
+                          <td><a data-edit="insertHTML &Phi; ">&Phi;</a></td>
+                          <td><a data-edit="insertHTML &Psi; ">&Psi;</a></td>
+                          <td><a data-edit="insertHTML &Omega; ">&Omega;</a></td>
+                          <td><a data-edit="insertHTML &alpha; ">&alpha;</a></td>
+                          <td><a data-edit="insertHTML &beta; ">&beta;</a></td>
+                          <td><a data-edit="insertHTML &gamma; ">&gamma;</a></td></tr><tr>
+                          <td><a data-edit="insertHTML &delta; ">&delta;</a></td>
+                          <td><a data-edit="insertHTML &epsilon; ">&epsilon;</a></td>
+                          <td><a data-edit="insertHTML &zeta; ">&zeta;</a></td>
+                          <td><a data-edit="insertHTML &eta; ">&eta;</a></td>
+                          <td><a data-edit="insertHTML &theta; ">&theta;</a></td>
+                          <td><a data-edit="insertHTML &iota; ">&iota;</a></td>
+                          <td><a data-edit="insertHTML &kappa; ">&kappa;</a></td>
+                          <td><a data-edit="insertHTML &lambda; ">&lambda;</a></td>
+                          <td><a data-edit="insertHTML &mu; ">&mu;</a></td>
+                          <td><a data-edit="insertHTML &nu; ">&nu;</a></td></tr><tr>
+                          <td><a data-edit="insertHTML &xi; ">&xi;</a></td>
+                          <td><a data-edit="insertHTML &omicron; ">&omicron;</a></td>
+                          <td><a data-edit="insertHTML &pi; ">&pi;</a></td>
+                          <td><a data-edit="insertHTML &rho; ">&rho;</a></td>
+                          <td><a data-edit="insertHTML &sigmaf; ">&sigmaf;</a></td>
+                          <td><a data-edit="insertHTML &sigma; ">&sigma;</a></td>
+                          <td><a data-edit="insertHTML &tau; ">&tau;</a></td>
+                          <td><a data-edit="insertHTML &upsilon; ">&upsilon;</a></td>
+                          <td><a data-edit="insertHTML &phi; ">&phi;</a></td>
+                          <td><a data-edit="insertHTML &chi; ">&chi;</a></td></tr><tr>
+                          <td><a data-edit="insertHTML &psi; ">&psi;</a></td>
+                          <td><a data-edit="insertHTML &omega; ">&omega;</a></td>
+                          <td><a data-edit="insertHTML &thetasym; ">&thetasym;</a></td>
+                          <td><a data-edit="insertHTML &upsih; ">&upsih;</a></td>
+                          <td><a data-edit="insertHTML &piv; ">&piv;</a></td>
+                          <td style="border-style:none;"></td>
+                          <td style="border-style:none;"></td>
+                          <td style="border-style:none;"></td>
+                          <td style="border-style:none;"></td>
+                          <td style="border-style:none;"></td>
+                        </tr>
+                      </table>
+                    </ul>
+                  </div>
               </div>
+              
+              <div class="btn-group">
+                <a class="btn btn-default" data-edit="justifyleft" title="Align Left (Ctrl/Cmd+L)"><i class="glyphicon glyphicon-align-left"></i>&nbsp;</a>
+                <a class="btn btn-default" data-edit="justifycenter" title="Center (Ctrl/Cmd+E)"><i class="glyphicon glyphicon-align-center"></i>&nbsp;</a>
+                <a class="btn btn-default" data-edit="justifyright" title="Align Right (Ctrl/Cmd+R)"><i class="glyphicon glyphicon-align-right"></i>&nbsp;</a>
+                <a class="btn btn-default" data-edit="justifyfull" title="Justify (Ctrl/Cmd+J)"><i class="glyphicon glyphicon-align-justify"></i>&nbsp;</a>
+              </div>
+              <div class="btn-group">
+                <a class="btn dropdown-toggle btn-default" data-toggle="dropdown" title="Hyperlink"><i class="glyphicon glyphicon-link"></i>&nbsp;</a>
+                <div class="dropdown-menu input-append">
+                  <input class="span2" placeholder="URL" type="text" data-edit="createLink"/>
+                  <button class="btn" type="button">Add</button>
+                </div>
+                <a class="btn btn-default" data-edit="unlink" title="Remove Hyperlink"><i class="glyphicon icon-brokenlink"></i>&nbsp;</a>
+              </div>
+
+              <br/>
               <div class="btn-group">
                   <a class="btn btn-default" data-edit="insertunorderedlist" title="Bullet list">&bull;</a>
                   <a class="btn btn-default" data-edit="insertorderedlist" title="Bullet list">1.</a>
@@ -106,11 +260,24 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
                   <a class="btn btn-default" data-edit="outdent" title="Reduct Indent (Shift-Tab)">&larr;</a>
               </div>
 
+
+              <a class="btn btn-default" data-edit="undo" title="Undo"><i class="glyphicon icon-undo"></i>&nbsp;</a>
+              <a class="btn btn-default" data-edit="redo" title="Redo"><i class="glyphicon icon-repeat"></i>&nbsp;</a>
+              <div class="btn-group">
+                <a class="btn dropdown-toggle btn-default " data-toggle="dropdown" title="Hyperlink"><i class="glyphicon icon-fullborders"></i>&nbsp;</a>
+                <div class="dropdown-menu input-append">
+                  <input class="span2 tablerows" placeholder="Rows" type="text"/>
+                  <input class="span2 tablecols" placeholder="Cols" type="text"/>
+                  <button class="btn addtable" type="button">Add</button>
+                </div>               
+              </div>
               <div class="btn-group">
                 <a class="btn btn-default" title="Insert picture (or just drag &amp; drop)" id="pictureBtn{{id}}">img</a>
                 <input type="file" data-role="magic-overlay" data-target="#pictureBtn{{id}}" data-edit="insertImage">
-                <button type="button" class="btn btn-default" title="Insert SVG" onclick="insertSvg();">svg</button>
+                <button type="button" class="btn btn-default" title="Insert SVG" onclick="insertSvg('{{id}}');">svg</button>
               </div>
+              <a class="btn btn-default dummyButton" style="visibility:hidden" data-edit="insertHTML &nbsp;" title="dumb"></a>
+
 
               <div class="btn-group pull-right">
                 <button type="button" class="btn btn-default" proxy-click="cancelEditing">Cancel</button>
@@ -138,8 +305,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
                   <div class="comment-form">
                     <br/>
                     <!-- <textarea class="form-control" value="{{ newComment }}"></textarea> -->
-                    <div class="btn-group" data-role="editor-toolbar"
-        data-target="#comment-form-{{id}}">
+                    <div class="btn-group" data-role="editor-toolbar" data-target="#comment-form-{{id}}">
                       <a class="btn btn-default" data-edit="bold" title="" data-original-title="Bold (Ctrl/Cmd+B)"><b>b</b></a>
                       <a class="btn btn-default" data-edit="italic" title="" data-original-title="Italic (Ctrl/Cmd+I)"><i>i</i></a>
                     </div>
@@ -163,7 +329,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
  </div> 
 
   <div class="col-xs-4">
-    <div class="toggled-inspectors inspectors affix page col-xs-4 no-print">
+    <div class="toggled-inspectors inspectors affix page col-xs-4 no-print" style="height:80%;">
 
       <select class="form-control" value="{{ currentInspector }}">
         <option value="document-info">Table of Contents</option>
@@ -172,14 +338,14 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
         <option value="export">Export</option>
       </select>
 
-      <div id="document-info" class="inspector">
+      <div id="document-info" class="inspector" style="height:100%;">
         <h3>Document info</h3>
 <!--         <dl>
           <dt>Author</dt><dd>Chris Delp</dd>
           <dt>Last modified</dt><dd>8/14/13 2:04pm</dd>
         </dl>
  -->    
-        <div id="toc"></div>
+        <div id="toc" style="height:100%;"></div>
       </div>
 
       <div id="history" class="inspector">
@@ -200,18 +366,20 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
         </ul>
       </div>
  -->
-      <div id="export" class="inspector">
+      <div id="export" class="inspector" style="height:100%;">
         <h3>Export</h3>
         <ul class="list-unstyled">
           <li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>         
           <li><button type="button" class="btn btn-default" proxy-click="printPreview">Print Preview</button></li>
-          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Snapshot</button></li>          
+          {{^viewTree.snapshot}}
+          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Snapshot</button></li>   
+          {{/viewTree.snapshot}}       
         </ul>
 
-        <ul class="list-unstyled">
-        {{#viewHierarchy.snapshots}}
-          <li><a href="{{ url }}">{{ formattedDate }} &mdash; {{ creator }}</a></li>
-        {{/viewHierarchy.snapshots}}
+        <ul class="list-unstyled" style="display:block; height:50%; overflow-y: auto">
+        {{#viewTree.snapshots}}
+          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} &mdash; {{ creator }}</a></li>
+        {{/viewTree.snapshots}}
         </ul>
       </div>
 
@@ -225,21 +393,17 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 
 
 
-		</div>
+    </div>
 
-		
-		
-		<!--  -->
-		
-		
-		
-		
-		
-		
-		
-	</script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
+    
+    
+    
+    
+    
+    
+    
+  </script><script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery-ui.min.js"></script>
-<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery.hotkeys.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/bootstrap-wysiwyg.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery.tocify.min.js"></script>
@@ -247,6 +411,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 <script src="${url.context}/scripts/vieweditor/vendor/moment.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/bootstrap.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/svgedit/embedapi.js"></script>
+<script src="${url.context}/scripts/vieweditor/vendor/css_browser_selector.js"></script>
 <script type="text/javascript" src="${url.context}/scripts/vieweditor/vendor/Ractive.js"></script>
 <script type="text/javascript">var app = new Ractive({ el : "main", template : "#template", data : pageData });</script>
 <script type="text/javascript">
@@ -305,8 +470,12 @@ app.on('saveSnapshot', function(viewId, html) {
     type: "POST",
     url: url,
     data: html,
-    contentType: "application/json; charset=UTF-8"
+    contentType: "application/json; charset=UTF-8",
+    success: function(result){
+      app.fire("snapshotSuccess", result);
+    }
   }, "Saved Snapshot", "Error saving snapshot");
+  
 })
 
 // comments.js
@@ -355,7 +524,45 @@ app.getSelectedNode = function() {
   return document.selection ? document.selection.createRange().parentElement() : window.getSelection().anchorNode.parentNode;
 }
 
+window.pageExitManager = function() 
+{
+  var numOpenEditors = 0;
+
+  var confirmOnPageExit = function (e) 
+  {
+      // If we haven't been passed the event get the window.event
+      e = e || window.event;
+
+      var message = 'There are ' + numOpenEditors + ' unsaved sections.';
+
+      // For IE6-8 and Firefox prior to version 4
+      if (e) 
+      {
+          e.returnValue = message;
+      }
+
+      // For Chrome, Safari, IE8+ and Opera 12+
+      return message;
+  };
+
+  return {
+    editorOpened : function() {
+      numOpenEditors += 1;
+      window.onbeforeunload = confirmOnPageExit;
+    },
+    editorClosed : function() {
+      numOpenEditors -= 1;
+      if(numOpenEditors == 0)
+      {
+        window.onbeforeunload = null;
+      }
+    }
+  }
+
+}();
+
 app.on('editSection', function(e, sectionId) {
+  window.pageExitManager.editorOpened();
 
   e.original.preventDefault();
   // TODO turn editing off for all other sections?
@@ -391,17 +598,52 @@ app.on('editSection', function(e, sectionId) {
     }
   });
 
+  var templateTable = function(rows, cols)
+  {
+    var result = "<table class='manualtable'>";
+    for(var x=0; x < rows; x++)
+    {
+      result += "<tr>";
+      for(var y = 0; y < cols; y++)
+      {
+        result += "<td>&nbsp;</td>";
+      }
+      result += "</tr>"
+    }
+    result += "</table>";
+    return result;
+  }
+
+  $(".addtable").click( function() {
+    //document.execCommand('enableInlineTableEditing', true);
+    var rows = parseInt($(".tablerows").val());
+    var cols = parseInt($(".tablecols").val());
+    var dummyButton = $('[data-role=editor-toolbar][data-target="#section' + sectionId + '"]').find(".dummyButton");
+    dummyButton.click();
+    document.execCommand("insertHTML", false, templateTable(rows, cols));
+  })
+
+  // Required so add link pop dialog doesn't disapear when user clicks in text box
+  $('.dropdown-menu input')
+        .click(function() {return false;})
+        .change(function () {
+          //console.log($(this).parent('.dropdown-menu').siblings('.dropdown-toggle').len())
+          //$(this).parent('.dropdown-menu').siblings('.dropdown-toggle').dropdown('toggle');
+        })
+        .keydown('esc', function () {this.value='';$(this).change();});
   // make sneaky overlay for image uploads
   $('[data-role=magic-overlay]').each(function () {
     var overlay = $(this), target = $(overlay.data('target')); 
     overlay.css('opacity', 0).css('position', 'absolute').offset(target.offset()).width(target.outerWidth()).height(target.outerHeight());
   });
 
+$('[data-toggle=dropdown]').dropdown();
   app.fire('initializeSvgEditor', section.filter('.page'));
 
 })
 
 app.on('cancelEditing', function(e) {
+  window.pageExitManager.editorClosed();
   e.original.preventDefault();
   var sectionId = app.get(e.keypath+'.id');
   app.set(e.keypath+'.editing', false);
@@ -415,6 +657,8 @@ app.on('cancelEditing', function(e) {
 })
 
 app.on('saveSection', function(e, sectionId) {
+  window.pageExitManager.editorClosed();
+
   e.original.preventDefault();
 
   $('.modified[data-mdid="' + sectionId+ '"]').text(app.formatDate(new Date()));
@@ -452,9 +696,9 @@ app.on('insertReference', function() {
 // elementDetails.js
 
 app.on('elementDetails', function(evt) {
-	evt.original.preventDefault();
-	app.set('inspectedElement', app.get(evt.keypath));
-	evt.node.blur();
+  evt.original.preventDefault();
+  app.set('inspectedElement', app.get(evt.keypath));
+  evt.node.blur();
 })
 
 // export.js
@@ -467,11 +711,11 @@ _.templateSettings = {
 
 var snapshotHTML = function()
 {
-	var everything = $('#the-document').clone();
-	everything.find('.comments, .section-actions, .toolbar').remove();
-	var innerHtml = everything.html();
-	var fullPageTemplate = _.template(app.data.printPreviewTemplate);
-	return fullPageTemplate({ content : innerHtml, documentTitle : app.data.viewTree.name });
+  var everything = $('#the-document').clone();
+  everything.find('.comments, .section-actions, .toolbar').remove();
+  var innerHtml = everything.html();
+  var fullPageTemplate = _.template(app.data.printPreviewTemplate);
+  return fullPageTemplate({ content : innerHtml, documentTitle : app.data.viewTree.name });
 }
 
 app.on('print', function() {
@@ -480,17 +724,17 @@ app.on('print', function() {
 
 app.on('printPreview', function() 
 {
-	var w = window.open('about:blank', 'printPreview');
-	var newDoc = w.document.open("text/html", "replace");
-	console.log("writing print preview to new window");
-	newDoc.write(snapshotHTML());
-	newDoc.close();
-	console.log("closed new html stream");
+  var w = window.open('about:blank', 'printPreview');
+  var newDoc = w.document.open("text/html", "replace");
+  console.log("writing print preview to new window");
+  newDoc.write(snapshotHTML());
+  newDoc.close();
+  console.log("closed new html stream");
 })
 
 app.on('snapshot', function(e, id) 
 {
-	app.fire('saveSnapshot', id, snapshotHTML());
+  app.fire('saveSnapshot', id, snapshotHTML());
 })
 
 // inspectors.js
@@ -520,6 +764,10 @@ app.on('message', function(type, message) {
     $('#top-alert').show().find('.message').html(message);
   }
 });
+
+app.on('hideIEMessage', function() {
+  $('#ie-alert').hide(); 
+})
 
 app.on('hideErrorMessage', function() {
   $('#top-alert').hide();
@@ -570,6 +818,16 @@ app.generateUpdates = function(section)
   // console.log("elements by id", elements);
   return _.values(elements);
 }
+
+
+app.on('snapshotSuccess', function(snapshotResponse) {
+  if(snapshotResponse.constructor.name === 'String')
+  {
+    snapshotResponse = JSON.parse(snapshotResponse);
+  }
+  snapshotResponse.formattedDate = app.formatDate(snapshotResponse.created);
+  viewTree.snapshots.push(snapshotResponse);
+})
 
 var writeBackCache = function()
 {
@@ -712,7 +970,13 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
           for (var cIdx in c.body[rIdx]) {
             var cell = c.body[rIdx][cIdx];
             var value = resolveValue(cell.content, elements, function(valueList) {
-              return _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) }).join(", ");
+              var listOfElements = _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) });
+              var stringResult = "<ul class='table-list'>";
+              _.each(listOfElements, function(e){
+                stringResult += "<li>" + e + "</li>";
+              })
+              stringResult += "</ul>";
+              return stringResult;
             });
             // TODO need to pull out the renderer here so that we can do multiple divs in a cell
             table += '<td colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '">' + value + "</td>";
@@ -833,9 +1097,15 @@ app.observe('viewHierarchy', function(viewData) {
   var tempTree = {"children" : []};
   addChildren(tempTree, [viewData.rootView], viewData.view2view, viewData.views, elementsById, 0);
   // console.log("tempTree", tempTree);
-  
+
   viewTree = tempTree.children.length > 0 ? tempTree.children[0] : [];
   viewTree.orderedChildren = constructOrderedChildren(viewTree);
+  viewTree.snapshot = viewData.snapshot;
+  if(viewTree.snapshot === true)
+  {
+    viewTree.snapshoted = app.formatDate(parseDate(viewData.snapshoted));
+  }
+  viewTree.snapshots = viewData.snapshots;
 
   app.set('viewTree', viewTree, function() {
     setTimeout(function() { 
@@ -1028,109 +1298,149 @@ app.observe('plan_sections', function(newText) {
 
 // svg.js
 
-window.initializeSvgHandler = function($el) {
-  // console.log("initializing svg edit handler for", $el);
-  $el.attr('contenteditable', false).click(function() {
-    // console.log("regular jquery click handler ", this);
-    // console.log("click event", evt);
-    var $svg = $(this);
-    $svg.after('<div class="editor" contenteditable="false"></div>');
-    var $editorContainer = $svg.next('.editor')
-    $editorContainer.append('<div class="mini-toolbar"><button class="btn btn-default btn-sm" onclick="deleteSvg(this)">delete</button><div class="pull-right btn-group"><button class="btn btn-default btn-sm" type="button" onclick="cancelSvg(this)">Cancel</button><button class="btn btn-default btn-sm" type="button" onclick="saveSvg(this)">Save</button></div></div>');
-    $editorContainer.append('<iframe src="${url.context}/scripts/vieweditor/vendor/svgedit/svg-editor.html" width="100%" height="600px" onload="init_embed(this)"></iframe>');
-    
-    // set initial content (innerHTML and outerHTML don't work with svgs)
-    var serializer = new XMLSerializer();
-    var svgString = serializer.serializeToString(this);
 
-    // save this as an attribute for later loading
-    $editorContainer.find('iframe').attr('data-original-svg', svgString);
-    // console.log("set initial svg to", svgString);
-    // console.log("set initial svg to", '<svg>'+$svg.html()+'</svg>', this);
-    $svg.hide();
-  });  
-  return $el;
+// Note:  This code was cleaner but FF has a bug where getBBox only works on visible elements
+// so svg-edit cannot be initialized while the modal his hidden
+// Instead we have a complicated event chain to lazily initialize svg-edit on first use
+
+
+// Callback to signify svg edit dom elements have completed initialization
+window.editorOnLoad = function(arg)
+{
+  app.fire("svgEditInit");
 }
 
-var cancelEditing = function(container) {
-  $(container).remove();
-}
+// Create an object to manage the svg-editor
+window.svgEditManager = function()
+{
+  // State variables
+  var curDocSvg;
+  var curDeleteOnCancel;  // used to delete a new svg element if it's being created and user selects cancel
+  var svgCanvas = null;
+  var iframe = null;
 
-window.saveSvg = function(btn) {
-  // console.log("clicked", btn);
-  var $editor = $(btn).closest('.editor');
-  // console.log("editor", $editor);
-  // console.log("frame", $editor.find('iframe'));
-  var canvas = $editor.find('iframe').data('canvas');
-  // console.log("canvas", canvas);
-  canvas.getSvgString()(function(data, error) {
-    if (error) {
-      app.fire('message', 'error', error);
-    } else {
-      // console.log("new svg data", data);
-      $editor.prev('svg').replaceWith(data);
-      initializeSvgHandler($editor.prev('svg'));
-      $editor.remove();
+  // Setup svg editor html in modal
+  var editorContainer = null;
+  app.on("svgEditCreate", function() {
+    // If this is the first time, create the editor.  onload="editorOnLoad" will trigger a callback to run svgEditInit to finish our initialization.
+    // svgEditInit will trigger svgEditUpdateContent to update the content of the editor once fully initialized 
+    if(editorContainer === null) {
+      editorContainer = $(".modal-body").html("<div class='editor-container'></div>").find(".editor-container");
+      editorContainer.append('<div class="mini-toolbar"><button class="btn btn-default btn-sm" id="svgDelete">delete</button><div class="pull-right btn-group"><button class="btn btn-default btn-sm" id="svgCancel" type="button">Cancel</button><button class="btn btn-default btn-sm" type="button" id="svgSave">Save</button></div></div>');
+      editorContainer.append('<iframe id="svg-editor-iframe" src="${url.context}/scripts/vieweditor/vendor/svgedit/svg-editor.html" width="100%" onload="editorOnLoad(this)" height="600px"></iframe>');
+
+      // Helper
+      var cleanupAndExit = function() {
+        svgCanvas.clear();
+        $('#myModal').modal('hide');
+      }
+
+      // Setup save delete and cancel buttons
+      editorContainer.find("#svgCancel").click(function() {
+        if(curDeleteOnCancel === true)
+        {
+          curDocSvg.remove();
+        }
+        cleanupAndExit();
+      });
+
+      editorContainer.find("#svgDelete").click(function() {
+        curDocSvg.remove();
+        cleanupAndExit();
+      });
+
+      editorContainer.find("#svgSave").click(function() {
+        var canvas = editorContainer.find("iframe").data('canvas');
+        canvas.getSvgString()(function(data, error) {
+            if (error) {
+              app.fire('message', 'error', error);
+            } else {
+              var parent = curDocSvg.parent();    // get the parent before we replace
+              curDocSvg.replaceWith(data); 
+              curDocSvg = null; // null out reference since we replaced it
+              addSvgClickHandler(parent.find('svg'));
+              cleanupAndExit();   
+            }
+          });
+      });
+    } 
+    else {
+      // If the editor is already setup manually trigger content update
+      app.fire("svgEditUpdateContent");
     }
   });
-}
 
-window.deleteSvg = function(btn) {
-  var $editor = $(btn).closest('.editor');
-  $editor.prev('svg').remove();
-  $editor.remove();
-}
+  // Init svg canvas and update content
+  app.on("svgEditInit", function() {
+    iframe = editorContainer.find("#svg-editor-iframe");
+    svgCanvas = new embedded_svg_edit(iframe.get(0));
+    iframe.data('canvas', svgCanvas);
+    // Hide main button, as we will be controlling new/load/save etc from the host document
+    var doc;
+    doc = iframe.get(0).contentDocument;
+    if (!doc)
+    {
+      doc = iframe.get(0).contentWindow.document;
+    }      
+    var mainButton = doc.getElementById('main_button');
+    mainButton.style.display = 'none';
+    app.fire("svgEditUpdateContent");
+  });
 
-window.cancelSvg = function(btn) {
-  console.log("clicked", btn);
-  var $editor = $(btn).closest('.editor');
-  $editor.prev('svg').show();
-  $editor.remove();
-}
+  // Update the content of the editor
+  app.on("svgEditUpdateContent", function() {
+      var serializer = new XMLSerializer();
+      var svgString = serializer.serializeToString(curDocSvg.get(0));
+      svgCanvas.setSvgString(svgString);
+  });
 
-window.init_embed = function(frame) {
-  var svgCanvas = new embedded_svg_edit(frame);
-  $(frame).data('canvas', svgCanvas);
-    
-  // Hide main button, as we will be controlling new/load/save etc from the host document
-  var doc;
-  doc = frame.contentDocument;
-  if (!doc)
-  {
-    doc = frame.contentWindow.document;
+  return {
+    edit : function(docSvg, deleteOnCancel)
+    {
+      // Register handler to ensure we don't continue on event chain until modal is shown.  FF bug prevents us from doing init while hidden
+      $('#myModal').on('shown.bs.modal', function () {
+        $('#myModal').on('shown.bs.modal', function () {}); // unregister handler
+        app.fire("svgEditCreate");      // Start event chain to lazily init svg-edit and update content
+      })
+      curDocSvg = docSvg;
+      curDeleteOnCancel = deleteOnCancel;
+      $('#myModal').modal('show'); // Note this has to happen in FF before svg-edit can be initialized, just to make things exciting
+    }
   }
-    
-  var mainButton = doc.getElementById('main_button');
-  mainButton.style.display = 'none';
+  
+}();
 
-  var originalSvg = $(frame).attr('data-original-svg');
-  // console.log("loading original svg content:", originalSvg);
-  svgCanvas.setSvgString($(frame).attr('data-original-svg'));
-}
-    
+// This event gets called on the section element when the edit button is pressed
+// It will add a click handler to all svg elements to trigger the modal
 app.on('initializeSvgEditor', function(el) {
-
-  initializeSvgHandler($(el).find('svg'));
+  addSvgClickHandler($(el).find('svg'));
 
   // TODO strip contenteditable attribute before saving
 })
 
-// FIXME this wasn't getting triggered
-app.on('insertSvg', function() {
-  console.log("!! inserting svg !!");
-})
+// Called when svg button is pressed to insert new svg and open editor modal
+window.insertSvg = function(sectionId) {
+  var dummyButton = $('[data-role=editor-toolbar][data-target="#section' + sectionId + '"]').find(".dummyButton");
+  dummyButton.click();
 
-window.insertSvg = function() {
-  document.execCommand('insertHTML', false, '<svg class="new-svg" width="640" height="480" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g><circle cx="0" cy="0" r="0" fill="white" /></g></svg>');
-  $svg = $('svg.new-svg').removeClass('new-svg');
-  // console.log("new svg element:", $svg);
-  initializeSvgHandler($svg).click(); // attach and trigger immediately
+  document.execCommand('insertHTML', false,  '<svg class="new-svg" contenteditable="false" style="display: inline" width="640" height="480" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g></g></svg>');
+  var svg = $('svg.new-svg');
+  svg.removeAttr("class");    // jquery svg bug prevents simply svg.removeClass('new-svg');
+  svgEditManager.edit(svg, true);
 } 
+
+// Add a click handler to existing svg elements to trigger modal
+window.addSvgClickHandler = function(el) {
+  el.attr('contenteditable', false).click(function() {
+    svgEditManager.edit($(this), false);
+  });
+}
+
 
 // toc.js
 
 app.on('makeToc', function() {
-	$("#toc").tocify({ selectors: "h2, h3, h4, h5", history : false, highlightOffset : 0, context: "#the-document", smoothScroll:false }).data("toc-tocify");	
+  $("#toc").tocify({ selectors: "h2, h3, h4, h5", history : false, scrollTo: "60", hideEffect: "none", showEffect: "none", highlightOnScroll: true, highlightOffset : 0, context: "#the-document", smoothScroll:false, extendPage:false }).data("toc-tocify");  
 })
 
 </script>

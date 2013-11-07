@@ -52,8 +52,8 @@ function handleView(view, seen, elements, views, view2view) {
 		return 1;
 	});
 	
-	viewinfo['author'] = view.properties['view:author'];
-	viewinfo['modified'] = utils.toISO8601(view.properties['view:lastModified']);
+	viewinfo['author'] = view.properties['cm:modifier'];
+	viewinfo['modified'] = utils.toISO8601(view.properties['cm:modified']);
 	views.push(viewinfo);
 	
 	if (!product) {
@@ -63,6 +63,10 @@ function handleView(view, seen, elements, views, view2view) {
 			handleView(childViews[i], seen, elements, views, view2view);
 		}
 	}
+	if (view.hasPermission("Write"))
+		viewinfo['editable'] = true;
+	else
+		viewinfo['editable'] = false;
 	return viewinfo;
 }
 
@@ -72,15 +76,15 @@ function getSnapshots(topview) {
 	for (var i in ss) {
 		//utils.toISO8601(date);
 		var snapshot = ss[i];
-		var html = snapshot.assocs["view:html"];
+		/*var html = snapshot.assocs["view:html"];
 		if (html.length > 0)
 			html = html[0];
 		else
-			continue;
+			continue;*/
 		snapshots.push({
 			"id": snapshot.properties["cm:name"], 
 			"created": utils.toISO8601(snapshot.properties["cm:created"]),
-			"url": url.context + html.url,
+			"url": url.context + "/wcs/ui/views/" + topview.properties["view:mdid"] + "/snapshots/" + snapshot.properties["cm:name"],//html.url,
 			"creator": snapshot.properties["cm:creator"]
 		});
 	}

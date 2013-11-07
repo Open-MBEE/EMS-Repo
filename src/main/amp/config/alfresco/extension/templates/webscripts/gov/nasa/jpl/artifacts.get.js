@@ -6,8 +6,6 @@ var extension = "";
 var cs = null;
 var filename = null;
 
-main();
-
 /**
  * Main function for executing logic
  */
@@ -36,7 +34,7 @@ function main() {
 			status.code = 200;
 		}
 	} else {
-		path += "Artifacts/";
+		path += "Sites/europa/Artifacts/";
 		for (var ii = 0; ii < tokens.length - 1; ii++) {
 			path += tokens[ii] + "/";
 		}
@@ -73,3 +71,13 @@ function checkCs(node, cs) {
 		return false;
 	}
 }
+
+
+
+if (UserUtil.hasWebScriptPermissions) {
+    main();
+} else {
+    status.code = 401;
+    status.redirect = true;
+}
+

@@ -1,0 +1,7 @@
+<webscript>
+  <shortname>Artifact Upload</shortname>
+  <description>Upload file content and meta-data into Repository. By default stores everything in a root Artifacts directory</description>
+  <url>/demo</url>
+  <authentication>user</authentication>
+  <transaction allow="readwrite">required</transaction>
+</webscript>

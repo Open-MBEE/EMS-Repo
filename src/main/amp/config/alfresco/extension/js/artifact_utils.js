@@ -51,7 +51,7 @@ function replaceArtifactUrl(content, prefix, pattern, escape) {
  */
 function searchForFile(filename) {
 	filename = filename.replace(/\\/g, '');
-	return companyhome.childByNamePath('Artifacts/magicdraw/' + filename);
+	return companyhome.childByNamePath('Sites/europa/Artifacts/magicdraw/' + filename);
 }
 
 
