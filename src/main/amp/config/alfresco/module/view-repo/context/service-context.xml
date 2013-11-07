@@ -27,12 +27,12 @@
     </bean>
 
     <!-- A simple module component that will be executed once -->
-    <bean id="java_query" class="gov.nasa.jpl.view_repo.JavaQuery" parent="module.baseComponent" >
-        <property name="moduleId" value="fred" />  <!-- See module.properties -->
+<!--     <bean id="java_query" class="gov.nasa.jpl.view_repo.JavaQuery" parent="module.baseComponent" >
+        <property name="moduleId" value="fred" />  See module.properties
         <property name="name" value="daComponent" />
-<!--         <property name="description" value="A demo component" /> -->
-<!--         <property name="sinceVersion" value="2.0" /> -->
-<!--         <property name="appliesFromVersion" value="2.0" /> -->
+        <property name="description" value="A demo component" />
+        <property name="sinceVersion" value="2.0" />
+        <property name="appliesFromVersion" value="2.0" />
         <property name="nodeService">
            <ref bean="NodeService" />
         </property>
@@ -43,7 +43,7 @@
            <ref bean="ContentService" />
         </property>
         <property name="nodeLocatorService" ref="nodeLocatorService" />
-    </bean>
+    </bean> -->
     
 	<bean id="webscript.gov.nasa.jpl.javatest.get"
 		class="gov.nasa.jpl.view_repo.TestJavaWebScript"
@@ -60,5 +60,4 @@
 		<property name="extensionName" value="UserUtil" />
 		<property name="ignore" value="false" />
 	</bean>
-	
 </beans>

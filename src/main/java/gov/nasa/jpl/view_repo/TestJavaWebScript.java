@@ -3,8 +3,6 @@ package gov.nasa.jpl.view_repo;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.jcr.Repository;
-
 import org.alfresco.repo.nodelocator.NodeLocatorService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -38,6 +36,7 @@ public class TestJavaWebScript extends DeclarativeWebScript {
 		Map<String, Object> model = new HashMap<String, Object>();
 		NodeRef root = nodeLocatorService.getNode("companyhome", null, null);
 		int count = nodeService.countChildAssocs(root, true);
+		getReply();
 		model.put("reply", Integer.toString(count));
 		return model;
 	}
