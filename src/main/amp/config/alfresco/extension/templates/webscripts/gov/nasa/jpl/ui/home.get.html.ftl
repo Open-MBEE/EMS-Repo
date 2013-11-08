@@ -732,7 +732,7 @@ app.observe('home', function(homeData)
         }
         node.children.push(child);
       })
-      node.showLink = !(node.id in homeData.volumes) //node.children.length == 0;
+      node.showLink = !(node.id in homeData.volumes); //node.children.length == 0;
       node.hidden = node.name === 'Unexported Document';
       buildHomeTree(node.children)
     })
