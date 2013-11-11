@@ -8,7 +8,7 @@ var date = new Date();
 var modelElements = {}
 
 function updateModelElement(element) {
-	var	modelNode = modelFolder.childByNamePath(element.mdid);
+	var	modelNode = getModelElement(modelFolder, element.mdid); //modelFolder.childByNamePath(element.mdid);
 	if (modelNode == null) {
 		return;
 	} else {
@@ -41,7 +41,7 @@ function main() {
 	if (viewid in modelElements) {
 		viewnode = modelElements[viewid];
 	} else {
-		viewnode = modelFolder.childByNamePath(viewid);
+		viewnode = getModelElement(modelFolder, viewid); //modelFolder.childByNamePath(viewid);
 	}
 	viewnode.properties['author'] = person.properties['cm:userName'];
 	viewnode.properties['lastModified'] = date;

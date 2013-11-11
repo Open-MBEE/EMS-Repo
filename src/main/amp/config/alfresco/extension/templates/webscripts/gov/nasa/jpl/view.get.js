@@ -28,7 +28,7 @@ function handleView(view) {
 	var sources = JSON.parse(sourcesJson);
 	for (var i in sources) {
 		var sourceid = sources[i];
-		var modelNode = modelFolder.childByNamePath(sourceid);
+		var modelNode = getModelElement(modelFolder, sourceid); //modelFolder.childByNamePath(sourceid);
 		if (modelNode == null)
 			continue;
 		if (seen.indexOf(sourceid) >= 0)
@@ -44,7 +44,7 @@ function handleView(view) {
 }
 
 function main() {
-	var topview = modelFolder.childByNamePath(viewid);
+	var topview = getModelElement(modelFolder, viewid); //modelFolder.childByNamePath(viewid);
 	if (topview == null) {
 		status.code = 404;
 	} else {

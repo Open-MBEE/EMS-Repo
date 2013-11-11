@@ -11,7 +11,7 @@ var product = false;
 var snapshoturl = {};
 // this was an old code where posting a snapshot means we recreate the json on server side and save it as a blob in the snapshot class, might be useful in future
 function main() {
-	var topview = modelFolder.childByNamePath(viewid);
+	var topview = getModelElement(modelFolder, viewid); //modelFolder.childByNamePath(viewid);
 	
 	var elements = [];
 	var seen = [];
@@ -28,7 +28,7 @@ function main() {
 			view2view = JSON.parse(topview.properties["view:view2viewJson"]);
 			var noSections = JSON.parse(topview.properties["view:noSectionsJson"]);
 			for (var viewmdid in view2view) {
-				var view = modelFolder.childByNamePath(viewmdid);
+				var view = getModelElement(modelFolder, viewmdid); //modelFolder.childByNamePath(viewmdid);
 				if (view == null) {
 					status.code = 404;
 					return;

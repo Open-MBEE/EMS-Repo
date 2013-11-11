@@ -17,7 +17,7 @@ function main() {
 	var views = postjson.views;
 	var nosections = postjson.noSections;
 	
-	var viewNode = modelFolder.childByNamePath(viewid);
+	var viewNode = getModelElement(modelFolder, viewid); // modelFolder.childByNamePath(viewid);
 	if (viewNode == null) {
 		status.code = 404; //should throw error
 		return;
@@ -30,7 +30,7 @@ function main() {
 	}
 
 	for (var vid in views) {
-		var vNode = modelFolder.childByNamePath(vid);
+		var vNode = getModelElement(modelFolder, vid); //modelFolder.childByNamePath(vid);
 		if (vNode == null) {
 			status.code = 404;//should throw error
 			return;

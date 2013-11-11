@@ -9,13 +9,15 @@ var modelMapping = {};
 var merged = [];
 
 function getOrCreateVolume(vid, name, roots) {
-	var vnode = modelFolder.childByNamePath(vid);
+	var vnode = getModelElement(modelFolder, vid); //modelFolder.childByNamePath(vid);
 	if (vnode == null) {
-		vnode = modelFolder.createNode(vid, "view:Volume");
+		vnode = createModelElement(modelFolder, vid, "view:Volume"); //modelFolder.createNode(vid, "view:Volume");
 		vnode.properties["view:name"] = name;
 		vnode.properties["view:mdid"] = vid;
+		vnode.properties["cm:title"] = name;
 	} else {
 		vnode.properties["view:name"] = name;
+		vnode.properties["cm:title"] = name;
 	}
 	if (roots.indexOf(vid) >= 0)
 		vnode.properties["view:rootVolume"] = true;
@@ -26,11 +28,12 @@ function getOrCreateVolume(vid, name, roots) {
 }
 
 function getOrCreateDocument(did) {
-	var dnode = modelFolder.childByNamePath(did);
+	var dnode = getModelElement(modelFolder, did); //modelFolder.childByNamePath(did);
 	if (dnode == null) {
-		dnode = modelFolder.createNode(did, "view:DocumentView");
+		dnode = createModelElement(modelFolder, did, "view:DocumentView"); //modelFolder.createNode(did, "view:DocumentView");
 		dnode.properties["view:mdid"] = did;
 		dnode.properties["view:name"] = "Unexported Document";
+		dnode.properties["cm:title"] = "Unexported Document";
 		dnode.save();
 	} 
 	return dnode;

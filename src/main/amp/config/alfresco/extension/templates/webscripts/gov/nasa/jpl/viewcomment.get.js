@@ -39,7 +39,7 @@ function handleView(viewnode) {
 }
 
 function main() {
-	var topview = modelFolder.childByNamePath(viewid);
+	var topview = getModelElement(modelFolder, viewid); //modelFolder.childByNamePath(viewid);
 	if (topview == null) {
 		status.code  = 404;
 	} else {

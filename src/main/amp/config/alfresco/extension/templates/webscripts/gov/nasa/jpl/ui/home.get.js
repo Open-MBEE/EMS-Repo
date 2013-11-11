@@ -43,7 +43,7 @@ function handleVolume(volume) {
 }
 
 function main() {
-	var roots = modelFolder.childrenByXPath("*[@view:rootVolume='true']");
+	var roots = modelFolder.childrenByXPath("//*[@view:rootVolume='true']");
 	for (var i in roots) {
 		var root = roots[i];
 		if (root.hasPermission("Read")) {

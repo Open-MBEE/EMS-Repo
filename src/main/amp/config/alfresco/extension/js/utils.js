@@ -61,3 +61,22 @@ function setName(modelNode, name) {
 	modelNode.properties["view:name"] = name;
 	modelNode.properties["cm:title"] = name;
 }
+
+
+function getModelElement(modelFolder, mdid) {
+	var lastDigit = mdid.charAt(mdid.length-1);
+	var bin = modelFolder.childByNamePath(lastDigit);
+	if (bin == null) {
+		return null;
+	}
+	return bin.childByNamePath(mdid);
+}
+
+function createModelElement(modelFolder, mdid, type) {
+	var lastDigit = mdid.charAt(mdid.length-1);
+	var bin = modelFolder.childByNamePath(lastDigit);
+	if (bin == null) {
+		bin = modelFolder.createFolder(lastDigit);
+	}
+	return bin.createNode(mdid, type);
+}

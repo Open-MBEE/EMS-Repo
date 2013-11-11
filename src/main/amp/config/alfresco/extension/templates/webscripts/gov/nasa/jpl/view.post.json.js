@@ -11,20 +11,20 @@ var user = args.user;
 function updateOrCreateModelElement(element, force) {
 	var modelNode = modelMapping[element.mdid];
 	if (modelNode == null || modelNode == undefined) {
-		modelNode = modelFolder.childByNamePath(element.mdid);
+		modelNode = getModelElement(modelFolder, element.mdid); //modelFolder.childByNamePath(element.mdid);
 		if (modelNode == null) {
 			if (element.type == "View") {
-				modelNode = modelFolder.createNode(element.mdid, "view:View");
+				modelNode = createModelElement(modelFolder, element.mdid, "view:View"); //modelFolder.createNode(element.mdid, "view:View");
 				setName(modelNode, element.name);
 			} else if (element.type == "Property") {
-				modelNode = modelFolder.createNode(element.mdid, "view:Property");
+				modelNode = createModelElement(modelFolder, element.mdid, "view:Property"); //modelFolder.createNode(element.mdid, "view:Property");
 				if (element.name != undefined) {
 					setName(modelNode, element.name);
 				}
 			} else if (element.type == "Comment")
-				modelNode = modelFolder.createNode(element.mdid, "view:Comment");
+				modelNode = createModelElement(modelFolder, element.mdid, "view:Comment"); //modelFolder.createNode(element.mdid, "view:Comment");
 			else {
-				modelNode = modelFolder.createNode(element.mdid, "view:ModelElement");
+				modelNode = createModelElement(modelFolder, element.mdid, "view:ModelElement"); //modelFolder.createNode(element.mdid, "view:ModelElement");
 				if (element.name != null || element.name != undefined) {
 					setName(modelNode, element.name);
 				}
@@ -63,7 +63,7 @@ function updateOrCreateModelElement(element, force) {
 function updateOrCreateView(view, ignoreNoSection) {
 	var viewNode = modelMapping[view.mdid];
 	if (viewNode == null || viewNode == undefined) {
-		viewNode = modelFolder.childByNamePath(view.mdid);
+		viewNode = getModelElement(modelFolder, view.mdid); //modelFolder.childByNamePath(view.mdid);
 		if (viewNode == null) {
 			return;
 		}
@@ -113,18 +113,18 @@ function main() {
 	if (postjson == null || postjson == undefined)
 		return;
 	var viewid = url.templateArgs.viewid;
-	var topview = modelFolder.childByNamePath(viewid);
+	var topview = getModelElement(modelFolder, viewid); //modelFolder.childByNamePath(viewid);
 	var product = false;
 	if (args.product == 'true')
 		product = true;
 	if (topview == null) {
 		if (args.doc == 'true') {
-			topview = modelFolder.createNode(viewid, "view:DocumentView");
+			topview = createModelElement(modelFolder, viewid, "view:DocumentView"); //modelFolder.createNode(viewid, "view:DocumentView");
 			if (product) {
 				topview.properties["view:product"] = true;
 			}
 		} else {
-			topview = modelFolder.createNode(viewid, "view:View");
+			topview = createModelElement(modelFolder, viewid, "view:View");//modelFolder.createNode(viewid, "view:View");
 		}
 		topview.properties["view:mdid"] = viewid;
 		topview.save();

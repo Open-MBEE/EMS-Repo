@@ -20,7 +20,7 @@ function main() {
 	commentNode.properties["view:committed"] = false;
 	commentNode.save();
 	
-	var view = modelFolder.childByNamePath(viewid);
+	var view = getModelElement(modelFolder, viewid); //modelFolder.childByNamePath(viewid);
 	if (view == null)
 		return;
 	view.createAssociation(commentNode, "view:comments");
