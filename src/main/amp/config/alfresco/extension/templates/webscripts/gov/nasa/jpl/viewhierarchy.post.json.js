@@ -1,5 +1,6 @@
 <import resource="classpath:alfresco/extension/js/json2.js">
 <import resource="classpath:alfresco/extension/js/utils.js">
+<import resource="classpath:alfresco/extension/js/artifact_utils.js">
 
 //var modelFolder = roothome.childByNamePath("/Sites/europa/vieweditor/model");
 //var presentationFolder = roothome.childByNamePath("/Sites/europa/vieweditor/presentation");
@@ -17,6 +18,11 @@ function main() {
 	var views = postjson.views;
 	var nosections = postjson.noSections;
 	
+	
+    // save off JSON file
+    var vepath = "Sites/europa/ViewEditor/";
+    saveFile(vepath, "VIEW_HIERARCHY_" + viewid, json.toString());
+
 	var viewNode = modelFolder.childByNamePath(viewid);
 	if (viewNode == null) {
 		status.code = 404; //should throw error

@@ -1,5 +1,6 @@
 <import resource="classpath:alfresco/extension/js/json2.js">
 <import resource="classpath:alfresco/extension/js/utils.js">
+<import resource="classpath:alfresco/extension/js/artifact_utils.js">
 
 //var europaSite = siteService.getSite("europa").node;
 var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
@@ -113,6 +114,11 @@ function main() {
 	if (postjson == null || postjson == undefined)
 		return;
 	var viewid = url.templateArgs.viewid;
+	
+	// save off JSON file
+    var vepath = "Sites/europa/ViewEditor/";
+    saveFile(vepath, "VIEW_" + viewid, json.toString());
+	
 	var topview = modelFolder.childByNamePath(viewid);
 	var product = false;
 	if (args.product == 'true')
