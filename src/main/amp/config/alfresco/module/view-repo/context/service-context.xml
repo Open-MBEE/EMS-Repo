@@ -51,11 +51,14 @@
 		<property name="nodeService" ref="NodeService" />
         <property name="nodeLocatorService" ref="nodeLocatorService" /> 
 	</bean>
-	
-	<!-- Java backed webscript for logout with redirection on login -->
-	<bean id="webscript.gov.nasa.jpl.utils.logout.get"
-		class="gov.nasa.jpl.view_repo.webscripts.LogoutWebScript"
-		parent="webscript"/>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.post"
+		class="gov.nasa.jpl.view_repo.webscripts.ViewPostJson"
+		parent="webscript">
+		<property name="nodeService" ref="NodeService" />
+        <property name="nodeLocatorService" ref="nodeLocatorService" /> 
+        <property name="repositoryHelper" ref="repositoryHelper" />
+	</bean>
 	
 	<!--  utility bean for checking user site permissions: also expose a webscript base object -->
 	<bean id="UserUtil" class="gov.nasa.jpl.view_repo.util.UserUtil" parent="baseJavaScriptExtension">
