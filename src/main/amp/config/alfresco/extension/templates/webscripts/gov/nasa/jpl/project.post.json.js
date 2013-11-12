@@ -9,9 +9,9 @@ var modelMapping = {};
 var merged = [];
 
 function getOrCreateVolume(vid, name, roots) {
-	var vnode = getModelElement(modelFolder, vid); //modelFolder.childByNamePath(vid);
+	var vnode = modelFolder.childByNamePath(vid);
 	if (vnode == null) {
-		vnode = createModelElement(modelFolder, vid, "view:Volume"); //modelFolder.createNode(vid, "view:Volume");
+		vnode = modelFolder.createNode(vid, "view:Volume");
 		vnode.properties["view:name"] = name;
 		vnode.properties["view:mdid"] = vid;
 		vnode.properties["cm:title"] = name;

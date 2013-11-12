@@ -65,18 +65,28 @@ function setName(modelNode, name) {
 
 function getModelElement(modelFolder, mdid) {
 	var lastDigit = mdid.charAt(mdid.length-1);
+	var secondDigit = mdid.charAt(mdid.length-2);
 	var bin = modelFolder.childByNamePath(lastDigit);
 	if (bin == null) {
 		return null;
 	}
-	return bin.childByNamePath(mdid);
+	var secondBin = bin.childByNamePath(secondDigit);
+	if (secondBin == null) {
+		return null;
+	}
+	return secondBin.childByNamePath(mdid);
 }
 
 function createModelElement(modelFolder, mdid, type) {
 	var lastDigit = mdid.charAt(mdid.length-1);
+	var secondDigit = mdid.charAt(mdid.length-2);
 	var bin = modelFolder.childByNamePath(lastDigit);
 	if (bin == null) {
 		bin = modelFolder.createFolder(lastDigit);
 	}
-	return bin.createNode(mdid, type);
+	var secondBin = bin.childByNamePath(secondDigit);
+	if (secondBin == null) {
+		secondBin = modelFolder.createFolder(secondDigit);
+	}
+	return secondBin.createNode(mdid, type);
 }

@@ -12,7 +12,7 @@ function main() {
 	var volid = requestbody.content;
 	var docid = url.templateArgs.docid;
 	var dnode = getModelElement(modelFolder, docid); //modelFolder.childByNamePath(docid);
-	var vnode = getModelElement(modelFolder, volid); //modelFolder.childByNamePath(volid);
+	var vnode = modelFolder.childByNamePath(volid);
 	if (dnode == null) {
 		dnode = createModelElement(modelFolder, docid, "view:DocumentView"); //modelFolder.createNode(docid, "view:DocumentView");
 		dnode.properties["view:mdid"] = docid;
