@@ -64,6 +64,7 @@
         <dependency>
             <groupId>${alfresco.groupId}</groupId>
             <artifactId>alfresco-repository</artifactId>
+            <version>${alfresco.version}</version>
         </dependency>
         <!-- Test dependencies -->
         <dependency>
@@ -71,6 +72,12 @@
             <artifactId>junit</artifactId>
             <version>4.8.1</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+        	<groupId>${alfresco.groupId}</groupId>
+        	<artifactId>alfresco-web-client</artifactId>
+        	<scope>system</scope>
+        	<systemPath>${project.basedir}/lib/alfresco-web-client-${alfresco.version}.jar</systemPath>
         </dependency>
     </dependencies>
 
@@ -98,44 +105,66 @@
         </repository>
     </repositories>
 
-  <build>
+	<build>
 		<plugins>
-        <plugin>
-          <groupId>org.zeroturnaround</groupId>
-          <artifactId>jrebel-maven-plugin</artifactId>
-          <version>1.1.5</version>
-          <executions>
-            <execution>
-              <id>generate-rebel-xml</id>
-              <phase>prepare-package</phase>
-              <goals>
-                <goal>generate</goal>
-              </goals>
-            </execution>
-          </executions>
-          <configuration>
-            <packaging>war</packaging>
-            <classpath>
-            	<fallback>default</fallback>
-            	<resources>
-            		<resource>
-            			<directory>src/main/amp/config</directory>
-            		</resource>
-            	</resources>
-            </classpath>
-            <war>
-            	<path>target/view-repo-war</path>
-            </war>
-            <web>
-            	<resources>
-            		<resource>
-            			<target>/</target>
-            			<directory>src/main/amp/web</directory>
-            		</resource>
-            	</resources>
-            </web>
-          </configuration>
-        </plugin>
-      </plugins>
+			<plugin>
+				<groupId>org.zeroturnaround</groupId>
+				<artifactId>jrebel-maven-plugin</artifactId>
+				<version>1.1.5</version>
+				<executions>
+					<execution>
+						<id>generate-rebel-xml</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<packaging>war</packaging>
+					<classpath>
+						<fallback>default</fallback>
+						<resources>
+							<resource>
+								<directory>src/main/amp/config</directory>
+							</resource>
+						</resources>
+					</classpath>
+					<war>
+						<path>target/view-repo-war</path>
+					</war>
+					<web>
+						<resources>
+							<resource>
+								<target>/</target>
+								<directory>src/main/amp/web</directory>
+							</resource>
+						</resources>
+					</web>
+				</configuration>
+			</plugin>
+			<!--  make sure fonts are copied correctly : alfresco munges woff files maybe because of UTF-8 encoding? -->
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-font-resources</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<overwrite>true</overwrite>
+							<outputDirectory>${project.build.directory}/${project.build.finalName}/web</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/src/main/amp/web</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 	</build>
 </project>

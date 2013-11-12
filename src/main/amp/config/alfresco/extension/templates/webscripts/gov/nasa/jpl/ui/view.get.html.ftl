@@ -40,7 +40,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
       </div>
 
       <ul class="nav navbar-nav pull-right">
-       <!-- <li><a href="${url.context}/navigate/logout">logout</a></li> -->
+       <li><a href="${url.context}/wcs/logout">logout</a></li>
       </ul>
 
       <ul class="nav navbar-nav pull-right">

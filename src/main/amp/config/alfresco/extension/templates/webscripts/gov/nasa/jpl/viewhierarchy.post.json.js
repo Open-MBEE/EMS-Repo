@@ -19,7 +19,8 @@ function main() {
 	
 	var viewNode = modelFolder.childByNamePath(viewid);
 	if (viewNode == null) {
-		return; //should throw error
+		status.code = 404; //should throw error
+		return;
 	}
 	if (viewNode.properties["view:product"]) {
 		viewNode.properties["view:view2viewJson"] = jsonUtils.toJSONString(views);
@@ -31,7 +32,8 @@ function main() {
 	for (var vid in views) {
 		var vNode = modelFolder.childByNamePath(vid);
 		if (vNode == null) {
-			continue;//should throw error
+			status.code = 404;//should throw error
+			return;
 		}
 		modelMapping[vid] = vNode;
 	}
@@ -51,6 +53,6 @@ if (status.code == 200) {
 } else if (status.code == 401) {
     response = "unauthorized";
 } else {
-    response = "NotFound";
+    response = "[ERROR] Not all views in the hierarchy have been exported!";
 }
 model['res'] = response;
