@@ -20,7 +20,7 @@ function main() {
 	
 	// save off JSON file
     var vepath = "Sites/europa/ViewEditor/";
-    saveFile(vepath, "VIEW_HIERARCHY_" + viewid, json.toString());
+    //saveFile(vepath, "VIEW_HIERARCHY_" + viewid, json.toString());
 
 	var viewNode = getModelElement(modelFolder, viewid); // modelFolder.childByNamePath(viewid);
 

@@ -117,7 +117,7 @@ function main() {
 
 	// save off JSON file
     var vepath = "Sites/europa/ViewEditor/";
-    saveFile(vepath, "VIEW_" + viewid, json.toString());
+    //saveFile(vepath, "VIEW_" + viewid, json.toString());
     
 	var topview = getModelElement(modelFolder, viewid); //modelFolder.childByNamePath(viewid);
 
@@ -189,3 +189,5 @@ if (status.code == 200) {
     response = "NotFound";
 }
 model['res'] = response;
+finishDate = new Date();
+logger.log(finishDate-date);
