@@ -91,8 +91,6 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
   <div id="the-document">
 
     {{#viewTree.orderedChildren}}
-
-
             <a name="{{id}}" style="display: block; position:relative; top:-60px; "></a>
             {{#(depth == 0) }}
               {{{("<h1><span class='"+class+" section-header editable' data-property='NAME' data-section-id='" + id + "'>" +  name + "</span></h1>" )}}}
@@ -274,7 +272,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
               <div class="btn-group">
                 <a class="btn btn-default" title="Insert picture (or just drag &amp; drop)" id="pictureBtn{{id}}">img</a>
                 <input type="file" data-role="magic-overlay" data-target="#pictureBtn{{id}}" data-edit="insertImage">
-                <button type="button" class="btn btn-default" title="Insert SVG" onclick="insertSvg('{{id}}');">svg</button>
+                <button type="button" class="btn btn-default requires-selection" title="Insert SVG" onclick="insertSvg('{{id}}');">svg</button>
               </div>
               <a class="btn btn-default dummyButton" style="visibility:hidden" data-edit="insertHTML &nbsp;" title="dumb"></a>
 
@@ -568,6 +566,7 @@ app.on('editSection', function(e, sectionId) {
   // TODO turn editing off for all other sections?
   app.set(e.keypath+'.editing', true);
   var section = $("[data-section-id='" + sectionId + "']");
+  var toolbar =$('[data-role=editor-toolbar][data-target="#section' + sectionId + '"]');
 
   var sectionHeader = section.filter('.section-header');
   sectionHeader.data('original-content', sectionHeader.html());
@@ -575,6 +574,28 @@ app.on('editSection', function(e, sectionId) {
   section.filter('.section.page').wysiwyg({toolbarSelector: '[data-role=editor-toolbar][data-target="#section' + sectionId + '"]'});
   section.filter('span').wysiwyg({toolbarSelector : '#no-toolbar'});
   
+  toolbar.find(".requires-selection").addClass("disabled");
+  var sectionPage = section.filter(".section.page");
+  // On focus, enable the button
+  sectionPage.on('focus', function(arg)
+  {
+    toolbar.find(".requires-selection").removeClass("disabled");
+  })
+  // On blur disable the button unless the object we clicked on was the button itself
+  // This code can only find the button in FF and Chrome
+  sectionPage.on('blur', function(arg)
+  {
+    var target = arg.relatedTarget; // Chrome
+    // Guess what, relatedTarget doesn't work on FF, if this is the case, look for originalEvent
+    // Safari fails here, IE Unknown
+    if(target === null && arg.originalEvent !== null)
+    {
+      target = arg.originalEvent.explicitOriginalTarget; // FF
+    }
+    var clickedButton = $(target).filter(".requires-selection");
+    toolbar.find(".requires-selection").not(clickedButton).addClass("disabled");
+  })
+
   // TODO turn this listener off on save or cancel
   section.on('keyup paste blur',function(evt) {
     // we need to use the selection api because we're in a contenteditable
