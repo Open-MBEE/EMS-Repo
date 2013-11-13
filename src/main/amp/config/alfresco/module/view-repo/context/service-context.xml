@@ -55,9 +55,8 @@
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.post"
 		class="gov.nasa.jpl.view_repo.webscripts.ViewPostJson"
 		parent="webscript">
-		<property name="nodeService" ref="NodeService" />
-        <property name="nodeLocatorService" ref="nodeLocatorService" /> 
         <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
 	</bean>
 	
 	<!--  utility bean for checking user site permissions: also expose a webscript base object -->
