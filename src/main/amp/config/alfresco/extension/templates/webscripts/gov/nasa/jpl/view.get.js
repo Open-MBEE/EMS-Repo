@@ -6,7 +6,7 @@ var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
 var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
 var res = [];
 var seen = [];
-
+var viewdone = [];
 var viewid = url.templateArgs.viewid
 var recurse = args.recurse == 'true' ? true : false;
 
@@ -36,10 +36,23 @@ function handleView(view) {
 			continue;
 		add(modelNode);
 	}
+	viewdone.push(view.properties["view:mdid"]);
 	if (recurse) {
-		var childViews = view.assocs["view:views"];
-		for (var i in childViews) {
-			handleView(childViews[i]);
+		if (view.properties["view:product"] == true) {
+			var view2view = JSON.parse(view.properties["view:view2viewJson"]);
+			for (var i in view2view) {
+				if (viewdone.indexOf(i) >= 0)
+					continue;
+				var v = getModelElement(modelFolder, i);
+				if (v == null)
+					continue;
+				handleView(v);
+			}
+		} else {
+			var childViews = view.assocs["view:views"];
+			for (var i in childViews) {
+				handleView(childViews[i]);
+			}
 		}
 	}
 }
