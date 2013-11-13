@@ -41,6 +41,10 @@ function main() {
 			status.code = 404;//should throw error
 			return;
 		}
+		if (vNode.typeShort != "view:View" && vNode.typeShort != "view:DocumentView") {
+			vNode.specializeType("view:View");
+			vNode.save();
+		}
 		modelMapping[vid] = vNode;
 	}
 	updateViewHierarchy(modelMapping, views, nosections);
