@@ -15,7 +15,7 @@ var views = [];
 var view2view = {};
 
 function main() {
-	var topview = modelFolder.childByNamePath(viewid);
+	var topview = getModelElement(modelFolder, viewid); //modelFolder.childByNamePath(viewid);
 	if (topview == null) {
 		status.code = 404;
 	} else {
@@ -25,7 +25,7 @@ function main() {
 			view2view = JSON.parse(topview.properties["view:view2viewJson"]);
 			var noSections = JSON.parse(topview.properties["view:noSectionsJson"]);
 			for (var viewmdid in view2view) {
-				var view = modelFolder.childByNamePath(viewmdid);
+				var view = getModelElement(modelFolder, viewmdid); //modelFolder.childByNamePath(viewmdid);
 				if (view == null) {
 					status.code = 404;
 					return;

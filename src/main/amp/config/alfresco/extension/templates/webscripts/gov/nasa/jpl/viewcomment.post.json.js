@@ -24,7 +24,7 @@ function updateOrCreateComment(comment) {
 }
 
 function doView(viewid, comments) {
-	var viewnode = modelFolder.childByNamePath(viewid);
+	var viewnode = getModelElement(modelFolder, viewid); //modelFolder.childByNamePath(viewid);
 	if (viewnode == null) {
 		status.code = 404;
 		return;

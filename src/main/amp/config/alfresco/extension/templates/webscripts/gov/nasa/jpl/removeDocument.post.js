@@ -8,7 +8,7 @@ var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapsh
 
 function main() {
 	var docid = url.templateArgs.docid;
-	var dnode = modelFolder.childByNamePath(docid);
+	var dnode = getModelElement(modelFolder, docid); //modelFolder.childByNamePath(docid);
 	if (dnode == null) {
 		status.code = 404;
 		return;

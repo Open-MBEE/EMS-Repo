@@ -9,7 +9,7 @@ var projectVolumes = [];
 
 function handleVolume(volume) {
 	volumes[volume.properties['view:mdid']] = volume.properties['view:name'];
-	childrenVolumes = volume.assocs['view:volumes'];
+	var childrenVolumes = volume.assocs['view:volumes'];
 	var cvs = [];
 	for (var i in childrenVolumes) {
 		var cv = childrenVolumes[i];
@@ -18,9 +18,14 @@ function handleVolume(volume) {
     		handleVolume(cv);
 		}
 	}
+	cvs = cvs.sort(function(a,b) {
+		var aname = volumes[a];
+		var bname = volumes[b];
+		return aname.localeCompare(bname);
+	});
 	volume2volumes[volume.properties['view:mdid']] = cvs;
 	
-	childrenDocuments = volume.assocs['view:documents'];
+	var childrenDocuments = volume.assocs['view:documents'];
 	var cds = [];
 	for (var i in childrenDocuments) {
 		var cd = childrenDocuments[i];
@@ -29,6 +34,11 @@ function handleVolume(volume) {
     		documents[cd.properties['view:mdid']] = cd.properties['view:name'];
 		}
 	}
+	cds = cds.sort(function(a,b) {
+		var aname = documents[a];
+		var bname = documents[b];
+		return aname.localeCompare(bname);
+	});
 	volume2documents[volume.properties['view:mdid']] = cds;
 }
 
@@ -41,6 +51,12 @@ function main() {
     		handleVolume(root);
 		}
 	}
+	projectVolumes = projectVolumes.sort(function(a,b) {
+		var aname = volumes[a];
+		var bname = volumes[b];
+		return aname.localeCompare(bname);
+	});
+	
 }
 
 status.code = 200;

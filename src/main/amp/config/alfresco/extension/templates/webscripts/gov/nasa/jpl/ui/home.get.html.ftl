@@ -44,6 +44,10 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/wcs" };
 				<a href="vision.html"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
 			</div>
 
+	      <ul class="nav navbar-nav pull-right">
+	       <li><a href="${url.context}/wcs/logout">logout</a></li>
+	      </ul>
+
 			<!-- 
 			<form class="navbar-form navbar-right" action="">
 	      <div class="form-group">
@@ -732,7 +736,7 @@ app.observe('home', function(homeData)
         }
         node.children.push(child);
       })
-      node.showLink = node.children.length == 0;
+      node.showLink = !(node.id in homeData.volumes); //node.children.length == 0;
       node.hidden = node.name === 'Unexported Document';
       buildHomeTree(node.children)
     })

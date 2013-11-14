@@ -16,7 +16,7 @@ function main() {
 		return;
 	}
 	
-	var topview = modelFolder.childByNamePath(docid);
+	var topview = getModelElement(modelFolder, docid); //modelFolder.childByNamePath(docid);
 	var jsonstring = node.properties["view:productJson"];
 	res = JSON.parse(jsonstring);
 	res['snapshots'] = [];
