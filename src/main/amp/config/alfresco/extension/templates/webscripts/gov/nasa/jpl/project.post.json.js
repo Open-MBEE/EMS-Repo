@@ -36,6 +36,10 @@ function getOrCreateDocument(did) {
 		dnode.properties["cm:title"] = "Unexported Document";
 		dnode.save();
 	} 
+	if (dnode.typeShort != "view:DocumentView") {
+		dnode.specializeType("view:DocumentView");
+		dnode.save();
+	}
 	return dnode;
 }
 
