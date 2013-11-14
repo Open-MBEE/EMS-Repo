@@ -5,6 +5,9 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteService;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 /**
  * Simple utility for user testing functionality
@@ -17,6 +20,8 @@ public class UserUtil extends BaseProcessorExtension {
 	private static SiteService siteService;
 	private static PersonService personService;
 	private static String siteName;
+	
+	private static Log logger = LogFactory.getLog(UserUtil.class);
 	
 	// for local testing without Site created from share, set ignore to true in configuration so check isn't made
 	private static boolean ignore = false;
@@ -61,5 +66,9 @@ public class UserUtil extends BaseProcessorExtension {
 			String normalized = personService.getUserIdentifier(username);
 			return siteService.isMember(site, normalized);
 		}
+	}
+	
+	public static void log(Object msg) {
+		logger.error(msg);
 	}
 }

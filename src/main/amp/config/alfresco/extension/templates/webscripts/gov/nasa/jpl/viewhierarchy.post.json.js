@@ -1,5 +1,6 @@
 <import resource="classpath:alfresco/extension/js/json2.js">
 <import resource="classpath:alfresco/extension/js/utils.js">
+<import resource="classpath:alfresco/extension/js/artifact_utils.js">
 
 //var modelFolder = roothome.childByNamePath("/Sites/europa/vieweditor/model");
 //var presentationFolder = roothome.childByNamePath("/Sites/europa/vieweditor/presentation");
@@ -17,7 +18,12 @@ function main() {
 	var views = postjson.views;
 	var nosections = postjson.noSections;
 	
-	var viewNode = modelFolder.childByNamePath(viewid);
+	// save off JSON file
+    var vepath = "Sites/europa/ViewEditor/";
+    //saveFile(vepath, "VIEW_HIERARCHY_" + viewid, json.toString());
+
+	var viewNode = getModelElement(modelFolder, viewid); // modelFolder.childByNamePath(viewid);
+
 	if (viewNode == null) {
 		status.code = 404; //should throw error
 		return;
@@ -30,10 +36,14 @@ function main() {
 	}
 
 	for (var vid in views) {
-		var vNode = modelFolder.childByNamePath(vid);
+		var vNode = getModelElement(modelFolder, vid); //modelFolder.childByNamePath(vid);
 		if (vNode == null) {
 			status.code = 404;//should throw error
 			return;
+		}
+		if (vNode.typeShort != "view:View" && vNode.typeShort != "view:DocumentView") {
+			vNode.specializeType("view:View");
+			vNode.save();
 		}
 		modelMapping[vid] = vNode;
 	}

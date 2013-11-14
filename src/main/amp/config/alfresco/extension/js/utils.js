@@ -61,3 +61,32 @@ function setName(modelNode, name) {
 	modelNode.properties["view:name"] = name;
 	modelNode.properties["cm:title"] = name;
 }
+
+
+function getModelElement(modelFolder, mdid) {
+	var lastDigit = mdid.charAt(mdid.length-1);
+	var secondDigit = mdid.charAt(mdid.length-2);
+	var bin = modelFolder.childByNamePath(lastDigit);
+	if (bin == null) {
+		return modelFolder.childByNamePath(mdid);
+	}
+	var secondBin = bin.childByNamePath(secondDigit);
+	if (secondBin == null) {
+		return modelFolder.childByNamePath(mdid);
+	}
+	return secondBin.childByNamePath(mdid);
+}
+
+function createModelElement(modelFolder, mdid, type) {
+	var lastDigit = mdid.charAt(mdid.length-1);
+	var secondDigit = mdid.charAt(mdid.length-2);
+	var bin = modelFolder.childByNamePath(lastDigit);
+	if (bin == null) {
+		return modelFolder.createNode(mdid, type);
+	}
+	var secondBin = bin.childByNamePath(secondDigit);
+	if (secondBin == null) {
+		return modelFolder.createNode(mdid, type);
+	}
+	return secondBin.createNode(mdid, type);
+}

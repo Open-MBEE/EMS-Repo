@@ -11,10 +11,10 @@ var modelMapping = {};
 function main() {
 	var volid = requestbody.content;
 	var docid = url.templateArgs.docid;
-	var dnode = modelFolder.childByNamePath(docid);
+	var dnode = getModelElement(modelFolder, docid); //modelFolder.childByNamePath(docid);
 	var vnode = modelFolder.childByNamePath(volid);
 	if (dnode == null) {
-		dnode = modelFolder.createNode(docid, "view:DocumentView");
+		dnode = createModelElement(modelFolder, docid, "view:DocumentView"); //modelFolder.createNode(docid, "view:DocumentView");
 		dnode.properties["view:mdid"] = docid;
 		setName(dnode, "Unexported Document");
 		dnode.save();

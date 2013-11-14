@@ -18,7 +18,7 @@ function handleView(view, seen, elements, views, view2view) {
 	var sources = JSON.parse(sourcesJson);
 	for (var i in sources) {
 		var sourceid = sources[i];
-		var modelNode = modelFolder.childByNamePath(sourceid);
+		var modelNode = getModelElement(modelFolder, sourceid); //modelFolder.childByNamePath(sourceid);
 		if (modelNode == null)
 			continue;
 		if (seen.indexOf(sourceid) >= 0)
