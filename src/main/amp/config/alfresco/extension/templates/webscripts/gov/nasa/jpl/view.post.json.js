@@ -69,6 +69,10 @@ function updateOrCreateView(view, ignoreNoSection) {
 			return;
 		}
 	}
+	if (viewNode.typeShort != "view:DocumentView" && viewNode.typeShort != "view:View") {
+		viewNode.specializeType("view:View");
+		viewNode.save();
+	}
 	var sources = [];
 	for (var i in view.contains) {
 		fillSources(view.contains[i], sources);
