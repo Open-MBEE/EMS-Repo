@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns="http://www.alfresco.org/model/dictionary/1.0" name="sysml:sysmlModel">
+    <description>SysML Lite Extension model</description>
+    <author>JPL</author>
+    <version>1.0</version>
+    <imports>
+        <import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d"/>
+        <import uri="http://www.alfresco.org/model/content/1.0" prefix="cm"/>
+    </imports>
+    <namespaces>
+        <namespace uri="http://jpl.nasa.gov/model/sysml-lite/1.0" prefix="sysml"/>
+    </namespaces>
+    <data-types/>
+    <constraints/>
+    <types>      
+    	<type name="sysml:Project">
+    		<parent>cm:folder</parent>
+    		<mandatory-aspects>
+    			<aspect>sysml:Identifiable</aspect>
+    		</mandatory-aspects>
+    	</type>  
+        <type name="sysml:Element">
+            <parent>cm:content</parent>
+            <properties>
+                <property name="sysml:name"> 
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="true">
+                    	<atomic>false</atomic>
+                    	<stored>false</stored>
+                    	<tokenised>true</tokenised>
+                    </index>
+                </property>
+            </properties>
+            <associations/>
+            <overrides/>
+            <mandatory-aspects>
+            	<aspect>sysml:Identifiable</aspect>
+            	<aspect>cm:versionable</aspect>
+            	<aspect>cm:taggable</aspect>
+            	<aspect>cm:titled</aspect>
+           <!--   	<aspect>cm:lockable</aspect> -->
+            </mandatory-aspects>
+        </type>
+        <type name="sysml:ElementFolder"> <!--  this is the "container" folder for each element -->
+        	<parent>cm:folder</parent>
+        	<mandatory-aspects>
+        		<aspect>cm:titled</aspect>
+        	</mandatory-aspects>
+        </type>
+        <type name="sysml:Package">
+        	<parent>sysml:Element</parent>
+        </type>
+        <type name="sysml:Viewpoint">
+        	<parent>sysml:Element</parent>
+        </type>
+        <type name="sysml:Property">
+            <parent>sysml:Element</parent>
+            <properties>
+                <property name="sysml:value"> <!-- valueSpec?? -->
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>true</tokenised>
+                    </index>
+                </property>
+                <property name="sysml:multiplicityMax">
+                    <type>d:int</type>
+                    <mandatory>false</mandatory>
+                    <default>1</default>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+                <property name="sysml:multiplicityMin">
+                    <type>d:int</type>
+                    <mandatory>false</mandatory>
+                    <default>1</default>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+            </properties>
+            <associations>
+            	<association name="sysml:propertyType">
+                    <source>
+                        <mandatory>false</mandatory>
+                        <many>false</many>
+                    </source>
+                    <target>
+                        <class>sysml:Element</class>
+                        <mandatory>false</mandatory>
+                        <many>false</many>
+                    </target>
+                </association>
+            </associations>
+            <overrides/>
+            <mandatory-aspects/>
+        </type>
+        <type name="sysml:Relationship">
+        	<parent>sysml:Element</parent>
+        	<properties/>
+        	<associations>
+        		<association name="sysml:source">
+        			<source>
+        				<mandatory>false</mandatory>
+        				<many>false</many>
+        			</source>
+        			<target>
+        				<class>sysml:Element</class>
+        				<mandatory>true</mandatory>
+        				<many>false</many>
+        			</target>
+        		</association>
+        		<association name="sysml:target">
+        			<source>
+        				<mandatory>false</mandatory>
+        				<many>false</many>
+        			</source>
+        			<target>
+        				<class>sysml:Element</class>
+        				<mandatory>true</mandatory>
+        				<many>false</many>
+        			</target>
+        		</association>
+        	</associations>
+        </type>
+    </types>
+    <aspects>
+        <aspect name="sysml:View">
+            <properties>
+                <property name="sysml:containsJson">
+                	<type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
+                <property name="sysml:sourcesJson">
+                	<type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
+                <property name="sysml:childrenViewsJson">
+                	<type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
+            </properties>
+            <associations/>
+            <overrides/>
+            <mandatory-aspects/>
+        </aspect>
+         <aspect name="sysml:Product">
+            <parent>sysml:View</parent>
+            <properties>
+                <property name="sysml:view2viewJson">
+                	<type>d:text</type>
+                	<mandatory>false</mandatory>
+                	<index enabled="false"/>
+                </property>
+                <property name="sysml:noSectionsJson">
+                	<type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
+            </properties>
+            <associations>
+            	<association name="sysml:snapshots">
+                    <source>
+                        <mandatory>false</mandatory>
+                        <many>false</many>
+                    </source>
+                    <target>
+                        <class>view:Snapshot</class>
+                        <mandatory>false</mandatory>
+                        <many>true</many>
+                    </target>
+                </association>
+            </associations>
+            <overrides/>
+            <mandatory-aspects/>
+        </aspect>
+        <aspect name="sysml:Identifiable">
+        	<properties>
+        		<property name="sysml:id">
+        			<type>d:text</type>
+        			<mandatory>true</mandatory>
+        			<index enabled="true">
+                    	<atomic>true</atomic>
+                    	<stored>false</stored>
+                    	<tokenised>false</tokenised>
+                    </index>
+        		</property>
+        	</properties>
+        </aspect>
+    </aspects>
+</model>
