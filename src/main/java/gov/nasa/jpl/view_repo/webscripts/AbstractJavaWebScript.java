@@ -18,6 +18,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
+import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * Base class for all EMS Java backed webscripts. Provides helper functions and
@@ -108,8 +109,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @param dnode
 	 */
 	protected void cleanDocument(ScriptNode dnode) {
-		// TODO implement cleanDocument
-		dnode.getSourceAssocs().get("view:documents");
+		JSONArray pvs = (JSONArray) dnode.getSourceAssocs().get("view:documents");
+		if (pvs != null) {
+			for (int ii = 0; ii < pvs.length(); ii++) {
+				// TODO: convert pv to ScriptNode to remove?
+			}
+		}
 	}
 
 	protected void setName(ScriptNode node, String name) {
@@ -118,12 +123,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	}
 
 	/**
-	 * Utility function to switch between different ways to set a NodeRefs
-	 * property
+	 * Wrapper function to switch between different ways to set a NodeRefs
+	 * property (foundational API or ScriptNode, latter has some odd null property
+	 * issues at the moment) 
 	 * 
-	 * @param node
-	 * @param type
-	 * @param value
+	 * @param node		Node to set property for
+	 * @param type		Short type for the property to set (e.g., "view:mdid")
+	 * @param value		Serializable value to set the property to
 	 */
 	protected void setNodeProperty(ScriptNode node, String type,
 			Serializable value) {
@@ -168,7 +174,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 	/**
 	 * Helper to create a QName from either a fully qualified or short-name
-	 * QName string
+	 * QName string (taken from ScriptNode)
 	 * 
 	 * @param s
 	 *            Fully qualified or short-name QName string
@@ -183,5 +189,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			qname = QName.createQName(s, this.services.getNamespaceService());
 		}
 		return qname;
+	}
+
+	/**
+	 * Helper utility to check the value of a request parameter
+	 * @param req		WebScriptRequest with parameter to be checked
+	 * @param name		String of the request parameter name to check
+	 * @param value		String of the value the parameter is being checked for
+	 * @return			True if parameter is equal to value, False otherwise
+	 */
+	protected boolean checkArgEquals(WebScriptRequest req, String name, String value) {
+		if (req.getParameter(name) == null) {
+			return false;
+		}
+		return req.getParameter(name).equals(value);
 	}
 }

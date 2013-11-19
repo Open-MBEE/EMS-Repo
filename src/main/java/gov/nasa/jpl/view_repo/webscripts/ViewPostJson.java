@@ -1,6 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
-//import gov.nasa.jpl.view_repo.util.UserUtil;
+import gov.nasa.jpl.view_repo.util.UserUtil;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -167,13 +167,6 @@ public class ViewPostJson extends AbstractJavaWebScript {
 	}
 
 
-	protected boolean checkArgEquals(WebScriptRequest req, String name, String value) {
-		if (req.getParameter(name) == null) {
-			return false;
-		}
-		return req.getParameter(name).equals(value);
-	}
-
 	/**
 	 * Main execution method
 	 * @param req
@@ -272,7 +265,7 @@ public class ViewPostJson extends AbstractJavaWebScript {
 		String response;
 	
 		// check user site permissions for webscript
-//		if (UserUtil.hasWebScriptPermissions()) {
+		if (UserUtil.hasWebScriptPermissions()) {
 			status.setCode(HttpServletResponse.SC_OK);
 			try {
 				mainMethod(req);
@@ -280,9 +273,9 @@ public class ViewPostJson extends AbstractJavaWebScript {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-//		} else {
-//			status.setCode(HttpServletResponse.SC_UNAUTHORIZED);
-//		}
+		} else {
+			status.setCode(HttpServletResponse.SC_UNAUTHORIZED);
+		}
 		
 		// set response based on status
 		switch (status.getCode()) {
