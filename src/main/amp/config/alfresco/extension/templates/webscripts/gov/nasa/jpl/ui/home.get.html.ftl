@@ -45,7 +45,7 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/wcs" };
 			</div>
 
 	      <ul class="nav navbar-nav pull-right">
-	       <li><a href="${url.context}/wcs/logout">logout</a></li>
+	       <li><a href="${url.context}/wcs/logout?next=${url.context}/wcs/ui/">logout</a></li>
 	      </ul>
 
 			<!-- 
