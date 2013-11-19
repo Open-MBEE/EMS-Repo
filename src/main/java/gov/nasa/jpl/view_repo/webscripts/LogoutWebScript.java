@@ -24,7 +24,7 @@ public class LogoutWebScript extends DeclarativeWebScript {
 			Status status, Cache cache) {
 		logout(req);
 		
-		String next = "%2Fview-repo%2Fwcs%2Fui%2F";
+		String next = getServicePath(req.getServiceContextPath()) + "%2Fwcs%2Fui%2F";
 		
 		if (req.getParameter(NEXT_PARAM) != null) {
 			next = req.getParameter(NEXT_PARAM);
