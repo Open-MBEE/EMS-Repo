@@ -123,9 +123,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	}
 
 	/**
-	 * Wrapper function to switch between different ways to set a NodeRefs
-	 * property (foundational API or ScriptNode, latter has some odd null property
-	 * issues at the moment) 
+	 * Wrapper set NodeRef's property using Foundational API or ScriptNode API
+	 * 
+	 * ScriptNode has some odd null pointer exceptions when dealing with properties
 	 * 
 	 * @param node		Node to set property for
 	 * @param type		Short type for the property to set (e.g., "view:mdid")
@@ -142,6 +142,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		}
 	}
 
+	/** 
+	 * Wrapper get NodeRef's property using Foundational API or ScriptNode API
+	 * @param node		Node to get property for
+	 * @param key		Short type for the property to get (e.g., "view:mdid")
+	 * @return			Node's specified property value
+	 */
 	protected Object getNodeProperty(ScriptNode node, String key) {
 		if (USE_FOUNDATIONAL) {
 			return nodeService.getProperty(node.getNodeRef(), createQName(key));
@@ -159,6 +165,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		if (USE_FOUNDATIONAL) {
 			Map<QName, Serializable> props = new HashMap<QName, Serializable>(
 					1, 1.0f);
+			// don't forget to set the name
 			props.put(ContentModel.PROP_NAME, name);
 
 			ChildAssociationRef assoc = nodeService.createNode(parent
