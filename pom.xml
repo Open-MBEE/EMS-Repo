@@ -163,6 +163,23 @@
 							</resources>
 						</configuration>
 					</execution>
+					<!-- Alfresco Maven plugin corrupts libraries too - so make sure to copy them over -->
+					<execution>
+						<id>copy-lib-resources</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<overwrite>true</overwrite>
+							<outputDirectory>${project.build.directory}/${project.build.finalName}/lib</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/src/main/amp/lib</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
