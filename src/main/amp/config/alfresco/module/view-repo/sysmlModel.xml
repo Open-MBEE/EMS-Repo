@@ -22,17 +22,7 @@
     	</type>  
         <type name="sysml:Element">
             <parent>cm:content</parent>
-            <properties>
-                <property name="sysml:name"> 
-                    <type>d:text</type>
-                    <mandatory>true</mandatory>
-                    <index enabled="true">
-                    	<atomic>false</atomic>
-                    	<stored>false</stored>
-                    	<tokenised>true</tokenised>
-                    </index>
-                </property>
-            </properties>
+            <properties/>
             <associations>
             	<association name="sysml:reifiedContainment">
             		<source>
@@ -49,6 +39,7 @@
             <overrides/>
             <mandatory-aspects>
             	<aspect>sysml:Identifiable</aspect>
+            	<aspect>sysml:Named</aspect>
             	<aspect>cm:versionable</aspect>
             	<aspect>cm:taggable</aspect>
             	<aspect>cm:titled</aspect> <!-- this is purely here for showing in ui, should show sysml:name instead -->
@@ -58,7 +49,7 @@
         <type name="sysml:ElementFolder"> <!--  this is the "container" folder for each element -->
         	<parent>cm:folder</parent>
         	<mandatory-aspects>
-        		<aspect>cm:titled</aspect> <!--  should we make sysml:name property in an aspect instead -->
+        		<aspect>sysml:Named</aspect> <!--  should we make sysml:name property in an aspect instead -->
         	</mandatory-aspects>
         </type>
         <type name="sysml:Package">
@@ -157,6 +148,12 @@
         <type name="sysml:Dependency">
         	<parent>sysml:Relationship</parent>
         </type>
+        <type name="sysml:Expose">
+        	<parent>sysml:Dependency</parent>
+        </type>
+        <type name="sysml:Conform">
+        	<parent>sysml:Dependency</parent>
+        </type>
         <type name="sysml:Generalization">
         	<parent>sysml:Relationship</parent>
         </type>
@@ -200,7 +197,11 @@
                 <property name="view2:sources"> <!--  json string cache of all elements referenced in this view -->
                 	<type>d:text</type>
                     <mandatory>false</mandatory>
-                    <index enabled="false"/>
+                    <index enabled="true">
+                    	<atomic>false</atomic>
+                		<stored>false</stored>
+                		<tokenised>true</tokenised>
+                    </index>
                 </property>
                 <property name="view2:allowedSources"> <!--  json string cache of all elements allowed to be transcluded in this view -->
                 	<type>d:text</type>
@@ -213,34 +214,11 @@
                     <index enabled="false"/>
                 </property>
             </properties>
-            <associations>
-            	<association name="sysml:exposes"> <!--  should these be specializing dependency relationship type instead, or be aspects? -->
-            		<source>
-                        <mandatory>false</mandatory>
-                        <many>false</many>
-                    </source>
-                    <target>
-                        <class>sysml:Element</class>
-                        <mandatory>false</mandatory>
-                        <many>true</many>
-                    </target>
-            	</association>
-            	<association name="sysml:conforms">
-            		<source>
-                        <mandatory>false</mandatory>
-                        <many>false</many>
-                    </source>
-                    <target>
-                        <class>sysml:Viewpoint</class>
-                        <mandatory>false</mandatory>
-                        <many>false</many>
-                    </target>
-            	</association>
-            </associations>
+            <associations/>
             <overrides/>
             <mandatory-aspects/>
         </aspect>
-         <aspect name="view2:Product">
+         <aspect name="view2:Product"> <!--  this is in sysml spec?? -->
             <parent>sysml:View</parent>
             <properties>
                 <property name="view2:view2view"> <!--  json string cache of the whole document view hierarchy -->
@@ -249,6 +227,11 @@
                 	<index enabled="false"/>
                 </property>
                 <property name="view2:noSections"> <!--  json string cache of which views are no sections (may go away in future) -->
+                	<type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
+                <property name="view2:rootViews"> <!--  json string cache of which views the root level views -->
                 	<type>d:text</type>
                     <mandatory>false</mandatory>
                     <index enabled="false"/>
@@ -279,6 +262,19 @@
                     	<atomic>true</atomic>
                     	<stored>false</stored>
                     	<tokenised>false</tokenised>
+                    </index>
+        		</property>
+        	</properties>
+        </aspect>
+        <aspect name="sysml:Named">
+        	<properties>
+        		<property name="sysml:name">
+        			<type>d:text</type>
+        			<mandatory>true</mandatory>
+        			<index enabled="true">
+                    	<atomic>false</atomic>
+                    	<stored>false</stored>
+                    	<tokenised>both</tokenised>
                     </index>
         		</property>
         	</properties>
