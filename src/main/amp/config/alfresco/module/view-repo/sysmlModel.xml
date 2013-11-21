@@ -25,7 +25,7 @@
             <properties>
                 <property name="sysml:name"> 
                     <type>d:text</type>
-                    <mandatory>false</mandatory>
+                    <mandatory>true</mandatory>
                     <index enabled="true">
                     	<atomic>false</atomic>
                     	<stored>false</stored>
@@ -33,32 +33,44 @@
                     </index>
                 </property>
             </properties>
-            <associations/>
+            <associations>
+            	<association name="sysml:reifiedContainment">
+            		<source>
+            			<mandatory>false</mandatory>
+            			<many>false</many>
+            		</source>
+            		<target>
+            			<class>sysml:ElementFolder</class>
+            			<mandatory>true</mandatory>
+            			<many>false</many>
+            		</target>
+            	</association>
+            </associations>
             <overrides/>
             <mandatory-aspects>
             	<aspect>sysml:Identifiable</aspect>
             	<aspect>cm:versionable</aspect>
             	<aspect>cm:taggable</aspect>
-            	<aspect>cm:titled</aspect>
+            	<aspect>cm:titled</aspect> <!-- this is purely here for showing in ui, should show sysml:name instead -->
            <!--   	<aspect>cm:lockable</aspect> -->
             </mandatory-aspects>
         </type>
         <type name="sysml:ElementFolder"> <!--  this is the "container" folder for each element -->
         	<parent>cm:folder</parent>
         	<mandatory-aspects>
-        		<aspect>cm:titled</aspect>
+        		<aspect>cm:titled</aspect> <!--  should we make sysml:name property in an aspect instead -->
         	</mandatory-aspects>
         </type>
         <type name="sysml:Package">
         	<parent>sysml:Element</parent>
         </type>
-        <type name="sysml:Viewpoint">
+        <type name="sysml:Viewpoint"> <!--  should this be aspect instead? -->
         	<parent>sysml:Element</parent>
         </type>
-        <type name="sysml:Property">
+        <type name="sysml:Property"> <!--  there are more attributes like navigable that ties into the association relationship, but that's a more complex discussion -->
             <parent>sysml:Element</parent>
             <properties>
-                <property name="sysml:value"> <!-- valueSpec?? -->
+                <property name="sysml:value"> <!-- use valueSpec with all the literal types of valuespecs? -->
                     <type>d:text</type>
                     <mandatory>false</mandatory>
                     <index enabled="true">
@@ -86,6 +98,16 @@
                         <stored>false</stored>
                         <tokenised>false</tokenised>
                     </index>
+                </property>
+                <property name="sysml:associationType"> <!-- use sysml association relationship or map to this property and propertyType? this only applies if there's a type?-->
+                	<type>d:text</type>
+                	<mandatory>false</mandatory>
+                	<default>composite</default> <!--  composite|shared|reference -->
+                	<index enabled="true">
+                		<atomic>false</atomic>
+                		<stored>false</stored>
+                		<tokenised>false</tokenised>
+                	</index>
                 </property>
             </properties>
             <associations>
@@ -136,7 +158,7 @@
         	<parent>sysml:Relationship</parent>
         </type>
         <type name="sysml:Generalization">
-        	<parent>sysml:Dependency</parent>
+        	<parent>sysml:Relationship</parent>
         </type>
         <type name="view2:Snapshot">
             <parent>cm:content</parent>
@@ -170,42 +192,70 @@
     <aspects>
         <aspect name="sysml:View">
             <properties>
-                <property name="sysml:containsJson">
+                <property name="view2:contains"> <!-- json string cache of the rendered view  structure and element transclusion -->
                 	<type>d:text</type>
                     <mandatory>false</mandatory>
                     <index enabled="false"/>
                 </property>
-                <property name="sysml:sourcesJson">
+                <property name="view2:sources"> <!--  json string cache of all elements referenced in this view -->
                 	<type>d:text</type>
                     <mandatory>false</mandatory>
                     <index enabled="false"/>
                 </property>
-                <property name="sysml:childrenViewsJson">
+                <property name="view2:allowedSources"> <!--  json string cache of all elements allowed to be transcluded in this view -->
                 	<type>d:text</type>
                     <mandatory>false</mandatory>
                     <index enabled="false"/>
                 </property>
-            </properties>
-            <associations/>
-            <overrides/>
-            <mandatory-aspects/>
-        </aspect>
-         <aspect name="sysml:Product">
-            <parent>sysml:View</parent>
-            <properties>
-                <property name="sysml:view2viewJson">
-                	<type>d:text</type>
-                	<mandatory>false</mandatory>
-                	<index enabled="false"/>
-                </property>
-                <property name="sysml:noSectionsJson">
+                <property name="view2:childrenViews"> <!--  json string cache of child views element ids -->
                 	<type>d:text</type>
                     <mandatory>false</mandatory>
                     <index enabled="false"/>
                 </property>
             </properties>
             <associations>
-            	<association name="sysml:snapshots">
+            	<association name="sysml:exposes"> <!--  should these be specializing dependency relationship type instead, or be aspects? -->
+            		<source>
+                        <mandatory>false</mandatory>
+                        <many>false</many>
+                    </source>
+                    <target>
+                        <class>sysml:Element</class>
+                        <mandatory>false</mandatory>
+                        <many>true</many>
+                    </target>
+            	</association>
+            	<association name="sysml:conforms">
+            		<source>
+                        <mandatory>false</mandatory>
+                        <many>false</many>
+                    </source>
+                    <target>
+                        <class>sysml:Viewpoint</class>
+                        <mandatory>false</mandatory>
+                        <many>false</many>
+                    </target>
+            	</association>
+            </associations>
+            <overrides/>
+            <mandatory-aspects/>
+        </aspect>
+         <aspect name="view2:Product">
+            <parent>sysml:View</parent>
+            <properties>
+                <property name="view2:view2view"> <!--  json string cache of the whole document view hierarchy -->
+                	<type>d:text</type>
+                	<mandatory>false</mandatory>
+                	<index enabled="false"/>
+                </property>
+                <property name="view2:noSections"> <!--  json string cache of which views are no sections (may go away in future) -->
+                	<type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="false"/>
+                </property>
+            </properties>
+            <associations>
+            	<association name="view2:snapshots">
                     <source>
                         <mandatory>false</mandatory>
                         <many>false</many>
