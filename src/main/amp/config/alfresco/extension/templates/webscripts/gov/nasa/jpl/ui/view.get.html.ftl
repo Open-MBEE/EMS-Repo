@@ -93,7 +93,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
     {{#viewTree.orderedChildren}}
             <a name="{{id}}" style="display: block; position:relative; top:-60px; "></a>
             {{#(depth == 0) }}
-              {{{("<h1><span class='"+class+" section-header editable' data-property='NAME' data-section-id='" + id + "'>" +  name + "</span></h1>" )}}}
+              {{{("<h1><span class='"+class+" section-header' data-property='NAME' data-section-id='" + id + "'>" +  name + "</span></h1>" )}}}
             {{/(depth == 0) }}
             {{^(depth == 0) }}
               {{{("<h"+ (depth+1) + " class='"+class+"'><span class='section-header' data-section-id='" + id + "'><span class='editable' data-property='NAME' data-mdid='" + id + "'>" +  name + "</span></span></h"+ (depth+1) + ">" )}}}
@@ -596,6 +596,16 @@ app.on('editSection', function(e, sectionId) {
     toolbar.find(".requires-selection").not(clickedButton).addClass("disabled");
   })
 
+
+  // Wrap content inisde of p tags if it isn't already.  Without this, Chrome will create new DIVs when 
+  // enter is pressed and give them attributes from the parent div, including mdid
+  var unwrapped = section.find(".editable.reference").not(".blank").filter(function() {
+    return $(this).find('p:first-child').length === 0;
+  });
+  unwrapped.wrapInner("<p class='pwrapper'></p>");
+
+  //console.log(unwrapped);
+  //unwrapped.wrapInner("<p class='pwrapper'></p>");
   // TODO turn this listener off on save or cancel
   section.on('keyup paste blur',function(evt) {
     // we need to use the selection api because we're in a contenteditable
@@ -614,7 +624,14 @@ app.on('editSection', function(e, sectionId) {
   section.click(function() {
     var $el = $(app.getSelectedNode());
     if ($el.is('.editable.reference.blank')) {
-      $el.html('&nbsp;');
+      $el.html("<p class='pwrapper'>&nbsp;</p>");
+      // Set selection inseide the p tag
+      var range = document.createRange();//Create a range (a range is a like the selection but invisible)
+      range.setStart($el.find("p").get(0),0);
+      range.collapse(true);
+      var selection = window.getSelection();//get the selection object (allows you to change selection)
+      selection.removeAllRanges();//remove any selections already made
+      selection.addRange(range);//make the range you have just created the visible selection
       $el.removeClass('blank');
     }
   });
