@@ -51,12 +51,18 @@
 		<property name="nodeService" ref="NodeService" />
         <property name="nodeLocatorService" ref="nodeLocatorService" /> 
 	</bean>
+	
+	<bean id="jwsUtil" class="gov.nasa.jpl.view_repo.webscripts.JwsUtil">
+		<property name="services" ref="ServiceRegistry" />
+		<property name="transactionInterval" value="500" />
+	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.post"
 		class="gov.nasa.jpl.view_repo.webscripts.ViewPostJson"
 		parent="webscript">
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
+        <property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 	
 	<!--  utility bean for checking user site permissions: also expose a webscript base object -->
@@ -65,6 +71,6 @@
 		<property name="personService" ref="PersonService"/>
 		<property name="siteName" value="europa"/>
 		<property name="extensionName" value="UserUtil" />
-		<property name="ignore" value="false" />
+		<property name="ignore" value="true" />
 	</bean>
 </beans>

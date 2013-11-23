@@ -54,21 +54,21 @@ public class ViewPostJson extends AbstractJavaWebScript {
 		ScriptNode modelNode = modelMapping.get(mdid);
 
 		if (modelNode == null) {
-			modelNode = getModelElement(modelFolder, mdid);
+			modelNode = jwsUtil.getModelElement(modelFolder, mdid);
 			if (modelNode == null) {
 				String modeltype = typeMap.containsKey(elementType) ? typeMap.get(elementType) : typeMap.get("ModelElement");
-				modelNode = createModelElement(modelFolder, mdid, modeltype);
+				modelNode = jwsUtil.createModelElement(modelFolder, mdid, modeltype);
 				if (elementName != null) {
-					setName(modelNode, elementName);
+					jwsUtil.setName(modelNode, elementName);
 				}
 			}
 		}
 		
-		if (elementName != null && !elementName.equals(getNodeProperty(modelNode, "view:name"))) {
+		if (elementName != null && !elementName.equals(jwsUtil.getNodeProperty(modelNode, "view:name"))) {
 			if (force) {
-				setName(modelNode, elementName);
+				jwsUtil.setName(modelNode, elementName);
 			} else {
-				setName(modelNode, getNodeProperty(modelNode, "view:name") + " - MERGED - " + elementName);
+				jwsUtil.setName(modelNode, jwsUtil.getNodeProperty(modelNode, "view:name") + " - MERGED - " + elementName);
 			}
 			Map<String, String> mergedEntry = new HashMap<String, String>();
 			mergedEntry.put("mdid", mdid);
@@ -77,11 +77,11 @@ public class ViewPostJson extends AbstractJavaWebScript {
 		}
 		
 		String elementDocumentation = element.has("documentation") ? (String) element.get("documentation") : null;
-		if (elementDocumentation != null && !elementDocumentation.equals(getNodeProperty(modelNode, "view:documentation"))) {
+		if (elementDocumentation != null && !elementDocumentation.equals(jwsUtil.getNodeProperty(modelNode, "view:documentation"))) {
 			if (force) {
-				setNodeProperty(modelNode, "view:documentation", elementDocumentation);
+				jwsUtil.setNodeProperty(modelNode, "view:documentation", elementDocumentation);
 			} else {
-				setNodeProperty(modelNode, "view:documentation", getNodeProperty(modelNode, "view:documentation") + " <p><strong><i> MERGED NEED RESOLUTION! </i></strong></p> " + elementDocumentation);
+				jwsUtil.setNodeProperty(modelNode, "view:documentation", jwsUtil.getNodeProperty(modelNode, "view:documentation") + " <p><strong><i> MERGED NEED RESOLUTION! </i></strong></p> " + elementDocumentation);
 			}
 			Map<String, String> mergedEntry = new HashMap<String, String>();
 			mergedEntry.put("mdid", mdid);
@@ -90,11 +90,11 @@ public class ViewPostJson extends AbstractJavaWebScript {
 		}
 		
 		String dvalue = element.has("dvalue") ? (String)element.get("dvalue") : null;
-		if (elementType != null && elementType.equals("Property") && dvalue != null && !dvalue.equals(getNodeProperty(modelNode, "view:defaultValue"))) {
+		if (elementType != null && elementType.equals("Property") && dvalue != null && !dvalue.equals(jwsUtil.getNodeProperty(modelNode, "view:defaultValue"))) {
 			if (force) {
-				setNodeProperty(modelNode, "view:defaultValue", dvalue);
+				jwsUtil.setNodeProperty(modelNode, "view:defaultValue", dvalue);
 			} else {
-				setNodeProperty(modelNode, "view:defaultValue", getNodeProperty(modelNode, "view:defaultValue") + " - MERGED - " + dvalue);
+				jwsUtil.setNodeProperty(modelNode, "view:defaultValue", jwsUtil.getNodeProperty(modelNode, "view:defaultValue") + " - MERGED - " + dvalue);
 			}
 			Map<String, String> mergedEntry = new HashMap<String, String>();
 			mergedEntry.put("mdid", mdid);
@@ -102,7 +102,7 @@ public class ViewPostJson extends AbstractJavaWebScript {
 			merged.add(mergedEntry);
 		}
 		
-		setNodeProperty(modelNode, "view:mdid", mdid);
+		jwsUtil.setNodeProperty(modelNode, "view:mdid", mdid);
 		modelMapping.put(mdid, modelNode);
 		return modelNode;
 	}
@@ -113,7 +113,7 @@ public class ViewPostJson extends AbstractJavaWebScript {
 		ScriptNode viewNode = modelMapping.get(mdid);
 		
 		if (viewNode == null) {
-			viewNode = getModelElement(modelFolder, mdid);
+			viewNode = jwsUtil.getModelElement(modelFolder, mdid);
 			if (viewNode == null) {
 				return null;
 			}
@@ -126,17 +126,17 @@ public class ViewPostJson extends AbstractJavaWebScript {
 			fillSources((JSONObject)array.get(ii), sources);
 		}
 		array = new JSONArray(sources);
-		setNodeProperty(viewNode, "view:sourcesJson", array.toString());
+		jwsUtil.setNodeProperty(viewNode, "view:sourcesJson", array.toString());
 		
 		if (view.get("noSection") != null && !ignoreNoSection) {
-			setNodeProperty(viewNode, "view:noSection", (Serializable)view.get("noSection"));
+			jwsUtil.setNodeProperty(viewNode, "view:noSection", (Serializable)view.get("noSection"));
 		} else {
-			setNodeProperty(viewNode, "view:noSection", false);
+			jwsUtil.setNodeProperty(viewNode, "view:noSection", false);
 		}
 
-		setNodeProperty(viewNode, "view:containsJson", view.getJSONArray("contains").toString());
-		setNodeProperty(viewNode, "view:author", user);
-		setNodeProperty(viewNode, "view:lastModified", new Date());
+		jwsUtil.setNodeProperty(viewNode, "view:containsJson", view.getJSONArray("contains").toString());
+		jwsUtil.setNodeProperty(viewNode, "view:author", user);
+		jwsUtil.setNodeProperty(viewNode, "view:lastModified", new Date());
 		
 		return viewNode;
 	}
@@ -151,8 +151,8 @@ public class ViewPostJson extends AbstractJavaWebScript {
 				// do nothing
 			} else {
 				ScriptNode modelNode = modelMapping.get(source);
-				if (!sources.contains((String)getNodeProperty(modelNode, "view:mdid"))) {
-					sources.add((String)getNodeProperty(modelNode, "view:mdid"));
+				if (!sources.contains((String)jwsUtil.getNodeProperty(modelNode, "view:mdid"))) {
+					sources.add((String)jwsUtil.getNodeProperty(modelNode, "view:mdid"));
 				}
 			}
 		} else if (type.equals("Table") || type.equals("List")) {
@@ -192,47 +192,67 @@ public class ViewPostJson extends AbstractJavaWebScript {
 			return;
 		}
 		
-		ScriptNode topview = getModelElement(modelFolder, viewid);
+		ScriptNode topview = jwsUtil.getModelElement(modelFolder, viewid);
 		
 		boolean product = false;
-		if (checkArgEquals(req, "product", "true")) {
+		if (jwsUtil.checkArgEquals(req, "product", "true")) {
 			product = true;
 		}
 		if (topview == null) {
-			if (checkArgEquals(req, "doc", "true")) {
-				topview = createModelElement(modelFolder, viewid, "view:DocumentView");
+			if (jwsUtil.checkArgEquals(req, "doc", "true")) {
+				topview = jwsUtil.createModelElement(modelFolder, viewid, "view:DocumentView");
 				if (product) {
-					setNodeProperty(topview, "view:product", true);
+					jwsUtil.setNodeProperty(topview, "view:product", true);
 				}
 			} else {
-				topview = createModelElement(modelFolder, viewid, "view:View");
+				topview = jwsUtil.createModelElement(modelFolder, viewid, "view:View");
 			}
-			setNodeProperty(topview, "view:mdid", viewid);
+			jwsUtil.setNodeProperty(topview, "view:mdid", viewid);
 		}
 		modelMapping.put(viewid, topview);
 		
-		if ( !topview.getTypeShort().equals("view:DocumentView") && checkArgEquals(req, "doc", "true") ) {
+		if ( !topview.getTypeShort().equals("view:DocumentView") && jwsUtil.checkArgEquals(req, "doc", "true") ) {
 			topview.specializeType("view:DocumentView");
 			if (product) {
-				setNodeProperty(topview, "view:product", true);
+				jwsUtil.setNodeProperty(topview, "view:product", true);
 			}
 		}
-		boolean force = checkArgEquals(req, "force", "true") ? true : false;
+		boolean force = jwsUtil.checkArgEquals(req, "force", "true") ? true : false;
 		
 		try {
 			JSONArray array;
 			
 			array = postjson.getJSONArray("elements");
-			for (int ii = 0; ii < array.length(); ii++) {
-				updateOrCreateModelElement((JSONObject) array.get(ii), force);
-			}
+			int interval = 100;
+			
+			jwsUtil.splitTransactions(new JwsFunctor() {
+				@Override
+				public Object execute(JSONArray jsonArray, int index,
+						Boolean... flags) throws JSONException {
+					updateOrCreateModelElement((JSONObject)jsonArray.get(index), flags[0]);
+					return null;
+				}
+			}, array, force);
+			
+//			for (int ii = 0; ii < array.length(); ii++) {
+//				updateOrCreateModelElement((JSONObject) array.get(ii), force);
+//			}
 			
 			array = postjson.getJSONArray("views");
-			for (int ii = 0; ii < array.length(); ii++) {
-				updateOrCreateView((JSONObject)array.get(ii), product);
-			}
+			jwsUtil.splitTransactions(new JwsFunctor() {
+				@Override
+				public Object execute(JSONArray jsonArray, int index,
+						Boolean... flags) throws JSONException {
+					updateOrCreateView((JSONObject)jsonArray.get(index), flags[0]);
+					return null;
+				}
+			}, array, product);
+
+//			for (int ii = 0; ii < array.length(); ii++) {
+//				updateOrCreateView((JSONObject)array.get(ii), product);
+//			}
 			
-			if (checkArgEquals(req, "recurse", "true") && !product) {
+			if (jwsUtil.checkArgEquals(req, "recurse", "true") && !product) {
 				updateViewHierarchy(modelMapping, postjson.getJSONObject("view2view"));
 			}
 			
@@ -244,10 +264,10 @@ public class ViewPostJson extends AbstractJavaWebScript {
 						noSections.add((String)view.get("mdid"));
 					}
 				}
-				setNodeProperty(topview, "view:view2viewJson", postjson.getJSONArray("view2view").toString());
+				jwsUtil.setNodeProperty(topview, "view:view2viewJson", postjson.getJSONArray("view2view").toString());
 				
 				JSONArray nosectionjsa = new JSONArray(noSections);
-				setNodeProperty(topview, "view:noSectionsJson", nosectionjsa.toString());
+				jwsUtil.setNodeProperty(topview, "view:noSectionsJson", nosectionjsa.toString());
 			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
