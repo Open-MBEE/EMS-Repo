@@ -234,10 +234,6 @@ public class ViewPostJson extends AbstractJavaWebScript {
 				}
 			}, array, force);
 			
-//			for (int ii = 0; ii < array.length(); ii++) {
-//				updateOrCreateModelElement((JSONObject) array.get(ii), force);
-//			}
-			
 			array = postjson.getJSONArray("views");
 			jwsUtil.splitTransactions(new JwsFunctor() {
 				@Override
@@ -248,10 +244,6 @@ public class ViewPostJson extends AbstractJavaWebScript {
 				}
 			}, array, product);
 
-//			for (int ii = 0; ii < array.length(); ii++) {
-//				updateOrCreateView((JSONObject)array.get(ii), product);
-//			}
-			
 			if (jwsUtil.checkArgEquals(req, "recurse", "true") && !product) {
 				updateViewHierarchy(modelMapping, postjson.getJSONObject("view2view"));
 			}
