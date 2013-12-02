@@ -60,15 +60,15 @@
   					...
   				},
   				"propertyTypes": {
-  					propertyElementId: typeElementId,
+  					propertyElementId: typeElementId, //for Property to the property type
   					...
   				},
   				"propertyValues": {
-  					propertyElementId: valueSpecElementId,
+  					propertyElementId: valueSpecElementId, //for Property type to the ValueSpec
   					...
   				},
   				"elementValues": {
-  					elementValueId: elementId,
+  					elementValueId: elementId, //for ElementValue types, the value is a noderef
   					...
   				}
   			}
