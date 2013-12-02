@@ -37,14 +37,20 @@
   			},
   			"elements": {
   				elementId: {
-  					"type": "Package" | "Property" | "Element" | "Dependency" | "Generalization" | "Relationship",
+  					"type": "Package" | "Property" | "Element" | 
+  							"Dependency" | "Generalization" | "DirectedRelationship" | 
+  							"Conform" | "Expose" | "Viewpoint" | "View" | 
+  							"LiteralBoolean" | "LiteralInteger" | "LiteralString" | 
+  							"LiteralReal" | "ElementValue" | "ValueSpecification" | "Expression"
   					"name": name,
   					"documentation": documentation,
   					"owner": elementId,
-  					("value": value,)
-  					("multiplicityMax": int,)
-  					("multiplicityMin": int)
-  					("associationType": composite|shared|reference)
+  					"isDerived": true|false, (if Property)
+  					"boolean": true|false, (if LiteralBoolean)
+  					"string": string, (if LiteralString)
+  					"integer": int, (if LiteralInteger)
+  					"double": double, (if LiteralReal)
+  					"expression": string (if Expression)
   				},
   				...
   			}
@@ -55,6 +61,14 @@
   				},
   				"propertyTypes": {
   					propertyElementId: typeElementId,
+  					...
+  				},
+  				"propertyValues": {
+  					propertyElementId: valueSpecElementId,
+  					...
+  				},
+  				"elementValues": {
+  					elementValueId: elementId,
   					...
   				}
   			}

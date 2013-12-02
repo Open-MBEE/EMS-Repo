@@ -71,6 +71,15 @@
                 		<tokenised>false</tokenised>
                 	</index>
                 </property>
+                <property name="sysml:value">
+                	<type>d:noderef</type>
+                	<mandatory>false</mandatory>
+                	<index enabled="true">
+                		<atomic>false</atomic>
+                		<stored>false</stored>
+                		<tokenised>false</tokenised>
+                	</index>
+                </property>
       <!--      <property name="sysml:multiplicityMax">
                     <type>d:int</type>
                     <mandatory>false</mandatory>
@@ -114,7 +123,7 @@
                         <many>false</many>
                     </target>
                 </association>
-                <child-association name="sysml:value"> <!--  a property can only have 1 default value, slots can have multiple -->
+          <!--       <child-association name="sysml:value"> 
                     <source>
                         <mandatory>false</mandatory>
                         <many>false</many>
@@ -122,9 +131,9 @@
                     <target>
                         <class>sysml:ValueSpecification</class>
                         <mandatory>false</mandatory>
-                        <many>false</many> <!--  allow many for slots? -->
+                        <many>false</many> 
                     </target>
-                </child-association>
+                </child-association> -->
             </associations>
             <overrides/>
             <mandatory-aspects/>
@@ -216,7 +225,7 @@
                 </property>
             </properties>
         </type>
-        <type name="sysml:Relationship">
+        <type name="sysml:DirectedRelationship">
         	<parent>sysml:Element</parent>
         	<properties/>
         	<associations>
@@ -245,7 +254,7 @@
         	</associations>
         </type>
         <type name="sysml:Dependency">
-        	<parent>sysml:Relationship</parent>
+        	<parent>sysml:DirectedRelationship</parent>
         </type>
         <type name="sysml:Expose">
         	<parent>sysml:Dependency</parent>
@@ -254,7 +263,7 @@
         	<parent>sysml:Dependency</parent>
         </type>
         <type name="sysml:Generalization">
-        	<parent>sysml:Relationship</parent>
+        	<parent>sysml:DirectedRelationship</parent>
         </type>
         <type name="sysml:View"> 				<!--  i still think this should be an aspect... -->
         	<parent>sysml:Viewpoint</parent>
