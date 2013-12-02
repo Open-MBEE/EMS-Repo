@@ -256,7 +256,7 @@
         <type name="sysml:Generalization">
         	<parent>sysml:Relationship</parent>
         </type>
-        <type name="sysml:View">
+        <type name="sysml:View"> 				<!--  i still think this should be an aspect... -->
         	<parent>sysml:Viewpoint</parent>
             <properties>
                 <property name="view2:contains"> <!-- json string cache of the rendered view  structure and element transclusion -->
@@ -314,7 +314,7 @@
                         <many>false</many>
                     </source>
                     <target>
-                        <class>view2:Snapshot</class>
+                        <class>view2:ConfigurationPoint</class>
                         <mandatory>false</mandatory>
                         <many>true</many>
                     </target>
