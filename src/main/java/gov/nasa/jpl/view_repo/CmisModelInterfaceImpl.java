@@ -322,7 +322,8 @@ public class CmisModelInterfaceImpl
     }
 
     @Override
-    public Collection< Object > getTypeProperties( ObjectType type, String version ) {
+    public Collection< Object > getTypeProperties( ObjectType type,
+                                                   String version ) {
         if ( type == null ) return null;
         Map< String, PropertyDefinition< ? > > defs = type.getPropertyDefinitions();
         if ( defs == null ) return null;

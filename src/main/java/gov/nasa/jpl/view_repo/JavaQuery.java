@@ -10,8 +10,11 @@ import gov.nasa.jpl.ae.util.MoreToString;
 import gov.nasa.jpl.ae.util.Utils;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -56,10 +59,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 
 /**
- * 
+ * This is a Java interface that uses the native Alfresco Java interface for
+ * accessing and querying model information.
  */
 public class JavaQuery extends AbstractModuleComponent
-                       implements ModelInterface< NodeRef, String, Object, String, String, AssociationRef > {
+                       implements ModelInterface< NodeRef, NodeRef, String, Object, String, String, AssociationRef, String > {
 
     public static ApplicationContext applicationContext;
     protected static JavaQuery instance;// = initAppContext(); // only use this in unit test mode
@@ -393,7 +397,7 @@ public class JavaQuery extends AbstractModuleComponent
     // JUnit
 
     @Override
-    public NodeRef getObject( String identifier ) {
+    public NodeRef get( NodeRef context, String identifier, String version ) {
         List<NodeRef> nodes = get( identifier );
         if ( Utils.isNullOrEmpty( nodes ) ) {
             Debug.errln( "CMIS getObject(): Could not find node " + identifier + "!" );
@@ -406,24 +410,25 @@ public class JavaQuery extends AbstractModuleComponent
     }
 
     @Override
-    public String getObjectId( NodeRef object ) {
+    public String getObjectId( NodeRef object, String version ) {
         return object.getId();
     }
 
     @Override
-    public String getName( NodeRef object ) {
+    public String getName( NodeRef object, String version ) {
         return (String)nodeService.getProperty( object, ContentModel.PROP_NAME );
     }
 
     @Override
-    public String getType( NodeRef object ) {
+    public String getTypeOf( NodeRef object, String version ) {
         QName type = nodeService.getType( object );
         if ( type == null ) return null;
         return type.toPrefixString();
     }
 
     @Override
-    public Collection< Object > getTypeProperties( String typeName ) {
+    public Collection< Object > getTypeProperties( String typeName,
+                                                   String version ) {
         if ( typeName == null ) return null;
         TypeDefinition type = getType(typeName);
         Map< QName, PropertyDefinition > props = type.getProperties();
@@ -441,7 +446,7 @@ public class JavaQuery extends AbstractModuleComponent
     }
     
     @Override
-    public Collection< Object > getProperties( NodeRef object ) {
+    public Collection< Object > getProperties( NodeRef object, String version ) {
         Map< QName, Serializable > props = nodeService.getProperties( object );
         if ( props == null ) return null;
         //return props.values();
@@ -451,7 +456,8 @@ public class JavaQuery extends AbstractModuleComponent
     }
 
     @Override
-    public Serializable getProperty( NodeRef object, String propertyName ) {
+    public Serializable getProperty( NodeRef object, String propertyName,
+                                     String version ) {
         Serializable prop =
                 nodeService.getProperty( object,
                                          QName.createQName( propertyName ) );
@@ -465,7 +471,8 @@ public class JavaQuery extends AbstractModuleComponent
      * gov.nasa.jpl.view_repo.ModelInterface#getRelationships(java.lang.Object)
      */
     @Override
-    public Collection< AssociationRef > getRelationships( NodeRef object ) {
+    public Collection< AssociationRef > getRelationships( NodeRef object,
+                                                          String version ) {
         List< AssociationRef > sassocs =
                 nodeService.getSourceAssocs( object,
                                              new RegexQNamePattern( ".*" ) );
@@ -480,7 +487,8 @@ public class JavaQuery extends AbstractModuleComponent
 
     @Override
     public Collection<AssociationRef> getRelationships( NodeRef object,
-                                                        String relationshipName ) {
+                                                        String relationshipName,
+                                                        String version ) {
         List< AssociationRef > results = new ArrayList<AssociationRef>();
         List< AssociationRef > assocs1 = nodeService.getSourceAssocs( object, QName.createQName( relationshipName) );
         if ( !Utils.isNullOrEmpty( assocs1 ) ) {
@@ -497,7 +505,8 @@ public class JavaQuery extends AbstractModuleComponent
     
     @Override
     public Collection< NodeRef > getRelated( NodeRef object,
-                                             String relationshipName ) {
+                                             String relationshipName,
+                                             String version ) {
         Set< NodeRef > results = new LinkedHashSet<NodeRef>();
         List< AssociationRef > assocs = nodeService.getSourceAssocs( object, QName.createQName( relationshipName) );
         if ( !Utils.isNullOrEmpty( assocs ) ) {
@@ -573,6 +582,253 @@ public class JavaQuery extends AbstractModuleComponent
         AuthenticationUtil.setFullyAuthenticatedUser( ADMIN_USER_NAME );
         log.debug( "Sample test logging: Application Context properly loaded for JavaQuery" );
         return javaQueryComponent;
+    }
+
+    @Override
+    public Collection< Object > op( ModelInterface.Operation operation,
+                                    Collection< ModelInterface.ModelItem > itemTypes,
+                                    Collection< ModelInterface.Item > context,
+                                    Collection< ModelInterface.Item > specifier,
+                                    Object newValue,
+                                    Boolean failForMultipleItemMatches ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean isAllowed( ModelInterface.Operation operation,
+                              Collection< ModelInterface.ModelItem > itemTypes,
+                              Collection< ModelInterface.Item > context,
+                              Collection< ModelInterface.Item > specifier,
+                              ModelInterface.Item newValue,
+                              Boolean failForMultipleItemMatches ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public Collection< Object > op( ModelInterface.Operation operation,
+                                    Collection< ModelInterface.ModelItem > itemTypes,
+                                    Collection< NodeRef > context,
+                                    String identifier,
+                                    String name,
+                                    String version,
+                                    boolean failForMultipleItemMatches ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > get( Collection< ModelInterface.ModelItem > itemTypes,
+                                     Collection< NodeRef > context,
+                                     String identifier,
+                                     String name,
+                                     String version ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > create( ModelInterface.ModelItem item,
+                                        Collection< NodeRef > context,
+                                        String identifier,
+                                        String name,
+                                        String version ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > delete( ModelInterface.ModelItem item,
+                                        Collection< NodeRef > context,
+                                        String identifier,
+                                        String name,
+                                        String version ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< NodeRef > getRootObjects( String version ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getType( NodeRef context, String name, String version ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean latestVersion( Collection< NodeRef > context ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean idsAreSettable() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean namesAreSettable() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean elementsMayBeChangedForVersion( String version ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean typesMayBeChangedForVersion( String version ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean propertiesMayBeChangedForVersion( String version ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean elementsMayBeCreatedForVersion( String version ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean typesMayBeCreatedForVersion( String version ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean propertiesMayBeCreatedForVersion( String version ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean elementsMayBeDeletedForVersion( String version ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean typesMayBeDeletedForVersion( String version ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean propertiesMayBeDeletedForVersion( String version ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public NodeRef createObject( String identifier, String version ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean setIdentifier( NodeRef element, String version ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean setName( NodeRef element, String version ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean setType( NodeRef element, String version ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public NodeRef deleteObject( String identifier, String version ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String deleteType( NodeRef element, String version ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > map( Collection< NodeRef > elements,
+                                     Method method,
+                                     int indexOfElementArgument,
+                                     Object... otherArguments )
+                                             throws InvocationTargetException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > filter( Collection< NodeRef > elements,
+                                        Method method,
+                                        int indexOfElementArgument,
+                                        Object... otherArguments )
+                                                throws InvocationTargetException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean forAll( Collection< NodeRef > elements,
+                           Method method,
+                           int indexOfElementArgument,
+                           Object... otherArguments )
+                                   throws InvocationTargetException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean thereExists( Collection< NodeRef > elements,
+                                Method method,
+                                int indexOfElementArgument,
+                                Object... otherArguments )
+                                        throws InvocationTargetException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public Object fold( Collection< NodeRef > elements,
+                        Object initialValue,
+                        Method method,
+                        int indexOfElementArgument,
+                        int indexOfPriorResultArgument,
+                        Object... otherArguments )
+                                throws InvocationTargetException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< NodeRef > sort( Collection< NodeRef > elements,
+                                       Comparator< ? > comparator,
+                                       Method method,
+                                       int indexOfElementArgument,
+                                       Object... otherArguments )
+                                               throws InvocationTargetException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 
