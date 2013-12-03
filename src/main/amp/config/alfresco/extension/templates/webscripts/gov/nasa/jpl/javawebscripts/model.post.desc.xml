@@ -39,18 +39,19 @@
   				elementId: {
   					"type": "Package" | "Property" | "Element" | 
   							"Dependency" | "Generalization" | "DirectedRelationship" | 
-  							"Conform" | "Expose" | "Viewpoint" | "View" | 
-  							"LiteralBoolean" | "LiteralInteger" | "LiteralString" | 
-  							"LiteralReal" | "ElementValue" | "ValueSpecification" | "Expression"
+  							"Conform" | "Expose" | "Viewpoint",
   					"name": name,
   					"documentation": documentation,
   					"owner": elementId,
+  					"isView": true|false,
   					"isDerived": true|false, (if Property)
-  					"boolean": true|false, (if LiteralBoolean)
-  					"string": string, (if LiteralString)
-  					"integer": int, (if LiteralInteger)
-  					"double": double, (if LiteralReal)
-  					"expression": string (if Expression)
+  					"boolean": true|false, (if Property)
+  					"string": string, (if Property)
+  					"integer": int, (if Property)
+  					"double": double, (if Property)
+  					"expression": string, (if Property)
+  					"valueType": "LiteralBoolean" | "LiteralInteger" | "LiteralString" | 
+  							"LiteralReal" | "ElementValue" | "Expression" (if Property)
   				},
   				...
   			}
@@ -63,12 +64,8 @@
   					propertyElementId: typeElementId, //for Property to the property type
   					...
   				},
-  				"propertyValues": {
-  					propertyElementId: valueSpecElementId, //for Property type to the ValueSpec
-  					...
-  				},
   				"elementValues": {
-  					elementValueId: elementId, //for ElementValue types, the value is a noderef
+  					propertyElementId: elementId, //for property with ElementValue as value types, the value is a noderef
   					...
   				}
   			}
