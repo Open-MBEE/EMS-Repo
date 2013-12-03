@@ -30,12 +30,12 @@
 		<link>
 			<name>src/main/thirdParty</name>
 			<type>2</type>
-			<location>C:/Users/bclement/workspaceYoxos/CSquery/thirdParty</location>
+			<location>/home/bclement/proj/workspaceIndigo/CS/thirdParty</location>
 		</link>
 		<link>
 			<name>src/main/java/gov/nasa/jpl/ae</name>
 			<type>2</type>
-			<location>C:/Users/bclement/workspaceYoxos/CSquery/src/gov/nasa/jpl/ae</location>
+			<location>/home/bclement/proj/workspaceIndigo/CS/src/gov/nasa/jpl/ae</location>
 		</link>
 	</linkedResources>
 </projectDescription>

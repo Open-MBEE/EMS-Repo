@@ -104,17 +104,16 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>gov.nasa.jpl</groupId>
-            <artifactId>ae</artifactId>
-            <version>1.0</version>
-            <type>jar</type>
-<!--        <groupId>gov.nasa.jpl.ae</groupId>
+<!--             <groupId>gov.nasa.jpl</groupId> -->
+<!--             <artifactId>ae</artifactId> -->
+<!--             <version>1.0</version> -->
+<!--             <type>jar</type> -->
+            <groupId>gov.nasa.jpl.ae</groupId>
             <artifactId>AE</artifactId>
             <version>1.0</version>
             <scope>system</scope>
             <type>jar</type>
             <systemPath>${project.basedir}/lib/AE.jar</systemPath>
- -->    
          </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
