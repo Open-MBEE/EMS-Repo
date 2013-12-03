@@ -45,6 +45,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * Utility class for handling transactions, node creation, node get, etc.
+ * TODO: This may not be thread safe, may need to have a new instance for each transaction
  * 
  * @author cinyoung
  *

@@ -40,6 +40,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
+import org.springframework.extensions.webscripts.Status;
+import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * Base class for all EMS Java backed webscripts. Provides helper functions and
@@ -67,6 +69,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			put("ModelElement", "view:ModelElement");
 		}
 	};
+	private Exception UnsupportedOperationException;
 
 	protected void initMemberVariables(String siteName) {
 		companyhome = new ScriptNode(repository.getCompanyHome(), services);
@@ -141,4 +144,21 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	}
 
 
+	/**
+	 * Utility to grab template parameters from a request
+	 */
+	protected String getRequestVar(WebScriptRequest req, String varid) {
+		return req.getServiceMatch().getTemplateVars().get(varid);
+	}
+	
+	/**
+	 * Parse the request and do validation checks on request
+	 * 
+	 * @param req		Request to be parsed
+	 * @param status	The status to be returned for the request
+	 * @param response	The response message to returned to the request
+	 * @return			True if request valid and parsed, False otherwise
+	 * @throws Exception Must be overridden
+	 */
+	abstract protected boolean parseRequest(WebScriptRequest req, Status status, StringBuffer response);
 }

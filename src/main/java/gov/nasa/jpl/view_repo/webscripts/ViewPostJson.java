@@ -215,7 +215,7 @@ public class ViewPostJson extends AbstractJavaWebScript {
 			return;
 		}
 		
-		viewid = req.getServiceMatch().getTemplateVars().get("viewid");
+		viewid = getRequestVar(req, "viewid");
 		if (viewid == null) {
 			return;
 		}
@@ -251,7 +251,6 @@ public class ViewPostJson extends AbstractJavaWebScript {
 			JSONArray array;
 			
 			array = postjson.getJSONArray("elements");
-			int interval = 100;
 			
 			jwsUtil.splitTransactions(new JwsFunctor() {
 				@Override
@@ -335,6 +334,14 @@ public class ViewPostJson extends AbstractJavaWebScript {
 		model.put("res", response);
 		
 		return model;
+	}
+
+
+	@Override
+	protected boolean parseRequest(WebScriptRequest req, Status status,
+			StringBuffer response) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 
