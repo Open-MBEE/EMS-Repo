@@ -2,8 +2,8 @@
 <import resource="classpath:alfresco/extension/js/utils.js">
 <import resource="classpath:alfresco/extension/js/view_utils.js">
 
-var modelFolder = companyhome.childByNamePath("ViewEditor/model");
-var snapshotFolder = companyhome.childByNamePath("ViewEditor/snapshots");
+var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
+var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
 var res = null;
 
 function main() {
@@ -15,25 +15,36 @@ function main() {
 		status.code = 404;
 		return;
 	}
-	/*
-	var topview = modelFolder.childByNamePath(docid);
+	
+	var topview = getModelElement(modelFolder, docid); //modelFolder.childByNamePath(docid);
 	var jsonstring = node.properties["view:productJson"];
-	var res = JSON.parse(jsonstring);
-	res['snapshots'] = getSnapsnots(topview);
+	res = JSON.parse(jsonstring);
+	res['snapshots'] = [];
 	res['user'] = person.properties['cm:userName'];
+	res['snapshoted'] = utils.toISO8601(node.properties['cm:created']);
 	res = toJson(res);
-	*/
-	var html = node.assocs["view:html"];
+	
+	/*var html = node.assocs["view:html"];
 	if (html.length > 0)
 		res = html[0].content;
 	else
 		status.code = 404;
-	
+	*/
 }
 
-status.code = 200;
-main();
-if (status.code == 200)
-	model['res'] = res;
-else
-	model['res'] = "NotFound";
+if (UserUtil.hasWebScriptPermissions()) {
+    status.code = 200;
+    main();
+} else {
+    status.code = 401;
+}
+
+var response;
+if (status.code == 200) {
+    response = res;
+} else if (status.code == 401) {
+    response = "unauthorized";
+} else {
+    response = "NotFound";
+}
+model['res'] = response;

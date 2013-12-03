@@ -3,15 +3,15 @@
 <import resource="classpath:alfresco/extension/js/artifact_utils.js">
 <import resource="classpath:alfresco/extension/js/view_utils.js">
 
-var modelFolder = companyhome.childByNamePath("ViewEditor/model");
-var snapshotFolder = companyhome.childByNamePath("ViewEditor/snapshots");
+var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
+var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
 var snapshotid = guid();
 var viewid = url.templateArgs.viewid;
 var product = false;
-
-/* this was an old code where posting a snapshot means we recreate the json on server side and save it as a blob in the snapshot class, might be useful in future
+var snapshoturl = {};
+// this was an old code where posting a snapshot means we recreate the json on server side and save it as a blob in the snapshot class, might be useful in future
 function main() {
-	var topview = modelFolder.childByNamePath(viewid);
+	var topview = getModelElement(modelFolder, viewid); //modelFolder.childByNamePath(viewid);
 	
 	var elements = [];
 	var seen = [];
@@ -20,6 +20,7 @@ function main() {
 	
 	if (topview == null) {
 		status.code = 404;
+		return;
 	} else {
 		if (topview.properties["view:product"])
 			product = true;
@@ -27,7 +28,7 @@ function main() {
 			view2view = JSON.parse(topview.properties["view:view2viewJson"]);
 			var noSections = JSON.parse(topview.properties["view:noSectionsJson"]);
 			for (var viewmdid in view2view) {
-				var view = modelFolder.childByNamePath(viewmdid);
+				var view = getModelElement(modelFolder, viewmdid); //modelFolder.childByNamePath(viewmdid);
 				if (view == null) {
 					status.code = 404;
 					return;
@@ -63,14 +64,14 @@ function main() {
     htmlNode.properties.content.setEncoding("UTF-8");
 	htmlNode.save();
 	snapshotNode.createAssociation(htmlNode, "view:html");
-	snapshoturl.url = url.context + "wcs/ui/views/" + viewid + "/snapshots/" + snapshotid;
+	snapshoturl.url = url.context + "/wcs/ui/views/" + viewid + "/snapshots/" + snapshotid;
 	snapshoturl.creator = person.properties['cm:userName'];
 	snapshoturl.created = utils.toISO8601(htmlNode.properties["cm:created"]);
 	snapshoturl.id = snapshotid;
 }
-*/
-var snapshoturl = {};
-function main() {
+
+
+/*function main() {
 	var html = requestbody.content;
 	var topview = modelFolder.childByNamePath(viewid);
 	if (topview == null) {
@@ -93,11 +94,21 @@ function main() {
 	snapshoturl.creator = person.properties['cm:userName'];
 	snapshoturl.created = utils.toISO8601(htmlNode.properties["cm:created"]);
 	snapshoturl.id = snapshotid;
+}*/
+
+if (UserUtil.hasWebScriptPermissions()) {
+    status.code = 200;
+    main();
+} else {
+    status.code = 401;
 }
 
-status.code = 200;
-main();
-if (status.code == 200)
-	model['res'] = jsonUtils.toJSONString(snapshoturl);
-else
-	model['res'] = "\"NotFound\"";
+var response;
+if (status.code == 200) {
+    response = toJson(snapshoturl);
+} else if (status.code == 401) {
+    response = "unauthorized";
+} else {
+    response = "NotFound";
+}
+model['res'] = response;

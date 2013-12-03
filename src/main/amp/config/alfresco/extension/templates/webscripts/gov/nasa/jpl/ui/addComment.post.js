@@ -2,13 +2,15 @@
 <import resource="classpath:alfresco/extension/js/utils.js">
 
 
-var modelFolder = companyhome.childByNamePath("ViewEditor/model");
+var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
+var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
+var commentFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/comments");
 
 var viewid = url.templateArgs.viewid;
 
 function main() {
 	var newid = "comment" + guid();
-	var	commentNode = modelFolder.createNode(newid, "view:Comment");
+	var	commentNode = commentFolder.createNode(newid, "view:Comment");
 	commentNode.properties["view:mdid"] = newid;
 
 	commentNode.properties["view:documentation"] = requestbody.content;
@@ -18,11 +20,25 @@ function main() {
 	commentNode.properties["view:committed"] = false;
 	commentNode.save();
 	
-	var view = modelFolder.childByNamePath(viewid);
+	var view = getModelElement(modelFolder, viewid); //modelFolder.childByNamePath(viewid);
 	if (view == null)
 		return;
 	view.createAssociation(commentNode, "view:comments");
 }
 
-main();
-model['res'] = "\"ok\"";
+if (UserUtil.hasWebScriptPermissions()) {
+    status.code = 200;
+    main();
+} else {
+    status.code = 401;
+}
+
+var response;
+if (status.code == 200) {
+    response = "ok";
+} else if (status.code == 401) {
+    response = "unauthorized";
+} else {
+    response = "NotFound";
+}
+model['res'] = response;

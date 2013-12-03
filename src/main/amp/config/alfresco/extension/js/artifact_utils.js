@@ -51,7 +51,7 @@ function replaceArtifactUrl(content, prefix, pattern, escape) {
  */
 function searchForFile(filename) {
 	filename = filename.replace(/\\/g, '');
-	return companyhome.childByNamePath('Artifacts/magicdraw/' + filename);
+	return companyhome.childByNamePath('Sites/europa/Artifacts/magicdraw/' + filename);
 }
 
 
@@ -137,4 +137,16 @@ function guessMimetype(filename) {
 		mimetype = 'application/octet-stream';
 	}
 	return mimetype;
+}
+
+function saveFile(path, filename, content) {
+    var upload = companyhome.childByNamePath(path + filename);
+    if (upload == null) {
+        upload = companyhome.childByNamePath(path).createFile(filename);
+        upload.properties.content.setContent(content);
+        upload.properties.content.setEncoding("UTF-8");
+        upload.properties.content.mimetype = guessMimetype(filename);
+        upload.properties.title = filename;
+        upload.save();
+    }
 }

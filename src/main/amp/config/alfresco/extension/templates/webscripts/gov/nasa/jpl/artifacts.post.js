@@ -1,13 +1,11 @@
 <import resource="classpath:alfresco/extension/js/artifact_utils.js">
 
 // everything is relative to Sites path
-var path = "Artifacts/";
+var path = "Sites/europa/Artifacts/";
 var extension = "";
 var cs = null;
 var filename = undefined;
 var content = undefined;
-
-main();
 
 function main() {
     //Query parameters on URL as exposed as args dictionary)
@@ -119,4 +117,13 @@ function mkdir(path)
     }
     
     return folder;
+}
+
+
+
+if (UserUtil.hasWebScriptPermissions) {
+    main();
+} else {
+    status.code = 401;
+    status.redirect = true;
 }
