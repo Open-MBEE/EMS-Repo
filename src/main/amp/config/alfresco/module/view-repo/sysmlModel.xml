@@ -81,6 +81,16 @@
                 		<tokenised>false</tokenised>
                 	</index>
                 </property>
+                <property name="sysml:isSlot">
+                	<type>d:boolean</type>
+                	<mandatory>false</mandatory>
+                	<default>false</default>
+                	<index enabled="true">
+                		<atomic>false</atomic>
+                		<stored>false</stored>
+                		<tokenised>false</tokenised>
+                	</index>
+                </property>
                 <property name="sysml:valueType">
                 	<type>d:text</type>
                 	<mandatory>false</mandatory>
@@ -94,6 +104,7 @@
                 <property name="sysml:elementValue">
                 	<type>d:noderef</type>
                 	<mandatory>false</mandatory>
+                	<multiple>true</multiple>
                 	<index enabled="true">
                 		<atomic>false</atomic>
                 		<stored>false</stored>
@@ -103,6 +114,7 @@
                 <property name="sysml:string">
                 	<type>d:text</type>
                 	<mandatory>false</mandatory>
+                	<multiple>true</multiple>
                 	<index enabled="true">
                 		<atomic>false</atomic>
                 		<stored>false</stored>
@@ -112,6 +124,7 @@
                 <property name="sysml:boolean">
                 	<type>d:boolean</type>
                 	<mandatory>false</mandatory>
+                	<multiple>true</multiple>
                 	<index enabled="true">
                 		<atomic>false</atomic>
                 		<stored>false</stored>
@@ -121,6 +134,7 @@
                 <property name="sysml:integer">
                 	<type>d:int</type>
                 	<mandatory>false</mandatory>
+                	<multiple>true</multiple>
                 	<index enabled="true">
                 		<atomic>false</atomic>
                 		<stored>false</stored>
@@ -130,6 +144,7 @@
                 <property name="sysml:double">
                 	<type>d:double</type>
                 	<mandatory>false</mandatory>
+                	<multiple>true</multiple>
                 	<index enabled="true">
                 		<atomic>false</atomic>
                 		<stored>false</stored>
@@ -139,6 +154,7 @@
                 <property name="sysml:expression">
                 	<type>d:text</type>
                 	<mandatory>false</mandatory>
+                	<multiple>true</multiple>
                 	<index enabled="true">
                 		<atomic>false</atomic>
                 		<stored>false</stored>
