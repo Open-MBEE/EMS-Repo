@@ -17,6 +17,7 @@
     limitations under the License.
 -->
 <beans>
+    <import resource="javawebscript-service-context.xml" />
     
     <bean id="view-repo_dictionaryBootstrap" parent="dictionaryModelBootstrap" depends-on="dictionaryBootstrap">
       <property name="models">
@@ -57,6 +58,7 @@
 		<property name="transactionInterval" value="500" />
 	</bean>
 
+<!-- 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.post"
 		class="gov.nasa.jpl.view_repo.webscripts.ViewPostJson"
 		parent="webscript">
@@ -64,6 +66,7 @@
         <property name="services" ref="ServiceRegistry" />
         <property name="jwsUtil" ref="jwsUtil" />
 	</bean>
+-->
 	
 	<!--  utility bean for checking user site permissions: also expose a webscript base object -->
 	<bean id="UserUtil" class="gov.nasa.jpl.view_repo.util.UserUtil" parent="baseJavaScriptExtension">
