@@ -1,0 +1,299 @@
+{
+    "roots": [
+        "magicdraw_uml_standard_profile_v_0001"
+    ],
+    "elementHierarchy": {
+        "_16_9_8f90291_1280253091529_392790_1528": [],
+        "_16_6_8f90291_1254846042821_86742_517": [
+            "_16_8beta_8f90291_1262793671275_521921_1415"
+        ],
+        "_16_0beta1_8bb027e_1222180306964_598019_240": [],
+        "_12_0EAPbeta_f720368_1161678240574_175135_97": [],
+        "_11_5_f720368_1159529670215_231387_1": [
+            "_16_0_9020291_1227272781501_360425_230",
+            "_12_0EAPbeta_f720368_1161678076339_464983_95",
+            "_15_5EAPbeta1_8ca0285_1207222354728_434471_815",
+            "_15_5EAPbeta1_8ca0285_1207222370039_532769_817",
+            "_12_0EAPbeta_f720368_1161678240574_175135_97",
+            "_16_6beta_641020e_1244036891295_265068_358",
+            "_15_5EAPbeta1_8ca0285_1207309180033_368978_408",
+            "_16_5beta1_641020e_1233908980998_560909_267",
+            "_17_0_1beta1_9150291_1303126568144_273167_1686",
+            "_17_0_2beta_9020291_1330587865352_573963_1834",
+            "_17_0_2_8bb027e_1338990626646_845021_2113",
+            "_12_0_8f90291_1163446670265_941740_378",
+            "_12_0_8f90291_1163453727562_955061_538"
+        ],
+        "_12_0_8f90291_1163453727562_955061_538": [],
+        "magicdraw_uml_standard_profile_v_0001": [
+            "_be00301_1073394351331_445580_2",
+            "_9_0_be00301_1108053761194_467635_11463",
+            "_16_8beta_62a020a_1256807755193_508228_378",
+            "_11_5_f720368_1159529670215_231387_1",
+            "_9_0_be00301_1108050582343_527400_10847"
+        ],
+        "_15_5EAPbeta1_8ca0285_1207222370039_532769_817": [],
+        "_17_0_2beta_9020291_1330587865352_573963_1834": [],
+        "_9_0_be00301_1108053761194_467635_11463": [
+            "_12_0EAPbeta_be00301_1157529392394_202602_1"
+        ],
+        "_17_0_1beta1_9150291_1303126568144_273167_1686": [],
+        "_16_8beta_62a020a_1256807755193_508228_378": [],
+        "_16_8beta_8f90291_1257522508384_891550_507": [],
+        "_be00301_1073394351331_445580_2": [
+            "_16_5beta1_62a020a_1231413383077_970393_265",
+            "_11_5_be00301_1153310565718_226811_161",
+            "_16_0beta1_8bb027e_1222180111870_868526_222",
+            "_16_8beta_8e8028e_1259661258123_93881_988",
+            "_9_0_2_be00301_1111670217596_336168_627",
+            "_16_6_8f90291_1254846042821_86742_517"
+        ],
+        "_11_5_be00301_1153310565718_226811_161": [],
+        "_16_0_9020291_1227272781501_360425_230": [],
+        "_16_8beta_8e8028e_1259661258123_93881_988": [],
+        "_12_0EAPbeta_be00301_1157529392394_202602_1": [],
+        "_16_5beta1_62a020a_1231413383077_970393_265": [],
+        "_15_5EAPbeta1_8ca0285_1207309180033_368978_408": [],
+        "_16_5beta1_641020e_1233908980998_560909_267": [],
+        "_15_5EAPbeta1_8ca0285_1207222354728_434471_815": [],
+        "_16_8beta_8f90291_1257598450888_37641_733": [],
+        "_16_8beta_8f90291_1262793671275_521921_1415": [
+            "_16_9_8f90291_1280253091529_392790_1528",
+            "_16_8beta_8f90291_1257598450888_37641_733",
+            "_16_8beta_8f90291_1257522508384_891550_507"
+        ],
+        "_12_0EAPbeta_f720368_1161678076339_464983_95": [],
+        "_16_6beta_641020e_1244036891295_265068_358": [],
+        "_9_0_2_be00301_1111670217596_336168_627": [],
+        "_9_0_be00301_1108050582343_527400_10847": [],
+        "_17_0_2_8bb027e_1338990626646_845021_2113": [],
+        "_12_0_8f90291_1163446670265_941740_378": [],
+        "_16_0beta1_8bb027e_1222180111870_868526_222": [
+            "_16_0beta1_8bb027e_1222180306964_598019_240"
+        ]
+    },
+    "relationships": {
+        "elementValues": {},
+        "relationshipElements": {},
+        "propertyTypes": {}
+    },
+    "elements": {
+        "_16_9_8f90291_1280253091529_392790_1528": {
+            "isView": false,
+            "name": "Other",
+            "owner": "_16_8beta_8f90291_1262793671275_521921_1415",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_16_6_8f90291_1254846042821_86742_517": {
+            "isView": false,
+            "name": "Traceability customization",
+            "owner": "_be00301_1073394351331_445580_2",
+            "documentation": "Traceability customization for UML, specifying needed derived properties expressions for analysing elements realization and specification. You can discover the specifications and realization of a element in higher and lover level of abstraction through any relationships and properties those are already used in project for traceability.",
+            "type": "Package"
+        },
+        "_16_0beta1_8bb027e_1222180306964_598019_240": {
+            "isView": false,
+            "name": "Diagram Merge",
+            "owner": "_16_0beta1_8bb027e_1222180111870_868526_222",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_12_0EAPbeta_f720368_1161678240574_175135_97": {
+            "isView": false,
+            "name": "OCL Library",
+            "owner": "_11_5_f720368_1159529670215_231387_1",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_11_5_f720368_1159529670215_231387_1": {
+            "isView": false,
+            "name": "Validation Profile",
+            "owner": "magicdraw_uml_standard_profile_v_0001",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_12_0_8f90291_1163453727562_955061_538": {
+            "isView": false,
+            "name": "UML completeness constraints",
+            "owner": "_11_5_f720368_1159529670215_231387_1",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_17_0_2beta_9020291_1330587865352_573963_1834": {
+            "isView": false,
+            "name": "Model Integrity Correctness",
+            "owner": "_11_5_f720368_1159529670215_231387_1",
+            "documentation": "",
+            "type": "Package"
+        },
+        "magicdraw_uml_standard_profile_v_0001": {
+            "isView": false,
+            "name": "UML Standard Profile",
+            "owner": "eee_1045467100313_135436_1",
+            "documentation": "UML Standard Profile contains UML metamodel (metaclasses without properties and associations), StandardProfileL2 and StandardProfileL3 from UML specification, Standard UML stereotypes defined in annex C of UML specification.\nProfile also includes validation suites for UML model correctness and completeness checking, and stereotypes used by MagicDraw internally.",
+            "type": "Package"
+        },
+        "_15_5EAPbeta1_8ca0285_1207222370039_532769_817": {
+            "isView": false,
+            "name": "Parameters Synchronization",
+            "owner": "_11_5_f720368_1159529670215_231387_1",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_17_0_1beta1_9150291_1303126568144_273167_1686": {
+            "isView": false,
+            "name": "Numbering Validation",
+            "owner": "_11_5_f720368_1159529670215_231387_1",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_9_0_be00301_1108053761194_467635_11463": {
+            "isView": false,
+            "name": "UML2 Metamodel",
+            "owner": "magicdraw_uml_standard_profile_v_0001",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_16_8beta_62a020a_1256807755193_508228_378": {
+            "isView": false,
+            "name": "StandardProfileL3",
+            "owner": "magicdraw_uml_standard_profile_v_0001",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_16_8beta_8f90291_1257522508384_891550_507": {
+            "isView": false,
+            "name": "Realization",
+            "owner": "_16_8beta_8f90291_1262793671275_521921_1415",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_be00301_1073394351331_445580_2": {
+            "isView": false,
+            "name": "MagicDraw Profile",
+            "owner": "magicdraw_uml_standard_profile_v_0001",
+            "documentation": "MagicDraw Profile contains UML extensions used in MagicDraw internal mechanisms and some features based on UML extensions.",
+            "type": "Package"
+        },
+        "_11_5_be00301_1153310565718_226811_161": {
+            "isView": false,
+            "name": "DSL Customization",
+            "owner": "_be00301_1073394351331_445580_2",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_16_0_9020291_1227272781501_360425_230": {
+            "isView": false,
+            "name": "Spelling",
+            "owner": "_11_5_f720368_1159529670215_231387_1",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_16_8beta_8e8028e_1259661258123_93881_988": {
+            "isView": false,
+            "name": "libraries",
+            "owner": "_be00301_1073394351331_445580_2",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_12_0EAPbeta_be00301_1157529392394_202602_1": {
+            "isView": false,
+            "name": "PrimitiveTypes",
+            "owner": "_9_0_be00301_1108053761194_467635_11463",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_16_5beta1_62a020a_1231413383077_970393_265": {
+            "isView": false,
+            "name": "migration",
+            "owner": "_be00301_1073394351331_445580_2",
+            "documentation": "Stereotypes used in migration framework.",
+            "type": "Package"
+        },
+        "_15_5EAPbeta1_8ca0285_1207309180033_368978_408": {
+            "isView": false,
+            "name": "Recovered Elements",
+            "owner": "_11_5_f720368_1159529670215_231387_1",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_16_5beta1_641020e_1233908980998_560909_267": {
+            "isView": false,
+            "name": "UML Correctness (active)",
+            "owner": "_11_5_f720368_1159529670215_231387_1",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_15_5EAPbeta1_8ca0285_1207222354728_434471_815": {
+            "isView": false,
+            "name": "Shape Ownership",
+            "owner": "_11_5_f720368_1159529670215_231387_1",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_16_8beta_8f90291_1257598450888_37641_733": {
+            "isView": false,
+            "name": "Specification",
+            "owner": "_16_8beta_8f90291_1262793671275_521921_1415",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_16_8beta_8f90291_1262793671275_521921_1415": {
+            "isView": false,
+            "name": "Properties descriptors",
+            "owner": "_16_6_8f90291_1254846042821_86742_517",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_12_0EAPbeta_f720368_1161678076339_464983_95": {
+            "isView": false,
+            "name": "Rule Validation Suite",
+            "owner": "_11_5_f720368_1159529670215_231387_1",
+            "documentation": "This is the Internal validation suite which checks other validation suites for correctness automatically.",
+            "type": "Package"
+        },
+        "_16_6beta_641020e_1244036891295_265068_358": {
+            "isView": false,
+            "name": "Relations Ownership",
+            "owner": "_11_5_f720368_1159529670215_231387_1",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_9_0_2_be00301_1111670217596_336168_627": {
+            "isView": false,
+            "name": "datatypes",
+            "owner": "_be00301_1073394351331_445580_2",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_9_0_be00301_1108050582343_527400_10847": {
+            "isView": false,
+            "name": "StandardProfileL2",
+            "owner": "magicdraw_uml_standard_profile_v_0001",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_17_0_2_8bb027e_1338990626646_845021_2113": {
+            "isView": false,
+            "name": "Path Overlapping",
+            "owner": "_11_5_f720368_1159529670215_231387_1",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_12_0_8f90291_1163446670265_941740_378": {
+            "isView": false,
+            "name": "UML correctness constraints",
+            "owner": "_11_5_f720368_1159529670215_231387_1",
+            "documentation": "",
+            "type": "Package"
+        },
+        "_16_0beta1_8bb027e_1222180111870_868526_222": {
+            "isView": false,
+            "name": "Merge",
+            "owner": "_be00301_1073394351331_445580_2",
+            "documentation": "",
+            "type": "Package"
+        }
+    }
+}
