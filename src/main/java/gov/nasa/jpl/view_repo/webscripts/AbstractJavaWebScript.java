@@ -60,7 +60,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	// internal members
 	protected ScriptNode companyhome;
 
-	protected final Map<String, String> typeMap = new HashMap<String, String>() {
+	// JSON to Alfresco Content Model mapping
+	protected final Map<String, String> json2acm = new HashMap<String, String>() {
 		private static final long serialVersionUID = -5467934440503910163L;
 		{
 			put("View", "view:View");
@@ -76,7 +77,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			put("Conform", "sysml:Conform");
 			put("Expose", "sysml:Expose");
 			put("Viewpoint", "sysml:Viewpoint");
-			put("name", "cm:name");
+			put("name", "sysml:name");
 			put("documentation", "sysml:documentation");
 			put("isDerived", "sysml:isDerived");
 			put("isSlot", "sysml:isSlot");

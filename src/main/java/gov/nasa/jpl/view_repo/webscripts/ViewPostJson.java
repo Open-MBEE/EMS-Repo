@@ -85,7 +85,7 @@ public class ViewPostJson extends AbstractJavaWebScript {
 		if (modelNode == null) {
 			modelNode = jwsUtil.getModelElement(modelFolder, mdid);
 			if (modelNode == null) {
-				String modeltype = typeMap.containsKey(elementType) ? typeMap.get(elementType) : typeMap.get("ModelElement");
+				String modeltype = json2acm.containsKey(elementType) ? json2acm.get(elementType) : json2acm.get("ModelElement");
 				modelNode = jwsUtil.createModelElement(modelFolder, mdid, modeltype);
 				if (elementName != null) {
 					jwsUtil.setName(modelNode, elementName);
@@ -257,7 +257,7 @@ public class ViewPostJson extends AbstractJavaWebScript {
 				@Override
 				public Object execute(JSONObject jsonObject, String key,
 						Boolean... flags) throws JSONException {
-					updateOrCreateModelElement((JSONObject)jsonObject.get(key), flags[0]);
+					updateOrCreateModelElement(jsonObject.getJSONObject(key), flags[0]);
 					return null;
 				}
 			}, jsonObject, force);
@@ -267,7 +267,7 @@ public class ViewPostJson extends AbstractJavaWebScript {
 				@Override
 				public Object execute(JSONObject jsonObject, String key,
 						Boolean... flags) throws JSONException {
-					updateOrCreateView((JSONObject)jsonObject.get(key), flags[0]);
+					updateOrCreateView(jsonObject.getJSONObject(key), flags[0]);
 					return null;
 				}
 			}, jsonObject, product);
@@ -278,6 +278,7 @@ public class ViewPostJson extends AbstractJavaWebScript {
 			
 			if (product) {
 				List<String> noSections = new ArrayList<String>();
+				@SuppressWarnings("unchecked")
 				Iterator<String> keys = jsonObject.keys();
 				while(keys.hasNext()) {
 					JSONObject view = jsonObject.getJSONObject(keys.next());

@@ -219,6 +219,7 @@ public class JwsUtil {
 
 		RetryingTransactionCallback<Object> work = new RetryingTransactionCallback<Object>() {
 			@Override
+			// TODO create a data structure for returning status
 			public Object execute() throws Throwable {
 				int max = start + range > jsonObject.length() ? jsonObject.length() : start + range;
 				JSONArray keys = jsonObject.names();
