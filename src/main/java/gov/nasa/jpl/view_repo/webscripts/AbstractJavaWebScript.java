@@ -67,9 +67,27 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			put("Property", "view:Property");
 			put("Comment", "view:Comment");
 			put("ModelElement", "view:ModelElement");
+			put("Package", "sysml:Package");
+			put("Property", "sysml:Property");
+			put("Element", "sysml:Element");
+			put("Dependency", "sysml:Dependency");
+			put("Generalization", "sysml:Generalization");
+			put("DirectedRelationship", "sysml:DirectedRelationship");
+			put("Conform", "sysml:Conform");
+			put("Expose", "sysml:Expose");
+			put("Viewpoint", "sysml:Viewpoint");
+			put("name", "cm:name");
+			put("documentation", "sysml:documentation");
+			put("isDerived", "sysml:isDerived");
+			put("isSlot", "sysml:isSlot");
+			put("boolean", "sysml:boolean");
+			put("string", "sysml:string");
+			put("integer", "sysml:integer");
+			put("double", "sysml:double");
+			put("expression", "sysml:expression");
+			put("valueType", "sysml:valueType");
 		}
 	};
-	private Exception UnsupportedOperationException;
 
 	protected void initMemberVariables(String siteName) {
 		companyhome = new ScriptNode(repository.getCompanyHome(), services);
@@ -145,13 +163,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 
 	/**
-	 * Utility to grab template parameters from a request
-	 */
-	protected String getRequestVar(WebScriptRequest req, String varid) {
-		return req.getServiceMatch().getTemplateVars().get(varid);
-	}
-	
-	/**
 	 * Parse the request and do validation checks on request
 	 * 
 	 * @param req		Request to be parsed
@@ -160,5 +171,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @return			True if request valid and parsed, False otherwise
 	 * @throws Exception Must be overridden
 	 */
-	abstract protected boolean parseRequest(WebScriptRequest req, Status status, StringBuffer response);
+	abstract protected boolean validateRequest(WebScriptRequest req, Status status, StringBuffer response);
+	
+	protected ScriptNode getSiteNode(String siteName) {
+		return new ScriptNode(services.getSiteService().getSite(siteName).getNodeRef(), services);
+	}
+
 }

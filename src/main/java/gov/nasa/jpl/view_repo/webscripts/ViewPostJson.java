@@ -34,6 +34,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -215,7 +216,7 @@ public class ViewPostJson extends AbstractJavaWebScript {
 			return;
 		}
 		
-		viewid = getRequestVar(req, "viewid");
+		viewid = JwsRequestUtils.getRequestVar(req, "viewid");
 		if (viewid == null) {
 			return;
 		}
@@ -248,28 +249,28 @@ public class ViewPostJson extends AbstractJavaWebScript {
 		boolean force = jwsUtil.checkArgEquals(req, "force", "true") ? true : false;
 		
 		try {
-			JSONArray array;
+			JSONObject jsonObject;
 			
-			array = postjson.getJSONArray("elements");
+			jsonObject = postjson.getJSONObject("elements");
 			
 			jwsUtil.splitTransactions(new JwsFunctor() {
 				@Override
-				public Object execute(JSONArray jsonArray, int index,
+				public Object execute(JSONObject jsonObject, String key,
 						Boolean... flags) throws JSONException {
-					updateOrCreateModelElement((JSONObject)jsonArray.get(index), flags[0]);
+					updateOrCreateModelElement((JSONObject)jsonObject.get(key), flags[0]);
 					return null;
 				}
-			}, array, force);
+			}, jsonObject, force);
 			
-			array = postjson.getJSONArray("views");
+			jsonObject = postjson.getJSONObject("views");
 			jwsUtil.splitTransactions(new JwsFunctor() {
 				@Override
-				public Object execute(JSONArray jsonArray, int index,
+				public Object execute(JSONObject jsonObject, String key,
 						Boolean... flags) throws JSONException {
-					updateOrCreateView((JSONObject)jsonArray.get(index), flags[0]);
+					updateOrCreateView((JSONObject)jsonObject.get(key), flags[0]);
 					return null;
 				}
-			}, array, product);
+			}, jsonObject, product);
 
 			if (jwsUtil.checkArgEquals(req, "recurse", "true") && !product) {
 				updateViewHierarchy(modelMapping, postjson.getJSONObject("view2view"));
@@ -277,8 +278,9 @@ public class ViewPostJson extends AbstractJavaWebScript {
 			
 			if (product) {
 				List<String> noSections = new ArrayList<String>();
-				for (int ii = 0; ii < array.length(); ii++) {
-					JSONObject view = array.getJSONObject(ii);
+				Iterator<String> keys = jsonObject.keys();
+				while(keys.hasNext()) {
+					JSONObject view = jsonObject.getJSONObject(keys.next());
 					if (view.has("noSection")) {
 						noSections.add((String)view.get("mdid"));
 					}
@@ -338,7 +340,7 @@ public class ViewPostJson extends AbstractJavaWebScript {
 
 
 	@Override
-	protected boolean parseRequest(WebScriptRequest req, Status status,
+	protected boolean validateRequest(WebScriptRequest req, Status status,
 			StringBuffer response) {
 		// TODO Auto-generated method stub
 		return false;

@@ -41,6 +41,7 @@ import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
@@ -211,7 +212,7 @@ public class JwsUtil {
 	 * @param range			Range of data to extract from jsonArray
 	 * @param flags			Boolean flags passed into functor
 	 */
-	protected void doTransaction(final JwsFunctor functor, final JSONArray jsonArray, final int start,
+	protected void doTransaction(final JwsFunctor functor, final JSONObject jsonObject, final int start,
 			final int range, final Boolean... flags) {
 		TransactionService transactionService = services
 				.getTransactionService();
@@ -219,9 +220,10 @@ public class JwsUtil {
 		RetryingTransactionCallback<Object> work = new RetryingTransactionCallback<Object>() {
 			@Override
 			public Object execute() throws Throwable {
-				int max = start + range > jsonArray.length() ? jsonArray.length() : start + range;
+				int max = start + range > jsonObject.length() ? jsonObject.length() : start + range;
+				JSONArray keys = jsonObject.names();
 				for (int ii = start; ii < max; ii++) {
-					functor.execute(jsonArray, ii, flags);
+					functor.execute(jsonObject, (String)keys.get(ii), flags);
 				}
 				return null;
 			}
@@ -236,11 +238,10 @@ public class JwsUtil {
 	 * @param jsonArray		The input data to call the functor on
 	 * @param flags			Any boolean flags needed for the functor
 	 */
-	public void splitTransactions(JwsFunctor functor, JSONArray jsonArray, Boolean... flags) {
-		int max = (int) Math.ceil((double) jsonArray.length()/transactionInterval);
+	public void splitTransactions(JwsFunctor functor, JSONObject jsonObject, Boolean... flags) {
+		int max = (int) Math.ceil((double) jsonObject.length()/transactionInterval);
 		for (int ii = 0; ii < max; ii++) {
-			doTransaction(functor, jsonArray, ii*transactionInterval, transactionInterval, flags);
+			doTransaction(functor, jsonObject, ii*transactionInterval, transactionInterval, flags);
 		}
 	}
-	
 }

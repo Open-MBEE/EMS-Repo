@@ -47,8 +47,6 @@ public class ProjectPost extends AbstractJavaWebScript {
 	private final String MODEL_PATH = "ViewEditor";
 	private final String MODEL_PATH_SEARCH = "/" + MODEL_PATH;
 	private final String MODEL_PATH_NESTED_SEARCH = MODEL_PATH_SEARCH + "/";
-	private final String PROJECT_ID = "projectId";
-	private final String SITE_NAME = "siteName";
 	
 	/**
 	 * Webscript entry point
@@ -61,9 +59,9 @@ public class ProjectPost extends AbstractJavaWebScript {
 		ScriptNode siteNode = null;
 
 		// grab the request variables
-		String siteName = getRequestVar(req, SITE_NAME);
-		String projectId = getRequestVar(req, PROJECT_ID);
-		if (parseRequest(req, status, response)) {
+		String siteName = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.SITE_NAME);
+		String projectId = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.PROJECT_ID);
+		if (validateRequest(req, status, response)) {
 			siteNode = getSiteNode(siteName);
 			ScriptNode modelContainerNode = siteNode.childByNamePath(MODEL_PATH_SEARCH);
 			if (modelContainerNode == null) {
@@ -100,56 +98,38 @@ public class ProjectPost extends AbstractJavaWebScript {
 	 * Note that this has side effect of setting the siteNode if parsed successfully
 	 */
 	@Override
-	protected boolean parseRequest(WebScriptRequest req, Status status, StringBuffer response) {
-		if (req.getContent() == null) {
-			status.setCode(HttpServletResponse.SC_NO_CONTENT);
-			response.append("No content provided");
+	protected boolean validateRequest(WebScriptRequest req, Status status, StringBuffer response) {
+		if (!JwsRequestUtils.validateContent(req, status, response)) {
 			return false;
 		}
 		
-		// check for valid siteName
-		String siteName = getRequestVar(req, SITE_NAME);
-		if (siteName == null) {
-			status.setCode(HttpServletResponse.SC_BAD_REQUEST);
-			response.append("Site name not provided");
+		String siteName = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.SITE_NAME);
+		if (!JwsRequestUtils.validateRequestVariable(status, response, siteName, JwsRequestUtils.SITE_NAME)) {
 			return false;
-		} else {
-			// check if site exists
-			SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-			if (siteInfo == null) {
-				status.setCode(HttpServletResponse.SC_NOT_FOUND);
-				response.append("Site " + siteName + " not found");
-				return false;
-			}
-			
-			// check if user has permissions to write to site
-			if (services.getPermissionService().hasPermission(siteInfo.getNodeRef(), "Write") != AccessStatus.ALLOWED) {
-				status.setCode(HttpServletResponse.SC_UNAUTHORIZED);
-				response.append("No write priveleges to site " + siteName);
-				return false;
-			}
-			
-			// check for valid projectId
-			String projectId = getRequestVar(req, PROJECT_ID);
-			if (projectId == null) {
-				status.setCode(HttpServletResponse.SC_BAD_REQUEST);
-				response.append("Project ID not provided");
-				return false;
-			} else {
-				// check if node already exists
-				ScriptNode siteNode = getSiteNode(siteName);
-				if (siteNode.childByNamePath(MODEL_PATH_NESTED_SEARCH + projectId) != null) {
-					status.setCode(HttpServletResponse.SC_FOUND);
-					response.append("Project ID already exists");
-					return false;
-				}
-			}
+		} 
+		
+		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+		if (!JwsRequestUtils.validateSiteExists(siteInfo, status, response)) {
+			return false;
+		}
+				
+		if (!JwsRequestUtils.validatePermissions(req, status, response, services, siteInfo.getNodeRef(), "Write")) {
+			return false;
+		}
+		
+		String projectId = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.PROJECT_ID);
+		if (!JwsRequestUtils.validateRequestVariable(status, response, projectId, JwsRequestUtils.PROJECT_ID)) {
+			return false;
+		}
+		
+		// check if node already exists
+		ScriptNode siteNode = getSiteNode(siteName);
+		if (siteNode.childByNamePath(MODEL_PATH_NESTED_SEARCH + projectId) != null) {
+			status.setCode(HttpServletResponse.SC_FOUND);
+			response.append("Project ID already exists");
+			return false;
 		}
 		
 		return true;
-	}
-	
-	protected ScriptNode getSiteNode(String siteName) {
-		return new ScriptNode(services.getSiteService().getSite(siteName).getNodeRef(), services);
 	}
 }
