@@ -30,8 +30,10 @@ package gov.nasa.jpl.view_repo;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import gov.nasa.jpl.ae.solver.Constraint;
 import gov.nasa.jpl.ae.util.Debug;
 import gov.nasa.jpl.ae.util.MoreToString;
+import gov.nasa.jpl.ae.util.Pair;
 import gov.nasa.jpl.ae.util.Utils;
 
 import java.io.Serializable;
@@ -88,7 +90,7 @@ import org.springframework.context.ApplicationContext;
  * accessing and querying model information.
  */
 public class JavaQuery extends AbstractModuleComponent
-                       implements ModelInterface< NodeRef, NodeRef, String, Object, String, String, AssociationRef, String > {
+                       implements ModelInterface< NodeRef, NodeRef, String, Object, String, String, Object, AssociationRef, String, Object, NodeRef > {
 
     public static ApplicationContext applicationContext;
     protected static JavaQuery instance;// = initAppContext(); // only use this in unit test mode
@@ -422,7 +424,7 @@ public class JavaQuery extends AbstractModuleComponent
     // JUnit
 
     @Override
-    public NodeRef get( NodeRef context, String identifier, String version ) {
+    public NodeRef getElement( NodeRef context, String identifier, String version ) {
         List<NodeRef> nodes = get( identifier );
         if ( Utils.isNullOrEmpty( nodes ) ) {
             Debug.errln( "CMIS getObject(): Could not find node " + identifier + "!" );
@@ -610,65 +612,74 @@ public class JavaQuery extends AbstractModuleComponent
     }
 
     @Override
-    public Collection< Object > op( ModelInterface.Operation operation,
-                                    Collection< ModelInterface.ModelItem > itemTypes,
-                                    Collection< ModelInterface.Item > context,
-                                    Collection< ModelInterface.Item > specifier,
-                                    Object newValue,
-                                    Boolean failForMultipleItemMatches ) {
+    public
+            Collection< Object >
+            op( gov.nasa.jpl.view_repo.ModelInterface.Operation operation,
+                Collection< gov.nasa.jpl.view_repo.ModelInterface.ModelItem > itemTypes,
+                Collection< gov.nasa.jpl.view_repo.ModelInterface.Item > context,
+                Collection< gov.nasa.jpl.view_repo.ModelInterface.Item > specifier,
+                Object newValue, Boolean failForMultipleItemMatches ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public boolean isAllowed( ModelInterface.Operation operation,
-                              Collection< ModelInterface.ModelItem > itemTypes,
-                              Collection< ModelInterface.Item > context,
-                              Collection< ModelInterface.Item > specifier,
-                              ModelInterface.Item newValue,
-                              Boolean failForMultipleItemMatches ) {
+    public
+            boolean
+            isAllowed( gov.nasa.jpl.view_repo.ModelInterface.Operation operation,
+                       Collection< gov.nasa.jpl.view_repo.ModelInterface.ModelItem > itemTypes,
+                       Collection< gov.nasa.jpl.view_repo.ModelInterface.Item > context,
+                       Collection< gov.nasa.jpl.view_repo.ModelInterface.Item > specifier,
+                       gov.nasa.jpl.view_repo.ModelInterface.Item newValue,
+                       Boolean failForMultipleItemMatches ) {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public Collection< Object > op( ModelInterface.Operation operation,
-                                    Collection< ModelInterface.ModelItem > itemTypes,
-                                    Collection< NodeRef > context,
-                                    String identifier,
-                                    String name,
-                                    String version,
-                                    boolean failForMultipleItemMatches ) {
+    public
+            Collection< Object >
+            op( gov.nasa.jpl.view_repo.ModelInterface.Operation operation,
+                Collection< gov.nasa.jpl.view_repo.ModelInterface.ModelItem > itemTypes,
+                Collection< NodeRef > context, String identifier, String name,
+                String version, boolean failForMultipleItemMatches ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection< Object > get( Collection< ModelInterface.ModelItem > itemTypes,
-                                     Collection< NodeRef > context,
-                                     String identifier,
-                                     String name,
-                                     String version ) {
+    public
+            Collection< Object >
+            get( Collection< gov.nasa.jpl.view_repo.ModelInterface.ModelItem > itemTypes,
+                 Collection< NodeRef > context, String identifier, String name,
+                 String version ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection< Object > create( ModelInterface.ModelItem item,
-                                        Collection< NodeRef > context,
-                                        String identifier,
-                                        String name,
-                                        String version ) {
+    public Collection< Object >
+            create( gov.nasa.jpl.view_repo.ModelInterface.ModelItem item,
+                    Collection< NodeRef > context, String identifier,
+                    String name, String version ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection< Object > delete( ModelInterface.ModelItem item,
-                                        Collection< NodeRef > context,
-                                        String identifier,
-                                        String name,
-                                        String version ) {
+    public Collection< Object >
+            delete( gov.nasa.jpl.view_repo.ModelInterface.ModelItem item,
+                    Collection< NodeRef > context, String identifier,
+                    String name, String version ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object >
+            set( gov.nasa.jpl.view_repo.ModelInterface.ModelItem item,
+                 Collection< NodeRef > context, String identifier, String name,
+                 String version, Object newValue ) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -794,67 +805,200 @@ public class JavaQuery extends AbstractModuleComponent
     }
 
     @Override
-    public Collection< Object > map( Collection< NodeRef > elements,
-                                     Method method,
-                                     int indexOfElementArgument,
-                                     Object... otherArguments )
-                                             throws InvocationTargetException {
+    public
+            Collection< Object >
+            map( Collection< NodeRef > elements, Method method,
+                 int indexOfElementArgument, Object... otherArguments )
+                                                                       throws InvocationTargetException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection< Object > filter( Collection< NodeRef > elements,
-                                        Method method,
-                                        int indexOfElementArgument,
-                                        Object... otherArguments )
-                                                throws InvocationTargetException {
+    public
+            Collection< Object >
+            filter( Collection< NodeRef > elements, Method method,
+                    int indexOfElementArgument, Object... otherArguments )
+                                                                          throws InvocationTargetException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public boolean forAll( Collection< NodeRef > elements,
-                           Method method,
-                           int indexOfElementArgument,
-                           Object... otherArguments )
-                                   throws InvocationTargetException {
+    public
+            boolean
+            forAll( Collection< NodeRef > elements, Method method,
+                    int indexOfElementArgument, Object... otherArguments )
+                                                                          throws InvocationTargetException {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public boolean thereExists( Collection< NodeRef > elements,
-                                Method method,
-                                int indexOfElementArgument,
-                                Object... otherArguments )
-                                        throws InvocationTargetException {
+    public
+            boolean
+            thereExists( Collection< NodeRef > elements, Method method,
+                         int indexOfElementArgument, Object... otherArguments )
+                                                                               throws InvocationTargetException {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public Object fold( Collection< NodeRef > elements,
-                        Object initialValue,
-                        Method method,
-                        int indexOfElementArgument,
-                        int indexOfPriorResultArgument,
-                        Object... otherArguments )
-                                throws InvocationTargetException {
+    public
+            Object
+            fold( Collection< NodeRef > elements, Object initialValue,
+                  Method method, int indexOfElementArgument,
+                  int indexOfPriorResultArgument, Object... otherArguments )
+                                                                            throws InvocationTargetException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection< NodeRef > sort( Collection< NodeRef > elements,
-                                       Comparator< ? > comparator,
-                                       Method method,
-                                       int indexOfElementArgument,
-                                       Object... otherArguments )
-                                               throws InvocationTargetException {
+    public Collection< NodeRef >
+            sort( Collection< NodeRef > elements, Comparator< ? > comparator,
+                  Method method, int indexOfElementArgument,
+                  Object... otherArguments ) throws InvocationTargetException {
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public String createNewSolverSession( String suggestedSessionId ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String copySolverSession( String idOfSessionToCopy ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String switchSolverSession( String idOfSessionToWhichToSwitch ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String deleteSolverSession( String idOfSessionToWhichToSwitch ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Constraint addConstraint( NodeRef constraintElement, String version,
+                                     String sessionId ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Constraint addDomainConstraint( NodeRef constraintElement,
+                                           String version,
+                                           Set< Object > valueDomainSet,
+                                           String sessionId ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Constraint
+            addDomainConstraint( NodeRef constraintElement, String version,
+                                 Pair< Object, Object > valueDomainRange,
+                                 String sessionId ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Constraint relaxDomain( NodeRef constraintElement, String version,
+                                   Set< Object > valueDomainSet,
+                                   String sessionId ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Constraint relaxDomain( NodeRef constraintElement, String version,
+                                   Pair< Object, Object > valueDomainRange,
+                                   String sessionId ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< NodeRef >
+            getConstraintElementsOfElement( NodeRef element, String version,
+                                            String sessionId ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< NodeRef >
+            getConstraintElementsOfContext( NodeRef context ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Constraint > getConstraintsOfElement( NodeRef element,
+                                                             String version,
+                                                             String sessionId ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Constraint > getConstraintsOfContext( NodeRef context ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setOptimizationFunction( Method method, Object... arguments ) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public Collection< NodeRef >
+            getViolatedConstraintElementsOfElement( NodeRef element,
+                                                    String version ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< NodeRef >
+            getViolatedConstraintElementsOfContext( NodeRef context ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Constraint >
+            getViolatedConstraintsOfElement( NodeRef element, String version ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Constraint >
+            getViolatedConstraintsOfContext( NodeRef context ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Number getScore() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 
 
 }

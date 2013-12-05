@@ -28,24 +28,57 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo;
 
+import gov.nasa.jpl.ae.solver.Constraint;
+import gov.nasa.jpl.ae.util.Pair;
+
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Set;
 
 /**
  * A generic interface for talking to models.  Looking to be sufficient for simplified SysML (without UML).
  * REVIEW -- What else might this need to be compatible with other things, like CMIS, OSLC, EMF, etc.  
  */
-public interface ModelInterface<E, C, T, P, N, I, R, V> {
-    public enum ModelItem { ELEMENT, CONTEXT, TYPE, PROPERTY, NAME, IDENTIFIER, VALUE, RELATIONSHIP, VERSION };
-    public enum Operation { GET, CREATE, UPDATE, DELETE };
+public interface ModelInterface<E, C, T, P, N, I, U, R, V, W, CE> {
+    /**
+     * ModelItems are types of things in a model on which Operations can be
+     * performed.
+     * <p>
+     * REVIEW -- Consider adding FUNCTION/PREDICATE, EXPRESSION, EVENT_ELEMENT<br>
+     * REVIEW -- Consider adding FUNCTION/PREDICATE, EXPRESSION, <br>
+     */
+    public enum ModelItem {
+        ELEMENT, CONTEXT, TYPE, PROPERTY, NAME, IDENTIFIER, VALUE,
+        RELATIONSHIP, VERSION, WORKSPACE, CONSTRAINT_ELEMENT, VIEW, VIEWPOINT
+    };
+    
+    /**
+     * Operation is a CRUD operation.  READ is the same as GET, and UPDATE is the same as SET.
+     * <p>
+     * REVIEW -- Consider adding CLONE/COPY, REPAIR, EXECUTE, EVALUATE, ???<br>
+     * REVIEW -- Consider adding MAP, FILTER, FOLD, FORALL, EXISTS, SORT, ???<br>
+     * REVIEW -- Consider adding SUM, SUBTRACT, INTERSECT, UNITE, DIFF, ???<br>
+     * REVIEW -- Consider adding SATISFY, OPTIMIZE
+     */
+    public enum Operation { CREATE, READ, UPDATE, DELETE,
+    		                GET, SET };
 
+    /**
+     * An Object with a label for the kind of model item it is.
+     */
     public class Item {
         public ModelItem kind;
         public Object obj;
-        public Item(Object obj, ModelItem kind) { this.kind = kind; this.obj = obj; }
+
+        public Item( Object obj, ModelItem kind ) {
+            this.kind = kind;
+            this.obj = obj;
+        }
     }
     
+    // general functions
+
     /**
      * Perform an Operation on something as specified by the input arguments.
      * Null values are interpreted as "unknown," "don't care," or
@@ -56,7 +89,7 @@ public interface ModelInterface<E, C, T, P, N, I, R, V> {
      * <p>
      * Examples:
      * <ol>
-     * <li> {@code op(GET, (ELEMENT), null, ("123", IDENTIFIER), null)} returns
+     * <li> {@code op(READ, (ELEMENT), null, ("123", IDENTIFIER), null)} returns
      * the element(s) with ID = "123."
      * <li>
      * {@code op(UPDATE, (PROPERTY), ((o1, ELEMENT),(o2, ELEMENT)), (("mass", NAME), ("kg", TYPE)), 1.0)}
@@ -69,7 +102,7 @@ public interface ModelInterface<E, C, T, P, N, I, R, V> {
      * </ol>
      * 
      * @param operation
-     *            whether to get, create, delete, or update the item
+     *            whether to read, create, delete, or update the item
      * @param itemTypes
      *            the kind of item it may be
      * @param context
@@ -77,11 +110,10 @@ public interface ModelInterface<E, C, T, P, N, I, R, V> {
      * @param specifier
      *            possible characteristics of the item
      * @param newValue
-     *            a new value for the item, as applicable for operation = CREATE
-     *            or UPDATE
+     *            a new value for the item, applicable to CREATE and UPDATE
      * @param failForMultipleItemMatches
      *            if true and multiple items are identified by the specifier for
-     *            a GET, UPDATE, or DELETE operation, then do not perform the
+     *            a READ, UPDATE, or DELETE operation, then do not perform the
      *            operation, and return null.
      * @return the item(s) specified in a collection or null if the operation is
      *         prohibited or inconsistent. See {@link isAllowed}.
@@ -90,7 +122,7 @@ public interface ModelInterface<E, C, T, P, N, I, R, V> {
                                     Collection< ModelItem > itemTypes,
                                     Collection< Item > context,
                                     Collection< Item > specifier,
-                                    Object newValue,
+                                    U newValue,
                                     Boolean failForMultipleItemMatches );
 
     /**
@@ -101,7 +133,7 @@ public interface ModelInterface<E, C, T, P, N, I, R, V> {
      * <p>
      * Examples:
      * <ol>
-     * <li> {@code isAllowed(GET, (VERSION), null, null, null)} returns true iff
+     * <li> {@code isAllowed(READ, (VERSION), null, null, null)} returns true iff
      * the ModelInterface supports getting versions.
      * <li> {@code isAllowed(UPDATE, (PROPERTY), ((null, TYPE)), null, null)}
      * returns true iff the ModelInterface supports updating type properties.
@@ -118,7 +150,7 @@ public interface ModelInterface<E, C, T, P, N, I, R, V> {
      * </ol>
      * 
      * @param operation
-     *            whether to get, create, delete, or update the item
+     *            whether to create, read/get, update/set, or delete the item
      * @param itemTypes
      *            the kind of item it may be
      * @param context
@@ -130,7 +162,7 @@ public interface ModelInterface<E, C, T, P, N, I, R, V> {
      *            or UPDATE
      * @param failForMultipleItemMatches
      *            if true and multiple items are identified by the specifier for
-     *            a GET, UPDATE, or DELETE operation, then return false.
+     *            a READ, UPDATE, or DELETE operation, then return false.
      * @return whether some operations of the kinds specified by the arguments
      *         are consistent, legal, and feasible.
      */
@@ -142,12 +174,12 @@ public interface ModelInterface<E, C, T, P, N, I, R, V> {
                                Boolean failForMultipleItemMatches );
 
     /**
-     * Either get, create, or delete something as specified by the input
-     * arguments. Null values are interpreted as "unknown," "don't care," or
-     * "not applicable." There may be multiple
+     * Either create, read/get, update/set, or delete something as specified by
+     * the input arguments. Null values are interpreted as "unknown,"
+     * "don't care," or "not applicable."
      * 
      * @param op
-     *            whether to get, create, or delete the item
+     *            whether to read/get, create, or delete the item
      * @param itemTypes
      *            the kind of item
      * @param context
@@ -155,8 +187,14 @@ public interface ModelInterface<E, C, T, P, N, I, R, V> {
      * @param identifier
      *            the identifier of the item
      * @param name
+     *            the name of the item
      * @param version
-     * @return
+     *            the version of the item
+     * @param failForMultipleItemMatches
+     *            if true and multiple items are identified by the other
+     *            arguments for a READ, UPDATE, or DELETE operation, then do not
+     *            perform the operation, and return null.
+     * @return the matching or resulting item(s)
      */
     public Collection< Object > op( Operation operation,
                                     Collection< ModelItem > itemTypes,
@@ -166,23 +204,33 @@ public interface ModelInterface<E, C, T, P, N, I, R, V> {
                                     V version,
                                     boolean failForMultipleItemMatches );
 
-    // general functions that may implement others
+    // More specific functions that overlap with or may help implement the general functions above.
+
     /**
-     * Get the model item(s) identified by or matching the input arguments.  Null values are interpreted as "unknown," "don't care," or "not applicable."  
-     * @param kindOfItem the item(s) must be of one of these specified kinds
-     * @param context the elements to which the sought item(s),
-     * @param identifier 
-     * @param name
-     * @param version
-     * @return the matching items
-     */
-    public Collection<Object> get( Collection<ModelItem> itemTypes, Collection<C> context, I identifier, N name, V version );
+	 * Get the model item(s) identified by or matching the input arguments. Null
+	 * values are interpreted as "unknown," "don't care," or "not applicable."
+	 * 
+	 * @param kindOfItem
+	 *            the item(s) must be of one of these specified kinds
+	 * @param context
+	 *            the elements that collectively contain the sought item(s)
+	 * @param identifier
+	 * @param name
+	 * @param version
+	 * @return the matching items
+	 */
+	public Collection<Object> get( Collection< ModelItem > itemTypes,
+				                   Collection< C > context,
+				                   I identifier,
+				                   N name,
+				                   V version );
     public Collection<Object> create( ModelItem item, Collection<C> context, I identifier, N name, V version );
     public Collection<Object> delete( ModelItem item, Collection<C> context, I identifier, N name, V version );
+    public Collection<Object> set( ModelItem item, Collection<C> context, I identifier, N name, V version, U newValue );
     // TODO -- update args and add update() and maybe copy()/clone()
 
     // accessors for class/object/element
-    public E get( C context, I identifier, V version );
+    public E getElement( C context, I identifier, V version );
     public Collection<E> getRootObjects( V version );
     public I getObjectId( E element, V version );
     public N getName( E element, V version );
@@ -388,4 +436,42 @@ public interface ModelInterface<E, C, T, P, N, I, R, V> {
                                  Object... otherArguments )
                                          throws java.lang.reflect.InvocationTargetException;     
 
+    // support for problem solving
+    
+    // problem solving session
+    // TODO -- replace sessions with model workspaces
+    // TODO -- otherwise, create a Session class that would include these session functions, which would return Sessions.
+	/**
+	 * Create a new problem solving session.
+	 * <p>
+	 * TODO -- REVIEW -- this is similar to a workspace where hypothetical model
+	 * changes can be made -- this should be implemented for the model as a
+	 * whole, and problem solving sessions will be unnecessary.
+	 * 
+	 * @param suggestedSessionId
+	 * @return the id for a new problem solving session, the one suggested if
+	 *         possible
+	 */
+    public I createNewSolverSession(I suggestedSessionId);
+    public I copySolverSession( I idOfSessionToCopy );
+    public I switchSolverSession( I idOfSessionToWhichToSwitch );
+    public I deleteSolverSession( I idOfSessionToWhichToSwitch );
+    
+    // Constraint CRUD
+    public Constraint addConstraint( CE constraintElement, V version, I sessionId );
+    public Constraint addDomainConstraint( CE constraintElement, V version, Set<U> valueDomainSet, I sessionId );
+    public Constraint addDomainConstraint( CE constraintElement, V version, Pair<U,U> valueDomainRange, I sessionId );
+    public Constraint relaxDomain( CE constraintElement, V version, Set<U> valueDomainSet, I sessionId );
+    public Constraint relaxDomain( CE constraintElement, V version, Pair<U,U> valueDomainRange, I sessionId );
+    public Collection<CE> getConstraintElementsOfElement( E element, V version, I sessionId );
+    public Collection<CE> getConstraintElementsOfContext( C context );
+    public Collection<Constraint> getConstraintsOfElement( E element, V version, I sessionId );
+    public Collection<Constraint> getConstraintsOfContext( C context );
+    public void setOptimizationFunction( Method method, Object... arguments ); // REVIEW -- should these be elements?
+    public Collection<CE> getViolatedConstraintElementsOfElement( E element, V version );
+    public Collection<CE> getViolatedConstraintElementsOfContext( C context );
+    public Collection<Constraint> getViolatedConstraintsOfElement( E element, V version );
+    public Collection<Constraint> getViolatedConstraintsOfContext( C context );
+    public Number getScore();
+    
 }
