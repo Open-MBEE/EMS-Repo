@@ -2,7 +2,7 @@
   <shortname>Initialize Project</shortname> 
   <description>
   </description>
-  <url>/javawebscripts/sites/{siteName}/projects/{projectId}?delete={delete?}</url>
+  <url>/javawebscripts/sites/{siteName}/projects/{projectId}?delete={delete?}&amp;fix={fix?}</url>
   <format default="json">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readwrite">required</transaction>
@@ -15,6 +15,14 @@
   			"name": magicdraw-project-name
   		}
   		</description>
+  	</arg>
+  	<arg>
+  		<name>delete</name>
+  		<description>Delete the specified project if true</description>
+  	</arg>
+  	<arg>
+  		<name>fix</name>
+  		<description>Force the fix (if true) if there are any discrepancies (e.g., project exists, but has different name).</description>
   	</arg>
   </args>
 </webscript>
