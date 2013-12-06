@@ -9,7 +9,7 @@
     </imports>
     <namespaces>
         <namespace uri="http://jpl.nasa.gov/model/sysml-lite/1.0" prefix="sysml"/>
-        <namesapce uri="http://jpl.nasa.gov/model/view/2.0" prefix="view2"/>
+        <namespace uri="http://jpl.nasa.gov/model/view/2.0" prefix="view2"/>
     </namespaces>
     <data-types/>
     <constraints/>
@@ -41,7 +41,7 @@
             		</source>
             		<target>
             			<class>sysml:ElementFolder</class>
-            			<mandatory>true</mandatory>
+            			<mandatory>false</mandatory>
             			<many>false</many>
             		</target>
             	</child-association>
@@ -202,15 +202,18 @@
                 </property >-->
             </properties>
             <associations>
+            <!-- NOTE: sysml:type/source/target need many to many relationships between source and target.
+                      also mandatory targets aren't allowed otheriwse its expected that an association be
+                      defined in the instance -->
             	<association name="sysml:type">
                     <source>
                         <mandatory>false</mandatory>
-                        <many>false</many>
+                        <many>true</many>
                     </source>
                     <target>
                         <class>sysml:Element</class>
                         <mandatory>false</mandatory>
-                        <many>false</many>
+                        <many>true</many>
                     </target>
                 </association>
             </associations>
@@ -224,23 +227,23 @@
         		<association name="sysml:source">
         			<source>
         				<mandatory>false</mandatory>
-        				<many>false</many>
+        				<many>true</many>
         			</source>
         			<target>
         				<class>sysml:Element</class>
-        				<mandatory>true</mandatory>
-        				<many>false</many>
+        				<mandatory>false</mandatory>
+        				<many>true</many>
         			</target>
         		</association>
         		<association name="sysml:target">
         			<source>
         				<mandatory>false</mandatory>
-        				<many>false</many>
+        				<many>true</many>
         			</source>
         			<target>
         				<class>sysml:Element</class>
-        				<mandatory>true</mandatory>
-        				<many>false</many>
+        				<mandatory>false</mandatory>
+        				<many>true</many>
         			</target>
         		</association>
         	</associations>
@@ -290,6 +293,7 @@
         <aspect name="sysml:Identifiable">
         	<properties>
         		<property name="sysml:id">
+        			<!-- equivalent to cm:name except for reified containment folder -->
         			<type>d:text</type>
         			<mandatory>true</mandatory>
         			<index enabled="true">
@@ -303,6 +307,7 @@
         <aspect name="sysml:Named">
         	<properties>
         		<property name="sysml:name">
+        			<!-- This property is equivalent to cm:titled - but need to display in repository browser -->
         			<type>d:text</type>
         			<mandatory>true</mandatory>
         			<index enabled="true">
