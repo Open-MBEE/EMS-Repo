@@ -23,6 +23,7 @@
       <property name="models">
         <list>
           <value>alfresco/module/view-repo/viewModel.xml</value>
+          <value>alfresco/module/view-repo/sysmlModel.xml</value>
         </list>
       </property>
     </bean>
