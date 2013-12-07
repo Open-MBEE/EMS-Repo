@@ -249,28 +249,36 @@ public class ViewPostJson extends AbstractJavaWebScript {
 		boolean force = jwsUtil.checkArgEquals(req, "force", "true") ? true : false;
 		
 		try {
-			JSONObject jsonObject;
+			JSONArray array;
 			
-			jsonObject = postjson.getJSONObject("elements");
+			array = postjson.getJSONArray("elements");
 			
 			jwsUtil.splitTransactions(new JwsFunctor() {
 				@Override
 				public Object execute(JSONObject jsonObject, String key,
 						Boolean... flags) throws JSONException {
-					updateOrCreateModelElement(jsonObject.getJSONObject(key), flags[0]);
 					return null;
 				}
-			}, jsonObject, force);
+				@Override
+				public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
+					updateOrCreateModelElement((JSONObject)jsonArray.get(index), flags[0]);
+					return null;
+				}
+			}, array, force);
 			
-			jsonObject = postjson.getJSONObject("views");
+			array = postjson.getJSONArray("views");
 			jwsUtil.splitTransactions(new JwsFunctor() {
 				@Override
 				public Object execute(JSONObject jsonObject, String key,
 						Boolean... flags) throws JSONException {
-					updateOrCreateView(jsonObject.getJSONObject(key), flags[0]);
 					return null;
 				}
-			}, jsonObject, product);
+				@Override
+				public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
+					updateOrCreateView((JSONObject)jsonArray.get(index), flags[0]);
+					return null;
+				}
+			}, array, product);
 
 			if (jwsUtil.checkArgEquals(req, "recurse", "true") && !product) {
 				updateViewHierarchy(modelMapping, postjson.getJSONObject("view2view"));
@@ -278,10 +286,8 @@ public class ViewPostJson extends AbstractJavaWebScript {
 			
 			if (product) {
 				List<String> noSections = new ArrayList<String>();
-				@SuppressWarnings("unchecked")
-				Iterator<String> keys = jsonObject.keys();
-				while(keys.hasNext()) {
-					JSONObject view = jsonObject.getJSONObject(keys.next());
+				for (int ii = 0; ii < array.length(); ii++) {
+					JSONObject view = array.getJSONObject(ii);
 					if (view.has("noSection")) {
 						noSections.add((String)view.get("mdid"));
 					}
@@ -341,11 +347,51 @@ public class ViewPostJson extends AbstractJavaWebScript {
 
 
 	@Override
-	protected boolean validateRequest(WebScriptRequest req, Status status,
-			StringBuffer response) {
+	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
+
+	protected void updateViewHierarchy(Map<String, ScriptNode> modelMapping,
+			JSONObject views) throws JSONException {
+		updateViewHierarchy(modelMapping, views, null);
+	}
+
+	protected void updateViewHierarchy(Map<String, ScriptNode> modelMapping,
+			JSONObject views, List<String> nosections) throws JSONException {
+		Iterator<?> keys = views.keys();
+		while (keys.hasNext()) {
+			String pview = (String) keys.next();
+			JSONArray cviews = views.getJSONArray(pview);
+			if (!modelMapping.containsKey(pview)) {
+				continue;
+			}
+			ScriptNode pviewnode = modelMapping.get(pview);
+			JSONArray oldchildren = (JSONArray) pviewnode.getAssocs().get(
+					"view:views");
+			if (oldchildren == null) {
+				continue;
+			}
+			for (int ii = 0; ii < oldchildren.length(); ii++) {
+				pviewnode.removeAssociation((ScriptNode) oldchildren.get(ii),
+						"view:views");
+			}
+			for (int ci = 0; ci < cviews.length(); ci++) {
+				String cvid = cviews.getString(ci);
+				ScriptNode cviewnode = modelMapping.get(cvid);
+				if (cviewnode == null) {
+					continue;
+				}
+				jwsUtil.setNodeProperty(cviewnode, "view:index", ci);
+				pviewnode.createAssociation(cviewnode, "view:views");
+			}
+			jwsUtil.setNodeProperty(pviewnode, "view:viewsJson",
+					cviews.toString());
+			if (nosections != null && nosections.contains(pview)) {
+				jwsUtil.setNodeProperty(pviewnode, "view:noSection", true);
+			}
+		}
+	}
 
 }
