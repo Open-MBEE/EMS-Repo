@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.alfresco.repo.jscript.ScriptNode;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONArray;
@@ -280,14 +281,20 @@ public class ModelPost extends AbstractJavaWebScript {
 
 		// only need to create reified container if it has any elements
 		if (array.length() > 0) {
+			// this is the element node
 			ScriptNode node = findNodeWithName(key);
 			
-			// create reified container if it exists
-			ScriptNode parent = node.getParent().childByNamePath(pkgName);
+			// create reified container if it doesn't exist
+			ScriptNode parent = findNodeWithName(pkgName);  // this is the reified element package
 			if (parent == null) {
 				parent = node.getParent().createFolder(pkgName, "sysml:ElementFolder");
 				jwsUtil.setNodeProperty(node, "sysml:id", key);
 				jwsUtil.setNodeProperty(node, "cm:name", key);
+			}
+			// make sure element and reified container in same place
+			// node should be accurate if hierarchy is correct
+			if (!parent.getParent().equals(node.getParent())) {
+				parent.move(node.getParent());
 			}
 			
 			// move elements to reified container if not already there
