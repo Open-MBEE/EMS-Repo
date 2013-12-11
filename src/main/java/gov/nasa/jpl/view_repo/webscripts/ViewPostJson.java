@@ -34,6 +34,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -84,7 +85,7 @@ public class ViewPostJson extends AbstractJavaWebScript {
 		if (modelNode == null) {
 			modelNode = jwsUtil.getModelElement(modelFolder, mdid);
 			if (modelNode == null) {
-				String modeltype = typeMap.containsKey(elementType) ? typeMap.get(elementType) : typeMap.get("ModelElement");
+				String modeltype = json2acm.containsKey(elementType) ? json2acm.get(elementType) : json2acm.get("ModelElement");
 				modelNode = jwsUtil.createModelElement(modelFolder, mdid, modeltype);
 				if (elementName != null) {
 					jwsUtil.setName(modelNode, elementName);
@@ -215,7 +216,7 @@ public class ViewPostJson extends AbstractJavaWebScript {
 			return;
 		}
 		
-		viewid = getRequestVar(req, "viewid");
+		viewid = JwsRequestUtils.getRequestVar(req, "viewid");
 		if (viewid == null) {
 			return;
 		}
@@ -254,8 +255,12 @@ public class ViewPostJson extends AbstractJavaWebScript {
 			
 			jwsUtil.splitTransactions(new JwsFunctor() {
 				@Override
-				public Object execute(JSONArray jsonArray, int index,
+				public Object execute(JSONObject jsonObject, String key,
 						Boolean... flags) throws JSONException {
+					return null;
+				}
+				@Override
+				public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
 					updateOrCreateModelElement((JSONObject)jsonArray.get(index), flags[0]);
 					return null;
 				}
@@ -264,8 +269,12 @@ public class ViewPostJson extends AbstractJavaWebScript {
 			array = postjson.getJSONArray("views");
 			jwsUtil.splitTransactions(new JwsFunctor() {
 				@Override
-				public Object execute(JSONArray jsonArray, int index,
+				public Object execute(JSONObject jsonObject, String key,
 						Boolean... flags) throws JSONException {
+					return null;
+				}
+				@Override
+				public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
 					updateOrCreateView((JSONObject)jsonArray.get(index), flags[0]);
 					return null;
 				}
@@ -338,11 +347,51 @@ public class ViewPostJson extends AbstractJavaWebScript {
 
 
 	@Override
-	protected boolean parseRequest(WebScriptRequest req, Status status,
-			StringBuffer response) {
+	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
+
+	protected void updateViewHierarchy(Map<String, ScriptNode> modelMapping,
+			JSONObject views) throws JSONException {
+		updateViewHierarchy(modelMapping, views, null);
+	}
+
+	protected void updateViewHierarchy(Map<String, ScriptNode> modelMapping,
+			JSONObject views, List<String> nosections) throws JSONException {
+		Iterator<?> keys = views.keys();
+		while (keys.hasNext()) {
+			String pview = (String) keys.next();
+			JSONArray cviews = views.getJSONArray(pview);
+			if (!modelMapping.containsKey(pview)) {
+				continue;
+			}
+			ScriptNode pviewnode = modelMapping.get(pview);
+			JSONArray oldchildren = (JSONArray) pviewnode.getAssocs().get(
+					"view:views");
+			if (oldchildren == null) {
+				continue;
+			}
+			for (int ii = 0; ii < oldchildren.length(); ii++) {
+				pviewnode.removeAssociation((ScriptNode) oldchildren.get(ii),
+						"view:views");
+			}
+			for (int ci = 0; ci < cviews.length(); ci++) {
+				String cvid = cviews.getString(ci);
+				ScriptNode cviewnode = modelMapping.get(cvid);
+				if (cviewnode == null) {
+					continue;
+				}
+				jwsUtil.setNodeProperty(cviewnode, "view:index", ci);
+				pviewnode.createAssociation(cviewnode, "view:views");
+			}
+			jwsUtil.setNodeProperty(pviewnode, "view:viewsJson",
+					cviews.toString());
+			if (nosections != null && nosections.contains(pview)) {
+				jwsUtil.setNodeProperty(pviewnode, "view:noSection", true);
+			}
+		}
+	}
 
 }

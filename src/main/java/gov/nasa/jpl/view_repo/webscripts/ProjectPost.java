@@ -35,7 +35,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.jscript.ScriptNode;
-import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,12 +42,30 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+/**
+ * Descriptor at /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/project.post.desc.xml
+ * @author cinyoung
+ *
+ */
 public class ProjectPost extends AbstractJavaWebScript {
 	private final String MODEL_PATH = "ViewEditor";
 	private final String MODEL_PATH_SEARCH = "/" + MODEL_PATH;
-	private final String MODEL_PATH_NESTED_SEARCH = MODEL_PATH_SEARCH + "/";
-	private final String PROJECT_ID = "projectId";
-	private final String SITE_NAME = "siteName";
+	
+	private String siteName = null;
+	private String projectId = null;
+	private boolean delete = false;
+	private boolean fix = false;
+		
+	/**
+	 * Utility method for getting the request parameters from the URL template
+	 * @param req
+	 */
+	private void parseRequestVariables(WebScriptRequest req) {
+		siteName = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.SITE_NAME);
+		projectId = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.PROJECT_ID);
+		delete = jwsUtil.checkArgEquals(req, "delete", "true") ? true : false;
+		fix = jwsUtil.checkArgEquals(req, "fix", "true") ? true : false;
+	}
 	
 	/**
 	 * Webscript entry point
@@ -56,100 +73,118 @@ public class ProjectPost extends AbstractJavaWebScript {
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
+		// clear out the response cache first (only one instance of each webscript)
+		response = new StringBuffer();
+		
 		Map<String, Object> model = new HashMap<String, Object>();
-		StringBuffer response = new StringBuffer();
-		ScriptNode siteNode = null;
+		int statusCode = HttpServletResponse.SC_OK;
 
-		// grab the request variables
-		String siteName = getRequestVar(req, SITE_NAME);
-		String projectId = getRequestVar(req, PROJECT_ID);
-		if (parseRequest(req, status, response)) {
-			siteNode = getSiteNode(siteName);
-			ScriptNode modelContainerNode = siteNode.childByNamePath(MODEL_PATH_SEARCH);
-			if (modelContainerNode == null) {
-				modelContainerNode = siteNode.createFolder(MODEL_PATH);
+		parseRequestVariables(req);
+		try {
+			if (validateRequest(req, status)) {
+				statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId, siteName);
 			}
-			ScriptNode projectNode = modelContainerNode.createFolder(projectId);
-			JSONObject postJson = (JSONObject)req.parseContent();
-			try {
-				jwsUtil.setNodeProperty(projectNode, "cm:title", postJson.getString("name"));
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			};
-			response.append("Project created");
-			status.setCode(HttpServletResponse.SC_ACCEPTED);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			// this is most likely null pointer from poorly undefined request parameters
+			// TODO check permissions on Project updating 
+			e.printStackTrace();
+			response.append("Invalid request.\n");
+			statusCode = HttpServletResponse.SC_BAD_REQUEST;
 		}
-		
-		boolean delete = jwsUtil.checkArgEquals(req, "delete", "true") ? true : false;
-		if (delete && status.getCode() == HttpServletResponse.SC_FOUND) {
-			response.delete(0, response.length());
-			ScriptNode projectNode = siteNode.childByNamePath(MODEL_PATH_NESTED_SEARCH + projectId);
-			projectNode.remove();
-			response.append("Project deleted");
-			status.setCode(HttpServletResponse.SC_ACCEPTED);
-		}
-		
-		response.append("\n");
+
+		status.setCode(statusCode);
 		model.put("res", response.toString());
 		return model;
 	}
 
-	
 	/**
-	 * Note that this has side effect of setting the siteNode if parsed successfully
+	 * Update or create the project specified by the JSONObject
+	 * @param jsonObject	JSONObject that has the name of the project
+	 * @param projectId		Project ID
+	 * @param siteName		Site project should reside in
+	 * @return				HttpStatusResponse code for success of the POST request
+	 * @throws JSONException
+	 */
+	private int updateOrCreateProject(JSONObject jsonObject, String projectId, String siteName) throws JSONException {
+		// make sure site exists
+		ScriptNode siteNode = getSiteNode(siteName);
+		if (siteNode == null) {
+			response.append("Site not found\n");
+			return HttpServletResponse.SC_NOT_FOUND;
+		}
+		
+		// make sure Model packge under site exists
+		ScriptNode modelContainerNode = siteNode.childByNamePath(MODEL_PATH_SEARCH);
+		if (modelContainerNode == null) {
+			if (fix) {
+				modelContainerNode = siteNode.createFolder(MODEL_PATH);
+				response.append("Model folder created.\n");
+			} else {
+				response.append("Model folder not found\n");
+				return HttpServletResponse.SC_FOUND;
+			}
+		}
+		
+		// create project if doesn't exist or update if fix is specified 
+		ScriptNode projectNode = findNodeWithName(projectId);
+		String projectName = jsonObject.getString("name");
+		if (projectNode == null) {
+			projectNode = modelContainerNode.createFolder(projectId, "sysml:Project");
+			jwsUtil.setNodeProperty(projectNode, "cm:title", projectName);
+			jwsUtil.setNodeProperty(projectNode, "sysml:name", projectName);
+			response.append("Project created.\n");
+		} else {
+			if (delete) {
+				projectNode.remove();
+				response.append("Project deleted.\n");
+			} else if (fix) {
+				// update Name if different than existing name
+				if (checkAndUpdateProperty(projectNode, projectName, "cm:title") || checkAndUpdateProperty(projectNode, projectName, "sysml:name")) {
+					response.append("Project renamed.\n");
+				}
+				// move sites if exists under different site
+				if (!projectNode.getParent().equals(modelContainerNode)) {
+					projectNode.move(modelContainerNode);
+					response.append("Project moved to specified site.\n");
+				}
+			} else {
+				response.append("Project not moved or name not updated.\n");
+				return HttpServletResponse.SC_FOUND;
+			}
+		}
+		
+		return HttpServletResponse.SC_OK;
+	}
+
+	/**
+	 * Validate the request and check some permissions
 	 */
 	@Override
-	protected boolean parseRequest(WebScriptRequest req, Status status, StringBuffer response) {
-		if (req.getContent() == null) {
-			status.setCode(HttpServletResponse.SC_NO_CONTENT);
-			response.append("No content provided");
+	protected boolean validateRequest(WebScriptRequest req, Status status) {
+		if (!JwsRequestUtils.validateContent(req, status, response)) {
 			return false;
 		}
 		
-		// check for valid siteName
-		String siteName = getRequestVar(req, SITE_NAME);
-		if (siteName == null) {
-			status.setCode(HttpServletResponse.SC_BAD_REQUEST);
-			response.append("Site name not provided");
+		if (!JwsRequestUtils.validateRequestVariable(status, response, siteName, JwsRequestUtils.SITE_NAME)) {
 			return false;
-		} else {
-			// check if site exists
-			SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-			if (siteInfo == null) {
-				status.setCode(HttpServletResponse.SC_NOT_FOUND);
-				response.append("Site " + siteName + " not found");
-				return false;
-			}
-			
-			// check if user has permissions to write to site
-			if (services.getPermissionService().hasPermission(siteInfo.getNodeRef(), "Write") != AccessStatus.ALLOWED) {
-				status.setCode(HttpServletResponse.SC_UNAUTHORIZED);
-				response.append("No write priveleges to site " + siteName);
-				return false;
-			}
-			
-			// check for valid projectId
-			String projectId = getRequestVar(req, PROJECT_ID);
-			if (projectId == null) {
-				status.setCode(HttpServletResponse.SC_BAD_REQUEST);
-				response.append("Project ID not provided");
-				return false;
-			} else {
-				// check if node already exists
-				ScriptNode siteNode = getSiteNode(siteName);
-				if (siteNode.childByNamePath(MODEL_PATH_NESTED_SEARCH + projectId) != null) {
-					status.setCode(HttpServletResponse.SC_FOUND);
-					response.append("Project ID already exists");
-					return false;
-				}
-			}
+		} 
+		
+		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+		if (!JwsRequestUtils.validateSiteExists(siteInfo, status, response)) {
+			return false;
+		}
+				
+		if (!JwsRequestUtils.validatePermissions(req, status, response, services, siteInfo.getNodeRef(), "Write")) {
+			return false;
 		}
 		
+		String projectId = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.PROJECT_ID);
+		if (!JwsRequestUtils.validateRequestVariable(status, response, projectId, JwsRequestUtils.PROJECT_ID)) {
+			return false;
+		}
+
 		return true;
-	}
-	
-	protected ScriptNode getSiteNode(String siteName) {
-		return new ScriptNode(services.getSiteService().getSite(siteName).getNodeRef(), services);
 	}
 }

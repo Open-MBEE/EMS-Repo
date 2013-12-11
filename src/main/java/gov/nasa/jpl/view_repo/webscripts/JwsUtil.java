@@ -41,6 +41,7 @@ import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
@@ -161,6 +162,11 @@ public class JwsUtil {
 		}
 	}
 
+	/**
+	 * Simple utility for setting the specialized name and title
+	 * @param node	Node to update
+	 * @param name	Name to set for the node
+	 */
 	protected void setName(ScriptNode node, String name) {
 		setNodeProperty(node, "view:name", name);
 		setNodeProperty(node, "cm:title", name);
@@ -171,7 +177,7 @@ public class JwsUtil {
 	 * Wrapper set NodeRef's property using Foundational API or ScriptNode API
 	 * 
 	 * ScriptNode has some odd null pointer exceptions when dealing with
-	 * properties
+	 * properties, so don't use ScriptNode API...
 	 * 
 	 * @param node
 	 *            Node to set property for
@@ -211,17 +217,31 @@ public class JwsUtil {
 	 * @param range			Range of data to extract from jsonArray
 	 * @param flags			Boolean flags passed into functor
 	 */
-	protected void doTransaction(final JwsFunctor functor, final JSONArray jsonArray, final int start,
+	protected void doTransaction(final JwsFunctor functor, final Object object, final int start,
 			final int range, final Boolean... flags) {
 		TransactionService transactionService = services
 				.getTransactionService();
 
 		RetryingTransactionCallback<Object> work = new RetryingTransactionCallback<Object>() {
 			@Override
+			// TODO status should be updated using the response and status members
 			public Object execute() throws Throwable {
-				int max = start + range > jsonArray.length() ? jsonArray.length() : start + range;
-				for (int ii = start; ii < max; ii++) {
-					functor.execute(jsonArray, ii, flags);
+				int length = getJSONLength(object);
+				if (length > 0) {
+					int max = start + range > length ? length : start + range;
+					
+					if (object instanceof JSONObject) {
+						JSONObject jsonObject = (JSONObject) object;
+						JSONArray keys = jsonObject.names();
+						for (int ii = start; ii < max; ii++) {
+							functor.execute(jsonObject, (String)keys.get(ii), flags);
+						}
+					} else if (object instanceof JSONArray) {
+						JSONArray jsonArray = (JSONArray) object;
+						for (int ii = start; ii < max; ii++) {
+							functor.execute(jsonArray, ii, flags);
+						}
+					}
 				}
 				return null;
 			}
@@ -231,16 +251,32 @@ public class JwsUtil {
 	}
 	
 	/**
-	 * Splits the transactions on a JSONArray of input data
+	 * Splits the transactions on a JSONArray or JSONObject of input data
 	 * @param functor		The function pointer to call on the JSONArray entries
 	 * @param jsonArray		The input data to call the functor on
 	 * @param flags			Any boolean flags needed for the functor
 	 */
-	public void splitTransactions(JwsFunctor functor, JSONArray jsonArray, Boolean... flags) {
-		int max = (int) Math.ceil((double) jsonArray.length()/transactionInterval);
-		for (int ii = 0; ii < max; ii++) {
-			doTransaction(functor, jsonArray, ii*transactionInterval, transactionInterval, flags);
+	public void splitTransactions(JwsFunctor functor, Object object, Boolean... flags) {
+		int length = getJSONLength(object);
+		if (length > 0) {
+			int max = (int) Math.ceil((double) length/transactionInterval);
+			for (int ii = 0; ii < max; ii++) {
+				doTransaction(functor, object, ii*transactionInterval, transactionInterval, flags);
+			}
 		}
 	}
 	
+	/**
+	 * Wrapper to get length of JSONObject and/or JSONArray
+	 * @param object	JSON thing to get length of
+	 * @return	length of JSON thing, -1 if not JSON thing
+	 */
+	private int getJSONLength(Object object) {
+		if (object instanceof JSONObject) {
+			return ((JSONObject)object).length();
+		} else if (object instanceof JSONArray) {
+			return ((JSONArray)object).length();
+		}
+		return -1;
+	}
 }
