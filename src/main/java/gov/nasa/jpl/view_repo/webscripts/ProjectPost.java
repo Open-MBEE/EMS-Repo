@@ -134,6 +134,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 			projectNode = modelContainerNode.createFolder(projectId, "sysml:Project");
 			jwsUtil.setNodeProperty(projectNode, "cm:title", projectName);
 			jwsUtil.setNodeProperty(projectNode, "sysml:name", projectName);
+			jwsUtil.setNodeProperty(projectNode, "sysml:id", projectId);
 			response.append("Project created.\n");
 		} else {
 			if (delete) {
@@ -143,6 +144,10 @@ public class ProjectPost extends AbstractJavaWebScript {
 				// update Name if different than existing name
 				if (checkAndUpdateProperty(projectNode, projectName, "cm:title") || checkAndUpdateProperty(projectNode, projectName, "sysml:name")) {
 					response.append("Project renamed.\n");
+				}
+				// update project id - temporary fix
+				if (checkAndUpdateProperty(projectNode, projectId, "sysml:id")) {
+					response.append("Project id updated.\n");
 				}
 				// move sites if exists under different site
 				if (!projectNode.getParent().equals(modelContainerNode)) {
