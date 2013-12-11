@@ -599,7 +599,7 @@ app.on('editSection', function(e, sectionId) {
 
   // Wrap content inisde of p tags if it isn't already.  Without this, Chrome will create new DIVs when 
   // enter is pressed and give them attributes from the parent div, including mdid
-  var unwrapped = section.find(".editable.reference").not(".blank").filter(function() {
+  var unwrapped = section.find(".editable.reference.doc").not(".blank").filter(function() {
     return $(this).find('p:first-child').length === 0;
   });
   unwrapped.wrapInner("<p class='pwrapper'></p>");
@@ -623,7 +623,7 @@ app.on('editSection', function(e, sectionId) {
   // TODO remove this listener on cancel or save
   section.click(function() {
     var $el = $(app.getSelectedNode());
-    if ($el.is('.editable.reference.blank')) {
+    if ($el.is('.editable.reference.blank.doc')) {
       $el.html("<p class='pwrapper'>&nbsp;</p>");
       // Set selection inseide the p tag
       var range = document.createRange();//Create a range (a range is a like the selection but invisible)
@@ -951,6 +951,8 @@ var renderEmbeddedValue = function(value, elements) {
   }
   if (value.editable) {
     classes.push('editable');
+    if (value.property == 'DOCUMENTATION')
+    	classes.push('doc');
     // TODO use something other than id here, since the same reference can appear multiple times
     h += '<div ' + classAttr(classes) + ' data-property="' + value.property + '" data-mdid="' + value.mdid +'" title="'+title+'">';
   } else {
@@ -1009,11 +1011,11 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
             var cell = c.body[rIdx][cIdx];
             var value = resolveValue(cell.content, elements, function(valueList) {
               var listOfElements = _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) });
-              var stringResult = "<ul class='table-list'>";
+              var stringResult = "";//"<ul class='table-list'>";
               _.each(listOfElements, function(e){
-                stringResult += "<li>" + e + "</li>";
+                stringResult += e + "<br/>"; //"<li>" + e + "</li>";
               })
-              stringResult += "</ul>";
+              //stringResult += "</ul>";
               return stringResult;
             });
             // TODO need to pull out the renderer here so that we can do multiple divs in a cell
