@@ -30,4 +30,12 @@
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.model.get"
+		class="gov.nasa.jpl.view_repo.webscripts.ModelGet" parent="webscript">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+
 </beans>

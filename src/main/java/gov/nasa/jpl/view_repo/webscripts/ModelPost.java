@@ -29,13 +29,13 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import org.alfresco.repo.jscript.ScriptNode;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONArray;
@@ -177,10 +177,9 @@ public class ModelPost extends AbstractJavaWebScript {
 	 */
 	protected void updateOrCreateRelationships(JSONObject jsonObject, String key) throws JSONException {
 		JSONObject object = jsonObject.getJSONObject(key);
-		@SuppressWarnings("unchecked")
-		Iterator<String> ids = object.keys();
+		Iterator<?> ids = object.keys();
 		while (ids.hasNext()) {
-			String id = ids.next();
+			String id = (String)ids.next();
 			if (key.equals("relationshipElements") && useRelationshipElements) {
 				updateOrCreateRelationship(object.getJSONObject(id), id);
 			} else if (key.equals("propertyTypes") && usePropertyTypes) {
@@ -210,32 +209,11 @@ public class ModelPost extends AbstractJavaWebScript {
 		// only change if old list is different than new
 		@SuppressWarnings("unchecked")
 		ArrayList<NodeRef> oldValues = (ArrayList<NodeRef>)jwsUtil.getNodeProperty(element, "sysml:elementValue");
-		if (!checkNodeRefListsEquivalent(values, oldValues)) {
+		if (!checkIfListsEquivalent(values, oldValues)) {
 			jwsUtil.setNodeProperty(element, "sysml:elementValue", values);
 		}
 	}
 
-	/**
-	 * Utility to compare lists of node refs to one another
-	 * @param x	First list to compare
-	 * @param y	Second list to compare
-	 * @return	true if same, false otherwise
-	 */
-	private boolean checkNodeRefListsEquivalent(ArrayList<NodeRef> x, ArrayList<NodeRef> y) {
-		if (x == null || y == null) {
-			return false;
-		}
-		if (x.size() != y.size()) {
-			return false;
-		}
-		for (int ii = 0; ii < x.size(); ii++) {
-			if (!x.get(ii).equals(y.get(ii))) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
 	/**
 	 * Update or create the property type association between an element and its type
 	 * @param typeId	ID of the type
@@ -305,11 +283,7 @@ public class ModelPost extends AbstractJavaWebScript {
 				}
 			}
 			
-			// create reified relationship between element and container if it doesn't already exist
-			if (node.getChildAssocs() != null && !node.getChildAssocs().containsKey(jwsUtil.createQName("sysml:reifiedContainment").toString())) {
-				createChildAssociation(node, parent, "sysml:reifiedContainment");
-				// TODO investigate why alfresco repo deletion of node doesn't remove its reified package
-			}
+			checkAndUpdateChildAssociation(node, parent, "sysml:reifiedContainment");
 		}
 	}
 
@@ -329,6 +303,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		if (node == null) {
 			node = jwsUtil.createModelElement(projectNode, key, json2acm.get(object.getString("type")));
 			jwsUtil.setNodeProperty(node, "cm:name", key);
+			jwsUtil.setNodeProperty(node, "sysml:id", key);
 			// TODO temporarily set title - until we figure out how to use sysml:name in repository browser
 			jwsUtil.setNodeProperty(node, "cm:title", object.getString("name"));
 		}
@@ -339,20 +314,28 @@ public class ModelPost extends AbstractJavaWebScript {
 		}
 		
 		// create or update properties of node
-		@SuppressWarnings("unchecked")
-		Iterator<String> props = object.keys();
+		Iterator<?> props = object.keys();
 		while(props.hasNext()) {
-			String type = props.next();
+			String type = (String) props.next();
 			String property = object.getString(type);
+			JSONArray array;
 			
 			if (json2acm.containsKey(type)) {
 				String acmType = json2acm.get(type);
-				if (type.equals("boolean") || type.startsWith("is")) {
+				if (type.startsWith("is")) {
 					checkAndUpdateProperty(node, new Boolean(property), acmType);
+				} else if (type.equals("boolean")) {
+					array = object.getJSONArray(type);
+					checkAndUpdatePropertyValues(node, array, acmType, new Boolean(true));
 				} else if (type.equals("integer")) {
-					checkAndUpdateProperty(node, new Integer(property), acmType);
+					array = object.getJSONArray(type);
+					checkAndUpdatePropertyValues(node, array, acmType, new Integer(0));
 				} else if (type.equals("double")) {
-					checkAndUpdateProperty(node, new Double(property), acmType);
+					array = object.getJSONArray(type);
+					checkAndUpdatePropertyValues(node, array, acmType, new Double(0.0));
+				} else if (type.equals("string")) {
+					array = object.getJSONArray(type);
+					checkAndUpdatePropertyValues(node, array, acmType, new String(""));
 				} else {
 					checkAndUpdateProperty(node, new String(property), acmType);
 				}
@@ -360,6 +343,39 @@ public class ModelPost extends AbstractJavaWebScript {
 				// do nothing TODO: unhandled from SysML/UML profiles are owner, type (type handled above)
 			}
 		}
+	}
+	
+	protected <T extends Serializable> void checkAndUpdatePropertyValues(ScriptNode node, JSONArray array, String type, T value) throws JSONException {
+		ArrayList<T> values = new ArrayList<T>();
+		for (int ii = 0; ii < array.length(); ii++) {
+			values.add((T) array.get(ii));
+		}
+		
+		ArrayList<T> oldValues = (ArrayList<T>) jwsUtil.getNodeProperty(node, type);
+		if (!checkIfListsEquivalent(oldValues, values)) {
+			jwsUtil.setNodeProperty(node, type, values);
+		}
+	}
+	
+	/**
+	 * Utility to compare lists of node refs to one another
+	 * @param x	First list to compare
+	 * @param y	Second list to compare
+	 * @return	true if same, false otherwise
+	 */
+	protected <T extends Serializable> boolean checkIfListsEquivalent(ArrayList<T> x, ArrayList<T> y) {
+		if (x == null || y == null) {
+			return false;
+		}
+		if (x.size() != y.size()) {
+			return false;
+		}
+		for (int ii = 0; ii < x.size(); ii++) {
+			if (!x.get(ii).equals(ii)) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	protected void updateOrCreateRoot(JSONArray jsonArray, int index, Boolean createRoot) {
@@ -417,6 +433,9 @@ public class ModelPost extends AbstractJavaWebScript {
 
 		ScriptNode siteNode = getSiteNode(siteName);
 		projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
+		if (projectNode == null) {
+			return false;
+		}
 		
 		return true;
 	}

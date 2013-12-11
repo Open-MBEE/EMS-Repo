@@ -38,6 +38,7 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
@@ -103,6 +104,39 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			put("valueType", "sysml:valueType");
 		}
 	};
+	
+	// Alfresco Content Model 2 JSON types
+	protected final Map<String, String> acm2json = new HashMap<String, String>() {
+		private static final long serialVersionUID = -4682311676740055702L;
+		{
+			// TODO update to use new sysmlModel.xml types
+			put("view:View", "View");
+			put("view:Property", "Property");
+			put("view:Comment", "Comment");
+			put("view:ModelElement", "ModelElement");
+			
+			put("sysml:Package", "Package");
+			put("sysml:Property", "Property");
+			put("sysml:Element", "Element");
+			put("sysml:Dependency", "Dependency");
+			put("sysml:Generalization", "Generalization");
+			put("sysml:DirectedRelationship", "DirectedRelationship");
+			put("sysml:Conform", "Conform");
+			put("sysml:Expose", "Expose");
+			put("sysml:Viewpoint", "Viewpoint");
+			put("sysml:name", "name");
+			put("sysml:documentation", "documentation");
+			put("sysml:isDerived", "isDerived");
+			put("sysml:isSlot", "isSlot");
+			put("sysml:boolean", "boolean");
+			put("sysml:string", "string");
+			put("sysml:integer", "integer");
+			put("sysml:double", "double");
+			put("sysml:expression", "expression");
+			put("sysml:valueType", "valueType");
+		}
+	};
+	
 
 	protected void initMemberVariables(String siteName) {
 		companyhome = new ScriptNode(repository.getCompanyHome(), services);
@@ -212,6 +246,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 				jwsUtil.setNodeProperty(node, acmType, value);
 				return true;
 			}
+		} else {
+			// TODO create if oldvalue doesn't exist?
+			jwsUtil.setNodeProperty(node, acmType, value);
 		}
 		return false;
 	}
@@ -221,18 +258,36 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * Create a child association between a parent and child node of the specified type
 	 * 
 	 * ScriptNode unfortunately doesn't provide this capability
+	 * // TODO investigate why alfresco repo deletion of node doesn't remove its reified package
 	 * 
 	 * NOTE: do not use for peer associations
 	 * @param parent	Parent node
 	 * @param child		Child node
 	 * @param type		Short name of the type of child association to create
-	 * @return			The created ChildAssociationRef
+	 * @return			True if updated or created child relationship
 	 */
-	protected ChildAssociationRef createChildAssociation(ScriptNode parent, ScriptNode child, String type) {
-		QName qname = jwsUtil.createQName(type);
-		return services.getNodeService().addChild(parent.getNodeRef(), child.getNodeRef(), qname, qname);
+	protected boolean checkAndUpdateChildAssociation(ScriptNode parent, ScriptNode child, String type) {
+		List<ChildAssociationRef> refs = services.getNodeService().getChildAssocs(parent.getNodeRef());
+		QName assocTypeQName = jwsUtil.createQName(type);
+
+		// check all associations to see if there's a matching association
+		for (ChildAssociationRef ref: refs) {
+			if (ref.getTypeQName().equals(assocTypeQName)) {
+				if (ref.getParentRef().equals(parent.getNodeRef()) && 
+						ref.getChildRef().equals(child.getNodeRef())) {
+					// found it, no need to update
+					return false; 
+				} else {
+					services.getNodeService().removeChildAssociation(ref);
+					break;
+				}
+			}
+		}
+
+		services.getNodeService().addChild(parent.getNodeRef(), child.getNodeRef(), assocTypeQName, assocTypeQName);
+		return true;		
 	}
-	
+		
 	/**
 	 * Check whether an association exists of the specified type between source and target, create/update as necessary
 	 * 
@@ -243,8 +298,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @return			true if association updated or created
 	 */
 	protected boolean checkAndUpdateAssociation(ScriptNode source, ScriptNode target, String type) {
-		List<AssociationRef> refs = services.getNodeService().getTargetAssocs(source.getNodeRef(), RegexQNamePattern.MATCH_ALL );
 		QName assocTypeQName = jwsUtil.createQName(type);
+		List<AssociationRef> refs = services.getNodeService().getTargetAssocs(source.getNodeRef(), RegexQNamePattern.MATCH_ALL );
 
 		// check all associations to see if there's a matching association
 		for (AssociationRef ref: refs) {
@@ -264,4 +319,20 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		services.getNodeService().createAssociation(source.getNodeRef(), target.getNodeRef(), assocTypeQName);
 		return true;
 	}
+	
+	protected AssociationRef getAssociation(ScriptNode source, String type) {
+		return getAssociation(source.getNodeRef(), type);
+	}
+	
+	protected AssociationRef getAssociation(NodeRef source, String type) {
+		QName assocTypeQName = jwsUtil.createQName(type);
+		List<AssociationRef> refs = services.getNodeService().getTargetAssocs(source, RegexQNamePattern.MATCH_ALL);
+		for (AssociationRef ref: refs) {
+			if (ref.getTypeQName().equals(assocTypeQName)) {
+				return ref;
+			}
+		}
+		return null;
+	}
+	
 }
