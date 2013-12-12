@@ -28,8 +28,8 @@
     </bean>
 
     <!-- A simple module component that will be executed once -->
-<!--     <bean id="java_query" class="gov.nasa.jpl.view_repo.JavaQuery" parent="module.baseComponent" >
-        <property name="moduleId" value="fred" />  See module.properties
+    <bean id="java_query" class="gov.nasa.jpl.view_repo.JavaQuery" parent="module.baseComponent" >
+        <property name="moduleId" value="fred" />  <!--  See module.properties  -->
         <property name="name" value="daComponent" />
         <property name="description" value="A demo component" />
         <property name="sinceVersion" value="2.0" />
@@ -48,7 +48,7 @@
            <ref bean="DictionaryService" />
         </property>
  		<property name="localConnectionManager" ref="webscripts.js.cmis.client"/>
-    </bean> -->
+    </bean>
     
 	<bean id="webscript.gov.nasa.jpl.javatest.get"
 		class="gov.nasa.jpl.view_repo.TestJavaWebScript"
@@ -70,7 +70,6 @@
 		<property name="transactionInterval" value="500" />
 	</bean>
 
-<!-- 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.post"
 		class="gov.nasa.jpl.view_repo.webscripts.ViewPostJson"
 		parent="webscript">
@@ -78,7 +77,6 @@
         <property name="services" ref="ServiceRegistry" />
         <property name="jwsUtil" ref="jwsUtil" />
 	</bean>
--->
 	
 	<!--  utility bean for checking user site permissions: also expose a webscript base object -->
 	<bean id="UserUtil" class="gov.nasa.jpl.view_repo.util.UserUtil" parent="baseJavaScriptExtension">
