@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.util;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +88,11 @@ public class EmsScriptNode extends ScriptNode {
 	
 	@Override
 	public EmsScriptNode childByNamePath(String path) {
-		return new EmsScriptNode(super.childByNamePath(path).getNodeRef(), services, response);
+		ScriptNode child = super.childByNamePath(path);
+		if (child == null) {
+			return null;
+		}
+		return new EmsScriptNode(child.getNodeRef(), services, response);
 	}
 
 
@@ -261,7 +266,12 @@ public class EmsScriptNode extends ScriptNode {
 	
 	@Override
 	public EmsScriptNode createNode(String name, String type) {
-		if (useFoundationalApi) {
+		EmsScriptNode result = null;
+//		Date start = new Date(), end; 
+
+		if (!useFoundationalApi) {
+			result = new EmsScriptNode(super.createNode(name, type).getNodeRef(), services, response);
+		} else {
 			Map<QName, Serializable> props = new HashMap<QName, Serializable>(
 					1, 1.0f);
 			// don't forget to set the name
@@ -274,10 +284,11 @@ public class EmsScriptNode extends ScriptNode {
 							QName.createValidLocalName(name)),
 					createQName(type), props);
 			log("Node " + name + " created");
-			return new EmsScriptNode(assoc.getChildRef(), services, response);			
-		} else {
-			return new EmsScriptNode(super.createNode(name, type).getNodeRef(), services, response);
+			result = new EmsScriptNode(assoc.getChildRef(), services, response);			
 		}
+		
+//		end = new Date(); System.out.println("\tcreateNode: " + (end.getTime()-start.getTime()));
+		return result;
 	}
 
 	/**

@@ -29,13 +29,14 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import java.io.Serializable;
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONArray;
@@ -53,7 +54,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ModelPost extends AbstractJavaWebScript {
-	private ScriptNode projectNode = null;
+	private EmsScriptNode projectNode = null;
 	
 	private final String ROOTS = "roots";
 	private final String ELEMENT_HIERARCHY = "elementHierarchy";
@@ -106,8 +107,9 @@ public class ModelPost extends AbstractJavaWebScript {
 			if (!postJson.has(element)) {
 				continue;
 			}
-			
 			Object object = postJson.get(element);
+
+//			Date start = new Date(), end; System.out.println("Processing " +jwsUtil.getJSONLength(object) + "  " + element);
 			if (element.equals(ELEMENTS) && useElements) {
 				jwsUtil.splitTransactions(new JwsFunctor() {
 					@Override
@@ -166,6 +168,7 @@ public class ModelPost extends AbstractJavaWebScript {
 					}
 				}, object);
 			}
+//			end = new Date(); System.out.println(element + " processed in " + (end.getTime()-start.getTime()));
 		}
 	}
 	
@@ -197,20 +200,20 @@ public class ModelPost extends AbstractJavaWebScript {
 	 * @throws JSONException
 	 */
 	private void updateOrCreateElementValues(JSONArray jsonArray, String id) throws JSONException {
-		ScriptNode element = findNodeWithName(id);
+		EmsScriptNode element = findScriptNodeByName(id);
 		
 		// create an array of the values to be added in as the elementValue property
 		ArrayList<NodeRef> values = new ArrayList<NodeRef>();
 		for (int ii = 0; ii < jsonArray.length(); ii++) {
-			ScriptNode value = findNodeWithName(jsonArray.getString(ii));
+			EmsScriptNode value = findScriptNodeByName(jsonArray.getString(ii));
 			values.add(value.getNodeRef());
 		}
 		
 		// only change if old list is different than new
 		@SuppressWarnings("unchecked")
-		ArrayList<NodeRef> oldValues = (ArrayList<NodeRef>)jwsUtil.getNodeProperty(element, "sysml:elementValue");
-		if (!checkIfListsEquivalent(values, oldValues)) {
-			jwsUtil.setNodeProperty(element, "sysml:elementValue", values);
+		ArrayList<NodeRef> oldValues = (ArrayList<NodeRef>)element.getProperty("sysml:elementValue");
+		if (!EmsScriptNode.checkIfListsEquivalent(values, oldValues)) {
+			element.setProperty("sysml:elementValue", values);
 		}
 	}
 
@@ -220,10 +223,10 @@ public class ModelPost extends AbstractJavaWebScript {
 	 * @param id		ID of the element
 	 */
 	private void updateOrCreatePropertyType(String typeId, String id) {
-		ScriptNode property = findNodeWithName(id);
-		ScriptNode propertyType = findNodeWithName(typeId);
+		EmsScriptNode property = findScriptNodeByName(id);
+		EmsScriptNode propertyType = findScriptNodeByName(typeId);
 		
-		checkAndUpdateAssociation(property, propertyType, "sysml:type");
+		property.createOrUpdateAssociation(propertyType, "sysml:type");
 	}
 
 	/**
@@ -233,15 +236,15 @@ public class ModelPost extends AbstractJavaWebScript {
 	 * @throws JSONException
 	 */
 	private void updateOrCreateRelationship(JSONObject jsonObject, String id) throws JSONException {
-		ScriptNode relationship = findNodeWithName(id);
+		EmsScriptNode relationship = findScriptNodeByName(id);
 		String sourceId = jsonObject.getString("source");
 		String targetId = jsonObject.getString("target");
 		
-		ScriptNode source = findNodeWithName(sourceId);
-		ScriptNode target = findNodeWithName(targetId);
+		EmsScriptNode source = findScriptNodeByName(sourceId);
+		EmsScriptNode target = findScriptNodeByName(targetId);
 
-		checkAndUpdateAssociation(relationship, source, "sysml:source");
-		checkAndUpdateAssociation(relationship, target, "sysml:target");
+		relationship.createOrUpdateAssociation(source, "sysml:source");
+		relationship.createOrUpdateAssociation(target, "sysml:target");
 	}
 
 	/**
@@ -260,14 +263,14 @@ public class ModelPost extends AbstractJavaWebScript {
 		// only need to create reified container if it has any elements
 		if (array.length() > 0) {
 			// this is the element node
-			ScriptNode node = findNodeWithName(key);
+			EmsScriptNode node = findScriptNodeByName(key);
 			
 			// create reified container if it doesn't exist
-			ScriptNode parent = findNodeWithName(pkgName);  // this is the reified element package
+			EmsScriptNode parent = findScriptNodeByName(pkgName);  // this is the reified element package
 			if (parent == null) {
 				parent = node.getParent().createFolder(pkgName, "sysml:ElementFolder");
-				jwsUtil.setNodeProperty(node, "sysml:id", key);
-				jwsUtil.setNodeProperty(node, "cm:name", key);
+				node.setProperty("sysml:id", key);
+				node.setProperty("cm:name", key);
 			}
 			// make sure element and reified container in same place
 			// node should be accurate if hierarchy is correct
@@ -277,13 +280,13 @@ public class ModelPost extends AbstractJavaWebScript {
 			
 			// move elements to reified container if not already there
 			for (int ii = 0; ii < array.length(); ii++) {
-				ScriptNode child = findNodeWithName(array.getString(ii));
+				EmsScriptNode child = findScriptNodeByName(array.getString(ii));
 				if (!child.getParent().equals(parent)) {
 					child.move(parent);
 				}
 			}
 			
-			checkAndUpdateChildAssociation(node, parent, "sysml:reifiedContainment");
+			node.createOrUpdateChildAssociation(parent, "sysml:reifiedContainment");
 		}
 	}
 
@@ -295,22 +298,22 @@ public class ModelPost extends AbstractJavaWebScript {
 	 */
 	protected void updateOrCreateElement(JSONObject jsonObject, String key) throws JSONException {
 		// TODO check permissions
-		
+		Date start = new Date(), end; System.out.println("updateOrCreateElement " + key);
 		JSONObject object = jsonObject.getJSONObject(key);
 		
 		// find node if exists, otherwise create
-		ScriptNode node = findNodeWithName(key);
+		EmsScriptNode node = findScriptNodeByName(key);
 		if (node == null) {
-			node = jwsUtil.createModelElement(projectNode, key, json2acm.get(object.getString("type")));
-			jwsUtil.setNodeProperty(node, "cm:name", key);
-			jwsUtil.setNodeProperty(node, "sysml:id", key);
+			node = projectNode.createNode(key, json2acm.get(object.getString("type")));
+			node.setProperty("cm:name", key);
+			node.setProperty("sysml:id", key);
 			// TODO temporarily set title - until we figure out how to use sysml:name in repository browser
-			jwsUtil.setNodeProperty(node, "cm:title", object.getString("name"));
+			node.setProperty("cm:title", object.getString("name"));
 		}
 		
 		// need to add View aspect before adding any properties (so they're valid properties of the node)
 		if (object.has("isView") && object.getString("isView").equals(true)) {
-			checkAndUpdateAspect(node, "sysml:View");
+			node.createOrUpdateAspect("sysml:View");
 		}
 		
 		// create or update properties of node
@@ -323,59 +326,27 @@ public class ModelPost extends AbstractJavaWebScript {
 			if (json2acm.containsKey(type)) {
 				String acmType = json2acm.get(type);
 				if (type.startsWith("is")) {
-					checkAndUpdateProperty(node, new Boolean(property), acmType);
+					node.createOrUpdateProperty(acmType, new Boolean(property));
 				} else if (type.equals("boolean")) {
 					array = object.getJSONArray(type);
-					checkAndUpdatePropertyValues(node, array, acmType, new Boolean(true));
+					node.createOrUpdatePropertyValues(acmType, array, new Boolean(true));
 				} else if (type.equals("integer")) {
 					array = object.getJSONArray(type);
-					checkAndUpdatePropertyValues(node, array, acmType, new Integer(0));
+					node.createOrUpdatePropertyValues(acmType, array, new Integer(0));
 				} else if (type.equals("double")) {
 					array = object.getJSONArray(type);
-					checkAndUpdatePropertyValues(node, array, acmType, new Double(0.0));
+					node.createOrUpdatePropertyValues(acmType, array, new Double(0.0));
 				} else if (type.equals("string")) {
 					array = object.getJSONArray(type);
-					checkAndUpdatePropertyValues(node, array, acmType, new String(""));
+					node.createOrUpdatePropertyValues(acmType, array, new String(""));
 				} else {
-					checkAndUpdateProperty(node, new String(property), acmType);
+					node.createOrUpdateProperty(acmType, new String(property));
 				}
 			} else {
 				// do nothing TODO: unhandled from SysML/UML profiles are owner, type (type handled above)
 			}
 		}
-	}
-	
-	protected <T extends Serializable> void checkAndUpdatePropertyValues(ScriptNode node, JSONArray array, String type, T value) throws JSONException {
-		ArrayList<T> values = new ArrayList<T>();
-		for (int ii = 0; ii < array.length(); ii++) {
-			values.add((T) array.get(ii));
-		}
-		
-		ArrayList<T> oldValues = (ArrayList<T>) jwsUtil.getNodeProperty(node, type);
-		if (!checkIfListsEquivalent(oldValues, values)) {
-			jwsUtil.setNodeProperty(node, type, values);
-		}
-	}
-	
-	/**
-	 * Utility to compare lists of node refs to one another
-	 * @param x	First list to compare
-	 * @param y	Second list to compare
-	 * @return	true if same, false otherwise
-	 */
-	protected <T extends Serializable> boolean checkIfListsEquivalent(ArrayList<T> x, ArrayList<T> y) {
-		if (x == null || y == null) {
-			return false;
-		}
-		if (x.size() != y.size()) {
-			return false;
-		}
-		for (int ii = 0; ii < x.size(); ii++) {
-			if (!x.get(ii).equals(ii)) {
-				return false;
-			}
-		}
-		return true;
+		end = new Date(); System.out.println("\tTotal: " + (end.getTime() - start.getTime()));
 	}
 	
 	protected void updateOrCreateRoot(JSONArray jsonArray, int index, Boolean createRoot) {
@@ -400,7 +371,6 @@ public class ModelPost extends AbstractJavaWebScript {
 			}
 		}
 
-		response.append("\n");
 		model.put("res", response.toString());
 		return model;
 	}
@@ -431,7 +401,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			return false;
 		}
 
-		ScriptNode siteNode = getSiteNode(siteName);
+		EmsScriptNode siteNode = getSiteNode(siteName);
 		projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
 		if (projectNode == null) {
 			return false;

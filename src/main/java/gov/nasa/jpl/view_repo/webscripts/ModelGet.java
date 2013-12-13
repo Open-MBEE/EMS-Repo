@@ -29,18 +29,15 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.alfresco.repo.jscript.ScriptNode;
-import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.site.SiteInfo;
@@ -61,47 +58,57 @@ public class ModelGet extends AbstractJavaWebScript {
 	private JSONObject elementHierarchy = new JSONObject();
 	private JSONObject elements = new JSONObject();
 	private JSONObject relationships = new JSONObject();
-	private ScriptNode projectNode = null;
-	private Map<String, NodeRef> viewedElements = new HashMap<String, NodeRef>();
-	private Set<String> viewedRelationships = new HashSet<String>();
-	private Set<String> viewedProperties = new HashSet<String>();
+	private EmsScriptNode modelRootNode = null;
+	private Map<String, EmsScriptNode> foundElements = new HashMap<String, EmsScriptNode>();
+	private Set<String> foundRelationships = new HashSet<String>();
+	private Set<String> foundProperties = new HashSet<String>();
 
 	private void clearCaches() {
 		response = new StringBuffer();
 		elementHierarchy = new JSONObject();
 		elements = new JSONObject();
 		relationships = new JSONObject();
-		viewedElements = new HashMap<String, NodeRef>();
-		viewedProperties = new HashSet<String>();
-		viewedRelationships = new HashSet<String>();
+		foundElements = new HashMap<String, EmsScriptNode>();
+		foundProperties = new HashSet<String>();
+		foundRelationships = new HashSet<String>();
 	}
 	
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		String siteName = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.SITE_NAME);
-		if (!JwsRequestUtils.validateRequestVariable(status, response, siteName, JwsRequestUtils.SITE_NAME)) {
-			return false;
-		} 
-
-		String projectId = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.PROJECT_ID);
-		if (!JwsRequestUtils.validateRequestVariable(status, response, projectId, JwsRequestUtils.PROJECT_ID)) {
+		String modelId = JwsRequestUtils.getRequestVar(req, "modelid");
+		if (!JwsRequestUtils.validateRequestVariable(status, response, modelId, "modelid")) {
 			return false;
 		}
-
-		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-		if (!JwsRequestUtils.validateSiteExists(siteInfo, status, response)) {
+		
+		modelRootNode = findScriptNodeByName(modelId);
+		if (!JwsRequestUtils.validatePermissions(req, status, response, services, modelRootNode.getNodeRef(), "Read")) {
 			return false;
 		}
-				
-		if (!JwsRequestUtils.validatePermissions(req, status, response, services, siteInfo.getNodeRef(), "Read")) {
-			return false;
-		}
-
-		ScriptNode siteNode = getSiteNode(siteName);
-		projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
-		if (projectNode == null) {
-			return false;
-		}
+		
+//		String siteName = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.SITE_NAME);
+//		if (!JwsRequestUtils.validateRequestVariable(status, response, siteName, JwsRequestUtils.SITE_NAME)) {
+//			return false;
+//		} 
+//
+//		String projectId = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.PROJECT_ID);
+//		if (!JwsRequestUtils.validateRequestVariable(status, response, projectId, JwsRequestUtils.PROJECT_ID)) {
+//			return false;
+//		}
+//
+//		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+//		if (!JwsRequestUtils.validateSiteExists(siteInfo, status, response)) {
+//			return false;
+//		}
+//				
+//		if (!JwsRequestUtils.validatePermissions(req, status, response, services, siteInfo.getNodeRef(), "Read")) {
+//			return false;
+//		}
+//
+//		EmsScriptNode siteNode = getSiteNode(siteName);
+//		projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
+//		if (projectNode == null) {
+//			return false;
+//		}
 		
 		return true;
 	}
@@ -116,16 +123,17 @@ public class ModelGet extends AbstractJavaWebScript {
 		
 		Map<String, Object> model = new HashMap<String, Object>();
 
+		boolean recurse = jwsUtil.checkArgEquals(req, "recurse", "true") ? true : false;
 		if (validateRequest(req, status)) {
 			try {
-				handleElementHierarchy(projectNode.getNodeRef());
+				if (recurse) {
+					handleElementHierarchy(modelRootNode);
+				}
+				// make sure to put the root node in as a found element
+				foundElements.put((String)modelRootNode.getProperty("cm:name"), modelRootNode);
 				handleElements();
 				handleRelationships();
-			} catch (InvalidNodeRefException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -149,74 +157,72 @@ public class ModelGet extends AbstractJavaWebScript {
 	}
 
 
-	private void handleElementHierarchy(NodeRef root) throws JSONException {
-		// ScriptNodes don't work for some reason.. always get Null pointer exception, looks like some timing issues
-		NodeService nodeService = services.getNodeService();
-		QName sysmlElementFolder = jwsUtil.createQName("sysml:ElementFolder");
-		QName sysmlId = jwsUtil.createQName("sysml:id");
-		QName cmName = jwsUtil.createQName("cm:name");
-		JSONArray array = new JSONArray();
+	/**
+	 * Build up the element hierarchy from the specified root
+	 * @param root		Root node to get children for
+	 * @throws JSONException
+	 */
+	private void handleElementHierarchy(EmsScriptNode root) throws JSONException {
+		JSONArray array = new JSONArray();		
 		
-		// child associations returns Map<String, Object> where String is the QName association type)
-		// Object is an ArrayList of the ScriptNodes with the specified association type
-		List<ChildAssociationRef> childrenAssocs = nodeService.getChildAssocs(root);
-		for (ChildAssociationRef assoc: childrenAssocs) {
-			NodeRef child = assoc.getChildRef();
-			if (nodeService.getType(child).equals(sysmlElementFolder)) {
+		// find all the children, recurse or add to array as needed
+		for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
+			EmsScriptNode child = new EmsScriptNode(assoc.getChildRef(), services, response);
+			if (child.getTypeShort().equals("sysml:ElementFolder")) {
 				handleElementHierarchy(child);
 			} else {
-				String value = (String)nodeService.getProperty(child, sysmlId);
+				String value = (String)child.getProperty("sysml:id");
 				if (value != null) {
 					array.put(value);
-					viewedElements.put(value, child);
+					foundElements.put(value, child);
+					// add empty hierarchies as well
+					elementHierarchy.put(value, new JSONArray());
 				}
 			}
 		}
 		
 		// if there were any children add them to the hierarchy object
-		if (array.length() > 0) {
-			String key = (String)nodeService.getProperty(root, sysmlId);
-			if (nodeService.getType(root).equals(sysmlElementFolder) && key == null) {
-				key = nodeService.getProperty(root, cmName).toString().replace("_pkg", "");
-			}
-			elementHierarchy.put(key, array);
+		String key = (String)root.getProperty("sysml:id");
+		if (root.getTypeShort().equals("sysml:ElementFolder") && key == null) {
+			// TODO this is temporary? until we can get sysml:id from Element Folder?
+			key = root.getProperty("cm:name").toString().replace("_pkg", "");
 		}
+		elementHierarchy.put(key, array);
 	}
 	
+	/**
+	 * Build up the element JSONObject
+	 * @throws JSONException
+	 */
 	private void handleElements() throws JSONException {
-		NodeService nodeService = services.getNodeService();
-		QName sysmlRelationship = jwsUtil.createQName("sysml:DirectedRelationship");
-		QName sysmlProperty = jwsUtil.createQName("sysml:Property");
-		
-		for (String id: viewedElements.keySet()) {
-			NodeRef node = viewedElements.get(id);
+		for (String id: foundElements.keySet()) {
+			EmsScriptNode node = foundElements.get(id);
 			JSONObject element = new JSONObject();
 			
-			QName nodeType = nodeService.getType(node);
-			element.put("type", nodeType.getLocalName());
+			element.put("type", node.getQNameType().getLocalName());
 			
 			// check for relationships to be handled later
-			if (isSubType(nodeType, sysmlRelationship)) {
-				viewedRelationships.add(id);
-			} else if (isSubType(nodeType, sysmlProperty)) {
-				viewedProperties.add(id);
+			if (node.isSubType("sysml:DirectedRelationship")) {
+				foundRelationships.add(id);
+			} else if (node.isSubType("sysml:Property")) {
+				foundProperties.add(id);
 			}
 			
 			// lets grab all the property values
 			for (String acmType: acm2json.keySet()) {
-				element.put(acm2json.get(acmType), nodeService.getProperty(node, jwsUtil.createQName(acmType)));
+				element.put(acm2json.get(acmType), node.getProperty(acmType));
 			}
 			
 			// check if it's a view
-			if (nodeService.hasAspect(node, jwsUtil.createQName("sysml:View"))) {
+			if (node.hasAspect("sysml:View")) {
 				element.put("isView", true);
 			} else {
 				element.put("isView", false);
 			}
 			
 			// add owner
-			String owner = ((String)nodeService.getProperty(nodeService.getPrimaryParent(node).getParentRef(), jwsUtil.createQName("cm:name"))).replace("_pkg", "");
-			element.put("owner", owner);
+			EmsScriptNode parent = node.getParent();
+			element.put("owner", parent.getName().replace("_pkg", ""));
 			// TODO perhaps get the sysml id onto the reified container as well?
 //			element.put("owner", nodeService.getProperty(nodeService.getPrimaryParent(node).getParentRef(), jwsUtil.createQName("sysml:id")));
 			
@@ -224,21 +230,29 @@ public class ModelGet extends AbstractJavaWebScript {
 		}
 	}
 
+	/**
+	 * Handle all the relationship JSONObjects
+	 * @throws JSONException
+	 */
 	private void handleRelationships() throws JSONException {
 		handleElementRelationships();
 		handlePropertyTypes();
 		handleElementValues();
 	}
 	
+	/**
+	 * Create the Element Values JSONObject
+	 * @throws JSONException
+	 */
 	private void handleElementValues() throws JSONException {
 		NodeService nodeService = services.getNodeService();
 		QName sysmlId = jwsUtil.createQName("sysml:id");
 
 		JSONObject elementValues = new JSONObject();
-		for (String id: viewedProperties) {
-			NodeRef node = viewedElements.get(id);
+		for (String id: foundProperties) {
+			EmsScriptNode node = foundElements.get(id);
 			@SuppressWarnings("unchecked")
-			ArrayList<NodeRef> values = (ArrayList<NodeRef>)nodeService.getProperty(node, jwsUtil.createQName("sysml:elementValue"));
+			ArrayList<NodeRef> values = (ArrayList<NodeRef>)node.getProperty("sysml:elementValue");
 			if (values != null) {
 				JSONArray array = new JSONArray();
 				for (NodeRef value: values) {
@@ -250,41 +264,45 @@ public class ModelGet extends AbstractJavaWebScript {
 		relationships.put("elementValues", elementValues);
 	}
 
+	/**
+	 * Create the PropertyTypes JSONObject
+	 * @throws JSONException
+	 */
 	private void handlePropertyTypes() throws JSONException {
-		NodeService nodeService = services.getNodeService();
-		QName sysmlId = jwsUtil.createQName("sysml:id");
-		
 		JSONObject propertyTypes = new JSONObject();
-		for (String id: viewedProperties) {
-			NodeRef node = viewedElements.get(id);
-			AssociationRef sysmlType = getAssociation(node, "sysml:type");
-			if (sysmlType != null) {
-				propertyTypes.put(id, nodeService.getProperty(sysmlType.getTargetRef(), sysmlId));
+		
+		for (String id: foundProperties) {
+			EmsScriptNode node = foundElements.get(id);
+			EmsScriptNode targetNode = node.getFirstAssociationByType("sysml:type");
+			if (targetNode != null) {
+				propertyTypes.put(id, targetNode.getProperty("sysml:id"));
 			}
 		}
+		
 		relationships.put("propertyTypes", propertyTypes);
 	}
 
+	/**
+	 * Create the ElementRelationships JSONObject
+	 * @throws JSONException
+	 */
 	private void handleElementRelationships() throws JSONException {
-		NodeService nodeService = services.getNodeService();
-		QName sysmlId = jwsUtil.createQName("sysml:id");
-
 		// handle relationship elements, property types and element values
 		JSONObject relationshipElements = new JSONObject();
-		for (String id: viewedRelationships) {
-			NodeRef node = viewedElements.get(id);
-			AssociationRef sysmlSource = getAssociation(node, "sysml:source");
-			AssociationRef sysmlTarget = getAssociation(node, "sysml:target");
+		for (String id: foundRelationships) {
+			EmsScriptNode node = foundElements.get(id);
+			EmsScriptNode sysmlSourceNode = node.getFirstAssociationByType("sysml:source");
+			EmsScriptNode sysmlTargetNode = node.getFirstAssociationByType("sysml:target");
 
 			JSONObject relationshipElement = new JSONObject();
-			relationshipElement.put("source", nodeService.getProperty(sysmlSource.getTargetRef(), sysmlId));
-			relationshipElement.put("target", nodeService.getProperty(sysmlTarget.getTargetRef(), sysmlId));
+			if (sysmlSourceNode != null) {
+				relationshipElement.put("source", sysmlSourceNode.getProperty("sysml:id"));
+			}
+			if (sysmlTargetNode != null) {
+				relationshipElement.put("target", sysmlTargetNode.getProperty("sysml:id"));
+			}
 			relationshipElements.put(id, relationshipElement);
 		}
 		relationships.put("relationshipElements", relationshipElements);
-	}
-
-	private boolean isSubType(QName className, QName ofClassName) {
-		return services.getDictionaryService().isSubClass(className, ofClassName);
 	}
 }

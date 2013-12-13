@@ -54,7 +54,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class JwsUtil {
 	// injected
 	private Boolean useFoundationalApi = true;
-	private int transactionInterval = 200;
+	private int transactionInterval = 500;
 	protected ServiceRegistry services = null;
 
 	// internal
@@ -271,7 +271,7 @@ public class JwsUtil {
 	 * @param object	JSON thing to get length of
 	 * @return	length of JSON thing, -1 if not JSON thing
 	 */
-	private int getJSONLength(Object object) {
+	public int getJSONLength(Object object) {
 		if (object instanceof JSONObject) {
 			return ((JSONObject)object).length();
 		} else if (object instanceof JSONArray) {

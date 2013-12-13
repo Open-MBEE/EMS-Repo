@@ -29,12 +29,13 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -109,14 +110,14 @@ public class ProjectPost extends AbstractJavaWebScript {
 	 */
 	private int updateOrCreateProject(JSONObject jsonObject, String projectId, String siteName) throws JSONException {
 		// make sure site exists
-		ScriptNode siteNode = getSiteNode(siteName);
+		EmsScriptNode siteNode = getSiteNode(siteName);
 		if (siteNode == null) {
 			response.append("Site not found\n");
 			return HttpServletResponse.SC_NOT_FOUND;
 		}
 		
-		// make sure Model packge under site exists
-		ScriptNode modelContainerNode = siteNode.childByNamePath(MODEL_PATH_SEARCH);
+		// make sure Model package under site exists
+		EmsScriptNode modelContainerNode = siteNode.childByNamePath(MODEL_PATH_SEARCH);
 		if (modelContainerNode == null) {
 			if (fix) {
 				modelContainerNode = siteNode.createFolder(MODEL_PATH);
@@ -128,27 +129,22 @@ public class ProjectPost extends AbstractJavaWebScript {
 		}
 		
 		// create project if doesn't exist or update if fix is specified 
-		ScriptNode projectNode = findNodeWithName(projectId);
+		EmsScriptNode projectNode = findScriptNodeByName(projectId);
 		String projectName = jsonObject.getString("name");
 		if (projectNode == null) {
 			projectNode = modelContainerNode.createFolder(projectId, "sysml:Project");
-			jwsUtil.setNodeProperty(projectNode, "cm:title", projectName);
-			jwsUtil.setNodeProperty(projectNode, "sysml:name", projectName);
-			jwsUtil.setNodeProperty(projectNode, "sysml:id", projectId);
+			projectNode.setProperty("cm:title", projectName);
+			projectNode.setProperty("sysml:name", projectName);
+			projectNode.setProperty("sysml:id", projectId);
 			response.append("Project created.\n");
 		} else {
 			if (delete) {
 				projectNode.remove();
 				response.append("Project deleted.\n");
 			} else if (fix) {
-				// update Name if different than existing name
-				if (checkAndUpdateProperty(projectNode, projectName, "cm:title") || checkAndUpdateProperty(projectNode, projectName, "sysml:name")) {
-					response.append("Project renamed.\n");
-				}
-				// update project id - temporary fix
-				if (checkAndUpdateProperty(projectNode, projectId, "sysml:id")) {
-					response.append("Project id updated.\n");
-				}
+				projectNode.createOrUpdateProperty("cm:title", projectName);
+				projectNode.createOrUpdateProperty("sysml:name", projectName);
+				projectNode.createOrUpdateProperty("sysml:id", projectId);
 				// move sites if exists under different site
 				if (!projectNode.getParent().equals(modelContainerNode)) {
 					projectNode.move(modelContainerNode);
@@ -159,7 +155,6 @@ public class ProjectPost extends AbstractJavaWebScript {
 				return HttpServletResponse.SC_FOUND;
 			}
 		}
-		
 		return HttpServletResponse.SC_OK;
 	}
 
