@@ -32,7 +32,6 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -90,6 +89,12 @@ public class ModelPost extends AbstractJavaWebScript {
 		}
 	}
 	
+	@Override
+	protected void clearCaches() {
+		super.clearCaches();
+		response = new StringBuffer();
+	}
+	
 	/**
 	 * Create or update the model as necessary based on the request
 	 * @param req			Request used to create/update the model
@@ -98,7 +103,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	 */
 	private void createOrUpdateModel(WebScriptRequest req, Status status) throws JSONException {
 		// clear out the response cache first (only one instance of each webscript)
-		response = new StringBuffer();
+		clearCaches();
 
 		JSONObject postJson = (JSONObject)req.parseContent();
 
@@ -107,9 +112,9 @@ public class ModelPost extends AbstractJavaWebScript {
 			if (!postJson.has(element)) {
 				continue;
 			}
-			Object object = postJson.get(element);
 
-//			Date start = new Date(), end; System.out.println("Processing " +jwsUtil.getJSONLength(object) + "  " + element);
+			Object object = postJson.get(element);
+			long start = System.currentTimeMillis(); System.out.println("Processing " +jwsUtil.getJSONLength(object) + "  " + element);
 			if (element.equals(ELEMENTS) && useElements) {
 				jwsUtil.splitTransactions(new JwsFunctor() {
 					@Override
@@ -168,7 +173,7 @@ public class ModelPost extends AbstractJavaWebScript {
 					}
 				}, object);
 			}
-//			end = new Date(); System.out.println(element + " processed in " + (end.getTime()-start.getTime()));
+			long end = System.currentTimeMillis(); System.out.println(element + " processed in " + (end-start) + " ms");
 		}
 	}
 	
@@ -236,10 +241,10 @@ public class ModelPost extends AbstractJavaWebScript {
 	 * @throws JSONException
 	 */
 	private void updateOrCreateRelationship(JSONObject jsonObject, String id) throws JSONException {
-		EmsScriptNode relationship = findScriptNodeByName(id);
 		String sourceId = jsonObject.getString("source");
 		String targetId = jsonObject.getString("target");
-		
+
+		EmsScriptNode relationship = findScriptNodeByName(id);
 		EmsScriptNode source = findScriptNodeByName(sourceId);
 		EmsScriptNode target = findScriptNodeByName(targetId);
 
@@ -272,6 +277,7 @@ public class ModelPost extends AbstractJavaWebScript {
 				node.setProperty("sysml:id", key);
 				node.setProperty("cm:name", key);
 			}
+			foundElements.put(pkgName, parent);
 			// make sure element and reified container in same place
 			// node should be accurate if hierarchy is correct
 			if (!parent.getParent().equals(node.getParent())) {
@@ -298,7 +304,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	 */
 	protected void updateOrCreateElement(JSONObject jsonObject, String key) throws JSONException {
 		// TODO check permissions
-		Date start = new Date(), end; System.out.println("updateOrCreateElement " + key);
+		long start = System.currentTimeMillis(); System.out.println("updateOrCreateElement " + key);
 		JSONObject object = jsonObject.getJSONObject(key);
 		
 		// find node if exists, otherwise create
@@ -310,6 +316,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			// TODO temporarily set title - until we figure out how to use sysml:name in repository browser
 			node.setProperty("cm:title", object.getString("name"));
 		}
+		foundElements.put(key, node); // cache the found value
 		
 		// need to add View aspect before adding any properties (so they're valid properties of the node)
 		if (object.has("isView") && object.getString("isView").equals(true)) {
@@ -346,7 +353,7 @@ public class ModelPost extends AbstractJavaWebScript {
 				// do nothing TODO: unhandled from SysML/UML profiles are owner, type (type handled above)
 			}
 		}
-		end = new Date(); System.out.println("\tTotal: " + (end.getTime() - start.getTime()));
+		long end = System.currentTimeMillis(); System.out.println("\tTotal: " + (end-start));
 	}
 	
 	protected void updateOrCreateRoot(JSONArray jsonArray, int index, Boolean createRoot) {

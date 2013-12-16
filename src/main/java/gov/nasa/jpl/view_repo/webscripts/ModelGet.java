@@ -40,7 +40,6 @@ import java.util.Set;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.namespace.QName;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,16 +58,16 @@ public class ModelGet extends AbstractJavaWebScript {
 	private JSONObject elements = new JSONObject();
 	private JSONObject relationships = new JSONObject();
 	private EmsScriptNode modelRootNode = null;
-	private Map<String, EmsScriptNode> foundElements = new HashMap<String, EmsScriptNode>();
 	private Set<String> foundRelationships = new HashSet<String>();
 	private Set<String> foundProperties = new HashSet<String>();
 
-	private void clearCaches() {
+	@Override
+	protected void clearCaches() {
+		super.clearCaches();
 		response = new StringBuffer();
 		elementHierarchy = new JSONObject();
 		elements = new JSONObject();
 		relationships = new JSONObject();
-		foundElements = new HashMap<String, EmsScriptNode>();
 		foundProperties = new HashSet<String>();
 		foundRelationships = new HashSet<String>();
 	}

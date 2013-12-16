@@ -30,7 +30,6 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,7 +62,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 	// internal members
 	protected ScriptNode companyhome;
-    
+	protected Map<String, EmsScriptNode> foundElements = new HashMap<String, EmsScriptNode>();
+
 	// needed for Lucene search
 	protected static final StoreRef SEARCH_STORE = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 	
@@ -168,6 +168,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		}
 	}
 
+	protected void clearCaches() {
+		foundElements = new HashMap<String, EmsScriptNode>();
+	}
+	
 	/**
 	 * Parse the request and do validation checks on request
 	 * 
@@ -195,15 +199,25 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @return		ScriptNode with name if found, null otherwise
 	 */
 	protected EmsScriptNode findScriptNodeByName(String name) {
-//		Date start = new Date(), end;
+//		long start=System.currentTimeMillis();
 		EmsScriptNode result = null;
-		NodeRef nodeRef = findNodeRefByName(name);
-		
-		if (nodeRef != null) {
-			result = new EmsScriptNode(nodeRef, services, response);
+
+		// be smart about search if possible
+		if (foundElements.containsKey(name)) {
+			result = foundElements.get(name);
+		} else if (name.endsWith("_pkg")) {
+			String elementName = name.replace("_pkg", "");
+			EmsScriptNode elementNode = findScriptNodeByName(elementName);
+			result = elementNode.getParent().childByNamePath(name);
+		} else {
+			NodeRef nodeRef = findNodeRefByName(name);
+			if (nodeRef != null) {
+				result = new EmsScriptNode(nodeRef, services, response);
+				foundElements.put(name, result); // add to cache
+			}
 		}
 		
-//		end = new Date(); System.out.println("\tfindScriptNodeByName: " + (end.getTime()-start.getTime()));
+//		long end=System.currentTimeMillis(); System.out.println("\tfindScriptNodeByName " + name + ": " + (end-start) + " ms");
 		return result;
 	}
 	
