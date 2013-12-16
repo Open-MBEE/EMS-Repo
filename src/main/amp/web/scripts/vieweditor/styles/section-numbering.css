@@ -1,34 +1,34 @@
 #the-document {counter-reset: level1;}
 #toc:before, #toc:after {counter-reset: level1; content: "";}
-#toc h3:before{content: ""}
+#toc h3.numbered-header:before{content: ""}
  
-#the-document h2, #toc > ul > li {counter-reset: level2;}
-#the-document h3, #toc > ul >  ul > li {counter-reset: level3;}
-#the-document h4, #toc > ul > ul > ul > li {counter-reset: level4;}
-#the-document h5, #toc > ul > ul > ul > ul > li {counter-reset: level5;}
-#the-document h6, #toc > ul > ul > ul > ul > ul > li {}
+#the-document h2.numbered-header, #toc h2..numbered-header > ul > li {counter-reset: level2;}
+#the-document h3.numbered-header, #toc > ul >  ul > li {counter-reset: level3;}
+#the-document h4.numbered-header, #toc > ul > ul > ul > li {counter-reset: level4;}
+#the-document h5.numbered-header, #toc > ul > ul > ul > ul > li {counter-reset: level5;}
+#the-document h6.numbered-header, #toc > ul > ul > ul > ul > ul > li {}
 
-#the-document h2:before,
+#the-document h2.numbered-header:before,
 #toc > ul > li a:before {
     content: counter(level1) " ";
     counter-increment: level1;
 }
-#the-document h3:before,
+#the-document h3.numbered-header:before,
 #toc > ul > ul > li a:before {
     content: counter(level1) "." counter(level2) " ";
     counter-increment: level2;
 }
-#the-document h4:before,
+#the-document h4.numbered-header:before,
 #toc > ul > ul > ul > li a:before {
     content: counter(level1) "." counter(level2) "." counter(level3) " ";
     counter-increment: level3;
 }
-#the-document h5:before,
+#the-document h5.numbered-header:before,
 #toc > ul > ul > ul > ul > li a:before {
     content: counter(level1) "." counter(level2) "." counter(level3) "." counter(level4) " ";
     counter-increment: level4;
 }
-#the-document h6:before,
+#the-document h6.numbered-header:before,
 #toc > ul > ul > ul > ul > ul > li a:before {
     content: counter(level1) "." counter(level2) "." counter(level3) "." counter(level4) "." counter(level5) " ";
     counter-increment: level5;
