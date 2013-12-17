@@ -1,7 +1,6 @@
 
 // Controller for a list of views
-ViewEditor.ViewController = Ember.ArrayController.extend({
-
+ViewEditor.ViewsController = Ember.ArrayController.extend({
 });
 
 // Controller for a single view
