@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+</head>
+<body>
+	<!--
+	 <div class="container">
+	      <div class="row">
+	        <div class="col-md-8">
+	        	<h1 id="foo">JS Integration test</h1>
+	        </div>
+	      </div>
+	</div>
+	-->
+
+
+	<script type="text/x-handlebars" data-template-name="element">
+		<ul>
+			  {{#each}}
+			  	{{dvalue}}
+			  {{/each}}
+		</ul>
+	</script>
+
+	<script type="text/x-handlebars" data-template-name="view">
+		<ul>
+		  {{#each}}
+		    <li>
+		      <label>{{author}} </label>
+		       {{#each c in comments}}
+		       	<label>{{c}}! </label>
+		       {{/each}}
+		      
+		    </li>
+		  {{/each}}
+		</ul>
+
+		<!-- {{input type="text" id="new-todo" placeholder="What needs to be done?" value=newTitle action="createView"}} -->
+	</script>
+
+	<!-- application template -->
+	<script type="text/x-handlebars">
+		hi
+		{{outlet}}
+		bye
+	</script>
+
+	<script type="text/javascript" src='vendor/jquery/jquery-1.10.2.js'></script>
+	<script type="text/javascript" src="vendor/handlebars/handlebars-1.0.0.js"></script>
+	<script type="text/javascript" src="vendor/ember/ember.js"></script>
+	<script type="text/javascript" src="vendor/ember/ember-data.js"></script>
+	<script type="text/javascript" src='vendor/bootstrap/js/bootstrap.js'></script>
+	<script type="text/javascript" src='vendor/bootstrap-wysiwyg/bootstrap-wysiwyg.js'></script>
+	<script type="text/javascript" src='vendor/underscore/underscore.js'></script>
+
+	<script src="src/adapters/alfresco_adapter.js"></script>
+	<script src="src/application.js"></script>
+	<script src="src/router.js"></script>
+	<script src="src/models/view.js"></script>
+	<script src="src/models/element.js"></script>
+	<script src="src/controllers/view_controller.js"></script>
+
+	<!--
+	<script type="text/javascript" src='../vendor/backbone/backbone.js'></script>
+	<script type="text/javascript" src='../vendor/purl/purl.js'></script> 
+	<script type="text/javascript" src='../src/application.min.js'></script>
+	-->
+	
+</body>
+</html>
