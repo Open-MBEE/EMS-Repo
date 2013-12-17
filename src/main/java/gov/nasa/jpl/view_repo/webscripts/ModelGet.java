@@ -215,6 +215,13 @@ public class ModelGet extends AbstractJavaWebScript {
 				element.put(acm2json.get(acmType), node.getProperty(acmType));
 			}
 			
+			// lets handle valueType and value
+			Object valueType = node.getProperty("sysml:valueType");
+			if (valueType != null) {
+				element.put("value", node.getProperty(json2acm.get((String) valueType)));
+				element.put("valueType", valueType);
+			}
+			
 			// check if it's a view
 			if (node.hasAspect("sysml:View")) {
 				element.put("isView", true);

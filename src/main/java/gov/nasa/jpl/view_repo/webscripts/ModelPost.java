@@ -330,6 +330,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			String property = object.getString(type);
 			JSONArray array;
 			
+			// keep the special types for backwards compatibility
 			if (json2acm.containsKey(type)) {
 				String acmType = json2acm.get(type);
 				if (type.startsWith("is")) {
@@ -353,6 +354,24 @@ public class ModelPost extends AbstractJavaWebScript {
 				// do nothing TODO: unhandled from SysML/UML profiles are owner, type (type handled above)
 			}
 		}
+		
+		// lets deal with the value and valueType now for forwards compatibility
+		if (object.has("valueType")) {
+			String acmType = json2acm.get(object.get("valueType"));
+			if (acmType != null) {
+				JSONArray array = object.getJSONArray("value");
+				if (acmType.equals("sysml:boolean")) {
+					node.createOrUpdatePropertyValues(acmType, array, new Boolean(true));
+				} else if (acmType.equals("sysml:integer")) {
+					node.createOrUpdatePropertyValues(acmType, array, new Integer(0));
+				} else if (acmType.equals("sysml:double")) {
+					node.createOrUpdatePropertyValues(acmType, array, new Double(0.0));
+				} else {
+					node.createOrUpdatePropertyValues(acmType, array, new String(""));
+				}
+			}
+		}
+		
 		long end = System.currentTimeMillis(); System.out.println("\tTotal: " + (end-start));
 	}
 	
