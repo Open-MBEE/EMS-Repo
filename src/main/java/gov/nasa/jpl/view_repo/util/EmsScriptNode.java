@@ -31,7 +31,6 @@ package gov.nasa.jpl.view_repo.util;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -187,7 +186,6 @@ public class EmsScriptNode extends ScriptNode {
 		services.getNodeService().addChild(nodeRef, child.getNodeRef(), typeQName, typeQName);
 		return true;		
 	}
-
 	
 	
 	/**

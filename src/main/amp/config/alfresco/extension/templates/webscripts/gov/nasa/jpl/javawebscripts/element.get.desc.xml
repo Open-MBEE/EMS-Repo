@@ -8,7 +8,7 @@
   		
   	If recurse isn't specified as true, just provides the {modelid} element data, otherwise returns everything in hierarchy
   </description>
-  <url>/javawebscripts/model/{modelid}?recurse={recurse?}</url>
+  <url>/javawebscripts/element/{elementid}?recurse={recurse?}</url>
   <format default="json">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readwrite">required</transaction>
@@ -18,7 +18,6 @@
   		<name>posted content</name>
   		<description>The request body of the post as json:
   		{
-  			"roots": [elementId, ...],
   			"elementHierarchy": {
   				elementId: [childElementId, ...],
   				...

@@ -1,5 +1,5 @@
 # post new with appropriate site
-curl -X POST -u admin:admin -H "Content-Type:application/json" --data '{"name":"Clipper"}' "http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/17_0123455"
+curl -X POST -u admin:admin -H "Content-Type:application/json" --data '{"name":"Clipper"}' "http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/17_0123455?fix=true"
 
 # post already existing
 curl -X POST -u admin:admin -H "Content-Type:application/json" --data '{"name":"Clipper"}' "http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/17_0123455"

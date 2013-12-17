@@ -75,6 +75,9 @@ public class ModelGet extends AbstractJavaWebScript {
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		String modelId = JwsRequestUtils.getRequestVar(req, "modelid");
+		if (modelId == null) {
+			modelId = JwsRequestUtils.getRequestVar(req, "elementid");
+		}
 		if (!JwsRequestUtils.validateRequestVariable(status, response, modelId, "modelid")) {
 			return false;
 		}
@@ -210,6 +213,13 @@ public class ModelGet extends AbstractJavaWebScript {
 			// lets grab all the property values
 			for (String acmType: acm2json.keySet()) {
 				element.put(acm2json.get(acmType), node.getProperty(acmType));
+			}
+			
+			// lets handle valueType and value
+			Object valueType = node.getProperty("sysml:valueType");
+			if (valueType != null) {
+				element.put("value", node.getProperty(json2acm.get((String) valueType)));
+				element.put("valueType", valueType);
 			}
 			
 			// check if it's a view

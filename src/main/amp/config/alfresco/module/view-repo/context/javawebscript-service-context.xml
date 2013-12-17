@@ -17,8 +17,69 @@
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
+<!-- 
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.site.delete"
+		class="gov.nasa.jpl.view_repo.webscripts.SiteDelete" parent="webscript">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.site.get"
+		class="gov.nasa.jpl.view_repo.webscripts.SiteGet" parent="webscript">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.site.post"
+		class="gov.nasa.jpl.view_repo.webscripts.SitePost" parent="webscript">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+-->
+
+<!-- 
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.project.delete"
+		class="gov.nasa.jpl.view_repo.webscripts.ProjectDelete" parent="webscript">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.project.get"
+		class="gov.nasa.jpl.view_repo.webscripts.ProjectGet" parent="webscript">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+ -->
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.project.post"
 		class="gov.nasa.jpl.view_repo.webscripts.ProjectPost" parent="webscript">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+
+<!-- 
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.element.delete"
+		class="gov.nasa.jpl.view_repo.webscripts.ElementDelete" parent="webscript">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+-->
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.element.get"
+		class="gov.nasa.jpl.view_repo.webscripts.ModelGet" parent="webscript">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.element.post"
+		class="gov.nasa.jpl.view_repo.webscripts.ModelPost" parent="webscript">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
@@ -38,4 +99,84 @@
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
+	<!-- Create proxies for the service beans: Interceptors don't work... -->
+<!-- 
+	<bean id="performanceInterceptor" class="gov.nasa.jpl.view_repo.aspects.PerformanceInterceptor"/>
+
+	<bean id="performanceAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+		<property name="advice" ref="performanceInterceptor"/>
+		<property name="patterns">
+			<list>
+				<value>.*find.*</value>
+				<value>.*updateOrCreate.*</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="performanceAdvisor" class="org.springframework.aop.support.NameMatchMethodPointcutAdvisor">
+		<property name="advice" ref="performanceInterceptor"/>
+		<property name="mappedNames">
+			<list>
+				<value>findNodeRefByName</value>
+				<value>findScriptNodeByName</value>
+				<value>handleElementHierarchy</value>
+				<value>handleElements</value>
+				<value>handleElementValues</value>
+				<value>handleElementRelationships</value>
+				<value>handlePropertyTypes</value>
+				<value>updateOrCreateElement</value>
+				<value>updateOrCreateElementHierarchy</value>
+				<value>updateOrCreateElementValues</value>
+				<value>updateOrCreatePropertyType</value>
+				<value>updateOrCreateRelationships</value>
+				<value>updateOrCreateProject</value>
+			</list>
+		</property>
+	</bean>
+	 
+	<bean id="view.post.proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="target">
+			<ref bean="webscript.gov.nasa.jpl.javawebscripts.view.post" />
+		</property>
+		<property name="interceptorNames">
+			<list>
+				<idref bean="performanceAdvisor" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="model.post.proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="target">
+			<ref bean="webscript.gov.nasa.jpl.javawebscripts.model.post" />
+		</property>
+		<property name="interceptorNames">
+			<list>
+				<idref bean="performanceAdvisor" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="project.post.proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="target">
+			<ref bean="webscript.gov.nasa.jpl.javawebscripts.project.post" />
+		</property>
+		<property name="interceptorNames">
+			<list>
+				<idref bean="performanceAdvisor" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="model.get.proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="target">
+			<ref bean="webscript.gov.nasa.jpl.javawebscripts.model.get" />
+		</property>
+		<property name="interceptorNames">
+			<list>
+				<idref bean="performanceAdvisor" />
+			</list>
+		</property>
+	</bean>
+-->
+	
 </beans>
