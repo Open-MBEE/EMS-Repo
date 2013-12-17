@@ -2,7 +2,7 @@
 #toc:before, #toc:after {counter-reset: level1; content: "";}
 #toc h3.numbered-header:before{content: ""}
  
-#the-document h2.numbered-header, #toc h2..numbered-header > ul > li {counter-reset: level2;}
+#the-document h2.numbered-header, #toc > ul > li {counter-reset: level2;}
 #the-document h3.numbered-header, #toc > ul >  ul > li {counter-reset: level3;}
 #the-document h4.numbered-header, #toc > ul > ul > ul > li {counter-reset: level4;}
 #the-document h5.numbered-header, #toc > ul > ul > ul > ul > li {counter-reset: level5;}
