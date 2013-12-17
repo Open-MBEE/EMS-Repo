@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -52,8 +53,13 @@ import org.apache.chemistry.opencmis.client.api.FolderType;
 import org.apache.chemistry.opencmis.client.api.ItemIterable;
 import org.apache.chemistry.opencmis.client.api.ObjectType;
 import org.apache.chemistry.opencmis.client.api.QueryResult;
+import org.apache.chemistry.opencmis.client.api.Repository;
 import org.apache.chemistry.opencmis.client.api.Session;
+import org.apache.chemistry.opencmis.client.api.SessionFactory;
+import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
+import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.data.PropertyData;
+import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
@@ -291,7 +297,32 @@ public class JavaQuery extends AbstractModuleComponent
     }
     
     public static List<QueryResult> cmisQuery( String query ) {
-        Session session = localConnectionManager.getConnection().getSession();
+        Map<String, String> parameter = new HashMap<String,String>();
+        org.json.JSONObject hello = null;
+
+        // Set the user credentials
+        parameter.put(SessionParameter.USER, "admin");
+        parameter.put(SessionParameter.PASSWORD, "admin");
+
+        // Specify the connection settings
+        parameter.put(SessionParameter.ATOMPUB_URL, "http://localhost:8080/view-repo/cmisatom");
+        parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
+
+        // Set the alfresco object factory
+        parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
+
+        // Create a session
+        SessionFactory factory = SessionFactoryImpl.newInstance();
+        List<Repository> repositories = factory.getRepositories(parameter);
+        Debug.outln(repositories.size() + " Repositories");
+        for(Repository r: repositories) {
+            Debug.outln("  Id: " + r.getId());
+            Debug.outln("  Name: " + r.getName());
+            Debug.outln("  Description: " + r.getDescription());
+        }
+        Debug.outln("");
+        Session session = repositories.get(0).createSession();
+        //Session session = localConnectionManager.getConnection().getSession();
         
         // Folder browsing example:
         Folder folder = session.getRootFolder();

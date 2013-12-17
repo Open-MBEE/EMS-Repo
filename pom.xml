@@ -92,6 +92,12 @@
 			</dependency> Test dependencies cmis client dependencies <dependency> <groupId>org.alfresco.cmis.client</groupId> 
 			<artifactId>alfresco-opencmis-extension</artifactId> <version>0.2</version> 
 			<type>jar</type> </dependency> -->
+        <!--  apache chemistry opencmis SERVER -->
+		<dependency>
+		    <groupId>org.apache.chemistry.opencmis</groupId>
+		    <artifactId>chemistry-opencmis-server-support</artifactId>
+		    <version>0.8.0</version>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.chemistry.opencmis</groupId>
 			<artifactId>chemistry-opencmis-commons-impl</artifactId>
@@ -104,17 +110,16 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>gov.nasa.jpl</groupId>
-			<artifactId>ae</artifactId>
-			<version>1.0</version>
-			<type>jar</type>
-<!-- 			<groupId>gov.nasa.jpl.ae</groupId>
+<!-- 			<groupId>gov.nasa.jpl</groupId> -->
+<!-- 			<artifactId>ae</artifactId> -->
+<!-- 			<version>1.0</version> -->
+<!-- 			<type>jar</type> -->
+ 			<groupId>gov.nasa.jpl.ae</groupId>
 			<artifactId>AE</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
 			<type>jar</type>
 			<systemPath>${project.basedir}/lib/AE.jar</systemPath>
- -->	
  		</dependency>
 		<dependency>
 			<groupId>org.alfresco</groupId>
