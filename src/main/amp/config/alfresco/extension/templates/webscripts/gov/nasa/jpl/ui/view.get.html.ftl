@@ -40,7 +40,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
       </div>
 
       <ul class="nav navbar-nav pull-right">
-       <li><a href="${url.context}/wcs/logout">logout</a></li>
+       <li><a href="${url.context}/wcs/logout?next=${url.context}/wcs/ui/">logout</a></li>
       </ul>
 
       <ul class="nav navbar-nav pull-right">
@@ -93,10 +93,10 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
     {{#viewTree.orderedChildren}}
             <a name="{{id}}" style="display: block; position:relative; top:-60px; "></a>
             {{#(depth == 0) }}
-              {{{("<h1><span class='"+class+" section-header editable' data-property='NAME' data-section-id='" + id + "'>" +  name + "</span></h1>" )}}}
+              {{{("<h1 class='numbered-header'><span class='"+class+" section-header' data-property='NAME' data-section-id='" + id + "'>" +  name + "</span></h1>" )}}}
             {{/(depth == 0) }}
             {{^(depth == 0) }}
-              {{{("<h"+ (depth+1) + " class='"+class+"'><span class='section-header' data-section-id='" + id + "'><span class='editable' data-property='NAME' data-mdid='" + id + "'>" +  name + "</span></span></h"+ (depth+1) + ">" )}}}
+              {{{("<h"+ (depth+1) + " class='numbered-header "+class+"'><span class='section-header' data-section-id='" + id + "'><span class='editable' data-property='NAME' data-mdid='" + id + "'>" +  name + "</span></span></h"+ (depth+1) + ">" )}}}
             {{/(depth == 0) }}
            
             <div class="author {{ class }}">Edited by <span class="author-name" data-mdid="{{id}}">{{ viewData.author }}</span></div>
@@ -596,6 +596,16 @@ app.on('editSection', function(e, sectionId) {
     toolbar.find(".requires-selection").not(clickedButton).addClass("disabled");
   })
 
+
+  // Wrap content inisde of p tags if it isn't already.  Without this, Chrome will create new DIVs when 
+  // enter is pressed and give them attributes from the parent div, including mdid
+  var unwrapped = section.find(".editable.reference.doc").not(".blank").filter(function() {
+    return $(this).find('p:first-child').length === 0;
+  });
+  unwrapped.wrapInner("<p class='pwrapper'></p>");
+
+  //console.log(unwrapped);
+  //unwrapped.wrapInner("<p class='pwrapper'></p>");
   // TODO turn this listener off on save or cancel
   section.on('keyup paste blur',function(evt) {
     // we need to use the selection api because we're in a contenteditable
@@ -613,8 +623,15 @@ app.on('editSection', function(e, sectionId) {
   // TODO remove this listener on cancel or save
   section.click(function() {
     var $el = $(app.getSelectedNode());
-    if ($el.is('.editable.reference.blank')) {
-      $el.html('&nbsp;');
+    if ($el.is('.editable.reference.blank.doc')) {
+      $el.html("<p class='pwrapper'>&nbsp;</p>");
+      // Set selection inseide the p tag
+      var range = document.createRange();//Create a range (a range is a like the selection but invisible)
+      range.setStart($el.find("p").get(0),0);
+      range.collapse(true);
+      var selection = window.getSelection();//get the selection object (allows you to change selection)
+      selection.removeAllRanges();//remove any selections already made
+      selection.addRange(range);//make the range you have just created the visible selection
       $el.removeClass('blank');
     }
   });
@@ -934,6 +951,8 @@ var renderEmbeddedValue = function(value, elements) {
   }
   if (value.editable) {
     classes.push('editable');
+    if (value.property == 'DOCUMENTATION')
+    	classes.push('doc');
     // TODO use something other than id here, since the same reference can appear multiple times
     h += '<div ' + classAttr(classes) + ' data-property="' + value.property + '" data-mdid="' + value.mdid +'" title="'+title+'">';
   } else {
@@ -992,11 +1011,11 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
             var cell = c.body[rIdx][cIdx];
             var value = resolveValue(cell.content, elements, function(valueList) {
               var listOfElements = _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) });
-              var stringResult = "<ul class='table-list'>";
+              var stringResult = "";//"<ul class='table-list'>";
               _.each(listOfElements, function(e){
-                stringResult += "<li>" + e + "</li>";
+                stringResult += e + "<br/>"; //"<li>" + e + "</li>";
               })
-              stringResult += "</ul>";
+              //stringResult += "</ul>";
               return stringResult;
             });
             // TODO need to pull out the renderer here so that we can do multiple divs in a cell
@@ -1461,7 +1480,7 @@ window.addSvgClickHandler = function(el) {
 // toc.js
 
 app.on('makeToc', function() {
-  $("#toc").tocify({ selectors: "h2, h3, h4, h5", history : false, scrollTo: "60", hideEffect: "none", showEffect: "none", highlightOnScroll: true, highlightOffset : 0, context: "#the-document", smoothScroll:false, extendPage:false }).data("toc-tocify");  
+  $("#toc").tocify({ selectors: "h2.numbered-header, h3.numbered-header, h4.numbered-header, h5.numbered-header", history : false, scrollTo: "60", hideEffect: "none", showEffect: "none", highlightOnScroll: true, highlightOffset : 0, context: "#the-document", smoothScroll:false, extendPage:false }).data("toc-tocify");  
 })
 
 </script>
