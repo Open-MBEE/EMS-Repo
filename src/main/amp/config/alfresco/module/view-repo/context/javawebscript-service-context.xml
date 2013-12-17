@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+<beans>
+	<!-- Bean definitions for all the Java backed webscripts -->
+	
+	<!-- Define the Java Webscript Utils bean - TODO: this may need to be made 
+		thread safe (e.g., instanced in each of the Java backed webscript beans) -->
+	<bean id="jwsUtil" class="gov.nasa.jpl.view_repo.webscripts.JwsUtil">
+		<property name="services" ref="ServiceRegistry" />
+		<property name="transactionInterval" value="500" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.post" class="gov.nasa.jpl.view_repo.webscripts.ViewPostJson"
+		parent="webscript">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.project.post"
+		class="gov.nasa.jpl.view_repo.webscripts.ProjectPost" parent="webscript">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.model.post"
+		class="gov.nasa.jpl.view_repo.webscripts.ModelPost" parent="webscript">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.model.get"
+		class="gov.nasa.jpl.view_repo.webscripts.ModelGet" parent="webscript">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+
+</beans>
