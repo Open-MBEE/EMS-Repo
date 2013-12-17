@@ -32,5 +32,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="C:/MD/lib/org.eclipse.emf.ecore_2.7.0.201210251512.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

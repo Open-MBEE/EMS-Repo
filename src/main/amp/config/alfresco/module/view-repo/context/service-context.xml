@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
 <!--
@@ -118,3 +119,94 @@
 		<property name="ignore" value="true" />
 	</bean>
 </beans>
+=======
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+    	
+    http://www.apache.org/licenses/LICENSE-2.0
+    	
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<beans>
+    <import resource="javawebscript-service-context.xml" />
+    
+    <bean id="view-repo_dictionaryBootstrap" parent="dictionaryModelBootstrap" depends-on="dictionaryBootstrap">
+      <property name="models">
+        <list>
+          <value>alfresco/module/view-repo/viewModel.xml</value>
+        </list>
+      </property>
+    </bean>
+
+    <!-- A simple module component that will be executed once -->
+    <bean id="java_query" class="gov.nasa.jpl.view_repo.JavaQuery" parent="module.baseComponent" >
+        <property name="moduleId" value="fred" />  <!--  See module.properties  -->
+        <property name="name" value="daComponent" />
+        <property name="description" value="A demo component" />
+        <property name="sinceVersion" value="2.0" />
+        <property name="appliesFromVersion" value="2.0" />
+        <property name="nodeService">
+           <ref bean="NodeService" />
+        </property>
+        <property name="searchService">
+           <ref bean="SearchService" />
+        </property>
+        <property name="contentService">
+           <ref bean="ContentService" />
+        </property>
+        <property name="nodeLocatorService" ref="nodeLocatorService" />
+        <property name="dictionaryService">
+           <ref bean="DictionaryService" />
+        </property>
+ 		<property name="localConnectionManager" ref="webscripts.js.cmis.client"/>
+    </bean>
+    
+	<bean id="webscript.gov.nasa.jpl.javatest.get"
+		class="gov.nasa.jpl.view_repo.TestJavaWebScript"
+		parent="webscript">
+		<property name="nodeService" ref="NodeService" />
+        <property name="nodeLocatorService" ref="nodeLocatorService" /> 
+	</bean>
+
+    <bean id="webscript.gov.nasa.jpl.java_query.post"
+        class="gov.nasa.jpl.view_repo.JavaQueryPost"
+        parent="webscript">
+        <property name="nodeService" ref="NodeService" />
+        <property name="nodeLocatorService" ref="nodeLocatorService" /> 
+    </bean>
+
+	
+	<bean id="jwsUtil" class="gov.nasa.jpl.view_repo.webscripts.JwsUtil">
+		<property name="services" ref="ServiceRegistry" />
+		<property name="transactionInterval" value="500" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.post"
+		class="gov.nasa.jpl.view_repo.webscripts.ViewPostJson"
+		parent="webscript">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+        <property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+	
+	<!--  utility bean for checking user site permissions: also expose a webscript base object -->
+	<bean id="UserUtil" class="gov.nasa.jpl.view_repo.util.UserUtil" parent="baseJavaScriptExtension">
+		<property name="siteService" ref="SiteService"/>
+		<property name="personService" ref="PersonService"/>
+		<property name="siteName" value="europa"/>
+		<property name="extensionName" value="UserUtil" />
+		<property name="ignore" value="true" />
+	</bean>
+</beans>
+>>>>>>> branch 'text_query' of https://bclement@mbse.jpl.nasa.gov/stash/scm/mbee/alfresco-view-repo.git
