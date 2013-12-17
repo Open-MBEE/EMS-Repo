@@ -131,6 +131,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			put("sysml:double", "double");
 			put("sysml:expression", "expression");
 			put("sysml:valueType", "valueType");
+			
+			put("cm:modified", "lastModified");
+			put("cm:modifier", "author");
 		}
 	};
 	

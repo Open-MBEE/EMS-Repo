@@ -75,6 +75,9 @@ public class ModelGet extends AbstractJavaWebScript {
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		String modelId = JwsRequestUtils.getRequestVar(req, "modelid");
+		if (modelId == null) {
+			modelId = JwsRequestUtils.getRequestVar(req, "elementid");
+		}
 		if (!JwsRequestUtils.validateRequestVariable(status, response, modelId, "modelid")) {
 			return false;
 		}

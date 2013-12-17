@@ -61,7 +61,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	private final String RELATIONSHIPS = "relationships";
 	
 	// NOTE: Order is necessary
-	private final String[] JSON_ELEMENTS = {ELEMENTS, ROOTS, ELEMENT_HIERARCHY, RELATIONSHIPS};
+	private final String[] JSON_ELEMENT_TYPES = {ELEMENTS, ROOTS, ELEMENT_HIERARCHY, RELATIONSHIPS};
 	private boolean createRoots = false;
 	private boolean useHierarchy=true;
 	private boolean useElements=true;
@@ -108,14 +108,14 @@ public class ModelPost extends AbstractJavaWebScript {
 		JSONObject postJson = (JSONObject)req.parseContent();
 
 		// cycle through all the expected JSON element top level types, this will cycle in correct order
-		for (String element: JSON_ELEMENTS) {
-			if (!postJson.has(element)) {
+		for (String jsonElementType: JSON_ELEMENT_TYPES) {
+			if (!postJson.has(jsonElementType)) {
 				continue;
 			}
 
-			Object object = postJson.get(element);
-			long start = System.currentTimeMillis(); System.out.println("Processing " +jwsUtil.getJSONLength(object) + "  " + element);
-			if (element.equals(ELEMENTS) && useElements) {
+			Object object = postJson.get(jsonElementType);
+			long start = System.currentTimeMillis(); System.out.println("Processing " +jwsUtil.getJSONLength(object) + "  " + jsonElementType);
+			if (jsonElementType.equals(ELEMENTS) && useElements) {
 				jwsUtil.splitTransactions(new JwsFunctor() {
 					@Override
 					public Object execute(JSONObject jsonObject, String key,
@@ -129,7 +129,7 @@ public class ModelPost extends AbstractJavaWebScript {
 						return null;
 					}
 				}, object);
-			} else if (element.equals(ROOTS) && useRoots) {
+			} else if (jsonElementType.equals(ROOTS) && useRoots) {
 				jwsUtil.splitTransactions(new JwsFunctor() {
 					@Override
 					public Object execute(JSONObject jsonObject, String key,
@@ -143,7 +143,7 @@ public class ModelPost extends AbstractJavaWebScript {
 						return null;
 					}
 				}, object, createRoots);
-			} else if (element.equals(ELEMENT_HIERARCHY) && useHierarchy) {
+			} else if (jsonElementType.equals(ELEMENT_HIERARCHY) && useHierarchy) {
 				jwsUtil.splitTransactions(new JwsFunctor() {
 					@Override
 					public Object execute(JSONObject jsonObject, String key,
@@ -157,7 +157,7 @@ public class ModelPost extends AbstractJavaWebScript {
 						return null;
 					}
 				}, object);
-			} else if (element.equals(RELATIONSHIPS)) {
+			} else if (jsonElementType.equals(RELATIONSHIPS)) {
 				// TODO split this out updating the separate relationships underneath
 				jwsUtil.splitTransactions(new JwsFunctor() {
 					@Override
@@ -173,7 +173,7 @@ public class ModelPost extends AbstractJavaWebScript {
 					}
 				}, object);
 			}
-			long end = System.currentTimeMillis(); System.out.println(element + " processed in " + (end-start) + " ms");
+			long end = System.currentTimeMillis(); System.out.println(jsonElementType + " processed in " + (end-start) + " ms");
 		}
 	}
 	
@@ -389,29 +389,51 @@ public class ModelPost extends AbstractJavaWebScript {
 			return false;
 		}
 		
-		String siteName = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.SITE_NAME);
-		if (!JwsRequestUtils.validateRequestVariable(status, response, siteName, JwsRequestUtils.SITE_NAME)) {
-			return false;
-		} 
-
-		String projectId = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.PROJECT_ID);
-		if (!JwsRequestUtils.validateRequestVariable(status, response, projectId, JwsRequestUtils.PROJECT_ID)) {
-			return false;
-		}
-
-		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-		if (!JwsRequestUtils.validateSiteExists(siteInfo, status, response)) {
-			return false;
-		}
-				
-		if (!JwsRequestUtils.validatePermissions(req, status, response, services, siteInfo.getNodeRef(), "Write")) {
-			return false;
-		}
-
-		EmsScriptNode siteNode = getSiteNode(siteName);
-		projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
-		if (projectNode == null) {
-			return false;
+		String elementId = JwsRequestUtils.getRequestVar(req, "elementid");
+		if (elementId != null) {
+			if (!JwsRequestUtils.validateRequestVariable(status, response, elementId, "elementid")) {
+				return false;
+			}
+			
+			// projectNode should be the owner..., which should exist
+			try {
+				JSONObject postJson = (JSONObject)req.parseContent();
+				JSONObject elementsJson = postJson.getJSONObject("elements");
+				JSONObject elementJson = elementsJson.getJSONObject(elementId);
+				projectNode = findScriptNodeByName(elementJson.getString("owner"));
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			if (projectNode == null) {
+				return false;
+			}
+		} else {
+			String siteName = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.SITE_NAME);
+			if (!JwsRequestUtils.validateRequestVariable(status, response, siteName, JwsRequestUtils.SITE_NAME)) {
+				return false;
+			} 
+	
+			String projectId = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.PROJECT_ID);
+			if (!JwsRequestUtils.validateRequestVariable(status, response, projectId, JwsRequestUtils.PROJECT_ID)) {
+				return false;
+			}
+	
+			SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+			if (!JwsRequestUtils.validateSiteExists(siteInfo, status, response)) {
+				return false;
+			}
+					
+			if (!JwsRequestUtils.validatePermissions(req, status, response, services, siteInfo.getNodeRef(), "Write")) {
+				return false;
+			}
+	
+			EmsScriptNode siteNode = getSiteNode(siteName);
+			projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
+			if (projectNode == null) {
+				return false;
+			}
 		}
 		
 		return true;
