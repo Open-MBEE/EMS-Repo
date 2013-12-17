@@ -1,10 +1,12 @@
 <import resource="classpath:alfresco/extension/js/json2.js">
+<import resource="classpath:alfresco/extension/js/utils.js">
 
 //var europaSite = siteService.getSite("europa").node;
-var modelFolder = companyhome.childByNamePath("ViewEditor/model");
+var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
+var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
 var res = [];
 var seen = [];
-
+var viewdone = [];
 var viewid = url.templateArgs.viewid
 var recurse = args.recurse == 'true' ? true : false;
 
@@ -27,23 +29,36 @@ function handleView(view) {
 	var sources = JSON.parse(sourcesJson);
 	for (var i in sources) {
 		var sourceid = sources[i];
-		var modelNode = modelFolder.childByNamePath(sourceid);
+		var modelNode = getModelElement(modelFolder, sourceid); //modelFolder.childByNamePath(sourceid);
 		if (modelNode == null)
 			continue;
 		if (seen.indexOf(sourceid) >= 0)
 			continue;
 		add(modelNode);
 	}
+	viewdone.push(view.properties["view:mdid"]);
 	if (recurse) {
-		var childViews = view.assocs["view:views"];
-		for (var i in childViews) {
-			handleView(childViews[i]);
+		if (view.properties["view:product"] == true) {
+			var view2view = JSON.parse(view.properties["view:view2viewJson"]);
+			for (var i in view2view) {
+				if (viewdone.indexOf(i) >= 0)
+					continue;
+				var v = getModelElement(modelFolder, i);
+				if (v == null)
+					continue;
+				handleView(v);
+			}
+		} else {
+			var childViews = view.assocs["view:views"];
+			for (var i in childViews) {
+				handleView(childViews[i]);
+			}
 		}
 	}
 }
 
 function main() {
-	var topview = modelFolder.childByNamePath(viewid);
+	var topview = getModelElement(modelFolder, viewid); //modelFolder.childByNamePath(viewid);
 	if (topview == null) {
 		status.code = 404;
 	} else {
@@ -51,7 +66,20 @@ function main() {
 	}
 }
 
-status.code = 200;
-main();
-var	response = status.code == 200 ? jsonUtils.toJSONString(res) : "NotFound";
+
+if (UserUtil.hasWebScriptPermissions()) {
+    status.code = 200;
+    main();
+} else {
+    status.code = 401;
+}
+
+var response;
+if (status.code == 200) {
+    response = jsonUtils.toJSONString(res);
+} else if (status.code == 401) {
+    response = "unauthorized";
+} else {
+    response = "NotFound";
+}
 model['res'] = response;

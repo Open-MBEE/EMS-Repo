@@ -16,7 +16,9 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<beans>    
+<beans>
+    <import resource="javawebscript-service-context.xml" />
+    
     <!-- A simple class that is initialized by Spring -->
     <bean id="changeme.exampleBean" class="gov.nasa.jpl.view_repo.Demo" init-method="init" />
     
@@ -38,7 +40,7 @@
         </list>
       </property>
     </bean>
- 
+
 <!-- 	<bean id="demoScript" parent="baseJavaScriptExtension" class="gov.nasa.jpl.view_repo.DemoJavascriptComponent"> -->
 <!-- 	    <property name="demoComponent" ref="changeme.exampleComponent"/> -->
 <!-- 	    <property name="extensionName"> -->
@@ -56,8 +58,11 @@
     
     <!-- A simple module component that will be executed once -->
     <bean id="java_query" class="gov.nasa.jpl.view_repo.JavaQuery" parent="module.baseComponent" >
-        <property name="moduleId" value="fred" /> 
+        <property name="moduleId" value="fred" />  <!--  See module.properties  -->
         <property name="name" value="daComponent" />
+        <property name="description" value="A demo component" />
+        <property name="sinceVersion" value="2.0" />
+        <property name="appliesFromVersion" value="2.0" />
         <property name="nodeService">
            <ref bean="NodeService" />
         </property>
@@ -75,6 +80,7 @@
  		<property name="localConnectionManager" ref="webscripts.js.cmis.client"/>
  		-->
     </bean>
+    
 	<bean id="webscript.gov.nasa.jpl.javatest.get"
 		class="gov.nasa.jpl.view_repo.TestJavaWebScript"
 		parent="webscript">
@@ -89,4 +95,26 @@
         <property name="nodeLocatorService" ref="nodeLocatorService" /> 
     </bean>
 
+	
+	<bean id="jwsUtil" class="gov.nasa.jpl.view_repo.webscripts.JwsUtil">
+		<property name="services" ref="ServiceRegistry" />
+		<property name="transactionInterval" value="500" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.post"
+		class="gov.nasa.jpl.view_repo.webscripts.ViewPostJson"
+		parent="webscript">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+        <property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+	
+	<!--  utility bean for checking user site permissions: also expose a webscript base object -->
+	<bean id="UserUtil" class="gov.nasa.jpl.view_repo.util.UserUtil" parent="baseJavaScriptExtension">
+		<property name="siteService" ref="SiteService"/>
+		<property name="personService" ref="PersonService"/>
+		<property name="siteName" value="europa"/>
+		<property name="extensionName" value="UserUtil" />
+		<property name="ignore" value="true" />
+	</bean>
 </beans>

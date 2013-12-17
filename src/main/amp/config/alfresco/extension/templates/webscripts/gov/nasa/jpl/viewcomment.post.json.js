@@ -2,14 +2,15 @@
 <import resource="classpath:alfresco/extension/js/utils.js">
 
 //var europaSite = siteService.getSite("europa").node;
-var modelFolder = companyhome.childByNamePath("ViewEditor/model");
-
+var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
+var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
+var commentFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/comments");
 var modelMapping = {};
 
 function updateOrCreateComment(comment) {
-	var commentNode = modelFolder.childByNamePath(comment.id);
+	var commentNode = commentFolder.childByNamePath(comment.id);
 	if (commentNode == null) {
-		commentNode = modelFolder.createNode(comment.id, "view:Comment");
+		commentNode = commentFolder.createNode(comment.id, "view:Comment");
 		commentNode.properties["view:mdid"] = comment.id;
 	}
 	commentNode.properties["view:documentation"] = comment.body;
@@ -23,7 +24,7 @@ function updateOrCreateComment(comment) {
 }
 
 function doView(viewid, comments) {
-	var viewnode = modelFolder.childByNamePath(viewid);
+	var viewnode = getModelElement(modelFolder, viewid); //modelFolder.childByNamePath(viewid);
 	if (viewnode == null) {
 		status.code = 404;
 		return;
@@ -58,6 +59,22 @@ function main() {
 		doView(viewid, postjson.view2comment[viewid]);
 	}
 }
-status.code = 200;
-main();
-model['res'] = status.code == 200 ? "ok" : "NotFound";
+
+
+
+if (UserUtil.hasWebScriptPermissions()) {
+    status.code = 200;
+    main();
+} else {
+    status.code = 401;
+}
+
+var response;
+if (status.code == 200) {
+    response = "ok";
+} else if (status.code == 401) {
+    response = "unauthorized";
+} else {
+    response = "NotFound";
+}
+model['res'] = response;

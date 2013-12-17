@@ -2,7 +2,8 @@
 <import resource="classpath:alfresco/extension/js/utils.js">
 
 //var europaSite = siteService.getSite("europa").node;
-var modelFolder = companyhome.childByNamePath("ViewEditor/model");
+var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
+var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
 
 var modelMapping = {};
 var merged = [];
@@ -13,8 +14,10 @@ function getOrCreateVolume(vid, name, roots) {
 		vnode = modelFolder.createNode(vid, "view:Volume");
 		vnode.properties["view:name"] = name;
 		vnode.properties["view:mdid"] = vid;
+		vnode.properties["cm:title"] = name;
 	} else {
 		vnode.properties["view:name"] = name;
+		vnode.properties["cm:title"] = name;
 	}
 	if (roots.indexOf(vid) >= 0)
 		vnode.properties["view:rootVolume"] = true;
@@ -25,13 +28,18 @@ function getOrCreateVolume(vid, name, roots) {
 }
 
 function getOrCreateDocument(did) {
-	var dnode = modelFolder.childByNamePath(did);
+	var dnode = getModelElement(modelFolder, did); //modelFolder.childByNamePath(did);
 	if (dnode == null) {
-		dnode = modelFolder.createNode(did, "view:DocumentView");
+		dnode = createModelElement(modelFolder, did, "view:DocumentView"); //modelFolder.createNode(did, "view:DocumentView");
 		dnode.properties["view:mdid"] = did;
 		dnode.properties["view:name"] = "Unexported Document";
+		dnode.properties["cm:title"] = "Unexported Document";
 		dnode.save();
 	} 
+	if (dnode.typeShort != "view:DocumentView") {
+		dnode.specializeType("view:DocumentView");
+		dnode.save();
+	}
 	return dnode;
 }
 
@@ -100,5 +108,19 @@ function main() {
 	volume2document(v2d);
 }
 
-main();
-model['res'] = "ok";
+if (UserUtil.hasWebScriptPermissions()) {
+    status.code = 200;
+    main();
+} else {
+    status.code = 401;
+}
+
+var response;
+if (status.code == 200) {
+    response = "ok";
+} else if (status.code == 401) {
+    response = "unauthorized";
+} else {
+    response = "NotFound";
+}
+model['res'] = response;

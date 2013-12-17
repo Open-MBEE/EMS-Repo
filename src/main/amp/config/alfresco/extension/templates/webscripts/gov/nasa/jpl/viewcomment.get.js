@@ -2,7 +2,8 @@
 <import resource="classpath:alfresco/extension/js/utils.js">
 
 //var europaSite = siteService.getSite("europa").node;
-var modelFolder = companyhome.childByNamePath("ViewEditor/model");
+var modelFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/model");
+var snapshotFolder = companyhome.childByNamePath("Sites/europa/ViewEditor/snapshots");
 
 var viewid = url.templateArgs.viewid;
 var recurse = args.recurse == 'true' ? true : false;
@@ -38,7 +39,7 @@ function handleView(viewnode) {
 }
 
 function main() {
-	var topview = modelFolder.childByNamePath(viewid);
+	var topview = getModelElement(modelFolder, viewid); //modelFolder.childByNamePath(viewid);
 	if (topview == null) {
 		status.code  = 404;
 	} else {
@@ -46,7 +47,20 @@ function main() {
 	}
 }
 
-status.code = 200;
-main();
-var	response = status.code == 200 ? jsonUtils.toJSONString({"comments": comments, "view2comment": view2comment}) : "NotFound";
+
+if (UserUtil.hasWebScriptPermissions()) {
+    status.code = 200;
+    main();
+} else {
+    status.code = 401;
+}
+
+var response;
+if (status.code == 200) {
+    response = jsonUtils.toJSONString({"comments": comments, "view2comment": view2comment}) ;
+} else if (status.code == 401) {
+    response = "unauthorized";
+} else {
+    response = "NotFound";
+}
 model['res'] = response;
