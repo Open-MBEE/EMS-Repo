@@ -99,6 +99,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			put("double", "sysml:double");
 			put("expression", "sysml:expression");
 			put("valueType", "sysml:valueType");
+			
+			put("LiteralBoolean", "sysml:boolean");
+			put("LiteralInteger", "sysml:integer");
+			put("LiteralString", "sysml:string");
+			put("LiteralReal", "sysml:double");
+			put("ElementValue", "sysml:string");
+			put("Expression", "sysml:string");
 		}
 	};
 	
@@ -125,19 +132,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			put("sysml:documentation", "documentation");
 			put("sysml:isDerived", "isDerived");
 			put("sysml:isSlot", "isSlot");
+			/*
 			put("sysml:boolean", "boolean");
 			put("sysml:string", "string");
 			put("sysml:integer", "integer");
 			put("sysml:double", "double");
 			put("sysml:expression", "expression");
 			put("sysml:valueType", "valueType");
-			
+			*/
 			put("cm:modified", "lastModified");
 			put("cm:modifier", "author");
 		}
 	};
 	
-
 	protected void initMemberVariables(String siteName) {
 		companyhome = new ScriptNode(repository.getCompanyHome(), services);
 	}
