@@ -324,32 +324,32 @@ public class JavaQuery extends AbstractModuleComponent
     }
     
     public static List<QueryResult> cmisQuery( String query ) {
-//        Map<String, String> parameter = new HashMap<String,String>();
-//        org.json.JSONObject hello = null;
-//
-//        // Set the user credentials
-//        parameter.put(SessionParameter.USER, "admin");
-//        parameter.put(SessionParameter.PASSWORD, "admin");
-//
-//        // Specify the connection settings
-//        parameter.put(SessionParameter.ATOMPUB_URL, "http://localhost:8080/view-repo/cmisatom");
-//        parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
-//
-//        // Set the alfresco object factory
-//        parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
-//
-//        // Create a session
-//        SessionFactory factory = SessionFactoryImpl.newInstance();
-//        List<Repository> repositories = factory.getRepositories(parameter);
-//        Debug.outln(repositories.size() + " Repositories");
-//        for(Repository r: repositories) {
-//            Debug.outln("  Id: " + r.getId());
-//            Debug.outln("  Name: " + r.getName());
-//            Debug.outln("  Description: " + r.getDescription());
-//        }
-//        Debug.outln("");
-//        Session session = repositories.get(0).createSession();
-        Session session = localConnectionManager.getConnection().getSession();
+        Map<String, String> parameter = new HashMap<String,String>();
+        org.json.JSONObject hello = null;
+
+        // Set the user credentials
+        parameter.put(SessionParameter.USER, "admin");
+        parameter.put(SessionParameter.PASSWORD, "admin");
+
+        // Specify the connection settings
+        parameter.put(SessionParameter.ATOMPUB_URL, "http://localhost:8080/view-repo/cmisatom");
+        parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
+
+        // Set the alfresco object factory
+        parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
+
+        // Create a session
+        SessionFactory factory = SessionFactoryImpl.newInstance();
+        List<Repository> repositories = factory.getRepositories(parameter);
+        Debug.outln(repositories.size() + " Repositories");
+        for(Repository r: repositories) {
+            Debug.outln("  Id: " + r.getId());
+            Debug.outln("  Name: " + r.getName());
+            Debug.outln("  Description: " + r.getDescription());
+        }
+        Debug.outln("");
+        Session session = repositories.get(0).createSession();
+//        Session session = localConnectionManager.getConnection().getSession();
         
         // Folder browsing example:
         Folder folder = session.getRootFolder();
@@ -618,7 +618,7 @@ public class JavaQuery extends AbstractModuleComponent
         // TODO: Provide this in an SDK base class
         JavaQuery javaQueryComponent = null;
         ApplicationContextHelper.setUseLazyLoading( false );
-        ApplicationContextHelper.setNoAutoStart( true );
+        ApplicationContextHelper.setNoAutoStart( false );
         String[] contextPath = new String[] { "classpath:alfresco/application-context.xml" };
         if ( applicationContext == null ) {
             applicationContext =
@@ -629,7 +629,7 @@ public class JavaQuery extends AbstractModuleComponent
         javaQueryComponent.nodeService =
                 (NodeService)applicationContext.getBean( "NodeService" );
         javaQueryComponent.nodeLocatorService =
-                (NodeLocatorService)applicationContext.getBean( "NodeLocatorService" );
+                (NodeLocatorService)applicationContext.getBean( "nodeLocatorService" );
         javaQueryComponent.searchService =
                 (SearchService)applicationContext.getBean( "SearchService" );
         javaQueryComponent.contentService =

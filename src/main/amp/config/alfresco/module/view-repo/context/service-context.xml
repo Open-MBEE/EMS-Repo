@@ -33,6 +33,7 @@
         <property name="nodeLocatorService" ref="nodeLocatorService" />
         <property name="repository" ref="JCR.Repository" />
     </bean>
+    
     <bean id="view-repo_dictionaryBootstrap" parent="dictionaryModelBootstrap" depends-on="dictionaryBootstrap">
       <property name="models">
         <list>
@@ -59,7 +60,7 @@
     
     <!-- A simple module component that will be executed once -->
     <bean id="java_query" class="gov.nasa.jpl.view_repo.JavaQuery" parent="module.baseComponent" >
-        <property name="moduleId" value="fred" />  <!--  See module.properties  -->
+        <property name="moduleId" value="view-repo" />  <!--  See module.properties  -->
         <property name="name" value="daComponent" />
         <property name="description" value="A demo component" />
         <property name="sinceVersion" value="2.0" />
@@ -77,7 +78,9 @@
         <property name="dictionaryService">
            <ref bean="DictionaryService" />
         </property>
+        <!-- 
  		<property name="localConnectionManager" ref="webscripts.js.cmis.client"/>
+ 		 -->
     </bean>
     
 	<bean id="webscript.gov.nasa.jpl.javatest.get"
