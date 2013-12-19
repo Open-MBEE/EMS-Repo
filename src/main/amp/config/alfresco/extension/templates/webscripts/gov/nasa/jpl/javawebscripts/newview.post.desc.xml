@@ -35,7 +35,7 @@
   				 				"rowspan": rowspan
   				 			}, ...], ...], 
   				 			"header": same as body, 
-  				 			//** optional **/
+  				 			//** optional, probably translate to table class if user wants to customize css? **/
   				 			"style": style
   				 		},
   				 		{
@@ -46,7 +46,6 @@
   				 					(see above...)
   				 				}, ...], ...
   				 			],
-  				 			"bulleted": true/false,
   				 			"ordered": true/false
   				 		}, ...  
   				 	],

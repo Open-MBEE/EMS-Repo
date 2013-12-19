@@ -52,6 +52,7 @@
   					"documentation": documentation,
   					"owner": elementId/null,
   					"isView": true|false,
+  					"isProduct": true|false,  (isDocument?)
   					
   					//************** if type is "Property" ******/
   					"propertyType": elementId/null;
