@@ -1,0 +1,59 @@
+<webscript>
+    <description>
+		DRAFT
+		
+		{
+  			"views": {
+  				elementId: {
+  					"id": elementId;
+  					"displayedElements": [elementId, ...],
+  					"allowedElements": [elementId, ..],
+  				 	"contains": [
+  				 		{
+  				 			"type": Paragraph", 
+  				 			"sourceType": "reference"|"text",
+  				 			
+  				 			//*** if sourceType is reference ***/
+  				 			"source": elementId, 
+  				 			"sourceProperty": "documentation"|"name"|"value", 
+  				 			
+  				 			//*** if sourceType is text **/
+  				 			"text": text
+  				 		},
+  				 		{
+  				 			"type": "Table", 
+  				 			"title": title, 
+  				 			"body": [[{
+  				 				"content": [ //this allows multiple things in a cell
+  				 					{
+  				 						"type": "Paragraph"|"List", 
+  				 						(see above...)
+  				 					}, ...
+  				 				],
+  				 				//** optional **/
+  				 				"colspan": colspan, 
+  				 				"rowspan": rowspan
+  				 			}, ...], ...], 
+  				 			"header": same as body, 
+  				 			//** optional **/
+  				 			"style": style
+  				 		},
+  				 		{
+  				 			"type": "List",
+  				 			"list": [
+  				 				[{ //each list item can have multiple things, Table in a list may not be supported
+  				 					"type": "Paragraph"/"List"/"Table",
+  				 					(see above...)
+  				 				}, ...], ...
+  				 			],
+  				 			"bulleted": true/false,
+  				 			"ordered": true/false
+  				 		}, ...  
+  				 	],
+  				}
+  			
+			}
+  		}
+  		</description>
+  		
+ </webscript>

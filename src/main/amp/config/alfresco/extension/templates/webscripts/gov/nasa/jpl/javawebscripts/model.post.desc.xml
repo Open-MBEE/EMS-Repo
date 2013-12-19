@@ -39,27 +39,37 @@
   				...
   			},
   			"elements": {
+  			//added properties of elements so the element json object should have all information about that element
+  			//in terms of data interchange, this seems to be a better way for clients to process information then 
+  			//having "relationships" in a separate object, since the relationships in alfresco are implementation details
+  			//for properties that are really first class to the element
   				elementId: {
+  					"id": elementId,
   					"type": "Package" | "Property" | "Element" | 
   							"Dependency" | "Generalization" | "DirectedRelationship" | 
   							"Conform" | "Expose" | "Viewpoint",
   					"name": name,
   					"documentation": documentation,
-  					"owner": elementId,
+  					"owner": elementId/null,
   					"isView": true|false,
-  					"isDerived": true|false, (if Property)
-  					"isSlot": true|false, (if Property)
-  					"boolean": [true|false], (if Property)
-  					"string": [string], (if Property)
-  					"integer": [int], (if Property)
-  					"double": [double], (if Property)
-  					"expression": [string], (if Property)
+  					
+  					//************** if type is "Property" ******/
+  					"propertyType": elementId/null;
+  					"isDerived": true|false, 
+  					"isSlot": true|false, 
+  					"value": [?], (based on valueType)
   					"valueType": "LiteralBoolean" | "LiteralInteger" | "LiteralString" | 
-  							"LiteralReal" | "ElementValue" | "Expression" (if Property)
+  							"LiteralReal" | "ElementValue" | "Expression",
+  					
+  					//*************** if type is subtype of DirectedRelationship (Generalization/Expose/Conform/Dependency) ***/
+  					"source": elementId,
+  					"target": elementId
   				},
   				...
   			}
   			"relationships": {
+  			//if element object have these information already, would this still be needed? the code can build up this object 
+  			//internally as it goes through the elements to preserve the udpate order
   				"relationshipElements": {
   					relationshipElementId: {"source": sourceElementId, "target": targetElementId},
   					...
