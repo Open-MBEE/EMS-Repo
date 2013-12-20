@@ -427,9 +427,18 @@ var absoluteUrl = function(relativeUrl) {
 
 var ajaxWithHandlers = function(options, successMessage, errorMessage) {
   $.ajax(options)
-    .done(function() { app.fire('message', 'success', successMessage); })
+    .done(function(data) { 
+    	if (data.indexOf("html") != -1) {
+    		alert("Not saved! You've been logged out, login in a new window first!");
+      		window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/");
+    	}
+    	app.fire('message', 'success', successMessage); })
     .fail(function(e) { 
       if (e && e.status && e.status === 200) {
+      	if (e.responseText.indexOf("html") != -1) {
+      		alert("Not saved! You've been logged out, login in a new window first!");
+      		window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/");
+      	}
         // we got a 200 back, but json parsing might have failed
         return;
       } else {
@@ -440,6 +449,7 @@ var ajaxWithHandlers = function(options, successMessage, errorMessage) {
       }
     })
 }
+
 
 app.on('saveView', function(viewId, viewData) {
   var jsonData = JSON.stringify(viewData);
@@ -1483,6 +1493,21 @@ app.on('makeToc', function() {
   $("#toc").tocify({ selectors: "h2.numbered-header, h3.numbered-header, h4.numbered-header, h5.numbered-header", history : false, scrollTo: "60", hideEffect: "none", showEffect: "none", highlightOnScroll: true, highlightOffset : 0, context: "#the-document", smoothScroll:false, extendPage:false }).data("toc-tocify");  
 })
 
+(function poll() {
+    setTimeout(function() {
+        $.ajax({
+            url: absoluteUrl('/ui/?format=json'),
+            type: "GET",
+            success: function(data) {
+                if (data.indexOf("html") != -1)
+                	alert("You've been logged out! Login in a new window first!");
+      				window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/");
+            },
+            complete: poll,
+            timeout: 5000
+        })
+    }, 60000);
+})();
 </script>
 </body>
 </html>
