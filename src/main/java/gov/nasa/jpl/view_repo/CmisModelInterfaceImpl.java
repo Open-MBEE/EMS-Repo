@@ -5,7 +5,6 @@ package gov.nasa.jpl.view_repo;
 
 // import AbstractContentTransformer2;
 
-import gov.nasa.jpl.ae.solver.Constraint;
 import gov.nasa.jpl.ae.util.Debug;
 import gov.nasa.jpl.ae.util.Pair;
 import gov.nasa.jpl.ae.util.Utils;
@@ -40,13 +39,15 @@ import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 
+import sysml.SystemModel;
+
 /**
  * An implementation of a generic model interface for querying CMIS servers
  * using Apache Chemistry OpenCMIS.
  */
 public class CmisModelInterfaceImpl
 		implements
-		ModelInterface<CmisObject, OperationContext, ObjectType, Object, String, String, Object, Relationship, String, Object, CmisObject> {
+		SystemModel<CmisObject, OperationContext, ObjectType, Object, String, String, Object, Relationship, String, Object, CmisObject> {
 
 	protected static CmisModelInterfaceImpl instance;
 	protected String ADMIN_USER_NAME = "admin";
@@ -87,7 +88,7 @@ public class CmisModelInterfaceImpl
 
 	public String latestVersion(ChangeEvent change) {
 		String id = change.getObjectId();
-		CmisObject obj = getElement(null, id, null);
+		CmisObject obj = getObject(null, id, null);
 		String v = null;
 		if (obj instanceof Document) {
 			v = latestVersion((Document) obj);
@@ -98,7 +99,7 @@ public class CmisModelInterfaceImpl
 
 	public GregorianCalendar timeOflatestChange(ChangeEvent change) {
 		String id = change.getObjectId();
-		CmisObject obj = getElement(null, id, null);
+		CmisObject obj = getObject(null, id, null);
 		if (obj instanceof Document) {
 			return timeOflatestChange((Document) obj);
 		}
@@ -141,12 +142,12 @@ public class CmisModelInterfaceImpl
 
 	public Collection<Document> getDocuments() {
 		// Collection< Object > docs = get( Utils.newList(
-		// ModelInterface.ModelItem.ELEMENT ), getRootObjects( null ), null,
+		// ModelInterface.ModelItem.OBJECT ), getRootObjects( null ), null,
 		// null, null );
 		Collection<Object> docs = op(Operation.GET,
-				Utils.newList(ModelInterface.ModelItem.ELEMENT),
+				Utils.newList(SystemModel.ModelItem.OBJECT),
 				Utils.newList(new Item(getSession().getRootFolder(),
-						ModelItem.ELEMENT)), Utils.newList(new Item("Document",
+						ModelItem.OBJECT)), Utils.newList(new Item("Document",
 						ModelItem.TYPE)), null, false);
 		return Utils.asList(docs, Document.class);
 	}
@@ -300,7 +301,7 @@ public class CmisModelInterfaceImpl
 	}
 
 	@Override
-	public CmisObject getElement(OperationContext context, String identifier,
+	public CmisObject getObject(OperationContext context, String identifier,
 			String version) {
 		if (identifier == null)
 			return null;
@@ -450,10 +451,10 @@ public class CmisModelInterfaceImpl
     @Override
     public
             Collection< Object >
-            op( gov.nasa.jpl.view_repo.ModelInterface.Operation operation,
-                Collection< gov.nasa.jpl.view_repo.ModelInterface.ModelItem > itemTypes,
-                Collection< gov.nasa.jpl.view_repo.ModelInterface.Item > context,
-                Collection< gov.nasa.jpl.view_repo.ModelInterface.Item > specifier,
+            op( SystemModel.Operation operation,
+                Collection< SystemModel.ModelItem > itemTypes,
+                Collection< SystemModel.Item > context,
+                Collection< SystemModel.Item > specifier,
                 Object newValue, Boolean failForMultipleItemMatches ) {
         // TODO Auto-generated method stub
         return null;
@@ -462,11 +463,11 @@ public class CmisModelInterfaceImpl
     @Override
     public
             boolean
-            isAllowed( gov.nasa.jpl.view_repo.ModelInterface.Operation operation,
-                       Collection< gov.nasa.jpl.view_repo.ModelInterface.ModelItem > itemTypes,
-                       Collection< gov.nasa.jpl.view_repo.ModelInterface.Item > context,
-                       Collection< gov.nasa.jpl.view_repo.ModelInterface.Item > specifier,
-                       gov.nasa.jpl.view_repo.ModelInterface.Item newValue,
+            isAllowed( SystemModel.Operation operation,
+                       Collection< SystemModel.ModelItem > itemTypes,
+                       Collection< SystemModel.Item > context,
+                       Collection< SystemModel.Item > specifier,
+                       SystemModel.Item newValue,
                        Boolean failForMultipleItemMatches ) {
         // TODO Auto-generated method stub
         return false;
@@ -475,8 +476,8 @@ public class CmisModelInterfaceImpl
     @Override
     public
             Collection< Object >
-            op( gov.nasa.jpl.view_repo.ModelInterface.Operation operation,
-                Collection< gov.nasa.jpl.view_repo.ModelInterface.ModelItem > itemTypes,
+            op( SystemModel.Operation operation,
+                Collection< SystemModel.ModelItem > itemTypes,
                 Collection< OperationContext > context, String identifier,
                 String name, String version, boolean failForMultipleItemMatches ) {
         // TODO Auto-generated method stub
@@ -486,7 +487,7 @@ public class CmisModelInterfaceImpl
     @Override
     public
             Collection< Object >
-            get( Collection< gov.nasa.jpl.view_repo.ModelInterface.ModelItem > itemTypes,
+            get( Collection< SystemModel.ModelItem > itemTypes,
                  Collection< OperationContext > context, String identifier,
                  String name, String version ) {
         // TODO Auto-generated method stub
@@ -495,7 +496,7 @@ public class CmisModelInterfaceImpl
 
     @Override
     public Collection< Object >
-            create( gov.nasa.jpl.view_repo.ModelInterface.ModelItem item,
+            create( SystemModel.ModelItem item,
                     Collection< OperationContext > context, String identifier,
                     String name, String version ) {
         // TODO Auto-generated method stub
@@ -504,7 +505,7 @@ public class CmisModelInterfaceImpl
 
     @Override
     public Collection< Object >
-            delete( gov.nasa.jpl.view_repo.ModelInterface.ModelItem item,
+            delete( SystemModel.ModelItem item,
                     Collection< OperationContext > context, String identifier,
                     String name, String version ) {
         // TODO Auto-generated method stub
@@ -513,7 +514,7 @@ public class CmisModelInterfaceImpl
 
     @Override
     public Collection< Object >
-            set( gov.nasa.jpl.view_repo.ModelInterface.ModelItem item,
+            set( SystemModel.ModelItem item,
                  Collection< OperationContext > context, String identifier,
                  String name, String version, Object newValue ) {
         // TODO Auto-generated method stub
@@ -534,9 +535,9 @@ public class CmisModelInterfaceImpl
     }
 
     @Override
-    public boolean latestVersion( Collection< OperationContext > context ) {
+    public String latestVersion( Collection< OperationContext > context ) {
         // TODO Auto-generated method stub
-        return false;
+        return null;
     }
 
     @Override
@@ -552,7 +553,7 @@ public class CmisModelInterfaceImpl
     }
 
     @Override
-    public boolean elementsMayBeChangedForVersion( String version ) {
+    public boolean objectsMayBeChangedForVersion( String version ) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -570,7 +571,7 @@ public class CmisModelInterfaceImpl
     }
 
     @Override
-    public boolean elementsMayBeCreatedForVersion( String version ) {
+    public boolean objectsMayBeCreatedForVersion( String version ) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -588,7 +589,7 @@ public class CmisModelInterfaceImpl
     }
 
     @Override
-    public boolean elementsMayBeDeletedForVersion( String version ) {
+    public boolean objectsMayBeDeletedForVersion( String version ) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -645,7 +646,7 @@ public class CmisModelInterfaceImpl
     public
             Collection< Object >
             map( Collection< CmisObject > elements, Method method,
-                 int indexOfElementArgument, Object... otherArguments )
+                 int indexOfObjectArgument, Object... otherArguments )
                                                                        throws InvocationTargetException {
         // TODO Auto-generated method stub
         return null;
@@ -655,7 +656,7 @@ public class CmisModelInterfaceImpl
     public
             Collection< Object >
             filter( Collection< CmisObject > elements, Method method,
-                    int indexOfElementArgument, Object... otherArguments )
+                    int indexOfObjectArgument, Object... otherArguments )
                                                                           throws InvocationTargetException {
         // TODO Auto-generated method stub
         return null;
@@ -665,7 +666,7 @@ public class CmisModelInterfaceImpl
     public
             boolean
             forAll( Collection< CmisObject > elements, Method method,
-                    int indexOfElementArgument, Object... otherArguments )
+                    int indexOfObjectArgument, Object... otherArguments )
                                                                           throws InvocationTargetException {
         // TODO Auto-generated method stub
         return false;
@@ -675,7 +676,7 @@ public class CmisModelInterfaceImpl
     public
             boolean
             thereExists( Collection< CmisObject > elements, Method method,
-                         int indexOfElementArgument, Object... otherArguments )
+                         int indexOfObjectArgument, Object... otherArguments )
                                                                                throws InvocationTargetException {
         // TODO Auto-generated method stub
         return false;
@@ -685,7 +686,7 @@ public class CmisModelInterfaceImpl
     public
             Object
             fold( Collection< CmisObject > elements, Object initialValue,
-                  Method method, int indexOfElementArgument,
+                  Method method, int indexOfObjectArgument,
                   int indexOfPriorResultArgument, Object... otherArguments )
                                                                             throws InvocationTargetException {
         // TODO Auto-generated method stub
@@ -697,105 +698,150 @@ public class CmisModelInterfaceImpl
             Collection< CmisObject >
             sort( Collection< CmisObject > elements,
                   Comparator< ? > comparator, Method method,
-                  int indexOfElementArgument, Object... otherArguments )
+                  int indexOfObjectArgument, Object... otherArguments )
                                                                         throws InvocationTargetException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public String createNewSolverSession( String suggestedSessionId ) {
+    public Class< CmisObject > getObjectClass() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public String copySolverSession( String idOfSessionToCopy ) {
+    public Class< OperationContext > getContextClass() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public String switchSolverSession( String idOfSessionToWhichToSwitch ) {
+    public Class< ObjectType > getTypeClass() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public String deleteSolverSession( String idOfSessionToWhichToSwitch ) {
+    public Class< Object > getPropertyClass() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Constraint addConstraint( CmisObject constraintElement,
-                                     String version, String sessionId ) {
+    public Class< String > getNameClass() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Constraint addDomainConstraint( CmisObject constraintElement,
-                                           String version,
-                                           Set< Object > valueDomainSet,
-                                           String sessionId ) {
+    public Class< String > getIdentifierClass() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Constraint
-            addDomainConstraint( CmisObject constraintElement, String version,
-                                 Pair< Object, Object > valueDomainRange,
-                                 String sessionId ) {
+    public Class< Object > getValueClass() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Constraint relaxDomain( CmisObject constraintElement,
-                                   String version,
-                                   Set< Object > valueDomainSet,
-                                   String sessionId ) {
+    public Class< Relationship > getRelationshipClass() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Constraint relaxDomain( CmisObject constraintElement,
-                                   String version,
-                                   Pair< Object, Object > valueDomainRange,
-                                   String sessionId ) {
+    public Class< String > getVersionClass() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public Class< Object > getWorkspaceClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Class< CmisObject > getConstraintClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public CmisObject getDomainConstraint( CmisObject object, String version,
+                                           Object workspace ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void addConstraint( CmisObject constraint, String version,
+                               Object workspace ) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void addDomainConstraint( CmisObject constraint, String version,
+                                     Set< Object > valueDomainSet,
+                                     Object workspace ) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void
+            addDomainConstraint( CmisObject constraint, String version,
+                                 util.Pair< Object, Object > valueDomainRange,
+                                 Object workspace ) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void relaxDomain( CmisObject constraint, String version,
+                             Set< Object > valueDomainSet, Object workspace ) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void relaxDomain( CmisObject constraint, String version,
+                             util.Pair< Object, Object > valueDomainRange,
+                             Object workspace ) {
+        // TODO Auto-generated method stub
+        
     }
 
     @Override
     public Collection< CmisObject >
-            getConstraintElementsOfElement( CmisObject element, String version,
-                                            String sessionId ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< CmisObject >
-            getConstraintElementsOfContext( OperationContext context ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< Constraint >
             getConstraintsOfElement( CmisObject element, String version,
-                                     String sessionId ) {
+                                     Object workspace ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection< Constraint >
+    public Collection< CmisObject >
             getConstraintsOfContext( OperationContext context ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public
+            Collection< CmisObject >
+            getViolatedConstraintsOfElement( CmisObject element, String version ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject >
+            getViolatedConstraintsOfContext( OperationContext context ) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -807,40 +853,11 @@ public class CmisModelInterfaceImpl
     }
 
     @Override
-    public Collection< CmisObject >
-            getViolatedConstraintElementsOfElement( CmisObject element,
-                                                    String version ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< CmisObject >
-            getViolatedConstraintElementsOfContext( OperationContext context ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public
-            Collection< Constraint >
-            getViolatedConstraintsOfElement( CmisObject element, String version ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< Constraint >
-            getViolatedConstraintsOfContext( OperationContext context ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public Number getScore() {
         // TODO Auto-generated method stub
         return null;
     }
+
 
 
 

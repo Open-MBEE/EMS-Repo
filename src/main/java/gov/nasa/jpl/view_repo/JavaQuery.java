@@ -30,10 +30,8 @@ package gov.nasa.jpl.view_repo;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import gov.nasa.jpl.ae.solver.Constraint;
 import gov.nasa.jpl.ae.util.Debug;
 import gov.nasa.jpl.ae.util.MoreToString;
-import gov.nasa.jpl.ae.util.Pair;
 import gov.nasa.jpl.ae.util.Utils;
 
 import java.io.Serializable;
@@ -85,12 +83,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 
+import sysml.SystemModel;
+
 /**
  * This is a Java interface that uses the native Alfresco Java interface for
  * accessing and querying model information.
  */
 public class JavaQuery extends AbstractModuleComponent
-                       implements ModelInterface< NodeRef, NodeRef, String, Object, String, String, Object, AssociationRef, String, Object, NodeRef > {
+                       implements SystemModel< NodeRef, NodeRef, String, Object, String, String, Object, AssociationRef, String, Object, NodeRef > {
 
     public static ApplicationContext applicationContext;
     protected static JavaQuery instance;// = initAppContext(); // only use this in unit test mode
@@ -424,7 +424,7 @@ public class JavaQuery extends AbstractModuleComponent
     // JUnit
 
     @Override
-    public NodeRef getElement( NodeRef context, String identifier, String version ) {
+    public NodeRef getObject( NodeRef context, String identifier, String version ) {
         List<NodeRef> nodes = get( identifier );
         if ( Utils.isNullOrEmpty( nodes ) ) {
             Debug.errln( "CMIS getObject(): Could not find node " + identifier + "!" );
@@ -614,10 +614,10 @@ public class JavaQuery extends AbstractModuleComponent
     @Override
     public
             Collection< Object >
-            op( gov.nasa.jpl.view_repo.ModelInterface.Operation operation,
-                Collection< gov.nasa.jpl.view_repo.ModelInterface.ModelItem > itemTypes,
-                Collection< gov.nasa.jpl.view_repo.ModelInterface.Item > context,
-                Collection< gov.nasa.jpl.view_repo.ModelInterface.Item > specifier,
+            op( SystemModel.Operation operation,
+                Collection< SystemModel.ModelItem > itemTypes,
+                Collection< SystemModel.Item > context,
+                Collection< SystemModel.Item > specifier,
                 Object newValue, Boolean failForMultipleItemMatches ) {
         // TODO Auto-generated method stub
         return null;
@@ -626,11 +626,11 @@ public class JavaQuery extends AbstractModuleComponent
     @Override
     public
             boolean
-            isAllowed( gov.nasa.jpl.view_repo.ModelInterface.Operation operation,
-                       Collection< gov.nasa.jpl.view_repo.ModelInterface.ModelItem > itemTypes,
-                       Collection< gov.nasa.jpl.view_repo.ModelInterface.Item > context,
-                       Collection< gov.nasa.jpl.view_repo.ModelInterface.Item > specifier,
-                       gov.nasa.jpl.view_repo.ModelInterface.Item newValue,
+            isAllowed( SystemModel.Operation operation,
+                       Collection< SystemModel.ModelItem > itemTypes,
+                       Collection< SystemModel.Item > context,
+                       Collection< SystemModel.Item > specifier,
+                       SystemModel.Item newValue,
                        Boolean failForMultipleItemMatches ) {
         // TODO Auto-generated method stub
         return false;
@@ -639,8 +639,8 @@ public class JavaQuery extends AbstractModuleComponent
     @Override
     public
             Collection< Object >
-            op( gov.nasa.jpl.view_repo.ModelInterface.Operation operation,
-                Collection< gov.nasa.jpl.view_repo.ModelInterface.ModelItem > itemTypes,
+            op( SystemModel.Operation operation,
+                Collection< SystemModel.ModelItem > itemTypes,
                 Collection< NodeRef > context, String identifier, String name,
                 String version, boolean failForMultipleItemMatches ) {
         // TODO Auto-generated method stub
@@ -650,7 +650,7 @@ public class JavaQuery extends AbstractModuleComponent
     @Override
     public
             Collection< Object >
-            get( Collection< gov.nasa.jpl.view_repo.ModelInterface.ModelItem > itemTypes,
+            get( Collection< SystemModel.ModelItem > itemTypes,
                  Collection< NodeRef > context, String identifier, String name,
                  String version ) {
         // TODO Auto-generated method stub
@@ -659,7 +659,7 @@ public class JavaQuery extends AbstractModuleComponent
 
     @Override
     public Collection< Object >
-            create( gov.nasa.jpl.view_repo.ModelInterface.ModelItem item,
+            create( SystemModel.ModelItem item,
                     Collection< NodeRef > context, String identifier,
                     String name, String version ) {
         // TODO Auto-generated method stub
@@ -668,7 +668,7 @@ public class JavaQuery extends AbstractModuleComponent
 
     @Override
     public Collection< Object >
-            delete( gov.nasa.jpl.view_repo.ModelInterface.ModelItem item,
+            delete( SystemModel.ModelItem item,
                     Collection< NodeRef > context, String identifier,
                     String name, String version ) {
         // TODO Auto-generated method stub
@@ -677,7 +677,7 @@ public class JavaQuery extends AbstractModuleComponent
 
     @Override
     public Collection< Object >
-            set( gov.nasa.jpl.view_repo.ModelInterface.ModelItem item,
+            set( SystemModel.ModelItem item,
                  Collection< NodeRef > context, String identifier, String name,
                  String version, Object newValue ) {
         // TODO Auto-generated method stub
@@ -697,9 +697,9 @@ public class JavaQuery extends AbstractModuleComponent
     }
 
     @Override
-    public boolean latestVersion( Collection< NodeRef > context ) {
+    public String latestVersion( Collection< NodeRef > context ) {
         // TODO Auto-generated method stub
-        return false;
+        return null;
     }
 
     @Override
@@ -715,7 +715,7 @@ public class JavaQuery extends AbstractModuleComponent
     }
 
     @Override
-    public boolean elementsMayBeChangedForVersion( String version ) {
+    public boolean objectsMayBeChangedForVersion( String version ) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -733,7 +733,7 @@ public class JavaQuery extends AbstractModuleComponent
     }
 
     @Override
-    public boolean elementsMayBeCreatedForVersion( String version ) {
+    public boolean objectsMayBeCreatedForVersion( String version ) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -751,7 +751,7 @@ public class JavaQuery extends AbstractModuleComponent
     }
 
     @Override
-    public boolean elementsMayBeDeletedForVersion( String version ) {
+    public boolean objectsMayBeDeletedForVersion( String version ) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -775,19 +775,19 @@ public class JavaQuery extends AbstractModuleComponent
     }
 
     @Override
-    public boolean setIdentifier( NodeRef element, String version ) {
+    public boolean setIdentifier( NodeRef object, String version ) {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public boolean setName( NodeRef element, String version ) {
+    public boolean setName( NodeRef object, String version ) {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public boolean setType( NodeRef element, String version ) {
+    public boolean setType( NodeRef object, String version ) {
         // TODO Auto-generated method stub
         return false;
     }
@@ -799,7 +799,7 @@ public class JavaQuery extends AbstractModuleComponent
     }
 
     @Override
-    public String deleteType( NodeRef element, String version ) {
+    public String deleteType( NodeRef object, String version ) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -807,8 +807,8 @@ public class JavaQuery extends AbstractModuleComponent
     @Override
     public
             Collection< Object >
-            map( Collection< NodeRef > elements, Method method,
-                 int indexOfElementArgument, Object... otherArguments )
+            map( Collection< NodeRef > objects, Method method,
+                 int indexOfObjectArgument, Object... otherArguments )
                                                                        throws InvocationTargetException {
         // TODO Auto-generated method stub
         return null;
@@ -817,8 +817,8 @@ public class JavaQuery extends AbstractModuleComponent
     @Override
     public
             Collection< Object >
-            filter( Collection< NodeRef > elements, Method method,
-                    int indexOfElementArgument, Object... otherArguments )
+            filter( Collection< NodeRef > objects, Method method,
+                    int indexOfObjectArgument, Object... otherArguments )
                                                                           throws InvocationTargetException {
         // TODO Auto-generated method stub
         return null;
@@ -827,8 +827,8 @@ public class JavaQuery extends AbstractModuleComponent
     @Override
     public
             boolean
-            forAll( Collection< NodeRef > elements, Method method,
-                    int indexOfElementArgument, Object... otherArguments )
+            forAll( Collection< NodeRef > objects, Method method,
+                    int indexOfObjectArgument, Object... otherArguments )
                                                                           throws InvocationTargetException {
         // TODO Auto-generated method stub
         return false;
@@ -837,8 +837,8 @@ public class JavaQuery extends AbstractModuleComponent
     @Override
     public
             boolean
-            thereExists( Collection< NodeRef > elements, Method method,
-                         int indexOfElementArgument, Object... otherArguments )
+            thereExists( Collection< NodeRef > objects, Method method,
+                         int indexOfObjectArgument, Object... otherArguments )
                                                                                throws InvocationTargetException {
         // TODO Auto-generated method stub
         return false;
@@ -847,8 +847,8 @@ public class JavaQuery extends AbstractModuleComponent
     @Override
     public
             Object
-            fold( Collection< NodeRef > elements, Object initialValue,
-                  Method method, int indexOfElementArgument,
+            fold( Collection< NodeRef > objects, Object initialValue,
+                  Method method, int indexOfObjectArgument,
                   int indexOfPriorResultArgument, Object... otherArguments )
                                                                             throws InvocationTargetException {
         // TODO Auto-generated method stub
@@ -857,103 +857,149 @@ public class JavaQuery extends AbstractModuleComponent
 
     @Override
     public Collection< NodeRef >
-            sort( Collection< NodeRef > elements, Comparator< ? > comparator,
-                  Method method, int indexOfElementArgument,
+            sort( Collection< NodeRef > objects, Comparator< ? > comparator,
+                  Method method, int indexOfObjectArgument,
                   Object... otherArguments ) throws InvocationTargetException {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public String createNewSolverSession( String suggestedSessionId ) {
+    public Class< NodeRef > getObjectClass() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public String copySolverSession( String idOfSessionToCopy ) {
+    public Class< NodeRef > getContextClass() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public String switchSolverSession( String idOfSessionToWhichToSwitch ) {
+    public Class< String > getTypeClass() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public String deleteSolverSession( String idOfSessionToWhichToSwitch ) {
+    public Class< Object > getPropertyClass() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Constraint addConstraint( NodeRef constraintElement, String version,
-                                     String sessionId ) {
+    public Class< String > getNameClass() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Constraint addDomainConstraint( NodeRef constraintElement,
-                                           String version,
-                                           Set< Object > valueDomainSet,
-                                           String sessionId ) {
+    public Class< String > getIdentifierClass() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Constraint
-            addDomainConstraint( NodeRef constraintElement, String version,
-                                 Pair< Object, Object > valueDomainRange,
-                                 String sessionId ) {
+    public Class< Object > getValueClass() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Constraint relaxDomain( NodeRef constraintElement, String version,
-                                   Set< Object > valueDomainSet,
-                                   String sessionId ) {
+    public Class< AssociationRef > getRelationshipClass() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Constraint relaxDomain( NodeRef constraintElement, String version,
-                                   Pair< Object, Object > valueDomainRange,
-                                   String sessionId ) {
+    public Class< String > getVersionClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Class< Object > getWorkspaceClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Class< NodeRef > getConstraintClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public NodeRef getDomainConstraint( NodeRef object, String version,
+                                        Object workspace ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void addConstraint( NodeRef constraint, String version,
+                               Object workspace ) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void addDomainConstraint( NodeRef constraint, String version,
+                                     Set< Object > valueDomainSet,
+                                     Object workspace ) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void
+            addDomainConstraint( NodeRef constraint, String version,
+                                 util.Pair< Object, Object > valueDomainRange,
+                                 Object workspace ) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void relaxDomain( NodeRef constraint, String version,
+                             Set< Object > valueDomainSet, Object workspace ) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void relaxDomain( NodeRef constraint, String version,
+                             util.Pair< Object, Object > valueDomainRange,
+                             Object workspace ) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public Collection< NodeRef > getConstraintsOfElement( NodeRef element,
+                                                          String version,
+                                                          Object workspace ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< NodeRef > getConstraintsOfContext( NodeRef context ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Collection< NodeRef >
-            getConstraintElementsOfElement( NodeRef element, String version,
-                                            String sessionId ) {
+            getViolatedConstraintsOfElement( NodeRef element, String version ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public Collection< NodeRef >
-            getConstraintElementsOfContext( NodeRef context ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< Constraint > getConstraintsOfElement( NodeRef element,
-                                                             String version,
-                                                             String sessionId ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< Constraint > getConstraintsOfContext( NodeRef context ) {
+            getViolatedConstraintsOfContext( NodeRef context ) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -962,35 +1008,6 @@ public class JavaQuery extends AbstractModuleComponent
     public void setOptimizationFunction( Method method, Object... arguments ) {
         // TODO Auto-generated method stub
         
-    }
-
-    @Override
-    public Collection< NodeRef >
-            getViolatedConstraintElementsOfElement( NodeRef element,
-                                                    String version ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< NodeRef >
-            getViolatedConstraintElementsOfContext( NodeRef context ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< Constraint >
-            getViolatedConstraintsOfElement( NodeRef element, String version ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< Constraint >
-            getViolatedConstraintsOfContext( NodeRef context ) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
