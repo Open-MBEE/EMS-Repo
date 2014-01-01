@@ -309,6 +309,12 @@ public class CmisModelInterfaceImpl
 		String id = null;
 		CmisObject object = null;
 
+		// unfortunately, this isn't in opencmis 0.8.0, found it in 0.10.0
+		//if ( context == null ) context = OperationContextUtils.createMaximumOperationContext();
+        if ( context == null ) {
+            context = session.createOperationContext();
+        }
+		
 		// try as object id
 		object = getSession().getObject(identifier, context);
 
