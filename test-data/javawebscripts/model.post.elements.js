@@ -34,7 +34,7 @@
           "type" : "Property"
         },
         "_12345_5EAPbeta_be00301_1148651295316_167207_450" : { "boolean" : [ true, false, true ],
-            "string" : ["hello", "goodbye"],
+            "value" : ["hello", "goodbye"],
             "integer": [1, 2,3,4,5,6],
             "double": [0.0, 1.3],
             "documentation" : "",
@@ -44,7 +44,7 @@
             "name" : "hideMetatype",
             "owner" : "_12345_5EAPbeta_be00301_1148632817486_155219_3",
             "type" : "Property",
-            "valueType" : "LiteralBoolean"
+            "valueType" : "LiteralString"
           },
     },
   "roots" : [ "_12345_5EAPbeta_be00301_1148301962580_941673_3150",

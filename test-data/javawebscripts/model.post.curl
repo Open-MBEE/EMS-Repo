@@ -3,3 +3,4 @@ curl -X POST -u admin:admin -H "Content-Type:application/json" --data @model.pos
 
 # get elements
 curl -X GET -u admin:admin "http://localhost:8080/view-repo/service/javawebscripts/model/17_0123455"
+

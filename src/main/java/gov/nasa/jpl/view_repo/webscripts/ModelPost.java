@@ -36,6 +36,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONArray;
@@ -205,20 +207,28 @@ public class ModelPost extends AbstractJavaWebScript {
 	 * @throws JSONException
 	 */
 	private void updateOrCreateElementValues(JSONArray jsonArray, String id) throws JSONException {
-		EmsScriptNode element = findScriptNodeByName(id);
-		
 		// create an array of the values to be added in as the elementValue property
 		ArrayList<NodeRef> values = new ArrayList<NodeRef>();
 		for (int ii = 0; ii < jsonArray.length(); ii++) {
-			EmsScriptNode value = findScriptNodeByName(jsonArray.getString(ii));
-			values.add(value.getNodeRef());
+			String valueId = jsonArray.getString(ii);
+			EmsScriptNode value = findScriptNodeByName(valueId);
+			if (value != null) {
+				values.add(value.getNodeRef());
+			} else {
+				log("ERROR: could not find element value node with id " + valueId + "\n", HttpServletResponse.SC_BAD_REQUEST);
+			}
 		}
 		
 		// only change if old list is different than new
-		@SuppressWarnings("unchecked")
-		ArrayList<NodeRef> oldValues = (ArrayList<NodeRef>)element.getProperty("sysml:elementValue");
-		if (!EmsScriptNode.checkIfListsEquivalent(values, oldValues)) {
-			element.setProperty("sysml:elementValue", values);
+		EmsScriptNode element = findScriptNodeByName(id);
+		if (element != null) {
+			@SuppressWarnings("unchecked")
+			ArrayList<NodeRef> oldValues = (ArrayList<NodeRef>)element.getProperty("sysml:elementValue");
+			if (!EmsScriptNode.checkIfListsEquivalent(values, oldValues)) {
+				element.setProperty("sysml:elementValue", values);
+			}
+		} else {
+			log("ERROR: could not find element node with id " + id + "\n", HttpServletResponse.SC_BAD_REQUEST);
 		}
 	}
 
@@ -231,7 +241,16 @@ public class ModelPost extends AbstractJavaWebScript {
 		EmsScriptNode property = findScriptNodeByName(id);
 		EmsScriptNode propertyType = findScriptNodeByName(typeId);
 		
-		property.createOrUpdateAssociation(propertyType, "sysml:type");
+		if (property != null && propertyType != null) {
+			property.createOrUpdateAssociation(propertyType, "sysml:type");
+		} else {
+			if (property == null) {
+				log("ERROR: could not find property node with id " + id + "\n", HttpServletResponse.SC_BAD_REQUEST);
+			}
+			if (propertyType == null) {
+				log("ERROR: could not find property type node with id " + typeId + "\n", HttpServletResponse.SC_BAD_REQUEST);
+			}
+		}
 	}
 
 	/**
@@ -248,8 +267,20 @@ public class ModelPost extends AbstractJavaWebScript {
 		EmsScriptNode source = findScriptNodeByName(sourceId);
 		EmsScriptNode target = findScriptNodeByName(targetId);
 
-		relationship.createOrUpdateAssociation(source, "sysml:source");
-		relationship.createOrUpdateAssociation(target, "sysml:target");
+		if (relationship != null && source != null && target != null) {
+			relationship.createOrUpdateAssociation(source, "sysml:source");
+			relationship.createOrUpdateAssociation(target, "sysml:target");
+		} else {
+			if (relationship == null) {
+				log("ERROR: could not find relationship node with id " + id + "\n", HttpServletResponse.SC_BAD_REQUEST);
+			}
+			if (source == null) {
+				log("ERROR: could not find source node with id " + sourceId + "\n", HttpServletResponse.SC_BAD_REQUEST);
+			}
+			if (target == null) {
+				log("ERROR: could not find target node with id " + targetId + "\n", HttpServletResponse.SC_BAD_REQUEST);
+			}
+		}
 	}
 
 	/**
@@ -269,6 +300,10 @@ public class ModelPost extends AbstractJavaWebScript {
 		if (array.length() > 0) {
 			// this is the element node
 			EmsScriptNode node = findScriptNodeByName(key);
+			if (node == null) {
+				log("ERROR: could not find element node with id " + key + "\n", HttpServletResponse.SC_BAD_REQUEST);
+				return;
+			}
 			
 			// create reified container if it doesn't exist
 			EmsScriptNode parent = findScriptNodeByName(pkgName);  // this is the reified element package
@@ -276,6 +311,7 @@ public class ModelPost extends AbstractJavaWebScript {
 				parent = node.getParent().createFolder(pkgName, "sysml:ElementFolder");
 				node.setProperty("sysml:id", key);
 				node.setProperty("cm:name", key);
+				node.setProperty("sysml:name", (String)node.getProperty("sysml:name"));
 			}
 			foundElements.put(pkgName, parent);
 			// make sure element and reified container in same place
@@ -287,6 +323,10 @@ public class ModelPost extends AbstractJavaWebScript {
 			// move elements to reified container if not already there
 			for (int ii = 0; ii < array.length(); ii++) {
 				EmsScriptNode child = findScriptNodeByName(array.getString(ii));
+				if (child == null) {
+					log("ERROR: could not find child node with id " + array.getString(ii) + "\n", HttpServletResponse.SC_BAD_REQUEST);
+					continue;
+				}
 				if (!child.getParent().equals(parent)) {
 					child.move(parent);
 				}
@@ -393,6 +433,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			try {
 				createOrUpdateModel(req, status);
 			} catch (JSONException e) {
+				log("ERROR: JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
 				e.printStackTrace();
 			}
 		}

@@ -69,6 +69,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	
     // response to HTTP request, made as class variable so all methods can update
     protected StringBuffer response = new StringBuffer();
+    protected Status responseStatus = new Status();
     
 	// JSON to Alfresco Content Model mapping
 	protected final Map<String, String> json2acm = new HashMap<String, String>() {
@@ -249,4 +250,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		return node;		
 	}
 		
+	protected void log(String msg, int code) {
+		response.append(msg);
+		responseStatus.setCode(code);
+		responseStatus.setMessage(msg);
+	}
 }

@@ -11,7 +11,7 @@
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.post" class="gov.nasa.jpl.view_repo.webscripts.ViewPostJson"
-		parent="webscript">
+		parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
@@ -19,21 +19,21 @@
 
 <!-- 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.site.delete"
-		class="gov.nasa.jpl.view_repo.webscripts.SiteDelete" parent="webscript">
+		class="gov.nasa.jpl.view_repo.webscripts.SiteDelete" parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.site.get"
-		class="gov.nasa.jpl.view_repo.webscripts.SiteGet" parent="webscript">
+		class="gov.nasa.jpl.view_repo.webscripts.SiteGet" parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.site.post"
-		class="gov.nasa.jpl.view_repo.webscripts.SitePost" parent="webscript">
+		class="gov.nasa.jpl.view_repo.webscripts.SitePost" parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
@@ -42,21 +42,21 @@
 
 <!-- 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.project.delete"
-		class="gov.nasa.jpl.view_repo.webscripts.ProjectDelete" parent="webscript">
+		class="gov.nasa.jpl.view_repo.webscripts.ProjectDelete" parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.project.get"
-		class="gov.nasa.jpl.view_repo.webscripts.ProjectGet" parent="webscript">
+		class="gov.nasa.jpl.view_repo.webscripts.ProjectGet" parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
  -->
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.project.post"
-		class="gov.nasa.jpl.view_repo.webscripts.ProjectPost" parent="webscript">
+		class="gov.nasa.jpl.view_repo.webscripts.ProjectPost" parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
@@ -64,7 +64,7 @@
 
 <!-- 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.element.delete"
-		class="gov.nasa.jpl.view_repo.webscripts.ElementDelete" parent="webscript">
+		class="gov.nasa.jpl.view_repo.webscripts.ElementDelete" parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
@@ -72,28 +72,28 @@
 -->
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.element.get"
-		class="gov.nasa.jpl.view_repo.webscripts.ModelGet" parent="webscript">
+		class="gov.nasa.jpl.view_repo.webscripts.ModelGet" parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.element.post"
-		class="gov.nasa.jpl.view_repo.webscripts.ModelPost" parent="webscript">
+		class="gov.nasa.jpl.view_repo.webscripts.ModelPost" parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.model.post"
-		class="gov.nasa.jpl.view_repo.webscripts.ModelPost" parent="webscript">
+		class="gov.nasa.jpl.view_repo.webscripts.ModelPost" parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.model.get"
-		class="gov.nasa.jpl.view_repo.webscripts.ModelGet" parent="webscript">
+		class="gov.nasa.jpl.view_repo.webscripts.ModelGet" parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />

@@ -11,7 +11,7 @@
   <url>/javawebscripts/element/{elementid}?recurse={recurse?}</url>
   <format default="json">any</format> 
   <authentication>user</authentication> 
-  <transaction allow="readwrite">required</transaction>
+  <transaction allow="readonly">required</transaction>
   <family>EMS Java Webscripts</family>
   <args>
   	<arg>
@@ -29,6 +29,8 @@
   							"Conform" | "Expose" | "Viewpoint",
   					"name": name,
   					"documentation": documentation,
+  					"author": lastModifiedAuthor,
+  					"lastModified": lastModifiedDate,
   					"owner": elementId,
   					"isView": true|false,
   					"isDerived": true|false, (if Property)
