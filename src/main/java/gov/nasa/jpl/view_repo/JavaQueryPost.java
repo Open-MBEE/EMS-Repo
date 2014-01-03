@@ -65,7 +65,7 @@ public class JavaQueryPost extends DeclarativeWebScript {
         int i=0;
         for ( File f : testClassFiles ) {
             String clsName = f.getName().replaceFirst( "[.](java|class)$", "" );
-            Class< ? > cls = ClassUtils.getClassForName( clsName, packageName, false );
+            Class< ? > cls = ClassUtils.getClassForName( clsName, null, packageName, false );
             testClasses[i++] = cls;
         }
         return testClasses;
