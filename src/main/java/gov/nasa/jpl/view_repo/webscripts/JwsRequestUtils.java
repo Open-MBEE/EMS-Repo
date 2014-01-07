@@ -44,7 +44,7 @@ public class JwsRequestUtils {
 	public static boolean validateContent(WebScriptRequest req, Status status, StringBuffer response) {
 		if (req.getContent() == null) {
 			status.setCode(HttpServletResponse.SC_NO_CONTENT);
-			response.append("No content provided");
+			response.append("No content providedn\n");
 			return false;
 		}
 		
@@ -54,7 +54,7 @@ public class JwsRequestUtils {
 	public static boolean validateSiteExists(SiteInfo siteInfo, Status status, StringBuffer response) {
 		if (siteInfo == null) {
 			status.setCode(HttpServletResponse.SC_NOT_FOUND);
-			response.append("Site not found");
+			response.append("Site not found.\n");
 			return false;
 		}
 		return true;
@@ -63,7 +63,7 @@ public class JwsRequestUtils {
 	public static boolean validatePermissions(WebScriptRequest request, Status status, StringBuffer response, ServiceRegistry services, NodeRef nodeRef, String permissions) {
 		if (services.getPermissionService().hasPermission(nodeRef, permissions) != AccessStatus.ALLOWED) {
 			status.setCode(HttpServletResponse.SC_UNAUTHORIZED);
-			response.append("No write priveleges to " + nodeRef.toString());
+			response.append("No write priveleges to " + nodeRef.toString() + "n\n");
 			return false;
 		}
 		return true;
@@ -72,7 +72,7 @@ public class JwsRequestUtils {
 	public static boolean validateRequestVariable(Status status, StringBuffer response, String value, String type) {
 		if (value == null) {
 			status.setCode(HttpServletResponse.SC_BAD_REQUEST);
-			response.append(type + " not provided");
+			response.append(type + " not providedn\n");
 			return false;
 		}
 		return true;
@@ -85,4 +85,5 @@ public class JwsRequestUtils {
 	public static String getRequestVar(WebScriptRequest req, String varid) {
 		return req.getServiceMatch().getTemplateVars().get(varid);
 	}
+	
 }

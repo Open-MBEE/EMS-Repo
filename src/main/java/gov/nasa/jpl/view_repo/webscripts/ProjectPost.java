@@ -74,8 +74,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
-		// clear out the response cache first (only one instance of each webscript)
-		response = new StringBuffer();
+		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
 		int statusCode = HttpServletResponse.SC_OK;
@@ -84,9 +83,10 @@ public class ProjectPost extends AbstractJavaWebScript {
 		try {
 			if (validateRequest(req, status)) {
 				statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId, siteName);
+			} else {
+				// TODO: Maybe check this out
+				statusCode = status.getCode(); // since status is set inside the validateRequest
 			}
-		} catch (JSONException e) {
-			e.printStackTrace();
 		} catch (Exception e) {
 			// this is most likely null pointer from poorly undefined request parameters
 			// TODO check permissions on Project updating 
@@ -112,7 +112,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		// make sure site exists
 		EmsScriptNode siteNode = getSiteNode(siteName);
 		if (siteNode == null) {
-			response.append("Site not found\n");
+			response.append("Site not found.\n");
 			return HttpServletResponse.SC_NOT_FOUND;
 		}
 		
@@ -123,8 +123,8 @@ public class ProjectPost extends AbstractJavaWebScript {
 				modelContainerNode = siteNode.createFolder(MODEL_PATH);
 				response.append("Model folder created.\n");
 			} else {
-				response.append("Model folder not found\n");
-				return HttpServletResponse.SC_FOUND;
+				response.append("Model folder not found.\n");
+				return HttpServletResponse.SC_NOT_FOUND;
 			}
 		}
 		
@@ -145,13 +145,14 @@ public class ProjectPost extends AbstractJavaWebScript {
 				projectNode.createOrUpdateProperty("cm:title", projectName);
 				projectNode.createOrUpdateProperty("sysml:name", projectName);
 				projectNode.createOrUpdateProperty("sysml:id", projectId);
+				response.append("Project metadata updated.\n");
 				// move sites if exists under different site
 				if (!projectNode.getParent().equals(modelContainerNode)) {
 					projectNode.move(modelContainerNode);
 					response.append("Project moved to specified site.\n");
 				}
 			} else {
-				response.append("Project not moved or name not updated.\n");
+				response.append("Project not moved or name not updated. Use fix=true to update.\n");
 				return HttpServletResponse.SC_FOUND;
 			}
 		}
@@ -167,15 +168,18 @@ public class ProjectPost extends AbstractJavaWebScript {
 			return false;
 		}
 		
+		// check site exists
 		if (!JwsRequestUtils.validateRequestVariable(status, response, siteName, JwsRequestUtils.SITE_NAME)) {
 			return false;
 		} 
 		
+		// get the site
 		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
 		if (!JwsRequestUtils.validateSiteExists(siteInfo, status, response)) {
 			return false;
 		}
 				
+		// check permissions
 		if (!JwsRequestUtils.validatePermissions(req, status, response, services, siteInfo.getNodeRef(), "Write")) {
 			return false;
 		}

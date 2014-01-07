@@ -91,11 +91,6 @@ public class ModelPost extends AbstractJavaWebScript {
 		}
 	}
 	
-	@Override
-	protected void clearCaches() {
-		super.clearCaches();
-		response = new StringBuffer();
-	}
 	
 	/**
 	 * Create or update the model as necessary based on the request
@@ -116,7 +111,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			}
 
 			Object object = postJson.get(jsonElementType);
-			long start = System.currentTimeMillis(); System.out.println("Processing " +jwsUtil.getJSONLength(object) + "  " + jsonElementType);
+//			long start = System.currentTimeMillis(); System.out.println("Processing " +jwsUtil.getJSONLength(object) + "  " + jsonElementType);
 			if (jsonElementType.equals(ELEMENTS) && useElements) {
 				jwsUtil.splitTransactions(new JwsFunctor() {
 					@Override
@@ -175,7 +170,7 @@ public class ModelPost extends AbstractJavaWebScript {
 					}
 				}, object);
 			}
-			long end = System.currentTimeMillis(); System.out.println(jsonElementType + " processed in " + (end-start) + " ms");
+//			long end = System.currentTimeMillis(); System.out.println(jsonElementType + " processed in " + (end-start) + " ms");
 		}
 	}
 	
@@ -319,16 +314,23 @@ public class ModelPost extends AbstractJavaWebScript {
 			if (!parent.getParent().equals(node.getParent())) {
 				parent.move(node.getParent());
 			}
-			
+						
 			// move elements to reified container if not already there
 			for (int ii = 0; ii < array.length(); ii++) {
-				EmsScriptNode child = findScriptNodeByName(array.getString(ii));
+				String childName = array.getString(ii);
+				EmsScriptNode child = findScriptNodeByName(childName);
 				if (child == null) {
-					log("ERROR: could not find child node with id " + array.getString(ii) + "\n", HttpServletResponse.SC_BAD_REQUEST);
+					log("ERROR: could not find child node with id " + childName + "\n", HttpServletResponse.SC_BAD_REQUEST);
 					continue;
 				}
 				if (!child.getParent().equals(parent)) {
 					child.move(parent);
+				}
+				
+				// move reified containers as necessary too
+				EmsScriptNode childPkg = findScriptNodeByName(childName + REIFIED_PKG_SUFFIX);
+				if (childPkg != null && !childPkg.getParent().equals(parent)) {
+					childPkg.move(parent);
 				}
 			}
 			

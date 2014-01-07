@@ -179,8 +179,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		}
 	}
 
+	/**
+	 * Utility for clearing out caches - TODO: test with the non-singleton Spring classes, as this may not be necessary
+	 */
 	protected void clearCaches() {
 		foundElements = new HashMap<String, EmsScriptNode>();
+		response = new StringBuffer();
 	}
 	
 	/**

@@ -66,7 +66,6 @@ public class ModelGet extends AbstractJavaWebScript {
 	@Override
 	protected void clearCaches() {
 		super.clearCaches();
-		response = new StringBuffer();
 		elementHierarchy = new JSONObject();
 		elements = new JSONObject();
 		relationships = new JSONObject();
