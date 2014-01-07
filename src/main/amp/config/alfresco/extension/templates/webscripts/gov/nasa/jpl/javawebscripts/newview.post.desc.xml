@@ -3,8 +3,8 @@
 		DRAFT
 		
 		{
-  			"views": {
-  				elementId: {
+  			"views": 
+  				[ {
   					"id": elementId;
   					"displayedElements": [elementId, ...],
   					"allowedElements": [elementId, ..],
@@ -52,7 +52,7 @@
   				 	],
   				}
   			
-			}
+			]
   		}
   		</description>
   		
