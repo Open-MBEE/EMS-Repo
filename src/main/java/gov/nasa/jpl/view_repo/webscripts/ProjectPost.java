@@ -62,8 +62,8 @@ public class ProjectPost extends AbstractJavaWebScript {
 	 * @param req
 	 */
 	private void parseRequestVariables(WebScriptRequest req) {
-		siteName = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.SITE_NAME);
-		projectId = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.PROJECT_ID);
+		siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+		projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
 		delete = jwsUtil.checkArgEquals(req, "delete", "true") ? true : false;
 		fix = jwsUtil.checkArgEquals(req, "fix", "true") ? true : false;
 	}
@@ -164,28 +164,28 @@ public class ProjectPost extends AbstractJavaWebScript {
 	 */
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		if (!JwsRequestUtils.validateContent(req, status, response)) {
+		if (!checkRequestContent(req)) {
 			return false;
 		}
 		
 		// check site exists
-		if (!JwsRequestUtils.validateRequestVariable(status, response, siteName, JwsRequestUtils.SITE_NAME)) {
+		if (!checkRequestVariable(siteName, SITE_NAME)) {
 			return false;
 		} 
 		
 		// get the site
 		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-		if (!JwsRequestUtils.validateSiteExists(siteInfo, status, response)) {
+		if (!checkRequestVariable(siteInfo, "Site")) {
 			return false;
 		}
 				
 		// check permissions
-		if (!JwsRequestUtils.validatePermissions(req, status, response, services, siteInfo.getNodeRef(), "Write")) {
+		if (!checkPermissions(siteInfo.getNodeRef(), "Write")) {
 			return false;
 		}
 		
-		String projectId = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.PROJECT_ID);
-		if (!JwsRequestUtils.validateRequestVariable(status, response, projectId, JwsRequestUtils.PROJECT_ID)) {
+		String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
+		if (!checkRequestVariable(projectId, PROJECT_ID)) {
 			return false;
 		}
 

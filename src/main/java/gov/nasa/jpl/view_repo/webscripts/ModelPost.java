@@ -117,29 +117,15 @@ public class ModelPost extends AbstractJavaWebScript {
 					@Override
 					public Object execute(JSONObject jsonObject, String key,
 							Boolean... flags) throws JSONException {
-						updateOrCreateElement(jsonObject, key);
+						updateOrCreateElement(jsonObject.getJSONObject(key));
 						return null;
 					}
 					@Override
 					public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
-						// do nothing, not called
+						updateOrCreateElement(jsonArray.getJSONObject(index));
 						return null;
 					}
 				}, object);
-			} else if (jsonElementType.equals(ROOTS) && useRoots) {
-				jwsUtil.splitTransactions(new JwsFunctor() {
-					@Override
-					public Object execute(JSONObject jsonObject, String key,
-							Boolean... flags) throws JSONException {
-						// do nothing, not called
-						return null;
-					}
-					@Override
-					public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
-						updateOrCreateRoot(jsonArray, index, flags[0]);
-						return null;
-					}
-				}, object, createRoots);
 			} else if (jsonElementType.equals(ELEMENT_HIERARCHY) && useHierarchy) {
 				jwsUtil.splitTransactions(new JwsFunctor() {
 					@Override
@@ -344,10 +330,11 @@ public class ModelPost extends AbstractJavaWebScript {
 	 * @param key			ID of element
 	 * @throws JSONException
 	 */
-	protected void updateOrCreateElement(JSONObject jsonObject, String key) throws JSONException {
+	protected void updateOrCreateElement(JSONObject object) throws JSONException {
 		// TODO check permissions
+//		JSONObject object = jsonObject.getJSONObject(key);
+		String key = object.getString("id");
 		long start = System.currentTimeMillis(); System.out.println("updateOrCreateElement " + key);
-		JSONObject object = jsonObject.getJSONObject(key);
 		
 		// find node if exists, otherwise create
 		EmsScriptNode node = findScriptNodeByName(key);
@@ -368,27 +355,14 @@ public class ModelPost extends AbstractJavaWebScript {
 		// create or update properties of node
 		Iterator<?> props = object.keys();
 		while(props.hasNext()) {
-			String type = (String) props.next();
-			String property = object.getString(type);
-			JSONArray array;
+			String jsonPropertyKey = (String) props.next();
+			String property = object.getString(jsonPropertyKey);
 			
 			// keep the special types for backwards compatibility
-			if (json2acm.containsKey(type)) {
-				String acmType = json2acm.get(type);
-				if (type.startsWith("is")) {
+			if (json2acm.containsKey(jsonPropertyKey)) {
+				String acmType = json2acm.get(jsonPropertyKey);
+				if (jsonPropertyKey.startsWith("is")) {
 					node.createOrUpdateProperty(acmType, new Boolean(property));
-				} else if (type.equals("boolean")) {
-					array = object.getJSONArray(type);
-					node.createOrUpdatePropertyValues(acmType, array, new Boolean(true));
-				} else if (type.equals("integer")) {
-					array = object.getJSONArray(type);
-					node.createOrUpdatePropertyValues(acmType, array, new Integer(0));
-				} else if (type.equals("double")) {
-					array = object.getJSONArray(type);
-					node.createOrUpdatePropertyValues(acmType, array, new Double(0.0));
-				} else if (type.equals("string")) {
-					array = object.getJSONArray(type);
-					node.createOrUpdatePropertyValues(acmType, array, new String(""));
 				} else {
 					node.createOrUpdateProperty(acmType, new String(property));
 				}
@@ -414,11 +388,10 @@ public class ModelPost extends AbstractJavaWebScript {
 			}
 		}
 		
+		// lets create the maps for the hierarchy, element values, and relationships
+		String owner = object.getString("owner");
+		
 		long end = System.currentTimeMillis(); System.out.println("\tTotal: " + (end-start));
-	}
-	
-	protected void updateOrCreateRoot(JSONArray jsonArray, int index, Boolean createRoot) {
-		// TODO complete when understand functionality
 	}
 
 	/**
@@ -447,13 +420,13 @@ public class ModelPost extends AbstractJavaWebScript {
 	
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		if (!JwsRequestUtils.validateContent(req, status, response)) {
+		if (!checkRequestContent(req)) {
 			return false;
 		}
 		
-		String elementId = JwsRequestUtils.getRequestVar(req, "elementid");
+		String elementId = req.getServiceMatch().getTemplateVars().get("elementid");
 		if (elementId != null) {
-			if (!JwsRequestUtils.validateRequestVariable(status, response, elementId, "elementid")) {
+			if (!checkRequestVariable(elementId, "elementid")) {
 				return false;
 			}
 			
@@ -472,22 +445,22 @@ public class ModelPost extends AbstractJavaWebScript {
 				return false;
 			}
 		} else {
-			String siteName = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.SITE_NAME);
-			if (!JwsRequestUtils.validateRequestVariable(status, response, siteName, JwsRequestUtils.SITE_NAME)) {
+			String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+			if (!checkRequestVariable(siteName, SITE_NAME)) {
 				return false;
 			} 
 	
-			String projectId = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.PROJECT_ID);
-			if (!JwsRequestUtils.validateRequestVariable(status, response, projectId, JwsRequestUtils.PROJECT_ID)) {
+			String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
+			if (!checkRequestVariable(projectId, PROJECT_ID)) {
 				return false;
 			}
 	
 			SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-			if (!JwsRequestUtils.validateSiteExists(siteInfo, status, response)) {
+			if (!checkRequestVariable(siteInfo, "Site")) {
 				return false;
 			}
 					
-			if (!JwsRequestUtils.validatePermissions(req, status, response, services, siteInfo.getNodeRef(), "Write")) {
+			if (!checkPermissions(siteInfo.getNodeRef(), "Write")) {
 				return false;
 			}
 	

@@ -33,6 +33,8 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
@@ -41,6 +43,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
+import org.alfresco.service.cmr.security.AccessStatus;
 import org.json.JSONArray;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
@@ -259,4 +262,32 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		responseStatus.setCode(code);
 		responseStatus.setMessage(msg);
 	}
+	
+	protected static final String PROJECT_ID = "projectId";
+	protected static final String SITE_NAME = "siteName";
+	
+	protected boolean checkRequestContent(WebScriptRequest req) {
+		if (req.getContent() == null || req.getContent().getSize() <= 0) {
+			log("No content provided.\n", HttpServletResponse.SC_NO_CONTENT);
+			return false;
+		}
+		return true;
+	}
+	
+	protected boolean checkPermissions(NodeRef nodeRef, String permissions) {
+		if (services.getPermissionService().hasPermission(nodeRef, permissions) != AccessStatus.ALLOWED) {
+			log("No write priveleges to " + nodeRef.toString() + ".\n", HttpServletResponse.SC_UNAUTHORIZED);
+			return false;
+		}
+		return true;
+	}
+
+	protected boolean checkRequestVariable(Object value, String type) {
+		if (value == null) {
+			log(type + " not provided.\n", HttpServletResponse.SC_BAD_REQUEST);
+			return false;
+		}
+		return true;
+	}
+
 }

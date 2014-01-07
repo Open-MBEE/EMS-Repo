@@ -216,7 +216,7 @@ public class ViewPostJson extends AbstractJavaWebScript {
 			return;
 		}
 		
-		viewid = JwsRequestUtils.getRequestVar(req, "viewid");
+		viewid = req.getServiceMatch().getTemplateVars().get("viewid");
 		if (viewid == null) {
 			return;
 		}

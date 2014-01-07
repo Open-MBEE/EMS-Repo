@@ -37,8 +37,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -75,17 +73,17 @@ public class ModelGet extends AbstractJavaWebScript {
 	
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		String modelId = JwsRequestUtils.getRequestVar(req, "modelid");
+		String modelId = req.getServiceMatch().getTemplateVars().get("modelid");
 		if (modelId == null) {
-			modelId = JwsRequestUtils.getRequestVar(req, "elementid");
+			modelId = req.getServiceMatch().getTemplateVars().get("elementid");
 		}
-		if (!JwsRequestUtils.validateRequestVariable(status, response, modelId, "modelid")) {
+		
+		if (!checkRequestVariable(modelId, "modelid")) {
 			return false;
 		}
 		
 		modelRootNode = findScriptNodeByName(modelId);
-		if (!JwsRequestUtils.validatePermissions(req, status, response, services, modelRootNode.getNodeRef(), "Read")) {
-			log("ERROR: Root node with id " + modelId + " not found\n", HttpServletResponse.SC_NOT_FOUND);
+		if (!checkPermissions(modelRootNode.getNodeRef(), "Read")) {
 			return false;
 		}
 		
