@@ -3,6 +3,11 @@
 <beans>
 	<!-- Bean definitions for all the Java backed webscripts -->
 	
+	<!-- Java backed webscript for logout with redirection on login -->
+	<bean id="webscript.gov.nasa.jpl.utils.logout.get"
+		class="gov.nasa.jpl.view_repo.webscripts.LogoutWebScript"
+		parent="webscript"/>
+	
 	<!-- Define the Java Webscript Utils bean - TODO: this may need to be made 
 		thread safe (e.g., instanced in each of the Java backed webscript beans) -->
 	<bean id="jwsUtil" class="gov.nasa.jpl.view_repo.webscripts.JwsUtil">
@@ -11,6 +16,20 @@
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.post" class="gov.nasa.jpl.view_repo.webscripts.ViewPostJson"
+		parent="webscript" singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.newview.post" class="gov.nasa.jpl.view_repo.webscripts.NewViewPost"
+		parent="webscript" singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+	
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.newview.get" class="gov.nasa.jpl.view_repo.webscripts.NewViewGet"
 		parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
