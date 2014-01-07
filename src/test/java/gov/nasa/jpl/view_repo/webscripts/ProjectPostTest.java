@@ -29,15 +29,18 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.util.ApplicationContextHelper;
 import org.json.JSONException;
@@ -52,33 +55,19 @@ import org.springframework.extensions.surf.util.InputStreamContent;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Match;
 import org.springframework.extensions.webscripts.Status;
+import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.servlet.WebScriptServletRequest;
 
 public class ProjectPostTest {
 	private static final String ADMIN_USER_NAME = "admin";
 
 	protected static ProjectPost projectPostComponent;
-	
 	protected static ApplicationContext applicationContext;
+	
+	private static final String SITE_NAME = "europa";
+	
+	private static SiteService siteService;
 
-	private static void initAppContext() {
-        ApplicationContextHelper.setUseLazyLoading(false);
-        ApplicationContextHelper.setNoAutoStart(true);
-        applicationContext = ApplicationContextHelper.getApplicationContext(new String[] { "classpath:alfresco/application-context.xml" });
-        
-        projectPostComponent = (ProjectPost) applicationContext.getBean("webscript.gov.nasa.jpl.javawebscripts.project.post");
-        
-        AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
-	}
-	
-	private static void initAlfresco() {
-		ServiceRegistry services = (ServiceRegistry)applicationContext.getBean("ServiceRegistry");
-		SiteService siteService = services.getSiteService();
-		if (siteService.getSite("europa") == null) {
-			siteService.createSite("europa", "europa", "Europa", "europa site", true);
-		}
-	}
-	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		initAppContext();
@@ -96,31 +85,97 @@ public class ProjectPostTest {
 	@After
 	public void tearDown() throws Exception {
 	}
+	
+	
+	
 
 	@Test
-	public void test() throws JSONException {
-		// need to mockup and stub the WebScriptRequest - mockito cannot handle final classes
-		// such as Match, so we have to create the appropriate values here
+	public void nominalTest() throws JSONException {
+		// build up all the request data
 		Map<String, String> templateVars = new HashMap<String, String>();
-		templateVars.put("siteName", "europa");
+		templateVars.put("siteName", SITE_NAME);
 		templateVars.put("projectId", "123456");
 		
-		Match match = new Match("", templateVars, "");
-		assertNotNull(match);
+		JSONObject json = new JSONObject();
+		json.append("name", "Clipper");
 		
-		WebScriptServletRequest request = mock(WebScriptServletRequest.class);
-		assertNotNull(request);
-		when(request.getServiceMatch()).thenReturn(match);
-		when(request.getParameter("fix")).thenReturn("true");
-		when(request.getParameter("delete")).thenReturn("false");
-		JSONObject value = new JSONObject();
-		value.append("name", "Clipper");
-		when(request.getContent()).thenReturn(new InputStreamContent(null, null, null));
-		when(request.parseContent()).thenReturn(value);
-		
-		Map<String, Object> model = projectPostComponent.executeImpl(request, new Status(), new Cache());
-		
+		Map<String, String> parameters = new HashMap<String, String>();
+		parameters.put("fix", "true");
+		parameters.put("delete", "false");
+
+		Status status = new Status();
+
+		// create mock and add stubs
+		WebScriptRequest request = mockRequestAndStubs(templateVars, parameters, json);
+
+		// do actual tests
+		Map<String, Object> model;
+
+		// call with no site built
+		model = projectPostComponent.executeImpl(request, status, new Cache());
 		System.out.println(model);
+		assertEquals("Site not found", HttpServletResponse.SC_NOT_FOUND, status.getCode());
+
+		// create the site
+		siteService.createSite(SITE_NAME, SITE_NAME, SITE_NAME, SITE_NAME, true);
+
+		// call the web service, don't force fix
+		parameters.put("fix", "false");
+		model = projectPostComponent.executeImpl(request, status, new Cache());
+		assertEquals("Model folder not found", HttpServletResponse.SC_NOT_FOUND, status.getCode());
+
+		// call the web service, force fix
+		parameters.put("fix", "true");
+		model = projectPostComponent.executeImpl(request, status, new Cache());
+		assertEquals("Project not created", HttpServletResponse.SC_OK, status.getCode());
+		
+		// call web service again with same project
+		model = projectPostComponent.executeImpl(request, status, new Cache());
+		assertEquals("Project already created", HttpServletResponse.SC_FOUND, status.getCode());
+		
+		// call web service with bad JSON
+		json = new JSONObject();
+		model = projectPostComponent.executeImpl(request, status, new Cache());
+		assertEquals("Bad JSON supplied", HttpServletResponse.SC_BAD_REQUEST, status.getCode());
 	}
 
+	protected WebScriptRequest mockRequestAndStubs(Map<String, String> templateVars, Map<String, String> parameters, JSONObject json) {
+		WebScriptRequest request = mock(WebScriptServletRequest.class);
+		
+		Match match = new Match("", templateVars, "");
+		when(request.getServiceMatch()).thenReturn(match);
+		when(request.getContent()).thenReturn(new InputStreamContent(null, null, null));
+		when(request.parseContent()).thenReturn(json);
+		
+		for (String key: parameters.keySet()) {
+			when(request.getParameter(key)).thenReturn(parameters.get(key));
+		}
+		
+		return request;
+	}
+
+	/**
+	 * Initialize the application context
+	 */
+	private static void initAppContext() {
+        ApplicationContextHelper.setUseLazyLoading(false);
+        ApplicationContextHelper.setNoAutoStart(true);
+        applicationContext = ApplicationContextHelper.getApplicationContext(new String[] { "classpath:alfresco/application-context.xml" });
+        
+        projectPostComponent = (ProjectPost) applicationContext.getBean("webscript.gov.nasa.jpl.javawebscripts.project.post");
+        
+        AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
+	}
+	
+	/**
+	 * Initialize the Alfresco setup
+	 */
+	private static void initAlfresco() {
+		ServiceRegistry services = (ServiceRegistry)applicationContext.getBean("ServiceRegistry");
+		siteService = services.getSiteService();
+		SiteInfo site = siteService.getSite(SITE_NAME);
+		if (site != null) {
+			siteService.deleteSite(SITE_NAME);
+		}
+	}
 }

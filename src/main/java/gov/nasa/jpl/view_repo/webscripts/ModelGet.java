@@ -37,8 +37,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -57,7 +55,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ModelGet extends AbstractJavaWebScript {
 	private JSONObject elementHierarchy = new JSONObject();
-	private JSONObject elements = new JSONObject();
+	private JSONArray elements = new JSONArray();
 	private JSONObject relationships = new JSONObject();
 	private EmsScriptNode modelRootNode = null;
 	private Set<String> foundRelationships = new HashSet<String>();
@@ -66,9 +64,8 @@ public class ModelGet extends AbstractJavaWebScript {
 	@Override
 	protected void clearCaches() {
 		super.clearCaches();
-		response = new StringBuffer();
 		elementHierarchy = new JSONObject();
-		elements = new JSONObject();
+		elements = new JSONArray();
 		relationships = new JSONObject();
 		foundProperties = new HashSet<String>();
 		foundRelationships = new HashSet<String>();
@@ -76,17 +73,17 @@ public class ModelGet extends AbstractJavaWebScript {
 	
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		String modelId = JwsRequestUtils.getRequestVar(req, "modelid");
+		String modelId = req.getServiceMatch().getTemplateVars().get("modelid");
 		if (modelId == null) {
-			modelId = JwsRequestUtils.getRequestVar(req, "elementid");
+			modelId = req.getServiceMatch().getTemplateVars().get("elementid");
 		}
-		if (!JwsRequestUtils.validateRequestVariable(status, response, modelId, "modelid")) {
+		
+		if (!checkRequestVariable(modelId, "modelid")) {
 			return false;
 		}
 		
 		modelRootNode = findScriptNodeByName(modelId);
-		if (!JwsRequestUtils.validatePermissions(req, status, response, services, modelRootNode.getNodeRef(), "Read")) {
-			log("ERROR: Root node with id " + modelId + " not found\n", HttpServletResponse.SC_NOT_FOUND);
+		if (!checkPermissions(modelRootNode.getNodeRef(), "Read")) {
 			return false;
 		}
 		
@@ -137,7 +134,7 @@ public class ModelGet extends AbstractJavaWebScript {
 				// make sure to put the root node in as a found element
 				foundElements.put((String)modelRootNode.getProperty("cm:name"), modelRootNode);
 				handleElements();
-				handleRelationships();
+//				handleRelationships();
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
@@ -145,9 +142,9 @@ public class ModelGet extends AbstractJavaWebScript {
 		
 		JSONObject top = new JSONObject();
 		try {
-			top.put("elementHierarchy", elementHierarchy);
+//			top.put("elementHierarchy", elementHierarchy);
 			top.put("elements", elements);
-			top.put("relationships", relationships);
+//			top.put("relationships", relationships);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -238,7 +235,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			// TODO perhaps get the sysml id onto the reified container as well?
 //			element.put("owner", nodeService.getProperty(nodeService.getPrimaryParent(node).getParentRef(), jwsUtil.createQName("sysml:id")));
 			
-			elements.put(id, element);
+			elements.put(element);
 		}
 	}
 

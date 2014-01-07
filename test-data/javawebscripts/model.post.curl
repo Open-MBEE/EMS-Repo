@@ -1,6 +1,8 @@
 # post new elements
 curl -X POST -u admin:admin -H "Content-Type:application/json" --data @model.post.elements.js "http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/17_0123455/model"
 
+ curl -w "%{http_code}" -X POST -u admin:admin -H "Content-Type:application/json" --data @JsonData/element.post.json "http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/170123455/model"
+
 # get elements
 curl -X GET -u admin:admin "http://localhost:8080/view-repo/service/javawebscripts/model/17_0123455"
 
