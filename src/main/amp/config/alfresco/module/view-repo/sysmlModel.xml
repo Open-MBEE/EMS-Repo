@@ -325,7 +325,7 @@
                     <mandatory>false</mandatory>
                     <index enabled="false"/>
                 </property>
-                <property name="view2:sources"> <!--  json string cache of all elements referenced in this view -->
+                <property name="view2:displayedElements"> <!--  json string cache of all elements referenced in this view -->
                 	<type>d:text</type>
                     <mandatory>false</mandatory>
                     <index enabled="true">
@@ -334,7 +334,7 @@
                 		<tokenised>true</tokenised>
                     </index>
                 </property>
-                <property name="view2:allowedSources"> <!--  json string cache of all elements allowed to be transcluded in this view -->
+                <property name="view2:allowedElements"> <!--  json string cache of all elements allowed to be transcluded in this view -->
                 	<type>d:text</type>
                     <mandatory>false</mandatory>
                     <index enabled="false"/>
@@ -358,11 +358,6 @@
                 	<index enabled="false"/>
                 </property>
                 <property name="view2:noSections"> <!--  json string cache of which views are no sections (may go away in future) -->
-                	<type>d:text</type>
-                    <mandatory>false</mandatory>
-                    <index enabled="false"/>
-                </property>
-                <property name="view2:rootViews"> <!--  json string cache of which views the root level views -->
                 	<type>d:text</type>
                     <mandatory>false</mandatory>
                     <index enabled="false"/>

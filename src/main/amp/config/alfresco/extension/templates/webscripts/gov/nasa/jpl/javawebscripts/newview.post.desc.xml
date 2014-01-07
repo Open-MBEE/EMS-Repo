@@ -8,6 +8,7 @@
   					"id": elementId;
   					"displayedElements": [elementId, ...],
   					"allowedElements": [elementId, ..],
+  					"chlidrenViews": [viewId, ..],
   				 	"contains": [
   				 		{
   				 			"type": Paragraph", 
