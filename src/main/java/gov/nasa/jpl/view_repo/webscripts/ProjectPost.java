@@ -84,8 +84,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 			if (validateRequest(req, status)) {
 				statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId, siteName);
 			} else {
-				// TODO: Maybe check this out
-				statusCode = status.getCode(); // since status is set inside the validateRequest
+				statusCode = responseStatus.getCode();
 			}
 		} catch (Exception e) {
 			// this is most likely null pointer from poorly undefined request parameters

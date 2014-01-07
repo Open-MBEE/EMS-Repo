@@ -55,7 +55,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ModelGet extends AbstractJavaWebScript {
 	private JSONObject elementHierarchy = new JSONObject();
-	private JSONObject elements = new JSONObject();
+	private JSONArray elements = new JSONArray();
 	private JSONObject relationships = new JSONObject();
 	private EmsScriptNode modelRootNode = null;
 	private Set<String> foundRelationships = new HashSet<String>();
@@ -65,7 +65,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	protected void clearCaches() {
 		super.clearCaches();
 		elementHierarchy = new JSONObject();
-		elements = new JSONObject();
+		elements = new JSONArray();
 		relationships = new JSONObject();
 		foundProperties = new HashSet<String>();
 		foundRelationships = new HashSet<String>();
@@ -134,7 +134,7 @@ public class ModelGet extends AbstractJavaWebScript {
 				// make sure to put the root node in as a found element
 				foundElements.put((String)modelRootNode.getProperty("cm:name"), modelRootNode);
 				handleElements();
-				handleRelationships();
+//				handleRelationships();
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
@@ -142,9 +142,9 @@ public class ModelGet extends AbstractJavaWebScript {
 		
 		JSONObject top = new JSONObject();
 		try {
-			top.put("elementHierarchy", elementHierarchy);
+//			top.put("elementHierarchy", elementHierarchy);
 			top.put("elements", elements);
-			top.put("relationships", relationships);
+//			top.put("relationships", relationships);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -235,7 +235,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			// TODO perhaps get the sysml id onto the reified container as well?
 //			element.put("owner", nodeService.getProperty(nodeService.getPrimaryParent(node).getParentRef(), jwsUtil.createQName("sysml:id")));
 			
-			elements.put(id, element);
+			elements.put(element);
 		}
 	}
 

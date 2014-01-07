@@ -103,6 +103,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			put("double", "sysml:double");
 			put("expression", "sysml:expression");
 			put("valueType", "sysml:valueType");
+			put("id", "sysml:id");
+			put("source", "sysml:source");
+			put("target", "sysml:target");
 			
 			put("LiteralBoolean", "sysml:boolean");
 			put("LiteralInteger", "sysml:integer");
@@ -132,10 +135,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			put("sysml:Conform", "Conform");
 			put("sysml:Expose", "Expose");
 			put("sysml:Viewpoint", "Viewpoint");
+			put("sysml:id", "id");
 			put("sysml:name", "name");
 			put("sysml:documentation", "documentation");
 			put("sysml:isDerived", "isDerived");
 			put("sysml:isSlot", "isSlot");
+			put("sysml:source", "source");
+			put("sysml:target", "target");
 			/*
 			put("sysml:boolean", "boolean");
 			put("sysml:string", "string");
@@ -267,7 +273,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	protected static final String SITE_NAME = "siteName";
 	
 	protected boolean checkRequestContent(WebScriptRequest req) {
-		if (req.getContent() == null || req.getContent().getSize() <= 0) {
+		if (req.getContent() == null) {
 			log("No content provided.\n", HttpServletResponse.SC_NO_CONTENT);
 			return false;
 		}

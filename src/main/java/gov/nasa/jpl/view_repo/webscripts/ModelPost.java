@@ -62,32 +62,28 @@ public class ModelPost extends AbstractJavaWebScript {
 	private final String ELEMENTS = "elements";
 	private final String RELATIONSHIPS = "relationships";
 	
+	private JSONObject elementHierarchyJson;
+	private JSONObject relationshipsJson;
+	
 	// NOTE: Order is necessary
 	private final String[] JSON_ELEMENT_TYPES = {ELEMENTS, ROOTS, ELEMENT_HIERARCHY, RELATIONSHIPS};
-	private boolean createRoots = false;
-	private boolean useHierarchy=true;
 	private boolean useElements=true;
 	private boolean useRelationshipElements=true;
 	private boolean usePropertyTypes=true;
 	private boolean useElementValues=true;
-	private boolean useRoots=true;
 	private boolean toggleChoices = false;
 	
 	/**
 	 * Parse the URL request variables so they're globally available
 	 * @param req	URL request to parse
 	 */
-	private void parseRequestVariables(WebScriptRequest req) {
-		createRoots = jwsUtil.checkArgEquals(req, "createRoots", "true") ? true : false;
-		
+	private void parseRequestVariables(WebScriptRequest req) {		
 		toggleChoices = jwsUtil.checkArgEquals(req, "toggleChoices", "true") ? true : false;
 		if (toggleChoices) {
-			useHierarchy = jwsUtil.checkArgEquals(req, "hierarchy", "true") ? true : false;
 			useElements = jwsUtil.checkArgEquals(req, "elements", "true") ? true : false;
 			useRelationshipElements = jwsUtil.checkArgEquals(req, "relationshipElements", "true") ? true : false;
 			usePropertyTypes = jwsUtil.checkArgEquals(req, "propertyTypes", "true") ? true : false;
 			useElementValues = jwsUtil.checkArgEquals(req, "elementValues", "true") ? true : false;
-			useRoots = jwsUtil.checkArgEquals(req, "roots", "true") ? true : false;
 		}
 	}
 	
@@ -126,36 +122,36 @@ public class ModelPost extends AbstractJavaWebScript {
 						return null;
 					}
 				}, object);
-			} else if (jsonElementType.equals(ELEMENT_HIERARCHY) && useHierarchy) {
-				jwsUtil.splitTransactions(new JwsFunctor() {
-					@Override
-					public Object execute(JSONObject jsonObject, String key,
-							Boolean... flags) throws JSONException {
-						updateOrCreateElementHierarchy(jsonObject, key);
-						return null;
-					}
-					@Override
-					public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
-						// do nothing, not called
-						return null;
-					}
-				}, object);
-			} else if (jsonElementType.equals(RELATIONSHIPS)) {
-				// TODO split this out updating the separate relationships underneath
-				jwsUtil.splitTransactions(new JwsFunctor() {
-					@Override
-					public Object execute(JSONObject jsonObject, String key,
-							Boolean... flags) throws JSONException {
-						updateOrCreateRelationships(jsonObject, key);
-						return null;
-					}
-					@Override
-					public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
-						// do nothing, not called
-						return null;
-					}
-				}, object);
-			}
+			} 
+			
+			jwsUtil.splitTransactions(new JwsFunctor() {
+				@Override
+				public Object execute(JSONObject jsonObject, String key,
+						Boolean... flags) throws JSONException {
+					updateOrCreateElementHierarchy(jsonObject, key);
+					return null;
+				}
+				@Override
+				public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
+					// do nothing, not called
+					return null;
+				}
+			}, elementHierarchyJson);
+
+			// TODO split this out updating the separate relationships underneath
+			jwsUtil.splitTransactions(new JwsFunctor() {
+				@Override
+				public Object execute(JSONObject jsonObject, String key,
+						Boolean... flags) throws JSONException {
+					updateOrCreateRelationships(jsonObject, key);
+					return null;
+				}
+				@Override
+				public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
+					// do nothing, not called
+					return null;
+				}
+			}, relationshipsJson);
 //			long end = System.currentTimeMillis(); System.out.println(jsonElementType + " processed in " + (end-start) + " ms");
 		}
 	}
@@ -330,33 +326,33 @@ public class ModelPost extends AbstractJavaWebScript {
 	 * @param key			ID of element
 	 * @throws JSONException
 	 */
-	protected void updateOrCreateElement(JSONObject object) throws JSONException {
+	protected void updateOrCreateElement(JSONObject elementJson) throws JSONException {
 		// TODO check permissions
 //		JSONObject object = jsonObject.getJSONObject(key);
-		String key = object.getString("id");
-		long start = System.currentTimeMillis(); System.out.println("updateOrCreateElement " + key);
+		String id = elementJson.getString("id");
+		long start = System.currentTimeMillis(); System.out.println("updateOrCreateElement " + id);
 		
 		// find node if exists, otherwise create
-		EmsScriptNode node = findScriptNodeByName(key);
+		EmsScriptNode node = findScriptNodeByName(id);
 		if (node == null) {
-			node = projectNode.createNode(key, json2acm.get(object.getString("type")));
-			node.setProperty("cm:name", key);
-			node.setProperty("sysml:id", key);
+			node = projectNode.createNode(id, json2acm.get(elementJson.getString("type")));
+			node.setProperty("cm:name", id);
+			node.setProperty("sysml:id", id);
 			// TODO temporarily set title - until we figure out how to use sysml:name in repository browser
-			node.setProperty("cm:title", object.getString("name"));
+			node.setProperty("cm:title", elementJson.getString("name"));
 		}
-		foundElements.put(key, node); // cache the found value
+		foundElements.put(id, node); // cache the found value
 		
 		// need to add View aspect before adding any properties (so they're valid properties of the node)
-		if (object.has("isView") && object.getString("isView").equals(true)) {
+		if (elementJson.has("isView") && elementJson.getString("isView").equals(true)) {
 			node.createOrUpdateAspect("sysml:View");
 		}
 		
 		// create or update properties of node
-		Iterator<?> props = object.keys();
+		Iterator<?> props = elementJson.keys();
 		while(props.hasNext()) {
 			String jsonPropertyKey = (String) props.next();
-			String property = object.getString(jsonPropertyKey);
+			String property = elementJson.getString(jsonPropertyKey);
 			
 			// keep the special types for backwards compatibility
 			if (json2acm.containsKey(jsonPropertyKey)) {
@@ -372,10 +368,10 @@ public class ModelPost extends AbstractJavaWebScript {
 		}
 		
 		// lets deal with the value and valueType now for forwards compatibility
-		if (object.has("valueType")) {
-			String acmType = json2acm.get(object.get("valueType"));
+		if (elementJson.has("valueType")) {
+			String acmType = json2acm.get(elementJson.get("valueType"));
 			if (acmType != null) {
-				JSONArray array = object.getJSONArray("value");
+				JSONArray array = elementJson.getJSONArray("value");
 				if (acmType.equals("sysml:boolean")) {
 					node.createOrUpdatePropertyValues(acmType, array, new Boolean(true));
 				} else if (acmType.equals("sysml:integer")) {
@@ -384,12 +380,43 @@ public class ModelPost extends AbstractJavaWebScript {
 					node.createOrUpdatePropertyValues(acmType, array, new Double(0.0));
 				} else {
 					node.createOrUpdatePropertyValues(acmType, array, new String(""));
+					// fill in the Element Values to be assigned later
+					if (elementJson.get("valueType").equals("ElementValue")) {
+						if (!relationshipsJson.has("elementValues")) {
+							relationshipsJson.put("elementValues", new JSONObject());
+						}
+						relationshipsJson.getJSONObject("elementValues").put(id, array);
+					}
 				}
 			}
 		}
 		
 		// lets create the maps for the hierarchy, element values, and relationships
-		String owner = object.getString("owner");
+		String owner = elementJson.getString("owner");
+		if (!elementHierarchyJson.has(owner)) {
+			elementHierarchyJson.put(owner, new JSONArray());
+		}
+		elementHierarchyJson.getJSONArray(owner).put(id);
+		
+		if (elementJson.has("propertyType")) {
+			String propertyType = elementJson.getString("propertyType");
+			if (!relationshipsJson.has("propertyType")) {
+				relationshipsJson.put("propertyTypes", new JSONObject());
+			}
+			relationshipsJson.getJSONObject("propertyTypes").put(id, propertyType);
+		}
+		
+		if (elementJson.has("source") && elementJson.has("target")) {
+			if (!relationshipsJson.has("relationshipElements")) {
+				relationshipsJson.put("relationshipElements", new JSONObject());
+			}
+			JSONObject relJson = new JSONObject();
+			String source = elementJson.getString("source");
+			String target = elementJson.getString("target");
+			relJson.put("source", source);
+			relJson.put("target", target);
+			relationshipsJson.getJSONObject("relationshipElements").put(id, relJson);
+		}
 		
 		long end = System.currentTimeMillis(); System.out.println("\tTotal: " + (end-start));
 	}
@@ -401,7 +428,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	protected Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
 		Map<String, Object> model = new HashMap<String, Object>();
-		StringBuffer response = new StringBuffer();
+		clearCaches();
 		
 		if (validateRequest(req, status)) {
 			parseRequestVariables(req);
@@ -467,10 +494,18 @@ public class ModelPost extends AbstractJavaWebScript {
 			EmsScriptNode siteNode = getSiteNode(siteName);
 			projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
 			if (projectNode == null) {
+				log("Project not found.\n", HttpServletResponse.SC_NOT_FOUND);
 				return false;
 			}
 		}
 		
 		return true;
+	}
+	
+	@Override
+	protected void clearCaches() {
+		super.clearCaches();
+		elementHierarchyJson = new JSONObject();
+		relationshipsJson = new JSONObject();
 	}
 }
