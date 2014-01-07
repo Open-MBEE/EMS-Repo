@@ -30,9 +30,7 @@ public class JavaQueryTest {
 
     @BeforeClass
     public static void initAppContext() {
-        // TODO: Make testing properly working without need for helpers
-        // TODO: Provide this in an SDK base class
-        javaQueryComponent = JavaQuery.getInstance();
+        javaQueryComponent = JavaQuery.initAppContext();
     }
 
     @Test

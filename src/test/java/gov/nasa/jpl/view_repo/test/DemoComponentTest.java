@@ -13,6 +13,7 @@ import javax.jcr.SimpleCredentials;
 
 import gov.nasa.jpl.view_repo.DemoComponent;
 
+import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -50,12 +51,16 @@ public class DemoComponentTest {
         // TODO: Provide this in an SDK base class
         ApplicationContextHelper.setUseLazyLoading(false);
         ApplicationContextHelper.setNoAutoStart(true);
-        applicationContext = ApplicationContextHelper.getApplicationContext(new String[] { "classpath:alfresco/application-context.xml" });
-        demoComponent = (DemoComponent) applicationContext.getBean("changeme.exampleComponent");
-        nodeService = (NodeService) applicationContext.getBean("NodeService");
-        AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
-        log.debug("Sample test logging: If you see this message, means your unit test logging is properly configured. Change it in test-log4j.properties");
-        log.debug("Sample test logging: Application Context properly loaded");
+        try {
+            applicationContext = ApplicationContextHelper.getApplicationContext(new String[] { "classpath:alfresco/application-context.xml" });
+            demoComponent = (DemoComponent) applicationContext.getBean("changeme.exampleComponent");
+            nodeService = (NodeService) applicationContext.getBean("NodeService");
+            AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
+            log.debug("Sample test logging: If you see this message, means your unit test logging is properly configured. Change it in test-log4j.properties");
+            log.debug("Sample test logging: Application Context properly loaded");
+        } catch ( AlfrescoRuntimeException e ) {
+            e.printStackTrace();
+        }
     }
     
 

@@ -648,67 +648,67 @@ public class CmisModelInterfaceImpl
         return null;
     }
 
-    @Override
-    public
-            Collection< Object >
-            map( Collection< CmisObject > elements, Method method,
-                 int indexOfObjectArgument, Object... otherArguments )
-                                                                       throws InvocationTargetException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public
-            Collection< Object >
-            filter( Collection< CmisObject > elements, Method method,
-                    int indexOfObjectArgument, Object... otherArguments )
-                                                                          throws InvocationTargetException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public
-            boolean
-            forAll( Collection< CmisObject > elements, Method method,
-                    int indexOfObjectArgument, Object... otherArguments )
-                                                                          throws InvocationTargetException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public
-            boolean
-            thereExists( Collection< CmisObject > elements, Method method,
-                         int indexOfObjectArgument, Object... otherArguments )
-                                                                               throws InvocationTargetException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public
-            Object
-            fold( Collection< CmisObject > elements, Object initialValue,
-                  Method method, int indexOfObjectArgument,
-                  int indexOfPriorResultArgument, Object... otherArguments )
-                                                                            throws InvocationTargetException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public
-            Collection< CmisObject >
-            sort( Collection< CmisObject > elements,
-                  Comparator< ? > comparator, Method method,
-                  int indexOfObjectArgument, Object... otherArguments )
-                                                                        throws InvocationTargetException {
-        // TODO Auto-generated method stub
-        return null;
-    }
+//    @Override
+//    public
+//            Collection< Object >
+//            map( Collection< CmisObject > elements, Method method,
+//                 int indexOfObjectArgument, Object... otherArguments )
+//                                                                       throws InvocationTargetException {
+//        // TODO Auto-generated method stub
+//        return null;
+//    }
+//
+//    @Override
+//    public
+//            Collection< Object >
+//            filter( Collection< CmisObject > elements, Method method,
+//                    int indexOfObjectArgument, Object... otherArguments )
+//                                                                          throws InvocationTargetException {
+//        // TODO Auto-generated method stub
+//        return null;
+//    }
+//
+//    @Override
+//    public
+//            boolean
+//            forAll( Collection< CmisObject > elements, Method method,
+//                    int indexOfObjectArgument, Object... otherArguments )
+//                                                                          throws InvocationTargetException {
+//        // TODO Auto-generated method stub
+//        return false;
+//    }
+//
+//    @Override
+//    public
+//            boolean
+//            thereExists( Collection< CmisObject > elements, Method method,
+//                         int indexOfObjectArgument, Object... otherArguments )
+//                                                                               throws InvocationTargetException {
+//        // TODO Auto-generated method stub
+//        return false;
+//    }
+//
+//    @Override
+//    public
+//            Object
+//            fold( Collection< CmisObject > elements, Object initialValue,
+//                  Method method, int indexOfObjectArgument,
+//                  int indexOfPriorResultArgument, Object... otherArguments )
+//                                                                            throws InvocationTargetException {
+//        // TODO Auto-generated method stub
+//        return null;
+//    }
+//
+//    @Override
+//    public
+//            Collection< CmisObject >
+//            sort( Collection< CmisObject > elements,
+//                  Comparator< ? > comparator, Method method,
+//                  int indexOfObjectArgument, Object... otherArguments )
+//                                                                        throws InvocationTargetException {
+//        // TODO Auto-generated method stub
+//        return null;
+//    }
 
     @Override
     public Class< CmisObject > getObjectClass() {
@@ -798,14 +798,14 @@ public class CmisModelInterfaceImpl
         
     }
 
-    @Override
-    public void
-            addDomainConstraint( CmisObject constraint, String version,
-                                 util.Pair< Object, Object > valueDomainRange,
-                                 Object workspace ) {
-        // TODO Auto-generated method stub
-        
-    }
+//    @Override
+//    public void
+//            addDomainConstraint( CmisObject constraint, String version,
+//                                 util.Pair< Object, Object > valueDomainRange,
+//                                 Object workspace ) {
+//        // TODO Auto-generated method stub
+//        
+//    }
 
     @Override
     public void relaxDomain( CmisObject constraint, String version,
@@ -814,13 +814,13 @@ public class CmisModelInterfaceImpl
         
     }
 
-    @Override
-    public void relaxDomain( CmisObject constraint, String version,
-                             util.Pair< Object, Object > valueDomainRange,
-                             Object workspace ) {
-        // TODO Auto-generated method stub
-        
-    }
+//    @Override
+//    public void relaxDomain( CmisObject constraint, String version,
+//                             util.Pair< Object, Object > valueDomainRange,
+//                             Object workspace ) {
+//        // TODO Auto-generated method stub
+//        
+//    }
 
     @Override
     public Collection< CmisObject >
@@ -862,6 +862,219 @@ public class CmisModelInterfaceImpl
     public Number getScore() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public
+            void
+            addDomainConstraint( CmisObject arg0,
+                                 String arg1,
+                                 gov.nasa.jpl.mbee.util.Pair< Object, Object > arg2,
+                                 Object arg3 ) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public CmisObject asConstraint( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public OperationContext asContext( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String asIdentifier( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String asName( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public CmisObject asObject( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Object asProperty( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Relationship asRelationship( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ObjectType asType( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Object asValue( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String asVersion( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Object asWorkspace( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public
+            Collection< Object >
+            filter( Collection< CmisObject > arg0,
+                    sysml.SystemModel.MethodCall arg1, int arg2 )
+                                                                 throws InvocationTargetException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public
+            Object
+            fold( Collection< CmisObject > arg0, Object arg1,
+                  sysml.SystemModel.MethodCall arg2, int arg3, int arg4 )
+                                                                         throws InvocationTargetException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public
+            boolean
+            forAll( Collection< CmisObject > arg0,
+                    sysml.SystemModel.MethodCall arg1, int arg2 )
+                                                                 throws InvocationTargetException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public Collection< OperationContext > getContext() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public CmisObject getObjectForRole( Relationship arg0, String arg1,
+                                        String arg2 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public CmisObject getRelatedObjects( Relationship arg0, String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public CmisObject getSource( Relationship arg0, String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public CmisObject getTarget( Relationship arg0, String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String getVersion() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Object getWorkspace() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean isDirected( Relationship arg0, String arg1 ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public
+            Collection< Object >
+            map( Collection< CmisObject > arg0,
+                 sysml.SystemModel.MethodCall arg1, int arg2 )
+                                                              throws InvocationTargetException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void
+            relaxDomain( CmisObject arg0, String arg1,
+                         gov.nasa.jpl.mbee.util.Pair< Object, Object > arg2,
+                         Object arg3 ) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void setContext( Collection< OperationContext > arg0 ) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void setVersion( String arg0 ) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void setWorkspace( Object arg0 ) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public
+            Collection< CmisObject >
+            sort( Collection< CmisObject > arg0, Comparator< ? > arg1,
+                  sysml.SystemModel.MethodCall arg2, int arg3 )
+                                                               throws InvocationTargetException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public
+            boolean
+            thereExists( Collection< CmisObject > arg0,
+                         sysml.SystemModel.MethodCall arg1, int arg2 )
+                                                                      throws InvocationTargetException {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 
