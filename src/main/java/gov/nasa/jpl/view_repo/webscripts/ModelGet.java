@@ -83,34 +83,10 @@ public class ModelGet extends AbstractJavaWebScript {
 		}
 		
 		modelRootNode = findScriptNodeByName(modelId);
+		// TODO: need to check permissions on every node ref - though it looks like this might throw an error
 		if (!checkPermissions(modelRootNode.getNodeRef(), "Read")) {
 			return false;
 		}
-		
-//		String siteName = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.SITE_NAME);
-//		if (!JwsRequestUtils.validateRequestVariable(status, response, siteName, JwsRequestUtils.SITE_NAME)) {
-//			return false;
-//		} 
-//
-//		String projectId = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.PROJECT_ID);
-//		if (!JwsRequestUtils.validateRequestVariable(status, response, projectId, JwsRequestUtils.PROJECT_ID)) {
-//			return false;
-//		}
-//
-//		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-//		if (!JwsRequestUtils.validateSiteExists(siteInfo, status, response)) {
-//			return false;
-//		}
-//				
-//		if (!JwsRequestUtils.validatePermissions(req, status, response, services, siteInfo.getNodeRef(), "Read")) {
-//			return false;
-//		}
-//
-//		EmsScriptNode siteNode = getSiteNode(siteName);
-//		projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
-//		if (projectNode == null) {
-//			return false;
-//		}
 		
 		return true;
 	}

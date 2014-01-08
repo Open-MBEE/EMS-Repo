@@ -90,8 +90,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 			// this is most likely null pointer from poorly undefined request parameters
 			// TODO check permissions on Project updating 
 			e.printStackTrace();
-			response.append("Invalid request.\n");
-			statusCode = HttpServletResponse.SC_BAD_REQUEST;
+			log(LogLevel.ERROR, "Invalid request.\n", HttpServletResponse.SC_BAD_REQUEST);
 		}
 
 		status.setCode(statusCode);
@@ -111,7 +110,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		// make sure site exists
 		EmsScriptNode siteNode = getSiteNode(siteName);
 		if (siteNode == null) {
-			response.append("Site not found.\n");
+			log(LogLevel.ERROR, "Site not found.\n", HttpServletResponse.SC_NOT_FOUND);
 			return HttpServletResponse.SC_NOT_FOUND;
 		}
 		
@@ -120,9 +119,9 @@ public class ProjectPost extends AbstractJavaWebScript {
 		if (modelContainerNode == null) {
 			if (fix) {
 				modelContainerNode = siteNode.createFolder(MODEL_PATH);
-				response.append("Model folder created.\n");
+				log(LogLevel.INFO, "Model folder created.\n", HttpServletResponse.SC_OK);
 			} else {
-				response.append("Model folder not found.\n");
+				log(LogLevel.ERROR, "Model folder not found. Use fix=true to force Model folder creation.\n", HttpServletResponse.SC_NOT_FOUND);
 				return HttpServletResponse.SC_NOT_FOUND;
 			}
 		}
@@ -135,23 +134,23 @@ public class ProjectPost extends AbstractJavaWebScript {
 			projectNode.setProperty("cm:title", projectName);
 			projectNode.setProperty("sysml:name", projectName);
 			projectNode.setProperty("sysml:id", projectId);
-			response.append("Project created.\n");
+			log(LogLevel.INFO, "Project created.\n", HttpServletResponse.SC_OK);
 		} else {
 			if (delete) {
 				projectNode.remove();
-				response.append("Project deleted.\n");
+				log(LogLevel.INFO, "Project deleted.\n", HttpServletResponse.SC_OK);
 			} else if (fix) {
 				projectNode.createOrUpdateProperty("cm:title", projectName);
 				projectNode.createOrUpdateProperty("sysml:name", projectName);
 				projectNode.createOrUpdateProperty("sysml:id", projectId);
-				response.append("Project metadata updated.\n");
+				log(LogLevel.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
 				// move sites if exists under different site
 				if (!projectNode.getParent().equals(modelContainerNode)) {
 					projectNode.move(modelContainerNode);
-					response.append("Project moved to specified site.\n");
+					log(LogLevel.INFO, "Project moved to new site.\n", HttpServletResponse.SC_OK);
 				}
 			} else {
-				response.append("Project not moved or name not updated. Use fix=true to update.\n");
+				log(LogLevel.WARNING, "Project not moved or name not updated. Use fix=true to update.\n", HttpServletResponse.SC_NOT_FOUND);
 				return HttpServletResponse.SC_FOUND;
 			}
 		}

@@ -1,5 +1,5 @@
 <webscript>
-	<shortname>Post view</shortname>
+<shortname>Get View</shortname>
     <description>
 		DRAFT
 		
@@ -12,7 +12,7 @@
   					"childrenViews": [viewId, ..],
   				 	"contains": [
   				 		{
-  				 			"type": Paragraph", 
+  				 			"type": "Paragraph", 
   				 			"sourceType": "reference"|"text",
   				 			
   				 			//*** if sourceType is reference ***/
@@ -56,9 +56,15 @@
 			]
   		}
   		</description>
-  		<url>/javawebscripts/newviews</url>
+  		<url>/javawebscripts/newviews/{id}?recurse={recurse?}</url>
   		<format default="json">any</format>
   		<authentication>user</authentication>
-  		<transaction allow="readwrite">required</transaction>
+  		<transaction allow="readonly">required</transaction>
   		<family>EMS Java Webscripts</family>
+  		<args>
+  			<arg>
+  				<name>recurse</name>
+  				<description>Returns children views if true. False by default.</description>
+  			</arg>
+  		</args>  		
  </webscript>

@@ -58,11 +58,20 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * 
  */
 public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
+	public enum LogLevel {
+		DEBUG(0), INFO(1), WARNING(2), ERROR(3);
+		private int value;
+		private LogLevel(int value) {
+			this.value = value;
+		}
+	}
+	
 	// injected members
 	protected ServiceRegistry services;
 	protected Repository repository;
 	protected JwsUtil jwsUtil;
-
+	protected LogLevel logLevel = LogLevel.WARNING;
+	
 	// internal members
 	protected ScriptNode companyhome;
 	protected Map<String, EmsScriptNode> foundElements = new HashMap<String, EmsScriptNode>();
@@ -194,6 +203,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	protected void clearCaches() {
 		foundElements = new HashMap<String, EmsScriptNode>();
 		response = new StringBuffer();
+		responseStatus.setCode(HttpServletResponse.SC_OK);
 	}
 	
 	/**
@@ -262,7 +272,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 		return node;		
 	}
-		
+	
+	protected void log(LogLevel level, String msg, int code) {
+		if (level.value >= logLevel.value) {
+			log("[" + level.name() + "]" + msg, code);
+		}
+	}
+	
 	protected void log(String msg, int code) {
 		response.append(msg);
 		responseStatus.setCode(code);
@@ -274,7 +290,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	
 	protected boolean checkRequestContent(WebScriptRequest req) {
 		if (req.getContent() == null) {
-			log("No content provided.\n", HttpServletResponse.SC_NO_CONTENT);
+			log(LogLevel.ERROR, "No content provided.\n", HttpServletResponse.SC_NO_CONTENT);
 			return false;
 		}
 		return true;
@@ -282,7 +298,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	
 	protected boolean checkPermissions(NodeRef nodeRef, String permissions) {
 		if (services.getPermissionService().hasPermission(nodeRef, permissions) != AccessStatus.ALLOWED) {
-			log("No write priveleges to " + nodeRef.toString() + ".\n", HttpServletResponse.SC_UNAUTHORIZED);
+			log(LogLevel.WARNING, "No write priveleges to " + nodeRef.toString() + ".\n", HttpServletResponse.SC_UNAUTHORIZED);
 			return false;
 		}
 		return true;
@@ -290,7 +306,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 	protected boolean checkRequestVariable(Object value, String type) {
 		if (value == null) {
-			log(type + " not provided.\n", HttpServletResponse.SC_BAD_REQUEST);
+			log(LogLevel.ERROR, type + " not provided.\n", HttpServletResponse.SC_BAD_REQUEST);
 			return false;
 		}
 		return true;

@@ -371,9 +371,9 @@ public class EmsScriptNode extends ScriptNode {
 	 * @param msg	Message to be appened to response
 	 */
 	public void log(String msg) {
-		if (response != null) {
-			response.append(msg + "\n");
-		}
+//		if (response != null) {
+//			response.append(msg + "\n");
+//		}
 	}
 
 	

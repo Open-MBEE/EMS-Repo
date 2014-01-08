@@ -23,7 +23,7 @@
   	Additional arguments can be toggled if toggleChoice=true to simply tell Alfresco which parts of the model to load. e.g. load only elements if
   	toggleChoice=true&amp;elements=true
   </description>
-  <url>/javawebscripts/sites/{siteName}/projects/{projectId}/model?createRoots={createRoots?}&amp;hierarchy={hierarchy?}&amp;elements={elements?}&amp;relationshipElements={relationshipElements?}&amp;propertyTypes={propertyTypes?}&amp;elementValues={elementValues?}&amp;roots={roots?}&amp;toggleChoices{toggleChoices?}</url>
+  <url>/javawebscripts/sites/{siteName}/projects/{projectId}/model</url>
   <format default="json">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readwrite">required</transaction>
