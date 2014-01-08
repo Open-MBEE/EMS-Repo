@@ -54,6 +54,11 @@ public class NewViewGet extends AbstractJavaWebScript {
 		}
 		
 		EmsScriptNode view = findScriptNodeByName(viewId);
+		if (view == null) {
+			log(LogLevel.ERROR, "View not found with id: " + viewId + ".\n", HttpServletResponse.SC_NOT_FOUND);
+			return false;
+		}
+		
 		if (!checkPermissions(view.getNodeRef(), "Read")) {
 			log(LogLevel.WARNING, "No read permissions", HttpServletResponse.SC_FORBIDDEN);
 			return false;

@@ -35,6 +35,13 @@
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
+	
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.newview_element.get" class="gov.nasa.jpl.view_repo.webscripts.ModelGet"
+		parent="webscript" singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
 
 <!-- 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.site.delete"

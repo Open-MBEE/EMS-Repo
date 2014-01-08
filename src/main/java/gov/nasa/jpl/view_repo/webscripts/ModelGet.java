@@ -30,12 +30,15 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -60,6 +63,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	private EmsScriptNode modelRootNode = null;
 	private Set<String> foundRelationships = new HashSet<String>();
 	private Set<String> foundProperties = new HashSet<String>();
+	private Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
 
 	@Override
 	protected void clearCaches() {
@@ -69,6 +73,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		relationships = new JSONObject();
 		foundProperties = new HashSet<String>();
 		foundRelationships = new HashSet<String>();
+		elementsFound = new HashMap<String, EmsScriptNode>();
 	}
 	
 	@Override
@@ -79,12 +84,19 @@ public class ModelGet extends AbstractJavaWebScript {
 		}
 		
 		if (!checkRequestVariable(modelId, "modelid")) {
+			log(LogLevel.ERROR, "Element id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
 			return false;
 		}
 		
 		modelRootNode = findScriptNodeByName(modelId);
+		if (modelRootNode == null) {
+			log(LogLevel.ERROR, "Element not found with id: " + modelId + ".\n", HttpServletResponse.SC_NOT_FOUND);
+			return false;
+		}
+		
 		// TODO: need to check permissions on every node ref - though it looks like this might throw an error
 		if (!checkPermissions(modelRootNode.getNodeRef(), "Read")) {
+			log(LogLevel.WARNING, "No read permissions", HttpServletResponse.SC_FORBIDDEN);
 			return false;
 		}
 		
@@ -102,13 +114,17 @@ public class ModelGet extends AbstractJavaWebScript {
 		Map<String, Object> model = new HashMap<String, Object>();
 
 		boolean recurse = jwsUtil.checkArgEquals(req, "recurse", "true") ? true : false;
+		boolean isViewRequest = req.getURL().contains("newviews") ? true : false;
+		
 		if (validateRequest(req, status)) {
 			try {
-				if (recurse) {
-					handleElementHierarchy(modelRootNode);
+				if (isViewRequest) {
+					handleViewHierarchy(modelRootNode, recurse);
+				} else {
+					handleElementHierarchy(modelRootNode, recurse);
 				}
 				// make sure to put the root node in as a found element
-				foundElements.put((String)modelRootNode.getProperty("cm:name"), modelRootNode);
+//				foundElements.put((String)modelRootNode.getProperty("cm:name"), modelRootNode);
 				handleElements();
 //				handleRelationships();
 			} catch (JSONException e) {
@@ -135,37 +151,65 @@ public class ModelGet extends AbstractJavaWebScript {
 	}
 
 
+	private void handleViewHierarchy(EmsScriptNode root, boolean recurse) throws JSONException {
+		Object allowedElements = root.getProperty("view2:allowedElements");
+		if (allowedElements != null) {
+			JSONArray childElementJson = new JSONArray(allowedElements.toString());
+			for (int ii = 0; ii < childElementJson.length(); ii++) {
+				String id = childElementJson.getString(ii);
+				EmsScriptNode childElement = findScriptNodeByName(id);
+				elementsFound.put(id, childElement);
+			}
+			if (recurse) {
+				Object childrenViews = root.getProperty("view2:childrenViews");
+				if (childrenViews != null) {
+					JSONArray childViewJson = new JSONArray(childrenViews.toString());
+					for (int ii = 0; ii < childViewJson.length(); ii++) {
+						String id = childViewJson.getString(ii);
+						EmsScriptNode childView = findScriptNodeByName(id);
+						handleViewHierarchy(childView, recurse);
+					}
+				}
+			}
+		}
+	}
+	
+	
 	/**
 	 * Build up the element hierarchy from the specified root
 	 * @param root		Root node to get children for
 	 * @throws JSONException
 	 */
-	private void handleElementHierarchy(EmsScriptNode root) throws JSONException {
+	private void handleElementHierarchy(EmsScriptNode root, boolean recurse) throws JSONException {
 		JSONArray array = new JSONArray();		
-		
-		// find all the children, recurse or add to array as needed
-		for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
-			EmsScriptNode child = new EmsScriptNode(assoc.getChildRef(), services, response);
-			if (child.getTypeShort().equals("sysml:ElementFolder")) {
-				handleElementHierarchy(child);
-			} else {
-				String value = (String)child.getProperty("sysml:id");
-				if (value != null) {
-					array.put(value);
-					foundElements.put(value, child);
-					// add empty hierarchies as well
-					elementHierarchy.put(value, new JSONArray());
+		elementsFound.put((String)root.getProperty("sysml:id"), root);
+
+		if (recurse) {
+			// find all the children, recurse or add to array as needed
+			for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
+				EmsScriptNode child = new EmsScriptNode(assoc.getChildRef(), services, response);
+				if (child.getTypeShort().equals("sysml:ElementFolder")) {
+						handleElementHierarchy(child, recurse);
+				} else {
+					String value = (String)child.getProperty("sysml:id");
+					if (value != null) {
+						array.put(value);
+						elementsFound.put(value, child);
+						// add empty hierarchies as well
+						elementHierarchy.put(value, new JSONArray());
+					}
 				}
 			}
+			
+			// if there were any children add them to the hierarchy object
+			String key = (String)root.getProperty("sysml:id");
+			if (root.getTypeShort().equals("sysml:ElementFolder") && key == null) {
+				// TODO this is temporary? until we can get sysml:id from Element Folder?
+				key = root.getProperty("cm:name").toString().replace("_pkg", "");
+			}
+			
+			elementHierarchy.put(key, array);
 		}
-		
-		// if there were any children add them to the hierarchy object
-		String key = (String)root.getProperty("sysml:id");
-		if (root.getTypeShort().equals("sysml:ElementFolder") && key == null) {
-			// TODO this is temporary? until we can get sysml:id from Element Folder?
-			key = root.getProperty("cm:name").toString().replace("_pkg", "");
-		}
-		elementHierarchy.put(key, array);
 	}
 	
 	/**
@@ -173,8 +217,8 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * @throws JSONException
 	 */
 	private void handleElements() throws JSONException {
-		for (String id: foundElements.keySet()) {
-			EmsScriptNode node = foundElements.get(id);
+		for (String id: elementsFound.keySet()) {
+			EmsScriptNode node = elementsFound.get(id);
 			JSONObject element = new JSONObject();
 			
 			element.put("type", node.getQNameType().getLocalName());

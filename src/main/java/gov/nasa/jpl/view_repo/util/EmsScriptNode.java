@@ -136,15 +136,17 @@ public class EmsScriptNode extends ScriptNode {
 		// check all associations to see if there's a matching association
 		for (AssociationRef ref: refs) {
 			if (ref.getTypeQName().equals(typeQName)) {
-				if (ref.getSourceRef().equals(nodeRef) && 
-						ref.getTargetRef().equals(target.getNodeRef())) {
-					// found it, no need to update
-					return false; 
-				} else {
-					// association doesn't match, no way to modify a ref, so need to remove then create
-					services.getNodeService().removeAssociation(nodeRef, target.getNodeRef(), typeQName);
-					break;
+				if (ref.getSourceRef() != null && ref.getTargetRef() != null) {
+					if (ref.getSourceRef().equals(nodeRef) && 
+							ref.getTargetRef().equals(target.getNodeRef())) {
+						// found it, no need to update
+						return false; 
+					}
 				}
+			
+				// association doesn't match, no way to modify a ref, so need to remove then create
+				services.getNodeService().removeAssociation(nodeRef, target.getNodeRef(), typeQName);
+				break;
 			}
 		}
 		
