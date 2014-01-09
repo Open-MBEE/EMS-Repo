@@ -36,6 +36,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,8 +60,7 @@ public class NewViewGet extends AbstractJavaWebScript {
 			return false;
 		}
 		
-		if (!checkPermissions(view.getNodeRef(), "Read")) {
-			log(LogLevel.WARNING, "No read permissions", HttpServletResponse.SC_FORBIDDEN);
+		if (!checkPermissions(view, PermissionService.READ)) {
 			return false;
 		}
 		
@@ -97,8 +97,8 @@ public class NewViewGet extends AbstractJavaWebScript {
 					model.put("res", viewsJson.getJSONObject(0).toString());
 				} else {
 					JSONObject json = new JSONObject();
-						json.put("views", viewsJson);
-					model.put("res", json.toString());
+					json.put("views", viewsJson);
+					model.put("res", json.toString(4));
 				}
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -120,29 +120,32 @@ public class NewViewGet extends AbstractJavaWebScript {
 		if (view == null) {
 			log(LogLevel.ERROR, "View not found with ID: " + viewId, HttpServletResponse.SC_NOT_FOUND);
 		}
-		Object property = view.getProperty("sysml:id");
-		if (property != null) {
-			viewJson.put("id", property);
-		}
-		property = view.getProperty("view2:displayedElements");
-		if (property != null) {
-			viewJson.put("displayedElements", new JSONArray(property.toString()));
-		}
-		property = view.getProperty("view2:allowedElements");
-		if (property != null) {
-			viewJson.put("allowedElements", new JSONArray(property.toString()));
-		}
-		property = view.getProperty("view2:contains");
-		if (property != null) {
-			viewJson.put("contains", new JSONArray(property.toString()));
-		}
-		property = view.getProperty("view2:childrenViews");
-		if (property != null) {
-			JSONArray childrenJson = new JSONArray(property.toString());
-			viewJson.put("childrenViews", childrenJson);
-			if (recurse) {
-				for (int ii = 0; ii < childrenJson.length(); ii++) {
-					handleView(childrenJson.getString(ii), recurse);
+		
+		if (checkPermissions(view, PermissionService.READ)) { 
+			Object property = view.getProperty("sysml:id");
+			if (property != null) {
+				viewJson.put("id", property);
+			}
+			property = view.getProperty("view2:displayedElements");
+			if (property != null) {
+				viewJson.put("displayedElements", new JSONArray(property.toString()));
+			}
+			property = view.getProperty("view2:allowedElements");
+			if (property != null) {
+				viewJson.put("allowedElements", new JSONArray(property.toString()));
+			}
+			property = view.getProperty("view2:contains");
+			if (property != null) {
+				viewJson.put("contains", new JSONArray(property.toString()));
+			}
+			property = view.getProperty("view2:childrenViews");
+			if (property != null) {
+				JSONArray childrenJson = new JSONArray(property.toString());
+				viewJson.put("childrenViews", childrenJson);
+				if (recurse) {
+					for (int ii = 0; ii < childrenJson.length(); ii++) {
+						handleView(childrenJson.getString(ii), recurse);
+					}
 				}
 			}
 		}

@@ -1,12 +1,11 @@
 <webscript> 
   <shortname>Get View Elements</shortname> 
-  <description>Handles getting of model from alfresco
-  	use cases: 
-  		- get model package hierarchy
-  		- get elements inside packages
-  		- get relationships between elements
-  		
-  	If recurse isn't specified as true, just provides the {modelid} element data, otherwise returns everything in hierarchy
+  <description>Retrieves all the allowedElements of a view.
+  
+  	If recurse is true, then all elements of all children views are returned as well
+  	
+  	Format output is same as for elements.
+  	
   </description>
   <url>/javawebscripts/newviews/{modelid}/elements?recurse={recurse?}</url>
   <format default="json">any</format> 
@@ -15,51 +14,8 @@
   <family>EMS Java Webscripts</family>
   <args>
   	<arg>
-  		<name>posted content</name>
-  		<description>The request body of the post as json:
-  		{
-  			"elementHierarchy": {
-  				elementId: [childElementId, ...],
-  				...
-  			},
-  			"elements": {
-  				elementId: {
-  					"type": "Package" | "Property" | "Element" | 
-  							"Dependency" | "Generalization" | "DirectedRelationship" | 
-  							"Conform" | "Expose" | "Viewpoint",
-  					"name": name,
-  					"documentation": documentation,
-  					"author": lastModifiedAuthor,
-  					"lastModified": lastModifiedDate,
-  					"owner": elementId,
-  					"isView": true|false,
-  					"isDerived": true|false, (if Property)
-  					"isSlot": true|false, (if Property)
-  					"boolean": [true|false], (if Property)
-  					"string": [string], (if Property)
-  					"integer": [int], (if Property)
-  					"double": [double], (if Property)
-  					"expression": [string], (if Property)
-  					"valueType": "LiteralBoolean" | "LiteralInteger" | "LiteralString" | 
-  							"LiteralReal" | "ElementValue" | "Expression" (if Property)
-  				},
-  				...
-  			}
-  			"relationships": {
-  				"relationshipElements": {
-  					relationshipElementId: {"source": sourceElementId, "target": targetElementId},
-  					...
-  				},
-  				"propertyTypes": {
-  					propertyElementId: typeElementId, //for Property to the property type
-  					...
-  				},
-  				"elementValues": {
-  					propertyElementId: [elementId], //for property with ElementValue as value types, the value is a noderef
-  					...
-  				}
-  			}
-  		}
+  		<name>recurse</name>
+  		<description>If true, then all elements of all children views are returned as well.
   		</description>
   	</arg>
   </args>

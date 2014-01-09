@@ -36,6 +36,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -111,7 +112,9 @@ public class NewViewPost extends AbstractJavaWebScript {
 			return;
 		}
 			
-		if (view.hasPermission("Write")) {
+		if (checkPermissions(view, PermissionService.WRITE)) {
+		    view.createOrUpdateAspect("sysml:View");
+
 			JSONArray array;
 			
 			if (viewJson.has("contains")) {
@@ -130,8 +133,6 @@ public class NewViewPost extends AbstractJavaWebScript {
 				array = viewJson.getJSONArray("childrenViews");
 				view.setProperty("view2:childrenViews", array.toString());
 			}
-		} else {
-			log(LogLevel.WARNING, "no write permissions on: " + id + ".\n", HttpServletResponse.SC_UNAUTHORIZED);
 		}
 	}
 }

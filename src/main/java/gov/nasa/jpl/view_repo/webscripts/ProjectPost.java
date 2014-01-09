@@ -36,6 +36,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -140,14 +141,19 @@ public class ProjectPost extends AbstractJavaWebScript {
 				projectNode.remove();
 				log(LogLevel.INFO, "Project deleted.\n", HttpServletResponse.SC_OK);
 			} else if (fix) {
-				projectNode.createOrUpdateProperty("cm:title", projectName);
-				projectNode.createOrUpdateProperty("sysml:name", projectName);
-				projectNode.createOrUpdateProperty("sysml:id", projectId);
-				log(LogLevel.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
-				// move sites if exists under different site
-				if (!projectNode.getParent().equals(modelContainerNode)) {
-					projectNode.move(modelContainerNode);
-					log(LogLevel.INFO, "Project moved to new site.\n", HttpServletResponse.SC_OK);
+				if (checkPermissions(projectNode, PermissionService.WRITE)){ 
+					projectNode.createOrUpdateProperty("cm:title", projectName);
+					projectNode.createOrUpdateProperty("sysml:name", projectName);
+					projectNode.createOrUpdateProperty("sysml:id", projectId);
+					log(LogLevel.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
+				
+					if (checkPermissions(projectNode.getParent(), PermissionService.WRITE)) { 
+						// move sites if exists under different site
+						if (!projectNode.getParent().equals(modelContainerNode)) {
+							projectNode.move(modelContainerNode);
+							log(LogLevel.INFO, "Project moved to new site.\n", HttpServletResponse.SC_OK);
+						}
+					}
 				}
 			} else {
 				log(LogLevel.WARNING, "Project not moved or name not updated. Use fix=true to update.\n", HttpServletResponse.SC_NOT_FOUND);
@@ -178,7 +184,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		}
 				
 		// check permissions
-		if (!checkPermissions(siteInfo.getNodeRef(), "Write")) {
+		if (!checkPermissions(siteInfo.getNodeRef(), PermissionService.WRITE)) {
 			return false;
 		}
 		

@@ -39,6 +39,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -312,7 +313,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	protected void updateOrCreateElement(JSONObject elementJson) throws JSONException {
 		// TODO check permissions
 		String id = elementJson.getString("id");
-		long start = System.currentTimeMillis(); System.out.println("updateOrCreateElement " + id);
+//		long start = System.currentTimeMillis(); System.out.println("updateOrCreateElement " + id);
 		
 		// find node if exists, otherwise create
 		EmsScriptNode node = findScriptNodeByName(id);
@@ -324,11 +325,6 @@ public class ModelPost extends AbstractJavaWebScript {
 			node.setProperty("cm:title", elementJson.getString("name"));
 		}
 		foundElements.put(id, node); // cache the found value
-		
-		// need to add View aspect before adding any properties (so they're valid properties of the node)
-		if (elementJson.has("isView") && elementJson.getString("isView").equals(true)) {
-			node.createOrUpdateAspect("sysml:View");
-		}
 		
 		// create or update properties of node
 		Iterator<?> props = elementJson.keys();
@@ -375,7 +371,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		
 		// lets create the maps for the hierarchy, element values, and relationships
 		String owner = elementJson.getString("owner");
-		if (!owner.equals("null")) {
+		if (owner != null && !owner.equals("null")) {
 			// if owner is null, leave at project root level
 			if (!elementHierarchyJson.has(owner)) {
 				elementHierarchyJson.put(owner, new JSONArray());
@@ -403,7 +399,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			relationshipsJson.getJSONObject("relationshipElements").put(id, relJson);
 		}
 		
-		long end = System.currentTimeMillis(); System.out.println("\tTotal: " + (end-start));
+//		long end = System.currentTimeMillis(); System.out.println("\tTotal: " + (end-start));
 	}
 
 	/**
@@ -471,7 +467,7 @@ public class ModelPost extends AbstractJavaWebScript {
 				return false;
 			}
 					
-			if (!checkPermissions(siteInfo.getNodeRef(), "Write")) {
+			if (!checkPermissions(siteInfo.getNodeRef(), PermissionService.WRITE)) {
 				return false;
 			}
 	

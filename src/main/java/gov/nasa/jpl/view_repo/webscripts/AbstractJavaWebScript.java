@@ -44,6 +44,8 @@ import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessStatus;
+import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONArray;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
@@ -67,9 +69,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	}
 	
 	// injected members
-	protected ServiceRegistry services;
-	protected Repository repository;
-	protected JwsUtil jwsUtil;
+	protected ServiceRegistry services;		// get any of the Alfresco services
+	protected Repository repository;		// used for lucene search
+	protected JwsUtil jwsUtil;				// used to split transactions
 	protected LogLevel logLevel = LogLevel.WARNING;
 	
 	// internal members
@@ -87,7 +89,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	protected final Map<String, String> json2acm = new HashMap<String, String>() {
 		private static final long serialVersionUID = -5467934440503910163L;
 		{
-			// TODO update to use new sysmlModel.xml types
 			put("View", "view:View");
 			put("Property", "view:Property");
 			put("Comment", "view:Comment");
@@ -129,7 +130,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	protected final Map<String, String> acm2json = new HashMap<String, String>() {
 		private static final long serialVersionUID = -4682311676740055702L;
 		{
-			// TODO update to use new sysmlModel.xml types
 			put("view:View", "View");
 			put("view:Property", "Property");
 			put("view:Comment", "Comment");
@@ -151,14 +151,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			put("sysml:isSlot", "isSlot");
 			put("sysml:source", "source");
 			put("sysml:target", "target");
-			/*
-			put("sysml:boolean", "boolean");
-			put("sysml:string", "string");
-			put("sysml:integer", "integer");
-			put("sysml:double", "double");
-			put("sysml:expression", "expression");
-			put("sysml:valueType", "valueType");
-			*/
+
 			put("cm:modified", "lastModified");
 			put("cm:modifier", "author");
 		}
@@ -198,7 +191,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	}
 
 	/**
-	 * Utility for clearing out caches - TODO: test with the non-singleton Spring classes, as this may not be necessary
+	 * Utility for clearing out caches
+	 * TODO: do we need to clear caches if Spring isn't making singleton instances
 	 */
 	protected void clearCaches() {
 		foundElements = new HashMap<String, EmsScriptNode>();
@@ -222,7 +216,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @return	ScriptNode of site with name siteName
 	 */
 	protected EmsScriptNode getSiteNode(String siteName) {
-		return new EmsScriptNode(services.getSiteService().getSite(siteName).getNodeRef(), services, response);
+		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+		if (siteInfo != null) {
+			return new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+		}
+		return null;
 	}
 
 	
@@ -296,9 +294,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		return true;
 	}
 	
+	protected boolean checkPermissions(EmsScriptNode node, String permissions) {
+		if (services.getPermissionService().hasPermission(node.getNodeRef(), permissions) != AccessStatus.ALLOWED) {
+			Object property = node.getProperty("cm:name");
+			log(LogLevel.WARNING, "No " + permissions + " priveleges to " + property.toString() + ".\n", HttpServletResponse.SC_UNAUTHORIZED);
+			return false;
+		}
+		return true;
+	}
+	
 	protected boolean checkPermissions(NodeRef nodeRef, String permissions) {
 		if (services.getPermissionService().hasPermission(nodeRef, permissions) != AccessStatus.ALLOWED) {
-			log(LogLevel.WARNING, "No write priveleges to " + nodeRef.toString() + ".\n", HttpServletResponse.SC_UNAUTHORIZED);
+			log(LogLevel.WARNING, "No " + permissions + " priveleges to " + nodeRef.toString() + ".\n", HttpServletResponse.SC_UNAUTHORIZED);
 			return false;
 		}
 		return true;
@@ -310,6 +317,40 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Lucene search for the specified pattern and ACM type
+	 * @param type		escaped ACM type for lucene search: e.g. "@sysml\\:documentation:\""
+	 * @param pattern   Pattern to look for
+	 */
+	protected Map<String, EmsScriptNode> searchForElements(String type, String pattern) {
+		Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
+
+		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
+			ResultSet resultSet = null;
+			try {
+				pattern = type + pattern + "\"";
+				resultSet = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, pattern);
+				for (ResultSetRow row: resultSet) {
+					EmsScriptNode node = new EmsScriptNode(row.getNodeRef(), services, response);
+					if (checkPermissions(node, PermissionService.READ)) {
+    					String id = (String) node.getProperty("sysml:id");
+    					if (id != null) {
+    						searchResults.put(id, node);
+    					}
+					}
+				}
+			} catch (Exception e) {
+				log(LogLevel.ERROR, "Could not parse search: " + pattern + ".\n", HttpServletResponse.SC_BAD_REQUEST);  
+			} finally {
+				if (resultSet != null) {
+					resultSet.close();
+				}
+			}
+		}
+
+		return searchResults;
 	}
 
 }

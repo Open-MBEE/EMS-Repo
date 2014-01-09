@@ -30,7 +30,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,6 +42,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.QName;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,13 +58,14 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ModelGet extends AbstractJavaWebScript {
 	private JSONObject elementHierarchy = new JSONObject();
-	private JSONArray elements = new JSONArray();
+	protected JSONArray elements = new JSONArray();
 	private JSONObject relationships = new JSONObject();
 	private EmsScriptNode modelRootNode = null;
 	private Set<String> foundRelationships = new HashSet<String>();
 	private Set<String> foundProperties = new HashSet<String>();
-	private Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
+	protected Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
 
+	
 	@Override
 	protected void clearCaches() {
 		super.clearCaches();
@@ -75,6 +76,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		foundRelationships = new HashSet<String>();
 		elementsFound = new HashMap<String, EmsScriptNode>();
 	}
+
 	
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
@@ -95,14 +97,14 @@ public class ModelGet extends AbstractJavaWebScript {
 		}
 		
 		// TODO: need to check permissions on every node ref - though it looks like this might throw an error
-		if (!checkPermissions(modelRootNode.getNodeRef(), "Read")) {
-			log(LogLevel.WARNING, "No read permissions", HttpServletResponse.SC_FORBIDDEN);
+		if (!checkPermissions(modelRootNode, PermissionService.READ)) {
 			return false;
 		}
 		
 		return true;
 	}
 
+	
 	/**
 	 * Entry point
 	 */
@@ -123,8 +125,6 @@ public class ModelGet extends AbstractJavaWebScript {
 				} else {
 					handleElementHierarchy(modelRootNode, recurse);
 				}
-				// make sure to put the root node in as a found element
-//				foundElements.put((String)modelRootNode.getProperty("cm:name"), modelRootNode);
 				handleElements();
 //				handleRelationships();
 			} catch (JSONException e) {
@@ -147,11 +147,18 @@ public class ModelGet extends AbstractJavaWebScript {
 			e.printStackTrace();
 		}
 		
+		status = responseStatus;
 		return model;
 	}
 
 
-	private void handleViewHierarchy(EmsScriptNode root, boolean recurse) throws JSONException {
+	/**
+	 * Recurse a view hierarchy to get all allowed elements
+	 * @param root		Root view to find elements for
+	 * @param recurse	If true, find elements for children views
+	 * @throws JSONException	JSON element creation error
+	 */
+	protected void handleViewHierarchy(EmsScriptNode root, boolean recurse) throws JSONException {
 		Object allowedElements = root.getProperty("view2:allowedElements");
 		if (allowedElements != null) {
 			JSONArray childElementJson = new JSONArray(allowedElements.toString());
@@ -180,7 +187,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * @param root		Root node to get children for
 	 * @throws JSONException
 	 */
-	private void handleElementHierarchy(EmsScriptNode root, boolean recurse) throws JSONException {
+	protected void handleElementHierarchy(EmsScriptNode root, boolean recurse) throws JSONException {
 		JSONArray array = new JSONArray();		
 		elementsFound.put((String)root.getProperty("sysml:id"), root);
 
@@ -216,54 +223,58 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * Build up the element JSONObject
 	 * @throws JSONException
 	 */
-	private void handleElements() throws JSONException {
+	protected void handleElements() throws JSONException {
 		for (String id: elementsFound.keySet()) {
 			EmsScriptNode node = elementsFound.get(id);
-			JSONObject element = new JSONObject();
-			
-			element.put("type", node.getQNameType().getLocalName());
-			
-			// check for relationships to be handled later
-			if (node.isSubType("sysml:DirectedRelationship")) {
-				foundRelationships.add(id);
-			} else if (node.isSubType("sysml:Property")) {
-				foundProperties.add(id);
+
+			if (checkPermissions(node, PermissionService.READ)) {
+    			// check for relationships to be handled later
+    			if (node.isSubType("sysml:DirectedRelationship")) {
+    				foundRelationships.add(id);
+    			} else if (node.isSubType("sysml:Property")) {
+    				foundProperties.add(id);
+    			}
+    			
+    			// create the JSON object of the node
+    			JSONObject element = new JSONObject();
+    			element.put("type", node.getQNameType().getLocalName());
+    			
+    			// lets grab all the property values
+    			for (String acmType: acm2json.keySet()) {
+    				element.put(acm2json.get(acmType), node.getProperty(acmType));
+    			}
+    			
+    			// lets handle valueType and value
+    			Object valueType = node.getProperty("sysml:valueType");
+    			if (valueType != null) {
+    				element.put("value", node.getProperty(json2acm.get((String) valueType)));
+    				element.put("valueType", valueType);
+    			}
+    			
+    			// check if it's a view
+    			if (node.hasAspect("sysml:View")) {
+    				element.put("isView", true);
+    			} else {
+    				element.put("isView", false);
+    			}
+    			
+    			// add owner
+    			EmsScriptNode parent = node.getParent();
+    			element.put("owner", parent.getName().replace("_pkg", ""));
+    
+    			element.put("qualifiedName",node.getSysmlQName());
+    			
+    			elements.put(element);
 			}
-			
-			// lets grab all the property values
-			for (String acmType: acm2json.keySet()) {
-				element.put(acm2json.get(acmType), node.getProperty(acmType));
-			}
-			
-			// lets handle valueType and value
-			Object valueType = node.getProperty("sysml:valueType");
-			if (valueType != null) {
-				element.put("value", node.getProperty(json2acm.get((String) valueType)));
-				element.put("valueType", valueType);
-			}
-			
-			// check if it's a view
-			if (node.hasAspect("sysml:View")) {
-				element.put("isView", true);
-			} else {
-				element.put("isView", false);
-			}
-			
-			// add owner
-			EmsScriptNode parent = node.getParent();
-			element.put("owner", parent.getName().replace("_pkg", ""));
-			// TODO perhaps get the sysml id onto the reified container as well?
-//			element.put("owner", nodeService.getProperty(nodeService.getPrimaryParent(node).getParentRef(), jwsUtil.createQName("sysml:id")));
-			
-			elements.put(element);
 		}
 	}
+	
 
 	/**
 	 * Handle all the relationship JSONObjects
 	 * @throws JSONException
 	 */
-	private void handleRelationships() throws JSONException {
+	protected void handleRelationships() throws JSONException {
 		handleElementRelationships();
 		handlePropertyTypes();
 		handleElementValues();
@@ -273,21 +284,23 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * Create the Element Values JSONObject
 	 * @throws JSONException
 	 */
-	private void handleElementValues() throws JSONException {
+	protected void handleElementValues() throws JSONException {
 		NodeService nodeService = services.getNodeService();
 		QName sysmlId = jwsUtil.createQName("sysml:id");
 
 		JSONObject elementValues = new JSONObject();
 		for (String id: foundProperties) {
 			EmsScriptNode node = foundElements.get(id);
-			@SuppressWarnings("unchecked")
-			ArrayList<NodeRef> values = (ArrayList<NodeRef>)node.getProperty("sysml:elementValue");
-			if (values != null) {
-				JSONArray array = new JSONArray();
-				for (NodeRef value: values) {
-					array.put((String)nodeService.getProperty(value, sysmlId));
-				}
-				elementValues.put(id, array);
+			if (checkPermissions(node, PermissionService.READ)){ 
+    			@SuppressWarnings("unchecked")
+    			ArrayList<NodeRef> values = (ArrayList<NodeRef>)node.getProperty("sysml:elementValue");
+    			if (values != null) {
+    				JSONArray array = new JSONArray();
+    				for (NodeRef value: values) {
+    					array.put((String)nodeService.getProperty(value, sysmlId));
+    				}
+    				elementValues.put(id, array);
+    			}
 			}
 		}
 		relationships.put("elementValues", elementValues);
@@ -297,14 +310,16 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * Create the PropertyTypes JSONObject
 	 * @throws JSONException
 	 */
-	private void handlePropertyTypes() throws JSONException {
+	protected void handlePropertyTypes() throws JSONException {
 		JSONObject propertyTypes = new JSONObject();
 		
 		for (String id: foundProperties) {
 			EmsScriptNode node = foundElements.get(id);
-			EmsScriptNode targetNode = node.getFirstAssociationByType("sysml:type");
-			if (targetNode != null) {
-				propertyTypes.put(id, targetNode.getProperty("sysml:id"));
+			if (checkPermissions(node, PermissionService.READ)){ 
+    			EmsScriptNode targetNode = node.getFirstAssociationByType("sysml:type");
+    			if (targetNode != null) {
+    				propertyTypes.put(id, targetNode.getProperty("sysml:id"));
+    			}
 			}
 		}
 		
@@ -315,7 +330,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * Create the ElementRelationships JSONObject
 	 * @throws JSONException
 	 */
-	private void handleElementRelationships() throws JSONException {
+	protected void handleElementRelationships() throws JSONException {
 		// handle relationship elements, property types and element values
 		JSONObject relationshipElements = new JSONObject();
 		for (String id: foundRelationships) {
@@ -324,11 +339,13 @@ public class ModelGet extends AbstractJavaWebScript {
 			EmsScriptNode sysmlTargetNode = node.getFirstAssociationByType("sysml:target");
 
 			JSONObject relationshipElement = new JSONObject();
-			if (sysmlSourceNode != null) {
-				relationshipElement.put("source", sysmlSourceNode.getProperty("sysml:id"));
-			}
-			if (sysmlTargetNode != null) {
-				relationshipElement.put("target", sysmlTargetNode.getProperty("sysml:id"));
+			if (sysmlSourceNode != null && sysmlTargetNode != null) {
+			    if (checkPermissions(node, PermissionService.READ) && 
+			            checkPermissions(sysmlSourceNode, PermissionService.READ) &&
+			            checkPermissions(sysmlTargetNode, PermissionService.READ)) {
+		            relationshipElement.put("source", sysmlSourceNode.getProperty("sysml:id"));
+		            relationshipElement.put("target", sysmlTargetNode.getProperty("sysml:id"));
+			    }
 			}
 			relationshipElements.put(id, relationshipElement);
 		}

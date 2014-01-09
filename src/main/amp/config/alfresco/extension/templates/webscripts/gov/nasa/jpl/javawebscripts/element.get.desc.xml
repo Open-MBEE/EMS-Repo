@@ -1,12 +1,7 @@
 <webscript> 
-  <shortname>Get View</shortname> 
-  <description>Handles getting of model from alfresco
-  	use cases: 
-  		- get model package hierarchy
-  		- get elements inside packages
-  		- get relationships between elements
-  		
-  	If recurse isn't specified as true, just provides the {modelid} element data, otherwise returns everything in hierarchy
+  <shortname>Get Element</shortname> 
+  <description>
+  	Get element information.
   </description>
   <url>/javawebscripts/element/{elementid}?recurse={recurse?}</url>
   <format default="json">any</format> 
@@ -15,22 +10,22 @@
   <family>EMS Java Webscripts</family>
   <args>
   	<arg>
+  		<name>recurse</name>
+  		<description>
+  		If true, returns all the children elements (contained).
+  		</description>
+  	</arg>
+  	<arg>
   		<name>posted content</name>
   		<description>The request body of the post as json:
   		{
-  			"elementHierarchy": {
-  				elementId: [childElementId, ...],
-  				...
-  			},
   			"elements": {
-  				elementId: {
+  				[{
   					"type": "Package" | "Property" | "Element" | 
   							"Dependency" | "Generalization" | "DirectedRelationship" | 
   							"Conform" | "Expose" | "Viewpoint",
   					"name": name,
   					"documentation": documentation,
-  					"author": lastModifiedAuthor,
-  					"lastModified": lastModifiedDate,
   					"owner": elementId,
   					"isView": true|false,
   					"isDerived": true|false, (if Property)
@@ -44,20 +39,7 @@
   							"LiteralReal" | "ElementValue" | "Expression" (if Property)
   				},
   				...
-  			}
-  			"relationships": {
-  				"relationshipElements": {
-  					relationshipElementId: {"source": sourceElementId, "target": targetElementId},
-  					...
-  				},
-  				"propertyTypes": {
-  					propertyElementId: typeElementId, //for Property to the property type
-  					...
-  				},
-  				"elementValues": {
-  					propertyElementId: [elementId], //for property with ElementValue as value types, the value is a noderef
-  					...
-  				}
+  				]
   			}
   		}
   		</description>

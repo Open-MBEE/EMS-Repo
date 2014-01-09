@@ -43,6 +43,13 @@
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.element.search.get" class="gov.nasa.jpl.view_repo.webscripts.ModelSearch"
+		parent="webscript" singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+
 <!-- 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.site.delete"
 		class="gov.nasa.jpl.view_repo.webscripts.SiteDelete" parent="webscript" singleton="false">

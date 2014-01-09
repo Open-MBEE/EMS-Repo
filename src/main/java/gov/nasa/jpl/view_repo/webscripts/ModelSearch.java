@@ -26,63 +26,52 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
+
 package gov.nasa.jpl.view_repo.webscripts;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.web.app.Application;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
-import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
- * Java backed webscript for logging out of Alfresco repository. 
+ * Model search service that returns a JSONArray of elements
  * @author cinyoung
  *
  */
-public class LogoutWebScript extends DeclarativeWebScript {
-	private final String NEXT_PARAM = "next";
+public class ModelSearch extends ModelGet {
+	protected final String[] searchTypes = {"@sysml\\:documentation:\"", "@sysml\\:name:\"", "@sysml\\:id:\"", "@sysml\\:string:\""};
 	
 	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req,
-			Status status, Cache cache) {
-		logout(req);
+	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+		clearCaches();
 		
-		String next = getServicePath(req.getServiceContextPath()) + "%2Fwcs%2Fui%2F";
+		Map<String, Object> model = new HashMap<String, Object>();
 		
-		if (req.getParameter(NEXT_PARAM) != null) {
-			next = req.getParameter(NEXT_PARAM);
+		String keyword = req.getParameter("keyword");
+		for (String searchType: searchTypes) {
+			elementsFound.putAll(searchForElements(searchType, keyword));
 		}
-		
-		// set redirection parameters
-		status.setCode(HttpServletResponse.SC_TEMPORARY_REDIRECT);
-		status.setRedirect(true);
-		status.setLocation(req.getServerPath() + getServicePath(req.getServiceContextPath()) 
-				+ "/faces/jsp/login.jsp?_alfRedirect=" + next);
+				
+		try {
+			handleElements();
 
-		return new HashMap<String, Object>();
-	}
-
-	/**
-	 * Simple utility that logs out the user
-	 * @param wsr
-	 */
-	private void logout(WebScriptRequest wsr) {
-		FacesContext fc = FacesContext.getCurrentInstance();
-		Application.logOut(fc);
-	}
-	
-	/**
-	 * Simple utility to get the service path out of the service context
-	 * @param scpath	Service context path
-	 * @return			service path
-	 */
-	private String getServicePath(String scpath) {
-		return scpath.replace("/wcservice","").replace("/wcs","").replace("/service","");
+			JSONObject top = new JSONObject();
+			top.put("elements", elements);
+			model.put("res", top.toString(4));
+		} catch (JSONException e) {
+			log(LogLevel.ERROR, "Could not create the JSON response", HttpServletResponse.SC_BAD_REQUEST);
+			model.put("res", response);
+			e.printStackTrace();
+		}
+				
+		status = responseStatus;
+		return model;
 	}
 }

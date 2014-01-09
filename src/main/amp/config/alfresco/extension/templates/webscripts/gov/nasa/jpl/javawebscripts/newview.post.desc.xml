@@ -1,7 +1,7 @@
 <webscript>
 	<shortname>Post view</shortname>
     <description>
-		DRAFT
+		Post a view with this format.
 		
 		{
   			"views": 

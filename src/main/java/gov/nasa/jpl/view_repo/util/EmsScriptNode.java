@@ -32,6 +32,7 @@ package gov.nasa.jpl.view_repo.util;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +42,10 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.cmr.repository.Path;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.repository.Path.ChildAssocElement;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
@@ -402,5 +406,34 @@ public class EmsScriptNode extends ScriptNode {
 	
 	public void setStatus(Status status) {
 		this.status = status;
+	}
+	
+	/**
+	 * Gets the SysML qualified name for an object - if not SysML, won't return anything
+	 * @return
+	 */
+	public String getSysmlQName() {
+        StringBuffer qname = new StringBuffer();
+
+        NodeService nodeService = services.getNodeService();
+        Path path = nodeService.getPath(this.getNodeRef());
+        Iterator<Path.Element> pathElements = path.iterator();
+        while (pathElements.hasNext()) {
+            Path.Element pathElement = pathElements.next();
+            if (pathElement instanceof ChildAssocElement) {
+                   ChildAssociationRef elementRef = ((ChildAssocElement)pathElement).getRef();
+                    if (elementRef.getParentRef() != null)
+                    {
+                        Serializable nameProp = null;
+                        nameProp = nodeService.getProperty(elementRef.getChildRef(), QName.createQName("sysml:name", services.getNamespaceService()));
+                        if (nameProp != null) {
+                            // use the name property if we are allowed access to it
+                            qname.append("/" + nameProp.toString());
+                        }
+                    }
+            }
+        }
+
+        return qname.toString();
 	}
 }
