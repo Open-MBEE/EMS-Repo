@@ -154,7 +154,8 @@ public class EmsScriptNode extends ScriptNode {
 			}
 		}
 		
-		log(getName() + ": " + type + " peer association updated, target: " + target.getName());
+		// Target nodeRef isn't found?
+//		log(getName() + ": " + type + " peer association updated, target: " + target.getName());
 		services.getNodeService().createAssociation(nodeRef, target.getNodeRef(), typeQName);
 		return true;
 	}

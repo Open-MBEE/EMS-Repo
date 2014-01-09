@@ -1,0 +1,17 @@
+<webscript>
+<shortname>Get Product</shortname>
+    <description>
+    See newview.post.desc.xml for format. 
+  	</description>
+		<url>/javawebscripts/products/{id}</url>
+		<format default="json">any</format>
+		<authentication>user</authentication>
+		<transaction allow="readonly">required</transaction>
+		<family>EMS Java Webscripts</family>
+		<args>
+			<arg>
+				<name>id</name>
+				<description>ID of the document to be retrieved</description>
+			</arg>
+		</args>  		
+ </webscript>

@@ -44,7 +44,7 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-public class NewViewPost extends AbstractJavaWebScript {
+public class ProductPost extends AbstractJavaWebScript {
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		// TODO Auto-generated method stub
@@ -60,7 +60,7 @@ public class NewViewPost extends AbstractJavaWebScript {
 		Map<String, Object> model = new HashMap<String, Object>();
 		
 		try {
-			updateViews((JSONObject)req.parseContent());
+			updateProducts((JSONObject)req.parseContent());
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();
@@ -71,9 +71,9 @@ public class NewViewPost extends AbstractJavaWebScript {
 		return model;
 	}
 	
-	private void updateViews(JSONObject jsonObject) throws JSONException {
-		if (jsonObject.has("views")) {
-			JSONArray viewsJson = jsonObject.getJSONArray("views");
+	private void updateProducts(JSONObject jsonObject) throws JSONException {
+		if (jsonObject.has("products")) {
+			JSONArray productsJson = jsonObject.getJSONArray("products");
 			
 			jwsUtil.splitTransactions(new JwsFunctor() {
 				@Override
@@ -86,52 +86,44 @@ public class NewViewPost extends AbstractJavaWebScript {
 				@Override
 				public Object execute(JSONArray jsonArray, int index,
 						Boolean... flags) throws JSONException {
-					updateView(jsonArray, index);
+					updateProduct(jsonArray, index);
 					return null;
 				}
-			}, viewsJson);
+			}, productsJson);
 		}
 	}
 	
 	
-	private void updateView(JSONArray viewsJson, int index) throws JSONException {
-		JSONObject viewJson = viewsJson.getJSONObject(index);
-		updateView(viewJson);
+	private void updateProduct(JSONArray productsJson, int index) throws JSONException {
+		JSONObject productJson = productsJson.getJSONObject(index);
+		updateProduct(productJson);
 	}
 	
-	private void updateView(JSONObject viewJson) throws JSONException {
-		String id = viewJson.getString("id");
+	private void updateProduct(JSONObject productJson) throws JSONException {
+		String id = productJson.getString("id");
 		if (id == null) {
-			log(LogLevel.ERROR, "view id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
+			log(LogLevel.ERROR, "product id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}
 		
-		EmsScriptNode view = findScriptNodeByName(id);
-		if (view == null) {
-			log(LogLevel.ERROR, "could not find view with id: " + id, HttpServletResponse.SC_NOT_FOUND);
+		EmsScriptNode product = findScriptNodeByName(id);
+		if (product == null) {
+			log(LogLevel.ERROR, "could not find product with id: " + id, HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
 			
-		if (checkPermissions(view, PermissionService.WRITE)) {
-		    view.createOrUpdateAspect("sysml:View");
+		if (checkPermissions(product, PermissionService.WRITE)) {
+		    product.createOrUpdateAspect("view2:Product");
 
 			JSONArray array;
 			
-			if (viewJson.has("contains")) {
-				array = viewJson.getJSONArray("contains");
-				view.createOrUpdateProperty("view2:contains", array.toString());
+			if (productJson.has("view2view")) {
+			    array = productJson.getJSONArray("view2view");
+			    product.createOrUpdateProperty("view2:view2view", array.toString());
 			}
-			if (viewJson.has("allowedElements")) {
-				array = viewJson.getJSONArray("allowedElements");
-				view.createOrUpdateProperty("view2:allowedElements", array.toString());
-			}
-			if (viewJson.has("displayedElements")) {
-				array = viewJson.getJSONArray("displayedElements");
-				view.createOrUpdateProperty("view2:displayedElements", array.toString());
-			}
-			if (viewJson.has("childrenViews")) {
-				array = viewJson.getJSONArray("childrenViews");
-				view.createOrUpdateProperty("view2:childrenViews", array.toString());
+			if (productJson.has("noSections")) {
+				array = productJson.getJSONArray("noSections");
+				product.createOrUpdateProperty("view2:noSections", array.toString());
 			}
 		}
 	}

@@ -37,20 +37,41 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.service.cmr.security.PermissionService;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONArray;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-public class NewViewPost extends AbstractJavaWebScript {
+public class ProductGet extends AbstractJavaWebScript {
+	private JSONArray productsJson;
+	
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		// TODO Auto-generated method stub
-		return false;
+		String productId = req.getServiceMatch().getTemplateVars().get("id");
+		if (!checkRequestVariable(productId, "id")) {
+			return false;
+		}
+		
+		EmsScriptNode product = findScriptNodeByName(productId);
+		if (product == null) {
+			log(LogLevel.ERROR, "Product not found with id: " + productId + ".\n", HttpServletResponse.SC_NOT_FOUND);
+			return false;
+		}
+		
+		if (!checkPermissions(product, PermissionService.READ)) {
+			return false;
+		}
+		
+		return true;
 	}
 	
+	@Override
+	protected void clearCaches() {
+		super.clearCaches();
+		productsJson = new JSONArray();
+	}
 	
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req,
@@ -59,80 +80,55 @@ public class NewViewPost extends AbstractJavaWebScript {
 		
 		Map<String, Object> model = new HashMap<String, Object>();
 		
-		try {
-			updateViews((JSONObject)req.parseContent());
-		} catch (JSONException e) {
-			log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
-			e.printStackTrace();
+		if (validateRequest(req, status)) {
+			try {
+				String productId = req.getServiceMatch().getTemplateVars().get("id");
+				handleProduct(productId);
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
+		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
+			try {
+				model.put("res", productsJson.getJSONObject(0).toString(4));
+			} catch (JSONException e) {
+				e.printStackTrace();
+				log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				model.put("res", response.toString());
+			}
+		} else {
+			model.put("res", response.toString());
+		}
+
 		status = responseStatus;
-		model.put("res", response.toString());
 		return model;
 	}
-	
-	private void updateViews(JSONObject jsonObject) throws JSONException {
-		if (jsonObject.has("views")) {
-			JSONArray viewsJson = jsonObject.getJSONArray("views");
-			
-			jwsUtil.splitTransactions(new JwsFunctor() {
-				@Override
-				public Object execute(JSONObject jsonObject, String key,
-						Boolean... flags) throws JSONException {
-					// TODO Auto-generated method stub
-					return null;
-				}
 
-				@Override
-				public Object execute(JSONArray jsonArray, int index,
-						Boolean... flags) throws JSONException {
-					updateView(jsonArray, index);
-					return null;
-				}
-			}, viewsJson);
-		}
-	}
 	
-	
-	private void updateView(JSONArray viewsJson, int index) throws JSONException {
-		JSONObject viewJson = viewsJson.getJSONObject(index);
-		updateView(viewJson);
-	}
-	
-	private void updateView(JSONObject viewJson) throws JSONException {
-		String id = viewJson.getString("id");
-		if (id == null) {
-			log(LogLevel.ERROR, "view id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
-			return;
+	private void handleProduct(String productId) throws JSONException {
+		JSONObject productJson = new JSONObject();
+		EmsScriptNode product = findScriptNodeByName(productId);
+		if (product == null) {
+			log(LogLevel.ERROR, "Product not found with ID: " + productId, HttpServletResponse.SC_NOT_FOUND);
 		}
 		
-		EmsScriptNode view = findScriptNodeByName(id);
-		if (view == null) {
-			log(LogLevel.ERROR, "could not find view with id: " + id, HttpServletResponse.SC_NOT_FOUND);
-			return;
-		}
-			
-		if (checkPermissions(view, PermissionService.WRITE)) {
-		    view.createOrUpdateAspect("sysml:View");
-
-			JSONArray array;
-			
-			if (viewJson.has("contains")) {
-				array = viewJson.getJSONArray("contains");
-				view.createOrUpdateProperty("view2:contains", array.toString());
+		if (checkPermissions(product, PermissionService.READ)) { 
+			Object property = product.getProperty("sysml:id");
+			if (property != null) {
+				productJson.put("id", property);
 			}
-			if (viewJson.has("allowedElements")) {
-				array = viewJson.getJSONArray("allowedElements");
-				view.createOrUpdateProperty("view2:allowedElements", array.toString());
+			property = product.getProperty("view2:view2view");
+			if (property != null) {
+				productJson.put("view2view", new JSONArray(property.toString()));
 			}
-			if (viewJson.has("displayedElements")) {
-				array = viewJson.getJSONArray("displayedElements");
-				view.createOrUpdateProperty("view2:displayedElements", array.toString());
-			}
-			if (viewJson.has("childrenViews")) {
-				array = viewJson.getJSONArray("childrenViews");
-				view.createOrUpdateProperty("view2:childrenViews", array.toString());
+			property = product.getProperty("view2:noSections");
+			if (property != null) {
+				productJson.put("noSections", new JSONArray(property.toString()));
 			}
 		}
+		
+		productsJson.put(productJson);
 	}
 }

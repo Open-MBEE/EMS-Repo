@@ -13,6 +13,11 @@ curl -w "%{http_code}\n" -X GET -u admin:admin -H "Content-Type:application/json
 # search elements
 curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/view-repo/service/javawebscripts/element/search?keyword=hrere"
 
+# post product
+curl -w "%{http_code}\n" -X POST -u admin:admin -H "Content-Type:application/json" --data @JsonData/product.post.json "http://localhost:8080/view-repo/service/javawebscripts/products"
+
+#get product
+curl -w "%{http_code}\n" -X GET -u admin:admin -H "Content-Type:application/json" "http://localhost:8080/view-repo/service/javawebscripts/products/_17_0_2_3_407019f_1389118135499_133536_25456"
 
 
 # post new elements

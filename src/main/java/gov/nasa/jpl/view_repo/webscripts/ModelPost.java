@@ -370,13 +370,15 @@ public class ModelPost extends AbstractJavaWebScript {
 		}
 		
 		// lets create the maps for the hierarchy, element values, and relationships
-		String owner = elementJson.getString("owner");
-		if (owner != null && !owner.equals("null")) {
-			// if owner is null, leave at project root level
-			if (!elementHierarchyJson.has(owner)) {
-				elementHierarchyJson.put(owner, new JSONArray());
-			}
-			elementHierarchyJson.getJSONArray(owner).put(id);
+		if (elementJson.has("owner")) {
+    		String owner = elementJson.getString("owner");
+    		if (owner != null && !owner.equals("null")) {
+    			// if owner is null, leave at project root level
+    			if (!elementHierarchyJson.has(owner)) {
+    				elementHierarchyJson.put(owner, new JSONArray());
+    			}
+    			elementHierarchyJson.getJSONArray(owner).put(id);
+    		}
 		}
 		
 		if (elementJson.has("propertyType")) {
