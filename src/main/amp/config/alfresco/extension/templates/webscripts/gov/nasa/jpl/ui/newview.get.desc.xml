@@ -86,7 +86,7 @@
   					"propertyType": elementId/null;
   					"isDerived": true|false, 
   					"isSlot": true|false, 
-  					"value": [?], (based on valueType)
+  					"value": [?], (based on valueType) //the old dvalue is basically always the first value as a string
   					"valueType": "LiteralBoolean" | "LiteralInteger" | "LiteralString" | 
   							"LiteralReal" | "ElementValue" | "Expression",
   					
