@@ -2,8 +2,34 @@
   <shortname>Post Element</shortname> 
   <description>
   Post element for creation or update.
+  		{
+  			"elements": [
+  				{
+  					"id": elementId,
+  					"type": "Package" | "Property" | "Element" | 
+  							"Dependency" | "Generalization" | "DirectedRelationship" | 
+  							"Conform" | "Expose" | "Viewpoint",
+  					"name": name,
+  					"documentation": documentation,
+  					"owner": elementId/null,
+  					
+  					//************** if type is "Property" ******/
+  					"propertyType": elementId/null;
+  					"isDerived": true|false, 
+  					"isSlot": true|false, 
+  					"value": [?], (based on valueType)
+  					"valueType": "LiteralBoolean" | "LiteralInteger" | "LiteralString" | 
+  							"LiteralReal" | "ElementValue" | "Expression",
+  					
+  					//*************** if type is subtype of DirectedRelationship (Generalization/Expose/Conform/Dependency) ***/
+  					"source": elementId,
+  					"target": elementId
+  				},
+  				...
+  			]
+  		}
   </description>
-  <url>/javawebscripts/element/{elementid}</url>
+  <url>/javawebscripts/elements/{elementid}</url>
   <format default="json">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readwrite">required</transaction>

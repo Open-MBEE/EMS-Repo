@@ -56,7 +56,7 @@
 			]
   		}
   		</description>
-  		<url>/javawebscripts/newviews</url>
+  		<url>/javawebscripts/views</url>
   		<format default="json">any</format>
   		<authentication>user</authentication>
   		<transaction allow="readwrite">required</transaction>
