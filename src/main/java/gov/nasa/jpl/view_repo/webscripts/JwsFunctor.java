@@ -32,7 +32,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 /**
- * Function pointer for handling transactions based on JSONObject or JSONArray inputs
+ * Function pointer for handling transactions based on JSONArray inputs
  * 
  * @author cinyoung
  *

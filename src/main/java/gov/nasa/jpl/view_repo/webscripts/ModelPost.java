@@ -115,14 +115,12 @@ public class ModelPost extends AbstractJavaWebScript {
 		}
 		
 		// handle the hierarchy
-		jwsUtil.splitTransactions(new JwsFunctor() {
-			@Override
-			public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
-				// do nothing, not called
-				return null;
-			}
-		}, elementHierarchyJson);
-
+		Iterator<?> iter = elementHierarchyJson.keys();
+		while (iter.hasNext()) {
+		    updateOrCreateElementHierarchy(elementHierarchyJson, (String)iter.next());
+		}
+		        
+		        
 		// handle the relationships
 		// TODO split this out updating the separate relationships underneath
 		updateOrCreateRelationships(relationshipsJson, "relationshipElements");

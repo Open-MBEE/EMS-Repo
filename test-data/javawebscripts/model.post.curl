@@ -1,6 +1,9 @@
 # post elements
 curl -w "%{http_code}\n" -X POST -u admin:admin -H "Content-Type:application/json" --data @JsonData/element.post.json "http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/17_0123455/elements"
 
+# get elements
+curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/view-repo/service/javawebscripts/elements/17_0123455"
+
 # post views
 curl -w "%{http_code}\n" -X POST -u admin:admin -H "Content-Type:application/json" --data @JsonData/view.post.json "http://localhost:8080/view-repo/service/javawebscripts/views"
 
@@ -23,6 +26,4 @@ curl -w "%{http_code}\n" -X GET -u admin:admin -H "Content-Type:application/json
 # post new elements
 curl -X POST -u admin:admin -H "Content-Type:application/json" --data @model.post.elements.js "http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/17_0123455/model"
 
-# get elements
-curl -X GET -u admin:admin "http://localhost:8080/view-repo/service/javawebscripts/element/17_0123455"
 
