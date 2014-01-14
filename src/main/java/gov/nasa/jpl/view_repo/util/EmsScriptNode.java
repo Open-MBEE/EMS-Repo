@@ -32,9 +32,11 @@ package gov.nasa.jpl.view_repo.util;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.jscript.ScriptNode;
@@ -46,11 +48,13 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.Path;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.repository.Path.ChildAssocElement;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
 
 /**
@@ -72,6 +76,101 @@ public class EmsScriptNode extends ScriptNode {
 	// for lucene search
 	protected static final StoreRef SEARCH_STORE = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 
+	// JSON to Alfresco Content Model mapping
+    public static final Map<String, String> JSON2ACM = new HashMap<String, String>() {
+        private static final long serialVersionUID = -5467934440503910163L;
+        {
+//            put("View", "view:View");
+//            put("Property", "view:Property");
+//            put("Comment", "view:Comment");
+//            put("ModelElement", "view:ModelElement");
+            
+            put("Conform", "sysml:Conform");
+            put("Dependency", "sysml:Dependency");
+            put("DirectedRelationship", "sysml:DirectedRelationship");
+            put("Element", "sysml:Element");
+            put("Expose", "sysml:Expose");
+            put("Generalization", "sysml:Generalization");
+            put("Package", "sysml:Package");
+            put("Property", "sysml:Property");
+            put("Viewpoint", "sysml:Viewpoint");
+            put("isDerived", "sysml:isDerived");
+            put("isSlot", "sysml:isSlot");
+            put("documentation", "sysml:documentation");
+            put("id", "sysml:id");
+            put("name", "sysml:name");
+            put("source", "sysml:source");
+            put("target", "sysml:target");
+            put("valueType", "sysml:valueType");
+//          put("boolean", "sysml:boolean");
+//          put("string", "sysml:string");
+//          put("integer", "sysml:integer");
+//          put("double", "sysml:double");
+//          put("expression", "sysml:expression");
+            
+            put("allowedElements", "view2:allowedElements");
+            put("childrenViews", "view2:childrenViews");
+            put("contains", "view2:contains");
+            put("displayedElements", "view2:displayedElements");
+            put("noSections", "view2:noSections");
+            put("view2view", "view2:view2view");
+            
+            put("Expression", "sysml:string");
+            put("LiteralBoolean", "sysml:boolean");
+            put("LiteralInteger", "sysml:integer");
+            put("LiteralReal", "sysml:double");
+            put("LiteralString", "sysml:string");
+            put("ElementValue", "sysml:string");
+        }
+    };
+    
+    // Alfresco Content Model 2 JSON types
+    public static final Map<String, String> ACM2JSON = new HashMap<String, String>() {
+        private static final long serialVersionUID = -4682311676740055702L;
+        {
+//            put("view:View", "View");
+//            put("view:Property", "Property");
+//            put("view:Comment", "Comment");
+//            put("view:ModelElement", "ModelElement");
+            
+            put("view2:allowedElements", "allowedElements");
+            put("view2:childrenViews", "childrenViews");
+            put("view2:contains", "contains");
+            put("view2:displayedElements", "displayedElements");
+            put("view2:noSections", "noSections");
+            put("view2:view2view", "view2view");
+            
+            put("sysml:Conform", "Conform");
+            put("sysml:Dependency", "Dependency");
+            put("sysml:DirectedRelationship", "DirectedRelationship");
+            put("sysml:Element", "Element");
+            put("sysml:Expose", "Expose");
+            put("sysml:Generalization", "Generalization");
+            put("sysml:Package", "Package");
+            put("sysml:Property", "Property");
+            put("sysml:Viewpoint", "Viewpoint");
+            put("sysml:documentation", "documentation");
+            put("sysml:id", "id");
+            put("sysml:isDerived", "isDerived");
+            put("sysml:isSlot", "isSlot");
+            put("sysml:name", "name");
+            put("sysml:source", "source");
+            put("sysml:target", "target");
+
+            put("cm:modified", "lastModified");
+            put("cm:modifier", "author");
+        }
+    };
+
+    // TODO: reduce the JSON size to only output necessary properties
+    protected static final Set<String> VIEW_JSON = new HashSet<String>() {
+        private static final long serialVersionUID = -2080928480362524333L;
+        
+    };
+    
+    protected static final Map<String, Set<String>> JSON_MIN = new HashMap<String, Set<String>>() {
+        private static final long serialVersionUID = -2080928480362524333L;
+    };
 
 	public EmsScriptNode(NodeRef nodeRef, ServiceRegistry services) {
 		super(nodeRef, services);
@@ -436,5 +535,154 @@ public class EmsScriptNode extends ScriptNode {
         }
 
         return qname.toString();
+	}
+	
+
+	/**
+	 * Get the children views as a JSONArray
+	 * @return
+	 */
+	public JSONArray getChildrenViewsJSONArray() {
+	    JSONArray childrenViews = new JSONArray();
+        try {
+            Object property = this.getProperty("view2:childrenViews");
+            if (property != null) {
+                childrenViews = new JSONArray(property.toString());
+            }
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+	    return childrenViews;
+	}
+	
+	
+	/**
+	 * Convert node into our custom JSONObject
+	 */
+	public JSONObject toJSONObject() {
+	    JSONObject element = new JSONObject();
+	    try {
+            element.put("type",  this.getQNameType().getLocalName());
+            
+            // add in all the properties
+            for (String acmType: ACM2JSON.keySet()) {
+                Object elementValue = this.getProperty(acmType);
+                if (elementValue != null) {
+                    String jsonType = ACM2JSON.get(acmType);
+                    if (jsonType.equals("allowedElements") || jsonType.equals("childrenViews") || 
+                            jsonType.equals("displayedElements") || jsonType.equals("noSections") ||
+                            jsonType.equals("view2view")) {
+                        element.put(jsonType, new JSONArray(elementValue.toString()));
+                    } else {
+                        element.put(jsonType, elementValue);
+                    }
+                }
+            }
+            
+            // add in the value and value type
+            Object valueType = this.getProperty("sysml:valueType");
+            if (valueType != null) {
+                element.put("value",  this.getProperty(JSON2ACM.get((String) valueType)));
+                element.put("valueType",  valueType);
+            }
+            
+            EmsScriptNode parent = this.getParent();
+            element.put("owner",  parent.getName().replace("_pkg", ""));
+            
+            element.put("qualifiedName",  this.getSysmlQName());
+            
+            element.put("editable", this.hasPermission(PermissionService.WRITE));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }    
+
+	    return element;
+	}
+	
+	/**
+	 * Given an JSONObject, filters it to find the appropriate relationships
+	 * @param jsonObject
+	 * @return
+	 */
+	public static JSONObject filterRelationsJSONObject(JSONObject jsonObject) {
+        JSONObject relations = new JSONObject();
+        JSONObject elementValues = new JSONObject();
+        JSONObject propertyTypes = new JSONObject();
+        JSONObject relationshipElements = new JSONObject();
+        JSONArray array;
+
+        try {
+            if (jsonObject.has("valueType")) {
+                array = jsonObject.getJSONArray("value");
+                if (jsonObject.get("valueType").equals("ElementValue")) {
+                    elementValues.put(jsonObject.getString("id"), array);
+                }
+            } else if (jsonObject.has("propertyType")) {
+                String propertyType = jsonObject.getString("propertyType");
+                propertyTypes.put(jsonObject.getString("id"), propertyType);
+            } else if (jsonObject.has("source") && jsonObject.has("target")) {
+                JSONObject relJson = new JSONObject();
+                String source = jsonObject.getString("source");
+                String target = jsonObject.getString("target");
+                relJson.put("source", source);
+                relJson.put("target", target);
+                relationshipElements.put(jsonObject.getString("id"), relJson);
+            }
+
+            relations.put("relationshipElements", relationshipElements);
+            relations.put("propertyTypes", propertyTypes);
+            relations.put("elementValues", elementValues);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        
+        return relations;
+	}
+	
+	/**
+	 * Update the node with the properties from the jsonObject
+	 * @param jsonObject
+	 */
+	public void ingestJSON(JSONObject jsonObject) {
+        try {
+    	    JSONArray array;
+    	    
+    	    // fill in all the properties
+    	    for (String jsonType: JSON2ACM.keySet()) {
+    	        String acmType = JSON2ACM.get(jsonType);
+    	        if (jsonObject.has(jsonType)) {
+    	            if (jsonType.equals("view2view") || jsonType.equals("noSections")) {
+    	                array = jsonObject.getJSONArray(jsonType);
+    	                this.createOrUpdateProperty(acmType, array.toString());
+    	            } else {
+    	                String property = jsonObject.getString(jsonType);
+    	                if (jsonType.startsWith("is")) {
+    	                    this.createOrUpdateProperty(acmType, new Boolean(property));
+    	                } else {
+    	                    this.createOrUpdateProperty(acmType, new String(property));
+    	                }
+    	            }
+    	        }
+    	    }
+    	    
+    	    // fill in the valueTypes and all relationships
+            if (jsonObject.has("valueType")) {
+                String acmType = JSON2ACM.get(jsonObject.get("valueType"));
+                array = jsonObject.getJSONArray("value");
+                if (acmType.equals("sysml:boolean")) {
+                    this.createOrUpdatePropertyValues(acmType, array, new Boolean(true));
+                } else if (acmType.equals("sysml:integer")) {
+                    this.createOrUpdatePropertyValues(acmType, array, new Integer(0));
+                } else if (acmType.equals("sysml:double")) {
+                    this.createOrUpdatePropertyValues(acmType, array, new Double(0.0));
+                } else {
+                    this.createOrUpdatePropertyValues(acmType, array, new String(""));
+                }
+            }
+	    } catch (JSONException e) {
+	        e.printStackTrace();
+	    }
 	}
 }

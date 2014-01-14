@@ -85,78 +85,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     protected StringBuffer response = new StringBuffer();
     protected Status responseStatus = new Status();
     
-	// JSON to Alfresco Content Model mapping
-	protected final Map<String, String> json2acm = new HashMap<String, String>() {
-		private static final long serialVersionUID = -5467934440503910163L;
-		{
-			put("View", "view:View");
-			put("Property", "view:Property");
-			put("Comment", "view:Comment");
-			put("ModelElement", "view:ModelElement");
-			
-			put("Package", "sysml:Package");
-			put("Property", "sysml:Property");
-			put("Element", "sysml:Element");
-			put("Dependency", "sysml:Dependency");
-			put("Generalization", "sysml:Generalization");
-			put("DirectedRelationship", "sysml:DirectedRelationship");
-			put("Conform", "sysml:Conform");
-			put("Expose", "sysml:Expose");
-			put("Viewpoint", "sysml:Viewpoint");
-			put("name", "sysml:name");
-			put("documentation", "sysml:documentation");
-			put("isDerived", "sysml:isDerived");
-			put("isSlot", "sysml:isSlot");
-			put("boolean", "sysml:boolean");
-			put("string", "sysml:string");
-			put("integer", "sysml:integer");
-			put("double", "sysml:double");
-			put("expression", "sysml:expression");
-			put("valueType", "sysml:valueType");
-			put("id", "sysml:id");
-			put("source", "sysml:source");
-			put("target", "sysml:target");
-			
-			put("LiteralBoolean", "sysml:boolean");
-			put("LiteralInteger", "sysml:integer");
-			put("LiteralString", "sysml:string");
-			put("LiteralReal", "sysml:double");
-			put("ElementValue", "sysml:string");
-			put("Expression", "sysml:string");
-		}
-	};
-	
-	// Alfresco Content Model 2 JSON types
-	protected final Map<String, String> acm2json = new HashMap<String, String>() {
-		private static final long serialVersionUID = -4682311676740055702L;
-		{
-			put("view:View", "View");
-			put("view:Property", "Property");
-			put("view:Comment", "Comment");
-			put("view:ModelElement", "ModelElement");
-			
-			put("sysml:Package", "Package");
-			put("sysml:Property", "Property");
-			put("sysml:Element", "Element");
-			put("sysml:Dependency", "Dependency");
-			put("sysml:Generalization", "Generalization");
-			put("sysml:DirectedRelationship", "DirectedRelationship");
-			put("sysml:Conform", "Conform");
-			put("sysml:Expose", "Expose");
-			put("sysml:Viewpoint", "Viewpoint");
-			put("sysml:id", "id");
-			put("sysml:name", "name");
-			put("sysml:documentation", "documentation");
-			put("sysml:isDerived", "isDerived");
-			put("sysml:isSlot", "isSlot");
-			put("sysml:source", "source");
-			put("sysml:target", "target");
 
-			put("cm:modified", "lastModified");
-			put("cm:modifier", "author");
-		}
-	};
-	
 	protected void initMemberVariables(String siteName) {
 		companyhome = new ScriptNode(repository.getCompanyHome(), services);
 	}
@@ -295,7 +224,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	}
 	
 	protected boolean checkPermissions(EmsScriptNode node, String permissions) {
-		if (services.getPermissionService().hasPermission(node.getNodeRef(), permissions) != AccessStatus.ALLOWED) {
+//		if (services.getPermissionService().hasPermission(node.getNodeRef(), permissions) != AccessStatus.ALLOWED) {
+	    if (!node.hasPermission(permissions)) {
 			Object property = node.getProperty("cm:name");
 			log(LogLevel.WARNING, "No " + permissions + " priveleges to " + property.toString() + ".\n", HttpServletResponse.SC_UNAUTHORIZED);
 			return false;

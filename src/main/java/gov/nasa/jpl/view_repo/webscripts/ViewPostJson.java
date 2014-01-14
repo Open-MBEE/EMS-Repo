@@ -28,6 +28,7 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.UserUtil;
 
 import java.io.Serializable;
@@ -85,7 +86,7 @@ public class ViewPostJson extends AbstractJavaWebScript {
 		if (modelNode == null) {
 			modelNode = jwsUtil.getModelElement(modelFolder, mdid);
 			if (modelNode == null) {
-				String modeltype = json2acm.containsKey(elementType) ? json2acm.get(elementType) : json2acm.get("ModelElement");
+				String modeltype = EmsScriptNode.JSON2ACM.containsKey(elementType) ? EmsScriptNode.JSON2ACM.get(elementType) : EmsScriptNode.JSON2ACM.get("ModelElement");
 				modelNode = jwsUtil.createModelElement(modelFolder, mdid, modeltype);
 				if (elementName != null) {
 					jwsUtil.setName(modelNode, elementName);

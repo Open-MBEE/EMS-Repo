@@ -39,7 +39,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -108,27 +107,13 @@ public class ProductGet extends AbstractJavaWebScript {
 
 	
 	private void handleProduct(String productId) throws JSONException {
-		JSONObject productJson = new JSONObject();
 		EmsScriptNode product = findScriptNodeByName(productId);
 		if (product == null) {
 			log(LogLevel.ERROR, "Product not found with ID: " + productId, HttpServletResponse.SC_NOT_FOUND);
 		}
-		
-		if (checkPermissions(product, PermissionService.READ)) { 
-			Object property = product.getProperty("sysml:id");
-			if (property != null) {
-				productJson.put("id", property);
-			}
-			property = product.getProperty("view2:view2view");
-			if (property != null) {
-				productJson.put("view2view", new JSONArray(property.toString()));
-			}
-			property = product.getProperty("view2:noSections");
-			if (property != null) {
-				productJson.put("noSections", new JSONArray(property.toString()));
-			}
+
+		if (checkPermissions(product, PermissionService.READ)){ 
+		    productsJson.put(product.toJSONObject());
 		}
-		
-		productsJson.put(productJson);
 	}
 }

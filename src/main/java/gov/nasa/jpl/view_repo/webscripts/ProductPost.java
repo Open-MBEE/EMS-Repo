@@ -114,17 +114,7 @@ public class ProductPost extends AbstractJavaWebScript {
 			
 		if (checkPermissions(product, PermissionService.WRITE)) {
 		    product.createOrUpdateAspect("view2:Product");
-
-			JSONArray array;
-			
-			if (productJson.has("view2view")) {
-			    array = productJson.getJSONArray("view2view");
-			    product.createOrUpdateProperty("view2:view2view", array.toString());
-			}
-			if (productJson.has("noSections")) {
-				array = productJson.getJSONArray("noSections");
-				product.createOrUpdateProperty("view2:noSections", array.toString());
-			}
+		    product.ingestJSON(productJson);
 		}
 	}
 }

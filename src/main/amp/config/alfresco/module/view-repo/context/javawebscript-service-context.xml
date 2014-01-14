@@ -15,13 +15,6 @@
 		<property name="transactionInterval" value="500" />
 	</bean>
 
-	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.post" class="gov.nasa.jpl.view_repo.webscripts.ViewPostJson"
-		parent="webscript" singleton="false">
-		<property name="repositoryHelper" ref="repositoryHelper" />
-		<property name="services" ref="ServiceRegistry" />
-		<property name="jwsUtil" ref="jwsUtil" />
-	</bean>
-
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.newview.post" class="gov.nasa.jpl.view_repo.webscripts.NewViewPost"
 		parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
@@ -41,6 +34,7 @@
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
+		<property name="isViewRequest" value="true" />
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.element.search.get" class="gov.nasa.jpl.view_repo.webscripts.ModelSearch"
@@ -124,6 +118,7 @@
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
+		<property name="isViewRequest" value="false" />
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.element.post"
@@ -135,13 +130,6 @@
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.model.post"
 		class="gov.nasa.jpl.view_repo.webscripts.ModelPost" parent="webscript" singleton="false">
-		<property name="repositoryHelper" ref="repositoryHelper" />
-		<property name="services" ref="ServiceRegistry" />
-		<property name="jwsUtil" ref="jwsUtil" />
-	</bean>
-
-	<bean id="webscript.gov.nasa.jpl.javawebscripts.model.get"
-		class="gov.nasa.jpl.view_repo.webscripts.ModelGet" parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />

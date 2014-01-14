@@ -93,13 +93,13 @@ public class NewViewGet extends AbstractJavaWebScript {
 		
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
 			try {
+                JSONObject json = new JSONObject();
 				if (!recurse) {
-					model.put("res", viewsJson.getJSONObject(0).toString());
+					json.put("res", viewsJson.getJSONObject(0).toString(4));
 				} else {
-					JSONObject json = new JSONObject();
-					json.put("views", viewsJson);
-					model.put("res", json.toString(4));
+	                json.put("views", viewsJson);
 				}
+                model.put("res", json.toString(4));
 			} catch (JSONException e) {
 				e.printStackTrace();
 				log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -115,42 +115,20 @@ public class NewViewGet extends AbstractJavaWebScript {
 
 	
 	private void handleView(String viewId, boolean recurse) throws JSONException {
-		JSONObject viewJson = new JSONObject();
 		EmsScriptNode view = findScriptNodeByName(viewId);
 		if (view == null) {
 			log(LogLevel.ERROR, "View not found with ID: " + viewId, HttpServletResponse.SC_NOT_FOUND);
 		}
 		
 		if (checkPermissions(view, PermissionService.READ)) { 
-			Object property = view.getProperty("sysml:id");
-			if (property != null) {
-				viewJson.put("id", property);
-			}
-			property = view.getProperty("view2:displayedElements");
-			if (property != null) {
-				viewJson.put("displayedElements", new JSONArray(property.toString()));
-			}
-			property = view.getProperty("view2:allowedElements");
-			if (property != null) {
-				viewJson.put("allowedElements", new JSONArray(property.toString()));
-			}
-			property = view.getProperty("view2:contains");
-			if (property != null) {
-				viewJson.put("contains", new JSONArray(property.toString()));
-			}
-			property = view.getProperty("view2:childrenViews");
-			if (property != null) {
-				JSONArray childrenJson = new JSONArray(property.toString());
-				viewJson.put("childrenViews", childrenJson);
-				if (recurse) {
-					for (int ii = 0; ii < childrenJson.length(); ii++) {
-						handleView(childrenJson.getString(ii), recurse);
-					}
-				}
-			}
+    		viewsJson.put(view.toJSONObject());
+    		if (recurse) {
+        		JSONArray childrenJson = view.getChildrenViewsJSONArray();
+        		for (int ii = 0; ii < childrenJson.length(); ii++) {
+        		    handleView(childrenJson.getString(ii), recurse);
+        		}
+    		}
 		}
-		
-		viewsJson.put(viewJson);
 	}
 	
 }

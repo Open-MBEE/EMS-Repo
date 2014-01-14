@@ -57,6 +57,9 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ModelGet extends AbstractJavaWebScript {
+    // injected via spring configuration
+    protected boolean isViewRequest = false;
+    
 	private JSONObject elementHierarchy = new JSONObject();
 	protected JSONArray elements = new JSONArray();
 	private JSONObject relationships = new JSONObject();
@@ -116,7 +119,6 @@ public class ModelGet extends AbstractJavaWebScript {
 		Map<String, Object> model = new HashMap<String, Object>();
 
 		boolean recurse = jwsUtil.checkArgEquals(req, "recurse", "true") ? true : false;
-		boolean isViewRequest = req.getURL().contains("newviews") ? true : false;
 		
 		if (validateRequest(req, status)) {
 			try {
@@ -165,7 +167,9 @@ public class ModelGet extends AbstractJavaWebScript {
 			for (int ii = 0; ii < childElementJson.length(); ii++) {
 				String id = childElementJson.getString(ii);
 				EmsScriptNode childElement = findScriptNodeByName(id);
-				elementsFound.put(id, childElement);
+				if (checkPermissions(childElement, PermissionService.READ)) {
+				    elementsFound.put(id, childElement);
+				}
 			}
 			if (recurse) {
 				Object childrenViews = root.getProperty("view2:childrenViews");
@@ -174,7 +178,9 @@ public class ModelGet extends AbstractJavaWebScript {
 					for (int ii = 0; ii < childViewJson.length(); ii++) {
 						String id = childViewJson.getString(ii);
 						EmsScriptNode childView = findScriptNodeByName(id);
-						handleViewHierarchy(childView, recurse);
+						if (checkPermissions(childView, PermissionService.READ)) {
+						    handleViewHierarchy(childView, recurse);
+						}
 					}
 				}
 			}
@@ -195,16 +201,18 @@ public class ModelGet extends AbstractJavaWebScript {
 			// find all the children, recurse or add to array as needed
 			for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
 				EmsScriptNode child = new EmsScriptNode(assoc.getChildRef(), services, response);
-				if (child.getTypeShort().equals("sysml:ElementFolder")) {
+				if (checkPermissions(child, PermissionService.READ)) {
+			       if (child.getTypeShort().equals("sysml:ElementFolder")) {
 						handleElementHierarchy(child, recurse);
-				} else {
-					String value = (String)child.getProperty("sysml:id");
-					if (value != null) {
-						array.put(value);
-						elementsFound.put(value, child);
-						// add empty hierarchies as well
-						elementHierarchy.put(value, new JSONArray());
-					}
+    			   } else {
+    					String value = (String)child.getProperty("sysml:id");
+    					if (value != null) {
+    						array.put(value);
+    						elementsFound.put(value, child);
+    						// add empty hierarchies as well
+    						elementHierarchy.put(value, new JSONArray());
+    					}
+    			   }
 				}
 			}
 			
@@ -227,44 +235,14 @@ public class ModelGet extends AbstractJavaWebScript {
 		for (String id: elementsFound.keySet()) {
 			EmsScriptNode node = elementsFound.get(id);
 
-			if (checkPermissions(node, PermissionService.READ)) {
-    			// check for relationships to be handled later
-    			if (node.isSubType("sysml:DirectedRelationship")) {
-    				foundRelationships.add(id);
-    			} else if (node.isSubType("sysml:Property")) {
-    				foundProperties.add(id);
-    			}
-    			
-    			// create the JSON object of the node
-    			JSONObject element = new JSONObject();
-    			element.put("type", node.getQNameType().getLocalName());
-    			
-    			// lets grab all the property values
-    			for (String acmType: acm2json.keySet()) {
-    				element.put(acm2json.get(acmType), node.getProperty(acmType));
-    			}
-    			
-    			// lets handle valueType and value
-    			Object valueType = node.getProperty("sysml:valueType");
-    			if (valueType != null) {
-    				element.put("value", node.getProperty(json2acm.get((String) valueType)));
-    				element.put("valueType", valueType);
-    			}
-    			
-    			// check if it's a view
-    			if (node.hasAspect("sysml:View")) {
-    				element.put("isView", true);
-    			} else {
-    				element.put("isView", false);
-    			}
-    			
-    			// add owner
-    			EmsScriptNode parent = node.getParent();
-    			element.put("owner", parent.getName().replace("_pkg", ""));
-    
-    			element.put("qualifiedName",node.getSysmlQName());
-    			
-    			elements.put(element);
+			if (checkPermissions(node, PermissionService.READ)){ 
+                elements.put(node.toJSONObject());
+//              // check for relationships to be handled later
+//              if (node.isSubType("sysml:DirectedRelationship")) {
+//                  foundRelationships.add(id);
+//              } else if (node.isSubType("sysml:Property")) {
+//                  foundProperties.add(id);
+//              }
 			}
 		}
 	}
@@ -350,5 +328,10 @@ public class ModelGet extends AbstractJavaWebScript {
 			relationshipElements.put(id, relationshipElement);
 		}
 		relationships.put("relationshipElements", relationshipElements);
+	}
+	
+	
+	public void setIsViewRequest(boolean flag) {
+	    isViewRequest = flag;
 	}
 }

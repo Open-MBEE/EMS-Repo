@@ -114,25 +114,7 @@ public class NewViewPost extends AbstractJavaWebScript {
 			
 		if (checkPermissions(view, PermissionService.WRITE)) {
 		    view.createOrUpdateAspect("sysml:View");
-
-			JSONArray array;
-			
-			if (viewJson.has("contains")) {
-				array = viewJson.getJSONArray("contains");
-				view.createOrUpdateProperty("view2:contains", array.toString());
-			}
-			if (viewJson.has("allowedElements")) {
-				array = viewJson.getJSONArray("allowedElements");
-				view.createOrUpdateProperty("view2:allowedElements", array.toString());
-			}
-			if (viewJson.has("displayedElements")) {
-				array = viewJson.getJSONArray("displayedElements");
-				view.createOrUpdateProperty("view2:displayedElements", array.toString());
-			}
-			if (viewJson.has("childrenViews")) {
-				array = viewJson.getJSONArray("childrenViews");
-				view.createOrUpdateProperty("view2:childrenViews", array.toString());
-			}
+		    view.ingestJSON(viewJson);
 		}
 	}
 }

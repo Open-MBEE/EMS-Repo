@@ -173,7 +173,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		for (int ii = 0; ii < jsonArray.length(); ii++) {
 			String valueId = jsonArray.getString(ii);
 			EmsScriptNode value = findScriptNodeByName(valueId);
-			if (value != null) {
+			if (value != null && checkPermissions(value, PermissionService.WRITE)) {
 				values.add(value.getNodeRef());
 			} else {
 				log(LogLevel.ERROR, "could not find element value node with id " + valueId + "\n", HttpServletResponse.SC_BAD_REQUEST);
@@ -182,7 +182,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		
 		// only change if old list is different than new
 		EmsScriptNode element = findScriptNodeByName(id);
-		if (element != null) {
+		if (element != null && checkPermissions(element, PermissionService.WRITE)) {
 			@SuppressWarnings("unchecked")
 			ArrayList<NodeRef> oldValues = (ArrayList<NodeRef>)element.getProperty("sysml:elementValue");
 			if (!EmsScriptNode.checkIfListsEquivalent(values, oldValues)) {
@@ -203,7 +203,9 @@ public class ModelPost extends AbstractJavaWebScript {
 		EmsScriptNode propertyType = findScriptNodeByName(typeId);
 		
 		if (property != null && propertyType != null) {
-			property.createOrUpdateAssociation(propertyType, "sysml:type");
+		    if (checkPermissions(property, PermissionService.WRITE) && checkPermissions(propertyType, PermissionService.READ)) {
+		        property.createOrUpdateAssociation(propertyType, "sysml:type");
+		    }
 		} else {
 			if (property == null) {
 				log(LogLevel.ERROR, "could not find property node with id " + id + "\n", HttpServletResponse.SC_BAD_REQUEST);
@@ -229,8 +231,10 @@ public class ModelPost extends AbstractJavaWebScript {
 		EmsScriptNode target = findScriptNodeByName(targetId);
 
 		if (relationship != null && source != null && target != null) {
-			relationship.createOrUpdateAssociation(source, "sysml:source");
-			relationship.createOrUpdateAssociation(target, "sysml:target");
+		    if (checkPermissions(relationship, PermissionService.WRITE) && checkPermissions(source, PermissionService.READ) && checkPermissions(target, PermissionService.READ)) {
+    			relationship.createOrUpdateAssociation(source, "sysml:source");
+    			relationship.createOrUpdateAssociation(target, "sysml:target");
+		    }
 		} else {
 			if (relationship == null) {
 				log(LogLevel.ERROR, "could not find relationship node with id " + id + "\n", HttpServletResponse.SC_BAD_REQUEST);
@@ -266,41 +270,47 @@ public class ModelPost extends AbstractJavaWebScript {
 				return;
 			}
 			
-			// create reified container if it doesn't exist
-			EmsScriptNode parent = findScriptNodeByName(pkgName);  // this is the reified element package
-			if (parent == null) {
-				parent = node.getParent().createFolder(pkgName, "sysml:ElementFolder");
-				node.setProperty("sysml:id", key);
-				node.setProperty("cm:name", key);
-				node.setProperty("sysml:name", (String)node.getProperty("sysml:name"));
+			if (checkPermissions(node, PermissionService.WRITE)) {
+    			// create reified container if it doesn't exist
+    			EmsScriptNode parent = findScriptNodeByName(pkgName);  // this is the reified element package
+    			if (parent == null) {
+    				parent = node.getParent().createFolder(pkgName, "sysml:ElementFolder");
+    				node.setProperty("sysml:id", key);
+    				node.setProperty("cm:name", key);
+    				node.setProperty("sysml:name", (String)node.getProperty("sysml:name"));
+    			}
+    			if (checkPermissions(parent, PermissionService.WRITE)) { 
+        			foundElements.put(pkgName, parent);
+        			// make sure element and reified container in same place
+        			// node should be accurate if hierarchy is correct
+        			if (!parent.getParent().equals(node.getParent())) {
+        				parent.move(node.getParent());
+        			}
+        						
+        			// move elements to reified container if not already there
+        			for (int ii = 0; ii < array.length(); ii++) {
+        				String childName = array.getString(ii);
+        				EmsScriptNode child = findScriptNodeByName(childName);
+        				if (child == null) {
+        					log(LogLevel.ERROR, "could not find child node with id " + childName + "\n", HttpServletResponse.SC_BAD_REQUEST);
+        					continue;
+        				}
+        				if (checkPermissions(child, PermissionService.WRITE)) {
+            				if (!child.getParent().equals(parent)) {
+            					child.move(parent);
+            				}
+            				
+            				// move reified containers as necessary too
+            				EmsScriptNode childPkg = findScriptNodeByName(childName + REIFIED_PKG_SUFFIX);
+            				if (childPkg != null && !childPkg.getParent().equals(parent)) {
+            					childPkg.move(parent);
+            				}
+        				}
+        			}
+        			
+        			node.createOrUpdateChildAssociation(parent, "sysml:reifiedContainment");
+    			}
 			}
-			foundElements.put(pkgName, parent);
-			// make sure element and reified container in same place
-			// node should be accurate if hierarchy is correct
-			if (!parent.getParent().equals(node.getParent())) {
-				parent.move(node.getParent());
-			}
-						
-			// move elements to reified container if not already there
-			for (int ii = 0; ii < array.length(); ii++) {
-				String childName = array.getString(ii);
-				EmsScriptNode child = findScriptNodeByName(childName);
-				if (child == null) {
-					log(LogLevel.ERROR, "could not find child node with id " + childName + "\n", HttpServletResponse.SC_BAD_REQUEST);
-					continue;
-				}
-				if (!child.getParent().equals(parent)) {
-					child.move(parent);
-				}
-				
-				// move reified containers as necessary too
-				EmsScriptNode childPkg = findScriptNodeByName(childName + REIFIED_PKG_SUFFIX);
-				if (childPkg != null && !childPkg.getParent().equals(parent)) {
-					childPkg.move(parent);
-				}
-			}
-			
-			node.createOrUpdateChildAssociation(parent, "sysml:reifiedContainment");
 		}
 	}
 
@@ -318,89 +328,49 @@ public class ModelPost extends AbstractJavaWebScript {
 		// find node if exists, otherwise create
 		EmsScriptNode node = findScriptNodeByName(id);
 		if (node == null) {
-			node = projectNode.createNode(id, json2acm.get(elementJson.getString("type")));
+			node = projectNode.createNode(id, EmsScriptNode.JSON2ACM.get(elementJson.getString("type")));
 			node.setProperty("cm:name", id);
 			node.setProperty("sysml:id", id);
 			// TODO temporarily set title - until we figure out how to use sysml:name in repository browser
 			node.setProperty("cm:title", elementJson.getString("name"));
 		}
-		foundElements.put(id, node); // cache the found value
 		
-		// create or update properties of node
-		Iterator<?> props = elementJson.keys();
-		while(props.hasNext()) {
-			String jsonPropertyKey = (String) props.next();
-			String property = elementJson.getString(jsonPropertyKey);
-			
-			// keep the special types for backwards compatibility
-			if (json2acm.containsKey(jsonPropertyKey)) {
-				String acmType = json2acm.get(jsonPropertyKey);
-				if (jsonPropertyKey.startsWith("is")) {
-					node.createOrUpdateProperty(acmType, new Boolean(property));
-				} else {
-					node.createOrUpdateProperty(acmType, new String(property));
-				}
-			} else {
-				// do nothing TODO: unhandled from SysML/UML profiles are owner, type (type handled above)
-			}
+		if (checkPermissions(node, PermissionService.WRITE)){
+		    foundElements.put(id, node); // cache the found value
+		    
+		    // injecting the JSON will return the relationships found
+		    node.ingestJSON(elementJson);
+		    
+            // add the relationships into our maps
+            JSONObject relations = EmsScriptNode.filterRelationsJSONObject(elementJson);
+		    String keys[] = {"elementValues", "propertyTypes", "relationshipElements"};
+		    for (String key: keys) {
+		        if (!relationshipsJson.has(key)) {
+		            relationshipsJson.put(key, new JSONObject());
+		        }
+		        if (relations.has(key)) {
+    		        JSONObject json = relations.getJSONObject(key);
+    		        Iterator<?> iter = json.keys();
+    		        while (iter.hasNext()) {
+    		            String iterId = (String) iter.next();
+    		            relationshipsJson.getJSONObject(key).put(iterId, json.get(iterId));
+    		        }
+		        }
+		    }
+		    
+		    // TODO: need to fix for Permissions reasons
+            if (elementJson.has("owner")) {
+                String owner = elementJson.getString("owner");
+                if (owner != null && !owner.equals("null")) {
+                    // if owner is null, leave at project root level
+                    if (!elementHierarchyJson.has(owner)) {
+                        elementHierarchyJson.put(owner, new JSONArray());
+                    }
+                    elementHierarchyJson.getJSONArray(owner).put(id);
+                }
+            }
 		}
-		
-		// lets deal with the value and valueType now for forwards compatibility
-		if (elementJson.has("valueType")) {
-			String acmType = json2acm.get(elementJson.get("valueType"));
-			if (acmType != null) {
-				JSONArray array = elementJson.getJSONArray("value");
-				if (acmType.equals("sysml:boolean")) {
-					node.createOrUpdatePropertyValues(acmType, array, new Boolean(true));
-				} else if (acmType.equals("sysml:integer")) {
-					node.createOrUpdatePropertyValues(acmType, array, new Integer(0));
-				} else if (acmType.equals("sysml:double")) {
-					node.createOrUpdatePropertyValues(acmType, array, new Double(0.0));
-				} else {
-					node.createOrUpdatePropertyValues(acmType, array, new String(""));
-					// fill in the Element Values to be assigned later
-					if (elementJson.get("valueType").equals("ElementValue")) {
-						if (!relationshipsJson.has("elementValues")) {
-							relationshipsJson.put("elementValues", new JSONObject());
-						}
-						relationshipsJson.getJSONObject("elementValues").put(id, array);
-					}
-				}
-			}
-		}
-		
-		// lets create the maps for the hierarchy, element values, and relationships
-		if (elementJson.has("owner")) {
-    		String owner = elementJson.getString("owner");
-    		if (owner != null && !owner.equals("null")) {
-    			// if owner is null, leave at project root level
-    			if (!elementHierarchyJson.has(owner)) {
-    				elementHierarchyJson.put(owner, new JSONArray());
-    			}
-    			elementHierarchyJson.getJSONArray(owner).put(id);
-    		}
-		}
-		
-		if (elementJson.has("propertyType")) {
-			String propertyType = elementJson.getString("propertyType");
-			if (!relationshipsJson.has("propertyType")) {
-				relationshipsJson.put("propertyTypes", new JSONObject());
-			}
-			relationshipsJson.getJSONObject("propertyTypes").put(id, propertyType);
-		}
-		
-		if (elementJson.has("source") && elementJson.has("target")) {
-			if (!relationshipsJson.has("relationshipElements")) {
-				relationshipsJson.put("relationshipElements", new JSONObject());
-			}
-			JSONObject relJson = new JSONObject();
-			String source = elementJson.getString("source");
-			String target = elementJson.getString("target");
-			relJson.put("source", source);
-			relJson.put("target", target);
-			relationshipsJson.getJSONObject("relationshipElements").put(id, relJson);
-		}
-		
+
 //		long end = System.currentTimeMillis(); System.out.println("\tTotal: " + (end-start));
 	}
 
@@ -452,6 +422,10 @@ public class ModelPost extends AbstractJavaWebScript {
 			
 			if (projectNode == null) {
 				return false;
+		 	}
+			
+			if (checkPermissions(projectNode, PermissionService.WRITE)) {
+			    return false;
 			}
 		} else {
 			String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
