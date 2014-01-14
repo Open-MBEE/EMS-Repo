@@ -107,11 +107,6 @@ public class ModelPost extends AbstractJavaWebScript {
 			Object object = postJson.get(ELEMENTS);
 			jwsUtil.splitTransactions(new JwsFunctor() {
 				@Override
-				public Object execute(JSONObject jsonObject, String key,
-						Boolean... flags) throws JSONException {
-					return null;
-				}
-				@Override
 				public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
 					updateOrCreateElement(jsonArray.getJSONObject(index));
 					return null;
@@ -121,12 +116,6 @@ public class ModelPost extends AbstractJavaWebScript {
 		
 		// handle the hierarchy
 		jwsUtil.splitTransactions(new JwsFunctor() {
-			@Override
-			public Object execute(JSONObject jsonObject, String key,
-					Boolean... flags) throws JSONException {
-				updateOrCreateElementHierarchy(jsonObject, key);
-				return null;
-			}
 			@Override
 			public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
 				// do nothing, not called

@@ -256,11 +256,6 @@ public class ViewPostJson extends AbstractJavaWebScript {
 			
 			jwsUtil.splitTransactions(new JwsFunctor() {
 				@Override
-				public Object execute(JSONObject jsonObject, String key,
-						Boolean... flags) throws JSONException {
-					return null;
-				}
-				@Override
 				public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
 					updateOrCreateModelElement((JSONObject)jsonArray.get(index), flags[0]);
 					return null;
@@ -269,11 +264,6 @@ public class ViewPostJson extends AbstractJavaWebScript {
 			
 			array = postjson.getJSONArray("views");
 			jwsUtil.splitTransactions(new JwsFunctor() {
-				@Override
-				public Object execute(JSONObject jsonObject, String key,
-						Boolean... flags) throws JSONException {
-					return null;
-				}
 				@Override
 				public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
 					updateOrCreateView((JSONObject)jsonArray.get(index), flags[0]);

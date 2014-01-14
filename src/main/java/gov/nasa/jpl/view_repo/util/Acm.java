@@ -280,7 +280,7 @@ public class Acm {
      }
 
     /**
-     * Map to filter the JSON keys for display
+     * Map to filter the JSON keys for display purposes inside of EmsScriptNode
      */
     public static final Map<JSON_TYPE_FILTER, Set<String>> JSON_FILTER_MAP = new HashMap<JSON_TYPE_FILTER, Set<String>>() {
         private static final long serialVersionUID = -2080928480362524333L;

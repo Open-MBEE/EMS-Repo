@@ -460,63 +460,61 @@ public class EmsScriptNode extends ScriptNode {
 	}
 	
 	
-	public JSONObject toJSONObject() {
+	public JSONObject toJSONObject() throws JSONException {
 	    return toJSONObject(Acm.JSON_TYPE_FILTER.ALL);
 	}
 	
-	public JSONObject toJSONObject(Acm.JSON_TYPE_FILTER renderType) {
+	public JSONObject toJSONObject(Acm.JSON_TYPE_FILTER renderType) throws JSONException {
 	    return toJSONObject(renderType, true, true);
 	}
 	
 	/**
 	 * Convert node into our custom JSONObject
+	 * @throws JSONException 
 	 */
-	public JSONObject toJSONObject(Acm.JSON_TYPE_FILTER renderType, boolean showQualifiedName, boolean showEditable) {
+	public JSONObject toJSONObject(Acm.JSON_TYPE_FILTER renderType, boolean showQualifiedName, boolean showEditable) throws JSONException {
 	    JSONObject element = new JSONObject();
-	    try {
-            // add in all the properties
-            for (String acmType: Acm.ACM2JSON.keySet()) {
-                Object elementValue = this.getProperty(acmType);
-                if (elementValue != null) {
-                    String jsonType = Acm.ACM2JSON.get(acmType);
-                    if (Acm.JSON_FILTER_MAP.get(renderType).contains(jsonType)) {
-                        if (Acm.JSON_ARRAYS.contains(jsonType)) {
-                            element.put(jsonType, new JSONArray(elementValue.toString()));
-                        } else {
-                            element.put(jsonType, elementValue);
-                        }
+
+	    // add in all the properties
+        for (String acmType: Acm.ACM2JSON.keySet()) {
+            Object elementValue = this.getProperty(acmType);
+            if (elementValue != null) {
+                String jsonType = Acm.ACM2JSON.get(acmType);
+                if (Acm.JSON_FILTER_MAP.get(renderType).contains(jsonType)) {
+                    if (Acm.JSON_ARRAYS.contains(jsonType)) {
+                        element.put(jsonType, new JSONArray(elementValue.toString()));
+                    } else {
+                        element.put(jsonType, elementValue);
                     }
                 }
             }
+        }
 
-            // add custom properties
-            if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_TYPE)) {
-                element.put(Acm.JSON_TYPE,  this.getQNameType().getLocalName());
-            }
+        // add custom properties
+        if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_TYPE)) {
+            element.put(Acm.JSON_TYPE,  this.getQNameType().getLocalName());
+        }
 
-            if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_VALUE_TYPE)) {
-                Object valueType = this.getProperty(Acm.ACM_VALUE_TYPE);
-                if (valueType != null) {
-                    element.put("value",  this.getProperty(Acm.JSON2ACM.get((String) valueType)));
-                    element.put(Acm.JSON_VALUE_TYPE,  valueType);
-                }
+        if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_VALUE_TYPE)) {
+            Object valueType = this.getProperty(Acm.ACM_VALUE_TYPE);
+            if (valueType != null) {
+                element.put("value",  this.getProperty(Acm.JSON2ACM.get((String) valueType)));
+                element.put(Acm.JSON_VALUE_TYPE,  valueType);
             }
-            
-            if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_OWNER)) {
-                EmsScriptNode parent = this.getParent();
-                element.put(Acm.JSON_OWNER,  parent.getName().replace("_pkg", ""));
-            }
-            
-            if (showQualifiedName) {
-                element.put("qualifiedName",  this.getSysmlQName());
-            }
-            
-            if (showEditable) {
-                element.put("editable", this.hasPermission(PermissionService.WRITE));
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }    
+        }
+        
+        if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_OWNER)) {
+            EmsScriptNode parent = this.getParent();
+            element.put(Acm.JSON_OWNER,  parent.getName().replace("_pkg", ""));
+        }
+        
+        if (showQualifiedName) {
+            element.put("qualifiedName",  this.getSysmlQName());
+        }
+        
+        if (showEditable) {
+            element.put("editable", this.hasPermission(PermissionService.WRITE));
+        }
 
 	    return element;
 	}
@@ -526,38 +524,35 @@ public class EmsScriptNode extends ScriptNode {
 	 * Given an JSONObject, filters it to find the appropriate relationships
 	 * @param jsonObject
 	 * @return
+	 * @throws JSONException 
 	 */
-	public static JSONObject filterRelationsJSONObject(JSONObject jsonObject) {
+	public static JSONObject filterRelationsJSONObject(JSONObject jsonObject) throws JSONException {
         JSONObject relations = new JSONObject();
         JSONObject elementValues = new JSONObject();
         JSONObject propertyTypes = new JSONObject();
         JSONObject relationshipElements = new JSONObject();
         JSONArray array;
 
-        try {
-            if (jsonObject.has(Acm.JSON_VALUE_TYPE)) {
-                array = jsonObject.getJSONArray("value");
-                if (jsonObject.get(Acm.JSON_VALUE_TYPE).equals(Acm.JSON_ELEMENT_VALUE)) {
-                    elementValues.put(jsonObject.getString(Acm.JSON_ID), array);
-                }
-            } else if (jsonObject.has(Acm.JSON_PROPERTY_TYPE)) {
-                String propertyType = jsonObject.getString(Acm.JSON_PROPERTY_TYPE);
-                propertyTypes.put(jsonObject.getString(Acm.JSON_ID), propertyType);
-            } else if (jsonObject.has(Acm.JSON_SOURCE) && jsonObject.has(Acm.JSON_TARGET)) {
-                JSONObject relJson = new JSONObject();
-                String source = jsonObject.getString(Acm.JSON_SOURCE);
-                String target = jsonObject.getString(Acm.JSON_TARGET);
-                relJson.put(Acm.JSON_SOURCE, source);
-                relJson.put(Acm.JSON_TARGET, target);
-                relationshipElements.put(jsonObject.getString(Acm.JSON_ID), relJson);
+        if (jsonObject.has(Acm.JSON_VALUE_TYPE)) {
+            array = jsonObject.getJSONArray("value");
+            if (jsonObject.get(Acm.JSON_VALUE_TYPE).equals(Acm.JSON_ELEMENT_VALUE)) {
+                elementValues.put(jsonObject.getString(Acm.JSON_ID), array);
             }
-
-            relations.put("relationshipElements", relationshipElements);
-            relations.put("propertyTypes", propertyTypes);
-            relations.put("elementValues", elementValues);
-        } catch (JSONException e) {
-            e.printStackTrace();
+        } else if (jsonObject.has(Acm.JSON_PROPERTY_TYPE)) {
+            String propertyType = jsonObject.getString(Acm.JSON_PROPERTY_TYPE);
+            propertyTypes.put(jsonObject.getString(Acm.JSON_ID), propertyType);
+        } else if (jsonObject.has(Acm.JSON_SOURCE) && jsonObject.has(Acm.JSON_TARGET)) {
+            JSONObject relJson = new JSONObject();
+            String source = jsonObject.getString(Acm.JSON_SOURCE);
+            String target = jsonObject.getString(Acm.JSON_TARGET);
+            relJson.put(Acm.JSON_SOURCE, source);
+            relJson.put(Acm.JSON_TARGET, target);
+            relationshipElements.put(jsonObject.getString(Acm.JSON_ID), relJson);
         }
+
+        relations.put("relationshipElements", relationshipElements);
+        relations.put("propertyTypes", propertyTypes);
+        relations.put("elementValues", elementValues);
         
         return relations;
 	}
@@ -565,45 +560,42 @@ public class EmsScriptNode extends ScriptNode {
 	/**
 	 * Update the node with the properties from the jsonObject
 	 * @param jsonObject
+	 * @throws JSONException 
 	 */
-	public void ingestJSON(JSONObject jsonObject) {
-        try {
-    	    JSONArray array;
-    	    
-    	    // fill in all the properties
-    	    for (String jsonType: Acm.JSON2ACM.keySet()) {
-    	        String acmType = Acm.JSON2ACM.get(jsonType);
-    	        if (jsonObject.has(jsonType)) {
-    	            if (jsonType.equals(Acm.JSON_VIEW_2_VIEW) || jsonType.equals(Acm.JSON_NO_SECTIONS)) {
-    	                array = jsonObject.getJSONArray(jsonType);
-    	                this.createOrUpdateProperty(acmType, array.toString());
-    	            } else {
-    	                String property = jsonObject.getString(jsonType);
-    	                if (jsonType.startsWith("is")) {
-    	                    this.createOrUpdateProperty(acmType, new Boolean(property));
-    	                } else {
-    	                    this.createOrUpdateProperty(acmType, new String(property));
-    	                }
-    	            }
-    	        }
-    	    }
-    	    
-    	    // fill in the valueTypes and all relationships
-            if (jsonObject.has(Acm.JSON_VALUE_TYPE)) {
-                String acmType = Acm.JSON2ACM.get(jsonObject.get(Acm.JSON_VALUE_TYPE));
-                array = jsonObject.getJSONArray("value");
-                if (acmType.equals("sysml:boolean")) {
-                    this.createOrUpdatePropertyValues(acmType, array, new Boolean(true));
-                } else if (acmType.equals("sysml:integer")) {
-                    this.createOrUpdatePropertyValues(acmType, array, new Integer(0));
-                } else if (acmType.equals("sysml:double")) {
-                    this.createOrUpdatePropertyValues(acmType, array, new Double(0.0));
-                } else {
-                    this.createOrUpdatePropertyValues(acmType, array, new String(""));
-                }
-            }
-	    } catch (JSONException e) {
-	        e.printStackTrace();
+	public void ingestJSON(JSONObject jsonObject) throws JSONException {
+	    JSONArray array;
+	    
+	    // fill in all the properties
+	    for (String jsonType: Acm.JSON2ACM.keySet()) {
+	        String acmType = Acm.JSON2ACM.get(jsonType);
+	        if (jsonObject.has(jsonType)) {
+	            if (jsonType.equals(Acm.JSON_VIEW_2_VIEW) || jsonType.equals(Acm.JSON_NO_SECTIONS)) {
+	                array = jsonObject.getJSONArray(jsonType);
+	                this.createOrUpdateProperty(acmType, array.toString());
+	            } else {
+	                String property = jsonObject.getString(jsonType);
+	                if (jsonType.startsWith("is")) {
+	                    this.createOrUpdateProperty(acmType, new Boolean(property));
+	                } else {
+	                    this.createOrUpdateProperty(acmType, new String(property));
+	                }
+	            }
+	        }
 	    }
+	    
+	    // fill in the valueTypes and all relationships
+        if (jsonObject.has(Acm.JSON_VALUE_TYPE)) {
+            String acmType = Acm.JSON2ACM.get(jsonObject.get(Acm.JSON_VALUE_TYPE));
+            array = jsonObject.getJSONArray("value");
+            if (acmType.equals("sysml:boolean")) {
+                this.createOrUpdatePropertyValues(acmType, array, new Boolean(true));
+            } else if (acmType.equals("sysml:integer")) {
+                this.createOrUpdatePropertyValues(acmType, array, new Integer(0));
+            } else if (acmType.equals("sysml:double")) {
+                this.createOrUpdatePropertyValues(acmType, array, new Double(0.0));
+            } else {
+                this.createOrUpdatePropertyValues(acmType, array, new String(""));
+            }
+        }
 	}
 }

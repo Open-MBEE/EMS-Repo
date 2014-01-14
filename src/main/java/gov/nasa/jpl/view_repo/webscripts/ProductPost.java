@@ -77,13 +77,6 @@ public class ProductPost extends AbstractJavaWebScript {
 			
 			jwsUtil.splitTransactions(new JwsFunctor() {
 				@Override
-				public Object execute(JSONObject jsonObject, String key,
-						Boolean... flags) throws JSONException {
-					// TODO Auto-generated method stub
-					return null;
-				}
-
-				@Override
 				public Object execute(JSONArray jsonArray, int index,
 						Boolean... flags) throws JSONException {
 					updateProduct(jsonArray, index);

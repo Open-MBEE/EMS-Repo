@@ -230,14 +230,8 @@ public class JwsUtil {
 				if (length > 0) {
 					int max = start + range > length ? length : start + range;
 					
-					if (object instanceof JSONObject) {
-						JSONObject jsonObject = (JSONObject) object;
-						JSONArray keys = jsonObject.names();
-						for (int ii = start; ii < max; ii++) {
-							functor.execute(jsonObject, (String)keys.get(ii), flags);
-						}
-					} else if (object instanceof JSONArray) {
-						JSONArray jsonArray = (JSONArray) object;
+					if (object instanceof JSONArray) {
+					    JSONArray jsonArray = (JSONArray) object;
 						for (int ii = start; ii < max; ii++) {
 							functor.execute(jsonArray, ii, flags);
 						}

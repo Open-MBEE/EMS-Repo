@@ -131,7 +131,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	
 	/**
 	 * Parse the request and do validation checks on request
-	 * 
+	 * TODO: Investigate whether or not to deprecate and/or remove
 	 * @param req		Request to be parsed
 	 * @param status	The status to be returned for the request
 	 * @return			true if request valid and parsed, false otherwise
@@ -155,7 +155,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	
 	/**
 	 * Find node of specified name (returns first found - so assume uniquely named ids
-	 * TODO extend so context can be specified
+	 * TODO extend so search context can be specified
 	 * @param name	Node name to search for
 	 * @return		ScriptNode with name if found, null otherwise
 	 */
@@ -182,6 +182,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		return result;
 	}
 	
+	/**
+	 * Find a NodeReference by name (returns first match, assuming things are unique)
+	 * 
+	 * @param name Node name to search for
+	 * @return     NodeRef of first match, null otherwise
+	 */
 	protected NodeRef findNodeRefByName(String name) {
 		ResultSet results = null;
 		NodeRef node = null;
@@ -212,19 +218,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		responseStatus.setMessage(msg);
 	}
 	
-	protected static final String PROJECT_ID = "projectId";
-	protected static final String SITE_NAME = "siteName";
-	
-	protected boolean checkRequestContent(WebScriptRequest req) {
-		if (req.getContent() == null) {
-			log(LogLevel.ERROR, "No content provided.\n", HttpServletResponse.SC_NO_CONTENT);
-			return false;
-		}
-		return true;
-	}
-	
+	/**
+	 * Checks whether user has permissions to the node and logs results and status as appropriate
+	 * @param node         EmsScriptNode to check permissions on
+	 * @param permissions  Permissions to check
+	 * @return             true if user has specified permissions to node, false otherwise
+	 */
 	protected boolean checkPermissions(EmsScriptNode node, String permissions) {
-//		if (services.getPermissionService().hasPermission(node.getNodeRef(), permissions) != AccessStatus.ALLOWED) {
 	    if (!node.hasPermission(permissions)) {
 			Object property = node.getProperty("cm:name");
 			log(LogLevel.WARNING, "No " + permissions + " priveleges to " + property.toString() + ".\n", HttpServletResponse.SC_UNAUTHORIZED);
@@ -232,7 +232,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		}
 		return true;
 	}
-	
+
+	/**
+	 * Checks whether user has permissions to the nodeRef and logs results and status as appropriate
+	 * @param nodeRef      NodeRef to check permissions againts
+	 * @param permissions  Permissions to check
+	 * @return             true if user has specified permissions to node, false otherwise
+	 */
 	protected boolean checkPermissions(NodeRef nodeRef, String permissions) {
 		if (services.getPermissionService().hasPermission(nodeRef, permissions) != AccessStatus.ALLOWED) {
 			log(LogLevel.WARNING, "No " + permissions + " priveleges to " + nodeRef.toString() + ".\n", HttpServletResponse.SC_UNAUTHORIZED);
@@ -240,6 +246,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		}
 		return true;
 	}
+
+	
+	protected static final String PROJECT_ID = "projectId";
+    protected static final String SITE_NAME = "siteName";
+    
+    protected boolean checkRequestContent(WebScriptRequest req) {
+        if (req.getContent() == null) {
+            log(LogLevel.ERROR, "No content provided.\n", HttpServletResponse.SC_NO_CONTENT);
+            return false;
+        }
+        return true;
+    }
+    
 
 	protected boolean checkRequestVariable(Object value, String type) {
 		if (value == null) {
@@ -250,7 +269,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	}
 
 	/**
-	 * Lucene search for the specified pattern and ACM type
+	 * Perform Lucene search for the specified pattern and ACM type
+	 * TODO: Scope Lucene search by adding either parent or path context
 	 * @param type		escaped ACM type for lucene search: e.g. "@sysml\\:documentation:\""
 	 * @param pattern   Pattern to look for
 	 */
