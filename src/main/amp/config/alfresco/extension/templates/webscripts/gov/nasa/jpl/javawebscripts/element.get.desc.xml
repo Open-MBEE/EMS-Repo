@@ -40,6 +40,10 @@
   					//*************** if type is subtype of DirectedRelationship (Generalization/Expose/Conform/Dependency) ***/
   					"source": elementId,
   					"target": elementId
+  					
+  					//*************** if type is Comment *******/
+  					"body": body
+  					"annotatedElements": [elementId, ...]
   				},
   				...
   			]

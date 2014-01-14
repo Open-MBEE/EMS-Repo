@@ -18,7 +18,7 @@
   					"id": elementId,
   					"type": "Package" | "Property" | "Element" | 
   							"Dependency" | "Generalization" | "DirectedRelationship" | 
-  							"Conform" | "Expose" | "Viewpoint",
+  							"Conform" | "Expose" | "Viewpoint" | "Comment",
   					"name": name,
   					"documentation": documentation,
   					"owner": elementId/null,
@@ -34,6 +34,10 @@
   					//*************** if type is subtype of DirectedRelationship (Generalization/Expose/Conform/Dependency) ***/
   					"source": elementId,
   					"target": elementId
+  					
+  					//*************** if type is Comment *******/
+  					"body": body
+  					"annotatedElements": [elementId, ...]
   				},
   				...
   			]
