@@ -479,7 +479,7 @@ public class EmsScriptNode extends ScriptNode {
                 Object elementValue = this.getProperty(acmType);
                 if (elementValue != null) {
                     String jsonType = Acm.ACM2JSON.get(acmType);
-                    if (Acm.JSON_FILTER_MAP.get(renderType.name()).contains(jsonType)) {
+                    if (Acm.JSON_FILTER_MAP.get(renderType).contains(jsonType)) {
                         if (Acm.JSON_ARRAYS.contains(jsonType)) {
                             element.put(jsonType, new JSONArray(elementValue.toString()));
                         } else {
@@ -489,13 +489,12 @@ public class EmsScriptNode extends ScriptNode {
                 }
             }
 
-
             // add custom properties
-            if (Acm.JSON_FILTER_MAP.get(renderType.name()).contains(Acm.JSON_TYPE)) {
+            if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_TYPE)) {
                 element.put(Acm.JSON_TYPE,  this.getQNameType().getLocalName());
             }
 
-            if (Acm.JSON_FILTER_MAP.get(renderType.name()).contains(Acm.JSON_VALUE_TYPE)) {
+            if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_VALUE_TYPE)) {
                 Object valueType = this.getProperty(Acm.ACM_VALUE_TYPE);
                 if (valueType != null) {
                     element.put("value",  this.getProperty(Acm.JSON2ACM.get((String) valueType)));
@@ -503,7 +502,7 @@ public class EmsScriptNode extends ScriptNode {
                 }
             }
             
-            if (Acm.JSON_FILTER_MAP.get(renderType.name()).contains(Acm.JSON_OWNER)) {
+            if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_OWNER)) {
                 EmsScriptNode parent = this.getParent();
                 element.put(Acm.JSON_OWNER,  parent.getName().replace("_pkg", ""));
             }
