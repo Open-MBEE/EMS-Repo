@@ -30,6 +30,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.Acm;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -161,7 +162,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * @throws JSONException	JSON element creation error
 	 */
 	protected void handleViewHierarchy(EmsScriptNode root, boolean recurse) throws JSONException {
-		Object allowedElements = root.getProperty("view2:allowedElements");
+		Object allowedElements = root.getProperty(Acm.ACM_ALLOWED_ELEMENTS);
 		if (allowedElements != null) {
 			JSONArray childElementJson = new JSONArray(allowedElements.toString());
 			for (int ii = 0; ii < childElementJson.length(); ii++) {
@@ -172,7 +173,7 @@ public class ModelGet extends AbstractJavaWebScript {
 				}
 			}
 			if (recurse) {
-				Object childrenViews = root.getProperty("view2:childrenViews");
+				Object childrenViews = root.getProperty(Acm.ACM_CHILDREN_VIEWS);
 				if (childrenViews != null) {
 					JSONArray childViewJson = new JSONArray(childrenViews.toString());
 					for (int ii = 0; ii < childViewJson.length(); ii++) {
@@ -195,17 +196,17 @@ public class ModelGet extends AbstractJavaWebScript {
 	 */
 	protected void handleElementHierarchy(EmsScriptNode root, boolean recurse) throws JSONException {
 		JSONArray array = new JSONArray();		
-		elementsFound.put((String)root.getProperty("sysml:id"), root);
+		elementsFound.put((String)root.getProperty(Acm.ACM_ID), root);
 
 		if (recurse) {
 			// find all the children, recurse or add to array as needed
 			for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
 				EmsScriptNode child = new EmsScriptNode(assoc.getChildRef(), services, response);
 				if (checkPermissions(child, PermissionService.READ)) {
-			       if (child.getTypeShort().equals("sysml:ElementFolder")) {
+			       if (child.getTypeShort().equals(Acm.ACM_ELEMENT_FOLDER)) {
 						handleElementHierarchy(child, recurse);
     			   } else {
-    					String value = (String)child.getProperty("sysml:id");
+    					String value = (String)child.getProperty(Acm.ACM_ID);
     					if (value != null) {
     						array.put(value);
     						elementsFound.put(value, child);
@@ -217,8 +218,8 @@ public class ModelGet extends AbstractJavaWebScript {
 			}
 			
 			// if there were any children add them to the hierarchy object
-			String key = (String)root.getProperty("sysml:id");
-			if (root.getTypeShort().equals("sysml:ElementFolder") && key == null) {
+			String key = (String)root.getProperty(Acm.ACM_ID);
+			if (root.getTypeShort().equals(Acm.ACM_ELEMENT_FOLDER) && key == null) {
 				// TODO this is temporary? until we can get sysml:id from Element Folder?
 				key = root.getProperty("cm:name").toString().replace("_pkg", "");
 			}
@@ -236,7 +237,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			EmsScriptNode node = elementsFound.get(id);
 
 			if (checkPermissions(node, PermissionService.READ)){ 
-                elements.put(node.toJSONObject());
+                elements.put(node.toJSONObject(Acm.JSON_TYPE_FILTER.ELEMENT));
 //              // check for relationships to be handled later
 //              if (node.isSubType("sysml:DirectedRelationship")) {
 //                  foundRelationships.add(id);
@@ -264,14 +265,14 @@ public class ModelGet extends AbstractJavaWebScript {
 	 */
 	protected void handleElementValues() throws JSONException {
 		NodeService nodeService = services.getNodeService();
-		QName sysmlId = jwsUtil.createQName("sysml:id");
+		QName sysmlId = jwsUtil.createQName(Acm.ACM_ID);
 
 		JSONObject elementValues = new JSONObject();
 		for (String id: foundProperties) {
 			EmsScriptNode node = foundElements.get(id);
 			if (checkPermissions(node, PermissionService.READ)){ 
     			@SuppressWarnings("unchecked")
-    			ArrayList<NodeRef> values = (ArrayList<NodeRef>)node.getProperty("sysml:elementValue");
+    			ArrayList<NodeRef> values = (ArrayList<NodeRef>)node.getProperty(Acm.ACM_ELEMENT_VALUE);
     			if (values != null) {
     				JSONArray array = new JSONArray();
     				for (NodeRef value: values) {
@@ -294,9 +295,9 @@ public class ModelGet extends AbstractJavaWebScript {
 		for (String id: foundProperties) {
 			EmsScriptNode node = foundElements.get(id);
 			if (checkPermissions(node, PermissionService.READ)){ 
-    			EmsScriptNode targetNode = node.getFirstAssociationByType("sysml:type");
+    			EmsScriptNode targetNode = node.getFirstAssociationByType(Acm.ACM_TYPE);
     			if (targetNode != null) {
-    				propertyTypes.put(id, targetNode.getProperty("sysml:id"));
+    				propertyTypes.put(id, targetNode.getProperty(Acm.ACM_ID));
     			}
 			}
 		}
@@ -313,16 +314,16 @@ public class ModelGet extends AbstractJavaWebScript {
 		JSONObject relationshipElements = new JSONObject();
 		for (String id: foundRelationships) {
 			EmsScriptNode node = foundElements.get(id);
-			EmsScriptNode sysmlSourceNode = node.getFirstAssociationByType("sysml:source");
-			EmsScriptNode sysmlTargetNode = node.getFirstAssociationByType("sysml:target");
+			EmsScriptNode sysmlSourceNode = node.getFirstAssociationByType(Acm.ACM_SOURCE);
+			EmsScriptNode sysmlTargetNode = node.getFirstAssociationByType(Acm.ACM_TARGET);
 
 			JSONObject relationshipElement = new JSONObject();
 			if (sysmlSourceNode != null && sysmlTargetNode != null) {
 			    if (checkPermissions(node, PermissionService.READ) && 
 			            checkPermissions(sysmlSourceNode, PermissionService.READ) &&
 			            checkPermissions(sysmlTargetNode, PermissionService.READ)) {
-		            relationshipElement.put("source", sysmlSourceNode.getProperty("sysml:id"));
-		            relationshipElement.put("target", sysmlTargetNode.getProperty("sysml:id"));
+		            relationshipElement.put(Acm.JSON_SOURCE, sysmlSourceNode.getProperty(Acm.ACM_ID));
+		            relationshipElement.put(Acm.JSON_TARGET, sysmlTargetNode.getProperty(Acm.ACM_ID));
 			    }
 			}
 			relationshipElements.put(id, relationshipElement);

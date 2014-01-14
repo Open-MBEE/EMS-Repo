@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.ArrayList;
@@ -184,9 +185,9 @@ public class ModelPost extends AbstractJavaWebScript {
 		EmsScriptNode element = findScriptNodeByName(id);
 		if (element != null && checkPermissions(element, PermissionService.WRITE)) {
 			@SuppressWarnings("unchecked")
-			ArrayList<NodeRef> oldValues = (ArrayList<NodeRef>)element.getProperty("sysml:elementValue");
+			ArrayList<NodeRef> oldValues = (ArrayList<NodeRef>)element.getProperty(Acm.ACM_ELEMENT_VALUE);
 			if (!EmsScriptNode.checkIfListsEquivalent(values, oldValues)) {
-				element.setProperty("sysml:elementValue", values);
+				element.setProperty(Acm.ACM_ELEMENT_VALUE, values);
 			}
 		} else {
 			log(LogLevel.ERROR, "could not find element node with id " + id + "\n", HttpServletResponse.SC_BAD_REQUEST);
@@ -204,7 +205,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		
 		if (property != null && propertyType != null) {
 		    if (checkPermissions(property, PermissionService.WRITE) && checkPermissions(propertyType, PermissionService.READ)) {
-		        property.createOrUpdateAssociation(propertyType, "sysml:type");
+		        property.createOrUpdateAssociation(propertyType, Acm.ACM_TYPE);
 		    }
 		} else {
 			if (property == null) {
@@ -223,8 +224,8 @@ public class ModelPost extends AbstractJavaWebScript {
 	 * @throws JSONException
 	 */
 	private void updateOrCreateRelationship(JSONObject jsonObject, String id) throws JSONException {
-		String sourceId = jsonObject.getString("source");
-		String targetId = jsonObject.getString("target");
+		String sourceId = jsonObject.getString(Acm.JSON_SOURCE);
+		String targetId = jsonObject.getString(Acm.JSON_TARGET);
 
 		EmsScriptNode relationship = findScriptNodeByName(id);
 		EmsScriptNode source = findScriptNodeByName(sourceId);
@@ -232,8 +233,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
 		if (relationship != null && source != null && target != null) {
 		    if (checkPermissions(relationship, PermissionService.WRITE) && checkPermissions(source, PermissionService.READ) && checkPermissions(target, PermissionService.READ)) {
-    			relationship.createOrUpdateAssociation(source, "sysml:source");
-    			relationship.createOrUpdateAssociation(target, "sysml:target");
+    			relationship.createOrUpdateAssociation(source, Acm.ACM_SOURCE);
+    			relationship.createOrUpdateAssociation(target, Acm.ACM_TARGET);
 		    }
 		} else {
 			if (relationship == null) {
@@ -274,10 +275,10 @@ public class ModelPost extends AbstractJavaWebScript {
     			// create reified container if it doesn't exist
     			EmsScriptNode parent = findScriptNodeByName(pkgName);  // this is the reified element package
     			if (parent == null) {
-    				parent = node.getParent().createFolder(pkgName, "sysml:ElementFolder");
-    				node.setProperty("sysml:id", key);
+    				parent = node.getParent().createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER);
+    				node.setProperty(Acm.ACM_ID, key);
     				node.setProperty("cm:name", key);
-    				node.setProperty("sysml:name", (String)node.getProperty("sysml:name"));
+// TODO: this looks redundant    				node.setProperty(Acm.ACM_NAME, (String)node.getProperty(Acm.ACM_NAME));
     			}
     			if (checkPermissions(parent, PermissionService.WRITE)) { 
         			foundElements.put(pkgName, parent);
@@ -308,7 +309,7 @@ public class ModelPost extends AbstractJavaWebScript {
         				}
         			}
         			
-        			node.createOrUpdateChildAssociation(parent, "sysml:reifiedContainment");
+        			node.createOrUpdateChildAssociation(parent, Acm.ACM_REIFIED_CONTAINMENT);
     			}
 			}
 		}
@@ -322,15 +323,15 @@ public class ModelPost extends AbstractJavaWebScript {
 	 */
 	protected void updateOrCreateElement(JSONObject elementJson) throws JSONException {
 		// TODO check permissions
-		String id = elementJson.getString("id");
+		String id = elementJson.getString(Acm.JSON_ID);
 //		long start = System.currentTimeMillis(); System.out.println("updateOrCreateElement " + id);
 		
 		// find node if exists, otherwise create
 		EmsScriptNode node = findScriptNodeByName(id);
 		if (node == null) {
-			node = projectNode.createNode(id, EmsScriptNode.JSON2ACM.get(elementJson.getString("type")));
+			node = projectNode.createNode(id, Acm.JSON2ACM.get(elementJson.getString(Acm.JSON_TYPE)));
 			node.setProperty("cm:name", id);
-			node.setProperty("sysml:id", id);
+			node.setProperty(Acm.ACM_ID, id);
 			// TODO temporarily set title - until we figure out how to use sysml:name in repository browser
 			node.setProperty("cm:title", elementJson.getString("name"));
 		}
@@ -359,8 +360,8 @@ public class ModelPost extends AbstractJavaWebScript {
 		    }
 		    
 		    // TODO: need to fix for Permissions reasons
-            if (elementJson.has("owner")) {
-                String owner = elementJson.getString("owner");
+            if (elementJson.has(Acm.JSON_OWNER)) {
+                String owner = elementJson.getString(Acm.JSON_OWNER);
                 if (owner != null && !owner.equals("null")) {
                     // if owner is null, leave at project root level
                     if (!elementHierarchyJson.has(owner)) {
@@ -414,7 +415,7 @@ public class ModelPost extends AbstractJavaWebScript {
 				JSONObject postJson = (JSONObject)req.parseContent();
 				JSONObject elementsJson = postJson.getJSONObject("elements");
 				JSONObject elementJson = elementsJson.getJSONObject(elementId);
-				projectNode = findScriptNodeByName(elementJson.getString("owner"));
+				projectNode = findScriptNodeByName(elementJson.getString(Acm.JSON_OWNER));
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

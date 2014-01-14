@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.HashMap;
@@ -100,7 +101,7 @@ public class NewViewPost extends AbstractJavaWebScript {
 	}
 	
 	private void updateView(JSONObject viewJson) throws JSONException {
-		String id = viewJson.getString("id");
+		String id = viewJson.getString(Acm.JSON_ID);
 		if (id == null) {
 			log(LogLevel.ERROR, "view id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
 			return;
@@ -113,7 +114,7 @@ public class NewViewPost extends AbstractJavaWebScript {
 		}
 			
 		if (checkPermissions(view, PermissionService.WRITE)) {
-		    view.createOrUpdateAspect("sysml:View");
+		    view.createOrUpdateAspect(Acm.ACM_VIEW);
 		    view.ingestJSON(viewJson);
 		}
 	}

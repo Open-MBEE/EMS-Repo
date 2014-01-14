@@ -30,6 +30,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.Acm;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -113,7 +114,7 @@ public class ProductGet extends AbstractJavaWebScript {
 		}
 
 		if (checkPermissions(product, PermissionService.READ)){ 
-		    productsJson.put(product.toJSONObject());
+		    productsJson.put(product.toJSONObject(Acm.JSON_TYPE_FILTER.PRODUCT));
 		}
 	}
 }

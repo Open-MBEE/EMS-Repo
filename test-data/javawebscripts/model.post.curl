@@ -1,5 +1,5 @@
 # post elements
-curl -w "%{http_code}\n" -X POST -u admin:admin -H "Content-Type:application/json" --data @JsonData/element.post.json "http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/17_0123455/model"
+curl -w "%{http_code}\n" -X POST -u admin:admin -H "Content-Type:application/json" --data @JsonData/element.post.json "http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/17_0123455/elements"
 
 # post views
 curl -w "%{http_code}\n" -X POST -u admin:admin -H "Content-Type:application/json" --data @JsonData/view.post.json "http://localhost:8080/view-repo/service/javawebscripts/views"

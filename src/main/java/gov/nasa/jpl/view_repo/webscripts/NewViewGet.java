@@ -30,6 +30,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.Acm;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -94,11 +95,7 @@ public class NewViewGet extends AbstractJavaWebScript {
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
 			try {
                 JSONObject json = new JSONObject();
-				if (!recurse) {
-					json.put("res", viewsJson.getJSONObject(0).toString(4));
-				} else {
-	                json.put("views", viewsJson);
-				}
+                json.put("views", viewsJson);
                 model.put("res", json.toString(4));
 			} catch (JSONException e) {
 				e.printStackTrace();
@@ -121,7 +118,7 @@ public class NewViewGet extends AbstractJavaWebScript {
 		}
 		
 		if (checkPermissions(view, PermissionService.READ)) { 
-    		viewsJson.put(view.toJSONObject());
+    		viewsJson.put(view.toJSONObject(Acm.JSON_TYPE_FILTER.VIEW));
     		if (recurse) {
         		JSONArray childrenJson = view.getChildrenViewsJSONArray();
         		for (int ii = 0; ii < childrenJson.length(); ii++) {
