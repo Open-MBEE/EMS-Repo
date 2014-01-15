@@ -45,7 +45,7 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-public class NewViewGet extends AbstractJavaWebScript {
+public class ViewGet extends AbstractJavaWebScript {
 	private JSONArray viewsJson;
 	
 	@Override

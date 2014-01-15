@@ -45,7 +45,7 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-public class NewViewPost extends AbstractJavaWebScript {
+public class ViewPost extends AbstractJavaWebScript {
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		// TODO Auto-generated method stub

@@ -50,6 +50,7 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+@Deprecated
 public class ViewPostJson extends AbstractJavaWebScript {
 	private ScriptNode modelFolder = null;
 	// snapshotFolder not needed here
