@@ -98,6 +98,7 @@ public class ModelPost extends AbstractJavaWebScript {
    * @throws JSONException    Parse error
    */
   private void createOrUpdateModel(WebScriptRequest req, Status status) throws JSONException {
+      System.out.println("Starting createOrUpdateModel");
 //       long start, end, total = 0;
 
       // clear out the response cache first (only one instance of each webscript)
@@ -125,32 +126,30 @@ public class ModelPost extends AbstractJavaWebScript {
                       owner = projectNode;
                   } else {
                       owner = findScriptNodeByName(ownerName);
+                      if (owner == null) {
+                          log(LogLevel.WARNING, "Could not find owner of element:" + rootElement, HttpServletResponse.SC_NOT_FOUND);
+                      }
+                      // really want to add pkg as owner
+                      EmsScriptNode reifiedPkg = findScriptNodeByName(ownerName + "_pkg");
+                      if (reifiedPkg == null) {
+                          reifiedPkg = getOrCreateReifiedNode(owner, ownerName);
+                      }
+                      owner = reifiedPkg;
                   }
                   if (owner != null) {
                       updateOrCreateElement(elementMap.get(rootElement), owner);
-                  } else {
-                      log(LogLevel.WARNING, "Could not find owner of element:" + rootElement, HttpServletResponse.SC_NOT_FOUND);
                   }
               }
           }
       }
       
       // handle the relationships
-      // TODO split this out updating the separate relationships underneath
-//        start = System.currentTimeMillis(); 
       updateOrCreateRelationships(relationshipsJson, "relationshipElements");
-//        end = System.currentTimeMillis(); System.out.println("updateOrCreateRelationshipElements: " + (end-start) + "ms"); 
-//        start = System.currentTimeMillis(); 
       updateOrCreateRelationships(relationshipsJson, "propertyTypes");
-//        end = System.currentTimeMillis(); System.out.println("updateOrCreatePropertyTypes: " + (end-start) + "ms"); 
-//        start = System.currentTimeMillis(); 
       updateOrCreateRelationships(relationshipsJson, "elementValues");
-//        end = System.currentTimeMillis(); System.out.println("updateOrCreateElementValues: " + (end-start) + "ms"); 
-//        start = System.currentTimeMillis(); 
       updateOrCreateRelationships(relationshipsJson, "annotatedElements");
-//        end = System.currentTimeMillis(); System.out.println("updateOrCreateElementAnnotatedElements: " + (end-start) + "ms"); 
 
-        System.out.println("Update Model Elements Done waiting on transaction to complete...\n");
+      System.out.println("Update Model Elements Done waiting on transaction to complete...\n");
   }
   
   /**
@@ -383,13 +382,15 @@ public class ModelPost extends AbstractJavaWebScript {
       fillRootElements();
   }
   
-  protected void fillRootElements() {
+  protected void fillRootElements() throws JSONException {
       Iterator<?> iter = elementHierarchyJson.keys();
       while (iter.hasNext()) {
           String ownerId = (String)iter.next();
           if (!elementMap.containsKey(ownerId)) {
-              rootElements.add(ownerId);
-              // TODO: do check if node is actually found?
+              JSONArray hierarchy = elementHierarchyJson.getJSONArray(ownerId);
+              for (int ii = 0; ii < hierarchy.length(); ii++) {
+                  rootElements.add(hierarchy.getString(ii));
+              }
           }
       }
   }
@@ -435,27 +436,11 @@ public class ModelPost extends AbstractJavaWebScript {
                 node.ingestJSON(elementJson);
             }
 
-            // create reification if there are children
+            // always create reified container
             if (elementHierarchyJson.has(id)) {
-                String pkgName = id + "_pkg";
-//                if (!newElements.contains(id)) {
-                    reifiedNode = findScriptNodeByName(pkgName);
-//                } else {
-                  if (reifiedNode == null) {
-                    reifiedNode = parent.createFolder(pkgName,
-                            Acm.ACM_ELEMENT_FOLDER);
-                    reifiedNode.setProperty(Acm.ACM_ID, id);
-                    reifiedNode.setProperty("cm:name", pkgName);
-                    reifiedNode.setProperty(Acm.ACM_NAME,
-                            (String) node.getProperty(Acm.ACM_NAME));
-                }
-                if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
-                    foundElements.put(pkgName, reifiedNode);
-//                    node.createOrUpdateChildAssociation(reifiedNode,
-//                            Acm.ACM_REIFIED_CONTAINMENT);
-                    children = elementHierarchyJson.getJSONArray(id);
-                }
-            }
+                reifiedNode = getOrCreateReifiedNode(node, id);
+                children = elementHierarchyJson.getJSONArray(id);
+            } // end if (elementHierarchyJson.has(id)) {
 //            trx.commit();
 //        } catch (Throwable e) {
 //            try {
@@ -499,6 +484,29 @@ public class ModelPost extends AbstractJavaWebScript {
         // + (end-start));
     }
 
+    protected EmsScriptNode getOrCreateReifiedNode(EmsScriptNode node, String id) {
+        EmsScriptNode reifiedNode = null;
+        EmsScriptNode parent = node.getParent();
+        
+        if (checkPermissions(parent, PermissionService.WRITE)) {
+            // System.out.println("Creating reified package for " + node.getProperty(Acm.ACM_NAME));
+            String pkgName = id + "_pkg";
+            reifiedNode = findScriptNodeByName(pkgName);
+            if (reifiedNode == null) {
+                reifiedNode = parent.createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER);
+                reifiedNode.setProperty(Acm.ACM_ID, id);
+                reifiedNode.setProperty("cm:name", pkgName);
+                reifiedNode.setProperty(Acm.ACM_NAME, (String) node.getProperty(Acm.ACM_NAME));
+            }
+            if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
+                foundElements.put(pkgName, reifiedNode);
+                // node.createOrUpdateChildAssociation(reifiedNode, Acm.ACM_REIFIED_CONTAINMENT);
+            }
+        }
+        
+        return reifiedNode;
+    }
+    
   /**
    * Entry point
    */
