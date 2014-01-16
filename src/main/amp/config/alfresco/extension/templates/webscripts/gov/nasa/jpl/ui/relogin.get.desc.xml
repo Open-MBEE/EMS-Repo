@@ -1,0 +1,11 @@
+<webscript> 
+  <shortname>Get view editor home page</shortname> 
+  <description>tell people to go back to their tab
+  </description>
+  <url>/ui/relogin</url> 
+  <format default="html">any</format> 
+  <authentication>user</authentication> 
+  <transaction allow="readonly">none</transaction>
+  <family>View Editor</family>
+  
+</webscript>
