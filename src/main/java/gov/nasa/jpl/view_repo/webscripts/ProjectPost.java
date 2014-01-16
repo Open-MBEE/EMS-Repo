@@ -57,6 +57,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 	private String projectId = null;
 	private boolean delete = false;
 	private boolean fix = false;
+	private boolean createSite = false;
 		
 	/**
 	 * Utility method for getting the request parameters from the URL template
@@ -67,7 +68,8 @@ public class ProjectPost extends AbstractJavaWebScript {
 		projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
 		delete = jwsUtil.checkArgEquals(req, "delete", "true") ? true : false;
 		fix = jwsUtil.checkArgEquals(req, "fix", "true") ? true : false;
-	}
+		createSite = jwsUtil.checkArgEquals(req, "createSite", "true") ? true : false;
+ 	}
 	
 	/**
 	 * Webscript entry point
@@ -111,8 +113,15 @@ public class ProjectPost extends AbstractJavaWebScript {
 		// make sure site exists
 		EmsScriptNode siteNode = getSiteNode(siteName);
 		if (siteNode == null) {
-			log(LogLevel.ERROR, "Site not found.\n", HttpServletResponse.SC_NOT_FOUND);
-			return HttpServletResponse.SC_NOT_FOUND;
+		    if (createSite) {
+		        // TODO this is only for testing
+		        String SITE_NAME="europa";
+		        services.getSiteService().createSite(SITE_NAME, SITE_NAME, SITE_NAME, SITE_NAME, true);
+		        siteNode = getSiteNode(siteName);
+		    } else {
+		        log(LogLevel.ERROR, "Site not found.\n", HttpServletResponse.SC_NOT_FOUND);
+		        return HttpServletResponse.SC_NOT_FOUND;
+		    }
 		}
 		
 		// make sure Model package under site exists
@@ -178,15 +187,15 @@ public class ProjectPost extends AbstractJavaWebScript {
 		} 
 		
 		// get the site
-		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-		if (!checkRequestVariable(siteInfo, "Site")) {
-			return false;
-		}
+//		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+//		if (!checkRequestVariable(siteInfo, "Site")) {
+//			return false;
+//		}
 				
 		// check permissions
-		if (!checkPermissions(siteInfo.getNodeRef(), PermissionService.WRITE)) {
-			return false;
-		}
+//		if (!checkPermissions(siteInfo.getNodeRef(), PermissionService.WRITE)) {
+//			return false;
+//		}
 		
 		String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
 		if (!checkRequestVariable(projectId, PROJECT_ID)) {

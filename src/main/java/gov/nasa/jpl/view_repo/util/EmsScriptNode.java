@@ -128,7 +128,7 @@ public class EmsScriptNode extends ScriptNode {
 	
 	/**
 	 * Check whether an association exists of the specified type between source and target, create/update as necessary
-	 * 
+	 * TODO: updating associations only works for singular associations, need to expand to multiple
 	 * NOTE: do not use for child associations
 	 * @param target	Target node of the association
 	 * @param type		Short name of the type of association to create 
@@ -516,6 +516,8 @@ public class EmsScriptNode extends ScriptNode {
             element.put("editable", this.hasPermission(PermissionService.WRITE));
         }
 
+        // TODO: get target associations to get comments - e.g., target of annotated element
+        
 	    return element;
 	}
 	
@@ -530,6 +532,7 @@ public class EmsScriptNode extends ScriptNode {
         JSONObject relations = new JSONObject();
         JSONObject elementValues = new JSONObject();
         JSONObject propertyTypes = new JSONObject();
+        JSONObject annotatedElements = new JSONObject();
         JSONObject relationshipElements = new JSONObject();
         JSONArray array;
 
@@ -548,8 +551,12 @@ public class EmsScriptNode extends ScriptNode {
             relJson.put(Acm.JSON_SOURCE, source);
             relJson.put(Acm.JSON_TARGET, target);
             relationshipElements.put(jsonObject.getString(Acm.JSON_ID), relJson);
+        } else if (jsonObject.has(Acm.JSON_ANNOTATED_ELEMENTS)) {
+            array = jsonObject.getJSONArray("annotatedElements");
+            annotatedElements.put(jsonObject.getString(Acm.JSON_ID), array);
         }
 
+        relations.put("annotatedElements", annotatedElements);
         relations.put("relationshipElements", relationshipElements);
         relations.put("propertyTypes", propertyTypes);
         relations.put("elementValues", elementValues);

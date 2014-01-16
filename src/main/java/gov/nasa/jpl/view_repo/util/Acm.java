@@ -59,6 +59,8 @@ public class Acm {
     public static String JSON_SOURCE = "source";
     public static String JSON_TARGET = "target";
     public static String JSON_VALUE_TYPE = "valueType";
+    public static String JSON_BODY = "body";
+    public static String JSON_ANNOTATED_ELEMENTS = "annotatedElements";
     
     public static String JSON_ALLOWED_ELEMENTS = "allowedElements";
     public static String JSON_CHILDREN_VIEWS = "childrenViews";
@@ -104,6 +106,8 @@ public class Acm {
     public static String ACM_TYPE = SYSML + JSON_TYPE;
     public static String ACM_REIFIED_CONTAINMENT = SYSML + "reifiedContainment";
     public static String ACM_VIEW = SYSML + "View";
+    public static String ACM_BODY = SYSML + JSON_BODY;
+    public static String ACM_ANNOTATED_ELEMENTS = SYSML + JSON_ANNOTATED_ELEMENTS;
     
     public static String ACM_ALLOWED_ELEMENTS = VIEW + JSON_ALLOWED_ELEMENTS;
     public static String ACM_CHILDREN_VIEWS = VIEW + JSON_CHILDREN_VIEWS;
@@ -146,6 +150,7 @@ public class Acm {
             put(JSON_SOURCE, ACM_SOURCE);
             put(JSON_TARGET, ACM_TARGET);
             put(JSON_VALUE_TYPE, ACM_VALUE_TYPE);
+            put(JSON_BODY, ACM_BODY);
             
             put(JSON_ALLOWED_ELEMENTS, ACM_ALLOWED_ELEMENTS);
             put(JSON_CHILDREN_VIEWS, ACM_CHILDREN_VIEWS);
@@ -184,6 +189,7 @@ public class Acm {
             put(ACM_SOURCE, JSON_SOURCE);
             put(ACM_TARGET, JSON_TARGET);
 //            put(ACM_VALUE_TYPE, JSON_VALUE_TYPE);
+            put(ACM_BODY, JSON_BODY);
             
             put(ACM_ALLOWED_ELEMENTS, JSON_ALLOWED_ELEMENTS);
             put(ACM_CHILDREN_VIEWS, JSON_CHILDREN_VIEWS);
