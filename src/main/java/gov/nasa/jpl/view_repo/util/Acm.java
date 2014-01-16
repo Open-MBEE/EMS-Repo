@@ -42,6 +42,7 @@ import java.util.Set;
  */
 public class Acm {
     // JSON types
+    public static String JSON_COMMENT = "Comment";
     public static String JSON_CONFORM = "Conform";
     public static String JSON_DEPENDENCY = "Dependency";
     public static String JSON_DIRECTED_RELATIONSHIP = "DirectedRelationship";
@@ -86,6 +87,7 @@ public class Acm {
     public static String SYSML = "sysml:";
     public static String VIEW = "view2:";
     
+    public static String ACM_COMMENT = SYSML + JSON_COMMENT;
     public static String ACM_CONFORM = SYSML + JSON_CONFORM;
     public static String ACM_DEPENDENCY = SYSML + JSON_DEPENDENCY;
     public static String ACM_DIRECTED_RELATIONSHIP = SYSML + JSON_DIRECTED_RELATIONSHIP;
@@ -133,6 +135,7 @@ public class Acm {
     public static final Map<String, String> JSON2ACM = new HashMap<String, String>() {
         private static final long serialVersionUID = -5467934440503910163L;
         {
+            put(JSON_COMMENT, ACM_COMMENT);
             put(JSON_CONFORM, ACM_CONFORM);
             put(JSON_DEPENDENCY, ACM_DEPENDENCY);
             put(JSON_DIRECTED_RELATIONSHIP, ACM_DIRECTED_RELATIONSHIP);
@@ -172,6 +175,7 @@ public class Acm {
     public static final Map<String, String> ACM2JSON = new HashMap<String, String>() {
         private static final long serialVersionUID = -4682311676740055702L;
         {
+            put(ACM_COMMENT, JSON_COMMENT);
             put(ACM_CONFORM, JSON_CONFORM);
             put(ACM_DEPENDENCY, JSON_DEPENDENCY);
             put(ACM_DIRECTED_RELATIONSHIP, JSON_DIRECTED_RELATIONSHIP);

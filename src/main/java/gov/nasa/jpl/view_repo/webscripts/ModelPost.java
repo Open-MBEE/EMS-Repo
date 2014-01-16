@@ -40,7 +40,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -192,8 +191,7 @@ public class ModelPost extends AbstractJavaWebScript {
             for (int ii = 0; ii < jsonArray.length(); ii++){
                 String targetId = jsonArray.getString(ii);
                 EmsScriptNode target = findScriptNodeByName(targetId);
-                
-                source.createOrUpdateAssociation(target, Acm.ACM_ANNOTATED_ELEMENTS);
+                source.createOrUpdateAssociation(target, Acm.ACM_ANNOTATED_ELEMENTS, true);
             }
         }
     }

@@ -135,30 +135,36 @@ public class EmsScriptNode extends ScriptNode {
 	 * @return			true if association updated or created
 	 */
 	public boolean createOrUpdateAssociation(ScriptNode target, String type) {
-		QName typeQName = createQName(type);
-		List<AssociationRef> refs = services.getNodeService().getTargetAssocs(nodeRef, RegexQNamePattern.MATCH_ALL );
+	    return createOrUpdateAssociation(target, type, false);
+	}
+	
+	public boolean createOrUpdateAssociation(ScriptNode target, String type, boolean isMultiple) {
+        QName typeQName = createQName(type);
+        List<AssociationRef> refs = services.getNodeService().getTargetAssocs(nodeRef, RegexQNamePattern.MATCH_ALL );
 
-		// check all associations to see if there's a matching association
-		for (AssociationRef ref: refs) {
-			if (ref.getTypeQName().equals(typeQName)) {
-				if (ref.getSourceRef() != null && ref.getTargetRef() != null) {
-					if (ref.getSourceRef().equals(nodeRef) && 
-							ref.getTargetRef().equals(target.getNodeRef())) {
-						// found it, no need to update
-						return false; 
-					}
-				}
-			
-				// association doesn't match, no way to modify a ref, so need to remove then create
-				services.getNodeService().removeAssociation(nodeRef, target.getNodeRef(), typeQName);
-				break;
-			}
-		}
-		
-		// Target nodeRef isn't found?
-//		log(getName() + ": " + type + " peer association updated, target: " + target.getName());
-		services.getNodeService().createAssociation(nodeRef, target.getNodeRef(), typeQName);
-		return true;
+        // check all associations to see if there's a matching association
+        for (AssociationRef ref: refs) {
+            if (ref.getTypeQName().equals(typeQName)) {
+                if (ref.getSourceRef() != null && ref.getTargetRef() != null) {
+                    if (ref.getSourceRef().equals(nodeRef) && 
+                            ref.getTargetRef().equals(target.getNodeRef())) {
+                        // found it, no need to update
+                        return false; 
+                    }
+                }
+                // TODO: need to check for multiple associations?
+                if (!isMultiple) {
+                    // association doesn't match, no way to modify a ref, so need to remove then create
+                    services.getNodeService().removeAssociation(nodeRef, target.getNodeRef(), typeQName);
+                    break;
+                }
+            }
+        }
+        
+        // Target nodeRef isn't found?
+//      log(getName() + ": " + type + " peer association updated, target: " + target.getName());
+        services.getNodeService().createAssociation(nodeRef, target.getNodeRef(), typeQName);
+        return true;
 	}
 	
 	
@@ -283,35 +289,25 @@ public class EmsScriptNode extends ScriptNode {
 			// don't forget to set the name
 			props.put(ContentModel.PROP_NAME, name);
 
-			ChildAssociationRef assoc = services.getNodeService().createNode(
-					nodeRef,
-					ContentModel.ASSOC_CONTAINS,
-					QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI,
-							QName.createValidLocalName(name)),
-					createQName(type), props);
-			log("Node " + name + " created");
-			result = new EmsScriptNode(assoc.getChildRef(), services, response);			
+			QName typeQName = createQName(type);
+			if (typeQName != null) {
+    			ChildAssociationRef assoc = services.getNodeService().createNode(
+    					nodeRef,
+    					ContentModel.ASSOC_CONTAINS,
+    					QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI,
+    							QName.createValidLocalName(name)),
+    					createQName(type), props);
+                log("Node " + name + " created");
+                result = new EmsScriptNode(assoc.getChildRef(), services, response);            
+			} else {
+			    log("Could not find type "  + type);
+			}
 		}
 		
 //		end = new Date(); System.out.println("\tcreateNode: " + (end.getTime()-start.getTime()));
 		return result;
 	}
 
-	/**
-	 * Returns a list of the AssociationRefs by the specified type
-	 * FIXME The regexp doesn't seem to work to getting all the associations of a particular type
-	 * @param type		Short name for type to filter on
-	 * @return
-	 */
-	public List<AssociationRef> getAssociationsByType(String type) {
-		String tokens[] = type.split(":");
-		if (tokens.length != 2) {
-			return null;
-		}
-		RegexQNamePattern pattern = new RegexQNamePattern(tokens[0], tokens[1]);
-		return services.getNodeService().getTargetAssocs(nodeRef, pattern);
-	}
-	
 	/**
 	 * Return the first AssociationRef of a particular type
 	 * @param type	Short name for type to filter on
@@ -516,10 +512,49 @@ public class EmsScriptNode extends ScriptNode {
             element.put("editable", this.hasPermission(PermissionService.WRITE));
         }
 
-        // TODO: get target associations to get comments - e.g., target of annotated element
+        JSONArray annotatedElements = getTargetAssocsByType(Acm.ACM_ANNOTATED_ELEMENTS);
+        if (annotatedElements.length() > 0) {
+            element.put(Acm.JSON_ANNOTATED_ELEMENTS, annotatedElements);
+        }
+        
         
 	    return element;
 	}
+	
+	public JSONArray getTargetAssocsByType(String acmType) {
+	    boolean isSource = false;
+	    return getAssocsByDirection(acmType, isSource);
+	}
+
+    public JSONArray getSourceAssocsByType(String acmType) {
+        boolean isSource = true;
+        return getAssocsByDirection(acmType, isSource);
+    }
+
+	protected JSONArray getAssocsByDirection(String acmType, boolean isSource) {
+        JSONArray array = new JSONArray();
+        List<AssociationRef> assocs;
+        if (isSource) {
+            assocs = services.getNodeService().getSourceAssocs(nodeRef, RegexQNamePattern.MATCH_ALL);
+        } else {
+            assocs = services.getNodeService().getTargetAssocs(nodeRef, RegexQNamePattern.MATCH_ALL);
+        }
+        for (AssociationRef aref: assocs) {
+            QName typeQName = createQName(acmType); 
+            if (aref.getTypeQName().equals(typeQName)) {
+                NodeRef targetRef;
+                if (isSource) {
+                    targetRef = aref.getSourceRef();
+                } else {
+                    targetRef = aref.getTargetRef();
+                }
+                array.put(services.getNodeService().getProperty(targetRef, createQName(Acm.ACM_ID)));
+            }
+        }
+        
+        return array;
+	}
+	
 	
 	
 	/**
