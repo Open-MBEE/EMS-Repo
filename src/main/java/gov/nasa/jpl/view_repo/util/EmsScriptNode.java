@@ -503,6 +503,13 @@ public class EmsScriptNode extends ScriptNode {
             EmsScriptNode parent = this.getParent();
             element.put(Acm.JSON_OWNER,  parent.getName().replace("_pkg", ""));
         }
+
+        if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_COMMENT)){ 
+            JSONArray annotatedElements = getTargetAssocsByType(Acm.ACM_ANNOTATED_ELEMENTS);
+            if (annotatedElements.length() > 0) {
+                element.put(Acm.JSON_ANNOTATED_ELEMENTS, annotatedElements);
+            }
+        }
         
         if (showQualifiedName) {
             element.put("qualifiedName",  this.getSysmlQName());
@@ -511,12 +518,6 @@ public class EmsScriptNode extends ScriptNode {
         if (showEditable) {
             element.put("editable", this.hasPermission(PermissionService.WRITE));
         }
-
-        JSONArray annotatedElements = getTargetAssocsByType(Acm.ACM_ANNOTATED_ELEMENTS);
-        if (annotatedElements.length() > 0) {
-            element.put(Acm.JSON_ANNOTATED_ELEMENTS, annotatedElements);
-        }
-        
         
 	    return element;
 	}

@@ -207,6 +207,7 @@ public class Acm {
         }
     };
 
+    
     /**
      * Properties that should be JSONArrays rather than primitive types
      */
@@ -223,16 +224,28 @@ public class Acm {
     };
     
     /**
+     * Properties to be displayed at all times
+     */
+    protected static final Set<String> COMMON_JSON = new HashSet<String>() {
+        private static final long serialVersionUID = 8715041115029041344L;
+        {
+            add(JSON_ID);
+            add(JSON_AUTHOR);
+            add(JSON_LAST_MODIFIED);
+        }
+    };
+    
+    /**
      * Properties to be displayed when requesting Views
      */
     protected static final Set<String> VIEW_JSON = new HashSet<String>() {
         private static final long serialVersionUID = -2080928480362524333L;
         {
-            add(JSON_ID);
             add(JSON_DISPLAYED_ELEMENTS);
             add(JSON_ALLOWED_ELEMENTS);
             add(JSON_CHILDREN_VIEWS);
             add(JSON_CONTAINS);
+            addAll(COMMON_JSON);
         }
     };
     
@@ -242,7 +255,6 @@ public class Acm {
     protected static final Set<String> ELEMENT_JSON = new HashSet<String>() {
         private static final long serialVersionUID = -6771999751087714932L;
         {
-            add(JSON_ID);
             add(JSON_TYPE);
             add(JSON_NAME);
             add(JSON_DOCUMENTATION);
@@ -253,6 +265,9 @@ public class Acm {
 
             add(JSON_OWNER);
             add(JSON_VALUE_TYPE);
+            add(JSON_COMMENT);
+
+            addAll(COMMON_JSON);
         }
     };
     
@@ -262,9 +277,21 @@ public class Acm {
     protected static final Set<String> PRODUCT_JSON = new HashSet<String>() {
         private static final long serialVersionUID = 3335972461663141541L;
         {
-            add(JSON_ID);
             add(JSON_VIEW_2_VIEW);
             add(JSON_NO_SECTIONS);
+
+            addAll(COMMON_JSON);
+        }
+    };
+    
+    /**
+     * Display comment properties
+     */
+    public static final Set<String> COMMENT_JSON = new HashSet<String>() {
+        private static final long serialVersionUID = -6102902765527909734L;
+        {
+            add(JSON_BODY);
+            addAll(COMMON_JSON);
         }
     };
     
@@ -286,7 +313,7 @@ public class Acm {
      *
      */
     public static enum JSON_TYPE_FILTER {
-        VIEW, ELEMENT, PRODUCT, ALL;
+        VIEW, ELEMENT, PRODUCT, COMMENT, ALL;
      }
 
     /**
@@ -299,6 +326,7 @@ public class Acm {
             put(JSON_TYPE_FILTER.ELEMENT, ELEMENT_JSON);
             put(JSON_TYPE_FILTER.PRODUCT, PRODUCT_JSON);
             put(JSON_TYPE_FILTER.ALL, ALL_JSON);
+            put(JSON_TYPE_FILTER.COMMENT, COMMENT_JSON);
         }
     };
 }

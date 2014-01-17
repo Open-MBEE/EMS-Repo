@@ -79,6 +79,13 @@
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.moaproduct.get"
+		class="gov.nasa.jpl.view_repo.webscripts.MoaProductGet" parent="webscript"
+		singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
 
 	<!-- <bean id="webscript.gov.nasa.jpl.javawebscripts.site.delete" class="gov.nasa.jpl.view_repo.webscripts.SiteDelete" 
 		parent="webscript" singleton="false"> <property name="repositoryHelper" ref="repositoryHelper" 
@@ -150,9 +157,7 @@
 			</list>
 		</property>
 	</bean>
-	 -->
 	<bean id="performanceInterceptor" class="gov.nasa.jpl.view_repo.aspects.PerformanceInterceptor" />
-	<!-- 
 	<bean id="performanceAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
 		<property name="advice" ref="performanceInterceptor" />
 		<property name="patterns">
@@ -162,7 +167,6 @@
 			</list>
 		</property>
 	</bean>
-	 -->
 	<bean id="performanceAdvisor"
 		class="org.springframework.aop.support.NameMatchMethodPointcutAdvisor">
 		<property name="advice" ref="performanceInterceptor" />
@@ -225,4 +229,5 @@
 			</list>
 		</property>
 	</bean>
+		 -->	
 </beans>
