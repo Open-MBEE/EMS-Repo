@@ -33,6 +33,7 @@ import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -40,6 +41,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.UserTransaction;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -98,7 +100,8 @@ public class ModelPost extends AbstractJavaWebScript {
    * @throws JSONException    Parse error
    */
   private void createOrUpdateModel(WebScriptRequest req, Status status) throws JSONException {
-      System.out.println("Starting createOrUpdateModel");
+      Date now = new Date();
+      System.out.println("Starting createOrUpdateModel: " + now);
 //       long start, end, total = 0;
 
       // clear out the response cache first (only one instance of each webscript)
@@ -149,7 +152,8 @@ public class ModelPost extends AbstractJavaWebScript {
       updateOrCreateRelationships(relationshipsJson, "elementValues");
       updateOrCreateRelationships(relationshipsJson, "annotatedElements");
 
-      System.out.println("Update Model Elements Done waiting on transaction to complete...\n");
+      now = new Date();
+      System.out.println("Update Model Elements Done waiting on transaction to complete..." + now + "\n");
   }
   
   /**
@@ -159,22 +163,38 @@ public class ModelPost extends AbstractJavaWebScript {
    * @throws JSONException
    */
   protected void updateOrCreateRelationships(JSONObject jsonObject, String key) throws JSONException {
-      if (jsonObject.has(key)) {
-          JSONObject object = jsonObject.getJSONObject(key);
-          Iterator<?> ids = object.keys();
-          while (ids.hasNext()) {
-              String id = (String)ids.next();
-              if (key.equals("relationshipElements")) {
-                  updateOrCreateRelationship(object.getJSONObject(id), id);
-              } else if (key.equals("propertyTypes")) {
-                  updateOrCreatePropertyType(object.getString(id), id);
-              } else if (key.equals("elementValues")) {
-                  updateOrCreateElementValues(object.getJSONArray(id), id);
-              } else if (key.equals("annotatedElements")) {
-                  updateOrCreateAnnotatedElements(object.getJSONArray(id), id);
+      long start = System.currentTimeMillis(), end; System.out.print("updateOrCreate" + key + ": ");
+      UserTransaction trx;
+      trx = services.getTransactionService().getUserTransaction();
+      try {
+          trx.begin();
+            if (jsonObject.has(key)) {
+                  JSONObject object = jsonObject.getJSONObject(key);
+                  Iterator<?> ids = object.keys();
+                  while (ids.hasNext()) {
+                      String id = (String)ids.next();
+                      if (key.equals("relationshipElements")) {
+                          updateOrCreateRelationship(object.getJSONObject(id), id);
+                      } else if (key.equals("propertyTypes")) {
+                          updateOrCreatePropertyType(object.getString(id), id);
+                      } else if (key.equals("elementValues")) {
+                          updateOrCreateElementValues(object.getJSONArray(id), id);
+                      } else if (key.equals("annotatedElements")) {
+                          updateOrCreateAnnotatedElements(object.getJSONArray(id), id);
+                      }
+                  }
               }
-          }
-      }
+            trx.commit();
+        } catch (Throwable e) {
+            try {
+                if (trx.getStatus() == javax.transaction.Status.STATUS_ACTIVE) {
+                    trx.rollback();
+                }
+            } catch (Throwable ee) {
+                // TODO handle double exception in whatever way is appropriate
+            }
+        }
+      end = System.currentTimeMillis(); System.out.println((end-start) + "ms");
   }
 
   /**
@@ -354,32 +374,47 @@ public class ModelPost extends AbstractJavaWebScript {
   Map<String, JSONObject> elementMap = new HashMap<String, JSONObject>();
   Set<String> rootElements = new HashSet<String>();
   protected void buildElementMap(JSONArray jsonArray) throws JSONException {
-      for (int ii = 0; ii < jsonArray.length(); ii++) {
-          JSONObject elementJson = jsonArray.getJSONObject(ii);
-          String sysmlId = elementJson.getString(Acm.JSON_ID);
-          elementMap.put(sysmlId, elementJson);
-          
-          // lets look for everything initially
-          if (findScriptNodeByName(sysmlId) == null) {
-              newElements.add(sysmlId);
+      UserTransaction trx;
+      trx = services.getTransactionService().getUserTransaction();
+      try {
+          trx.begin();
+
+          for (int ii = 0; ii < jsonArray.length(); ii++) {
+              JSONObject elementJson = jsonArray.getJSONObject(ii);
+              String sysmlId = elementJson.getString(Acm.JSON_ID);
+              elementMap.put(sysmlId, elementJson);
+              
+              // lets look for everything initially
+              if (findScriptNodeByName(sysmlId) == null) {
+                  newElements.add(sysmlId);
+              }
+              
+              // create the hierarchy
+                if (elementJson.has(Acm.JSON_OWNER)) {
+                    String owner = elementJson.getString(Acm.JSON_OWNER);
+                    // if owner is null, leave at project root level
+                    if (owner == null || owner.equals("null")) {
+                        owner = (String)projectNode.getProperty(Acm.ACM_ID);
+                        rootElements.add(sysmlId);
+                    }
+                    if (!elementHierarchyJson.has(owner)) {
+                        elementHierarchyJson.put(owner, new JSONArray());
+                    }
+                    elementHierarchyJson.getJSONArray(owner).put(sysmlId);
+                }
           }
           
-          // create the hierarchy
-            if (elementJson.has(Acm.JSON_OWNER)) {
-                String owner = elementJson.getString(Acm.JSON_OWNER);
-                // if owner is null, leave at project root level
-                if (owner == null || owner.equals("null")) {
-                    owner = (String)projectNode.getProperty(Acm.ACM_ID);
-                    rootElements.add(sysmlId);
-                }
-                if (!elementHierarchyJson.has(owner)) {
-                    elementHierarchyJson.put(owner, new JSONArray());
-                }
-                elementHierarchyJson.getJSONArray(owner).put(sysmlId);
-            }
+          fillRootElements();
+          trx.commit();
+      } catch (Throwable e) {
+          try {
+              if (trx.getStatus() == javax.transaction.Status.STATUS_ACTIVE) {
+                  trx.rollback();
+              }
+          } catch (Throwable ee) {
+              // TODO handle double exception in whatever way is appropriate
+          }
       }
-      
-      fillRootElements();
   }
   
   protected void fillRootElements() throws JSONException {
@@ -407,17 +442,16 @@ public class ModelPost extends AbstractJavaWebScript {
             return;
         }
         String id = elementJson.getString(Acm.JSON_ID);
-//        long start = System.currentTimeMillis(), end;
-        // System.out.println("updateOrCreateElement " + id);
+        long start = System.currentTimeMillis(), end; System.out.println("updateOrCreateElement " + id);
         JSONArray children = new JSONArray();
         EmsScriptNode reifiedNode = null;
 
         // find node if exists, otherwise create
         EmsScriptNode node;
-//        UserTransaction trx;
-//        trx = services.getTransactionService().getUserTransaction();
-//        try {
-//            trx.begin();
+        UserTransaction trx;
+        trx = services.getTransactionService().getUserTransaction();
+        try {
+            trx.begin();
             if (!newElements.contains(id)) {
                 node = findScriptNodeByName(id);
             } else {
@@ -436,23 +470,21 @@ public class ModelPost extends AbstractJavaWebScript {
                 node.ingestJSON(elementJson);
             }
 
-            // always create reified container
             if (elementHierarchyJson.has(id)) {
                 reifiedNode = getOrCreateReifiedNode(node, id);
                 children = elementHierarchyJson.getJSONArray(id);
             } // end if (elementHierarchyJson.has(id)) {
-//            trx.commit();
-//        } catch (Throwable e) {
-//            try {
-//                if (trx.getStatus() == javax.transaction.Status.STATUS_ACTIVE) {
-//                    trx.rollback();
-//                }
-//            } catch (Throwable ee) {
-//                // TODO handle double exception in whatever way is appropriate
-//            }
-//        }
-//        end = System.currentTimeMillis(); System.out.println(id + ": updateOrCreateElement " + (end-start) + "ms");
-
+            trx.commit();
+        } catch (Throwable e) {
+            try {
+                if (trx.getStatus() == javax.transaction.Status.STATUS_ACTIVE) {
+                    trx.rollback();
+                }
+            } catch (Throwable ee) {
+                // TODO handle double exception in whatever way is appropriate
+            }
+        }
+        end = System.currentTimeMillis(); System.out.println(id + ": updateOrCreateElement " + (end-start) + "ms");
         
         // add the relationships into our maps
         JSONObject relations = EmsScriptNode.filterRelationsJSONObject(elementJson);
