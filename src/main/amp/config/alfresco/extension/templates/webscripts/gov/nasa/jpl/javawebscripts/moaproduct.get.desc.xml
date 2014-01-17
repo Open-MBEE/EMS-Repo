@@ -1,6 +1,6 @@
 <webscript> 
-  <shortname>Get View Comments</shortname> 
-  <description>Retrieves all the comments that annotate a view. Returns same format as getting elements.
+  <shortname>Get Mother of All Products</shortname> 
+  <description>Retrieves everything in a product - views, elements, comments, etc.
   </description>
   <url>/javawebscripts/moaproducts/{id}</url>
   <format default="json">any</format> 
