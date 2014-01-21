@@ -138,18 +138,18 @@ public class ModelGet extends AbstractJavaWebScript {
 		JSONObject top = new JSONObject();
 		try {
 //			top.put("elementHierarchy", elementHierarchy);
-			top.put("elements", elements);
+		    if (elements.length() > 0) {
+		        top.put("elements", elements);
+	            model.put("res", top.toString(4));
+		    } else {
+		        log(LogLevel.WARNING, "Element not found", HttpServletResponse.SC_NOT_FOUND);
+		        model.put("res", response.toString());
+		    }
 //			top.put("relationships", relationships);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		try {
-			model.put("res", top.toString(4));
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+				
 		status.setCode(responseStatus.getCode());
 		return model;
 	}

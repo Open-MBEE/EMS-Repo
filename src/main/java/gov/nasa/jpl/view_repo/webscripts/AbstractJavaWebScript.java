@@ -268,7 +268,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 	protected boolean checkRequestVariable(Object value, String type) {
 		if (value == null) {
-			log(LogLevel.ERROR, type + " not provided.\n", HttpServletResponse.SC_BAD_REQUEST);
+			log(LogLevel.ERROR, type + " not found.\n", HttpServletResponse.SC_BAD_REQUEST);
 			return false;
 		}
 		return true;

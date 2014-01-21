@@ -106,6 +106,14 @@
 		class="gov.nasa.jpl.view_repo.webscripts.ProjectGet" parent="webscript" singleton="false"> 
 		<property name="repositoryHelper" ref="repositoryHelper" /> <property name="services" 
 		ref="ServiceRegistry" /> <property name="jwsUtil" ref="jwsUtil" /> </bean> -->
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.project.get"
+		class="gov.nasa.jpl.view_repo.webscripts.ProjectGet" parent="webscript"
+		singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.project.post"
 		class="gov.nasa.jpl.view_repo.webscripts.ProjectPost" parent="webscript"
 		singleton="false">

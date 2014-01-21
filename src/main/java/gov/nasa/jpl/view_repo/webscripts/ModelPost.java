@@ -580,7 +580,9 @@ public class ModelPost extends AbstractJavaWebScript {
                 node.setProperty(Acm.ACM_ID, id);
                 // TODO temporarily set title - until we figure out how to use
                 // sysml:name in repository browser
-                node.setProperty("cm:title", elementJson.getString("name"));
+                if (elementJson.has("name")) {
+                    node.setProperty("cm:title", elementJson.getString("name"));
+                }
                 // System.out.println("\t  created path: " +
                 // node.getQnamePath());
             } else {
