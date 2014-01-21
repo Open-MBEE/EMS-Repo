@@ -28,6 +28,7 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.HashMap;
@@ -154,7 +155,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 	
 	/**
-	 * Find node of specified name (returns first found - so assume uniquely named ids
+	 * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
 	 * TODO extend so search context can be specified
 	 * @param name	Node name to search for
 	 * @return		ScriptNode with name if found, null otherwise
@@ -181,6 +182,24 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 //		long end=System.currentTimeMillis(); System.out.println("\tfindScriptNodeByName " + name + ": " + (end-start) + " ms");
 		return result;
 	}
+
+	protected NodeRef findNodeRefByType(String name, String type) {
+        ResultSet results = null;
+        NodeRef nodeRef = null;
+        try {
+            results = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, type + name + "\"");
+            for (ResultSetRow row: results) {
+                nodeRef = row.getNodeRef();
+                break ; //Assumption is things are uniquely named - TODO: fix since snapshots have same name?...
+            }
+        } finally {
+            if (results != null) {
+                results.close();
+            }
+        }
+
+        return nodeRef;     
+	}
 	
 	/**
 	 * Find a NodeReference by name (returns first match, assuming things are unique)
@@ -189,26 +208,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @return     NodeRef of first match, null otherwise
 	 */
 	protected NodeRef findNodeRefByName(String name) {
-		ResultSet results = null;
-		NodeRef node = null;
-		try {
-			results = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, "@cm\\:name:\"" + name + "\"");
-			for (ResultSetRow row: results) {
-				node = row.getNodeRef();
-				break ; //Assumption is things are uniquely named - TODO: fix since snapshots have same name?...
-			}
-		} finally {
-			if (results != null) {
-				results.close();
-			}
-		}
-
-		return node;		
+//	    return findNodeRefByType(name, "@cm\\:name:\"");
+        return findNodeRefByType(name, "@sysml\\:id:\""); // TODO: temporarily search by ID
 	}
 	
 	protected void log(LogLevel level, String msg, int code) {
 		if (level.value >= logLevel.value) {
-			log("[" + level.name() + "]" + msg, code);
+			log("[" + level.name() + "]: " + msg + "\n", code);
 		}
 	}
 	
@@ -285,7 +291,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 				for (ResultSetRow row: resultSet) {
 					EmsScriptNode node = new EmsScriptNode(row.getNodeRef(), services, response);
 					if (checkPermissions(node, PermissionService.READ)) {
-    					String id = (String) node.getProperty("sysml:id");
+    					String id = (String) node.getProperty(Acm.ACM_ID);
     					if (id != null) {
     						searchResults.put(id, node);
     					}
