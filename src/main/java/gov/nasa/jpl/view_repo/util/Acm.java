@@ -255,6 +255,7 @@ public class Acm {
     protected static final Set<String> ELEMENT_JSON = new HashSet<String>() {
         private static final long serialVersionUID = -6771999751087714932L;
         {
+            add(JSON_BODY);
             add(JSON_TYPE);
             add(JSON_NAME);
             add(JSON_DOCUMENTATION);

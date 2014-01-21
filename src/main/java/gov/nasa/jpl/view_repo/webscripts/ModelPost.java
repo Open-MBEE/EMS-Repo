@@ -55,6 +55,9 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * Descriptor file: /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/model.post.desc.xml
+ * 
+ * NOTE: Transactions are independently managed in this Jave webscript, so make sure that the descriptor file has transactions set to none
+ *  
  * @author cinyoung
  * 
  * TODO Need merge? and force? similar to View?
@@ -118,6 +121,7 @@ public class ModelPost extends AbstractJavaWebScript {
           buildElementMap(jsonArray);
 
           for (String rootElement: rootElements) {
+              System.out.println("ROOT ELEMENT FOUND: " + rootElement);
               if (!rootElement.equals((String)projectNode.getProperty("cm:name"))) {
                   String ownerName = null;
                   JSONObject element = elementMap.get(rootElement);
@@ -143,7 +147,7 @@ public class ModelPost extends AbstractJavaWebScript {
                       updateOrCreateElement(elementMap.get(rootElement), owner);
                   }
               }
-          }
+          } // end for (String rootElement: rootElements) {
       }
       
       // handle the relationships
@@ -189,6 +193,7 @@ public class ModelPost extends AbstractJavaWebScript {
             try {
                 if (trx.getStatus() == javax.transaction.Status.STATUS_ACTIVE) {
                     trx.rollback();
+          System.out.println("\tNeeded to rollback: " + e.getMessage());
                 }
             } catch (Throwable ee) {
                 // TODO handle double exception in whatever way is appropriate
@@ -375,16 +380,16 @@ public class ModelPost extends AbstractJavaWebScript {
   Set<String> rootElements = new HashSet<String>();
   protected void buildElementMap(JSONArray jsonArray) throws JSONException {
       UserTransaction trx;
+
+      // lets look for everything initially
       trx = services.getTransactionService().getUserTransaction();
       try {
           trx.begin();
-
           for (int ii = 0; ii < jsonArray.length(); ii++) {
               JSONObject elementJson = jsonArray.getJSONObject(ii);
               String sysmlId = elementJson.getString(Acm.JSON_ID);
               elementMap.put(sysmlId, elementJson);
               
-              // lets look for everything initially
               if (findScriptNodeByName(sysmlId) == null) {
                   newElements.add(sysmlId);
               }
@@ -406,15 +411,16 @@ public class ModelPost extends AbstractJavaWebScript {
           
           fillRootElements();
           trx.commit();
-      } catch (Throwable e) {
-          try {
-              if (trx.getStatus() == javax.transaction.Status.STATUS_ACTIVE) {
-                  trx.rollback();
+          } catch (Throwable e) {
+              try {
+                  if (trx.getStatus() == javax.transaction.Status.STATUS_ACTIVE) {
+                      trx.rollback();
+        System.out.println("\tNeeded to rollback: " + e.getMessage());
+                  }
+              } catch (Throwable ee) {
+                  // TODO handle double exception in whatever way is appropriate
               }
-          } catch (Throwable ee) {
-              // TODO handle double exception in whatever way is appropriate
           }
-      }
   }
   
   protected void fillRootElements() throws JSONException {
@@ -452,9 +458,8 @@ public class ModelPost extends AbstractJavaWebScript {
         trx = services.getTransactionService().getUserTransaction();
         try {
             trx.begin();
-            if (!newElements.contains(id)) {
-                node = findScriptNodeByName(id);
-            } else {
+            if (newElements.contains(id)) {
+//                System.out.println("\tupdateOrCreateElement creating: " + id + " under " + parent.getQnamePath());
                 node = parent.createNode(id,
                         Acm.JSON2ACM.get(elementJson.getString(Acm.JSON_TYPE)));
                 node.setProperty("cm:name", id);
@@ -462,15 +467,30 @@ public class ModelPost extends AbstractJavaWebScript {
                 // TODO temporarily set title - until we figure out how to use
                 // sysml:name in repository browser
                 node.setProperty("cm:title", elementJson.getString("name"));
-                foundElements.put(id, node); // cache the found value
+//                System.out.println("\t  created path: " + node.getQnamePath());
+            } else {
+                node = findScriptNodeByName(id);
+                try {
+//                  System.out.println("\tupdateOrCreateElement found: " + id + " => " + node.getQnamePath() + " => " + node.getSiteShortName());
+                  if (!node.getParent().equals(parent)) {
+//                      System.out.println("\tupdateOrCreateElement moving element to new parent");
+                      node.move(parent);
+                  }
+                } catch (Exception e) {
+                    System.out.println("could not find node information: " + id);
+                    e.printStackTrace();
+                }
             }
+            foundElements.put(id, node); // cache the found value
 
             if (checkPermissions(node, PermissionService.WRITE)) {
                 // injecting the JSON will return the relationships found
+//                System.out.println("\tupdateOrCreateElement updating metadata");
                 node.ingestJSON(elementJson);
             }
 
             if (elementHierarchyJson.has(id)) {
+//                System.out.println("\tupdateOrCreateElement creating reification");
                 reifiedNode = getOrCreateReifiedNode(node, id);
                 children = elementHierarchyJson.getJSONArray(id);
             } // end if (elementHierarchyJson.has(id)) {
@@ -479,12 +499,13 @@ public class ModelPost extends AbstractJavaWebScript {
             try {
                 if (trx.getStatus() == javax.transaction.Status.STATUS_ACTIVE) {
                     trx.rollback();
+                    System.out.println("\tNeeded to rollback: " + e.getMessage());
                 }
             } catch (Throwable ee) {
-                // TODO handle double exception in whatever way is appropriate
+                System.out.println("\tRollback failed: " + ee.getMessage());
             }
         }
-        end = System.currentTimeMillis(); System.out.println(id + ": updateOrCreateElement " + (end-start) + "ms");
+        end = System.currentTimeMillis(); System.out.println("\tupdateOrCreateElement: " + elementJson.get("name") + ": " + (end-start) + "ms");
         
         // add the relationships into our maps
         JSONObject relations = EmsScriptNode.filterRelationsJSONObject(elementJson);
@@ -526,7 +547,7 @@ public class ModelPost extends AbstractJavaWebScript {
             reifiedNode = findScriptNodeByName(pkgName);
             if (reifiedNode == null) {
                 reifiedNode = parent.createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER);
-                reifiedNode.setProperty(Acm.ACM_ID, id);
+//                reifiedNode.setProperty(Acm.ACM_ID, id);
                 reifiedNode.setProperty("cm:name", pkgName);
                 reifiedNode.setProperty(Acm.ACM_NAME, (String) node.getProperty(Acm.ACM_NAME));
             }

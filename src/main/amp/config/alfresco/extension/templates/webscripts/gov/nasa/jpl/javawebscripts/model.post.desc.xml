@@ -6,9 +6,6 @@
   <url>/javawebscripts/sites/{siteName}/projects/{projectId}/elements</url>
   <format default="json">any</format> 
   <authentication>user</authentication>
-  <!--  
-  <transaction allow="readwrite">required</transaction>
-  -->
   <transaction>none</transaction>
   <family>EMS Java Webscripts</family>
   <args>

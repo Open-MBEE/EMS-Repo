@@ -195,11 +195,24 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * @throws JSONException
 	 */
 	protected void handleElementHierarchy(EmsScriptNode root, boolean recurse) throws JSONException {
-		JSONArray array = new JSONArray();		
-		elementsFound.put((String)root.getProperty(Acm.ACM_ID), root);
+		JSONArray array = new JSONArray();
+		
+		// add root element to elementsFound if its not already there (if it's there, it's probably because the root is a reified pkg node)
+		String sysmlId = (String)root.getProperty(Acm.ACM_ID);
+		if (!elementsFound.containsKey(sysmlId)) {
+		    elementsFound.put((String)root.getProperty(Acm.ACM_ID), root);
+		}
 
 		if (recurse) {
 			// find all the children, recurse or add to array as needed
+		    // TODO: figure out why the child association creation from the reification isn't being picked up
+//		    String rootName = (String)root.getProperty("cm:name");
+//		    if (!rootName.contains("_pkg")) {
+//		        EmsScriptNode reifiedNode = findScriptNodeByName(rootName + "_pkg");
+//		        if (reifiedNode != null) {
+//		            handleElementHierarchy(reifiedNode, recurse);
+//		        }
+//		    } 
 			for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
 				EmsScriptNode child = new EmsScriptNode(assoc.getChildRef(), services, response);
 				if (checkPermissions(child, PermissionService.READ)) {
@@ -216,7 +229,7 @@ public class ModelGet extends AbstractJavaWebScript {
     			   }
 				}
 			}
-			
+	    	
 			// if there were any children add them to the hierarchy object
 			String key = (String)root.getProperty(Acm.ACM_ID);
 			if (root.getTypeShort().equals(Acm.ACM_ELEMENT_FOLDER) && key == null) {
