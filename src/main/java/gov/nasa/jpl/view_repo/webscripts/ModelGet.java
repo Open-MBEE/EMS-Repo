@@ -311,7 +311,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		for (String id: foundProperties) {
 			EmsScriptNode node = foundElements.get(id);
 			if (checkPermissions(node, PermissionService.READ)){ 
-    			EmsScriptNode targetNode = node.getFirstAssociationByType(Acm.ACM_TYPE);
+    			EmsScriptNode targetNode = node.getFirstAssociationByType(Acm.ACM_PROPERTY_TYPE);
     			if (targetNode != null) {
     				propertyTypes.put(id, targetNode.getProperty(Acm.ACM_ID));
     			}

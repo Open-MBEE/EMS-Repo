@@ -314,7 +314,7 @@ public class ModelPost extends AbstractJavaWebScript {
         if (property != null && propertyType != null) {
             if (checkPermissions(property, PermissionService.WRITE)
                     && checkPermissions(propertyType, PermissionService.READ)) {
-                property.createOrUpdateAssociation(propertyType, Acm.ACM_TYPE);
+                property.createOrUpdateAssociation(propertyType, Acm.ACM_PROPERTY_TYPE);
             }
         } else {
             if (property == null) {

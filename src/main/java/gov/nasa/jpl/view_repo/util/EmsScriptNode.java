@@ -486,24 +486,46 @@ public class EmsScriptNode extends ScriptNode {
             }
         }
 
-        // add custom properties
+        // add in content type
         if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_TYPE)) {
             element.put(Acm.JSON_TYPE,  this.getQNameType().getLocalName());
         }
+        
+        // add in property type(s)
+        if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_PROPERTY_TYPE)) {
+            JSONArray propertyTypes = getTargetAssocsByType(Acm.ACM_PROPERTY_TYPE);
+            if (propertyTypes.length() > 0) {
+                element.put(Acm.JSON_PROPERTY_TYPE, propertyTypes.get(0));
+            }
+        }
 
+        // add in value and value types
         if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_VALUE_TYPE)) {
             Object valueType = this.getProperty(Acm.ACM_VALUE_TYPE);
             if (valueType != null) {
-                element.put("value",  this.getProperty(Acm.JSON2ACM.get((String) valueType)));
+                if (valueType.equals(Acm.JSON_ELEMENT_VALUE)) {
+                    @SuppressWarnings("unchecked")
+                    List<NodeRef> elementValue = (List<NodeRef>) this.getProperty(Acm.ACM_ELEMENT_VALUE);
+                    JSONArray array = new JSONArray();
+                    for (NodeRef evRef: elementValue) {
+                        EmsScriptNode ev = new EmsScriptNode(evRef, services, response);
+                        array.put(ev.getProperty(Acm.ACM_ID));
+                    }
+                    element.put("value", array);
+                } else {
+                    element.put("value",  this.getProperty(Acm.JSON2ACM.get((String) valueType)));
+                }
                 element.put(Acm.JSON_VALUE_TYPE,  valueType);
             }
         }
         
+        // add in owner
         if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_OWNER)) {
             EmsScriptNode parent = this.getParent();
             element.put(Acm.JSON_OWNER,  parent.getName().replace("_pkg", ""));
         }
 
+        // add comment
         if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_COMMENT)){ 
             JSONArray annotatedElements = getTargetAssocsByType(Acm.ACM_ANNOTATED_ELEMENTS);
             if (annotatedElements.length() > 0) {
@@ -511,10 +533,12 @@ public class EmsScriptNode extends ScriptNode {
             }
         }
         
+        // show qualified name if toggled
         if (showQualifiedName) {
             element.put("qualifiedName",  this.getSysmlQName());
         }
         
+        // show editable if toggled
         if (showEditable) {
             element.put("editable", this.hasPermission(PermissionService.WRITE));
         }
@@ -557,9 +581,8 @@ public class EmsScriptNode extends ScriptNode {
 	}
 	
 	
-	
 	/**
-	 * Given an JSONObject, filters it to find the appropriate relationships
+	 * Given an JSONObject, filters it to find the appropriate relationships to be provided into model post
 	 * @param jsonObject
 	 * @return
 	 * @throws JSONException 
@@ -577,10 +600,16 @@ public class EmsScriptNode extends ScriptNode {
             if (jsonObject.get(Acm.JSON_VALUE_TYPE).equals(Acm.JSON_ELEMENT_VALUE)) {
                 elementValues.put(jsonObject.getString(Acm.JSON_ID), array);
             }
-        } else if (jsonObject.has(Acm.JSON_PROPERTY_TYPE)) {
+        }
+        
+        if (jsonObject.has(Acm.JSON_PROPERTY_TYPE)) {
             String propertyType = jsonObject.getString(Acm.JSON_PROPERTY_TYPE);
-            propertyTypes.put(jsonObject.getString(Acm.JSON_ID), propertyType);
-        } else if (jsonObject.has(Acm.JSON_SOURCE) && jsonObject.has(Acm.JSON_TARGET)) {
+            if (!propertyType.equals("null")) {
+                propertyTypes.put(jsonObject.getString(Acm.JSON_ID), propertyType);
+            }
+        }
+        
+        if (jsonObject.has(Acm.JSON_SOURCE) && jsonObject.has(Acm.JSON_TARGET)) {
             JSONObject relJson = new JSONObject();
             String source = jsonObject.getString(Acm.JSON_SOURCE);
             String target = jsonObject.getString(Acm.JSON_TARGET);

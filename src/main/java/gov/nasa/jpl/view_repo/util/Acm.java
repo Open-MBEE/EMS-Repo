@@ -123,7 +123,8 @@ public class Acm {
     public static String ACM_LITERAL_INTEGER = SYSML + "integer";
     public static String ACM_LITERAL_REAL = SYSML + "double";
     public static String ACM_LITERAL_STRING = SYSML + "string";
-    public static String ACM_ELEMENT_VALUE = SYSML + "string";
+    public static String ACM_ELEMENT_VALUE = SYSML + "elementValue";
+    public static String ACM_PROPERTY_TYPE = SYSML + JSON_PROPERTY_TYPE;
     
     public static String ACM_ELEMENT_FOLDER = SYSML + "ElementFolder";
 
@@ -263,6 +264,7 @@ public class Acm {
             add(JSON_IS_DERIVED);
             add(JSON_SOURCE);
             add(JSON_TARGET);
+            add(JSON_PROPERTY_TYPE);
 
             add(JSON_OWNER);
             add(JSON_VALUE_TYPE);
