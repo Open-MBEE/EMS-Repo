@@ -29,22 +29,16 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.namespace.QName;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,10 +57,7 @@ public class ModelGet extends AbstractJavaWebScript {
     
 	private JSONObject elementHierarchy = new JSONObject();
 	protected JSONArray elements = new JSONArray();
-	private JSONObject relationships = new JSONObject();
 	private EmsScriptNode modelRootNode = null;
-	private Set<String> foundRelationships = new HashSet<String>();
-	private Set<String> foundProperties = new HashSet<String>();
 	protected Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
 
 	
@@ -75,9 +66,6 @@ public class ModelGet extends AbstractJavaWebScript {
 		super.clearCaches();
 		elementHierarchy = new JSONObject();
 		elements = new JSONArray();
-		relationships = new JSONObject();
-		foundProperties = new HashSet<String>();
-		foundRelationships = new HashSet<String>();
 		elementsFound = new HashMap<String, EmsScriptNode>();
 	}
 
@@ -129,7 +117,6 @@ public class ModelGet extends AbstractJavaWebScript {
 					handleElementHierarchy(modelRootNode, recurse);
 				}
 				handleElements();
-//				handleRelationships();
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
@@ -137,7 +124,6 @@ public class ModelGet extends AbstractJavaWebScript {
 		
 		JSONObject top = new JSONObject();
 		try {
-//			top.put("elementHierarchy", elementHierarchy);
 		    if (elements.length() > 0) {
 		        top.put("elements", elements);
 	            model.put("res", top.toString(4));
@@ -145,7 +131,6 @@ public class ModelGet extends AbstractJavaWebScript {
 		        log(LogLevel.WARNING, "Element not found", HttpServletResponse.SC_NOT_FOUND);
 		        model.put("res", response.toString());
 		    }
-//			top.put("relationships", relationships);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -254,100 +239,15 @@ public class ModelGet extends AbstractJavaWebScript {
 
 			if (checkPermissions(node, PermissionService.READ)){ 
                 elements.put(node.toJSONObject(Acm.JSON_TYPE_FILTER.ELEMENT));
-//              // check for relationships to be handled later
-//              if (node.isSubType("sysml:DirectedRelationship")) {
-//                  foundRelationships.add(id);
-//              } else if (node.isSubType("sysml:Property")) {
-//                  foundProperties.add(id);
-//              }
 			}
 		}
 	}
-	
-
-	/**
-	 * Handle all the relationship JSONObjects
-	 * @throws JSONException
-	 */
-	protected void handleRelationships() throws JSONException {
-		handleElementRelationships();
-		handlePropertyTypes();
-		handleElementValues();
-	}
-	
-	/**
-	 * Create the Element Values JSONObject
-	 * @throws JSONException
-	 */
-	protected void handleElementValues() throws JSONException {
-		NodeService nodeService = services.getNodeService();
-		QName sysmlId = jwsUtil.createQName(Acm.ACM_ID);
-
-		JSONObject elementValues = new JSONObject();
-		for (String id: foundProperties) {
-			EmsScriptNode node = foundElements.get(id);
-			if (checkPermissions(node, PermissionService.READ)){ 
-    			@SuppressWarnings("unchecked")
-    			ArrayList<NodeRef> values = (ArrayList<NodeRef>)node.getProperty(Acm.ACM_ELEMENT_VALUE);
-    			if (values != null) {
-    				JSONArray array = new JSONArray();
-    				for (NodeRef value: values) {
-    					array.put((String)nodeService.getProperty(value, sysmlId));
-    				}
-    				elementValues.put(id, array);
-    			}
-			}
-		}
-		relationships.put("elementValues", elementValues);
-	}
-
-	/**
-	 * Create the PropertyTypes JSONObject
-	 * @throws JSONException
-	 */
-	protected void handlePropertyTypes() throws JSONException {
-		JSONObject propertyTypes = new JSONObject();
 		
-		for (String id: foundProperties) {
-			EmsScriptNode node = foundElements.get(id);
-			if (checkPermissions(node, PermissionService.READ)){ 
-    			EmsScriptNode targetNode = node.getFirstAssociationByType(Acm.ACM_PROPERTY_TYPE);
-    			if (targetNode != null) {
-    				propertyTypes.put(id, targetNode.getProperty(Acm.ACM_ID));
-    			}
-			}
-		}
-		
-		relationships.put("propertyTypes", propertyTypes);
-	}
-
+	
 	/**
-	 * Create the ElementRelationships JSONObject
-	 * @throws JSONException
+	 * Need to differentiate between View or Element request - specified during Spring configuration
+	 * @param flag
 	 */
-	protected void handleElementRelationships() throws JSONException {
-		// handle relationship elements, property types and element values
-		JSONObject relationshipElements = new JSONObject();
-		for (String id: foundRelationships) {
-			EmsScriptNode node = foundElements.get(id);
-			EmsScriptNode sysmlSourceNode = node.getFirstAssociationByType(Acm.ACM_SOURCE);
-			EmsScriptNode sysmlTargetNode = node.getFirstAssociationByType(Acm.ACM_TARGET);
-
-			JSONObject relationshipElement = new JSONObject();
-			if (sysmlSourceNode != null && sysmlTargetNode != null) {
-			    if (checkPermissions(node, PermissionService.READ) && 
-			            checkPermissions(sysmlSourceNode, PermissionService.READ) &&
-			            checkPermissions(sysmlTargetNode, PermissionService.READ)) {
-		            relationshipElement.put(Acm.JSON_SOURCE, sysmlSourceNode.getProperty(Acm.ACM_ID));
-		            relationshipElement.put(Acm.JSON_TARGET, sysmlTargetNode.getProperty(Acm.ACM_ID));
-			    }
-			}
-			relationshipElements.put(id, relationshipElement);
-		}
-		relationships.put("relationshipElements", relationshipElements);
-	}
-	
-	
 	public void setIsViewRequest(boolean flag) {
 	    isViewRequest = flag;
 	}

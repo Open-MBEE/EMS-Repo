@@ -579,27 +579,19 @@ public class ModelPost extends AbstractJavaWebScript {
         try {
             trx.begin();
             if (newElements.contains(id)) {
-                // System.out.println("\tupdateOrCreateElement creating: " + id
-                // + " under " + parent.getQnamePath());
                 node = parent.createNode(id,
                         Acm.JSON2ACM.get(elementJson.getString(Acm.JSON_TYPE)));
                 node.setProperty("cm:name", id);
-                node.setProperty(Acm.ACM_ID, id);
-                // TODO temporarily set title - until we figure out how to use
-                // sysml:name in repository browser
-                if (elementJson.has("name")) {
-                    node.setProperty("cm:title", elementJson.getString("name"));
-                }
-                // System.out.println("\t  created path: " +
-                // node.getQnamePath());
+//                node.setProperty(Acm.ACM_ID, id);
+//                // TODO temporarily set title - until we figure out how to use
+//                // sysml:name in repository browser
+//                if (elementJson.has("name")) {
+//                    node.setProperty("cm:title", elementJson.getString("name"));
+//                }
             } else {
                 node = findScriptNodeByName(id);
                 try {
-                    // System.out.println("\tupdateOrCreateElement found: " + id
-                    // + " => " + node.getQnamePath() + " => " +
-                    // node.getSiteShortName());
                     if (!node.getParent().equals(parent)) {
-                        // System.out.println("\tupdateOrCreateElement moving element to new parent");
                         node.move(parent);
                     }
                 } catch (Exception e) {
@@ -610,17 +602,16 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             foundElements.put(id, node); // cache the found value
 
+            // update metadata
             if (checkPermissions(node, PermissionService.WRITE)) {
-                // injecting the JSON will return the relationships found
-                // System.out.println("\tupdateOrCreateElement updating metadata");
                 node.ingestJSON(elementJson);
             }
 
             if (elementHierarchyJson.has(id)) {
-                // System.out.println("\tupdateOrCreateElement creating reification");
                 reifiedNode = getOrCreateReifiedNode(node, id);
                 children = elementHierarchyJson.getJSONArray(id);
-            } // end if (elementHierarchyJson.has(id)) {
+            }
+            
             trx.commit();
         } catch (Throwable e) {
             try {
@@ -639,8 +630,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 + ": " + (end - start) + "ms");
 
         // add the relationships into our maps
-        JSONObject relations = EmsScriptNode
-                .filterRelationsJSONObject(elementJson);
+        JSONObject relations = EmsScriptNode.filterRelationsJSONObject(elementJson);
         String keys[] = { "elementValues", "propertyTypes",
                 "relationshipElements", "annotatedElements" };
         for (String key : keys) {
@@ -675,8 +665,6 @@ public class ModelPost extends AbstractJavaWebScript {
         EmsScriptNode parent = node.getParent();
 
         if (checkPermissions(parent, PermissionService.WRITE)) {
-            // System.out.println("Creating reified package for " +
-            // node.getProperty(Acm.ACM_NAME));
             String pkgName = id + "_pkg";
             reifiedNode = findScriptNodeByName(pkgName);
             if (reifiedNode == null) {
@@ -742,7 +730,6 @@ public class ModelPost extends AbstractJavaWebScript {
                 projectNode = findScriptNodeByName(elementJson
                         .getString(Acm.JSON_OWNER));
             } catch (JSONException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
 
