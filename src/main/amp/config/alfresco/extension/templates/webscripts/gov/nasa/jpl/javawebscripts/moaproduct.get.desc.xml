@@ -3,7 +3,7 @@
   <description>Retrieves everything in a product - views, elements, comments, etc.
   </description>
   <url>/javawebscripts/moaproducts/{id}</url>
-  <format default="json">any</format> 
+  <format default="html">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readonly">required</transaction>
   <family>EMS Java Webscripts</family>

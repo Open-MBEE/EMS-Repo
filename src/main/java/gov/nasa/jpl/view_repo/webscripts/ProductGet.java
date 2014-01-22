@@ -94,7 +94,7 @@ public class ProductGet extends AbstractJavaWebScript {
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
 			try {
 			    JSONObject top = new JSONObject();
-			    top.put("products", productsJson.getJSONObject(0));
+			    top.put("products", productsJson);
 				model.put("res", top.toString(4));
 			} catch (JSONException e) {
 				e.printStackTrace();

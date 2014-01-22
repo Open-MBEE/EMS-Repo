@@ -144,9 +144,15 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                         
                         // get the owner so we can create node inside owner
+                        // DirectedRelationships can be sent with no owners, so, if not specified look for its existing owner
                         EmsScriptNode owner = null;
                         if (ownerName == null || ownerName.equals("null")) {
-                            owner = projectNode;
+                            EmsScriptNode elementNode = findScriptNodeByName(rootElement);
+                            if (elementNode == null) {
+                                owner = projectNode;
+                            } else {
+                                owner = elementNode.getParent();
+                            }
                         } else {
                             owner = findScriptNodeByName(ownerName);
                             if (owner == null) {
