@@ -691,7 +691,7 @@ public class EmsScriptNode extends ScriptNode {
                 this.createOrUpdatePropertyValues(acmType, array, new Integer(0));
             } else if (acmType.equals("sysml:double")) {
                 this.createOrUpdatePropertyValues(acmType, array, new Double(0.0));
-            } else {
+            } else if (acmType.equals("sysml:string")) {
                 this.createOrUpdatePropertyValues(acmType, array, new String(""));
             }
         }

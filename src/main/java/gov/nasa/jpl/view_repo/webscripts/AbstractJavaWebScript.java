@@ -47,7 +47,6 @@ import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
-import org.json.JSONArray;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -101,23 +100,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 	public void setJwsUtil(JwsUtil util) {
 		jwsUtil = util;
-	}
-
-	/**
-	 * Clear all parent volume associations
-	 * 
-	 * TODO cleanup?
-	 * 
-	 * @param dnode
-	 */
-	protected void cleanDocument(ScriptNode dnode) {
-		JSONArray pvs = (JSONArray) dnode.getSourceAssocs().get(
-				"view:documents");
-		if (pvs != null) {
-			for (int ii = 0; ii < pvs.length(); ii++) {
-				// TODO: convert pv to ScriptNode to remove?
-			}
-		}
 	}
 
 	/**
@@ -190,9 +172,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         NodeRef nodeRef = null;
         try {
             results = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, type + name + "\"");
-            for (ResultSetRow row: results) {
-                nodeRef = row.getNodeRef();
-                break ; //Assumption is things are uniquely named - TODO: fix since snapshots have same name?...
+            if (results != null) {
+                for (ResultSetRow row: results) {
+                    nodeRef = row.getNodeRef();
+                    break ; //Assumption is things are uniquely named - TODO: fix since snapshots have same name?...
+                }
             }
         } finally {
             if (results != null) {
@@ -235,7 +219,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	protected boolean checkPermissions(EmsScriptNode node, String permissions) {
 	    if (!node.hasPermission(permissions)) {
 			Object property = node.getProperty("cm:name");
-			log(LogLevel.WARNING, "No " + permissions + " priveleges to " + property.toString() + ".\n", HttpServletResponse.SC_UNAUTHORIZED);
+			if (property != null) {
+			    log(LogLevel.WARNING, "No " + permissions + " priveleges to " + property.toString() + ".\n", HttpServletResponse.SC_UNAUTHORIZED);
+			}
 			return false;
 		}
 		return true;

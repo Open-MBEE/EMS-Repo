@@ -128,8 +128,10 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		if (checkPermissions(product, PermissionService.READ)){
 		    JSONObject object = product.toJSONObject(Acm.JSON_TYPE_FILTER.PRODUCT);
 		    productsJson = new JSONObject(object, JSONObject.getNames(object));
-		    
-		    handleViews(object.getJSONArray(Acm.JSON_VIEW_2_VIEW));
+
+		    if (object.has(Acm.JSON_VIEW_2_VIEW)) {
+		        handleViews(object.getJSONArray(Acm.JSON_VIEW_2_VIEW));
+		    }
 		    
 		    productsJson.put("views", viewsJson);
 		    productsJson.put("elements", elementsJson);
@@ -144,9 +146,11 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	    for (int ii = 0; ii < view2view.length(); ii++) {
 	        JSONObject view = view2view.getJSONObject(ii);
 	        viewIds.add(view.getString(Acm.JSON_ID));
-	        JSONArray childrenViews = view.getJSONArray(Acm.JSON_CHILDREN_VIEWS);
-	        for (int jj = 0; jj < childrenViews.length(); jj++) {
-	            viewIds.add(childrenViews.getString(jj));
+	        if (view.has(Acm.JSON_CHILDREN_VIEWS)) {
+        	        JSONArray childrenViews = view.getJSONArray(Acm.JSON_CHILDREN_VIEWS);
+        	        for (int jj = 0; jj < childrenViews.length(); jj++) {
+        	            viewIds.add(childrenViews.getString(jj));
+        	        }
 	        }
 	    }
 	    
@@ -154,24 +158,27 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	    for (String viewId: viewIds) {
 	        EmsScriptNode view = findScriptNodeByName(viewId);
 	        if (view != null && checkPermissions(view, PermissionService.READ)) {
-    	        JSONObject viewJson = view.toJSONObject(Acm.JSON_TYPE_FILTER.VIEW);
-    	        
-    	        // add any related comments as part of the view
-    	        JSONArray commentsJson = new JSONArray();
-    	        JSONArray comments = view.getSourceAssocsByType(Acm.ACM_ANNOTATED_ELEMENTS);
-    	        for (int ii = 0; ii < comments.length(); ii++) {
-    	            EmsScriptNode comment = findScriptNodeByName(comments.getString(ii));
-    	            if (comment != null && checkPermissions(comment, PermissionService.READ)) {
-    	                commentsJson.put(comment.toJSONObject(Acm.JSON_TYPE_FILTER.COMMENT));
-    	            }
-    	        }
-    	        viewJson.put("comments", commentsJson);
-    	        
-    	        viewsJson.put(viewJson);
-    	        JSONArray allowedElements = viewJson.getJSONArray(Acm.JSON_ALLOWED_ELEMENTS);
-    	        for (int ii = 0; ii < allowedElements.length(); ii++) {
-    	            elementIds.add(allowedElements.getString(ii));
-    	        }
+        	        JSONObject viewJson = view.toJSONObject(Acm.JSON_TYPE_FILTER.VIEW);
+        	        
+        	        // add any related comments as part of the view
+        	        JSONArray commentsJson = new JSONArray();
+        	        JSONArray comments = view.getSourceAssocsByType(Acm.ACM_ANNOTATED_ELEMENTS);
+        	        for (int ii = 0; ii < comments.length(); ii++) {
+        	            EmsScriptNode comment = findScriptNodeByName(comments.getString(ii));
+        	            if (comment != null && checkPermissions(comment, PermissionService.READ)) {
+        	                commentsJson.put(comment.toJSONObject(Acm.JSON_TYPE_FILTER.COMMENT));
+        	            }
+        	        }
+        	        viewJson.put("comments", commentsJson);
+        	        
+        	        if (viewJson.has(Acm.JSON_ALLOWED_ELEMENTS)) {
+            	        JSONArray allowedElements = viewJson.getJSONArray(Acm.JSON_ALLOWED_ELEMENTS);
+            	        for (int ii = 0; ii < allowedElements.length(); ii++) {
+            	            elementIds.add(allowedElements.getString(ii));
+            	        }
+        	        }
+        	        
+                viewsJson.put(viewJson);
 	        }
 	    }
 	    

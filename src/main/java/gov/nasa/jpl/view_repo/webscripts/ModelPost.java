@@ -204,6 +204,7 @@ public class ModelPost extends AbstractJavaWebScript {
         UserTransaction trx;
         trx = services.getTransactionService().getUserTransaction();
         try {
+            System.out.println("updateOrCreateRelationships: beginning transaction {");
             trx.begin();
             if (jsonObject.has(key)) {
                 JSONObject object = jsonObject.getJSONObject(key);
@@ -222,16 +223,14 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
                 }
             }
+            System.out.println("} updateOrCreateRelationships committing: " + key);
             trx.commit();
         } catch (Throwable e) {
             try {
-                if (trx.getStatus() == javax.transaction.Status.STATUS_ACTIVE) {
-                    trx.rollback();
-                    System.out.println("\tNeeded to rollback: "
-                            + e.getMessage());
-                }
+                trx.rollback();
+                System.out.println("\t####### ERROR: Needed to rollback: " + e.getMessage());
             } catch (Throwable ee) {
-                // TODO handle double exception in whatever way is appropriate
+                System.out.println("\tRollback failed: " + ee.getMessage());
             }
         }
         end = System.currentTimeMillis();
@@ -450,22 +449,17 @@ public class ModelPost extends AbstractJavaWebScript {
                             // move reified containers as necessary too
                             EmsScriptNode childPkg = findScriptNodeByName(childName
                                     + REIFIED_PKG_SUFFIX);
-                            if (childPkg != null
-                                    && !childPkg.getParent()
-                                            .equals(reifiedNode)) {
+                            if (childPkg != null && !childPkg.getParent().equals(reifiedNode)) {
                                 System.out.println("moving "
                                         + childPkg.getProperty("cm:name")
                                         + " to "
                                         + reifiedNode.getProperty("cm:name"));
                                 childPkg.move(reifiedNode);
                             }
-                        } // end if (checkPermissions(child,
-                          // PermissionService.WRITE)) {
-                    } // end if (checkPermissions(reifiedNode,
-                      // PermissionService.WRITE)) {
+                        } // end if (checkPermissions(child, PermissionService.WRITE)) {
+                    } // end if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
 
-                    node.createOrUpdateChildAssociation(reifiedNode,
-                            Acm.ACM_REIFIED_CONTAINMENT);
+                    node.createOrUpdateChildAssociation(reifiedNode, Acm.ACM_REIFIED_CONTAINMENT);
                 } // end if (checkPermissions(node, PermissionService.WRITE)) {
             }
         }
@@ -486,6 +480,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // lets look for everything initially
         trx = services.getTransactionService().getUserTransaction();
         try {
+            System.out.println("buildElementMap begin transaction {");
             trx.begin();
             for (int ii = 0; ii < jsonArray.length(); ii++) {
                 JSONObject elementJson = jsonArray.getJSONObject(ii);
@@ -528,16 +523,14 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             
             fillRootElements();
+            System.out.println("} buildElementMap committing");
             trx.commit();
         } catch (Throwable e) {
             try {
-                if (trx.getStatus() == javax.transaction.Status.STATUS_ACTIVE) {
-                    trx.rollback();
-                    System.out.println("\tNeeded to rollback: "
-                            + e.getMessage());
-                }
+                trx.rollback();
+                System.out.println("\t####### ERROR: Needed to rollback: " + e.getMessage());
             } catch (Throwable ee) {
-                // TODO handle double exception in whatever way is appropriate
+                System.out.println("\tRollback failed: " + ee.getMessage());
             }
         }
         
@@ -583,26 +576,28 @@ public class ModelPost extends AbstractJavaWebScript {
         UserTransaction trx;
         trx = services.getTransactionService().getUserTransaction();
         try {
+            System.out.println("updateOrCreateElement begin transaction {");
             trx.begin();
             if (newElements.contains(id)) {
+                System.out.println("\tcreating node");
                 node = parent.createNode(id,
                         Acm.JSON2ACM.get(elementJson.getString(Acm.JSON_TYPE)));
                 node.setProperty("cm:name", id);
-//                node.setProperty(Acm.ACM_ID, id);
+                node.setProperty(Acm.ACM_ID, id);
 //                // TODO temporarily set title - until we figure out how to use
 //                // sysml:name in repository browser
 //                if (elementJson.has("name")) {
 //                    node.setProperty("cm:title", elementJson.getString("name"));
 //                }
             } else {
+                System.out.println("\tmodifying node");
                 node = findScriptNodeByName(id);
                 try {
                     if (!node.getParent().equals(parent)) {
                         node.move(parent);
                     }
                 } catch (Exception e) {
-                    System.out
-                            .println("could not find node information: " + id);
+                    System.out.println("could not find node information: " + id);
                     e.printStackTrace();
                 }
             }
@@ -610,22 +605,22 @@ public class ModelPost extends AbstractJavaWebScript {
 
             // update metadata
             if (checkPermissions(node, PermissionService.WRITE)) {
+                System.out.println("\tinserting metadata");
                 node.ingestJSON(elementJson);
             }
 
             if (elementHierarchyJson.has(id)) {
+                System.out.println("\tcreating reified package");
                 reifiedNode = getOrCreateReifiedNode(node, id);
                 children = elementHierarchyJson.getJSONArray(id);
             }
             
+            System.out.println("} updateOrCreateElement committing");
             trx.commit();
         } catch (Throwable e) {
             try {
-                if (trx.getStatus() == javax.transaction.Status.STATUS_ACTIVE) {
-                    trx.rollback();
-                    System.out.println("\tNeeded to rollback: "
-                            + e.getMessage());
-                }
+                System.out.println("\t####### ERROR: Needed to rollback: " + e.getMessage());
+                trx.rollback();
             } catch (Throwable ee) {
                 System.out.println("\tRollback failed: " + ee.getMessage());
             }
@@ -636,6 +631,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 + ": " + (end - start) + "ms");
 
         // add the relationships into our maps
+        System.out.println("\tfiltering relationships");
         JSONObject relations = EmsScriptNode.filterRelationsJSONObject(elementJson);
         String keys[] = { "elementValues", "propertyTypes",
                 "relationshipElements", "annotatedElements" };
