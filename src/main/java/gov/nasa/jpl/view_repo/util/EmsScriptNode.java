@@ -138,6 +138,7 @@ public class EmsScriptNode extends ScriptNode {
 	    return createOrUpdateAssociation(target, type, false);
 	}
 	
+	
 	public boolean createOrUpdateAssociation(ScriptNode target, String type, boolean isMultiple) {
         QName typeQName = createQName(type);
         List<AssociationRef> refs = services.getNodeService().getTargetAssocs(nodeRef, RegexQNamePattern.MATCH_ALL );
@@ -220,7 +221,6 @@ public class EmsScriptNode extends ScriptNode {
 				return true;
 			}
 		} else {
-			// TODO create if oldvalue doesn't exist?
 			log(getName() + ": " + acmType + " property created with value = " + value);
 			setProperty(acmType, value);
 		}
@@ -276,6 +276,12 @@ public class EmsScriptNode extends ScriptNode {
 	}
 	
 	
+	/**
+	 * Override createNode to return an EmsScriptNode
+	 * @param name     cm:name of node
+	 * @param type     Alfresco Content Model type of node to create
+	 * @return         created child EmsScriptNode
+	 */
 	@Override
 	public EmsScriptNode createNode(String name, String type) {
 		EmsScriptNode result = null;
@@ -373,6 +379,7 @@ public class EmsScriptNode extends ScriptNode {
 	/**
 	 * Append onto the response for logging purposes
 	 * @param msg	Message to be appened to response
+	 * TODO: fix logger for EmsScriptNode
 	 */
 	public void log(String msg) {
 //		if (response != null) {
@@ -382,9 +389,9 @@ public class EmsScriptNode extends ScriptNode {
 
 	
 	/**
-	 * Genericized function to set property for non-collection types (collections are a bit hairier)
-	 * @param acmType
-	 * @param value
+	 * Genericized function to set property for non-collection types
+	 * @param acmType  Property short name for alfresco content model type 
+	 * @param value    Value to set property to
 	 */
 	public <T extends Serializable >void setProperty(String acmType, T value) {
 		if (useFoundationalApi) {
@@ -408,7 +415,7 @@ public class EmsScriptNode extends ScriptNode {
 	
 	/**
 	 * Gets the SysML qualified name for an object - if not SysML, won't return anything
-	 * @return
+	 * @return SysML qualified name (e.g., sysml:name qualified)
 	 */
 	public String getSysmlQName() {
         StringBuffer qname = new StringBuffer();
@@ -456,17 +463,29 @@ public class EmsScriptNode extends ScriptNode {
 	}
 	
 	
+    /**
+     * Convert node into our custom JSONObject with all possible keys
+     * @return                     JSONObject serialization of node
+     */
 	public JSONObject toJSONObject() throws JSONException {
 	    return toJSONObject(Acm.JSON_TYPE_FILTER.ALL);
 	}
 	
+    /**
+     * Convert node into our custom JSONObject, showing qualifiedName and editable keys
+     * @param renderType           Type of JSONObject to render, this filters what keys are in JSONObject
+     * @return                     JSONObject serialization of node
+     */
 	public JSONObject toJSONObject(Acm.JSON_TYPE_FILTER renderType) throws JSONException {
 	    return toJSONObject(renderType, true, true);
 	}
 	
 	/**
 	 * Convert node into our custom JSONObject
-	 * @throws JSONException 
+	 * @param renderType           Type of JSONObject to render, this filters what keys are in JSONObject
+	 * @param showQualifiedName    If true, displays qualifiedName key
+	 * @param showEditable         If true, displays editable key
+	 * @return                     JSONObject serialization of node
 	 */
 	public JSONObject toJSONObject(Acm.JSON_TYPE_FILTER renderType, boolean showQualifiedName, boolean showEditable) throws JSONException {
 	    JSONObject element = new JSONObject();
@@ -506,14 +525,19 @@ public class EmsScriptNode extends ScriptNode {
                 if (valueType.equals(Acm.JSON_ELEMENT_VALUE)) {
                     @SuppressWarnings("unchecked")
                     List<NodeRef> elementValue = (List<NodeRef>) this.getProperty(Acm.ACM_ELEMENT_VALUE);
-                    JSONArray array = new JSONArray();
-                    for (NodeRef evRef: elementValue) {
-                        EmsScriptNode ev = new EmsScriptNode(evRef, services, response);
-                        array.put(ev.getProperty(Acm.ACM_ID));
+                    if (elementValue != null) {
+                        JSONArray array = new JSONArray();
+                        for (NodeRef evRef: elementValue) {
+                            EmsScriptNode ev = new EmsScriptNode(evRef, services, response);
+                            array.put(ev.getProperty(Acm.ACM_ID));
+                        }
+                        element.put("value", array);
                     }
-                    element.put("value", array);
                 } else {
-                    element.put("value",  this.getProperty(Acm.JSON2ACM.get((String) valueType)));
+                    Object property = this.getProperty(Acm.JSON2ACM.get((String) valueType));
+                    if (property != null) {
+                        element.put("value",  property);
+                    }
                 }
                 element.put(Acm.JSON_VALUE_TYPE,  valueType);
             }
@@ -522,7 +546,9 @@ public class EmsScriptNode extends ScriptNode {
         // add in owner
         if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_OWNER)) {
             EmsScriptNode parent = this.getParent();
-            element.put(Acm.JSON_OWNER,  parent.getName().replace("_pkg", ""));
+            if (parent != null) {
+                element.put(Acm.JSON_OWNER,  parent.getName().replace("_pkg", ""));
+            }
         }
 
         // add comment
