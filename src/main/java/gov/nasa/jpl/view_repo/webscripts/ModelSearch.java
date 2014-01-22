@@ -71,7 +71,7 @@ public class ModelSearch extends ModelGet {
 			e.printStackTrace();
 		}
 				
-		status = responseStatus;
+		status.setCode(responseStatus.getCode());;
 		return model;
 	}
 }

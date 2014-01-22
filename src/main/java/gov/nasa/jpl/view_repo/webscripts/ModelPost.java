@@ -127,7 +127,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // check if we have single element or array of elements and create
         // accordingly
         if (!postJson.has(ELEMENTS)) {
-            // TODO: check if this is correct
+//            updateOrCreateElement(postJson.getJSONArray(ELEMENTS).getJSONObject(0), projectNode);
             updateOrCreateElement(postJson, projectNode);
         } else {
             // create the element map and hierarchies
@@ -149,6 +149,10 @@ public class ModelPost extends AbstractJavaWebScript {
                             owner = projectNode;
                         } else {
                             owner = findScriptNodeByName(ownerName);
+                            if (owner == null) {
+                                log(LogLevel.WARNING, "Could not find owner with name: " + ownerName + " putting into project", HttpServletResponse.SC_NOT_FOUND);
+                                owner = projectNode;
+                            }
                             // really want to add pkg as owner
                             EmsScriptNode reifiedPkg = findScriptNodeByName(ownerName
                                     + "_pkg");
@@ -498,6 +502,9 @@ public class ModelPost extends AbstractJavaWebScript {
                         elementHierarchyJson.put(ownerId, new JSONArray());
                     }
                     elementHierarchyJson.getJSONArray(ownerId).put(sysmlId);
+                } else {
+                    // if no owners are specified, add directly to root elements
+                    rootElements.add(sysmlId);
                 }
             }
 
@@ -627,8 +634,9 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
         end = System.currentTimeMillis();
+        
         System.out.println("\tupdateOrCreateElement: "
-                + elementJson.get("name") + ": " + (end - start) + "ms");
+                + ": " + (end - start) + "ms");
 
         // add the relationships into our maps
         JSONObject relations = EmsScriptNode

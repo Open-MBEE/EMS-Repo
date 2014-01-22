@@ -66,7 +66,7 @@ public class ProductPost extends AbstractJavaWebScript {
 			e.printStackTrace();
 		}
 		
-		status = responseStatus;
+        status.setCode(responseStatus.getCode());
 		model.put("res", response.toString());
 		return model;
 	}

@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -92,7 +93,9 @@ public class ProductGet extends AbstractJavaWebScript {
 		
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
 			try {
-				model.put("res", productsJson.getJSONObject(0).toString(4));
+			    JSONObject top = new JSONObject();
+			    top.put("products", productsJson.getJSONObject(0));
+				model.put("res", top.toString(4));
 			} catch (JSONException e) {
 				e.printStackTrace();
 				log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -102,7 +105,7 @@ public class ProductGet extends AbstractJavaWebScript {
 			model.put("res", response.toString());
 		}
 
-		status = responseStatus;
+		status.setCode(responseStatus.getCode());
 		return model;
 	}
 

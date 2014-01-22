@@ -88,7 +88,7 @@ public class ModelCommentGet extends ModelGet {
             }
         }
 
-        status = responseStatus;
+        status.setCode(responseStatus.getCode());
         return model;
     }
 }

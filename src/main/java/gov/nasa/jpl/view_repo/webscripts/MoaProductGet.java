@@ -114,7 +114,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 			model.put("res", response.toString());
 		}
 
-		status = responseStatus;
+		status.setCode(responseStatus.getCode());
 		return model;
 	}
 
