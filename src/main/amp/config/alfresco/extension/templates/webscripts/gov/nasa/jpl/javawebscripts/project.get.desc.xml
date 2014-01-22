@@ -1,0 +1,12 @@
+<webscript> 
+  <shortname>Get Project</shortname> 
+  <description>
+  </description>
+  <url>/javawebscripts/sites/{siteName}/projects/{projectId}</url>
+  <format default="json">any</format> 
+  <authentication>user</authentication> 
+  <transaction allow="readonly">required</transaction>
+  <family>EMS Java Webscripts</family>
+  <args>
+  </args>
+</webscript>

@@ -30,25 +30,14 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
- * Function pointer for handling transactions based on JSONObject or JSONArray inputs
+ * Function pointer for handling transactions based on JSONArray inputs
  * 
  * @author cinyoung
  *
  */
 public interface JwsFunctor {
-	/**
-	 * Execute the transaction for creating from an JSON type
-	 * @param jsonObject	Input JSON object to generate content from
-	 * @param key			Key into JSON object to create content from
-	 * @param flags			Var args of boolean flags (e.g., force, product, etc.)
-	 * @return				Optional return of what is created
-	 * @throws JSONException
-	 */
-	public Object execute(JSONObject jsonObject, String key, Boolean... flags) throws JSONException;
-	
 	/**
 	 * Execute the transaction for creating from an JSON type
 	 * @param jsonArray		Input JSON array to generate content from

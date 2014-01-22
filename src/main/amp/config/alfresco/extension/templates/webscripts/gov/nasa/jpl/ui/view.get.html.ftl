@@ -430,14 +430,14 @@ var ajaxWithHandlers = function(options, successMessage, errorMessage) {
     .done(function(data) { 
       if (data.indexOf("html") != -1) {
         alert("Not saved! You've been logged out, login in a new window first!");
-          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/");
+      		window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
       }
       app.fire('message', 'success', successMessage); })
     .fail(function(e) { 
       if (e && e.status && e.status === 200) {
         if (e.responseText.indexOf("html") != -1) {
           alert("Not saved! You've been logged out, login in a new window first!");
-          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/");
+      		window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
         }
         // we got a 200 back, but json parsing might have failed
         return;
@@ -1494,12 +1494,12 @@ app.on('makeToc', function() {
 (function poll() {
     setTimeout(function() {
         $.ajax({
-            url: absoluteUrl('/ui/?format=json'),
+            url: absoluteUrl('/ui/relogin'),
             type: "GET",
             success: function(data) {
                 if (data.indexOf("html") != -1) 
                   alert("You've been logged out! Login in a new window first!");
-          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/");
+      				window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
             },
             complete: poll,
             timeout: 5000

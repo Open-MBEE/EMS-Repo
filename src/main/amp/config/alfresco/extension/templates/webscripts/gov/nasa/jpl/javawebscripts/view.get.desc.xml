@@ -1,14 +1,24 @@
 <webscript>
+<shortname>Get View</shortname>
     <description>
-		DRAFT
-		
-		{
+    See newview.post.desc.xml for format. 
+  	</description>
+		<url>/javawebscripts/views/{id}?recurse={recurse?}</url>
+		<format default="json">any</format>
+		<authentication>user</authentication>
+		<transaction allow="readonly">required</transaction>
+		<family>EMS Java Webscripts</family>
+		<args>
+			<arg>
+				<name>recurse</name>
+				<description>Returns children views if true. False by default.
+				{
   			"views": 
   				[ {
-  					"id": elementId;
+  					"id": elementId,
   					"displayedElements": [elementId, ...],
   					"allowedElements": [elementId, ..],
-  					"chlidrenViews": [viewId, ..],
+  					"childrenViews": [viewId, ..],
   				 	"contains": [
   				 		{
   				 			"type": Paragraph", 
@@ -54,6 +64,8 @@
   			
 			]
   		}
-  		</description>
-  		
+				
+				</description>
+			</arg>
+		</args>  		
  </webscript>

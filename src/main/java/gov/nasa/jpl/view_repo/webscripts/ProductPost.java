@@ -26,63 +26,88 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
+
 package gov.nasa.jpl.view_repo.webscripts;
+
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.web.app.Application;
+import org.alfresco.service.cmr.security.PermissionService;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONArray;
 import org.springframework.extensions.webscripts.Cache;
-import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-/**
- * Java backed webscript for logging out of Alfresco repository. 
- * @author cinyoung
- *
- */
-public class LogoutWebScript extends DeclarativeWebScript {
-	private final String NEXT_PARAM = "next";
+public class ProductPost extends AbstractJavaWebScript {
+	@Override
+	protected boolean validateRequest(WebScriptRequest req, Status status) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
 	
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
-		logout(req);
+		clearCaches();
 		
-		String next = getServicePath(req.getServiceContextPath()) + "%2Fwcs%2Fui%2F";
+		Map<String, Object> model = new HashMap<String, Object>();
 		
-		if (req.getParameter(NEXT_PARAM) != null) {
-			next = req.getParameter(NEXT_PARAM);
+		try {
+			updateProducts((JSONObject)req.parseContent());
+		} catch (JSONException e) {
+			log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+			e.printStackTrace();
 		}
 		
-		// set redirection parameters
-		status.setCode(HttpServletResponse.SC_TEMPORARY_REDIRECT);
-		status.setRedirect(true);
-		status.setLocation(req.getServerPath() + getServicePath(req.getServiceContextPath()) 
-				+ "/faces/jsp/login.jsp?_alfRedirect=" + next);
-
-		return new HashMap<String, Object>();
-	}
-
-	/**
-	 * Simple utility that logs out the user
-	 * @param wsr
-	 */
-	private void logout(WebScriptRequest wsr) {
-		FacesContext fc = FacesContext.getCurrentInstance();
-		Application.logOut(fc);
+        status.setCode(responseStatus.getCode());
+		model.put("res", response.toString());
+		return model;
 	}
 	
-	/**
-	 * Simple utility to get the service path out of the service context
-	 * @param scpath	Service context path
-	 * @return			service path
-	 */
-	private String getServicePath(String scpath) {
-		return scpath.replace("/wcservice","").replace("/wcs","").replace("/service","");
+	private void updateProducts(JSONObject jsonObject) throws JSONException {
+		if (jsonObject.has("products")) {
+			JSONArray productsJson = jsonObject.getJSONArray("products");
+			
+			jwsUtil.splitTransactions(new JwsFunctor() {
+				@Override
+				public Object execute(JSONArray jsonArray, int index,
+						Boolean... flags) throws JSONException {
+					updateProduct(jsonArray, index);
+					return null;
+				}
+			}, productsJson);
+		}
+	}
+	
+	
+	private void updateProduct(JSONArray productsJson, int index) throws JSONException {
+		JSONObject productJson = productsJson.getJSONObject(index);
+		updateProduct(productJson);
+	}
+	
+	private void updateProduct(JSONObject productJson) throws JSONException {
+		String id = productJson.getString("id");
+		if (id == null) {
+			log(LogLevel.ERROR, "product id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
+			return;
+		}
+		
+		EmsScriptNode product = findScriptNodeByName(id);
+		if (product == null) {
+			log(LogLevel.ERROR, "could not find product with id: " + id, HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+			
+		if (checkPermissions(product, PermissionService.WRITE)) {
+		    product.createOrUpdateAspect("view2:Product");
+		    product.ingestJSON(productJson);
+		}
 	}
 }

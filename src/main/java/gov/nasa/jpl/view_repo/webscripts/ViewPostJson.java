@@ -29,6 +29,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.UserUtil;
+import gov.nasa.jpl.view_repo.util.Acm;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+@Deprecated
 public class ViewPostJson extends AbstractJavaWebScript {
 	private ScriptNode modelFolder = null;
 	// snapshotFolder not needed here
@@ -85,7 +87,7 @@ public class ViewPostJson extends AbstractJavaWebScript {
 		if (modelNode == null) {
 			modelNode = jwsUtil.getModelElement(modelFolder, mdid);
 			if (modelNode == null) {
-				String modeltype = json2acm.containsKey(elementType) ? json2acm.get(elementType) : json2acm.get("ModelElement");
+				String modeltype = Acm.JSON2ACM.containsKey(elementType) ? Acm.JSON2ACM.get(elementType) : Acm.JSON2ACM.get("ModelElement");
 				modelNode = jwsUtil.createModelElement(modelFolder, mdid, modeltype);
 				if (elementName != null) {
 					jwsUtil.setName(modelNode, elementName);
@@ -255,11 +257,6 @@ public class ViewPostJson extends AbstractJavaWebScript {
 			
 			jwsUtil.splitTransactions(new JwsFunctor() {
 				@Override
-				public Object execute(JSONObject jsonObject, String key,
-						Boolean... flags) throws JSONException {
-					return null;
-				}
-				@Override
 				public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
 					updateOrCreateModelElement((JSONObject)jsonArray.get(index), flags[0]);
 					return null;
@@ -268,11 +265,6 @@ public class ViewPostJson extends AbstractJavaWebScript {
 			
 			array = postjson.getJSONArray("views");
 			jwsUtil.splitTransactions(new JwsFunctor() {
-				@Override
-				public Object execute(JSONObject jsonObject, String key,
-						Boolean... flags) throws JSONException {
-					return null;
-				}
 				@Override
 				public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
 					updateOrCreateView((JSONObject)jsonArray.get(index), flags[0]);

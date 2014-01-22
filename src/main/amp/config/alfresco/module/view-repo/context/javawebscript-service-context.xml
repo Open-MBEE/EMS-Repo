@@ -2,12 +2,11 @@
 <!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
 <beans>
 	<!-- Bean definitions for all the Java backed webscripts -->
-	
+
 	<!-- Java backed webscript for logout with redirection on login -->
-	<bean id="webscript.gov.nasa.jpl.utils.logout.get"
-		class="gov.nasa.jpl.view_repo.webscripts.LogoutWebScript"
-		parent="webscript"/>
-	
+	<bean id="webscript.gov.nasa.jpl.utils.logout.get" class="gov.nasa.jpl.view_repo.webscripts.LogoutWebScript"
+		parent="webscript" />
+
 	<!-- Define the Java Webscript Utils bean - TODO: this may need to be made 
 		thread safe (e.g., instanced in each of the Java backed webscript beans) -->
 	<bean id="jwsUtil" class="gov.nasa.jpl.view_repo.webscripts.JwsUtil">
@@ -15,115 +14,160 @@
 		<property name="transactionInterval" value="500" />
 	</bean>
 
-	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.post" class="gov.nasa.jpl.view_repo.webscripts.ViewPostJson"
-		parent="webscript" singleton="false">
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.post"
+		class="gov.nasa.jpl.view_repo.webscripts.ViewPost" parent="webscript"
+		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
-	<bean id="webscript.gov.nasa.jpl.javawebscripts.newview.post" class="gov.nasa.jpl.view_repo.webscripts.NewViewPost"
-		parent="webscript" singleton="false">
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.get"
+		class="gov.nasa.jpl.view_repo.webscripts.ViewGet" parent="webscript"
+		singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.element.get"
+		class="gov.nasa.jpl.view_repo.webscripts.ModelGet" parent="webscript"
+		singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+		<property name="isViewRequest" value="true" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.element.post"
+		class="gov.nasa.jpl.view_repo.webscripts.ModelPost" parent="webscript"
+		singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.element.search.get"
+		class="gov.nasa.jpl.view_repo.webscripts.ModelSearch" parent="webscript"
+		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 	
-	<bean id="webscript.gov.nasa.jpl.javawebscripts.newview.get" class="gov.nasa.jpl.view_repo.webscripts.NewViewGet"
-		parent="webscript" singleton="false">
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.element.comment.get"
+		class="gov.nasa.jpl.view_repo.webscripts.ModelCommentGet" parent="webscript"
+		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
-<!-- 
-	<bean id="webscript.gov.nasa.jpl.javawebscripts.site.delete"
-		class="gov.nasa.jpl.view_repo.webscripts.SiteDelete" parent="webscript" singleton="false">
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.product.get"
+		class="gov.nasa.jpl.view_repo.webscripts.ProductGet" parent="webscript"
+		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
-	<bean id="webscript.gov.nasa.jpl.javawebscripts.site.get"
-		class="gov.nasa.jpl.view_repo.webscripts.SiteGet" parent="webscript" singleton="false">
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.product.post"
+		class="gov.nasa.jpl.view_repo.webscripts.ProductPost" parent="webscript"
+		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
-	<bean id="webscript.gov.nasa.jpl.javawebscripts.site.post"
-		class="gov.nasa.jpl.view_repo.webscripts.SitePost" parent="webscript" singleton="false">
-		<property name="repositoryHelper" ref="repositoryHelper" />
-		<property name="services" ref="ServiceRegistry" />
-		<property name="jwsUtil" ref="jwsUtil" />
-	</bean>
--->
-
-<!-- 
-	<bean id="webscript.gov.nasa.jpl.javawebscripts.project.delete"
-		class="gov.nasa.jpl.view_repo.webscripts.ProjectDelete" parent="webscript" singleton="false">
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.moaproduct.get"
+		class="gov.nasa.jpl.view_repo.webscripts.MoaProductGet" parent="webscript"
+		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
+	<!-- <bean id="webscript.gov.nasa.jpl.javawebscripts.site.delete" class="gov.nasa.jpl.view_repo.webscripts.SiteDelete" 
+		parent="webscript" singleton="false"> <property name="repositoryHelper" ref="repositoryHelper" 
+		/> <property name="services" ref="ServiceRegistry" /> <property name="jwsUtil" 
+		ref="jwsUtil" /> </bean> <bean id="webscript.gov.nasa.jpl.javawebscripts.site.get" 
+		class="gov.nasa.jpl.view_repo.webscripts.SiteGet" parent="webscript" singleton="false"> 
+		<property name="repositoryHelper" ref="repositoryHelper" /> <property name="services" 
+		ref="ServiceRegistry" /> <property name="jwsUtil" ref="jwsUtil" /> </bean> 
+		<bean id="webscript.gov.nasa.jpl.javawebscripts.site.post" class="gov.nasa.jpl.view_repo.webscripts.SitePost" 
+		parent="webscript" singleton="false"> <property name="repositoryHelper" ref="repositoryHelper" 
+		/> <property name="services" ref="ServiceRegistry" /> <property name="jwsUtil" 
+		ref="jwsUtil" /> </bean> -->
+
+	<!-- <bean id="webscript.gov.nasa.jpl.javawebscripts.project.delete" class="gov.nasa.jpl.view_repo.webscripts.ProjectDelete" 
+		parent="webscript" singleton="false"> <property name="repositoryHelper" ref="repositoryHelper" 
+		/> <property name="services" ref="ServiceRegistry" /> <property name="jwsUtil" 
+		ref="jwsUtil" /> </bean> <bean id="webscript.gov.nasa.jpl.javawebscripts.project.get" 
+		class="gov.nasa.jpl.view_repo.webscripts.ProjectGet" parent="webscript" singleton="false"> 
+		<property name="repositoryHelper" ref="repositoryHelper" /> <property name="services" 
+		ref="ServiceRegistry" /> <property name="jwsUtil" ref="jwsUtil" /> </bean> -->
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.project.get"
-		class="gov.nasa.jpl.view_repo.webscripts.ProjectGet" parent="webscript" singleton="false">
-		<property name="repositoryHelper" ref="repositoryHelper" />
-		<property name="services" ref="ServiceRegistry" />
-		<property name="jwsUtil" ref="jwsUtil" />
-	</bean>
- -->
-	<bean id="webscript.gov.nasa.jpl.javawebscripts.project.post"
-		class="gov.nasa.jpl.view_repo.webscripts.ProjectPost" parent="webscript" singleton="false">
+		class="gov.nasa.jpl.view_repo.webscripts.ProjectGet" parent="webscript"
+		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
-<!-- 
-	<bean id="webscript.gov.nasa.jpl.javawebscripts.element.delete"
-		class="gov.nasa.jpl.view_repo.webscripts.ElementDelete" parent="webscript" singleton="false">
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.project.post"
+		class="gov.nasa.jpl.view_repo.webscripts.ProjectPost" parent="webscript"
+		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
--->
+
+	<!-- <bean id="webscript.gov.nasa.jpl.javawebscripts.element.delete" class="gov.nasa.jpl.view_repo.webscripts.ElementDelete" 
+		parent="webscript" singleton="false"> <property name="repositoryHelper" ref="repositoryHelper" 
+		/> <property name="services" ref="ServiceRegistry" /> <property name="jwsUtil" 
+		ref="jwsUtil" /> </bean> -->
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.element.get"
-		class="gov.nasa.jpl.view_repo.webscripts.ModelGet" parent="webscript" singleton="false">
+		class="gov.nasa.jpl.view_repo.webscripts.ModelGet" parent="webscript"
+		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
+		<property name="isViewRequest" value="false" />
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.element.post"
-		class="gov.nasa.jpl.view_repo.webscripts.ModelPost" parent="webscript" singleton="false">
+		class="gov.nasa.jpl.view_repo.webscripts.ModelPost" parent="webscript"
+		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
-	<bean id="webscript.gov.nasa.jpl.javawebscripts.model.post"
-		class="gov.nasa.jpl.view_repo.webscripts.ModelPost" parent="webscript" singleton="false">
-		<property name="repositoryHelper" ref="repositoryHelper" />
-		<property name="services" ref="ServiceRegistry" />
-		<property name="jwsUtil" ref="jwsUtil" />
-	</bean>
-
-	<bean id="webscript.gov.nasa.jpl.javawebscripts.model.get"
-		class="gov.nasa.jpl.view_repo.webscripts.ModelGet" parent="webscript" singleton="false">
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.model.post" class="gov.nasa.jpl.view_repo.webscripts.ModelPost"
+		parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
 	<!-- Create proxies for the service beans: Interceptors don't work... -->
-<!-- 
-	<bean id="performanceInterceptor" class="gov.nasa.jpl.view_repo.aspects.PerformanceInterceptor"/>
-
+	<!-- 
+	<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
+		<property name="beanNames">
+			<value>webscript.gov.nasa.jpl.javawebscripts.model.post</value>
+			<value>webscript.gov.nasa.jpl.javawebscripts.element.post</value>
+			<value>webscript.gov.nasa.jpl.javawebscripts.element.get</value>
+		</property>
+		<property name="interceptorNames">
+			<list>
+				<value>performanceAdvisor</value>
+			</list>
+		</property>
+	</bean>
+	<bean id="performanceInterceptor" class="gov.nasa.jpl.view_repo.aspects.PerformanceInterceptor" />
 	<bean id="performanceAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
-		<property name="advice" ref="performanceInterceptor"/>
+		<property name="advice" ref="performanceInterceptor" />
 		<property name="patterns">
 			<list>
 				<value>.*find.*</value>
@@ -131,9 +175,9 @@
 			</list>
 		</property>
 	</bean>
-
-	<bean id="performanceAdvisor" class="org.springframework.aop.support.NameMatchMethodPointcutAdvisor">
-		<property name="advice" ref="performanceInterceptor"/>
+	<bean id="performanceAdvisor"
+		class="org.springframework.aop.support.NameMatchMethodPointcutAdvisor">
+		<property name="advice" ref="performanceInterceptor" />
 		<property name="mappedNames">
 			<list>
 				<value>findNodeRefByName</value>
@@ -152,7 +196,7 @@
 			</list>
 		</property>
 	</bean>
-	 
+ 
 	<bean id="view.post.proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="target">
 			<ref bean="webscript.gov.nasa.jpl.javawebscripts.view.post" />
@@ -163,7 +207,6 @@
 			</list>
 		</property>
 	</bean>
-
 	<bean id="model.post.proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="target">
 			<ref bean="webscript.gov.nasa.jpl.javawebscripts.model.post" />
@@ -174,7 +217,6 @@
 			</list>
 		</property>
 	</bean>
-
 	<bean id="project.post.proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="target">
 			<ref bean="webscript.gov.nasa.jpl.javawebscripts.project.post" />
@@ -185,10 +227,9 @@
 			</list>
 		</property>
 	</bean>
-
 	<bean id="model.get.proxy" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="target">
-			<ref bean="webscript.gov.nasa.jpl.javawebscripts.model.get" />
+			<ref bean="webscript.gov.nasa.jpl.javawebscripts.element.get" />
 		</property>
 		<property name="interceptorNames">
 			<list>
@@ -196,6 +237,5 @@
 			</list>
 		</property>
 	</bean>
--->
-	
+		 -->	
 </beans>

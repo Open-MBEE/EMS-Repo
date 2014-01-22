@@ -56,6 +56,33 @@
            <!--   	<aspect>cm:lockable</aspect> -->
             </mandatory-aspects>
         </type>
+        <type name="sysml:Comment">
+        	<parent>sysml:Element</parent>
+        	<properties>
+        		<property name="sysml:body">
+        			<type>d:text</type>
+        			<mandatory>false</mandatory>
+        			<index enabled="true">
+        				<atomic>false</atomic>
+        				<stored>false</stored>
+        				<tokenised>true</tokenised>
+        			</index>
+        		</property>
+        	</properties>
+        	<associations>
+        		<association name="sysml:annotatedElements">
+                    <source>
+                        <mandatory>false</mandatory>
+                        <many>true</many>
+                    </source>
+                    <target>
+                        <class>sysml:Element</class>
+                        <mandatory>false</mandatory>
+                        <many>true</many>
+                    </target>
+                </association>
+        	</associations>
+        </type>
         <type name="sysml:ElementFolder"> <!--  this is the "container" folder for each element -->
         	<parent>cm:folder</parent>
         	<mandatory-aspects>
@@ -203,9 +230,9 @@
             </properties>
             <associations>
             <!-- NOTE: sysml:type/source/target need many to many relationships between source and target.
-                      also mandatory targets aren't allowed otheriwse its expected that an association be
+                      also mandatory targets aren't allowed otherwise its expected that an association be
                       defined in the instance -->
-            	<association name="sysml:type">
+            	<association name="sysml:propertyType">
                     <source>
                         <mandatory>false</mandatory>
                         <many>true</many>

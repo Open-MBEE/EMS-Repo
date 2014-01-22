@@ -26,63 +26,89 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
+
 package gov.nasa.jpl.view_repo.webscripts;
+
+import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.web.app.Application;
+import org.alfresco.service.cmr.security.PermissionService;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONArray;
 import org.springframework.extensions.webscripts.Cache;
-import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-/**
- * Java backed webscript for logging out of Alfresco repository. 
- * @author cinyoung
- *
- */
-public class LogoutWebScript extends DeclarativeWebScript {
-	private final String NEXT_PARAM = "next";
+public class ViewPost extends AbstractJavaWebScript {
+	@Override
+	protected boolean validateRequest(WebScriptRequest req, Status status) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
 	
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
-		logout(req);
+		clearCaches();
 		
-		String next = getServicePath(req.getServiceContextPath()) + "%2Fwcs%2Fui%2F";
+		Map<String, Object> model = new HashMap<String, Object>();
 		
-		if (req.getParameter(NEXT_PARAM) != null) {
-			next = req.getParameter(NEXT_PARAM);
+		try {
+			updateViews((JSONObject)req.parseContent());
+		} catch (JSONException e) {
+			log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+			e.printStackTrace();
 		}
 		
-		// set redirection parameters
-		status.setCode(HttpServletResponse.SC_TEMPORARY_REDIRECT);
-		status.setRedirect(true);
-		status.setLocation(req.getServerPath() + getServicePath(req.getServiceContextPath()) 
-				+ "/faces/jsp/login.jsp?_alfRedirect=" + next);
-
-		return new HashMap<String, Object>();
-	}
-
-	/**
-	 * Simple utility that logs out the user
-	 * @param wsr
-	 */
-	private void logout(WebScriptRequest wsr) {
-		FacesContext fc = FacesContext.getCurrentInstance();
-		Application.logOut(fc);
+        status.setCode(responseStatus.getCode());
+		model.put("res", response.toString());
+		return model;
 	}
 	
-	/**
-	 * Simple utility to get the service path out of the service context
-	 * @param scpath	Service context path
-	 * @return			service path
-	 */
-	private String getServicePath(String scpath) {
-		return scpath.replace("/wcservice","").replace("/wcs","").replace("/service","");
+	private void updateViews(JSONObject jsonObject) throws JSONException {
+		if (jsonObject.has("views")) {
+			JSONArray viewsJson = jsonObject.getJSONArray("views");
+			
+			jwsUtil.splitTransactions(new JwsFunctor() {
+				@Override
+				public Object execute(JSONArray jsonArray, int index,
+						Boolean... flags) throws JSONException {
+					updateView(jsonArray, index);
+					return null;
+				}
+			}, viewsJson);
+		}
+	}
+	
+	
+	private void updateView(JSONArray viewsJson, int index) throws JSONException {
+		JSONObject viewJson = viewsJson.getJSONObject(index);
+		updateView(viewJson);
+	}
+	
+	private void updateView(JSONObject viewJson) throws JSONException {
+		String id = viewJson.getString(Acm.JSON_ID);
+		if (id == null) {
+			log(LogLevel.ERROR, "view id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
+			return;
+		}
+		
+		EmsScriptNode view = findScriptNodeByName(id);
+		if (view == null) {
+			log(LogLevel.ERROR, "could not find view with id: " + id, HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+			
+		if (checkPermissions(view, PermissionService.WRITE)) {
+		    view.createOrUpdateAspect(Acm.ACM_VIEW);
+		    view.ingestJSON(viewJson);
+		}
 	}
 }

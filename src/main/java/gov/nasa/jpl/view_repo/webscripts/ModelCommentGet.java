@@ -26,63 +26,69 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
+
 package gov.nasa.jpl.view_repo.webscripts;
+
+import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.web.app.Application;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
-import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
- * Java backed webscript for logging out of Alfresco repository. 
+ * Retrieve comments that annotate the specified element
+ * 
  * @author cinyoung
- *
+ * 
  */
-public class LogoutWebScript extends DeclarativeWebScript {
-	private final String NEXT_PARAM = "next";
-	
-	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req,
-			Status status, Cache cache) {
-		logout(req);
-		
-		String next = getServicePath(req.getServiceContextPath()) + "%2Fwcs%2Fui%2F";
-		
-		if (req.getParameter(NEXT_PARAM) != null) {
-			next = req.getParameter(NEXT_PARAM);
-		}
-		
-		// set redirection parameters
-		status.setCode(HttpServletResponse.SC_TEMPORARY_REDIRECT);
-		status.setRedirect(true);
-		status.setLocation(req.getServerPath() + getServicePath(req.getServiceContextPath()) 
-				+ "/faces/jsp/login.jsp?_alfRedirect=" + next);
+public class ModelCommentGet extends ModelGet {
+    @Override
+    protected Map<String, Object> executeImpl(WebScriptRequest req,
+            Status status, Cache cache) {
+        clearCaches();
 
-		return new HashMap<String, Object>();
-	}
+        Map<String, Object> model = new HashMap<String, Object>();
 
-	/**
-	 * Simple utility that logs out the user
-	 * @param wsr
-	 */
-	private void logout(WebScriptRequest wsr) {
-		FacesContext fc = FacesContext.getCurrentInstance();
-		Application.logOut(fc);
-	}
-	
-	/**
-	 * Simple utility to get the service path out of the service context
-	 * @param scpath	Service context path
-	 * @return			service path
-	 */
-	private String getServicePath(String scpath) {
-		return scpath.replace("/wcservice","").replace("/wcs","").replace("/service","");
-	}
+        String elementId = req.getServiceMatch().getTemplateVars().get("id");
+        EmsScriptNode element = findScriptNodeByName(elementId);
+
+        if (element == null) {
+            log(LogLevel.ERROR, "Could not find element",
+                    HttpServletResponse.SC_NOT_FOUND);
+            model.put("res", response);
+        } else {
+            try {
+                JSONArray commentIds = element.getSourceAssocsByType(Acm.ACM_ANNOTATED_ELEMENTS);
+                for (int ii = 0; ii < commentIds.length(); ii++) {
+                    String commentId = commentIds.getString(ii);
+                    EmsScriptNode comment = findScriptNodeByName(commentId);
+                    if (comment != null) {
+                        elementsFound.put(commentId, comment);
+                    }
+                }
+
+                handleElements();
+
+                JSONObject top = new JSONObject();
+                top.put("elements", elements);
+                model.put("res", top.toString(4));
+            } catch (JSONException e) {
+                log(LogLevel.ERROR, "Could not create the JSON response", HttpServletResponse.SC_BAD_REQUEST);
+                model.put("res", response);
+                e.printStackTrace();
+            }
+        }
+
+        status.setCode(responseStatus.getCode());
+        return model;
+    }
 }
