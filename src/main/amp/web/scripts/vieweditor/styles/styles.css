@@ -335,16 +335,26 @@ h1 {
   height: auto;
 }
 
-[data-property=DOCUMENTATION].editable, [data-property=DOCUMENTATION].editable.reference * {
-	background: lightgray;
+[data-property=documentation].editable, [data-property=documentation].editable.reference * {
+	background: #F0F0F0;
 }
 
-[data-property=NAME].editable, [data-property=NAME].editable.reference * {
-	background: lightblue;
+[data-property=name].editable, [data-property=name].editable.reference * {
+	background: #E6E6FA;
 }
 
-[data-property=DVALUE].editable, [data-property=DVALUE].editable.reference * {
+[data-property=value].editable, [data-property=value].editable.reference * {
 	background: lightgreen;
+}
+/*
+.editable.reference:empty
+{
+	padding-left: 10px;
+}
+*/
+.editable.reference:empty:after {
+	color: #aaa;
+	content: "no content";
 }
 
 .not-editable.reference {
@@ -397,3 +407,89 @@ h1 {
 .mini-toolbar button {
   background: #fff !important;
 }
+
+
+.transclusionList .items
+{
+	height:600px;
+	/*overflow-y: scroll;*/
+}
+.transclusionList .items>div
+{
+	cursor: pointer;
+	position: relative;
+	margin-bottom: 5px;
+}
+.transclusionList .items>div:hover
+{
+	background:#fafafa;
+}
+.transclusionList .items>div .body>*
+{
+	padding:10px;
+}
+.transclusionList .body
+{
+	padding-bottom: 20px;
+}
+.transclusionList .items>div .body>*:hover
+{
+	background:#eee;
+}
+.transclusionList .items>div .name
+{
+	margin-bottom: 0;
+	padding-bottom: 10px;
+}
+.transclusionList .items>div .dvalue
+{
+	font-size:11px;
+	color:#999;
+	padding-left:5px;
+	padding-bottom: 10px;
+}
+.transclusionList .items>div .documentation
+{
+	font-size:11px;
+	color:#999;
+	padding-left:5px;
+	padding-bottom: 10px;
+}
+.transclusionList .items>div .name:hover
+{
+	background: #eee;
+	color:#666;
+}
+.transclusionList .items>div .dvalue:hover
+{
+	background: #eee;
+	color:#666;
+}
+.transclusionList .items>div .documentation:hover
+{
+	background: #eee;
+	color:#666;
+}
+
+[data-property=documentation].editable.reference .transclusion {
+	border-bottom: 1px solid blue;
+	/*background: lightgrey;*/
+}
+
+[data-property=documentation].editable.reference .transclusion:hover {
+	background: lightgrey;	
+}
+
+/*
+.transclusion .items>div .edit
+{
+	margin-top:1px;
+	width:100%;
+
+	text-align: right;
+	color:#999;
+	padding-top:1px;
+	padding-bottom:4px;
+}
+*/
+
