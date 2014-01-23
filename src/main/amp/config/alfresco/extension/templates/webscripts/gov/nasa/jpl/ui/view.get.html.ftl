@@ -479,7 +479,7 @@ app.on('saveView', function(viewId, viewData) {
   var jsonData = JSON.stringify(viewData);
   console.log("Saving ", jsonData);
   //alfresco/wcs/javawebscripts/views/id/elements
-  var url = absoluteUrl('/alfresco/wcs/javawebscripts/views/' + viewId + '/elements');
+  var url = absoluteUrl('/javawebscripts/views/' + viewId + '/elements');
   console.log(url);
   ajaxWithHandlers({ 
     type: "POST",
@@ -490,7 +490,7 @@ app.on('saveView', function(viewId, viewData) {
 })
 
 app.on('saveComment', function(evt, viewId, commentBody) {
-  var url = absoluteUrl("/alfresco/wcs/javawebscripts/views/" + viewId + "/elements");
+  var url = absoluteUrl("/javawebscripts/views/" + viewId + "/elements");
   var jsonData = JSON.stringify({"elements": [{"id": "_comment_" + (new Date()).getTime(), "body": commentBody}]});
   console.log(jsonData);
   ajaxWithHandlers({ 
@@ -1165,7 +1165,10 @@ var renderEmbeddedValue = function(value, elements) {
   var ref = elements[value.mdid];
   var title = ref ? (ref.name || ref.mdid) +' ('+value.property.toLowerCase()+')' : '';
   var classes = ['reference'];
-  var blankContent = !value.content || value.content === "" || value.content.match(/^\s+$/);
+  var blankContent = false;
+  if(!value.content){
+    blankContent = !value.content || value.content === "" || value.content.match(/^\s+$/);
+  } 
   if (blankContent) {
     classes.push('blank')
   }
