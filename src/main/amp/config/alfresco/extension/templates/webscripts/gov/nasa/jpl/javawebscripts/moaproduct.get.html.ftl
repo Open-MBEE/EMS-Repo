@@ -27,7 +27,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
             <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
           {{/environment.development}}
           {{^environment.development}}
-            <a class="navbar-brand" href="${url.context}/wcs/javawebscripts/productlist/europa/">Europa View Editor {{ title }}</a>
+            <a class="navbar-brand" href="${url.context}/wcs/javawebscripts/productlist/europa">Europa View Editor {{ title }}</a>
           {{/environment.development}}  
       </div>
 
