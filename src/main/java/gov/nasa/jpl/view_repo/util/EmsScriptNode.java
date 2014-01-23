@@ -502,7 +502,9 @@ public class EmsScriptNode extends ScriptNode {
                 String jsonType = Acm.ACM2JSON.get(acmType);
                 if (Acm.JSON_FILTER_MAP.get(renderType).contains(jsonType)) {
                     if (Acm.JSON_ARRAYS.contains(jsonType)) {
-                        element.put(jsonType, new JSONArray(elementValue.toString()));
+                        String elementString = elementValue.toString();
+                        elementString = fixArtifactUrls(elementString, true);
+                        element.put(jsonType, new JSONArray(elementString));
                     } else {
                         if (elementValue instanceof String) {
                             String elementString = (String) elementValue;
@@ -712,11 +714,12 @@ public class EmsScriptNode extends ScriptNode {
 //	     modelRootNode.fixArtifactUrls("<img src=\"/editor/images/docgen/_17_0_2_3_407019f_1389209968802_719827_29133_latest.svg\" alt=\"diagram view\"/>",  true);
 //        modelRootNode.fixArtifactUrls("<img src=\\\"/editor/images/docgen/_17_0_2_3_407019f_1389209968802_719827_29133_latest.svg\\\" alt=\\\"diagram view\\\"/>", false);
 
-	    result = replaceArtifactUrl(result, "src=\"/staging/images/docgen/", "src=\"/staging/images/docgen/.*?\"", escape);
-	    result = replaceArtifactUrl(result, "src=\"/editor/images/docgen/", "src=\"/editor/images/docgen/.*?\"", escape);
+//	    result = replaceArtifactUrl(result, "src=\"/staging/images/docgen/", "src=\"/staging/images/docgen/.*?\"", escape);
+//	    result = replaceArtifactUrl(result, "src=\"/editor/images/docgen/", "src=\"/editor/images/docgen/.*?\"", escape);
+//        result = replaceArtifactUrl(result, "src=\\\"/editor/images/docgen/", "src=\\\"/editor/images/docgen/.*?\\\"", escape);
         result = replaceArtifactUrl(result, "src=\\\\\"/editor/images/docgen/", "src=\\\\\"/editor/images/docgen/.*?\\\\\"", escape);
-	    //result = replaceArtifactUrl(result, "\\/editor\\/images\\/docgen\\/", "\\/editor\\/images\\/docgen\\/.*?\"", escape);
-	    return result;
+	    
+        return result;
 	}
 	
 	public String replaceArtifactUrl(String content, String prefix, String pattern, boolean escape) {
@@ -729,21 +732,25 @@ public class EmsScriptNode extends ScriptNode {
 	    Matcher matcher = p.matcher(content);
 	   
         while (matcher.find()) {
-            String filename = matcher.group(0).replace(prefix, "").replace("\"","").replace("_latest", "");
+            String filename = matcher.group(0);//matcher.group(0).replace(prefix, "").replace("\"","").replace("_latest", "");
+            filename = filename.replace("\"", "");
+            filename = filename.replace("_latest", "");
+            filename = filename.replace("\\","");
+            filename = filename.replace("src=/editor/images/docgen/", "");
             NodeRef nodeRef = findNodeRefByType(filename, "@cm\\:name:\"");
             if (nodeRef != null) {
                 NodeRef versionedNodeRef = services.getVersionService().getCurrentVersion(nodeRef).getVersionedNodeRef();
                 EmsScriptNode versionedNode = new EmsScriptNode(versionedNodeRef, services, response);
                 String nodeurl = "";
                 if (prefix.indexOf("src") >= 0) {
-                    nodeurl = "src=\"";
+                    nodeurl = "src=\\\"";
                 }
                 // TODO: need to map context out...
                 String context = "https://sheldon/alfresco";
-                nodeurl += context + versionedNode.getUrl() + "\"";
-                if (escape) {
-                    nodeurl = nodeurl.replace("/", "").replace("\\", "\\\"");
-                }
+                nodeurl += context + versionedNode.getUrl() + "\\\"";
+//                if (escape) {
+//                    nodeurl = nodeurl.replace("/", "").replace("\\", "\\\"");
+//                }
                 result = content.replace(matcher.group(0), nodeurl);
             }
         }
