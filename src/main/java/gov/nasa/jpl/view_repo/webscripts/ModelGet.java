@@ -153,8 +153,11 @@ public class ModelGet extends AbstractJavaWebScript {
 			for (int ii = 0; ii < childElementJson.length(); ii++) {
 				String id = childElementJson.getString(ii);
 				EmsScriptNode childElement = findScriptNodeByName(id);
-				if (checkPermissions(childElement, PermissionService.READ)) {
-				    elementsFound.put(id, childElement);
+				// TODO Need to report that allowedElements can't be found
+				if (childElement != null) {
+        				if (checkPermissions(childElement, PermissionService.READ)) {
+        				    elementsFound.put(id, childElement);
+        				}
 				}
 			}
 			if (recurse) {
@@ -164,8 +167,10 @@ public class ModelGet extends AbstractJavaWebScript {
 					for (int ii = 0; ii < childViewJson.length(); ii++) {
 						String id = childViewJson.getString(ii);
 						EmsScriptNode childView = findScriptNodeByName(id);
-						if (checkPermissions(childView, PermissionService.READ)) {
-						    handleViewHierarchy(childView, recurse);
+						if (childView != null) {
+        						if (checkPermissions(childView, PermissionService.READ)) {
+        						    handleViewHierarchy(childView, recurse);
+        						}
 						}
 					}
 				}

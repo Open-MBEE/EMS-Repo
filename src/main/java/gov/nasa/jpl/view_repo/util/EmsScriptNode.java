@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.jscript.ScriptNode;
@@ -46,6 +48,9 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.Path;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.repository.Path.ChildAssocElement;
+import org.alfresco.service.cmr.search.ResultSet;
+import org.alfresco.service.cmr.search.ResultSetRow;
+import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
@@ -499,7 +504,12 @@ public class EmsScriptNode extends ScriptNode {
                     if (Acm.JSON_ARRAYS.contains(jsonType)) {
                         element.put(jsonType, new JSONArray(elementValue.toString()));
                     } else {
-                        element.put(jsonType, elementValue);
+                        if (elementValue instanceof String) {
+                            String elementString = (String) elementValue;
+                            element.put(jsonType, fixArtifactUrls(elementString, false));
+                        } else {
+                            element.put(jsonType, elementValue);
+                        }
                     }
                 }
             }
@@ -695,5 +705,72 @@ public class EmsScriptNode extends ScriptNode {
                 this.createOrUpdatePropertyValues(acmType, array, new String(""));
             }
         }
+	}
+	
+	public String fixArtifactUrls(String content, boolean escape) {
+	    String result = content;
+//	     modelRootNode.fixArtifactUrls("<img src=\"/editor/images/docgen/_17_0_2_3_407019f_1389209968802_719827_29133_latest.svg\" alt=\"diagram view\"/>",  true);
+//        modelRootNode.fixArtifactUrls("<img src=\\\"/editor/images/docgen/_17_0_2_3_407019f_1389209968802_719827_29133_latest.svg\\\" alt=\\\"diagram view\\\"/>", false);
+
+	    result = replaceArtifactUrl(result, "src=\"/staging/images/docgen/", "src=\"/staging/images/docgen/.*?\"", escape);
+	    result = replaceArtifactUrl(result, "src=\"/editor/images/docgen/", "src=\"/editor/images/docgen/.*?\"", escape);
+        result = replaceArtifactUrl(result, "src=\\\\\"/editor/images/docgen/", "src=\\\\\"/editor/images/docgen/.*?\\\\\"", escape);
+	    //result = replaceArtifactUrl(result, "\\/editor\\/images\\/docgen\\/", "\\/editor\\/images\\/docgen\\/.*?\"", escape);
+	    return result;
+	}
+	
+	public String replaceArtifactUrl(String content, String prefix, String pattern, boolean escape) {
+	    if (content == null) {
+	        return content;
+	    }
+	    
+	    String result = content;
+	    Pattern p = Pattern.compile(pattern);
+	    Matcher matcher = p.matcher(content);
+	   
+        while (matcher.find()) {
+            String filename = matcher.group(0).replace(prefix, "").replace("\"","").replace("_latest", "");
+            NodeRef nodeRef = findNodeRefByType(filename, "@cm\\:name:\"");
+            if (nodeRef != null) {
+                NodeRef versionedNodeRef = services.getVersionService().getCurrentVersion(nodeRef).getVersionedNodeRef();
+                EmsScriptNode versionedNode = new EmsScriptNode(versionedNodeRef, services, response);
+                String nodeurl = "";
+                if (prefix.indexOf("src") >= 0) {
+                    nodeurl = "src=\"";
+                }
+                // TODO: need to map context out...
+                String context = "https://sheldon/alfresco";
+                nodeurl += context + versionedNode.getUrl() + "\"";
+                if (escape) {
+                    nodeurl = nodeurl.replace("/", "").replace("\\", "\\\"");
+                }
+                result = content.replace(matcher.group(0), nodeurl);
+            }
+        }
+        
+	    return result;
+	}
+	
+	// TODO: make this utility function - used in AbstractJavaWebscript too
+	protected NodeRef findNodeRefByType(String name, String type) {
+        ResultSet results = null;
+        NodeRef nodeRef = null;
+        try {
+            results = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, type + name + "\"");
+            if (results != null) {
+                for (ResultSetRow row: results) {
+                    nodeRef = row.getNodeRef();
+                    break ; //Assumption is things are uniquely named - TODO: fix since snapshots have same name?...
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (results != null) {
+                results.close();
+            }
+        }
+
+        return nodeRef;	    
 	}
 }

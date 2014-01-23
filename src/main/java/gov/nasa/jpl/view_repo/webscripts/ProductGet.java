@@ -80,7 +80,7 @@ public class ProductGet extends AbstractJavaWebScript {
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
-		
+
 		if (validateRequest(req, status)) {
 			try {
 				String productId = req.getServiceMatch().getTemplateVars().get("id");
@@ -90,7 +90,7 @@ public class ProductGet extends AbstractJavaWebScript {
 				e.printStackTrace();
 			}
 		}
-		
+
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
 			try {
 			    JSONObject top = new JSONObject();
@@ -120,4 +120,5 @@ public class ProductGet extends AbstractJavaWebScript {
 		    productsJson.put(product.toJSONObject(Acm.JSON_TYPE_FILTER.PRODUCT));
 		}
 	}
+
 }

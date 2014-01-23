@@ -745,32 +745,40 @@ public class ModelPost extends AbstractJavaWebScript {
         } else {
             String siteName = req.getServiceMatch().getTemplateVars()
                     .get(SITE_NAME);
-            if (!checkRequestVariable(siteName, SITE_NAME)) {
-                return false;
-            }
-
-            String projectId = req.getServiceMatch().getTemplateVars()
-                    .get(PROJECT_ID);
-            if (!checkRequestVariable(projectId, PROJECT_ID)) {
-                return false;
-            }
-
-            SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-            if (!checkRequestVariable(siteInfo, "Site")) {
-                return false;
-            }
-
-            if (!checkPermissions(siteInfo.getNodeRef(),
-                    PermissionService.WRITE)) {
-                return false;
-            }
-
-            EmsScriptNode siteNode = getSiteNode(siteName);
-            projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
-            if (projectNode == null) {
-                log(LogLevel.ERROR, "Project not found.\n",
-                        HttpServletResponse.SC_NOT_FOUND);
-                return false;
+            if (siteName == null) {
+                // handling for view/{id}/elements
+                String projectId = req.getServiceMatch().getTemplateVars()
+                        .get("modelid");
+                projectNode = findScriptNodeByName(projectId);
+            } else {
+                // Handling for project/{id}/elements
+                if (!checkRequestVariable(siteName, SITE_NAME)) {
+                    return false;
+                }
+    
+                String projectId = req.getServiceMatch().getTemplateVars()
+                        .get(PROJECT_ID);
+                if (!checkRequestVariable(projectId, PROJECT_ID)) {
+                    return false;
+                }
+    
+                SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+                if (!checkRequestVariable(siteInfo, "Site")) {
+                    return false;
+                }
+    
+                if (!checkPermissions(siteInfo.getNodeRef(),
+                        PermissionService.WRITE)) {
+                    return false;
+                }
+    
+                EmsScriptNode siteNode = getSiteNode(siteName);
+                projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
+                if (projectNode == null) {
+                    log(LogLevel.ERROR, "Project not found.\n",
+                            HttpServletResponse.SC_NOT_FOUND);
+                    return false;
+                }
             }
         }
 
