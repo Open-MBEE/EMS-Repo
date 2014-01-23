@@ -480,7 +480,6 @@ app.on('saveView', function(viewId, viewData) {
   console.log("Saving ", jsonData);
   //alfresco/wcs/javawebscripts/views/id/elements
   var url = absoluteUrl('/javawebscripts/views/' + viewId + '/elements');
-  console.log(url);
   ajaxWithHandlers({ 
     type: "POST",
     url: url,
@@ -638,7 +637,7 @@ app.on('editSection', function(e, sectionId) {
   
   app.replaceSpanWithBracket(section);
 
-  app.set('currentInspector', 'transclusionList ');
+  app.set('currentInspector', 'transclusionList');
 
 
   toolbar.find(".requires-selection").addClass("disabled");
@@ -664,6 +663,7 @@ app.on('editSection', function(e, sectionId) {
     }
     var clickedButton = $(target).filter(".requires-selection");
     toolbar.find(".requires-selection").not(clickedButton).addClass("disabled");
+    //console.log("End Section blur");
   })
 
 
@@ -674,9 +674,11 @@ app.on('editSection', function(e, sectionId) {
   });
   unwrapped.wrapInner("<p class='pwrapper'></p>");
 
+  section.find("p").addClass("pwrapper");
+
   // TODO turn this listener off on save or cancel
   section.on('keyup paste blur',function(evt) {
-    console.log("start Section key paste blur")
+    //console.log("start Section key paste blur")
     // Error sometimes when document.selection is undefined
     //console.log("A", document.selection, evt);
     // we need to use the selection api because we're in a contenteditable
@@ -690,11 +692,13 @@ app.on('editSection', function(e, sectionId) {
     // TODO filter out html for name and dvalue?
     // find others, set their values
     $('[data-mdid='+mdid+'][data-property='+property+']').not($el).html(newValue);
+    //console.log("end Section key paste blur")
   })
 
   // handle placeholder text
   // TODO remove this listener on cancel or save
   section.click(function() {
+    //console.log("start Section click")
     var $el = $(app.getSelectedNode());
     if ($el.is('.editable.reference.blank.doc')) {
       $el.html("<p class='pwrapper'>&nbsp;</p>");
@@ -707,6 +711,7 @@ app.on('editSection', function(e, sectionId) {
       selection.addRange(range);//make the range you have just created the visible selection
       $el.removeClass('blank');
     }
+    //console.log("end Section click")
   });
 
   var templateTable = function(rows, cols)
@@ -765,6 +770,8 @@ app.on('cancelEditing', function(e) {
   $sectionHeader.attr('contenteditable', false);
 
   section.find(".reference.editable").attr('contenteditable', false);
+
+  //section.find("p").removeClass("pwrapper");
   // app.set(e.keypath+'.content', app.get(e.keypath+'.previousContent'));
   // console.log("canceled", app.get(e.keypath));
 })
@@ -779,7 +786,7 @@ app.spanContentToBracket = function(content) {
   return contentDom.html();
 }
 
-app.spanContentToValue = function(content, vtree) {
+app.spanContentToValue = function(content, vtree, depth) {
   var contentDom = $('<div>' + content + '</div>');
   contentDom.find(".transclusion").each(function(i){
 
@@ -799,7 +806,19 @@ app.spanContentToValue = function(content, vtree) {
         // TODO:  If the transcluded element has html in it, then we can't just include it in a span. 
         // Using a div or p tag for transcluded elements creates its own set of joys because jquery
         // has its own ideas about how things should change when these elements are nested.
-        var safeText = $("<div>" + elem.documentation + "</div>").text()
+        var docData = elem.documentation
+        
+        if(depth === undefined){
+          depth = 0;
+        }
+        if(depth <= 3) {
+          docData = app.spanContentToValue(docData, vtree, depth + 1);
+        } else {
+          docData = " ERROR_MAX_NESTED_REF_DEPTH "
+        }
+        var docDom = $("<div>" + docData + "</div>");
+        //console.log(docDom.find(".transclusion"))
+        var safeText = docDom.text();
         innerVal = safeText;//"ASDFASF";//elem.documentation.text();
       } else if (t === "value") {
         innerVal = elem.value;
@@ -821,6 +840,8 @@ app.on('saveSection', function(e, sectionId) {
 
   var section = $("[data-section-id='" + sectionId + "']");
   section.find(".reference.editable").attr('contenteditable', false);
+
+  //section.find("p").removeClass("pwrapper");
 
   e.original.preventDefault();
 
@@ -875,7 +896,6 @@ app.on('saveSection', function(e, sectionId) {
       //var text = app.transToText($(this));
       //$(this).replaceWith(text);
   }); 
-
 
   //app.fire('saveSectionComplete', e, sectionId);
   //If data is saved before references are converted to dom elements, 
@@ -1056,7 +1076,6 @@ app.editableElements = function(section) {
 
 app.generateUpdates = function(section)
 {
-  console.log("AAA");
   var elements = app.editableElements(section);
   _.each(elements, function(e) {
     if(e.hasOwnProperty("documentation")) {
@@ -1877,19 +1896,19 @@ app.on('transclusionDown', function(e) {
   //  document.execCommand("insertHTML", false, "IMAREFERENCE!!!");
 
   //$(".transcludable").on('click', function() {
-    console.log("-----");
+    //console.log("-----");
     saveSelection();
-    console.log("ASDF!!!", e);
+    //console.log("ASDF!!!", e);
     
     if(savedSel.length > 0){
       var section = $(savedSel[0].commonAncestorContainer).closest(".section.page.editing");
       //var section = $(app.getSelectedNode()).closest(".section.page.editing");
       var sectionId = section.attr("data-section-id");
-      console.log(sectionId);
+      //console.log(sectionId);
       var tran = $(e.node);
-      console.log("tran", tran);
+      //console.log("tran", tran);
       var transId = tran.attr("data-trans-id");
-      console.log("tid", transId);
+      //console.log("tid", transId);
       
       var refType = "";
       if(tran.hasClass("name")){
@@ -1909,7 +1928,7 @@ app.on('transclusionDown', function(e) {
       //})
       //elem = elem[0];
       var name = $('[data-trans-id="'+transId+'"].transcludable.name').text();
-      console.log(name);
+      //console.log(name);
       var r = '["'+name+'":'+refType+':'+transId+'] ';
       document.execCommand("insertHTML", false, r);
       lastTransLength = r.length;
@@ -1917,7 +1936,7 @@ app.on('transclusionDown', function(e) {
 
     }  
     
-    console.log("-----");
+    //console.log("-----");
     //saveSelection();
     //if(savedSel.length > 0){
   //    var section = $(savedSel[0].commonAncestorContainer).closest(".section.page.editing");//$(savedSel.commonAncestorContainer).closest(".section.page.editing");
@@ -1930,14 +1949,14 @@ app.on('transclusionDown', function(e) {
 })
 
 app.on('transclusionUp', function(e) {
-  console.log("Start Up");
+  //console.log("Start Up");
   restoreSelection();
 
   //setTimeout(function() {
       //var advanceLength = r.length;
   if(lastTransLength !== 0) {
     var range = window.getSelection().getRangeAt(0);
-    console.log(range.startOffset, range.startContainer);
+    //console.log(range.startOffset, range.startContainer);
     range.setStart(range.startContainer, range.startOffset + lastTransLength);
     range.setEnd(range.startContainer, range.startOffset + 0);
     window.getSelection().removeAllRanges();
@@ -1947,7 +1966,7 @@ app.on('transclusionUp', function(e) {
  // },100);
 
 
-  console.log("End Up");
+  //console.log("End Up");
 })
 
 //console.log("ASDFASFD");
