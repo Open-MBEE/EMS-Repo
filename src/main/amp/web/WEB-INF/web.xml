@@ -778,7 +778,7 @@
    <!-- Activiti servlet mapping placeholder -->
 
    <session-config>
-      <session-timeout>60</session-timeout>
+      <session-timeout>360</session-timeout>
    </session-config>
 
    <welcome-file-list>
