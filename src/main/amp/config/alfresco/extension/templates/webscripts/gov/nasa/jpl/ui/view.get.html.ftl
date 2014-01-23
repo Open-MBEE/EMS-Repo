@@ -349,12 +349,15 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 
       <div id="transclusionList" class="inspector" style="height:100%;">
         <h3>Elements</h3>
+        <input class="form-control" type="text" placeholder="search" id="search" value="{{transcludableQuery}}" />
+        <style id="search_style"></style>
         <div class="transclusionList" style="display:block; height:80%; overflow-y: auto">
           <div class="items">
             {{#viewTree.elements}}
               {{#name}}
-              <div class="body">
-                <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable name"><h5>{{name}}</h5></div>
+              <div class="body searchable" data-search-index="{{searchIndex}}">
+                <div class="qualifiedName">{{qualifiedNamePreview}}</div>
+                <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable name">{{name}}</div>
                 {{#documentation}}
                   <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable documentation">{{documentationPreview}}</div>
                 {{/documentation}}
@@ -474,7 +477,10 @@ var ajaxWithHandlers = function(options, successMessage, errorMessage) {
 
 app.on('saveView', function(viewId, viewData) {
   var jsonData = JSON.stringify(viewData);
-  var url = absoluteUrl('/ui/views/' + viewId);
+  console.log("Saving ", jsonData);
+  //alfresco/wcs/javawebscripts/views/id/elements
+  var url = absoluteUrl('/alfresco/wcs/javawebscripts/views/' + viewId + '/elements');
+  console.log(url);
   ajaxWithHandlers({ 
     type: "POST",
     url: url,
@@ -484,12 +490,14 @@ app.on('saveView', function(viewId, viewData) {
 })
 
 app.on('saveComment', function(evt, viewId, commentBody) {
-  var url = absoluteUrl("/ui/views/"+viewId+"/comment");
+  var url = absoluteUrl("/alfresco/wcs/javawebscripts/views/" + viewId + "/elements");
+  var jsonData = JSON.stringify({"elements": [{"id": "_comment_" + (new Date()).getTime(), "body": commentBody}]});
+  console.log(jsonData);
   ajaxWithHandlers({ 
     type: "POST",
     url: url,
-    data: commentBody,
-    contentType: "text/plain; charset=UTF-8"
+    data: jsonData,
+    contentType: "application/json; charset=UTF-8"
   }, "Saved comment", "Error saving comment"); 
 })
 
@@ -629,6 +637,9 @@ app.on('editSection', function(e, sectionId) {
   section.filter('span').wysiwyg({toolbarSelector : '#no-toolbar'});
   
   app.replaceSpanWithBracket(section);
+
+  app.set('currentInspector', 'transclusionList ');
+
 
   toolbar.find(".requires-selection").addClass("disabled");
   var sectionPage = section.filter(".section.page");
@@ -825,6 +836,47 @@ app.on('saveSection', function(e, sectionId) {
   app.set(e.keypath+'.content', content);//section.filter(".section").html());
   app.set(e.keypath+'.editing', false);
 
+  // update viewTree with changes
+  var viewTree = app.get("viewTree");
+  var elements = app.editableElements(section);
+  _.each(elements, function(e) {
+    _.each(viewTree.elements, function(cure) {
+      if(cure.mdid === e.mdid)
+      {
+        if(e.hasOwnProperty("documentation"))
+        {
+          cure.documentation = e.documentation;
+          var preview = app.generatePreviewDocumentation(cure.documentation);
+          if(preview) {
+            cure.documentationPreview = preview;
+          }
+          $('[data-trans-id="'+cure.mdid+'"].transcludable.documentation').text(cure.documentationPreview);
+        }
+        if(e.hasOwnProperty("name"))
+        {
+          cure.name = e.name;
+          $('[data-trans-id="'+cure.mdid+'"].transcludable.name').text(cure.name);
+        }
+        if(e.hasOwnProperty("value"))
+        {
+          cure.value = e.value;
+          $('[data-trans-id="'+cure.mdid+'"].transcludable.dvalue').text(cure.value);
+        }
+      }
+    });
+  })
+  app.set(viewTree);
+
+  // update all other transclusions 
+  $(".transclusion").each(function(){
+    var h = $(this)[0].outerHTML;
+    h = app.spanContentToValue(h, viewTree);
+    $(this).replaceWith(h);
+      //var text = app.transToText($(this));
+      //$(this).replaceWith(text);
+  }); 
+
+
   //app.fire('saveSectionComplete', e, sectionId);
   //If data is saved before references are converted to dom elements, 
   //change realData saveSection to saveSectionComplete and fire event above
@@ -947,6 +999,30 @@ var viewTree = {
 
 }
 
+app.generatePreviewDocumentation = function(doc)
+{
+  //console.log("ASDFASD");
+  var d = doc.trim();
+  
+  var preview = "";
+  if(d.length > 0) {
+        //console.log(String(_.escape(e.documentation)));
+        //console.log($(String(_.escape(e.documentation)))); 
+        //e.documentationPreview =  "ASD";// $(e.documentation).text();
+        //e.documentationPreview = _.escape(e.documentation);
+        preview = "<div>" + d + "</div>";
+        //console.log($);
+        //var asdfasfd = $(e.documentationPreview);
+        preview = $(preview).text();//.substring(0, 50) + "...";
+        //e.documentationPreview = _.unescape(e.documentationPreview);
+        var dots = (preview.length > 200) ? "..." : "";
+        preview = preview.substring(0,200) + dots;
+        return preview;
+    }
+    
+    return false;
+}
+
 app.formatDate = function(d)
 {
   return moment(d).format('D MMM YYYY, h:mm a');
@@ -957,9 +1033,9 @@ var parseDate = function(dateString)
   return moment(dateString);
 }
 
-app.generateUpdates = function(section)
-{
+app.editableElements = function(section) {
   var elements = {};
+  //console.log("VT", viewTree);
   $('.editable[data-property]', section).each(function(i,el)
   {
       var $el = $(el);
@@ -969,20 +1045,30 @@ app.generateUpdates = function(section)
       }
       var mdid = $el.attr('data-mdid');
       var data = elements[mdid] || { mdid : mdid };
-      data[$el.attr('data-property').toLowerCase()] = el.innerHTML;
+      var prop = $el.attr('data-property').toLowerCase()
+      data[prop] = el.innerHTML;
       // result.push(data);
       elements[mdid] = data;
 
-      // TODO actually update view tree
-      //console.log(viewTree)
   });
+  return elements;
+}
+
+app.generateUpdates = function(section)
+{
+  console.log("AAA");
+  var elements = app.editableElements(section);
   _.each(elements, function(e) {
     if(e.hasOwnProperty("documentation")) {
       e.documentation = app.spanContentToBracket(e.documentation);
     }
+    e.id = e.mdid;
+    delete e["mdid"];
   });
+
+  //console.log("VT2", viewTree);
   // console.log("elements by id", elements);
-  return _.values(elements);
+  return {"elements": _.values(elements)};
 }
 
 
@@ -1310,24 +1396,29 @@ app.observe('viewHierarchy', function(viewData) {
   }
   viewTree.snapshots = viewData.snapshots;
   viewTree.elements = viewData.elements;
+  
+  
+  _.each(viewTree.elements, function(e) {
     
+  });
+
   // Create a list of transcludable elements
   _.each(viewTree.elements, function(e) {
+
+    // set string for client side searching
+    e.searchIndex = e.qualifiedName.toLowerCase();
+
+    // Remove name after last slash for   
+    if(e.hasOwnProperty('qualifiedName')) {
+      e.qualifiedNamePreview = e.qualifiedName.substr(0, e.qualifiedName.lastIndexOf("/"));
+    }
+
     //console.log(e);
     if(e.hasOwnProperty('documentation')) {
-      var d = e.documentation.trim();
-      if(d.length > 0) {
-        //console.log(String(_.escape(e.documentation)));
-        //console.log($(String(_.escape(e.documentation)))); 
-        //e.documentationPreview =  "ASD";// $(e.documentation).text();
-        //e.documentationPreview = _.escape(e.documentation);
-        e.documentationPreview = "<div>" + d + "</div>";
-        //console.log($);
-        //var asdfasfd = $(e.documentationPreview);
-        e.documentationPreview = $(e.documentationPreview).text();//.substring(0, 50) + "...";
-        //e.documentationPreview = _.unescape(e.documentationPreview);
-        var dots = (e.documentationPreview.length > 200) ? "..." : "";
-        e.documentationPreview = e.documentationPreview.substring(0,200) + dots;
+      var preview = app.generatePreviewDocumentation(e.documentation);
+      //console.log(preview);
+      if(preview){
+        e.documentationPreview = preview;
       }
     }
   });
@@ -1338,10 +1429,9 @@ app.observe('viewHierarchy', function(viewData) {
       app.fire('makeToc');
     }, 0);
   });
-
-
-
 })
+
+
 
 // rich-reference.js
 
@@ -1511,6 +1601,33 @@ app.createLiveTable = function($el, tableData) {
 }
 
 
+// search.js
+
+app.observe('transcludableQuery', function(q) {
+  var searchStyle = document.getElementById('search_style');
+  if (!q) {
+    searchStyle.innerHTML = "";
+    return;
+  }
+
+  // tokenize the search
+  var split = q.split(" ");
+  var selector = "";
+
+  // add a new css selector for each token to hide anyting that doesn't have that token
+  for(var i in split)
+  {
+    // don't do anything if there's no token
+    if(split[i].trim() == "")
+  {
+    continue;
+  }
+    selector += '.searchable:not([data-search-index*="' +split[i]+ '"]){ display : none; }';
+  }
+
+  searchStyle.innerHTML = selector; //".searchable:not([data-search-index*=\"" + q + "\"]) { display: none; }";
+})
+
 // sections.js
 
 app.observe('plan_sections', function(newText) {
@@ -1673,7 +1790,7 @@ app.on('makeToc', function() {
 })
 // note sure why but transclude.js doesn't load properly unless we have a log line here?
 console.log("");
-
+/*
 (function poll() {
     setTimeout(function() {
         $.ajax({
@@ -1689,6 +1806,7 @@ console.log("");
         })
     }, 60000);
 })();
+*/
 
 // transclusion.js
 
