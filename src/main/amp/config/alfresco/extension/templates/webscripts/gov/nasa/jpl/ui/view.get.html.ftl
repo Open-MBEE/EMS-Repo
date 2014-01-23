@@ -356,14 +356,14 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
             {{#viewTree.elements}}
               {{#name}}
               <div class="body searchable" data-search-index="{{searchIndex}}">
-                <div class="qualifiedName">{{qualifiedNamePreview}}</div>
+                <div class="qualifiedName" title="{{qualifiedName}}">{{qualifiedNameParentPreview}}</div>
                 <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable name">{{name}}</div>
                 {{#documentation}}
                   <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable documentation">{{documentationPreview}}</div>
                 {{/documentation}}
-                {{#dvalue}}
-                  <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable dvalue">{{dvalue}}</div>
-                {{/dvalue}}
+                {{#value}}
+                  <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable dvalue">{{value}}</div>
+                {{/value}}
               </div>
               {{/name}}
             {{/viewTree.elements}}
@@ -791,7 +791,7 @@ app.spanContentToValue = function(content, vtree) {
         return curElem.mdid === id;
       })
       elem = elem[0];
-
+      
       var innerVal = "Not Found";
       if(t === "name"){
         innerVal = elem.name;
@@ -802,7 +802,7 @@ app.spanContentToValue = function(content, vtree) {
         var safeText = $("<div>" + elem.documentation + "</div>").text()
         innerVal = safeText;//"ASDFASF";//elem.documentation.text();
       } else if (t === "value") {
-        innerVal = elem.dvalue;
+        innerVal = elem.value;
       }
       dom.html(innerVal);
      
@@ -1343,6 +1343,10 @@ app.observe('viewHierarchy', function(viewData) {
   // Hack, add an mdid proprety to each element  that is equal to it's id
   _.each(viewData.elements, function(cure) {
     cure.mdid = cure.id;
+    if(cure.hasOwnProperty("value")) {
+      cure.value = cure.value[0];
+    }
+
   })
 
     // Fill in values for all transcluded span tags in documentation fields
@@ -1399,12 +1403,7 @@ app.observe('viewHierarchy', function(viewData) {
   }
   viewTree.snapshots = viewData.snapshots;
   viewTree.elements = viewData.elements;
-  
-  
-  _.each(viewTree.elements, function(e) {
-    
-  });
-
+  viewTree.elementsById = elementsById;
   // Create a list of transcludable elements
   _.each(viewTree.elements, function(e) {
 
@@ -1414,6 +1413,8 @@ app.observe('viewHierarchy', function(viewData) {
     // Remove name after last slash for   
     if(e.hasOwnProperty('qualifiedName')) {
       e.qualifiedNamePreview = e.qualifiedName.substr(0, e.qualifiedName.lastIndexOf("/"));
+      e.qualifiedNameParentPreview =  e.qualifiedNamePreview.substr(e.qualifiedNamePreview.lastIndexOf("/")+1, e.qualifiedNamePreview.length);
+    
     }
 
     //console.log(e);
@@ -1425,7 +1426,6 @@ app.observe('viewHierarchy', function(viewData) {
       }
     }
   });
-  //console.log(viewTree.elements);
 
   app.set('viewTree', viewTree, function() {
     setTimeout(function() { 
