@@ -491,7 +491,7 @@ app.on('saveView', function(viewId, viewData) {
 
 app.on('saveComment', function(evt, viewId, commentBody) {
   var url = absoluteUrl("/javawebscripts/views/" + viewId + "/elements");
-  var jsonData = JSON.stringify({"elements": [{"id": "_comment_" + (new Date()).getTime(), "body": commentBody}]});
+  var jsonData = JSON.stringify({"elements": [{"id": "_comment_" + (new Date()).getTime(), "body": commentBody, "type": "Comment"}]});
   console.log(jsonData);
   ajaxWithHandlers({ 
     type: "POST",
@@ -1614,6 +1614,7 @@ app.observe('transcludableQuery', function(q) {
   }
 
   // tokenize the search
+  q = q.replace('"',"");
   var split = q.split(" ");
   var selector = "";
 
