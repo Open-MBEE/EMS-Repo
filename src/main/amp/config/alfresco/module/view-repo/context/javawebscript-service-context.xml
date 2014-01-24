@@ -40,7 +40,7 @@
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.element.post"
-		class="gov.nasa.jpl.view_repo.webscripts.ModelPost" parent="webscript"
+		class="gov.nasa.jpl.view_repo.webscripts.ViewModelPost" parent="webscript"
 		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />

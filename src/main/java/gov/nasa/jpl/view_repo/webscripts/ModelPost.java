@@ -101,7 +101,7 @@ public class ModelPost extends AbstractJavaWebScript {
     private JSONObject relationshipsJson;
 
     private Set<String> newElements;
-
+    
     /**
      * Create or update the model as necessary based on the request
      * 
@@ -112,7 +112,7 @@ public class ModelPost extends AbstractJavaWebScript {
      * @throws JSONException
      *             Parse error
      */
-    private void createOrUpdateModel(WebScriptRequest req, Status status)
+    protected void createOrUpdateModel(WebScriptRequest req, Status status)
             throws Exception {
         Date now = new Date();
         System.out.println("Starting createOrUpdateModel: " + now);
@@ -246,7 +246,7 @@ public class ModelPost extends AbstractJavaWebScript {
      *            The ID of the element to add the values to
      * @throws JSONException
      */
-    private void updateOrCreateAnnotatedElements(JSONArray jsonArray, String id)
+    protected void updateOrCreateAnnotatedElements(JSONArray jsonArray, String id)
             throws JSONException {
         EmsScriptNode source = findScriptNodeByName(id);
 
@@ -269,7 +269,7 @@ public class ModelPost extends AbstractJavaWebScript {
      *            The ID of the element to add the values to
      * @throws JSONException
      */
-    private void updateOrCreateElementValues(JSONArray jsonArray, String id)
+    protected void updateOrCreateElementValues(JSONArray jsonArray, String id)
             throws JSONException {
         // create an array of the values to be added in as the elementValue
         // property
@@ -312,7 +312,7 @@ public class ModelPost extends AbstractJavaWebScript {
      * @param id
      *            ID of the element
      */
-    private void updateOrCreatePropertyType(String typeId, String id) {
+    protected void updateOrCreatePropertyType(String typeId, String id) {
         EmsScriptNode property = findScriptNodeByName(id);
         EmsScriptNode propertyType = findScriptNodeByName(typeId);
 
@@ -344,7 +344,7 @@ public class ModelPost extends AbstractJavaWebScript {
      *            Id of the directed relationship element
      * @throws JSONException
      */
-    private void updateOrCreateRelationship(JSONObject jsonObject, String id)
+    protected void updateOrCreateRelationship(JSONObject jsonObject, String id)
             throws JSONException {
         String sourceId = jsonObject.getString(Acm.JSON_SOURCE);
         String targetId = jsonObject.getString(Acm.JSON_TARGET);
@@ -720,6 +720,7 @@ public class ModelPost extends AbstractJavaWebScript {
         String elementId = req.getServiceMatch().getTemplateVars()
                 .get("elementid");
         if (elementId != null) {
+            // TODO - move this to ViewModelPost - really non hierarchical post
             if (!checkRequestVariable(elementId, "elementid")) {
                 return false;
             }
@@ -745,40 +746,33 @@ public class ModelPost extends AbstractJavaWebScript {
         } else {
             String siteName = req.getServiceMatch().getTemplateVars()
                     .get(SITE_NAME);
-            if (siteName == null) {
-                // handling for view/{id}/elements
-                String projectId = req.getServiceMatch().getTemplateVars()
-                        .get("modelid");
-                projectNode = findScriptNodeByName(projectId);
-            } else {
-                // Handling for project/{id}/elements
-                if (!checkRequestVariable(siteName, SITE_NAME)) {
-                    return false;
-                }
-    
-                String projectId = req.getServiceMatch().getTemplateVars()
-                        .get(PROJECT_ID);
-                if (!checkRequestVariable(projectId, PROJECT_ID)) {
-                    return false;
-                }
-    
-                SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-                if (!checkRequestVariable(siteInfo, "Site")) {
-                    return false;
-                }
-    
-                if (!checkPermissions(siteInfo.getNodeRef(),
-                        PermissionService.WRITE)) {
-                    return false;
-                }
-    
-                EmsScriptNode siteNode = getSiteNode(siteName);
-                projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
-                if (projectNode == null) {
-                    log(LogLevel.ERROR, "Project not found.\n",
-                            HttpServletResponse.SC_NOT_FOUND);
-                    return false;
-                }
+            // Handling for project/{id}/elements
+            if (!checkRequestVariable(siteName, SITE_NAME)) {
+                return false;
+            }
+
+            String projectId = req.getServiceMatch().getTemplateVars()
+                    .get(PROJECT_ID);
+            if (!checkRequestVariable(projectId, PROJECT_ID)) {
+                return false;
+            }
+
+            SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+            if (!checkRequestVariable(siteInfo, "Site")) {
+                return false;
+            }
+
+            if (!checkPermissions(siteInfo.getNodeRef(),
+                    PermissionService.WRITE)) {
+                return false;
+            }
+
+            EmsScriptNode siteNode = getSiteNode(siteName);
+            projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
+            if (projectNode == null) {
+                log(LogLevel.ERROR, "Project not found.\n",
+                        HttpServletResponse.SC_NOT_FOUND);
+                return false;
             }
         }
 
