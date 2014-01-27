@@ -76,10 +76,11 @@ public class ViewModelPost extends ModelPost {
             String id = elementJson.getString(Acm.JSON_ID);
             EmsScriptNode elementNode = findScriptNodeByName(id);
             if (elementNode != null) {
+                updateOrCreateElement(elementJson, elementNode.getParent());
             } else {
                 // new element, we need a proper parent
-                
                 boolean parentFound = true;
+                
                 // for now only support new comments
                 if (elementJson.has(Acm.JSON_ANNOTATED_ELEMENTS)) {
                     JSONArray annotatedJson = elementJson.getJSONArray(Acm.JSON_ANNOTATED_ELEMENTS);

@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.util;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -55,6 +56,9 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -509,6 +513,10 @@ public class EmsScriptNode extends ScriptNode {
                         if (elementValue instanceof String) {
                             String elementString = (String) elementValue;
                             element.put(jsonType, fixArtifactUrls(elementString, false));
+                        } else if (elementValue instanceof Date) {
+                            DateTime dt = new DateTime((Date) elementValue);
+                            DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+                            element.put(jsonType, fmt.print(dt));
                         } else {
                             element.put(jsonType, elementValue);
                         }

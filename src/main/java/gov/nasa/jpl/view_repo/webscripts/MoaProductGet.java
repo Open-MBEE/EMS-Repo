@@ -32,8 +32,13 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.Acm;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -163,11 +168,16 @@ public class MoaProductGet extends AbstractJavaWebScript {
         	        // add any related comments as part of the view
         	        JSONArray commentsJson = new JSONArray();
         	        JSONArray comments = view.getSourceAssocsByType(Acm.ACM_ANNOTATED_ELEMENTS);
+        	        List<EmsScriptNode> commentList = new ArrayList<EmsScriptNode>();
         	        for (int ii = 0; ii < comments.length(); ii++) {
         	            EmsScriptNode comment = findScriptNodeByName(comments.getString(ii));
         	            if (comment != null && checkPermissions(comment, PermissionService.READ)) {
-        	                commentsJson.put(comment.toJSONObject(Acm.JSON_TYPE_FILTER.COMMENT));
+        	                commentList.add(comment);
         	            }
+        	        }
+        	        Collections.sort(commentList, new EmsScriptNodeComparator());
+        	        for (EmsScriptNode comment: commentList) {
+        	            commentsJson.put(comment.toJSONObject(Acm.JSON_TYPE_FILTER.COMMENT));
         	        }
         	        viewJson.put("comments", commentsJson);
         	        
@@ -190,5 +200,24 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	            elementsJson.put(elementJson);
 	        }
 	    }
+	}
+	
+	class EmsScriptNodeComparator implements Comparator<EmsScriptNode> {
+        @Override
+        public int compare(EmsScriptNode x, EmsScriptNode y) {
+            Date xModified;
+            Date yModified;
+            
+            xModified = (Date) x.getProperty(Acm.ACM_LAST_MODIFIED);
+            yModified = (Date) y.getProperty(Acm.ACM_LAST_MODIFIED);
+            
+            if (xModified == null) {
+                return -1;
+            } else if (yModified == null) {
+                return 1;
+            } else {
+                return (xModified.compareTo(yModified));
+            }
+        }
 	}
 }
