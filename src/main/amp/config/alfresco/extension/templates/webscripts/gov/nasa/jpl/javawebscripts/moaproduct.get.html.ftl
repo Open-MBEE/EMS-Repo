@@ -490,7 +490,7 @@ app.on('saveView', function(viewId, viewData) {
 
 app.on('saveComment', function(evt, viewId, commentBody) {
   var url = absoluteUrl("/javawebscripts/views/" + viewId + "/elements");
-  var jsonData = JSON.stringify({"elements": [{"id": "_comment_" + (new Date()).getTime(), "body": commentBody, "type": "Comment"}]});
+  var jsonData = JSON.stringify({"elements": [{"id": "_comment_" + (new Date()).getTime(), "body": commentBody, "type": "Comment", "annotatedElements":[viewId]}]});
   console.log(jsonData);
   ajaxWithHandlers({ 
     type: "POST",
