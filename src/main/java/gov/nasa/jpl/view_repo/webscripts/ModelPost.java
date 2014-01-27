@@ -98,9 +98,9 @@ public class ModelPost extends AbstractJavaWebScript {
      *      ...
      * }
      */
-    private JSONObject relationshipsJson;
+    protected JSONObject relationshipsJson;
 
-    private Set<String> newElements;
+    protected Set<String> newElements;
     
     /**
      * Create or update the model as necessary based on the request
@@ -176,15 +176,19 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         // handle the relationships
-        updateOrCreateRelationships(relationshipsJson, "relationshipElements");
-        updateOrCreateRelationships(relationshipsJson, "propertyTypes");
-        updateOrCreateRelationships(relationshipsJson, "elementValues");
-        updateOrCreateRelationships(relationshipsJson, "annotatedElements");
-
+        updateOrCreateAllRelationships(relationshipsJson);
+        
         now = new Date();
         System.out
                 .println("Update Model Elements Done waiting on transaction to complete..."
                         + now + "\n");
+    }
+    
+    protected void updateOrCreateAllRelationships(JSONObject jsonObject) throws JSONException {
+        updateOrCreateRelationships(jsonObject, "relationshipElements");
+        updateOrCreateRelationships(jsonObject, "propertyTypes");
+        updateOrCreateRelationships(jsonObject, "elementValues");
+        updateOrCreateRelationships(jsonObject, "annotatedElements");
     }
 
     /**

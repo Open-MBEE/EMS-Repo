@@ -51,14 +51,12 @@ public class ViewModelPost extends ModelPost {
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
 
-        if (validateRequest(req, status)) {
-            try {
-                createOrUpdateModel(req, status);
-            } catch (Exception e) {
-                log(LogLevel.ERROR, "JSON malformed\n",
-                        HttpServletResponse.SC_BAD_REQUEST);
-                e.printStackTrace();
-            }
+        try {
+            createOrUpdateModel(req, status);
+        } catch (Exception e) {
+            log(LogLevel.ERROR, "JSON malformed\n",
+                    HttpServletResponse.SC_BAD_REQUEST);
+            e.printStackTrace();
         }
 
         status.setCode(responseStatus.getCode());
@@ -75,10 +73,36 @@ public class ViewModelPost extends ModelPost {
         for (int ii = 0; ii < array.length(); ii++) {
             JSONObject elementJson = array.getJSONObject(ii);
             
-            EmsScriptNode elementNode = findScriptNodeByName(elementJson.getString(Acm.JSON_ID));
+            String id = elementJson.getString(Acm.JSON_ID);
+            EmsScriptNode elementNode = findScriptNodeByName(id);
             if (elementNode != null) {
-                updateOrCreateElement(elementJson, elementNode.getParent());
+            } else {
+                // new element, we need a proper parent
+                
+                boolean parentFound = true;
+                // for now only support new comments
+                if (elementJson.has(Acm.JSON_ANNOTATED_ELEMENTS)) {
+                    JSONArray annotatedJson = elementJson.getJSONArray(Acm.JSON_ANNOTATED_ELEMENTS);
+                    // lets make parent first annotated element
+                    if (annotatedJson.length() <= 0) {
+                        parentFound = false;
+                    } else {
+                        EmsScriptNode commentParent = findScriptNodeByName(annotatedJson.getString(0));
+                        if (commentParent == null) {
+                            parentFound = false;
+                        } else {
+                            newElements.add(id);
+                            updateOrCreateElement(elementJson, commentParent.getParent());
+                        }
+                    }
+                    
+                    if (!parentFound) {
+                        log(LogLevel.WARNING, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
+                    }
+                }
             }
         }
+        
+        updateOrCreateAllRelationships(relationshipsJson);
     }
 }
