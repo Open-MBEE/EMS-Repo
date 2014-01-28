@@ -51,6 +51,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
+@Deprecated
 public class JwsUtil {
 	// injected
 	private Boolean useFoundationalApi = true;

@@ -71,7 +71,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	// injected members
 	protected ServiceRegistry services;		// get any of the Alfresco services
 	protected Repository repository;		// used for lucene search
-	protected JwsUtil jwsUtil;				// used to split transactions
 	protected LogLevel logLevel = LogLevel.WARNING;
 	
 	// internal members
@@ -96,10 +95,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 	public void setServices(ServiceRegistry registry) {
 		this.services = registry;
-	}
-
-	public void setJwsUtil(JwsUtil util) {
-		jwsUtil = util;
 	}
 
 	/**
@@ -296,5 +291,24 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 		return searchResults;
 	}
+
+	/**
+     * Helper utility to check the value of a request parameter
+     * 
+     * @param req
+     *            WebScriptRequest with parameter to be checked
+     * @param name
+     *            String of the request parameter name to check
+     * @param value
+     *            String of the value the parameter is being checked for
+     * @return True if parameter is equal to value, False otherwise
+     */
+    public static boolean checkArgEquals(WebScriptRequest req, String name,
+            String value) {
+        if (req.getParameter(name) == null) {
+            return false;
+        }
+        return req.getParameter(name).equals(value);
+    }
 
 }

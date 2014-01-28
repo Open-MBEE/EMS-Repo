@@ -65,9 +65,9 @@ public class ProjectPost extends AbstractJavaWebScript {
 	private void parseRequestVariables(WebScriptRequest req) {
 		siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
 		projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
-		delete = jwsUtil.checkArgEquals(req, "delete", "true") ? true : false;
-		fix = jwsUtil.checkArgEquals(req, "fix", "true") ? true : false;
-		createSite = jwsUtil.checkArgEquals(req, "createSite", "true") ? true : false;
+		delete = checkArgEquals(req, "delete", "true") ? true : false;
+		fix = checkArgEquals(req, "fix", "true") ? true : false;
+		createSite = checkArgEquals(req, "createSite", "true") ? true : false;
  	}
 	
 	/**
@@ -119,7 +119,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		        services.getSiteService().createSite(SITE_NAME, SITE_NAME, SITE_NAME, SITE_NAME, true);
 		        siteNode = getSiteNode(siteName);
 		    } else {
-		        log(LogLevel.ERROR, "Site not found.\n", HttpServletResponse.SC_NOT_FOUND);
+		        log(LogLevel.ERROR, "Site not found for " + siteName + ".\n", HttpServletResponse.SC_NOT_FOUND);
 		        return HttpServletResponse.SC_NOT_FOUND;
 		    }
 		}
@@ -127,6 +127,8 @@ public class ProjectPost extends AbstractJavaWebScript {
 		// make sure Model package under site exists
 		EmsScriptNode modelContainerNode = siteNode.childByNamePath(MODEL_PATH_SEARCH);
 		if (modelContainerNode == null) {
+		    // always create
+		    fix = true;
 			if (fix) {
 				modelContainerNode = siteNode.createFolder(MODEL_PATH);
 				log(LogLevel.INFO, "Model folder created.\n", HttpServletResponse.SC_OK);
@@ -165,7 +167,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 					}
 				}
 			} else {
-				log(LogLevel.WARNING, "Project not moved or name not updated. Use fix=true to update.\n", HttpServletResponse.SC_NOT_FOUND);
+				log(LogLevel.WARNING, "Project already exists.\n", HttpServletResponse.SC_FOUND);
 				return HttpServletResponse.SC_FOUND;
 			}
 		}

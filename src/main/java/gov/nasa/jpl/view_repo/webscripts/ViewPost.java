@@ -76,14 +76,18 @@ public class ViewPost extends AbstractJavaWebScript {
 		if (jsonObject.has("views")) {
 			JSONArray viewsJson = jsonObject.getJSONArray("views");
 			
-			jwsUtil.splitTransactions(new JwsFunctor() {
-				@Override
-				public Object execute(JSONArray jsonArray, int index,
-						Boolean... flags) throws JSONException {
-					updateView(jsonArray, index);
-					return null;
-				}
-			}, viewsJson);
+			for (int ii = 0; ii < viewsJson.length(); ii++) {
+			    updateView(viewsJson, ii);
+			}
+			
+//			jwsUtil.splitTransactions(new JwsFunctor() {
+//				@Override
+//				public Object execute(JSONArray jsonArray, int index,
+//						Boolean... flags) throws JSONException {
+//					updateView(jsonArray, index);
+//					return null;
+//				}
+//			}, viewsJson);
 		}
 	}
 	

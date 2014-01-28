@@ -107,7 +107,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		
 		Map<String, Object> model = new HashMap<String, Object>();
 
-		boolean recurse = jwsUtil.checkArgEquals(req, "recurse", "true") ? true : false;
+		boolean recurse = checkArgEquals(req, "recurse", "true") ? true : false;
 		
 		if (validateRequest(req, status)) {
 			try {
