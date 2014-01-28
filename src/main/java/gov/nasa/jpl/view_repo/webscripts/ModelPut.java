@@ -33,18 +33,18 @@ import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.service.cmr.security.PermissionService;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-public class ViewModelPost extends ModelPost {
+public class ModelPut extends ModelPost {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req,
@@ -69,42 +69,21 @@ public class ViewModelPost extends ModelPost {
             throws Exception {
         JSONObject postJson = (JSONObject) req.parseContent();
         
-        JSONArray array = postJson.getJSONArray("elements");
-        
-        for (int ii = 0; ii < array.length(); ii++) {
-            JSONObject elementJson = array.getJSONObject(ii);
+        Iterator<?> oldIds = postJson.keys();
+        while(oldIds.hasNext()) {
+            String oldId = (String) oldIds.next();
+            String newId = postJson.getString(oldId);
             
-            String id = elementJson.getString(Acm.JSON_ID);
-            EmsScriptNode elementNode = findScriptNodeByName(id);
-            if (elementNode != null) {
-                updateOrCreateElement(elementJson, elementNode.getParent());
-            } else {
-                // new element, we need a proper parent
-                boolean parentFound = true;
-                
-                // for now only support new comments
-                if (elementJson.has(Acm.JSON_ANNOTATED_ELEMENTS)) {
-                    JSONArray annotatedJson = elementJson.getJSONArray(Acm.JSON_ANNOTATED_ELEMENTS);
-                    // lets make parent first annotated element
-                    if (annotatedJson.length() <= 0) {
-                        parentFound = false;
+            if (oldId != null && newId != null && oldId != newId) {
+                EmsScriptNode elementNode = findScriptNodeByName(oldId);
+                if (checkPermissions(elementNode, PermissionService.WRITE)) {
+                    if (elementNode != null) {
+                        elementNode.setProperty(Acm.ACM_ID, newId);
                     } else {
-                        EmsScriptNode commentParent = findScriptNodeByName(annotatedJson.getString(0));
-                        if (commentParent == null) {
-                            parentFound = false;
-                        } else {
-                            newElements.add(id);
-                            updateOrCreateElement(elementJson, commentParent.getParent());
-                        }
-                    }
-                    
-                    if (!parentFound) {
-                        log(LogLevel.WARNING, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
+                        log(LogLevel.WARNING, "Element not found with id: " + oldId, HttpServletResponse.SC_BAD_REQUEST);
                     }
                 }
             }
         }
-        
-        updateOrCreateAllRelationships(relationshipsJson);
     }
 }

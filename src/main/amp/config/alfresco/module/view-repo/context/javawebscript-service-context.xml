@@ -63,6 +63,14 @@
 		<property name="jwsUtil" ref="jwsUtil" />
 	</bean>
 
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.element.put"
+		class="gov.nasa.jpl.view_repo.webscripts.ModelPut" parent="webscript"
+		singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+		<property name="jwsUtil" ref="jwsUtil" />
+	</bean>
+
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.product.get"
 		class="gov.nasa.jpl.view_repo.webscripts.ProductGet" parent="webscript"
 		singleton="false">

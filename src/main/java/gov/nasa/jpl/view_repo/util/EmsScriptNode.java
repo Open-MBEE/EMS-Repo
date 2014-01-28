@@ -719,12 +719,6 @@ public class EmsScriptNode extends ScriptNode {
 	
 	public String fixArtifactUrls(String content, boolean escape) {
 	    String result = content;
-//	     modelRootNode.fixArtifactUrls("<img src=\"/editor/images/docgen/_17_0_2_3_407019f_1389209968802_719827_29133_latest.svg\" alt=\"diagram view\"/>",  true);
-//        modelRootNode.fixArtifactUrls("<img src=\\\"/editor/images/docgen/_17_0_2_3_407019f_1389209968802_719827_29133_latest.svg\\\" alt=\\\"diagram view\\\"/>", false);
-
-//	    result = replaceArtifactUrl(result, "src=\"/staging/images/docgen/", "src=\"/staging/images/docgen/.*?\"", escape);
-//	    result = replaceArtifactUrl(result, "src=\"/editor/images/docgen/", "src=\"/editor/images/docgen/.*?\"", escape);
-//        result = replaceArtifactUrl(result, "src=\\\"/editor/images/docgen/", "src=\\\"/editor/images/docgen/.*?\\\"", escape);
         result = replaceArtifactUrl(result, "src=\\\\\"/editor/images/docgen/", "src=\\\\\"/editor/images/docgen/.*?\\\\\"", escape);
 	    
         return result;
@@ -740,7 +734,8 @@ public class EmsScriptNode extends ScriptNode {
 	    Matcher matcher = p.matcher(content);
 	   
         while (matcher.find()) {
-            String filename = matcher.group(0);//matcher.group(0).replace(prefix, "").replace("\"","").replace("_latest", "");
+            String filename = matcher.group(0);
+            // not sure why this can't be chained correctly
             filename = filename.replace("\"", "");
             filename = filename.replace("_latest", "");
             filename = filename.replace("\\","");

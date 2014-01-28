@@ -575,6 +575,7 @@ public class ModelPost extends AbstractJavaWebScript {
         JSONArray children = new JSONArray();
         EmsScriptNode reifiedNode = null;
 
+        // TODO Need to permission check on new node creation
         // find node if exists, otherwise create
         EmsScriptNode node;
         UserTransaction trx;
