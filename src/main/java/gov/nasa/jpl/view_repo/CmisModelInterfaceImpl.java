@@ -8,13 +8,9 @@ package gov.nasa.jpl.view_repo;
 import gov.nasa.jpl.ae.util.Debug;
 import gov.nasa.jpl.ae.util.Pair;
 import gov.nasa.jpl.ae.util.Utils;
-import gov.nasa.jpl.mbee.util.MethodCall;
-
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -40,15 +36,16 @@ import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 
+import sysml.AbstractSystemModel;
 import sysml.SystemModel;
 
 /**
  * An implementation of a generic model interface for querying CMIS servers
  * using Apache Chemistry OpenCMIS.
  */
-public class CmisModelInterfaceImpl
-		implements
-		SystemModel<CmisObject, OperationContext, ObjectType, Object, String, String, Object, Relationship, String, Object, CmisObject> {
+public class CmisModelInterfaceImpl 
+		extends
+		AbstractSystemModel<CmisObject, OperationContext, ObjectType, Object, String, String, Object, Relationship, String, Object, CmisObject> {
 
 	protected static CmisModelInterfaceImpl instance;
 	protected String ADMIN_USER_NAME = "admin";
@@ -89,7 +86,7 @@ public class CmisModelInterfaceImpl
 
 	public String latestVersion(ChangeEvent change) {
 		String id = change.getObjectId();
-		CmisObject obj = getElement(null, id, null);
+		CmisObject obj = getElement(null, id);
 		String v = null;
 		if (obj instanceof Document) {
 			v = latestVersion((Document) obj);
@@ -100,7 +97,7 @@ public class CmisModelInterfaceImpl
 
 	public GregorianCalendar timeOflatestChange(ChangeEvent change) {
 		String id = change.getObjectId();
-		CmisObject obj = getElement(null, id, null);
+		CmisObject obj = getElement(null, id);
 		if (obj instanceof Document) {
 			return timeOflatestChange((Document) obj);
 		}
@@ -147,8 +144,8 @@ public class CmisModelInterfaceImpl
 		// null, null );
 		Collection<Object> docs = op(Operation.GET,
 				Utils.newList(SystemModel.ModelItem.ELEMENT),
-				Utils.newList(new Item(getSession().getRootFolder(),
-						ModelItem.ELEMENT)), Utils.newList(new Item("Document",
+				Utils.newList(new SystemModel.Item(getSession().getRootFolder(),
+						ModelItem.ELEMENT)), Utils.newList(new SystemModel.Item("Document",
 						ModelItem.TYPE)), null, false);
 		return Utils.asList(docs, Document.class);
 	}
@@ -165,9 +162,6 @@ public class CmisModelInterfaceImpl
 			String changeLogToken) {
 		List<ChangeEvent> changes = getSession().getContentChanges(
 				changeLogToken, true, Long.MAX_VALUE).getChangeEvents();
-		// getSession().getRootFolder().createDocument( null, null, null
-		// ).getVersionSeriesId();
-		Folder root = getSession().getRootFolder();
 		if (Utils.isNullOrEmpty(changes)) {
 			return null;
 		}
@@ -192,14 +186,10 @@ public class CmisModelInterfaceImpl
 	public GregorianCalendar timeOfLatestChange(String changeLogToken) {
 		List<ChangeEvent> changes = getSession().getContentChanges(
 				changeLogToken, true, Long.MAX_VALUE).getChangeEvents();
-		// getSession().getRootFolder().createDocument( null, null, null
-		// ).getVersionSeriesId();
-		Folder root = getSession().getRootFolder();
 		if (Utils.isNullOrEmpty(changes)) {
 			return null;
 		}
 		GregorianCalendar latestTime = null;
-		String latestVersion = null;
 		for (ChangeEvent change : changes) { // = changes.get( 0 );
 			if (change == null)
 				continue;
@@ -209,7 +199,6 @@ public class CmisModelInterfaceImpl
 				String v = latestVersion(change);
 				if (v != null) {
 					latestTime = c;
-					latestVersion = v;
 				}
 			}
 		}
@@ -301,9 +290,9 @@ public class CmisModelInterfaceImpl
 		return object;
 	}
 
-	@Override
-	public CmisObject getElement(OperationContext context, String identifier,
-			String version) {
+	//@Override
+	public CmisObject getElement(OperationContext context, String identifier ) {//,
+			//String version) {
 		if (identifier == null)
 			return null;
 		// check if object id
@@ -339,29 +328,29 @@ public class CmisModelInterfaceImpl
 		return object;
 	}
 
-	@Override
-	public String getElementId(CmisObject object, String version) {
+	//@Override
+	public String getElementId(CmisObject object) {//, String version) {
 		if (object == null)
 			return null;
 		return object.getId();
 	}
 
-	@Override
-	public String getName(CmisObject object, String version) {
+	//@Override
+	public String getName(CmisObject object) {//, String version) {
 		if (object == null)
 			return null;
 		return object.getName();
 	}
 
-	@Override
-	public ObjectType getTypeOf(CmisObject object, String version) {
+	//@Override
+	public ObjectType getTypeOf(CmisObject object) {//, String version) {
 		if (object == null)
 			return null;
 		return object.getType();
 	}
 
-	@Override
-	public Collection<Object> getTypeProperties(ObjectType type, String version) {
+	//@Override
+	public Collection<Object> getTypeProperties(ObjectType type) {//, String version) {
 		if (type == null)
 			return null;
 		Map<String, PropertyDefinition<?>> defs = type.getPropertyDefinitions();
@@ -372,8 +361,8 @@ public class CmisModelInterfaceImpl
 		return set;
 	}
 
-	@Override
-	public Collection<Object> getProperties(CmisObject object, String version) {
+	//@Override
+	public Collection<Object> getProperties(CmisObject object) {//, String version) {
 		if (object == null)
 			return null;
 		List<Property<?>> props = object.getProperties();
@@ -384,9 +373,9 @@ public class CmisModelInterfaceImpl
 		return list;
 	}
 
-	@Override
-	public Object getProperty(CmisObject object, String propertyName,
-			String version) {
+	//@Override
+	public Object getProperty(CmisObject object, String propertyName) {//,
+			//String version) {
 		if (object == null || propertyName == null)
 			return null;
 		Property<Object> prop = object.getProperty(propertyName);
@@ -398,17 +387,17 @@ public class CmisModelInterfaceImpl
 	 * 
 	 * @see ModelInterface#getRelationships(java.lang.Object)
 	 */
-	@Override
-	public Collection<Relationship> getRelationships(CmisObject object,
-			String version) {
+	//@Override
+	public Collection<Relationship> getRelationships(CmisObject object) {//,
+			//String version) {
 		if (object == null)
 			return null;
 		return object.getRelationships();
 	}
 
-	@Override
+	//@Override
 	public Collection<Relationship> getRelationships(CmisObject object,
-			String relationshipName, String version) {
+	                                                 String relationshipName) {//, String version) {
 		if (object == null || relationshipName == null)
 			return null;
 		List<Relationship> rels = object.getRelationships();
@@ -428,32 +417,896 @@ public class CmisModelInterfaceImpl
 		return relsForProp;
 	}
 
-	@Override
-	public Collection<CmisObject> getRelated(CmisObject object,
-			String relationshipName, String version) {
-		Collection<Relationship> rels = getRelationships(object,
-				relationshipName);
-		Set<CmisObject> results = new LinkedHashSet<CmisObject>();
-		for (Relationship r : rels) {
-			if (r == null)
-				continue;
-			CmisObject source = r.getSource();
-			CmisObject target = r.getTarget();
-			if (source != null && !source.equals(object)) {
-				results.add(source);
-			} else if (target != null && !target.equals(object)) {
-				results.add(source);
-			}
-		}
-		return results;
-	}
+    //@Override
+    public Collection< CmisObject > getRelated( CmisObject object,
+                                                String relationshipName ) {
+        Collection< Relationship > rels =
+                getRelationships( object, relationshipName );
+        Set< CmisObject > results = new LinkedHashSet< CmisObject >();
+        for ( Relationship r : rels ) {
+            if ( r == null ) continue;
+            CmisObject source = r.getSource();
+            CmisObject target = r.getTarget();
+            if ( source != null && !source.equals( object ) ) {
+                results.add( source );
+            } else if ( target != null && !target.equals( object ) ) {
+                results.add( source );
+            }
+        }
+        return results;
+    }
 
-	public static CmisModelInterfaceImpl getInstance() {
-		if (instance == null) {
-			instance = new CmisModelInterfaceImpl();
-		}
-		return instance;
-	}
+    public static CmisModelInterfaceImpl getInstance() {
+        if ( instance == null ) {
+            instance = new CmisModelInterfaceImpl();
+        }
+        return instance;
+    }
+
+    @Override
+    public CmisObject createConstraint( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public CmisObject createElement( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String createIdentifier( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String createName( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Object createProperty( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Relationship createRelationship( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ObjectType createType( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Object createValue( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public String createVersion( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public CmisObject createView( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public CmisObject createViewpoint( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Object createWorkspace( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Object delete( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getConstraint( Object arg0, Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Class< CmisObject > getConstraintClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getConstraintWithElement( Object arg0,
+                                                              CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getConstraintWithIdentifier( Object arg0,
+                                                                 String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getConstraintWithName( Object arg0,
+                                                           String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getConstraintWithProperty( Object arg0,
+                                                               Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject >
+            getConstraintWithRelationship( Object arg0, Relationship arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getConstraintWithType( Object arg0,
+                                                           ObjectType arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getConstraintWithValue( Object arg0,
+                                                            Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getConstraintWithVersion( Object arg0,
+                                                              String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getConstraintWithView( Object arg0,
+                                                           CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject >
+            getConstraintWithViewpoint( Object arg0, CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getConstraintWithWorkspace( Object arg0,
+                                                                Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Class< OperationContext > getContextClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getElement( Object arg0, Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Class< CmisObject > getElementClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getElementForRole( Relationship arg0,
+                                                       String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getElementWithConstraint( Object arg0,
+                                                              CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getElementWithIdentifier( Object arg0,
+                                                              String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject >
+            getElementWithName( Object arg0, String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getElementWithProperty( Object arg0,
+                                                            Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject >
+            getElementWithRelationship( Object arg0, Relationship arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getElementWithType( Object arg0,
+                                                        ObjectType arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getElementWithValue( Object arg0,
+                                                         Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getElementWithVersion( Object arg0,
+                                                           String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getElementWithView( Object arg0,
+                                                        CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getElementWithViewpoint( Object arg0,
+                                                             CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getElementWithWorkspace( Object arg0,
+                                                             Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< String > getIdentifier( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Class< String > getIdentifierClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< String > getName( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Class< String > getNameClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getProperty( Object arg0, Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Class< Object > getPropertyClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getPropertyWithConstraint( Object arg0,
+                                                           CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getPropertyWithElement( Object arg0,
+                                                        CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getPropertyWithIdentifier( Object arg0,
+                                                           String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getPropertyWithRelationship( Object arg0,
+                                                             Relationship arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getPropertyWithType( Object arg0,
+                                                     ObjectType arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getPropertyWithValue( Object arg0, Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object >
+            getPropertyWithVersion( Object arg0, String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getPropertyWithView( Object arg0,
+                                                     CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getPropertyWithViewpoint( Object arg0,
+                                                          CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getPropertyWithWorkspace( Object arg0,
+                                                          Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getRelatedElements( Relationship arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Relationship >
+            getRelationship( Object arg0, Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Class< Relationship > getRelationshipClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Relationship >
+            getRelationshipWithConstraint( Object arg0, CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Relationship >
+            getRelationshipWithElement( Object arg0, CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Relationship >
+            getRelationshipWithIdentifier( Object arg0, String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Relationship > getRelationshipWithName( Object arg0,
+                                                               String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Relationship > getRelationshipWithProperty( Object arg0,
+                                                                   Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Relationship > getRelationshipWithType( Object arg0,
+                                                               ObjectType arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Relationship > getRelationshipWithValue( Object arg0,
+                                                                Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Relationship > getRelationshipWithVersion( Object arg0,
+                                                                  String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Relationship > getRelationshipWithView( Object arg0,
+                                                               CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Relationship >
+            getRelationshipWithViewpoint( Object arg0, CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Relationship >
+            getRelationshipWithWorkspace( Object arg0, Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getSource( Relationship arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getTarget( Relationship arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< ObjectType > getType( Object arg0, Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Class< ObjectType > getTypeClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< ObjectType > getTypeWithConstraint( Object arg0,
+                                                           CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< ObjectType > getTypeWithElement( Object arg0,
+                                                        CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< ObjectType > getTypeWithIdentifier( Object arg0,
+                                                           String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< ObjectType > getTypeWithName( Object arg0, String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< ObjectType > getTypeWithProperty( Object arg0,
+                                                         Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< ObjectType > getTypeWithRelationship( Object arg0,
+                                                             Relationship arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< ObjectType > getTypeWithValue( Object arg0, Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< ObjectType >
+            getTypeWithVersion( Object arg0, String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< ObjectType > getTypeWithView( Object arg0,
+                                                     CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< ObjectType > getTypeWithViewpoint( Object arg0,
+                                                          CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< ObjectType > getTypeWithWorkspace( Object arg0,
+                                                          Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getValue( Object arg0, Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Class< Object > getValueClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getValueWithConstraint( Object arg0,
+                                                        CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getValueWithElement( Object arg0,
+                                                     CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object >
+            getValueWithIdentifier( Object arg0, String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getValueWithName( Object arg0, String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getValueWithProperty( Object arg0, Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getValueWithRelationship( Object arg0,
+                                                          Relationship arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getValueWithType( Object arg0, ObjectType arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getValueWithVersion( Object arg0, String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getValueWithView( Object arg0, CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getValueWithViewpoint( Object arg0,
+                                                       CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object >
+            getValueWithWorkspace( Object arg0, Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< String > getVersion( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Class< String > getVersionClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getView( Object arg0, Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Class< ? extends CmisObject > getViewClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewWithConstraint( Object arg0,
+                                                           CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewWithElement( Object arg0,
+                                                        CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewWithIdentifier( Object arg0,
+                                                           String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewWithName( Object arg0, String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewWithProperty( Object arg0,
+                                                         Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewWithRelationship( Object arg0,
+                                                             Relationship arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewWithType( Object arg0,
+                                                     ObjectType arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewWithValue( Object arg0, Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject >
+            getViewWithVersion( Object arg0, String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewWithViewpoint( Object arg0,
+                                                          CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewWithWorkspace( Object arg0,
+                                                          Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewpoint( Object arg0, Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Class< ? extends CmisObject > getViewpointClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject >
+            getViewpointWithConstraint( Object arg0, CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewpointWithElement( Object arg0,
+                                                             CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewpointWithIdentifier( Object arg0,
+                                                                String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewpointWithName( Object arg0,
+                                                          String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewpointWithProperty( Object arg0,
+                                                              Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject >
+            getViewpointWithRelationship( Object arg0, Relationship arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewpointWithType( Object arg0,
+                                                          ObjectType arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewpointWithValue( Object arg0,
+                                                           Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewpointWithVersion( Object arg0,
+                                                             String arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewpointWithView( Object arg0,
+                                                          CmisObject arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< CmisObject > getViewpointWithWorkspace( Object arg0,
+                                                               Object arg1 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Collection< Object > getWorkspace( Object arg0 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Class< Object > getWorkspaceClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean isDirected( Relationship arg0 ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public Object set( Object arg0, Object arg1, Object arg2 ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
     public void addConstraint( CmisObject arg0, String arg1, Object arg2 ) {
@@ -480,175 +1333,6 @@ public class CmisModelInterfaceImpl
     }
 
     @Override
-    public CmisObject asConstraint( Object arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OperationContext asContext( Object arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< OperationContext > asContextCollection( Object arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public CmisObject asElement( Object arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String asIdentifier( Object arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String asName( Object arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Object asProperty( Object arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Relationship asRelationship( Object arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public ObjectType asType( Object arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Object asValue( Object arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String asVersion( Object arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Object asWorkspace( Object arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< Object > create( sysml.SystemModel.ModelItem arg0,
-                                        Collection< OperationContext > arg1,
-                                        String arg2, String arg3, String arg4 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public CmisObject createElement( String arg0, String arg1 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< Object > delete( sysml.SystemModel.ModelItem arg0,
-                                        Collection< OperationContext > arg1,
-                                        String arg2, String arg3, String arg4 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public CmisObject deleteElement( String arg0, String arg1 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public ObjectType deleteType( CmisObject arg0, String arg1 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean elementsMayBeChangedForVersion( String arg0 ) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean elementsMayBeCreatedForVersion( String arg0 ) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean elementsMayBeDeletedForVersion( String arg0 ) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public
-            Collection< CmisObject >
-            filter( Collection< CmisObject > arg0, MethodCall arg1, int arg2 )
-                                                                              throws InvocationTargetException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Object
-            fold( Collection< CmisObject > arg0, Object arg1, MethodCall arg2,
-                  int arg3, int arg4 ) throws InvocationTargetException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean forAll( Collection< CmisObject > arg0, MethodCall arg1,
-                           int arg2 ) throws InvocationTargetException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public Collection< Object >
-            get( Collection< sysml.SystemModel.ModelItem > arg0,
-                 Collection< OperationContext > arg1, String arg2, String arg3,
-                 String arg4 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Class< ? > getClass( sysml.SystemModel.ModelItem arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Class< CmisObject > getConstraintClass() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public Collection< CmisObject >
             getConstraintsOfContext( OperationContext arg0 ) {
         // TODO Auto-generated method stub
@@ -664,18 +1348,6 @@ public class CmisModelInterfaceImpl
     }
 
     @Override
-    public Collection< OperationContext > getContext() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Class< OperationContext > getContextClass() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public CmisObject getDomainConstraint( CmisObject arg0, String arg1,
                                            Object arg2 ) {
         // TODO Auto-generated method stub
@@ -683,110 +1355,7 @@ public class CmisModelInterfaceImpl
     }
 
     @Override
-    public Class< CmisObject > getElementClass() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public CmisObject getElementForRole( Relationship arg0, String arg1,
-                                         String arg2 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Class< String > getIdentifierClass() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Class< String > getNameClass() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Class< Object > getPropertyClass() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public CmisObject getRelatedElements( Relationship arg0, String arg1 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Class< Relationship > getRelationshipClass() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< CmisObject > getRootElements( String arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public Number getScore() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public CmisObject getSource( Relationship arg0, String arg1 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public CmisObject getTarget( Relationship arg0, String arg1 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public ObjectType getType( OperationContext arg0, String arg1, String arg2 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Class< ObjectType > getTypeClass() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Class< Object > getValueClass() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public String getVersion() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Class< String > getVersionClass() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Class< ? extends CmisObject > getViewClass() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Class< ? extends CmisObject > getViewpointClass() {
         // TODO Auto-generated method stub
         return null;
     }
@@ -806,95 +1375,13 @@ public class CmisModelInterfaceImpl
     }
 
     @Override
-    public Object getWorkspace() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Class< Object > getWorkspaceClass() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean idsAreSettable() {
+    public boolean idsAreWritable() {
         // TODO Auto-generated method stub
         return false;
     }
 
     @Override
-    public boolean isAllowed( sysml.SystemModel.Operation arg0,
-                              Collection< sysml.SystemModel.ModelItem > arg1,
-                              Collection< sysml.SystemModel.Item > arg2,
-                              Collection< sysml.SystemModel.Item > arg3,
-                              sysml.SystemModel.Item arg4, Boolean arg5 ) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean isDirected( Relationship arg0, String arg1 ) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public String latestVersion( Collection< OperationContext > arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public
-            Collection< Object >
-            map( Collection< CmisObject > arg0, MethodCall arg1, int arg2 )
-                                                                           throws InvocationTargetException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean namesAreSettable() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public Collection< Object >
-            op( sysml.SystemModel.Operation arg0,
-                Collection< sysml.SystemModel.ModelItem > arg1,
-                Collection< sysml.SystemModel.Item > arg2,
-                Collection< sysml.SystemModel.Item > arg3, Object arg4,
-                Boolean arg5 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< Object >
-            op( sysml.SystemModel.Operation arg0,
-                Collection< sysml.SystemModel.ModelItem > arg1,
-                Collection< OperationContext > arg2, String arg3, String arg4,
-                String arg5, boolean arg6 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean propertiesMayBeChangedForVersion( String arg0 ) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean propertiesMayBeCreatedForVersion( String arg0 ) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean propertiesMayBeDeletedForVersion( String arg0 ) {
+    public boolean namesAreWritable() {
         // TODO Auto-generated method stub
         return false;
     }
@@ -916,85 +1403,13 @@ public class CmisModelInterfaceImpl
     }
 
     @Override
-    public Collection< Object > set( sysml.SystemModel.ModelItem arg0,
-                                     Collection< OperationContext > arg1,
-                                     String arg2, String arg3, String arg4,
-                                     Object arg5 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void setContext( Collection< OperationContext > arg0 ) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public boolean setIdentifier( CmisObject arg0, String arg1 ) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean setName( CmisObject arg0, String arg1 ) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
     public void setOptimizationFunction( Method arg0, Object... arg1 ) {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public boolean setType( CmisObject arg0, String arg1 ) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public void setVersion( String arg0 ) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void setWorkspace( Object arg0 ) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public Collection< CmisObject >
-            sort( Collection< CmisObject > arg0, Comparator< ? > arg1,
-                  MethodCall arg2, int arg3 ) throws InvocationTargetException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public boolean thereExists( Collection< CmisObject > arg0, MethodCall arg1,
-                                int arg2 ) throws InvocationTargetException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean typesMayBeChangedForVersion( String arg0 ) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean typesMayBeCreatedForVersion( String arg0 ) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean typesMayBeDeletedForVersion( String arg0 ) {
+    public boolean versionsAreWritable() {
         // TODO Auto-generated method stub
         return false;
     }
