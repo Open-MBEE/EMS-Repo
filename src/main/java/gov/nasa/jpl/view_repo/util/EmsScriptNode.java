@@ -352,7 +352,7 @@ public class EmsScriptNode extends ScriptNode {
 	
 	@Override
 	public String getName() {
-		return (String)getProperty("cm:name");
+		return (String)getProperty(Acm.ACM_CM_NAME);
 	}
 
 
@@ -705,13 +705,13 @@ public class EmsScriptNode extends ScriptNode {
         if (jsonObject.has(Acm.JSON_VALUE_TYPE)) {
             String acmType = Acm.JSON2ACM.get(jsonObject.get(Acm.JSON_VALUE_TYPE));
             array = jsonObject.getJSONArray("value");
-            if (acmType.equals("sysml:boolean")) {
+            if (acmType.equals(Acm.ACM_LITERAL_BOOLEAN)) {
                 this.createOrUpdatePropertyValues(acmType, array, new Boolean(true));
-            } else if (acmType.equals("sysml:integer")) {
+            } else if (acmType.equals(Acm.ACM_LITERAL_INTEGER)) {
                 this.createOrUpdatePropertyValues(acmType, array, new Integer(0));
-            } else if (acmType.equals("sysml:double")) {
+            } else if (acmType.equals(Acm.ACM_LITERAL_REAL)) {
                 this.createOrUpdatePropertyValues(acmType, array, new Double(0.0));
-            } else if (acmType.equals("sysml:string")) {
+            } else if (acmType.equals(Acm.ACM_LITERAL_STRING)) {
                 this.createOrUpdatePropertyValues(acmType, array, new String(""));
             }
         }

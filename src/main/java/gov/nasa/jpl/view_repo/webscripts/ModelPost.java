@@ -136,7 +136,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 for (String rootElement : rootElements) {
                     System.out.println("ROOT ELEMENT FOUND: " + rootElement);
                     if (!rootElement.equals((String) projectNode
-                            .getProperty("cm:name"))) {
+                            .getProperty(Acm.ACM_CM_NAME))) {
                         String ownerName = null;
                         JSONObject element = elementMap.get(rootElement);
                         if (element.has(Acm.JSON_OWNER)) {
@@ -419,7 +419,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     reifiedNode = node.getParent().createFolder(pkgName,
                             Acm.ACM_ELEMENT_FOLDER);
                     reifiedNode.setProperty(Acm.ACM_ID, key);
-                    reifiedNode.setProperty("cm:name", pkgName);
+                    reifiedNode.setProperty(Acm.ACM_CM_NAME, pkgName);
                     reifiedNode.setProperty(Acm.ACM_NAME,
                             (String) node.getProperty(Acm.ACM_NAME));
                 }
@@ -445,8 +445,8 @@ public class ModelPost extends AbstractJavaWebScript {
                         if (checkPermissions(child, PermissionService.WRITE)) {
                             if (!child.getParent().equals(reifiedNode)) {
                                 System.out.println("moving "
-                                        + child.getProperty("cm:name") + " to "
-                                        + reifiedNode.getProperty("cm:name"));
+                                        + child.getProperty(Acm.ACM_CM_NAME) + " to "
+                                        + reifiedNode.getProperty(Acm.ACM_CM_NAME));
                                 child.move(reifiedNode);
                             }
 
@@ -455,9 +455,9 @@ public class ModelPost extends AbstractJavaWebScript {
                                     + REIFIED_PKG_SUFFIX);
                             if (childPkg != null && !childPkg.getParent().equals(reifiedNode)) {
                                 System.out.println("moving "
-                                        + childPkg.getProperty("cm:name")
+                                        + childPkg.getProperty(Acm.ACM_CM_NAME)
                                         + " to "
-                                        + reifiedNode.getProperty("cm:name"));
+                                        + reifiedNode.getProperty(Acm.ACM_CM_NAME));
                                 childPkg.move(reifiedNode);
                             }
                         } // end if (checkPermissions(child, PermissionService.WRITE)) {
@@ -587,7 +587,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 System.out.println("\tcreating node");
                 node = parent.createNode(id,
                         Acm.JSON2ACM.get(elementJson.getString(Acm.JSON_TYPE)));
-                node.setProperty("cm:name", id);
+                node.setProperty(Acm.ACM_CM_NAME, id);
                 node.setProperty(Acm.ACM_ID, id);
 //                // TODO temporarily set title - until we figure out how to use
 //                // sysml:name in repository browser
@@ -678,7 +678,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 reifiedNode = parent.createFolder(pkgName,
                         Acm.ACM_ELEMENT_FOLDER);
                 // reifiedNode.setProperty(Acm.ACM_ID, id);
-                reifiedNode.setProperty("cm:name", pkgName);
+                reifiedNode.setProperty(Acm.ACM_CM_NAME, pkgName);
                 reifiedNode.setProperty(Acm.ACM_NAME,
                         (String) node.getProperty(Acm.ACM_NAME));
             }

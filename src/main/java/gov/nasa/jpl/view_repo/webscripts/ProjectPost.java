@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.HashMap;
@@ -140,12 +141,12 @@ public class ProjectPost extends AbstractJavaWebScript {
 		
 		// create project if doesn't exist or update if fix is specified 
 		EmsScriptNode projectNode = findScriptNodeByName(projectId);
-		String projectName = jsonObject.getString("name");
+		String projectName = jsonObject.getString(Acm.JSON_NAME);
 		if (projectNode == null) {
-			projectNode = modelContainerNode.createFolder(projectId, "sysml:Project");
-			projectNode.setProperty("cm:title", projectName);
-			projectNode.setProperty("sysml:name", projectName);
-			projectNode.setProperty("sysml:id", projectId);
+			projectNode = modelContainerNode.createFolder(projectId, Acm.ACM_PROJECT);
+			projectNode.setProperty(Acm.ACM_CM_NAME, projectName);
+			projectNode.setProperty(Acm.ACM_NAME, projectName);
+			projectNode.setProperty(Acm.ACM_ID, projectId);
 			log(LogLevel.INFO, "Project created.\n", HttpServletResponse.SC_OK);
 		} else {
 			if (delete) {
@@ -153,9 +154,9 @@ public class ProjectPost extends AbstractJavaWebScript {
 				log(LogLevel.INFO, "Project deleted.\n", HttpServletResponse.SC_OK);
 			} else if (fix) {
 				if (checkPermissions(projectNode, PermissionService.WRITE)){ 
-					projectNode.createOrUpdateProperty("cm:title", projectName);
-					projectNode.createOrUpdateProperty("sysml:name", projectName);
-					projectNode.createOrUpdateProperty("sysml:id", projectId);
+					projectNode.createOrUpdateProperty(Acm.ACM_CM_NAME, projectName);
+					projectNode.createOrUpdateProperty(Acm.ACM_NAME, projectName);
+					projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
 					log(LogLevel.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
 				
 					if (checkPermissions(projectNode.getParent(), PermissionService.WRITE)) { 

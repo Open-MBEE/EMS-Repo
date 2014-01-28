@@ -83,9 +83,10 @@ public class Acm {
     public static String JSON_AUTHOR = "author";
     public static String JSON_PROPERTY_TYPE = "propertyType";
 
-    // ACM types
+    // ACM types with the different name spaces
     public static String SYSML = "sysml:";
     public static String VIEW = "view2:";
+    public static String CM = "cm:";
     
     public static String ACM_COMMENT = SYSML + JSON_COMMENT;
     public static String ACM_CONFORM = SYSML + JSON_CONFORM;
@@ -117,6 +118,7 @@ public class Acm {
     public static String ACM_DISPLAYED_ELEMENTS = VIEW + JSON_DISPLAYED_ELEMENTS;
     public static String ACM_NO_SECTIONS = VIEW + JSON_NO_SECTIONS;
     public static String ACM_VIEW_2_VIEW = VIEW + JSON_VIEW_2_VIEW;
+    public static String ACM_PRODUCT = VIEW + "Product";
     
     public static String ACM_EXPRESSION = SYSML + "string";
     public static String ACM_LITERAL_BOOLEAN = SYSML + "boolean";
@@ -127,12 +129,18 @@ public class Acm {
     public static String ACM_PROPERTY_TYPE = SYSML + JSON_PROPERTY_TYPE;
     
     public static String ACM_ELEMENT_FOLDER = SYSML + "ElementFolder";
+    public static String ACM_PROJECT = SYSML + "Project";
 
-    public static String CM = "cm:";
     public static String ACM_LAST_MODIFIED = CM + "modified";
     public static String ACM_AUTHOR = CM + "modifier";
     
-    // JSON to Alfresco Content Model mapping
+    public static String ACM_CM_NAME = CM + "name";
+    public static String ACM_CM_TITLE = CM + "title";
+    
+    
+    /**
+     *  JSON to Alfresco Content Model mapping
+     */
     public static final Map<String, String> JSON2ACM = new HashMap<String, String>() {
         private static final long serialVersionUID = -5467934440503910163L;
         {
@@ -172,7 +180,9 @@ public class Acm {
         }
     };
     
-    // Alfresco Content Model 2 JSON types
+    /**
+     *  Alfresco Content Model 2 JSON types
+     */
     public static final Map<String, String> ACM2JSON = new HashMap<String, String>() {
         private static final long serialVersionUID = -4682311676740055702L;
         {
@@ -193,7 +203,7 @@ public class Acm {
             put(ACM_NAME, JSON_NAME);
             put(ACM_SOURCE, JSON_SOURCE);
             put(ACM_TARGET, JSON_TARGET);
-//            put(ACM_VALUE_TYPE, JSON_VALUE_TYPE);
+//            put(ACM_VALUE_TYPE, JSON_VALUE_TYPE); // this is parsed differently so don't leave it in
             put(ACM_BODY, JSON_BODY);
             
             put(ACM_ALLOWED_ELEMENTS, JSON_ALLOWED_ELEMENTS);
@@ -210,7 +220,7 @@ public class Acm {
 
     
     /**
-     * Properties that should be JSONArrays rather than primitive types
+     * Properties that are JSONArrays rather than primitive types, so parsing is differnt
      */
     protected static final Set<String> JSON_ARRAYS = new HashSet<String>() {
          private static final long serialVersionUID = -2080928480362524333L;
@@ -225,7 +235,7 @@ public class Acm {
     };
     
     /**
-     * Properties to be displayed at all times
+     * Properties that are always serialized in JSON
      */
     protected static final Set<String> COMMON_JSON = new HashSet<String>() {
         private static final long serialVersionUID = 8715041115029041344L;
@@ -237,21 +247,18 @@ public class Acm {
     };
     
     /**
-     * Properties to be displayed when requesting Views
+     * Properties that are serialized when requesting Comments
      */
-    protected static final Set<String> VIEW_JSON = new HashSet<String>() {
-        private static final long serialVersionUID = -2080928480362524333L;
+    public static final Set<String> COMMENT_JSON = new HashSet<String>() {
+        private static final long serialVersionUID = -6102902765527909734L;
         {
-            add(JSON_DISPLAYED_ELEMENTS);
-            add(JSON_ALLOWED_ELEMENTS);
-            add(JSON_CHILDREN_VIEWS);
-            add(JSON_CONTAINS);
+            add(JSON_BODY);
             addAll(COMMON_JSON);
         }
     };
     
     /**
-     * Properties to be displayed when requesting Elements
+     * Properties that are serialized when when requesting Elements
      */
     protected static final Set<String> ELEMENT_JSON = new HashSet<String>() {
         private static final long serialVersionUID = -6771999751087714932L;
@@ -275,7 +282,7 @@ public class Acm {
     };
     
     /**
-     * Properties to be displayed when requesting Products
+     * Properties that are serialized when requesting Products
      */
     protected static final Set<String> PRODUCT_JSON = new HashSet<String>() {
         private static final long serialVersionUID = 3335972461663141541L;
@@ -288,31 +295,34 @@ public class Acm {
     };
     
     /**
-     * Display comment properties
+     * Properties that are serialized when requesting Views
      */
-    public static final Set<String> COMMENT_JSON = new HashSet<String>() {
-        private static final long serialVersionUID = -6102902765527909734L;
+    protected static final Set<String> VIEW_JSON = new HashSet<String>() {
+        private static final long serialVersionUID = -2080928480362524333L;
         {
-            add(JSON_BODY);
+            add(JSON_DISPLAYED_ELEMENTS);
+            add(JSON_ALLOWED_ELEMENTS);
+            add(JSON_CHILDREN_VIEWS);
+            add(JSON_CONTAINS);
             addAll(COMMON_JSON);
         }
     };
     
     /**
-     * Display all properties
+     * Serialize all properties
      */
     public static final Set<String> ALL_JSON = new HashSet<String>() {
         private static final long serialVersionUID = 494169408514256049L;
         {
-            addAll(VIEW_JSON);
+            addAll(COMMENT_JSON);
             addAll(ELEMENT_JSON);
             addAll(PRODUCT_JSON);
+            addAll(VIEW_JSON);
         }
     };
     
     /**
-     * Enum for specifying what property set to display
-     * @author cinyoung
+     * Enumeration for specifying which JSON serialization property set to use
      *
      */
     public static enum JSON_TYPE_FILTER {
@@ -325,11 +335,11 @@ public class Acm {
     public static final Map<JSON_TYPE_FILTER, Set<String>> JSON_FILTER_MAP = new HashMap<JSON_TYPE_FILTER, Set<String>>() {
         private static final long serialVersionUID = -2080928480362524333L;
         {
-            put(JSON_TYPE_FILTER.VIEW, VIEW_JSON);
-            put(JSON_TYPE_FILTER.ELEMENT, ELEMENT_JSON);
-            put(JSON_TYPE_FILTER.PRODUCT, PRODUCT_JSON);
             put(JSON_TYPE_FILTER.ALL, ALL_JSON);
             put(JSON_TYPE_FILTER.COMMENT, COMMENT_JSON);
+            put(JSON_TYPE_FILTER.ELEMENT, ELEMENT_JSON);
+            put(JSON_TYPE_FILTER.PRODUCT, PRODUCT_JSON);
+            put(JSON_TYPE_FILTER.VIEW, VIEW_JSON);
         }
     };
 }

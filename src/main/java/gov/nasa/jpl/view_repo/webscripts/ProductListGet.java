@@ -118,7 +118,7 @@ public class ProductListGet extends AbstractJavaWebScript {
 
 		
 	private void handleProductList() throws JSONException {
-	    String pattern = "ASPECT:\"" + "view2:Product" + "\"";
+	    String pattern = "ASPECT:\"" + Acm.ACM_PRODUCT + "\"";
         if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
             ResultSet resultSet = null;
             try {
@@ -147,7 +147,7 @@ public class ProductListGet extends AbstractJavaWebScript {
 
             EmsScriptNode parent = node.getParent();
             String parentId = (String)parent.getProperty(Acm.ACM_ID);
-            String parentName = (String)parent.getProperty("cm:name");
+            String parentName = (String)parent.getProperty(Acm.ACM_CM_NAME);
             if (parentName.contains("_pkg")) {
                 parentId = parentName.replace("_pkg", "");
             }
@@ -158,7 +158,7 @@ public class ProductListGet extends AbstractJavaWebScript {
             handleParents(node, "ViewEditor");
         }
         
-        productJson.put("name", projectNode.getProperty("cm:title"));
+        productJson.put("name", projectNode.getProperty(Acm.ACM_CM_TITLE));
         productJson.put("volumes", volumes);
         productJson.put("volume2volumes", volume2volumes);
         productJson.put("documents", documents);
@@ -170,7 +170,7 @@ public class ProductListGet extends AbstractJavaWebScript {
         String id = (String)node.getProperty(Acm.ACM_ID);
         String sysmlName = (String)node.getProperty(Acm.ACM_NAME);
         if (id == null) {
-            String cmName = (String)node.getProperty("cm:name");
+            String cmName = (String)node.getProperty(Acm.ACM_CM_NAME);
             id = cmName.replace("_pkg", "");
         }
         if (!documents.has(id)) {
@@ -180,7 +180,7 @@ public class ProductListGet extends AbstractJavaWebScript {
         EmsScriptNode parent = node.getParent();
         String parentSysmlName = (String)parent.getProperty(Acm.ACM_NAME);
         String parentId = (String)parent.getProperty(Acm.ACM_ID);
-        String parentCmName = (String)parent.getProperty("cm:name");
+        String parentCmName = (String)parent.getProperty(Acm.ACM_CM_NAME);
         if (parentCmName.contains("_pkg")) {
             parentId = parentCmName.replace("_pkg", "");
         }
@@ -189,7 +189,7 @@ public class ProductListGet extends AbstractJavaWebScript {
                 projectVolumes.put(id);
             }
         } else {
-            parentSysmlName = (String)parent.getProperty("cm:name");
+            parentSysmlName = (String)parent.getProperty(Acm.ACM_CM_NAME);
             if (parentSysmlName.contains("_pkg")) {
                 parentId = parentSysmlName.replace("_pkg", "");
             }
