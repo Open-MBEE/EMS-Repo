@@ -15,33 +15,60 @@
 		<version>1.0.2</version>
 	</parent>
 
-	<!-- | SDK properties have sensible defaults in the SDK parent, | but you 
-		can override the properties below to use another version. | For more available 
-		properties see the alfresco-sdk-parent POM. -->
-	<properties>
-		<!-- Defines the alfresco edition to compile against. Allowed values are 
-			[org.alfresco|org.alfresco.enterprise] -->
-		<alfresco.groupId>org.alfresco</alfresco.groupId>
-		<!-- Defines the alfresco version to compile against -->
-		<alfresco.version>4.2.c</alfresco.version>
-		<app.log.root.level>WARN</app.log.root.level>
-		<alfresco.data.location>alf_data_dev</alfresco.data.location>
-		<!-- Defines the target WAR artifactId to run this amp, only used with 
-			the -Pamp-to-war switch . | Allowed values: alfresco | share. Defaults to 
-			a repository AMP, but could point to your foundation WAR -->
-		<alfresco.client.war>alfresco</alfresco.client.war>
-		<!-- Defines the target WAR groupId to run this amp, only used with the 
-			-Pamp-to-war switch . | Could be org.alfresco | org.alfresco.enterprise or 
-			your corporate groupId -->
-		<alfresco.client.war.groupId>org.alfresco</alfresco.client.war.groupId>
-		<!-- Defines the target WAR version to run this amp, only used with the 
-			-Pamp-to-war switch -->
-		<alfresco.client.war.version>4.2.c</alfresco.client.war.version>
-		<!-- This controls which properties will be picked in src/test/properties 
-			for embedded run -->
-		<env>local</env>
-		<maven.test.skip>false</maven.test.skip>
-	</properties>
+<!-- <<<<<<< HEAD -->
+<!-- 	--> <!-- | SDK properties have sensible defaults in the SDK parent, | but you  -->
+<!-- 		can override the properties below to use another version. | For more available  -->
+<!-- 		properties see the alfresco-sdk-parent POM. --> -->
+<!-- 	<properties> -->
+<!-- 		--> <!-- Defines the alfresco edition to compile against. Allowed values are  -->
+<!-- 			[org.alfresco|org.alfresco.enterprise] --> -->
+<!-- 		<alfresco.groupId>org.alfresco</alfresco.groupId> -->
+<!-- 		--> <!-- Defines the alfresco version to compile against --> -->
+<!-- 		<alfresco.version>4.2.c</alfresco.version> -->
+<!-- 		<app.log.root.level>WARN</app.log.root.level> -->
+<!-- 		<alfresco.data.location>alf_data_dev</alfresco.data.location> -->
+<!-- 		--> <!-- Defines the target WAR artifactId to run this amp, only used with  -->
+<!-- 			the -Pamp-to-war switch . | Allowed values: alfresco | share. Defaults to  -->
+<!-- 			a repository AMP, but could point to your foundation WAR --> -->
+<!-- 		<alfresco.client.war>alfresco</alfresco.client.war> -->
+<!-- 		--> <!-- Defines the target WAR groupId to run this amp, only used with the  -->
+<!-- 			-Pamp-to-war switch . | Could be org.alfresco | org.alfresco.enterprise or  -->
+<!-- 			your corporate groupId --> -->
+<!-- 		<alfresco.client.war.groupId>org.alfresco</alfresco.client.war.groupId> -->
+<!-- 		--> <!-- Defines the target WAR version to run this amp, only used with the  -->
+<!-- 			-Pamp-to-war switch --> -->
+<!-- 		<alfresco.client.war.version>4.2.c</alfresco.client.war.version> -->
+<!-- 		--> <!-- This controls which properties will be picked in src/test/properties  -->
+<!-- 			for embedded run --> -->
+<!-- 		<env>local</env> -->
+<!-- 		<maven.test.skip>false</maven.test.skip> -->
+<!-- 	</properties> -->
+<!-- ======= -->
+    <!-- 
+       | SDK properties have sensible defaults in the SDK parent,
+       | but you can override the properties below to use another version. 
+       | For more available properties see the alfresco-sdk-parent POM. 
+       -->
+    <properties>
+        <!-- Defines the alfresco edition to compile against. Allowed values are [org.alfresco|org.alfresco.enterprise]--> 
+        <alfresco.groupId>org.alfresco</alfresco.groupId>
+        <!-- Defines the alfresco version to compile against -->
+        <alfresco.version>4.2.c</alfresco.version>
+        <app.log.root.level>WARN</app.log.root.level>
+        <alfresco.data.location>alf_data</alfresco.data.location>
+        <!-- Defines the target WAR artifactId to run this amp, only used with the -Pamp-to-war switch
+        .    | Allowed values: alfresco | share. Defaults to a repository AMP, but could point to your foundation WAR -->
+        <alfresco.client.war>alfresco</alfresco.client.war>
+        <!-- Defines the target WAR groupId to run this amp, only used with the -Pamp-to-war switch
+        .    | Could be org.alfresco | org.alfresco.enterprise or your corporate groupId -->
+        <alfresco.client.war.groupId>org.alfresco</alfresco.client.war.groupId>
+        <!-- Defines the target WAR version to run this amp, only used with the -Pamp-to-war switch -->
+        <alfresco.client.war.version>4.2.c</alfresco.client.war.version>
+        <!-- This controls which properties will be picked in src/test/properties for embedded run -->
+        <env>local</env>
+        <maven.test.skip>false</maven.test.skip>
+    </properties>
+<!-- >>>>>>> refs/remotes/origin/refactor -->
 
 	<!-- Here we realize the connection with the Alfresco selected platform 
 		(e.g.version and edition) -->
@@ -70,6 +97,22 @@
 			<groupId>${alfresco.groupId}</groupId>
 			<artifactId>alfresco-repository</artifactId>
             <version>${alfresco.version}</version>
+<!-- <<<<<<< HEAD -->
+<!-- ======= -->
+        </dependency>
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>1.8.4</version>
+			<scope>test</scope>
+<!-- >>>>>>> refs/remotes/origin/refactor -->
 		</dependency>
         <dependency>
         	<groupId>${alfresco.groupId}</groupId>
@@ -243,6 +286,23 @@
 							</resources>
 						</configuration>
 					</execution>
+					<!-- Alfresco Maven plugin corrupts libraries too - so make sure to copy them over -->
+					<execution>
+						<id>copy-lib-resources</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<overwrite>true</overwrite>
+							<outputDirectory>${project.build.directory}/${project.build.finalName}/lib</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/src/main/amp/lib</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
@@ -259,27 +319,39 @@
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											build-helper-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.8,)
-										</versionRange>
-										<goals>
-											<goal>
-												add-test-resource
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
+<!-- <<<<<<< HEAD -->
+<!-- 											org.codehaus.mojo -->
+<!-- 										</groupId> -->
+<!-- 										<artifactId> -->
+<!-- 											build-helper-maven-plugin -->
+<!-- 										</artifactId> -->
+<!-- 										<versionRange> -->
+<!-- 											[1.8,) -->
+<!-- 										</versionRange> -->
+<!-- 										<goals> -->
+<!-- 											<goal> -->
+<!-- 												add-test-resource -->
+<!-- 											</goal> -->
+<!-- 										</goals> -->
+<!-- 									</pluginExecutionFilter> -->
+<!-- 									<action> -->
+<!-- 										<ignore></ignore> -->
+<!-- 									</action> -->
+<!-- 								</pluginExecution> -->
+<!-- 								<pluginExecution> -->
+<!-- 									<pluginExecutionFilter> -->
+<!-- 										<groupId> -->
+<!-- 											org.alfresco.maven.plugin -->
+<!-- 										</groupId> -->
+<!-- 										<artifactId> -->
+<!-- 											alfresco-maven-plugin -->
+<!-- 										</artifactId> -->
+<!-- 										<versionRange> -->
+<!-- 											[1.0.2,) -->
+<!-- 										</versionRange> -->
+<!-- 										<goals> -->
+<!-- 											<goal>set-version</goal> -->
+<!-- ======= -->
 											org.alfresco.maven.plugin
 										</groupId>
 										<artifactId>
@@ -290,6 +362,28 @@
 										</versionRange>
 										<goals>
 											<goal>set-version</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.codehaus.mojo
+										</groupId>
+										<artifactId>
+											build-helper-maven-plugin
+										</artifactId>
+										<versionRange>
+											[1.7,)
+										</versionRange>
+										<goals>
+											<goal>
+												add-test-resource
+											</goal>
+<!-- >>>>>>> refs/remotes/origin/refactor -->
 										</goals>
 									</pluginExecutionFilter>
 									<action>

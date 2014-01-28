@@ -1,0 +1,19 @@
+<webscript> 
+  <shortname>Get Element</shortname> 
+  <description>
+  	Get element information.
+  </description>
+  <url>/javawebscripts/element/search?keyword={keyword}</url>
+  <format default="json">any</format> 
+  <authentication>user</authentication> 
+  <transaction allow="readonly">required</transaction>
+  <family>EMS Java Webscripts</family>
+  <args>
+  	<arg>
+  		<name>keyword</name>
+  		<description>
+  		Search for keyword in Alfresco
+  		</description>
+  	</arg>
+  </args>
+</webscript>

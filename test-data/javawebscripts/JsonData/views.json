@@ -1,0 +1,18 @@
+{ "views":
+	[
+		{
+		"id": "301",
+		"displayedElements": ["302", "303"],
+		"allowedElements": ["302", "303"],
+		"childrenViews": ["304"],
+		"contains": [
+		{
+		"type": "Paragraph",
+		"sourceType": "reference",
+		"source": "301",
+		"sourceProperty": "documentation"
+		}
+		]
+		}
+	]
+}

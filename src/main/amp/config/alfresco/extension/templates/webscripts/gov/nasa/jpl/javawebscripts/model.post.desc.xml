@@ -1,78 +1,46 @@
 <webscript> 
-  <shortname>Post View</shortname> 
-  <description>Handles posting of model from magicdraw
-  	use cases: 
-  		- initialize model package hierarchy
-  		- post elements inside packages
-  		- post relationships between elements
-  		
-   the createRoots flag determines whether the root should be created at the project root if not found
-   the goal is to reuse the same json structure for any load or update model scenario
-   envisioned use case for initial model load:
-   		1. project is initialized already
-   		2. the model package structure is posted - here the root elements are the root packages and all elements being packages, createRoots is true
-   		3. the rest of the elements are posted, either at each package or all packages, the root elements determine where to start but createRoots is false
-   			(the roots here are not necessarily root packages of the model) - this allows model load to be done incrementally
-   		4. relationships can be posted separately or with 3, handle relationships last
-   	use case for updating model:
-   		1. there are some changes on magicdraw - new elements or moved elements within a project
-   		2. roots determine where to start - update model element hierarchy, createRoots is false, if any element besides root is not found, create it
-   		3. for updates it's possible to post the whole model, follow the same order of ops as model load
-  	it may be possible for the initial load json to include everything, and we just split them into smaller transactions on server side
-  	
-  	Additional arguments can be toggled if toggleChoice=true to simply tell Alfresco which parts of the model to load. e.g. load only elements if
-  	toggleChoice=true&amp;elements=true
+  <shortname>Post Element</shortname> 
+  <description>
+  Post elements to the project
   </description>
-  <url>/javawebscripts/sites/{siteName}/projects/{projectId}/model?createRoots={createRoots?}&amp;hierarchy={hierarchy?}&amp;elements={elements?}&amp;relationshipElements={relationshipElements?}&amp;propertyTypes={propertyTypes?}&amp;elementValues={elementValues?}&amp;roots={roots?}&amp;toggleChoices{toggleChoices?}</url>
+  <url>/javawebscripts/sites/{siteName}/projects/{projectId}/elements</url>
   <format default="json">any</format> 
-  <authentication>user</authentication> 
-  <transaction allow="readwrite">required</transaction>
+  <authentication>user</authentication>
+  <transaction>none</transaction>
   <family>EMS Java Webscripts</family>
   <args>
   	<arg>
   		<name>posted content</name>
   		<description>The request body of the post as json:
   		{
-  			"roots": [elementId, ...],
-  			"elementHierarchy": {
-  				elementId: [childElementId, ...],
-  				...
-  			},
-  			"elements": {
-  				elementId: {
+  			"elements": [
+  				{
+  					"id": elementId,
   					"type": "Package" | "Property" | "Element" | 
   							"Dependency" | "Generalization" | "DirectedRelationship" | 
-  							"Conform" | "Expose" | "Viewpoint",
+  							"Conform" | "Expose" | "Viewpoint" | "Comment",
   					"name": name,
   					"documentation": documentation,
-  					"owner": elementId,
-  					"isView": true|false,
-  					"isDerived": true|false, (if Property)
-  					"isSlot": true|false, (if Property)
-  					"boolean": [true|false], (if Property)
-  					"string": [string], (if Property)
-  					"integer": [int], (if Property)
-  					"double": [double], (if Property)
-  					"expression": [string], (if Property)
+  					"owner": elementId/null,
+  					
+  					//************** if type is "Property" ******/
+  					"propertyType": elementId/null;
+  					"isDerived": true|false, 
+  					"isSlot": true|false, 
+  					"value": [?], (based on valueType)
   					"valueType": "LiteralBoolean" | "LiteralInteger" | "LiteralString" | 
-  							"LiteralReal" | "ElementValue" | "Expression" (if Property)
+  							"LiteralReal" | "ElementValue" | "Expression",
+  					
+  					//*************** if type is subtype of DirectedRelationship (Generalization/Expose/Conform/Dependency) ***/
+  					"source": elementId,
+  					"target": elementId
+  					
+  					//*************** if type is Comment *******/
+  					"body": body
+  					"annotatedElements": [elementId, ...]
   				},
   				...
-  			}
-  			"relationships": {
-  				"relationshipElements": {
-  					relationshipElementId: {"source": sourceElementId, "target": targetElementId},
-  					...
-  				},
-  				"propertyTypes": {
-  					propertyElementId: typeElementId, //for Property to the property type
-  					...
-  				},
-  				"elementValues": {
-  					propertyElementId: [elementId], //for property with ElementValue as value types, the value is a noderef
-  					...
-  				}
-  			}
+  			]
   		}
   		</description>
   	</arg>

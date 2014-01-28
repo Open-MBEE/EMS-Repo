@@ -51,10 +51,11 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
+@Deprecated
 public class JwsUtil {
 	// injected
 	private Boolean useFoundationalApi = true;
-	private int transactionInterval = 200;
+	private int transactionInterval = 500;
 	protected ServiceRegistry services = null;
 
 	// internal
@@ -230,14 +231,8 @@ public class JwsUtil {
 				if (length > 0) {
 					int max = start + range > length ? length : start + range;
 					
-					if (object instanceof JSONObject) {
-						JSONObject jsonObject = (JSONObject) object;
-						JSONArray keys = jsonObject.names();
-						for (int ii = start; ii < max; ii++) {
-							functor.execute(jsonObject, (String)keys.get(ii), flags);
-						}
-					} else if (object instanceof JSONArray) {
-						JSONArray jsonArray = (JSONArray) object;
+					if (object instanceof JSONArray) {
+					    JSONArray jsonArray = (JSONArray) object;
 						for (int ii = start; ii < max; ii++) {
 							functor.execute(jsonArray, ii, flags);
 						}
@@ -271,7 +266,7 @@ public class JwsUtil {
 	 * @param object	JSON thing to get length of
 	 * @return	length of JSON thing, -1 if not JSON thing
 	 */
-	private int getJSONLength(Object object) {
+	public int getJSONLength(Object object) {
 		if (object instanceof JSONObject) {
 			return ((JSONObject)object).length();
 		} else if (object instanceof JSONArray) {

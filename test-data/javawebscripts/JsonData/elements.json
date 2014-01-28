@@ -1,0 +1,11 @@
+{ "elements" : [
+
+{"documentation" : "something", "id":"300", "isDerived":false, "name":"300", "owner"="null", "type": "Property", "value" : ["dlam"], "valueType" : "LiteralString"},
+{"documentation" : "else", "id":"301", "isDerived":false, "name":"301", "owner"="300", "type": "Property", "value" : ["dlam"], "valueType" : "LiteralString"},
+{"documentation" : "to", "id":"302", "isDerived":false, "name":"302", "owner"="301", "type": "Property", "value" : ["dlam"], "valueType" : "LiteralString"},
+{"documentation" : "talk", "id":"303", "isDerived":false, "name":"303", "owner"="302", "type": "Property", "value" : ["dlam"], "valueType" : "LiteralString"},
+{"documentation" : "about", "id":"304", "isDerived":false, "name":"304", "owner"="303", "type": "Property", "value" : ["dlam"], "valueType" : "LiteralString"},
+
+{"documentation" :"directed_relationship", "id":"400","owner":"300","type":"DirectedRelationship","source":"302","target":"303", "name":"400", "propertyType":null},
+{"documentation" :"element values", "id":"600","owner":null,"type":"Property","valueType":"ElementValue","value":["300","302"], "name":"600", "propertyType"="304"},
+]}
