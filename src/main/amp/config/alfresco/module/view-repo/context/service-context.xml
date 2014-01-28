@@ -104,11 +104,11 @@
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.post"
-		class="gov.nasa.jpl.view_repo.webscripts.ViewPostJson"
+		class="gov.nasa.jpl.view_repo.webscripts.ViewPost"
 		parent="webscript">
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
-        <property name="jwsUtil" ref="jwsUtil" />
+<!--         <property name="jwsUtil" ref="jwsUtil" /> -->
 	</bean>
 	
 	<!--  utility bean for checking user site permissions: also expose a webscript base object -->
