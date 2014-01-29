@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.web.app.Application;
 import org.springframework.extensions.webscripts.Cache;
@@ -52,14 +53,14 @@ public class LogoutWebScript extends DeclarativeWebScript {
 			Status status, Cache cache) {
 		logout(req);
 		
-		String next = "%2Fview-repo%2Fwcs%2Fui%2F";
+		String next = getServicePath(req.getServiceContextPath()) + "%2Fwcs%2Fui%2F";
 		
 		if (req.getParameter(NEXT_PARAM) != null) {
 			next = req.getParameter(NEXT_PARAM);
 		}
 		
 		// set redirection parameters
-		status.setCode(307);
+		status.setCode(HttpServletResponse.SC_TEMPORARY_REDIRECT);
 		status.setRedirect(true);
 		status.setLocation(req.getServerPath() + getServicePath(req.getServiceContextPath()) 
 				+ "/faces/jsp/login.jsp?_alfRedirect=" + next);

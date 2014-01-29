@@ -29,22 +29,16 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
-import org.alfresco.repo.jscript.ScriptNode;
-import org.alfresco.service.cmr.repository.AssociationRef;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.InvalidNodeRefException;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.site.SiteInfo;
-import org.alfresco.service.namespace.QName;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,54 +52,51 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ModelGet extends AbstractJavaWebScript {
+    // injected via spring configuration
+    protected boolean isViewRequest = false;
+    
 	private JSONObject elementHierarchy = new JSONObject();
-	private JSONObject elements = new JSONObject();
-	private JSONObject relationships = new JSONObject();
-	private ScriptNode projectNode = null;
-	private Map<String, NodeRef> viewedElements = new HashMap<String, NodeRef>();
-	private Set<String> viewedRelationships = new HashSet<String>();
-	private Set<String> viewedProperties = new HashSet<String>();
+	protected JSONArray elements = new JSONArray();
+	private EmsScriptNode modelRootNode = null;
+	protected Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
 
-	private void clearCaches() {
-		response = new StringBuffer();
+	
+	@Override
+	protected void clearCaches() {
+		super.clearCaches();
 		elementHierarchy = new JSONObject();
-		elements = new JSONObject();
-		relationships = new JSONObject();
-		viewedElements = new HashMap<String, NodeRef>();
-		viewedProperties = new HashSet<String>();
-		viewedRelationships = new HashSet<String>();
+		elements = new JSONArray();
+		elementsFound = new HashMap<String, EmsScriptNode>();
 	}
+
 	
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		String siteName = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.SITE_NAME);
-		if (!JwsRequestUtils.validateRequestVariable(status, response, siteName, JwsRequestUtils.SITE_NAME)) {
-			return false;
-		} 
-
-		String projectId = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.PROJECT_ID);
-		if (!JwsRequestUtils.validateRequestVariable(status, response, projectId, JwsRequestUtils.PROJECT_ID)) {
+		String modelId = req.getServiceMatch().getTemplateVars().get("modelid");
+		if (modelId == null) {
+			modelId = req.getServiceMatch().getTemplateVars().get("elementid");
+		}
+		
+		if (!checkRequestVariable(modelId, "modelid")) {
+			log(LogLevel.ERROR, "Element id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
 			return false;
 		}
-
-		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-		if (!JwsRequestUtils.validateSiteExists(siteInfo, status, response)) {
+		
+		modelRootNode = findScriptNodeByName(modelId);
+		if (modelRootNode == null) {
+			log(LogLevel.ERROR, "Element not found with id: " + modelId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
 		}
-				
-		if (!JwsRequestUtils.validatePermissions(req, status, response, services, siteInfo.getNodeRef(), "Read")) {
-			return false;
-		}
-
-		ScriptNode siteNode = getSiteNode(siteName);
-		projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
-		if (projectNode == null) {
+		
+		// TODO: need to check permissions on every node ref - though it looks like this might throw an error
+		if (!checkPermissions(modelRootNode, PermissionService.READ)) {
 			return false;
 		}
 		
 		return true;
 	}
 
+	
 	/**
 	 * Entry point
 	 */
@@ -116,175 +107,153 @@ public class ModelGet extends AbstractJavaWebScript {
 		
 		Map<String, Object> model = new HashMap<String, Object>();
 
+		boolean recurse = checkArgEquals(req, "recurse", "true") ? true : false;
+		
 		if (validateRequest(req, status)) {
 			try {
-				handleElementHierarchy(projectNode.getNodeRef());
+				if (isViewRequest) {
+					handleViewHierarchy(modelRootNode, recurse);
+				} else {
+					handleElementHierarchy(modelRootNode, recurse);
+				}
 				handleElements();
-				handleRelationships();
-			} catch (InvalidNodeRefException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		
 		JSONObject top = new JSONObject();
 		try {
-			top.put("elementHierarchy", elementHierarchy);
-			top.put("elements", elements);
-			top.put("relationships", relationships);
+		    if (elements.length() > 0) {
+		        top.put("elements", elements);
+	            model.put("res", top.toString(4));
+		    } else {
+		        log(LogLevel.WARNING, "Element not found", HttpServletResponse.SC_NOT_FOUND);
+		        model.put("res", response.toString());
+		    }
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		try {
-			model.put("res", top.toString(4));
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+				
+		status.setCode(responseStatus.getCode());
 		return model;
 	}
 
 
-	private void handleElementHierarchy(NodeRef root) throws JSONException {
-		// ScriptNodes don't work for some reason.. always get Null pointer exception, looks like some timing issues
-		NodeService nodeService = services.getNodeService();
-		QName sysmlElementFolder = jwsUtil.createQName("sysml:ElementFolder");
-		QName sysmlId = jwsUtil.createQName("sysml:id");
-		QName cmName = jwsUtil.createQName("cm:name");
-		JSONArray array = new JSONArray();
-		
-		// child associations returns Map<String, Object> where String is the QName association type)
-		// Object is an ArrayList of the ScriptNodes with the specified association type
-		List<ChildAssociationRef> childrenAssocs = nodeService.getChildAssocs(root);
-		for (ChildAssociationRef assoc: childrenAssocs) {
-			NodeRef child = assoc.getChildRef();
-			if (nodeService.getType(child).equals(sysmlElementFolder)) {
-				handleElementHierarchy(child);
-			} else {
-				String value = (String)nodeService.getProperty(child, sysmlId);
-				if (value != null) {
-					array.put(value);
-					viewedElements.put(value, child);
+	/**
+	 * Recurse a view hierarchy to get all allowed elements
+	 * @param root		Root view to find elements for
+	 * @param recurse	If true, find elements for children views
+	 * @throws JSONException	JSON element creation error
+	 */
+	protected void handleViewHierarchy(EmsScriptNode root, boolean recurse) throws JSONException {
+		Object allowedElements = root.getProperty(Acm.ACM_ALLOWED_ELEMENTS);
+		if (allowedElements != null) {
+			JSONArray childElementJson = new JSONArray(allowedElements.toString());
+			for (int ii = 0; ii < childElementJson.length(); ii++) {
+				String id = childElementJson.getString(ii);
+				EmsScriptNode childElement = findScriptNodeByName(id);
+				// TODO Need to report that allowedElements can't be found
+				if (childElement != null) {
+        				if (checkPermissions(childElement, PermissionService.READ)) {
+        				    elementsFound.put(id, childElement);
+        				}
+				}
+			}
+			if (recurse) {
+				Object childrenViews = root.getProperty(Acm.ACM_CHILDREN_VIEWS);
+				if (childrenViews != null) {
+					JSONArray childViewJson = new JSONArray(childrenViews.toString());
+					for (int ii = 0; ii < childViewJson.length(); ii++) {
+						String id = childViewJson.getString(ii);
+						EmsScriptNode childView = findScriptNodeByName(id);
+						if (childView != null) {
+        						if (checkPermissions(childView, PermissionService.READ)) {
+        						    handleViewHierarchy(childView, recurse);
+        						}
+						}
+					}
 				}
 			}
 		}
+	}
+	
+	
+	/**
+	 * Build up the element hierarchy from the specified root
+	 * @param root		Root node to get children for
+	 * @throws JSONException
+	 */
+	protected void handleElementHierarchy(EmsScriptNode root, boolean recurse) throws JSONException {
+		JSONArray array = new JSONArray();
 		
-		// if there were any children add them to the hierarchy object
-		if (array.length() > 0) {
-			String key = (String)nodeService.getProperty(root, sysmlId);
-			if (nodeService.getType(root).equals(sysmlElementFolder) && key == null) {
-				key = nodeService.getProperty(root, cmName).toString().replace("_pkg", "");
+		// add root element to elementsFound if its not already there (if it's there, it's probably because the root is a reified pkg node)
+		String sysmlId = (String)root.getProperty(Acm.ACM_ID);
+		if (!elementsFound.containsKey(sysmlId)) {
+		    // dont add reified packages
+		    if (!((String)root.getProperty("cm:name")).contains("_pkg")) {
+		        elementsFound.put((String)root.getProperty(Acm.ACM_ID), root);
+		    }
+		}
+
+		if (recurse) {
+			// find all the children, recurse or add to array as needed
+		    // TODO: figure out why the child association creation from the reification isn't being picked up
+		    String rootName = (String)root.getProperty("cm:name");
+		    if (!rootName.contains("_pkg")) {
+		        EmsScriptNode reifiedNode = findScriptNodeByName(rootName + "_pkg");
+		        if (reifiedNode != null) {
+		            handleElementHierarchy(reifiedNode, recurse);
+		        }
+		    } 
+			for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
+				EmsScriptNode child = new EmsScriptNode(assoc.getChildRef(), services, response);
+				if (checkPermissions(child, PermissionService.READ)) {
+			       if (child.getTypeShort().equals(Acm.ACM_ELEMENT_FOLDER)) {
+						handleElementHierarchy(child, recurse);
+    			   } else {
+    					String value = (String)child.getProperty(Acm.ACM_ID);
+    					if (value != null) {
+    						array.put(value);
+    						elementsFound.put(value, child);
+    						// add empty hierarchies as well
+    						elementHierarchy.put(value, new JSONArray());
+    					}
+    			   }
+				}
 			}
+	    	
+			// if there were any children add them to the hierarchy object
+			String key = (String)root.getProperty(Acm.ACM_ID);
+			if (root.getTypeShort().equals(Acm.ACM_ELEMENT_FOLDER) && key == null) {
+				// TODO this is temporary? until we can get sysml:id from Element Folder?
+				key = root.getProperty("cm:name").toString().replace("_pkg", "");
+			}
+			
 			elementHierarchy.put(key, array);
 		}
 	}
 	
-	private void handleElements() throws JSONException {
-		NodeService nodeService = services.getNodeService();
-		QName sysmlRelationship = jwsUtil.createQName("sysml:DirectedRelationship");
-		QName sysmlProperty = jwsUtil.createQName("sysml:Property");
-		
-		for (String id: viewedElements.keySet()) {
-			NodeRef node = viewedElements.get(id);
-			JSONObject element = new JSONObject();
-			
-			QName nodeType = nodeService.getType(node);
-			element.put("type", nodeType.getLocalName());
-			
-			// check for relationships to be handled later
-			if (isSubType(nodeType, sysmlRelationship)) {
-				viewedRelationships.add(id);
-			} else if (isSubType(nodeType, sysmlProperty)) {
-				viewedProperties.add(id);
+	/**
+	 * Build up the element JSONObject
+	 * @throws JSONException
+	 */
+	protected void handleElements() throws JSONException {
+		for (String id: elementsFound.keySet()) {
+			EmsScriptNode node = elementsFound.get(id);
+
+			if (checkPermissions(node, PermissionService.READ)){ 
+                elements.put(node.toJSONObject(Acm.JSON_TYPE_FILTER.ELEMENT));
 			}
-			
-			// lets grab all the property values
-			for (String acmType: acm2json.keySet()) {
-				element.put(acm2json.get(acmType), nodeService.getProperty(node, jwsUtil.createQName(acmType)));
-			}
-			
-			// check if it's a view
-			if (nodeService.hasAspect(node, jwsUtil.createQName("sysml:View"))) {
-				element.put("isView", true);
-			} else {
-				element.put("isView", false);
-			}
-			
-			// add owner
-			String owner = ((String)nodeService.getProperty(nodeService.getPrimaryParent(node).getParentRef(), jwsUtil.createQName("cm:name"))).replace("_pkg", "");
-			element.put("owner", owner);
-			// TODO perhaps get the sysml id onto the reified container as well?
-//			element.put("owner", nodeService.getProperty(nodeService.getPrimaryParent(node).getParentRef(), jwsUtil.createQName("sysml:id")));
-			
-			elements.put(id, element);
 		}
 	}
-
-	private void handleRelationships() throws JSONException {
-		handleElementRelationships();
-		handlePropertyTypes();
-		handleElementValues();
-	}
+		
 	
-	private void handleElementValues() throws JSONException {
-		NodeService nodeService = services.getNodeService();
-		QName sysmlId = jwsUtil.createQName("sysml:id");
-
-		JSONObject elementValues = new JSONObject();
-		for (String id: viewedProperties) {
-			NodeRef node = viewedElements.get(id);
-			@SuppressWarnings("unchecked")
-			ArrayList<NodeRef> values = (ArrayList<NodeRef>)nodeService.getProperty(node, jwsUtil.createQName("sysml:elementValue"));
-			if (values != null) {
-				JSONArray array = new JSONArray();
-				for (NodeRef value: values) {
-					array.put((String)nodeService.getProperty(value, sysmlId));
-				}
-				elementValues.put(id, array);
-			}
-		}
-		relationships.put("elementValues", elementValues);
-	}
-
-	private void handlePropertyTypes() throws JSONException {
-		NodeService nodeService = services.getNodeService();
-		QName sysmlId = jwsUtil.createQName("sysml:id");
-		
-		JSONObject propertyTypes = new JSONObject();
-		for (String id: viewedProperties) {
-			NodeRef node = viewedElements.get(id);
-			AssociationRef sysmlType = getAssociation(node, "sysml:type");
-			if (sysmlType != null) {
-				propertyTypes.put(id, nodeService.getProperty(sysmlType.getTargetRef(), sysmlId));
-			}
-		}
-		relationships.put("propertyTypes", propertyTypes);
-	}
-
-	private void handleElementRelationships() throws JSONException {
-		NodeService nodeService = services.getNodeService();
-		QName sysmlId = jwsUtil.createQName("sysml:id");
-
-		// handle relationship elements, property types and element values
-		JSONObject relationshipElements = new JSONObject();
-		for (String id: viewedRelationships) {
-			NodeRef node = viewedElements.get(id);
-			AssociationRef sysmlSource = getAssociation(node, "sysml:source");
-			AssociationRef sysmlTarget = getAssociation(node, "sysml:target");
-
-			JSONObject relationshipElement = new JSONObject();
-			relationshipElement.put("source", nodeService.getProperty(sysmlSource.getTargetRef(), sysmlId));
-			relationshipElement.put("target", nodeService.getProperty(sysmlTarget.getTargetRef(), sysmlId));
-			relationshipElements.put(id, relationshipElement);
-		}
-		relationships.put("relationshipElements", relationshipElements);
-	}
-
-	private boolean isSubType(QName className, QName ofClassName) {
-		return services.getDictionaryService().isSubClass(className, ofClassName);
+	/**
+	 * Need to differentiate between View or Element request - specified during Spring configuration
+	 * @param flag
+	 */
+	public void setIsViewRequest(boolean flag) {
+	    isViewRequest = flag;
 	}
 }

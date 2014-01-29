@@ -29,14 +29,22 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import java.io.Serializable;
+import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
-import org.alfresco.repo.jscript.ScriptNode;
+import javax.servlet.http.HttpServletResponse;
+import javax.transaction.UserTransaction;
+
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,397 +54,743 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
- * Descriptor file: /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/model.post.desc.xml
+ * Descriptor file:
+ * /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts
+ * /gov/nasa/jpl/javawebscripts/model.post.desc.xml
+ * 
+ * NOTE: Transactions are independently managed in this Jave webscript, so make
+ * sure that the descriptor file has transactions set to none
+ * 
  * @author cinyoung
  * 
- * TODO Need merge? and force? similar to View?
- *
+ *         TODO Need merge? and force? similar to View?
+ * 
  */
 public class ModelPost extends AbstractJavaWebScript {
-	private ScriptNode projectNode = null;
-	
-	private final String ROOTS = "roots";
-	private final String ELEMENT_HIERARCHY = "elementHierarchy";
-	private final String ELEMENTS = "elements";
-	private final String RELATIONSHIPS = "relationships";
-	
-	// NOTE: Order is necessary
-	private final String[] JSON_ELEMENTS = {ELEMENTS, ROOTS, ELEMENT_HIERARCHY, RELATIONSHIPS};
-	private boolean createRoots = false;
-	private boolean useHierarchy=true;
-	private boolean useElements=true;
-	private boolean useRelationshipElements=true;
-	private boolean usePropertyTypes=true;
-	private boolean useElementValues=true;
-	private boolean useRoots=true;
-	private boolean toggleChoices = false;
-	
-	/**
-	 * Parse the URL request variables so they're globally available
-	 * @param req	URL request to parse
-	 */
-	private void parseRequestVariables(WebScriptRequest req) {
-		createRoots = jwsUtil.checkArgEquals(req, "createRoots", "true") ? true : false;
-		
-		toggleChoices = jwsUtil.checkArgEquals(req, "toggleChoices", "true") ? true : false;
-		if (toggleChoices) {
-			useHierarchy = jwsUtil.checkArgEquals(req, "hierarchy", "true") ? true : false;
-			useElements = jwsUtil.checkArgEquals(req, "elements", "true") ? true : false;
-			useRelationshipElements = jwsUtil.checkArgEquals(req, "relationshipElements", "true") ? true : false;
-			usePropertyTypes = jwsUtil.checkArgEquals(req, "propertyTypes", "true") ? true : false;
-			useElementValues = jwsUtil.checkArgEquals(req, "elementValues", "true") ? true : false;
-			useRoots = jwsUtil.checkArgEquals(req, "roots", "true") ? true : false;
-		}
-	}
-	
-	/**
-	 * Create or update the model as necessary based on the request
-	 * @param req			Request used to create/update the model
-	 * @param status		Status to be updated
-	 * @throws JSONException	Parse error
-	 */
-	private void createOrUpdateModel(WebScriptRequest req, Status status) throws JSONException {
-		// clear out the response cache first (only one instance of each webscript)
-		response = new StringBuffer();
+    private EmsScriptNode projectNode = null;
 
-		JSONObject postJson = (JSONObject)req.parseContent();
+    private final String ELEMENTS = "elements";
 
-		// cycle through all the expected JSON element top level types, this will cycle in correct order
-		for (String element: JSON_ELEMENTS) {
-			if (!postJson.has(element)) {
-				continue;
-			}
-			
-			Object object = postJson.get(element);
-			if (element.equals(ELEMENTS) && useElements) {
-				jwsUtil.splitTransactions(new JwsFunctor() {
-					@Override
-					public Object execute(JSONObject jsonObject, String key,
-							Boolean... flags) throws JSONException {
-						updateOrCreateElement(jsonObject, key);
-						return null;
-					}
-					@Override
-					public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
-						// do nothing, not called
-						return null;
-					}
-				}, object);
-			} else if (element.equals(ROOTS) && useRoots) {
-				jwsUtil.splitTransactions(new JwsFunctor() {
-					@Override
-					public Object execute(JSONObject jsonObject, String key,
-							Boolean... flags) throws JSONException {
-						// do nothing, not called
-						return null;
-					}
-					@Override
-					public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
-						updateOrCreateRoot(jsonArray, index, flags[0]);
-						return null;
-					}
-				}, object, createRoots);
-			} else if (element.equals(ELEMENT_HIERARCHY) && useHierarchy) {
-				jwsUtil.splitTransactions(new JwsFunctor() {
-					@Override
-					public Object execute(JSONObject jsonObject, String key,
-							Boolean... flags) throws JSONException {
-						updateOrCreateElementHierarchy(jsonObject, key);
-						return null;
-					}
-					@Override
-					public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
-						// do nothing, not called
-						return null;
-					}
-				}, object);
-			} else if (element.equals(RELATIONSHIPS)) {
-				// TODO split this out updating the separate relationships underneath
-				jwsUtil.splitTransactions(new JwsFunctor() {
-					@Override
-					public Object execute(JSONObject jsonObject, String key,
-							Boolean... flags) throws JSONException {
-						updateOrCreateRelationships(jsonObject, key);
-						return null;
-					}
-					@Override
-					public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException {
-						// do nothing, not called
-						return null;
-					}
-				}, object);
-			}
-		}
-	}
-	
-	/**
-	 * Update or create relationships
-	 * @param jsonObject	Input data to generate relationships from
-	 * @param key			The relationship type (e.g., relationshipElements, projectTypes, or elementValues)
-	 * @throws JSONException
-	 */
-	protected void updateOrCreateRelationships(JSONObject jsonObject, String key) throws JSONException {
-		JSONObject object = jsonObject.getJSONObject(key);
-		Iterator<?> ids = object.keys();
-		while (ids.hasNext()) {
-			String id = (String)ids.next();
-			if (key.equals("relationshipElements") && useRelationshipElements) {
-				updateOrCreateRelationship(object.getJSONObject(id), id);
-			} else if (key.equals("propertyTypes") && usePropertyTypes) {
-				updateOrCreatePropertyType(object.getString(id), id);
-			} else if (key.equals("elementValues") && useElementValues) {
-				updateOrCreateElementValues(object.getJSONArray(id), id);
-			}
-		}
-	}
+    /**
+     * JSONObject of element hierarchy 
+     * { 
+     *  elementId: [childElementId, ...], 
+     *  ...
+     * },
+     */
+    private JSONObject elementHierarchyJson;
 
-	/**
-	 * Update or create element values (multiple noderefs ordered in a list)
-	 * @param jsonArray		Array of the IDs that house the values for the element
-	 * @param id			The ID of the element to add the values to
-	 * @throws JSONException
-	 */
-	private void updateOrCreateElementValues(JSONArray jsonArray, String id) throws JSONException {
-		ScriptNode element = findNodeWithName(id);
-		
-		// create an array of the values to be added in as the elementValue property
-		ArrayList<NodeRef> values = new ArrayList<NodeRef>();
-		for (int ii = 0; ii < jsonArray.length(); ii++) {
-			ScriptNode value = findNodeWithName(jsonArray.getString(ii));
-			values.add(value.getNodeRef());
-		}
-		
-		// only change if old list is different than new
-		@SuppressWarnings("unchecked")
-		ArrayList<NodeRef> oldValues = (ArrayList<NodeRef>)jwsUtil.getNodeProperty(element, "sysml:elementValue");
-		if (!checkIfListsEquivalent(values, oldValues)) {
-			jwsUtil.setNodeProperty(element, "sysml:elementValue", values);
-		}
-	}
+    /**
+     * JSONObject of the relationships
+     * "relationshipElements": {
+     *      relationshipElementId: {
+     *          "source": sourceElementId,
+     *          "target": targetElementId
+     *      },
+     *      ... 
+     * },
+     * "propertyTypes": { 
+     *      propertyElementId: typeElementId, //for Property to the property type
+     *      ... 
+     * },
+     * "elementValues": { 
+     *      propertyElementId: [elementId], //for property with ElementValue as value types, the value is a noderef
+     *      ...
+     * }
+     */
+    protected JSONObject relationshipsJson;
 
-	/**
-	 * Update or create the property type association between an element and its type
-	 * @param typeId	ID of the type
-	 * @param id		ID of the element
-	 */
-	private void updateOrCreatePropertyType(String typeId, String id) {
-		ScriptNode property = findNodeWithName(id);
-		ScriptNode propertyType = findNodeWithName(typeId);
-		
-		checkAndUpdateAssociation(property, propertyType, "sysml:type");
-	}
+    protected Set<String> newElements;
+    
+    /**
+     * Create or update the model as necessary based on the request
+     * 
+     * @param req
+     *            Request used to create/update the model
+     * @param status
+     *            Status to be updated
+     * @throws JSONException
+     *             Parse error
+     */
+    protected void createOrUpdateModel(WebScriptRequest req, Status status)
+            throws Exception {
+        Date now = new Date();
+        System.out.println("Starting createOrUpdateModel: " + now);
+        // long start, end, total = 0;
 
-	/**
-	 * Update or create the element relationship associations 
-	 * @param jsonObject	JSONObject that defines the source and target of the directed relationship
-	 * @param id			Id of the directed relationship element
-	 * @throws JSONException
-	 */
-	private void updateOrCreateRelationship(JSONObject jsonObject, String id) throws JSONException {
-		ScriptNode relationship = findNodeWithName(id);
-		String sourceId = jsonObject.getString("source");
-		String targetId = jsonObject.getString("target");
-		
-		ScriptNode source = findNodeWithName(sourceId);
-		ScriptNode target = findNodeWithName(targetId);
+        // clear out the response cache first (only one instance of each
+        // webscript)
+        clearCaches();
 
-		checkAndUpdateAssociation(relationship, source, "sysml:source");
-		checkAndUpdateAssociation(relationship, target, "sysml:target");
-	}
+        JSONObject postJson = (JSONObject) req.parseContent();
 
-	/**
-	 * Create or update the element hierarchy as specified by the JSON Object. Does reification
-	 * of containment
-	 * @param jsonObject	Hierarchy of containment
-	 * @param key			Name of the parent element
-	 * @throws JSONException
-	 */
-	protected void updateOrCreateElementHierarchy(JSONObject jsonObject, String key) throws JSONException {
-		String REIFIED_PKG_SUFFIX = "_pkg";
-		String pkgName = key + REIFIED_PKG_SUFFIX;
+        // check if we have single element or array of elements and create
+        // accordingly
+        if (!postJson.has(ELEMENTS)) {
+//            updateOrCreateElement(postJson.getJSONArray(ELEMENTS).getJSONObject(0), projectNode);
+            updateOrCreateElement(postJson, projectNode);
+        } else {
+            // create the element map and hierarchies
+            if (buildElementMap(postJson.getJSONArray(ELEMENTS))) {
+                // start building up elements from the root elements
+                for (String rootElement : rootElements) {
+                    System.out.println("ROOT ELEMENT FOUND: " + rootElement);
+                    if (!rootElement.equals((String) projectNode
+                            .getProperty("cm:name"))) {
+                        String ownerName = null;
+                        JSONObject element = elementMap.get(rootElement);
+                        if (element.has(Acm.JSON_OWNER)) {
+                            ownerName = element.getString(Acm.JSON_OWNER);
+                        }
+                        
+                        // get the owner so we can create node inside owner
+                        // DirectedRelationships can be sent with no owners, so, if not specified look for its existing owner
+                        EmsScriptNode owner = null;
+                        if (ownerName == null || ownerName.equals("null")) {
+                            EmsScriptNode elementNode = findScriptNodeByName(rootElement);
+                            if (elementNode == null) {
+                                owner = projectNode;
+                            } else {
+                                owner = elementNode.getParent();
+                            }
+                        } else {
+                            owner = findScriptNodeByName(ownerName);
+                            if (owner == null) {
+                                log(LogLevel.WARNING, "Could not find owner with name: " + ownerName + " putting into project", HttpServletResponse.SC_NOT_FOUND);
+                                owner = projectNode;
+                            }
+                            // really want to add pkg as owner
+                            EmsScriptNode reifiedPkg = findScriptNodeByName(ownerName
+                                    + "_pkg");
+                            if (reifiedPkg == null) {
+                                reifiedPkg = getOrCreateReifiedNode(owner,
+                                        ownerName);
+                            }
+                            owner = reifiedPkg;
+                        }
+                        
+                        updateOrCreateElement(elementMap.get(rootElement), owner);
+                    }
+                } // end for (String rootElement: rootElements) {
+            } // end if (buildElementMap(postJson.getJSONArray(ELEMENTS))) {
+        }
 
-		JSONArray array = jsonObject.getJSONArray(key);
+        // handle the relationships
+        updateOrCreateAllRelationships(relationshipsJson);
+        
+        now = new Date();
+        System.out
+                .println("Update Model Elements Done waiting on transaction to complete..."
+                        + now + "\n");
+    }
+    
+    protected void updateOrCreateAllRelationships(JSONObject jsonObject) throws JSONException {
+        updateOrCreateRelationships(jsonObject, "relationshipElements");
+        updateOrCreateRelationships(jsonObject, "propertyTypes");
+        updateOrCreateRelationships(jsonObject, "elementValues");
+        updateOrCreateRelationships(jsonObject, "annotatedElements");
+    }
 
-		// only need to create reified container if it has any elements
-		if (array.length() > 0) {
-			// this is the element node
-			ScriptNode node = findNodeWithName(key);
-			
-			// create reified container if it doesn't exist
-			ScriptNode parent = findNodeWithName(pkgName);  // this is the reified element package
-			if (parent == null) {
-				parent = node.getParent().createFolder(pkgName, "sysml:ElementFolder");
-				jwsUtil.setNodeProperty(node, "sysml:id", key);
-				jwsUtil.setNodeProperty(node, "cm:name", key);
-			}
-			// make sure element and reified container in same place
-			// node should be accurate if hierarchy is correct
-			if (!parent.getParent().equals(node.getParent())) {
-				parent.move(node.getParent());
-			}
-			
-			// move elements to reified container if not already there
-			for (int ii = 0; ii < array.length(); ii++) {
-				ScriptNode child = findNodeWithName(array.getString(ii));
-				if (!child.getParent().equals(parent)) {
-					child.move(parent);
-				}
-			}
-			
-			checkAndUpdateChildAssociation(node, parent, "sysml:reifiedContainment");
-		}
-	}
+    /**
+     * Update or create relationships
+     * 
+     * @param jsonObject
+     *            Input data to generate relationships from
+     * @param key
+     *            The relationship type (e.g., relationshipElements,
+     *            projectTypes, or elementValues)
+     * @throws JSONException
+     */
+    protected void updateOrCreateRelationships(JSONObject jsonObject, String key)
+            throws JSONException {
+        long start = System.currentTimeMillis(), end;
+        System.out.print("updateOrCreate" + key + ": ");
+        UserTransaction trx;
+        trx = services.getTransactionService().getUserTransaction();
+        try {
+            System.out.println("updateOrCreateRelationships: beginning transaction {");
+            trx.begin();
+            if (jsonObject.has(key)) {
+                JSONObject object = jsonObject.getJSONObject(key);
+                Iterator<?> ids = object.keys();
+                while (ids.hasNext()) {
+                    String id = (String) ids.next();
+                    if (key.equals("relationshipElements")) {
+                        updateOrCreateRelationship(object.getJSONObject(id), id);
+                    } else if (key.equals("propertyTypes")) {
+                        updateOrCreatePropertyType(object.getString(id), id);
+                    } else if (key.equals("elementValues")) {
+                        updateOrCreateElementValues(object.getJSONArray(id), id);
+                    } else if (key.equals("annotatedElements")) {
+                        updateOrCreateAnnotatedElements(
+                                object.getJSONArray(id), id);
+                    }
+                }
+            }
+            System.out.println("} updateOrCreateRelationships committing: " + key);
+            trx.commit();
+        } catch (Throwable e) {
+            try {
+                trx.rollback();
+                System.out.println("\t####### ERROR: Needed to rollback: " + e.getMessage());
+            } catch (Throwable ee) {
+                System.out.println("\tRollback failed: " + ee.getMessage());
+            }
+        }
+        end = System.currentTimeMillis();
+        System.out.println((end - start) + "ms");
+    }
 
-	/**
-	 * Update or create element with specified metadata
-	 * @param jsonObject	Metadata to be added to element
-	 * @param key			ID of element
-	 * @throws JSONException
-	 */
-	protected void updateOrCreateElement(JSONObject jsonObject, String key) throws JSONException {
-		// TODO check permissions
-		
-		JSONObject object = jsonObject.getJSONObject(key);
-		
-		// find node if exists, otherwise create
-		ScriptNode node = findNodeWithName(key);
-		if (node == null) {
-			node = jwsUtil.createModelElement(projectNode, key, json2acm.get(object.getString("type")));
-			jwsUtil.setNodeProperty(node, "cm:name", key);
-			jwsUtil.setNodeProperty(node, "sysml:id", key);
-			// TODO temporarily set title - until we figure out how to use sysml:name in repository browser
-			jwsUtil.setNodeProperty(node, "cm:title", object.getString("name"));
-		}
-		
-		// need to add View aspect before adding any properties (so they're valid properties of the node)
-		if (object.has("isView") && object.getString("isView").equals(true)) {
-			checkAndUpdateAspect(node, "sysml:View");
-		}
-		
-		// create or update properties of node
-		Iterator<?> props = object.keys();
-		while(props.hasNext()) {
-			String type = (String) props.next();
-			String property = object.getString(type);
-			JSONArray array;
-			
-			if (json2acm.containsKey(type)) {
-				String acmType = json2acm.get(type);
-				if (type.startsWith("is")) {
-					checkAndUpdateProperty(node, new Boolean(property), acmType);
-				} else if (type.equals("boolean")) {
-					array = object.getJSONArray(type);
-					checkAndUpdatePropertyValues(node, array, acmType, new Boolean(true));
-				} else if (type.equals("integer")) {
-					array = object.getJSONArray(type);
-					checkAndUpdatePropertyValues(node, array, acmType, new Integer(0));
-				} else if (type.equals("double")) {
-					array = object.getJSONArray(type);
-					checkAndUpdatePropertyValues(node, array, acmType, new Double(0.0));
-				} else if (type.equals("string")) {
-					array = object.getJSONArray(type);
-					checkAndUpdatePropertyValues(node, array, acmType, new String(""));
-				} else {
-					checkAndUpdateProperty(node, new String(property), acmType);
-				}
-			} else {
-				// do nothing TODO: unhandled from SysML/UML profiles are owner, type (type handled above)
-			}
-		}
-	}
-	
-	protected <T extends Serializable> void checkAndUpdatePropertyValues(ScriptNode node, JSONArray array, String type, T value) throws JSONException {
-		ArrayList<T> values = new ArrayList<T>();
-		for (int ii = 0; ii < array.length(); ii++) {
-			values.add((T) array.get(ii));
-		}
-		
-		ArrayList<T> oldValues = (ArrayList<T>) jwsUtil.getNodeProperty(node, type);
-		if (!checkIfListsEquivalent(oldValues, values)) {
-			jwsUtil.setNodeProperty(node, type, values);
-		}
-	}
-	
-	/**
-	 * Utility to compare lists of node refs to one another
-	 * @param x	First list to compare
-	 * @param y	Second list to compare
-	 * @return	true if same, false otherwise
-	 */
-	protected <T extends Serializable> boolean checkIfListsEquivalent(ArrayList<T> x, ArrayList<T> y) {
-		if (x == null || y == null) {
-			return false;
-		}
-		if (x.size() != y.size()) {
-			return false;
-		}
-		for (int ii = 0; ii < x.size(); ii++) {
-			if (!x.get(ii).equals(ii)) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	protected void updateOrCreateRoot(JSONArray jsonArray, int index, Boolean createRoot) {
-		// TODO complete when understand functionality
-	}
+    /**
+     * Update or create annotated elements (multiple noderefs ordered in a list)
+     * 
+     * @param jsonArray
+     *            Array of the IDs that house the values for the element
+     * @param id
+     *            The ID of the element to add the values to
+     * @throws JSONException
+     */
+    protected void updateOrCreateAnnotatedElements(JSONArray jsonArray, String id)
+            throws JSONException {
+        EmsScriptNode source = findScriptNodeByName(id);
 
-	/**
-	 * Entry point
-	 */
-	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req,
-			Status status, Cache cache) {
-		Map<String, Object> model = new HashMap<String, Object>();
-		StringBuffer response = new StringBuffer();
-		
-		if (validateRequest(req, status)) {
-			parseRequestVariables(req);
-			try {
-				createOrUpdateModel(req, status);
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-		}
+        if (checkPermissions(source, PermissionService.WRITE)) {
+            for (int ii = 0; ii < jsonArray.length(); ii++) {
+                String targetId = jsonArray.getString(ii);
+                EmsScriptNode target = findScriptNodeByName(targetId);
+                source.createOrUpdateAssociation(target,
+                        Acm.ACM_ANNOTATED_ELEMENTS, true);
+            }
+        }
+    }
 
-		response.append("\n");
-		model.put("res", response.toString());
-		return model;
-	}
-	
-	
-	@Override
-	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		if (!JwsRequestUtils.validateContent(req, status, response)) {
-			return false;
-		}
-		
-		String siteName = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.SITE_NAME);
-		if (!JwsRequestUtils.validateRequestVariable(status, response, siteName, JwsRequestUtils.SITE_NAME)) {
-			return false;
-		} 
+    /**
+     * Update or create element values (multiple noderefs ordered in a list)
+     * 
+     * @param jsonArray
+     *            Array of the IDs that house the values for the element
+     * @param id
+     *            The ID of the element to add the values to
+     * @throws JSONException
+     */
+    protected void updateOrCreateElementValues(JSONArray jsonArray, String id)
+            throws JSONException {
+        // create an array of the values to be added in as the elementValue
+        // property
+        ArrayList<NodeRef> values = new ArrayList<NodeRef>();
+        for (int ii = 0; ii < jsonArray.length(); ii++) {
+            String valueId = jsonArray.getString(ii);
+            EmsScriptNode value = findScriptNodeByName(valueId);
+            if (value != null
+                    && checkPermissions(value, PermissionService.WRITE)) {
+                values.add(value.getNodeRef());
+            } else {
+                log(LogLevel.ERROR,
+                        "could not find element value node with id " + valueId
+                                + "\n", HttpServletResponse.SC_BAD_REQUEST);
+            }
+        }
 
-		String projectId = JwsRequestUtils.getRequestVar(req, JwsRequestUtils.PROJECT_ID);
-		if (!JwsRequestUtils.validateRequestVariable(status, response, projectId, JwsRequestUtils.PROJECT_ID)) {
-			return false;
-		}
+        // only change if old list is different than new
+        EmsScriptNode element = findScriptNodeByName(id);
+        if (element != null
+                && checkPermissions(element, PermissionService.WRITE)) {
+            @SuppressWarnings("unchecked")
+            ArrayList<NodeRef> oldValues = (ArrayList<NodeRef>) element
+                    .getProperty(Acm.ACM_ELEMENT_VALUE);
+            if (!EmsScriptNode.checkIfListsEquivalent(values, oldValues)) {
+                element.setProperty(Acm.ACM_ELEMENT_VALUE, values);
+            }
+        } else {
+            log(LogLevel.ERROR, "could not find element node with id " + id
+                    + "\n", HttpServletResponse.SC_BAD_REQUEST);
+        }
+    }
 
-		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-		if (!JwsRequestUtils.validateSiteExists(siteInfo, status, response)) {
-			return false;
-		}
-				
-		if (!JwsRequestUtils.validatePermissions(req, status, response, services, siteInfo.getNodeRef(), "Write")) {
-			return false;
-		}
+    /**
+     * Update or create the property type association between an element and its
+     * type
+     * 
+     * @param typeId
+     *            ID of the type
+     * @param id
+     *            ID of the element
+     */
+    protected void updateOrCreatePropertyType(String typeId, String id) {
+        EmsScriptNode property = findScriptNodeByName(id);
+        EmsScriptNode propertyType = findScriptNodeByName(typeId);
 
-		ScriptNode siteNode = getSiteNode(siteName);
-		projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
-		if (projectNode == null) {
-			return false;
-		}
-		
-		return true;
-	}
+        if (property != null && propertyType != null) {
+            if (checkPermissions(property, PermissionService.WRITE)
+                    && checkPermissions(propertyType, PermissionService.READ)) {
+                property.createOrUpdateAssociation(propertyType, Acm.ACM_PROPERTY_TYPE);
+            }
+        } else {
+            if (property == null) {
+                log(LogLevel.ERROR, "could not find property node with id "
+                        + id + "\n", HttpServletResponse.SC_BAD_REQUEST);
+            }
+            if (propertyType == null) {
+                log(LogLevel.ERROR,
+                        "could not find property type node with id " + typeId
+                                + "\n", HttpServletResponse.SC_BAD_REQUEST);
+            }
+        }
+    }
+
+    /**
+     * Update or create the element relationship associations
+     * 
+     * @param jsonObject
+     *            JSONObject that defines the source and target of the directed
+     *            relationship
+     * @param id
+     *            Id of the directed relationship element
+     * @throws JSONException
+     */
+    protected void updateOrCreateRelationship(JSONObject jsonObject, String id)
+            throws JSONException {
+        String sourceId = jsonObject.getString(Acm.JSON_SOURCE);
+        String targetId = jsonObject.getString(Acm.JSON_TARGET);
+
+        EmsScriptNode relationship = findScriptNodeByName(id);
+        EmsScriptNode source = findScriptNodeByName(sourceId);
+        EmsScriptNode target = findScriptNodeByName(targetId);
+
+        if (relationship != null && source != null && target != null) {
+            if (checkPermissions(relationship, PermissionService.WRITE)
+                    && checkPermissions(source, PermissionService.READ)
+                    && checkPermissions(target, PermissionService.READ)) {
+                relationship.createOrUpdateAssociation(source, Acm.ACM_SOURCE);
+                relationship.createOrUpdateAssociation(target, Acm.ACM_TARGET);
+            }
+        } else {
+            if (relationship == null) {
+                log(LogLevel.ERROR, "could not find relationship node with id "
+                        + id + "\n", HttpServletResponse.SC_BAD_REQUEST);
+            }
+            if (source == null) {
+                log(LogLevel.ERROR, "could not find source node with id "
+                        + sourceId + "\n", HttpServletResponse.SC_BAD_REQUEST);
+            }
+            if (target == null) {
+                log(LogLevel.ERROR, "could not find target node with id "
+                        + targetId + "\n", HttpServletResponse.SC_BAD_REQUEST);
+            }
+        }
+    }
+
+    /**
+     * Create or update the element hierarchy as specified by the JSON Object.
+     * Does reification of containment
+     * 
+     * @param jsonObject
+     *            Hierarchy of containment
+     * @param key
+     *            Name of the parent element
+     * @throws JSONException
+     */
+    protected void updateOrCreateElementHierarchy(JSONObject jsonObject,
+            String key) throws JSONException {
+        String REIFIED_PKG_SUFFIX = "_pkg";
+        String pkgName = key + REIFIED_PKG_SUFFIX;
+
+        JSONArray array = jsonObject.getJSONArray(key);
+
+        // only need to create reified container if it has any elements
+        if (array.length() > 0) {
+            // this is the element node
+            EmsScriptNode node = findScriptNodeByName(key);
+            if (node == null) {
+                log(LogLevel.ERROR, "could not find element node with id "
+                        + key + "\n", HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+
+            if (checkPermissions(node, PermissionService.WRITE)) {
+                // create reified container if it doesn't exist
+                EmsScriptNode reifiedNode = findScriptNodeByName(pkgName); // this
+                                                                           // is
+                                                                           // the
+                                                                           // reified
+                                                                           // element
+                                                                           // package
+                if (reifiedNode == null) {
+                    reifiedNode = node.getParent().createFolder(pkgName,
+                            Acm.ACM_ELEMENT_FOLDER);
+                    reifiedNode.setProperty(Acm.ACM_ID, key);
+                    reifiedNode.setProperty("cm:name", pkgName);
+                    reifiedNode.setProperty(Acm.ACM_NAME,
+                            (String) node.getProperty(Acm.ACM_NAME));
+                }
+                if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
+                    foundElements.put(pkgName, reifiedNode);
+                    // make sure element and reified container in same place
+                    // node should be accurate if hierarchy is correct
+                    if (!reifiedNode.getParent().equals(node.getParent())) {
+                        reifiedNode.move(node.getParent());
+                    }
+
+                    // move elements to reified container if not already there
+                    for (int ii = 0; ii < array.length(); ii++) {
+                        String childName = array.getString(ii);
+                        EmsScriptNode child = findScriptNodeByName(childName);
+                        if (child == null) {
+                            log(LogLevel.ERROR,
+                                    "could not find child node with id "
+                                            + childName + "\n",
+                                    HttpServletResponse.SC_BAD_REQUEST);
+                            continue;
+                        }
+                        if (checkPermissions(child, PermissionService.WRITE)) {
+                            if (!child.getParent().equals(reifiedNode)) {
+                                System.out.println("moving "
+                                        + child.getProperty("cm:name") + " to "
+                                        + reifiedNode.getProperty("cm:name"));
+                                child.move(reifiedNode);
+                            }
+
+                            // move reified containers as necessary too
+                            EmsScriptNode childPkg = findScriptNodeByName(childName
+                                    + REIFIED_PKG_SUFFIX);
+                            if (childPkg != null && !childPkg.getParent().equals(reifiedNode)) {
+                                System.out.println("moving "
+                                        + childPkg.getProperty("cm:name")
+                                        + " to "
+                                        + reifiedNode.getProperty("cm:name"));
+                                childPkg.move(reifiedNode);
+                            }
+                        } // end if (checkPermissions(child, PermissionService.WRITE)) {
+                    } // end if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
+
+                    node.createOrUpdateChildAssociation(reifiedNode, Acm.ACM_REIFIED_CONTAINMENT);
+                } // end if (checkPermissions(node, PermissionService.WRITE)) {
+            }
+        }
+    }
+
+    Map<String, JSONObject> elementMap = new HashMap<String, JSONObject>();
+    Set<String> rootElements = new HashSet<String>();
+
+    /**
+     * Builds up the element map and hierarchy and returns true if valid
+     * @param jsonArray         Takes in the elements JSONArray
+     * @return                  True if all elements and owners can be found with write permissions, false otherwise
+     */
+    protected boolean buildElementMap(JSONArray jsonArray) throws JSONException {
+        boolean isValid = true;
+        UserTransaction trx;
+
+        // lets look for everything initially
+        trx = services.getTransactionService().getUserTransaction();
+        try {
+            System.out.println("buildElementMap begin transaction {");
+            trx.begin();
+            for (int ii = 0; ii < jsonArray.length(); ii++) {
+                JSONObject elementJson = jsonArray.getJSONObject(ii);
+                String sysmlId = elementJson.getString(Acm.JSON_ID);
+                elementMap.put(sysmlId, elementJson);
+
+                if (findScriptNodeByName(sysmlId) == null) {
+                    newElements.add(sysmlId);
+                }
+
+                // create the hierarchy
+                if (elementJson.has(Acm.JSON_OWNER)) {
+                    String ownerId = elementJson.getString(Acm.JSON_OWNER);
+                    // if owner is null, leave at project root level
+                    if (ownerId == null || ownerId.equals("null")) {
+                        ownerId = (String) projectNode.getProperty(Acm.ACM_ID);
+                        rootElements.add(sysmlId);
+                    }
+                    if (!elementHierarchyJson.has(ownerId)) {
+                        elementHierarchyJson.put(ownerId, new JSONArray());
+                    }
+                    elementHierarchyJson.getJSONArray(ownerId).put(sysmlId);
+                } else {
+                    // if no owners are specified, add directly to root elements
+                    rootElements.add(sysmlId);
+                }
+            }
+
+            // lets iterate through elements
+           for (String elementId: elementMap.keySet()) {
+                if (!newElements.contains(elementId)) {
+                    EmsScriptNode element = findScriptNodeByName(elementId);
+                    if (element == null) {
+                        log(LogLevel.ERROR, "Could not find node with id: " + elementId, HttpServletResponse.SC_NOT_FOUND);
+                        isValid = false;
+                    } else if (!checkPermissions(element, PermissionService.WRITE)) {
+                        isValid = false;
+                    }
+                }
+            }
+            
+            fillRootElements();
+            System.out.println("} buildElementMap committing");
+            trx.commit();
+        } catch (Throwable e) {
+            try {
+                trx.rollback();
+                System.out.println("\t####### ERROR: Needed to rollback: " + e.getMessage());
+            } catch (Throwable ee) {
+                System.out.println("\tRollback failed: " + ee.getMessage());
+            }
+        }
+        
+        return isValid;
+    }
+
+    protected void fillRootElements() throws JSONException {
+        Iterator<?> iter = elementHierarchyJson.keys();
+        while (iter.hasNext()) {
+            String ownerId = (String) iter.next();
+            if (!elementMap.containsKey(ownerId)) {
+                JSONArray hierarchy = elementHierarchyJson
+                        .getJSONArray(ownerId);
+                for (int ii = 0; ii < hierarchy.length(); ii++) {
+                    rootElements.add(hierarchy.getString(ii));
+                }
+            }
+        }
+    }
+
+    /**
+     * Update or create element with specified metadata
+     * 
+     * @param jsonObject
+     *            Metadata to be added to element
+     * @param key
+     *            ID of element
+     * @throws JSONException
+     */
+    protected void updateOrCreateElement(JSONObject elementJson,
+            EmsScriptNode parent) throws JSONException {
+        if (!elementJson.has(Acm.JSON_ID)) {
+            return;
+        }
+        String id = elementJson.getString(Acm.JSON_ID);
+        long start = System.currentTimeMillis(), end;
+        System.out.println("updateOrCreateElement " + id);
+        JSONArray children = new JSONArray();
+        EmsScriptNode reifiedNode = null;
+
+        // TODO Need to permission check on new node creation
+        // find node if exists, otherwise create
+        EmsScriptNode node;
+        UserTransaction trx;
+        trx = services.getTransactionService().getUserTransaction();
+        try {
+            System.out.println("updateOrCreateElement begin transaction {");
+            trx.begin();
+            if (newElements.contains(id)) {
+                System.out.println("\tcreating node");
+                node = parent.createNode(id,
+                        Acm.JSON2ACM.get(elementJson.getString(Acm.JSON_TYPE)));
+                node.setProperty("cm:name", id);
+                node.setProperty(Acm.ACM_ID, id);
+//                // TODO temporarily set title - until we figure out how to use
+//                // sysml:name in repository browser
+//                if (elementJson.has("name")) {
+//                    node.setProperty("cm:title", elementJson.getString("name"));
+//                }
+            } else {
+                System.out.println("\tmodifying node");
+                node = findScriptNodeByName(id);
+                try {
+                    if (!node.getParent().equals(parent)) {
+                        node.move(parent);
+                    }
+                } catch (Exception e) {
+                    System.out.println("could not find node information: " + id);
+                    e.printStackTrace();
+                }
+            }
+            foundElements.put(id, node); // cache the found value
+
+            // update metadata
+            if (checkPermissions(node, PermissionService.WRITE)) {
+                System.out.println("\tinserting metadata");
+                node.ingestJSON(elementJson);
+            }
+
+            if (elementHierarchyJson.has(id)) {
+                System.out.println("\tcreating reified package");
+                reifiedNode = getOrCreateReifiedNode(node, id);
+                children = elementHierarchyJson.getJSONArray(id);
+            }
+            
+            System.out.println("} updateOrCreateElement committing");
+            trx.commit();
+        } catch (Throwable e) {
+            try {
+                System.out.println("\t####### ERROR: Needed to rollback: " + e.getMessage());
+                trx.rollback();
+            } catch (Throwable ee) {
+                System.out.println("\tRollback failed: " + ee.getMessage());
+            }
+        }
+        end = System.currentTimeMillis();
+        
+        System.out.println("\tupdateOrCreateElement: "
+                + ": " + (end - start) + "ms");
+
+        // add the relationships into our maps
+        System.out.println("\tfiltering relationships");
+        JSONObject relations = EmsScriptNode.filterRelationsJSONObject(elementJson);
+        String keys[] = { "elementValues", "propertyTypes",
+                "relationshipElements", "annotatedElements" };
+        for (String key : keys) {
+            if (!relationshipsJson.has(key)) {
+                relationshipsJson.put(key, new JSONObject());
+            }
+            if (relations.has(key)) {
+                JSONObject json = relations.getJSONObject(key);
+                Iterator<?> iter = json.keys();
+                while (iter.hasNext()) {
+                    String iterId = (String) iter.next();
+                    relationshipsJson.getJSONObject(key).put(iterId,
+                            json.get(iterId));
+                }
+            }
+        }
+
+        // create the children elements
+        if (reifiedNode != null) {
+            for (int ii = 0; ii < children.length(); ii++) {
+                updateOrCreateElement(elementMap.get(children.getString(ii)),
+                        reifiedNode);
+            }
+        }
+
+        // long end = System.currentTimeMillis(); System.out.println("\tTotal: "
+        // + (end-start));
+    }
+
+    protected EmsScriptNode getOrCreateReifiedNode(EmsScriptNode node, String id) {
+        EmsScriptNode reifiedNode = null;
+        EmsScriptNode parent = node.getParent();
+
+        if (checkPermissions(parent, PermissionService.WRITE)) {
+            String pkgName = id + "_pkg";
+            reifiedNode = findScriptNodeByName(pkgName);
+            if (reifiedNode == null) {
+                reifiedNode = parent.createFolder(pkgName,
+                        Acm.ACM_ELEMENT_FOLDER);
+                // reifiedNode.setProperty(Acm.ACM_ID, id);
+                reifiedNode.setProperty("cm:name", pkgName);
+                reifiedNode.setProperty(Acm.ACM_NAME,
+                        (String) node.getProperty(Acm.ACM_NAME));
+            }
+            if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
+                foundElements.put(pkgName, reifiedNode);
+                // node.createOrUpdateChildAssociation(reifiedNode,
+                // Acm.ACM_REIFIED_CONTAINMENT);
+            }
+        }
+
+        return reifiedNode;
+    }
+
+    /**
+     * Entry point
+     */
+    @Override
+    protected Map<String, Object> executeImpl(WebScriptRequest req,
+            Status status, Cache cache) {
+        Map<String, Object> model = new HashMap<String, Object>();
+        clearCaches();
+
+        if (validateRequest(req, status)) {
+            try {
+                createOrUpdateModel(req, status);
+            } catch (Exception e) {
+                log(LogLevel.ERROR, "JSON malformed\n",
+                        HttpServletResponse.SC_BAD_REQUEST);
+                e.printStackTrace();
+            }
+        }
+
+        status.setCode(responseStatus.getCode());
+        model.put("res", response.toString());
+        return model;
+    }
+
+    @Override
+    protected boolean validateRequest(WebScriptRequest req, Status status) {
+        if (!checkRequestContent(req)) {
+            return false;
+        }
+
+        String elementId = req.getServiceMatch().getTemplateVars()
+                .get("elementid");
+        if (elementId != null) {
+            // TODO - move this to ViewModelPost - really non hierarchical post
+            if (!checkRequestVariable(elementId, "elementid")) {
+                return false;
+            }
+
+            // projectNode should be the owner..., which should exist
+            try {
+                JSONObject postJson = (JSONObject) req.parseContent();
+                JSONObject elementsJson = postJson.getJSONObject("elements");
+                JSONObject elementJson = elementsJson.getJSONObject(elementId);
+                projectNode = findScriptNodeByName(elementJson
+                        .getString(Acm.JSON_OWNER));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            if (projectNode == null) {
+                return false;
+            }
+
+            if (checkPermissions(projectNode, PermissionService.WRITE)) {
+                return false;
+            }
+        } else {
+            String siteName = req.getServiceMatch().getTemplateVars()
+                    .get(SITE_NAME);
+            // Handling for project/{id}/elements
+            if (!checkRequestVariable(siteName, SITE_NAME)) {
+                return false;
+            }
+
+            String projectId = req.getServiceMatch().getTemplateVars()
+                    .get(PROJECT_ID);
+            if (!checkRequestVariable(projectId, PROJECT_ID)) {
+                return false;
+            }
+
+            SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+            if (!checkRequestVariable(siteInfo, "Site")) {
+                return false;
+            }
+
+            if (!checkPermissions(siteInfo.getNodeRef(),
+                    PermissionService.WRITE)) {
+                return false;
+            }
+
+            EmsScriptNode siteNode = getSiteNode(siteName);
+            projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
+            if (projectNode == null) {
+                log(LogLevel.ERROR, "Project not found.\n",
+                        HttpServletResponse.SC_NOT_FOUND);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    protected void clearCaches() {
+        super.clearCaches();
+        elementHierarchyJson = new JSONObject();
+        relationshipsJson = new JSONObject();
+        rootElements = new HashSet<String>();
+        elementMap = new HashMap<String, JSONObject>();
+        newElements = new HashSet<String>();
+    }
 }

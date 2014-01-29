@@ -15,5 +15,6 @@ curl -H "Content-Type: application/json" --data @JsonData/SysMLProfileComplete.j
 # post element values
 curl -H "Content-Type: application/json" --data @JsonData/SysMLProfileComplete.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/eee_1045467100313_135436_2/model?toggleChoices=true&elementValues=true"
 
+
 # get everything
 curl -X GET -u admin:admin "http://localhost:8080/view-repo/service/javawebscripts/model/eee_1045467100313_135436_2"
