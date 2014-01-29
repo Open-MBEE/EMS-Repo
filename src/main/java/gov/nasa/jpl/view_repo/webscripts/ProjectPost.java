@@ -144,7 +144,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		String projectName = jsonObject.getString(Acm.JSON_NAME);
 		if (projectNode == null) {
 			projectNode = modelContainerNode.createFolder(projectId, Acm.ACM_PROJECT);
-			projectNode.setProperty(Acm.ACM_CM_NAME, projectName);
+			projectNode.setProperty(Acm.ACM_CM_TITLE, projectName);
 			projectNode.setProperty(Acm.ACM_NAME, projectName);
 			projectNode.setProperty(Acm.ACM_ID, projectId);
 			log(LogLevel.INFO, "Project created.\n", HttpServletResponse.SC_OK);
@@ -154,7 +154,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 				log(LogLevel.INFO, "Project deleted.\n", HttpServletResponse.SC_OK);
 			} else if (fix) {
 				if (checkPermissions(projectNode, PermissionService.WRITE)){ 
-					projectNode.createOrUpdateProperty(Acm.ACM_CM_NAME, projectName);
+					projectNode.createOrUpdateProperty(Acm.ACM_CM_TITLE, projectName);
 					projectNode.createOrUpdateProperty(Acm.ACM_NAME, projectName);
 					projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
 					log(LogLevel.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
