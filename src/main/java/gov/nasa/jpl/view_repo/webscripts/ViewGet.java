@@ -55,7 +55,7 @@ public class ViewGet extends AbstractJavaWebScript {
 			return false;
 		}
 		
-		EmsScriptNode view = findScriptNodeByName(viewId);
+		EmsScriptNode view = findScriptNodeById(viewId);
 		if (view == null) {
 			log(LogLevel.ERROR, "View not found with id: " + viewId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
@@ -112,7 +112,7 @@ public class ViewGet extends AbstractJavaWebScript {
 
 	
 	private void handleView(String viewId, boolean recurse) throws JSONException {
-		EmsScriptNode view = findScriptNodeByName(viewId);
+		EmsScriptNode view = findScriptNodeById(viewId);
 		if (view == null) {
 			log(LogLevel.ERROR, "View not found with ID: " + viewId, HttpServletResponse.SC_NOT_FOUND);
 		}

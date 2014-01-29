@@ -29,6 +29,8 @@
 
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.jscript.ScriptNode;
@@ -53,6 +57,7 @@ import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
@@ -352,7 +357,7 @@ public class EmsScriptNode extends ScriptNode {
 	
 	@Override
 	public String getName() {
-		return (String)getProperty("cm:name");
+		return (String)getProperty(Acm.ACM_CM_NAME);
 	}
 
 
@@ -705,13 +710,13 @@ public class EmsScriptNode extends ScriptNode {
         if (jsonObject.has(Acm.JSON_VALUE_TYPE)) {
             String acmType = Acm.JSON2ACM.get(jsonObject.get(Acm.JSON_VALUE_TYPE));
             array = jsonObject.getJSONArray("value");
-            if (acmType.equals("sysml:boolean")) {
+            if (acmType.equals(Acm.ACM_LITERAL_BOOLEAN)) {
                 this.createOrUpdatePropertyValues(acmType, array, new Boolean(true));
-            } else if (acmType.equals("sysml:integer")) {
+            } else if (acmType.equals(Acm.ACM_LITERAL_INTEGER)) {
                 this.createOrUpdatePropertyValues(acmType, array, new Integer(0));
-            } else if (acmType.equals("sysml:double")) {
+            } else if (acmType.equals(Acm.ACM_LITERAL_REAL)) {
                 this.createOrUpdatePropertyValues(acmType, array, new Double(0.0));
-            } else if (acmType.equals("sysml:string")) {
+            } else if (acmType.equals(Acm.ACM_LITERAL_STRING)) {
                 this.createOrUpdatePropertyValues(acmType, array, new String(""));
             }
         }
@@ -723,6 +728,12 @@ public class EmsScriptNode extends ScriptNode {
 	    
         return result;
 	}
+	
+//	public EmsScriptNode getVersionOfElement( EmsScriptNode element, String version ) {
+//        NodeRef versionedNodeRef = services.getVersionService().getgetCurrentVersion(element).getVersionedNodeRef();
+//        EmsScriptNode versionedNode = new EmsScriptNode(versionedNodeRef, services, response);
+//
+//	}
 	
 	public String replaceArtifactUrl(String content, String prefix, String pattern, boolean escape) {
 	    if (content == null) {
@@ -761,26 +772,40 @@ public class EmsScriptNode extends ScriptNode {
 	    return result;
 	}
 	
-	// TODO: make this utility function - used in AbstractJavaWebscript too
 	protected NodeRef findNodeRefByType(String name, String type) {
-        ResultSet results = null;
-        NodeRef nodeRef = null;
-        try {
-            results = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, type + name + "\"");
-            if (results != null) {
-                for (ResultSetRow row: results) {
-                    nodeRef = row.getNodeRef();
-                    break ; //Assumption is things are uniquely named - TODO: fix since snapshots have same name?...
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (results != null) {
-                results.close();
-            }
-        }
-
-        return nodeRef;	    
+	    return NodeUtil.findNodeRefByType( name, type, services );
 	}
+	
+    /**
+     * Checks whether user has permissions to the node and logs results and status as appropriate
+     * @param node         EmsScriptNode to check permissions on
+     * @param permissions  Permissions to check
+     * @return             true if user has specified permissions to node, false otherwise
+     */
+    public boolean checkPermissions(String permissions, StringBuffer response, Status status) {
+        if (!hasPermission(permissions)) {
+            Object property = getProperty(Acm.ACM_CM_NAME);
+            if (property != null) {
+                String msg = "Warning! No " + permissions + " priveleges to " + property.toString() + ".\n";
+                response.append( msg );
+                status.setCode( HttpServletResponse.SC_UNAUTHORIZED, msg ); 
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Get site of specified short name
+     * @param siteName
+     * @return  ScriptNode of site with name siteName
+     */
+    public static EmsScriptNode getSiteNode(String siteName, ServiceRegistry services, StringBuffer response) {
+        SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+        if (siteInfo != null) {
+            return new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+        }
+        return null;
+    }
+
 }

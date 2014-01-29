@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.HashMap;
@@ -103,14 +104,14 @@ public class ProductPost extends AbstractJavaWebScript {
 			return;
 		}
 		
-		EmsScriptNode product = findScriptNodeByName(id);
+		EmsScriptNode product = findScriptNodeById(id);
 		if (product == null) {
 			log(LogLevel.ERROR, "could not find product with id: " + id, HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
 			
 		if (checkPermissions(product, PermissionService.WRITE)) {
-		    product.createOrUpdateAspect("view2:Product");
+		    product.createOrUpdateAspect(Acm.ACM_PRODUCT);
 		    product.ingestJSON(productJson);
 		}
 	}

@@ -30,6 +30,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -123,38 +124,39 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @return	ScriptNode of site with name siteName
 	 */
 	protected EmsScriptNode getSiteNode(String siteName) {
-		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-		if (siteInfo != null) {
-			return new EmsScriptNode(siteInfo.getNodeRef(), services, response);
-		}
-		return null;
+	    return EmsScriptNode.getSiteNode( siteName, services, response );
+//		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+//		if (siteInfo != null) {
+//			return new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+//		}
+//		return null;
 	}
 
 	
 	/**
 	 * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
 	 * TODO extend so search context can be specified
-	 * @param name	Node name to search for
+	 * @param id	Node id to search for
 	 * @return		ScriptNode with name if found, null otherwise
 	 */
-	protected EmsScriptNode findScriptNodeByName(String name) {
+	protected EmsScriptNode findScriptNodeById(String id) {
 //		long start=System.currentTimeMillis();
 		EmsScriptNode result = null;
 
 		// be smart about search if possible
-		if (foundElements.containsKey(name)) {
-			result = foundElements.get(name);
-		} else if (name.endsWith("_pkg")) {
-			String elementName = name.replace("_pkg", "");
-			EmsScriptNode elementNode = findScriptNodeByName(elementName);
+		if (foundElements.containsKey(id)) {
+			result = foundElements.get(id);
+		} else if (id.endsWith("_pkg")) {
+			String elementName = id.replace("_pkg", "");
+			EmsScriptNode elementNode = findScriptNodeById(elementName);
 			if (elementNode != null) {
-			    result = elementNode.getParent().childByNamePath(name);
+			    result = elementNode.getParent().childByNamePath(id);
 			}
 		} else {
-			NodeRef nodeRef = findNodeRefByName(name);
+			NodeRef nodeRef = findNodeRefById(id);
 			if (nodeRef != null) {
 				result = new EmsScriptNode(nodeRef, services, response);
-				foundElements.put(name, result); // add to cache
+				foundElements.put(id, result); // add to cache
 			}
 		}
 		
@@ -163,23 +165,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	}
 
 	protected NodeRef findNodeRefByType(String name, String type) {
-        ResultSet results = null;
-        NodeRef nodeRef = null;
-        try {
-            results = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, type + name + "\"");
-            if (results != null) {
-                for (ResultSetRow row: results) {
-                    nodeRef = row.getNodeRef();
-                    break ; //Assumption is things are uniquely named - TODO: fix since snapshots have same name?...
-                }
-            }
-        } finally {
-            if (results != null) {
-                results.close();
-            }
-        }
-
-        return nodeRef;     
+	    return NodeUtil.findNodeRefByType( name, type, services );
 	}
 	
 	/**
@@ -188,9 +174,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @param name Node name to search for
 	 * @return     NodeRef of first match, null otherwise
 	 */
-	protected NodeRef findNodeRefByName(String name) {
-//	    return findNodeRefByType(name, "@cm\\:name:\"");
-        return findNodeRefByType(name, "@sysml\\:id:\""); // TODO: temporarily search by ID
+	protected NodeRef findNodeRefById(String name) {
+	    return NodeUtil.findNodeRefById( name, services );
 	}
 	
 	protected void log(LogLevel level, String msg, int code) {
@@ -212,14 +197,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @return             true if user has specified permissions to node, false otherwise
 	 */
 	protected boolean checkPermissions(EmsScriptNode node, String permissions) {
-	    if (!node.hasPermission(permissions)) {
-			Object property = node.getProperty("cm:name");
-			if (property != null) {
-			    log(LogLevel.WARNING, "No " + permissions + " priveleges to " + property.toString() + ".\n", HttpServletResponse.SC_UNAUTHORIZED);
-			}
-			return false;
-		}
-		return true;
+	    return node.checkPermissions( permissions, response, responseStatus );
+//	    if (!node.hasPermission(permissions)) {
+//			Object property = node.getProperty(Acm.ACM_CM_NAME);
+//			if (property != null) {
+//			    log(LogLevel.WARNING, "No " + permissions + " priveleges to " + property.toString() + ".\n", HttpServletResponse.SC_UNAUTHORIZED);
+//			}
+//			return false;
+//		}
+//		return true;
 	}
 
 	/**
@@ -263,33 +249,39 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @param type		escaped ACM type for lucene search: e.g. "@sysml\\:documentation:\""
 	 * @param pattern   Pattern to look for
 	 */
-	protected Map<String, EmsScriptNode> searchForElements(String type, String pattern) {
-		Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
-
-		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
-			ResultSet resultSet = null;
-			try {
-				pattern = type + pattern + "\"";
-				resultSet = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, pattern);
-				for (ResultSetRow row: resultSet) {
-					EmsScriptNode node = new EmsScriptNode(row.getNodeRef(), services, response);
-					if (checkPermissions(node, PermissionService.READ)) {
-    					String id = (String) node.getProperty(Acm.ACM_ID);
-    					if (id != null) {
-    						searchResults.put(id, node);
-    					}
-					}
-				}
-			} catch (Exception e) {
-				log(LogLevel.ERROR, "Could not parse search: " + pattern + ".\n", HttpServletResponse.SC_BAD_REQUEST);  
-			} finally {
-				if (resultSet != null) {
-					resultSet.close();
-				}
-			}
-		}
-
-		return searchResults;
+    protected Map< String, EmsScriptNode > searchForElements( String type,
+                                                              String pattern ) {
+        Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
+        searchResults.putAll( NodeUtil.searchForElements( type, pattern, services, response,
+                                                          responseStatus ) );
+        //foundElements.putAll(searchResults);
+        return searchResults;
+        //		Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
+//
+//		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
+//			ResultSet resultSet = null;
+//			try {
+//				pattern = type + pattern + "\"";
+//				resultSet = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, pattern);
+//				for (ResultSetRow row: resultSet) {
+//					EmsScriptNode node = new EmsScriptNode(row.getNodeRef(), services, response);
+//					if (checkPermissions(node, PermissionService.READ)) {
+//    					String id = (String) node.getProperty(Acm.ACM_ID);
+//    					if (id != null) {
+//    						searchResults.put(id, node);
+//    					}
+//					}
+//				}
+//			} catch (Exception e) {
+//				log(LogLevel.ERROR, "Could not parse search: " + pattern + ".\n", HttpServletResponse.SC_BAD_REQUEST);  
+//			} finally {
+//				if (resultSet != null) {
+//					resultSet.close();
+//				}
+//			}
+//		}
+//
+//		return searchResults;
 	}
 
 	/**

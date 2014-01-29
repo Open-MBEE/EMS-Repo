@@ -75,7 +75,7 @@ public class ModelPut extends ModelPost {
             String newId = postJson.getString(oldId);
             
             if (oldId != null && newId != null && oldId != newId) {
-                EmsScriptNode elementNode = findScriptNodeByName(oldId);
+                EmsScriptNode elementNode = findScriptNodeById(oldId);
                 if (checkPermissions(elementNode, PermissionService.WRITE)) {
                     if (elementNode != null) {
                         elementNode.setProperty(Acm.ACM_ID, newId);

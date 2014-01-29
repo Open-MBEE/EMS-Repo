@@ -74,7 +74,7 @@ public class ViewModelPost extends ModelPost {
             JSONObject elementJson = array.getJSONObject(ii);
             
             String id = elementJson.getString(Acm.JSON_ID);
-            EmsScriptNode elementNode = findScriptNodeByName(id);
+            EmsScriptNode elementNode = findScriptNodeById(id);
             if (elementNode != null) {
                 updateOrCreateElement(elementJson, elementNode.getParent());
             } else {
@@ -88,7 +88,7 @@ public class ViewModelPost extends ModelPost {
                     if (annotatedJson.length() <= 0) {
                         parentFound = false;
                     } else {
-                        EmsScriptNode commentParent = findScriptNodeByName(annotatedJson.getString(0));
+                        EmsScriptNode commentParent = findScriptNodeById(annotatedJson.getString(0));
                         if (commentParent == null) {
                             parentFound = false;
                         } else {
