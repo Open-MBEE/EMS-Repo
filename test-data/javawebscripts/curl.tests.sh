@@ -23,7 +23,7 @@ echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elements.json $BASE_URL"sites/e
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/views.json $BASE_URL"views\""
 
 # post comments (can only add these to a particular view - though view isn't really checked at the moment)
-echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/comments.json $BASE_URL"view/301/elements\""
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/comments.json $BASE_URL"views/301/elements\""
 
 # post products
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/products.json $BASE_URL"products\""
@@ -66,3 +66,12 @@ echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/directedrelationships.json $BAS
 
 # get changed element to see if source/target changed
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/400\""
+
+echo ""
+echo SNAPSHOTS
+
+# post snapshot
+echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:text/html" --data @JsonData/snapshot.html http://localhost:8080/view-repo/service/ui/views/301/snapshot
+
+# get snapshots
+echo  curl -w "%{http_code}" -u admin:admin -X GET http://localhost:8080/view-repo/service/ui/views/301/snapshots

@@ -15,6 +15,20 @@
 		<property name="transactionInterval" value="500" />
 	</bean>
  -->
+	<bean id="webscript.gov.nasa.jpl.ui.snapshot.post"
+		class="gov.nasa.jpl.view_repo.webscripts.SnapshotPost" parent="webscript"
+		singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.ui.snapshot.get"
+		class="gov.nasa.jpl.view_repo.webscripts.SnapshotGet" parent="webscript"
+		singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+	</bean>
+
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.post"
 		class="gov.nasa.jpl.view_repo.webscripts.ViewPost" parent="webscript"
 		singleton="false">

@@ -1,12 +1,9 @@
 <webscript> 
-  <shortname>Get View</shortname> 
-  <description>Return all elements referenced in the view
-		see view.get.desc.xml for json returned
-  	    additional json key value returned:
-  	    	"snapshoted": ISO8601 formatted date string
+  <shortname>Get all snapshots for view</shortname> 
+  <description>Return all snapshots for a view
   </description>
-  <url>/ui/views/{viewid}/snapshots/{id}</url> 
-  <format default="html">any</format> 
+  <url>/ui/views/{viewid}/snapshots</url> 
+  <format default="json">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readonly">required</transaction>
   <family>View Editor</family>

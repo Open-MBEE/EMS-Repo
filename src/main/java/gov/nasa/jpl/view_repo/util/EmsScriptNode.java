@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.util;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -532,7 +533,7 @@ public class EmsScriptNode extends ScriptNode {
         
         // add in property type(s)
         if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_PROPERTY_TYPE)) {
-            JSONArray propertyTypes = getTargetAssocsByType(Acm.ACM_PROPERTY_TYPE);
+            JSONArray propertyTypes = getTargetAssocsIdsByType(Acm.ACM_PROPERTY_TYPE);
             if (propertyTypes.length() > 0) {
                 element.put(Acm.JSON_PROPERTY_TYPE, propertyTypes.get(0));
             }
@@ -573,7 +574,7 @@ public class EmsScriptNode extends ScriptNode {
 
         // add comment
         if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_COMMENT)){ 
-            JSONArray annotatedElements = getTargetAssocsByType(Acm.ACM_ANNOTATED_ELEMENTS);
+            JSONArray annotatedElements = getTargetAssocsIdsByType(Acm.ACM_ANNOTATED_ELEMENTS);
             if (annotatedElements.length() > 0) {
                 element.put(Acm.JSON_ANNOTATED_ELEMENTS, annotatedElements);
             }
@@ -592,17 +593,23 @@ public class EmsScriptNode extends ScriptNode {
 	    return element;
 	}
 	
-	public JSONArray getTargetAssocsByType(String acmType) {
+	public JSONArray getTargetAssocsIdsByType(String acmType) {
 	    boolean isSource = false;
-	    return getAssocsByDirection(acmType, isSource);
+	    return getAssocsIdsByDirection(acmType, isSource);
 	}
 
-    public JSONArray getSourceAssocsByType(String acmType) {
+    public JSONArray getSourceAssocsIdsByType(String acmType) {
         boolean isSource = true;
-        return getAssocsByDirection(acmType, isSource);
+        return getAssocsIdsByDirection(acmType, isSource);
     }
 
-	protected JSONArray getAssocsByDirection(String acmType, boolean isSource) {
+    /**
+     * Returns a JSONArray of the sysml:ids of the found associations
+     * @param acmType
+     * @param isSource
+     * @return  JSONArray of the sysml:ids found
+     */
+	protected JSONArray getAssocsIdsByDirection(String acmType, boolean isSource) {
         JSONArray array = new JSONArray();
         List<AssociationRef> assocs;
         if (isSource) {
@@ -625,6 +632,50 @@ public class EmsScriptNode extends ScriptNode {
         
         return array;
 	}
+	
+
+    public List<EmsScriptNode> getTargetAssocsNodesByType(String acmType) {
+        boolean isSource = false;
+        return getAssocsNodesByDirection(acmType, isSource);
+    }
+
+    public List<EmsScriptNode> getSourceAssocsNodesByType(String acmType) {
+        boolean isSource = true;
+        return getAssocsNodesByDirection(acmType, isSource);
+    }
+
+    /**
+     * Get a list of EmsScriptNodes of the specified association type
+     * @param acmType
+     * @param isSource
+     * @return
+     */
+    protected List<EmsScriptNode> getAssocsNodesByDirection(String acmType,
+            boolean isSource) {
+        List<EmsScriptNode> list = new ArrayList<EmsScriptNode>();
+        List<AssociationRef> assocs;
+        if (isSource) {
+            assocs = services.getNodeService().getSourceAssocs(nodeRef,
+                    RegexQNamePattern.MATCH_ALL);
+        } else {
+            assocs = services.getNodeService().getTargetAssocs(nodeRef,
+                    RegexQNamePattern.MATCH_ALL);
+        }
+        for (AssociationRef aref : assocs) {
+            QName typeQName = createQName(acmType);
+            if (aref.getTypeQName().equals(typeQName)) {
+                NodeRef targetRef;
+                if (isSource) {
+                    targetRef = aref.getSourceRef();
+                } else {
+                    targetRef = aref.getTargetRef();
+                }
+                list.add(new EmsScriptNode(targetRef, services, response));
+            }
+        }
+
+        return list;
+    }	
 	
 	
 	/**
@@ -717,6 +768,12 @@ public class EmsScriptNode extends ScriptNode {
         }
 	}
 	
+	/**
+	 * Wrapper for replaceArtifactUrl with different patterns if necessary
+	 * @param content
+	 * @param escape
+	 * @return
+	 */
 	public String fixArtifactUrls(String content, boolean escape) {
 	    String result = content;
         result = replaceArtifactUrl(result, "src=\\\\\"/editor/images/docgen/", "src=\\\\\"/editor/images/docgen/.*?\\\\\"", escape);
@@ -724,6 +781,14 @@ public class EmsScriptNode extends ScriptNode {
         return result;
 	}
 	
+	/**
+	 * Utility method that replaces the image links with references to the repository urls
+	 * @param content
+	 * @param prefix
+	 * @param pattern
+	 * @param escape
+	 * @return
+	 */
 	public String replaceArtifactUrl(String content, String prefix, String pattern, boolean escape) {
 	    if (content == null) {
 	        return content;
@@ -783,4 +848,25 @@ public class EmsScriptNode extends ScriptNode {
 
         return nodeRef;	    
 	}
+	
+	   
+    public static class EmsScriptNodeComparator implements Comparator<EmsScriptNode> {
+        @Override
+        public int compare(EmsScriptNode x, EmsScriptNode y) {
+            Date xModified;
+            Date yModified;
+            
+            xModified = (Date) x.getProperty(Acm.ACM_LAST_MODIFIED);
+            yModified = (Date) y.getProperty(Acm.ACM_LAST_MODIFIED);
+            
+            if (xModified == null) {
+                return -1;
+            } else if (yModified == null) {
+                return 1;
+            } else {
+                return (xModified.compareTo(yModified));
+            }
+        }
+    }
+
 }
