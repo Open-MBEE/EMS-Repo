@@ -59,7 +59,7 @@ public class ModelCommentGet extends ModelGet {
         Map<String, Object> model = new HashMap<String, Object>();
 
         String elementId = req.getServiceMatch().getTemplateVars().get("id");
-        EmsScriptNode element = findScriptNodeByName(elementId);
+        EmsScriptNode element = findScriptNodeById(elementId);
 
         if (element == null) {
             log(LogLevel.ERROR, "Could not find element",
@@ -70,7 +70,7 @@ public class ModelCommentGet extends ModelGet {
                 JSONArray commentIds = element.getSourceAssocsByType(Acm.ACM_ANNOTATED_ELEMENTS);
                 for (int ii = 0; ii < commentIds.length(); ii++) {
                     String commentId = commentIds.getString(ii);
-                    EmsScriptNode comment = findScriptNodeByName(commentId);
+                    EmsScriptNode comment = findScriptNodeById(commentId);
                     if (comment != null) {
                         elementsFound.put(commentId, comment);
                     }

@@ -69,7 +69,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 			return false;
 		}
 		
-		EmsScriptNode product = findScriptNodeByName(productId);
+		EmsScriptNode product = findScriptNodeById(productId);
 		if (product == null) {
 			log(LogLevel.ERROR, "Product not found with id: " + productId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
@@ -125,7 +125,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 
 	
 	private void handleProduct(String productId) throws JSONException {
-		EmsScriptNode product = findScriptNodeByName(productId);
+		EmsScriptNode product = findScriptNodeById(productId);
 		if (product == null) {
 			log(LogLevel.ERROR, "Product not found with ID: " + productId, HttpServletResponse.SC_NOT_FOUND);
 		}
@@ -161,7 +161,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	    
 	    // insert all the views and find all the elements
 	    for (String viewId: viewIds) {
-	        EmsScriptNode view = findScriptNodeByName(viewId);
+	        EmsScriptNode view = findScriptNodeById(viewId);
 	        if (view != null && checkPermissions(view, PermissionService.READ)) {
         	        JSONObject viewJson = view.toJSONObject(Acm.JSON_TYPE_FILTER.VIEW);
         	        
@@ -170,7 +170,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
         	        JSONArray comments = view.getSourceAssocsByType(Acm.ACM_ANNOTATED_ELEMENTS);
         	        List<EmsScriptNode> commentList = new ArrayList<EmsScriptNode>();
         	        for (int ii = 0; ii < comments.length(); ii++) {
-        	            EmsScriptNode comment = findScriptNodeByName(comments.getString(ii));
+        	            EmsScriptNode comment = findScriptNodeById(comments.getString(ii));
         	            if (comment != null && checkPermissions(comment, PermissionService.READ)) {
         	                commentList.add(comment);
         	            }
@@ -194,7 +194,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	    
 	    // insert all the elements
 	    for (String elementId: elementIds) {
-	        EmsScriptNode element = findScriptNodeByName(elementId);
+	        EmsScriptNode element = findScriptNodeById(elementId);
 	        if (element != null && checkPermissions(element, PermissionService.READ)) {
 	            JSONObject elementJson = element.toJSONObject(Acm.JSON_TYPE_FILTER.ELEMENT);
 	            elementsJson.put(elementJson);

@@ -140,7 +140,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		}
 		
 		// create project if doesn't exist or update if fix is specified 
-		EmsScriptNode projectNode = findScriptNodeByName(projectId);
+		EmsScriptNode projectNode = findScriptNodeById(projectId);
 		String projectName = jsonObject.getString(Acm.JSON_NAME);
 		if (projectNode == null) {
 			projectNode = modelContainerNode.createFolder(projectId, Acm.ACM_PROJECT);

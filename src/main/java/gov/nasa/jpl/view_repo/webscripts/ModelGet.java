@@ -82,7 +82,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			return false;
 		}
 		
-		modelRootNode = findScriptNodeByName(modelId);
+		modelRootNode = findScriptNodeById(modelId);
 		if (modelRootNode == null) {
 			log(LogLevel.ERROR, "Element not found with id: " + modelId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
@@ -152,7 +152,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			JSONArray childElementJson = new JSONArray(allowedElements.toString());
 			for (int ii = 0; ii < childElementJson.length(); ii++) {
 				String id = childElementJson.getString(ii);
-				EmsScriptNode childElement = findScriptNodeByName(id);
+				EmsScriptNode childElement = findScriptNodeById(id);
 				// TODO Need to report that allowedElements can't be found
 				if (childElement != null) {
         				if (checkPermissions(childElement, PermissionService.READ)) {
@@ -166,7 +166,7 @@ public class ModelGet extends AbstractJavaWebScript {
 					JSONArray childViewJson = new JSONArray(childrenViews.toString());
 					for (int ii = 0; ii < childViewJson.length(); ii++) {
 						String id = childViewJson.getString(ii);
-						EmsScriptNode childView = findScriptNodeByName(id);
+						EmsScriptNode childView = findScriptNodeById(id);
 						if (childView != null) {
         						if (checkPermissions(childView, PermissionService.READ)) {
         						    handleViewHierarchy(childView, recurse);
@@ -201,7 +201,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		    // TODO: figure out why the child association creation from the reification isn't being picked up
 		    String rootName = (String)root.getProperty(Acm.ACM_CM_NAME);
 		    if (!rootName.contains("_pkg")) {
-		        EmsScriptNode reifiedNode = findScriptNodeByName(rootName + "_pkg");
+		        EmsScriptNode reifiedNode = findScriptNodeById(rootName + "_pkg");
 		        if (reifiedNode != null) {
 		            handleElementHierarchy(reifiedNode, recurse);
 		        }
