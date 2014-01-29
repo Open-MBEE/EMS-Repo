@@ -845,6 +845,9 @@ app.spanContentToBracket = function(content) {
 
 app.spanContentToValue = function(content, vtree, depth) {
   var contentDom = $('<div>' + content + '</div>');
+  if(depth === undefined) {
+    depth = 0;
+  }
   contentDom.find(".transclusion").each(function(i){
 
       var dom = $(this);
@@ -860,26 +863,22 @@ app.spanContentToValue = function(content, vtree, depth) {
       if(t === "name"){
         innerVal = elem.name;
       } else if (t === "documentation") {
-        // TODO:  If the transcluded element has html in it, then we can't just include it in a span. 
-        // Using a div or p tag for transcluded elements creates its own set of joys because jquery
-        // has its own ideas about how things should change when these elements are nested.
-        var docData = elem.documentation
-        
-        if(depth === undefined){
-          depth = 0;
-        }
-        if(depth <= 3) {
-          docData = app.spanContentToValue(docData, vtree, depth + 1);
-        } else {
-          docData = " ERROR_MAX_NESTED_REF_DEPTH "
-        }
-        var docDom = $("<div>" + docData + "</div>");
-        //console.log(docDom.find(".transclusion"))
-        var safeText = docDom.text();
-        innerVal = safeText;//"ASDFASF";//elem.documentation.text();
+        innerVal = elem.documentation;//"ASDFASF";//elem.documentation.text();
       } else if (t === "value") {
         innerVal = elem.value;
       }
+
+      // TODO:  If the transcluded element has html in it, then we can't just include it in a span. 
+      // Using a div or p tag for transcluded elements creates its own set of joys because jquery
+      // has its own ideas about how things should change when these elements are nested.          
+      if(depth <= 3) {
+        innerVal = app.spanContentToValue(innerVal, vtree, depth + 1);
+      } else {
+        innerVal = " ERROR_MAX_NESTED_REF_DEPTH "
+      }
+      var docDom = $("<div>" + innerVal + "</div>");
+      //console.log(docDom.find(".transclusion"))
+      innerVal = docDom.text();
 
       // Set the hovertext to display the fully qualified name if it exists
       var hoverText = "[" + t + "]";
@@ -916,10 +915,8 @@ app.on('saveSection', function(e, sectionId) {
 
   //console.log("savesection", section);
   app.set(e.keypath+'.name', section.filter(".section-header").html());
-  var content = section.filter(".section").html();
 
-  content = app.replaceBracketWithSpan(content);
- 
+
   // update viewTree with changes
   var viewTree = app.get("viewTree");
   var elements = app.editableElements(section);
@@ -929,7 +926,7 @@ app.on('saveSection', function(e, sectionId) {
       {
         if(e.hasOwnProperty("documentation"))
         {
-          cure.documentation = e.documentation;
+          cure.documentation = app.replaceBracketWithSpan(e.documentation);
           var preview = app.generatePreviewDocumentation(cure.documentation);
           if(preview) {
             cure.documentationPreview = preview;
@@ -941,7 +938,8 @@ app.on('saveSection', function(e, sectionId) {
         }
         if(e.hasOwnProperty("name"))
         {
-          cure.name = e.name;
+          e.name = e.name.replace(/^((<br>)|(<\/br>)|\s)*|((<br>)|(<\/br>)|\s)*$/gi,"");
+          cure.name = app.replaceBracketWithSpan(e.name);
           // update value in transclusion tab
           $('[data-trans-id="'+cure.mdid+'"].transcludable.name').html(cure.name);
           // update other references to this element in document
@@ -949,7 +947,7 @@ app.on('saveSection', function(e, sectionId) {
         }
         if(e.hasOwnProperty("value"))
         {
-          cure.value = e.value;
+          cure.value = app.replaceBracketWithSpan(e.value);
           // update value in transclusion tab
           $('[data-trans-id="'+cure.mdid+'"].transcludable.dvalue').html(cure.value);
           // update other references to this element in document
@@ -959,9 +957,13 @@ app.on('saveSection', function(e, sectionId) {
     });
   })
 
-  app.set(e.keypath+'.content', content);//section.filter(".section").html());
-  app.set(e.keypath+'.editing', false);
+  var content = section.filter(".section").html();
 
+  //content = app.replaceBracketWithSpan(content);
+ 
+  
+  app.set(e.keypath+'.content', content);//section.filter(".section").html());  
+  app.set(e.keypath+'.editing', false);
   app.set(viewTree);
 
   // update all other transclusions 
