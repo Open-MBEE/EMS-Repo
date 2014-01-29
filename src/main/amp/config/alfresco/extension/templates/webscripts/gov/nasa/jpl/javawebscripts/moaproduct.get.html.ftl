@@ -296,7 +296,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
                 {{#viewData.comments}}
                     <li class="comment list-group-item">
                       {{{ body }}}
-                      <div class="comment-info"><small>{{ author }}, {{ modified }}<small></div>
+                      <div class="comment-info"><small>{{ author }}, {{ lastModified }}<small></div>
                     </li>
                 {{/viewData.comments}}
                 <li class="list-group-item">
@@ -547,7 +547,7 @@ app.on('addComment', function(evt, mbid) {
   commentField.find('.placeholder').detach();
   var newCommentBody = commentField.cleanHtml();
   if (newCommentBody != "") {
-    app.get(evt.keypath+".viewData.comments").push({ author : 'You', body : newCommentBody, modified : new Date()});
+    app.get(evt.keypath+".viewData.comments").push({ author : 'You', body : newCommentBody, lastModified : new Date()});
 
     app.fire('saveComment', null, mbid, newCommentBody);
   }
@@ -919,10 +919,7 @@ app.on('saveSection', function(e, sectionId) {
   var content = section.filter(".section").html();
 
   content = app.replaceBracketWithSpan(content);
-
-  app.set(e.keypath+'.content', content);//section.filter(".section").html());
-  app.set(e.keypath+'.editing', false);
-
+ 
   // update viewTree with changes
   var viewTree = app.get("viewTree");
   var elements = app.editableElements(section);
@@ -962,6 +959,8 @@ app.on('saveSection', function(e, sectionId) {
     });
   })
 
+  app.set(e.keypath+'.content', content);//section.filter(".section").html());
+  app.set(e.keypath+'.editing', false);
 
   app.set(viewTree);
 
@@ -1160,6 +1159,10 @@ app.generateUpdates = function(section)
     }
     e.id = e.mdid;
     delete e["mdid"];
+    var sourceEl =app.get("viewTree").elementsById[e.id];
+    if(sourceEl.hasOwnProperty("valueType")) {
+      e.valueType = sourceEl.valueType;
+    }
   });
 
   //console.log("VT2", viewTree);
