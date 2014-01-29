@@ -693,7 +693,13 @@ public class EmsScriptNode extends ScriptNode {
         JSONArray array;
 
         if (jsonObject.has(Acm.JSON_VALUE_TYPE)) {
-            array = jsonObject.getJSONArray("value");
+            Object object = jsonObject.get(Acm.JSON_VALUE);
+            if (object instanceof String) {
+                array = new JSONArray();
+                array.put(object);
+            } else {
+                array = jsonObject.getJSONArray(Acm.JSON_VALUE);
+            }
             if (jsonObject.get(Acm.JSON_VALUE_TYPE).equals(Acm.JSON_ELEMENT_VALUE)) {
                 elementValues.put(jsonObject.getString(Acm.JSON_ID), array);
             }
@@ -714,7 +720,7 @@ public class EmsScriptNode extends ScriptNode {
             relJson.put(Acm.JSON_TARGET, target);
             relationshipElements.put(jsonObject.getString(Acm.JSON_ID), relJson);
         } else if (jsonObject.has(Acm.JSON_ANNOTATED_ELEMENTS)) {
-            array = jsonObject.getJSONArray("annotatedElements");
+            array = jsonObject.getJSONArray(Acm.JSON_ANNOTATED_ELEMENTS);
             annotatedElements.put(jsonObject.getString(Acm.JSON_ID), array);
         }
 
@@ -732,14 +738,12 @@ public class EmsScriptNode extends ScriptNode {
 	 * @throws JSONException 
 	 */
 	public void ingestJSON(JSONObject jsonObject) throws JSONException {
-	    JSONArray array;
-	    
 	    // fill in all the properties
 	    for (String jsonType: Acm.JSON2ACM.keySet()) {
 	        String acmType = Acm.JSON2ACM.get(jsonType);
 	        if (jsonObject.has(jsonType)) {
 	            if (jsonType.equals(Acm.JSON_VIEW_2_VIEW) || jsonType.equals(Acm.JSON_NO_SECTIONS)) {
-	                array = jsonObject.getJSONArray(jsonType);
+	                JSONArray array = jsonObject.getJSONArray(jsonType);
 	                this.createOrUpdateProperty(acmType, array.toString());
 	            } else {
 	                String property = jsonObject.getString(jsonType);
@@ -751,11 +755,25 @@ public class EmsScriptNode extends ScriptNode {
 	            }
 	        }
 	    }
+
+	    // if already existing, possible that value type isn't specified (e.g. from view editor)
+	    if (!jsonObject.has(Acm.JSON_VALUE_TYPE) && jsonObject.has(Acm.JSON_VALUE)) {
+	        jsonObject.put(Acm.JSON_VALUE_TYPE, (String)getProperty(Acm.ACM_VALUE_TYPE));
+	    }
 	    
 	    // fill in the valueTypes and all relationships
         if (jsonObject.has(Acm.JSON_VALUE_TYPE)) {
+            JSONArray array;
+            
             String acmType = Acm.JSON2ACM.get(jsonObject.get(Acm.JSON_VALUE_TYPE));
-            array = jsonObject.getJSONArray("value");
+            Object value = jsonObject.get(Acm.JSON_VALUE);
+            // view editor just sends a string for the value instead of an array
+            if (value instanceof String) {
+                array = new JSONArray();
+                array.put(jsonObject.get(Acm.JSON_VALUE));
+            } else {
+                array = jsonObject.getJSONArray(Acm.JSON_VALUE);
+            }
             if (acmType.equals(Acm.ACM_LITERAL_BOOLEAN)) {
                 this.createOrUpdatePropertyValues(acmType, array, new Boolean(true));
             } else if (acmType.equals(Acm.ACM_LITERAL_INTEGER)) {
@@ -813,8 +831,8 @@ public class EmsScriptNode extends ScriptNode {
                 if (prefix.indexOf("src") >= 0) {
                     nodeurl = "src=\\\"";
                 }
-                // TODO: need to map context out...
-                String context = "https://sheldon/alfresco";
+                // TODO: need to map context out in case we aren't at alfresco
+                String context = "/alfresco";
                 nodeurl += context + versionedNode.getUrl() + "\\\"";
 //                if (escape) {
 //                    nodeurl = nodeurl.replace("/", "").replace("\\", "\\\"");
