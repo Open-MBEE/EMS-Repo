@@ -282,7 +282,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
                 <button type="button" class="btn btn-primary" proxy-click="saveSection:{{ id }}">Save changes</button>
               </div>
             </div>
-            <div id="section{{ id }}" class="section page editing" data-section-id="{{ id }}" contenteditable="true" proxy-dblclick="sectionDoubleClick">
+            <div id="section{{ id }}" class="section page editing" data-section-id="{{ id }}" contenteditable="false" proxy-dblclick="sectionDoubleClick">
               {{{ content }}}
             </div>
             {{/editing}}
@@ -618,6 +618,61 @@ app.replaceSpanWithBracket = function(section) {
 
 }
 
+var savedSel;
+
+
+function _saveSelection() {
+  //console.log("Start");
+    if (window.getSelection) {
+        sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+            var ranges = [];
+            for (var i = 0, len = sel.rangeCount; i < len; ++i) {
+                ranges.push(sel.getRangeAt(i));
+            }
+                        //console.log("End");
+            return ranges;
+
+        }
+    } else if (document.selection && document.selection.createRange) {
+                  console.log("End");
+        return document.selection.createRange();
+    }
+    //console.log("End");
+    return null;
+}
+
+function _restoreSelection(savedSel) {
+    if (savedSel) {
+        if (window.getSelection) {
+            sel = window.getSelection();
+            sel.removeAllRanges();
+            for (var i = 0, len = savedSel.length; i < len; ++i) {
+                sel.addRange(savedSel[i]);
+            }
+        } else if (document.selection && savedSel.select) {
+            savedSel.select();
+        }
+    }
+}
+
+app.getSavedSelection = function()
+{
+  return savedSel;
+}
+
+app.saveSelection = function()
+{
+  //console.log("SAVE");
+  savedSel = _saveSelection();
+}
+
+app.restoreSelection = function()
+{
+  _restoreSelection(savedSel);
+}
+
+
 app.on('editSection', function(e, sectionId) {
   window.pageExitManager.editorOpened();
 
@@ -635,6 +690,10 @@ app.on('editSection', function(e, sectionId) {
   section.filter('.section.page').wysiwyg({toolbarSelector: '[data-role=editor-toolbar][data-target="#section' + sectionId + '"]'});
   section.filter('span').wysiwyg({toolbarSelector : '#no-toolbar'});
   
+  // We will set the individual editable elements to contenteditable true.  If this root container is true than
+  // it will prevent sub elements from getting key events.
+  section.filter('.section.page').attr("contenteditable", false);
+
   app.replaceSpanWithBracket(section);
 
   app.set('currentInspector', 'transclusionList');
@@ -675,25 +734,22 @@ app.on('editSection', function(e, sectionId) {
   unwrapped.wrapInner("<p class='pwrapper'></p>");
 
   section.find("p").addClass("pwrapper");
+  
+  section.on('keyup paste click',function(evt) {
+    app.saveSelection();
+  });
 
-  // TODO turn this listener off on save or cancel
-  section.on('keyup paste blur',function(evt) {
-    //console.log("start Section key paste blur")
-    // Error sometimes when document.selection is undefined
-    //console.log("A", document.selection, evt);
-    // we need to use the selection api because we're in a contenteditable
-
-    // use event target instead of selected node so that we can still get the element if the user deletes all characters in it
-    var editedElement = evt.target;//app.getSelectedNode();
-    var $el = $(editedElement);
-    var mdid = $el.attr('data-mdid');
-    var property = $el.attr('data-property');
-    var newValue = $(editedElement).html();
-    // TODO filter out html for name and dvalue?
-    // find others, set their values
-    $('[data-mdid='+mdid+'][data-property='+property+']').not($el).html(newValue);
-    //console.log("end Section key paste blur")
-  })
+  // TODO: turn off this handler?
+  // Update other references to an element within this view on change
+  section.find("[data-mdid][data-property]").on('keyup paste blur', function(evt) 
+  {
+      var editedElement = evt.target;//app.getSelectedNode();
+      var $el = $(editedElement);
+      var mdid = $el.attr('data-mdid');
+      var property = $el.attr('data-property');
+      var newValue =  $el.html();
+      section.find("[data-mdid='"+mdid+"'][data-property='"+property+"']").not($el).html(newValue);
+  });
 
   // handle placeholder text
   // TODO remove this listener on cancel or save
@@ -761,6 +817,7 @@ $('[data-toggle=dropdown]').dropdown();
 app.on('cancelEditing', function(e) {
   window.pageExitManager.editorClosed();
   e.original.preventDefault();
+  //var section = $("[data-section-id='" + sectionId + "']");
   var sectionId = app.get(e.keypath+'.id');
   app.set(e.keypath+'.editing', false);
   // console.log("canceling", sectionId);
@@ -769,7 +826,7 @@ app.on('cancelEditing', function(e) {
   $sectionHeader.html($sectionHeader.data('original-content'));
   $sectionHeader.attr('contenteditable', false);
 
-  section.find(".reference.editable").attr('contenteditable', false);
+  //section.find(".reference.editable").attr('contenteditable', false);
 
   //section.find("p").removeClass("pwrapper");
   // app.set(e.keypath+'.content', app.get(e.keypath+'.previousContent'));
@@ -823,6 +880,15 @@ app.spanContentToValue = function(content, vtree, depth) {
       } else if (t === "value") {
         innerVal = elem.value;
       }
+
+      // Set the hovertext to display the fully qualified name if it exists
+      var hoverText = "[" + t + "]";
+      if(elem.qualifiedName)
+      {
+        hoverText = elem.qualifiedName + " " + hoverText;
+      }
+      dom.attr("title", hoverText);
+
       dom.html(innerVal);
      
   });
@@ -871,21 +937,32 @@ app.on('saveSection', function(e, sectionId) {
           if(preview) {
             cure.documentationPreview = preview;
           }
-          $('[data-trans-id="'+cure.mdid+'"].transcludable.documentation').text(cure.documentationPreview);
+          // update value in transclusion tab
+          $('[data-trans-id="'+cure.mdid+'"].transcludable.documentation').html(cure.documentationPreview);
+          // update other references to this element in document
+          $("[data-mdid='"+cure.mdid+"'][data-property='documentation']").html(cure.documentation);
         }
         if(e.hasOwnProperty("name"))
         {
           cure.name = e.name;
-          $('[data-trans-id="'+cure.mdid+'"].transcludable.name').text(cure.name);
+          // update value in transclusion tab
+          $('[data-trans-id="'+cure.mdid+'"].transcludable.name').html(cure.name);
+          // update other references to this element in document
+          $("[data-mdid='"+cure.mdid+"'][data-property='name']").html(cure.name);
         }
         if(e.hasOwnProperty("value"))
         {
           cure.value = e.value;
-          $('[data-trans-id="'+cure.mdid+'"].transcludable.dvalue').text(cure.value);
+          // update value in transclusion tab
+          $('[data-trans-id="'+cure.mdid+'"].transcludable.dvalue').html(cure.value);
+          // update other references to this element in document
+          $("[data-mdid='"+cure.mdid+"'][data-property='value']").html(cure.value);
         }
       }
     });
   })
+
+
   app.set(viewTree);
 
   // update all other transclusions 
@@ -1422,6 +1499,10 @@ app.observe('viewHierarchy', function(viewData) {
   }
   viewTree.snapshots = viewData.snapshots;
   viewTree.elements = viewData.elements;
+
+  viewTree.elements = _.sortBy(viewTree.elements, function(e){ return e.qualifiedName });
+
+
   viewTree.elementsById = elementsById;
   // Create a list of transcludable elements
   _.each(viewTree.elements, function(e) {
@@ -1625,7 +1706,9 @@ app.createLiveTable = function($el, tableData) {
 
 // search.js
 
-app.observe('transcludableQuery', function(q) {
+
+var search = _.debounce(
+  function(q){
   var searchStyle = document.getElementById('search_style');
   if (!q) {
     searchStyle.innerHTML = "";
@@ -1642,13 +1725,16 @@ app.observe('transcludableQuery', function(q) {
   {
     // don't do anything if there's no token
     if(split[i].trim() == "")
-  {
-    continue;
-  }
+    {
+      continue;
+    }
     selector += '.searchable:not([data-search-index*="' +split[i]+ '"]){ display : none; }';
   }
-
   searchStyle.innerHTML = selector; //".searchable:not([data-search-index*=\"" + q + "\"]) { display: none; }";
+}, 250);
+
+app.observe('transcludableQuery', function(q) {
+  search(q);
 })
 
 // sections.js
@@ -1835,52 +1921,8 @@ console.log("");
 
 
 
-var savedSel;
+
 var lastTransLength = 0;
-
-function _saveSelection() {
-  //console.log("Start");
-    if (window.getSelection) {
-        sel = window.getSelection();
-        if (sel.getRangeAt && sel.rangeCount) {
-            var ranges = [];
-            for (var i = 0, len = sel.rangeCount; i < len; ++i) {
-                ranges.push(sel.getRangeAt(i));
-            }
-                        console.log("End");
-            return ranges;
-
-        }
-    } else if (document.selection && document.selection.createRange) {
-                  console.log("End");
-        return document.selection.createRange();
-    }
-    //console.log("End");
-    return null;
-}
-
-function _restoreSelection(savedSel) {
-    if (savedSel) {
-        if (window.getSelection) {
-            sel = window.getSelection();
-            sel.removeAllRanges();
-            for (var i = 0, len = savedSel.length; i < len; ++i) {
-                sel.addRange(savedSel[i]);
-            }
-        } else if (document.selection && savedSel.select) {
-            savedSel.select();
-        }
-    }
-}
-
-function saveSelection()
-{
-  savedSel = _saveSelection();
-}
-function restoreSelection()
-{
-  _restoreSelection(savedSel);
-}
 
 //app.on("imcool", function(e)  {
 //  console.log("Thats right");
@@ -1897,9 +1939,11 @@ app.on('transclusionDown', function(e) {
 
   //$(".transcludable").on('click', function() {
     //console.log("-----");
-    saveSelection();
+    //saveSelection();
     //console.log("ASDF!!!", e);
     
+    var savedSel = app.getSavedSelection();
+    //console.log("TransDown", savedSel);
     if(savedSel.length > 0){
       var section = $(savedSel[0].commonAncestorContainer).closest(".section.page.editing");
       //var section = $(app.getSelectedNode()).closest(".section.page.editing");
@@ -1930,11 +1974,13 @@ app.on('transclusionDown', function(e) {
       var name = $('[data-trans-id="'+transId+'"].transcludable.name').text();
       //console.log(name);
       var r = '["'+name+'":'+refType+':'+transId+'] ';
+      app.restoreSelection();
       document.execCommand("insertHTML", false, r);
       lastTransLength = r.length;
 
 
     }  
+    //console.log("TransDown done");
     
     //console.log("-----");
     //saveSelection();
@@ -1950,21 +1996,25 @@ app.on('transclusionDown', function(e) {
 
 app.on('transclusionUp', function(e) {
   //console.log("Start Up");
-  restoreSelection();
+  app.restoreSelection();
 
   //setTimeout(function() {
       //var advanceLength = r.length;
   if(lastTransLength !== 0) {
+
     var range = window.getSelection().getRangeAt(0);
     //console.log(range.startOffset, range.startContainer);
+    //console.log("target : " + (range.startOffset + lastTransLength) + " : ", range.startContainer );
     range.setStart(range.startContainer, range.startOffset + lastTransLength);
+    //console.log("Good1");
     range.setEnd(range.startContainer, range.startOffset + 0);
+
     window.getSelection().removeAllRanges();
     window.getSelection().addRange(range);
   }
   lastTransLength = 0;
  // },100);
-
+  app.saveSelection();
 
   //console.log("End Up");
 })
