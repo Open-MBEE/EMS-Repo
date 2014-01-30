@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
@@ -38,7 +39,6 @@ import java.util.Map;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.cmr.repository.ContentData;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -80,30 +80,29 @@ public class SnapshotPost extends AbstractJavaWebScript {
             DateTime now = new DateTime();
             DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
 
-            String snapshotId = viewid + "_" + now.getMillis() + ".html";
+            String snapshotId = viewid + "_" + now.getMillis();
             EmsScriptNode snapshotNode = snapshotFolderNode.createNode(
                     snapshotId, "view2:Snapshot");
             snapshotNode.createOrUpdateProperty("cm:isIndexed", true);
             snapshotNode.createOrUpdateProperty("cm:isContentIndexed", false);
             snapshotNode.createOrUpdateProperty(Acm.ACM_ID, snapshotId);
             
-            System.out.println("Creating snapshot with indexing: " + snapshotNode.getProperty("cm:isIndexed"));
-            ContentWriter writer = services.getContentService().getWriter(
-                    snapshotNode.getNodeRef(), ContentModel.PROP_CONTENT, true);
-            writer.putContent(html);
+            MoaProductGet moaService = new MoaProductGet();
+            moaService.setRepositoryHelper(repository);
+            moaService.setServices(services);
+            JSONObject snapshotJson = moaService.generateMoaProduct(viewid, req.getContextPath());
+            if (snapshotJson == null) {
+                // RETURN IF NOT FOUND
+            }
             
-            ContentData contentData = writer.getContentData();
-            contentData = ContentData.setMimetype(contentData, "text/html");
-            services.getNodeService().setProperty(snapshotNode.getNodeRef(), ContentModel.PROP_CONTENT, contentData);
-
-            // Scriptnode has weird toplevelscope null pointer
-//            Map<String, Object> properties = snapshotNode.getProperties();
-//            if (properties != null) {
-//                ScriptNode.ScriptContentData content = (ScriptNode.ScriptContentData)properties.get("content");
-//                content.setMimetype("text/html");
-//            } else {
-//                System.out.println("properties are null....");
-//            }
+            ContentWriter writer = services.getContentService().getWriter(snapshotNode.getNodeRef(), ContentModel.PROP_CONTENT, true);
+            try {
+                snapshotJson.put("snapshot", true);
+                writer.putContent(snapshotJson.toString(4));
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
+            ModelLoadActionExecuter.setContentDataMimeType(writer, snapshotNode, "application/json", services);
             
             topview.createOrUpdateAssociation(snapshotNode, "view2:snapshots");
             
@@ -115,7 +114,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 snapshoturl.put("creator",
                         AuthenticationUtil.getFullyAuthenticatedUser());
                 snapshoturl.put("created", fmt.print(now));
-                snapshoturl.put("url", req.getContextPath() + snapshotNode.getUrl());
+                snapshoturl.put("url", req.getContextPath() + "/wcs/snapshots/" + snapshotId);
 
                 model.put("res", snapshoturl.toString(4));
             } catch (JSONException e) {

@@ -93,20 +93,12 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req,
-			Status status, Cache cache) {
-		clearCaches();
-		
+			Status status, Cache cache) {		
 		Map<String, Object> model = new HashMap<String, Object>();
 		
 		if (validateRequest(req, status)) {
-			try {
-				String productId = req.getServiceMatch().getTemplateVars().get("id");
-				handleProduct(productId);
-				handleSnapshots(productId, req.getContextPath());
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+            String productId = req.getServiceMatch().getTemplateVars().get("id");
+		    generateMoaProduct(productId, req.getContextPath());
 		}
 		
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
@@ -125,6 +117,18 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		return model;
 	}
 
+    public JSONObject generateMoaProduct(String productId, String contextPath) {
+        clearCaches();
+        try {
+            handleProduct(productId);
+            handleSnapshots(productId, contextPath);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return productsJson;
+    }	
 	
 	private void handleProduct(String productId) throws JSONException {
 		EmsScriptNode product = findScriptNodeByName(productId);
@@ -156,12 +160,11 @@ public class MoaProductGet extends AbstractJavaWebScript {
             JSONObject jsonObject = new JSONObject();
             // strip off the _{timestamp.html} from the end of the snapshots id
             String id = (String)snapshot.getProperty(Acm.ACM_ID);
-            id = id.substring(0,id.lastIndexOf("_"));
-            jsonObject.put("id", id);
+            jsonObject.put("id", id.substring(0, id.lastIndexOf("_")));
             DateTime dt = new DateTime((Date)snapshot.getProperty(Acm.ACM_LAST_MODIFIED));
             DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
             jsonObject.put("created", fmt.print(dt));
-            jsonObject.put("url", contextPath + snapshot.getUrl());
+            jsonObject.put("url", contextPath + "/wcs/snapshots/" + id);
             jsonObject.put("creator", (String) snapshot.getProperty("cm:modifier"));
             snapshotsJson.put(jsonObject);
         }
