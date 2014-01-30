@@ -6,6 +6,10 @@
   margin: 1cm;
 }
 
+img {
+	max-width: 100%;
+}
+
 p a:after {
   content: " (" attr(href) ")";
   font-size: 90%;
