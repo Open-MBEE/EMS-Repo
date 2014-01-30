@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.namespace.QName;
 import org.springframework.extensions.webscripts.Status;
 
 import sysml.AbstractSystemModel;
@@ -29,8 +30,10 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     
     @Override
     public boolean isDirected( EmsScriptNode relationship ) {
-        // TODO Auto-generated method stub
-        return false;
+        if ( relationship == null ) return false;
+        return services.getDictionaryService()
+                       .isSubClass( relationship.getQNameType(),
+                                    QName.createQName( "sysml:DirectedRelationship" ) );
     }
 
     @Override
