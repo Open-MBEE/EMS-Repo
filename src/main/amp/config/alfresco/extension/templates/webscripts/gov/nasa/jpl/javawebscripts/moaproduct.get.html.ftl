@@ -32,7 +32,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
       </div>
 
       <ul class="nav navbar-nav">
-        <li><a  href="/share/page/">dashboard</a></li>
+        <li><a  href="/share/page/">Europa EMS Dashboard</a></li>
       </ul>   
         
       <div class="pull-right">
@@ -333,8 +333,8 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
         <option value="document-info">Table of Contents</option>
         <!-- <option value="history">History</option> -->
         <!-- <option value="references">References</option> -->
-        <option value="transclusionList">Transclusion</option>
-        <option value="export">Export</option>
+        <option value="transclusionList">Cross reference</option>
+        <option value="export">Configurations</option>
       </select>
 
       <div id="document-info" class="inspector" style="height:100%;">
@@ -395,7 +395,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
           <li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>         
           <li><button type="button" class="btn btn-default" proxy-click="printPreview">Print Preview</button></li>
           {{^viewTree.snapshot}}
-          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Snapshot</button></li>   
+          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Configuration Seal</button></li>   
           {{/viewTree.snapshot}}       
         </ul>
 
@@ -455,18 +455,21 @@ var ajaxWithHandlers = function(options, successMessage, errorMessage) {
     .done(function(data) { 
       if (data.indexOf("html") != -1) {
         alert("Not saved! You've been logged out, login in a new window first!");
-      		window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
+          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
       }
       app.fire('message', 'success', successMessage); })
     .fail(function(e) { 
       if (e && e.status && e.status === 200) {
         if (e.responseText.indexOf("html") != -1) {
           alert("Not saved! You've been logged out, login in a new window first!");
-      		window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
+          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
         }
         // we got a 200 back, but json parsing might have failed
         return;
       } else {
+        if(e && e.status && e.status === 401) {
+          errorMessage += ": user does not have authorization to perform this action";
+        }
         app.fire('message', 'error', errorMessage); 
         if (console && console.log) {
           console.log("ajax error:", e);
