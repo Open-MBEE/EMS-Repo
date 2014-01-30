@@ -60,7 +60,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * 
  */
 public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
-	public enum LogLevel {
+    public enum LogLevel {
 		DEBUG(0), INFO(1), WARNING(2), ERROR(3);
 		private int value;
 		private LogLevel(int value) {
@@ -199,10 +199,21 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		}
 	}
 	
+	protected void log(LogLevel level, String msg) {
+	    if (level.value >= logLevel.value) {
+	        log(msg);
+	    }
+	}
+	
 	protected void log(String msg, int code) {
 		response.append(msg);
 		responseStatus.setCode(code);
 		responseStatus.setMessage(msg);
+	}
+	
+	protected void log(String msg) {
+	    response.append(msg + "\n");
+	    System.out.println(msg);
 	}
 	
 	/**
@@ -311,4 +322,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return req.getParameter(name).equals(value);
     }
 
+    public StringBuffer getResponse() {
+        return response;
+    }
+
+    public Status getResponseStatus() {
+        return responseStatus;
+    }
+    
+    public void setLogLevel(LogLevel level) {
+        logLevel = level;
+    }
 }

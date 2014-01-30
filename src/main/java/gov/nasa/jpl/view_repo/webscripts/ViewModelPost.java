@@ -62,9 +62,9 @@ public class ViewModelPost extends ModelPost {
         String viewid = req.getServiceMatch().getTemplateVars().get("modelid");
         UserTransaction trx = services.getTransactionService().getUserTransaction();
         try {
+            trx.begin();
             EmsScriptNode view = findScriptNodeByName(viewid);
             view.createOrUpdateProperty("cm:modifier", AuthenticationUtil.getFullyAuthenticatedUser());
-
             trx.commit();
         } catch (Throwable e) {
             try {
