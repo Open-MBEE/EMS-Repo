@@ -62,7 +62,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         clearCaches();
 
         String viewid = req.getServiceMatch().getTemplateVars().get("viewid");
-        EmsScriptNode topview = findScriptNodeByName(viewid);
+        EmsScriptNode topview = findScriptNodeById(viewid);
         EmsScriptNode snapshotFolderNode = getSnapshotFolderNode(topview);
 
         Map<String, Object> model = new HashMap<String, Object>();
