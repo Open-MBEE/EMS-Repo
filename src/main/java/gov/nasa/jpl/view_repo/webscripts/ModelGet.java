@@ -211,15 +211,15 @@ public class ModelGet extends AbstractJavaWebScript {
 				if (checkPermissions(child, PermissionService.READ)) {
 			       if (child.getTypeShort().equals(Acm.ACM_ELEMENT_FOLDER)) {
 						handleElementHierarchy(child, recurse);
-    			   } else {
-    					String value = (String)child.getProperty(Acm.ACM_ID);
-    					if (value != null) {
-    						array.put(value);
-    						elementsFound.put(value, child);
-    						// add empty hierarchies as well
-    						elementHierarchy.put(value, new JSONArray());
-    					}
-    			   }
+    			       } else {
+        					String value = (String)child.getProperty(Acm.ACM_ID);
+        					if (value != null) {
+        						array.put(value);
+        						elementsFound.put(value, child);
+        						// add empty hierarchies as well
+        						elementHierarchy.put(value, new JSONArray());
+        					}
+    			       }
 				}
 			}
 	    	

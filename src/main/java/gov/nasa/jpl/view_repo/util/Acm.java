@@ -60,6 +60,7 @@ public class Acm {
     public static String JSON_SOURCE = "source";
     public static String JSON_TARGET = "target";
     public static String JSON_VALUE_TYPE = "valueType";
+    public static String JSON_VALUE = "value";
     public static String JSON_BODY = "body";
     public static String JSON_ANNOTATED_ELEMENTS = "annotatedElements";
     

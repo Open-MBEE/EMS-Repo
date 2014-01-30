@@ -36,13 +36,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.UserTransaction;
 
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+/**
+ * Services /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/view/element.post.desc.xml
+ * 
+ * @author cinyoung
+ *
+ */
 public class ViewModelPost extends ModelPost {
 
     @Override
@@ -51,6 +59,22 @@ public class ViewModelPost extends ModelPost {
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
 
+        String viewid = req.getServiceMatch().getTemplateVars().get("modelid");
+        UserTransaction trx = services.getTransactionService().getUserTransaction();
+        try {
+            EmsScriptNode view = findScriptNodeByName(viewid);
+            view.createOrUpdateProperty("cm:modifier", AuthenticationUtil.getFullyAuthenticatedUser());
+
+            trx.commit();
+        } catch (Throwable e) {
+            try {
+                System.out.println("\t####### ERROR: Needed to ViewModelPost rollback: " + e.getMessage());
+                trx.rollback();
+            } catch (Throwable ee) {
+                System.out.println("\tRollback ViewModelPost failed: " + ee.getMessage());
+            }
+        }
+        
         try {
             createOrUpdateModel(req, status);
         } catch (Exception e) {

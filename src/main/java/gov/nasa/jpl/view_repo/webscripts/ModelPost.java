@@ -600,6 +600,10 @@ public class ModelPost extends AbstractJavaWebScript {
                 try {
                     if (!node.getParent().equals(parent)) {
                         node.move(parent);
+                        EmsScriptNode pkgNode = findScriptNodeByName(id + "_pkg");
+                        if (pkgNode != null) {
+                            pkgNode.move(parent);
+                        }
                     }
                 } catch (Exception e) {
                     System.out.println("could not find node information: " + id);

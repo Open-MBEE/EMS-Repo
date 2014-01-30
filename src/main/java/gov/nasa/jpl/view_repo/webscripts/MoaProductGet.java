@@ -32,9 +32,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.Acm;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,6 +43,9 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.service.cmr.security.PermissionService;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -101,6 +102,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 			try {
 				String productId = req.getServiceMatch().getTemplateVars().get("id");
 				handleProduct(productId);
+				handleSnapshots(productId, req.getContextPath());
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -143,6 +145,29 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		}
 	}
 	
+	private void handleSnapshots(String productId, String contextPath) throws JSONException {
+	    EmsScriptNode product = findScriptNodeById(productId);
+	    
+        JSONArray snapshotsJson = new JSONArray();
+        List<EmsScriptNode> snapshotsList = product.getTargetAssocsNodesByType("view2:snapshots");
+
+        Collections.sort(snapshotsList, new EmsScriptNode.EmsScriptNodeComparator());
+        for (EmsScriptNode snapshot: snapshotsList) {
+            JSONObject jsonObject = new JSONObject();
+            // strip off the _{timestamp.html} from the end of the snapshots id
+            String id = (String)snapshot.getProperty(Acm.ACM_ID);
+            id = id.substring(0,id.lastIndexOf("_"));
+            jsonObject.put("id", id);
+            DateTime dt = new DateTime((Date)snapshot.getProperty(Acm.ACM_LAST_MODIFIED));
+            DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+            jsonObject.put("created", fmt.print(dt));
+            jsonObject.put("url", contextPath + snapshot.getUrl());
+            jsonObject.put("creator", (String) snapshot.getProperty("cm:modifier"));
+            snapshotsJson.put(jsonObject);
+        }
+        productsJson.put("snapshots", snapshotsJson);
+    }
+	
 	private void handleViews(JSONArray view2view) throws JSONException {
 	    Set<String> viewIds = new HashSet<String>();
 	    Set<String> elementIds = new HashSet<String>();
@@ -167,15 +192,8 @@ public class MoaProductGet extends AbstractJavaWebScript {
         	        
         	        // add any related comments as part of the view
         	        JSONArray commentsJson = new JSONArray();
-        	        JSONArray comments = view.getSourceAssocsByType(Acm.ACM_ANNOTATED_ELEMENTS);
-        	        List<EmsScriptNode> commentList = new ArrayList<EmsScriptNode>();
-        	        for (int ii = 0; ii < comments.length(); ii++) {
-        	            EmsScriptNode comment = findScriptNodeById(comments.getString(ii));
-        	            if (comment != null && checkPermissions(comment, PermissionService.READ)) {
-        	                commentList.add(comment);
-        	            }
-        	        }
-        	        Collections.sort(commentList, new EmsScriptNodeComparator());
+        	        List<EmsScriptNode> commentList = view.getSourceAssocsNodesByType(Acm.ACM_ANNOTATED_ELEMENTS);//new ArrayList<EmsScriptNode>();
+        	        Collections.sort(commentList, new EmsScriptNode.EmsScriptNodeComparator());
         	        for (EmsScriptNode comment: commentList) {
         	            commentsJson.put(comment.toJSONObject(Acm.JSON_TYPE_FILTER.COMMENT));
         	        }
@@ -200,24 +218,5 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	            elementsJson.put(elementJson);
 	        }
 	    }
-	}
-	
-	class EmsScriptNodeComparator implements Comparator<EmsScriptNode> {
-        @Override
-        public int compare(EmsScriptNode x, EmsScriptNode y) {
-            Date xModified;
-            Date yModified;
-            
-            xModified = (Date) x.getProperty(Acm.ACM_LAST_MODIFIED);
-            yModified = (Date) y.getProperty(Acm.ACM_LAST_MODIFIED);
-            
-            if (xModified == null) {
-                return -1;
-            } else if (yModified == null) {
-                return 1;
-            } else {
-                return (xModified.compareTo(yModified));
-            }
-        }
 	}
 }
