@@ -29,8 +29,8 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.Collections;
 import java.util.Date;
@@ -43,9 +43,6 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.service.cmr.security.PermissionService;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -96,6 +93,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 			Status status, Cache cache) {		
 		Map<String, Object> model = new HashMap<String, Object>();
 		
+		// generate the product and JSON
 		if (validateRequest(req, status)) {
             String productId = req.getServiceMatch().getTemplateVars().get("id");
 		    generateMoaProduct(productId, req.getContextPath());
@@ -106,8 +104,8 @@ public class MoaProductGet extends AbstractJavaWebScript {
 				model.put("res", productsJson.toString(4));
 			} catch (JSONException e) {
 				e.printStackTrace();
-				log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				model.put("res", response.toString());
+                log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			}
 		} else {
 			model.put("res", response.toString());
@@ -117,6 +115,12 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		return model;
 	}
 
+	/**
+	 * Public utility for generating the Mother Of All Products 
+	 * @param productId    Product ID to generate MOA listing for
+	 * @param contextPath  Context path needed for the snapshot URLs
+	 * @return             JSON object of the entire product
+	 */
     public JSONObject generateMoaProduct(String productId, String contextPath) {
         clearCaches();
         try {
@@ -130,6 +134,11 @@ public class MoaProductGet extends AbstractJavaWebScript {
         return productsJson;
     }	
 	
+    /**
+     * Create the MOA Product JSON
+     * @param productId
+     * @throws JSONException
+     */
 	private void handleProduct(String productId) throws JSONException {
 		EmsScriptNode product = findScriptNodeByName(productId);
 		if (product == null) {
@@ -149,6 +158,12 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		}
 	}
 	
+	/**
+	 * Get the snapshots associated
+	 * @param productId
+	 * @param contextPath
+	 * @throws JSONException
+	 */
 	private void handleSnapshots(String productId, String contextPath) throws JSONException {
 	    EmsScriptNode product = findScriptNodeByName(productId);
 	    
@@ -157,13 +172,12 @@ public class MoaProductGet extends AbstractJavaWebScript {
 
         Collections.sort(snapshotsList, new EmsScriptNode.EmsScriptNodeComparator());
         for (EmsScriptNode snapshot: snapshotsList) {
-            JSONObject jsonObject = new JSONObject();
-            // strip off the _{timestamp.html} from the end of the snapshots id
             String id = (String)snapshot.getProperty(Acm.ACM_ID);
+            Date date = (Date)snapshot.getProperty(Acm.ACM_LAST_MODIFIED);
+            
+            JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", id.substring(0, id.lastIndexOf("_")));
-            DateTime dt = new DateTime((Date)snapshot.getProperty(Acm.ACM_LAST_MODIFIED));
-            DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-            jsonObject.put("created", fmt.print(dt));
+            jsonObject.put("created", EmsScriptNode.getIsoTime(date));
             jsonObject.put("url", contextPath + "/wcs/snapshots/" + id);
             jsonObject.put("creator", (String) snapshot.getProperty("cm:modifier"));
             snapshotsJson.put(jsonObject);

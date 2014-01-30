@@ -33,13 +33,15 @@ import gov.nasa.jpl.view_repo.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.repository.ContentWriter;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -57,78 +59,89 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     @Override
-    protected Map<String, Object> executeImpl(WebScriptRequest req,
-            Status status, Cache cache) {
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         clearCaches();
 
-        String viewid = req.getServiceMatch().getTemplateVars().get("viewid");
-        EmsScriptNode topview = findScriptNodeByName(viewid);
+        String viewId = req.getServiceMatch().getTemplateVars().get("viewid");
+        EmsScriptNode topview = findScriptNodeByName(viewId);
         EmsScriptNode snapshotFolderNode = getSnapshotFolderNode(topview);
 
         Map<String, Object> model = new HashMap<String, Object>();
 
-        String html;
-        try {
-            html = req.getContent().getContent();
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-            html = null;
+        // Don't do anything with the HTML, we just save off a copy of the generated JSON
+//        String html;
+//        try {
+//            html = req.getContent().getContent();
+//        } catch (IOException e1) {
+//            e1.printStackTrace();
+//        }
+
+        DateTime now = new DateTime();
+        DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+
+        String snapshotName = viewId + "_" + now.getMillis();
+        EmsScriptNode snapshotNode = null;
+        if (checkPermissions(snapshotFolderNode, PermissionService.WRITE)) {
+            snapshotNode = createSnapshot(viewId, snapshotName, req.getContextPath(), snapshotFolderNode);
+            if (snapshotNode != null) {
+                topview.createOrUpdateAssociation(snapshotNode, "view2:snapshots");
+            }
         }
 
-        if (html != null) {
-            DateTime now = new DateTime();
-            DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-
-            String snapshotId = viewid + "_" + now.getMillis();
-            EmsScriptNode snapshotNode = snapshotFolderNode.createNode(
-                    snapshotId, "view2:Snapshot");
-            snapshotNode.createOrUpdateProperty("cm:isIndexed", true);
-            snapshotNode.createOrUpdateProperty("cm:isContentIndexed", false);
-            snapshotNode.createOrUpdateProperty(Acm.ACM_ID, snapshotId);
-            
-            MoaProductGet moaService = new MoaProductGet();
-            moaService.setRepositoryHelper(repository);
-            moaService.setServices(services);
-            JSONObject snapshotJson = moaService.generateMoaProduct(viewid, req.getContextPath());
-            if (snapshotJson == null) {
-                // RETURN IF NOT FOUND
-            }
-            
-            ContentWriter writer = services.getContentService().getWriter(snapshotNode.getNodeRef(), ContentModel.PROP_CONTENT, true);
-            try {
-                snapshotJson.put("snapshot", true);
-                writer.putContent(snapshotJson.toString(4));
-            } catch (Exception e1) {
-                e1.printStackTrace();
-            }
-            ModelLoadActionExecuter.setContentDataMimeType(writer, snapshotNode, "application/json", services);
-            
-            topview.createOrUpdateAssociation(snapshotNode, "view2:snapshots");
-            
-            
-            status.setCode(responseStatus.getCode());
-            try {
-                JSONObject snapshoturl = new JSONObject();
-                snapshoturl.put("id", snapshotId);
-                snapshoturl.put("creator",
-                        AuthenticationUtil.getFullyAuthenticatedUser());
-                snapshoturl.put("created", fmt.print(now));
-                snapshoturl.put("url", req.getContextPath() + "/wcs/snapshots/" + snapshotId);
-
-                model.put("res", snapshoturl.toString(4));
-            } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                model.put("res", response.toString());
-            }
-        } else {
-            model.put("res", response.toString());
+        try {
+            JSONObject snapshoturl = new JSONObject();
+            snapshoturl.put("id", snapshotName);
+            snapshoturl.put("creator", AuthenticationUtil.getFullyAuthenticatedUser());
+            snapshoturl.put("created", fmt.print(now));
+            snapshoturl.put("url", req.getContextPath() + "/wcs/snapshots/" + snapshotName);
+            model.put("res", snapshoturl.toString(4));
+        } catch (JSONException e) {
+            e.printStackTrace();
+            log(LogLevel.ERROR, "Error generating JSON for snapshot", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
         
+        status.setCode(responseStatus.getCode());
+        if (status.getCode() != HttpServletResponse.SC_OK) {
+            model.put("res", response.toString());
+        }
         return model;
     }
 
+    
+    private EmsScriptNode createSnapshot(String viewId, String snapshotName, String contextPath, EmsScriptNode snapshotFolder) {
+        EmsScriptNode snapshotNode = snapshotFolder.createNode(snapshotName, "view2:Snapshot");
+        snapshotNode.createOrUpdateProperty("cm:isIndexed", true);
+        snapshotNode.createOrUpdateProperty("cm:isContentIndexed", false);
+        snapshotNode.createOrUpdateProperty(Acm.ACM_ID, snapshotName);
+        
+        MoaProductGet moaService = new MoaProductGet();
+        moaService.setRepositoryHelper(repository);
+        moaService.setServices(services);
+        JSONObject snapshotJson = moaService.generateMoaProduct(viewId, contextPath);
+        if (snapshotJson == null) {
+            log(LogLevel.ERROR, "Could not generate the snapshot JSON", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return null;
+        }
+        
+        ContentWriter writer = services.getContentService().getWriter(snapshotNode.getNodeRef(), ContentModel.PROP_CONTENT, true);
+        try {
+            snapshotJson.put("snapshot", true);
+            writer.putContent(snapshotJson.toString(4));
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
+        ModelLoadActionExecuter.setContentDataMimeType(writer, snapshotNode, "application/json", services);
+        
+        return snapshotNode;
+    }
+    
+    
+    /**
+     * Retrieve the snapshot folder for the view (goes up chain until it hits ViewEditor)
+     * 
+     * @param viewNode
+     * @return
+     */
     public static EmsScriptNode getSnapshotFolderNode(EmsScriptNode viewNode) {
         EmsScriptNode parent = viewNode.getParent();
 
@@ -146,5 +159,4 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
         return snapshotNode;
     }
-
 }

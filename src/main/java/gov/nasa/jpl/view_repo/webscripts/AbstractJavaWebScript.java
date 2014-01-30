@@ -133,6 +133,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	
 	/**
 	 * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
+	 * This does caching of found elements so they don't need to be looked up with a different API each time.
+	 * 
 	 * TODO extend so search context can be specified
 	 * @param name	Node name to search for
 	 * @return		ScriptNode with name if found, null otherwise
@@ -201,8 +203,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	
 	protected void log(LogLevel level, String msg) {
 	    if (level.value >= logLevel.value) {
-	        log(msg);
+	        log("[" + level.name() + "]: " + msg);
 	    }
+        System.out.println(msg);
 	}
 	
 	protected void log(String msg, int code) {
@@ -213,7 +216,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	
 	protected void log(String msg) {
 	    response.append(msg + "\n");
-	    System.out.println(msg);
 	}
 	
 	/**
@@ -286,9 +288,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 					EmsScriptNode node = new EmsScriptNode(row.getNodeRef(), services, response);
 					if (checkPermissions(node, PermissionService.READ)) {
     					String id = (String) node.getProperty(Acm.ACM_ID);
-    					if (id != null) {
-    						searchResults.put(id, node);
-    					}
+        					if (id != null) {
+        						searchResults.put(id, node);
+        					}
 					}
 				}
 			} catch (Exception e) {

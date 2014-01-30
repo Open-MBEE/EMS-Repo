@@ -129,7 +129,6 @@ public class EmsScriptNode extends ScriptNode {
 	 */
 	public boolean createOrUpdateAspect(String aspect) {
 		if (!hasAspect(aspect)) {
-			log(getName() + ": " + aspect + " aspect added");
 			return addAspect(aspect);
 		}
 		return false;
@@ -153,27 +152,26 @@ public class EmsScriptNode extends ScriptNode {
         QName typeQName = createQName(type);
         List<AssociationRef> refs = services.getNodeService().getTargetAssocs(nodeRef, RegexQNamePattern.MATCH_ALL );
 
-        // check all associations to see if there's a matching association
-        for (AssociationRef ref: refs) {
-            if (ref.getTypeQName().equals(typeQName)) {
-                if (ref.getSourceRef() != null && ref.getTargetRef() != null) {
-                    if (ref.getSourceRef().equals(nodeRef) && 
-                            ref.getTargetRef().equals(target.getNodeRef())) {
-                        // found it, no need to update
-                        return false; 
+        if (refs != null) {
+            // check all associations to see if there's a matching association
+            for (AssociationRef ref: refs) {
+                if (ref.getTypeQName().equals(typeQName)) {
+                    if (ref.getSourceRef() != null && ref.getTargetRef() != null) {
+                        if (ref.getSourceRef().equals(nodeRef) && ref.getTargetRef().equals(target.getNodeRef())) {
+                            // found it, no need to update
+                            return false; 
+                        }
                     }
-                }
-                // TODO: need to check for multiple associations?
-                if (!isMultiple) {
-                    // association doesn't match, no way to modify a ref, so need to remove then create
-                    services.getNodeService().removeAssociation(nodeRef, target.getNodeRef(), typeQName);
-                    break;
+                    // TODO: need to check for multiple associations?
+                    if (!isMultiple) {
+                        // association doesn't match, no way to modify a ref, so need to remove then create
+                        services.getNodeService().removeAssociation(nodeRef, target.getNodeRef(), typeQName);
+                        break;
+                    }
                 }
             }
         }
         
-        // Target nodeRef isn't found?
-//      log(getName() + ": " + type + " peer association updated, target: " + target.getName());
         services.getNodeService().createAssociation(nodeRef, target.getNodeRef(), typeQName);
         return true;
 	}
@@ -193,21 +191,21 @@ public class EmsScriptNode extends ScriptNode {
 		List<ChildAssociationRef> refs = services.getNodeService().getChildAssocs(nodeRef);
 		QName typeQName = createQName(type);
 
-		// check all associations to see if there's a matching association
-		for (ChildAssociationRef ref: refs) {
-			if (ref.getTypeQName().equals(typeQName)) {
-				if (ref.getParentRef().equals(nodeRef) && 
-						ref.getChildRef().equals(child.getNodeRef())) {
-					// found it, no need to update
-					return false; 
-				} else {
-					services.getNodeService().removeChildAssociation(ref);
-					break;
-				}
-			}
+		if (refs != null) {
+        		// check all associations to see if there's a matching association
+        		for (ChildAssociationRef ref: refs) {
+        			if (ref.getTypeQName().equals(typeQName)) {
+        				if (ref.getParentRef().equals(nodeRef) && ref.getChildRef().equals(child.getNodeRef())) {
+        					// found it, no need to update
+        					return false; 
+        				} else {
+        					services.getNodeService().removeChildAssociation(ref);
+        					break;
+        				}
+        			}
+        		}
 		}
 
-		log(getName() + ": " + type + " added child association to child = " + child.getName());
 		services.getNodeService().addChild(nodeRef, child.getNodeRef(), typeQName, typeQName);
 		return true;		
 	}
@@ -224,15 +222,13 @@ public class EmsScriptNode extends ScriptNode {
 	public <T extends Serializable> boolean createOrUpdateProperty(String acmType, T value) {
 		@SuppressWarnings("unchecked")
 		T oldValue = (T) getProperty(acmType);
-		if (oldValue != null) {
-			if (!value.equals(oldValue)) {
-				setProperty(acmType, value);
-				log(getName() + ": " + acmType + " property updated to value = " + value);
-				return true;
-			}
+		if (oldValue == null) {
+            setProperty(acmType, value);
 		} else {
-			log(getName() + ": " + acmType + " property created with value = " + value);
-			setProperty(acmType, value);
+            if (!value.equals(oldValue)) {
+                setProperty(acmType, value);
+                return true;
+            }
 		}
 		return false;
 	}	
@@ -255,7 +251,6 @@ public class EmsScriptNode extends ScriptNode {
 		
 		ArrayList<T> oldValues = (ArrayList<T>) getProperty(type);
 		if (!checkIfListsEquivalent(oldValues, values)) {
-			log(getName() + ": " + type + " multivalue property updated to " + values);
 			setProperty(type, values);
 		} else {
 			return false;
@@ -300,20 +295,18 @@ public class EmsScriptNode extends ScriptNode {
 		if (!useFoundationalApi) {
 			result = new EmsScriptNode(super.createNode(name, type).getNodeRef(), services, response);
 		} else {
-			Map<QName, Serializable> props = new HashMap<QName, Serializable>(
-					1, 1.0f);
+			Map<QName, Serializable> props = new HashMap<QName, Serializable>(1, 1.0f);
 			// don't forget to set the name
 			props.put(ContentModel.PROP_NAME, name);
 
 			QName typeQName = createQName(type);
 			if (typeQName != null) {
-    			ChildAssociationRef assoc = services.getNodeService().createNode(
-    					nodeRef,
-    					ContentModel.ASSOC_CONTAINS,
-    					QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI,
-    							QName.createValidLocalName(name)),
-    					createQName(type), props);
-                log("Node " + name + " created");
+			    ChildAssociationRef assoc = services.getNodeService().createNode(
+                                                                					nodeRef,
+                                                                					ContentModel.ASSOC_CONTAINS,
+                                                                					QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI,
+                                                                							QName.createValidLocalName(name)),
+                                                                					createQName(type), props);
                 result = new EmsScriptNode(assoc.getChildRef(), services, response);            
 			} else {
 			    log("Could not find type "  + type);
@@ -405,7 +398,6 @@ public class EmsScriptNode extends ScriptNode {
 	 */
 	public <T extends Serializable >void setProperty(String acmType, T value) {
 		if (useFoundationalApi) {
-			log(getName() + ": " + acmType + " property set to " + value);
 			services.getNodeService().setProperty(nodeRef, createQName(acmType), value);
 		} else {
 			getProperties().put(acmType, value);
@@ -465,7 +457,6 @@ public class EmsScriptNode extends ScriptNode {
                 childrenViews = new JSONArray(property.toString());
             }
         } catch (JSONException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -480,6 +471,7 @@ public class EmsScriptNode extends ScriptNode {
 	public JSONObject toJSONObject() throws JSONException {
 	    return toJSONObject(Acm.JSON_TYPE_FILTER.ALL);
 	}
+
 	
     /**
      * Convert node into our custom JSONObject, showing qualifiedName and editable keys
@@ -489,6 +481,7 @@ public class EmsScriptNode extends ScriptNode {
 	public JSONObject toJSONObject(Acm.JSON_TYPE_FILTER renderType) throws JSONException {
 	    return toJSONObject(renderType, true, true);
 	}
+	
 	
 	/**
 	 * Convert node into our custom JSONObject
@@ -515,16 +508,14 @@ public class EmsScriptNode extends ScriptNode {
                             String elementString = (String) elementValue;
                             element.put(jsonType, fixArtifactUrls(elementString, false));
                         } else if (elementValue instanceof Date) {
-                            DateTime dt = new DateTime((Date) elementValue);
-                            DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-                            element.put(jsonType, fmt.print(dt));
+                            element.put(jsonType, getIsoTime((Date)elementValue));
                         } else {
                             element.put(jsonType, elementValue);
                         }
-                    }
-                }
-            }
-        }
+                    } // end if (Acm.JSON_ARRAYS.contains(jsonType)) {
+                } // end if (Acm.JSON_FILTER_MAP.get(renderType).contains(jsonType)) {
+            } // end if (elementValue != null) {
+        } // end for (String acmType: Acm.ACM2JSON.keySet()) {
 
         // add in content type
         if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_TYPE)) {
@@ -561,8 +552,8 @@ public class EmsScriptNode extends ScriptNode {
                     }
                 }
                 element.put(Acm.JSON_VALUE_TYPE,  valueType);
-            }
-        }
+            } // if (valueType != null) {
+        } // if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_VALUE_TYPE)) {
         
         // add in owner
         if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_OWNER)) {
@@ -655,11 +646,9 @@ public class EmsScriptNode extends ScriptNode {
         List<EmsScriptNode> list = new ArrayList<EmsScriptNode>();
         List<AssociationRef> assocs;
         if (isSource) {
-            assocs = services.getNodeService().getSourceAssocs(nodeRef,
-                    RegexQNamePattern.MATCH_ALL);
+            assocs = services.getNodeService().getSourceAssocs(nodeRef, RegexQNamePattern.MATCH_ALL);
         } else {
-            assocs = services.getNodeService().getTargetAssocs(nodeRef,
-                    RegexQNamePattern.MATCH_ALL);
+            assocs = services.getNodeService().getTargetAssocs(nodeRef, RegexQNamePattern.MATCH_ALL);
         }
         for (AssociationRef aref : assocs) {
             QName typeQName = createQName(acmType);
@@ -680,6 +669,7 @@ public class EmsScriptNode extends ScriptNode {
 	
 	/**
 	 * Given an JSONObject, filters it to find the appropriate relationships to be provided into model post
+	 * TODO: filterRelationsJSONObject probably doesn't need to be in EmsScriptNode
 	 * @param jsonObject
 	 * @return
 	 * @throws JSONException 
@@ -742,7 +732,7 @@ public class EmsScriptNode extends ScriptNode {
 	    for (String jsonType: Acm.JSON2ACM.keySet()) {
 	        String acmType = Acm.JSON2ACM.get(jsonType);
 	        if (jsonObject.has(jsonType)) {
-	            if (jsonType.equals(Acm.JSON_VIEW_2_VIEW) || jsonType.equals(Acm.JSON_NO_SECTIONS)) {
+	            if (Acm.JSON_ARRAYS.contains(jsonType)) {
 	                JSONArray array = jsonObject.getJSONArray(jsonType);
 	                this.createOrUpdateProperty(acmType, array.toString());
 	            } else {
@@ -885,6 +875,12 @@ public class EmsScriptNode extends ScriptNode {
                 return (xModified.compareTo(yModified));
             }
         }
+    }
+    
+    public static String getIsoTime(Date date) {
+        DateTime dt = new DateTime(date);
+        DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+        return fmt.print(dt);
     }
 
 }

@@ -40,9 +40,12 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Simple utility for user testing functionality
  * 
+ * This is exposed to the Javascript engine for processing
+ * 
  * @author cinyoung
  *
  */
+@Deprecated
 public class UserUtil extends BaseProcessorExtension {
 	// alternatively could use the more intuitive ScriptSiteService - siteServiceScript bean
 	private static SiteService siteService;
