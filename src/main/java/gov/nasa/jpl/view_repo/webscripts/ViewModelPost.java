@@ -114,14 +114,14 @@ public class ViewModelPost extends ModelPost {
                         parentFound = false;
                     } else {
                         EmsScriptNode commentParent = findScriptNodeByName(annotatedJson.getString(0));
-                        if (checkPermissions(commentParent, PermissionService.WRITE)) {
                             if (commentParent == null) {
                                 parentFound = false;
                             } else {
-                                newElements.add(id);
-                                updateOrCreateElement(elementJson, commentParent.getParent());
+                                if (checkPermissions(commentParent, PermissionService.WRITE)) {
+                                    newElements.add(id);
+                                    updateOrCreateElement(elementJson, commentParent.getParent());
+                                }
                             }
-                        }
                     }
 
                     if (!parentFound) {

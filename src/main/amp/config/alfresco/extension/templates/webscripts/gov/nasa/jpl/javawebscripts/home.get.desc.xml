@@ -10,7 +10,7 @@
 	 		"projectVolumes": [volumeid,...]
 	 	}  	
   </description>
-  <url>/javawebscripts/productlist/{id}</url> 
+  <url>/ve/documents/{id}</url> 
   <format default="html">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readonly">required</transaction>

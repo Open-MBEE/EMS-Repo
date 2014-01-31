@@ -1,7 +1,7 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Editor</title>
+    <title>View Editor: ${title}</title>
     <link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
@@ -27,7 +27,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
             <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
           {{/environment.development}}
           {{^environment.development}}
-            <a class="navbar-brand" href="${url.context}/wcs/javawebscripts/productlist/europa">Europa View Editor {{ title }}</a>
+            <a class="navbar-brand" href="${url.context}/wcs/ve/documents/europa">Europa View Editor {{ title }}</a>
           {{/environment.development}}  
       </div>
 
@@ -36,11 +36,11 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
       </ul>   
         
       <div class="pull-right">
-        <a href="#"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
+        <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
       </div>
 
       <ul class="nav navbar-nav pull-right">
-       <li><a href="${url.context}/wcs/logout?next=${url.context}/wcs/ui/">logout</a></li>
+       <li><a href="${url.context}/wcs/logout?next=${url.full}">logout</a></li>
       </ul>
 
       <ul class="nav navbar-nav pull-right">

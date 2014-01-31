@@ -106,6 +106,7 @@ public class ProductListGet extends AbstractJavaWebScript {
         		try {
                     handleProductList();
                     model.put("res", productJson.toString(4));
+                    model.put("title", projectNode.getProperty(Acm.ACM_CM_TITLE));
                 } catch (JSONException e1) {
                     e1.printStackTrace();
                     model.put("res", response.toString());

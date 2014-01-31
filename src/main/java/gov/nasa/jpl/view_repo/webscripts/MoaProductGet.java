@@ -93,15 +93,19 @@ public class MoaProductGet extends AbstractJavaWebScript {
 			Status status, Cache cache) {		
 		Map<String, Object> model = new HashMap<String, Object>();
 		
+		String productId = null;
 		// generate the product and JSON
 		if (validateRequest(req, status)) {
-            String productId = req.getServiceMatch().getTemplateVars().get("id");
+            productId = req.getServiceMatch().getTemplateVars().get("id");
 		    generateMoaProduct(productId, req.getContextPath());
 		}
 		
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
 			try {
 				model.put("res", productsJson.toString(4));
+				if (productId != null) {
+				    model.put("title", findScriptNodeByName(productId).getProperty(Acm.ACM_NAME));
+				}
 			} catch (JSONException e) {
 				e.printStackTrace();
 				model.put("res", response.toString());

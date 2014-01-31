@@ -64,6 +64,8 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
     private Repository repository;
     private String contextUrl;
 
+    private StringBuffer response;
+
     // Parameter values to be passed in when the action is created
     public static final String NAME = "modelLoad";
     public static final String PARAM_PROJECT_NAME = "projectName";
@@ -81,8 +83,6 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
     public void setContextUrl(String url) {
         contextUrl = url;
     }
-
-    private StringBuffer response;
 
     @Override
     protected void executeImpl(Action action, NodeRef nodeRef) {

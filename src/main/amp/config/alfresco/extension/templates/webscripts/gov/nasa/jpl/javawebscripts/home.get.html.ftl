@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>View Editor</title>
+		<title>View Editor: ${title}</title>
 		<link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
 		<link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
 		<link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
@@ -26,26 +26,20 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/wcs" };
 						<a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
 					{{/environment.development}}
 					{{^environment.development}}
-						<a class="navbar-brand" href="${url.context}/wcs/ui/">Europa View Editor {{ title }}</a>
+						<a class="navbar-brand" href="${url.full}">Europa View Editor {{ title }}</a>
 					{{/environment.development}}
 			</div>
 			<ul class="nav navbar-nav">
-				{{#environment.development}}
-				<li><a href="dashboard.html">dashboard</a></li>
-				<li><a href="about.html">about</a></li>
-				{{/environment.development}}
-				{{^environment.development}}
-				<li><a href="/share/page/">dashboard</a></li>
-				{{/environment.development}}
+				<li><a href="/share/page/">Europa EMS Dashboard</a></li>
 			</ul>
 
 
 			<div class="pull-right">
-				<a href="vision.html"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
+				<img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
 			</div>
 
 	      <ul class="nav navbar-nav pull-right">
-	       <li><a href="${url.context}/wcs/logout?next=${url.context}/wcs/ui/">logout</a></li>
+	       <li><a href="${url.context}/wcs/logout?next=${url.full}">logout</a></li>
 	      </ul>
 
 			<!-- 
@@ -87,7 +81,7 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/wcs" };
       {{^hidden}}
         <li class="{{ .class }}">
           {{#showLink}}
-          <a href="${url.context}/wcs/javawebscripts/moaproducts/{{id}}">{{name}}</a>
+          <a href="${url.context}/wcs/ve/products/{{id}}">{{name}}</a>
           {{/showLink}}
           {{^showLink}}
           {{ name }}
