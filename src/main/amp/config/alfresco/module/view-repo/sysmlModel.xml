@@ -327,6 +327,19 @@
     		        	<aspect>sysml:Identifiable</aspect>
             </mandatory-aspects>
         </type>
+        <type name="sysml:Operation">
+            <parent>sysml:Element</parent>
+            <properties>
+                <property name="sysml:parameter">
+	                <type>sysml:Element</type>
+	                <multiple>true</multiple>
+                </property>
+                <property name="sysml:isVarArg">
+                    <type>d:boolean</type>
+                    <multiple>false</multiple>
+                </property>
+            </properties>             
+        </type>
     </types>
     <aspects>
         <aspect name="sysml:Identifiable">
