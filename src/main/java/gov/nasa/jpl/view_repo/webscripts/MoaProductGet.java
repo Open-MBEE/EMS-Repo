@@ -101,15 +101,9 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		}
 		
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
-			try {
-				model.put("res", productsJson.toString(4));
-				if (productId != null) {
-				    model.put("title", findScriptNodeByName(productId).getProperty(Acm.ACM_NAME));
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
-				model.put("res", response.toString());
-                log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			model.put("res", productsJson.toString());
+			if (productId != null) {
+			    model.put("title", findScriptNodeByName(productId).getProperty(Acm.ACM_NAME));
 			}
 		} else {
 			model.put("res", response.toString());
