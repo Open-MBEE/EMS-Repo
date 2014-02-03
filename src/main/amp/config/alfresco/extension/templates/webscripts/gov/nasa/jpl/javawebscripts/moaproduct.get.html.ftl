@@ -12,13 +12,14 @@
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
   
 <script type="text/javascript">
-var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
+var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 </script>
 
 </head>
 
   <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
 <div id="main"></div>
+
 <script id="template" type="text/mustache">
 
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -27,7 +28,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
             <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
           {{/environment.development}}
           {{^environment.development}}
-            <a class="navbar-brand" href="${url.context}/wcs/ve/documents/europa">Europa View Editor {{ title }}</a>
+            <a class="navbar-brand" href="${url.context}/service/ve/documents/europa">Europa View Editor {{ title }}</a>
           {{/environment.development}}  
       </div>
 
@@ -40,7 +41,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
       </div>
 
       <ul class="nav navbar-nav pull-right">
-       <li><a href="${url.context}/wcs/logout?next=${url.full}">logout</a></li>
+       <li><a href="${url.context}/service/logout?next=${url.full}" class="submit-logout">logout</a></li>
       </ul>
 
       <ul class="nav navbar-nav pull-right">
@@ -436,6 +437,22 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 <script src="${url.context}/scripts/vieweditor/vendor/svgedit/embedapi.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/css_browser_selector.js"></script>
 <script type="text/javascript" src="${url.context}/scripts/vieweditor/vendor/Ractive.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$('a.submit-logout').click(function() {
+		$.ajax({
+			type: 'GET',
+			url: '${url.context}/service/logout',
+			success: function (data) {
+				alert("logged out successfully.");
+			},
+			error: function(data) {
+				alert("Invalid username or password. Try again.");
+			}
+		});
+	});
+});
+</script>
 <script type="text/javascript">var app = new Ractive({ el : "main", template : "#template", data : pageData });</script>
 <script type="text/javascript">
 var context = window;
@@ -455,14 +472,14 @@ var ajaxWithHandlers = function(options, successMessage, errorMessage) {
     .done(function(data) { 
       if (data.indexOf("html") != -1) {
         alert("Not saved! You've been logged out, login in a new window first!");
-          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
+          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/service/ui/relogin");
       }
       app.fire('message', 'success', successMessage); })
     .fail(function(e) { 
       if (e && e.status && e.status === 200) {
         if (e.responseText.indexOf("html") != -1) {
           alert("Not saved! You've been logged out, login in a new window first!");
-          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
+          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/service/ui/relogin");
         }
         // we got a 200 back, but json parsing might have failed
         return;
@@ -481,7 +498,7 @@ var ajaxWithHandlers = function(options, successMessage, errorMessage) {
 app.on('saveView', function(viewId, viewData) {
   var jsonData = JSON.stringify(viewData);
   console.log("Saving ", jsonData);
-  //alfresco/wcs/javawebscripts/views/id/elements
+  //alfresco/service/javawebscripts/views/id/elements
   var url = absoluteUrl('/javawebscripts/views/' + viewId + '/elements');
   ajaxWithHandlers({ 
     type: "POST",
@@ -1918,7 +1935,7 @@ console.log("");
             success: function(data) {
                 if (data.indexOf("html") != -1) 
                   alert("You've been logged out! Login in a new window first!");
-          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
+          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/service/ui/relogin");
             },
             complete: poll,
             timeout: 5000

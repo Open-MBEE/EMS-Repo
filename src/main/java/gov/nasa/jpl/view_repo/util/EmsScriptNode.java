@@ -824,6 +824,8 @@ public class EmsScriptNode extends ScriptNode {
                 // TODO: need to map context out in case we aren't at alfresco
                 String context = "/alfresco";
                 nodeurl += context + versionedNode.getUrl() + "\\\"";
+                // this is service api for getting the content information
+                nodeurl = nodeurl.replace("/d/d/", "/service/api/node/content/");
 //                if (escape) {
 //                    nodeurl = nodeurl.replace("/", "").replace("\\", "\\\"");
 //                }
