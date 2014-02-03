@@ -74,7 +74,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class ModelPost extends AbstractJavaWebScript {
     private EmsScriptNode projectNode = null;
     // when run in background as an action, this needs to be false
-    private boolean runWithoutTransactions = true;
+    private boolean runWithoutTransactions = false;
     protected String projectId;
 
     private final String ELEMENTS = "elements";
@@ -215,7 +215,7 @@ public class ModelPost extends AbstractJavaWebScript {
             updateOrCreateTransactionableRelationships(jsonObject, key);
         } else {
             UserTransaction trx;
-            trx = services.getTransactionService().getUserTransaction();
+            trx = services.getTransactionService().getNonPropagatingUserTransaction();
             try {
                 trx.begin();
                 log(LogLevel.INFO, "updateOrCreateRelationships: beginning transaction {");
@@ -490,7 +490,8 @@ public class ModelPost extends AbstractJavaWebScript {
             isValid =  buildTransactionableElementMap(jsonArray);
         } else {
             UserTransaction trx;
-            trx = services.getTransactionService().getUserTransaction();
+            // building element map is a read-only transaction
+            trx = services.getTransactionService().getNonPropagatingUserTransaction(true);
             try {
                 trx.begin();
                 log(LogLevel.INFO, "buildElementMap begin transaction {");
@@ -591,7 +592,7 @@ public class ModelPost extends AbstractJavaWebScript {
             reifiedNode = updateOrCreateTransactionableElement(elementJson, parent, children);
         } else {
             UserTransaction trx;
-            trx = services.getTransactionService().getUserTransaction();
+            trx = services.getTransactionService().getNonPropagatingUserTransaction();
             try {
                 trx.begin();
                 log(LogLevel.INFO, "updateOrCreateElement begin transaction {");
@@ -702,17 +703,15 @@ public class ModelPost extends AbstractJavaWebScript {
             String pkgName = id + "_pkg";
             reifiedNode = findScriptNodeByName(pkgName);
             if (reifiedNode == null) {
-                reifiedNode = parent.createFolder(pkgName,
-                        Acm.ACM_ELEMENT_FOLDER);
+                reifiedNode = parent.createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER);
                 // reifiedNode.setProperty(Acm.ACM_ID, id);
                 reifiedNode.setProperty(Acm.ACM_CM_NAME, pkgName);
-                reifiedNode.setProperty(Acm.ACM_NAME,
-                        (String) node.getProperty(Acm.ACM_NAME));
+                reifiedNode.setProperty(Acm.ACM_NAME, (String) node.getProperty(Acm.ACM_NAME));
+                log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getProperty(Acm.ACM_CM_NAME));
             }
             if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
                 foundElements.put(pkgName, reifiedNode);
-                // node.createOrUpdateChildAssociation(reifiedNode,
-                // Acm.ACM_REIFIED_CONTAINMENT);
+                node.createOrUpdateChildAssociation(reifiedNode, Acm.ACM_REIFIED_CONTAINMENT);
             }
         }
 

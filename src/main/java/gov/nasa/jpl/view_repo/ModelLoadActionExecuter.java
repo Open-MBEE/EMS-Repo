@@ -115,6 +115,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
             modelService.setServices(services);
             modelService.setProjectNode(projectNode);
             modelService.setLogLevel(LogLevel.DEBUG);
+            modelService.setRunWithoutTransactions(false);
             Status status = new Status();
             try {
                 modelService.createOrUpdateModel(content, status);
@@ -144,12 +145,12 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
 
         jsonNode.setProperty("ems:job_status", jobStatus);
 
-        Action mailAction = services.getActionService().createAction(MailActionExecuter.NAME);
-        mailAction.setParameterValue(MailActionExecuter.PARAM_SUBJECT, "[EuropaEMS] Project " + projectName + " Load " + jsonNode.getProperty("ems:job_status"));
-        mailAction.setParameterValue(MailActionExecuter.PARAM_TO, recipient);
-        mailAction.setParameterValue(MailActionExecuter.PARAM_FROM, "europaems@jpl.nasa.gov");
-        mailAction.setParameterValue(MailActionExecuter.PARAM_TEXT, "Log URL: " + contextUrl + logNode.getUrl());
-        services.getActionService().executeAction(mailAction, null);
+//        Action mailAction = services.getActionService().createAction(MailActionExecuter.NAME);
+//        mailAction.setParameterValue(MailActionExecuter.PARAM_SUBJECT, "[EuropaEMS] Project " + projectName + " Load " + jsonNode.getProperty("ems:job_status"));
+//        mailAction.setParameterValue(MailActionExecuter.PARAM_TO, recipient);
+//        mailAction.setParameterValue(MailActionExecuter.PARAM_FROM, "europaems@jpl.nasa.gov");
+//        mailAction.setParameterValue(MailActionExecuter.PARAM_TEXT, "Log URL: " + contextUrl + logNode.getUrl());
+//        services.getActionService().executeAction(mailAction, null);
     }
 
     protected void clearCache() {
