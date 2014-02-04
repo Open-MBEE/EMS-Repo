@@ -29,8 +29,10 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,10 +65,15 @@ public class SnapshotGet extends AbstractJavaWebScript {
 
         String snapshotString = getSnapshotString(id);
         if (snapshotString != null) {
+            EmsScriptNode snapshot = findScriptNodeByName(id);
+            Date date = (Date)snapshot.getProperty(Acm.ACM_LAST_MODIFIED);
             model.put("res", getSnapshotString(id));
+            model.put("title", "Snapshot (" + EmsScriptNode.getIsoTime(date) + ")");
         } else {
             model.put("res", response.toString());
+            model.put("title", "ERROR no snapshot found");
         }
+        model.put("id", id.substring(0, id.lastIndexOf("_")));
 
         status.setCode(responseStatus.getCode());
         return model;

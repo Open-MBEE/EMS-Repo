@@ -176,7 +176,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", id.substring(0, id.lastIndexOf("_")));
             jsonObject.put("created", EmsScriptNode.getIsoTime(date));
-            jsonObject.put("url", contextPath + "/wcs/snapshots/" + id);
+            jsonObject.put("url", contextPath + "/service/snapshots/" + id);
             jsonObject.put("creator", (String) snapshot.getProperty("cm:modifier"));
             snapshotsJson.put(jsonObject);
         }

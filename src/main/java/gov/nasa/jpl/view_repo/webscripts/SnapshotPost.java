@@ -93,7 +93,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             snapshoturl.put("id", snapshotName);
             snapshoturl.put("creator", AuthenticationUtil.getFullyAuthenticatedUser());
             snapshoturl.put("created", fmt.print(now));
-            snapshoturl.put("url", req.getContextPath() + "/wcs/snapshots/" + snapshotName);
+            snapshoturl.put("url", req.getContextPath() + "/service/snapshots/" + snapshotName);
             model.put("res", snapshoturl.toString(4));
         } catch (JSONException e) {
             e.printStackTrace();
