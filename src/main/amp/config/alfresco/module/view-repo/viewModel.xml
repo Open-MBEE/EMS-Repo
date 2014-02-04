@@ -281,7 +281,7 @@
                 <property name="view:cs">
                     <type>d:text</type>
                     <mandatory>false</mandatory>
-                    <index enabled="false"/>
+                    <index enabled="true"/>
                 </property>
             </properties>
             <associations/>

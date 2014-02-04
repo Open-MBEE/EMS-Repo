@@ -29,9 +29,14 @@
 
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.mbee.util.ClassUtils;
+import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -39,16 +44,24 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.jscript.ScriptNode;
+import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.nodelocator.CompanyHomeNodeLocator;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.ContentData;
+import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.Path;
@@ -86,6 +99,11 @@ public class EmsScriptNode extends ScriptNode {
 	
 	boolean useFoundationalApi = true;
 
+    protected static StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
+
+    protected EmsScriptNode companyHome = null;
+
+    
 	// for lucene search
 	protected static final StoreRef SEARCH_STORE = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 
@@ -227,6 +245,11 @@ public class EmsScriptNode extends ScriptNode {
 	 * @return			true if property updated, false otherwise (e.g., value did not change)
 	 */
 	public <T extends Serializable> boolean createOrUpdateProperty(String acmType, T value) {
+	    if ( value instanceof String ) {
+	        @SuppressWarnings( "unchecked" )
+            T t = (T)pullOutImageData( (String)value );
+	        value = t;
+	    }
 		@SuppressWarnings("unchecked")
 		T oldValue = (T) getProperty(acmType);
 		if (oldValue != null) {
@@ -242,8 +265,173 @@ public class EmsScriptNode extends ScriptNode {
 		return false;
 	}	
 
+	public EmsScriptNode getCompanyHome() {
+	    if ( companyHome == null ) {
+	        NodeRef companyHomeNodeRef = services.getNodeLocatorService().getNode("companyhome", null, null);
+	        if ( companyHomeNodeRef != null ) {
+	            companyHome = new EmsScriptNode( companyHomeNodeRef, services, response, status );
+	        }
+	    }
+	    return companyHome;
+	}
 	
-	/**
+	public Set< NodeRef > getRootNodes() {
+	    return services.getNodeService().getAllRootNodes( getStoreRef() );
+	}
+	
+	public EmsScriptNode mkdir( EmsScriptNode source, String path ) {
+	    EmsScriptNode result = null;
+	    if ( source == null ) {
+	        Pattern p = Pattern.compile( "(Sites)?/?(\\w*)" );
+	        Matcher m = p.matcher( path );
+	        if ( m.matches() ) {
+    	        String siteName = m.group( 1 ); 
+    	        source = getSiteNode( siteName, services, response );
+                if ( source != null ) {
+                    result = mkdir( source, path );
+                    if ( result != null ) return result;
+                    source = null;
+                }
+	        }
+	    }
+        if ( source == null ) {
+            source = getCompanyHome();
+            if ( source != null ) {
+                result = mkdir( source, path );
+                if ( result != null ) return result;
+                source = null;
+            }
+        }
+        if ( source == null ) {
+            Set< NodeRef > roots = getRootNodes();
+            EmsScriptNode esn = null;
+            for ( NodeRef ref : roots ) {
+                source = new EmsScriptNode( ref, services, response, status );
+                result = mkdir( source, path );
+                if ( result != null ) return result;
+                source = null;
+            }
+        }
+        if ( source == null ) {
+            Debug.error( "Can't determine source node of path " + path + "!" );
+            return null;
+        }
+        EmsScriptNode folder = source.childByNamePath( path );
+        if ( folder == null ) {
+            folder = source.createFolder( path );
+            if ( folder == null ) {
+                Debug.error( "Can't create folder for path " + path + "!" );
+                return null;
+            }
+        }
+        return folder;
+	}
+	
+	public static String getMimeType( String type ) {
+	    Field[] fields = ClassUtils.getAllFields( MimetypeMap.class );
+	    for ( Field f : fields ) {
+	        if ( f.getName().startsWith( "MIMETYPE" ) ) {
+	            if ( ClassUtils.isStatic( f ) && f.getName().substring( 8 ).toLowerCase().contains( type.toLowerCase() ) ) {
+	                try {
+                        return (String)f.get( null );
+                    } catch ( IllegalArgumentException e ) {
+                    } catch ( IllegalAccessException e ) {
+                    }
+	            }
+	        }
+	    }
+	    return null;
+	}
+	
+	public long getChecksum( String dataString ) {
+	    byte[] data = null;
+        try {
+            data = dataString.getBytes( "UTF-8" );
+        } catch ( UnsupportedEncodingException e ) {
+            e.printStackTrace();
+            return 0;
+        }
+	    long cs = 0;
+	    Checksum checksum = new CRC32();
+        checksum.update(data, 0, data.length);
+        cs = checksum.getValue();
+        return cs;
+	}
+	
+    public EmsScriptNode createArtifact( String name, String type,
+                                         String content, String siteName,
+                                         String subfolderName ) {
+        String artifactFolderName = "Artifacts"
+                                    + ( Utils.isNullOrEmpty( subfolderName )
+                                        ? "" : "/" + subfolderName );
+        EmsScriptNode siteNode = null;
+        if ( !Utils.isNullOrEmpty( siteName ) ) {
+            siteNode = getSiteNode( siteName, services, response );
+            if ( siteNode == null ) {
+                Debug.error( "Can't find node for site: " + siteName );
+                return null;
+            }
+        }
+        EmsScriptNode subfolder = mkdir( siteNode, artifactFolderName );
+        if ( subfolder == null ) {
+            Debug.error( "Can't create subfolder for site, " + siteName
+                         + ", in artifact folder, "
+                         + artifactFolderName + "!" );
+            return null;
+        }
+
+//        DateTime now = new DateTime();
+//        DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+
+        long cs = getChecksum( content );
+        String artifactId = name + "." + type;
+        EmsScriptNode artifactNode =
+                subfolder.createNode( artifactId, "cm:document" );
+        artifactNode.createOrUpdateProperty( "cm:isIndexed", true );
+        artifactNode.createOrUpdateProperty( "cm:isContentIndexed", false );
+        artifactNode.addAspect( Acm.ACM_IDENTIFIABLE );
+        artifactNode.createOrUpdateProperty( Acm.ACM_ID, artifactId );
+        artifactNode.addAspect( "view:Checksummable" );
+        artifactNode.createOrUpdateProperty( "view:cs", cs );
+
+        System.out.println("Creating artifact with indexing: " + artifactNode.getProperty("cm:isIndexed"));
+        ContentWriter writer = services.getContentService().getWriter(
+                artifactNode.getNodeRef(), ContentModel.PROP_CONTENT, true);
+        writer.putContent(content);
+        
+        ContentData contentData = writer.getContentData();
+        contentData = ContentData.setMimetype(contentData, getMimeType( type ) );
+        services.getNodeService().setProperty(artifactNode.getNodeRef(), ContentModel.PROP_CONTENT, contentData);
+        return artifactNode;
+    }
+	
+	public String pullOutImageData( String value ) {
+	    if ( value == null ) return null;
+	    String v = value;
+	    while ( true ) {
+    	    Pattern p = Pattern.compile("(.*)<img\\s*src\\s*=\\s*[\"']data:image/(\\w*);base64,([^\"']*)[\"'][^>]*>(.*)");
+    	    Matcher m = p.matcher( v );
+    	    boolean b = m.matches();
+    	    if ( m.matches() ) {
+    	        if ( m.groupCount() != 4 ) {
+    	            Debug.error( "Expected 4 match groups, got " + m.groupCount() + "! " + m );
+    	            break;
+    	        }
+    	        String extension = m.group(2);
+    	        String content = m.group(3);
+                String name = "img" + System.currentTimeMillis();
+                EmsScriptNode artNode = createArtifact( name, extension, content, null, "images" );
+                
+                String url = artNode.getUrl();
+    	        String link = "<a href=\"" + url + "\">" + name + "</a>";
+    	        v = m.group( 1 ) + link + m.group( 4 );
+    	    }
+	    }
+        return v;
+    }
+
+
+    /**
 	 * Checks and updates properties that have multiple values
 	 * @param type		Short name of the content model property to be updated
 	 * @param array		New list of values to update
@@ -429,6 +617,14 @@ public class EmsScriptNode extends ScriptNode {
 	}
 	
 	/**
+     * @return the storeRef
+     */
+    public static StoreRef getStoreRef() {
+        return storeRef;
+    }
+
+
+    /**
 	 * Gets the SysML qualified name for an object - if not SysML, won't return anything
 	 * @return SysML qualified name (e.g., sysml:name qualified)
 	 */

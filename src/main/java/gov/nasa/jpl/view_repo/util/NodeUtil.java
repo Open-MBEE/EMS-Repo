@@ -15,6 +15,21 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.springframework.extensions.webscripts.Status;
 
 public class NodeUtil {
+    public enum SearchType {
+        DOCUMENTATION( "@sysml\\:documentation:\"" ),
+        NAME( "@sysml\\:name:\"" ),
+        ID( "@sysml\\:id:\"" ),
+        STRING( "@sysml\\:string:\"" ),
+        BODY( "@sysml\\:body:\"" ),
+        CHECKSUM( "@view\\:cs\"" );
+        
+        public String prefix;
+
+        SearchType( String prefix ) {
+            this.prefix = prefix;
+        }
+    };
+
     // needed for Lucene search
     protected static final StoreRef SEARCH_STORE =
             new StoreRef( StoreRef.PROTOCOL_WORKSPACE, "SpacesStore" );
@@ -24,13 +39,17 @@ public class NodeUtil {
                                                    "@sysml\\:string:\"",
                                                    "@sysml\\:body:\""};
     
-    public static NodeRef findNodeRefByType(String name, String type, ServiceRegistry services) {
+    public static NodeRef findNodeRefByType(String name, SearchType type, ServiceRegistry services) {
+        return findNodeRefByType( name, type.prefix, services );
+    }
+    
+    public static NodeRef findNodeRefByType(String name, String prefix, ServiceRegistry services) {
         ResultSet results = null;
         NodeRef nodeRef = null;
         try {
             results = services.getSearchService().query( SEARCH_STORE,
                                                          SearchService.LANGUAGE_LUCENE,
-                                                         type + name + "\"" );
+                                                         prefix + name + "\"" );
             if (results != null) {
                 for (ResultSetRow row: results) {
                     nodeRef = row.getNodeRef();
@@ -55,7 +74,7 @@ public class NodeUtil {
      */
     public static NodeRef findNodeRefById(String id, ServiceRegistry services) {
 //      return findNodeRefByType(name, "@cm\\:name:\"");
-        return findNodeRefByType(id, "@sysml\\:id:\"", services); // TODO: temporarily search by ID
+        return findNodeRefByType(id, SearchType.ID, services); // TODO: temporarily search by ID
     }
     
     
