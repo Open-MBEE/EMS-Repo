@@ -146,12 +146,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		// be smart about search if possible
 		if (foundElements.containsKey(name)) {
 			result = foundElements.get(name);
-		} else if (name.endsWith("_pkg")) {
-			String elementName = name.replace("_pkg", "");
-			EmsScriptNode elementNode = findScriptNodeByName(elementName);
-			if (elementNode != null) {
-			    result = elementNode.getParent().childByNamePath(name);
-			}
+//		} else if (name.endsWith("_pkg")) {
+//			String elementName = name.replace("_pkg", "");
+//			EmsScriptNode elementNode = findScriptNodeByName(elementName);
+//			if (elementNode != null) {
+//			    result = elementNode.getParent().childByNamePath(name);
+//			}
 		} else {
 			NodeRef nodeRef = findNodeRefByName(name);
 			if (nodeRef != null) {

@@ -704,7 +704,7 @@ public class ModelPost extends AbstractJavaWebScript {
             reifiedNode = findScriptNodeByName(pkgName);
             if (reifiedNode == null) {
                 reifiedNode = parent.createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER);
-                // reifiedNode.setProperty(Acm.ACM_ID, id);
+                reifiedNode.setProperty(Acm.ACM_ID, pkgName);
                 reifiedNode.setProperty(Acm.ACM_CM_NAME, pkgName);
                 reifiedNode.setProperty(Acm.ACM_NAME, (String) node.getProperty(Acm.ACM_NAME));
                 log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getProperty(Acm.ACM_CM_NAME));
