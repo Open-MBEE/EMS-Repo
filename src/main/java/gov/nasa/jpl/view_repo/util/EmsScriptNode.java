@@ -36,7 +36,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -377,18 +376,6 @@ public class EmsScriptNode extends ScriptNode {
       return ( s == null || s.isEmpty() ||
                s.trim().toLowerCase().equals( "null" ) );
     }
-    // Check if array has really got something.
-    private static boolean isNullOrEmpty( Object[] s ) {
-      return ( s == null || s.length == 0 );
-    }
-    // Check if Collection has really got something.
-    private static boolean isNullOrEmpty( Collection< ? > s ) {
-      return ( s == null || s.isEmpty() );
-    }
-    // Check if Map has really got something.
-    private static boolean isNullOrEmpty( Map< ?, ? > s ) {
-      return ( s == null || s.isEmpty() );
-    }
 	
 	public static String getMimeType( String type ) {
 	    Field[] fields = getAllFields( MimetypeMap.class );
@@ -447,37 +434,39 @@ public class EmsScriptNode extends ScriptNode {
         ResultSet existingArtifacts = findNodeRefsByType( "" + cs, "@view\\:cs:\"" );
         Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
         existingArtifacts.close();
+        
         EmsScriptNode matchingNode = null;
-        EmsScriptNode targetSiteNode = getSiteNode( targetSiteName, services, response );
-        boolean nameMatch = false, subfolderMatch = false, siteMatch = false;
-        for ( EmsScriptNode art : nodeSet ) {
-            if ( art == null ) continue;
-            byte[] artContent = art.getContent() == null ? null : art.getContent().getBytes(); 
-            if ( artContent == null && content != null ) continue;
-            // compare content to see if the file already exists
-            if ( artContent == content || art.getContent().getBytes().equals( content ) ) {
-                // In case there are multiple files that have identical content,
-                // match based on name, site, and subfolder.
-                boolean isBest = false;
-                if ( matchingNode == null ) isBest = true;
-                boolean nameMatches = art.getName().equals( name );
-                if ( !isBest && !nameMatches && nameMatch ) continue;
-                if ( !isBest && nameMatches && !nameMatch ) isBest = true;
-                String artSiteName = art.getSiteName();
-                boolean siteMatches = artSiteName != null && artSiteName.equals(targetSiteName);
-                if ( !isBest && !siteMatches && siteMatch ) continue;
-                if ( !isBest && siteMatches && !siteMatch ) isBest = true;
-                boolean subfolderMatches = art.getDisplayPath().contains( subfolderName );
-                if ( !isBest && !subfolderMatches && subfolderMatch ) continue;
-                if ( !isBest && subfolderMatches && !subfolderMatch ) isBest = true;
-                if ( isBest ) {
-                    matchingNode = art;
-                    nameMatch = nameMatches;
-                    siteMatch = siteMatches;
-                    subfolderMatch = subfolderMatches;
-                }
-            }
+        if (nodeSet != null && nodeSet.size() > 0) {
+            matchingNode = nodeSet.iterator().next();
         }
+        EmsScriptNode targetSiteNode = getSiteNode( targetSiteName, services, response );
+        // TopLevelScope NullPointerException.... otherwise this would work
+//        boolean nameMatch = false, subfolderMatch = false, siteMatch = false;
+//        for ( EmsScriptNode art : nodeSet ) {
+//            if ( art == null ) continue;
+//            if (art.getSize() == content.length) {
+//                // In case there are multiple files that have identical content,
+//                // match based on name, site, and subfolder.
+//                boolean isBest = false;
+//                if ( matchingNode == null ) isBest = true;
+//                boolean nameMatches = art.getName().equals( name );
+//                if ( !isBest && !nameMatches && nameMatch ) continue;
+//                if ( !isBest && nameMatches && !nameMatch ) isBest = true;
+//                String artSiteName = art.getSiteName();
+//                boolean siteMatches = artSiteName != null && artSiteName.equals(targetSiteName);
+//                if ( !isBest && !siteMatches && siteMatch ) continue;
+//                if ( !isBest && siteMatches && !siteMatch ) isBest = true;
+//                boolean subfolderMatches = art.getDisplayPath().contains( subfolderName );
+//                if ( !isBest && !subfolderMatches && subfolderMatch ) continue;
+//                if ( !isBest && subfolderMatches && !subfolderMatch ) isBest = true;
+//                if ( isBest ) {
+//                    matchingNode = art;
+//                    nameMatch = nameMatches;
+//                    siteMatch = siteMatches;
+//                    subfolderMatch = subfolderMatches;
+//                }
+//            }
+//        }
         
         if ( matchingNode != null ) return matchingNode;
 
@@ -530,11 +519,9 @@ public class EmsScriptNode extends ScriptNode {
 	public String extractAndReplaceImageData( String value ) {
 	    if ( value == null ) return null;
 	    String v = value;
-	    EmsScriptNode siteNode = null;
 	    while ( true ) {
     	    Pattern p = Pattern.compile("(.*)<img\\s*src\\s*=\\s*[\"']data:image/(\\w*);base64,([^\"']*)[\"'][^>]*>(.*)");
     	    Matcher m = p.matcher( v );
-    	    boolean b = m.matches();
     	    if ( !m.matches() ) break;
     	    else {
     	        if ( m.groupCount() != 4 ) {
@@ -552,7 +539,7 @@ public class EmsScriptNode extends ScriptNode {
                 
                 String url = artNode.getUrl();
     	        String link = "<a href=\"" + url + "\">" + name + "</a>";
-    	        link = link.replace("/d/d/", "/service/api/node/content/");
+    	        link = link.replace("/d/d/", "/alfresco/service/api/node/content/");
     	        v = m.group( 1 ) + link + m.group( 4 );
     	    }
 	    }
@@ -576,10 +563,10 @@ public class EmsScriptNode extends ScriptNode {
 	 * @return			True if values updated/create, false if unchanged
 	 * @throws JSONException
 	 */
-	@SuppressWarnings("unchecked")
 	public <T extends Serializable> boolean createOrUpdatePropertyValues(String type, JSONArray array, T valueType) throws JSONException {
 		ArrayList<T> values = new ArrayList<T>();
 		for (int ii = 0; ii < array.length(); ii++) {
+            @SuppressWarnings( "unchecked" )
 		    T value = (T)array.get(ii);
             if ( value instanceof String ) {
                 @SuppressWarnings( "unchecked" )
@@ -589,6 +576,7 @@ public class EmsScriptNode extends ScriptNode {
 			values.add(value);
 		}
 		
+        @SuppressWarnings( "unchecked" )
 		ArrayList<T> oldValues = (ArrayList<T>) getProperty(type);
 		if (!checkIfListsEquivalent(oldValues, values)) {
 			setProperty(type, values);
