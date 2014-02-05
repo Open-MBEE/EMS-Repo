@@ -51,10 +51,16 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+/**
+ * Retrieve a listing of all the documents for the appropriate project
+ * @author cinyoung
+ *
+ */
 public class ProductListGet extends AbstractJavaWebScript {
 	private JSONObject productJson;
 	private Set<EmsScriptNode> productSet;
 	private EmsScriptNode projectNode;
+	private String projectQnamePath;
     JSONObject volumes;
     JSONObject volume2volumes;
     JSONObject documents;
@@ -74,6 +80,7 @@ public class ProductListGet extends AbstractJavaWebScript {
             return false;
         }
         projectNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+        projectQnamePath = projectNode.getQnamePath();
         
         if (!checkPermissions(projectNode, PermissionService.READ)) {
             return false;
@@ -123,12 +130,14 @@ public class ProductListGet extends AbstractJavaWebScript {
         if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
             ResultSet resultSet = null;
             try {
-                // TODO: need to scope search for products to the projectNode
                 resultSet = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, pattern);
                 for (ResultSetRow row: resultSet) {
                     EmsScriptNode node = new EmsScriptNode(row.getNodeRef(), services, response);
-                    if (checkPermissions(node, PermissionService.READ)) {
-                        productSet.add(node);
+                    // filter by project
+                    if (node.getQnamePath().startsWith(projectQnamePath)) {
+                        if (checkPermissions(node, PermissionService.READ)) {
+                            productSet.add(node);
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -173,6 +182,8 @@ public class ProductListGet extends AbstractJavaWebScript {
         if (id == null) {
             String cmName = (String)node.getProperty(Acm.ACM_CM_NAME);
             id = cmName.replace("_pkg", "");
+        } else {
+            id = id.replace("_pkg", "");
         }
         if (!documents.has(id)) {
             volumes.put(id, sysmlName);
