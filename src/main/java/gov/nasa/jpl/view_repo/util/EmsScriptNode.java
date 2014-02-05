@@ -507,6 +507,7 @@ public class EmsScriptNode extends ScriptNode {
             return null;
         }
         
+        artifactNode.addAspect( "cm:indexControl" );
         artifactNode.createOrUpdateProperty( "cm:isIndexed", true );
         artifactNode.createOrUpdateProperty( "cm:isContentIndexed", false );
         artifactNode.addAspect( Acm.ACM_IDENTIFIABLE );
