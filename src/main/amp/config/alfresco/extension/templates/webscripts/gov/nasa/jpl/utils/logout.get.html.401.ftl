@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>View Editor: ${title}</title>
+		<title>View Editor: Logged out</title>
 		<link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
 		<link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
 		<link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
@@ -11,7 +11,7 @@
 		<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
 	
 <script type="text/javascript">
-var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
+var pageData = { baseUrl: "${url.context}/service" };
 </script>
 
 </head>
@@ -26,7 +26,7 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
 						<a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
 					{{/environment.development}}
 					{{^environment.development}}
-						<a class="navbar-brand" href="${url.full}">Europa View Editor {{ title }}</a>
+						<a class="navbar-brand" href="${url.context}/service/ve/documents/europa">Europa View Editor {{ title }}</a>
 					{{/environment.development}}
 			</div>
 			<ul class="nav navbar-nav">
@@ -37,12 +37,12 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
 			<div class="pull-right">
 				<img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
 			</div>
+			<!-- 
 
 	      <ul class="nav navbar-nav pull-right">
 	       <li><a href="${url.context}/service/logout?next=${url.full}">logout</a></li>
 	      </ul>
 
-			<!-- 
 			<form class="navbar-form navbar-right" action="">
 	      <div class="form-group">
 	        <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
@@ -66,16 +66,7 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
   
   <div class="col-md-4">
     
-    <div class="panel panel-default">
-      <div class="panel-heading">{{homeTree.name}}</div>
-      <div class="panel-body">
-        <ul>
-          {{#homeTree.children}}
-            {{>doc_and_children}}
-          {{/homeTree.children}}
-        </ul>
-      </div>
-    </div>
+ <p>Successfully logged out of View Editor.</p>
 
     <!-- {{>doc_and_children}} -->
       {{^hidden}}

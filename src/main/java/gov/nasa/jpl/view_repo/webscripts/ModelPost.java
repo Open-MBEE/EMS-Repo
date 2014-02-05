@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
@@ -43,6 +44,10 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 
+import org.alfresco.model.ContentModel;
+import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ActionService;
+import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
@@ -68,6 +73,9 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ModelPost extends AbstractJavaWebScript {
     private EmsScriptNode projectNode = null;
+    // when run in background as an action, this needs to be false
+    private boolean runWithoutTransactions = false;
+    protected String projectId;
 
     private final String ELEMENTS = "elements";
 
@@ -101,28 +109,28 @@ public class ModelPost extends AbstractJavaWebScript {
     protected JSONObject relationshipsJson;
 
     protected Set<String> newElements;
+
+    protected SiteInfo siteInfo;
     
     /**
      * Create or update the model as necessary based on the request
      * 
-     * @param req
-     *            Request used to create/update the model
+     * @param content
+     *            JSONObject used to create/update the model
      * @param status
      *            Status to be updated
      * @throws JSONException
      *             Parse error
      */
-    protected void createOrUpdateModel(WebScriptRequest req, Status status)
+    public void createOrUpdateModel(Object content, Status status)
             throws Exception {
         Date now = new Date();
-        System.out.println("Starting createOrUpdateModel: " + now);
+        log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         // long start, end, total = 0;
 
-        // clear out the response cache first (only one instance of each
-        // webscript)
         clearCaches();
 
-        JSONObject postJson = (JSONObject) req.parseContent();
+        JSONObject postJson = (JSONObject) content;
 
         // check if we have single element or array of elements and create
         // accordingly
@@ -134,7 +142,7 @@ public class ModelPost extends AbstractJavaWebScript {
             if (buildElementMap(postJson.getJSONArray(ELEMENTS))) {
                 // start building up elements from the root elements
                 for (String rootElement : rootElements) {
-                    System.out.println("ROOT ELEMENT FOUND: " + rootElement);
+                    log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
                     if (!rootElement.equals((String) projectNode
                             .getProperty(Acm.ACM_CM_NAME))) {
                         String ownerName = null;
@@ -179,9 +187,7 @@ public class ModelPost extends AbstractJavaWebScript {
         updateOrCreateAllRelationships(relationshipsJson);
         
         now = new Date();
-        System.out
-                .println("Update Model Elements Done waiting on transaction to complete..."
-                        + now + "\n");
+        log(LogLevel.INFO, "Update Model Elements Done waiting on transaction to complete..." + now + "\n");
     }
     
     protected void updateOrCreateAllRelationships(JSONObject jsonObject) throws JSONException {
@@ -204,42 +210,49 @@ public class ModelPost extends AbstractJavaWebScript {
     protected void updateOrCreateRelationships(JSONObject jsonObject, String key)
             throws JSONException {
         long start = System.currentTimeMillis(), end;
-        System.out.print("updateOrCreate" + key + ": ");
-        UserTransaction trx;
-        trx = services.getTransactionService().getUserTransaction();
-        try {
-            System.out.println("updateOrCreateRelationships: beginning transaction {");
-            trx.begin();
-            if (jsonObject.has(key)) {
-                JSONObject object = jsonObject.getJSONObject(key);
-                Iterator<?> ids = object.keys();
-                while (ids.hasNext()) {
-                    String id = (String) ids.next();
-                    if (key.equals("relationshipElements")) {
-                        updateOrCreateRelationship(object.getJSONObject(id), id);
-                    } else if (key.equals("propertyTypes")) {
-                        updateOrCreatePropertyType(object.getString(id), id);
-                    } else if (key.equals("elementValues")) {
-                        updateOrCreateElementValues(object.getJSONArray(id), id);
-                    } else if (key.equals("annotatedElements")) {
-                        updateOrCreateAnnotatedElements(
-                                object.getJSONArray(id), id);
-                    }
-                }
-            }
-            System.out.println("} updateOrCreateRelationships committing: " + key);
-            trx.commit();
-        } catch (Throwable e) {
+        log(LogLevel.INFO, "updateOrCreateRelationships" + key + ": ");
+        if (runWithoutTransactions) {
+            updateOrCreateTransactionableRelationships(jsonObject, key);
+        } else {
+            UserTransaction trx;
+            trx = services.getTransactionService().getNonPropagatingUserTransaction();
             try {
-                trx.rollback();
-                System.out.println("\t####### ERROR: Needed to rollback: " + e.getMessage());
-            } catch (Throwable ee) {
-                System.out.println("\tRollback failed: " + ee.getMessage());
+                trx.begin();
+                log(LogLevel.INFO, "updateOrCreateRelationships: beginning transaction {");
+                updateOrCreateTransactionableRelationships(jsonObject, key);
+                log(LogLevel.INFO, "} updateOrCreateRelationships committing: " + key);
+                trx.commit();
+            } catch (Throwable e) {
+                try {
+                    trx.rollback();
+                    log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                } catch (Throwable ee) {
+                    log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                }
             }
         }
         end = System.currentTimeMillis();
-        System.out.println((end - start) + "ms");
+        log(LogLevel.INFO, (end - start) + "ms");
     }
+    
+    protected void updateOrCreateTransactionableRelationships(JSONObject jsonObject, String key) throws JSONException {
+        if (jsonObject.has(key)) {
+            JSONObject object = jsonObject.getJSONObject(key);
+            Iterator<?> ids = object.keys();
+            while (ids.hasNext()) {
+                String id = (String) ids.next();
+                if (key.equals("relationshipElements")) {
+                    updateOrCreateRelationship(object.getJSONObject(id), id);
+                } else if (key.equals("propertyTypes")) {
+                    updateOrCreatePropertyType(object.getString(id), id);
+                } else if (key.equals("elementValues")) {
+                    updateOrCreateElementValues(object.getJSONArray(id), id);
+                } else if (key.equals("annotatedElements")) {
+                    updateOrCreateAnnotatedElements(object.getJSONArray(id), id);
+                }
+            }
+        }
+    }    
 
     /**
      * Update or create annotated elements (multiple noderefs ordered in a list)
@@ -409,19 +422,12 @@ public class ModelPost extends AbstractJavaWebScript {
 
             if (checkPermissions(node, PermissionService.WRITE)) {
                 // create reified container if it doesn't exist
-                EmsScriptNode reifiedNode = findScriptNodeById(pkgName); // this
-                                                                           // is
-                                                                           // the
-                                                                           // reified
-                                                                           // element
-                                                                           // package
+                EmsScriptNode reifiedNode = findScriptNodeById(pkgName);
                 if (reifiedNode == null) {
-                    reifiedNode = node.getParent().createFolder(pkgName,
-                            Acm.ACM_ELEMENT_FOLDER);
+                    reifiedNode = node.getParent().createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER);
                     reifiedNode.setProperty(Acm.ACM_ID, key);
                     reifiedNode.setProperty(Acm.ACM_CM_NAME, pkgName);
-                    reifiedNode.setProperty(Acm.ACM_NAME,
-                            (String) node.getProperty(Acm.ACM_NAME));
+                    reifiedNode.setProperty(Acm.ACM_NAME, (String) node.getProperty(Acm.ACM_NAME));
                 }
                 if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
                     foundElements.put(pkgName, reifiedNode);
@@ -444,7 +450,7 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                         if (checkPermissions(child, PermissionService.WRITE)) {
                             if (!child.getParent().equals(reifiedNode)) {
-                                System.out.println("moving "
+                                log(LogLevel.INFO, "moving "
                                         + child.getProperty(Acm.ACM_CM_NAME) + " to "
                                         + reifiedNode.getProperty(Acm.ACM_CM_NAME));
                                 child.move(reifiedNode);
@@ -454,7 +460,7 @@ public class ModelPost extends AbstractJavaWebScript {
                             EmsScriptNode childPkg = findScriptNodeById(childName
                                     + REIFIED_PKG_SUFFIX);
                             if (childPkg != null && !childPkg.getParent().equals(reifiedNode)) {
-                                System.out.println("moving "
+                                log(LogLevel.INFO, "moving "
                                         + childPkg.getProperty(Acm.ACM_CM_NAME)
                                         + " to "
                                         + reifiedNode.getProperty(Acm.ACM_CM_NAME));
@@ -479,64 +485,76 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     protected boolean buildElementMap(JSONArray jsonArray) throws JSONException {
         boolean isValid = true;
-        UserTransaction trx;
 
-        // lets look for everything initially
-        trx = services.getTransactionService().getUserTransaction();
-        try {
-            System.out.println("buildElementMap begin transaction {");
-            trx.begin();
-            for (int ii = 0; ii < jsonArray.length(); ii++) {
-                JSONObject elementJson = jsonArray.getJSONObject(ii);
-                String sysmlId = elementJson.getString(Acm.JSON_ID);
-                elementMap.put(sysmlId, elementJson);
-
-                if (findScriptNodeById(sysmlId) == null) {
-                    newElements.add(sysmlId);
-                }
-
-                // create the hierarchy
-                if (elementJson.has(Acm.JSON_OWNER)) {
-                    String ownerId = elementJson.getString(Acm.JSON_OWNER);
-                    // if owner is null, leave at project root level
-                    if (ownerId == null || ownerId.equals("null")) {
-                        ownerId = (String) projectNode.getProperty(Acm.ACM_ID);
-                        rootElements.add(sysmlId);
-                    }
-                    if (!elementHierarchyJson.has(ownerId)) {
-                        elementHierarchyJson.put(ownerId, new JSONArray());
-                    }
-                    elementHierarchyJson.getJSONArray(ownerId).put(sysmlId);
-                } else {
-                    // if no owners are specified, add directly to root elements
-                    rootElements.add(sysmlId);
-                }
-            }
-
-            // lets iterate through elements
-           for (String elementId: elementMap.keySet()) {
-                if (!newElements.contains(elementId)) {
-                    EmsScriptNode element = findScriptNodeById(elementId);
-                    if (element == null) {
-                        log(LogLevel.ERROR, "Could not find node with id: " + elementId, HttpServletResponse.SC_NOT_FOUND);
-                        isValid = false;
-                    } else if (!checkPermissions(element, PermissionService.WRITE)) {
-                        isValid = false;
-                    }
-                }
-            }
-            
-            fillRootElements();
-            System.out.println("} buildElementMap committing");
-            trx.commit();
-        } catch (Throwable e) {
+        if (runWithoutTransactions) {
+            isValid =  buildTransactionableElementMap(jsonArray);
+        } else {
+            UserTransaction trx;
+            // building element map is a read-only transaction
+            trx = services.getTransactionService().getNonPropagatingUserTransaction(true);
             try {
-                trx.rollback();
-                System.out.println("\t####### ERROR: Needed to rollback: " + e.getMessage());
-            } catch (Throwable ee) {
-                System.out.println("\tRollback failed: " + ee.getMessage());
+                trx.begin();
+                log(LogLevel.INFO, "buildElementMap begin transaction {");
+                isValid = buildTransactionableElementMap(jsonArray);
+                log(LogLevel.INFO, "} buildElementMap committing");
+                trx.commit();
+            } catch (Throwable e) {
+                try {
+                    trx.rollback();
+                    log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                } catch (Throwable ee) {
+                    log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                }
+                isValid = false;
             }
         }
+        
+        return isValid;
+    }
+
+    protected boolean buildTransactionableElementMap(JSONArray jsonArray) throws JSONException {
+        boolean isValid = true;
+        for (int ii = 0; ii < jsonArray.length(); ii++) {
+            JSONObject elementJson = jsonArray.getJSONObject(ii);
+            String sysmlId = elementJson.getString(Acm.JSON_ID);
+            elementMap.put(sysmlId, elementJson);
+
+            if (findScriptNodeById(sysmlId) == null) {
+                newElements.add(sysmlId);
+            }
+
+            // create the hierarchy
+            if (elementJson.has(Acm.JSON_OWNER)) {
+                String ownerId = elementJson.getString(Acm.JSON_OWNER);
+                // if owner is null, leave at project root level
+                if (ownerId == null || ownerId.equals("null")) {
+                    ownerId = (String) projectNode.getProperty(Acm.ACM_ID);
+                    rootElements.add(sysmlId);
+                }
+                if (!elementHierarchyJson.has(ownerId)) {
+                    elementHierarchyJson.put(ownerId, new JSONArray());
+                }
+                elementHierarchyJson.getJSONArray(ownerId).put(sysmlId);
+            } else {
+                // if no owners are specified, add directly to root elements
+                rootElements.add(sysmlId);
+            }
+        }
+
+        // lets iterate through elements
+       for (String elementId: elementMap.keySet()) {
+            if (!newElements.contains(elementId)) {
+                EmsScriptNode element = findScriptNodeById(elementId);
+                if (element == null) {
+                    log(LogLevel.ERROR, "Could not find node with id: " + elementId, HttpServletResponse.SC_NOT_FOUND);
+                    isValid = false;
+                } else if (!checkPermissions(element, PermissionService.WRITE)) {
+                    isValid = false;
+                }
+            }
+        }
+        
+        fillRootElements();
         
         return isValid;
     }
@@ -566,84 +584,100 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     protected void updateOrCreateElement(JSONObject elementJson,
             EmsScriptNode parent) throws JSONException {
+        JSONArray children = new JSONArray();
+        
+        EmsScriptNode reifiedNode = null;
+        
+        if (runWithoutTransactions) {
+            reifiedNode = updateOrCreateTransactionableElement(elementJson, parent, children);
+        } else {
+            UserTransaction trx;
+            trx = services.getTransactionService().getNonPropagatingUserTransaction();
+            try {
+                trx.begin();
+                log(LogLevel.INFO, "updateOrCreateElement begin transaction {");
+                reifiedNode = updateOrCreateTransactionableElement(elementJson, parent, children);
+                log(LogLevel.INFO, "} updateOrCreateElement end transaction");
+                trx.commit();
+            } catch (Throwable e) {
+                try {
+                    trx.rollback();
+                    log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                    e.printStackTrace();
+                } catch (Throwable ee) {
+                    log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                    ee.printStackTrace();
+                }
+            }
+        }
+
+        // create the children elements
+        if (reifiedNode != null) {
+            for (int ii = 0; ii < children.length(); ii++) {
+                updateOrCreateElement(elementMap.get(children.getString(ii)),
+                        reifiedNode);
+            }
+        }
+    }
+
+    protected EmsScriptNode updateOrCreateTransactionableElement(JSONObject elementJson, EmsScriptNode parent, JSONArray children) throws JSONException {
         if (!elementJson.has(Acm.JSON_ID)) {
-            return;
+            return null;
         }
         String id = elementJson.getString(Acm.JSON_ID);
         long start = System.currentTimeMillis(), end;
-        System.out.println("updateOrCreateElement " + id);
-        JSONArray children = new JSONArray();
-        EmsScriptNode reifiedNode = null;
+        log(LogLevel.INFO, "updateOrCreateElement " + id);
 
         // TODO Need to permission check on new node creation
         // find node if exists, otherwise create
         EmsScriptNode node;
-        UserTransaction trx;
-        trx = services.getTransactionService().getUserTransaction();
-        try {
-            System.out.println("updateOrCreateElement begin transaction {");
-            trx.begin();
-            if (newElements.contains(id)) {
-                System.out.println("\tcreating node");
-                node = parent.createNode(id,
-                        Acm.JSON2ACM.get(elementJson.getString(Acm.JSON_TYPE)));
-                node.setProperty(Acm.ACM_CM_NAME, id);
-                node.setProperty(Acm.ACM_ID, id);
-//                // TODO temporarily set title - until we figure out how to use
-//                // sysml:name in repository browser
-//                if (elementJson.has("name")) {
-//                    node.setProperty("cm:title", elementJson.getString("name"));
-//                }
-            } else {
-                System.out.println("\tmodifying node");
-                node = findScriptNodeById(id);
-                try {
-                    if (!node.getParent().equals(parent)) {
-                        node.move(parent);
-                        EmsScriptNode pkgNode = findScriptNodeById(id + "_pkg");
-                        if (pkgNode != null) {
-                            pkgNode.move(parent);
-                        }
-                    }
-                } catch (Exception e) {
-                    System.out.println("could not find node information: " + id);
-                    e.printStackTrace();
-                }
-            }
-            foundElements.put(id, node); // cache the found value
-
-            // update metadata
-            if (checkPermissions(node, PermissionService.WRITE)) {
-                System.out.println("\tinserting metadata");
-                node.ingestJSON(elementJson);
-            }
-
-            if (elementHierarchyJson.has(id)) {
-                System.out.println("\tcreating reified package");
-                reifiedNode = getOrCreateReifiedNode(node, id);
-                children = elementHierarchyJson.getJSONArray(id);
-            }
-            
-            System.out.println("} updateOrCreateElement committing");
-            trx.commit();
-        } catch (Throwable e) {
+        EmsScriptNode reifiedNode = null;
+        if (newElements.contains(id)) {
+            log(LogLevel.INFO, "\tcreating node");
+            node = parent.createNode(id, Acm.JSON2ACM.get(elementJson.getString(Acm.JSON_TYPE)));
+            node.setProperty(Acm.ACM_CM_NAME, id);
+            node.setProperty(Acm.ACM_ID, id);
+        } else {
+            log(LogLevel.INFO, "\tmodifying node");
+            node = findScriptNodeById(id);
             try {
-                System.out.println("\t####### ERROR: Needed to rollback: " + e.getMessage());
-                trx.rollback();
-            } catch (Throwable ee) {
-                System.out.println("\tRollback failed: " + ee.getMessage());
+                if (!node.getParent().equals(parent)) {
+                    node.move(parent);
+                    EmsScriptNode pkgNode = findScriptNodeById(id + "_pkg");
+                    if (pkgNode != null) {
+                        pkgNode.move(parent);
+                    }
+                }
+            } catch (Exception e) {
+                log(LogLevel.WARNING, "could not find node information: " + id);
+                e.printStackTrace();
             }
         }
-        end = System.currentTimeMillis();
-        
-        System.out.println("\tupdateOrCreateElement: "
-                + ": " + (end - start) + "ms");
+        foundElements.put(id, node); // cache the found value
+
+        // update metadata
+        if (checkPermissions(node, PermissionService.WRITE)) {
+            log(LogLevel.INFO, "\tinserting metadata");
+            node.ingestJSON(elementJson);
+        }
+
+        if (elementHierarchyJson.has(id)) {
+            log(LogLevel.INFO, "\tcreating reified package");
+            reifiedNode = getOrCreateReifiedNode(node, id);
+            JSONArray array = elementHierarchyJson.getJSONArray(id);
+            for (int ii = 0; ii < array.length(); ii++) {
+                children.put(array.get(ii));
+            }
+        }
 
         // add the relationships into our maps
-        System.out.println("\tfiltering relationships");
+        log(LogLevel.INFO, "\tfiltering relationships");
         JSONObject relations = EmsScriptNode.filterRelationsJSONObject(elementJson);
-        String keys[] = { "elementValues", "propertyTypes",
-                "relationshipElements", "annotatedElements" };
+        String keys[] = { 
+                "elementValues",
+                "propertyTypes",
+                "relationshipElements",
+                "annotatedElements" };
         for (String key : keys) {
             if (!relationshipsJson.has(key)) {
                 relationshipsJson.put(key, new JSONObject());
@@ -659,18 +693,10 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
 
-        // create the children elements
-        if (reifiedNode != null) {
-            for (int ii = 0; ii < children.length(); ii++) {
-                updateOrCreateElement(elementMap.get(children.getString(ii)),
-                        reifiedNode);
-            }
-        }
-
-        // long end = System.currentTimeMillis(); System.out.println("\tTotal: "
-        // + (end-start));
+        end = System.currentTimeMillis(); log(LogLevel.INFO, "\tTotal: " + (end-start) + " ms");
+        return reifiedNode;
     }
-
+    
     protected EmsScriptNode getOrCreateReifiedNode(EmsScriptNode node, String id) {
         EmsScriptNode reifiedNode = null;
         EmsScriptNode parent = node.getParent();
@@ -679,17 +705,15 @@ public class ModelPost extends AbstractJavaWebScript {
             String pkgName = id + "_pkg";
             reifiedNode = findScriptNodeById(pkgName);
             if (reifiedNode == null) {
-                reifiedNode = parent.createFolder(pkgName,
-                        Acm.ACM_ELEMENT_FOLDER);
-                // reifiedNode.setProperty(Acm.ACM_ID, id);
+                reifiedNode = parent.createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER);
+                reifiedNode.setProperty(Acm.ACM_ID, pkgName);
                 reifiedNode.setProperty(Acm.ACM_CM_NAME, pkgName);
-                reifiedNode.setProperty(Acm.ACM_NAME,
-                        (String) node.getProperty(Acm.ACM_NAME));
+                reifiedNode.setProperty(Acm.ACM_NAME, (String) node.getProperty(Acm.ACM_NAME));
+                log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getProperty(Acm.ACM_CM_NAME));
             }
             if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
                 foundElements.put(pkgName, reifiedNode);
-                // node.createOrUpdateChildAssociation(reifiedNode,
-                // Acm.ACM_REIFIED_CONTAINMENT);
+                node.createOrUpdateChildAssociation(reifiedNode, Acm.ACM_REIFIED_CONTAINMENT);
             }
         }
 
@@ -704,10 +728,18 @@ public class ModelPost extends AbstractJavaWebScript {
             Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
+        
+        boolean runInBackground = checkArgEquals(req, "background", "true");
 
         if (validateRequest(req, status)) {
             try {
-                createOrUpdateModel(req, status);
+                if (runInBackground) {
+                    saveAndStartAction(req, status);
+                    response.append("JSON uploaded, model load being processed in background.\n");
+                    response.append("You will be notified via email when the model load has finished.\n");
+                } else {
+                    createOrUpdateModel(req.parseContent(), status);
+                }
             } catch (Exception e) {
                 log(LogLevel.ERROR, "JSON malformed\n",
                         HttpServletResponse.SC_BAD_REQUEST);
@@ -720,14 +752,60 @@ public class ModelPost extends AbstractJavaWebScript {
         return model;
     }
 
+    protected void saveAndStartAction(WebScriptRequest req, Status status) throws Exception {
+        EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+
+        EmsScriptNode jobPkgNode = siteNode.childByNamePath("Jobs");
+        if (jobPkgNode == null) {
+            jobPkgNode = siteNode.createFolder("Jobs", "cm:folder");
+        }
+        
+        String jobNodeName = "Job " + projectId + ".json";
+        EmsScriptNode jobNode = jobPkgNode.childByNamePath(jobNodeName);
+        if (jobNode == null) {
+            jobNode = jobPkgNode.createNode(jobNodeName, "ems:Job");
+        } else {
+//            String jobStatus = (String)jobNode.getProperty("ems:job_status");
+//            if (jobStatus.equals("Active")) {
+//                status.setCode(HttpServletResponse.SC_CONFLICT, "Previous project export is still loading");
+//                return;
+//            }
+        }
+        jobNode.createOrUpdateProperty("ems:job_status", "Active");
+        jobNode.createOrUpdateProperty("cm:isContentIndexed", false);
+        
+        // write out the json
+        NodeRef jobNodeRef = jobNode.getNodeRef();
+        ContentWriter writer = services.getContentService().getWriter(jobNodeRef, ContentModel.PROP_CONTENT, true);
+        writer.putContent(((JSONObject)req.parseContent()).toString(4));
+        ModelLoadActionExecuter.setContentDataMimeType(writer, jobNode, "application/json", services);
+
+        // create the log with the association
+        String jobLogNodeName = "Job " + projectId + ".log";
+        EmsScriptNode jobLogNode = jobPkgNode.childByNamePath(jobLogNodeName);
+        if (jobLogNode == null) {
+            jobLogNode = jobPkgNode.createNode(jobLogNodeName, "cm:content");
+        }
+        jobNode.createOrUpdateProperty("ems:job_log", jobLogNode);
+        
+        
+        EmsScriptNode projectNode = findScriptNodeById(projectId);
+        // kick off the action
+        ActionService actionService = services.getActionService();
+        Action loadAction = actionService.createAction(ModelLoadActionExecuter.NAME);
+        loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_ID, projectId);
+        loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_NAME, (String)projectNode.getProperty(Acm.ACM_NAME));
+        loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_NODE, projectNode);
+        services.getActionService().executeAction(loadAction , jobNodeRef, true, true);
+    }
+    
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
         if (!checkRequestContent(req)) {
             return false;
         }
 
-        String elementId = req.getServiceMatch().getTemplateVars()
-                .get("elementid");
+        String elementId = req.getServiceMatch().getTemplateVars().get("elementid");
         if (elementId != null) {
             // TODO - move this to ViewModelPost - really non hierarchical post
             if (!checkRequestVariable(elementId, "elementid")) {
@@ -753,20 +831,18 @@ public class ModelPost extends AbstractJavaWebScript {
                 return false;
             }
         } else {
-            String siteName = req.getServiceMatch().getTemplateVars()
-                    .get(SITE_NAME);
+            String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
             // Handling for project/{id}/elements
             if (!checkRequestVariable(siteName, SITE_NAME)) {
                 return false;
             }
 
-            String projectId = req.getServiceMatch().getTemplateVars()
-                    .get(PROJECT_ID);
+            projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
             if (!checkRequestVariable(projectId, PROJECT_ID)) {
                 return false;
             }
 
-            SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+            siteInfo = services.getSiteService().getSite(siteName);
             if (!checkRequestVariable(siteInfo, "Site")) {
                 return false;
             }
@@ -788,6 +864,18 @@ public class ModelPost extends AbstractJavaWebScript {
         return true;
     }
 
+    public void setProjectIdAndNode(String projectId) {
+        projectNode = findScriptNodeById(projectId);
+    }
+    
+    public void setProjectNode(EmsScriptNode pn) {
+        projectNode = pn;
+    }
+    
+    public void setRunWithoutTransactions(boolean withoutTransactions) {
+        runWithoutTransactions = withoutTransactions;           
+    }
+    
     @Override
     protected void clearCaches() {
         super.clearCaches();

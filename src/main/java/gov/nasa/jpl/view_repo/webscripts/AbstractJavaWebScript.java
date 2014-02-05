@@ -61,7 +61,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * 
  */
 public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
-	public enum LogLevel {
+    public enum LogLevel {
 		DEBUG(0), INFO(1), WARNING(2), ERROR(3);
 		private int value;
 		private LogLevel(int value) {
@@ -124,7 +124,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @return	ScriptNode of site with name siteName
 	 */
 	protected EmsScriptNode getSiteNode(String siteName) {
-	    return EmsScriptNode.getSiteNode( siteName, services, response );
+	    return NodeUtil.getSiteNode( siteName, services, response );
 //		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
 //		if (siteInfo != null) {
 //			return new EmsScriptNode(siteInfo.getNodeRef(), services, response);
@@ -135,6 +135,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	
 	/**
 	 * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
+	 * This does caching of found elements so they don't need to be looked up with a different API each time.
+	 * 
 	 * TODO extend so search context can be specified
 	 * @param id	Node id to search for
 	 * @return		ScriptNode with name if found, null otherwise
@@ -146,12 +148,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		// be smart about search if possible
 		if (foundElements.containsKey(id)) {
 			result = foundElements.get(id);
-		} else if (id.endsWith("_pkg")) {
-			String elementName = id.replace("_pkg", "");
-			EmsScriptNode elementNode = findScriptNodeById(elementName);
-			if (elementNode != null) {
-			    result = elementNode.getParent().childByNamePath(id);
-			}
+//		} else if (name.endsWith("_pkg")) {
+//			String elementName = name.replace("_pkg", "");
+//			EmsScriptNode elementNode = findScriptNodeByName(elementName);
+//			if (elementNode != null) {
+//			    result = elementNode.getParent().childByNamePath(name);
+//			}
 		} else {
 			NodeRef nodeRef = findNodeRefById(id);
 			if (nodeRef != null) {
@@ -184,10 +186,21 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		}
 	}
 	
+	protected void log(LogLevel level, String msg) {
+	    if (level.value >= logLevel.value) {
+	        log("[" + level.name() + "]: " + msg);
+	    }
+        System.out.println(msg);
+	}
+	
 	protected void log(String msg, int code) {
 		response.append(msg);
 		responseStatus.setCode(code);
 		responseStatus.setMessage(msg);
+	}
+	
+	protected void log(String msg) {
+	    response.append(msg + "\n");
 	}
 	
 	/**
@@ -256,33 +269,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                                                           responseStatus ) );
         //foundElements.putAll(searchResults);
         return searchResults;
-        //		Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
-//
-//		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
-//			ResultSet resultSet = null;
-//			try {
-//				pattern = type + pattern + "\"";
-//				resultSet = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, pattern);
-//				for (ResultSetRow row: resultSet) {
-//					EmsScriptNode node = new EmsScriptNode(row.getNodeRef(), services, response);
-//					if (checkPermissions(node, PermissionService.READ)) {
-//    					String id = (String) node.getProperty(Acm.ACM_ID);
-//    					if (id != null) {
-//    						searchResults.put(id, node);
-//    					}
-//					}
-//				}
-//			} catch (Exception e) {
-//				log(LogLevel.ERROR, "Could not parse search: " + pattern + ".\n", HttpServletResponse.SC_BAD_REQUEST);  
-//			} finally {
-//				if (resultSet != null) {
-//					resultSet.close();
-//				}
-//			}
-//		}
-//
-//		return searchResults;
-	}
+    }
 
 	/**
      * Helper utility to check the value of a request parameter
@@ -303,4 +290,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return req.getParameter(name).equals(value);
     }
 
+    public StringBuffer getResponse() {
+        return response;
+    }
+
+    public Status getResponseStatus() {
+        return responseStatus;
+    }
+    
+    public void setLogLevel(LogLevel level) {
+        logLevel = level;
+    }
 }

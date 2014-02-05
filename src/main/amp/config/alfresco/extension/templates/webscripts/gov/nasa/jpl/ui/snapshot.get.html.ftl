@@ -1,7 +1,7 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Editor</title>
+    <title>View Editor: ${title}</title>
     <link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
@@ -27,25 +27,26 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
             <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
           {{/environment.development}}
           {{^environment.development}}
-            <a class="navbar-brand" href="${url.context}/wcs/ui/">Europa View Editor {{ title }}</a>
+            <a class="navbar-brand" href="${url.context}/service/ve/documents/europa">Europa View Editor {{ title }}</a>
           {{/environment.development}}  
       </div>
 
       <ul class="nav navbar-nav">
-        <li><a  href="/share/page/">dashboard</a></li>
+        <li><a  href="/share/page/">Europa EMS Dashboard</a></li>
       </ul>   
         
       <div class="pull-right">
-        <a href="#"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
+        <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
       </div>
 
       <ul class="nav navbar-nav pull-right">
-       <li><a href="${url.context}/wcs/logout?next=${url.context}/wcs/ui/">logout</a></li>
+       <li><a href="${url.context}/service/logout?next=${url.full}">logout</a></li>
       </ul>
 
       <ul class="nav navbar-nav pull-right">
         {{#viewTree.snapshot}}
           <li><a class="navbar-brand" href="#">Snapshot ({{viewTree.snapshoted}})</a></li>
+          <li><a class="navbar-brand" href="${url.context}/service/ve/products/${id}">Latest Version</a></li> 
         {{/viewTree.snapshot}}
 
       </ul>
@@ -282,7 +283,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
                 <button type="button" class="btn btn-primary" proxy-click="saveSection:{{ id }}">Save changes</button>
               </div>
             </div>
-            <div id="section{{ id }}" class="section page editing" data-section-id="{{ id }}" contenteditable="true" proxy-dblclick="sectionDoubleClick">
+            <div id="section{{ id }}" class="section page editing" data-section-id="{{ id }}" contenteditable="false" proxy-dblclick="sectionDoubleClick">
               {{{ content }}}
             </div>
             {{/editing}}
@@ -296,7 +297,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
                 {{#viewData.comments}}
                     <li class="comment list-group-item">
                       {{{ body }}}
-                      <div class="comment-info"><small>{{ author }}, {{ modified }}<small></div>
+                      <div class="comment-info"><small>{{ author }}, {{ lastModified }}<small></div>
                     </li>
                 {{/viewData.comments}}
                 <li class="list-group-item">
@@ -333,7 +334,8 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
         <option value="document-info">Table of Contents</option>
         <!-- <option value="history">History</option> -->
         <!-- <option value="references">References</option> -->
-        <option value="export">Export</option>
+        <option value="transclusionList">Cross reference</option>
+        <option value="export">Configurations</option>
       </select>
 
       <div id="document-info" class="inspector" style="height:100%;">
@@ -346,7 +348,31 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
         <div id="toc" style="height:100%;"></div>
       </div>
 
-      <div id="history" class="inspector">
+      <div id="transclusionList" class="inspector" style="height:100%;">
+        <h3>Elements</h3>
+        <input class="form-control" type="text" placeholder="search" id="search" value="{{transcludableQuery}}" />
+        <style id="search_style"></style>
+        <div class="transclusionList" style="display:block; height:80%; overflow-y: auto">
+          <div class="items">
+            {{#viewTree.elements}}
+              {{#name}}
+              <div class="body searchable" data-search-index="{{searchIndex}}">
+                <div class="qualifiedName" title="{{qualifiedName}}">{{qualifiedNameParentPreview}}</div>
+                <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable name">{{name}}</div>
+                {{#documentation}}
+                  <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable documentation">{{documentationPreview}}</div>
+                {{/documentation}}
+                {{#value}}
+                  <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable dvalue">{{value}}</div>
+                {{/value}}
+              </div>
+              {{/name}}
+            {{/viewTree.elements}}
+          </div>
+        </div>
+      </div>
+
+      <div id="history" class="inspector" style="height:100%;">
         <h3>History</h3>
         <ul class="list-unstyled">
           <li>v1 &mdash; Chris Delp</li>
@@ -370,7 +396,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
           <li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>         
           <li><button type="button" class="btn btn-default" proxy-click="printPreview">Print Preview</button></li>
           {{^viewTree.snapshot}}
-          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Snapshot</button></li>   
+          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Configuration Seal</button></li>   
           {{/viewTree.snapshot}}       
         </ul>
 
@@ -427,12 +453,24 @@ var absoluteUrl = function(relativeUrl) {
 
 var ajaxWithHandlers = function(options, successMessage, errorMessage) {
   $.ajax(options)
-    .done(function() { app.fire('message', 'success', successMessage); })
+    .done(function(data) { 
+      if (data.indexOf("html") != -1) {
+        alert("Not saved! You've been logged out, login in a new window first!");
+          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
+      }
+      app.fire('message', 'success', successMessage); })
     .fail(function(e) { 
       if (e && e.status && e.status === 200) {
+        if (e.responseText.indexOf("html") != -1) {
+          alert("Not saved! You've been logged out, login in a new window first!");
+          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
+        }
         // we got a 200 back, but json parsing might have failed
         return;
       } else {
+        if(e && e.status && e.status === 401) {
+          errorMessage += ": user does not have authorization to perform this action";
+        }
         app.fire('message', 'error', errorMessage); 
         if (console && console.log) {
           console.log("ajax error:", e);
@@ -443,7 +481,9 @@ var ajaxWithHandlers = function(options, successMessage, errorMessage) {
 
 app.on('saveView', function(viewId, viewData) {
   var jsonData = JSON.stringify(viewData);
-  var url = absoluteUrl('/ui/views/' + viewId);
+  console.log("Saving ", jsonData);
+  //alfresco/wcs/javawebscripts/views/id/elements
+  var url = absoluteUrl('/javawebscripts/views/' + viewId + '/elements');
   ajaxWithHandlers({ 
     type: "POST",
     url: url,
@@ -453,12 +493,14 @@ app.on('saveView', function(viewId, viewData) {
 })
 
 app.on('saveComment', function(evt, viewId, commentBody) {
-  var url = absoluteUrl("/ui/views/"+viewId+"/comment");
+  var url = absoluteUrl("/javawebscripts/views/" + viewId + "/elements");
+  var jsonData = JSON.stringify({"elements": [{"id": "_comment_" + (new Date()).getTime(), "body": commentBody, "type": "Comment", "annotatedElements":[viewId]}]});
+  console.log(jsonData);
   ajaxWithHandlers({ 
     type: "POST",
     url: url,
-    data: commentBody,
-    contentType: "text/plain; charset=UTF-8"
+    data: jsonData,
+    contentType: "application/json; charset=UTF-8"
   }, "Saved comment", "Error saving comment"); 
 })
 
@@ -509,7 +551,7 @@ app.on('addComment', function(evt, mbid) {
   commentField.find('.placeholder').detach();
   var newCommentBody = commentField.cleanHtml();
   if (newCommentBody != "") {
-    app.get(evt.keypath+".viewData.comments").push({ author : 'You', body : newCommentBody, modified : new Date()});
+    app.get(evt.keypath+".viewData.comments").push({ author : 'You', body : newCommentBody, lastModified : new Date()});
 
     app.fire('saveComment', null, mbid, newCommentBody);
   }
@@ -559,6 +601,82 @@ window.pageExitManager = function()
 
 }();
 
+app.transToText = function transToText(s) {
+  var t = "[";
+  var name = $("[data-trans-id='"+s.attr("data-mdid")+"'].name").text();
+  t += '"' + name + '":';
+  //var d = data[s.attr("mdid")];
+  //if(d) t += '"' + d.name + '":';
+  //else t += '"Element Not Found":';
+  t += s.attr("data-type") + ":";
+  t += s.attr("data-mdid") + "]";
+  return t;
+}
+
+app.replaceSpanWithBracket = function(section) {
+
+  section.find(".transclusion").each(function(){
+      var text = app.transToText($(this));
+      $(this).replaceWith(text);
+  }); 
+
+}
+
+var savedSel;
+
+
+function _saveSelection() {
+  //console.log("Start");
+    if (window.getSelection) {
+        sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+            var ranges = [];
+            for (var i = 0, len = sel.rangeCount; i < len; ++i) {
+                ranges.push(sel.getRangeAt(i));
+            }
+                        //console.log("End");
+            return ranges;
+
+        }
+    } else if (document.selection && document.selection.createRange) {
+                  console.log("End");
+        return document.selection.createRange();
+    }
+    //console.log("End");
+    return null;
+}
+
+function _restoreSelection(savedSel) {
+    if (savedSel) {
+        if (window.getSelection) {
+            sel = window.getSelection();
+            sel.removeAllRanges();
+            for (var i = 0, len = savedSel.length; i < len; ++i) {
+                sel.addRange(savedSel[i]);
+            }
+        } else if (document.selection && savedSel.select) {
+            savedSel.select();
+        }
+    }
+}
+
+app.getSavedSelection = function()
+{
+  return savedSel;
+}
+
+app.saveSelection = function()
+{
+  //console.log("SAVE");
+  savedSel = _saveSelection();
+}
+
+app.restoreSelection = function()
+{
+  _restoreSelection(savedSel);
+}
+
+
 app.on('editSection', function(e, sectionId) {
   window.pageExitManager.editorOpened();
 
@@ -568,23 +686,37 @@ app.on('editSection', function(e, sectionId) {
   var section = $("[data-section-id='" + sectionId + "']");
   var toolbar =$('[data-role=editor-toolbar][data-target="#section' + sectionId + '"]');
 
+  section.find(".reference.editable").attr('contenteditable', true);
+
   var sectionHeader = section.filter('.section-header');
   sectionHeader.data('original-content', sectionHeader.html());
   // bind toolbar properly, no toolbar for section name
   section.filter('.section.page').wysiwyg({toolbarSelector: '[data-role=editor-toolbar][data-target="#section' + sectionId + '"]'});
   section.filter('span').wysiwyg({toolbarSelector : '#no-toolbar'});
   
+  // We will set the individual editable elements to contenteditable true.  If this root container is true than
+  // it will prevent sub elements from getting key events.
+  section.filter('.section.page').attr("contenteditable", false);
+
+  app.replaceSpanWithBracket(section);
+
+  app.set('currentInspector', 'transclusionList');
+
+
   toolbar.find(".requires-selection").addClass("disabled");
   var sectionPage = section.filter(".section.page");
   // On focus, enable the button
   sectionPage.on('focus', function(arg)
   {
+    //console.log("Start Section focus")
     toolbar.find(".requires-selection").removeClass("disabled");
+    // console.log("end Section focus")
   })
   // On blur disable the button unless the object we clicked on was the button itself
   // This code can only find the button in FF and Chrome
   sectionPage.on('blur', function(arg)
   {
+    //console.log("Start Section blur");
     var target = arg.relatedTarget; // Chrome
     // Guess what, relatedTarget doesn't work on FF, if this is the case, look for originalEvent
     // Safari fails here, IE Unknown
@@ -594,6 +726,7 @@ app.on('editSection', function(e, sectionId) {
     }
     var clickedButton = $(target).filter(".requires-selection");
     toolbar.find(".requires-selection").not(clickedButton).addClass("disabled");
+    //console.log("End Section blur");
   })
 
 
@@ -604,24 +737,28 @@ app.on('editSection', function(e, sectionId) {
   });
   unwrapped.wrapInner("<p class='pwrapper'></p>");
 
-  //console.log(unwrapped);
-  //unwrapped.wrapInner("<p class='pwrapper'></p>");
-  // TODO turn this listener off on save or cancel
-  section.on('keyup paste blur',function(evt) {
-    // we need to use the selection api because we're in a contenteditable
-    var editedElement = app.getSelectedNode();
-    var $el = $(editedElement);
-    var mdid = $el.attr('data-mdid');
-    var property = $el.attr('data-property');
-    var newValue = $(editedElement).html();
-    // TODO filter out html for name and dvalue?
-    // find others, set their values
-    $('[data-mdid='+mdid+'][data-property='+property+']').not($el).html(newValue);
-  })
+  section.find("p").addClass("pwrapper");
+  
+  section.on('keyup paste click',function(evt) {
+    app.saveSelection();
+  });
+
+  // TODO: turn off this handler?
+  // Update other references to an element within this view on change
+  section.find("[data-mdid][data-property]").on('keyup paste blur', function(evt) 
+  {
+      var editedElement = evt.target;//app.getSelectedNode();
+      var $el = $(editedElement);
+      var mdid = $el.attr('data-mdid');
+      var property = $el.attr('data-property');
+      var newValue =  $el.html();
+      section.find("[data-mdid='"+mdid+"'][data-property='"+property+"']").not($el).html(newValue);
+  });
 
   // handle placeholder text
   // TODO remove this listener on cancel or save
   section.click(function() {
+    //console.log("start Section click")
     var $el = $(app.getSelectedNode());
     if ($el.is('.editable.reference.blank.doc')) {
       $el.html("<p class='pwrapper'>&nbsp;</p>");
@@ -634,6 +771,7 @@ app.on('editSection', function(e, sectionId) {
       selection.addRange(range);//make the range you have just created the visible selection
       $el.removeClass('blank');
     }
+    //console.log("end Section click")
   });
 
   var templateTable = function(rows, cols)
@@ -683,6 +821,7 @@ $('[data-toggle=dropdown]').dropdown();
 app.on('cancelEditing', function(e) {
   window.pageExitManager.editorClosed();
   e.original.preventDefault();
+  //var section = $("[data-section-id='" + sectionId + "']");
   var sectionId = app.get(e.keypath+'.id');
   app.set(e.keypath+'.editing', false);
   // console.log("canceling", sectionId);
@@ -690,24 +829,159 @@ app.on('cancelEditing', function(e) {
   // console.log("canceled editing for section header", $sectionHeader);
   $sectionHeader.html($sectionHeader.data('original-content'));
   $sectionHeader.attr('contenteditable', false);
+
+  //section.find(".reference.editable").attr('contenteditable', false);
+
+  //section.find("p").removeClass("pwrapper");
   // app.set(e.keypath+'.content', app.get(e.keypath+'.previousContent'));
   // console.log("canceled", app.get(e.keypath));
 })
 
+app.spanContentToBracket = function(content) {
+  var contentDom = $('<div>' + content + '</div>');
+  contentDom.find(".transclusion").each(function(i){
+    var dom = $(this);
+    var t = app.transToText(dom);
+    dom.html(t);
+  });
+  return contentDom.html();
+}
+
+app.spanContentToValue = function(content, vtree, depth) {
+  var contentDom = $('<div>' + content + '</div>');
+  if(depth === undefined) {
+    depth = 0;
+  }
+  contentDom.find(".transclusion").each(function(i){
+
+      var dom = $(this);
+      var id = dom.attr("data-mdid");
+      var t = dom.attr("data-type");
+
+      var elem = _.filter(vtree.elements, function(curElem) {
+        return curElem.mdid === id;
+      })
+      elem = elem[0];
+      
+      var innerVal = "Not Found";
+      if(t === "name"){
+        innerVal = elem.name;
+      } else if (t === "documentation") {
+        innerVal = elem.documentation;//"ASDFASF";//elem.documentation.text();
+      } else if (t === "value") {
+        innerVal = elem.value;
+      }
+
+      // TODO:  If the transcluded element has html in it, then we can't just include it in a span. 
+      // Using a div or p tag for transcluded elements creates its own set of joys because jquery
+      // has its own ideas about how things should change when these elements are nested.          
+      if(depth <= 3) {
+        innerVal = app.spanContentToValue(innerVal, vtree, depth + 1);
+      } else {
+        innerVal = " ERROR_MAX_NESTED_REF_DEPTH "
+      }
+      var docDom = $("<div>" + innerVal + "</div>");
+      //console.log(docDom.find(".transclusion"))
+      innerVal = docDom.text();
+
+      // Set the hovertext to display the fully qualified name if it exists
+      var hoverText = "[" + t + "]";
+      if(elem.qualifiedName)
+      {
+        hoverText = elem.qualifiedName + " " + hoverText;
+      }
+      dom.attr("title", hoverText);
+
+      dom.html(innerVal);
+     
+  });
+  return contentDom.html();
+}
+
+app.replaceBracketWithSpan = function(content)
+{
+  content = content.replace(/\[\"([^"]*)\":([^\s:]*):([^\s:]*)\]/g,"<span class='transclusion' data-mdid='$3' data-type='$2' data-name='$1'></span>");
+  return app.spanContentToValue(content, app.get("viewTree"));//app.spanContentToValue(content);
+}
+
 app.on('saveSection', function(e, sectionId) {
   window.pageExitManager.editorClosed();
+
+  var section = $("[data-section-id='" + sectionId + "']");
+  section.find(".reference.editable").attr('contenteditable', false);
+
+  //section.find("p").removeClass("pwrapper");
 
   e.original.preventDefault();
 
   $('.modified[data-mdid="' + sectionId+ '"]').text(app.formatDate(new Date()));
   $('.author-name[data-mdid="' + sectionId+ '"]').text("You");
 
-
-  var section = $("[data-section-id='" + sectionId + "']");
   //console.log("savesection", section);
   app.set(e.keypath+'.name', section.filter(".section-header").html());
-  app.set(e.keypath+'.content', section.filter(".section").html());
+
+
+  // update viewTree with changes
+  var viewTree = app.get("viewTree");
+  var elements = app.editableElements(section);
+  _.each(elements, function(e) {
+    _.each(viewTree.elements, function(cure) {
+      if(cure.mdid === e.mdid)
+      {
+        if(e.hasOwnProperty("documentation"))
+        {
+          cure.documentation = app.replaceBracketWithSpan(e.documentation);
+          var preview = app.generatePreviewDocumentation(cure.documentation);
+          if(preview) {
+            cure.documentationPreview = preview;
+          }
+          // update value in transclusion tab
+          $('[data-trans-id="'+cure.mdid+'"].transcludable.documentation').html(cure.documentationPreview);
+          // update other references to this element in document
+          $("[data-mdid='"+cure.mdid+"'][data-property='documentation']").html(cure.documentation);
+        }
+        if(e.hasOwnProperty("name"))
+        {
+          e.name = e.name.replace(/^((<br>)|(<\/br>)|\s)*|((<br>)|(<\/br>)|\s)*$/gi,"");
+          cure.name = app.replaceBracketWithSpan(e.name);
+          // update value in transclusion tab
+          $('[data-trans-id="'+cure.mdid+'"].transcludable.name').html(cure.name);
+          // update other references to this element in document
+          $("[data-mdid='"+cure.mdid+"'][data-property='name']").html(cure.name);
+        }
+        if(e.hasOwnProperty("value"))
+        {
+          cure.value = app.replaceBracketWithSpan(e.value);
+          // update value in transclusion tab
+          $('[data-trans-id="'+cure.mdid+'"].transcludable.dvalue').html(cure.value);
+          // update other references to this element in document
+          $("[data-mdid='"+cure.mdid+"'][data-property='value']").html(cure.value);
+        }
+      }
+    });
+  })
+
+  var content = section.filter(".section").html();
+
+  //content = app.replaceBracketWithSpan(content);
+ 
+  
+  app.set(e.keypath+'.content', content);//section.filter(".section").html());  
   app.set(e.keypath+'.editing', false);
+  app.set(viewTree);
+
+  // update all other transclusions 
+  $(".transclusion").each(function(){
+    var h = $(this)[0].outerHTML;
+    h = app.spanContentToValue(h, viewTree);
+    $(this).replaceWith(h);
+      //var text = app.transToText($(this));
+      //$(this).replaceWith(text);
+  }); 
+
+  //app.fire('saveSectionComplete', e, sectionId);
+  //If data is saved before references are converted to dom elements, 
+  //change realData saveSection to saveSectionComplete and fire event above
   //console.log("survived");
 })
 
@@ -741,7 +1015,9 @@ app.on('elementDetails', function(evt) {
 
 // export.js
 
-app.data.printPreviewTemplate = "\n<html>\n\t<head>\n\t\t<title>{{ documentTitle }}</title>\n\t\t<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>\n\t\t<style type=\"text/css\">\n\n\n\t\t  .no-section {\n\t\t    display: none;\n\t\t  }\n\n\t\t  .page-sections.no-section {\n\t\t    display: block;\n\t\t  }\n\n\t\t  .blank.reference {\n\t\t\t  display: none;\n\t\t\t}\n\n\t\t\t@page {\n\t\t\t  margin: 1cm;\n\t\t\t}\n\n\t\t\tbody {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t.page-sections, #the-document h1, #the-document h2, #the-document h3, #the-document h4, #the-document h5 {\n\t\t\t  font-family: 'PT Serif', Georgia, serif;\n\t\t\t}\n\t\t\t.navbar-brand, .page .inspector, .inspectors {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t#the-document {counter-reset: level1;}\n\t\t\t#toc:before, #toc:after {counter-reset: level1; content: \"\";}\n\t\t\t#toc h3:before{content: \"\"}\n\t\t\t \n\t\t\t#the-document h2, #toc > ul > li {counter-reset: level2;}\n\t\t\t#the-document h3, #toc > ul >  ul > li {counter-reset: level3;}\n\t\t\t#the-document h4, #toc > ul > ul > ul > li {counter-reset: level4;}\n\t\t\t#the-document h5, #toc > ul > ul > ul > ul > li {counter-reset: level5;}\n\t\t\t#the-document h6, #toc > ul > ul > ul > ul > ul > li {}\n\n\t\t\t#the-document h2:before,\n\t\t\t#toc > ul > li a:before {\n\t\t\t    content: counter(level1) \" \";\n\t\t\t    counter-increment: level1;\n\t\t\t}\n\t\t\t#the-document h3:before,\n\t\t\t#toc > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \" \";\n\t\t\t    counter-increment: level2;\n\t\t\t}\n\t\t\t#the-document h4:before,\n\t\t\t#toc > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \" \";\n\t\t\t    counter-increment: level3;\n\t\t\t}\n\t\t\t#the-document h5:before,\n\t\t\t#toc > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \" \";\n\t\t\t    counter-increment: level4;\n\t\t\t}\n\t\t\t#the-document h6:before,\n\t\t\t#toc > ul > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \".\" counter(level5) \" \";\n\t\t\t    counter-increment: level5;\n\t\t\t}\n\t\t</style>\n\t</head>\n\t<body>\n\t\t<div id=\"the-document\">\n\t\t\t{{ content }}\n\t\t</div>\n\t</body>\n</html>";
+app.data.printPreviewTemplate = "\n<html>\n\t<head>\n\t\t<style>img {max-width: 100%;}</style>\n\t\t<title>{{ documentTitle }}</title>\n\t\t<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>\n\t\t<style type=\"text/css\">\n\n\n\t\t  .no-section {\n\t\t    display: none;\n\t\t  }\n\n\t\t  .page-sections.no-section {\n\t\t    display: block;\n\t\t  }\n\n\t\t  .blank.reference {\n\t\t\t  display: none;\n\t\t\t}\n\n\t\t\t@page {\n\t\t\t  margin: 1cm;\n\t\t\t}\n\n\t\t\tbody {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t.page-sections, #the-document h1, #the-document h2, #the-document h3, #the-document h4, #the-document h5 {\n\t\t\t  font-family: 'PT Serif', Georgia, serif;\n\t\t\t}\n\t\t\t.navbar-brand, .page .inspector, .inspectors {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t#the-document {counter-reset: level1;}\n\t\t\t#toc:before, #toc:after {counter-reset: level1; content: \"\";}\n\t\t\t#toc h3:before{content: \"\"}\n\t\t\t \n\t\t\t#the-document h2, #toc > ul > li {counter-reset: level2;}\n\t\t\t#the-document h3, #toc > ul >  ul > li {counter-reset: level3;}\n\t\t\t#the-document h4, #toc > ul > ul > ul > li {counter-reset: level4;}\n\t\t\t#the-document h5, #toc > ul > ul > ul > ul > li {counter-reset: level5;}\n\t\t\t#the-document h6, #toc > ul > ul > ul > ul > ul > li {}\n\n\t\t\t#the-document h2:before,\n\t\t\t#toc > ul > li a:before {\n\t\t\t    content: counter(level1) \" \";\n\t\t\t    counter-increment: level1;\n\t\t\t}\n\t\t\t#the-document h3:before,\n\t\t\t#toc > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \" \";\n\t\t\t    counter-increment: level2;\n\t\t\t}\n\t\t\t#the-document h4:before,\n\t\t\t#toc > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \" \";\n\t\t\t    counter-increment: level3;\n\t\t\t}\n\t\t\t#the-document h5:before,\n\t\t\t#toc > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \" \";\n\t\t\t    counter-increment: level4;\n\t\t\t}\n\t\t\t#the-document h6:before,\n\t\t\t#toc > ul > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \".\" counter(level5) \" \";\n\t\t\t    counter-increment: level5;\n\t\t\t}\n\t\t</style>\n\t</head>\n\t<body>\n\t\t<div id=\"the-document\">\n\t\t\t{{ content }}\n\t\t</div>\n\t</body>\n</html>";
+
+
 
 _.templateSettings = {
   interpolate: /\{\{(.+?)\}\}/g
@@ -827,6 +1103,30 @@ var viewTree = {
 
 }
 
+app.generatePreviewDocumentation = function(doc)
+{
+  //console.log("ASDFASD");
+  var d = doc.trim();
+  
+  var preview = "";
+  if(d.length > 0) {
+        //console.log(String(_.escape(e.documentation)));
+        //console.log($(String(_.escape(e.documentation)))); 
+        //e.documentationPreview =  "ASD";// $(e.documentation).text();
+        //e.documentationPreview = _.escape(e.documentation);
+        preview = "<div>" + d + "</div>";
+        //console.log($);
+        //var asdfasfd = $(e.documentationPreview);
+        preview = $(preview).text();//.substring(0, 50) + "...";
+        //e.documentationPreview = _.unescape(e.documentationPreview);
+        var dots = (preview.length > 200) ? "..." : "";
+        preview = preview.substring(0,200) + dots;
+        return preview;
+    }
+    
+    return false;
+}
+
 app.formatDate = function(d)
 {
   return moment(d).format('D MMM YYYY, h:mm a');
@@ -837,9 +1137,9 @@ var parseDate = function(dateString)
   return moment(dateString);
 }
 
-app.generateUpdates = function(section)
-{
+app.editableElements = function(section) {
   var elements = {};
+  //console.log("VT", viewTree);
   $('.editable[data-property]', section).each(function(i,el)
   {
       var $el = $(el);
@@ -849,12 +1149,33 @@ app.generateUpdates = function(section)
       }
       var mdid = $el.attr('data-mdid');
       var data = elements[mdid] || { mdid : mdid };
-      data[$el.attr('data-property').toLowerCase()] = el.innerHTML;
+      var prop = $el.attr('data-property').toLowerCase()
+      data[prop] = el.innerHTML;
       // result.push(data);
       elements[mdid] = data;
+
   });
+  return elements;
+}
+
+app.generateUpdates = function(section)
+{
+  var elements = app.editableElements(section);
+  _.each(elements, function(e) {
+    if(e.hasOwnProperty("documentation")) {
+      e.documentation = app.spanContentToBracket(e.documentation);
+    }
+    e.id = e.mdid;
+    delete e["mdid"];
+    var sourceEl =app.get("viewTree").elementsById[e.id];
+    if(sourceEl.hasOwnProperty("valueType")) {
+      e.valueType = sourceEl.valueType;
+    }
+  });
+
+  //console.log("VT2", viewTree);
   // console.log("elements by id", elements);
-  return _.values(elements);
+  return {"elements": _.values(elements)};
 }
 
 
@@ -886,7 +1207,7 @@ var writeBackCache = function()
 }();
 
 var buildList = function(object, elements, html) {
-  if (!html) html = "";
+  if (!html) html = "<div contenteditable='false'>";
   var listTag = object.ordered ? 'ol' : 'ul';
   html += '<'+listTag+'>';
   // items is a 2D array. first depth is lists, second is multiple values per item
@@ -910,29 +1231,35 @@ var buildList = function(object, elements, html) {
     })
 
   })
-  html += '</'+listTag+'>';
+  html += '</'+listTag+'></div>';
   return html;
 }
 
 var resolveValue = function(object, elements, listProcessor) {
+  
   if (Array.isArray(object)) {
     var valuesArray = _.map(object, function(obj) { return resolveValue(obj, elements) });
     return listProcessor ? listProcessor(valuesArray) : _.pluck(valuesArray, 'content').join("  ");
-  } else if (object.source === 'text') {
+  } else if (object.sourceType === 'text') {
     return { content : object.text, editable : false };
   // } else if (object.type === 'List') {
   //   return { content : '!! sublist !! ', editable : false };
-  } else {
-    // console.log("resolving ", object.useProperty, " for ", object.source, object);
+  } else if(object.sourceType === 'reference') {
+    // console.log("resolving ", object.sourceProperty, " for ", object.source, object);
+
     var source = elements[object.source];
     if (!source) {
       return { content : 'reference missing', mdid : object.source };
-    } else if (object.useProperty)
-      var referencedValue = source[object.useProperty.toLowerCase()];
-    else
-      console.warn("!! no useProperty for", object);
+    } else if (object.sourceProperty) {
+
+      var referencedValue = source[object.sourceProperty.toLowerCase()];
+    } else{
+      console.warn("!! no sourceProperty for", object);
+    }
     // console.log(referencedValue);
-    return { content : referencedValue, editable : true, mdid :  source.mdid, property: object.useProperty };
+    return { content : referencedValue, editable : true, mdid :  source.mdid, property: object.sourceProperty };
+  } else {
+    return {content: "Unknown source type", mdid: object.source};
   }
 }
 
@@ -945,15 +1272,20 @@ var renderEmbeddedValue = function(value, elements) {
   var ref = elements[value.mdid];
   var title = ref ? (ref.name || ref.mdid) +' ('+value.property.toLowerCase()+')' : '';
   var classes = ['reference'];
-  var blankContent = !value.content || value.content === "" || value.content.match(/^\s+$/);
+  var blankContent = false;
+  if(!value.content){
+    blankContent = !value.content || value.content === "" || value.content.match(/^\s+$/);
+  } 
   if (blankContent) {
     classes.push('blank')
   }
   if (value.editable) {
     classes.push('editable');
-    if (value.property == 'DOCUMENTATION')
-    	classes.push('doc');
+    if (value.property == 'documentation') {
+      classes.push('doc');
+    }
     // TODO use something other than id here, since the same reference can appear multiple times
+    //contenteditable="true"
     h += '<div ' + classAttr(classes) + ' data-property="' + value.property + '" data-mdid="' + value.mdid +'" title="'+title+'">';
   } else {
     if (ref) {
@@ -966,6 +1298,7 @@ var renderEmbeddedValue = function(value, elements) {
     }
   }
   h += blankContent ? 'no content for ' + (ref.name || ref.id) + ' ' + value.property.toLowerCase() : value.content;
+  //h += blankContent ? '' : value.content;
   h += '</div>';
   return h;
 }
@@ -991,7 +1324,7 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
       var c = child.viewData.contains[cIdx];
       if (c.type == 'Table') {
         // console.log("skipping table...");
-        var table = '<table class="table table-striped">';
+        var table = '<div contenteditable="false"><table class="table table-striped">';
         table += "<thead>";
         table += "<tr>";
         for (var hIdx in c.header[0]) {
@@ -1011,7 +1344,7 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
             var cell = c.body[rIdx][cIdx];
             var value = resolveValue(cell.content, elements, function(valueList) {
               var listOfElements = _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) });
-              var stringResult = "";//"<ul class='table-list'>";
+              var stringResult = ""; //<ul class='table-list'>";
               _.each(listOfElements, function(e){
                 stringResult += e + "<br/>"; //"<li>" + e + "</li>";
               })
@@ -1024,7 +1357,7 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
           table += "</tr>";
         }
         table += "</tbody>"
-        table += "</table>"
+        table += "</table></div>"
         child.content += table;
       } else if (c.type === 'List') {
         child.content += buildList(c, elements);        
@@ -1108,6 +1441,28 @@ app.observe('home', function(homeData)
  })
 
 app.observe('viewHierarchy', function(viewData) {
+
+  // Hack, add an mdid proprety to each view that is equal to it's id
+  _.each(viewData.views, function(curv) {
+    curv.mdid = curv.id;
+  })
+
+  // Hack, add an mdid proprety to each element  that is equal to it's id
+  _.each(viewData.elements, function(cure) {
+    cure.mdid = cure.id;
+    if(cure.hasOwnProperty("value")) {
+      cure.value = cure.value[0];
+    }
+
+  })
+
+    // Fill in values for all transcluded span tags in documentation fields
+  _.each(viewData.elements, function(cure) {
+    if(cure.hasOwnProperty('documentation')) {
+      cure.documentation = app.spanContentToValue(cure.documentation, viewData);
+    }
+  })
+  
   // index views by id
   var viewsById = {};
   for (var idx in viewData.views) {
@@ -1130,6 +1485,14 @@ app.observe('viewHierarchy', function(viewData) {
     })
   }
 
+  // For now, just translate the new View2View api so that it looks like the old one
+  var viewMapping = {};
+  _.each(viewData.view2view, function(curv) {
+    viewMapping[curv.id] = curv.childrenViews;
+  })
+  viewData.view2view = viewMapping;
+  viewData.rootView = viewData.id;
+
   // // app.set('debug', JSON.stringify(viewData));
   // console.log(viewData);
   // TODO: Change addChildren to construct the parentNode content instead of the childrenNodes
@@ -1146,6 +1509,34 @@ app.observe('viewHierarchy', function(viewData) {
     viewTree.snapshoted = app.formatDate(parseDate(viewData.snapshoted));
   }
   viewTree.snapshots = viewData.snapshots;
+  viewTree.elements = viewData.elements;
+
+  viewTree.elements = _.sortBy(viewTree.elements, function(e){ return e.qualifiedName });
+
+
+  viewTree.elementsById = elementsById;
+  // Create a list of transcludable elements
+  _.each(viewTree.elements, function(e) {
+
+    // set string for client side searching
+    e.searchIndex = e.qualifiedName.toLowerCase();
+
+    // Remove name after last slash for   
+    if(e.hasOwnProperty('qualifiedName')) {
+      e.qualifiedNamePreview = e.qualifiedName.substr(0, e.qualifiedName.lastIndexOf("/"));
+      e.qualifiedNameParentPreview =  e.qualifiedNamePreview.substr(e.qualifiedNamePreview.lastIndexOf("/")+1, e.qualifiedNamePreview.length);
+    
+    }
+
+    //console.log(e);
+    if(e.hasOwnProperty('documentation')) {
+      var preview = app.generatePreviewDocumentation(e.documentation);
+      //console.log(preview);
+      if(preview){
+        e.documentationPreview = preview;
+      }
+    }
+  });
 
   app.set('viewTree', viewTree, function() {
     setTimeout(function() { 
@@ -1153,6 +1544,8 @@ app.observe('viewHierarchy', function(viewData) {
     }, 0);
   });
 })
+
+
 
 // rich-reference.js
 
@@ -1322,6 +1715,39 @@ app.createLiveTable = function($el, tableData) {
 }
 
 
+// search.js
+
+
+var search = _.debounce(
+  function(q){
+  var searchStyle = document.getElementById('search_style');
+  if (!q) {
+    searchStyle.innerHTML = "";
+    return;
+  }
+
+  // tokenize the search
+  q = q.replace('"',"");
+  var split = q.split(" ");
+  var selector = "";
+
+  // add a new css selector for each token to hide anyting that doesn't have that token
+  for(var i in split)
+  {
+    // don't do anything if there's no token
+    if(split[i].trim() == "")
+    {
+      continue;
+    }
+    selector += '.searchable:not([data-search-index*="' +split[i]+ '"]){ display : none; }';
+  }
+  searchStyle.innerHTML = selector; //".searchable:not([data-search-index*=\"" + q + "\"]) { display: none; }";
+}, 250);
+
+app.observe('transcludableQuery', function(q) {
+  search(q);
+})
+
 // sections.js
 
 app.observe('plan_sections', function(newText) {
@@ -1482,7 +1908,129 @@ window.addSvgClickHandler = function(el) {
 app.on('makeToc', function() {
   $("#toc").tocify({ selectors: "h2.numbered-header, h3.numbered-header, h4.numbered-header, h5.numbered-header", history : false, scrollTo: "60", hideEffect: "none", showEffect: "none", highlightOnScroll: true, highlightOffset : 0, context: "#the-document", smoothScroll:false, extendPage:false }).data("toc-tocify");  
 })
+// note sure why but transclude.js doesn't load properly unless we have a log line here?
+console.log("");
+/*
+(function poll() {
+    setTimeout(function() {
+        $.ajax({
+            url: absoluteUrl('/ui/relogin'),
+            type: "GET",
+            success: function(data) {
+                if (data.indexOf("html") != -1) 
+                  alert("You've been logged out! Login in a new window first!");
+          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
+            },
+            complete: poll,
+            timeout: 5000
+        })
+    }, 60000);
+})();
+*/
 
+// transclusion.js
+
+
+
+
+var lastTransLength = 0;
+
+//app.on("imcool", function(e)  {
+//  console.log("Thats right");
+  //saveSelection();
+//})
+
+app.on("viewTree", function(vt) {
+  console.log("Load", vt);
+})
+//transclusionClick
+app.on('transclusionDown', function(e) {
+  //restoreSelection();
+  //  document.execCommand("insertHTML", false, "IMAREFERENCE!!!");
+
+  //$(".transcludable").on('click', function() {
+    //console.log("-----");
+    //saveSelection();
+    //console.log("ASDF!!!", e);
+    
+    var savedSel = app.getSavedSelection();
+    //console.log("TransDown", savedSel);
+    if(savedSel.length > 0){
+      var section = $(savedSel[0].commonAncestorContainer).closest(".section.page.editing");
+      //var section = $(app.getSelectedNode()).closest(".section.page.editing");
+      var sectionId = section.attr("data-section-id");
+      //console.log(sectionId);
+      var tran = $(e.node);
+      //console.log("tran", tran);
+      var transId = tran.attr("data-trans-id");
+      //console.log("tid", transId);
+      
+      var refType = "";
+      if(tran.hasClass("name")){
+        refType = "name";
+      }else if(tran.hasClass("documentation")){
+        refType = "documentation";
+      } else if(tran.hasClass("dvalue")){
+        refType = "value";
+      }
+
+      //var dummyButton = $('[data-role=editor-toolbar][data-target="#section' + sectionId + '"]').find(".dummyButton");
+      //dummyButton.click();
+      
+      //var vtree = app.get("viewTree");
+      //var elem = _.filter(vtree.elements, function(curElem) {
+      // return curElem.mdid === transId;
+      //})
+      //elem = elem[0];
+      var name = $('[data-trans-id="'+transId+'"].transcludable.name').text();
+      //console.log(name);
+      var r = '["'+name+'":'+refType+':'+transId+'] ';
+      app.restoreSelection();
+      document.execCommand("insertHTML", false, r);
+      lastTransLength = r.length;
+
+
+    }  
+    //console.log("TransDown done");
+    
+    //console.log("-----");
+    //saveSelection();
+    //if(savedSel.length > 0){
+  //    var section = $(savedSel[0].commonAncestorContainer).closest(".section.page.editing");//$(savedSel.commonAncestorContainer).closest(".section.page.editing");
+  //    console.log(section.attr("data-section-id"));
+    //  restoreSelection();
+    //  document.execCommand("insertHTML", false, "IMAREFERENCE!!!");
+    //}
+    //*/
+  //})
+})
+
+app.on('transclusionUp', function(e) {
+  //console.log("Start Up");
+  app.restoreSelection();
+
+  //setTimeout(function() {
+      //var advanceLength = r.length;
+  if(lastTransLength !== 0) {
+
+    var range = window.getSelection().getRangeAt(0);
+    //console.log(range.startOffset, range.startContainer);
+    //console.log("target : " + (range.startOffset + lastTransLength) + " : ", range.startContainer );
+    range.setStart(range.startContainer, range.startOffset + lastTransLength);
+    //console.log("Good1");
+    range.setEnd(range.startContainer, range.startOffset + 0);
+
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+  }
+  lastTransLength = 0;
+ // },100);
+  app.saveSelection();
+
+  //console.log("End Up");
+})
+
+//console.log("ASDFASFD");
 </script>
 </body>
 </html>

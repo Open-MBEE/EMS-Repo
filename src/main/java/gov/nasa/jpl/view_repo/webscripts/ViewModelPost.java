@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -62,9 +63,9 @@ public class ViewModelPost extends ModelPost {
         String viewid = req.getServiceMatch().getTemplateVars().get("modelid");
         UserTransaction trx = services.getTransactionService().getUserTransaction();
         try {
+            trx.begin();
             EmsScriptNode view = findScriptNodeById(viewid);
             view.createOrUpdateProperty("cm:modifier", AuthenticationUtil.getFullyAuthenticatedUser());
-
             trx.commit();
         } catch (Throwable e) {
             try {
@@ -113,14 +114,16 @@ public class ViewModelPost extends ModelPost {
                         parentFound = false;
                     } else {
                         EmsScriptNode commentParent = findScriptNodeById(annotatedJson.getString(0));
-                        if (commentParent == null) {
-                            parentFound = false;
-                        } else {
-                            newElements.add(id);
-                            updateOrCreateElement(elementJson, commentParent.getParent());
-                        }
+                            if (commentParent == null) {
+                                parentFound = false;
+                            } else {
+                                if (checkPermissions(commentParent, PermissionService.WRITE)) {
+                                    newElements.add(id);
+                                    updateOrCreateElement(elementJson, commentParent.getParent());
+                                }
+                            }
                     }
-                    
+
                     if (!parentFound) {
                         log(LogLevel.WARNING, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
                     }

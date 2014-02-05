@@ -39,6 +39,7 @@
         <list>
           <value>alfresco/module/view-repo/viewModel.xml</value>
           <value>alfresco/module/view-repo/sysmlModel.xml</value>
+          <value>alfresco/module/view-repo/emsModel.xml</value>
         </list>
       </property>
     </bean>
@@ -119,4 +120,11 @@
 		<property name="extensionName" value="UserUtil" />
 		<property name="ignore" value="true" />
 	</bean>
+	
+	<!-- add in the modelLoad Action -->    
+    <bean id="modelLoad" class="gov.nasa.jpl.view_repo.ModelLoadActionExecuter" parent="action-executer">
+	    <property name="services" ref="ServiceRegistry"/>
+	    <property name="repository" ref="repositoryHelper"/>
+	    <property name="contextUrl" value="https://sheldon.jpl.nasa.gov/alfresco"/>
+    </bean>	
 </beans>

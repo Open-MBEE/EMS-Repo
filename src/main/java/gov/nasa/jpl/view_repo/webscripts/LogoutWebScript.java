@@ -46,12 +46,13 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class LogoutWebScript extends DeclarativeWebScript {
+    private boolean logoutBasicAuth = true;
 	private final String NEXT_PARAM = "next";
 	
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
-		logout(req);
+		logout(req, status);
 		
 		String next = getServicePath(req.getServiceContextPath()) + "%2Fwcs%2Fui%2F";
 		
@@ -60,11 +61,14 @@ public class LogoutWebScript extends DeclarativeWebScript {
 		}
 		
 		// set redirection parameters
-		status.setCode(HttpServletResponse.SC_TEMPORARY_REDIRECT);
 		status.setRedirect(true);
-		status.setLocation(req.getServerPath() + getServicePath(req.getServiceContextPath()) 
-				+ "/faces/jsp/login.jsp?_alfRedirect=" + next);
-
+		if (logoutBasicAuth) {
+            status.setLocation(req.getServerPath() + getServicePath(req.getServiceContextPath()) + next);
+		} else {
+	        status.setLocation(req.getServerPath() + getServicePath(req.getServiceContextPath()) 
+	                + "/faces/jsp/login.jsp?_alfRedirect=" + next);
+		}
+		
 		return new HashMap<String, Object>();
 	}
 
@@ -72,9 +76,14 @@ public class LogoutWebScript extends DeclarativeWebScript {
 	 * Simple utility that logs out the user
 	 * @param wsr
 	 */
-	private void logout(WebScriptRequest wsr) {
-		FacesContext fc = FacesContext.getCurrentInstance();
-		Application.logOut(fc);
+	private void logout(WebScriptRequest wsr, Status status) {
+	    if (logoutBasicAuth) {
+	        status.setCode(HttpServletResponse.SC_UNAUTHORIZED);
+	    } else {
+            FacesContext fc = FacesContext.getCurrentInstance();
+            Application.logOut(fc);
+            status.setCode(HttpServletResponse.SC_TEMPORARY_REDIRECT);
+	    }
 	}
 	
 	/**

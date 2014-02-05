@@ -37,6 +37,7 @@ import org.json.JSONException;
  * @author cinyoung
  *
  */
+@Deprecated
 public interface JwsFunctor {
 	/**
 	 * Execute the transaction for creating from an JSON type

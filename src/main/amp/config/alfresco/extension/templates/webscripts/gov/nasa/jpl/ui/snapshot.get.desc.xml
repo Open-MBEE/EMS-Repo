@@ -2,8 +2,8 @@
   <shortname>Get all snapshots for view</shortname> 
   <description>Return all snapshots for a view
   </description>
-  <url>/ui/views/{viewid}/snapshots</url> 
-  <format default="json">any</format> 
+  <url>/snapshots/{id}</url> 
+  <format default="html">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readonly">required</transaction>
   <family>View Editor</family>

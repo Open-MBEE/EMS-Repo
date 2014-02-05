@@ -1,7 +1,7 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Editor</title>
+    <title>View Editor: ${title}</title>
     <link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
@@ -12,13 +12,14 @@
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
   
 <script type="text/javascript">
-var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
+var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 </script>
 
 </head>
 
   <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
 <div id="main"></div>
+
 <script id="template" type="text/mustache">
 
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -27,20 +28,20 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
             <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
           {{/environment.development}}
           {{^environment.development}}
-            <a class="navbar-brand" href="${url.context}/wcs/javawebscripts/productlist/europa">Europa View Editor {{ title }}</a>
+            <a class="navbar-brand" href="${url.context}/service/ve/documents/europa">Europa View Editor {{ title }}</a>
           {{/environment.development}}  
       </div>
 
       <ul class="nav navbar-nav">
-        <li><a  href="/share/page/">dashboard</a></li>
+        <li><a  href="/share/page/">Europa EMS Dashboard</a></li>
       </ul>   
         
       <div class="pull-right">
-        <a href="#"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
+        <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
       </div>
 
       <ul class="nav navbar-nav pull-right">
-       <li><a href="${url.context}/wcs/logout?next=${url.context}/wcs/ui/">logout</a></li>
+       <li><a href="${url.context}/service/logout?next=${url.full}" class="submit-logout">logout</a></li>
       </ul>
 
       <ul class="nav navbar-nav pull-right">
@@ -333,8 +334,8 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
         <option value="document-info">Table of Contents</option>
         <!-- <option value="history">History</option> -->
         <!-- <option value="references">References</option> -->
-        <option value="transclusionList">Transclusion</option>
-        <option value="export">Export</option>
+        <option value="transclusionList">Cross reference</option>
+        <option value="export">Configurations</option>
       </select>
 
       <div id="document-info" class="inspector" style="height:100%;">
@@ -395,7 +396,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
           <li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>         
           <li><button type="button" class="btn btn-default" proxy-click="printPreview">Print Preview</button></li>
           {{^viewTree.snapshot}}
-          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Snapshot</button></li>   
+          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Configuration Seal</button></li>   
           {{/viewTree.snapshot}}       
         </ul>
 
@@ -436,6 +437,22 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 <script src="${url.context}/scripts/vieweditor/vendor/svgedit/embedapi.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/css_browser_selector.js"></script>
 <script type="text/javascript" src="${url.context}/scripts/vieweditor/vendor/Ractive.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$('a.submit-logout').click(function() {
+		$.ajax({
+			type: 'GET',
+			url: '${url.context}/service/logout',
+			success: function (data) {
+				alert("logged out successfully.");
+			},
+			error: function(data) {
+				alert("Invalid username or password. Try again.");
+			}
+		});
+	});
+});
+</script>
 <script type="text/javascript">var app = new Ractive({ el : "main", template : "#template", data : pageData });</script>
 <script type="text/javascript">
 var context = window;
@@ -455,18 +472,21 @@ var ajaxWithHandlers = function(options, successMessage, errorMessage) {
     .done(function(data) { 
       if (data.indexOf("html") != -1) {
         alert("Not saved! You've been logged out, login in a new window first!");
-      		window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
+          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/service/ui/relogin");
       }
       app.fire('message', 'success', successMessage); })
     .fail(function(e) { 
       if (e && e.status && e.status === 200) {
         if (e.responseText.indexOf("html") != -1) {
           alert("Not saved! You've been logged out, login in a new window first!");
-      		window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
+          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/service/ui/relogin");
         }
         // we got a 200 back, but json parsing might have failed
         return;
       } else {
+        if(e && e.status && e.status === 401) {
+          errorMessage += ": user does not have authorization to perform this action";
+        }
         app.fire('message', 'error', errorMessage); 
         if (console && console.log) {
           console.log("ajax error:", e);
@@ -478,7 +498,7 @@ var ajaxWithHandlers = function(options, successMessage, errorMessage) {
 app.on('saveView', function(viewId, viewData) {
   var jsonData = JSON.stringify(viewData);
   console.log("Saving ", jsonData);
-  //alfresco/wcs/javawebscripts/views/id/elements
+  //alfresco/service/javawebscripts/views/id/elements
   var url = absoluteUrl('/javawebscripts/views/' + viewId + '/elements');
   ajaxWithHandlers({ 
     type: "POST",
@@ -845,6 +865,9 @@ app.spanContentToBracket = function(content) {
 
 app.spanContentToValue = function(content, vtree, depth) {
   var contentDom = $('<div>' + content + '</div>');
+  if(depth === undefined) {
+    depth = 0;
+  }
   contentDom.find(".transclusion").each(function(i){
 
       var dom = $(this);
@@ -860,26 +883,22 @@ app.spanContentToValue = function(content, vtree, depth) {
       if(t === "name"){
         innerVal = elem.name;
       } else if (t === "documentation") {
-        // TODO:  If the transcluded element has html in it, then we can't just include it in a span. 
-        // Using a div or p tag for transcluded elements creates its own set of joys because jquery
-        // has its own ideas about how things should change when these elements are nested.
-        var docData = elem.documentation
-        
-        if(depth === undefined){
-          depth = 0;
-        }
-        if(depth <= 3) {
-          docData = app.spanContentToValue(docData, vtree, depth + 1);
-        } else {
-          docData = " ERROR_MAX_NESTED_REF_DEPTH "
-        }
-        var docDom = $("<div>" + docData + "</div>");
-        //console.log(docDom.find(".transclusion"))
-        var safeText = docDom.text();
-        innerVal = safeText;//"ASDFASF";//elem.documentation.text();
+        innerVal = elem.documentation;//"ASDFASF";//elem.documentation.text();
       } else if (t === "value") {
         innerVal = elem.value;
       }
+
+      // TODO:  If the transcluded element has html in it, then we can't just include it in a span. 
+      // Using a div or p tag for transcluded elements creates its own set of joys because jquery
+      // has its own ideas about how things should change when these elements are nested.          
+      if(depth <= 3) {
+        innerVal = app.spanContentToValue(innerVal, vtree, depth + 1);
+      } else {
+        innerVal = " ERROR_MAX_NESTED_REF_DEPTH "
+      }
+      var docDom = $("<div>" + innerVal + "</div>");
+      //console.log(docDom.find(".transclusion"))
+      innerVal = docDom.text();
 
       // Set the hovertext to display the fully qualified name if it exists
       var hoverText = "[" + t + "]";
@@ -916,10 +935,8 @@ app.on('saveSection', function(e, sectionId) {
 
   //console.log("savesection", section);
   app.set(e.keypath+'.name', section.filter(".section-header").html());
-  var content = section.filter(".section").html();
 
-  content = app.replaceBracketWithSpan(content);
- 
+
   // update viewTree with changes
   var viewTree = app.get("viewTree");
   var elements = app.editableElements(section);
@@ -929,7 +946,7 @@ app.on('saveSection', function(e, sectionId) {
       {
         if(e.hasOwnProperty("documentation"))
         {
-          cure.documentation = e.documentation;
+          cure.documentation = app.replaceBracketWithSpan(e.documentation);
           var preview = app.generatePreviewDocumentation(cure.documentation);
           if(preview) {
             cure.documentationPreview = preview;
@@ -941,7 +958,8 @@ app.on('saveSection', function(e, sectionId) {
         }
         if(e.hasOwnProperty("name"))
         {
-          cure.name = e.name;
+          e.name = e.name.replace(/^((<br>)|(<\/br>)|\s)*|((<br>)|(<\/br>)|\s)*$/gi,"");
+          cure.name = app.replaceBracketWithSpan(e.name);
           // update value in transclusion tab
           $('[data-trans-id="'+cure.mdid+'"].transcludable.name').html(cure.name);
           // update other references to this element in document
@@ -949,7 +967,7 @@ app.on('saveSection', function(e, sectionId) {
         }
         if(e.hasOwnProperty("value"))
         {
-          cure.value = e.value;
+          cure.value = app.replaceBracketWithSpan(e.value);
           // update value in transclusion tab
           $('[data-trans-id="'+cure.mdid+'"].transcludable.dvalue').html(cure.value);
           // update other references to this element in document
@@ -959,9 +977,13 @@ app.on('saveSection', function(e, sectionId) {
     });
   })
 
-  app.set(e.keypath+'.content', content);//section.filter(".section").html());
-  app.set(e.keypath+'.editing', false);
+  var content = section.filter(".section").html();
 
+  //content = app.replaceBracketWithSpan(content);
+ 
+  
+  app.set(e.keypath+'.content', content);//section.filter(".section").html());  
+  app.set(e.keypath+'.editing', false);
   app.set(viewTree);
 
   // update all other transclusions 
@@ -1009,7 +1031,9 @@ app.on('elementDetails', function(evt) {
 
 // export.js
 
-app.data.printPreviewTemplate = "\n<html>\n\t<head>\n\t\t<title>{{ documentTitle }}</title>\n\t\t<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>\n\t\t<style type=\"text/css\">\n\n\n\t\t  .no-section {\n\t\t    display: none;\n\t\t  }\n\n\t\t  .page-sections.no-section {\n\t\t    display: block;\n\t\t  }\n\n\t\t  .blank.reference {\n\t\t\t  display: none;\n\t\t\t}\n\n\t\t\t@page {\n\t\t\t  margin: 1cm;\n\t\t\t}\n\n\t\t\tbody {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t.page-sections, #the-document h1, #the-document h2, #the-document h3, #the-document h4, #the-document h5 {\n\t\t\t  font-family: 'PT Serif', Georgia, serif;\n\t\t\t}\n\t\t\t.navbar-brand, .page .inspector, .inspectors {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t#the-document {counter-reset: level1;}\n\t\t\t#toc:before, #toc:after {counter-reset: level1; content: \"\";}\n\t\t\t#toc h3:before{content: \"\"}\n\t\t\t \n\t\t\t#the-document h2, #toc > ul > li {counter-reset: level2;}\n\t\t\t#the-document h3, #toc > ul >  ul > li {counter-reset: level3;}\n\t\t\t#the-document h4, #toc > ul > ul > ul > li {counter-reset: level4;}\n\t\t\t#the-document h5, #toc > ul > ul > ul > ul > li {counter-reset: level5;}\n\t\t\t#the-document h6, #toc > ul > ul > ul > ul > ul > li {}\n\n\t\t\t#the-document h2:before,\n\t\t\t#toc > ul > li a:before {\n\t\t\t    content: counter(level1) \" \";\n\t\t\t    counter-increment: level1;\n\t\t\t}\n\t\t\t#the-document h3:before,\n\t\t\t#toc > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \" \";\n\t\t\t    counter-increment: level2;\n\t\t\t}\n\t\t\t#the-document h4:before,\n\t\t\t#toc > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \" \";\n\t\t\t    counter-increment: level3;\n\t\t\t}\n\t\t\t#the-document h5:before,\n\t\t\t#toc > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \" \";\n\t\t\t    counter-increment: level4;\n\t\t\t}\n\t\t\t#the-document h6:before,\n\t\t\t#toc > ul > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \".\" counter(level5) \" \";\n\t\t\t    counter-increment: level5;\n\t\t\t}\n\t\t</style>\n\t</head>\n\t<body>\n\t\t<div id=\"the-document\">\n\t\t\t{{ content }}\n\t\t</div>\n\t</body>\n</html>";
+app.data.printPreviewTemplate = "\n<html>\n\t<head>\n\t\t<style>img {max-width: 100%;}</style>\n\t\t<title>{{ documentTitle }}</title>\n\t\t<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>\n\t\t<style type=\"text/css\">\n\n\n\t\t  .no-section {\n\t\t    display: none;\n\t\t  }\n\n\t\t  .page-sections.no-section {\n\t\t    display: block;\n\t\t  }\n\n\t\t  .blank.reference {\n\t\t\t  display: none;\n\t\t\t}\n\n\t\t\t@page {\n\t\t\t  margin: 1cm;\n\t\t\t}\n\n\t\t\tbody {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t.page-sections, #the-document h1, #the-document h2, #the-document h3, #the-document h4, #the-document h5 {\n\t\t\t  font-family: 'PT Serif', Georgia, serif;\n\t\t\t}\n\t\t\t.navbar-brand, .page .inspector, .inspectors {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t#the-document {counter-reset: level1;}\n\t\t\t#toc:before, #toc:after {counter-reset: level1; content: \"\";}\n\t\t\t#toc h3:before{content: \"\"}\n\t\t\t \n\t\t\t#the-document h2, #toc > ul > li {counter-reset: level2;}\n\t\t\t#the-document h3, #toc > ul >  ul > li {counter-reset: level3;}\n\t\t\t#the-document h4, #toc > ul > ul > ul > li {counter-reset: level4;}\n\t\t\t#the-document h5, #toc > ul > ul > ul > ul > li {counter-reset: level5;}\n\t\t\t#the-document h6, #toc > ul > ul > ul > ul > ul > li {}\n\n\t\t\t#the-document h2:before,\n\t\t\t#toc > ul > li a:before {\n\t\t\t    content: counter(level1) \" \";\n\t\t\t    counter-increment: level1;\n\t\t\t}\n\t\t\t#the-document h3:before,\n\t\t\t#toc > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \" \";\n\t\t\t    counter-increment: level2;\n\t\t\t}\n\t\t\t#the-document h4:before,\n\t\t\t#toc > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \" \";\n\t\t\t    counter-increment: level3;\n\t\t\t}\n\t\t\t#the-document h5:before,\n\t\t\t#toc > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \" \";\n\t\t\t    counter-increment: level4;\n\t\t\t}\n\t\t\t#the-document h6:before,\n\t\t\t#toc > ul > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \".\" counter(level5) \" \";\n\t\t\t    counter-increment: level5;\n\t\t\t}\n\t\t</style>\n\t</head>\n\t<body>\n\t\t<div id=\"the-document\">\n\t\t\t{{ content }}\n\t\t</div>\n\t</body>\n</html>";
+
+
 
 _.templateSettings = {
   interpolate: /\{\{(.+?)\}\}/g
@@ -1911,7 +1935,7 @@ console.log("");
             success: function(data) {
                 if (data.indexOf("html") != -1) 
                   alert("You've been logged out! Login in a new window first!");
-          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
+          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/service/ui/relogin");
             },
             complete: poll,
             timeout: 5000
