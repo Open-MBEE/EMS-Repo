@@ -837,12 +837,10 @@ public class EmsScriptNode extends ScriptNode {
                 if (Acm.JSON_FILTER_MAP.get(renderType).contains(jsonType)) {
                     if (Acm.JSON_ARRAYS.contains(jsonType)) {
                         String elementString = elementValue.toString();
-//                        elementString = fixArtifactUrls(elementString, true);
                         element.put(jsonType, new JSONArray(elementString));
                     } else {
                         if (elementValue instanceof String) {
                             String elementString = (String) elementValue;
-//                            element.put(jsonType, fixArtifactUrls(elementString, false));
                             element.put(jsonType, elementString);
                         } else if (elementValue instanceof Date) {
                             element.put(jsonType, getIsoTime((Date)elementValue));
@@ -918,10 +916,6 @@ public class EmsScriptNode extends ScriptNode {
             element.put("editable", this.hasPermission(PermissionService.WRITE));
         }
 
-        // fix all the urls in the JSON string (since it could be anywhere)
-        String elementString = element.toString();
-        elementString = fixArtifactUrls(elementString, true);
-        element = new JSONObject(elementString);
 	    return element;
 	}
 	
@@ -1096,6 +1090,11 @@ public class EmsScriptNode extends ScriptNode {
 	 * @throws JSONException 
 	 */
 	public void ingestJSON(JSONObject jsonObject) throws JSONException {
+        // fix all the artifcat urls in the JSON string
+        String elementString = jsonObject.toString();
+        elementString = fixArtifactUrls(elementString, true);
+        jsonObject = new JSONObject(elementString);
+
 	    // fill in all the properties
 	    for (String jsonType: Acm.JSON2ACM.keySet()) {
 	        String acmType = Acm.JSON2ACM.get(jsonType);

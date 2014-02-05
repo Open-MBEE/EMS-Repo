@@ -29,7 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.view_repo.ModelLoadActionExecuter;
+import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
@@ -107,8 +107,16 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return model;
     }
 
+    public EmsScriptNode createSnapshot(String viewId) {
+        String snapshotName = viewId + "_" + System.currentTimeMillis();
+        String contextPath = "alfresco/service/";
+        EmsScriptNode viewNode = findScriptNodeByName(viewId);
+        EmsScriptNode snapshotFolder = getSnapshotFolderNode(viewNode);
+        return createSnapshot(viewId, snapshotName, contextPath, snapshotFolder);
+    }
     
-    private EmsScriptNode createSnapshot(String viewId, String snapshotName, String contextPath, EmsScriptNode snapshotFolder) {
+    
+    public EmsScriptNode createSnapshot(String viewId, String snapshotName, String contextPath, EmsScriptNode snapshotFolder) {
         EmsScriptNode snapshotNode = snapshotFolder.createNode(snapshotName, "view2:Snapshot");
         snapshotNode.createOrUpdateProperty("cm:isIndexed", true);
         snapshotNode.createOrUpdateProperty("cm:isContentIndexed", false);
@@ -151,7 +159,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
             parent = oldparent.getParent();
             parentName = (String) parent.getProperty(Acm.ACM_CM_NAME);
         }
-
+        // put snapshots at the project level
+        parent = parent.getParent();
+        
         EmsScriptNode snapshotNode = parent.childByNamePath("snapshots");
         if (snapshotNode == null) {
             snapshotNode = parent.createFolder("snapshots");

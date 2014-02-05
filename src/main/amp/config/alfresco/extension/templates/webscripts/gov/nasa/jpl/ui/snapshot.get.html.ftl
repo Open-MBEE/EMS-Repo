@@ -12,7 +12,7 @@
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
   
 <script type="text/javascript">
-var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
+var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 </script>
 
 </head>
