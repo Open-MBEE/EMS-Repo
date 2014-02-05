@@ -29,22 +29,38 @@
 
 package gov.nasa.jpl.view_repo.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.DatatypeConverter;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.ContentData;
+import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.Path;
@@ -54,6 +70,7 @@ import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
@@ -81,6 +98,13 @@ public class EmsScriptNode extends ScriptNode {
 	
 	boolean useFoundationalApi = true;
 
+    protected static StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
+
+    protected EmsScriptNode companyHome = null;
+    
+    protected EmsScriptNode siteNode = null;
+
+    
 	// for lucene search
 	protected static final StoreRef SEARCH_STORE = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 
@@ -108,6 +132,11 @@ public class EmsScriptNode extends ScriptNode {
 		}
 		return new EmsScriptNode(child.getNodeRef(), services, response);
 	}
+
+    @Override
+    public EmsScriptNode createFile(String name) {
+        return new EmsScriptNode(super.createFile(name).getNodeRef(), services, response, status);
+    }
 
 
 	@Override
@@ -220,21 +249,326 @@ public class EmsScriptNode extends ScriptNode {
 	 * @return			true if property updated, false otherwise (e.g., value did not change)
 	 */
 	public <T extends Serializable> boolean createOrUpdateProperty(String acmType, T value) {
+	    if ( value instanceof String ) {
+	        @SuppressWarnings( "unchecked" )
+            T t = (T)extractAndReplaceImageData( (String)value );
+	        value = t;
+	    }
 		@SuppressWarnings("unchecked")
 		T oldValue = (T) getProperty(acmType);
-		if (oldValue == null) {
-            setProperty(acmType, value);
-		} else {
+		if (oldValue != null) {
             if (!value.equals(oldValue)) {
                 setProperty(acmType, value);
+				log(getName() + ": " + acmType + " property updated to value = " + value);
                 return true;
             }
+		} else {
+			log(getName() + ": " + acmType + " property created with value = " + value);
+			setProperty(acmType, value);
 		}
 		return false;
 	}	
 
+	public EmsScriptNode getCompanyHome() {
+	    if ( companyHome == null ) {
+	        NodeRef companyHomeNodeRef = services.getNodeLocatorService().getNode("companyhome", null, null);
+	        if ( companyHomeNodeRef != null ) {
+	            companyHome = new EmsScriptNode( companyHomeNodeRef, services, response, status );
+	        }
+	    }
+	    return companyHome;
+	}
 	
-	/**
+	public Set< NodeRef > getRootNodes() {
+	    return services.getNodeService().getAllRootNodes( getStoreRef() );
+	}
+	
+    /**
+     * Find or create a folder
+     * 
+     * @param source
+     *            node within which folder will have been created; may be null
+     * @param path
+     *            folder path as folder-name1 + '/' + folder-name2 . . .
+     * @return the existing or new folder
+     */
+	public EmsScriptNode mkdir( EmsScriptNode source, String path ) {
+	    EmsScriptNode result = null;
+	    // if no source is specified, see if path include the site
+	    if ( source == null ) {
+	        Pattern p = Pattern.compile( "(Sites)?/?(\\w*)" );
+	        Matcher m = p.matcher( path );
+	        if ( m.matches() ) {
+    	        String siteName = m.group( 1 ); 
+    	        source = getSiteNode( siteName, services, response );
+                if ( source != null ) {
+                    result = mkdir( source, path );
+                    if ( result != null ) return result;
+                    source = null;
+                }
+	        }
+	    }
+        // if no source is identified, see if path is from the company home
+        if ( source == null ) {
+            source = getCompanyHome();
+            if ( source != null ) {
+                result = mkdir( source, path );
+                if ( result != null ) return result;
+                source = null;
+            }
+        }
+        // if no source is identified, see if path is from a root node
+        if ( source == null ) {
+            Set< NodeRef > roots = getRootNodes();
+            for ( NodeRef ref : roots ) {
+                source = new EmsScriptNode( ref, services, response, status );
+                result = mkdir( source, path );
+                if ( result != null ) return result;
+                source = null;
+            }
+        }
+        if ( source == null ) {
+            log( "Can't determine source node of path " + path + "!" );
+            return null;
+        }
+        // find the folder corresponding to the path beginning from the source node
+        EmsScriptNode folder = source.childByNamePath( path );
+        if ( folder == null ) {
+            String[] arr = path.split( "/" );
+            for ( String p : arr ) {
+                folder = source.createFolder( p );
+                if ( folder == null ) {
+                    log( "Can't create folder for path " + path + "!" );
+                    return null;
+                }
+                source = folder;
+            }
+        }
+        return folder;
+	}
+	
+    // TODO -- These utility functions are copied from
+    // gov.nasa.jpl.mbee.util.ClassUtils -- should access from jar or linked
+    // source.
+    private static boolean isStatic( Member method ) {
+        if ( method == null ) return false;
+        return ( Modifier.isStatic( method.getModifiers() ) );
+    }
+    private static Field[] getAllFields( Class< ? extends Object > cls ) {
+        List< Field > fieldList = getListOfAllFields( cls );
+        Field[] fieldArr = new Field[ fieldList.size() ];
+        fieldList.toArray( fieldArr );
+        return fieldArr;
+    }
+    private static List< Field >
+            getListOfAllFields( Class< ? extends Object > cls ) {
+        if ( cls == null ) return null;
+        ArrayList< Field > fieldList = new ArrayList< Field >();
+        for ( Field f : cls.getDeclaredFields() ) {
+            f.setAccessible( true );
+            fieldList.add( f );
+        }
+        List< Field > superFields = getListOfAllFields( cls.getSuperclass() );
+        if ( superFields != null ) fieldList.addAll( superFields );
+        return fieldList;
+    }
+    // Check if string has really got something.
+    private static boolean isNullOrEmpty( String s ) {
+      return ( s == null || s.isEmpty() ||
+               s.trim().toLowerCase().equals( "null" ) );
+    }
+    // Check if array has really got something.
+    private static boolean isNullOrEmpty( Object[] s ) {
+      return ( s == null || s.length == 0 );
+    }
+    // Check if Collection has really got something.
+    private static boolean isNullOrEmpty( Collection< ? > s ) {
+      return ( s == null || s.isEmpty() );
+    }
+    // Check if Map has really got something.
+    private static boolean isNullOrEmpty( Map< ?, ? > s ) {
+      return ( s == null || s.isEmpty() );
+    }
+	
+	public static String getMimeType( String type ) {
+	    Field[] fields = getAllFields( MimetypeMap.class );
+	    for ( Field f : fields ) {
+	        if ( f.getName().startsWith( "MIMETYPE" ) ) {
+                if ( isStatic( f )
+                     && f.getName().substring( 8 ).toLowerCase()
+                         .contains( type.toLowerCase() ) ) {
+	                try {
+                        return (String)f.get( null );
+                    } catch ( IllegalArgumentException e ) {
+                    } catch ( IllegalAccessException e ) {
+                    }
+	            }
+	        }
+	    }
+	    return null;
+	}
+	
+    public long getChecksum( String dataString ) {
+        byte[] data = null;
+        data = dataString.getBytes(); //( "UTF-8" );
+        return getChecksum( data );
+    }
+
+    public long getChecksum( byte[] data ) {
+        long cs = 0;
+        Checksum checksum = new CRC32();
+        checksum.update( data, 0, data.length );
+        cs = checksum.getValue();
+        return cs;
+    }
+	
+	public Set<EmsScriptNode> toEmsScriptNodeSet( ResultSet resultSet ) {
+	    Set<EmsScriptNode> emsNodeSet = new TreeSet< EmsScriptNode >( new EmsScriptNodeComparator() );
+        for ( ResultSetRow row : resultSet ) {
+            NodeRef ref = row.getNodeRef();
+            if ( ref == null ) continue;
+            EmsScriptNode node = new EmsScriptNode( ref, services, response, status );
+            emsNodeSet.add( node );
+        }
+        return emsNodeSet;
+	}
+	
+    public EmsScriptNode findOrCreateArtifact( String name,
+                                               String type,
+                                               String base64content,
+                                               String targetSiteName,
+                                               String subfolderName ) {
+        byte[] content = ( base64content == null ) ? 
+                         null :
+                         DatatypeConverter.parseBase64Binary( base64content );
+        long cs = getChecksum( content );
+        
+        // see if image already exists by looking up by checksum
+        ResultSet existingArtifacts = findNodeRefsByType( "" + cs, "@view\\:cs:\"" );
+        Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
+        existingArtifacts.close();
+        EmsScriptNode matchingNode = null;
+        EmsScriptNode targetSiteNode = getSiteNode( targetSiteName, services, response );
+        boolean nameMatch = false, subfolderMatch = false, siteMatch = false;
+        for ( EmsScriptNode art : nodeSet ) {
+            if ( art == null ) continue;
+            byte[] artContent = art.getContent() == null ? null : art.getContent().getBytes(); 
+            if ( artContent == null && content != null ) continue;
+            // compare content to see if the file already exists
+            if ( artContent == content || art.getContent().getBytes().equals( content ) ) {
+                // In case there are multiple files that have identical content,
+                // match based on name, site, and subfolder.
+                boolean isBest = false;
+                if ( matchingNode == null ) isBest = true;
+                boolean nameMatches = art.getName().equals( name );
+                if ( !isBest && !nameMatches && nameMatch ) continue;
+                if ( !isBest && nameMatches && !nameMatch ) isBest = true;
+                String artSiteName = art.getSiteName();
+                boolean siteMatches = artSiteName != null && artSiteName.equals(targetSiteName);
+                if ( !isBest && !siteMatches && siteMatch ) continue;
+                if ( !isBest && siteMatches && !siteMatch ) isBest = true;
+                boolean subfolderMatches = art.getDisplayPath().contains( subfolderName );
+                if ( !isBest && !subfolderMatches && subfolderMatch ) continue;
+                if ( !isBest && subfolderMatches && !subfolderMatch ) isBest = true;
+                if ( isBest ) {
+                    matchingNode = art;
+                    nameMatch = nameMatches;
+                    siteMatch = siteMatches;
+                    subfolderMatch = subfolderMatches;
+                }
+            }
+        }
+        
+        if ( matchingNode != null ) return matchingNode;
+
+        // create new artifact
+
+        // find subfolder in site or create it 
+        String artifactFolderName = "Artifacts"
+                                    + ( isNullOrEmpty( subfolderName )
+                                        ? "" : "/" + subfolderName );
+        // find site; it must exist!
+        if ( targetSiteNode == null ) {
+            log( "Can't find node for site: " + targetSiteName + "!" );
+            return null;
+        }
+        // find or create subfolder
+        EmsScriptNode subfolder = mkdir( targetSiteNode, artifactFolderName );
+        if ( subfolder == null ) {
+            log( "Can't create subfolder for site, " + targetSiteName
+                 + ", in artifact folder, " + artifactFolderName + "!" );
+            return null;
+        }
+
+        String artifactId = name + "." + type;
+        EmsScriptNode artifactNode = subfolder.createNode( artifactId, "cm:content" );
+        if (artifactNode == null) {
+          log( "Failed to create new artifact " + artifactId + "!" );
+            return null;
+        }
+        
+        artifactNode.addAspect( "cm:indexControl" );
+        artifactNode.createOrUpdateProperty( "cm:isIndexed", true );
+        artifactNode.createOrUpdateProperty( "cm:isContentIndexed", false );
+        artifactNode.addAspect( Acm.ACM_IDENTIFIABLE );
+        artifactNode.createOrUpdateProperty( Acm.ACM_ID, artifactId );
+        artifactNode.addAspect( "view:Checksummable" );
+        artifactNode.createOrUpdateProperty( "view:cs", cs );
+
+        System.out.println("Creating artifact with indexing: " + artifactNode.getProperty("cm:isIndexed"));
+        ContentWriter writer = services.getContentService().getWriter(
+                artifactNode.getNodeRef(), ContentModel.PROP_CONTENT, true);
+        InputStream contentStream = new ByteArrayInputStream(content);
+        writer.putContent(contentStream);
+        
+        ContentData contentData = writer.getContentData();
+        contentData = ContentData.setMimetype(contentData, getMimeType( type ) );
+        services.getNodeService().setProperty(artifactNode.getNodeRef(), ContentModel.PROP_CONTENT, contentData);
+        return artifactNode;
+    }
+	
+	public String extractAndReplaceImageData( String value ) {
+	    if ( value == null ) return null;
+	    String v = value;
+	    EmsScriptNode siteNode = null;
+	    while ( true ) {
+    	    Pattern p = Pattern.compile("(.*)<img\\s*src\\s*=\\s*[\"']data:image/(\\w*);base64,([^\"']*)[\"'][^>]*>(.*)");
+    	    Matcher m = p.matcher( v );
+    	    boolean b = m.matches();
+    	    if ( !m.matches() ) break;
+    	    else {
+    	        if ( m.groupCount() != 4 ) {
+    	            log( "Expected 4 match groups, got " + m.groupCount() + "! " + m );
+    	            break;
+    	        }
+    	        String extension = m.group(2);
+    	        String content = m.group(3);
+                String name = "img_" + System.currentTimeMillis();
+                EmsScriptNode artNode = findOrCreateArtifact( name, extension, content, getSiteName(), "images" );
+                if ( artNode == null ) {
+                    log( "Failed to pull out image data for value! " + value );
+                    break;
+                }
+                
+                String url = artNode.getUrl();
+    	        String link = "<a href=\"" + url + "\">" + name + "</a>";
+    	        link = link.replace("/d/d/", "/service/api/node/content/");
+    	        v = m.group( 1 ) + link + m.group( 4 );
+    	    }
+	    }
+        return v;
+    }
+
+
+	public String getSiteName() {
+        if ( siteName == null ) {
+            EmsScriptNode siteNode = getSiteNode();
+            if ( siteNode != null ) siteName = siteNode.getName();
+        }
+        return siteName;
+    }
+
+    /**
 	 * Checks and updates properties that have multiple values
 	 * @param type		Short name of the content model property to be updated
 	 * @param array		New list of values to update
@@ -246,7 +580,13 @@ public class EmsScriptNode extends ScriptNode {
 	public <T extends Serializable> boolean createOrUpdatePropertyValues(String type, JSONArray array, T valueType) throws JSONException {
 		ArrayList<T> values = new ArrayList<T>();
 		for (int ii = 0; ii < array.length(); ii++) {
-			values.add((T) array.get(ii));
+		    T value = (T)array.get(ii);
+            if ( value instanceof String ) {
+                @SuppressWarnings( "unchecked" )
+                T t = (T)extractAndReplaceImageData( (String)value );
+                value = t;
+            }
+			values.add(value);
 		}
 		
 		ArrayList<T> oldValues = (ArrayList<T>) getProperty(type);
@@ -301,12 +641,12 @@ public class EmsScriptNode extends ScriptNode {
 
 			QName typeQName = createQName(type);
 			if (typeQName != null) {
-			    ChildAssociationRef assoc = services.getNodeService().createNode(
-                                                                					nodeRef,
-                                                                					ContentModel.ASSOC_CONTAINS,
-                                                                					QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI,
-                                                                							QName.createValidLocalName(name)),
-                                                                					createQName(type), props);
+			    ChildAssociationRef assoc = 
+			            services.getNodeService().createNode(nodeRef,
+			                                                 ContentModel.ASSOC_CONTAINS,
+			                                                 QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI,
+			                                                                   QName.createValidLocalName(name)),
+			                                                                   createQName(type), props);
                 result = new EmsScriptNode(assoc.getChildRef(), services, response);            
 			} else {
 			    log("Could not find type "  + type);
@@ -416,6 +756,14 @@ public class EmsScriptNode extends ScriptNode {
 	}
 	
 	/**
+     * @return the storeRef
+     */
+    public static StoreRef getStoreRef() {
+        return storeRef;
+    }
+
+
+    /**
 	 * Gets the SysML qualified name for an object - if not SysML, won't return anything
 	 * @return SysML qualified name (e.g., sysml:name qualified)
 	 */
@@ -726,6 +1074,33 @@ public class EmsScriptNode extends ScriptNode {
         
         return relations;
 	}
+
+    /**
+     * Retrieve the site folder containing this node. If this is a view, then it
+     * is the folder containing the ViewEditor folder. Otherwise, it is the
+     * parent folder contained by the Sites folder.
+     * 
+     * @return the site folder containing this node
+     */
+    public EmsScriptNode getSiteNode() {
+        if ( siteNode != null ) return siteNode;
+        EmsScriptNode parent = this;
+        String parentName = (String) parent.getProperty(Acm.ACM_CM_NAME);
+        while (!parentName.equals("ViewEditor")) {
+            EmsScriptNode oldparent = parent;
+            parent = oldparent.getParent();
+            if ( parent == null ) return null; // site not found!
+            parentName = (String) parent.getProperty(Acm.ACM_CM_NAME);
+            if ( parent.getName().toLowerCase().equals( "sites" ) ) {
+                siteNode = oldparent;
+                return siteNode;
+            }
+        }
+        // The site is the folder containing the ViewEditor!
+        siteNode = parent.getParent();
+        return siteNode;
+    }
+
 	
 	/**
 	 * Update the node with the properties from the jsonObject
@@ -846,7 +1221,7 @@ public class EmsScriptNode extends ScriptNode {
         ResultSet results = null;
         NodeRef nodeRef = null;
         try {
-            results = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, type + name + "\"");
+            results = findNodeRefsByType( name, type );
             if (results != null) {
                 for (ResultSetRow row: results) {
                     nodeRef = row.getNodeRef();
@@ -863,7 +1238,45 @@ public class EmsScriptNode extends ScriptNode {
 
         return nodeRef;	    
 	}
-	
+    // TODO: make this utility function - used in AbstractJavaWebscript too
+    protected ResultSet findNodeRefsByType(String name, String type) {
+        ResultSet results = null;
+        results = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, type + name + "\"");
+        return results;     
+    }
+    
+    /**
+     * Checks whether user has permissions to the node and logs results and status as appropriate
+     * @param node         EmsScriptNode to check permissions on
+     * @param permissions  Permissions to check
+     * @return             true if user has specified permissions to node, false otherwise
+     */
+    public boolean checkPermissions(String permissions, StringBuffer response, Status status) {
+        if (!hasPermission(permissions)) {
+            Object property = getProperty(Acm.ACM_CM_NAME);
+            if (property != null) {
+                String msg = "Warning! No " + permissions + " priveleges to " + property.toString() + ".\n";
+                response.append( msg );
+                status.setCode( HttpServletResponse.SC_UNAUTHORIZED, msg ); 
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Get site of specified short name
+     * @param siteName
+     * @return  ScriptNode of site with name siteName
+     */
+    public static EmsScriptNode getSiteNode(String siteName, ServiceRegistry services, StringBuffer response) {
+        if ( isNullOrEmpty( siteName ) ) return null;
+        SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+        if (siteInfo != null) {
+            return new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+        }
+        return null;
+    }
 	   
     public static class EmsScriptNodeComparator implements Comparator<EmsScriptNode> {
         @Override

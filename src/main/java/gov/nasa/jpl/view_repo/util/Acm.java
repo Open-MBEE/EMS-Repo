@@ -102,6 +102,7 @@ public class Acm {
     public static String ACM_IS_DERIVED = SYSML + JSON_IS_DERIVED;
     public static String ACM_IS_SLOT = SYSML + JSON_IS_SLOT;
     public static String ACM_DOCUMENTATION = SYSML + JSON_DOCUMENTATION;
+    public static String ACM_IDENTIFIABLE = SYSML + "Identifiable";
     public static String ACM_ID = SYSML + JSON_ID;
     public static String ACM_NAME = SYSML + JSON_NAME;
     public static String ACM_SOURCE = SYSML + JSON_SOURCE;

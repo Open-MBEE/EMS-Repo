@@ -603,8 +603,10 @@ public class ModelPost extends AbstractJavaWebScript {
                 try {
                     trx.rollback();
                     log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                    e.printStackTrace();
                 } catch (Throwable ee) {
                     log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                    ee.printStackTrace();
                 }
             }
         }
