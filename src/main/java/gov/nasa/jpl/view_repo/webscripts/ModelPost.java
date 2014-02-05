@@ -29,7 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.view_repo.ModelLoadActionExecuter;
+import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
@@ -126,7 +126,7 @@ public class ModelPost extends AbstractJavaWebScript {
             throws Exception {
         Date now = new Date();
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
-        // long start, end, total = 0;
+        long start = System.currentTimeMillis(), end, total = 0;
 
         clearCaches();
 
@@ -187,7 +187,9 @@ public class ModelPost extends AbstractJavaWebScript {
         updateOrCreateAllRelationships(relationshipsJson);
         
         now = new Date();
-        log(LogLevel.INFO, "Update Model Elements Done waiting on transaction to complete..." + now + "\n");
+        end = System.currentTimeMillis();
+        total = end -start;
+        log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
     }
     
     protected void updateOrCreateAllRelationships(JSONObject jsonObject) throws JSONException {

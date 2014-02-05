@@ -65,7 +65,7 @@
 	</bean>
 	
 	<!-- add in the modelLoad Action -->    
-    <bean id="modelLoad" class="gov.nasa.jpl.view_repo.ModelLoadActionExecuter" parent="action-executer">
+    <bean id="modelLoad" class="gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter" parent="action-executer">
 	    <property name="services" ref="ServiceRegistry"/>
 	    <property name="repository" ref="repositoryHelper"/>
 	    <property name="contextUrl" value="https://sheldon.jpl.nasa.gov/alfresco"/>
