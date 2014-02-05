@@ -34,6 +34,7 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -170,6 +171,18 @@ public class ProductListGet extends AbstractJavaWebScript {
         
         productJson.put("name", projectNode.getProperty(Acm.ACM_CM_TITLE));
         productJson.put("volumes", volumes);
+        // lets clean volume2volumes - html page doesn't support empty volume2volumes
+        Set<String> emptyV = new HashSet<String>();
+        Iterator<?> v2v = volume2volumes.keys();
+        while (v2v.hasNext()) {
+            String vol = (String)v2v.next();
+            if (volume2volumes.getJSONArray(vol).length() <= 0) {
+                emptyV.add(vol);
+            }
+        }
+        for (String r: emptyV) {
+            volume2volumes.remove(r);
+        }
         productJson.put("volume2volumes", volume2volumes);
         productJson.put("documents", documents);
         productJson.put("volume2documents", volume2documents);
