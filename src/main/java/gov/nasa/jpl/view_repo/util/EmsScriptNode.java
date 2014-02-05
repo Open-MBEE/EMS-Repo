@@ -29,6 +29,8 @@
 
 package gov.nasa.jpl.view_repo.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
@@ -50,6 +52,7 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.DatatypeConverter;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
@@ -99,6 +102,8 @@ public class EmsScriptNode extends ScriptNode {
     protected static StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 
     protected EmsScriptNode companyHome = null;
+    
+    protected EmsScriptNode siteNode = null;
 
     
 	// for lucene search
@@ -128,6 +133,11 @@ public class EmsScriptNode extends ScriptNode {
 		}
 		return new EmsScriptNode(child.getNodeRef(), services, response);
 	}
+
+    @Override
+    public EmsScriptNode createFile(String name) {
+        return new EmsScriptNode(super.createFile(name).getNodeRef(), services, response, status);
+    }
 
 
 	@Override
@@ -242,7 +252,7 @@ public class EmsScriptNode extends ScriptNode {
 	public <T extends Serializable> boolean createOrUpdateProperty(String acmType, T value) {
 	    if ( value instanceof String ) {
 	        @SuppressWarnings( "unchecked" )
-            T t = (T)pullOutImageData( (String)value );
+            T t = (T)extractAndReplaceImageData( (String)value );
 	        value = t;
 	    }
 		@SuppressWarnings("unchecked")
@@ -325,10 +335,14 @@ public class EmsScriptNode extends ScriptNode {
         // find the folder corresponding to the path beginning from the source node
         EmsScriptNode folder = source.childByNamePath( path );
         if ( folder == null ) {
-            folder = source.createFolder( path );
-            if ( folder == null ) {
-                log( "Can't create folder for path " + path + "!" );
-                return null;
+            String[] arr = path.split( "/" );
+            for ( String p : arr ) {
+                folder = source.createFolder( p );
+                if ( folder == null ) {
+                    log( "Can't create folder for path " + path + "!" );
+                    return null;
+                }
+                source = folder;
             }
         }
         return folder;
@@ -395,20 +409,19 @@ public class EmsScriptNode extends ScriptNode {
 	    return null;
 	}
 	
-	public long getChecksum( String dataString ) {
-	    byte[] data = null;
-        try {
-            data = dataString.getBytes( "UTF-8" );
-        } catch ( UnsupportedEncodingException e ) {
-            e.printStackTrace();
-            return 0;
-        }
-	    long cs = 0;
-	    Checksum checksum = new CRC32();
-        checksum.update(data, 0, data.length);
+    public long getChecksum( String dataString ) {
+        byte[] data = null;
+        data = dataString.getBytes(); //( "UTF-8" );
+        return getChecksum( data );
+    }
+
+    public long getChecksum( byte[] data ) {
+        long cs = 0;
+        Checksum checksum = new CRC32();
+        checksum.update( data, 0, data.length );
         cs = checksum.getValue();
         return cs;
-	}
+    }
 	
 	public Set<EmsScriptNode> toEmsScriptNodeSet( ResultSet resultSet ) {
 	    Set<EmsScriptNode> emsNodeSet = new TreeSet< EmsScriptNode >( new EmsScriptNodeComparator() );
@@ -421,19 +434,53 @@ public class EmsScriptNode extends ScriptNode {
         return emsNodeSet;
 	}
 	
-    public EmsScriptNode findOrCreateArtifact( String name, String type,
-                                               String content, String siteName,
+    public EmsScriptNode findOrCreateArtifact( String name,
+                                               String type,
+                                               String base64content,
+                                               String targetSiteName,
                                                String subfolderName ) {
+        byte[] content = ( base64content == null ) ? 
+                         null :
+                         DatatypeConverter.parseBase64Binary( base64content );
         long cs = getChecksum( content );
         
         // see if image already exists by looking up by checksum
         ResultSet existingArtifacts = findNodeRefsByType( "" + cs, "@view\\:cs:\"" );
-        for ( EmsScriptNode art : toEmsScriptNodeSet( existingArtifacts ) ) {
+        Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
+        existingArtifacts.close();
+        EmsScriptNode matchingNode = null;
+        EmsScriptNode targetSiteNode = getSiteNode( targetSiteName, services, response );
+        boolean nameMatch = false, subfolderMatch = false, siteMatch = false;
+        for ( EmsScriptNode art : nodeSet ) {
             if ( art == null ) continue;
-            if ( art.getContent().equals( content ) ) {
-                return art;
+            byte[] artContent = art.getContent() == null ? null : art.getContent().getBytes(); 
+            if ( artContent == null && content != null ) continue;
+            // compare content to see if the file already exists
+            if ( artContent == content || art.getContent().getBytes().equals( content ) ) {
+                // In case there are multiple files that have identical content,
+                // match based on name, site, and subfolder.
+                boolean isBest = false;
+                if ( matchingNode == null ) isBest = true;
+                boolean nameMatches = art.getName().equals( name );
+                if ( !isBest && !nameMatches && nameMatch ) continue;
+                if ( !isBest && nameMatches && !nameMatch ) isBest = true;
+                String artSiteName = art.getSiteName();
+                boolean siteMatches = artSiteName != null && artSiteName.equals(targetSiteName);
+                if ( !isBest && !siteMatches && siteMatch ) continue;
+                if ( !isBest && siteMatches && !siteMatch ) isBest = true;
+                boolean subfolderMatches = art.getDisplayPath().contains( subfolderName );
+                if ( !isBest && !subfolderMatches && subfolderMatch ) continue;
+                if ( !isBest && subfolderMatches && !subfolderMatch ) isBest = true;
+                if ( isBest ) {
+                    matchingNode = art;
+                    nameMatch = nameMatches;
+                    siteMatch = siteMatches;
+                    subfolderMatch = subfolderMatches;
+                }
             }
         }
+        
+        if ( matchingNode != null ) return matchingNode;
 
         // create new artifact
 
@@ -442,33 +489,25 @@ public class EmsScriptNode extends ScriptNode {
                                     + ( isNullOrEmpty( subfolderName )
                                         ? "" : "/" + subfolderName );
         // find site; it must exist!
-        EmsScriptNode siteNode = null;
-        if ( !isNullOrEmpty( siteName ) ) {
-            siteNode = getSiteNode( siteName, services, response );
-            if ( siteNode == null ) {
-                log( "Can't find node for site: " + siteName + "!" );
-                return null;
-            }
+        if ( targetSiteNode == null ) {
+            log( "Can't find node for site: " + targetSiteName + "!" );
+            return null;
         }
         // find or create subfolder
-        EmsScriptNode subfolder = mkdir( siteNode, artifactFolderName );
+        EmsScriptNode subfolder = mkdir( targetSiteNode, artifactFolderName );
         if ( subfolder == null ) {
-            log( "Can't create subfolder for site, " + siteName
+            log( "Can't create subfolder for site, " + targetSiteName
                  + ", in artifact folder, " + artifactFolderName + "!" );
             return null;
         }
 
-//        DateTime now = new DateTime();
-//        DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-
         String artifactId = name + "." + type;
-        ScriptNode scriptNode = subfolder.createFile( artifactId );
-        if ( scriptNode == null ) {
-            log( "Failed to create new artifact " + name + "!" );
+        EmsScriptNode artifactNode = subfolder.createNode( artifactId, "cm:content" );
+        if (artifactNode == null) {
+          log( "Failed to create new artifact " + artifactId + "!" );
             return null;
         }
-        EmsScriptNode artifactNode = new EmsScriptNode( scriptNode.getNodeRef(), services, response, status );
-                
+        
         artifactNode.createOrUpdateProperty( "cm:isIndexed", true );
         artifactNode.createOrUpdateProperty( "cm:isContentIndexed", false );
         artifactNode.addAspect( Acm.ACM_IDENTIFIABLE );
@@ -479,7 +518,8 @@ public class EmsScriptNode extends ScriptNode {
         System.out.println("Creating artifact with indexing: " + artifactNode.getProperty("cm:isIndexed"));
         ContentWriter writer = services.getContentService().getWriter(
                 artifactNode.getNodeRef(), ContentModel.PROP_CONTENT, true);
-        writer.putContent(content);
+        InputStream contentStream = new ByteArrayInputStream(content);
+        writer.putContent(contentStream);
         
         ContentData contentData = writer.getContentData();
         contentData = ContentData.setMimetype(contentData, getMimeType( type ) );
@@ -487,9 +527,10 @@ public class EmsScriptNode extends ScriptNode {
         return artifactNode;
     }
 	
-	public String pullOutImageData( String value ) {
+	public String extractAndReplaceImageData( String value ) {
 	    if ( value == null ) return null;
 	    String v = value;
+	    EmsScriptNode siteNode = null;
 	    while ( true ) {
     	    Pattern p = Pattern.compile("(.*)<img\\s*src\\s*=\\s*[\"']data:image/(\\w*);base64,([^\"']*)[\"'][^>]*>(.*)");
     	    Matcher m = p.matcher( v );
@@ -502,8 +543,8 @@ public class EmsScriptNode extends ScriptNode {
     	        }
     	        String extension = m.group(2);
     	        String content = m.group(3);
-                String name = "img" + System.currentTimeMillis();
-                EmsScriptNode artNode = findOrCreateArtifact( name, extension, content, null, "images" );
+                String name = "img_" + System.currentTimeMillis();
+                EmsScriptNode artNode = findOrCreateArtifact( name, extension, content, getSiteName(), "images" );
                 if ( artNode == null ) {
                     log( "Failed to pull out image data for value! " + value );
                     break;
@@ -511,6 +552,7 @@ public class EmsScriptNode extends ScriptNode {
                 
                 String url = artNode.getUrl();
     	        String link = "<a href=\"" + url + "\">" + name + "</a>";
+    	        link = link.replace("/d/d/", "/service/api/node/content/");
     	        v = m.group( 1 ) + link + m.group( 4 );
     	    }
 	    }
@@ -518,7 +560,15 @@ public class EmsScriptNode extends ScriptNode {
     }
 
 
-	/**
+	public String getSiteName() {
+        if ( siteName == null ) {
+            EmsScriptNode siteNode = getSiteNode();
+            if ( siteNode != null ) siteName = siteNode.getName();
+        }
+        return siteName;
+    }
+
+    /**
 	 * Checks and updates properties that have multiple values
 	 * @param type		Short name of the content model property to be updated
 	 * @param array		New list of values to update
@@ -533,7 +583,7 @@ public class EmsScriptNode extends ScriptNode {
 		    T value = (T)array.get(ii);
             if ( value instanceof String ) {
                 @SuppressWarnings( "unchecked" )
-                T t = (T)pullOutImageData( (String)value );
+                T t = (T)extractAndReplaceImageData( (String)value );
                 value = t;
             }
 			values.add(value);
@@ -591,12 +641,12 @@ public class EmsScriptNode extends ScriptNode {
 
 			QName typeQName = createQName(type);
 			if (typeQName != null) {
-			    ChildAssociationRef assoc = services.getNodeService().createNode(
-                                                                					nodeRef,
-                                                                					ContentModel.ASSOC_CONTAINS,
-                                                                					QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI,
-                                                                							QName.createValidLocalName(name)),
-                                                                					createQName(type), props);
+			    ChildAssociationRef assoc = 
+			            services.getNodeService().createNode(nodeRef,
+			                                                 ContentModel.ASSOC_CONTAINS,
+			                                                 QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI,
+			                                                                   QName.createValidLocalName(name)),
+			                                                                   createQName(type), props);
                 result = new EmsScriptNode(assoc.getChildRef(), services, response);            
 			} else {
 			    log("Could not find type "  + type);
@@ -1019,6 +1069,33 @@ public class EmsScriptNode extends ScriptNode {
         
         return relations;
 	}
+
+    /**
+     * Retrieve the site folder containing this node. If this is a view, then it
+     * is the folder containing the ViewEditor folder. Otherwise, it is the
+     * parent folder contained by the Sites folder.
+     * 
+     * @return the site folder containing this node
+     */
+    public EmsScriptNode getSiteNode() {
+        if ( siteNode != null ) return siteNode;
+        EmsScriptNode parent = this;
+        String parentName = (String) parent.getProperty(Acm.ACM_CM_NAME);
+        while (!parentName.equals("ViewEditor")) {
+            EmsScriptNode oldparent = parent;
+            parent = oldparent.getParent();
+            if ( parent == null ) return null; // site not found!
+            parentName = (String) parent.getProperty(Acm.ACM_CM_NAME);
+            if ( parent.getName().toLowerCase().equals( "sites" ) ) {
+                siteNode = oldparent;
+                return siteNode;
+            }
+        }
+        // The site is the folder containing the ViewEditor!
+        siteNode = parent.getParent();
+        return siteNode;
+    }
+
 	
 	/**
 	 * Update the node with the properties from the jsonObject
@@ -1188,6 +1265,7 @@ public class EmsScriptNode extends ScriptNode {
      * @return  ScriptNode of site with name siteName
      */
     public static EmsScriptNode getSiteNode(String siteName, ServiceRegistry services, StringBuffer response) {
+        if ( isNullOrEmpty( siteName ) ) return null;
         SiteInfo siteInfo = services.getSiteService().getSite(siteName);
         if (siteInfo != null) {
             return new EmsScriptNode(siteInfo.getNodeRef(), services, response);
