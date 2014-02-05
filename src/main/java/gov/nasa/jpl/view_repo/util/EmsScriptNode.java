@@ -916,6 +916,10 @@ public class EmsScriptNode extends ScriptNode {
             element.put("editable", this.hasPermission(PermissionService.WRITE));
         }
 
+        // TODO: Remove since this is being done on save fix all the artifcat urls in the JSON string
+        String elementString = element.toString();
+        elementString = fixArtifactUrls(elementString, true);
+        element = new JSONObject(elementString);
 	    return element;
 	}
 	
