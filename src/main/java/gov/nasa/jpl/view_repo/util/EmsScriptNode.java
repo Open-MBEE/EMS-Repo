@@ -538,7 +538,7 @@ public class EmsScriptNode extends ScriptNode {
                 }
                 
                 String url = artNode.getUrl();
-    	        String link = "<a href=\"" + url + "\">" + name + "</a>";
+    	        String link = "<img src=\"" + url + "\">" + name + "</img>";
     	        link = link.replace("/d/d/", "/alfresco/service/api/node/content/");
     	        v = m.group( 1 ) + link + m.group( 4 );
     	    }
@@ -1094,11 +1094,6 @@ public class EmsScriptNode extends ScriptNode {
 	 * @throws JSONException 
 	 */
 	public void ingestJSON(JSONObject jsonObject) throws JSONException {
-        // fix all the artifcat urls in the JSON string
-        String elementString = jsonObject.toString();
-        elementString = fixArtifactUrls(elementString, true);
-        jsonObject = new JSONObject(elementString);
-
 	    // fill in all the properties
 	    for (String jsonType: Acm.JSON2ACM.keySet()) {
 	        String acmType = Acm.JSON2ACM.get(jsonType);
@@ -1200,7 +1195,7 @@ public class EmsScriptNode extends ScriptNode {
 //                if (escape) {
 //                    nodeurl = nodeurl.replace("/", "").replace("\\", "\\\"");
 //                }
-                result = content.replace(matcher.group(0), nodeurl);
+                result = result.replace(matcher.group(0), nodeurl);
             }
         }
         
