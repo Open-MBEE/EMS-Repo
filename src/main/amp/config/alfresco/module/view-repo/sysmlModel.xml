@@ -327,6 +327,58 @@
     		        	<aspect>sysml:Identifiable</aspect>
             </mandatory-aspects>
         </type>
+        
+        
+        <type name="sysml:ValueSpecification">
+        	<parent>sysml:Element</parent>
+        </type>
+        <type name="sysml:Expression">
+        	<parent>sysml:ValueSpecification</parent>
+        	<properties>
+        		<property name="sysml:operand">
+                	<type>d:noderef</type>
+                	<mandatory>false</mandatory>
+                	<multiple>true</multiple>
+                	<index enabled="true">
+                		<atomic>false</atomic>
+                		<stored>false</stored>
+                		<tokenised>false</tokenised>
+                	</index>
+                </property>
+            </properties>
+        </type>
+        <type name="sysml:LiteralBoolean">
+        	<parent>sysml:ValueSpecification</parent>
+        	<properties>
+        		<property name="sysml:boolean2">
+                	<type>d:boolean</type>
+                	<mandatory>false</mandatory>
+                	<multiple>false</multiple>
+                	<index enabled="true">
+                		<atomic>false</atomic>
+                		<stored>false</stored>
+                		<tokenised>false</tokenised>
+                	</index>
+                </property>
+        	</properties>
+        </type>
+        <type name="sysml:Operation">
+        	<parent>sysml:Element</parent>
+        	<properties>
+        		<property name="sysml:parameter">
+                	<type>d:noderef</type>
+                	<mandatory>false</mandatory>
+                	<multiple>true</multiple>
+                	<index enabled="true">
+                		<atomic>false</atomic>
+                		<stored>false</stored>
+                		<tokenised>false</tokenised>
+                	</index>
+                </property>
+        	</properties>
+        </type>
+        
+        
     </types>
     <aspects>
         <aspect name="sysml:Identifiable">
