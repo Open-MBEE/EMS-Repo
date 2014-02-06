@@ -118,79 +118,10 @@
                 		<tokenised>false</tokenised>
                 	</index>
                 </property>
-<!--                 <property name="sysml:valueType"> -->
-<!--                 	<type>d:text</type> -->
-<!--                 	<mandatory>false</mandatory> -->
-<!--                 	<default>LiteralString</default> -->
-<!--                 	<index enabled="true"> -->
-<!--                 		<atomic>false</atomic> -->
-<!--                 		<stored>false</stored> -->
-<!--                 		<tokenised>false</tokenised> -->
-<!--                 	</index> -->
-<!--                 </property> -->
-<!--                 <property name="sysml:elementValue"> -->
-<!--                 	<type>d:noderef</type> -->
-<!--                 	<mandatory>false</mandatory> -->
-<!--                 	<multiple>true</multiple> -->
-<!--                 	<index enabled="true"> -->
-<!--                 		<atomic>false</atomic> -->
-<!--                 		<stored>false</stored> -->
-<!--                 		<tokenised>false</tokenised> -->
-<!--                 	</index> -->
-<!--                 </property> -->
-<!--                 <property name="sysml:string"> -->
-<!--                 	<type>d:text</type> -->
-<!--                 	<mandatory>false</mandatory> -->
-<!--                 	<multiple>true</multiple> -->
-<!--                 	<index enabled="true"> -->
-<!--                 		<atomic>false</atomic> -->
-<!--                 		<stored>false</stored> -->
-<!--                 		<tokenised>false</tokenised> -->
-<!--                 	</index> -->
-<!--                 </property> -->
-<!--                 <property name="sysml:boolean"> -->
-<!--                 	<type>d:boolean</type> -->
-<!--                 	<mandatory>false</mandatory> -->
-<!--                 	<multiple>true</multiple> -->
-<!--                 	<index enabled="true"> -->
-<!--                 		<atomic>false</atomic> -->
-<!--                 		<stored>false</stored> -->
-<!--                 		<tokenised>false</tokenised> -->
-<!--                 	</index> -->
-<!--                 </property> -->
-<!--                 <property name="sysml:integer"> -->
-<!--                 	<type>d:int</type> -->
-<!--                 	<mandatory>false</mandatory> -->
-<!--                 	<multiple>true</multiple> -->
-<!--                 	<index enabled="true"> -->
-<!--                 		<atomic>false</atomic> -->
-<!--                 		<stored>false</stored> -->
-<!--                 		<tokenised>false</tokenised> -->
-<!--                 	</index> -->
-<!--                 </property> -->
-<!--                 <property name="sysml:double"> -->
-<!--                 	<type>d:double</type> -->
-<!--                 	<mandatory>false</mandatory> -->
-<!--                 	<multiple>true</multiple> -->
-<!--                 	<index enabled="true"> -->
-<!--                 		<atomic>false</atomic> -->
-<!--                 		<stored>false</stored> -->
-<!--                 		<tokenised>false</tokenised> -->
-<!--                 	</index> -->
-<!--                 </property> -->
-<!--                 <property name="sysml:expression"> -->
-<!--                 	<type>d:text</type> -->
-<!--                 	<mandatory>false</mandatory> -->
-<!--                 	<multiple>true</multiple> -->
-<!--                 	<index enabled="true"> -->
-<!--                 		<atomic>false</atomic> -->
-<!--                 		<stored>false</stored> -->
-<!--                 		<tokenised>false</tokenised> -->
-<!--                 	</index> -->
-<!--                 </property> -->
                <property name="sysml:value">
                 	<type>d:noderef</type>
                 	<mandatory>false</mandatory>
+                	<multiple>true</multiple>
                 	<index enabled="true">
                 		<atomic>false</atomic>
                 		<stored>false</stored>
@@ -544,66 +475,6 @@
                 </property>
             </properties>
         </type>
-        <type name="sysml:">
-            <parent>sysml:ValueSpecification</parent>
-            <properties>
-                <property name="sysml:">
-                    <type>d:boolean</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-            </properties>
-        </type>
-        <type name="sysml:">
-            <parent>sysml:ValueSpecification</parent>
-            <properties>
-                <property name="sysml:">
-                    <type>d:boolean</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-            </properties>
-        </type>
-        <type name="sysml:">
-            <parent>sysml:ValueSpecification</parent>
-            <properties>
-                <property name="sysml:">
-                    <type>d:boolean</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-            </properties>
-        </type>
-        <type name="sysml:">
-            <parent>sysml:ValueSpecification</parent>
-            <properties>
-                <property name="sysml:">
-                    <type>d:boolean</type>
-                    <mandatory>false</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-            </properties>
-        </type>
         
         <type name="sysml:Operation">
         	<parent>sysml:Element</parent>
@@ -640,7 +511,7 @@
         <type name="sysml:Parameter">
             <parent>sysml:Element</parent>
             <properties>
-                <property name="direction">
+                <property name="sysml:direction">
                     <type>d:text</type>
                     <mandatory>false</mandatory>
                     <multiple>false</multiple>
@@ -650,8 +521,18 @@
                         <tokenised>false</tokenised>
                     </index>
                 </property>
-                <property name="parameterType">
+                <property name="sysml:parameterType">
                     <type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+                <property name="sysml:defaultValue">
+                    <type>d:nodeRef</type>
                     <mandatory>false</mandatory>
                     <multiple>false</multiple>
                     <index enabled="true">
