@@ -516,7 +516,17 @@ public class ModelPost extends AbstractJavaWebScript {
         boolean isValid = true;
         for (int ii = 0; ii < jsonArray.length(); ii++) {
             JSONObject elementJson = jsonArray.getJSONObject(ii);
-            String sysmlId = elementJson.getString(Acm.JSON_ID);
+            String sysmlId = null;
+            try {
+                sysmlId = elementJson.getString( Acm.JSON_ID );
+            } catch ( JSONException e ) {
+                // ignore
+            }
+            if ( sysmlId == null ) {
+                log( LogLevel.ERROR, "No id in element json!",
+                     HttpServletResponse.SC_NOT_FOUND );
+                continue;
+            }
             elementMap.put(sysmlId, elementJson);
 
             if (findScriptNodeByName(sysmlId) == null) {
@@ -711,6 +721,7 @@ public class ModelPost extends AbstractJavaWebScript {
     
     protected EmsScriptNode getOrCreateReifiedNode(EmsScriptNode node, String id) {
         EmsScriptNode reifiedNode = null;
+        if ( node == null ) return null;
         EmsScriptNode parent = node.getParent();
 
         if (checkPermissions(parent, PermissionService.WRITE)) {
@@ -725,7 +736,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
                 foundElements.put(pkgName, reifiedNode);
-                node.createOrUpdateChildAssociation(reifiedNode, Acm.ACM_REIFIED_CONTAINMENT);
+                //node.createOrUpdateChildAssociation(reifiedNode, Acm.ACM_REIFIED_CONTAINMENT);
             }
         }
 
