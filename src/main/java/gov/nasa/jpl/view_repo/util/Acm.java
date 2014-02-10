@@ -166,7 +166,7 @@ public class Acm {
     public static final String ACM_STRING = SYSML + JSON_STRING;
 
     
-    public static final String ACM_ELEMENT_VALUE = SYSML + "elementValue";
+    public static final String ACM_ELEMENT_VALUE = SYSML + JSON_ELEMENT_VALUE;
     public static final String ACM_PROPERTY_TYPE = SYSML + JSON_PROPERTY_TYPE;
     
     public static final String ACM_ELEMENT_FOLDER = SYSML + "ElementFolder";
