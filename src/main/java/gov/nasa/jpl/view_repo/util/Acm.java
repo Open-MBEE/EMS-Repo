@@ -182,15 +182,31 @@ public class Acm {
     /**
      *  JSON to Alfresco Content Model mapping
      */
-    public static final Map<String, String> JSON2ACM = new HashMap<String, String>();
+    public static Map<String, String> JSON2ACM = null; //getJSON2ACM();
     /**
      *  Alfresco Content Model 2 JSON types
      */
-    public static final Map<String, String> ACM2JSON = new HashMap<String, String>();
+    public static Map<String, String> ACM2JSON = null; //getACM2JSON();
+    
+    {init();}
     
         //private static final long serialVersionUID = -5467934440503910163L;
-    {
+    public static Map<String, String> getACM2JSON() { 
+        if ( ACM2JSON == null || ACM2JSON.size() <= 0 ) {
+            init();
+        }
+        return ACM2JSON;
+    }
+    public static Map<String, String> getJSON2ACM() { 
+        if ( JSON2ACM == null || JSON2ACM.size() <= 0 ) {
+            init();
+        }
+        return JSON2ACM;
+    }
+    public static void init() { 
         try {
+            ACM2JSON = new HashMap<String, String>();
+            JSON2ACM = new HashMap<String, String>();
             for ( Field f : Acm.class.getDeclaredFields() ) {
                 if ( f.getName().startsWith( "JSON_" ) ) {
                     String acmName = f.getName().replace( "JSON", "ACM" );
@@ -200,9 +216,9 @@ public class Acm {
                         if ( f2 != null ) {
                             String jsonVal = (String)f.get(null);
                             String acmVal = (String)f2.get(null);
-                            if ( !jsonVal.equals("JSON_VALUE") ) {  // FIXME -- TOOO -- REVIEW
+                            if ( !f.getName().equals("JSON_VALUE") ) {  // FIXME -- TOOO -- REVIEW
                                 JSON2ACM.put( jsonVal, acmVal);
-                                if ( !jsonVal.equals("JSON_VALUE_TYPE") ) {
+                                if ( !f.getName().equals("JSON_VALUE_TYPE") ) {
                                     // this is parsed differently so don't include it
                                     ACM2JSON.put( acmVal, jsonVal);
                                 }
@@ -216,6 +232,7 @@ public class Acm {
         } catch ( Throwable t ) {
             t.printStackTrace();
         }
+    }
 //            put(JSON_COMMENT, ACM_COMMENT);
 //            put(JSON_CONFORM, ACM_CONFORM);
 //            put(JSON_DEPENDENCY, ACM_DEPENDENCY);
@@ -249,7 +266,6 @@ public class Acm {
 //            put(JSON_LITERAL_REAL, ACM_LITERAL_REAL);
 //            put(JSON_LITERAL_STRING, ACM_LITERAL_STRING);
 //            put(JSON_ELEMENT_VALUE, ACM_ELEMENT_VALUE);
-    }
     
 //    /**
 //     *  Alfresco Content Model 2 JSON types

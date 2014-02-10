@@ -630,13 +630,23 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // TODO Need to permission check on new node creation
         // find node if exists, otherwise create
-        EmsScriptNode node;
+        EmsScriptNode node = null;
         EmsScriptNode reifiedNode = null;
         if (newElements.contains(id)) {
             log(LogLevel.INFO, "\tcreating node");
-            node = parent.createNode(id, Acm.JSON2ACM.get(elementJson.getString(Acm.JSON_TYPE)));
+            String type = null;
+//            try {.
+                type  = Acm.JSON2ACM.get(elementJson.getString(Acm.JSON_TYPE));
+                if (type==null) {
+                    System.out.println("PREFIX: " + elementJson.getString(Acm.JSON_TYPE));
+                } else {
+                node = parent.createNode(id, type);
+//            } catch (Exception e ) {
+//                e.printStackTrace();
+//            }
             node.setProperty(Acm.ACM_CM_NAME, id);
             node.setProperty(Acm.ACM_ID, id);
+                }
         } else {
             log(LogLevel.INFO, "\tmodifying node");
             node = findScriptNodeByName(id);
@@ -653,10 +663,12 @@ public class ModelPost extends AbstractJavaWebScript {
                 e.printStackTrace();
             }
         }
-        foundElements.put(id, node); // cache the found value
+        if (id !=  null && node != null) {
+            foundElements.put(id, node); // cache the found value
+        }
 
         // update metadata
-        if (checkPermissions(node, PermissionService.WRITE)) {
+        if (node != null && checkPermissions(node, PermissionService.WRITE)) {
             log(LogLevel.INFO, "\tinserting metadata");
             node.ingestJSON(elementJson);
         }
@@ -728,6 +740,10 @@ public class ModelPost extends AbstractJavaWebScript {
             Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
+        
+//        Acm.ACM2JSON = null;
+//        Acm.JSON2ACM = null;
+        System.out.println(Acm.getACM2JSON());
         
         boolean runInBackground = checkArgEquals(req, "background", "true");
 

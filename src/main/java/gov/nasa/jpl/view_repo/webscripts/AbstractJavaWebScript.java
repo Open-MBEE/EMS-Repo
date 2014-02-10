@@ -225,6 +225,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @return             true if user has specified permissions to node, false otherwise
 	 */
 	protected boolean checkPermissions(EmsScriptNode node, String permissions) {
+	    if ( node == null ) return true;
 	    if (!node.hasPermission(permissions)) {
 			Object property = node.getProperty(Acm.ACM_CM_NAME);
 			if (property != null) {

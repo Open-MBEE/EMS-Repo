@@ -663,6 +663,9 @@ public class EmsScriptNode extends ScriptNode {
 		EmsScriptNode result = null;
 //		Date start = new Date(), end; 
 
+//		if ( type == null ) {
+//		    type = "sysml:Element";
+//		}
 		if (!useFoundationalApi) {
 			result = new EmsScriptNode(super.createNode(name, type).getNodeRef(), services, response);
 		} else {
@@ -1148,6 +1151,7 @@ public class EmsScriptNode extends ScriptNode {
 	                this.createOrUpdateProperty(acmType, array.toString());
 	            } else {
 	                String property = jsonObject.getString(jsonType);
+	                System.out.println("creating or updating property: " + acmType + " = " + property );
 	                if (jsonType.startsWith("is")) {
 	                    this.createOrUpdateProperty(acmType, new Boolean(property));
 	                } else {
