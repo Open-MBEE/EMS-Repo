@@ -541,7 +541,7 @@ public class EmsScriptNode extends ScriptNode {
                 }
                 
                 String url = artNode.getUrl();
-    	        String link = "<img src=\"" + url + "\">" + name + "</img>";
+    	        String link = "<img src=\"" + url + "\"/>";
     	        link = link.replace("/d/d/", "/alfresco/service/api/node/content/");
     	        v = m.group( 1 ) + link + m.group( 4 );
     	    }
