@@ -335,10 +335,13 @@ public class EmsScriptNode extends ScriptNode {
         if ( folder == null ) {
             String[] arr = path.split( "/" );
             for ( String p : arr ) {
-                folder = source.createFolder( p );
-                if ( folder == null ) {
-                    log( "Can't create folder for path " + path + "!" );
-                    return null;
+                folder = source.childByNamePath(p);
+                if (folder == null) {
+                    folder = source.createFolder( p );
+                    if ( folder == null ) {
+                        log( "Can't create folder for path " + path + "!" );
+                        return null;
+                    }
                 }
                 source = folder;
             }
