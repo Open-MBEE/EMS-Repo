@@ -28,32 +28,32 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo.actions;
 
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
-import gov.nasa.jpl.view_repo.webscripts.ModelPost;
+import gov.nasa.jpl.view_repo.webscripts.ProductListGet;
+import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ParameterDefinition;
-import org.alfresco.service.cmr.repository.ContentIOException;
-import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.springframework.extensions.webscripts.Status;
 
 /**
  * Action for loading the project model in the background asynchronously
  * @author cinyoung
  */
-public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
+public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstractBase {
     /**
      * Injected variables from Spring configuration
      */
@@ -64,10 +64,8 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
     private StringBuffer response;
 
     // Parameter values to be passed in when the action is created
-    public static final String NAME = "modelLoad";
-    public static final String PARAM_PROJECT_NAME = "projectName";
-    public static final String PARAM_PROJECT_ID = "projectId";
-    public static final String PARAM_PROJECT_NODE = "projectNode";
+    public static final String NAME = "configurationGeneration";
+    public static final String PARAM_SITE_NAME = "siteName";
 
     public void setRepository(Repository rep) {
         repository = rep;
@@ -83,60 +81,59 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
 
     @Override
     protected void executeImpl(Action action, NodeRef nodeRef) {
-        String projectId = (String) action.getParameterValue(PARAM_PROJECT_ID);
-        String projectName = (String) action.getParameterValue(PARAM_PROJECT_NAME);
-        EmsScriptNode projectNode = (EmsScriptNode) action.getParameterValue(PARAM_PROJECT_NODE);
-        System.out.println("ModelLoadActionExecuter started execution of " + projectName + " [id: " + projectId + "]");
         clearCache();
 
-        // Parse the stored file for loading
-        EmsScriptNode jsonNode = new EmsScriptNode(nodeRef, services, response);
-        ContentReader reader = services.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
-        JSONObject content = null;
-        try {
-            content = new JSONObject(reader.getContentString());
-        } catch (ContentIOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
+        EmsScriptNode jobNode = new EmsScriptNode(nodeRef, services, response);
+
+        // grab all documents in site
+        String siteName = (String) action.getParameterValue(PARAM_SITE_NAME);
+        System.out.println("ConfigurationGenerationActionExecuter started execution of " + siteName);
+        SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+        if (siteInfo == null) {
+            return;
         }
+        EmsScriptNode site = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+        ProductListGet productService = new ProductListGet();
+        Set<EmsScriptNode> productSet = productService.getProductSet(site.getQnamePath());
 
-
-        // Update the model
-        String jobStatus = "Failed";
-        if (content == null) {
-            response.append("ERRROR: Could not load JSON file for job\n");
-        } else {
-            ModelPost modelService = new ModelPost();
-            modelService.setRepositoryHelper(repository);
-            modelService.setServices(services);
-            modelService.setProjectNode(projectNode);
-            modelService.setLogLevel(LogLevel.DEBUG);
-            modelService.setRunWithoutTransactions(false);
+        // create snapshots of all documents
+        // TODO: perhaps roll these in their own transactions
+        String jobStatus = "Succeeded";
+        Set<EmsScriptNode> snapshots = new HashSet<EmsScriptNode>();
+        for (EmsScriptNode product: productSet) {
+            // Update the model
+            SnapshotPost snapshotService = new SnapshotPost();
+            snapshotService.setRepositoryHelper(repository);
+            snapshotService.setServices(services);
+            snapshotService.setLogLevel(LogLevel.DEBUG);
             Status status = new Status();
-            try {
-                modelService.createOrUpdateModel(content, status);
-            } catch (Exception e) {
-                status.setCode(HttpServletResponse.SC_BAD_REQUEST);
-                response.append("ERROR: could not parse request\n");
-                e.printStackTrace();
+            EmsScriptNode snapshot = snapshotService.createSnapshot((String)product.getProperty(Acm.ACM_ID));
+            if (status.getCode() != HttpServletResponse.SC_OK) {
+                jobStatus = "Failed";
+                response.append("[ERROR]: could not make snapshot for " + product.getProperty(Acm.ACM_NAME));
+            } else {
+                response.append("[INFO]: Successfully created snapshot: " + snapshot.getProperty(Acm.ACM_CM_NAME));
             }
-            if (status.getCode() == HttpServletResponse.SC_OK) {
-                jobStatus = "Succeeded";
+            if (snapshot != null) {
+                snapshots.add(snapshot);
             }
-            response.append(modelService.getResponse().toString());
+            response.append(snapshotService.getResponse().toString());
         }
-
+        // make relationships between configuration nodea nd all the snapshots
+        for (EmsScriptNode snapshot: snapshots) {
+            jobNode.createOrUpdateAssociation(snapshot, "ems:configuredSnapshots", true);
+        }
+        
+        // save off the status of the job
+        jobNode.setProperty("ems:job_status", jobStatus);
+        
         // Save off the log
-        EmsScriptNode logNode = ActionUtil.saveLogToFile(jsonNode, "text/plain", services, response);
+        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response);
 
-        // set the status
-        jsonNode.setProperty("ems:job_status", jobStatus);
-
-        // Send off the notification email
-        String subject = "[EuropaEMS] Project " + projectName + " Load " + jobStatus;
+        // Send off notification email
+        String subject = "[EuropaEMS] Configuration " + siteName + " Generation " + jobStatus;
         String msg = "Log URL: " + contextUrl + logNode.getUrl();
-        ActionUtil.sendEmailToModifier(jsonNode, msg, subject, services, response);
+        ActionUtil.sendEmailToModifier(jobNode, msg, subject, services, response);
     }
 
     protected void clearCache() {

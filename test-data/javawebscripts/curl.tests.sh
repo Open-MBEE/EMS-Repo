@@ -1,20 +1,26 @@
 #!/bin/sh
 
 export CURL_STATUS="-w \"%{http_code}\""
-export CURL_USER=" -u admin:admin"
-
-export CURL_SECURITY="-k -3" 
-
-export CURL_FLAGS=$CURL_STATUS$CURL_USER
 export CURL_POST_FLAGS="-X POST -H \"Content-Type:application/json\" --data"
 export CURL_PUT_FLAGS="-X PUT"
 export CURL_GET_FLAGS="-X GET"
-export BASE_URL="\"http://localhost:8080/view-repo/service/javawebscripts/"
+
+export CURL_SECURITY=" -k -3" 
+
+#if [true]; then
+#	export CURL_USER=" -u admin:admin"
+#	export CURL_FLAGS=$CURL_STATUS$CURL_USER
+#	export BASE_URL="\"http://localhost:8080/view-repo/service/javawebscripts/"
+#else
+	export CURL_USER=" -u cinyoung"
+	export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
+	export BASE_URL="\"https://sheldon/alfresco/service/javawebscripts/"
+#fi
 
 # TODO: CURL commands aren't executed from bash using environment variables
 echo POSTS
 # create project and site
-echo curl $CURL_FLAGS $CURL_POST_FLAGS \'{\"name\":\"View Repo Test\"}\' $BASE_URL"sites/europa/projects/123456?fix=true&createSite=true\""
+echo curl $CURL_FLAGS $CURL_POST_FLAGS \'{\"name\":\"CY Test\"}\' $BASE_URL"sites/europa/projects/123456?fix=true&createSite=true\""
 
 # post elements to project
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elements.json $BASE_URL"sites/europa/projects/123456/elements\""

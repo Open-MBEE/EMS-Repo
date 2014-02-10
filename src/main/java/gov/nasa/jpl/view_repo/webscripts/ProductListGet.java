@@ -125,8 +125,7 @@ public class ProductListGet extends AbstractJavaWebScript {
 		return model;
 	}
 
-		
-	private void handleProductList() throws JSONException {
+	public Set<EmsScriptNode> getProductSet(String qnamePath) {
 	    String pattern = "ASPECT:\"" + Acm.ACM_PRODUCT + "\"";
         if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
             ResultSet resultSet = null;
@@ -135,7 +134,7 @@ public class ProductListGet extends AbstractJavaWebScript {
                 for (ResultSetRow row: resultSet) {
                     EmsScriptNode node = new EmsScriptNode(row.getNodeRef(), services, response);
                     // filter by project
-                    if (node.getQnamePath().startsWith(projectQnamePath)) {
+                    if (node.getQnamePath().startsWith(qnamePath)) {
                         if (checkPermissions(node, PermissionService.READ)) {
                             productSet.add(node);
                         }
@@ -149,7 +148,12 @@ public class ProductListGet extends AbstractJavaWebScript {
                 }
             }
         }
-	    
+        
+        return productSet;
+	}
+		
+	private void handleProductList() throws JSONException {
+	    getProductSet(projectQnamePath);
                 
         for (EmsScriptNode node: productSet) {
             String id = (String)node.getProperty(Acm.ACM_ID);
@@ -230,4 +234,5 @@ public class ProductListGet extends AbstractJavaWebScript {
             handleParents(parent, stopName);
         }
 	}
+	
 }

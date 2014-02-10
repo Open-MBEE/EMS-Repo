@@ -6,6 +6,7 @@
     <imports>
         <import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d"/>
         <import uri="http://www.alfresco.org/model/content/1.0" prefix="cm"/>
+        <import uri="http://jpl.nasa.gov/model/view/2.0" prefix="view2"/>
     </imports>
     <namespaces>
         <namespace uri="http://jpl.nasa.gov/model/ems/1.0" prefix="ems"/>
@@ -40,12 +41,6 @@
 	                	<multiple>false</multiple>
 	                	<index enabled="false"/>
                 </property>
-                <property name="ems:email">
-	                	<type>d:text</type>
-	                	<mandatory>false</mandatory>
-	                	<multiple>false</multiple>
-	                	<index enabled="false"/>
-                </property>
             </properties>
             <associations/>
             <overrides/>
@@ -53,8 +48,27 @@
 	            	<aspect>cm:indexControl</aspect>
 	            	<aspect>cm:versionable</aspect>
 	            	<aspect>cm:taggable</aspect>
-	            	<aspect>cm:titled</aspect> <!-- this is purely here for showing in ui, should show sysml:name instead -->
+	            	<aspect>cm:titled</aspect>
             </mandatory-aspects>
+        </type>
+        <type name="ems:ConfigurationSet">
+            <parent>ems:Job</parent>
+            <properties/>
+            <associations>
+            		<association name="ems:configuredSnapshots">
+            			<source>
+            				<mandatory>false</mandatory>
+            				<many>true</many>
+            			</source>
+            			<target>
+            				<class>view2:Snapshot</class>
+            				<mandatory>false</mandatory>
+            				<many>true</many>
+            			</target>
+            		</association>
+            </associations>
+            <overrides/>
+            <mandatory-aspects/>
         </type>
      </types>
 </model>

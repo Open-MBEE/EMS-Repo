@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -780,7 +781,7 @@ public class ModelPost extends AbstractJavaWebScript {
         NodeRef jobNodeRef = jobNode.getNodeRef();
         ContentWriter writer = services.getContentService().getWriter(jobNodeRef, ContentModel.PROP_CONTENT, true);
         writer.putContent(((JSONObject)req.parseContent()).toString(4));
-        ModelLoadActionExecuter.setContentDataMimeType(writer, jobNode, "application/json", services);
+        ActionUtil.setContentDataMimeType(writer, jobNode, "application/json", services);
 
         // create the log with the association
         String jobLogNodeName = "Job " + projectId + ".log";

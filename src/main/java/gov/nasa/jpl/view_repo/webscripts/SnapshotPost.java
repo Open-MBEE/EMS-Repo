@@ -29,7 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
+import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
@@ -138,7 +138,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         } catch (Exception e1) {
             e1.printStackTrace();
         }
-        ModelLoadActionExecuter.setContentDataMimeType(writer, snapshotNode, "application/json", services);
+        ActionUtil.setContentDataMimeType(writer, snapshotNode, "application/json", services);
         
         return snapshotNode;
     }

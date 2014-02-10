@@ -6,5 +6,11 @@
   <format default="html">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readonly">required</transaction>
-  <family>EMS Java Webscripts</family>
+  <family>EMS Java Read Webscripts</family>
+  <args>
+  	<arg>
+  		<name>id</name>
+  		<description>Product Id to retrieve the entire product information for.</description>
+  	</arg>
+  </args>
 </webscript>
