@@ -569,6 +569,37 @@ public class EmsScriptNode extends ScriptNode {
     }
 
     /**
+     * Checks and updates properties that have multiple values
+     * @param type      Short name of the content model property to be updated
+     * @param array     New list of values to update
+     * @param valueType The value type (needed for casting and making things generic)
+     * @return          True if values updated/create, false if unchanged
+     * @throws JSONException
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends Serializable> boolean createOrUpdatePropertyValues(String type, JSONArray array) throws JSONException {
+        ArrayList<T> values = new ArrayList<T>();
+        for (int ii = 0; ii < array.length(); ii++) {
+            T value = (T)array.get(ii);
+            if ( value instanceof String ) {
+                @SuppressWarnings( "unchecked" )
+                T t = (T)extractAndReplaceImageData( (String)value );
+                value = t;
+            }
+            values.add(value);
+        }
+        
+        ArrayList<T> oldValues = (ArrayList<T>) getProperty(type);
+        if (!checkIfListsEquivalent(oldValues, values)) {
+            setProperty(type, values);
+        } else {
+            return false;
+        }
+        
+        return true;
+    }
+
+    /**
 	 * Checks and updates properties that have multiple values
 	 * @param type		Short name of the content model property to be updated
 	 * @param array		New list of values to update
@@ -1132,7 +1163,16 @@ public class EmsScriptNode extends ScriptNode {
 	    }
 	    
 	    // fill in the valueTypes and all relationships
-        if (jsonObject.has(Acm.JSON_VALUE_TYPE)) {
+        if ( jsonObject.has( Acm.JSON_VALUE_TYPE )
+             && !jsonObject.has( Acm.JSON_VALUE_TYPE ) ) {
+           JSONArray array;
+            array = new JSONArray();
+            array = jsonObject.getJSONArray(Acm.JSON_VALUE);
+            this.createOrUpdatePropertyValues(Acm.ACM_VALUE, array);
+        }
+	    
+        // This should no longer be needed since properties no longer use this JSON tpye
+	    if (jsonObject.has(Acm.JSON_VALUE_TYPE)) {
             JSONArray array;
             
             String acmType = Acm.JSON2ACM.get(jsonObject.get(Acm.JSON_VALUE_TYPE));

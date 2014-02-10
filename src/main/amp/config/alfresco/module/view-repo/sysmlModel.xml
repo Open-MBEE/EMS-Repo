@@ -282,7 +282,7 @@
             <parent>sysml:ValueSpecification</parent>
             <properties>
                 <property name="sysml:durationMax">
-                    <type>d:nodeRef</type>
+                    <type>d:noderef</type>
                     <mandatory>false</mandatory>
                     <multiple>false</multiple>
                     <index enabled="true">
@@ -292,7 +292,7 @@
                     </index>
                 </property>
                 <property name="sysml:durationMin">
-                    <type>d:nodeRef</type>
+                    <type>d:noderef</type>
                     <mandatory>false</mandatory>
                     <multiple>false</multiple>
                     <index enabled="true">
@@ -307,7 +307,7 @@
             <parent>sysml:ValueSpecification</parent>
             <properties>
                 <property name="sysml:element">
-                    <type>d:nodeRef</type>
+                    <type>d:noderef</type>
                     <mandatory>false</mandatory>
                     <multiple>false</multiple>
                     <index enabled="true">
@@ -337,7 +337,7 @@
             <parent>sysml:ValueSpecification</parent>
             <properties>
                 <property name="sysml:instance">
-                    <type>d:nodeRef</type>
+                    <type>d:noderef</type>
                     <mandatory>false</mandatory>
                     <multiple>false</multiple>
                     <index enabled="true">
@@ -432,7 +432,7 @@
         <type name="sysml:OpaqueExpression">
             <parent>sysml:ValueSpecification</parent>
             <properties>
-                <property name="sysml:body">
+                <property name="sysml:expressionBody">
                     <type>d:text</type>
                     <mandatory>false</mandatory>
                     <multiple>true</multiple>
@@ -454,7 +454,7 @@
             <parent>sysml:ValueSpecification</parent>
             <properties>
                 <property name="sysml:timeMax">
-                    <type>d:nodeRef</type>
+                    <type>d:noderef</type>
                     <mandatory>false</mandatory>
                     <multiple>false</multiple>
                     <index enabled="true">
@@ -464,7 +464,7 @@
                     </index>
                 </property>
                 <property name="sysml:timeMin">
-                    <type>d:nodeRef</type>
+                    <type>d:noderef</type>
                     <mandatory>false</mandatory>
                     <multiple>false</multiple>
                     <index enabled="true">
@@ -532,7 +532,7 @@
                     </index>
                 </property>
                 <property name="sysml:defaultValue">
-                    <type>d:nodeRef</type>
+                    <type>d:noderef</type>
                     <mandatory>false</mandatory>
                     <multiple>false</multiple>
                     <index enabled="true">
