@@ -126,7 +126,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         MoaProductGet moaService = new MoaProductGet();
         moaService.setRepositoryHelper(repository);
         moaService.setServices(services);
-        JSONObject snapshotJson = moaService.generateMoaProduct(viewId, contextPath, true);
+        JSONObject snapshotJson = moaService.generateMoaProduct(viewId, contextPath);
         if (snapshotJson == null) {
             log(LogLevel.ERROR, "Could not generate the snapshot JSON", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return null;

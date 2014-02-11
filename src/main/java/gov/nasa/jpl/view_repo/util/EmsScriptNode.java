@@ -443,33 +443,6 @@ public class EmsScriptNode extends ScriptNode {
             matchingNode = nodeSet.iterator().next();
         }
         EmsScriptNode targetSiteNode = getSiteNode( targetSiteName, services, response );
-        // TopLevelScope NullPointerException.... otherwise this would work
-//        boolean nameMatch = false, subfolderMatch = false, siteMatch = false;
-//        for ( EmsScriptNode art : nodeSet ) {
-//            if ( art == null ) continue;
-//            if (art.getSize() == content.length) {
-//                // In case there are multiple files that have identical content,
-//                // match based on name, site, and subfolder.
-//                boolean isBest = false;
-//                if ( matchingNode == null ) isBest = true;
-//                boolean nameMatches = art.getName().equals( name );
-//                if ( !isBest && !nameMatches && nameMatch ) continue;
-//                if ( !isBest && nameMatches && !nameMatch ) isBest = true;
-//                String artSiteName = art.getSiteName();
-//                boolean siteMatches = artSiteName != null && artSiteName.equals(targetSiteName);
-//                if ( !isBest && !siteMatches && siteMatch ) continue;
-//                if ( !isBest && siteMatches && !siteMatch ) isBest = true;
-//                boolean subfolderMatches = art.getDisplayPath().contains( subfolderName );
-//                if ( !isBest && !subfolderMatches && subfolderMatch ) continue;
-//                if ( !isBest && subfolderMatches && !subfolderMatch ) isBest = true;
-//                if ( isBest ) {
-//                    matchingNode = art;
-//                    nameMatch = nameMatches;
-//                    siteMatch = siteMatches;
-//                    subfolderMatch = subfolderMatches;
-//                }
-//            }
-//        }
         
         if ( matchingNode != null ) return matchingNode;
 
