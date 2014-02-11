@@ -128,7 +128,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         }
 
         // Save off the log
-        EmsScriptNode logNode = ActionUtil.saveLogToFile(jsonNode, "text/plain", services, response);
+        EmsScriptNode logNode = ActionUtil.saveLogToFile(jsonNode, "text/plain", services, response.toString());
 
         // set the status
         jsonNode.setProperty("ems:job_status", jobStatus);

@@ -97,7 +97,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		// generate the product and JSON
 		if (validateRequest(req, status)) {
             productId = req.getServiceMatch().getTemplateVars().get("id");
-		    generateMoaProduct(productId, req.getContextPath());
+		    generateMoaProduct(productId, req.getContextPath(), false);
 		}
 		
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
@@ -119,10 +119,10 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	 * @param contextPath  Context path needed for the snapshot URLs
 	 * @return             JSON object of the entire product
 	 */
-    public JSONObject generateMoaProduct(String productId, String contextPath) {
+    public JSONObject generateMoaProduct(String productId, String contextPath, boolean isSnapshot) {
         clearCaches();
         try {
-            handleProduct(productId);
+            handleProduct(productId, isSnapshot);
             handleSnapshots(productId, contextPath);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -137,7 +137,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
      * @param productId
      * @throws JSONException
      */
-	private void handleProduct(String productId) throws JSONException {
+	private void handleProduct(String productId, boolean isSnapshot) throws JSONException {
 		EmsScriptNode product = findScriptNodeByName(productId);
 		if (product == null) {
 			log(LogLevel.ERROR, "Product not found with ID: " + productId, HttpServletResponse.SC_NOT_FOUND);
@@ -148,7 +148,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		    productsJson = new JSONObject(object, JSONObject.getNames(object));
 
 		    if (object.has(Acm.JSON_VIEW_2_VIEW)) {
-		        handleViews(object.getJSONArray(Acm.JSON_VIEW_2_VIEW));
+		        handleViews(object.getJSONArray(Acm.JSON_VIEW_2_VIEW), isSnapshot);
 		    }
 		    
 		    productsJson.put("views", viewsJson);
@@ -183,7 +183,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
         productsJson.put("snapshots", snapshotsJson);
     }
 	
-	private void handleViews(JSONArray view2view) throws JSONException {
+	private void handleViews(JSONArray view2view, boolean isSnapshot) throws JSONException {
 	    Set<String> viewIds = new HashSet<String>();
 	    Set<String> elementIds = new HashSet<String>();
 	    

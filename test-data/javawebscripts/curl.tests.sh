@@ -1,6 +1,7 @@
 #!/bin/sh
 
 export CURL_STATUS="-w \"%{http_code}\""
+export CURL_POST_FLAGS_NO_DATA="-X POST"
 export CURL_POST_FLAGS="-X POST -H \"Content-Type:application/json\" --data"
 export CURL_PUT_FLAGS="-X PUT"
 export CURL_GET_FLAGS="-X GET"
@@ -8,13 +9,13 @@ export CURL_GET_FLAGS="-X GET"
 export CURL_SECURITY=" -k -3" 
 
 #if [true]; then
-#	export CURL_USER=" -u admin:admin"
-#	export CURL_FLAGS=$CURL_STATUS$CURL_USER
-#	export BASE_URL="\"http://localhost:8080/view-repo/service/javawebscripts/"
+	export CURL_USER=" -u admin:admin"
+	export CURL_FLAGS=$CURL_STATUS$CURL_USER
+	export BASE_URL="\"http://localhost:8080/view-repo/service/javawebscripts/"
 #else
-	export CURL_USER=" -u cinyoung"
-	export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
-	export BASE_URL="\"https://sheldon/alfresco/service/javawebscripts/"
+#	export CURL_USER=" -u cinyoung"
+#	export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
+#	export BASE_URL="\"https://sheldon/alfresco/service/javawebscripts/"
 #fi
 
 # TODO: CURL commands aren't executed from bash using environment variables
@@ -81,3 +82,12 @@ echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:text/html" 
 
 # get snapshots
 echo  curl -w "%{http_code}" -u admin:admin -X GET http://localhost:8080/view-repo/service/ui/views/301/snapshots
+
+echo ""
+echo CONFIGURATIONS
+
+# post configuration
+echo curl $CURL_FLAGS $CURL_POST_FLAGS_NO_DATA $BASE_URL"configurations/europa/snapshot%20label\""
+
+# get configurations
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"configurations/europa\""

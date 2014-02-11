@@ -31,8 +31,8 @@ package gov.nasa.jpl.view_repo.actions;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
-import gov.nasa.jpl.view_repo.webscripts.ProductListGet;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
+import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 
 import java.util.HashSet;
 import java.util.List;
@@ -93,8 +93,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
             return;
         }
         EmsScriptNode site = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
-        ProductListGet productService = new ProductListGet();
-        Set<EmsScriptNode> productSet = productService.getProductSet(site.getQnamePath());
+        Set<EmsScriptNode> productSet = WebScriptUtil.getAllNodesInPath(site.getQnamePath(), "ASPECT", Acm.ACM_PRODUCT, services, response);
 
         // create snapshots of all documents
         // TODO: perhaps roll these in their own transactions
@@ -107,7 +106,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
             snapshotService.setServices(services);
             snapshotService.setLogLevel(LogLevel.DEBUG);
             Status status = new Status();
-            EmsScriptNode snapshot = snapshotService.createSnapshot((String)product.getProperty(Acm.ACM_ID));
+            EmsScriptNode snapshot = snapshotService.createSnapshot(product, (String)product.getProperty(Acm.ACM_ID));
             if (status.getCode() != HttpServletResponse.SC_OK) {
                 jobStatus = "Failed";
                 response.append("[ERROR]: could not make snapshot for " + product.getProperty(Acm.ACM_NAME));
@@ -119,7 +118,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
             }
             response.append(snapshotService.getResponse().toString());
         }
-        // make relationships between configuration nodea nd all the snapshots
+        // make relationships between configuration node and all the snapshots
         for (EmsScriptNode snapshot: snapshots) {
             jobNode.createOrUpdateAssociation(snapshot, "ems:configuredSnapshots", true);
         }
@@ -128,12 +127,19 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         jobNode.setProperty("ems:job_status", jobStatus);
         
         // Save off the log
-        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response);
+        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
 
         // Send off notification email
-        String subject = "[EuropaEMS] Configuration " + siteName + " Generation " + jobStatus;
-        String msg = "Log URL: " + contextUrl + logNode.getUrl();
-        ActionUtil.sendEmailToModifier(jobNode, msg, subject, services, response);
+        try {
+            String subject = "[EuropaEMS] Configuration " + siteName + " Generation " + jobStatus;
+            String msg = "Log URL: " + contextUrl + logNode.getUrl();
+            ActionUtil.sendEmailToModifier(jobNode, msg, subject, services, response);
+        } catch (Exception e) {
+            // in case running locally this shouldn't rollback transaction
+            e.printStackTrace();
+        }
+        
+        System.out.println("Completed configuration set");
     }
 
     protected void clearCache() {

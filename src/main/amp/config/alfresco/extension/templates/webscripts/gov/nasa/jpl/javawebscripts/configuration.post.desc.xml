@@ -1,0 +1,15 @@
+<webscript>
+	<shortname>Post a configuration</shortname>
+    <description>
+		Post a configuration with this format.
+		{  "name": configurationName,
+		   "description": configurationDescription.
+		   "nodeid": noderef ID, if applicable from a previous URL
+		}
+  		</description>
+  		<url>/javawebscripts/configurations/{siteName}</url>
+  		<format default="json">any</format>
+  		<authentication>user</authentication>
+  		<transaction allow="readwrite">required</transaction>
+  		<family>EMS Java Webscripts</family>
+ </webscript>

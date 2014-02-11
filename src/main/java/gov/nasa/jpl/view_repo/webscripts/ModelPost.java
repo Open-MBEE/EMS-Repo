@@ -45,10 +45,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 
-import org.alfresco.model.ContentModel;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
-import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
@@ -144,8 +142,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 // start building up elements from the root elements
                 for (String rootElement : rootElements) {
                     log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
-                    if (!rootElement.equals((String) projectNode
-                            .getProperty(Acm.ACM_CM_NAME))) {
+                    if (!rootElement.equals((String) projectNode.getProperty(Acm.ACM_CM_NAME))) {
                         String ownerName = null;
                         JSONObject element = elementMap.get(rootElement);
                         if (element.has(Acm.JSON_OWNER)) {
@@ -274,8 +271,7 @@ public class ModelPost extends AbstractJavaWebScript {
             for (int ii = 0; ii < jsonArray.length(); ii++) {
                 String targetId = jsonArray.getString(ii);
                 EmsScriptNode target = findScriptNodeByName(targetId);
-                source.createOrUpdateAssociation(target,
-                        Acm.ACM_ANNOTATED_ELEMENTS, true);
+                source.createOrUpdateAssociation(target, Acm.ACM_ANNOTATED_ELEMENTS, true);
             }
         }
     }
@@ -758,39 +754,11 @@ public class ModelPost extends AbstractJavaWebScript {
     protected void saveAndStartAction(WebScriptRequest req, Status status) throws Exception {
         EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
 
-        EmsScriptNode jobPkgNode = siteNode.childByNamePath("Jobs");
-        if (jobPkgNode == null) {
-            jobPkgNode = siteNode.createFolder("Jobs", "cm:folder");
-        }
-        
-        String jobNodeName = "Job " + projectId + ".json";
-        EmsScriptNode jobNode = jobPkgNode.childByNamePath(jobNodeName);
-        if (jobNode == null) {
-            jobNode = jobPkgNode.createNode(jobNodeName, "ems:Job");
-        } else {
-//            String jobStatus = (String)jobNode.getProperty("ems:job_status");
-//            if (jobStatus.equals("Active")) {
-//                status.setCode(HttpServletResponse.SC_CONFLICT, "Previous project export is still loading");
-//                return;
-//            }
-        }
-        jobNode.createOrUpdateProperty("ems:job_status", "Active");
-        jobNode.createOrUpdateProperty("cm:isContentIndexed", false);
+        String jobName = "Load Job " + projectId + ".json";
+        EmsScriptNode jobNode = ActionUtil.getOrCreateJob(siteNode, jobName, "ems:Job", status, response);
         
         // write out the json
-        NodeRef jobNodeRef = jobNode.getNodeRef();
-        ContentWriter writer = services.getContentService().getWriter(jobNodeRef, ContentModel.PROP_CONTENT, true);
-        writer.putContent(((JSONObject)req.parseContent()).toString(4));
-        ActionUtil.setContentDataMimeType(writer, jobNode, "application/json", services);
-
-        // create the log with the association
-        String jobLogNodeName = "Job " + projectId + ".log";
-        EmsScriptNode jobLogNode = jobPkgNode.childByNamePath(jobLogNodeName);
-        if (jobLogNode == null) {
-            jobLogNode = jobPkgNode.createNode(jobLogNodeName, "cm:content");
-        }
-        jobNode.createOrUpdateProperty("ems:job_log", jobLogNode);
-        
+        ActionUtil.saveStringToFile(jobNode, "application/json", services, ((JSONObject)req.parseContent()).toString(4));
         
         EmsScriptNode projectNode = findScriptNodeByName(projectId);
         // kick off the action
@@ -799,7 +767,7 @@ public class ModelPost extends AbstractJavaWebScript {
         loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_ID, projectId);
         loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_NAME, (String)projectNode.getProperty(Acm.ACM_NAME));
         loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_NODE, projectNode);
-        services.getActionService().executeAction(loadAction , jobNodeRef, true, true);
+        services.getActionService().executeAction(loadAction , jobNode.getNodeRef(), true, true);
     }
     
     @Override

@@ -40,9 +40,6 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.ResultSetRow;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONArray;
@@ -126,28 +123,7 @@ public class ProductListGet extends AbstractJavaWebScript {
 	}
 
 	public Set<EmsScriptNode> getProductSet(String qnamePath) {
-	    String pattern = "ASPECT:\"" + Acm.ACM_PRODUCT + "\"";
-        if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
-            ResultSet resultSet = null;
-            try {
-                resultSet = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, pattern);
-                for (ResultSetRow row: resultSet) {
-                    EmsScriptNode node = new EmsScriptNode(row.getNodeRef(), services, response);
-                    // filter by project
-                    if (node.getQnamePath().startsWith(qnamePath)) {
-                        if (checkPermissions(node, PermissionService.READ)) {
-                            productSet.add(node);
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                log(LogLevel.ERROR, "Could not parse search: " + pattern + ". " + e.getMessage() + "\n", HttpServletResponse.SC_BAD_REQUEST);  
-            } finally {
-                if (resultSet != null) {
-                    resultSet.close();
-                }
-            }
-        }
+	    productSet = WebScriptUtil.getAllNodesInPath(qnamePath, "ASPECT", Acm.ACM_PRODUCT, services, response);
         
         return productSet;
 	}
@@ -156,21 +132,23 @@ public class ProductListGet extends AbstractJavaWebScript {
 	    getProductSet(projectQnamePath);
                 
         for (EmsScriptNode node: productSet) {
-            String id = (String)node.getProperty(Acm.ACM_ID);
-            String name = (String)node.getProperty(Acm.ACM_NAME);
-            documents.put(id, name);
-
-            EmsScriptNode parent = node.getParent();
-            String parentId = (String)parent.getProperty(Acm.ACM_ID);
-            String parentName = (String)parent.getProperty(Acm.ACM_CM_NAME);
-            if (parentName.contains("_pkg")) {
-                parentId = parentName.replace("_pkg", "");
+            if (checkPermissions(node, PermissionService.READ)) {
+                String id = (String)node.getProperty(Acm.ACM_ID);
+                String name = (String)node.getProperty(Acm.ACM_NAME);
+                documents.put(id, name);
+    
+                EmsScriptNode parent = node.getParent();
+                String parentId = (String)parent.getProperty(Acm.ACM_ID);
+                String parentName = (String)parent.getProperty(Acm.ACM_CM_NAME);
+                if (parentName.contains("_pkg")) {
+                    parentId = parentName.replace("_pkg", "");
+                }
+                if (!volume2documents.has(parentId)) {
+                    volume2documents.put(parentId, new JSONArray());
+                }
+                ((JSONArray)volume2documents.get(parentId)).put(id);
+                handleParents(node, "ViewEditor");
             }
-            if (!volume2documents.has(parentId)) {
-                volume2documents.put(parentId, new JSONArray());
-            }
-            ((JSONArray)volume2documents.get(parentId)).put(id);
-            handleParents(node, "ViewEditor");
         }
         
         productJson.put("name", projectNode.getProperty(Acm.ACM_CM_TITLE));
@@ -207,31 +185,33 @@ public class ProductListGet extends AbstractJavaWebScript {
         }
         
         EmsScriptNode parent = node.getParent();
-        String parentSysmlName = (String)parent.getProperty(Acm.ACM_NAME);
-        String parentId = (String)parent.getProperty(Acm.ACM_ID);
-        String parentCmName = (String)parent.getProperty(Acm.ACM_CM_NAME);
-        if (parentCmName.contains("_pkg")) {
-            parentId = parentCmName.replace("_pkg", "");
-        }
-        if (parentId == null) {
-            if (!projectVolumes.toString().contains(id)) {
-                projectVolumes.put(id);
+        if (checkPermissions(parent, PermissionService.READ)) {
+            String parentSysmlName = (String)parent.getProperty(Acm.ACM_NAME);
+            String parentId = (String)parent.getProperty(Acm.ACM_ID);
+            String parentCmName = (String)parent.getProperty(Acm.ACM_CM_NAME);
+            if (parentCmName.contains("_pkg")) {
+                parentId = parentCmName.replace("_pkg", "");
             }
-        } else {
-            parentSysmlName = (String)parent.getProperty(Acm.ACM_CM_NAME);
-            if (parentSysmlName.contains("_pkg")) {
-                parentId = parentSysmlName.replace("_pkg", "");
-            }
-            if (!volume2volumes.has(parentId)) {
-                volume2volumes.put(parentId, new JSONArray());
-            }
-            if (!documents.has(id)) {
-                JSONArray array = (JSONArray)volume2volumes.get(parentId);
-                if (!array.toString().contains(id)) {
-                    array.put(id);
+            if (parentId == null) {
+                if (!projectVolumes.toString().contains(id)) {
+                    projectVolumes.put(id);
                 }
+            } else {
+                parentSysmlName = (String)parent.getProperty(Acm.ACM_CM_NAME);
+                if (parentSysmlName.contains("_pkg")) {
+                    parentId = parentSysmlName.replace("_pkg", "");
+                }
+                if (!volume2volumes.has(parentId)) {
+                    volume2volumes.put(parentId, new JSONArray());
+                }
+                if (!documents.has(id)) {
+                    JSONArray array = (JSONArray)volume2volumes.get(parentId);
+                    if (!array.toString().contains(id)) {
+                        array.put(id);
+                    }
+                }
+                handleParents(parent, stopName);
             }
-            handleParents(parent, stopName);
         }
 	}
 	

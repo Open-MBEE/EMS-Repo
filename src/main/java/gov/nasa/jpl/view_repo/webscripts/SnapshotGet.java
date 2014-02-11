@@ -82,8 +82,7 @@ public class SnapshotGet extends AbstractJavaWebScript {
     private String getSnapshotString(String snapshotId) {
         EmsScriptNode snapshot = findScriptNodeByName(snapshotId);
         if (snapshot != null) {
-            ContentReader reader = services.getContentService().getReader(
-                    snapshot.getNodeRef(), ContentModel.PROP_CONTENT);
+            ContentReader reader = services.getContentService().getReader(snapshot.getNodeRef(), ContentModel.PROP_CONTENT);
             return reader.getContentString();
         }
         log(LogLevel.ERROR, "Snapshot not found for id: " + snapshotId,

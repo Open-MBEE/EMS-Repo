@@ -1,0 +1,29 @@
+<webscript>
+<shortname>Get Configurations</shortname>
+    <description>
+    Format is:
+    { "configurations": [
+    		{"modified": modifiedTime,
+    		 "name": configurationName,
+    		 "description": configurationDescription,
+    		 "snapshots": [
+    		 	{ "url": urlSnapshot
+    		 	  "name": nameOfDocument
+    		 	}
+    		 ]
+    		}, ...
+    ]
+    }
+  	</description>
+		<url>/javawebscripts/configurations/{siteName}</url>
+		<format default="json">any</format>
+		<authentication>user</authentication>
+		<transaction allow="readonly">required</transaction>
+		<family>EMS Java Webscripts</family>
+		<args>
+			<arg>
+				<name>siteName</name>
+				<description>site to find documents for</description>
+			</arg>
+		</args>  		
+ </webscript>

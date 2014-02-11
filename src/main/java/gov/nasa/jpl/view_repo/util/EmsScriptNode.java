@@ -919,10 +919,10 @@ public class EmsScriptNode extends ScriptNode {
             element.put("editable", this.hasPermission(PermissionService.WRITE));
         }
 
-        // TODO: Remove since this is being done on save fix all the artifcat urls in the JSON string
         String elementString = element.toString();
         elementString = fixArtifactUrls(elementString, true);
         element = new JSONObject(elementString);
+ 
 	    return element;
 	}
 	
@@ -1184,6 +1184,7 @@ public class EmsScriptNode extends ScriptNode {
             filename = filename.replace("src=/editor/images/docgen/", "");
             NodeRef nodeRef = findNodeRefByType(filename, "@cm\\:name:\"");
             if (nodeRef != null) {
+                // this should grab whatever is the latest versions purl - so fine for snapshots
                 NodeRef versionedNodeRef = services.getVersionService().getCurrentVersion(nodeRef).getVersionedNodeRef();
                 EmsScriptNode versionedNode = new EmsScriptNode(versionedNodeRef, services, response);
                 String nodeurl = "";
@@ -1195,9 +1196,6 @@ public class EmsScriptNode extends ScriptNode {
                 nodeurl += context + versionedNode.getUrl() + "\\\"";
                 // this is service api for getting the content information
                 nodeurl = nodeurl.replace("/d/d/", "/service/api/node/content/");
-//                if (escape) {
-//                    nodeurl = nodeurl.replace("/", "").replace("\\", "\\\"");
-//                }
                 result = result.replace(matcher.group(0), nodeurl);
             }
         }
@@ -1227,6 +1225,7 @@ public class EmsScriptNode extends ScriptNode {
 
         return nodeRef;	    
 	}
+	
     // TODO: make this utility function - used in AbstractJavaWebscript too
     protected ResultSet findNodeRefsByType(String name, String type) {
         ResultSet results = null;
