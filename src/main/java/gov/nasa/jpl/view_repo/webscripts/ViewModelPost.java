@@ -41,6 +41,7 @@ import javax.transaction.UserTransaction;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
@@ -101,7 +102,7 @@ public class ViewModelPost extends ModelPost {
             String id = elementJson.getString(Acm.JSON_ID);
             EmsScriptNode elementNode = findScriptNodeByName(id);
             if (elementNode != null) {
-                updateOrCreateElement(elementJson, elementNode.getParent());
+                updateOrCreateElement(elementJson, elementNode.getParent(), false);
             } else {
                 // new element, we need a proper parent
                 boolean parentFound = true;
@@ -119,7 +120,7 @@ public class ViewModelPost extends ModelPost {
                             } else {
                                 if (checkPermissions(commentParent, PermissionService.WRITE)) {
                                     newElements.add(id);
-                                    updateOrCreateElement(elementJson, commentParent.getParent());
+                                    updateOrCreateElement(elementJson, commentParent.getParent(), false);
                                 }
                             }
                     }
@@ -132,5 +133,44 @@ public class ViewModelPost extends ModelPost {
         }
         
         updateOrCreateAllRelationships(relationshipsJson);
+        
+        updateNodeReferencesForView( array );
+    }
+
+    protected void updateNodeReferencesForView( JSONArray array ) throws JSONException {
+        for (int ii = 0; ii < array.length(); ii++) {
+            JSONObject elementJson = array.getJSONObject(ii);
+            
+            String id = elementJson.getString(Acm.JSON_ID);
+            EmsScriptNode elementNode = findScriptNodeByName(id);
+            if (elementNode != null) {
+                updateOrCreateElement(elementJson, elementNode.getParent(), true);
+            } else {
+                // new element, we need a proper parent
+                boolean parentFound = true;
+                
+                // for now only support new comments
+                if (elementJson.has(Acm.JSON_ANNOTATED_ELEMENTS)) {
+                    JSONArray annotatedJson = elementJson.getJSONArray(Acm.JSON_ANNOTATED_ELEMENTS);
+                    // lets make parent first annotated element
+                    if (annotatedJson.length() <= 0) {
+                        parentFound = false;
+                    } else {
+                        EmsScriptNode commentParent = findScriptNodeByName(annotatedJson.getString(0));
+                            if (commentParent == null) {
+                                parentFound = false;
+                            } else {
+                                if (checkPermissions(commentParent, PermissionService.WRITE)) {
+                                    updateOrCreateElement(elementJson, commentParent.getParent(), true);
+                                }
+                            }
+                    }
+
+                    if (!parentFound) {
+                        log(LogLevel.WARNING, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
+                    }
+                }
+            }
+        }
     }
 }

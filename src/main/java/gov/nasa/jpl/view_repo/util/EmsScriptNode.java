@@ -267,7 +267,7 @@ public class EmsScriptNode extends ScriptNode {
 			setProperty(acmType, value);
 		}
 		return false;
-	}	
+	}
 
 	public EmsScriptNode getCompanyHome() {
 	    if ( companyHome == null ) {
@@ -1163,17 +1163,24 @@ public class EmsScriptNode extends ScriptNode {
 
 	    // if already existing, possible that value type isn't specified (e.g. from view editor)
 	    if (!jsonObject.has(Acm.JSON_VALUE_TYPE) && jsonObject.has(Acm.JSON_VALUE)) {
-	        jsonObject.put(Acm.JSON_VALUE_TYPE, (String)getProperty(Acm.ACM_VALUE_TYPE));
+	        String existing = (String)getProperty(Acm.ACM_VALUE_TYPE);
+	        if ( existing != null ) {
+	            jsonObject.put(Acm.JSON_VALUE_TYPE, existing);
+	        }
 	    }
 	    
-	    // fill in the valueTypes and all relationships
-        if ( jsonObject.has( Acm.JSON_VALUE_TYPE )
-             && !jsonObject.has( Acm.JSON_VALUE_TYPE ) ) {
-           JSONArray array;
-            array = new JSONArray();
-            array = jsonObject.getJSONArray(Acm.JSON_VALUE);
-            this.createOrUpdatePropertyValues(Acm.ACM_VALUE, array);
-        }
+//	    // fill in the valueTypes and all relationships
+//        if ( jsonObject.has( Acm.JSON_VALUE ) &&
+//             !jsonObject.has( Acm.JSON_VALUE_TYPE ) ) {
+//            JSONArray array;
+//            array = new JSONArray();
+//            try {
+//                array = jsonObject.getJSONArray(Acm.JSON_VALUE);
+//                this.createOrUpdatePropertyValues(Acm.ACM_VALUE, array, this.nodeRef);
+//            } catch ( Exception e ) {
+//                e.printStackTrace();
+//            }
+//        }
 	    
         // This should no longer be needed since properties no longer use this JSON tpye
 	    if (jsonObject.has(Acm.JSON_VALUE_TYPE)) {
