@@ -166,6 +166,7 @@ public class Acm {
     public static final String ACM_VALUE_TYPE = SYSML + JSON_VALUE_TYPE;
     public static final String ACM_VALUE = SYSML + JSON_VALUE;
 //    public static final String ACM_VALUE_EXPRESSION = SYSML + JSON_VALUE_EXPRESSION;
+//    public static final String ACM_OWNER = SYSML + JSON_OWNER;
     public static final String ACM_TYPE = SYSML + JSON_TYPE;
     public static final String ACM_REIFIED_CONTAINMENT = SYSML + "reifiedContainment";
     public static final String ACM_VIEW = SYSML + "View";
@@ -195,6 +196,7 @@ public class Acm {
 //    public static final String ACM_LITERAL_STRING = SYSML + JSON_LITERAL_STRING;
 
     public static final String ACM_BOOLEAN = SYSML + JSON_BOOLEAN;
+    public static final String ACM_DOUBLE = SYSML + JSON_DOUBLE;
     public static final String ACM_INTEGER = SYSML + JSON_INTEGER;
     public static final String ACM_REAL = SYSML + JSON_REAL;
     public static final String ACM_NATURAL_VALUE = SYSML + JSON_NATURAL_VALUE;
@@ -295,7 +297,11 @@ public class Acm {
                             }
                         }
                     } catch (Throwable t) {
-                        t.printStackTrace();
+                        if ( t instanceof NoSuchFieldException ) {
+                            System.out.println( t.getLocalizedMessage() );
+                        } else {
+                            t.printStackTrace();
+                        }
                     }
                 }
             }

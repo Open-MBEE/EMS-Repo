@@ -41,7 +41,6 @@ import javax.transaction.UserTransaction;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
@@ -137,7 +136,7 @@ public class ViewModelPost extends ModelPost {
         updateNodeReferencesForView( array );
     }
 
-    protected void updateNodeReferencesForView( JSONArray array ) throws JSONException {
+    protected void updateNodeReferencesForView( JSONArray array ) throws Exception {
         for (int ii = 0; ii < array.length(); ii++) {
             JSONObject elementJson = array.getJSONObject(ii);
             

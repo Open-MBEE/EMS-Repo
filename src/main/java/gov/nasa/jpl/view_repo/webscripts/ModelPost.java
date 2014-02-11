@@ -196,7 +196,7 @@ public class ModelPost extends AbstractJavaWebScript {
     }
     
     
-    protected void updateNodeReferences(boolean singleElement, JSONObject postJson) throws JSONException {
+    protected void updateNodeReferences(boolean singleElement, JSONObject postJson) throws Exception {
         if ( singleElement ) {
             updateOrCreateElement(postJson, projectNode, true);
         }
@@ -664,7 +664,7 @@ public class ModelPost extends AbstractJavaWebScript {
      * @throws JSONException
      */
     protected void updateOrCreateElement(JSONObject elementJson,
-            EmsScriptNode parent, boolean ingest) throws JSONException {
+                                         EmsScriptNode parent, boolean ingest) throws Exception {
         JSONArray children = new JSONArray();
         
         EmsScriptNode reifiedNode = null;
@@ -696,12 +696,12 @@ public class ModelPost extends AbstractJavaWebScript {
         if (reifiedNode != null) {
             for (int ii = 0; ii < children.length(); ii++) {
                 updateOrCreateElement(elementMap.get(children.getString(ii)),
-                        reifiedNode, ingest);
+                                      reifiedNode, ingest);
             }
         }
     }
 
-    protected EmsScriptNode updateOrCreateTransactionableElement(JSONObject elementJson, EmsScriptNode parent, JSONArray children, boolean ingest) throws JSONException {
+    protected EmsScriptNode updateOrCreateTransactionableElement(JSONObject elementJson, EmsScriptNode parent, JSONArray children, boolean ingest) throws Exception {
         if (!elementJson.has(Acm.JSON_ID)) {
             return null;
         }
@@ -727,9 +727,18 @@ public class ModelPost extends AbstractJavaWebScript {
                     
                 } else {
                     log( LogLevel.INFO, "\tcreating node" );
-                    node = parent.createNode( id, type );
-                    node.setProperty( Acm.ACM_CM_NAME, id );
-                    node.setProperty( Acm.ACM_ID, id );
+                    try {
+                        node = parent.createNode( id, type );
+                        node.setProperty( Acm.ACM_CM_NAME, id );
+                        node.setProperty( Acm.ACM_ID, id );
+                    } catch ( Exception e ) {
+                        System.out.println( "Got exception in "
+                                            + "updateOrCreateTransactionableElement(elementJson="
+                                            + elementJson + ", parent="
+                                            + parent + ", children=" + children
+                                            + "), calling parent.createNode(id=" + id + ", " + type + ")" );
+                        throw e;
+                    }
                 }
             }
         } else {
