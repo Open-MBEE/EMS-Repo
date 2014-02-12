@@ -57,8 +57,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class ProductListGet extends AbstractJavaWebScript {
 	private JSONObject productJson;
 	private Set<EmsScriptNode> productSet;
-	private EmsScriptNode projectNode;
-	private String projectQnamePath;
+	private EmsScriptNode siteNode;
     JSONObject volumes;
     JSONObject volume2volumes;
     JSONObject documents;
@@ -67,20 +66,19 @@ public class ProductListGet extends AbstractJavaWebScript {
 	
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-        String projectId = req.getServiceMatch().getTemplateVars().get("id");
-        if (!checkRequestVariable(projectId, "id")) {
+        String siteId = req.getServiceMatch().getTemplateVars().get("id");
+        if (!checkRequestVariable(siteId, "id")) {
             return false;
         }
         
-        SiteInfo siteInfo = services.getSiteService().getSite(projectId);
+        SiteInfo siteInfo = services.getSiteService().getSite(siteId);
         if (siteInfo == null) {
-            log(LogLevel.ERROR, "Project not found with id: " + projectId + ".\n", HttpServletResponse.SC_NOT_FOUND);
+            log(LogLevel.ERROR, "Project not found with id: " + siteId + ".\n", HttpServletResponse.SC_NOT_FOUND);
             return false;
         }
-        projectNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
-        projectQnamePath = projectNode.getQnamePath();
+        siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
         
-        if (!checkPermissions(projectNode, PermissionService.READ)) {
+        if (!checkPermissions(siteNode, PermissionService.READ)) {
             return false;
         }
         
@@ -90,9 +88,13 @@ public class ProductListGet extends AbstractJavaWebScript {
 	@Override
 	protected void clearCaches() {
 		super.clearCaches();
-		productJson = new JSONObject();
-		productSet = new HashSet<EmsScriptNode>();
-		projectNode = null;
+		siteNode = null;
+	}
+	
+	protected void initDataStructs() {
+        productJson = new JSONObject();
+        productSet = new HashSet<EmsScriptNode>();
+        siteNode = null;
         volumes = new JSONObject();
         volume2volumes = new JSONObject();
         documents = new JSONObject();
@@ -109,9 +111,9 @@ public class ProductListGet extends AbstractJavaWebScript {
 
 		if (validateRequest(req, status)) {
         		try {
-                    handleProductList();
+                    handleProductList(siteNode);
                     model.put("res", productJson.toString(4));
-                    model.put("title", projectNode.getProperty(Acm.ACM_CM_TITLE));
+                    model.put("title", siteNode.getProperty(Acm.ACM_CM_TITLE));
                 } catch (JSONException e1) {
                     e1.printStackTrace();
                     model.put("res", response.toString());
@@ -128,8 +130,9 @@ public class ProductListGet extends AbstractJavaWebScript {
         return productSet;
 	}
 		
-	private void handleProductList() throws JSONException {
-	    getProductSet(projectQnamePath);
+	public JSONObject handleProductList(EmsScriptNode pnode) throws JSONException {
+	    initDataStructs();
+	    getProductSet(pnode.getQnamePath());
                 
         for (EmsScriptNode node: productSet) {
             if (checkPermissions(node, PermissionService.READ)) {
@@ -151,7 +154,7 @@ public class ProductListGet extends AbstractJavaWebScript {
             }
         }
         
-        productJson.put("name", projectNode.getProperty(Acm.ACM_CM_TITLE));
+        productJson.put("name", pnode.getProperty(Acm.ACM_CM_TITLE));
         productJson.put("volumes", volumes);
         // lets clean volume2volumes - html page doesn't support empty volume2volumes
         Set<String> emptyV = new HashSet<String>();
@@ -169,6 +172,8 @@ public class ProductListGet extends AbstractJavaWebScript {
         productJson.put("documents", documents);
         productJson.put("volume2documents", volume2documents);
         productJson.put("projectVolumes", projectVolumes);
+        
+        return productJson;
 	}
 	
 	protected void handleParents(EmsScriptNode node, String stopName) throws JSONException {
