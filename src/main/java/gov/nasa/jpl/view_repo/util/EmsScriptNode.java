@@ -29,6 +29,8 @@
 
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -1156,8 +1158,62 @@ public class EmsScriptNode extends ScriptNode {
         return siteNode;
     }
 
+    /**
+     * Update or create element values (multiple noderefs ordered in a list)
+     * 
+     * @param jsonArray
+     *            Array of the IDs that house the values for the element
+     * @param id
+     *            The ID of the element to add the values to
+     * @throws JSONException
+     */
+    protected void updateOrCreateElementValues(JSONArray jsonArray, String property)
+            throws JSONException {
+        // create an array of the values to be added in as the elementValue
+        // property
+        ArrayList<NodeRef> values = new ArrayList<NodeRef>();
+        for (int ii = 0; ii < jsonArray.length(); ii++) {
+            String valueId = jsonArray.getString(ii);
+            ResultSet existingArtifacts = findNodeRefsByType( valueId, "@cm\\:name:\"" );
+            Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
+            existingArtifacts.close();
+
+            EmsScriptNode value = (nodeSet == null || nodeSet.size() <= 0) ? null : nodeSet.iterator().next();
+            if (value != null
+                    && value.checkPermissions(PermissionService.WRITE, response, status)) {
+                values.add(value.getNodeRef());
+            } else {
+                log("could not find element value node with id " + valueId
+                                + "\n");
+            }
+        }
+
+        // only change if old list is different than new
+//        EmsScriptNode element = findScriptNodeByName(id);
+        if (//element != null &&
+                checkPermissions(PermissionService.WRITE, response, status)) {
+            @SuppressWarnings("unchecked")
+            ArrayList<NodeRef> oldValues = (ArrayList<NodeRef>)getProperty(property);
+            if (!EmsScriptNode.checkIfListsEquivalent(values, oldValues)) {
+                setProperty(property, values);
+            }
+        } else {
+            log("no write permissions " + id
+                    + "\n");
+        }
+    }
 	
-	/**
+	public EmsScriptNode findScriptNodeByName( String id ) {
+        ResultSet existingArtifacts = findNodeRefsByType( id, "@cm\\:name:\"" );
+        Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
+        existingArtifacts.close();
+
+        EmsScriptNode value = (nodeSet == null || nodeSet.size() <= 0) ? null : nodeSet.iterator().next();
+        return value;
+    }
+
+
+    /**
 	 * Update the node with the properties from the jsonObject
 	 * @param jsonObject
 	 * @throws JSONException 
@@ -1167,7 +1223,16 @@ public class EmsScriptNode extends ScriptNode {
 	    for (String jsonType: Acm.JSON2ACM.keySet()) {
 	        String acmType = Acm.JSON2ACM.get(jsonType);
 	        if (jsonObject.has(jsonType)) {
-	            if (Acm.JSON_ARRAYS.contains(jsonType)) {
+                if (Acm.JSON_NODEREFS.contains(jsonType)) {
+                    JSONArray array = null;
+                    if (Acm.JSON_ARRAYS.contains(jsonType)) {
+                        array = jsonObject.getJSONArray(jsonType);
+                    } else {
+                        array = new JSONArray();
+                        array.put( jsonObject.getString(jsonType) );
+                    }
+                    updateOrCreateElementValues( array, acmType );
+                } else if (Acm.JSON_ARRAYS.contains(jsonType)) {
 	                JSONArray array = jsonObject.getJSONArray(jsonType);
 	                this.createOrUpdateProperty(acmType, array.toString());
 	            } else {
@@ -1198,7 +1263,8 @@ public class EmsScriptNode extends ScriptNode {
 //            array = new JSONArray();
 //            try {
 //                array = jsonObject.getJSONArray(Acm.JSON_VALUE);
-//                this.createOrUpdatePropertyValues(Acm.ACM_VALUE, array, this.nodeRef);
+//                updateOrCreateElementValues( array, Acm.ACM_VALUE );
+//                //this.createOrUpdatePropertyValues(Acm.ACM_VALUE, array);
 //            } catch ( Exception e ) {
 //                e.printStackTrace();
 //            }
@@ -1315,7 +1381,7 @@ public class EmsScriptNode extends ScriptNode {
     protected ResultSet findNodeRefsByType(String name, String type) {
         ResultSet results = null;
         results = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, type + name + "\"");
-        return results;     
+        return results;
     }
     
     /**

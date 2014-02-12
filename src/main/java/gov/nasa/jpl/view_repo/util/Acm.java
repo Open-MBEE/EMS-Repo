@@ -292,13 +292,13 @@ public class Acm {
                         if ( f2 != null ) {
                             String jsonVal = (String)f.get(null);
                             String acmVal = (String)f2.get(null);
-                            if ( !f.getName().equals("JSON_VALUE") ) {
+//                            if ( !f.getName().equals("JSON_VALUE") ) {
                                 JSON2ACM.put( jsonVal, acmVal);
                                 if ( !f.getName().equals("JSON_VALUE_TYPE") ) {
                                     // this is parsed differently so don't include it
                                     ACM2JSON.put( acmVal, jsonVal);
                                 }
-                            }
+//                            }
                         }
                     } catch (Throwable t) {
                         if ( t instanceof NoSuchFieldException ) {
@@ -418,6 +418,29 @@ public class Acm {
             add(JSON_NO_SECTIONS);
         }
     };
+    
+    /**
+     * Properties that are JSONArrays rather than primitive types, so parsing is differnt
+     */
+    protected static final Set<String> JSON_NODEREFS = new HashSet<String>() {
+        private static final long serialVersionUID = -6616374715310786125L;
+        {
+           add(JSON_VALUE);
+           add(JSON_VALUE_EXPRESSION);
+           add(JSON_DURATION_MAX);
+           add(JSON_DURATION_MIN);
+           add(JSON_ELEMENT_VALUE_ELEMENT);
+           add(JSON_OPERAND);
+           add(JSON_INSTANCE);
+           add(JSON_TIME_INTERVAL_MAX);
+           add(JSON_TIME_INTERVAL_MIN);
+           add(JSON_OPERATION_PARAMETER);
+           add(JSON_INSTANCE_SPECIFICATION_SPECIFICATION);
+           add(JSON_CONSTRAINT_SPECIFICATION);
+           add(JSON_PARAMETER_DEFAULT_VALUE);
+       }
+   };
+
     
     /**
      * Properties that are always serialized in JSON
