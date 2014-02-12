@@ -44,6 +44,8 @@ import java.util.Set;
 public class Acm {
     // JSON types
     public static final String JSON_COMMENT = "Comment";
+    public static final String JSON_CONSTRAINT = "Constraint";
+    public static final String JSON_CONSTRAINT_SPECIFICATION = "constraintSpecification";
     public static final String JSON_CONFORM = "Conform";
     public static final String JSON_DEPENDENCY = "Dependency";
     public static final String JSON_DIRECTED_RELATIONSHIP = "DirectedRelationship";
@@ -144,6 +146,8 @@ public class Acm {
     public static final String CM = "cm:";
     
     public static final String ACM_COMMENT = SYSML + JSON_COMMENT;
+    public static final String ACM_CONSTRAINT = SYSML + JSON_CONSTRAINT;
+    public static final String ACM_CONSTRAINT_SPECIFICATION = SYSML + JSON_CONSTRAINT_SPECIFICATION;
     public static final String ACM_CONFORM = SYSML + JSON_CONFORM;
     public static final String ACM_DEPENDENCY = SYSML + JSON_DEPENDENCY;
     public static final String ACM_DIRECTED_RELATIONSHIP = SYSML + JSON_DIRECTED_RELATIONSHIP;
@@ -288,7 +292,7 @@ public class Acm {
                         if ( f2 != null ) {
                             String jsonVal = (String)f.get(null);
                             String acmVal = (String)f2.get(null);
-                            if ( !f.getName().equals("JSON_VALUE") ) {  // FIXME -- TOOO -- REVIEW
+                            if ( !f.getName().equals("JSON_VALUE") ) {
                                 JSON2ACM.put( jsonVal, acmVal);
                                 if ( !f.getName().equals("JSON_VALUE_TYPE") ) {
                                     // this is parsed differently so don't include it

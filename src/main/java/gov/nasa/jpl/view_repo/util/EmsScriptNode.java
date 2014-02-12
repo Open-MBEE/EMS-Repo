@@ -675,13 +675,24 @@ public class EmsScriptNode extends ScriptNode {
 
 			QName typeQName = createQName(type);
 			if (typeQName != null) {
+			    try {
 			    ChildAssociationRef assoc = 
 			            services.getNodeService().createNode(nodeRef,
 			                                                 ContentModel.ASSOC_CONTAINS,
 			                                                 QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI,
 			                                                                   QName.createValidLocalName(name)),
 			                                                                   createQName(type), props);
-                result = new EmsScriptNode(assoc.getChildRef(), services, response);            
+                result = new EmsScriptNode(assoc.getChildRef(), services, response);
+	            } catch ( Exception e ) {
+	                System.out.println( "Got exception in "
+	                                    + "createNode(name=" + name
+	                                    + ", type=" + type
+	                                    + ") for EmsScriptNode " + this
+	                                    + " calling createNode(nodeRef=" + nodeRef
+	                                    + ", . . .)" );
+	                e.printStackTrace();
+	            }
+
 			} else {
 			    log("Could not find type "  + type);
 			}
@@ -772,7 +783,17 @@ public class EmsScriptNode extends ScriptNode {
 	 */
 	public <T extends Serializable >void setProperty(String acmType, T value) {
 		if (useFoundationalApi) {
-			services.getNodeService().setProperty(nodeRef, createQName(acmType), value);
+		    try {
+		        services.getNodeService().setProperty(nodeRef, createQName(acmType), value);
+		    } catch ( Exception e ) {
+                System.out.println( "Got exception in "
+                                    + "setProperty(acmType=" + acmType
+                                    + ", value=" + value
+                                    + ") for EmsScriptNode " + this
+                                    + " calling setProperty(nodeRef=" + nodeRef
+                                    + ", " + acmType + ", " + value + ")" );
+                e.printStackTrace();
+		    }
 		} else {
 			getProperties().put(acmType, value);
 			save();
@@ -1152,7 +1173,8 @@ public class EmsScriptNode extends ScriptNode {
 	            } else {
 	                String property = jsonObject.getString(jsonType);
 	                System.out.println("creating or updating property: " + acmType + " = " + property );
-	                if (jsonType.startsWith("is")) {
+                    if ( jsonType.startsWith( "is" )
+                         && ( property.equalsIgnoreCase( "true" ) || property.equalsIgnoreCase( "false" ) ) ) {
 	                    this.createOrUpdateProperty(acmType, new Boolean(property));
 	                } else {
 	                    this.createOrUpdateProperty(acmType, new String(property));

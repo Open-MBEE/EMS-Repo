@@ -504,6 +504,22 @@
             </properties>
         </type>
         
+        <type name="sysml:Constraint">
+            <parent>sysml:Element</parent>
+            <properties>
+                <property name="sysml:constraintSpecification">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+            </properties>
+        </type>
+        
         <type name="sysml:Parameter">
             <parent>sysml:Element</parent>
             <properties>
