@@ -94,7 +94,6 @@ public class ProductListGet extends AbstractJavaWebScript {
 	protected void initDataStructs() {
         productJson = new JSONObject();
         productSet = new HashSet<EmsScriptNode>();
-        siteNode = null;
         volumes = new JSONObject();
         volume2volumes = new JSONObject();
         documents = new JSONObject();
@@ -113,7 +112,7 @@ public class ProductListGet extends AbstractJavaWebScript {
         		try {
                     handleProductList(siteNode);
                     model.put("res", productJson.toString(4));
-                    model.put("title", siteNode.getProperty(Acm.ACM_CM_TITLE));
+                    model.put("title", siteNode.getProperty(Acm.CM_TITLE));
                 } catch (JSONException e1) {
                     e1.printStackTrace();
                     model.put("res", response.toString());
@@ -142,7 +141,7 @@ public class ProductListGet extends AbstractJavaWebScript {
     
                 EmsScriptNode parent = node.getParent();
                 String parentId = (String)parent.getProperty(Acm.ACM_ID);
-                String parentName = (String)parent.getProperty(Acm.ACM_CM_NAME);
+                String parentName = (String)parent.getProperty(Acm.CM_NAME);
                 if (parentName.contains("_pkg")) {
                     parentId = parentName.replace("_pkg", "");
                 }
@@ -154,7 +153,7 @@ public class ProductListGet extends AbstractJavaWebScript {
             }
         }
         
-        productJson.put("name", pnode.getProperty(Acm.ACM_CM_TITLE));
+        productJson.put("name", pnode.getProperty(Acm.CM_TITLE));
         productJson.put("volumes", volumes);
         // lets clean volume2volumes - html page doesn't support empty volume2volumes
         Set<String> emptyV = new HashSet<String>();
@@ -180,7 +179,7 @@ public class ProductListGet extends AbstractJavaWebScript {
         String id = (String)node.getProperty(Acm.ACM_ID);
         String sysmlName = (String)node.getProperty(Acm.ACM_NAME);
         if (id == null) {
-            String cmName = (String)node.getProperty(Acm.ACM_CM_NAME);
+            String cmName = (String)node.getProperty(Acm.CM_NAME);
             id = cmName.replace("_pkg", "");
         } else {
             id = id.replace("_pkg", "");
@@ -193,7 +192,7 @@ public class ProductListGet extends AbstractJavaWebScript {
         if (checkPermissions(parent, PermissionService.READ)) {
             String parentSysmlName = (String)parent.getProperty(Acm.ACM_NAME);
             String parentId = (String)parent.getProperty(Acm.ACM_ID);
-            String parentCmName = (String)parent.getProperty(Acm.ACM_CM_NAME);
+            String parentCmName = (String)parent.getProperty(Acm.CM_NAME);
             if (parentCmName.contains("_pkg")) {
                 parentId = parentCmName.replace("_pkg", "");
             }
@@ -202,7 +201,7 @@ public class ProductListGet extends AbstractJavaWebScript {
                     projectVolumes.put(id);
                 }
             } else {
-                parentSysmlName = (String)parent.getProperty(Acm.ACM_CM_NAME);
+                parentSysmlName = (String)parent.getProperty(Acm.CM_NAME);
                 if (parentSysmlName.contains("_pkg")) {
                     parentId = parentSysmlName.replace("_pkg", "");
                 }

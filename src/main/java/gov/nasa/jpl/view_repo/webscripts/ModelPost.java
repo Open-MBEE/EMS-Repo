@@ -142,7 +142,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 // start building up elements from the root elements
                 for (String rootElement : rootElements) {
                     log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
-                    if (!rootElement.equals((String) projectNode.getProperty(Acm.ACM_CM_NAME))) {
+                    if (!rootElement.equals((String) projectNode.getProperty(Acm.CM_NAME))) {
                         String ownerName = null;
                         JSONObject element = elementMap.get(rootElement);
                         if (element.has(Acm.JSON_OWNER)) {
@@ -425,7 +425,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 if (reifiedNode == null) {
                     reifiedNode = node.getParent().createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER);
                     reifiedNode.setProperty(Acm.ACM_ID, key);
-                    reifiedNode.setProperty(Acm.ACM_CM_NAME, pkgName);
+                    reifiedNode.setProperty(Acm.CM_NAME, pkgName);
                     reifiedNode.setProperty(Acm.ACM_NAME, (String) node.getProperty(Acm.ACM_NAME));
                 }
                 if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
@@ -450,8 +450,8 @@ public class ModelPost extends AbstractJavaWebScript {
                         if (checkPermissions(child, PermissionService.WRITE)) {
                             if (!child.getParent().equals(reifiedNode)) {
                                 log(LogLevel.INFO, "moving "
-                                        + child.getProperty(Acm.ACM_CM_NAME) + " to "
-                                        + reifiedNode.getProperty(Acm.ACM_CM_NAME));
+                                        + child.getProperty(Acm.CM_NAME) + " to "
+                                        + reifiedNode.getProperty(Acm.CM_NAME));
                                 child.move(reifiedNode);
                             }
 
@@ -460,9 +460,9 @@ public class ModelPost extends AbstractJavaWebScript {
                                     + REIFIED_PKG_SUFFIX);
                             if (childPkg != null && !childPkg.getParent().equals(reifiedNode)) {
                                 log(LogLevel.INFO, "moving "
-                                        + childPkg.getProperty(Acm.ACM_CM_NAME)
+                                        + childPkg.getProperty(Acm.CM_NAME)
                                         + " to "
-                                        + reifiedNode.getProperty(Acm.ACM_CM_NAME));
+                                        + reifiedNode.getProperty(Acm.CM_NAME));
                                 childPkg.move(reifiedNode);
                             }
                         } // end if (checkPermissions(child, PermissionService.WRITE)) {
@@ -634,7 +634,7 @@ public class ModelPost extends AbstractJavaWebScript {
         if (newElements.contains(id)) {
             log(LogLevel.INFO, "\tcreating node");
             node = parent.createNode(id, Acm.JSON2ACM.get(elementJson.getString(Acm.JSON_TYPE)));
-            node.setProperty(Acm.ACM_CM_NAME, id);
+            node.setProperty(Acm.CM_NAME, id);
             node.setProperty(Acm.ACM_ID, id);
         } else {
             log(LogLevel.INFO, "\tmodifying node");
@@ -706,9 +706,9 @@ public class ModelPost extends AbstractJavaWebScript {
             if (reifiedNode == null) {
                 reifiedNode = parent.createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER);
                 reifiedNode.setProperty(Acm.ACM_ID, pkgName);
-                reifiedNode.setProperty(Acm.ACM_CM_NAME, pkgName);
+                reifiedNode.setProperty(Acm.CM_NAME, pkgName);
                 reifiedNode.setProperty(Acm.ACM_NAME, (String) node.getProperty(Acm.ACM_NAME));
-                log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getProperty(Acm.ACM_CM_NAME));
+                log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getProperty(Acm.CM_NAME));
             }
             if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
                 foundElements.put(pkgName, reifiedNode);

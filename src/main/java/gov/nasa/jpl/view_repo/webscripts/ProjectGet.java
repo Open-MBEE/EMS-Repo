@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.HashMap;
@@ -38,6 +39,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -73,47 +76,54 @@ public class ProjectGet extends AbstractJavaWebScript {
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
-        int statusCode = HttpServletResponse.SC_OK;
+        JSONObject json = null;
 
         parseRequestVariables(req);
         try {
             if (validateRequest(req, status)) {
-                statusCode = handleProject(projectId, siteName);
-            } else {
-                statusCode = responseStatus.getCode();
+                json = handleProject(projectId, siteName);
             }
         } catch (Exception e) {
-            // this is most likely null pointer from poorly undefined request
-            // parameters
+            // this is most likely null pointer from poorly undefined request parameters
             e.printStackTrace();
-            log(LogLevel.ERROR, "Invalid request.\n",
-                    HttpServletResponse.SC_BAD_REQUEST);
+            log(LogLevel.ERROR, "Could not create JSON.\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
 
-        status.setCode(statusCode);
-        model.put("res", response.toString());
+        if (json == null) {
+            model.put("res", response.toString());
+        } else {
+            model.put("res", json.toString());
+        }
+        status.setCode(responseStatus.getCode());
         return model;
     }
 
     /**
-     * Update or create the project specified by the JSONObject
+     * G the project specified by the JSONObject
      * 
      * @param projectId
      *            Project ID
      * @param siteName
      *            Site project should reside in
      * @return HttpStatusResponse code for success of the POST request
+     * @throws JSONException 
      */
-    private int handleProject(String projectId, String siteName) {
+    private JSONObject handleProject(String projectId, String siteName) throws JSONException {
         EmsScriptNode siteNode = new EmsScriptNode(services.getSiteService().getSite(siteName).getNodeRef(), services, response);
         
-        if (siteNode.childByNamePath("ViewEditor/" + projectId) == null) {
-//        
-//        if (findScriptNodeByName(projectId) == null) {
-            return HttpServletResponse.SC_NOT_FOUND;
+        EmsScriptNode projectNode = siteNode.childByNamePath("ViewEditor/" + projectId);
+        if (projectNode == null) {
+            log(LogLevel.ERROR, "Could not find project", HttpServletResponse.SC_NOT_FOUND);
+            return null;
         }
 
-        return HttpServletResponse.SC_OK;
+        log(LogLevel.INFO, "Found project", HttpServletResponse.SC_OK);
+        JSONObject json = new JSONObject();
+        json.put(Acm.JSON_ID, projectId);
+        json.put(Acm.JSON_NAME, projectNode.getProperty(Acm.CM_TITLE));
+        json.put(Acm.JSON_PROJECT_VERSION, projectNode.getProperty(Acm.ACM_PROJECT_VERSION));
+        
+        return json;
     }
 
     /**

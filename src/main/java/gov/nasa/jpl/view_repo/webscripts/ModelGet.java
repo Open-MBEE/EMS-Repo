@@ -191,7 +191,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		String sysmlId = (String)root.getProperty(Acm.ACM_ID);
 		if (!elementsFound.containsKey(sysmlId)) {
 		    // dont add reified packages
-		    if (!((String)root.getProperty(Acm.ACM_CM_NAME)).contains("_pkg")) {
+		    if (!((String)root.getProperty(Acm.CM_NAME)).contains("_pkg")) {
 		        elementsFound.put((String)root.getProperty(Acm.ACM_ID), root);
 		    }
 		}
@@ -199,7 +199,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		if (recurse) {
 			// find all the children, recurse or add to array as needed
 		    // TODO: figure out why the child association creation from the reification isn't being picked up
-		    String rootName = (String)root.getProperty(Acm.ACM_CM_NAME);
+		    String rootName = (String)root.getProperty(Acm.CM_NAME);
 		    if (!rootName.contains("_pkg")) {
 		        EmsScriptNode reifiedNode = findScriptNodeByName(rootName + "_pkg");
 		        if (reifiedNode != null) {
@@ -227,7 +227,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			String key = (String)root.getProperty(Acm.ACM_ID);
 			if (root.getTypeShort().equals(Acm.ACM_ELEMENT_FOLDER) && key == null) {
 				// TODO this is temporary? until we can get sysml:id from Element Folder?
-				key = root.getProperty(Acm.ACM_CM_NAME).toString().replace("_pkg", "");
+				key = root.getProperty(Acm.CM_NAME).toString().replace("_pkg", "");
 			}
 			
 			elementHierarchy.put(key, array);

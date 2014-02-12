@@ -102,7 +102,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
                     nodeId = postJson.getString("nodeid");
                     List<NodeRef> nodeRefs = NodeRef.getNodeRefs(nodeId);
                     jobNode = new EmsScriptNode(nodeRefs.get(0), services, response);
-                    jobNode.createOrUpdateProperty(Acm.ACM_CM_NAME, jobName);
+                    jobNode.createOrUpdateProperty(Acm.CM_NAME, jobName);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();

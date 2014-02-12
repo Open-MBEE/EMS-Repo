@@ -73,12 +73,14 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         if (jsonObject != null) {
             try {
                 model.put("res", jsonObject.toString(4));
+                model.put("title", req.getServiceMatch().getTemplateVars().get(SITE_NAME));
             } catch (JSONException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         } else {
             model.put("res", response.toString());
+            model.put("title", "ERROR could not load");
         }
         
         status.setCode(responseStatus.getCode());
@@ -123,7 +125,7 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         Date date = (Date)config.getProperty(Acm.ACM_LAST_MODIFIED);
         
         json.put("modified", EmsScriptNode.getIsoTime(date));
-        json.put("name", config.getProperty(Acm.ACM_CM_NAME));
+        json.put("name", config.getProperty(Acm.CM_NAME));
         json.put("description", config.getProperty("cm:description"));
         json.put("nodeid", EmsScriptNode.getStoreRef().toString() + "/" + config.getNodeRef().getId());
         

@@ -111,7 +111,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
                 jobStatus = "Failed";
                 response.append("[ERROR]: could not make snapshot for " + product.getProperty(Acm.ACM_NAME));
             } else {
-                response.append("[INFO]: Successfully created snapshot: " + snapshot.getProperty(Acm.ACM_CM_NAME));
+                response.append("[INFO]: Successfully created snapshot: " + snapshot.getProperty(Acm.CM_NAME));
             }
             if (snapshot != null) {
                 snapshots.add(snapshot);
@@ -135,8 +135,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
             String msg = "Log URL: " + contextUrl + logNode.getUrl();
             ActionUtil.sendEmailToModifier(jobNode, msg, subject, services, response);
         } catch (Exception e) {
-            // in case running locally this shouldn't rollback transaction
-            e.printStackTrace();
+            // do nothing this is for local testing
         }
         
         System.out.println("Completed configuration set");

@@ -142,11 +142,18 @@ public class ProjectPost extends AbstractJavaWebScript {
 		// create project if doesn't exist or update if fix is specified 
 		EmsScriptNode projectNode = findScriptNodeByName(projectId);
 		String projectName = jsonObject.getString(Acm.JSON_NAME);
+		String projectVersion = null;
+		if (jsonObject.has(Acm.JSON_PROJECT_VERSION)) {
+		    projectVersion = jsonObject.getString(Acm.JSON_PROJECT_VERSION);
+		}
 		if (projectNode == null) {
 			projectNode = modelContainerNode.createFolder(projectId, Acm.ACM_PROJECT);
-			projectNode.setProperty(Acm.ACM_CM_TITLE, projectName);
+			projectNode.setProperty(Acm.CM_TITLE, projectName);
 			projectNode.setProperty(Acm.ACM_NAME, projectName);
 			projectNode.setProperty(Acm.ACM_ID, projectId);
+			if (projectVersion != null) {
+			    projectNode.setProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
+			}
 			log(LogLevel.INFO, "Project created.\n", HttpServletResponse.SC_OK);
 		} else {
 			if (delete) {
@@ -154,9 +161,12 @@ public class ProjectPost extends AbstractJavaWebScript {
 				log(LogLevel.INFO, "Project deleted.\n", HttpServletResponse.SC_OK);
 			} else if (fix) {
 				if (checkPermissions(projectNode, PermissionService.WRITE)){ 
-					projectNode.createOrUpdateProperty(Acm.ACM_CM_TITLE, projectName);
+					projectNode.createOrUpdateProperty(Acm.CM_TITLE, projectName);
 					projectNode.createOrUpdateProperty(Acm.ACM_NAME, projectName);
 					projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
+		            if (projectVersion != null) {
+		                projectNode.createOrUpdateProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
+		            }
 					log(LogLevel.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
 				
 					if (checkPermissions(projectNode.getParent(), PermissionService.WRITE)) { 
@@ -207,4 +217,5 @@ public class ProjectPost extends AbstractJavaWebScript {
 
 		return true;
 	}
+	
 }

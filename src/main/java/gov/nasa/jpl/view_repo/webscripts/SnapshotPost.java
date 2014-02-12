@@ -152,11 +152,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
     public static EmsScriptNode getSnapshotFolderNode(EmsScriptNode viewNode) {
         EmsScriptNode parent = viewNode.getParent();
 
-        String parentName = (String) parent.getProperty(Acm.ACM_CM_NAME);
+        String parentName = (String) parent.getProperty(Acm.CM_NAME);
         while (!parentName.equals("ViewEditor")) {
             EmsScriptNode oldparent = parent;
             parent = oldparent.getParent();
-            parentName = (String) parent.getProperty(Acm.ACM_CM_NAME);
+            parentName = (String) parent.getProperty(Acm.CM_NAME);
         }
         // put snapshots at the project level
         parent = parent.getParent();

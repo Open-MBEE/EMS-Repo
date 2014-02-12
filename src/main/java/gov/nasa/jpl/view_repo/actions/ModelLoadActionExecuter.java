@@ -134,9 +134,13 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         jsonNode.setProperty("ems:job_status", jobStatus);
 
         // Send off the notification email
-        String subject = "[EuropaEMS] Project " + projectName + " Load " + jobStatus;
-        String msg = "Log URL: " + contextUrl + logNode.getUrl();
-        ActionUtil.sendEmailToModifier(jsonNode, msg, subject, services, response);
+        try {
+            String subject = "[EuropaEMS] Project " + projectName + " Load " + jobStatus;
+            String msg = "Log URL: " + contextUrl + logNode.getUrl();
+            ActionUtil.sendEmailToModifier(jsonNode, msg, subject, services, response);
+        } catch (Exception e) {
+            // do nothing - this is only for local testing
+        }
     }
 
     protected void clearCache() {

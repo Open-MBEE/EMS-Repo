@@ -650,7 +650,7 @@ public class EmsScriptNode extends ScriptNode {
 	
 	@Override
 	public String getName() {
-		return (String)getProperty(Acm.ACM_CM_NAME);
+		return (String)getProperty(Acm.CM_NAME);
 	}
 
 
@@ -1047,12 +1047,12 @@ public class EmsScriptNode extends ScriptNode {
     public EmsScriptNode getSiteNode() {
         if ( siteNode != null ) return siteNode;
         EmsScriptNode parent = this;
-        String parentName = (String) parent.getProperty(Acm.ACM_CM_NAME);
+        String parentName = (String) parent.getProperty(Acm.CM_NAME);
         while (!parentName.equals("ViewEditor")) {
             EmsScriptNode oldparent = parent;
             parent = oldparent.getParent();
             if ( parent == null ) return null; // site not found!
-            parentName = (String) parent.getProperty(Acm.ACM_CM_NAME);
+            parentName = (String) parent.getProperty(Acm.CM_NAME);
             if ( parent.getName().toLowerCase().equals( "sites" ) ) {
                 siteNode = oldparent;
                 return siteNode;
@@ -1214,7 +1214,7 @@ public class EmsScriptNode extends ScriptNode {
      */
     public boolean checkPermissions(String permissions, StringBuffer response, Status status) {
         if (!hasPermission(permissions)) {
-            Object property = getProperty(Acm.ACM_CM_NAME);
+            Object property = getProperty(Acm.CM_NAME);
             if (property != null) {
                 String msg = "Warning! No " + permissions + " priveleges to " + property.toString() + ".\n";
                 response.append( msg );
