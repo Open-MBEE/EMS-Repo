@@ -689,8 +689,8 @@ public class EmsScriptNode extends ScriptNode {
 	                System.out.println( "Got exception in "
 	                                    + "createNode(name=" + name
 	                                    + ", type=" + type
-	                                    + ") for EmsScriptNode " + this
-	                                    + " calling createNode(nodeRef=" + nodeRef
+	                                    + ") for EmsScriptNode(" + this
+	                                    + ") calling createNode(nodeRef=" + nodeRef
 	                                    + ", . . .)" );
 	                e.printStackTrace();
 	            }

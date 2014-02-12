@@ -147,40 +147,26 @@ public class ModelPost extends AbstractJavaWebScript {
                     log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
                     if (!rootElement.equals((String) projectNode
                             .getProperty(Acm.ACM_CM_NAME))) {
-                        EmsScriptNode owner = getOwner( rootElement, true );
-//                        String ownerName = null;
-//                        JSONObject element = elementMap.get(rootElement);
-//                        if (element.has(Acm.JSON_OWNER)) {
-//                            ownerName = element.getString(Acm.JSON_OWNER);
-//                        }
-//                        
-//                        // get the owner so we can create node inside owner
-//                        // DirectedRelationships can be sent with no owners, so, if not specified look for its existing owner
-//                        EmsScriptNode owner = null;
-//                        if (ownerName == null || ownerName.equals("null")) {
-//                            EmsScriptNode elementNode = findScriptNodeByName(rootElement);
-//                            if (elementNode == null) {
-//                                owner = projectNode;
-//                            } else {
-//                                owner = elementNode.getParent();
-//                            }
-//                        } else {
-//                            owner = findScriptNodeByName(ownerName);
-//                            if (owner == null) {
-//                                log(LogLevel.WARNING, "Could not find owner with name: " + ownerName + " putting into project", HttpServletResponse.SC_NOT_FOUND);
-//                                owner = projectNode;
-//                            }
-//                            // really want to add pkg as owner
-//                            EmsScriptNode reifiedPkg = findScriptNodeByName(ownerName
-//                                    + "_pkg");
-//                            if (reifiedPkg == null) {
-//                                reifiedPkg = getOrCreateReifiedNode(owner,
-//                                        ownerName);
-//                            }
-//                            owner = reifiedPkg;
-//                        }
+                        UserTransaction trx;
+                        trx = services.getTransactionService().getNonPropagatingUserTransaction();
+                        EmsScriptNode owner = null;
+                        try {
+                            trx.begin();
+                            owner = getOwner( rootElement, true );
+                            trx.commit();
+                        } catch (Throwable e) {
+                            try {
+                                trx.rollback();
+                                log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                            } catch (Throwable ee) {
+                                log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                            }
+                        }
                         
-                        updateOrCreateElement(elementMap.get(rootElement), owner, false);
+                        
+                        if (owner != null) {
+                            updateOrCreateElement(elementMap.get(rootElement), owner, false);
+                        }
                     }
                 } // end for (String rootElement: rootElements) {
             } // end if (buildElementMap(postJson.getJSONArray(ELEMENTS))) {
@@ -233,31 +219,35 @@ public class ModelPost extends AbstractJavaWebScript {
         // get the owner so we can create node inside owner
         // DirectedRelationships can be sent with no owners, so, if not specified look for its existing owner
         EmsScriptNode owner = null;
+        EmsScriptNode reifiedPkg = null;
         if (ownerName == null || ownerName.equals("null")) {
             EmsScriptNode elementNode = findScriptNodeByName(rootElement);
-            if (elementNode == null) {
+            if (elementNode == null || !elementNode.exists()) {
                 owner = projectNode;
             } else {
                 owner = elementNode.getParent();
             }
         } else {
             owner = findScriptNodeByName(ownerName);
-            if (owner == null) {
+            if (owner == null || !owner.exists()) {
                 log(LogLevel.WARNING, "Could not find owner with name: " + ownerName + " putting into project", HttpServletResponse.SC_NOT_FOUND);
                 owner = projectNode;
-            }
+            } 
             // really want to add pkg as owner
-            EmsScriptNode reifiedPkg = findScriptNodeByName(ownerName
-                    + "_pkg");
-            if (reifiedPkg == null ) {
+            reifiedPkg = findScriptNodeByName(ownerName + "_pkg");
+            if (reifiedPkg == null || !reifiedPkg.exists()) {
                 if ( createOwnerPkgIfNotFound) {
-                    reifiedPkg = getOrCreateReifiedNode(owner, ownerName);
+                    reifiedPkg = getOrCreateReifiedNode(owner, ownerName, false);
                 } else {
                     log(LogLevel.WARNING, "Could not find owner package: " + ownerName, HttpServletResponse.SC_NOT_FOUND);
                 }
             }
             owner = reifiedPkg;
         }
+        log( LogLevel.INFO, "\tgetOwner(" + rootElement + "): json element=("
+                            + element + "), ownerName=" + ownerName
+                            + ", reifiedPkg=(" + reifiedPkg + ", projectNode=("
+                            + projectNode + "), returning owner=" + owner );
         return owner;
     }
     
@@ -693,7 +683,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         // create the children elements
-        if (reifiedNode != null) {
+        if (reifiedNode != null && reifiedNode.exists()) {
             for (int ii = 0; ii < children.length(); ii++) {
                 updateOrCreateElement(elementMap.get(children.getString(ii)),
                                       reifiedNode, ingest);
@@ -713,39 +703,34 @@ public class ModelPost extends AbstractJavaWebScript {
         // find node if exists, otherwise create
         EmsScriptNode node = findScriptNodeByName( id );
         EmsScriptNode reifiedNode = null;
-        if ( node == null && newElements.contains( id ) ) {
+        if ( (node == null || !node.exists()) && newElements.contains( id ) ) {
             String type = null;
             String jsonType = elementJson.getString( Acm.JSON_TYPE );
             if ( jsonType != null ) type = Acm.JSON2ACM.get( jsonType );
-            if ( type == null ) {
+            if ( type == null || type.trim().isEmpty() ) {
                 System.out.println( "PREFIX: type not found for " + jsonType );
                 return null;
             } else {
-                node = findScriptNodeByName( id );
-                if ( node != null ) {
-                    log(LogLevel.ERROR, "Should never get here! " + type + ", " + id );
-                    
-                } else {
-                    log( LogLevel.INFO, "\tcreating node" );
-                    try {
-                        node = parent.createNode( id, type );
-                        node.setProperty( Acm.ACM_CM_NAME, id );
-                        node.setProperty( Acm.ACM_ID, id );
-                    } catch ( Exception e ) {
-                        System.out.println( "Got exception in "
-                                            + "updateOrCreateTransactionableElement(elementJson="
-                                            + elementJson + ", parent="
-                                            + parent + ", children=" + children
-                                            + "), calling parent.createNode(id=" + id + ", " + type + ")" );
-                        throw e;
-                    }
+                log( LogLevel.INFO, "\tcreating node" );
+                try {
+                    node = parent.createNode( id, type );
+                    if ( node == null || !node.exists() ) throw new Exception( "createNode() failed." );
+                    node.setProperty( Acm.ACM_CM_NAME, id );
+                    node.setProperty( Acm.ACM_ID, id );
+                } catch ( Exception e ) {
+                    System.out.println( "Got exception in "
+                                        + "updateOrCreateTransactionableElement(elementJson="
+                                        + elementJson + ", parent=("
+                                        + parent + "), children=(" + children
+                                        + ")), calling parent.createNode(id=" + id + ", " + type + ")" );
+                    throw e;
                 }
             }
         } else {
             log(LogLevel.INFO, "\tmodifying node");
             node = findScriptNodeByName(id);
             try {
-                if (!node.getParent().equals(parent)) {
+                if (node != null && node.exists() && !node.getParent().equals(parent)) {
                     node.move(parent);
                     EmsScriptNode pkgNode = findScriptNodeByName(id + "_pkg");
                     if (pkgNode != null) {
@@ -757,26 +742,32 @@ public class ModelPost extends AbstractJavaWebScript {
                 e.printStackTrace();
             }
         }
-        if (id !=  null && node != null) {
+        boolean nodeExists = node != null && node.exists(); 
+        if (id != null && nodeExists ) {
             foundElements.put(id, node); // cache the found value
         }
 
         // update metadata
-        if (ingest && node != null && checkPermissions(node, PermissionService.WRITE)) {
+        if (ingest && nodeExists && checkPermissions(node, PermissionService.WRITE)) {
             log(LogLevel.INFO, "\tinserting metadata");
             node.ingestJSON(elementJson);
         }
 
-        if (elementHierarchyJson.has(id)) {
+        if (nodeExists && elementHierarchyJson.has(id)) {
             log(LogLevel.INFO, "\tcreating reified package");
-            reifiedNode = getOrCreateReifiedNode(node, id);
+            reifiedNode = getOrCreateReifiedNode(node, id, true);
+            
             JSONArray array = elementHierarchyJson.getJSONArray(id);
-            for (int ii = 0; !ingest && ii < array.length(); ii++) {
-                children.put(array.get(ii));
+            if ( array != null ) {
+                for (int ii = 0; !ingest && ii < array.length(); ii++) {
+                    children.put(array.get(ii));
+                }
             }
         }
 
         // add the relationships into our maps
+        // REVIEW -- Should we skip this if the node or reified node does not exist?
+        // REVIEW -- Should we throw an exception if the node or reified node does not exist?
         log(LogLevel.INFO, "\tfiltering relationships");
         JSONObject relations = EmsScriptNode.filterRelationsJSONObject(elementJson);
         String keys[] = { 
@@ -803,20 +794,39 @@ public class ModelPost extends AbstractJavaWebScript {
         return reifiedNode;
     }
     
-    protected EmsScriptNode getOrCreateReifiedNode(EmsScriptNode node, String id) {
+    protected EmsScriptNode getOrCreateReifiedNode(EmsScriptNode node, String id, boolean useParent) {
         EmsScriptNode reifiedNode = null;
-        if ( node == null ) return null;
-        EmsScriptNode parent = node.getParent();
+        if ( node == null || !node.exists() ) {
+            log( LogLevel.ERROR,
+                 "Trying to create reified node for missing node! id = " + id );
+            return null;
+        }
+        EmsScriptNode parent;
+        if (useParent) {
+            parent= node.getParent();
+        } else {
+            parent = node;
+        }
+        if ( parent == null || !parent.exists() ) {
+            log( LogLevel.ERROR,
+                 "Trying to create reified node folder in missing parent folder for node " + node );
+            return null;
+        }
 
         if (checkPermissions(parent, PermissionService.WRITE)) {
             String pkgName = id + "_pkg";
             reifiedNode = findScriptNodeByName(pkgName);
-            if (reifiedNode == null) {
+            if (reifiedNode == null || !reifiedNode.exists()) {
                 reifiedNode = parent.createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER);
-                reifiedNode.setProperty(Acm.ACM_ID, pkgName);
-                reifiedNode.setProperty(Acm.ACM_CM_NAME, pkgName);
-                reifiedNode.setProperty(Acm.ACM_NAME, (String) node.getProperty(Acm.ACM_NAME));
-                log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getProperty(Acm.ACM_CM_NAME));
+                if (reifiedNode == null || !reifiedNode.exists()) {
+                    log(LogLevel.ERROR, "\t failed to create reified node " + pkgName + " in " + parent.getProperty(Acm.ACM_CM_NAME));
+                    return null;
+                } else {
+                    reifiedNode.setProperty(Acm.ACM_ID, pkgName);
+                    reifiedNode.setProperty(Acm.ACM_CM_NAME, pkgName);
+                    reifiedNode.setProperty(Acm.ACM_NAME, (String) node.getProperty(Acm.ACM_NAME));
+                    log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getProperty(Acm.ACM_CM_NAME));
+                }
             }
             if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
                 foundElements.put(pkgName, reifiedNode);
