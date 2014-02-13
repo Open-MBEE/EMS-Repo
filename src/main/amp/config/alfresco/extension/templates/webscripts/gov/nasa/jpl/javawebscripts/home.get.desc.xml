@@ -1,6 +1,6 @@
 <webscript> 
-  <shortname>Get view editor home page</shortname> 
-  <description>Return all documents in the specified site
+  <shortname>Get View Editor home page</shortname> 
+  <description>Return all documents in the specified site in format that shows containment:
 		{
 	 		"name" : projectname,
 	 		"volumes": {mdid: volumename},

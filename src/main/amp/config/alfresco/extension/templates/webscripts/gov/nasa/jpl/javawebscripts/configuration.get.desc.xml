@@ -19,7 +19,7 @@
 		<format default="json">any</format>
 		<authentication>user</authentication>
 		<transaction allow="readonly">required</transaction>
-		<family>EMS Java Webscripts</family>
+		<family>EMS Java Read Webscripts</family>
 		<args>
 			<arg>
 				<name>siteName</name>

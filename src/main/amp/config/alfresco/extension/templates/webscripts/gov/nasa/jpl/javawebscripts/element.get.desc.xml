@@ -2,23 +2,7 @@
   <shortname>Get Element</shortname> 
   <description>
   	Get element information.
-  </description>
-  <url>/javawebscripts/elements/{elementid}?recurse={recurse?}</url>
-  <format default="json">any</format> 
-  <authentication>user</authentication> 
-  <transaction allow="readonly">required</transaction>
-  <family>EMS Java Read Webscripts</family>
-  <args>
-  	<arg>
-  		<name>recurse</name>
-  		<description>
-  		If true, returns all the children elements (contained).
-  		</description>
-  	</arg>
-  	<arg>
-  		<name>posted content</name>
-  		<description>The request body of the post as json:
-  		{
+  	{
   			"elements": [
   				{
   					"id": elementId,
@@ -48,6 +32,17 @@
   				...
   			]
   		}
+  </description>
+  <url>/javawebscripts/elements/{elementid}?recurse={recurse?}</url>
+  <format default="json">any</format> 
+  <authentication>user</authentication> 
+  <transaction allow="readonly">required</transaction>
+  <family>EMS Java Read Webscripts</family>
+  <args>
+  	<arg>
+  		<name>recurse</name>
+  		<description>
+  		If true, returns all the children elements (contained).
   		</description>
   	</arg>
   </args>

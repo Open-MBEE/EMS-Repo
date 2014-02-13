@@ -1,13 +1,64 @@
 <webscript>
 <shortname>Get Product</shortname>
     <description>
-    See newview.post.desc.xml for format. 
-  	</description>
+		{
+  			"views": 
+  				[ {
+  					"id": elementId,
+  					"displayedElements": [elementId, ...],
+  					"allowedElements": [elementId, ..],
+  					"childrenViews": [viewId, ..],
+  					"comments": [commentId, ..],
+  				 	"contains": [
+  				 		{
+  				 			"type": Paragraph", 
+  				 			"sourceType": "reference"|"text",
+  				 			
+  				 			//*** if sourceType is reference ***/
+  				 			"source": elementId, 
+  				 			"sourceProperty": "documentation"|"name"|"value", 
+  				 			
+  				 			//*** if sourceType is text **/
+  				 			"text": text
+  				 		},
+  				 		{
+  				 			"type": "Table", 
+  				 			"title": title, 
+  				 			"body": [[{
+  				 				"content": [ //this allows multiple things in a cell
+  				 					{
+  				 						"type": "Paragraph"|"List", 
+  				 						(see above...)
+  				 					}, ...
+  				 				],
+  				 				//** optional **/
+  				 				"colspan": colspan, 
+  				 				"rowspan": rowspan
+  				 			}, ...], ...], 
+  				 			"header": same as body, 
+  				 			//** optional, probably translate to table class if user wants to customize css? **/
+  				 			"style": style
+  				 		},
+  				 		{
+  				 			"type": "List",
+  				 			"list": [
+  				 				[{ //each list item can have multiple things, Table in a list may not be supported
+  				 					"type": "Paragraph"/"List"/"Table",
+  				 					(see above...)
+  				 				}, ...], ...
+  				 			],
+  				 			"ordered": true/false
+  				 		}, ...  
+  				 	],
+  				}
+  			
+			]
+  		}  	</description>
 		<url>/javawebscripts/products/{id}</url>
 		<format default="json">any</format>
 		<authentication>user</authentication>
 		<transaction allow="readonly">required</transaction>
-		<family>EMS Java Webscripts</family>
+		<family>EMS Java Read Webscripts</family>
 		<args>
 			<arg>
 				<name>id</name>
