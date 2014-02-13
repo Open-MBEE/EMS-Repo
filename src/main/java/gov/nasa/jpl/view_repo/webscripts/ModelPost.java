@@ -740,7 +740,8 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
                 foundElements.put(pkgName, reifiedNode);
-                node.createOrUpdateChildAssociation(reifiedNode, Acm.ACM_REIFIED_CONTAINMENT);
+                // this reification containment association is more trouble than it's worth...
+//                node.createOrUpdateChildAssociation(reifiedNode, Acm.ACM_REIFIED_CONTAINMENT);
             }
         }
 
