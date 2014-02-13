@@ -440,19 +440,20 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 <script type="text/javascript">
 $(document).ready(function() {
 	$('a.submit-logout').click(function() {
+		alert('Logged out successfully. Access requires reauthentication.');
 		var userAgent = navigator.userAgent.toLowerCase();
 		if (userAgent.indexOf('ie') >= 0) {
 		   document.execCommand("ClearAuthenticationCache", "false");
-		   window.location = '${url.context}/service/logout';
+		   window.location = '${url.full}';
 		} else if (userAgent.indexOf('chrome') >= 0 || userAgent.indexOf('firefox') >= 0 || userAgent.indexOf('safari') >= 0) {
 				$.ajax({
 					type: 'GET',
 					url: '${url.context}/service/logout',
 					success: function (data) {
-						window.location = '${url.full}'
+						window.location.replace('${url.full}');
 					},
 					error: function(data) {
-						window.location = '${url.full}';
+						window.location.replace('${url.full}');
 					},
 					username: 'hello',
 					password: 'goodbye'
@@ -1750,8 +1751,8 @@ var search = _.debounce(
     return;
   }
 
-  // tokenize the search
-  q = q.replace('"',"");
+  // tokenize the search (to lower case so we're case insensitive matching how things are placed into index)
+  q = q.toLowerCase().replace('"',"");
   var split = q.split(" ");
   var selector = "";
 
