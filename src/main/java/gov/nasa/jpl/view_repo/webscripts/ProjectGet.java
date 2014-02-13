@@ -38,7 +38,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -99,7 +98,7 @@ public class ProjectGet extends AbstractJavaWebScript {
     }
 
     /**
-     * G the project specified by the JSONObject
+     * Get the project specified by the JSONObject
      * 
      * @param projectId
      *            Project ID
@@ -109,19 +108,29 @@ public class ProjectGet extends AbstractJavaWebScript {
      * @throws JSONException 
      */
     private JSONObject handleProject(String projectId, String siteName) throws JSONException {
-        EmsScriptNode siteNode = new EmsScriptNode(services.getSiteService().getSite(siteName).getNodeRef(), services, response);
+        EmsScriptNode projectNode;
+        JSONObject json = null;
         
-        EmsScriptNode projectNode = siteNode.childByNamePath("ViewEditor/" + projectId);
-        if (projectNode == null) {
-            log(LogLevel.ERROR, "Could not find project", HttpServletResponse.SC_NOT_FOUND);
-            return null;
+        if (siteName == null) {
+            projectNode = findScriptNodeByName(projectId);
+        } else {
+            EmsScriptNode siteNode = new EmsScriptNode(services.getSiteService().getSite(siteName).getNodeRef(), services, response);
+            projectNode = siteNode.childByNamePath("ViewEditor/" + projectId);
+            if (projectNode == null) {
+                log(LogLevel.ERROR, "Could not find project", HttpServletResponse.SC_NOT_FOUND);
+                return null;
+            }
         }
-
-        log(LogLevel.INFO, "Found project", HttpServletResponse.SC_OK);
-        JSONObject json = new JSONObject();
-        json.put(Acm.JSON_ID, projectId);
-        json.put(Acm.JSON_NAME, projectNode.getProperty(Acm.CM_TITLE));
-        json.put(Acm.JSON_PROJECT_VERSION, projectNode.getProperty(Acm.ACM_PROJECT_VERSION));
+        
+        if (checkPermissions(projectNode, PermissionService.READ)) {
+            log(LogLevel.INFO, "Found project", HttpServletResponse.SC_OK);
+            json = new JSONObject();
+            json.put(Acm.JSON_ID, projectId);
+            json.put(Acm.JSON_NAME, projectNode.getProperty(Acm.CM_TITLE));
+            json.put(Acm.JSON_PROJECT_VERSION, projectNode.getProperty(Acm.ACM_PROJECT_VERSION));
+        } else {
+            log(LogLevel.ERROR, "No permissions to read", HttpServletResponse.SC_UNAUTHORIZED);
+        }
         
         return json;
     }
@@ -132,22 +141,6 @@ public class ProjectGet extends AbstractJavaWebScript {
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
         if (!checkRequestContent(req)) {
-            return false;
-        }
-
-        // check site exists
-        if (!checkRequestVariable(siteName, SITE_NAME)) {
-            return false;
-        }
-
-        // get the site
-        SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-        if (!checkRequestVariable(siteInfo, "Site")) {
-            return false;
-        }
-
-        // check permissions
-        if (!checkPermissions(siteInfo.getNodeRef(), PermissionService.READ)) {
             return false;
         }
 
