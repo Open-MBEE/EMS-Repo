@@ -40,7 +40,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
       </div>
 
       <ul class="nav navbar-nav pull-right">
-       <li><a href="${url.context}/service/logout?next=${url.full}">logout</a></li>
+       <li><a href="#" class="submit-logout">logout</a></li>
       </ul>
 
       <ul class="nav navbar-nav pull-right">
@@ -437,6 +437,30 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 <script src="${url.context}/scripts/vieweditor/vendor/svgedit/embedapi.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/css_browser_selector.js"></script>
 <script type="text/javascript" src="${url.context}/scripts/vieweditor/vendor/Ractive.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$('a.submit-logout').click(function() {
+		var userAgent = navigator.userAgent.toLowerCase();
+		if (userAgent.indexOf('ie') >= 0) {
+		   document.execCommand("ClearAuthenticationCache", "false");
+		   window.location = '${url.context}/service/logout';
+		} else if (userAgent.indexOf('chrome') >= 0 || userAgent.indexOf('firefox') >= 0 || userAgent.indexOf('safari') >= 0) {
+				$.ajax({
+					type: 'GET',
+					url: '${url.context}/service/logout',
+					success: function (data) {
+						window.location = '${url.full}'
+					},
+					error: function(data) {
+						window.location = '${url.full}';
+					},
+					username: 'hello',
+					password: 'goodbye'
+				});
+		}
+	});
+});
+</script>
 <script type="text/javascript">var app = new Ractive({ el : "main", template : "#template", data : pageData });</script>
 <script type="text/javascript">
 var context = window;
@@ -456,14 +480,14 @@ var ajaxWithHandlers = function(options, successMessage, errorMessage) {
     .done(function(data) { 
       if (data.indexOf("html") != -1) {
         alert("Not saved! You've been logged out, login in a new window first!");
-          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
+          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/service/ui/relogin");
       }
       app.fire('message', 'success', successMessage); })
     .fail(function(e) { 
       if (e && e.status && e.status === 200) {
         if (e.responseText.indexOf("html") != -1) {
           alert("Not saved! You've been logged out, login in a new window first!");
-          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
+          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/service/ui/relogin");
         }
         // we got a 200 back, but json parsing might have failed
         return;
@@ -482,7 +506,7 @@ var ajaxWithHandlers = function(options, successMessage, errorMessage) {
 app.on('saveView', function(viewId, viewData) {
   var jsonData = JSON.stringify(viewData);
   console.log("Saving ", jsonData);
-  //alfresco/wcs/javawebscripts/views/id/elements
+  //alfresco/service/javawebscripts/views/id/elements
   var url = absoluteUrl('/javawebscripts/views/' + viewId + '/elements');
   ajaxWithHandlers({ 
     type: "POST",
@@ -1919,7 +1943,7 @@ console.log("");
             success: function(data) {
                 if (data.indexOf("html") != -1) 
                   alert("You've been logged out! Login in a new window first!");
-          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
+          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/service/ui/relogin");
             },
             complete: poll,
             timeout: 5000

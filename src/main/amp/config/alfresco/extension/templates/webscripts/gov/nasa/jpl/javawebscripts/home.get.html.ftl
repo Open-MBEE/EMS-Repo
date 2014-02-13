@@ -39,7 +39,7 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
 			</div>
 
 	      <ul class="nav navbar-nav pull-right">
-	       <li><a href="${url.context}/service/logout?next=${url.full}">logout</a></li>
+       		<li><a href="#" class="submit-logout">logout</a></li>
 	      </ul>
 
 			<!-- 
@@ -187,6 +187,30 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
 <script src="${url.context}/scripts/vieweditor/vendor/moment.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/bootstrap.min.js"></script>
 <script type="text/javascript" src="${url.context}/scripts/vieweditor/vendor/Ractive.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$('a.submit-logout').click(function() {
+		var userAgent = navigator.userAgent.toLowerCase();
+		if (userAgent.indexOf('ie') >= 0) {
+		   document.execCommand("ClearAuthenticationCache", "false");
+		   window.location = '${url.context}/service/logout';
+		} else if (userAgent.indexOf('chrome') >= 0 || userAgent.indexOf('firefox') >= 0 || userAgent.indexOf('safari') >= 0) {
+				$.ajax({
+					type: 'GET',
+					url: '${url.context}/service/logout',
+					success: function (data) {
+						window.location = '${url.full}'
+					},
+					error: function(data) {
+						window.location = '${url.full}';
+					},
+					username: 'hello',
+					password: 'goodbye'
+				});
+		}
+	});
+});
+</script>
 <script type="text/javascript">var app = new Ractive({ el : "main", template : "#template", data : pageData });</script>
 <script type="text/javascript">
 var context = window;
