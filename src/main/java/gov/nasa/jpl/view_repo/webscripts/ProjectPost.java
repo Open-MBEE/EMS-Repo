@@ -85,23 +85,61 @@ public class ProjectPost extends AbstractJavaWebScript {
 		parseRequestVariables(req);
 		try {
 			if (validateRequest(req, status)) {
-				statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId, siteName);
+			    if (siteName != null) {
+			        statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId, siteName);
+			    } else {
+			        statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId);
+			    }
 			} else {
 				statusCode = responseStatus.getCode();
 			}
-		} catch (Exception e) {
-			// this is most likely null pointer from poorly undefined request parameters
-			// TODO check permissions on Project updating 
-			e.printStackTrace();
-			log(LogLevel.ERROR, "Invalid request.\n", HttpServletResponse.SC_BAD_REQUEST);
-		}
+        } catch (JSONException e) {
+            log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
+        } catch (Exception e) {
+            log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
+        }
 
 		status.setCode(statusCode);
 		model.put("res", response.toString());
 		return model;
 	}
 
-	/**
+	private int updateOrCreateProject(JSONObject jsonObject, String projectId) throws JSONException {
+	      EmsScriptNode projectNode = findScriptNodeByName(projectId);
+	      
+	      if (projectNode == null) {
+	          log(LogLevel.ERROR, "Could not find project\n", HttpServletResponse.SC_NOT_FOUND);
+	          return HttpServletResponse.SC_NOT_FOUND;
+	      }
+	      
+	      String projectName = null;
+        if (jsonObject.has(Acm.JSON_NAME)) {
+            projectName = jsonObject.getString(Acm.JSON_NAME);
+        }
+        String projectVersion = null;
+        if (jsonObject.has(Acm.JSON_PROJECT_VERSION)) {
+            projectVersion = jsonObject.getString(Acm.JSON_PROJECT_VERSION);
+        }
+        if (fix) {
+            if (checkPermissions(projectNode, PermissionService.WRITE)){ 
+                projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
+                if (projectName != null) {
+                    projectNode.createOrUpdateProperty(Acm.CM_TITLE, projectName);
+                    projectNode.createOrUpdateProperty(Acm.ACM_NAME, projectName);
+                }
+                if (projectVersion != null) {
+                    projectNode.createOrUpdateProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
+                }
+                log(LogLevel.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
+            }
+        }
+        
+        return HttpServletResponse.SC_OK;
+    }
+
+    /**
 	 * Update or create the project specified by the JSONObject
 	 * @param jsonObject	JSONObject that has the name of the project
 	 * @param projectId		Project ID
@@ -141,7 +179,10 @@ public class ProjectPost extends AbstractJavaWebScript {
 		
 		// create project if doesn't exist or update if fix is specified 
 		EmsScriptNode projectNode = findScriptNodeByName(projectId);
-		String projectName = jsonObject.getString(Acm.JSON_NAME);
+		String projectName = null;
+		if (jsonObject.has(Acm.JSON_NAME)) {
+		    projectName = jsonObject.getString(Acm.JSON_NAME);
+		}
 		String projectVersion = null;
 		if (jsonObject.has(Acm.JSON_PROJECT_VERSION)) {
 		    projectVersion = jsonObject.getString(Acm.JSON_PROJECT_VERSION);
@@ -149,8 +190,10 @@ public class ProjectPost extends AbstractJavaWebScript {
 		if (projectNode == null) {
 			projectNode = modelContainerNode.createFolder(projectId, Acm.ACM_PROJECT);
 			projectNode.setProperty(Acm.CM_TITLE, projectName);
-			projectNode.setProperty(Acm.ACM_NAME, projectName);
 			projectNode.setProperty(Acm.ACM_ID, projectId);
+            if (projectName != null) {
+                projectNode.setProperty(Acm.ACM_NAME, projectName);
+            }
 			if (projectVersion != null) {
 			    projectNode.setProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
 			}
@@ -161,9 +204,11 @@ public class ProjectPost extends AbstractJavaWebScript {
 				log(LogLevel.INFO, "Project deleted.\n", HttpServletResponse.SC_OK);
 			} else if (fix) {
 				if (checkPermissions(projectNode, PermissionService.WRITE)){ 
-					projectNode.createOrUpdateProperty(Acm.CM_TITLE, projectName);
-					projectNode.createOrUpdateProperty(Acm.ACM_NAME, projectName);
 					projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
+					if (projectName != null) {
+                        projectNode.createOrUpdateProperty(Acm.CM_TITLE, projectName);
+                        projectNode.createOrUpdateProperty(Acm.ACM_NAME, projectName);
+					}
 		            if (projectVersion != null) {
 		                projectNode.createOrUpdateProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
 		            }
@@ -195,9 +240,9 @@ public class ProjectPost extends AbstractJavaWebScript {
 		}
 		
 		// check site exists
-		if (!checkRequestVariable(siteName, SITE_NAME)) {
-			return false;
-		} 
+//		if (!checkRequestVariable(siteName, SITE_NAME)) {
+//			return false;
+//		} 
 		
 		// get the site
 //		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
