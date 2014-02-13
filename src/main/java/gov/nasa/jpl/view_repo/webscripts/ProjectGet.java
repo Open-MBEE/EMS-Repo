@@ -82,12 +82,13 @@ public class ProjectGet extends AbstractJavaWebScript {
             if (validateRequest(req, status)) {
                 json = handleProject(projectId, siteName);
             }
-        } catch (Exception e) {
-            // this is most likely null pointer from poorly undefined request parameters
+        } catch (JSONException e) {
+            log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             e.printStackTrace();
-            log(LogLevel.ERROR, "Could not create JSON.\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
         }
-
         if (json == null) {
             model.put("res", response.toString());
         } else {

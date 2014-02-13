@@ -7,7 +7,7 @@
     		 "name": configurationName,
     		 "description": configurationDescription,
     		 "snapshots": [
-    		 	{ "url": urlSnapshot
+    		 	{ "url": snapshotUrl
     		 	  "name": nameOfDocument
     		 	}
     		 ]

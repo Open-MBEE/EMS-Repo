@@ -46,7 +46,13 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ModelSearch extends ModelGet {
-	protected final String[] searchTypes = {"@sysml\\:documentation:\"", "@sysml\\:name:\"", "@sysml\\:id:\"", "@sysml\\:string:\""};
+	protected final String[] searchTypes = {
+	        "@sysml\\:documentation:\"", 
+	        "@sysml\\:name:\"", 
+	        "@sysml\\:id:\"", 
+	        "@sysml\\:string:\"",
+	        "@sysml\\:body:\""
+	        };
 	
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {

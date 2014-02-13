@@ -50,6 +50,11 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+/**
+ * Handle the creation of configuration sets for a particular site
+ * @author cinyoung
+ *
+ */
 public class ConfigurationPost extends AbstractJavaWebScript {
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
@@ -71,6 +76,11 @@ public class ConfigurationPost extends AbstractJavaWebScript {
         return model;
     }
 
+    /**
+     * Save off the configuration set and kick off snapshot creation in background
+     * @param req
+     * @param status
+     */
     private void saveAndStartAction(WebScriptRequest req, Status status) {
         String siteName; 
         String jobName = null;

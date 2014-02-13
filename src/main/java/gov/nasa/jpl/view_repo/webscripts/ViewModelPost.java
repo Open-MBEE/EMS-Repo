@@ -41,6 +41,7 @@ import javax.transaction.UserTransaction;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
@@ -78,9 +79,11 @@ public class ViewModelPost extends ModelPost {
         
         try {
             createOrUpdateModel(req, status);
+        } catch (JSONException e) {
+            log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
+            e.printStackTrace();
         } catch (Exception e) {
-            log(LogLevel.ERROR, "JSON malformed\n",
-                    HttpServletResponse.SC_BAD_REQUEST);
+            log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             e.printStackTrace();
         }
 

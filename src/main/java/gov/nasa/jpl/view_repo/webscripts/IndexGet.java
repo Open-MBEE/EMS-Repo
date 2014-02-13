@@ -45,6 +45,15 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+/**
+ * Handler for rendering custom Document landing page
+ * 
+ * Looks for the "index.json" inside of the Site directory and renders that.
+ * If file isn't found, defaults to ProductListGet.
+ * 
+ * @author cinyoung
+ *
+ */
 public class IndexGet extends AbstractJavaWebScript {
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
@@ -88,6 +97,12 @@ public class IndexGet extends AbstractJavaWebScript {
         return model;
     }
 
+    /**
+     * Retrieve the index.json file if it exists and parse into JSONObject
+     * @param site
+     * @return
+     * @throws JSONException
+     */
     private JSONObject getIndexJson(EmsScriptNode site) throws JSONException {
         EmsScriptNode index = site.childByNamePath("index.json");
         if (index == null) {

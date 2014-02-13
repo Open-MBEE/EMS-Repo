@@ -49,6 +49,11 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+/**
+ * Retrieve all Configuration Sets for a site
+ * @author cinyoung
+ *
+ */
 public class ConfigurationGet extends AbstractJavaWebScript {
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
@@ -75,7 +80,6 @@ public class ConfigurationGet extends AbstractJavaWebScript {
                 model.put("res", jsonObject.toString(4));
                 model.put("title", req.getServiceMatch().getTemplateVars().get(SITE_NAME));
             } catch (JSONException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         } else {
@@ -87,6 +91,12 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         return model;
     }
 
+    /**
+     * Create JSONObject of Configuration sets
+     * @param req
+     * @return
+     * @throws JSONException
+     */
     public JSONObject handleConfiguration(WebScriptRequest req) throws JSONException {
         String siteName; 
         SiteInfo siteInfo; 
@@ -119,6 +129,13 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         return jsonObject;
     }
     
+    /**
+     * Given a configuration node, convert to JSON
+     * @param config
+     * @param contextPath
+     * @return
+     * @throws JSONException
+     */
     private JSONObject getConfigJson(EmsScriptNode config, String contextPath) throws JSONException {
         JSONObject json = new JSONObject();
         JSONArray snapshotsJson = new JSONArray();
