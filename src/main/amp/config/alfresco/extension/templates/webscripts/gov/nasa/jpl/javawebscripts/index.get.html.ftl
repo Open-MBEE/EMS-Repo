@@ -190,24 +190,7 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
 <script type="text/javascript">
 $(document).ready(function() {
 	$('a.submit-logout').click(function() {
-		var userAgent = navigator.userAgent.toLowerCase();
-		if (userAgent.indexOf('ie') >= 0) {
-		   document.execCommand("ClearAuthenticationCache", "false");
-		   window.location = '${url.context}/service/logout';
-		} else if (userAgent.indexOf('chrome') >= 0 || userAgent.indexOf('firefox') >= 0 || userAgent.indexOf('safari') >= 0) {
-				$.ajax({
-					type: 'GET',
-					url: '${url.context}/service/logout',
-					success: function (data) {
-						window.location = '${url.full}'
-					},
-					error: function(data) {
-						window.location = '${url.full}';
-					},
-					username: 'hello',
-					password: 'goodbye'
-				});
-		}
+		window.location.replace('${url.context}/service/logout/info?next=${url.full}');
 	});
 });
 </script>
