@@ -440,25 +440,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 <script type="text/javascript">
 $(document).ready(function() {
 	$('a.submit-logout').click(function() {
-		alert('Logged out successfully. Access requires reauthentication.');
-		var userAgent = navigator.userAgent.toLowerCase();
-		if (userAgent.indexOf('ie') >= 0) {
-		   document.execCommand("ClearAuthenticationCache", "false");
-		   window.location = '${url.full}';
-		} else if (userAgent.indexOf('chrome') >= 0 || userAgent.indexOf('firefox') >= 0 || userAgent.indexOf('safari') >= 0) {
-				$.ajax({
-					type: 'GET',
-					url: '${url.context}/service/logout',
-					success: function (data) {
-						window.location.replace('${url.full}');
-					},
-					error: function(data) {
-						window.location.replace('${url.full}');
-					},
-					username: 'hello',
-					password: 'goodbye'
-				});
-		}
+		window.location.replace('${url.context}/service/logout/info?next=${url.full}');
 	});
 });
 </script>
