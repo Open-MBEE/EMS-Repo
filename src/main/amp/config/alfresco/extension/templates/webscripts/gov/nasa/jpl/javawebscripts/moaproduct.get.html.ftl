@@ -94,10 +94,10 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
     {{#viewTree.orderedChildren}}
             <a name="{{id}}" style="display: block; position:relative; top:-60px; "></a>
             {{#(depth == 0) }}
-              {{{("<h1 class='numbered-header'><span class='"+class+" section-header' data-property='NAME' data-section-id='" + id + "'>" +  name + "</span></h1>" )}}}
+              {{{("<h1 class='numbered-header'><span class='"+class+" section-header' data-property='name' data-section-id='" + id + "'>" +  name + "</span></h1>" )}}}
             {{/(depth == 0) }}
             {{^(depth == 0) }}
-              {{{("<h"+ (depth+1) + " class='numbered-header "+class+"'><span class='section-header' data-section-id='" + id + "'><span class='editable' data-property='NAME' data-mdid='" + id + "'>" +  name + "</span></span></h"+ (depth+1) + ">" )}}}
+              {{{("<h"+ (depth+1) + " class='numbered-header "+class+"'><span class='section-header' data-section-id='" + id + "'><span class='editable' data-property='name' data-mdid='" + id + "'>" +  name + "</span></span></h"+ (depth+1) + ">" )}}}
             {{/(depth == 0) }}
            
             <div class="author {{ class }}">Edited by <span class="author-name" data-mdid="{{id}}">{{ viewData.author }}</span></div>
