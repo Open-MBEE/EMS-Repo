@@ -63,8 +63,8 @@
 					},
 					error: function(data) {
 					},
-					username: 'hello',
-					password: 'goodbye'
+					username: '',
+					password: 'badpassword'
 				});
 		}
 	});
