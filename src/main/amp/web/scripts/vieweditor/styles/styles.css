@@ -336,15 +336,18 @@ h1 {
 }
 
 [data-property=documentation].editable, [data-property=documentation].editable.reference * {
-	background: #F0F0F0;
+	/*background: #F0F0F0;*/
+	/*border-bottom: 1px solid green;*/
 }
 
 [data-property=name].editable, [data-property=name].editable.reference * {
-	background: #E6E6FA;
+	/*background: #E6E6FA;*/
+	border-bottom: 1px solid #E099FF;
 }
 
 [data-property=value].editable, [data-property=value].editable.reference * {
-	background: lightgreen;
+	/*background: lightgreen;*/
+	border-bottom: 1px solid #E099FF;
 }
 /*
 .editable.reference:empty
@@ -525,6 +528,26 @@ h1 {
 [data-property=documentation].editable.reference .transclusion:hover {
 	background: lightgrey;	
 }
+
+
+[data-property=name].editable.reference .transclusion {
+	border-bottom: 1px solid blue;
+	/*background: lightgrey;*/
+}
+
+[data-property=name].editable.reference .transclusion:hover {
+	background: lightgrey;	
+}
+
+[data-property=value].editable.reference .transclusion {
+	border-bottom: 1px solid blue;
+	/*background: lightgrey;*/
+}
+
+[data-property=value].editable.reference .transclusion:hover {
+	background: lightgrey;	
+}
+
 
 /*
 .transclusion .items>div .edit
