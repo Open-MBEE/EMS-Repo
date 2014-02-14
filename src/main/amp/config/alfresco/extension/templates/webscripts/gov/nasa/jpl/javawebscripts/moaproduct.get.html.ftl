@@ -335,7 +335,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
         <!-- <option value="history">History</option> -->
         <!-- <option value="references">References</option> -->
         <option value="transclusionList">Cross reference</option>
-        <option value="export">Configurations</option>
+        <option value="export">Model Versions</option>
       </select>
 
       <div id="document-info" class="inspector" style="height:100%;">
@@ -396,7 +396,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
           <li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>         
           <li><button type="button" class="btn btn-default" proxy-click="printPreview">Print Preview</button></li>
           {{^viewTree.snapshot}}
-          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Configuration Seal</button></li>   
+          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Mark Model Version </button></li>   
           {{/viewTree.snapshot}}       
         </ul>
 
@@ -617,7 +617,10 @@ window.pageExitManager = function()
     },
     editorClosed : function() {
       numOpenEditors -= 1;
-      if(numOpenEditors == 0)
+      if(numOpenEditors < 0) {
+        numOpenEditors = 0;
+      }
+      if(numOpenEditors === 0)
       {
         window.onbeforeunload = null;
       }
@@ -887,37 +890,38 @@ app.spanContentToValue = function(content, vtree, depth) {
         return curElem.mdid === id;
       })
       elem = elem[0];
-      
-      var innerVal = "Not Found";
-      if(t === "name"){
-        innerVal = elem.name;
-      } else if (t === "documentation") {
-        innerVal = elem.documentation;//"ASDFASF";//elem.documentation.text();
-      } else if (t === "value") {
-        innerVal = elem.value;
-      }
+      if(elem !== null && elem !== undefined) {
+        var innerVal = "Not Found";
+        if(t === "name"){
+          innerVal = elem.name;
+        } else if (t === "documentation") {
+          innerVal = elem.documentation;//"ASDFASF";//elem.documentation.text();
+        } else if (t === "value") {
+          innerVal = elem.value;
+        }
 
-      // TODO:  If the transcluded element has html in it, then we can't just include it in a span. 
-      // Using a div or p tag for transcluded elements creates its own set of joys because jquery
-      // has its own ideas about how things should change when these elements are nested.          
-      if(depth <= 3) {
-        innerVal = app.spanContentToValue(innerVal, vtree, depth + 1);
-      } else {
-        innerVal = " ERROR_MAX_NESTED_REF_DEPTH "
-      }
-      var docDom = $("<div>" + innerVal + "</div>");
-      //console.log(docDom.find(".transclusion"))
-      innerVal = docDom.text();
+        // TODO:  If the transcluded element has html in it, then we can't just include it in a span. 
+        // Using a div or p tag for transcluded elements creates its own set of joys because jquery
+        // has its own ideas about how things should change when these elements are nested.          
+        if(depth <= 3) {
+          innerVal = app.spanContentToValue(innerVal, vtree, depth + 1);
+        } else {
+          innerVal = " ERROR_MAX_NESTED_REF_DEPTH "
+        }
+        var docDom = $("<div>" + innerVal + "</div>");
+        //console.log(docDom.find(".transclusion"))
+        innerVal = docDom.text();
 
-      // Set the hovertext to display the fully qualified name if it exists
-      var hoverText = "[" + t + "]";
-      if(elem.qualifiedName)
-      {
-        hoverText = elem.qualifiedName + " " + hoverText;
-      }
-      dom.attr("title", hoverText);
+        // Set the hovertext to display the fully qualified name if it exists
+        var hoverText = "[" + t + "]";
+        if(elem.qualifiedName)
+        {
+          hoverText = elem.qualifiedName + " " + hoverText;
+        }
+        dom.attr("title", hoverText);
 
-      dom.html(innerVal);
+        dom.html(innerVal);
+      }
      
   });
   return contentDom.html();
@@ -1341,7 +1345,7 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
     child.content = "";
     child.depth = depth;
     child.class = child.viewData.noSection ? 'no-section' : '';
-    child.viewData.modifiedFormatted = app.formatDate(parseDate(child.viewData.modified));
+    child.viewData.modifiedFormatted = app.formatDate(parseDate(child.viewData.lastModified));
 
     // console.log("contains:", child.viewData.contains);
     for (var cIdx in child.viewData.contains) {
