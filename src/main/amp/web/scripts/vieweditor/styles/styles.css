@@ -548,6 +548,11 @@ h1 {
 	background: lightgrey;	
 }
 
+#saveAll {
+	display: none;
+	float: right;
+}
+
 
 /*
 .transclusion .items>div .edit

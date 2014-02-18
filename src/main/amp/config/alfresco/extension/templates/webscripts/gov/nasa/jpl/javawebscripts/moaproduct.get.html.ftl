@@ -91,6 +91,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 
   <div id="the-document">
 
+    <button type="button" id="saveAll" class="btn btn-primary">Save all</button>
     {{#viewTree.orderedChildren}}
             <a name="{{id}}" style="display: block; position:relative; top:-60px; "></a>
             {{#(depth == 0) }}
@@ -280,7 +281,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 
               <div class="btn-group pull-right">
                 <button type="button" class="btn btn-default" proxy-click="cancelEditing">Cancel</button>
-                <button type="button" class="btn btn-primary" proxy-click="saveSection:{{ id }}">Save changes</button>
+                <button type="button" class="btn btn-primary saveSection" proxy-click="saveSection:{{ id }}">Save changes</button>
               </div>
             </div>
             <div id="section{{ id }}" class="section page editing" data-section-id="{{ id }}" contenteditable="false" proxy-dblclick="sectionDoubleClick">
@@ -595,6 +596,7 @@ window.pageExitManager = function()
   return {
     editorOpened : function() {
       numOpenEditors += 1;
+      app.updateSaveAllButton(numOpenEditors);
       window.onbeforeunload = confirmOnPageExit;
     },
     editorClosed : function() {
@@ -606,10 +608,22 @@ window.pageExitManager = function()
       {
         window.onbeforeunload = null;
       }
+      app.updateSaveAllButton(numOpenEditors);
     }
   }
-
 }();
+
+app.updateSaveAllButton = function(n) {
+  if(n === 0) {
+    $("#saveAll").hide();
+  } else {
+    $("#saveAll").show();
+    // When clicked, click all save section buttons
+    $("#saveAll").click( function() {
+      $(".saveSection").click(); 
+    });
+  }
+}
 
 app.transToText = function transToText(s) {
   var t = "[";
