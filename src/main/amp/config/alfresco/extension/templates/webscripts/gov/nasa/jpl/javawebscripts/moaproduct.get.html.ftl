@@ -65,19 +65,103 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 
     </nav>
     <div id="ie-alert" class="alert alert-warning alert-dismissable ie_warning">
-      <button type="button" class="close" proxy-click="hideIEMessage" aria-hidden="true">&times;</button>
-      <span class="message">Internet Explorer is not officially supported by View Editor.  Please use Firefox.</span>
+      <button type="button" class="close no-print" proxy-click="hideIEMessage" aria-hidden="true">&times;</button>
+      <span class="message no-print">Internet Explorer is not officially supported by View Editor.  Please use Firefox.</span>
     </div>
 
     <div id="top-alert" class="alert alert-danger alert-dismissable" style="display:none">
-      <button type="button" class="close" proxy-click="hideErrorMessage" aria-hidden="true">&times;</button>
-      <span class="message"></span>
+      <button type="button" class="close no-print" proxy-click="hideErrorMessage" aria-hidden="true">&times;</button>
+      <span class="message no-print"></span>
     </div>
 
     <div class="wrapper">
       <div class="row split-view">
 
-<div class="col-xs-8">
+
+  <div class="col-xs-3">
+    <div class="toggled-inspectors inspectors affix page  no-print" style="height:80%;">
+
+      <select class="form-control" value="{{ currentInspector }}">
+        <option value="document-info">Table of Contents</option>
+        <!-- <option value="history">History</option> -->
+        <!-- <option value="references">References</option> -->
+        <option value="transclusionList">Cross reference</option>
+        <option value="export">Model Versions</option>
+      </select>
+
+      <div id="document-info" class="inspector" style="height:100%;">
+        <h3>Document info</h3>
+<!--         <dl>
+          <dt>Author</dt><dd>Chris Delp</dd>
+          <dt>Last modified</dt><dd>8/14/13 2:04pm</dd>
+        </dl>
+ -->    
+        <div id="toc" style="height:100%;"></div>
+      </div>
+
+      <div id="transclusionList" class="inspector" style="height:100%;">
+        <h3>Elements</h3>
+        <input class="form-control" type="text" placeholder="search" id="search" value="{{transcludableQuery}}" />
+        <style id="search_style"></style>
+        <div class="transclusionList" style="display:block; height:80%; overflow-y: auto">
+          <div class="items">
+            {{#viewTree.elements}}
+              {{#name}}
+              <div class="body searchable" data-search-index="{{searchIndex}}">
+                <div class="qualifiedName" title="{{qualifiedName}}">{{qualifiedNameParentPreview}}</div>
+                <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable name">{{name}}</div>
+                {{#documentation}}
+                  <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable documentation">{{documentationPreview}}</div>
+                {{/documentation}}
+                {{#value}}
+                  <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable dvalue">{{value}}</div>
+                {{/value}}
+              </div>
+              {{/name}}
+            {{/viewTree.elements}}
+          </div>
+        </div>
+      </div>
+
+      <div id="history" class="inspector" style="height:100%;">
+        <h3>History</h3>
+        <ul class="list-unstyled">
+          <li>v1 &mdash; Chris Delp</li>
+        </ul>
+      </div>
+
+<!--       <div id="references" class="inspector">
+        <h3>References</h3>
+        <ul>
+          {{#viewHierarchy.elements}}
+          <li>
+             {{ name }}
+          </li>
+          {{/viewHierarchy.elements}}
+        </ul>
+      </div>
+ -->
+      <div id="export" class="inspector" style="height:100%;">
+        <h3>Export</h3>
+        <ul class="list-unstyled">
+          <li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>         
+          <li><button type="button" class="btn btn-default" proxy-click="printPreview">Print Preview</button></li>
+          {{^viewTree.snapshot}}
+          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Mark Model Version </button></li>   
+          {{/viewTree.snapshot}}       
+        </ul>
+
+        <ul class="list-unstyled" style="display:block; height:50%; overflow-y: auto">
+        {{#viewTree.snapshots}}
+          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} &mdash; {{ creator }}</a></li>
+        {{/viewTree.snapshots}}
+        </ul>
+      </div>
+
+    </div>
+  </div>
+  
+<div class="col-xs-9">
 
 <!-- Modal -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -90,9 +174,19 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 </div><!-- /.modal -->
 
   <div id="the-document">
-
-    <button type="button" id="saveAll" class="btn btn-primary">Save all</button>
+    <div id="printTOC" class="print-only">
+      Table of Contents
+      <ul>
+      {{#viewTree.orderedChildren}}
+        {{^viewData.noSection}}
+          <li style="margin-left: {{(depth*20)}}px;">{{ name }}</li>
+        {{/viewData.noSection}}
+      {{/viewTree.orderedChildren}}
+      </ul>
+      </div>
+    <button type="button" id="saveAll" class="btn btn-primary no-print">Save all</button>
     {{#viewTree.orderedChildren}}
+      {{^viewData.noSection}}
             <a name="{{id}}" style="display: block; position:relative; top:-60px; "></a>
             {{#(depth == 0) }}
               {{{("<h1 class='numbered-header'><span class='"+class+" section-header' data-property='name' data-section-id='" + id + "'>" +  name + "</span></h1>" )}}}
@@ -101,14 +195,14 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
               {{{("<h"+ (depth+1) + " class='numbered-header "+class+"'><span class='section-header' data-section-id='" + id + "'><span class='editable' data-property='name' data-mdid='" + id + "'>" +  name + "</span></span></h"+ (depth+1) + ">" )}}}
             {{/(depth == 0) }}
            
-            <div class="author {{ class }}">Edited by <span class="author-name" data-mdid="{{id}}">{{ viewData.author }}</span></div>
-            <div class="modified {{ class }}" data-mdid="{{id}}">{{( viewData.modifiedFormatted )}}</div>
-             <a href="${'#'}{{id}}" title="permalink"><i class='glyphicon glyphicon-link'></i>&nbsp;</a>
-
+            <div class="no-print author {{ class }}">Edited by <span class="author-name" data-mdid="{{id}}">{{ viewData.author }}</span></div>
+            <div class="no-print modified {{ class }}" data-mdid="{{id}}">{{( viewData.modifiedFormatted )}}</div>
+             <a href="${'#'}{{id}}" title="permalink" class="no-print"><i class='glyphicon glyphicon-link'></i>&nbsp;</a>
+      {{/viewData.noSection}}
       <div class="page-sections {{ class }}">
         
         {{^(depth == 0) }}
-          <div class="section-wrapper" style="overflow-x: auto">
+          <div class="section-wrapper">
             
             <div class="section-actions pull-right btn-group no-print">
               {{^viewTree.snapshot}}
@@ -328,88 +422,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
   </div>
  </div> 
 
-  <div class="col-xs-4">
-    <div class="toggled-inspectors inspectors affix page col-xs-4 no-print" style="height:80%;">
 
-      <select class="form-control" value="{{ currentInspector }}">
-        <option value="document-info">Table of Contents</option>
-        <!-- <option value="history">History</option> -->
-        <!-- <option value="references">References</option> -->
-        <option value="transclusionList">Cross reference</option>
-        <option value="export">Model Versions</option>
-      </select>
-
-      <div id="document-info" class="inspector" style="height:100%;">
-        <h3>Document info</h3>
-<!--         <dl>
-          <dt>Author</dt><dd>Chris Delp</dd>
-          <dt>Last modified</dt><dd>8/14/13 2:04pm</dd>
-        </dl>
- -->    
-        <div id="toc" style="height:100%;"></div>
-      </div>
-
-      <div id="transclusionList" class="inspector" style="height:100%;">
-        <h3>Elements</h3>
-        <input class="form-control" type="text" placeholder="search" id="search" value="{{transcludableQuery}}" />
-        <style id="search_style"></style>
-        <div class="transclusionList" style="display:block; height:80%; overflow-y: auto">
-          <div class="items">
-            {{#viewTree.elements}}
-              {{#name}}
-              <div class="body searchable" data-search-index="{{searchIndex}}">
-                <div class="qualifiedName" title="{{qualifiedName}}">{{qualifiedNameParentPreview}}</div>
-                <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable name">{{name}}</div>
-                {{#documentation}}
-                  <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable documentation">{{documentationPreview}}</div>
-                {{/documentation}}
-                {{#value}}
-                  <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable dvalue">{{value}}</div>
-                {{/value}}
-              </div>
-              {{/name}}
-            {{/viewTree.elements}}
-          </div>
-        </div>
-      </div>
-
-      <div id="history" class="inspector" style="height:100%;">
-        <h3>History</h3>
-        <ul class="list-unstyled">
-          <li>v1 &mdash; Chris Delp</li>
-        </ul>
-      </div>
-
-<!--       <div id="references" class="inspector">
-        <h3>References</h3>
-        <ul>
-          {{#viewHierarchy.elements}}
-          <li>
-             {{ name }}
-          </li>
-          {{/viewHierarchy.elements}}
-        </ul>
-      </div>
- -->
-      <div id="export" class="inspector" style="height:100%;">
-        <h3>Export</h3>
-        <ul class="list-unstyled">
-          <li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>         
-          <li><button type="button" class="btn btn-default" proxy-click="printPreview">Print Preview</button></li>
-          {{^viewTree.snapshot}}
-          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Mark Model Version </button></li>   
-          {{/viewTree.snapshot}}       
-        </ul>
-
-        <ul class="list-unstyled" style="display:block; height:50%; overflow-y: auto">
-        {{#viewTree.snapshots}}
-          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} &mdash; {{ creator }}</a></li>
-        {{/viewTree.snapshots}}
-        </ul>
-      </div>
-
-    </div>
-  </div>
 
 
 </div>
@@ -1040,7 +1053,7 @@ app.on('elementDetails', function(evt) {
 
 // export.js
 
-app.data.printPreviewTemplate = "\n<html>\n\t<head>\n\t\t<style>img {max-width: 100%;}</style>\n\t\t<title>{{ documentTitle }}</title>\n\t\t<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>\n\t\t<style type=\"text/css\">\n\n\n\t\t  .no-section {\n\t\t    display: none;\n\t\t  }\n\n\t\t  .page-sections.no-section {\n\t\t    display: block;\n\t\t  }\n\n\t\t  .blank.reference {\n\t\t\t  display: none;\n\t\t\t}\n\n\t\t\t@page {\n\t\t\t  margin: 1cm;\n\t\t\t}\n\n\t\t\tbody {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t.page-sections, #the-document h1, #the-document h2, #the-document h3, #the-document h4, #the-document h5 {\n\t\t\t  font-family: 'PT Serif', Georgia, serif;\n\t\t\t}\n\t\t\t.navbar-brand, .page .inspector, .inspectors {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t#the-document {counter-reset: level1;}\n\t\t\t#toc:before, #toc:after {counter-reset: level1; content: \"\";}\n\t\t\t#toc h3:before{content: \"\"}\n\t\t\t \n\t\t\t#the-document h2, #toc > ul > li {counter-reset: level2;}\n\t\t\t#the-document h3, #toc > ul >  ul > li {counter-reset: level3;}\n\t\t\t#the-document h4, #toc > ul > ul > ul > li {counter-reset: level4;}\n\t\t\t#the-document h5, #toc > ul > ul > ul > ul > li {counter-reset: level5;}\n\t\t\t#the-document h6, #toc > ul > ul > ul > ul > ul > li {}\n\n\t\t\t#the-document h2:before,\n\t\t\t#toc > ul > li a:before {\n\t\t\t    content: counter(level1) \" \";\n\t\t\t    counter-increment: level1;\n\t\t\t}\n\t\t\t#the-document h3:before,\n\t\t\t#toc > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \" \";\n\t\t\t    counter-increment: level2;\n\t\t\t}\n\t\t\t#the-document h4:before,\n\t\t\t#toc > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \" \";\n\t\t\t    counter-increment: level3;\n\t\t\t}\n\t\t\t#the-document h5:before,\n\t\t\t#toc > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \" \";\n\t\t\t    counter-increment: level4;\n\t\t\t}\n\t\t\t#the-document h6:before,\n\t\t\t#toc > ul > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \".\" counter(level5) \" \";\n\t\t\t    counter-increment: level5;\n\t\t\t}\n\t\t</style>\n\t</head>\n\t<body>\n\t\t<div id=\"the-document\">\n\t\t\t{{ content }}\n\t\t</div>\n\t</body>\n</html>";
+app.data.printPreviewTemplate = "\n<html>\n\t<head>\n\t\t<style>img {max-width: 100%;}</style>\n\t\t<title>{{ documentTitle }}</title>\n\t\t<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>\n\t\t<style type=\"text/css\">.print-only{ display: block; } \n\n\n\t\t  .no-section {\n\t\t    display: none;\n\t\t  }\n\n\t\t  .page-sections.no-section {\n\t\t    display: block;\n\t\t  }\n\n\t\t  .blank.reference {\n\t\t\t  display: none;\n\t\t\t}\n\n\t\t\t@page {\n\t\t\t  margin: 1cm;\n\t\t\t}\n\n\t\t\tbody {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t.page-sections, #the-document h1, #the-document h2, #the-document h3, #the-document h4, #the-document h5 {\n\t\t\t  font-family: 'PT Serif', Georgia, serif;\n\t\t\t}\n\t\t\t.navbar-brand, .page .inspector, .inspectors {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t#the-document {counter-reset: level1;}\n\t\t\t#toc:before, #toc:after {counter-reset: level1; content: \"\";}\n\t\t\t#toc h3:before{content: \"\"}\n\t\t\t \n\t\t\t#the-document h2, #toc > ul > li {counter-reset: level2;}\n\t\t\t#the-document h3, #toc > ul >  ul > li {counter-reset: level3;}\n\t\t\t#the-document h4, #toc > ul > ul > ul > li {counter-reset: level4;}\n\t\t\t#the-document h5, #toc > ul > ul > ul > ul > li {counter-reset: level5;}\n\t\t\t#the-document h6, #toc > ul > ul > ul > ul > ul > li {}\n\n\t\t\t#the-document h2:before,\n\t\t\t#toc > ul > li a:before {\n\t\t\t    content: counter(level1) \" \";\n\t\t\t    counter-increment: level1;\n\t\t\t}\n\t\t\t#the-document h3:before,\n\t\t\t#toc > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \" \";\n\t\t\t    counter-increment: level2;\n\t\t\t}\n\t\t\t#the-document h4:before,\n\t\t\t#toc > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \" \";\n\t\t\t    counter-increment: level3;\n\t\t\t}\n\t\t\t#the-document h5:before,\n\t\t\t#toc > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \" \";\n\t\t\t    counter-increment: level4;\n\t\t\t}\n\t\t\t#the-document h6:before,\n\t\t\t#toc > ul > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \".\" counter(level5) \" \";\n\t\t\t    counter-increment: level5;\n\t\t\t}\n\t\t</style>\n\t</head>\n\t<body>\n\t\t<div id=\"the-document\">\n\t\t\t{{ content }}\n\t\t</div>\n\t</body>\n</html>";
 
 
 
@@ -1051,7 +1064,7 @@ _.templateSettings = {
 var snapshotHTML = function()
 {
   var everything = $('#the-document').clone();
-  everything.find('.comments, .section-actions, .toolbar').remove();
+  everything.find('.comments, .section-actions, .toolbar, .no-print').remove();
   var innerHtml = everything.html();
   var fullPageTemplate = _.template(app.data.printPreviewTemplate);
   return fullPageTemplate({ content : innerHtml, documentTitle : app.data.viewTree.name });
@@ -1344,12 +1357,12 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
     child.viewData.modifiedFormatted = app.formatDate(parseDate(child.viewData.lastModified));
 
     // console.log("contains:", child.viewData.contains);
-    for (var cIdx in child.viewData.contains) {
-      
+    for (var cIdx in child.viewData.contains) {     
       var c = child.viewData.contains[cIdx];
       if (c.type == 'Table') {
         // console.log("skipping table...");
         var table = '<div contenteditable="false"><table class="table table-striped">';
+        table += '<caption>'+c.title+'</caption>';
         table += "<thead>";
         table += "<tr>";
         for (var hIdx in c.header[0]) {
@@ -1492,8 +1505,14 @@ app.observe('viewHierarchy', function(viewData) {
   var viewsById = {};
   for (var idx in viewData.views) {
     var view = viewData.views[idx];
+    view.noSection = false;
     viewsById[view.mdid] = view;
   }
+  _.each(viewData.noSections, function(id) {
+    viewsById[id].noSection = true;
+  });
+
+
   app.set('viewsById', viewsById);
   // index elements by id
   var elementsById = {};
@@ -1933,6 +1952,15 @@ window.addSvgClickHandler = function(el) {
 app.on('makeToc', function() {
   $("#toc").tocify({ selectors: "h2.numbered-header, h3.numbered-header, h4.numbered-header, h5.numbered-header", history : false, scrollTo: "60", hideEffect: "none", showEffect: "none", highlightOnScroll: true, highlightOffset : 0, context: "#the-document", smoothScroll:false, extendPage:false }).data("toc-tocify");  
 })
+
+// Hack needed to fix inspector width due to bug in bootstrap affix when inspector is on the left side of the page
+app.resizeInspector = function() {
+    var $affixElement = $(".affix");
+    $affixElement.width($affixElement.parent().width());
+}
+$(window).resize(app.resizeInspector);
+app.resizeInspector();
+
 // note sure why but transclude.js doesn't load properly unless we have a log line here?
 console.log("");
 /*
