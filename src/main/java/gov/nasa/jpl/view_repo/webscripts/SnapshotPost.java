@@ -57,7 +57,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     @Override
-    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+    protected synchronized Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         clearCaches();
 
         String viewId = req.getServiceMatch().getTemplateVars().get("viewid");

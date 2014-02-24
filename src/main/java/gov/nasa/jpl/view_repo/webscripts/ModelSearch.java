@@ -55,7 +55,7 @@ public class ModelSearch extends ModelGet {
 	        };
 	
 	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+	protected synchronized Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();

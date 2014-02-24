@@ -52,7 +52,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ModelCommentGet extends ModelGet {
     @Override
-    protected Map<String, Object> executeImpl(WebScriptRequest req,
+    protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
             Status status, Cache cache) {
         clearCaches();
 

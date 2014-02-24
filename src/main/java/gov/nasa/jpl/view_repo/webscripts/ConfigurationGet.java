@@ -57,12 +57,12 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class ConfigurationGet extends AbstractJavaWebScript {
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
-        // TODO Auto-generated method stub
+        // Do nothing
         return false;
     }
 
     @Override
-    protected Map<String, Object> executeImpl(WebScriptRequest req,
+    protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
             Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
 

@@ -102,7 +102,7 @@ public class ProductListGet extends AbstractJavaWebScript {
 	}
 	
 	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req,
+	protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
 		clearCaches();
 		

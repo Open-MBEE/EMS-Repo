@@ -56,7 +56,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class ViewModelPost extends ModelPost {
 
     @Override
-    protected Map<String, Object> executeImpl(WebScriptRequest req,
+    protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
             Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();

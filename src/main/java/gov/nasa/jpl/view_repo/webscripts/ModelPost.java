@@ -415,87 +415,6 @@ public class ModelPost extends AbstractJavaWebScript {
         }
     }
 
-    /**
-     * Create or update the element hierarchy as specified by the JSON Object.
-     * Does reification of containment
-     * 
-     * @param jsonObject
-     *            Hierarchy of containment
-     * @param key
-     *            Name of the parent element
-     * @throws JSONException
-     */
-    protected void updateOrCreateElementHierarchy(JSONObject jsonObject,
-            String key) throws JSONException {
-        String REIFIED_PKG_SUFFIX = "_pkg";
-        String pkgName = key + REIFIED_PKG_SUFFIX;
-
-        JSONArray array = jsonObject.getJSONArray(key);
-
-        // only need to create reified container if it has any elements
-        if (array.length() > 0) {
-            // this is the element node
-            EmsScriptNode node = findScriptNodeByName(key);
-            if (node == null) {
-                log(LogLevel.ERROR, "could not find element node with id "
-                        + key + "\n", HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
-
-            if (checkPermissions(node, PermissionService.WRITE)) {
-                // create reified container if it doesn't exist
-                EmsScriptNode reifiedNode = findScriptNodeByName(pkgName); 
-                if (reifiedNode == null) {
-                    reifiedNode = node.getParent().createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER);
-                    reifiedNode.setProperty(Acm.ACM_ID, key);
-                    reifiedNode.setProperty(Acm.CM_NAME, pkgName);
-                    reifiedNode.setProperty(Acm.ACM_NAME, (String) node.getProperty(Acm.ACM_NAME));
-                }
-                if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
-                    foundElements.put(pkgName, reifiedNode);
-                    // make sure element and reified container in same place
-                    // node should be accurate if hierarchy is correct
-                    if (!reifiedNode.getParent().equals(node.getParent())) {
-                        reifiedNode.move(node.getParent());
-                    }
-
-                    // move elements to reified container if not already there
-                    for (int ii = 0; ii < array.length(); ii++) {
-                        String childName = array.getString(ii);
-                        EmsScriptNode child = findScriptNodeByName(childName);
-                        if (child == null) {
-                            log(LogLevel.ERROR,
-                                    "could not find child node with id "
-                                            + childName + "\n",
-                                    HttpServletResponse.SC_BAD_REQUEST);
-                            continue;
-                        }
-                        if (checkPermissions(child, PermissionService.WRITE)) {
-                            if (!child.getParent().equals(reifiedNode)) {
-                                log(LogLevel.INFO, "moving "
-                                        + child.getProperty(Acm.CM_NAME) + " to "
-                                        + reifiedNode.getProperty(Acm.CM_NAME));
-                                child.move(reifiedNode);
-                            }
-
-                            // move reified containers as necessary too
-                            EmsScriptNode childPkg = findScriptNodeByName(childName
-                                    + REIFIED_PKG_SUFFIX);
-                            if (childPkg != null && !childPkg.getParent().equals(reifiedNode)) {
-                                log(LogLevel.INFO, "moving "
-                                        + childPkg.getProperty(Acm.CM_NAME)
-                                        + " to "
-                                        + reifiedNode.getProperty(Acm.CM_NAME));
-                                childPkg.move(reifiedNode);
-                            }
-                        } // end if (checkPermissions(child, PermissionService.WRITE)) {
-                    } // end if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
-
-                    node.createOrUpdateChildAssociation(reifiedNode, Acm.ACM_REIFIED_CONTAINMENT);
-                } // end if (checkPermissions(node, PermissionService.WRITE)) {
-            }
-        }
-    }
 
     Map<String, JSONObject> elementMap = new HashMap<String, JSONObject>();
     Set<String> rootElements = new HashSet<String>();
@@ -636,8 +555,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // create the children elements
         if (reifiedNode != null) {
             for (int ii = 0; ii < children.length(); ii++) {
-                updateOrCreateElement(elementMap.get(children.getString(ii)),
-                        reifiedNode);
+                updateOrCreateElement(elementMap.get(children.getString(ii)), reifiedNode);
             }
         }
     }
@@ -736,7 +654,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 reifiedNode.setProperty(Acm.ACM_ID, pkgName);
                 reifiedNode.setProperty(Acm.CM_NAME, pkgName);
                 reifiedNode.setProperty(Acm.ACM_NAME, (String) node.getProperty(Acm.ACM_NAME));
-                log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getProperty(Acm.CM_NAME));
+                log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getProperty(Acm.CM_NAME) + " : " + reifiedNode.getNodeRef().toString());
             }
             if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
                 foundElements.put(pkgName, reifiedNode);
@@ -752,7 +670,7 @@ public class ModelPost extends AbstractJavaWebScript {
      * Entry point
      */
     @Override
-    protected Map<String, Object> executeImpl(WebScriptRequest req,
+    protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
             Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();

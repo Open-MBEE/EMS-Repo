@@ -75,7 +75,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 	 * Webscript entry point
 	 */
 	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req,
+	protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
 		clearCaches();
 		
