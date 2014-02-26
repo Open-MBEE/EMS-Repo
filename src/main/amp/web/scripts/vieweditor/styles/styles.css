@@ -566,6 +566,9 @@ h1 {
 	display: none;
 }
 
+.missing-trans-ref {
+	background-color: #E14A4A;
+}
 /*
 .transclusion .items>div .edit
 {
