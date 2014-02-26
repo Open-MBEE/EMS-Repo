@@ -6,8 +6,9 @@
     		{"modified": modifiedTime,
     		 "name": configurationName,
     		 "description": configurationDescription,
+    		 "nodeid": alfresco node id,
     		 "snapshots": [
-    		 	{ "url": snapshotUrl
+    		 	{ "url": snapshotUrl (e.g.  /alfresco/services/...)
     		 	  "name": nameOfDocument
     		 	}
     		 ]
