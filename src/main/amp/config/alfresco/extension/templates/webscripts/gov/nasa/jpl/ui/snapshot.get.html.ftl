@@ -641,7 +641,11 @@ app.updateSaveAllButton = function(n) {
 
 app.transToText = function transToText(s) {
   var t = "[";
-  var name = $("[data-trans-id='"+s.attr("data-mdid")+"'].name").text();
+  var elem = $("[data-trans-id='"+s.attr("data-mdid")+"'].name");
+  var name = s.attr("data-name");
+  if(elem.length > 0) {
+    name = $("[data-trans-id='"+s.attr("data-mdid")+"'].name").text();
+  }
   t += '"' + name + '":';
   //var d = data[s.attr("mdid")];
   //if(d) t += '"' + d.name + '":';
@@ -795,21 +799,37 @@ app.on('editSection', function(e, sectionId) {
 
   // handle placeholder text
   // TODO remove this listener on cancel or save
-  section.click(function() {
-    //console.log("start Section click")
-    var $el = $(app.getSelectedNode());
-    if ($el.is('.editable.reference.blank.doc')) {
+  section.find(".editable.reference.blank").on('keyup paste blur mousedown', function(evt) 
+  {
+      var editedElement = evt.target;//app.getSelectedNode();
+      var $el = $(editedElement);
+      if($el.is(".blank.doc")) {
+        console.log("Doc down");
       $el.html("<p class='pwrapper'>&nbsp;</p>");
-      // Set selection inseide the p tag
+        $el.removeClass('blank');
+
       var range = document.createRange();//Create a range (a range is a like the selection but invisible)
       range.setStart($el.find("p").get(0),0);
       range.collapse(true);
       var selection = window.getSelection();//get the selection object (allows you to change selection)
       selection.removeAllRanges();//remove any selections already made
       selection.addRange(range);//make the range you have just created the visible selection
+        $el.click();
+
+      } else if($el.is('.blank')) {
+        console.log("Other down");
+        $el.html("&nbsp;");
       $el.removeClass('blank');
+        
+        var range = document.createRange();
+        console.log("First", $el.first().get(0).firstChild);
+        range.setStart($el.first().get(0).firstChild,0);
+        range.collapse(true);
+        var selection = window.getSelection();//get the selection object (allows you to change selection)
+        selection.removeAllRanges();//remove any selections already made
+        selection.addRange(range);
+        $el.click();
     }
-    //console.log("end Section click")
   });
 
   var templateTable = function(rows, cols)
@@ -931,6 +951,8 @@ app.spanContentToValue = function(content, vtree, depth) {
         dom.attr("title", hoverText);
 
         dom.html(innerVal);
+      } else {
+        dom.addClass("missing-trans-ref");
       }
      
   });
@@ -939,7 +961,7 @@ app.spanContentToValue = function(content, vtree, depth) {
 
 app.replaceBracketWithSpan = function(content)
 {
-  content = content.replace(/\[\"([^"]*)\":([^\s:]*):([^\s:]*)\]/g,"<span class='transclusion' data-mdid='$3' data-type='$2' data-name='$1'></span>");
+  content = content.replace(/(\[\"([^"]*)\":([^\s:]*):([^\s:]*)\])/g,"<span class='transclusion' data-mdid='$4' data-type='$3' data-name='$2'>$1</span>");
   return app.spanContentToValue(content, app.get("viewTree"));//app.spanContentToValue(content);
 }
 
