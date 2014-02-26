@@ -53,7 +53,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ProjectPost extends AbstractJavaWebScript {
 	public ProjectPost() {
-	    
+	    super();
 	}
     
     public ProjectPost(Repository repositoryHelper, ServiceRegistry registry) {

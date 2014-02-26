@@ -49,7 +49,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ProductPost extends AbstractJavaWebScript {
 	public ProductPost() {
-	    
+	    super();
 	}
     
     public ProductPost(Repository repositoryHelper, ServiceRegistry registry) {

@@ -59,7 +59,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ConfigurationPost extends AbstractJavaWebScript {
     public ConfigurationPost() {
-        
+        super();
     }
     
     public ConfigurationPost(Repository repositoryHelper, ServiceRegistry registry) {

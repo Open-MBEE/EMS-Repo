@@ -50,7 +50,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ModelSearch extends ModelGet {
 	public ModelSearch() {
-	    
+	    super();
 	}
     
     public ModelSearch(Repository repositoryHelper, ServiceRegistry registry) {

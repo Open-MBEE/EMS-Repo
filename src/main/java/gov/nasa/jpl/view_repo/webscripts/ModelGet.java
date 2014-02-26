@@ -55,7 +55,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ModelGet extends AbstractJavaWebScript {
     public ModelGet() {
-        
+        super();
     }
     
     public ModelGet(Repository repositoryHelper, ServiceRegistry registry) {

@@ -58,7 +58,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class IndexGet extends AbstractJavaWebScript {
     public IndexGet() {
-        
+       super(); 
     }
     
     public IndexGet(Repository repositoryHelper, ServiceRegistry registry) {

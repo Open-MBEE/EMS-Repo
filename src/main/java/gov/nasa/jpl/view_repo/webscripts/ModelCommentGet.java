@@ -53,7 +53,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ModelCommentGet extends ModelGet {
     public ModelCommentGet() {
-        
+        super();
     }
     
     

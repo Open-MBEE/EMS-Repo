@@ -59,7 +59,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class MoaProductGet extends AbstractJavaWebScript {
     public MoaProductGet() {
-        
+        super();
     }
     
     

@@ -53,7 +53,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class SnapshotPost extends AbstractJavaWebScript {
     public SnapshotPost() {
-        
+        super();
     }
     
     public SnapshotPost(Repository repositoryHelper, ServiceRegistry registry) {

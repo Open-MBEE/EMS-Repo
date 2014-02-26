@@ -58,7 +58,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ConfigurationGet extends AbstractJavaWebScript {
     public ConfigurationGet() {
-        
+        super();
     }
         
     public ConfigurationGet(Repository repositoryHelper, ServiceRegistry registry) {

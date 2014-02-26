@@ -55,7 +55,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ProjectGet extends AbstractJavaWebScript {
     public ProjectGet() {
-        
+        super();
     }
     
     public ProjectGet(Repository repositoryHelper, ServiceRegistry registry) {

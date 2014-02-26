@@ -49,7 +49,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ProductGet extends AbstractJavaWebScript {
 	public ProductGet() {
-	    
+	    super();
 	}
     
     public ProductGet(Repository repositoryHelper, ServiceRegistry registry) {

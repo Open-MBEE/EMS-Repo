@@ -49,7 +49,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ViewPost extends AbstractJavaWebScript {
 	public ViewPost() {
-	    
+	    super();
 	}
     
     public ViewPost(Repository repositoryHelper, ServiceRegistry registry) {

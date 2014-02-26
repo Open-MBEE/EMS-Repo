@@ -57,7 +57,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ViewModelPost extends ModelPost {
     public ViewModelPost() {
-        
+        super(); 
     }
     
     public ViewModelPost(Repository repositoryHelper, ServiceRegistry registry) {

@@ -58,7 +58,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ProductListGet extends AbstractJavaWebScript {
 	public ProductListGet() {
-	    
+	    super();
 	}
     
     public ProductListGet(Repository repositoryHelper, ServiceRegistry registry) {

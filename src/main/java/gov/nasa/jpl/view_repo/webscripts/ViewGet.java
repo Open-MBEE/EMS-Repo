@@ -49,7 +49,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ViewGet extends AbstractJavaWebScript {
 	public ViewGet() {
-	    
+	    super();
 	}
     
     public ViewGet(Repository repositoryHelper, ServiceRegistry registry) {

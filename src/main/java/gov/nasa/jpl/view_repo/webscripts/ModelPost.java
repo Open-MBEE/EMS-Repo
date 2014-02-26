@@ -74,7 +74,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ModelPost extends AbstractJavaWebScript {
     public ModelPost() {
-        
+        super();
     }
     
     public ModelPost(Repository repositoryHelper, ServiceRegistry registry) {

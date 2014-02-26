@@ -52,7 +52,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ViewEditorDelete extends AbstractJavaWebScript {
  	public ViewEditorDelete() {
- 	    
+ 	    super();
  	}
     
     public ViewEditorDelete(Repository repositoryHelper, ServiceRegistry registry) {

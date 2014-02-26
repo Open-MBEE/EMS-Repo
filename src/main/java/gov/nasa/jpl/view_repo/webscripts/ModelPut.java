@@ -56,7 +56,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ModelPut extends ModelPost {
     public ModelPut() {
-        
+        super();
     }
     
     public ModelPut(Repository repositoryHelper, ServiceRegistry registry) {

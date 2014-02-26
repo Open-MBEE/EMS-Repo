@@ -53,7 +53,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ModelDelete extends AbstractJavaWebScript {
     public ModelDelete() {
-        
+        super();
     }
     
     public ModelDelete(Repository repositoryHelper, ServiceRegistry registry) {

@@ -103,6 +103,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
  
     public AbstractJavaWebScript() {
         // default constructor for spring
+        super();
     }
     
 	/**
