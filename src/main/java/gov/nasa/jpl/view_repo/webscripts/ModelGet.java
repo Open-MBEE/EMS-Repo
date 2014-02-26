@@ -116,6 +116,8 @@ public class ModelGet extends AbstractJavaWebScript {
 		
 		Map<String, Object> model = new HashMap<String, Object>();
 		ModelGet instance = new ModelGet(repository, services);
+		// make sure to pass down view request flag to instance
+		instance.setIsViewRequest(isViewRequest);
 
 		JSONArray elementsJson = new JSONArray();
 		if (validateRequest(req, status)) {
@@ -155,9 +157,9 @@ public class ModelGet extends AbstractJavaWebScript {
 
             boolean recurse = checkArgEquals(req, "recurse", "true") ? true : false;
             if (isViewRequest) {
-                    handleViewHierarchy(modelRootNode, recurse);
+                handleViewHierarchy(modelRootNode, recurse);
             } else {
-                    handleElementHierarchy(modelRootNode, recurse);
+                handleElementHierarchy(modelRootNode, recurse);
             }
             
             handleElements();
