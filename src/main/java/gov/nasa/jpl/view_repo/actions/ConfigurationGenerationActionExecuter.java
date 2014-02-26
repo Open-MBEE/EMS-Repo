@@ -101,7 +101,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         Set<EmsScriptNode> snapshots = new HashSet<EmsScriptNode>();
         for (EmsScriptNode product: productSet) {
             // Update the model
-            SnapshotPost snapshotService = new SnapshotPost();
+            SnapshotPost snapshotService = new SnapshotPost(repository, services);
             snapshotService.setRepositoryHelper(repository);
             snapshotService.setServices(services);
             snapshotService.setLogLevel(LogLevel.DEBUG);
@@ -130,13 +130,9 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
 
         // Send off notification email
-        try {
-            String subject = "[EuropaEMS] Configuration " + siteName + " Generation " + jobStatus;
-            String msg = "Log URL: " + contextUrl + logNode.getUrl();
-            ActionUtil.sendEmailToModifier(jobNode, msg, subject, services, response);
-        } catch (Exception e) {
-            // do nothing this is for local testing
-        }
+        String subject = "[EuropaEMS] Configuration " + siteName + " Generation " + jobStatus;
+        String msg = "Log URL: " + contextUrl + logNode.getUrl();
+        ActionUtil.sendEmailToModifier(jobNode, msg, subject, services, response);
         
         System.out.println("Completed configuration set");
     }

@@ -37,6 +37,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.springframework.extensions.webscripts.Cache;
@@ -49,7 +51,16 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ViewEditorDelete extends AbstractJavaWebScript {
- 	private EmsScriptNode siteNode = null;
+ 	public ViewEditorDelete() {
+ 	    
+ 	}
+    
+    public ViewEditorDelete(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
+
+    private EmsScriptNode siteNode = null;
 	private String siteName;
 	
 	@Override
@@ -76,6 +87,7 @@ public class ViewEditorDelete extends AbstractJavaWebScript {
 	
 	/**
 	 * Entry point
+	 * Leave synchronized as deletes can interfere with one another
 	 */
 	@Override
 	protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,

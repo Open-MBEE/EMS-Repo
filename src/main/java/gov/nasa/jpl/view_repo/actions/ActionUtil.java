@@ -77,13 +77,16 @@ public class ActionUtil {
      * @param services
      */
     public static void sendEmailTo(String sender, String recipient, String msg, String subject, ServiceRegistry services) {
-        Action mailAction = services.getActionService().createAction(MailActionExecuter.NAME);
-        mailAction.setParameterValue(MailActionExecuter.PARAM_SUBJECT, subject);
-        mailAction.setParameterValue(MailActionExecuter.PARAM_TO, recipient);
-        mailAction.setParameterValue(MailActionExecuter.PARAM_FROM, sender);
-        mailAction.setParameterValue(MailActionExecuter.PARAM_TEXT, msg);
-        services.getActionService().executeAction(mailAction, null);
-
+        try {
+            Action mailAction = services.getActionService().createAction(MailActionExecuter.NAME);
+            mailAction.setParameterValue(MailActionExecuter.PARAM_SUBJECT, subject);
+            mailAction.setParameterValue(MailActionExecuter.PARAM_TO, recipient);
+            mailAction.setParameterValue(MailActionExecuter.PARAM_FROM, sender);
+            mailAction.setParameterValue(MailActionExecuter.PARAM_TEXT, msg);
+            services.getActionService().executeAction(mailAction, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     /**

@@ -38,7 +38,9 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 
+import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -54,10 +56,16 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ViewModelPost extends ModelPost {
+    public ViewModelPost() {
+        
+    }
+    
+    public ViewModelPost(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
 
     @Override
-    protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
-            Status status, Cache cache) {
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
 
@@ -77,8 +85,11 @@ public class ViewModelPost extends ModelPost {
             }
         }
         
+        ViewModelPost instance = new ViewModelPost(repository, services);
+        
         try {
-            createOrUpdateModel(req, status);
+            instance.createOrUpdateModel(req, status);
+            appendResponseStatusInfo(instance);
         } catch (JSONException e) {
             log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
             e.printStackTrace();
@@ -92,10 +103,10 @@ public class ViewModelPost extends ModelPost {
         return model;
     }
     
-    protected void createOrUpdateModel(WebScriptRequest req, Status status)
-            throws Exception {
+    protected void createOrUpdateModel(WebScriptRequest req, Status status) throws Exception {
+        clearCaches();
+
         JSONObject postJson = (JSONObject) req.parseContent();
-        
         JSONArray array = postJson.getJSONArray("elements");
         
         for (int ii = 0; ii < array.length(); ii++) {

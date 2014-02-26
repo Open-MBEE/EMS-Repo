@@ -37,6 +37,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,45 +52,40 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ProjectPost extends AbstractJavaWebScript {
-	private final String MODEL_PATH = "ViewEditor";
+	public ProjectPost() {
+	    
+	}
+    
+    public ProjectPost(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
+    private final String MODEL_PATH = "ViewEditor";
 	private final String MODEL_PATH_SEARCH = "/" + MODEL_PATH;
 	
-	private String siteName = null;
-	private String projectId = null;
-	private boolean delete = false;
-	private boolean fix = false;
-	private boolean createSite = false;
-		
-	/**
-	 * Utility method for getting the request parameters from the URL template
-	 * @param req
-	 */
-	private void parseRequestVariables(WebScriptRequest req) {
-		siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
-		projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
-		delete = checkArgEquals(req, "delete", "true") ? true : false;
-		fix = checkArgEquals(req, "fix", "true") ? true : false;
-		createSite = checkArgEquals(req, "createSite", "true") ? true : false;
- 	}
 	
 	/**
 	 * Webscript entry point
 	 */
 	@Override
-	protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
-			Status status, Cache cache) {
+	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
 		int statusCode = HttpServletResponse.SC_OK;
 
-		parseRequestVariables(req);
 		try {
 			if (validateRequest(req, status)) {
+			    String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+		        String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
+		        boolean delete = checkArgEquals(req, "delete", "true") ? true : false;
+		        boolean fix = checkArgEquals(req, "fix", "true") ? true : false;
+		        boolean createSite = checkArgEquals(req, "createSite", "true") ? true : false;
+
 			    if (siteName != null) {
-			        statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId, siteName);
+			        statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId, siteName, createSite, fix, delete);
 			    } else {
-			        statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId);
+			        statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId, fix);
 			    }
 			} else {
 				statusCode = responseStatus.getCode();
@@ -106,7 +103,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		return model;
 	}
 
-	private int updateOrCreateProject(JSONObject jsonObject, String projectId) throws JSONException {
+	private int updateOrCreateProject(JSONObject jsonObject, String projectId, boolean fix) throws JSONException {
 	      EmsScriptNode projectNode = findScriptNodeByName(projectId);
 	      
 	      if (projectNode == null) {
@@ -147,8 +144,8 @@ public class ProjectPost extends AbstractJavaWebScript {
 	 * @return				HttpStatusResponse code for success of the POST request
 	 * @throws JSONException
 	 */
-	@SuppressWarnings("deprecation")
-    private int updateOrCreateProject(JSONObject jsonObject, String projectId, String siteName) throws JSONException {
+    @SuppressWarnings("deprecation")
+    private int updateOrCreateProject(JSONObject jsonObject, String projectId, String siteName, boolean createSite, boolean fix, boolean delete) throws JSONException {
 		// make sure site exists
 		EmsScriptNode siteNode = getSiteNode(siteName);
 		if (siteNode == null) {

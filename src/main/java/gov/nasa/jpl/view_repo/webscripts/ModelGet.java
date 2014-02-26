@@ -37,6 +37,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
@@ -52,12 +54,19 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ModelGet extends AbstractJavaWebScript {
+    public ModelGet() {
+        
+    }
+    
+    public ModelGet(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
     // injected via spring configuration
     protected boolean isViewRequest = false;
     
 	private JSONObject elementHierarchy = new JSONObject();
 	protected JSONArray elements = new JSONArray();
-	private EmsScriptNode modelRootNode = null;
 	protected Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
 
 	
@@ -82,7 +91,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			return false;
 		}
 		
-		modelRootNode = findScriptNodeByName(modelId);
+		EmsScriptNode modelRootNode = findScriptNodeByName(modelId);
 		if (modelRootNode == null) {
 			log(LogLevel.ERROR, "Element not found with id: " + modelId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
@@ -101,31 +110,23 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * Entry point
 	 */
 	@Override
-	protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
+	protected Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
+		ModelGet instance = new ModelGet(repository, services);
 
-		boolean recurse = checkArgEquals(req, "recurse", "true") ? true : false;
-		
+		JSONArray elementsJson = new JSONArray();
 		if (validateRequest(req, status)) {
-			try {
-				if (isViewRequest) {
-					handleViewHierarchy(modelRootNode, recurse);
-				} else {
-					handleElementHierarchy(modelRootNode, recurse);
-				}
-				handleElements();
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+		    elementsJson = instance.handleRequest(req);
+		    appendResponseStatusInfo(instance);
 		}
 		
 		JSONObject top = new JSONObject();
 		try {
-		    if (elements.length() > 0) {
-		        top.put("elements", elements);
+		    if (elementsJson.length() > 0) {
+		        top.put("elements", elementsJson);
 	            model.put("res", top.toString(4));
 		    } else {
 		        log(LogLevel.WARNING, "Element not found", HttpServletResponse.SC_NOT_FOUND);
@@ -137,6 +138,34 @@ public class ModelGet extends AbstractJavaWebScript {
 				
 		status.setCode(responseStatus.getCode());
 		return model;
+	}
+	
+	/**
+	 * Wrapper for handling a request and getting the appropriate JSONArray of elements
+	 * @param req
+	 * @return
+	 */
+	private JSONArray handleRequest(WebScriptRequest req) {
+        try {
+            String modelId = req.getServiceMatch().getTemplateVars().get("modelid");
+            if (modelId == null) {
+                modelId = req.getServiceMatch().getTemplateVars().get("elementid");
+            }
+            EmsScriptNode modelRootNode = findScriptNodeByName(modelId);
+
+            boolean recurse = checkArgEquals(req, "recurse", "true") ? true : false;
+            if (isViewRequest) {
+                    handleViewHierarchy(modelRootNode, recurse);
+            } else {
+                    handleElementHierarchy(modelRootNode, recurse);
+            }
+            
+            handleElements();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+	    
+        return elements;
 	}
 
 

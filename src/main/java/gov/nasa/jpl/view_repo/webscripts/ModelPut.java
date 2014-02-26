@@ -38,6 +38,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -53,15 +55,25 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ModelPut extends ModelPost {
+    public ModelPut() {
+        
+    }
+    
+    public ModelPut(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
 
     @Override
-    protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
+    protected Map<String, Object> executeImpl(WebScriptRequest req,
             Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
 
+        ModelPut instance = new ModelPut(repository, services);
+        
         try {
-            createOrUpdateModel(req, status);
+            instance.createOrUpdateModel(req, status);
+            appendResponseStatusInfo(instance);
         } catch (JSONException e) {
             log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
             e.printStackTrace();
@@ -75,6 +87,12 @@ public class ModelPut extends ModelPost {
         return model;
     }
     
+    /**
+     * Only updates models by changing syml IDs - for synching Alfresco generated to MD generated 
+     * @param req
+     * @param status
+     * @throws Exception
+     */
     protected void createOrUpdateModel(WebScriptRequest req, Status status)
             throws Exception {
         JSONObject postJson = (JSONObject) req.parseContent();

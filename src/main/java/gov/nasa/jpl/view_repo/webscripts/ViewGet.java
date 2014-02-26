@@ -37,6 +37,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,8 +48,15 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ViewGet extends AbstractJavaWebScript {
-	private JSONArray viewsJson;
-	
+	public ViewGet() {
+	    
+	}
+    
+    public ViewGet(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
+
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		String viewId = req.getServiceMatch().getTemplateVars().get("id");
@@ -68,24 +77,19 @@ public class ViewGet extends AbstractJavaWebScript {
 		return true;
 	}
 	
+
 	@Override
-	protected void clearCaches() {
-		super.clearCaches();
-		viewsJson = new JSONArray();
-	}
-	
-	@Override
-	protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
-			Status status, Cache cache) {
+	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
 		boolean recurse = checkArgEquals(req, "recurse", "true") ? true : false;
 		
+		JSONArray viewsJson = new JSONArray();
 		if (validateRequest(req, status)) {
 			try {
 				String viewId = req.getServiceMatch().getTemplateVars().get("id");
-				handleView(viewId, recurse);
+				handleView(viewId, viewsJson, recurse);
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -111,20 +115,20 @@ public class ViewGet extends AbstractJavaWebScript {
 	}
 
 	
-	private void handleView(String viewId, boolean recurse) throws JSONException {
+	private void handleView(String viewId, JSONArray viewsJson, boolean recurse) throws JSONException {
 		EmsScriptNode view = findScriptNodeByName(viewId);
 		if (view == null) {
 			log(LogLevel.ERROR, "View not found with ID: " + viewId, HttpServletResponse.SC_NOT_FOUND);
 		}
 		
 		if (checkPermissions(view, PermissionService.READ)) { 
-    		viewsJson.put(view.toJSONObject(Acm.JSON_TYPE_FILTER.VIEW));
-    		if (recurse) {
-        		JSONArray childrenJson = view.getChildrenViewsJSONArray();
-        		for (int ii = 0; ii < childrenJson.length(); ii++) {
-        		    handleView(childrenJson.getString(ii), recurse);
+		    viewsJson.put(view.toJSONObject(Acm.JSON_TYPE_FILTER.VIEW));
+        		if (recurse) {
+            		JSONArray childrenJson = view.getChildrenViewsJSONArray();
+            		for (int ii = 0; ii < childrenJson.length(); ii++) {
+            		    handleView(childrenJson.getString(ii), viewsJson, recurse);
+            		}
         		}
-    		}
 		}
 	}
 	

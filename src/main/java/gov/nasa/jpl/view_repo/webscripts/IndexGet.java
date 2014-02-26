@@ -37,6 +37,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONException;
@@ -55,8 +57,17 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class IndexGet extends AbstractJavaWebScript {
+    public IndexGet() {
+        
+    }
+    
+    public IndexGet(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
+        // do nothing
         return true;
     }
 
@@ -66,11 +77,12 @@ public class IndexGet extends AbstractJavaWebScript {
     }
 
     @Override
-    protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
-            Status status, Cache cache) {
+    protected synchronized Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
 
+        IndexGet instance = new IndexGet(repository, services);
+        
         String siteName = req.getServiceMatch().getTemplateVars().get("id");
         SiteInfo siteInfo = services.getSiteService().getSite(siteName);
         if (siteInfo == null) {
@@ -79,24 +91,25 @@ public class IndexGet extends AbstractJavaWebScript {
             EmsScriptNode site = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
             JSONObject json;
             try {
-                json = getIndexJson(site);
+                json = instance.getIndexJson(site);
+                appendResponseStatusInfo(instance);
                 model.put("res", json.toString());
                 model.put("title", siteName);
             } catch (JSONException e) {
-                e.printStackTrace();
                 log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                e.printStackTrace();
             }
         }
 
-        if (responseStatus.getCode() != HttpServletResponse.SC_OK){
-            model.put("res", "{}");
+        status.setCode(responseStatus.getCode());
+        if (status.getCode() != HttpServletResponse.SC_OK){
+            model.put("res", "{}"); // don't dump anything out
             model.put("title", "ERROR could not render");
         }
         
-        status.setCode(responseStatus.getCode());
         return model;
     }
-
+    
     /**
      * Retrieve the index.json file if it exists and parse into JSONObject
      * @param site
@@ -106,9 +119,7 @@ public class IndexGet extends AbstractJavaWebScript {
     private JSONObject getIndexJson(EmsScriptNode site) throws JSONException {
         EmsScriptNode index = site.childByNamePath("index.json");
         if (index == null) {
-            ProductListGet productListService = new ProductListGet();
-            productListService.setServices(services);
-            productListService.setRepositoryHelper(repository);
+            ProductListGet productListService = new ProductListGet(repository, services);
             return productListService.handleProductList(site); 
         } else {
             ContentReader reader = services.getContentService().getReader(index.getNodeRef(), ContentModel.PROP_CONTENT);

@@ -37,6 +37,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,49 +48,75 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * Retrieve comments that annotate the specified element
- * TODO: SNAPSHOT Posting needs permission checking
  * @author cinyoung
  * 
  */
 public class ModelCommentGet extends ModelGet {
+    public ModelCommentGet() {
+        
+    }
+    
+    
+    public ModelCommentGet(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
     @Override
-    protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
-            Status status, Cache cache) {
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
 
+        ModelCommentGet instance = new ModelCommentGet(repository, services);
         String elementId = req.getServiceMatch().getTemplateVars().get("id");
         EmsScriptNode element = findScriptNodeByName(elementId);
 
         if (element == null) {
-            log(LogLevel.ERROR, "Could not find element",
-                    HttpServletResponse.SC_NOT_FOUND);
+            log(LogLevel.ERROR, "Could not find element", HttpServletResponse.SC_NOT_FOUND);
             model.put("res", response);
         } else {
-            try {
-                JSONArray commentIds = element.getSourceAssocsIdsByType(Acm.ACM_ANNOTATED_ELEMENTS);
-                for (int ii = 0; ii < commentIds.length(); ii++) {
-                    String commentId = commentIds.getString(ii);
-                    EmsScriptNode comment = findScriptNodeByName(commentId);
-                    if (comment != null) {
-                        elementsFound.put(commentId, comment);
-                    }
-                }
-
-                handleElements();
-
+            JSONArray elementsJson = instance.getCommentElements(element);
+            appendResponseStatusInfo(instance);
+            if (elementsJson != null) {
                 JSONObject top = new JSONObject();
-                top.put("elements", elements);
-                model.put("res", top.toString(4));
-            } catch (JSONException e) {
-                log(LogLevel.ERROR, "Could not create the JSON response", HttpServletResponse.SC_BAD_REQUEST);
-                model.put("res", response);
-                e.printStackTrace();
+                try {
+                    top.put("elements",  elementsJson);
+                    model.put("res", top.toString(4));
+                } catch (JSONException e) {
+                    log(LogLevel.ERROR, "Could not create the JSON response", HttpServletResponse.SC_BAD_REQUEST);
+                    e.printStackTrace();
+                }
             }
         }
 
         status.setCode(responseStatus.getCode());
         return model;
+    }
+    
+    /**
+     * Encapsulate getting the JSONArray of comments annotating the specified element
+     * @param element
+     * @return
+     */
+    private JSONArray getCommentElements(EmsScriptNode element) {
+        try {
+            JSONArray commentIds = element.getSourceAssocsIdsByType(Acm.ACM_ANNOTATED_ELEMENTS);
+            for (int ii = 0; ii < commentIds.length(); ii++) {
+                String commentId = commentIds.getString(ii);
+                EmsScriptNode comment = findScriptNodeByName(commentId);
+                if (comment != null) {
+                    elementsFound.put(commentId, comment);
+                }
+            }
+    
+            handleElements();
+        
+            return elements;
+        } catch (JSONException e) {
+            log(LogLevel.ERROR, "Could not create the JSON response", HttpServletResponse.SC_BAD_REQUEST);
+            e.printStackTrace();
+        }
+        
+        return null;
     }
 }

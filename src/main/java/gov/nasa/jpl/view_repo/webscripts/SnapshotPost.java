@@ -38,7 +38,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -50,6 +52,14 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class SnapshotPost extends AbstractJavaWebScript {
+    public SnapshotPost() {
+        
+    }
+    
+    public SnapshotPost(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
         // TODO Auto-generated method stub
@@ -123,7 +133,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         
         view.createOrUpdateAssociation(snapshotNode, "view2:snapshots");
         
-        MoaProductGet moaService = new MoaProductGet();
+        MoaProductGet moaService = new MoaProductGet(repository, services);
         moaService.setRepositoryHelper(repository);
         moaService.setServices(services);
         JSONObject snapshotJson = moaService.generateMoaProduct(viewId, contextPath);
