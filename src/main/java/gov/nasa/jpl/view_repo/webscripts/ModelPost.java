@@ -82,10 +82,8 @@ public class ModelPost extends AbstractJavaWebScript {
     }
 
 
-//    private EmsScriptNode projectNode = null;
     // when run in background as an action, this needs to be false
     private boolean runWithoutTransactions = false;
-//    protected String projectId;
 
     private final String ELEMENTS = "elements";
 
@@ -119,8 +117,6 @@ public class ModelPost extends AbstractJavaWebScript {
     protected JSONObject relationshipsJson;
 
     protected Set<String> newElements;
-
-    protected SiteInfo siteInfo;
     
     /**
      * Create or update the model as necessary based on the request
@@ -713,6 +709,8 @@ public class ModelPost extends AbstractJavaWebScript {
     }
 
     protected void saveAndStartAction(WebScriptRequest req, Status status) throws Exception {
+    		String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+    		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
         EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
         String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
         
@@ -751,7 +749,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 return false;
             }
 
-            siteInfo = services.getSiteService().getSite(siteName);
+            SiteInfo siteInfo = services.getSiteService().getSite(siteName);
             if (!checkRequestVariable(siteInfo, "Site")) {
                 return false;
             }
