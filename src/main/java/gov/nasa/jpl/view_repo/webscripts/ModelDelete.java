@@ -39,6 +39,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
@@ -50,6 +52,15 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ModelDelete extends AbstractJavaWebScript {
+    public ModelDelete() {
+        super();
+    }
+    
+    public ModelDelete(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
+
     // injected via spring configuration
     protected boolean isViewRequest = false;
     
@@ -82,9 +93,11 @@ public class ModelDelete extends AbstractJavaWebScript {
 	
 	/**
 	 * Entry point
+	 * 
+	 * Make deletion synchronized to simplify checks for conflicting deletes
 	 */
 	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req,
+	protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
 		clearCaches();
 		

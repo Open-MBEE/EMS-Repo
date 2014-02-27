@@ -70,6 +70,8 @@ public class Acm {
     public static final String JSON_BODY = "body";
     public static final String JSON_EXPRESSION_BODY = "expressionBody";
     public static final String JSON_ANNOTATED_ELEMENTS = "annotatedElements";
+    public static String JSON_PROJECT_VERSION = "projectVersion";
+    
     
 //    public static final String JSON_TIME_MAX = "timeMax";
 //    public static final String JSON_TIME_MIN = "timeMin";
@@ -177,6 +179,7 @@ public class Acm {
     public static final String ACM_BODY = SYSML + JSON_BODY;
     public static final String ACM_EXPRESSION_BODY = SYSML + JSON_EXPRESSION_BODY;
     public static final String ACM_ANNOTATED_ELEMENTS = SYSML + JSON_ANNOTATED_ELEMENTS;
+    public static String ACM_PROJECT_VERSION = SYSML + JSON_PROJECT_VERSION;
     
 //    public static final String ACM_TIME_MAX = SYSML + JSON_TIME_MAX;    
 //    public static final String ACM_TIME_MIN = SYSML + JSON_TIME_MIN;    
@@ -245,14 +248,22 @@ public class Acm {
     public static final String ACM_PARAMETER_DEFAULT_VALUE = SYSML + JSON_PARAMETER_DEFAULT_VALUE;
  
     
-    public static final String ACM_ELEMENT_FOLDER = SYSML + "ElementFolder";
-    public static final String ACM_PROJECT = SYSML + "Project";
+    public static String ACM_ELEMENT_FOLDER = SYSML + "ElementFolder";
+    public static String ACM_PROJECT = SYSML + "Project";
 
-    public static final String ACM_LAST_MODIFIED = CM + "modified";
-    public static final String ACM_AUTHOR = CM + "modifier";
+    public static String ACM_LAST_MODIFIED = CM + "modified";
+    public static String ACM_AUTHOR = CM + "modifier";
     
-    public static final String ACM_CM_NAME = CM + "name";
-    public static final String ACM_CM_TITLE = CM + "title";
+    public static String CM_NAME = CM + "name";
+    public static String CM_TITLE = CM + "title";
+//    public static final String ACM_ELEMENT_FOLDER = SYSML + "ElementFolder";
+//    public static final String ACM_PROJECT = SYSML + "Project";
+//
+//    public static final String ACM_LAST_MODIFIED = CM + "modified";
+//    public static final String ACM_AUTHOR = CM + "modifier";
+//    
+//    public static final String ACM_CM_NAME = CM + "name";
+//    public static final String ACM_CM_TITLE = CM + "title";
     
     
     /**

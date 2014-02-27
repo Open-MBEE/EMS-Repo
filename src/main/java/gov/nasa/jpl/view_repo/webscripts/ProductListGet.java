@@ -40,9 +40,8 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.ResultSetRow;
-import org.alfresco.service.cmr.search.SearchService;
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONArray;
@@ -58,10 +57,17 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ProductListGet extends AbstractJavaWebScript {
-	private JSONObject productJson;
+	public ProductListGet() {
+	    super();
+	}
+    
+    public ProductListGet(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
+    private JSONObject productJson;
 	private Set<EmsScriptNode> productSet;
-	private EmsScriptNode projectNode;
-	private String projectQnamePath;
+	private EmsScriptNode siteNode;
     JSONObject volumes;
     JSONObject volume2volumes;
     JSONObject documents;
@@ -70,20 +76,19 @@ public class ProductListGet extends AbstractJavaWebScript {
 	
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-        String projectId = req.getServiceMatch().getTemplateVars().get("id");
-        if (!checkRequestVariable(projectId, "id")) {
+        String siteId = req.getServiceMatch().getTemplateVars().get("id");
+        if (!checkRequestVariable(siteId, "id")) {
             return false;
         }
         
-        SiteInfo siteInfo = services.getSiteService().getSite(projectId);
+        SiteInfo siteInfo = services.getSiteService().getSite(siteId);
         if (siteInfo == null) {
-            log(LogLevel.ERROR, "Project not found with id: " + projectId + ".\n", HttpServletResponse.SC_NOT_FOUND);
+            log(LogLevel.ERROR, "Project not found with id: " + siteId + ".\n", HttpServletResponse.SC_NOT_FOUND);
             return false;
         }
-        projectNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
-        projectQnamePath = projectNode.getQnamePath();
+        siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
         
-        if (!checkPermissions(projectNode, PermissionService.READ)) {
+        if (!checkPermissions(siteNode, PermissionService.READ)) {
             return false;
         }
         
@@ -93,9 +98,12 @@ public class ProductListGet extends AbstractJavaWebScript {
 	@Override
 	protected void clearCaches() {
 		super.clearCaches();
-		productJson = new JSONObject();
-		productSet = new HashSet<EmsScriptNode>();
-		projectNode = null;
+		siteNode = null;
+	}
+	
+	protected void initDataStructs() {
+        productJson = new JSONObject();
+        productSet = new HashSet<EmsScriptNode>();
         volumes = new JSONObject();
         volume2volumes = new JSONObject();
         documents = new JSONObject();
@@ -104,72 +112,61 @@ public class ProductListGet extends AbstractJavaWebScript {
 	}
 	
 	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req,
-			Status status, Cache cache) {
+	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
 
+		ProductListGet instance = new ProductListGet(repository, services);
+		
 		if (validateRequest(req, status)) {
         		try {
-                    handleProductList();
-                    model.put("res", productJson.toString(4));
-                    model.put("title", projectNode.getProperty(Acm.ACM_CM_TITLE));
-                } catch (JSONException e1) {
-                    e1.printStackTrace();
-                    model.put("res", response.toString());
-                }
+                JSONObject jsonObject = instance.handleProductList(siteNode);
+                appendResponseStatusInfo(instance);
+                model.put("res", jsonObject.toString(4));
+                model.put("title", siteNode.getProperty(Acm.CM_TITLE));
+            } catch (JSONException e) {
+                log(LogLevel.ERROR, "Could not create JSON Object", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                model.put("res", response.toString());
+                e.printStackTrace();
+            }
     		}
 
 		status.setCode(responseStatus.getCode());
 		return model;
 	}
 
+	public Set<EmsScriptNode> getProductSet(String qnamePath) {
+	    productSet = WebScriptUtil.getAllNodesInPath(qnamePath, "ASPECT", Acm.ACM_PRODUCT, services, response);
+        
+        return productSet;
+	}
 		
-	private void handleProductList() throws JSONException {
-	    String pattern = "ASPECT:\"" + Acm.ACM_PRODUCT + "\"";
-        if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
-            ResultSet resultSet = null;
-            try {
-                resultSet = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, pattern);
-                for (ResultSetRow row: resultSet) {
-                    EmsScriptNode node = new EmsScriptNode(row.getNodeRef(), services, response);
-                    // filter by project
-                    if (node.getQnamePath().startsWith(projectQnamePath)) {
-                        if (checkPermissions(node, PermissionService.READ)) {
-                            productSet.add(node);
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                log(LogLevel.ERROR, "Could not parse search: " + pattern + ". " + e.getMessage() + "\n", HttpServletResponse.SC_BAD_REQUEST);  
-            } finally {
-                if (resultSet != null) {
-                    resultSet.close();
-                }
-            }
-        }
-	    
+	public JSONObject handleProductList(EmsScriptNode pnode) throws JSONException {
+	    initDataStructs();
+	    getProductSet(pnode.getQnamePath());
                 
         for (EmsScriptNode node: productSet) {
-            String id = (String)node.getProperty(Acm.ACM_ID);
-            String name = (String)node.getProperty(Acm.ACM_NAME);
-            documents.put(id, name);
-
-            EmsScriptNode parent = node.getParent();
-            String parentId = (String)parent.getProperty(Acm.ACM_ID);
-            String parentName = (String)parent.getProperty(Acm.ACM_CM_NAME);
-            if (parentName.contains("_pkg")) {
-                parentId = parentName.replace("_pkg", "");
+            if (checkPermissions(node, PermissionService.READ)) {
+                String id = (String)node.getProperty(Acm.ACM_ID);
+                String name = (String)node.getProperty(Acm.ACM_NAME);
+                documents.put(id, name);
+    
+                EmsScriptNode parent = node.getParent();
+                String parentId = (String)parent.getProperty(Acm.ACM_ID);
+                String parentName = (String)parent.getProperty(Acm.CM_NAME);
+                if (parentName.contains("_pkg")) {
+                    parentId = parentName.replace("_pkg", "");
+                }
+                if (!volume2documents.has(parentId)) {
+                    volume2documents.put(parentId, new JSONArray());
+                }
+                ((JSONArray)volume2documents.get(parentId)).put(id);
+                handleParents(node, "ViewEditor");
             }
-            if (!volume2documents.has(parentId)) {
-                volume2documents.put(parentId, new JSONArray());
-            }
-            ((JSONArray)volume2documents.get(parentId)).put(id);
-            handleParents(node, "ViewEditor");
         }
         
-        productJson.put("name", projectNode.getProperty(Acm.ACM_CM_TITLE));
+        productJson.put("name", pnode.getProperty(Acm.CM_TITLE));
         productJson.put("volumes", volumes);
         // lets clean volume2volumes - html page doesn't support empty volume2volumes
         Set<String> emptyV = new HashSet<String>();
@@ -187,13 +184,15 @@ public class ProductListGet extends AbstractJavaWebScript {
         productJson.put("documents", documents);
         productJson.put("volume2documents", volume2documents);
         productJson.put("projectVolumes", projectVolumes);
+        
+        return productJson;
 	}
 	
 	protected void handleParents(EmsScriptNode node, String stopName) throws JSONException {
         String id = (String)node.getProperty(Acm.ACM_ID);
         String sysmlName = (String)node.getProperty(Acm.ACM_NAME);
         if (id == null) {
-            String cmName = (String)node.getProperty(Acm.ACM_CM_NAME);
+            String cmName = (String)node.getProperty(Acm.CM_NAME);
             id = cmName.replace("_pkg", "");
         } else {
             id = id.replace("_pkg", "");
@@ -203,31 +202,34 @@ public class ProductListGet extends AbstractJavaWebScript {
         }
         
         EmsScriptNode parent = node.getParent();
-        String parentSysmlName = (String)parent.getProperty(Acm.ACM_NAME);
-        String parentId = (String)parent.getProperty(Acm.ACM_ID);
-        String parentCmName = (String)parent.getProperty(Acm.ACM_CM_NAME);
-        if (parentCmName.contains("_pkg")) {
-            parentId = parentCmName.replace("_pkg", "");
-        }
-        if (parentId == null) {
-            if (!projectVolumes.toString().contains(id)) {
-                projectVolumes.put(id);
+        if (checkPermissions(parent, PermissionService.READ)) {
+            String parentSysmlName = (String)parent.getProperty(Acm.ACM_NAME);
+            String parentId = (String)parent.getProperty(Acm.ACM_ID);
+            String parentCmName = (String)parent.getProperty(Acm.CM_NAME);
+            if (parentCmName.contains("_pkg")) {
+                parentId = parentCmName.replace("_pkg", "");
             }
-        } else {
-            parentSysmlName = (String)parent.getProperty(Acm.ACM_CM_NAME);
-            if (parentSysmlName.contains("_pkg")) {
-                parentId = parentSysmlName.replace("_pkg", "");
-            }
-            if (!volume2volumes.has(parentId)) {
-                volume2volumes.put(parentId, new JSONArray());
-            }
-            if (!documents.has(id)) {
-                JSONArray array = (JSONArray)volume2volumes.get(parentId);
-                if (!array.toString().contains(id)) {
-                    array.put(id);
+            if (parentId == null) {
+                if (!projectVolumes.toString().contains(id)) {
+                    projectVolumes.put(id);
                 }
+            } else {
+                parentSysmlName = (String)parent.getProperty(Acm.CM_NAME);
+                if (parentSysmlName.contains("_pkg")) {
+                    parentId = parentSysmlName.replace("_pkg", "");
+                }
+                if (!volume2volumes.has(parentId)) {
+                    volume2volumes.put(parentId, new JSONArray());
+                }
+                if (!documents.has(id)) {
+                    JSONArray array = (JSONArray)volume2volumes.get(parentId);
+                    if (!array.toString().contains(id)) {
+                        array.put(id);
+                    }
+                }
+                handleParents(parent, stopName);
             }
-            handleParents(parent, stopName);
         }
 	}
+	
 }

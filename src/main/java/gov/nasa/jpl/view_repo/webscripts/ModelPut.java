@@ -38,13 +38,30 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+/**
+ * Allows updating of sysml:id for synchronization of Alfresco created elements to MD
+ * 
+ * /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/element.put.desc.xml
+ * @author cinyoung
+ *
+ */
 public class ModelPut extends ModelPost {
+    public ModelPut() {
+        super();
+    }
+    
+    public ModelPut(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req,
@@ -52,11 +69,16 @@ public class ModelPut extends ModelPost {
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
 
+        ModelPut instance = new ModelPut(repository, services);
+        
         try {
-            createOrUpdateModel(req, status);
+            instance.createOrUpdateModel(req, status);
+            appendResponseStatusInfo(instance);
+        } catch (JSONException e) {
+            log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
+            e.printStackTrace();
         } catch (Exception e) {
-            log(LogLevel.ERROR, "JSON malformed\n",
-                    HttpServletResponse.SC_BAD_REQUEST);
+            log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             e.printStackTrace();
         }
 
@@ -65,6 +87,12 @@ public class ModelPut extends ModelPost {
         return model;
     }
     
+    /**
+     * Only updates models by changing syml IDs - for synching Alfresco generated to MD generated 
+     * @param req
+     * @param status
+     * @throws Exception
+     */
     protected void createOrUpdateModel(WebScriptRequest req, Status status)
             throws Exception {
         JSONObject postJson = (JSONObject) req.parseContent();

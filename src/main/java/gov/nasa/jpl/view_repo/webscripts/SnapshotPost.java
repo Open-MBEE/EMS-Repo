@@ -29,7 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.view_repo.ModelLoadActionExecuter;
+import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
@@ -38,9 +38,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.model.ContentModel;
+import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
-import org.alfresco.service.cmr.repository.ContentWriter;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
@@ -52,6 +52,14 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class SnapshotPost extends AbstractJavaWebScript {
+    public SnapshotPost() {
+        super();
+    }
+    
+    public SnapshotPost(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
         // TODO Auto-generated method stub
@@ -59,7 +67,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     @Override
-    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+    protected synchronized Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         clearCaches();
 
         String viewId = req.getServiceMatch().getTemplateVars().get("viewid");
@@ -82,22 +90,23 @@ public class SnapshotPost extends AbstractJavaWebScript {
         String snapshotName = viewId + "_" + now.getMillis();
         EmsScriptNode snapshotNode = null;
         if (checkPermissions(snapshotFolderNode, PermissionService.WRITE)) {
-            snapshotNode = createSnapshot(viewId, snapshotName, req.getContextPath(), snapshotFolderNode);
-            if (snapshotNode != null) {
-                topview.createOrUpdateAssociation(snapshotNode, "view2:snapshots");
-            }
+            snapshotNode = createSnapshot(topview, viewId, snapshotName, req.getContextPath(), snapshotFolderNode);
         }
 
-        try {
-            JSONObject snapshoturl = new JSONObject();
-            snapshoturl.put("id", snapshotName);
-            snapshoturl.put("creator", AuthenticationUtil.getFullyAuthenticatedUser());
-            snapshoturl.put("created", fmt.print(now));
-            snapshoturl.put("url", req.getContextPath() + "/service/snapshots/" + snapshotName);
-            model.put("res", snapshoturl.toString(4));
-        } catch (JSONException e) {
-            e.printStackTrace();
-            log(LogLevel.ERROR, "Error generating JSON for snapshot", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        if (snapshotNode != null) {
+            try {
+                JSONObject snapshoturl = new JSONObject();
+                snapshoturl.put("id", snapshotName);
+                snapshoturl.put("creator", AuthenticationUtil.getFullyAuthenticatedUser());
+                snapshoturl.put("created", fmt.print(now));
+                snapshoturl.put("url", req.getContextPath() + "/service/snapshots/" + snapshotName);
+                model.put("res", snapshoturl.toString(4));
+            } catch (JSONException e) {
+                e.printStackTrace();
+                log(LogLevel.ERROR, "Error generating JSON for snapshot", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            log(LogLevel.ERROR, "Error creating snapshot node", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
         
         status.setCode(responseStatus.getCode());
@@ -107,14 +116,24 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return model;
     }
 
+    public EmsScriptNode createSnapshot(EmsScriptNode view, String viewId) {
+        String snapshotName = viewId + "_" + System.currentTimeMillis();
+        String contextPath = "alfresco/service/";
+        EmsScriptNode viewNode = findScriptNodeByName(viewId);
+        EmsScriptNode snapshotFolder = getSnapshotFolderNode(viewNode);
+        return createSnapshot(view, viewId, snapshotName, contextPath, snapshotFolder);
+    }
     
-    private EmsScriptNode createSnapshot(String viewId, String snapshotName, String contextPath, EmsScriptNode snapshotFolder) {
+    
+    public EmsScriptNode createSnapshot(EmsScriptNode view, String viewId, String snapshotName, String contextPath, EmsScriptNode snapshotFolder) {
         EmsScriptNode snapshotNode = snapshotFolder.createNode(snapshotName, "view2:Snapshot");
         snapshotNode.createOrUpdateProperty("cm:isIndexed", true);
         snapshotNode.createOrUpdateProperty("cm:isContentIndexed", false);
         snapshotNode.createOrUpdateProperty(Acm.ACM_ID, snapshotName);
         
-        MoaProductGet moaService = new MoaProductGet();
+        view.createOrUpdateAssociation(snapshotNode, "view2:snapshots");
+        
+        MoaProductGet moaService = new MoaProductGet(repository, services);
         moaService.setRepositoryHelper(repository);
         moaService.setServices(services);
         JSONObject snapshotJson = moaService.generateMoaProduct(viewId, contextPath);
@@ -123,14 +142,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
             return null;
         }
         
-        ContentWriter writer = services.getContentService().getWriter(snapshotNode.getNodeRef(), ContentModel.PROP_CONTENT, true);
         try {
             snapshotJson.put("snapshot", true);
-            writer.putContent(snapshotJson.toString(4));
+            ActionUtil.saveStringToFile(snapshotNode, "application/json", services, snapshotJson.toString(4));
         } catch (Exception e1) {
             e1.printStackTrace();
         }
-        ModelLoadActionExecuter.setContentDataMimeType(writer, snapshotNode, "application/json", services);
         
         return snapshotNode;
     }
@@ -145,13 +162,15 @@ public class SnapshotPost extends AbstractJavaWebScript {
     public static EmsScriptNode getSnapshotFolderNode(EmsScriptNode viewNode) {
         EmsScriptNode parent = viewNode.getParent();
 
-        String parentName = (String) parent.getProperty(Acm.ACM_CM_NAME);
+        String parentName = (String) parent.getProperty(Acm.CM_NAME);
         while (!parentName.equals("ViewEditor")) {
             EmsScriptNode oldparent = parent;
             parent = oldparent.getParent();
-            parentName = (String) parent.getProperty(Acm.ACM_CM_NAME);
+            parentName = (String) parent.getProperty(Acm.CM_NAME);
         }
-
+        // put snapshots at the project level
+        parent = parent.getParent();
+        
         EmsScriptNode snapshotNode = parent.childByNamePath("snapshots");
         if (snapshotNode == null) {
             snapshotNode = parent.createFolder("snapshots");
