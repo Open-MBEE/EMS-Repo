@@ -186,6 +186,23 @@
 							</resources>
 						</configuration>
 					</execution>
+					<!-- for deployment testing need to copy over the repository.properties pointing to H2 -->
+ 					<execution>
+						<id>copy-db-test-resources</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<overwrite>true</overwrite>
+							<outputDirectory>${project.build.directory}/view-repo-war/WEB-INF/classes/alfresco</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/local</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
