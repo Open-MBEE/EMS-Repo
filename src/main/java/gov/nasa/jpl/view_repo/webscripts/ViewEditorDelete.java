@@ -99,7 +99,16 @@ public class ViewEditorDelete extends AbstractJavaWebScript {
 		boolean recurse = true;
 		if (validateRequest(req, status)) {
 	        EmsScriptNode veNode = siteNode.childByNamePath("/ViewEditor");
-	        handleElementHierarchy(veNode, recurse);
+	        if (req.getParameter("project") != null) {
+	        		String projectid = req.getParameter("project");
+	        		veNode = veNode.childByNamePath("/" + projectid);
+	        		log(LogLevel.INFO, "Attempting to delete project " + projectid);
+	        }
+	        if (veNode != null) {
+	        		handleElementHierarchy(veNode, recurse);
+	        } else {
+	        		log(LogLevel.INFO, "could not find node to delete");
+	        }
 		}
 		
 		model.put("res", "okay");
