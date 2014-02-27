@@ -63,6 +63,7 @@ public class Acm {
     public static String JSON_VALUE = "value";
     public static String JSON_BODY = "body";
     public static String JSON_ANNOTATED_ELEMENTS = "annotatedElements";
+    public static String JSON_PROJECT_VERSION = "projectVersion";
     
     public static String JSON_ALLOWED_ELEMENTS = "allowedElements";
     public static String JSON_CHILDREN_VIEWS = "childrenViews";
@@ -113,7 +114,8 @@ public class Acm {
     public static String ACM_VIEW = SYSML + "View";
     public static String ACM_BODY = SYSML + JSON_BODY;
     public static String ACM_ANNOTATED_ELEMENTS = SYSML + JSON_ANNOTATED_ELEMENTS;
-    
+    public static String ACM_PROJECT_VERSION = SYSML + JSON_PROJECT_VERSION;
+   
     public static String ACM_ALLOWED_ELEMENTS = VIEW + JSON_ALLOWED_ELEMENTS;
     public static String ACM_CHILDREN_VIEWS = VIEW + JSON_CHILDREN_VIEWS;
     public static String ACM_CONTAINS = VIEW + JSON_CONTAINS;
@@ -136,8 +138,8 @@ public class Acm {
     public static String ACM_LAST_MODIFIED = CM + "modified";
     public static String ACM_AUTHOR = CM + "modifier";
     
-    public static String ACM_CM_NAME = CM + "name";
-    public static String ACM_CM_TITLE = CM + "title";
+    public static String CM_NAME = CM + "name";
+    public static String CM_TITLE = CM + "title";
     
     
     /**

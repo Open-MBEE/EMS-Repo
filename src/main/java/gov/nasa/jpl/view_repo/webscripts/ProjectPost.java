@@ -37,6 +37,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,58 +52,91 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ProjectPost extends AbstractJavaWebScript {
-	private final String MODEL_PATH = "ViewEditor";
+	public ProjectPost() {
+	    super();
+	}
+    
+    public ProjectPost(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
+    private final String MODEL_PATH = "ViewEditor";
 	private final String MODEL_PATH_SEARCH = "/" + MODEL_PATH;
 	
-	private String siteName = null;
-	private String projectId = null;
-	private boolean delete = false;
-	private boolean fix = false;
-	private boolean createSite = false;
-		
-	/**
-	 * Utility method for getting the request parameters from the URL template
-	 * @param req
-	 */
-	private void parseRequestVariables(WebScriptRequest req) {
-		siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
-		projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
-		delete = checkArgEquals(req, "delete", "true") ? true : false;
-		fix = checkArgEquals(req, "fix", "true") ? true : false;
-		createSite = checkArgEquals(req, "createSite", "true") ? true : false;
- 	}
 	
 	/**
 	 * Webscript entry point
 	 */
 	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req,
-			Status status, Cache cache) {
+	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
 		int statusCode = HttpServletResponse.SC_OK;
 
-		parseRequestVariables(req);
 		try {
 			if (validateRequest(req, status)) {
-				statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId, siteName);
+			    String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+		        String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
+		        boolean delete = checkArgEquals(req, "delete", "true") ? true : false;
+		        boolean fix = checkArgEquals(req, "fix", "true") ? true : false;
+		        boolean createSite = checkArgEquals(req, "createSite", "true") ? true : false;
+
+			    if (siteName != null) {
+			        statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId, siteName, createSite, fix, delete);
+			    } else {
+			        statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId, fix);
+			    }
 			} else {
 				statusCode = responseStatus.getCode();
 			}
-		} catch (Exception e) {
-			// this is most likely null pointer from poorly undefined request parameters
-			// TODO check permissions on Project updating 
-			e.printStackTrace();
-			log(LogLevel.ERROR, "Invalid request.\n", HttpServletResponse.SC_BAD_REQUEST);
-		}
+        } catch (JSONException e) {
+            log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
+        } catch (Exception e) {
+            log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
+        }
 
 		status.setCode(statusCode);
 		model.put("res", response.toString());
 		return model;
 	}
 
-	/**
+	private int updateOrCreateProject(JSONObject jsonObject, String projectId, boolean fix) throws JSONException {
+	      EmsScriptNode projectNode = findScriptNodeById(projectId);
+	      
+	      if (projectNode == null) {
+	          log(LogLevel.ERROR, "Could not find project\n", HttpServletResponse.SC_NOT_FOUND);
+	          return HttpServletResponse.SC_NOT_FOUND;
+	      }
+	      
+	      String projectName = null;
+        if (jsonObject.has(Acm.JSON_NAME)) {
+            projectName = jsonObject.getString(Acm.JSON_NAME);
+        }
+        String projectVersion = null;
+        if (jsonObject.has(Acm.JSON_PROJECT_VERSION)) {
+            projectVersion = jsonObject.getString(Acm.JSON_PROJECT_VERSION);
+        }
+        if (fix) {
+            if (checkPermissions(projectNode, PermissionService.WRITE)){ 
+                projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
+                if (projectName != null) {
+                    projectNode.createOrUpdateProperty(Acm.CM_TITLE, projectName);
+                    projectNode.createOrUpdateProperty(Acm.ACM_NAME, projectName);
+                }
+                if (projectVersion != null) {
+                    projectNode.createOrUpdateProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
+                }
+                log(LogLevel.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
+            }
+        }
+        
+        return HttpServletResponse.SC_OK;
+    }
+
+    /**
 	 * Update or create the project specified by the JSONObject
 	 * @param jsonObject	JSONObject that has the name of the project
 	 * @param projectId		Project ID
@@ -109,8 +144,8 @@ public class ProjectPost extends AbstractJavaWebScript {
 	 * @return				HttpStatusResponse code for success of the POST request
 	 * @throws JSONException
 	 */
-	@SuppressWarnings("deprecation")
-    private int updateOrCreateProject(JSONObject jsonObject, String projectId, String siteName) throws JSONException {
+    @SuppressWarnings("deprecation")
+    private int updateOrCreateProject(JSONObject jsonObject, String projectId, String siteName, boolean createSite, boolean fix, boolean delete) throws JSONException {
 		// make sure site exists
 		EmsScriptNode siteNode = getSiteNode(siteName);
 		if (siteNode == null) {
@@ -141,12 +176,24 @@ public class ProjectPost extends AbstractJavaWebScript {
 		
 		// create project if doesn't exist or update if fix is specified 
 		EmsScriptNode projectNode = findScriptNodeById(projectId);
-		String projectName = jsonObject.getString(Acm.JSON_NAME);
+		String projectName = null;
+		if (jsonObject.has(Acm.JSON_NAME)) {
+		    projectName = jsonObject.getString(Acm.JSON_NAME);
+		}
+		String projectVersion = null;
+		if (jsonObject.has(Acm.JSON_PROJECT_VERSION)) {
+		    projectVersion = jsonObject.getString(Acm.JSON_PROJECT_VERSION);
+		}
 		if (projectNode == null) {
 			projectNode = modelContainerNode.createFolder(projectId, Acm.ACM_PROJECT);
-			projectNode.setProperty(Acm.ACM_CM_TITLE, projectName);
-			projectNode.setProperty(Acm.ACM_NAME, projectName);
+			projectNode.setProperty(Acm.CM_TITLE, projectName);
 			projectNode.setProperty(Acm.ACM_ID, projectId);
+            if (projectName != null) {
+                projectNode.setProperty(Acm.ACM_NAME, projectName);
+            }
+			if (projectVersion != null) {
+			    projectNode.setProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
+			}
 			log(LogLevel.INFO, "Project created.\n", HttpServletResponse.SC_OK);
 		} else {
 			if (delete) {
@@ -154,9 +201,14 @@ public class ProjectPost extends AbstractJavaWebScript {
 				log(LogLevel.INFO, "Project deleted.\n", HttpServletResponse.SC_OK);
 			} else if (fix) {
 				if (checkPermissions(projectNode, PermissionService.WRITE)){ 
-					projectNode.createOrUpdateProperty(Acm.ACM_CM_TITLE, projectName);
-					projectNode.createOrUpdateProperty(Acm.ACM_NAME, projectName);
 					projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
+					if (projectName != null) {
+                        projectNode.createOrUpdateProperty(Acm.CM_TITLE, projectName);
+                        projectNode.createOrUpdateProperty(Acm.ACM_NAME, projectName);
+					}
+		            if (projectVersion != null) {
+		                projectNode.createOrUpdateProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
+		            }
 					log(LogLevel.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
 				
 					if (checkPermissions(projectNode.getParent(), PermissionService.WRITE)) { 
@@ -185,9 +237,9 @@ public class ProjectPost extends AbstractJavaWebScript {
 		}
 		
 		// check site exists
-		if (!checkRequestVariable(siteName, SITE_NAME)) {
-			return false;
-		} 
+//		if (!checkRequestVariable(siteName, SITE_NAME)) {
+//			return false;
+//		} 
 		
 		// get the site
 //		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
@@ -207,4 +259,5 @@ public class ProjectPost extends AbstractJavaWebScript {
 
 		return true;
 	}
+	
 }

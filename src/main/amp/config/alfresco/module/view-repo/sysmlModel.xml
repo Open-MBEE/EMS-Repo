@@ -16,6 +16,13 @@
     <types>      
     	<type name="sysml:Project">
     		<parent>cm:folder</parent>
+    		<properties>
+    			<property name="sysml:projectVersion">
+    				<type>d:text</type>
+    				<mandatory>false</mandatory>
+    				<index enabled="false"/>
+    			</property>
+    		</properties>
     		<mandatory-aspects>
     			<aspect>sysml:Identifiable</aspect>
     		</mandatory-aspects>

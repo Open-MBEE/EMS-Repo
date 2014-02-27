@@ -1,20 +1,29 @@
 #!/bin/sh
 
 export CURL_STATUS="-w \"%{http_code}\""
-export CURL_USER=" -u admin:admin"
-
-export CURL_SECURITY="-k -3" 
-
-export CURL_FLAGS=$CURL_STATUS$CURL_USER
+export CURL_POST_FLAGS_NO_DATA="-X POST"
 export CURL_POST_FLAGS="-X POST -H \"Content-Type:application/json\" --data"
 export CURL_PUT_FLAGS="-X PUT"
 export CURL_GET_FLAGS="-X GET"
-export BASE_URL="\"http://localhost:8080/view-repo/service/javawebscripts/"
+
+export CURL_SECURITY=" -k -3" 
+
+#if [true]; then
+#	export CURL_USER=" -u admin:admin"
+#	export CURL_FLAGS=$CURL_STATUS$CURL_USER
+#	export SERVICE_URL="\"http://localhost:8080/view-repo/service/"
+#	export BASE_URL="\"http://localhost:8080/view-repo/service/javawebscripts/"
+#else
+	export CURL_USER=" -u cinyoung"
+	export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
+	export SERVICE_URL="\"https://sheldon/alfresco/service/"
+	export BASE_URL="\"https://sheldon/alfresco/service/javawebscripts/"
+#fi
 
 # TODO: CURL commands aren't executed from bash using environment variables
 echo POSTS
 # create project and site
-echo curl $CURL_FLAGS $CURL_POST_FLAGS \'{\"name\":\"View Repo Test\"}\' $BASE_URL"sites/europa/projects/123456?fix=true&createSite=true\""
+echo curl $CURL_FLAGS $CURL_POST_FLAGS \'{\"name\":\"CY Test\"}\' $BASE_URL"sites/europa/projects/123456?fix=true&createSite=true\""
 
 # post elements to project
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elements.json $BASE_URL"sites/europa/projects/123456/elements\""
@@ -49,10 +58,10 @@ echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/303/comments\""
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"products/301\""
 
 # get moaproducts
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"moaproducts/301?format=json\""
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"ve/products/301?format=json\""
 
 # get product list
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"productlist/europa?format=json\""
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"ve/documents/europa?format=json\""
 
 # TODO - fix these URLs? change search to just search
 # get search
@@ -73,5 +82,14 @@ echo SNAPSHOTS
 # post snapshot
 echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:text/html" --data @JsonData/snapshot.html http://localhost:8080/view-repo/service/ui/views/301/snapshot
 
-# get snapshots
-echo  curl -w "%{http_code}" -u admin:admin -X GET http://localhost:8080/view-repo/service/ui/views/301/snapshots
+# get snapshots - this currently doesn't work
+#echo  curl -w "%{http_code}" -u admin:admin -X GET http://localhost:8080/view-repo/service/snapshots/301
+
+echo ""
+echo CONFIGURATIONS
+
+# post configuration
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/configuration.json $BASE_URL"configurations/europa\""
+
+# get configurations
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"configurations/europa\""

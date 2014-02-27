@@ -37,6 +37,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
@@ -52,12 +54,19 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ModelGet extends AbstractJavaWebScript {
+    public ModelGet() {
+        super();
+    }
+    
+    public ModelGet(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
     // injected via spring configuration
     protected boolean isViewRequest = false;
     
 	private JSONObject elementHierarchy = new JSONObject();
 	protected JSONArray elements = new JSONArray();
-	private EmsScriptNode modelRootNode = null;
 	protected Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
 
 	
@@ -82,7 +91,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			return false;
 		}
 		
-		modelRootNode = findScriptNodeById(modelId);
+		EmsScriptNode modelRootNode = findScriptNodeById(modelId);
 		if (modelRootNode == null) {
 			log(LogLevel.ERROR, "Element not found with id: " + modelId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
@@ -106,26 +115,20 @@ public class ModelGet extends AbstractJavaWebScript {
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
+		ModelGet instance = new ModelGet(repository, services);
+		// make sure to pass down view request flag to instance
+		instance.setIsViewRequest(isViewRequest);
 
-		boolean recurse = checkArgEquals(req, "recurse", "true") ? true : false;
-		
+		JSONArray elementsJson = new JSONArray();
 		if (validateRequest(req, status)) {
-			try {
-				if (isViewRequest) {
-					handleViewHierarchy(modelRootNode, recurse);
-				} else {
-					handleElementHierarchy(modelRootNode, recurse);
-				}
-				handleElements();
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+		    elementsJson = instance.handleRequest(req);
+		    appendResponseStatusInfo(instance);
 		}
 		
 		JSONObject top = new JSONObject();
 		try {
-		    if (elements.length() > 0) {
-		        top.put("elements", elements);
+		    if (elementsJson.length() > 0) {
+		        top.put("elements", elementsJson);
 	            model.put("res", top.toString(4));
 		    } else {
 		        log(LogLevel.WARNING, "Element not found", HttpServletResponse.SC_NOT_FOUND);
@@ -137,6 +140,34 @@ public class ModelGet extends AbstractJavaWebScript {
 				
 		status.setCode(responseStatus.getCode());
 		return model;
+	}
+	
+	/**
+	 * Wrapper for handling a request and getting the appropriate JSONArray of elements
+	 * @param req
+	 * @return
+	 */
+	private JSONArray handleRequest(WebScriptRequest req) {
+        try {
+            String modelId = req.getServiceMatch().getTemplateVars().get("modelid");
+            if (modelId == null) {
+                modelId = req.getServiceMatch().getTemplateVars().get("elementid");
+            }
+            EmsScriptNode modelRootNode = findScriptNodeById(modelId);
+
+            boolean recurse = checkArgEquals(req, "recurse", "true") ? true : false;
+            if (isViewRequest) {
+                handleViewHierarchy(modelRootNode, recurse);
+            } else {
+                handleElementHierarchy(modelRootNode, recurse);
+            }
+            
+            handleElements();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+	    
+        return elements;
 	}
 
 
@@ -191,7 +222,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		String sysmlId = (String)root.getProperty(Acm.ACM_ID);
 		if (!elementsFound.containsKey(sysmlId)) {
 		    // dont add reified packages
-		    if (!((String)root.getProperty(Acm.ACM_CM_NAME)).contains("_pkg")) {
+		    if (!((String)root.getProperty(Acm.CM_NAME)).contains("_pkg")) {
 		        elementsFound.put((String)root.getProperty(Acm.ACM_ID), root);
 		    }
 		}
@@ -199,7 +230,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		if (recurse) {
 			// find all the children, recurse or add to array as needed
 		    // TODO: figure out why the child association creation from the reification isn't being picked up
-		    String rootName = (String)root.getProperty(Acm.ACM_CM_NAME);
+		    String rootName = (String)root.getProperty(Acm.CM_NAME);
 		    if (!rootName.contains("_pkg")) {
 		        EmsScriptNode reifiedNode = findScriptNodeById(rootName + "_pkg");
 		        if (reifiedNode != null) {
@@ -227,7 +258,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			String key = (String)root.getProperty(Acm.ACM_ID);
 			if (root.getTypeShort().equals(Acm.ACM_ELEMENT_FOLDER) && key == null) {
 				// TODO this is temporary? until we can get sysml:id from Element Folder?
-				key = root.getProperty(Acm.ACM_CM_NAME).toString().replace("_pkg", "");
+				key = root.getProperty(Acm.CM_NAME).toString().replace("_pkg", "");
 			}
 			
 			elementHierarchy.put(key, array);

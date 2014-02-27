@@ -37,6 +37,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,7 +48,13 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ProductGet extends AbstractJavaWebScript {
-	private JSONArray productsJson;
+	public ProductGet() {
+	    super();
+	}
+    
+    public ProductGet(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
 	
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
@@ -69,37 +77,26 @@ public class ProductGet extends AbstractJavaWebScript {
 	}
 	
 	@Override
-	protected void clearCaches() {
-		super.clearCaches();
-		productsJson = new JSONArray();
-	}
-	
-	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req,
-			Status status, Cache cache) {
+	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
 
+		JSONArray productsJson = null;
 		if (validateRequest(req, status)) {
-			try {
-				String productId = req.getServiceMatch().getTemplateVars().get("id");
-				handleProduct(productId);
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			String productId = req.getServiceMatch().getTemplateVars().get("id");
+			productsJson = handleProduct(productId);
 		}
 
-		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
+		if (responseStatus.getCode() == HttpServletResponse.SC_OK && productsJson != null) {
 			try {
 			    JSONObject top = new JSONObject();
 			    top.put("products", productsJson);
 				model.put("res", top.toString(4));
 			} catch (JSONException e) {
-				e.printStackTrace();
 				log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				model.put("res", response.toString());
+                e.printStackTrace();
 			}
 		} else {
 			model.put("res", response.toString());
@@ -109,16 +106,24 @@ public class ProductGet extends AbstractJavaWebScript {
 		return model;
 	}
 
-	
-	private void handleProduct(String productId) throws JSONException {
+
+	private JSONArray handleProduct(String productId) {
+	    JSONArray productsJson = new JSONArray();
 		EmsScriptNode product = findScriptNodeById(productId);
 		if (product == null) {
 			log(LogLevel.ERROR, "Product not found with ID: " + productId, HttpServletResponse.SC_NOT_FOUND);
 		}
 
 		if (checkPermissions(product, PermissionService.READ)){ 
-		    productsJson.put(product.toJSONObject(Acm.JSON_TYPE_FILTER.PRODUCT));
+		    try {
+                productsJson.put(product.toJSONObject(Acm.JSON_TYPE_FILTER.PRODUCT));
+            } catch (JSONException e) {
+                log(LogLevel.ERROR, "Could not create products JSON array", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                e.printStackTrace();
+            }
 		}
+		
+		return productsJson;
 	}
 
 }

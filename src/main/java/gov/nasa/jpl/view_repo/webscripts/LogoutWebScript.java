@@ -28,6 +28,7 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo.webscripts;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,39 +36,44 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.web.app.Application;
+import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.Cache;
-import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.extensions.webscripts.WebScriptResponse;
 
 /**
- * Java backed webscript for logging out of Alfresco repository. 
+ * Provides the WWW-Authenticate response header that browsers need to
+ * clear authentication caches...
+ * 
+ * Extends AbstractWebScript that provides access to response header
  * @author cinyoung
  *
  */
-public class LogoutWebScript extends DeclarativeWebScript {
+public class LogoutWebScript extends AbstractWebScript {
     private boolean logoutBasicAuth = true;
-	private final String NEXT_PARAM = "next";
+//	private final String NEXT_PARAM = "next";
 	
-	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
-		logout(req, status);
-		
-		String next = getServicePath(req.getServiceContextPath()) + "%2Fwcs%2Fui%2F";
-		
-		if (req.getParameter(NEXT_PARAM) != null) {
-			next = req.getParameter(NEXT_PARAM);
-		}
-		
-		// set redirection parameters
-		status.setRedirect(true);
-		if (logoutBasicAuth) {
-            status.setLocation(req.getServerPath() + getServicePath(req.getServiceContextPath()) + next);
-		} else {
-	        status.setLocation(req.getServerPath() + getServicePath(req.getServiceContextPath()) 
-	                + "/faces/jsp/login.jsp?_alfRedirect=" + next);
-		}
+	    // No need to do anything for basic authentication since server will handle bad
+	    // credentials being sent by client
+//		logout(req, status);
+//		
+//		String next = getServicePath(req.getServiceContextPath()) + "%2Fwcs%2Fui%2F";
+//		
+//		if (req.getParameter(NEXT_PARAM) != null) {
+//			next = req.getParameter(NEXT_PARAM);
+//		}
+//		
+//		// set redirection parameters
+//		status.setRedirect(true);
+//		if (logoutBasicAuth) {
+//            status.setLocation(req.getServerPath() + getServicePath(req.getServiceContextPath()) + next);
+//		} else {
+//	        status.setLocation(req.getServerPath() + getServicePath(req.getServiceContextPath()) 
+//	                + "/faces/jsp/login.jsp?_alfRedirect=" + next);
+//		}
 		
 		return new HashMap<String, Object>();
 	}
@@ -76,10 +82,12 @@ public class LogoutWebScript extends DeclarativeWebScript {
 	 * Simple utility that logs out the user
 	 * @param wsr
 	 */
-	private void logout(WebScriptRequest wsr, Status status) {
+	@SuppressWarnings("unused")
+    private void logout(WebScriptRequest wsr, Status status) {
 	    if (logoutBasicAuth) {
 	        status.setCode(HttpServletResponse.SC_UNAUTHORIZED);
 	    } else {
+	        // logging out for WebClient
             FacesContext fc = FacesContext.getCurrentInstance();
             Application.logOut(fc);
             status.setCode(HttpServletResponse.SC_TEMPORARY_REDIRECT);
@@ -91,7 +99,49 @@ public class LogoutWebScript extends DeclarativeWebScript {
 	 * @param scpath	Service context path
 	 * @return			service path
 	 */
-	private String getServicePath(String scpath) {
+	@SuppressWarnings("unused")
+    private String getServicePath(String scpath) {
 		return scpath.replace("/wcservice","").replace("/wcs","").replace("/service","");
 	}
+
+    @Override
+    /**
+     * Stripped out the DeclarativeWebScript and hacked to get the appropriate response header
+     */
+    final public void execute(WebScriptRequest req, WebScriptResponse res) throws IOException
+    {
+        // retrieve requested format
+        String format = req.getFormat();
+
+        try
+        {
+            // establish mimetype from format
+            String mimetype = getContainer().getFormatRegistry().getMimeType(req.getAgent(), format);
+            // construct model for script / template
+            Status status = new Status();
+            Cache cache = new Cache(getDescription().getRequiredCache());
+            Map<String, Object> model = executeImpl(req, status, cache);
+            if (model == null)
+            {
+                model = new HashMap<String, Object>(8, 1.0f);
+            }
+            model.put("status", status);
+            model.put("cache", cache);
+            
+            int statusCode = status.getCode();
+            if (statusCode != HttpServletResponse.SC_OK && !req.forceSuccessStatus())
+            {
+                res.setStatus(statusCode);
+            }
+            
+
+            res.setCache(cache);
+            res.setContentType(mimetype + ";charset=UTF-8");
+            res.setHeader("WWW-Authenticate", "Basic realm=\"Alfresco\"");
+        }
+        catch(Throwable e)
+        {
+            throw createStatusException(e, req, res);
+        }
+    }
 }

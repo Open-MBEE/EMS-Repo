@@ -43,6 +43,8 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,11 +59,16 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class MoaProductGet extends AbstractJavaWebScript {
-	private JSONObject productsJson;
-	private JSONArray viewsJson;
-	private JSONArray elementsJson;
-	
-	@Override
+    public MoaProductGet() {
+        super();
+    }
+    
+    
+	public MoaProductGet(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
+    @Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		String productId = req.getServiceMatch().getTemplateVars().get("id");
 		if (!checkRequestVariable(productId, "id")) {
@@ -84,32 +91,29 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	@Override
 	protected void clearCaches() {
 		super.clearCaches();
-		productsJson = new JSONObject();
-		viewsJson = new JSONArray();
-		elementsJson = new JSONArray();
 	}
 	
 	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req,
-			Status status, Cache cache) {		
+	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {		
 		Map<String, Object> model = new HashMap<String, Object>();
 		
 		String productId = null;
-		// generate the product and JSON
+		JSONObject json = null;
 		if (validateRequest(req, status)) {
             productId = req.getServiceMatch().getTemplateVars().get("id");
-		    generateMoaProduct(productId, req.getContextPath());
-		}
-		
-		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
-			model.put("res", productsJson.toString());
-			if (productId != null) {
-			    model.put("title", findScriptNodeById(productId).getProperty(Acm.ACM_NAME));
-			}
-		} else {
-			model.put("res", response.toString());
+		    json = generateMoaProduct(productId, req.getContextPath());
 		}
 
+      if (responseStatus.getCode() == HttpServletResponse.SC_OK && json != null) {
+		    String jsonString = json.toString();
+            model.put("res", jsonString);
+            if (productId != null) {
+                model.put("title", findScriptNodeByName(productId).getProperty(Acm.ACM_NAME));
+            }
+        } else {
+            model.put("res", response.toString());
+        }
+		
 		status.setCode(responseStatus.getCode());
 		return model;
 	}
@@ -122,9 +126,10 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	 */
     public JSONObject generateMoaProduct(String productId, String contextPath) {
         clearCaches();
+        JSONObject productsJson = null;
         try {
-            handleProduct(productId);
-            handleSnapshots(productId, contextPath);
+            productsJson = handleProduct(productId);
+            handleSnapshots(productId, contextPath, productsJson);
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
@@ -138,8 +143,11 @@ public class MoaProductGet extends AbstractJavaWebScript {
      * @param productId
      * @throws JSONException
      */
-	private void handleProduct(String productId) throws JSONException {
-		EmsScriptNode product = findScriptNodeById(productId);
+	private JSONObject handleProduct(String productId) throws JSONException {
+		EmsScriptNode product = findScriptNodeByName(productId);
+		JSONObject productsJson = null;
+		JSONArray viewsJson = new JSONArray();
+		JSONArray elementsJson = new JSONArray();
 		if (product == null) {
 			log(LogLevel.ERROR, "Product not found with ID: " + productId, HttpServletResponse.SC_NOT_FOUND);
 		}
@@ -149,12 +157,14 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		    productsJson = new JSONObject(object, JSONObject.getNames(object));
 
 		    if (object.has(Acm.JSON_VIEW_2_VIEW)) {
-		        handleViews(object.getJSONArray(Acm.JSON_VIEW_2_VIEW));
+		        handleViews(object.getJSONArray(Acm.JSON_VIEW_2_VIEW), viewsJson, elementsJson);
 		    }
 		    
 		    productsJson.put("views", viewsJson);
 		    productsJson.put("elements", elementsJson);
 		}
+		
+		return productsJson;
 	}
 	
 	/**
@@ -163,7 +173,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	 * @param contextPath
 	 * @throws JSONException
 	 */
-	private void handleSnapshots(String productId, String contextPath) throws JSONException {
+	private void handleSnapshots(String productId, String contextPath, JSONObject productsJson) throws JSONException {
 	    EmsScriptNode product = findScriptNodeById(productId);
 	    
         JSONArray snapshotsJson = new JSONArray();
@@ -184,7 +194,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
         productsJson.put("snapshots", snapshotsJson);
     }
 	
-	private void handleViews(JSONArray view2view) throws JSONException {
+	private void handleViews(JSONArray view2view, JSONArray viewsJson, JSONArray elementsJson) throws JSONException {
 	    Set<String> viewIds = new HashSet<String>();
 	    Set<String> elementIds = new HashSet<String>();
 	    

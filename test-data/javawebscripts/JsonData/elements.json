@@ -6,6 +6,13 @@
 {"documentation" : "talk", "id":"303", "isDerived":false, "name":"303", "owner"="302", "type": "Property", "value" : ["dlam"], "valueType" : "LiteralString"},
 {"documentation" : "about", "id":"304", "isDerived":false, "name":"304", "owner"="303", "type": "Property", "value" : ["dlam"], "valueType" : "LiteralString"},
 
-{"documentation" :"directed_relationship", "id":"400","owner":"300","type":"DirectedRelationship","source":"302","target":"303", "name":"400", "propertyType":null},
+{"documentation" : "4something", "id":"400", "isDerived":false, "name":"400", "owner"="null", "type": "Property", "value" : ["dlam"], "valueType" : "LiteralString"},
+{"documentation" : "4else", "id":"401", "isDerived":false, "name":"401", "owner"="400", "type": "Property", "value" : ["dlam"], "valueType" : "LiteralString"},
+{"documentation" : "4to", "id":"402", "isDerived":false, "name":"402", "owner"="401", "type": "Property", "value" : ["dlam"], "valueType" : "LiteralString"},
+{"documentation" : "4talk", "id":"403", "isDerived":false, "name":"403", "owner"="402", "type": "Property", "value" : ["dlam"], "valueType" : "LiteralString"},
+{"documentation" : "4about", "id":"404", "isDerived":false, "name":"404", "owner"="403", "type": "Property", "value" : ["dlam"], "valueType" : "LiteralString"},
+
+
+{"documentation" :"directed_relationship", "id":"500","owner":"300","type":"DirectedRelationship","source":"302","target":"303", "name":"500", "propertyType":null},
 {"documentation" :"element values", "id":"600","owner":null,"type":"Property","valueType":"ElementValue","value":["300","302"], "name":"600", "propertyType"="304"},
 ]}

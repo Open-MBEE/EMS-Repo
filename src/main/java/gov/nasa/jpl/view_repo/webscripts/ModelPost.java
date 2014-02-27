@@ -29,7 +29,8 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.view_repo.ModelLoadActionExecuter;
+import gov.nasa.jpl.view_repo.actions.ActionUtil;
+import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
@@ -44,10 +45,10 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 
-import org.alfresco.model.ContentModel;
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
-import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
@@ -72,10 +73,17 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * 
  */
 public class ModelPost extends AbstractJavaWebScript {
-    private EmsScriptNode projectNode = null;
+    public ModelPost() {
+        super();
+    }
+    
+    public ModelPost(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
+
     // when run in background as an action, this needs to be false
     private boolean runWithoutTransactions = false;
-    protected String projectId;
 
     private final String ELEMENTS = "elements";
 
@@ -109,8 +117,6 @@ public class ModelPost extends AbstractJavaWebScript {
     protected JSONObject relationshipsJson;
 
     protected Set<String> newElements;
-
-    protected SiteInfo siteInfo;
     
     /**
      * Create or update the model as necessary based on the request
@@ -122,37 +128,32 @@ public class ModelPost extends AbstractJavaWebScript {
      * @throws JSONException
      *             Parse error
      */
-    public void createOrUpdateModel(Object content, Status status)
+    public void createOrUpdateModel(Object content, Status status, EmsScriptNode projectNode)
             throws Exception {
         Date now = new Date();
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
-        // long start, end, total = 0;
+        long start = System.currentTimeMillis(), end, total = 0;
 
         clearCaches();
 
         JSONObject postJson = (JSONObject) content;
 
-        // check if we have single element or array of elements and create
-        // accordingly
+        // check whether single JSONObject to create or an array
         if (!postJson.has(ELEMENTS)) {
-//            updateOrCreateElement(postJson.getJSONArray(ELEMENTS).getJSONObject(0), projectNode);
             updateOrCreateElement(postJson, projectNode);
         } else {
             // create the element map and hierarchies
-            if (buildElementMap(postJson.getJSONArray(ELEMENTS))) {
+            if (buildElementMap(postJson.getJSONArray(ELEMENTS), projectNode)) {
                 // start building up elements from the root elements
                 for (String rootElement : rootElements) {
                     log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
-                    if (!rootElement.equals((String) projectNode
-                            .getProperty(Acm.ACM_CM_NAME))) {
+                    if (!rootElement.equals((String) projectNode.getProperty(Acm.CM_NAME))) {
                         String ownerName = null;
                         JSONObject element = elementMap.get(rootElement);
                         if (element.has(Acm.JSON_OWNER)) {
                             ownerName = element.getString(Acm.JSON_OWNER);
                         }
                         
-                        // get the owner so we can create node inside owner
-                        // DirectedRelationships can be sent with no owners, so, if not specified look for its existing owner
                         EmsScriptNode owner = null;
                         if (ownerName == null || ownerName.equals("null")) {
                             EmsScriptNode elementNode = findScriptNodeById(rootElement);
@@ -160,6 +161,21 @@ public class ModelPost extends AbstractJavaWebScript {
                                 owner = projectNode;
                             } else {
                                 owner = elementNode.getParent();
+
+                        UserTransaction trx;
+                        trx = services.getTransactionService().getNonPropagatingUserTransaction();
+                        try {
+                            trx.begin();
+                            owner = getOwner(rootElement, ownerName, projectNode);
+                            trx.commit();
+                        } catch (Throwable e) {
+                            try {
+                                trx.rollback();
+                                log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                                e.printStackTrace();
+                            } catch (Throwable ee) {
+                                log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                                ee.printStackTrace();
                             }
                         } else {
                             owner = findScriptNodeById(ownerName);
@@ -177,7 +193,9 @@ public class ModelPost extends AbstractJavaWebScript {
                             owner = reifiedPkg;
                         }
                         
-                        updateOrCreateElement(elementMap.get(rootElement), owner);
+                        if (owner != null) {
+                            updateOrCreateElement(elementMap.get(rootElement), owner);
+                        }
                     }
                 } // end for (String rootElement: rootElements) {
             } // end if (buildElementMap(postJson.getJSONArray(ELEMENTS))) {
@@ -187,7 +205,37 @@ public class ModelPost extends AbstractJavaWebScript {
         updateOrCreateAllRelationships(relationshipsJson);
         
         now = new Date();
-        log(LogLevel.INFO, "Update Model Elements Done waiting on transaction to complete..." + now + "\n");
+        end = System.currentTimeMillis();
+        total = end -start;
+        log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
+    }
+    
+    private EmsScriptNode getOwner(String id, String ownerName, EmsScriptNode projectNode) {
+        // get the owner so we can create node inside owner
+        // DirectedRelationships can be sent with no owners, so, if not specified look for its existing owner
+        EmsScriptNode owner = null;
+        if (ownerName == null || ownerName.equals("null")) {
+            EmsScriptNode elementNode = findScriptNodeByName(id);
+            if (elementNode == null) {
+                owner = projectNode;
+            } else {
+                owner = elementNode.getParent();
+            }
+        } else {
+            owner = findScriptNodeByName(ownerName);
+            if (owner == null) {
+                log(LogLevel.WARNING, "Could not find owner with name: " + ownerName + " putting into project", HttpServletResponse.SC_NOT_FOUND);
+                owner = projectNode;
+            }
+            // really want to add pkg as owner
+            EmsScriptNode reifiedPkg = findScriptNodeByName(ownerName + "_pkg");
+            if (reifiedPkg == null) {
+                reifiedPkg = getOrCreateReifiedNode(owner,ownerName, true);
+            }
+            owner = reifiedPkg;
+        }
+        
+        return owner;
     }
     
     protected void updateOrCreateAllRelationships(JSONObject jsonObject) throws JSONException {
@@ -271,8 +319,7 @@ public class ModelPost extends AbstractJavaWebScript {
             for (int ii = 0; ii < jsonArray.length(); ii++) {
                 String targetId = jsonArray.getString(ii);
                 EmsScriptNode target = findScriptNodeById(targetId);
-                source.createOrUpdateAssociation(target,
-                        Acm.ACM_ANNOTATED_ELEMENTS, true);
+                source.createOrUpdateAssociation(target, Acm.ACM_ANNOTATED_ELEMENTS, true);
             }
         }
     }
@@ -393,87 +440,6 @@ public class ModelPost extends AbstractJavaWebScript {
         }
     }
 
-    /**
-     * Create or update the element hierarchy as specified by the JSON Object.
-     * Does reification of containment
-     * 
-     * @param jsonObject
-     *            Hierarchy of containment
-     * @param key
-     *            Name of the parent element
-     * @throws JSONException
-     */
-    protected void updateOrCreateElementHierarchy(JSONObject jsonObject,
-            String key) throws JSONException {
-        String REIFIED_PKG_SUFFIX = "_pkg";
-        String pkgName = key + REIFIED_PKG_SUFFIX;
-
-        JSONArray array = jsonObject.getJSONArray(key);
-
-        // only need to create reified container if it has any elements
-        if (array.length() > 0) {
-            // this is the element node
-            EmsScriptNode node = findScriptNodeById(key);
-            if (node == null) {
-                log(LogLevel.ERROR, "could not find element node with id "
-                        + key + "\n", HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
-
-            if (checkPermissions(node, PermissionService.WRITE)) {
-                // create reified container if it doesn't exist
-                EmsScriptNode reifiedNode = findScriptNodeById(pkgName);
-                if (reifiedNode == null) {
-                    reifiedNode = node.getParent().createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER);
-                    reifiedNode.setProperty(Acm.ACM_ID, key);
-                    reifiedNode.setProperty(Acm.ACM_CM_NAME, pkgName);
-                    reifiedNode.setProperty(Acm.ACM_NAME, (String) node.getProperty(Acm.ACM_NAME));
-                }
-                if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
-                    foundElements.put(pkgName, reifiedNode);
-                    // make sure element and reified container in same place
-                    // node should be accurate if hierarchy is correct
-                    if (!reifiedNode.getParent().equals(node.getParent())) {
-                        reifiedNode.move(node.getParent());
-                    }
-
-                    // move elements to reified container if not already there
-                    for (int ii = 0; ii < array.length(); ii++) {
-                        String childName = array.getString(ii);
-                        EmsScriptNode child = findScriptNodeById(childName);
-                        if (child == null) {
-                            log(LogLevel.ERROR,
-                                    "could not find child node with id "
-                                            + childName + "\n",
-                                    HttpServletResponse.SC_BAD_REQUEST);
-                            continue;
-                        }
-                        if (checkPermissions(child, PermissionService.WRITE)) {
-                            if (!child.getParent().equals(reifiedNode)) {
-                                log(LogLevel.INFO, "moving "
-                                        + child.getProperty(Acm.ACM_CM_NAME) + " to "
-                                        + reifiedNode.getProperty(Acm.ACM_CM_NAME));
-                                child.move(reifiedNode);
-                            }
-
-                            // move reified containers as necessary too
-                            EmsScriptNode childPkg = findScriptNodeById(childName
-                                    + REIFIED_PKG_SUFFIX);
-                            if (childPkg != null && !childPkg.getParent().equals(reifiedNode)) {
-                                log(LogLevel.INFO, "moving "
-                                        + childPkg.getProperty(Acm.ACM_CM_NAME)
-                                        + " to "
-                                        + reifiedNode.getProperty(Acm.ACM_CM_NAME));
-                                childPkg.move(reifiedNode);
-                            }
-                        } // end if (checkPermissions(child, PermissionService.WRITE)) {
-                    } // end if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
-
-                    node.createOrUpdateChildAssociation(reifiedNode, Acm.ACM_REIFIED_CONTAINMENT);
-                } // end if (checkPermissions(node, PermissionService.WRITE)) {
-            }
-        }
-    }
 
     Map<String, JSONObject> elementMap = new HashMap<String, JSONObject>();
     Set<String> rootElements = new HashSet<String>();
@@ -483,11 +449,11 @@ public class ModelPost extends AbstractJavaWebScript {
      * @param jsonArray         Takes in the elements JSONArray
      * @return                  True if all elements and owners can be found with write permissions, false otherwise
      */
-    protected boolean buildElementMap(JSONArray jsonArray) throws JSONException {
+    protected boolean buildElementMap(JSONArray jsonArray, EmsScriptNode projectNode) throws JSONException {
         boolean isValid = true;
 
         if (runWithoutTransactions) {
-            isValid =  buildTransactionableElementMap(jsonArray);
+            isValid =  buildTransactionableElementMap(jsonArray, projectNode);
         } else {
             UserTransaction trx;
             // building element map is a read-only transaction
@@ -495,7 +461,7 @@ public class ModelPost extends AbstractJavaWebScript {
             try {
                 trx.begin();
                 log(LogLevel.INFO, "buildElementMap begin transaction {");
-                isValid = buildTransactionableElementMap(jsonArray);
+                isValid = buildTransactionableElementMap(jsonArray, projectNode);
                 log(LogLevel.INFO, "} buildElementMap committing");
                 trx.commit();
             } catch (Throwable e) {
@@ -512,7 +478,7 @@ public class ModelPost extends AbstractJavaWebScript {
         return isValid;
     }
 
-    protected boolean buildTransactionableElementMap(JSONArray jsonArray) throws JSONException {
+    protected boolean buildTransactionableElementMap(JSONArray jsonArray, EmsScriptNode projectNode) throws JSONException {
         boolean isValid = true;
         for (int ii = 0; ii < jsonArray.length(); ii++) {
             JSONObject elementJson = jsonArray.getJSONObject(ii);
@@ -614,8 +580,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // create the children elements
         if (reifiedNode != null) {
             for (int ii = 0; ii < children.length(); ii++) {
-                updateOrCreateElement(elementMap.get(children.getString(ii)),
-                        reifiedNode);
+                updateOrCreateElement(elementMap.get(children.getString(ii)), reifiedNode);
             }
         }
     }
@@ -635,7 +600,7 @@ public class ModelPost extends AbstractJavaWebScript {
         if (newElements.contains(id)) {
             log(LogLevel.INFO, "\tcreating node");
             node = parent.createNode(id, Acm.JSON2ACM.get(elementJson.getString(Acm.JSON_TYPE)));
-            node.setProperty(Acm.ACM_CM_NAME, id);
+            node.setProperty(Acm.CM_NAME, id);
             node.setProperty(Acm.ACM_ID, id);
         } else {
             log(LogLevel.INFO, "\tmodifying node");
@@ -663,7 +628,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         if (elementHierarchyJson.has(id)) {
             log(LogLevel.INFO, "\tcreating reified package");
-            reifiedNode = getOrCreateReifiedNode(node, id);
+            reifiedNode = getOrCreateReifiedNode(node, id, false);
             JSONArray array = elementHierarchyJson.getJSONArray(id);
             for (int ii = 0; ii < array.length(); ii++) {
                 children.put(array.get(ii));
@@ -697,9 +662,14 @@ public class ModelPost extends AbstractJavaWebScript {
         return reifiedNode;
     }
     
-    protected EmsScriptNode getOrCreateReifiedNode(EmsScriptNode node, String id) {
+    protected EmsScriptNode getOrCreateReifiedNode(EmsScriptNode node, String id, boolean isOwnerParent) {
         EmsScriptNode reifiedNode = null;
-        EmsScriptNode parent = node.getParent();
+        EmsScriptNode parent;
+        if (isOwnerParent) {
+            parent = node;
+        } else {
+            parent = node.getParent();
+        }
 
         if (checkPermissions(parent, PermissionService.WRITE)) {
             String pkgName = id + "_pkg";
@@ -707,13 +677,14 @@ public class ModelPost extends AbstractJavaWebScript {
             if (reifiedNode == null) {
                 reifiedNode = parent.createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER);
                 reifiedNode.setProperty(Acm.ACM_ID, pkgName);
-                reifiedNode.setProperty(Acm.ACM_CM_NAME, pkgName);
+                reifiedNode.setProperty(Acm.CM_NAME, pkgName);
                 reifiedNode.setProperty(Acm.ACM_NAME, (String) node.getProperty(Acm.ACM_NAME));
-                log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getProperty(Acm.ACM_CM_NAME));
+                log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getProperty(Acm.CM_NAME) + " : " + reifiedNode.getNodeRef().toString());
             }
             if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
                 foundElements.put(pkgName, reifiedNode);
-                node.createOrUpdateChildAssociation(reifiedNode, Acm.ACM_REIFIED_CONTAINMENT);
+                // this reification containment association is more trouble than it's worth...
+//                node.createOrUpdateChildAssociation(reifiedNode, Acm.ACM_REIFIED_CONTAINMENT);
             }
         }
 
@@ -731,18 +702,23 @@ public class ModelPost extends AbstractJavaWebScript {
         
         boolean runInBackground = checkArgEquals(req, "background", "true");
 
+        ModelPost instance = new ModelPost(repository, services);
+        
         if (validateRequest(req, status)) {
             try {
                 if (runInBackground) {
-                    saveAndStartAction(req, status);
+                    instance.saveAndStartAction(req, status);
                     response.append("JSON uploaded, model load being processed in background.\n");
                     response.append("You will be notified via email when the model load has finished.\n");
                 } else {
-                    createOrUpdateModel(req.parseContent(), status);
+                    instance.createOrUpdateModel(req.parseContent(), status, getProjectNodeFromRequest(req));
                 }
+                appendResponseStatusInfo(instance);
+            } catch (JSONException e) {
+                log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
+                e.printStackTrace();
             } catch (Exception e) {
-                log(LogLevel.ERROR, "JSON malformed\n",
-                        HttpServletResponse.SC_BAD_REQUEST);
+                log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 e.printStackTrace();
             }
         }
@@ -753,41 +729,16 @@ public class ModelPost extends AbstractJavaWebScript {
     }
 
     protected void saveAndStartAction(WebScriptRequest req, Status status) throws Exception {
+    		String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+    		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
         EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
-
-        EmsScriptNode jobPkgNode = siteNode.childByNamePath("Jobs");
-        if (jobPkgNode == null) {
-            jobPkgNode = siteNode.createFolder("Jobs", "cm:folder");
-        }
+        String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
         
-        String jobNodeName = "Job " + projectId + ".json";
-        EmsScriptNode jobNode = jobPkgNode.childByNamePath(jobNodeName);
-        if (jobNode == null) {
-            jobNode = jobPkgNode.createNode(jobNodeName, "ems:Job");
-        } else {
-//            String jobStatus = (String)jobNode.getProperty("ems:job_status");
-//            if (jobStatus.equals("Active")) {
-//                status.setCode(HttpServletResponse.SC_CONFLICT, "Previous project export is still loading");
-//                return;
-//            }
-        }
-        jobNode.createOrUpdateProperty("ems:job_status", "Active");
-        jobNode.createOrUpdateProperty("cm:isContentIndexed", false);
+        String jobName = "Load Job " + projectId + ".json";
+        EmsScriptNode jobNode = ActionUtil.getOrCreateJob(siteNode, jobName, "ems:Job", status, response);
         
         // write out the json
-        NodeRef jobNodeRef = jobNode.getNodeRef();
-        ContentWriter writer = services.getContentService().getWriter(jobNodeRef, ContentModel.PROP_CONTENT, true);
-        writer.putContent(((JSONObject)req.parseContent()).toString(4));
-        ModelLoadActionExecuter.setContentDataMimeType(writer, jobNode, "application/json", services);
-
-        // create the log with the association
-        String jobLogNodeName = "Job " + projectId + ".log";
-        EmsScriptNode jobLogNode = jobPkgNode.childByNamePath(jobLogNodeName);
-        if (jobLogNode == null) {
-            jobLogNode = jobPkgNode.createNode(jobLogNodeName, "cm:content");
-        }
-        jobNode.createOrUpdateProperty("ems:job_log", jobLogNode);
-        
+        ActionUtil.saveStringToFile(jobNode, "application/json", services, ((JSONObject)req.parseContent()).toString(4));
         
         EmsScriptNode projectNode = findScriptNodeById(projectId);
         // kick off the action
@@ -796,7 +747,7 @@ public class ModelPost extends AbstractJavaWebScript {
         loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_ID, projectId);
         loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_NAME, (String)projectNode.getProperty(Acm.ACM_NAME));
         loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_NODE, projectNode);
-        services.getActionService().executeAction(loadAction , jobNodeRef, true, true);
+        services.getActionService().executeAction(loadAction , jobNode.getNodeRef(), true, true);
     }
     
     @Override
@@ -811,25 +762,6 @@ public class ModelPost extends AbstractJavaWebScript {
             if (!checkRequestVariable(elementId, "elementid")) {
                 return false;
             }
-
-            // projectNode should be the owner..., which should exist
-            try {
-                JSONObject postJson = (JSONObject) req.parseContent();
-                JSONObject elementsJson = postJson.getJSONObject("elements");
-                JSONObject elementJson = elementsJson.getJSONObject(elementId);
-                projectNode = findScriptNodeById(elementJson
-                        .getString(Acm.JSON_OWNER));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            if (projectNode == null) {
-                return false;
-            }
-
-            if (checkPermissions(projectNode, PermissionService.WRITE)) {
-                return false;
-            }
         } else {
             String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
             // Handling for project/{id}/elements
@@ -837,28 +769,22 @@ public class ModelPost extends AbstractJavaWebScript {
                 return false;
             }
 
-            projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
-            if (!checkRequestVariable(projectId, PROJECT_ID)) {
-                return false;
-            }
-
-            siteInfo = services.getSiteService().getSite(siteName);
+            SiteInfo siteInfo = services.getSiteService().getSite(siteName);
             if (!checkRequestVariable(siteInfo, "Site")) {
                 return false;
             }
-
-            if (!checkPermissions(siteInfo.getNodeRef(),
-                    PermissionService.WRITE)) {
-                return false;
-            }
-
-            EmsScriptNode siteNode = getSiteNode(siteName);
-            projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
-            if (projectNode == null) {
-                log(LogLevel.ERROR, "Project not found.\n",
-                        HttpServletResponse.SC_NOT_FOUND);
-                return false;
-            }
+        }
+        
+        // check project
+        EmsScriptNode projectNode = getProjectNodeFromRequest(req);
+        if (projectNode == null) {
+            log(LogLevel.ERROR, "Project not found.\n", HttpServletResponse.SC_NOT_FOUND);
+            return false;
+        }
+        
+        if (!checkPermissions(projectNode, PermissionService.WRITE)) {
+            log(LogLevel.WARNING, "No permissions to write to project.\n", HttpServletResponse.SC_UNAUTHORIZED);
+            return false;
         }
 
         return true;
@@ -868,8 +794,28 @@ public class ModelPost extends AbstractJavaWebScript {
         projectNode = findScriptNodeById(projectId);
     }
     
-    public void setProjectNode(EmsScriptNode pn) {
-        projectNode = pn;
+    private EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req) {
+        EmsScriptNode projectNode = null;
+        
+        String elementId = req.getServiceMatch().getTemplateVars().get("elementid");
+        if (elementId != null) {
+            // projectNode should be the owner..., which should exist
+            try {
+                JSONObject postJson = (JSONObject) req.parseContent();
+                JSONObject elementsJson = postJson.getJSONObject("elements");
+                JSONObject elementJson = elementsJson.getJSONObject(elementId);
+                projectNode = findScriptNodeById(elementJson.getString(Acm.JSON_OWNER));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+            String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+            String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
+            EmsScriptNode siteNode = getSiteNode(siteName);
+            projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
+        }
+        
+        return projectNode;
     }
     
     public void setRunWithoutTransactions(boolean withoutTransactions) {
