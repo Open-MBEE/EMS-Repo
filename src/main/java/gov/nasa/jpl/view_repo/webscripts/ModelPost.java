@@ -155,12 +155,6 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                         
                         EmsScriptNode owner = null;
-                        if (ownerName == null || ownerName.equals("null")) {
-                            EmsScriptNode elementNode = findScriptNodeById(rootElement);
-                            if (elementNode == null) {
-                                owner = projectNode;
-                            } else {
-                                owner = elementNode.getParent();
 
                         UserTransaction trx;
                         trx = services.getTransactionService().getNonPropagatingUserTransaction();
@@ -177,20 +171,6 @@ public class ModelPost extends AbstractJavaWebScript {
                                 log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
                                 ee.printStackTrace();
                             }
-                        } else {
-                            owner = findScriptNodeById(ownerName);
-                            if (owner == null) {
-                                log(LogLevel.WARNING, "Could not find owner with name: " + ownerName + " putting into project", HttpServletResponse.SC_NOT_FOUND);
-                                owner = projectNode;
-                            }
-                            // really want to add pkg as owner
-                            EmsScriptNode reifiedPkg = findScriptNodeById(ownerName
-                                    + "_pkg");
-                            if (reifiedPkg == null) {
-                                reifiedPkg = getOrCreateReifiedNode(owner,
-                                        ownerName);
-                            }
-                            owner = reifiedPkg;
                         }
                         
                         if (owner != null) {
@@ -215,20 +195,20 @@ public class ModelPost extends AbstractJavaWebScript {
         // DirectedRelationships can be sent with no owners, so, if not specified look for its existing owner
         EmsScriptNode owner = null;
         if (ownerName == null || ownerName.equals("null")) {
-            EmsScriptNode elementNode = findScriptNodeByName(id);
+            EmsScriptNode elementNode = findScriptNodeById(id);
             if (elementNode == null) {
                 owner = projectNode;
             } else {
                 owner = elementNode.getParent();
             }
         } else {
-            owner = findScriptNodeByName(ownerName);
+            owner = findScriptNodeById(ownerName);
             if (owner == null) {
                 log(LogLevel.WARNING, "Could not find owner with name: " + ownerName + " putting into project", HttpServletResponse.SC_NOT_FOUND);
                 owner = projectNode;
             }
             // really want to add pkg as owner
-            EmsScriptNode reifiedPkg = findScriptNodeByName(ownerName + "_pkg");
+            EmsScriptNode reifiedPkg = findScriptNodeById(ownerName + "_pkg");
             if (reifiedPkg == null) {
                 reifiedPkg = getOrCreateReifiedNode(owner,ownerName, true);
             }
@@ -790,10 +770,6 @@ public class ModelPost extends AbstractJavaWebScript {
         return true;
     }
 
-    public void setProjectIdAndNode(String projectId) {
-        projectNode = findScriptNodeById(projectId);
-    }
-    
     private EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req) {
         EmsScriptNode projectNode = null;
         

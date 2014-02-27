@@ -108,7 +108,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		    String jsonString = json.toString();
             model.put("res", jsonString);
             if (productId != null) {
-                model.put("title", findScriptNodeByName(productId).getProperty(Acm.ACM_NAME));
+                model.put("title", findScriptNodeById(productId).getProperty(Acm.ACM_NAME));
             }
         } else {
             model.put("res", response.toString());
@@ -144,7 +144,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
      * @throws JSONException
      */
 	private JSONObject handleProduct(String productId) throws JSONException {
-		EmsScriptNode product = findScriptNodeByName(productId);
+		EmsScriptNode product = findScriptNodeById(productId);
 		JSONObject productsJson = null;
 		JSONArray viewsJson = new JSONArray();
 		JSONArray elementsJson = new JSONArray();

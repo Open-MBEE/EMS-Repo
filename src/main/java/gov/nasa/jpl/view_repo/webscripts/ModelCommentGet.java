@@ -103,7 +103,7 @@ public class ModelCommentGet extends ModelGet {
             JSONArray commentIds = element.getSourceAssocsIdsByType(Acm.ACM_ANNOTATED_ELEMENTS);
             for (int ii = 0; ii < commentIds.length(); ii++) {
                 String commentId = commentIds.getString(ii);
-                EmsScriptNode comment = findScriptNodeByName(commentId);
+                EmsScriptNode comment = findScriptNodeById(commentId);
                 if (comment != null) {
                     elementsFound.put(commentId, comment);
                 }

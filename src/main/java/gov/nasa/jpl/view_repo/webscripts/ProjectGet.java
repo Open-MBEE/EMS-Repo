@@ -109,7 +109,7 @@ public class ProjectGet extends AbstractJavaWebScript {
         JSONObject json = null;
         
         if (siteName == null) {
-            projectNode = findScriptNodeByName(projectId);
+            projectNode = findScriptNodeById(projectId);
         } else {
             EmsScriptNode siteNode = new EmsScriptNode(services.getSiteService().getSite(siteName).getNodeRef(), services, response);
             projectNode = siteNode.childByNamePath("ViewEditor/" + projectId);
