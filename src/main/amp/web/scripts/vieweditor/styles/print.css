@@ -26,3 +26,7 @@ p a:after {
 .blank.reference {
   display: none;
 }
+
+.print-only {
+	display: block;
+}

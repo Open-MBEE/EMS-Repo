@@ -36,7 +36,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -380,18 +379,6 @@ public class EmsScriptNode extends ScriptNode {
       return ( s == null || s.isEmpty() ||
                s.trim().toLowerCase().equals( "null" ) );
     }
-    // Check if array has really got something.
-    private static boolean isNullOrEmpty( Object[] s ) {
-      return ( s == null || s.length == 0 );
-    }
-    // Check if Collection has really got something.
-    private static boolean isNullOrEmpty( Collection< ? > s ) {
-      return ( s == null || s.isEmpty() );
-    }
-    // Check if Map has really got something.
-    private static boolean isNullOrEmpty( Map< ?, ? > s ) {
-      return ( s == null || s.isEmpty() );
-    }
 	
 	public static String getMimeType( String type ) {
 	    Field[] fields = getAllFields( MimetypeMap.class );
@@ -612,10 +599,10 @@ public class EmsScriptNode extends ScriptNode {
 	 * @return			True if values updated/create, false if unchanged
 	 * @throws JSONException
 	 */
-	@SuppressWarnings("unchecked")
 	public <T extends Serializable> boolean createOrUpdatePropertyValues(String type, JSONArray array, T valueType) throws JSONException {
 		ArrayList<T> values = new ArrayList<T>();
 		for (int ii = 0; ii < array.length(); ii++) {
+            @SuppressWarnings( "unchecked" )
 		    T value = (T)array.get(ii);
             if ( value instanceof String ) {
                 @SuppressWarnings( "unchecked" )
@@ -625,6 +612,7 @@ public class EmsScriptNode extends ScriptNode {
 			values.add(value);
 		}
 		
+        @SuppressWarnings( "unchecked" )
 		ArrayList<T> oldValues = (ArrayList<T>) getProperty(type);
 		if (!checkIfListsEquivalent(oldValues, values)) {
 			setProperty(type, values);
@@ -909,12 +897,10 @@ public class EmsScriptNode extends ScriptNode {
                 if (Acm.JSON_FILTER_MAP.get(renderType).contains(jsonType)) {
                     if (Acm.JSON_ARRAYS.contains(jsonType)) {
                         String elementString = elementValue.toString();
-//                        elementString = fixArtifactUrls(elementString, true);
                         element.put(jsonType, new JSONArray(elementString));
                     } else {
                         if (elementValue instanceof String) {
                             String elementString = (String) elementValue;
-//                            element.put(jsonType, fixArtifactUrls(elementString, false));
                             element.put(jsonType, elementString);
                         } else if (elementValue instanceof Date) {
                             element.put(jsonType, getIsoTime((Date)elementValue));
@@ -990,7 +976,6 @@ public class EmsScriptNode extends ScriptNode {
             element.put("editable", this.hasPermission(PermissionService.WRITE));
         }
 
-        // fix all the urls in the JSON string (since it could be anywhere)
         String elementString = element.toString();
         elementString = fixArtifactUrls(elementString, true);
         element = new JSONObject(elementString);
@@ -1279,22 +1264,24 @@ public class EmsScriptNode extends ScriptNode {
             JSONArray array;
             
             String acmType = Acm.JSON2ACM.get(jsonObject.get(Acm.JSON_VALUE_TYPE));
-            Object value = jsonObject.get(Acm.JSON_VALUE);
-            // view editor just sends a string for the value instead of an array
-            if (value instanceof String) {
-                array = new JSONArray();
-                array.put(jsonObject.get(Acm.JSON_VALUE));
-            } else {
-                array = jsonObject.getJSONArray(Acm.JSON_VALUE);
-            }
-            if (acmType.equals(Acm.ACM_LITERAL_BOOLEAN)) {
-                this.createOrUpdatePropertyValues(acmType, array, new Boolean(true));
-            } else if (acmType.equals(Acm.ACM_LITERAL_INTEGER)) {
-                this.createOrUpdatePropertyValues(acmType, array, new Integer(0));
-            } else if (acmType.equals(Acm.ACM_LITERAL_REAL)) {
-                this.createOrUpdatePropertyValues(acmType, array, new Double(0.0));
-            } else if (acmType.equals(Acm.ACM_LITERAL_STRING)) {
-                this.createOrUpdatePropertyValues(acmType, array, new String(""));
+            if (jsonObject.has(Acm.JSON_VALUE)) {
+                Object value = jsonObject.get(Acm.JSON_VALUE);
+                // view editor just sends a string for the value instead of an array
+                if (value instanceof String) {
+                    array = new JSONArray();
+                    array.put(jsonObject.get(Acm.JSON_VALUE));
+                } else {
+                    array = jsonObject.getJSONArray(Acm.JSON_VALUE);
+                }
+                if (acmType.equals(Acm.ACM_LITERAL_BOOLEAN)) {
+                    this.createOrUpdatePropertyValues(acmType, array, new Boolean(true));
+                } else if (acmType.equals(Acm.ACM_LITERAL_INTEGER)) {
+                    this.createOrUpdatePropertyValues(acmType, array, new Integer(0));
+                } else if (acmType.equals(Acm.ACM_LITERAL_REAL)) {
+                    this.createOrUpdatePropertyValues(acmType, array, new Double(0.0));
+                } else if (acmType.equals(Acm.ACM_LITERAL_STRING)) {
+                    this.createOrUpdatePropertyValues(acmType, array, new String(""));
+                }
             }
         }
 	}

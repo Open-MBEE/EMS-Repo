@@ -186,7 +186,6 @@ public class Acm {
 //    public static final String ACM_DURATION_MAX = SYSML + JSON_DURATION_MAX;    
 //    public static final String ACM_DURATION_MIN = SYSML + JSON_DURATION_MIN;    
     
-    
     public static final String ACM_ALLOWED_ELEMENTS = VIEW + JSON_ALLOWED_ELEMENTS;
     public static final String ACM_CHILDREN_VIEWS = VIEW + JSON_CHILDREN_VIEWS;
     public static final String ACM_CONTAINS = VIEW + JSON_CONTAINS;

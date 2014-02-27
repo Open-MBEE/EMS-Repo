@@ -8,7 +8,7 @@
   		"projectVersion": projectVersion if there is a version
   	}
   </description>
-  <url>/javawebscripts/sites/{siteName}/projects/{projectId}</url>
+  <url>/javawebscripts/projects/{projectId}</url>
   <format default="json">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readonly">required</transaction>

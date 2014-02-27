@@ -86,6 +86,13 @@
 		<property name="services" ref="ServiceRegistry" />
 	</bean>
 
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.ve.delete"
+		class="gov.nasa.jpl.view_repo.webscripts.ViewEditorDelete" parent="webscript"
+		singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+	</bean>
+
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.product.get"
 		class="gov.nasa.jpl.view_repo.webscripts.ProductGet" parent="webscript"
 		singleton="false">
@@ -109,6 +116,20 @@
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.home.get"
 		class="gov.nasa.jpl.view_repo.webscripts.ProductListGet" parent="webscript"
+		singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.projectonly.get"
+		class="gov.nasa.jpl.view_repo.webscripts.ProjectGet" parent="webscript"
+		singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.projectonly.post"
+		class="gov.nasa.jpl.view_repo.webscripts.ProjectPost" parent="webscript"
 		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
@@ -144,6 +165,24 @@
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.model.post" class="gov.nasa.jpl.view_repo.webscripts.ModelPost"
+		parent="webscript" singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.configuration.post" class="gov.nasa.jpl.view_repo.webscripts.ConfigurationPost"
+		parent="webscript" singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.configuration.get" class="gov.nasa.jpl.view_repo.webscripts.ConfigurationGet"
+		parent="webscript" singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.index.get" class="gov.nasa.jpl.view_repo.webscripts.IndexGet"
 		parent="webscript" singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />

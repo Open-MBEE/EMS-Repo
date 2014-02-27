@@ -29,7 +29,8 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.view_repo.ModelLoadActionExecuter;
+import gov.nasa.jpl.view_repo.actions.ActionUtil;
+import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
@@ -44,10 +45,10 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 
-import org.alfresco.model.ContentModel;
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
-import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
@@ -184,7 +185,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // handle the relationships
         updateOrCreateAllRelationships(relationshipsJson);
         
-        updateNodeReferences(singleElement, postJson);
+        updateNodeReferences(singleElement, postJson, projectNode );
         
         now = new Date();
         end = System.currentTimeMillis();
@@ -192,16 +193,14 @@ public class ModelPost extends AbstractJavaWebScript {
         log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
     }
     
-    
-    protected void updateNodeReferences(boolean singleElement, JSONObject postJson) throws Exception {
+    protected void updateNodeReferences(boolean singleElement, JSONObject postJson, EmsScriptNode projectNode ) throws Exception {
         if ( singleElement ) {
             updateOrCreateElement(postJson, projectNode, true);
         }
         for (String rootElement : rootElements) {
             log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
-            if (!rootElement.equals((String) projectNode
-                    .getProperty(Acm.ACM_CM_NAME))) {
-                EmsScriptNode owner = getOwner( rootElement, false );
+            if (!rootElement.equals((String) projectNode.getProperty(Acm.CM_NAME))) {
+                EmsScriptNode owner = getOwner( rootElement, projectNode, false );
                 
                 try {
                     updateOrCreateElement(elementMap.get(rootElement), owner, true);
@@ -230,6 +229,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // get the owner so we can create node inside owner
         // DirectedRelationships can be sent with no owners, so, if not specified look for its existing owner
         EmsScriptNode owner = null;
+        EmsScriptNode reifiedPkg = null;
         if (ownerName == null || ownerName.equals("null")) {
             EmsScriptNode elementNode = findScriptNodeByName(rootElement);
             if (elementNode == null || !elementNode.exists()) {
@@ -244,7 +244,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 owner = projectNode;
             }
             // really want to add pkg as owner
-            EmsScriptNode reifiedPkg = findScriptNodeByName(ownerName + "_pkg");
+            reifiedPkg = findScriptNodeByName(ownerName + "_pkg");
             if (reifiedPkg == null || !reifiedPkg.exists()) {
                 if ( createOwnerPkgIfNotFound) {
                     reifiedPkg = getOrCreateReifiedNode(owner, ownerName, false);
@@ -747,7 +747,7 @@ public class ModelPost extends AbstractJavaWebScript {
             if (reifiedNode == null || !reifiedNode.exists()) {
                 reifiedNode = parent.createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER);
                 if (reifiedNode == null || !reifiedNode.exists()) {
-                    log(LogLevel.ERROR, "\t failed to create reified node " + pkgName + " in " + parent.getProperty(Acm.ACM_CM_NAME));
+                    log(LogLevel.ERROR, "\t failed to create reified node " + pkgName + " in " + parent.getProperty(Acm.CM_NAME));
                     return null;
                 } else {
                     reifiedNode.setProperty(Acm.ACM_ID, pkgName);

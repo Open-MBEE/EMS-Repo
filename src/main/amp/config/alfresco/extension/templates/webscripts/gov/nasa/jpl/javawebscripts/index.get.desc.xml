@@ -1,6 +1,6 @@
 <webscript> 
-  <shortname>Get View Editor home page</shortname> 
-  <description>Return all documents in the specified site in format that shows containment:
+  <shortname>Get view editor home page</shortname> 
+  <description>Return all documents in the specified site
 		{
 	 		"name" : projectname,
 	 		"volumes": {mdid: volumename},
@@ -10,7 +10,7 @@
 	 		"projectVolumes": [volumeid,...]
 	 	}  	
   </description>
-  <url>/ve/documents/{id}</url> 
+  <url>/ve/index/{id}</url> 
   <format default="html">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readonly">required</transaction>
@@ -19,7 +19,7 @@
   	<arg>
   		<name>id</name>
   		<description>
-  		Name of the site to find all documents in, e.g. /ve/documents/europa gets all the documents in the europa site.
+  		Name of the site to find index.json in to render the appropriate filtered index page
   		</description>
   	</arg>
   </args>
