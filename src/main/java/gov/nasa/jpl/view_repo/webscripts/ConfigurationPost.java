@@ -124,7 +124,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
                     nodeId = postJson.getString("nodeid");
                     List<NodeRef> nodeRefs = NodeRef.getNodeRefs(nodeId);
                     jobNode = new EmsScriptNode(nodeRefs.get(0), services, response);
-                    jobNode.createOrUpdateProperty(Acm.CM_NAME, "VERSION " + jobName);
+                    jobNode.createOrUpdateProperty(Acm.CM_NAME, jobName);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -143,11 +143,14 @@ public class ConfigurationPost extends AbstractJavaWebScript {
             return;
         }
         jobNode.createOrUpdateProperty("cm:description", jobDescription);
-                
-        // kick off the action
-        ActionService actionService = services.getActionService();
-        Action configurationAction = actionService.createAction(ConfigurationGenerationActionExecuter.NAME);
-        configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_SITE_NAME, siteName);
-        services.getActionService().executeAction(configurationAction , jobNode.getNodeRef(), true, true);
+             
+        // only create snapshots once - can update names and descriptions any time
+        if (!postJson.has("nodeid")) {
+	        // kick off the action
+	        ActionService actionService = services.getActionService();
+	        Action configurationAction = actionService.createAction(ConfigurationGenerationActionExecuter.NAME);
+	        configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_SITE_NAME, siteName);
+	        services.getActionService().executeAction(configurationAction , jobNode.getNodeRef(), true, true);
+        }
     }
 }
