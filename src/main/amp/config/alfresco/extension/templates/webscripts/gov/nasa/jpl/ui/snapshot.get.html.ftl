@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
+    <link href="${url.context}/scripts/vieweditor/styles/snapshot.css" rel="stylesheet" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/print.css" rel="stylesheet" media="print">
     <link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
     <link href="${url.context}/scripts/vieweditor/vendor/css/whhg.css" rel="stylesheet" >
@@ -19,38 +20,52 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 
   <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
 <div id="main"></div>
-
 <script id="template" type="text/mustache">
 
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="navbar-header">
-          {{#environment.development}}
-            <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
-          {{/environment.development}}
-          {{^environment.development}}
-            <a class="navbar-brand" href="${url.context}/service/ve/documents/europa">Europa View Editor {{ title }}</a>
-          {{/environment.development}}  
+      {{#environment.development}}
+              {{^viewTree.snapshot}}
+                <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
+              {{/viewTree.snapshot}}
+            {{/environment.development}}
+            {{^environment.development}}
+              {{^viewTree.snapshot}}
+                <a class="navbar-brand" href="${url.context}/service/ve/documents/europa">Europa View Editor {{ title }}</a>
+              {{/viewTree.snapshot}}
+      {{/environment.development}}  
       </div>
 
-      <ul class="nav navbar-nav">
-        <li><a  href="/share/page/">Europa EMS Dashboard</a></li>
-      </ul>   
-        
+      {{^viewTree.snapshot}}
+        <ul class="nav navbar-nav pull">
+          <li><a  href="/share/page/">Europa EMS Dashboard </a></li>
+        </ul>   
+      {{/viewTree.snapshot}}
+
       <div class="pull-right">
         <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
       </div>
 
       <ul class="nav navbar-nav pull-right">
-       <li><a href="#" class="submit-logout">logout</a></li>
+        <li><a href="#" class="submit-logout">logout</a></li>
       </ul>
 
-      <ul class="nav navbar-nav pull-right">
-        {{#viewTree.snapshot}}
-          <li><a class="navbar-brand" href="#">Snapshot ({{viewTree.snapshoted}})</a></li>
-          <li><a class="navbar-brand" href="${url.context}/service/ve/products/${id}">Latest Version</a></li> 
-        {{/viewTree.snapshot}}
-
-      </ul>
+      {{#viewTree.snapshot}}
+        <ul class="nav navbar-nav pull-left">
+          <li><a class="navbar-brand" href="#">Version Report ({{viewTree.snapshoted}})</a></li>
+        </ul>
+          <ul class="nav navbar-nav pull-right">
+          <li><a  href="/share/page/">Europa EMS Dashboard </a></li>
+        </ul> 
+        <ul class="nav navbar-nav pull-right">
+          {{#environment.development}}
+            <li><a  href="/">Go back to view editor </a></li>
+          {{/environment.development}}
+          {{^environment.development}}
+            <li><a  href="${url.context}/service/ve/documents/europa">Go back to View Editor </a></li>
+          {{/environment.development}}
+        </ul>
+      {{/viewTree.snapshot}}
 
       <!-- 
       <form class="navbar-form navbar-right" action="">
@@ -1387,16 +1402,18 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
         var table = '<div contenteditable="false"><table class="table table-striped">';
         table += '<caption>'+c.title+'</caption>';
         table += "<thead>";
-        table += "<tr>";
-        for (var hIdx in c.header[0]) {
-          var cell = c.header[0][hIdx];
-          var value = resolveValue(cell.content, elements, function(valueList) {
-            return _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) }).join("");
-          });
-          // console.log("header value", value)
-          table += '<th colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '">' + value + "</th>";
+        for(var rIdx in c.header) {
+          table += "<tr>";
+          for (var hIdx in c.header[rIdx]) {
+            var cell = c.header[rIdx][hIdx];
+            var value = resolveValue(cell.content, elements, function(valueList) {
+              return _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) }).join("");
+            });
+            // console.log("header value", value)
+            table += '<th colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '">' + value + "</th>";
+          }
+          table += "</tr>";
         }
-        table += "</tr>";
         table += "</thead>"
         table += "<tbody>";
         for (var rIdx in c.body) {
