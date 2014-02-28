@@ -43,6 +43,12 @@ nav {
 	border: 1px solid black;
 }
 
+.table thead>tr>th {
+	border: 1px solid black;
+	vertical-align: middle;
+
+}
+
 table {
 	border-top: 1px solid black;
 }
