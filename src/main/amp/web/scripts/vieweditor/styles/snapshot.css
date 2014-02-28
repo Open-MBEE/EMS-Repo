@@ -1,0 +1,32 @@
+[data-property=documentation].editable, [data-property=documentation].editable.reference * {
+}
+
+[data-property=name].editable, [data-property=name].editable.reference * {
+	border-bottom: none;
+}
+
+[data-property=value].editable, [data-property=value].editable.reference * {
+	border-bottom: none;
+}
+
+[data-property=documentation].editable.reference .transclusion {
+	border-bottom: 1px solid blue;
+	/*background: lightgrey;*/
+}
+
+[data-property=documentation].editable.reference .transclusion:hover {
+	background: transparent;	
+}
+
+[data-property=name].editable.reference .transclusion:hover {
+	background: transparent;	
+}
+
+[data-property=value].editable.reference .transclusion:hover {
+	background: transparent;	
+}
+
+
+.blank {
+	display: none;
+}

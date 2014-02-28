@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
+    <link href="${url.context}/scripts/vieweditor/styles/snapshot.css" rel="stylesheet" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/print.css" rel="stylesheet" media="print">
     <link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
     <link href="${url.context}/scripts/vieweditor/vendor/css/whhg.css" rel="stylesheet" >
