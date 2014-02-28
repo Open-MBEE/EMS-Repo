@@ -299,7 +299,9 @@ public class ModelPost extends AbstractJavaWebScript {
             for (int ii = 0; ii < jsonArray.length(); ii++) {
                 String targetId = jsonArray.getString(ii);
                 EmsScriptNode target = findScriptNodeByName(targetId);
-                source.createOrUpdateAssociation(target, Acm.ACM_ANNOTATED_ELEMENTS, true);
+                if (target != null) {
+                		source.createOrUpdateAssociation(target, Acm.ACM_ANNOTATED_ELEMENTS, true);
+                }
             }
         }
     }
