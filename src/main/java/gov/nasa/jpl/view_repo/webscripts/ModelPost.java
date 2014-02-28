@@ -45,6 +45,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
@@ -204,7 +205,8 @@ public class ModelPost extends AbstractJavaWebScript {
         } else {
             owner = findScriptNodeByName(ownerName);
             if (owner == null) {
-                log(LogLevel.WARNING, "Could not find owner with name: " + ownerName + " putting into project", HttpServletResponse.SC_NOT_FOUND);
+//                log(LogLevel.WARNING, "Could not find owner with name: " + ownerName + " putting into project", HttpServletResponse.SC_NOT_FOUND);
+                log(LogLevel.WARNING, "Could not find owner with name: " + ownerName + " putting into project", HttpServletResponse.SC_OK);
                 owner = projectNode;
             }
             // really want to add pkg as owner
@@ -299,7 +301,9 @@ public class ModelPost extends AbstractJavaWebScript {
             for (int ii = 0; ii < jsonArray.length(); ii++) {
                 String targetId = jsonArray.getString(ii);
                 EmsScriptNode target = findScriptNodeByName(targetId);
-                source.createOrUpdateAssociation(target, Acm.ACM_ANNOTATED_ELEMENTS, true);
+                if (target != null) {
+                		source.createOrUpdateAssociation(target, Acm.ACM_ANNOTATED_ELEMENTS, true);
+                }
             }
         }
     }
@@ -492,7 +496,8 @@ public class ModelPost extends AbstractJavaWebScript {
             if (!newElements.contains(elementId)) {
                 EmsScriptNode element = findScriptNodeByName(elementId);
                 if (element == null) {
-                    log(LogLevel.ERROR, "Could not find node with id: " + elementId, HttpServletResponse.SC_NOT_FOUND);
+//                    log(LogLevel.ERROR, "Could not find node with id: " + elementId, HttpServletResponse.SC_NOT_FOUND);
+                    log(LogLevel.ERROR, "Could not find node with id: " + elementId, HttpServletResponse.SC_OK);
                     isValid = false;
                 } else if (!checkPermissions(element, PermissionService.WRITE)) {
                     isValid = false;
@@ -530,6 +535,20 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     protected void updateOrCreateElement(JSONObject elementJson,
             EmsScriptNode parent) throws JSONException {
+    		// check that parent is of folder type
+    		if (!services.getDictionaryService().isSubClass(parent.getQNameType(), ContentModel.TYPE_FOLDER)) {
+    			String name = (String) parent.getProperty(Acm.ACM_NAME);
+    			if (name == null) {
+    				name = (String) parent.getProperty(Acm.CM_NAME);
+    			}
+    			String id = (String) parent.getProperty(Acm.ACM_ID);
+    			if (id == null) {
+    				id = "not sysml type";
+    			}
+    			log(LogLevel.WARNING, "Node " + name + " is not of type folder, so cannot create children [id=" + id + "]");
+    			return;
+    		}
+    	
         JSONArray children = new JSONArray();
         
         EmsScriptNode reifiedNode = null;
