@@ -10,7 +10,7 @@
 }
 
 [data-property=documentation].editable.reference .transclusion {
-	border-bottom: 1px solid blue;
+	border-bottom: none;
 	/*background: lightgrey;*/
 }
 
@@ -22,9 +22,20 @@
 	background: transparent;	
 }
 
+[data-property=name].editable.reference .transclusion {
+	border-bottom: none;
+	/*background: lightgrey;*/
+}
+
 [data-property=value].editable.reference .transclusion:hover {
 	background: transparent;	
 }
+
+[data-property=value].editable.reference .transclusion {
+	border-bottom: none;
+	/*background: lightgrey;*/
+}
+
 
 
 .blank {
