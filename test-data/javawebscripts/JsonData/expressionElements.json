@@ -21,7 +21,6 @@
         "owner": "expr_32165",
         "type": "ElementValue",
         "valueExpression": "expr_32165",
-"HERE": "Why is the valueExpression the owner??!!"
     },
     {
         "documentation": "",
@@ -77,7 +76,6 @@
         "owner": "e_38304",
         "propertyType": "_11_5EAPbeta_be00301_1147431819399_50461_1671",
         "type": "Property",
-	"HERE!" : "WHERE IS THE VALUE???!!!!"
     },
     {
         "documentation": "",

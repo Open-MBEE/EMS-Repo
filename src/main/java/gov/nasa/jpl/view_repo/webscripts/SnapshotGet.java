@@ -80,7 +80,7 @@ public class SnapshotGet extends AbstractJavaWebScript {
 
         String snapshotString = getSnapshotString(id);
         if (snapshotString != null) {
-            EmsScriptNode snapshot = findScriptNodeByName(id);
+            EmsScriptNode snapshot = findScriptNodeById(id);
             Date date = (Date)snapshot.getProperty(Acm.ACM_LAST_MODIFIED);
             model.put("res", snapshotString);
             model.put("title", "Snapshot (" + EmsScriptNode.getIsoTime(date) + ")");
@@ -95,7 +95,7 @@ public class SnapshotGet extends AbstractJavaWebScript {
     }
 
     private String getSnapshotString(String snapshotId) {
-        EmsScriptNode snapshot = findScriptNodeByName(snapshotId);
+        EmsScriptNode snapshot = findScriptNodeById(snapshotId);
         if (snapshot != null) {
             ContentReader reader = services.getContentService().getReader(snapshot.getNodeRef(), ContentModel.PROP_CONTENT);
             return reader.getContentString();

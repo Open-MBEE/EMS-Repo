@@ -44,10 +44,12 @@
         (e.g.version and edition) -->
     <dependencyManagement>
         <dependencies>
-            <!-- This will import the dependencyManagement for all artifacts in the selected Alfresco version/edition
-                (see http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Importing_Dependencies) 
-                NOTE: You still need to define dependencies in your POM, but you can omit version as it's enforced by this dependencyManagement. NOTE: It defaults 
-                to the latest version this SDK pom has been tested with, but alfresco version can/should be overridden in your project's pom -->
+			<!-- This will import the dependencyManagement for all artifacts in the 
+				selected Alfresco version/edition (see http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Importing_Dependencies) 
+				NOTE: You still need to define dependencies in your POM, but you can omit 
+				version as it's enforced by this dependencyManagement. NOTE: It defaults 
+				to the latest version this SDK pom has been tested with, but alfresco version 
+				can/should be overridden in your project's pom -->
             <dependency>
                 <groupId>${alfresco.groupId}</groupId>
                 <artifactId>alfresco-platform-distribution</artifactId>
@@ -58,8 +60,8 @@
         </dependencies>
     </dependencyManagement>
     <!-- Following dependencies are needed for compiling Java code in src/main/java; 
-         <scope>provided</scope> is inherited for each of the following; 
-         for more info, please refer to alfresco-platform-distribution POM -->
+		<scope>provided</scope> is inherited for each of the following; for more 
+		info, please refer to alfresco-platform-distribution POM -->
     <dependencies>
         <dependency>
             <groupId>${alfresco.groupId}</groupId>
@@ -79,12 +81,97 @@
 			<version>1.8.4</version>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-        	<groupId>${alfresco.groupId}</groupId>
-        	<artifactId>alfresco-web-client</artifactId>
-        	<scope>system</scope>
-        	<systemPath>${project.basedir}/lib/alfresco-web-client-${alfresco.version}.jar</systemPath>
+         <dependency>
+            <groupId>${alfresco.groupId}</groupId>
+            <artifactId>alfresco-web-client</artifactId>
+            <version>${alfresco.version}</version>
         </dependency>
+         <dependency>
+            <groupId>${alfresco.groupId}</groupId>
+            <artifactId>alfresco-web-framework-commons</artifactId>
+            <version>${alfresco.version}</version>
+        </dependency>
+ 
+<!--     <dependency>
+            <groupId>${alfresco.groupId}</groupId>
+            <artifactId>alfresco-web-framework-commons</artifactId>
+        	<scope>system</scope>
+        	<systemPath>${project.basedir}/lib/alfresco-web-framework-commons-4.2.e.jar</systemPath>
+        </dependency>
+        -->
+		<!-- needed for class loader problems -->
+		<dependency>
+			<groupId>org.eclipse.core</groupId>
+			<artifactId>org.eclipse.core.runtime</artifactId>
+			<version>3.6.0.v20100505</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>3.0.6.RELEASE</version>
+		</dependency>
+		<!-- apache chemistry opencmis CLIENT -->
+		<dependency>
+			<groupId>org.apache.chemistry.opencmis</groupId>
+			<artifactId>chemistry-opencmis-client-impl</artifactId>
+			<version>0.8.0</version>
+		</dependency>
+		<!-- apache chemistry opencmis SERVER <dependency> <groupId>org.apache.chemistry.opencmis</groupId> 
+			<artifactId>chemistry-opencmis-server-support</artifactId> <version>0.8.0</version> 
+			</dependency> Test dependencies cmis client dependencies <dependency> <groupId>org.alfresco.cmis.client</groupId> 
+			<artifactId>alfresco-opencmis-extension</artifactId> <version>0.2</version> 
+			<type>jar</type> </dependency> -->
+        <!--  apache chemistry opencmis SERVER -->
+		<dependency>
+		    <groupId>org.apache.chemistry.opencmis</groupId>
+		    <artifactId>chemistry-opencmis-server-support</artifactId>
+		    <version>0.8.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.chemistry.opencmis</groupId>
+			<artifactId>chemistry-opencmis-commons-impl</artifactId>
+			<version>0.8.0</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+<!-- 			<groupId>gov.nasa.jpl</groupId> -->
+<!-- 			<artifactId>ae</artifactId> -->
+<!-- 			<version>1.0</version> -->
+<!-- 			<type>jar</type> -->
+ 			<groupId>gov.nasa.jpl.ae</groupId>
+			<artifactId>AE</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<type>jar</type>
+			<systemPath>${project.basedir}/lib/AE.jar</systemPath>
+ 		</dependency>
+        <dependency>
+            <groupId>sysml</groupId>
+            <artifactId>sysml</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <type>jar</type>
+            <systemPath>${project.basedir}/lib/sysml.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>mbee_util</groupId>
+            <artifactId>mbee_util</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <type>jar</type>
+            <systemPath>${project.basedir}/lib/mbee_util.jar</systemPath>
+        </dependency>
+		<dependency>
+			<groupId>org.alfresco</groupId>
+			<artifactId>alfresco-remote-api</artifactId>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/alfresco-remote-api-4.2.c.jar</systemPath>
+		</dependency>
     </dependencies>
 
 	
@@ -101,6 +188,10 @@
             <id>alfresco-public</id>
             <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
         </repository>
+<!--         <repository> -->
+<!--             <id>alfresco-public-maven</id> -->
+<!--             <url>https://maven.alfresco.com/nexus/content/repositories/releases</url> -->
+<!--         </repository> -->
         <repository>
             <id>alfresco-public-snapshots</id>
             <url>https://artifacts.alfresco.com/nexus/content/groups/public-snapshots</url>
@@ -109,10 +200,23 @@
                 <updatePolicy>daily</updatePolicy>
             </snapshots>
         </repository>
+		<!-- <repository> -->
+		<!-- <id>project.local</id> -->
+		<!-- <name>project</name> -->
+		<!-- <url>file:${project.basedir}/repo</url> -->
+		<!-- </repository> -->
     </repositories>
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.8</version>
+				<!-- <executions> <execution> <phase>gather-sources</phase> <goals><goal>add-source</goal></goals> 
+					<configuration> <sources> <source>/CS/src/gov/nasa/jpl/ae</source> <source>/CS/src/thirdParty</source> 
+					</sources> </configuration> </execution> </executions> -->
+			</plugin>
 			<plugin>
 				<groupId>org.zeroturnaround</groupId>
 				<artifactId>jrebel-maven-plugin</artifactId>

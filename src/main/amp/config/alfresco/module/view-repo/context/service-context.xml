@@ -19,6 +19,21 @@
 <beans>
     <import resource="javawebscript-service-context.xml" />
     
+    <!-- A simple class that is initialized by Spring -->
+    <bean id="changeme.exampleBean" class="gov.nasa.jpl.view_repo.Demo" init-method="init" />
+    
+    <!-- A simple module component that will be executed once -->
+    <bean id="changeme.exampleComponent" class="gov.nasa.jpl.view_repo.DemoComponent" parent="module.baseComponent" >
+        <property name="moduleId" value="view-repo" />  <!-- See module.properties -->
+        <property name="name" value="exampleComponent" />
+        <property name="description" value="A demonstration component" />
+        <property name="sinceVersion" value="2.0" />
+        <property name="appliesFromVersion" value="2.0" />
+        <property name="nodeService" ref="NodeService" />
+        <property name="nodeLocatorService" ref="nodeLocatorService" />
+        <property name="repository" ref="JCR.Repository" />
+    </bean>
+    
     <bean id="view-repo_dictionaryBootstrap" parent="dictionaryModelBootstrap" depends-on="dictionaryBootstrap">
       <property name="models">
         <list>
@@ -29,9 +44,24 @@
       </property>
     </bean>
 
+<!-- 	<bean id="demoScript" parent="baseJavaScriptExtension" class="gov.nasa.jpl.view_repo.DemoJavascriptComponent"> -->
+<!-- 	    <property name="demoComponent" ref="changeme.exampleComponent"/> -->
+<!-- 	    <property name="extensionName"> -->
+<!-- 	    	<value>demo</value> -->
+<!-- 	    </property> -->
+<!-- 	</bean>     -->
+
+    <bean id="demoQuery" parent="baseJavaScriptExtension" class="gov.nasa.jpl.view_repo.DemoJavaQuery">
+        <property name="demoComponent" ref="changeme.exampleComponent"/>
+        <property name="extensionName">
+            <value>demo</value>
+        </property>
+    </bean>
+    
+    
     <!-- A simple module component that will be executed once -->
-<!--     <bean id="java_query" class="gov.nasa.jpl.view_repo.JavaQuery" parent="module.baseComponent" >
-        <property name="moduleId" value="fred" />  See module.properties
+    <bean id="java_query" class="gov.nasa.jpl.view_repo.JavaQuery" parent="module.baseComponent" >
+        <property name="moduleId" value="view-repo" />  <!--  See module.properties  -->
         <property name="name" value="daComponent" />
         <property name="description" value="A demo component" />
         <property name="sinceVersion" value="2.0" />
@@ -46,13 +76,40 @@
            <ref bean="ContentService" />
         </property>
         <property name="nodeLocatorService" ref="nodeLocatorService" />
-    </bean> -->
+        <property name="dictionaryService">
+           <ref bean="DictionaryService" />
+        </property>
+        <!-- 
+ 		<property name="localConnectionManager" ref="webscripts.js.cmis.client"/>
+ 		 -->
+    </bean>
     
 	<bean id="webscript.gov.nasa.jpl.javatest.get"
 		class="gov.nasa.jpl.view_repo.TestJavaWebScript"
 		parent="webscript">
 		<property name="nodeService" ref="NodeService" />
         <property name="nodeLocatorService" ref="nodeLocatorService" /> 
+	</bean>
+	
+    <bean id="webscript.gov.nasa.jpl.java_query.post"
+        class="gov.nasa.jpl.view_repo.JavaQueryPost"
+        parent="webscript">
+        <property name="nodeService" ref="NodeService" />
+        <property name="nodeLocatorService" ref="nodeLocatorService" /> 
+    </bean>
+
+	
+	<bean id="jwsUtil" class="gov.nasa.jpl.view_repo.webscripts.JwsUtil">
+		<property name="services" ref="ServiceRegistry" />
+		<property name="transactionInterval" value="500" />
+	</bean>
+
+	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.post"
+		class="gov.nasa.jpl.view_repo.webscripts.ViewPost"
+		parent="webscript">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+<!--         <property name="jwsUtil" ref="jwsUtil" /> -->
 	</bean>
 	
 	<!--  utility bean for checking user site permissions: also expose a webscript base object -->

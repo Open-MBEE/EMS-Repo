@@ -96,7 +96,7 @@ public class EmsScriptNode extends ScriptNode {
 	
 	boolean useFoundationalApi = true;
 
-    protected static StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
+    //protected static StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 
     protected EmsScriptNode companyHome = null;
     
@@ -104,7 +104,7 @@ public class EmsScriptNode extends ScriptNode {
 
     
 	// for lucene search
-	protected static final StoreRef SEARCH_STORE = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
+	//protected static final StoreRef SEARCH_STORE = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 
 	public EmsScriptNode(NodeRef nodeRef, ServiceRegistry services) {
 		super(nodeRef, services);
@@ -269,16 +269,13 @@ public class EmsScriptNode extends ScriptNode {
 
 	public EmsScriptNode getCompanyHome() {
 	    if ( companyHome == null ) {
-	        NodeRef companyHomeNodeRef = services.getNodeLocatorService().getNode("companyhome", null, null);
-	        if ( companyHomeNodeRef != null ) {
-	            companyHome = new EmsScriptNode( companyHomeNodeRef, services, response, status );
-	        }
+	        companyHome = NodeUtil.getCompanyHome( services );
 	    }
 	    return companyHome;
 	}
 	
 	public Set< NodeRef > getRootNodes() {
-	    return services.getNodeService().getAllRootNodes( getStoreRef() );
+	    return NodeUtil.getRootNodes( services );
 	}
 	
     /**
@@ -298,7 +295,7 @@ public class EmsScriptNode extends ScriptNode {
 	        Matcher m = p.matcher( path );
 	        if ( m.matches() ) {
     	        String siteName = m.group( 1 ); 
-    	        source = getSiteNode( siteName, services, response );
+    	        source = NodeUtil.getSiteNode( siteName, services, response );
                 if ( source != null ) {
                     result = mkdir( source, path );
                     if ( result != null ) return result;
@@ -433,15 +430,19 @@ public class EmsScriptNode extends ScriptNode {
         long cs = getChecksum( content );
         
         // see if image already exists by looking up by checksum
-        ResultSet existingArtifacts = findNodeRefsByType( "" + cs, "@view\\:cs:\"" );
+        ResultSet existingArtifacts =
+                NodeUtil.findNodeRefsByType( "" + cs, SearchType.CHECKSUM,
+                                             services );
         Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
         existingArtifacts.close();
         
         EmsScriptNode matchingNode = null;
+
         if (nodeSet != null && nodeSet.size() > 0) {
             matchingNode = nodeSet.iterator().next();
         }
-        EmsScriptNode targetSiteNode = getSiteNode( targetSiteName, services, response );
+        
+        EmsScriptNode targetSiteNode = NodeUtil.getSiteNode( targetSiteName, services, response );
 //        boolean nameMatch = false, subfolderMatch = false, siteMatch = false;
 //        for ( EmsScriptNode art : nodeSet ) {
 //            if ( art == null ) continue;
@@ -486,7 +487,9 @@ public class EmsScriptNode extends ScriptNode {
             return null;
         }
         // find or create subfolder
-        EmsScriptNode subfolder = mkdir( targetSiteNode, artifactFolderName );
+        EmsScriptNode subfolder =
+                NodeUtil.mkdir( targetSiteNode, artifactFolderName, services,
+                                response, status );
         if ( subfolder == null ) {
             log( "Can't create subfolder for site, " + targetSiteName
                  + ", in artifact folder, " + artifactFolderName + "!" );
@@ -806,7 +809,7 @@ public class EmsScriptNode extends ScriptNode {
      * @return the storeRef
      */
     public static StoreRef getStoreRef() {
-        return storeRef;
+        return NodeUtil.SEARCH_STORE;
     }
 
 
@@ -1343,34 +1346,16 @@ public class EmsScriptNode extends ScriptNode {
 	    return result;
 	}
 	
-	// TODO: make this utility function - used in AbstractJavaWebscript too
 	protected NodeRef findNodeRefByType(String name, String type) {
-        ResultSet results = null;
-        NodeRef nodeRef = null;
-        try {
-            results = findNodeRefsByType( name, type );
-            if (results != null) {
-                for (ResultSetRow row: results) {
-                    nodeRef = row.getNodeRef();
-                    break ; //Assumption is things are uniquely named - TODO: fix since snapshots have same name?...
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (results != null) {
-                results.close();
-            }
-        }
-
-        return nodeRef;	    
+	    return NodeUtil.findNodeRefByType( name, type, services );
 	}
-	
+
     // TODO: make this utility function - used in AbstractJavaWebscript too
     protected ResultSet findNodeRefsByType(String name, String type) {
-        ResultSet results = null;
-        results = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, type + name + "\"");
-        return results;
+        return NodeUtil.findNodeRefsByType( name, type, services );
+//        ResultSet results = null;
+//        results = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, type + name + "\"");
+//        return results;     
     }
     
     /**
@@ -1392,20 +1377,6 @@ public class EmsScriptNode extends ScriptNode {
         return true;
     }
 
-    /**
-     * Get site of specified short name
-     * @param siteName
-     * @return  ScriptNode of site with name siteName
-     */
-    public static EmsScriptNode getSiteNode(String siteName, ServiceRegistry services, StringBuffer response) {
-        if ( isNullOrEmpty( siteName ) ) return null;
-        SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-        if (siteInfo != null) {
-            return new EmsScriptNode(siteInfo.getNodeRef(), services, response);
-        }
-        return null;
-    }
-	   
     public static class EmsScriptNodeComparator implements Comparator<EmsScriptNode> {
         @Override
         public int compare(EmsScriptNode x, EmsScriptNode y) {

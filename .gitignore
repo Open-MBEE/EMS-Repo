@@ -3,3 +3,7 @@
 /alf_data
 *.log
 *.log.*
+*~
+output*.txt
+debug*.txt
+debug*.out
