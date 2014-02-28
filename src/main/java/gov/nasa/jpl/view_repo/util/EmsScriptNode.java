@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -67,9 +68,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.repository.Path.ChildAssocElement;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
