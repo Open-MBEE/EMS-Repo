@@ -164,7 +164,7 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         json.put("nodeid", EmsScriptNode.getStoreRef().toString() + "/" + config.getNodeRef().getId());
         
         List<EmsScriptNode> snapshots = config.getTargetAssocsNodesByType("ems:configuredSnapshots");
-        Collections.sort(snapshots, new SortAscendingCreated());
+        Collections.sort(snapshots, new EmsScriptNodeCreatedAscendingComparator());
         for (EmsScriptNode snapshot: snapshots) {
             JSONObject snapshotJson = new JSONObject();
             snapshotJson.put("url", contextPath + "/service/snapshots/" + snapshot.getProperty(Acm.ACM_ID));
@@ -178,7 +178,12 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         return json;
     }
     
-    public static class SortAscendingCreated implements Comparator<EmsScriptNode> {
+    /**
+     * Comparator sorts by ascending created date
+     * @author cinyoung
+     *
+     */
+    public static class EmsScriptNodeCreatedAscendingComparator implements Comparator<EmsScriptNode> {
         @Override
         public int compare(EmsScriptNode x, EmsScriptNode y) {
             Date xModified;
