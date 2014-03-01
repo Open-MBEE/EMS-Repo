@@ -42,6 +42,8 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -56,7 +58,16 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class MoaProductGet extends AbstractJavaWebScript {
-	@Override
+    public MoaProductGet() {
+        super();
+    }
+    
+    
+	public MoaProductGet(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
+    @Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		String productId = req.getServiceMatch().getTemplateVars().get("id");
 		if (!checkRequestVariable(productId, "id")) {
@@ -82,8 +93,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	}
 	
 	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req,
-			Status status, Cache cache) {		
+	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {		
 		Map<String, Object> model = new HashMap<String, Object>();
 		
 		String productId = null;

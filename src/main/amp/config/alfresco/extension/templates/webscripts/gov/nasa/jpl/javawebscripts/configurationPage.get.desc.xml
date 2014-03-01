@@ -1,0 +1,17 @@
+<webscript>
+<shortname>Get Configurations</shortname>
+    <description>
+    
+  	</description>
+		<url>/ve/configurations/{site}</url>
+		<format default="html">any</format>
+		<authentication>user</authentication>
+		<transaction allow="readonly">required</transaction>
+		<family>EMS Java Read Webscripts</family>
+		<args>
+			<arg>
+				<name>siteName</name>
+				<description>site to find documents for which snapshots will be created and linked to the configuration</description>
+			</arg>
+		</args>  		
+ </webscript>

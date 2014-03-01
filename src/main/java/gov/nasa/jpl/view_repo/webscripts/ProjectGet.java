@@ -37,6 +37,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,40 +48,34 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * Descriptor at
- * /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts
- * /gov/nasa/jpl/javawebscripts/project.get.desc.xml
+ * /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/project.get.desc.xml
  * 
  * @author cinyoung
  * 
  */
 public class ProjectGet extends AbstractJavaWebScript {
-    private String siteName = null;
-    private String projectId = null;
-
-    /**
-     * Utility method for getting the request parameters from the URL template
-     * 
-     * @param req
-     */
-    private void parseRequestVariables(WebScriptRequest req) {
-        siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
-        projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
+    public ProjectGet() {
+        super();
+    }
+    
+    public ProjectGet(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
     }
 
     /**
      * Webscript entry point
      */
     @Override
-    protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
-            Status status, Cache cache) {
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
         JSONObject json = null;
 
-        parseRequestVariables(req);
         try {
             if (validateRequest(req, status)) {
+                String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+                String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
                 json = handleProject(projectId, siteName);
             }
         } catch (JSONException e) {

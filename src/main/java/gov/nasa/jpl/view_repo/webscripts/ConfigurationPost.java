@@ -40,6 +40,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -56,20 +58,30 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ConfigurationPost extends AbstractJavaWebScript {
+    public ConfigurationPost() {
+        super();
+    }
+    
+    public ConfigurationPost(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
-        // TODO Auto-generated method stub
+        // do nothing
         return false;
     }
 
     @Override
-    protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
-            Status status, Cache cache) {
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
 
         clearCaches();
 
-        saveAndStartAction(req, status);
+        ConfigurationPost instance = new ConfigurationPost(repository, services);
+        
+        instance.saveAndStartAction(req, status);
+        appendResponseStatusInfo(instance);
         
         status.setCode(responseStatus.getCode());
         model.put("res", response.toString());
@@ -131,11 +143,14 @@ public class ConfigurationPost extends AbstractJavaWebScript {
             return;
         }
         jobNode.createOrUpdateProperty("cm:description", jobDescription);
-                
-        // kick off the action
-        ActionService actionService = services.getActionService();
-        Action configurationAction = actionService.createAction(ConfigurationGenerationActionExecuter.NAME);
-        configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_SITE_NAME, siteName);
-        services.getActionService().executeAction(configurationAction , jobNode.getNodeRef(), true, true);
+             
+        // only create snapshots once - can update names and descriptions any time
+        if (!postJson.has("nodeid")) {
+	        // kick off the action
+	        ActionService actionService = services.getActionService();
+	        Action configurationAction = actionService.createAction(ConfigurationGenerationActionExecuter.NAME);
+	        configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_SITE_NAME, siteName);
+	        services.getActionService().executeAction(configurationAction , jobNode.getNodeRef(), true, true);
+        }
     }
 }

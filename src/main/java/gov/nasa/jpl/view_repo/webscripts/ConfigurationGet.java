@@ -34,6 +34,7 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +42,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -55,6 +58,14 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ConfigurationGet extends AbstractJavaWebScript {
+    public ConfigurationGet() {
+        super();
+    }
+        
+    public ConfigurationGet(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
         // Do nothing
@@ -62,29 +73,28 @@ public class ConfigurationGet extends AbstractJavaWebScript {
     }
 
     @Override
-    protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
-            Status status, Cache cache) {
+    protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
 
         clearCaches();
+
+        // need to create new instance to do evaluation...
+        ConfigurationGet instance = new ConfigurationGet(repository, services);
         
-        JSONObject jsonObject = null;
-        try {
-            jsonObject = handleConfiguration(req);
-        } catch (JSONException e) {
-            log(LogLevel.ERROR, "Could not create the snapshot JSON", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            e.printStackTrace();
-        }
+        JSONObject jsonObject = instance.handleConfiguration(req);
+        appendResponseStatusInfo(instance);
         if (jsonObject != null) {
             try {
                 model.put("res", jsonObject.toString(4));
                 model.put("title", req.getServiceMatch().getTemplateVars().get(SITE_NAME));
             } catch (JSONException e) {
+                log(LogLevel.ERROR, "JSON toString error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 e.printStackTrace();
             }
         } else {
             model.put("res", response.toString());
             model.put("title", "ERROR could not load");
+            log(LogLevel.WARNING, "Could not find configuration", HttpServletResponse.SC_NOT_FOUND);
         }
         
         status.setCode(responseStatus.getCode());
@@ -97,7 +107,7 @@ public class ConfigurationGet extends AbstractJavaWebScript {
      * @return
      * @throws JSONException
      */
-    public JSONObject handleConfiguration(WebScriptRequest req) throws JSONException {
+    public JSONObject handleConfiguration(WebScriptRequest req) {
         String siteName; 
         SiteInfo siteInfo; 
         EmsScriptNode siteNode;
@@ -118,13 +128,20 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         configurations.addAll(WebScriptUtil.getAllNodesInPath(siteNode.getQnamePath(), "TYPE", "ems:ConfigurationSet", services, response));
         Collections.sort(configurations, new EmsScriptNode.EmsScriptNodeComparator());
         
-        JSONArray configJsonArray = new JSONArray();
-        for (EmsScriptNode config: configurations) {
-            configJsonArray.put(getConfigJson(config, req.getContextPath()));
+        JSONObject jsonObject = null;
+        try {
+            JSONArray configJsonArray = new JSONArray();
+            for (EmsScriptNode config: configurations) {
+                configJsonArray.put(getConfigJson(config, req.getContextPath()));
+            }
+            
+            jsonObject = new JSONObject(); 
+            jsonObject.put("configurations", configJsonArray);
+        } catch (JSONException e) {
+            log(LogLevel.ERROR, "Could not create the snapshot JSON", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
+            jsonObject = null;
         }
-        
-        JSONObject jsonObject = new JSONObject(); 
-        jsonObject.put("configurations", configJsonArray);
 
         return jsonObject;
     }
@@ -139,7 +156,7 @@ public class ConfigurationGet extends AbstractJavaWebScript {
     private JSONObject getConfigJson(EmsScriptNode config, String contextPath) throws JSONException {
         JSONObject json = new JSONObject();
         JSONArray snapshotsJson = new JSONArray();
-        Date date = (Date)config.getProperty(Acm.ACM_LAST_MODIFIED);
+        Date date = (Date)config.getProperty("cm:created");
         
         json.put("modified", EmsScriptNode.getIsoTime(date));
         json.put("name", config.getProperty(Acm.CM_NAME));
@@ -147,6 +164,7 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         json.put("nodeid", EmsScriptNode.getStoreRef().toString() + "/" + config.getNodeRef().getId());
         
         List<EmsScriptNode> snapshots = config.getTargetAssocsNodesByType("ems:configuredSnapshots");
+        Collections.sort(snapshots, new EmsScriptNodeCreatedAscendingComparator());
         for (EmsScriptNode snapshot: snapshots) {
             JSONObject snapshotJson = new JSONObject();
             snapshotJson.put("url", contextPath + "/service/snapshots/" + snapshot.getProperty(Acm.ACM_ID));
@@ -158,5 +176,29 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         json.put("snapshots", snapshotsJson);
         
         return json;
+    }
+    
+    /**
+     * Comparator sorts by ascending created date
+     * @author cinyoung
+     *
+     */
+    public static class EmsScriptNodeCreatedAscendingComparator implements Comparator<EmsScriptNode> {
+        @Override
+        public int compare(EmsScriptNode x, EmsScriptNode y) {
+            Date xModified;
+            Date yModified;
+            
+            xModified = (Date) x.getProperty("cm:created");
+            yModified = (Date) y.getProperty("cm:created");
+            
+            if (xModified == null) {
+                return -1;
+            } else if (yModified == null) {
+                return 1;
+            } else {
+                return (yModified.compareTo(xModified));
+            }
+        }
     }
 }

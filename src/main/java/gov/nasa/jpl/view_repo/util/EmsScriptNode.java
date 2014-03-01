@@ -1098,22 +1098,24 @@ public class EmsScriptNode extends ScriptNode {
             JSONArray array;
             
             String acmType = Acm.JSON2ACM.get(jsonObject.get(Acm.JSON_VALUE_TYPE));
-            Object value = jsonObject.get(Acm.JSON_VALUE);
-            // view editor just sends a string for the value instead of an array
-            if (value instanceof String) {
-                array = new JSONArray();
-                array.put(jsonObject.get(Acm.JSON_VALUE));
-            } else {
-                array = jsonObject.getJSONArray(Acm.JSON_VALUE);
-            }
-            if (acmType.equals(Acm.ACM_LITERAL_BOOLEAN)) {
-                this.createOrUpdatePropertyValues(acmType, array, new Boolean(true));
-            } else if (acmType.equals(Acm.ACM_LITERAL_INTEGER)) {
-                this.createOrUpdatePropertyValues(acmType, array, new Integer(0));
-            } else if (acmType.equals(Acm.ACM_LITERAL_REAL)) {
-                this.createOrUpdatePropertyValues(acmType, array, new Double(0.0));
-            } else if (acmType.equals(Acm.ACM_LITERAL_STRING)) {
-                this.createOrUpdatePropertyValues(acmType, array, new String(""));
+            if (jsonObject.has(Acm.JSON_VALUE)) {
+                Object value = jsonObject.get(Acm.JSON_VALUE);
+                // view editor just sends a string for the value instead of an array
+                if (value instanceof String) {
+                    array = new JSONArray();
+                    array.put(jsonObject.get(Acm.JSON_VALUE));
+                } else {
+                    array = jsonObject.getJSONArray(Acm.JSON_VALUE);
+                }
+                if (acmType.equals(Acm.ACM_LITERAL_BOOLEAN)) {
+                    this.createOrUpdatePropertyValues(acmType, array, new Boolean(true));
+                } else if (acmType.equals(Acm.ACM_LITERAL_INTEGER)) {
+                    this.createOrUpdatePropertyValues(acmType, array, new Integer(0));
+                } else if (acmType.equals(Acm.ACM_LITERAL_REAL)) {
+                    this.createOrUpdatePropertyValues(acmType, array, new Double(0.0));
+                } else if (acmType.equals(Acm.ACM_LITERAL_STRING)) {
+                    this.createOrUpdatePropertyValues(acmType, array, new String(""));
+                }
             }
         }
 	}

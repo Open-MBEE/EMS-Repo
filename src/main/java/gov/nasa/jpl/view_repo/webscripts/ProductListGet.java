@@ -40,6 +40,8 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONArray;
@@ -55,7 +57,15 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ProductListGet extends AbstractJavaWebScript {
-	private JSONObject productJson;
+	public ProductListGet() {
+	    super();
+	}
+    
+    public ProductListGet(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
+    private JSONObject productJson;
 	private Set<EmsScriptNode> productSet;
 	private EmsScriptNode siteNode;
     JSONObject volumes;
@@ -102,21 +112,28 @@ public class ProductListGet extends AbstractJavaWebScript {
 	}
 	
 	@Override
-	protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
-			Status status, Cache cache) {
+	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
 
+		ProductListGet instance = new ProductListGet(repository, services);
+		
 		if (validateRequest(req, status)) {
         		try {
-                    handleProductList(siteNode);
-                    model.put("res", productJson.toString(4));
-                    model.put("title", siteNode.getProperty(Acm.CM_TITLE));
-                } catch (JSONException e1) {
-                    e1.printStackTrace();
-                    model.put("res", response.toString());
-                }
+                JSONObject jsonObject = instance.handleProductList(siteNode);
+                appendResponseStatusInfo(instance);
+                model.put("res", jsonObject.toString(4));
+                model.put("title", siteNode.getProperty(Acm.CM_TITLE));
+            } catch (JSONException e) {
+                log(LogLevel.ERROR, "Could not create JSON Object", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                model.put("res", response.toString());
+                model.put("title", "ERROR");
+                e.printStackTrace();
+            }
+    		} else {
+    			model.put("res", "{}");
+    			model.put("title", "Could not find site");
     		}
 
 		status.setCode(responseStatus.getCode());

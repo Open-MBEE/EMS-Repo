@@ -39,12 +39,28 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+/**
+ * This class isn't used for anything currently
+ * @author cinyoung
+ *
+ */
+@Deprecated
 public class SnapshotGet extends AbstractJavaWebScript {
+    public SnapshotGet() {
+        super();
+    }
+    
+    public SnapshotGet(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
         return true;
@@ -56,8 +72,7 @@ public class SnapshotGet extends AbstractJavaWebScript {
     }
 
     @Override
-    protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
-            Status status, Cache cache) {
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         clearCaches();
 
         String id = req.getServiceMatch().getTemplateVars().get("id");
@@ -67,7 +82,7 @@ public class SnapshotGet extends AbstractJavaWebScript {
         if (snapshotString != null) {
             EmsScriptNode snapshot = findScriptNodeByName(id);
             Date date = (Date)snapshot.getProperty(Acm.ACM_LAST_MODIFIED);
-            model.put("res", getSnapshotString(id));
+            model.put("res", snapshotString);
             model.put("title", "Snapshot (" + EmsScriptNode.getIsoTime(date) + ")");
         } else {
             model.put("res", response.toString());

@@ -3,7 +3,7 @@
   <description>
   Deletes an element recursively - each delete in its own transaction
   </description>
-  <url>/javawebscripts/vieweditor/{id}</url>
+  <url>/javawebscripts/vieweditor/{id}?project={projectid?}</url>
   <format default="json">any</format> 
   <authentication>user</authentication> 
   <transaction>none</transaction>

@@ -37,6 +37,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.springframework.extensions.webscripts.Cache;
@@ -49,7 +51,16 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ViewEditorDelete extends AbstractJavaWebScript {
- 	private EmsScriptNode siteNode = null;
+ 	public ViewEditorDelete() {
+ 	    super();
+ 	}
+    
+    public ViewEditorDelete(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
+
+    private EmsScriptNode siteNode = null;
 	private String siteName;
 	
 	@Override
@@ -76,6 +87,7 @@ public class ViewEditorDelete extends AbstractJavaWebScript {
 	
 	/**
 	 * Entry point
+	 * Leave synchronized as deletes can interfere with one another
 	 */
 	@Override
 	protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
@@ -87,7 +99,16 @@ public class ViewEditorDelete extends AbstractJavaWebScript {
 		boolean recurse = true;
 		if (validateRequest(req, status)) {
 	        EmsScriptNode veNode = siteNode.childByNamePath("/ViewEditor");
-	        handleElementHierarchy(veNode, recurse);
+	        if (req.getParameter("project") != null) {
+	        		String projectid = req.getParameter("project");
+	        		veNode = veNode.childByNamePath("/" + projectid);
+	        		log(LogLevel.INFO, "Attempting to delete project " + projectid);
+	        }
+	        if (veNode != null) {
+	        		handleElementHierarchy(veNode, recurse);
+	        } else {
+	        		log(LogLevel.INFO, "could not find node to delete");
+	        }
 		}
 		
 		model.put("res", "okay");

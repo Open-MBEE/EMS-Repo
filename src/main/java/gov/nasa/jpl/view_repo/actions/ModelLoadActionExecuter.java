@@ -107,15 +107,14 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         if (content == null) {
             response.append("ERRROR: Could not load JSON file for job\n");
         } else {
-            ModelPost modelService = new ModelPost();
+            ModelPost modelService = new ModelPost(repository, services);
             modelService.setRepositoryHelper(repository);
             modelService.setServices(services);
-            modelService.setProjectNode(projectNode);
             modelService.setLogLevel(LogLevel.DEBUG);
             modelService.setRunWithoutTransactions(false);
             Status status = new Status();
             try {
-                modelService.createOrUpdateModel(content, status);
+                modelService.createOrUpdateModel(content, status, projectNode);
             } catch (Exception e) {
                 status.setCode(HttpServletResponse.SC_BAD_REQUEST);
                 response.append("ERROR: could not parse request\n");
@@ -134,13 +133,9 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         jsonNode.setProperty("ems:job_status", jobStatus);
 
         // Send off the notification email
-        try {
-            String subject = "[EuropaEMS] Project " + projectName + " Load " + jobStatus;
-            String msg = "Log URL: " + contextUrl + logNode.getUrl();
-            ActionUtil.sendEmailToModifier(jsonNode, msg, subject, services, response);
-        } catch (Exception e) {
-            // do nothing - this is only for local testing
-        }
+        String subject = "[EuropaEMS] Project " + projectName + " Load " + jobStatus;
+        String msg = "Log URL: " + contextUrl + logNode.getUrl();
+        ActionUtil.sendEmailToModifier(jsonNode, msg, subject, services, response);
     }
 
     protected void clearCache() {

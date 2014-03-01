@@ -37,6 +37,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,16 +48,24 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ProductPost extends AbstractJavaWebScript {
-	@Override
+	public ProductPost() {
+	    super();
+	}
+    
+    public ProductPost(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
+	
+    @Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		// TODO Auto-generated method stub
+		// do nothing
 		return false;
 	}
 	
 	
 	@Override
-	protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
-			Status status, Cache cache) {
+	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();

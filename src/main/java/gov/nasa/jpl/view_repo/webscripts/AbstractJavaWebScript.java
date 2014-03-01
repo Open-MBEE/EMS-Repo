@@ -84,8 +84,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     protected StringBuffer response = new StringBuffer();
     protected Status responseStatus = new Status();
     
-
-	protected void initMemberVariables(String siteName) {
+    protected void initMemberVariables(String siteName) {
 		companyhome = new ScriptNode(repository.getCompanyHome(), services);
 	}
 
@@ -97,6 +96,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		this.services = registry;
 	}
 
+    public AbstractJavaWebScript(Repository repositoryHelper, ServiceRegistry registry) {
+        this.setRepositoryHelper(repositoryHelper);
+        this.setServices(registry);
+    }
+ 
+    public AbstractJavaWebScript() {
+        // default constructor for spring
+        super();
+    }
+    
 	/**
 	 * Utility for clearing out caches
 	 * TODO: do we need to clear caches if Spring isn't making singleton instances
@@ -334,5 +343,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     
     public void setLogLevel(LogLevel level) {
         logLevel = level;
+    }
+    
+    public void appendResponseStatusInfo(AbstractJavaWebScript instance) {
+        response.append(instance.getResponse());
+        responseStatus.setCode(instance.getResponseStatus().getCode());
     }
 }

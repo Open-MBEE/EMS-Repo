@@ -34,6 +34,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -46,7 +49,15 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ModelSearch extends ModelGet {
-	protected final String[] searchTypes = {
+	public ModelSearch() {
+	    super();
+	}
+    
+    public ModelSearch(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
+    protected final String[] searchTypes = {
 	        "@sysml\\:documentation:\"", 
 	        "@sysml\\:name:\"", 
 	        "@sysml\\:id:\"", 
@@ -55,21 +66,19 @@ public class ModelSearch extends ModelGet {
 	        };
 	
 	@Override
-	protected synchronized Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
 		
-		String keyword = req.getParameter("keyword");
-		for (String searchType: searchTypes) {
-			elementsFound.putAll(searchForElements(searchType, keyword));
-		}
-				
+		ModelSearch instance = new ModelSearch(repository, services);
+		
 		try {
-			handleElements();
+	        JSONArray elementsJson = instance.executeSearchRequest(req);
+	        appendResponseStatusInfo(instance);
 
-			JSONObject top = new JSONObject();
-			top.put("elements", elements);
+	        JSONObject top = new JSONObject();
+			top.put("elements", elementsJson);
 			model.put("res", top.toString(4));
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "Could not create the JSON response", HttpServletResponse.SC_BAD_REQUEST);
@@ -77,7 +86,20 @@ public class ModelSearch extends ModelGet {
 			e.printStackTrace();
 		}
 				
-		status.setCode(responseStatus.getCode());;
+		status.setCode(responseStatus.getCode());
 		return model;
+	}
+	
+	private JSONArray executeSearchRequest(WebScriptRequest req) throws JSONException {
+        String keyword = req.getParameter("keyword");
+        if (keyword != null) {
+            for (String searchType: searchTypes) {
+                elementsFound.putAll(searchForElements(searchType, keyword));
+            }
+                    
+            handleElements();
+        }
+	    
+        return elements;
 	}
 }
