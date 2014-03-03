@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <title>Site Configuration Points</title>
-  <link rel="stylesheet" href="/alfresco/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
-  <link href="/alfresco/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
-  <link href="/alfresco/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
-  <link href="/alfresco/scripts/vieweditor/vendor/css/whhg.css" rel="stylesheet" >
+  <link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
+  <link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
+  <link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
+  <link href="${url.context}/scripts/vieweditor/vendor/css/whhg.css" rel="stylesheet" >
   <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
   
 </head>
@@ -14,7 +14,7 @@
   <div class="main">
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="navbar-header">
-        <a class="navbar-brand" href="/alfresco/service/ve/documents/{{currentSite}}">Europa View Editor</a>
+        <a class="navbar-brand" href="${url.context}/service/ve/documents/{{currentSite}}">View Editor</a>
       </div>
 
       <ul class="nav navbar-nav">
@@ -22,7 +22,7 @@
       </ul>   
 
       <div class="pull-right">
-        <img class="europa-icon" src="/alfresco/scripts/vieweditor/images/europa-icon.png" />
+        <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
       </div>
 
       <ul class="nav navbar-nav pull-right">
@@ -82,6 +82,6 @@
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.min.js"></script>
 
 <!--<script src="lib/angular/angular.js"></script>-->
-<script src="/alfresco/scripts/js/app.js"></script>
+<script src="${url.context}/scripts/js/app.js"></script>
 </body>
 </html>

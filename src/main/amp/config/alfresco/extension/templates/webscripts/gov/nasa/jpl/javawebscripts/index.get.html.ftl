@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>View Editor: ${title}</title>
+		<title>EMS View Editor: ${title}</title>
 		<link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
 		<link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
 		<link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
@@ -26,11 +26,11 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
 						<a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
 					{{/environment.development}}
 					{{^environment.development}}
-						<a class="navbar-brand" href="${url.full}">Europa View Editor {{ title }}</a>
+						<a class="navbar-brand" href="${url.context}/service/ve/documents/${siteName}">${siteTitle} View Editor {{title}}</a>
 					{{/environment.development}}
 			</div>
 			<ul class="nav navbar-nav">
-				<li><a href="/share/page/">Europa EMS Dashboard</a></li>
+				<li><a href="/share/page/">EMS Dashboard</a></li>
 			</ul>
 
 

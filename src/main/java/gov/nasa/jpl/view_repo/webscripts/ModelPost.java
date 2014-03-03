@@ -205,8 +205,7 @@ public class ModelPost extends AbstractJavaWebScript {
         } else {
             owner = findScriptNodeByName(ownerName);
             if (owner == null) {
-//                log(LogLevel.WARNING, "Could not find owner with name: " + ownerName + " putting into project", HttpServletResponse.SC_NOT_FOUND);
-                log(LogLevel.WARNING, "Could not find owner with name: " + ownerName + " putting into project", HttpServletResponse.SC_OK);
+                log(LogLevel.WARNING, "Could not find owner with name: " + ownerName + " putting into project", HttpServletResponse.SC_BAD_REQUEST);
                 owner = projectNode;
             }
             // really want to add pkg as owner
@@ -496,8 +495,7 @@ public class ModelPost extends AbstractJavaWebScript {
             if (!newElements.contains(elementId)) {
                 EmsScriptNode element = findScriptNodeByName(elementId);
                 if (element == null) {
-//                    log(LogLevel.ERROR, "Could not find node with id: " + elementId, HttpServletResponse.SC_NOT_FOUND);
-                    log(LogLevel.ERROR, "Could not find node with id: " + elementId, HttpServletResponse.SC_OK);
+                    log(LogLevel.ERROR, "Could not find node with id: " + elementId, HttpServletResponse.SC_BAD_REQUEST);
                     isValid = false;
                 } else if (!checkPermissions(element, PermissionService.WRITE)) {
                     isValid = false;
@@ -505,12 +503,14 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
         
-        fillRootElements();
+       	if (isValid) {
+    	   		isValid = fillRootElements();
+       	}
         
         return isValid;
     }
 
-    protected void fillRootElements() throws JSONException {
+    protected boolean fillRootElements() throws JSONException {
         Iterator<?> iter = elementHierarchyJson.keys();
         while (iter.hasNext()) {
             String ownerId = (String) iter.next();
@@ -522,6 +522,17 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
             }
         }
+        
+        for (String name: rootElements) {
+        		EmsScriptNode rootElement = findScriptNodeByName(name);
+        		if (rootElement != null) {
+	        		if (!checkPermissions(rootElement, PermissionService.WRITE)) {
+	        			log(LogLevel.ERROR, "Not authorized to write to " + name, HttpServletResponse.SC_UNAUTHORIZED);
+	        			return false;
+	        		}
+        		}
+        }
+        return true;
     }
 
     /**
@@ -781,11 +792,6 @@ public class ModelPost extends AbstractJavaWebScript {
             return false;
         }
         
-        if (!checkPermissions(projectNode, PermissionService.WRITE)) {
-            log(LogLevel.WARNING, "No permissions to write to project.\n", HttpServletResponse.SC_UNAUTHORIZED);
-            return false;
-        }
-
         return true;
     }
     

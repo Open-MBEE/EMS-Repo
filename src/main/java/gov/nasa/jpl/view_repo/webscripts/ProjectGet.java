@@ -113,10 +113,10 @@ public class ProjectGet extends AbstractJavaWebScript {
         } else {
             EmsScriptNode siteNode = new EmsScriptNode(services.getSiteService().getSite(siteName).getNodeRef(), services, response);
             projectNode = siteNode.childByNamePath("ViewEditor/" + projectId);
-            if (projectNode == null) {
-                log(LogLevel.ERROR, "Could not find project", HttpServletResponse.SC_NOT_FOUND);
-                return null;
-            }
+        }
+        if (projectNode == null) {
+            log(LogLevel.ERROR, "Could not find project", HttpServletResponse.SC_NOT_FOUND);
+            return null;
         }
         
         if (checkPermissions(projectNode, PermissionService.READ)) {

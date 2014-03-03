@@ -26,19 +26,19 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
       <div class="navbar-header">
       {{#environment.development}}
               {{^viewTree.snapshot}}
-                <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
+                <a class="navbar-brand" href="/">EMS View Editor {{ title }}</a>
               {{/viewTree.snapshot}}
             {{/environment.development}}
             {{^environment.development}}
               {{^viewTree.snapshot}}
-                <a class="navbar-brand" href="${url.context}/service/ve/documents/europa">Europa View Editor {{ title }}</a>
+                <a class="navbar-brand" href="${url.context}/service/ve/documents/${siteName}">${siteTitle} View Editor {{ title }}</a>
               {{/viewTree.snapshot}}
       {{/environment.development}}  
       </div>
 
       {{^viewTree.snapshot}}
         <ul class="nav navbar-nav pull">
-          <li><a  href="/share/page/">Europa EMS Dashboard </a></li>
+          <li><a  href="/share/page/">EMS Dashboard </a></li>
         </ul>   
       {{/viewTree.snapshot}}
 
@@ -52,17 +52,17 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 
       {{#viewTree.snapshot}}
         <ul class="nav navbar-nav pull-left">
-          <li><a class="navbar-brand" href="#">Version Report ({{viewTree.snapshoted}})</a></li>
+          <li><a class="navbar-brand" href="#">Version Report ({{viewTree.snapshoted}})  ${tag}</a></li>
         </ul>
           <ul class="nav navbar-nav pull-right">
-          <li><a  href="/share/page/">Europa EMS Dashboard </a></li>
+          <li><a  href="/share/page/">EMS Dashboard </a></li>
         </ul> 
         <ul class="nav navbar-nav pull-right">
           {{#environment.development}}
             <li><a  href="/">Go back to view editor </a></li>
           {{/environment.development}}
           {{^environment.development}}
-            <li><a  href="${url.context}/service/ve/documents/europa">Go back to View Editor </a></li>
+            <li><a  href="${url.context}/service/ve/documents/${siteName}">Go back to View Editor </a></li>
           {{/environment.development}}
         </ul>
       {{/viewTree.snapshot}}
@@ -169,7 +169,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 
         <ul class="list-unstyled" style="display:block; height:50%; overflow-y: auto">
         {{#viewTree.snapshots}}
-          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} &mdash; {{ creator }}</a></li>
+          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} &mdash; {{ creator }}  {{tag}}</a></li>
         {{/viewTree.snapshots}}
         </ul>
       </div>

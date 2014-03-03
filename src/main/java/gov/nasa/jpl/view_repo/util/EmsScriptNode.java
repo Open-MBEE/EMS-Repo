@@ -522,6 +522,10 @@ public class EmsScriptNode extends ScriptNode {
         return v;
     }
 
+	public String getSiteTitle() {
+		EmsScriptNode siteNode = getSiteNode();
+		return (String) siteNode.getProperty(Acm.CM_TITLE);
+	}
 
 	public String getSiteName() {
         if ( siteName == null ) {

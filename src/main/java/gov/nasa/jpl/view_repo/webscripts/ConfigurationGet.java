@@ -126,7 +126,7 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         // grab all configurations in site and order by date
         List<EmsScriptNode> configurations = new ArrayList<EmsScriptNode>();
         configurations.addAll(WebScriptUtil.getAllNodesInPath(siteNode.getQnamePath(), "TYPE", "ems:ConfigurationSet", services, response));
-        Collections.sort(configurations, new EmsScriptNode.EmsScriptNodeComparator());
+        Collections.sort(configurations, new EmsScriptNodeCreatedAscendingComparator());
         
         JSONObject jsonObject = null;
         try {
@@ -164,7 +164,6 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         json.put("nodeid", EmsScriptNode.getStoreRef().toString() + "/" + config.getNodeRef().getId());
         
         List<EmsScriptNode> snapshots = config.getTargetAssocsNodesByType("ems:configuredSnapshots");
-        Collections.sort(snapshots, new EmsScriptNodeCreatedAscendingComparator());
         for (EmsScriptNode snapshot: snapshots) {
             JSONObject snapshotJson = new JSONObject();
             snapshotJson.put("url", contextPath + "/service/snapshots/" + snapshot.getProperty(Acm.ACM_ID));
