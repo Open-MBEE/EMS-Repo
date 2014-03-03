@@ -240,7 +240,20 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
                   <a class="btn btn-default" data-edit="superscript" title="Superscript">x<sup>y</sup></a>
                   <a class="btn btn-default" data-edit="subscript" title="Subscript">x<sub>y</sub></a>
                   <div class="btn-group">
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                  <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Font Size">
+                    <i class="glyphicon glyphicon-text-height"></i>&nbsp;<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    <li><a data-edit="fontSize 7"><font size="7">Bigger</font></a></li>
+                    <li><a data-edit="fontSize 6"><font size="6">Big</font></a></li>
+                    <li><a data-edit="fontSize 5"><font size="5">Larger</font></a></li>
+                    <li><a data-edit="fontSize 4"><font size="4">Large</font></a></li>
+                    <li><a data-edit="fontSize 3"><font size="3">Normal</font></a></li>
+                    <li><a data-edit="fontSize 2"><font size="2">Small</font></a></li>
+                    <li><a data-edit="fontSize 1"><font size="1">Smallest</font></a></li>
+                    </ul>
+                </div>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Background color">
                       <i class="glyphicon icon-ink">&nbsp;</i>
                       <span class="caret"></span>
                     </button>
@@ -250,6 +263,19 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
                       <li><a data-edit="backcolor blue"><i class="icon-tint"></i>Blue</a></li>
                       <li><a data-edit="backcolor black"><i class="icon-tint"></i>Black</a></li>
                       <li><a data-edit="backcolor transparent"><i class="icon-tint"></i>None</a></li>
+                    </ul>
+                  </div>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Font color">
+                      <i class="glyphicon icon-tint">&nbsp;</i>
+                      <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><a data-edit="foreColor red"><i class="icon-tint"></i>Red</a></li>
+                      <li><a data-edit="foreColor limegreen"><i class="icon-tint"></i>Green</a></li>
+                      <li><a data-edit="foreColor blue"><i class="icon-tint"></i>Blue</a></li>
+                      <li><a data-edit="foreColor black"><i class="icon-tint"></i>Black</a></li>
+                      <li><a data-edit="foreColor transparent"><i class="icon-tint"></i>None</a></li>
                     </ul>
                   </div>
                   <div class="btn-group">
