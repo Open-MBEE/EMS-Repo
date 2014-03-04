@@ -169,7 +169,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 
         <ul class="list-unstyled" style="display:block; height:50%; overflow-y: auto">
         {{#viewTree.snapshots}}
-          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} &mdash; {{ creator }}  {{tag}}</a></li>
+          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} ({{ creator }})  {{tag}}</a></li>
         {{/viewTree.snapshots}}
         </ul>
       </div>

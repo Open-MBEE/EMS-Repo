@@ -54,14 +54,14 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
           <li><a class="navbar-brand" href="#">Version Report ({{viewTree.snapshoted}})</a></li>
         </ul>
           <ul class="nav navbar-nav pull-right">
-          <li><a  href="/share/page/">Europa EMS Dashboard </a></li>
+          <li><a  href="/share/page/">EMS Dashboard </a></li>
         </ul> 
         <ul class="nav navbar-nav pull-right">
           {{#environment.development}}
             <li><a  href="/">Go back to view editor </a></li>
           {{/environment.development}}
           {{^environment.development}}
-            <li><a  href="${url.context}/service/ve/documents/europa">Go back to View Editor </a></li>
+            <li><a  href="${url.context}/service/ve/documents/${siteName}">Go back to View Editor </a></li>
           {{/environment.development}}
         </ul>
       {{/viewTree.snapshot}}
@@ -168,7 +168,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 
         <ul class="list-unstyled" style="display:block; height:50%; overflow-y: auto">
         {{#viewTree.snapshots}}
-          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} &mdash; {{ creator }}  {{tag}}</a></li>
+          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} ({{ creator }})  {{tag}}</a></li>
         {{/viewTree.snapshots}}
         </ul>
       </div>
