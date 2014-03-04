@@ -196,7 +196,7 @@
 					<!-- for deployment testing need to copy over the repository.properties pointing to H2 -->
  					<execution>
 						<id>copy-db-test-resources</id>
-						<phase>deploy</phase>
+						<phase>pre-integration-test</phase>
 						<goals>
 							<goal>copy-resources</goal>
 						</goals>
