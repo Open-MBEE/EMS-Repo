@@ -607,16 +607,16 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // TODO Need to permission check on new node creation
         // find node if exists, otherwise create
-        EmsScriptNode node;
+        EmsScriptNode node = findScriptNodeByName(id);
         EmsScriptNode reifiedNode = null;
-        if (newElements.contains(id)) {
+        
+        if (node == null) {
             log(LogLevel.INFO, "\tcreating node");
             node = parent.createNode(id, Acm.JSON2ACM.get(elementJson.getString(Acm.JSON_TYPE)));
             node.setProperty(Acm.CM_NAME, id);
             node.setProperty(Acm.ACM_ID, id);
         } else {
             log(LogLevel.INFO, "\tmodifying node");
-            node = findScriptNodeByName(id);
             try {
                 if (!node.getParent().equals(parent)) {
                     node.move(parent);
