@@ -224,6 +224,7 @@ h1 {
 
 .inspector:last-child, .toggled-inspectors .inspector {
   margin-bottom: 0;
+  z-index: 100;
 }
 
 .inspector h3 {
