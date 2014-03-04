@@ -83,13 +83,30 @@
 		</dependency>
          <dependency>
             <groupId>${alfresco.groupId}</groupId>
-            <artifactId>alfresco-web-client</artifactId>
-            <version>${alfresco.version}</version>
-        </dependency>
-         <dependency>
-            <groupId>${alfresco.groupId}</groupId>
             <artifactId>alfresco-web-framework-commons</artifactId>
             <version>${alfresco.version}</version>
+        </dependency>
+<!--          <dependency> -->
+<!--             <groupId>${alfresco.groupId}</groupId> -->
+<!--             <artifactId>alfresco-web-client</artifactId> -->
+<!--             <version>${alfresco.version}</version> -->
+<!--         </dependency> -->
+<!--          <dependency> -->
+<!--             <groupId>${alfresco.groupId}</groupId> -->
+<!--             <artifactId>alfresco-remote-api</artifactId> -->
+<!--             <version>${alfresco.version}</version> -->
+<!--         </dependency> -->
+        <dependency>
+            <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-remote-api</artifactId>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/alfresco-remote-api-4.2.c.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-web-client</artifactId>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/alfresco-web-client-4.2.c.jar</systemPath>
         </dependency>
  
 <!--     <dependency>
@@ -133,12 +150,6 @@
 			<version>0.8.0</version>
 		</dependency>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.8.1</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 <!-- 			<groupId>gov.nasa.jpl</groupId> -->
 <!-- 			<artifactId>ae</artifactId> -->
 <!-- 			<version>1.0</version> -->
@@ -166,12 +177,6 @@
             <type>jar</type>
             <systemPath>${project.basedir}/lib/mbee_util.jar</systemPath>
         </dependency>
-		<dependency>
-			<groupId>org.alfresco</groupId>
-			<artifactId>alfresco-remote-api</artifactId>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/alfresco-remote-api-4.2.c.jar</systemPath>
-		</dependency>
     </dependencies>
 
 	
