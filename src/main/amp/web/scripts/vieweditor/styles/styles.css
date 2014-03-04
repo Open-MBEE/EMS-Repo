@@ -220,11 +220,11 @@ h1 {
 .inspector {
   margin-bottom: 20px;
   padding: 5px;
+  z-index: 100;
 }
 
 .inspector:last-child, .toggled-inspectors .inspector {
   margin-bottom: 0;
-  z-index: 100;
 }
 
 .inspector h3 {
