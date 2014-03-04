@@ -87,10 +87,10 @@
 			<scope>test</scope>
 		</dependency>
         <dependency>
-        	<groupId>${alfresco.groupId}</groupId>
-        	<artifactId>alfresco-web-client</artifactId>
-        	<scope>system</scope>
-        	<systemPath>${project.basedir}/lib/alfresco-web-client-${alfresco.version}.jar</systemPath>
+	        	<groupId>${alfresco.groupId}</groupId>
+	        	<artifactId>alfresco-web-client</artifactId>
+	        	<scope>system</scope>
+	        	<systemPath>${project.basedir}/lib/alfresco-web-client-${alfresco.version}.jar</systemPath>
         </dependency>
     </dependencies>
 
@@ -194,7 +194,7 @@
 						</configuration>
 					</execution>
 					<!-- for deployment testing need to copy over the repository.properties pointing to H2 -->
- 					<execution>
+  					<execution>
 						<id>copy-db-test-resources</id>
 						<phase>pre-integration-test</phase>
 						<goals>
@@ -210,7 +210,7 @@
 							</resources>
 						</configuration>
 					</execution>
-				</executions>
+			</executions>
 			</plugin>
 		</plugins>
 		<pluginManagement>
