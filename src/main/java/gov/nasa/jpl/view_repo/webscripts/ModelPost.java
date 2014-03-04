@@ -203,15 +203,17 @@ public class ModelPost extends AbstractJavaWebScript {
                 owner = elementNode.getParent();
             }
         } else {
+        		boolean isOwnerParent = false;
             owner = findScriptNodeByName(ownerName);
             if (owner == null) {
                 log(LogLevel.WARNING, "Could not find owner with name: " + ownerName + " putting into project", HttpServletResponse.SC_BAD_REQUEST);
                 owner = projectNode;
+                isOwnerParent = true;
             }
             // really want to add pkg as owner
             EmsScriptNode reifiedPkg = findScriptNodeByName(ownerName + "_pkg");
             if (reifiedPkg == null) {
-                reifiedPkg = getOrCreateReifiedNode(owner,ownerName, true);
+                reifiedPkg = getOrCreateReifiedNode(owner,ownerName, isOwnerParent);
             }
             owner = reifiedPkg;
         }
