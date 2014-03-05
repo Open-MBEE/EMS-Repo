@@ -140,3 +140,10 @@ Documentation links:
 * [AMP modules](http://docs.alfresco.com/4.2/index.jsp?topic=%2Fcom.alfresco.enterprise.doc%2Fconcepts%2Fdev-extensions-modules-intro.html)
 * [Content modeling](http://docs.alfresco.com/4.2/index.jsp?topic=%2Fcom.alfresco.enterprise.doc%2Fconcepts%2Fcontent-modeling-about.html)
 * [Forms?](http://wiki.alfresco.com/wiki/Forms)
+
+
+https://sheldon.jpl.nasa.gov/alfresco/service/index
+
+target/view-repo-war/WEB-INF/classes/alfresco/repository.properties
+
+

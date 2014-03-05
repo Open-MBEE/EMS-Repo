@@ -76,6 +76,15 @@
         "owner": "e_38304",
         "propertyType": "_11_5EAPbeta_be00301_1147431819399_50461_1671",
         "type": "Property",
+        "value": ["durVal"]
+    },
+    {
+        "documentation": "",
+        "id": "durVal",
+        "integer": 22,
+        "name": "",
+        "owner": "arg_ev_33001",
+        "type": "LiteralInteger"
     },
     {
         "documentation": "",
@@ -94,7 +103,16 @@
         "name": "initialDuration",
         "owner": "e_38263",
         "propertyType": "_11_5EAPbeta_be00301_1147431819399_50461_1671",
-        "type": "Property"
+        "type": "Property",
+        "value": ["initVal"]
+    },
+    {
+        "documentation": "",
+        "id": "initVal",
+        "integer": 11,
+        "name": "",
+        "owner": "arg_ev_33001",
+        "type": "LiteralInteger"
     },
 
 ]}

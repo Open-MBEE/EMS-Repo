@@ -18,6 +18,9 @@ import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.util.ApplicationContextHelper;
+import org.apache.commons.digester.SetRootRule;
+import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
 
 public class NodeUtil {
@@ -40,12 +43,28 @@ public class NodeUtil {
     // needed for Lucene search
     protected static final StoreRef SEARCH_STORE =
             new StoreRef( StoreRef.PROTOCOL_WORKSPACE, "SpacesStore" );
-    protected final static String[] searchTypes = {"@sysml\\:documentation:\"",
-                                                   "@sysml\\:name:\"",
-                                                   "@sysml\\:id:\"",
-                                                   "@sysml\\:string:\"",
-                                                   "@sysml\\:body:\""};
+//    protected final static String[] searchTypes = {"@sysml\\:documentation:\"",
+//                                                   "@sysml\\:name:\"",
+//                                                   "@sysml\\:id:\"",
+//                                                   "@sysml\\:string:\"",
+//                                                   "@sysml\\:body:\""};
+
+    public static ApplicationContext getApplicationContext() {
+        String[] contextPath =
+                new String[] { "classpath:alfresco/application-context.xml" };
+        ApplicationContext applicationContext =
+                ApplicationContextHelper.getApplicationContext( contextPath );
+        return applicationContext;
+    }
     
+    public static ServiceRegistry getServices() {
+        return getServiceRegistry();
+    }
+    public static ServiceRegistry getServiceRegistry() {
+        ServiceRegistry r = (ServiceRegistry)getApplicationContext().getBean( "ServiceRegistry" );
+        return r;
+    }
+
     protected static ResultSet findNodeRefsByType(String name, SearchType type, ServiceRegistry services) {
         return findNodeRefsByType( name, type.prefix, services );
     }
@@ -105,8 +124,8 @@ public class NodeUtil {
                        ServiceRegistry services, StringBuffer response,
                        Status status) {
         Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
-        for (String searchType: searchTypes ) {
-            elementsFound.putAll(searchForElements(searchType, pattern, services, response, status));
+        for (SearchType searchType: SearchType.values() ) {
+            elementsFound.putAll(searchForElements(searchType.prefix, pattern, services, response, status));
         }
         return elementsFound;
     }
@@ -244,10 +263,13 @@ public class NodeUtil {
         if ( folder == null ) {
             String[] arr = path.split( "/" );
             for ( String p : arr ) {
-                folder = source.createFolder( p );
-                if ( folder == null ) {
-                    log( "Can't create folder for path " + path + "!", response );
-                    return null;
+                folder = source.childByNamePath(p);
+                if (folder == null) {
+                    folder = source.createFolder( p );
+                    if ( folder == null ) {
+                        log( "Can't create folder for path " + path + "!", response );
+                        return null;
+                    }
                 }
                 source = folder;
             }

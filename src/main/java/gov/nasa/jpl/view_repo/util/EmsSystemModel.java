@@ -23,9 +23,15 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     protected ServiceRegistry services;
     protected EmsScriptNode serviceNode;
 
+    public EmsSystemModel() {
+        this( NodeUtil.getServiceRegistry() );
+    }
+
     public EmsSystemModel( ServiceRegistry services ) {
         this.services = services;
-        serviceNode = new EmsScriptNode( null, services );
+        serviceNode =
+                new EmsScriptNode( NodeUtil.getCompanyHome( services )
+                                           .getNodeRef(), services );
     }
     
     @Override
@@ -403,6 +409,10 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     @Override
     public Collection< EmsScriptNode > getProperty( Object context,
                                                     Object specifier ) {
+        if ( context instanceof EmsScriptNode ) {
+            EmsScriptNode node = (EmsScriptNode)context;
+            node.getProperty( "" + specifier );
+        }
         // TODO Auto-generated method stub
         return null;
     }
@@ -1030,6 +1040,10 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     public Number getScore() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    public ServiceRegistry getServices() {
+        return services;
     }
 
     
