@@ -165,11 +165,13 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         
         List<EmsScriptNode> snapshots = config.getTargetAssocsNodesByType("ems:configuredSnapshots");
         for (EmsScriptNode snapshot: snapshots) {
-            JSONObject snapshotJson = new JSONObject();
-            snapshotJson.put("url", contextPath + "/service/snapshots/" + snapshot.getProperty(Acm.ACM_ID));
             List<EmsScriptNode> views = snapshot.getSourceAssocsNodesByType("view2:snapshots");
-            snapshotJson.put("name", views.get(0).getProperty(Acm.ACM_NAME));
-            snapshotsJson.put(snapshotJson);
+            if (views.size() >= 1) {
+                JSONObject snapshotJson = new JSONObject();
+                snapshotJson.put("url", contextPath + "/service/snapshots/" + snapshot.getProperty(Acm.ACM_ID));
+            		snapshotJson.put("name", views.get(0).getProperty(Acm.ACM_NAME));
+            		snapshotsJson.put(snapshotJson);
+            }
         }
         
         json.put("snapshots", snapshotsJson);
