@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.alfresco.maven</groupId>
         <artifactId>alfresco-sdk-parent</artifactId>
-        <version>1.0.2</version>
+        <version>1.1.1</version>
     </parent>
 
     <!-- 
@@ -38,13 +38,6 @@
         <!-- This controls which properties will be picked in src/test/properties for embedded run -->
         <env>local</env>
         <maven.test.skip>false</maven.test.skip>
-        <!-- specify the DB settings for testing -->
-		<alfresco.db.name>alf_dev</alfresco.db.name>
-		<alfresco.db.username>alfresco</alfresco.db.username>
-		<alfresco.db.password>alfresco</alfresco.db.password>
-		<alfresco.db.params>MODE=PostgreSQL;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE;LOCK_TIMEOUT=10000;MVCC=TRUE;</alfresco.db.params>
-		<alfresco.db.url>jdbc:h2:./alf_data/h2_data/alf_dev</alfresco.db.url>
-		<alfresco.db.datasource.class>org.h2.jdbcx.JdbcDataSource</alfresco.db.datasource.class>
     </properties>
 
     <!-- Here we realize the connection with the Alfresco selected platform 
@@ -189,23 +182,6 @@
 							<resources>
 								<resource>
 									<directory>${basedir}/src/main/amp/lib</directory>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-					<!-- for deployment testing need to copy over the repository.properties pointing to H2 -->
-  					<execution>
-						<id>copy-db-test-resources</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<overwrite>true</overwrite>
-							<outputDirectory>${project.build.directory}/view-repo-war/WEB-INF/classes/alfresco</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${basedir}/local</directory>
 								</resource>
 							</resources>
 						</configuration>
