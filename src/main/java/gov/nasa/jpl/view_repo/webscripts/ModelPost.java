@@ -498,9 +498,8 @@ public class ModelPost extends AbstractJavaWebScript {
                 EmsScriptNode element = findScriptNodeByName(elementId);
                 if (element == null) {
                     log(LogLevel.ERROR, "Could not find node with id: " + elementId, HttpServletResponse.SC_BAD_REQUEST);
-//                    isValid = false; // continue even if element isn't writable, will check later
                 } else if (!checkPermissions(element, PermissionService.WRITE)) {
-//                    isValid = false;
+                		// do nothing, just log inside of checkPermissions
                 }
             }
         }
@@ -530,8 +529,8 @@ public class ModelPost extends AbstractJavaWebScript {
         		EmsScriptNode rootElement = findScriptNodeByName(name);
         		if (rootElement != null) {
 	        		if (!checkPermissions(rootElement, PermissionService.WRITE)) {
-	        			log(LogLevel.ERROR, "Not authorized to write to " + name, HttpServletResponse.SC_BAD_REQUEST);
-//	        			return false; // keep going even if not allowed to write, will be caught later
+	        			log(LogLevel.WARNING, "\tskipping as root element since no write permissions", HttpServletResponse.SC_BAD_REQUEST);
+	        			rootElements.remove(name);
 	        		}
         		}
         }
