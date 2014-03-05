@@ -34,6 +34,7 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -125,7 +126,7 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         // grab all configurations in site and order by date
         List<EmsScriptNode> configurations = new ArrayList<EmsScriptNode>();
         configurations.addAll(WebScriptUtil.getAllNodesInPath(siteNode.getQnamePath(), "TYPE", "ems:ConfigurationSet", services, response));
-        Collections.sort(configurations, new EmsScriptNode.EmsScriptNodeComparator());
+        Collections.sort(configurations, new EmsScriptNodeCreatedAscendingComparator());
         
         JSONObject jsonObject = null;
         try {
@@ -155,7 +156,7 @@ public class ConfigurationGet extends AbstractJavaWebScript {
     private JSONObject getConfigJson(EmsScriptNode config, String contextPath) throws JSONException {
         JSONObject json = new JSONObject();
         JSONArray snapshotsJson = new JSONArray();
-        Date date = (Date)config.getProperty(Acm.ACM_LAST_MODIFIED);
+        Date date = (Date)config.getProperty("cm:created");
         
         json.put("modified", EmsScriptNode.getIsoTime(date));
         json.put("name", config.getProperty(Acm.CM_NAME));
@@ -174,5 +175,29 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         json.put("snapshots", snapshotsJson);
         
         return json;
+    }
+    
+    /**
+     * Comparator sorts by ascending created date
+     * @author cinyoung
+     *
+     */
+    public static class EmsScriptNodeCreatedAscendingComparator implements Comparator<EmsScriptNode> {
+        @Override
+        public int compare(EmsScriptNode x, EmsScriptNode y) {
+            Date xModified;
+            Date yModified;
+            
+            xModified = (Date) x.getProperty("cm:created");
+            yModified = (Date) y.getProperty("cm:created");
+            
+            if (xModified == null) {
+                return -1;
+            } else if (yModified == null) {
+                return 1;
+            } else {
+                return (yModified.compareTo(xModified));
+            }
+        }
     }
 }

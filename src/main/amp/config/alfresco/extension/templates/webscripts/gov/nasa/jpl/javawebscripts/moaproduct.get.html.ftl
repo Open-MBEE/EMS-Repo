@@ -19,37 +19,52 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 
   <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
 <div id="main"></div>
-
 <script id="template" type="text/mustache">
 
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="navbar-header">
-          {{#environment.development}}
-            <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
-          {{/environment.development}}
-          {{^environment.development}}
-            <a class="navbar-brand" href="${url.context}/service/ve/documents/europa">Europa View Editor {{ title }}</a>
-          {{/environment.development}}  
+      {{#environment.development}}
+              {{^viewTree.snapshot}}
+                <a class="navbar-brand" href="/">EMS View Editor {{ title }}</a>
+              {{/viewTree.snapshot}}
+            {{/environment.development}}
+            {{^environment.development}}
+              {{^viewTree.snapshot}}
+                <a class="navbar-brand" href="${url.context}/service/ve/documents/${siteName}">${siteTitle} View Editor {{title}}</a>
+              {{/viewTree.snapshot}}
+      {{/environment.development}}  
       </div>
 
-      <ul class="nav navbar-nav">
-        <li><a  href="/share/page/">Europa EMS Dashboard</a></li>
-      </ul>   
-        
+      {{^viewTree.snapshot}}
+        <ul class="nav navbar-nav pull">
+          <li><a  href="/share/page/">EMS Dashboard </a></li>
+        </ul>   
+      {{/viewTree.snapshot}}
+
       <div class="pull-right">
         <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
       </div>
 
       <ul class="nav navbar-nav pull-right">
-       <li><a href="#" class="submit-logout">logout</a></li>
+        <li><a href="#" class="submit-logout">logout</a></li>
       </ul>
 
-      <ul class="nav navbar-nav pull-right">
-        {{#viewTree.snapshot}}
-          <li><a class="navbar-brand" href="#">Snapshot ({{viewTree.snapshoted}})</a></li>
-        {{/viewTree.snapshot}}
-
-      </ul>
+      {{#viewTree.snapshot}}
+        <ul class="nav navbar-nav pull-left">
+          <li><a class="navbar-brand" href="#">Version Report ({{viewTree.snapshoted}})</a></li>
+        </ul>
+          <ul class="nav navbar-nav pull-right">
+          <li><a  href="/share/page/">EMS Dashboard </a></li>
+        </ul> 
+        <ul class="nav navbar-nav pull-right">
+          {{#environment.development}}
+            <li><a  href="/">Go back to view editor </a></li>
+          {{/environment.development}}
+          {{^environment.development}}
+            <li><a  href="${url.context}/service/ve/documents/${siteName}">Go back to View Editor </a></li>
+          {{/environment.development}}
+        </ul>
+      {{/viewTree.snapshot}}
 
       <!-- 
       <form class="navbar-form navbar-right" action="">
@@ -153,7 +168,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 
         <ul class="list-unstyled" style="display:block; height:50%; overflow-y: auto">
         {{#viewTree.snapshots}}
-          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} &mdash; {{ creator }}</a></li>
+          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} ({{ creator }})  {{tag}}</a></li>
         {{/viewTree.snapshots}}
         </ul>
       </div>
@@ -225,7 +240,20 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
                   <a class="btn btn-default" data-edit="superscript" title="Superscript">x<sup>y</sup></a>
                   <a class="btn btn-default" data-edit="subscript" title="Subscript">x<sub>y</sub></a>
                   <div class="btn-group">
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                  <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Font Size">
+                    <i class="glyphicon glyphicon-text-height"></i>&nbsp;<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                    <li><a data-edit="fontSize 7"><font size="7">Bigger</font></a></li>
+                    <li><a data-edit="fontSize 6"><font size="6">Big</font></a></li>
+                    <li><a data-edit="fontSize 5"><font size="5">Larger</font></a></li>
+                    <li><a data-edit="fontSize 4"><font size="4">Large</font></a></li>
+                    <li><a data-edit="fontSize 3"><font size="3">Normal</font></a></li>
+                    <li><a data-edit="fontSize 2"><font size="2">Small</font></a></li>
+                    <li><a data-edit="fontSize 1"><font size="1">Smallest</font></a></li>
+                    </ul>
+                </div>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Background color">
                       <i class="glyphicon icon-ink">&nbsp;</i>
                       <span class="caret"></span>
                     </button>
@@ -235,6 +263,19 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
                       <li><a data-edit="backcolor blue"><i class="icon-tint"></i>Blue</a></li>
                       <li><a data-edit="backcolor black"><i class="icon-tint"></i>Black</a></li>
                       <li><a data-edit="backcolor transparent"><i class="icon-tint"></i>None</a></li>
+                    </ul>
+                  </div>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Font color">
+                      <i class="glyphicon icon-tint">&nbsp;</i>
+                      <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><a data-edit="foreColor red"><i class="icon-tint"></i>Red</a></li>
+                      <li><a data-edit="foreColor limegreen"><i class="icon-tint"></i>Green</a></li>
+                      <li><a data-edit="foreColor blue"><i class="icon-tint"></i>Blue</a></li>
+                      <li><a data-edit="foreColor black"><i class="icon-tint"></i>Black</a></li>
+                      <li><a data-edit="foreColor transparent"><i class="icon-tint"></i>None</a></li>
                     </ul>
                   </div>
                   <div class="btn-group">
@@ -1386,16 +1427,18 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
         var table = '<div contenteditable="false"><table class="table table-striped">';
         table += '<caption>'+c.title+'</caption>';
         table += "<thead>";
-        table += "<tr>";
-        for (var hIdx in c.header[0]) {
-          var cell = c.header[0][hIdx];
-          var value = resolveValue(cell.content, elements, function(valueList) {
-            return _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) }).join("");
-          });
-          // console.log("header value", value)
-          table += '<th colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '">' + value + "</th>";
+        for(var rIdx in c.header) {
+          table += "<tr>";
+          for (var hIdx in c.header[rIdx]) {
+            var cell = c.header[rIdx][hIdx];
+            var value = resolveValue(cell.content, elements, function(valueList) {
+              return _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) }).join("");
+            });
+            // console.log("header value", value)
+            table += '<th colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '">' + value + "</th>";
+          }
+          table += "</tr>";
         }
-        table += "</tr>";
         table += "</thead>"
         table += "<tbody>";
         for (var rIdx in c.body) {

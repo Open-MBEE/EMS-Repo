@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.HashMap;
@@ -95,6 +96,8 @@ public class IndexGet extends AbstractJavaWebScript {
                 appendResponseStatusInfo(instance);
                 model.put("res", json.toString());
                 model.put("title", siteName);
+                model.put("siteName", site.getProperty(Acm.CM_NAME));
+                model.put("siteTitle", site.getProperty(Acm.CM_TITLE));
             } catch (JSONException e) {
                 log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 e.printStackTrace();
@@ -105,6 +108,8 @@ public class IndexGet extends AbstractJavaWebScript {
         if (status.getCode() != HttpServletResponse.SC_OK){
             model.put("res", "{}"); // don't dump anything out
             model.put("title", "ERROR could not render");
+            model.put("siteName", "");
+            model.put("siteTitle", "ERROR site not found");
         }
         
         return model;

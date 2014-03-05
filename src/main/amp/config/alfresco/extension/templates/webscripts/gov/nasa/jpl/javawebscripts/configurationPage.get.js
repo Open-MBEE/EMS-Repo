@@ -1,0 +1,1 @@
+model['site'] = url.templateArgs.site;

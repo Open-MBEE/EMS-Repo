@@ -125,10 +125,14 @@ public class ProductListGet extends AbstractJavaWebScript {
                 appendResponseStatusInfo(instance);
                 model.put("res", jsonObject.toString(4));
                 model.put("title", siteNode.getProperty(Acm.CM_TITLE));
+                model.put("siteName", siteNode.getProperty(Acm.CM_NAME));
+                model.put("siteTitle", siteNode.getProperty(Acm.CM_TITLE));
             } catch (JSONException e) {
                 log(LogLevel.ERROR, "Could not create JSON Object", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 model.put("res", response.toString());
                 model.put("title", "ERROR");
+                model.put("siteName", "");
+                model.put("siteTitle", "ERROR site not found");
                 e.printStackTrace();
             }
     		} else {
