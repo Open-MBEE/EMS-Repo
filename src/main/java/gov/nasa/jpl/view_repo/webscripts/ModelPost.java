@@ -498,9 +498,9 @@ public class ModelPost extends AbstractJavaWebScript {
                 EmsScriptNode element = findScriptNodeByName(elementId);
                 if (element == null) {
                     log(LogLevel.ERROR, "Could not find node with id: " + elementId, HttpServletResponse.SC_BAD_REQUEST);
-                    isValid = false;
+//                    isValid = false; // continue even if element isn't writable, will check later
                 } else if (!checkPermissions(element, PermissionService.WRITE)) {
-                    isValid = false;
+//                    isValid = false;
                 }
             }
         }
@@ -525,12 +525,13 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
         
+
         for (String name: rootElements) {
         		EmsScriptNode rootElement = findScriptNodeByName(name);
         		if (rootElement != null) {
 	        		if (!checkPermissions(rootElement, PermissionService.WRITE)) {
-	        			log(LogLevel.ERROR, "Not authorized to write to " + name, HttpServletResponse.SC_UNAUTHORIZED);
-	        			return false;
+	        			log(LogLevel.ERROR, "Not authorized to write to " + name, HttpServletResponse.SC_BAD_REQUEST);
+//	        			return false; // keep going even if not allowed to write, will be caught later
 	        		}
         		}
         }
