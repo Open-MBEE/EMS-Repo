@@ -13,12 +13,12 @@ import org.junit.runners.Suite.SuiteClasses;
 @SuiteClasses({ EmsSystemModelTest.class, JavaQueryTest.class, DemoComponentTest.class, TestLoadClass.class })
 public class TestSuite {
 
-    @BeforeClass 
+    @BeforeClass
     public static void setUpClass() {
+        System.out.println("Master setup");
         ServiceRegistry services = NodeUtil.getServiceRegistry();
         EmsSystemModelTest.setServiceRegistry( services );
-        System.out.println("Master setup");
-
+        JavaQueryTest.setServiceRegistry( services );
     }
 
     @AfterClass public static void tearDownClass() { 

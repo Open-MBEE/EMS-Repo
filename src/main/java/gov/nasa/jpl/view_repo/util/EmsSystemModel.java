@@ -1,9 +1,11 @@
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -24,11 +26,11 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     protected EmsScriptNode serviceNode;
 
     public EmsSystemModel() {
-        this( NodeUtil.getServiceRegistry() );
+        this( null );
     }
 
     public EmsSystemModel( ServiceRegistry services ) {
-        this.services = services;
+        this.services = ( services == null ? NodeUtil.getServiceRegistry() : services );
         serviceNode =
                 new EmsScriptNode( NodeUtil.getCompanyHome( services )
                                            .getNodeRef(), services );
@@ -409,11 +411,40 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     @Override
     public Collection< EmsScriptNode > getProperty( Object context,
                                                     Object specifier ) {
+        // find the specified property inside the context
         if ( context instanceof EmsScriptNode ) {
             EmsScriptNode node = (EmsScriptNode)context;
-            node.getProperty( "" + specifier );
+            if ( specifier == null ) {
+                // if no specifier, return all properties
+                Map< String, Object > props = node.getProperties();
+                if ( props == null ) return Utils.newList();
+                return Utils.asList( props.values(), EmsScriptNode.class );
+            } else {
+                Object prop = node.getProperty( "" + specifier );
+                return Utils.asList( prop, EmsScriptNode.class );
+            }
         }
-        // TODO Auto-generated method stub
+        if ( context != null ) {
+            // TODO -- error????  Are there any other contexts than an EmsScriptNode that would have a property?
+            Debug.error("context is not an EmsScriptNode!");
+            return null;
+        }
+        // context is null; look for nodes of type Property that match the specifier
+        if ( specifier != null ) {
+            return getElementWithName( context, "" + specifier );
+        }
+        // context and specifier are both be null
+        // REVIEW -- error?
+        // Debug.error("context and specifier cannot both be null!");
+        // REVIEW -- What about returning all properties?
+        Collection< EmsScriptNode > propertyTypes = getTypeWithName( context, "Property" );
+        if ( !Utils.isNullOrEmpty( propertyTypes ) ) {
+            ArrayList< EmsScriptNode > allProperties = new ArrayList< EmsScriptNode >();
+            for ( EmsScriptNode prop : propertyTypes ) {
+                allProperties.addAll( getElementWithType( context, propertyTypes.iterator().next() ) );
+            }
+            return allProperties;
+        }
         return null;
     }
 

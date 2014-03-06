@@ -16,8 +16,10 @@ import gov.nasa.jpl.view_repo.DemoComponent;
 import org.alfresco.error.AlfrescoRuntimeException;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ApplicationContextHelper;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
@@ -44,6 +46,8 @@ public class DemoComponentTest {
     
     protected static NodeService nodeService;
     
+    public static ServiceRegistry services = null;
+    
     @BeforeClass
     public static void initAppContext()
     {
@@ -52,9 +56,20 @@ public class DemoComponentTest {
         ApplicationContextHelper.setUseLazyLoading(false);
         ApplicationContextHelper.setNoAutoStart(true);
         try {
-            applicationContext = ApplicationContextHelper.getApplicationContext(new String[] { "classpath:alfresco/application-context.xml" });
-            demoComponent = (DemoComponent) applicationContext.getBean("changeme.exampleComponent");
-            nodeService = (NodeService) applicationContext.getBean("NodeService");
+            if ( services == null ) {
+                if ( applicationContext == null ) {
+                    applicationContext = ApplicationContextHelper.getApplicationContext(new String[] { "classpath:alfresco/application-context.xml" });
+                }
+                services = (ServiceRegistry)applicationContext.getBean( "ServiceRegistry" );
+                demoComponent = (DemoComponent)applicationContext.getBean("changeme.exampleComponent");
+            } else {
+                demoComponent = (DemoComponent)services.getService( QName.createQName( "changeme.exampleComponent" ) );
+            }
+            if ( services != null ) {
+                nodeService = services.getNodeService();
+            } else {
+                nodeService = (NodeService)applicationContext.getBean("NodeService");
+            }
             AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
             log.debug("Sample test logging: If you see this message, means your unit test logging is properly configured. Change it in test-log4j.properties");
             log.debug("Sample test logging: Application Context properly loaded");
@@ -115,4 +130,7 @@ public class DemoComponentTest {
 		}
     }
 
+    public static void setServiceRegistry( ServiceRegistry services ) {
+        DemoComponentTest.services  = services;
+    }
 }

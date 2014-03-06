@@ -51,6 +51,7 @@ import org.alfresco.repo.module.AbstractModuleComponent;
 import org.alfresco.repo.nodelocator.NodeLocatorService;
 import org.alfresco.repo.nodelocator.XPathNodeLocator;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.dictionary.TypeDefinition;
@@ -94,10 +95,11 @@ public class JavaQuery extends AbstractModuleComponent {
                        //implements SystemModel< NodeRef, NodeRef, String, Object, String, String, Object, AssociationRef, String, Object, NodeRef > {
 
     public static ApplicationContext applicationContext;
+    public static ServiceRegistry services = null;
     protected static JavaQuery instance;// = initAppContext(); // only use this in unit test mode
     protected static final String ADMIN_USER_NAME = "admin";
     public static Log log = LogFactory.getLog( JavaQuery.class );
-
+    
     public static int anInt = 3;
 
     public NodeService nodeService;
@@ -119,6 +121,10 @@ public class JavaQuery extends AbstractModuleComponent {
         if ( instance == null ) instance = this;
     }
     
+    public void setServices( ServiceRegistry services ) {
+        this.services = services;
+    }
+
     public void setContentService( ContentService contentService ) {
         this.contentService = contentService;
     }
@@ -613,23 +619,37 @@ public class JavaQuery extends AbstractModuleComponent {
         ApplicationContextHelper.setNoAutoStart( false );
         String[] contextPath = new String[] { "classpath:alfresco/application-context.xml" };
         try {
-            if ( applicationContext == null ) {
-                applicationContext =
-                        ApplicationContextHelper.getApplicationContext( contextPath );
-            }
-            javaQueryComponent =
-                    (JavaQuery)applicationContext.getBean( "java_query" );
             instance = javaQueryComponent;
-            javaQueryComponent.nodeService =
-                    (NodeService)applicationContext.getBean( "NodeService" );
-            javaQueryComponent.nodeLocatorService =
-                    (NodeLocatorService)applicationContext.getBean( "nodeLocatorService" );
-            javaQueryComponent.searchService =
-                    (SearchService)applicationContext.getBean( "SearchService" );
-            javaQueryComponent.contentService =
-                    (ContentService)applicationContext.getBean( "ContentService" );
-            javaQueryComponent.dictionaryService =
-                    (DictionaryService)applicationContext.getBean( "DictionaryService" );
+            if ( services == null ) {
+                if ( applicationContext == null ) {
+                    applicationContext =
+                            ApplicationContextHelper.getApplicationContext( contextPath );
+                }
+                javaQueryComponent =
+                        (JavaQuery)applicationContext.getBean( "java_query" );
+                services = (ServiceRegistry)applicationContext.getBean( "ServiceRegistry" );
+            } else {
+                javaQueryComponent = (JavaQuery)services.getService( QName.createQName( "java_query" ) );
+            }
+            if ( services != null ) {
+                javaQueryComponent.services = services;
+                javaQueryComponent.nodeService = services.getNodeService();
+                javaQueryComponent.nodeLocatorService =services.getNodeLocatorService();
+                javaQueryComponent.searchService = services.getSearchService();
+                javaQueryComponent.contentService = services.getContentService();
+                javaQueryComponent.dictionaryService = services.getDictionaryService();
+            } else {
+                javaQueryComponent.nodeService =
+                        (NodeService)applicationContext.getBean( "NodeService" );
+                javaQueryComponent.nodeLocatorService =
+                        (NodeLocatorService)applicationContext.getBean( "nodeLocatorService" );
+                javaQueryComponent.searchService =
+                        (SearchService)applicationContext.getBean( "SearchService" );
+                javaQueryComponent.contentService =
+                        (ContentService)applicationContext.getBean( "ContentService" );
+                javaQueryComponent.dictionaryService =
+                        (DictionaryService)applicationContext.getBean( "DictionaryService" );
+            }
             
             AuthenticationUtil.setFullyAuthenticatedUser( ADMIN_USER_NAME );
             log.debug( "Sample test logging: Application Context properly loaded for JavaQuery" );

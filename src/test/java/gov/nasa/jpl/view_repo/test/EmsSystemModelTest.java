@@ -24,20 +24,23 @@ public class EmsSystemModelTest {
     
     public static EmsSystemModel model = null;
     public static SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, EmsSystemModel > sysmlToAe = null;
+    public static ServiceRegistry services = null;
+    protected static final String ADMIN_USER_NAME = "admin";
 
     @BeforeClass
     public static void initAppContext() {
-        model = new EmsSystemModel();
+        model = new EmsSystemModel( services );
         sysmlToAe = new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, EmsSystemModel >( model );
-        AuthenticationUtil.setRunAsUserSystem();
+        //AuthenticationUtil.setRunAsUserSystem();
+        AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
         
-        System.out.println("LAUNCH DEBUGGER START!!!");
-        try {
-            Thread.sleep( 12000 );
-        } catch ( InterruptedException e ) {
-            e.printStackTrace();
-        }
-        System.out.println("LAUNCH DEBUGGER END!!!");
+//        System.out.println("LAUNCH DEBUGGER START!!!");
+//        try {
+//            Thread.sleep( 12000 );
+//        } catch ( InterruptedException e ) {
+//            e.printStackTrace();
+//        }
+//        System.out.println("LAUNCH DEBUGGER END!!!");
 
     }
 
@@ -60,9 +63,15 @@ public class EmsSystemModelTest {
                 
         System.out.println( "testExpressionEvaluation()" );
         
-        Collection< EmsScriptNode > nodes = model.getElementWithName( null, "expr_32165" );
+        Collection< EmsScriptNode > nodes = model.getElementWithName( null, "*" );
         System.out.println( "testExpressionEvaluation() nodes: "
                             + MoreToString.Helper.toLongString( nodes ) );
+        if ( Utils.isNullOrEmpty( nodes ) ) {
+            nodes = model.getElementWithName( null, "*" );
+            System.out.println( "testExpressionEvaluation() again, nodes : "
+                                + MoreToString.Helper.toLongString( nodes ) );
+        }
+        
         assertNotNull( nodes );
         Assert.assertFalse( nodes.isEmpty() );
         EmsScriptNode node = nodes.iterator().next();
@@ -98,7 +107,7 @@ public class EmsSystemModelTest {
     }
 
     public static void setServiceRegistry( ServiceRegistry services ) {
-        // TODO Auto-generated method stub
+        EmsSystemModelTest.services  = services;
         
     }
     

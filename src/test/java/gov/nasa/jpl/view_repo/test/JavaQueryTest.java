@@ -16,6 +16,7 @@ import gov.nasa.jpl.mbee.util.MoreToString;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.JavaQuery;
 
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -27,9 +28,11 @@ import org.junit.Test;
 public class JavaQueryTest {
 
     public static JavaQuery javaQueryComponent = null;
+    public static ServiceRegistry services = null;
 
     @BeforeClass
     public static void initAppContext() {
+        if ( services != null ) JavaQuery.services = services;
         javaQueryComponent = JavaQuery.initAppContext();
     }
 
@@ -238,6 +241,7 @@ public class JavaQueryTest {
     }
     
     @Test
+    @Ignore
     public void testLucene() {
         List<NodeRef> longList = new ArrayList<NodeRef>();
         String[] queries = new String[] {
@@ -364,5 +368,9 @@ public class JavaQueryTest {
         System.out.println( "testJavaEvaluatorTestClassRef() evaluate(" + clsName + ") = " + MoreToString.Helper.toString( actualObj ) );
         assertNotNull( actualObj );
         assertTrue( actualObj.toString().equals( clsName ) );
+    }
+
+    public static void setServiceRegistry( ServiceRegistry services ) {
+        JavaQueryTest.services  = services;
     }
 }
