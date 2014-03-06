@@ -524,13 +524,12 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
         
-
+        Set<String> removeList = new HashSet<String>();
         for (String name: rootElements) {
         		EmsScriptNode rootElement = findScriptNodeByName(name);
         		if (rootElement != null) {
 	        		if (!checkPermissions(rootElement, PermissionService.WRITE)) {
 	        			log(LogLevel.WARNING, "\tskipping as root element since no write permissions", HttpServletResponse.SC_BAD_REQUEST);
-	        			rootElements.remove(name);
 	        		}
         		}
         }

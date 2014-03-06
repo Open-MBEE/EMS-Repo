@@ -240,7 +240,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	    if (!node.hasPermission(permissions)) {
 			Object property = node.getProperty(Acm.CM_NAME);
 			if (property != null) {
-			    log(LogLevel.WARNING, "No " + permissions + " priveleges to " + property.toString() + ".\n", HttpServletResponse.SC_BAD_REQUEST);
+			    log(LogLevel.WARNING, "No " + permissions + " priveleges to " + property.toString() + ".", HttpServletResponse.SC_BAD_REQUEST);
 			}
 			return false;
 		}
