@@ -68,6 +68,8 @@ public class JavaQueryPost extends DeclarativeWebScript {
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		Map<String, Object> model = new HashMap<String, Object>();
+		boolean verbose = req.getParameter("verbose") == null || req.getParameter( "verbose" ).equals( "true" );
+		
 //		NodeRef root = nodeLocatorService.getNode("companyhome", null, null);
 //		int count = nodeService.countChildAssocs(root, true);
 //		//model.put("reply", n());//Integer.toString(count));
@@ -122,6 +124,7 @@ public class JavaQueryPost extends DeclarativeWebScript {
 		if ( reply != null ) replyString = MoreToString.Helper.toString( reply ); 
         System.out.println("\n\n\n" + Timepoint.now().toTimestamp() + "\nResult = : \"" + replyString + "\"\n\n");
 		model.put("reply", replyString );
+		model.put( "verbose", verbose );
 		return model;
 	}
 }

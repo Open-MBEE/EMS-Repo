@@ -48,9 +48,11 @@ Eclipse/Maven
 
         - If errors inhibit the later steps, then delete the project from java perspective, and re-import it from the EGit Perspective as shown above.
         
-    We're using a local library that needs to be included in your local Maven repository using the following command.
+    We're using a local libraries that need to be included in your local Maven repository using the following commands.
     
-    	mvn install:install-file -Dfile=lib/AE.jar -DgroupId=gov.nasa.jpl -DartifactId=ae -Dversion=1.0 -Dpackaging=jar
+    	mvn install:install-file -Dfile=lib/AE.jar -DgroupId=gov.nasa.jpl -DartifactId=AE -Dversion=1.0 -Dpackaging=jar
+        mvn install:install-file -Dfile=lib/mbee_util.jar -DgroupId=gov.nasa.jpl -DartifactId=mbee_util -Dversion=1.0 -Dpackaging=jar
+        mvn install:install-file -Dfile=lib/sysml.jar -DgroupId=gov.nasa.jpl -DartifactId=sysml -Dversion=1.0 -Dpackaging=jar
 
 # building, setting up maven, jrebel
 To build the amp file, do 
@@ -73,12 +75,15 @@ To clean all data and artifacts
 To execute JUnit tests and attach a debugger
 
     mvn -Dmaven.surefire.debug -Dmaven.test.skip=false test
-    
-	Put JUnit test java files in src/test/java
-    Set a breakpoint in a JUnit test.
-    Run a Remote Java Application configuration with localhost for Host and 5005 for Port.
-    Follow DemoComponentTest.java and its entry in service-content.xml
 
+    Put JUnit test java files in src/test/java
+    Set a breakpoint in a JUnit test.
+    Run a Remote Java Application configuration with localhost for Host and 5005 for Port. There's a view-repo.launch config in the project directory.  You may need to change the view-repo configuration's argument from 10000 to 5005.  
+    Follow DemoComponentTest.java and its entry in service-content.xml
+    
+For JUnit tests in a single Java class, for example, in MyJavaJUnitTestClass.java
+
+    mvn -Dmaven.surefire.debug -Dmaven.test.skip=false -Dtest=MyJavaJUnitTestClass test
 
 To update the target/view-repo-war manually
 
@@ -141,9 +146,20 @@ Documentation links:
 * [Content modeling](http://docs.alfresco.com/4.2/index.jsp?topic=%2Fcom.alfresco.enterprise.doc%2Fconcepts%2Fcontent-modeling-about.html)
 * [Forms?](http://wiki.alfresco.com/wiki/Forms)
 
+Get a directory of available services including the REST API
 
-https://sheldon.jpl.nasa.gov/alfresco/service/index
+    https://localhost:8080/alfresco/service/index
+    https://sheldon.jpl.nasa.gov/alfresco/service/index
+    https://europaems.jpl.nasa.gov/alfresco/service/index
 
-target/view-repo-war/WEB-INF/classes/alfresco/repository.properties
+THIS DOESN'T WORK: To attempt to turn off indexing (maybe because it slows down junit test runs), change VALIDATE to NONE for index.recovery.mode in
+ 
+    target/view-repo-war/WEB-INF/classes/alfresco/repository.properties
 
+To evaluate a Java expression from a webpage, go to 
 
+    http://localhost:8080/view-repo/wcs/java_query
+
+To evaluate a Java expression, in this example, Math.Min(1,2), from the command line
+
+    curl -w "%{http_code}\n" -u admin:admin -X POST -H "Content-Type:text/plain" "http://localhost:8080/view-repo/service/java_query?verbose=false" --data 'Math.min(1,2)'
