@@ -524,7 +524,6 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
         
-        Set<String> removeList = new HashSet<String>();
         for (String name: rootElements) {
         		EmsScriptNode rootElement = findScriptNodeByName(name);
         		if (rootElement != null) {
