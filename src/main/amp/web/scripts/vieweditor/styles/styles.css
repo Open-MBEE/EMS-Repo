@@ -153,6 +153,7 @@ h1 {
 
 .inspector {
 	border-bottom: 1px solid #ddd;
+	z-index: 100;
 }
 
 .inspector:last-child {
@@ -220,7 +221,6 @@ h1 {
 .inspector {
   margin-bottom: 20px;
   padding: 5px;
-  z-index: 100;
 }
 
 .inspector:last-child, .toggled-inspectors .inspector {
@@ -567,6 +567,7 @@ h1 {
 
 .inspectors {
 	left: 0px;
+	z-index: 100;
 } 
 
 .print-only {
