@@ -1043,7 +1043,7 @@ public class EmsScriptNode extends ScriptNode {
 
     /**
      * Retrieve the site folder containing this node. If this is a view, then it
-     * is the folder containing the ViewEditor folder. Otherwise, it is the
+     * is the folder containing the Models folder. Otherwise, it is the
      * parent folder contained by the Sites folder.
      * 
      * @return the site folder containing this node
@@ -1052,7 +1052,7 @@ public class EmsScriptNode extends ScriptNode {
         if ( siteNode != null ) return siteNode;
         EmsScriptNode parent = this;
         String parentName = (String) parent.getProperty(Acm.CM_NAME);
-        while (!parentName.equals("ViewEditor")) {
+        while (!parentName.equals("documentLibrary")) {
             EmsScriptNode oldparent = parent;
             parent = oldparent.getParent();
             if ( parent == null ) return null; // site not found!
@@ -1062,7 +1062,7 @@ public class EmsScriptNode extends ScriptNode {
                 return siteNode;
             }
         }
-        // The site is the folder containing the ViewEditor!
+        // The site is the folder containing the documentLibrary!
         siteNode = parent.getParent();
         return siteNode;
     }

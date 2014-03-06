@@ -170,7 +170,7 @@ public class ProductListGet extends AbstractJavaWebScript {
                     volume2documents.put(parentId, new JSONArray());
                 }
                 ((JSONArray)volume2documents.get(parentId)).put(id);
-                handleParents(node, "ViewEditor");
+                handleParents(node, "Models");
             }
         }
         
@@ -196,6 +196,12 @@ public class ProductListGet extends AbstractJavaWebScript {
         return productJson;
 	}
 	
+	/**
+	 * Work up the package hierarchy until the stopName folder is reached
+	 * @param node
+	 * @param stopName
+	 * @throws JSONException
+	 */
 	protected void handleParents(EmsScriptNode node, String stopName) throws JSONException {
         String id = (String)node.getProperty(Acm.ACM_ID);
         String sysmlName = (String)node.getProperty(Acm.ACM_NAME);

@@ -60,7 +60,7 @@ public class ProjectPost extends AbstractJavaWebScript {
         super(repositoryHelper, registry);
     }
 
-    private final String MODEL_PATH = "ViewEditor";
+    private final String MODEL_PATH = "documentLibrary/Models";
 	private final String MODEL_PATH_SEARCH = "/" + MODEL_PATH;
 	
 	
@@ -166,7 +166,11 @@ public class ProjectPost extends AbstractJavaWebScript {
 		    // always create
 		    fix = true;
 			if (fix) {
-				modelContainerNode = siteNode.createFolder(MODEL_PATH);
+				EmsScriptNode docLib = siteNode.childByNamePath("documentLibrary");
+				if (docLib == null) {
+					docLib = siteNode.createFolder("documentLibrary");
+				}
+				modelContainerNode = docLib.createFolder("Models");
 				log(LogLevel.INFO, "Model folder created.\n", HttpServletResponse.SC_OK);
 			} else {
 				log(LogLevel.ERROR, "Model folder not found. Use fix=true to force Model folder creation.\n", HttpServletResponse.SC_NOT_FOUND);
