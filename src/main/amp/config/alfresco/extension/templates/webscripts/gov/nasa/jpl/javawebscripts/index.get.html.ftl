@@ -9,6 +9,7 @@
 		<link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
 		<link href="${url.context}/scripts/vieweditor/styles/print.css" rel="stylesheet" media="print">
 		<link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
+		<script src="${url.context}/scripts/vieweditor/vendor/css_browser_selector.js"></script>
 		<link href="${url.context}/scripts/vieweditor/styles/section-numbering.css" rel="stylesheet">
 		<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
 	
@@ -57,6 +58,12 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
 	  -->
 
 		</nav>
+
+    <div id="ie-alert" class="alert alert-warning alert-dismissable ie_warning">
+      <button type="button" class="close no-print" proxy-click="hideIEMessage" aria-hidden="true">&times;</button>
+      <span class="message no-print">Internet Explorer is not officially supported by View Editor.  Please use Firefox.</span>
+    </div>
+
 
 		<div id="top-alert" class="alert alert-danger alert-dismissable" style="display:none">
 		  <button type="button" class="close" proxy-click="hideErrorMessage" aria-hidden="true">&times;</button>
@@ -466,6 +473,10 @@ app.on('message', function(type, message) {
     $('#top-alert').show().find('.message').html(message);
   }
 });
+
+app.on('hideIEMessage', function() {
+  $('#ie-alert').hide(); 
+})
 
 app.on('hideErrorMessage', function() {
   $('#top-alert').hide();
