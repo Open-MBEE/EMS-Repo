@@ -813,7 +813,7 @@ public class ModelPost extends AbstractJavaWebScript {
             String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
             String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
             EmsScriptNode siteNode = getSiteNode(siteName);
-            projectNode = siteNode.childByNamePath("/documentLibrary/Models/" + projectId);
+            projectNode = siteNode.childByNamePath("/Models/" + projectId);
         }
         
         return projectNode;

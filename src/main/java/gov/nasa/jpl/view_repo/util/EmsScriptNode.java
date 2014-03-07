@@ -1052,7 +1052,7 @@ public class EmsScriptNode extends ScriptNode {
         if ( siteNode != null ) return siteNode;
         EmsScriptNode parent = this;
         String parentName = (String) parent.getProperty(Acm.CM_NAME);
-        while (!parentName.equals("documentLibrary")) {
+        while (!parentName.equals("Models")) {
             EmsScriptNode oldparent = parent;
             parent = oldparent.getParent();
             if ( parent == null ) return null; // site not found!
@@ -1062,7 +1062,7 @@ public class EmsScriptNode extends ScriptNode {
                 return siteNode;
             }
         }
-        // The site is the folder containing the documentLibrary!
+        // The site is the folder containing the Models folder!
         siteNode = parent.getParent();
         return siteNode;
     }

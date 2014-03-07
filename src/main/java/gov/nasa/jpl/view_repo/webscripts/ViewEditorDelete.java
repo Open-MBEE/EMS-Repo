@@ -102,7 +102,7 @@ public class ViewEditorDelete extends AbstractJavaWebScript {
 
 	        if (req.getParameter("project") != null) {
 	        		String projectid = req.getParameter("project");
-	        		if (projectid.startsWith("ViewEditor") || projectid.startsWith("documentLibrary/Models")) {
+	        		if (projectid.startsWith("ViewEditor") || projectid.startsWith("Models")) {
 		        		veNode = siteNode.childByNamePath("/" + projectid);
 		        		log(LogLevel.INFO, "Attempting to delete dir " + projectid);
 	        		}
