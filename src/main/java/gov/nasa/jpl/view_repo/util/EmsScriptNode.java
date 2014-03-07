@@ -204,6 +204,19 @@ public class EmsScriptNode extends ScriptNode {
         return true;
 	}
 	
+	public void removeAssociations(String type) {
+        QName typeQName = createQName(type);
+        List<AssociationRef> refs = services.getNodeService().getTargetAssocs(nodeRef, RegexQNamePattern.MATCH_ALL );
+
+        if (refs != null) {
+            // check all associations to see if there's a matching association
+            for (AssociationRef ref: refs) {
+                if (ref.getTypeQName().equals(typeQName)) {
+                		services.getNodeService().removeAssociation(ref.getSourceRef(), ref.getTargetRef(), typeQName);
+                }
+            }
+        }
+	}
 	
 	/**
 	 * Create a child association between a parent and child node of the specified type
@@ -1052,7 +1065,7 @@ public class EmsScriptNode extends ScriptNode {
         if ( siteNode != null ) return siteNode;
         EmsScriptNode parent = this;
         String parentName = (String) parent.getProperty(Acm.CM_NAME);
-        while (!parentName.equals("Models")) {
+        while (!parentName.equals("Models") || !parentName.equals("ViewEditor")) {
             EmsScriptNode oldparent = parent;
             parent = oldparent.getParent();
             if ( parent == null ) return null; // site not found!

@@ -134,6 +134,10 @@ public class ActionUtil {
         sr.getNodeService().setProperty(node.getNodeRef(), ContentModel.PROP_CONTENT, contentData);
     }
     
+    /**
+     * Create a job inside a particular site
+     * @return The created job node
+     */
     public static EmsScriptNode getOrCreateJob(EmsScriptNode siteNode, String jobName, String jobType, Status status, StringBuffer response) {
         EmsScriptNode jobPkgNode = siteNode.childByNamePath("Jobs");
         if (jobPkgNode == null) {

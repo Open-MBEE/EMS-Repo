@@ -66,6 +66,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
     // Parameter values to be passed in when the action is created
     public static final String NAME = "configurationGeneration";
     public static final String PARAM_SITE_NAME = "siteName";
+    public static final String PARAM_PRODUCT_LIST = "docList";
 
     public void setRepository(Repository rep) {
         repository = rep;
@@ -84,39 +85,47 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         clearCache();
 
         EmsScriptNode jobNode = new EmsScriptNode(nodeRef, services, response);
+        // clear out any existing associated snapshots
+        jobNode.removeAssociations("ems:configuredSnapshots");
 
+        @SuppressWarnings("unchecked")
+		HashSet<String> productList = (HashSet<String>) action.getParameterValue(PARAM_PRODUCT_LIST);
+        
         // grab all documents in site
         String siteName = (String) action.getParameterValue(PARAM_SITE_NAME);
         System.out.println("ConfigurationGenerationActionExecuter started execution of " + siteName);
         SiteInfo siteInfo = services.getSiteService().getSite(siteName);
         if (siteInfo == null) {
+        		System.out.println("[ERROR]: could not find site: " + siteName);
             return;
         }
         EmsScriptNode site = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
         Set<EmsScriptNode> productSet = WebScriptUtil.getAllNodesInPath(site.getQnamePath(), "ASPECT", Acm.ACM_PRODUCT, services, response);
-
+        
         // create snapshots of all documents
         // TODO: perhaps roll these in their own transactions
         String jobStatus = "Succeeded";
         Set<EmsScriptNode> snapshots = new HashSet<EmsScriptNode>();
         for (EmsScriptNode product: productSet) {
-            // Update the model
-            SnapshotPost snapshotService = new SnapshotPost(repository, services);
-            snapshotService.setRepositoryHelper(repository);
-            snapshotService.setServices(services);
-            snapshotService.setLogLevel(LogLevel.DEBUG);
-            Status status = new Status();
-            EmsScriptNode snapshot = snapshotService.createSnapshot(product, (String)product.getProperty(Acm.ACM_ID));
-            if (status.getCode() != HttpServletResponse.SC_OK) {
-                jobStatus = "Failed";
-                response.append("[ERROR]: could not make snapshot for " + product.getProperty(Acm.ACM_NAME));
-            } else {
-                response.append("[INFO]: Successfully created snapshot: " + snapshot.getProperty(Acm.CM_NAME));
-            }
-            if (snapshot != null) {
-                snapshots.add(snapshot);
-            }
-            response.append(snapshotService.getResponse().toString());
+        		// only create the filtered list of documents
+        		if (productList.isEmpty() || productList.contains(product.getProperty(Acm.ACM_ID))) {
+	            SnapshotPost snapshotService = new SnapshotPost(repository, services);
+	            snapshotService.setRepositoryHelper(repository);
+	            snapshotService.setServices(services);
+	            snapshotService.setLogLevel(LogLevel.DEBUG);
+	            Status status = new Status();
+	            EmsScriptNode snapshot = snapshotService.createSnapshot(product, (String)product.getProperty(Acm.ACM_ID));
+	            if (status.getCode() != HttpServletResponse.SC_OK) {
+	                jobStatus = "Failed";
+	                response.append("[ERROR]: could not make snapshot for " + product.getProperty(Acm.ACM_NAME));
+	            } else {
+	                response.append("[INFO]: Successfully created snapshot: " + snapshot.getProperty(Acm.CM_NAME));
+	            }
+	            if (snapshot != null) {
+	                snapshots.add(snapshot);
+	            }
+	            response.append(snapshotService.getResponse().toString());
+        		}
         }
         // make relationships between configuration node and all the snapshots
         for (EmsScriptNode snapshot: snapshots) {
@@ -132,6 +141,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         // Send off notification email
         String subject = "[EuropaEMS] Configuration " + siteName + " Generation " + jobStatus;
         String msg = "Log URL: " + contextUrl + logNode.getUrl();
+        // TODO: NOTE!!! The following needs to be commented out for local testing....
         ActionUtil.sendEmailToModifier(jobNode, msg, subject, services, response);
         
         System.out.println("Completed configuration set");
