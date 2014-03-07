@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en" ng-app="myApp">
 <head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge;chrome=1" />
   <meta charset="utf-8">
   <title>Site Configuration Points</title>
   <link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">

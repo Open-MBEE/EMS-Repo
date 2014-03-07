@@ -1,5 +1,7 @@
+<!DOCTYPE html>
 <html>
 	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge;chrome=1" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>EMS View Editor: ${title}</title>
 		<link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
