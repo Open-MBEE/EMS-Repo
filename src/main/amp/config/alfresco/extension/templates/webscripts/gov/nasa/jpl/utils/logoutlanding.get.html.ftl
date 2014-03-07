@@ -54,7 +54,7 @@
 		if (userAgent.indexOf('ie') >= 0) {
 		   document.execCommand("ClearAuthenticationCache", "false");
 		} else if (userAgent.indexOf('chrome') >= 0 || userAgent.indexOf('firefox') >= 0 || userAgent.indexOf('safari') >= 0) {
-		
+			// firefox requires a username, safari injects the username into the reauthentication popup
 				$.ajax({
 					type: 'GET',
 					url: '${url.context}/service/logout',
@@ -63,7 +63,7 @@
 					},
 					error: function(data) {
 					},
-					username: '',
+					username: 'enterusername',
 					password: 'badpassword'
 				});
 		}
