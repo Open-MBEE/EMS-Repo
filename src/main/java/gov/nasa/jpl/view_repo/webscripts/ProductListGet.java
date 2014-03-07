@@ -170,7 +170,7 @@ public class ProductListGet extends AbstractJavaWebScript {
                     volume2documents.put(parentId, new JSONArray());
                 }
                 ((JSONArray)volume2documents.get(parentId)).put(id);
-                handleParents(node, "Models");
+                handleParents(node);
             }
         }
         
@@ -197,12 +197,11 @@ public class ProductListGet extends AbstractJavaWebScript {
 	}
 	
 	/**
-	 * Work up the package hierarchy until the stopName folder is reached
+	 * Work up the package hierarchy until the project folder is reached
 	 * @param node
-	 * @param stopName
 	 * @throws JSONException
 	 */
-	protected void handleParents(EmsScriptNode node, String stopName) throws JSONException {
+	protected void handleParents(EmsScriptNode node) throws JSONException {
         String id = (String)node.getProperty(Acm.ACM_ID);
         String sysmlName = (String)node.getProperty(Acm.ACM_NAME);
         if (id == null) {
@@ -241,7 +240,7 @@ public class ProductListGet extends AbstractJavaWebScript {
                         array.put(id);
                     }
                 }
-                handleParents(parent, stopName);
+                handleParents(parent);
             }
         }
 	}

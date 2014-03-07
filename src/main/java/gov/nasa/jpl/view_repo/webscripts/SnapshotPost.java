@@ -163,7 +163,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         EmsScriptNode parent = viewNode.getParent();
 
         String parentName = (String) parent.getProperty(Acm.CM_NAME);
-        while (!parentName.equals("Models")) {
+        while (!parentName.equals("Models") && !parentName.equals("ViewEditor")) {
             EmsScriptNode oldparent = parent;
             parent = oldparent.getParent();
             parentName = (String) parent.getProperty(Acm.CM_NAME);
