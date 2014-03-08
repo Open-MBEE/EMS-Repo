@@ -73,7 +73,7 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
 		<div class="wrapper">
 			<div class="row">
   
-  <div class="col-md-4">
+  <div class="col-md-8">
     
     <div class="panel panel-default">
       <div class="panel-heading">{{homeTree.name}}</div>
