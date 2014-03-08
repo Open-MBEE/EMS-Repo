@@ -74,7 +74,12 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
     </div>
 
     <div class="wrapper">
-      <div class="row split-view">
+<p>
+Please use the new Europa View Editor <a href="${url.context}/service/alfresco/ve/documents/europa">URL</a>.
+<br>
+Please note that this document may have not been exported to the new View Editor.
+</p>
+      <div class="row split-view" hidden>
 
 <div class="col-xs-8">
 

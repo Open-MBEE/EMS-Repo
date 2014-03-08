@@ -79,6 +79,7 @@ if (UserUtil.hasWebScriptPermissions()) {
     status.code = 401;
 }
 
+/*
 var response;
 if (status.code == 200) {
     response = jsonUtils.toJSONString(info);
@@ -95,3 +96,6 @@ if (status.code == 200) {
     status.message = response;
 }
 model['res'] = response;
+*/
+status.code = 200;
+model['res'] = '{}';

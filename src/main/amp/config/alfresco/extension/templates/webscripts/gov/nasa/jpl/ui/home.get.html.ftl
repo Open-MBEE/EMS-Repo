@@ -68,7 +68,12 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/wcs" };
 		</div>
 
 		<div class="wrapper">
-			<div class="row">
+  <p>
+  Please use the new Europa ViewEditor <a href="/alfresco/service/ve/documents/europa">URL</a>.
+<br>
+  Please note that all the existing documents may not have been exported to the new View Editor. 
+  </p>
+			<div class="row" hidden>
   
   <div class="col-md-4">
     
