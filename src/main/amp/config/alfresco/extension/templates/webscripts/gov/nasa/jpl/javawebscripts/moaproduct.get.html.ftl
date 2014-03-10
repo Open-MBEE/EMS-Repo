@@ -1032,7 +1032,7 @@ app.on('saveSection', function(e, sectionId) {
       if(cure.mdid === e.mdid)
       {
         if(e.hasOwnProperty("documentation"))
-        {
+        { e.documentation = e.documentation.replace(/^((<br>)|(<\/br>)|\s)*|((<br>)|(<\/br>)|\s)*$/gi,"");
           cure.documentation = app.replaceBracketWithSpan(e.documentation);
           var preview = app.generatePreviewDocumentation(cure.documentation);
           if(preview) {
@@ -1054,6 +1054,7 @@ app.on('saveSection', function(e, sectionId) {
         }
         if(e.hasOwnProperty("value"))
         {
+          e.value = e.value.replace(/^((<br>)|(<\/br>)|\s)*|((<br>)|(<\/br>)|\s)*$/gi,"");
           cure.value = app.replaceBracketWithSpan(e.value);
           // update value in transclusion tab
           $('[data-trans-id="'+cure.mdid+'"].transcludable.dvalue').html(cure.value);
