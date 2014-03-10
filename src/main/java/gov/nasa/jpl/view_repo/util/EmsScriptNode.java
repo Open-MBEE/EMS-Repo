@@ -1160,12 +1160,19 @@ public class EmsScriptNode extends ScriptNode {
 	                JSONArray array = jsonObject.getJSONArray(jsonType);
 	                this.createOrUpdateProperty(acmType, array.toString());
 	            } else {
-	                String property = jsonObject.getString(jsonType);
-	                System.out.println("creating or updating property: " + acmType + " = " + property );
-                    if ( jsonType.startsWith( "is" )
-                         && ( property.equalsIgnoreCase( "true" ) || property.equalsIgnoreCase( "false" ) ) ) {
-	                    this.createOrUpdateProperty(acmType, new Boolean(property));
+	                //System.out.println("creating or updating property: " + acmType + " = " + property );
+                    if ( jsonType.startsWith( "is" ) ) {
+                        //( property.equalsIgnoreCase( "true" ) || property.equalsIgnoreCase( "false" ) ) ) {
+                        Boolean property = jsonObject.getBoolean( jsonType);
+                        if ( property == null ) {
+                            String msg = "Error! Couldn't get boolean property " + jsonType + "=" + property + ".\n";
+                            response.append( msg );
+                            status.setCode( HttpServletResponse.SC_BAD_REQUEST, msg ); 
+                        } else {
+                            this.createOrUpdateProperty(acmType, property);
+                        }
 	                } else {
+	                    String property = jsonObject.getString(jsonType);
 	                    this.createOrUpdateProperty(acmType, new String(property));
 	                }
 	            }

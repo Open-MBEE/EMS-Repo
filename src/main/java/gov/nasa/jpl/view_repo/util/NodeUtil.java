@@ -40,6 +40,8 @@ public class NodeUtil {
         }
     };
 
+    public static ServiceRegistry services = null;
+    
     // needed for Lucene search
     protected static final StoreRef SEARCH_STORE =
             new StoreRef( StoreRef.PROTOCOL_WORKSPACE, "SpacesStore" );
@@ -60,9 +62,15 @@ public class NodeUtil {
     public static ServiceRegistry getServices() {
         return getServiceRegistry();
     }
+    public static void setServices( ServiceRegistry services ) {
+        NodeUtil.services = services;
+    }
+
     public static ServiceRegistry getServiceRegistry() {
-        ServiceRegistry r = (ServiceRegistry)getApplicationContext().getBean( "ServiceRegistry" );
-        return r;
+        if ( services == null ) {
+            services = (ServiceRegistry)getApplicationContext().getBean( "ServiceRegistry" );
+        }
+        return services;
     }
 
     protected static ResultSet findNodeRefsByType(String name, SearchType type, ServiceRegistry services) {

@@ -7,6 +7,8 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.ae.util.JavaEvaluator;
 import gov.nasa.jpl.mbee.util.MoreToString;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.ae.xml.EventXmlToJava;
 
 import java.io.File;
@@ -14,29 +16,34 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.alfresco.repo.nodelocator.NodeLocatorService;
-import org.alfresco.service.cmr.repository.NodeService;
+import org.alfresco.service.ServiceRegistry;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.springframework.extensions.surf.util.Content;
 import org.springframework.extensions.webscripts.Cache;
-import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-public class JavaQueryPost extends DeclarativeWebScript {
+public class JavaQueryPost extends AbstractJavaWebScript {
 
-	private NodeService nodeService;
-    
-    private NodeLocatorService nodeLocatorService;
+//    private NodeService nodeService;
+//    
+//    private NodeLocatorService nodeLocatorService;
 
-    public void setNodeService(NodeService nodeService) {
-        this.nodeService = nodeService;
+    @Override
+    public void setServices(ServiceRegistry services) {
+        super.setServices( services );
+        JavaQuery.services = services;
+        NodeUtil.setServices( services );
     }
     
-    public void setNodeLocatorService(NodeLocatorService nodeLocatorService) {
-        this.nodeLocatorService = nodeLocatorService;
-    }
+//    public void setNodeService(NodeService nodeService) {
+//        this.nodeService = nodeService;
+//    }
+//    
+//    public void setNodeLocatorService(NodeLocatorService nodeLocatorService) {
+//        this.nodeLocatorService = nodeLocatorService;
+//    }
     
     private String n() {
         return "foo";
@@ -93,7 +100,6 @@ public class JavaQueryPost extends DeclarativeWebScript {
         try {
             qString = query.getContent();
         } catch ( IOException e ) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         if ( Utils.isNullOrEmpty( qString ) ) {
@@ -127,4 +133,12 @@ public class JavaQueryPost extends DeclarativeWebScript {
 		model.put( "verbose", verbose );
 		return model;
 	}
+
+    @Override
+    protected boolean validateRequest( WebScriptRequest req, Status status ) {
+        if (!checkRequestContent(req)) {
+            return false;
+        }
+        return true;
+    }
 }

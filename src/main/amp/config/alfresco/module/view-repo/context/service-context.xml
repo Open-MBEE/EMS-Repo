@@ -94,8 +94,8 @@
     <bean id="webscript.gov.nasa.jpl.java_query.post"
         class="gov.nasa.jpl.view_repo.JavaQueryPost"
         parent="webscript">
-        <property name="nodeService" ref="NodeService" />
-        <property name="nodeLocatorService" ref="nodeLocatorService" /> 
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
     </bean>
 
 	

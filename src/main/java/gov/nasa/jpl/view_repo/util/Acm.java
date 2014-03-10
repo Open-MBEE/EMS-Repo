@@ -340,7 +340,7 @@ public class Acm {
     };
     
     /**
-     * Properties that are JSONArrays rather than primitive types, so parsing is differnt
+     * Properties that are reference Elements rather than primitive types, so parsing is different
      */
     protected static final Set<String> JSON_NODEREFS = new HashSet<String>() {
         private static final long serialVersionUID = -6616374715310786125L;
