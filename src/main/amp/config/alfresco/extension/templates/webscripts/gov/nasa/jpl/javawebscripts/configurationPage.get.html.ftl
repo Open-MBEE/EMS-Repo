@@ -141,7 +141,7 @@ angular.module('myApp', ['ui.router'])
             });
     };
   }])
-  .controller('TagAddRemoveCtrl', ["$scope", "$http", function($scope, $http) {
+  .controller('TagAddRemoveCtrl', ["$scope", "$http", "TagService", function($scope, $http, TagService) {
     $scope.selected = [];
     for (var i = 0; i < $scope.config.snapshots.length; i++) {
         $scope.selected.push($scope.config.snapshots[i].id);
@@ -159,6 +159,7 @@ angular.module('myApp', ['ui.router'])
                     current.push($scope.snapshotMap[id]);
                 }
                 $scope.config.snapshots = current;
+                TagService.updateSnapshots($scope.config.simpleNodeId, current);
                 $scope.toggles.hideAddRemoveForm = true;
             }).
             error(function(data, status, headers, config) {
@@ -248,6 +249,9 @@ angular.module('myApp', ['ui.router'])
                         done = true;
                     });
                 return promise;
+            },
+            updateSnapshots: function(configId, snapshots) {
+            	result.configurationsMap[configId].snapshots = snapshots;
             }
         }
         
