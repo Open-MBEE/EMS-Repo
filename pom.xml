@@ -85,6 +85,12 @@
 	        	<scope>system</scope>
 	        	<systemPath>${project.basedir}/lib/alfresco-web-client-${alfresco.version}.jar</systemPath>
         </dependency>
+        <!--  required for mapping slf4j to log4j -->
+        <dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+			<version>1.5.11</version>
+		</dependency>
     </dependencies>
 
 	
