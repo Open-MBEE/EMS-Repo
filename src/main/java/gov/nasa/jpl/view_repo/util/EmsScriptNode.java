@@ -511,8 +511,9 @@ public class EmsScriptNode extends ScriptNode {
 	    while ( true ) {
     	    Pattern p = Pattern.compile("(.*)<img\\s*src\\s*=\\s*[\"']data:image/(\\w*);base64,([^\"']*)[\"'][^>]*>(.*)");
     	    Matcher m = p.matcher( v );
-    	    if ( !m.matches() ) break;
-    	    else {
+    	    if ( !m.matches() ) {
+    	    		break;
+    	    } else {
     	        if ( m.groupCount() != 4 ) {
     	            log( "Expected 4 match groups, got " + m.groupCount() + "! " + m );
     	            break;
