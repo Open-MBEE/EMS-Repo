@@ -596,6 +596,12 @@
          <mimetype mimetype="application/mathematica" display="Mathematica notebook (.nb)">
             <extension>nb</extension>
          </mimetype>
+         <mimetype mimetype="application/pxc" display="Phoenix model (.pxc)">
+            <extension>pxc</extension>
+         </mimetype>
+         <mimetype mimetype="application/scriptWrapper" display="Phoenix script wrapper (.scriptWrapper)">
+            <extension>scriptWrapper</extension>
+         </mimetype>
 
       </mimetypes>
    </config>
