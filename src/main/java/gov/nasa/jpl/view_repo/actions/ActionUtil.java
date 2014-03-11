@@ -29,6 +29,10 @@
 
 package gov.nasa.jpl.view_repo.actions;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import javax.servlet.http.HttpServletResponse;
@@ -47,6 +51,8 @@ import org.springframework.extensions.webscripts.Status;
  *
  */
 public class ActionUtil {
+	private static String hostname = null;
+	
     // defeat instantiation
     private ActionUtil() {
         // do nothing
@@ -162,5 +168,20 @@ public class ActionUtil {
     
     public static void setJobStatus(EmsScriptNode jobNode, String value) {
         jobNode.createOrUpdateProperty("ems:job_status", value);
+    }
+    
+    public static String getHostName() {
+    		if (hostname == null) {
+		    	Process tr;
+			try {
+				tr = Runtime.getRuntime().exec( new String[]{ "hostname" } );
+			    	BufferedReader rd = new BufferedReader( new InputStreamReader( tr.getInputStream() ) );
+			    	hostname = rd.readLine();
+			    	System.out.println( "hostname:" + hostname );
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+    		}
+	    return hostname;
     }
 }

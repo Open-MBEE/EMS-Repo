@@ -59,7 +59,6 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
      */
     private ServiceRegistry services;
     private Repository repository;
-    private String contextUrl;
 
     private StringBuffer response;
 
@@ -76,10 +75,6 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         services = sr;
     }
     
-    public void setContextUrl(String url) {
-        contextUrl = url;
-    }
-
     @Override
     protected void executeImpl(Action action, NodeRef nodeRef) {
         clearCache();
@@ -138,6 +133,8 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         // Save off the log
         EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
 
+        String contextUrl = "https://" + ActionUtil.getHostName() + ".jpl.nasa.gov/alfresco";
+        
         // Send off notification email
         String subject = "[EuropaEMS] Configuration " + siteName + " Generation " + jobStatus;
         String msg = "Log URL: " + contextUrl + logNode.getUrl();

@@ -59,7 +59,6 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
      */
     private ServiceRegistry services;
     private Repository repository;
-    private String contextUrl;
 
     private StringBuffer response;
 
@@ -77,10 +76,6 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         services = sr;
     }
     
-    public void setContextUrl(String url) {
-        contextUrl = url;
-    }
-
     @Override
     protected void executeImpl(Action action, NodeRef nodeRef) {
         String projectId = (String) action.getParameterValue(PARAM_PROJECT_ID);
@@ -132,10 +127,14 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         // set the status
         jsonNode.setProperty("ems:job_status", jobStatus);
 
+        String contextUrl = "https://" + ActionUtil.getHostName() + ".jpl.nasa.gov/alfresco";
+        	
         // Send off the notification email
         String subject = "[EuropaEMS] Project " + projectName + " Load " + jobStatus;
         String msg = "Log URL: " + contextUrl + logNode.getUrl();
         ActionUtil.sendEmailToModifier(jsonNode, msg, subject, services, response);
+
+        System.out.println("ModelLoadActionExecuter completed execution of " + projectName + " [id: " + projectId + "]");
     }
 
     protected void clearCache() {
