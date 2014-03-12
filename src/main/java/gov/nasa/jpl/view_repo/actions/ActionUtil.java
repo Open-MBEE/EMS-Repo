@@ -177,7 +177,6 @@ public class ActionUtil {
 				tr = Runtime.getRuntime().exec( new String[]{ "hostname" } );
 			    	BufferedReader rd = new BufferedReader( new InputStreamReader( tr.getInputStream() ) );
 			    	hostname = rd.readLine();
-			    	System.out.println( "hostname:" + hostname );
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
