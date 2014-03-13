@@ -54,7 +54,26 @@ Eclipse/Maven
         mvn install:install-file -Dfile=lib/mbee_util.jar -DgroupId=gov.nasa.jpl -DartifactId=mbee_util -Dversion=1.0 -Dpackaging=jar
         mvn install:install-file -Dfile=lib/sysml.jar -DgroupId=gov.nasa.jpl -DartifactId=sysml -Dversion=1.0 -Dpackaging=jar
 
+    For the bae, sysml, and util projects you will need to update the build.properties file with your home directory and folder of where magic draw is installed.  For instance:
+        home=/Users/gcgandhi
+        md=/Applications/MD
+
+    If you are not using Eclispse yoxos, then you will need to install the IMCE Eclipse plug ins.  Do the following:
+        1. Get the .jar files from Brad or Dorris, and then place them in your eclipse installation plugins folder, i.e. "/Applications/eclipse/plugins".  
+        2. Restart Eclipse.  
+        3. For the mdk and bae projects rick click on the project folder and check that the library (IMCE MagicDraw Classpath Container) was added:  Properties->Java BuildPath->Libraries.  
+        4.Make sure that the library appears first in the list for the bae project (you can adjust this in the Order and Export tab).  
+
+    Make sure that Java Buildpath for the view-repo project is using Java 1.7.
+
+    Open up the Ant window by clicking on Window->Show View->Other->Ant.  For the bae, sysml, and util projects, 
+    drag the build.xml files into the Ant window.  Then expand each one in the Ant window, and run the makejar.
+    
+    
 # building, setting up maven, jrebel
+Make sure to install both the JRebel plug-in for Eclipse and download the Jrebel .jar and store it somewhere like "/Applications/jrebel".  
+The path to the jrebel.jar will be used by mvn via the MAVEN_OPTS environment variable.
+
 To build the amp file, do 
 
     mvn package
