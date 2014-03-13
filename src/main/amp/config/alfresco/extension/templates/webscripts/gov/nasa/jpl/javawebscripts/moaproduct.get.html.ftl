@@ -1618,7 +1618,7 @@ app.observe('viewHierarchy', function(viewData) {
   viewTree.snapshot = viewData.snapshot;
   if(viewTree.snapshot === true)
   {
-    viewTree.snapshoted = app.formatDate(parseDate(viewData.snapshoted));
+    viewTree.snapshoted = app.formatDate(parseDate(viewData.lastModified));
   }
   viewTree.snapshots = viewData.snapshots;
   viewTree.elements = viewData.elements;
