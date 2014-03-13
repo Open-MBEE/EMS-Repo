@@ -577,6 +577,13 @@ h1 {
 .missing-trans-ref {
 	background-color: #E14A4A;
 }
+
+
+media="screen"
+.table-striped>tbody>tr:nth-child(even)>td, .table-striped>tbody>tr:nth-child(even)>th {
+background-color: #ffffff;
+}
+
 /*
 .transclusion .items>div .edit
 {
