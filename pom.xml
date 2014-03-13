@@ -117,12 +117,12 @@
         </dependency>
         -->
 		<!-- needed for class loader problems -->
-		<dependency>
+<!-- 		<dependency>
 			<groupId>org.eclipse.core</groupId>
 			<artifactId>org.eclipse.core.runtime</artifactId>
 			<version>3.6.0.v20100505</version>
 		</dependency>
-		<dependency>
+ -->		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<version>3.0.6.RELEASE</version>
