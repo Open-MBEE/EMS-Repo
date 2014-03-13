@@ -465,6 +465,7 @@ h1 {
 	padding-left: 2px;
 	top:4px;
 	z-index: 2;
+	white-space: nowrap;
 }
 
 /* transclusion type display */
