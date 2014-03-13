@@ -450,7 +450,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
                     <div id="comment-form-{{id}}" class="comment-editor form-control" contenteditable="true">
                     </div>
                     <br/>
-                    <button type="button" class="btn btn-primary" proxy-click="addComment:{{id}}">Add comment</button>
+                    <button type="button" class="btn btn-primary add-comment" proxy-click="addComment:{{id}}">Add comment</button>
                   </div>
                 </li>
               </ul>
@@ -602,7 +602,10 @@ app.on('toggleComments', function(evt, id) {
   if (showing) {
     var commentField = comments.toggle().find('.comment-editor').wysiwyg();
     // app.placeholder(commentField, "Type your comment here");
-    commentField.focus();    
+    commentField.one("focus", function() {
+      window.pageExitManager.editorOpened();
+    })
+   
     selectBlank(commentField);
   } else {
     comments.hide();
@@ -610,8 +613,13 @@ app.on('toggleComments', function(evt, id) {
 });
 
 app.on('addComment', function(evt, mbid) {
+  window.pageExitManager.editorClosed();
   var commentFieldId = "#comment-form-" + mbid;
   var commentField = $(commentFieldId);
+  commentField.one("focus", function() {
+      window.pageExitManager.editorOpened();
+  }); 
+
   commentField.find('.placeholder').detach();
   var newCommentBody = commentField.cleanHtml();
   if (newCommentBody != "") {
@@ -677,6 +685,7 @@ app.updateSaveAllButton = function(n) {
     // When clicked, click all save section buttons
     $("#saveAll").click( function() {
       $(".saveSection").click(); 
+      $(".add-comment").click();
     });
   }
 }
