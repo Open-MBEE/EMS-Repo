@@ -245,13 +245,13 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
                   <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Font Size">
                     <i class="glyphicon glyphicon-text-height"></i>&nbsp;<b class="caret"></b></a>
                     <ul class="dropdown-menu">
-                    <li><a data-edit="fontSize 7"><font size="7">Bigger</font></a></li>
-                    <li><a data-edit="fontSize 6"><font size="6">Big</font></a></li>
-                    <li><a data-edit="fontSize 5"><font size="5">Larger</font></a></li>
-                    <li><a data-edit="fontSize 4"><font size="4">Large</font></a></li>
-                    <li><a data-edit="fontSize 3"><font size="3">Normal</font></a></li>
-                    <li><a data-edit="fontSize 2"><font size="2">Small</font></a></li>
-                    <li><a data-edit="fontSize 1"><font size="1">Smallest</font></a></li>
+                      <li><a data-edit="fontSize 7"><font size="7">Biggest</font></a></li>
+                      <li><a data-edit="fontSize 6"><font size="6">Bigger</font></a></li>
+                      <li><a data-edit="fontSize 5"><font size="5">Big</font></a></li>
+                      <li><a data-edit="fontSize 4"><font size="4">Larger</font></a></li>
+                      <li><a data-edit="fontSize 3"><font size="3">Large</font></a></li>
+                      <li><a data-edit="fontSize 2"><font size="2">Normal</font></a></li>
+                      <li><a data-edit="fontSize 1"><font size="1">Small</font></a></li>
                     </ul>
                 </div>
                   <div class="btn-group">
@@ -450,7 +450,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
                     <div id="comment-form-{{id}}" class="comment-editor form-control" contenteditable="true">
                     </div>
                     <br/>
-                    <button type="button" class="btn btn-primary" proxy-click="addComment:{{id}}">Add comment</button>
+                    <button type="button" class="btn btn-primary add-comment" proxy-click="addComment:{{id}}">Add comment</button>
                   </div>
                 </li>
               </ul>
@@ -602,7 +602,10 @@ app.on('toggleComments', function(evt, id) {
   if (showing) {
     var commentField = comments.toggle().find('.comment-editor').wysiwyg();
     // app.placeholder(commentField, "Type your comment here");
-    commentField.focus();    
+    commentField.one("focus", function() {
+      window.pageExitManager.editorOpened();
+    })
+   
     selectBlank(commentField);
   } else {
     comments.hide();
@@ -610,8 +613,13 @@ app.on('toggleComments', function(evt, id) {
 });
 
 app.on('addComment', function(evt, mbid) {
+  window.pageExitManager.editorClosed();
   var commentFieldId = "#comment-form-" + mbid;
   var commentField = $(commentFieldId);
+  commentField.one("focus", function() {
+      window.pageExitManager.editorOpened();
+  }); 
+
   commentField.find('.placeholder').detach();
   var newCommentBody = commentField.cleanHtml();
   if (newCommentBody != "") {
@@ -677,6 +685,7 @@ app.updateSaveAllButton = function(n) {
     // When clicked, click all save section buttons
     $("#saveAll").click( function() {
       $(".saveSection").click(); 
+      $(".add-comment").click();
     });
   }
 }
@@ -1618,7 +1627,7 @@ app.observe('viewHierarchy', function(viewData) {
   viewTree.snapshot = viewData.snapshot;
   if(viewTree.snapshot === true)
   {
-    viewTree.snapshoted = app.formatDate(parseDate(viewData.snapshoted));
+    viewTree.snapshoted = app.formatDate(parseDate(viewData.lastModified));
   }
   viewTree.snapshots = viewData.snapshots;
   viewTree.elements = viewData.elements;
