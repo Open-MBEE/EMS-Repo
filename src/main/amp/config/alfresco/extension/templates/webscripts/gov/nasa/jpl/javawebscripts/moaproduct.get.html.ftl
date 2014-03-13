@@ -517,11 +517,13 @@ var absoluteUrl = function(relativeUrl) {
 
 var ajaxWithHandlers = function(options, successMessage, errorMessage) {
   $.ajax(options)
-    .done(function(data) { 
+    .done(function(data) {
+    /* 
       if (data.indexOf("html") != -1) {
         alert("Not saved! You've been logged out, login in a new window first!");
           window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/service/ui/relogin");
       }
+     */
       app.fire('message', 'success', successMessage); })
     .fail(function(e) { 
       if (e && e.status && e.status === 200) {
