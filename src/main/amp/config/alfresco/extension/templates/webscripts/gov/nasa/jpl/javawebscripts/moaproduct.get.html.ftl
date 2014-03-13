@@ -790,7 +790,7 @@ app.on('editSection', function(e, sectionId) {
   toolbar.find(".requires-selection").addClass("disabled");
   var sectionPage = section.filter(".section.page");
   // On focus, enable the button
-  sectionPage.on('focus', function(arg)
+  section.find("[data-mdid][data-property='documentation']").on('focus', function(arg)
   {
     //console.log("Start Section focus")
     toolbar.find(".requires-selection").removeClass("disabled");
@@ -798,7 +798,7 @@ app.on('editSection', function(e, sectionId) {
   })
   // On blur disable the button unless the object we clicked on was the button itself
   // This code can only find the button in FF and Chrome
-  sectionPage.on('blur', function(arg)
+  section.find("[data-mdid][data-property='documentation']").on('blur', function(arg)
   {
     //console.log("Start Section blur");
     var target = arg.relatedTarget; // Chrome
