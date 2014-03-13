@@ -31,9 +31,15 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     public EmsSystemModel( ServiceRegistry services ) {
         this.services = ( services == null ? NodeUtil.getServiceRegistry() : services );
-        serviceNode =
-                new EmsScriptNode( NodeUtil.getCompanyHome( services )
-                                           .getNodeRef(), services );
+        System.out.println("ServiceRegistry = " + this.services);
+        if ( this.services == null ) {
+            // TODO -- complain!
+        } else {
+            serviceNode =
+                    new EmsScriptNode( NodeUtil.getCompanyHome( this.services )
+                                               .getNodeRef(),
+                                       this.services );
+        }
     }
     
     @Override

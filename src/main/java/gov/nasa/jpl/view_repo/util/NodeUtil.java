@@ -202,6 +202,11 @@ public class NodeUtil {
 
     public static EmsScriptNode getCompanyHome( ServiceRegistry services ) {
         EmsScriptNode companyHome = null;
+        if ( services == null ) services = getServiceRegistry();
+        if ( services == null || services.getNodeLocatorService() == null ) {
+            System.out.println( "getCompanyHome() failed, no services or no nodeLocatorService: "
+                                + services );
+        }
         NodeRef companyHomeNodeRef =
                 services.getNodeLocatorService().getNode( "companyhome", null,
                                                           null );
