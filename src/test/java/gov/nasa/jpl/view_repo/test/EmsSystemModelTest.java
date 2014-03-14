@@ -56,18 +56,21 @@ public class EmsSystemModelTest {
         // This test assumes that the model in
         // alfresco-view-repo/test-data/javawebscripts/JsonData/expressionElements.json
         // has been loaded with the curl command:
-        //   curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elements.json $BASE_URL"sites/europa/projects/123456/elements\""
+        //   curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/expressionElements.json $BASE_URL"sites/europa/projects/123456/elements\""
         // TODO -- load the data in initAppContext() above!
 
         //NodeRef node = NodeUtil.findNodeRefById( "expr_32165", model.getServices() );
                 
         System.out.println( "testExpressionEvaluation()" );
         
-        Collection< EmsScriptNode > nodes = model.getElementWithName( null, "*" );
+        Collection< EmsScriptNode > nodes = model.getElementWithName( null, "expr_32165" );
         System.out.println( "testExpressionEvaluation() nodes: "
                             + MoreToString.Helper.toLongString( nodes ) );
         if ( Utils.isNullOrEmpty( nodes ) ) {
             nodes = model.getElementWithName( null, "*" );
+            if ( !Utils.isNullOrEmpty( nodes ) ) {
+                System.out.println( "testExpressionEvaluation() got " + nodes.size() + " nodes." );
+            }
             System.out.println( "testExpressionEvaluation() again, nodes : "
                                 + MoreToString.Helper.toLongString( nodes ) );
         }
