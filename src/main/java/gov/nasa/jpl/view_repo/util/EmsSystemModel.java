@@ -14,6 +14,7 @@ import java.util.Set;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
+import org.mozilla.javascript.Scriptable;
 import org.springframework.extensions.webscripts.Status;
 
 import sysml.AbstractSystemModel;
@@ -41,6 +42,60 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
                                        this.services );
         }
     }
+    
+    
+    /**
+     * @return the nodes for the Alfresco sites on this EMS server. 
+     */
+    public EmsScriptNode[] getSiteNodes() {
+        Collection< EmsScriptNode > sitesNodes = getElementWithName( null, "Sites" );
+        if ( sitesNodes == null ) return new EmsScriptNode[]{};
+        if ( sitesNodes.isEmpty() ) return new EmsScriptNode[]{};
+        EmsScriptNode sitesNode = null;
+        for ( EmsScriptNode node : sitesNodes ) {
+            if ( node.getType().equals( "cm:folder" ) ) {
+                sitesNode = node; // hopefully! REVIEW
+                break;
+            }
+        }
+        if ( sitesNode == null ) sitesNode = sitesNodes.iterator().next();
+        
+        //children = sitesNode.
+                return null;
+        
+    }
+    
+    /**
+     * @return the names of the Alfresco sites on this EMS server. 
+     */
+    public String[] getSites() {
+        // TODO
+        return null;
+    }
+    
+    /**
+     * @return the URL to the ViewEdtor for a given EMS site name or null if the site does not exist. 
+     */
+    String getViewEditorUrlForSite( String siteName ){
+        // TODO
+        return null;
+    }
+    
+    /**
+     * @return the URL to this EMS server
+     */
+    String getEmsUrl() {
+        // TODO -- optional?
+        return null;
+    }
+    /**
+     * @return the name of this EMS server
+     */
+    String getEmsName() {
+        // TODO -- optional?
+        return null;
+    }
+
     
     @Override
     public boolean isDirected( EmsScriptNode relationship ) {
