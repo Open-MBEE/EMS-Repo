@@ -22,27 +22,18 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 
   <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
 <div id="main"></div>
-<script id="template" type="text/mustache">
 
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="navbar-header">
-      {{#environment.development}}
-              {{^viewTree.snapshot}}
-                <a class="navbar-brand" href="/">EMS View Editor {{ title }}</a>
-              {{/viewTree.snapshot}}
-            {{/environment.development}}
-            {{^environment.development}}
-              {{^viewTree.snapshot}}
-                <a class="navbar-brand" href="${url.context}/service/ve/documents/${siteName}">${siteTitle} View Editor {{ title }}</a>
-              {{/viewTree.snapshot}}
-      {{/environment.development}}  
+        <select name="docsmenu" id="docsmenu" style="margin-top:5%; font-size: 24px;">
+        		<option selected="selected" value="">Version Report ${title} ${tag}</option>
+        		<option value="${url.context}/service/ve/products/${id}">Current Version of Document</option>
+            	<option value="${url.context}/service/ve/index/${siteName}">Document List</option>
+            	<option value="${url.context}/service/ve/configurations/${siteName}">Released Document List</option>
+            	<option value="${url.context}/service/ve/documents/${siteName}">In-Work Document List</option>
+            	<option value="${url.context}/share/page/${siteName}/dashboard">EMS Site Dashboard</option>
+        </select>
       </div>
-
-      {{^viewTree.snapshot}}
-        <ul class="nav navbar-nav pull">
-          <li><a  href="/share/page/">EMS Dashboard </a></li>
-        </ul>   
-      {{/viewTree.snapshot}}
 
       <div class="pull-right">
         <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
@@ -51,35 +42,17 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
       <ul class="nav navbar-nav pull-right">
         <li><a href="#" class="submit-logout">logout</a></li>
       </ul>
+    </nav>
+    
+<script type="text/javascript">
+	var docsmenu=document.getElementById('docsmenu');
+	docsmenu.onchange = function() {
+	 window.open(this.options[this.selectedIndex].value, '_self');
+	}
+</script> 
 
-      {{#viewTree.snapshot}}
-        <ul class="nav navbar-nav pull-left">
-          <li><a class="navbar-brand" href="#">Version Report ({{viewTree.snapshoted}})  ${tag}</a></li>
-        </ul>
-          <ul class="nav navbar-nav pull-right">
-          <li><a  href="/share/page/">EMS Dashboard </a></li>
-        </ul> 
-        <ul class="nav navbar-nav pull-right">
-          {{#environment.development}}
-            <li><a  href="/">Go back to view editor </a></li>
-          {{/environment.development}}
-          {{^environment.development}}
-            <li><a  href="${url.context}/service/ve/documents/${siteName}">Go back to View Editor </a></li>
-          {{/environment.development}}
-        </ul>
-      {{/viewTree.snapshot}}
+<script id="template" type="text/mustache">
 
-      <!-- 
-      <form class="navbar-form navbar-right" action="">
-        <div class="form-group">
-          <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
-            <option value="modeler">Modeler</option>
-            <option value="reviewer">Reviewer</option>
-            <option value="manager">Manager</option>
-          </select>
-        </div>
-      </form>
-    -->
 
     </nav>
     <div id="ie-alert" class="alert alert-warning alert-dismissable ie_warning">

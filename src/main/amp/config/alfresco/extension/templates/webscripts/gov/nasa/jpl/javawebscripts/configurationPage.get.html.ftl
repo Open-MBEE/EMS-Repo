@@ -13,26 +13,32 @@
 </head>
 <body ng-init="currentSite = '${site}'">
   <div class="main">
-    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="navbar-header">
-        <a class="navbar-brand" href="${url.context}/service/ve/documents/{{currentSite}}">View Editor</a>
+        <select name="docsmenu" id="docsmenu" style="margin-top:10%; font-size: 24px;">
+            	<option value="${url.context}/service/ve/index/${site}">Document List</option>
+            	<option selected="selected" value="${url.context}/service/ve/configurations/${site}">Released Document List</option>
+            	<option value="${url.context}/service/ve/documents/${site}">In-Work Document List</option>
+            	<option value="${url.context}/share/page/${site}/dashboard">EMS Site Dashboard</option>
+        </select>
       </div>
-
-      <ul class="nav navbar-nav">
-        <li><a  href="/share/page/">Europa EMS Dashboard</a></li>
-      </ul>   
 
       <div class="pull-right">
         <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
       </div>
 
       <ul class="nav navbar-nav pull-right">
-       <li><a href="#" class="submit-logout">logout</a></li>
-     </ul>
+        <li><a href="#" class="submit-logout">logout</a></li>
+      </ul>
+    </nav>
+    
+<script type="text/javascript">
+	var docsmenu=document.getElementById('docsmenu');
+	docsmenu.onchange = function() {
+	 window.open(this.options[this.selectedIndex].value, '_self');
+	}
+</script> 
 
-     <ul class="nav navbar-nav pull-right">
-     </ul>
-   </nav>
    <div class="container" ng-controller="TagsCtrl">
     <div class="row">
       <span class="h3">Released Documents for site {{currentSite}}</span> &nbsp;

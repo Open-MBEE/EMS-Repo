@@ -3,7 +3,7 @@
 	<head>
 		<meta http-equiv="X-UA-Compatible" content="IE=edge;chrome=1" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>EMS View Editor: ${title}</title>
+		<title>${title} In-Work Documents List</title>
 		<link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
 		<link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
 		<link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
@@ -21,43 +21,34 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
 
 	<body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
 <div id="main"></div>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="navbar-header">
+        <select name="docsmenu" id="docsmenu" style="margin-top:10%; font-size: 24px;">
+            	<option value="${url.context}/service/ve/index/${siteName}">Document List</option>
+            	<option value="${url.context}/service/ve/configurations/${siteName}">Released Document List</option>
+            	<option selected="selected" value="${url.context}/service/ve/documents/${siteName}">In-Work Document List</option>
+            	<option value="${url.context}/share/page/${siteName}/dashboard">EMS Site Dashboard</option>
+        </select>
+      </div>
+
+      <div class="pull-right">
+        <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
+      </div>
+
+      <ul class="nav navbar-nav pull-right">
+        <li><a href="#" class="submit-logout">logout</a></li>
+      </ul>
+    </nav>
+    
+<script type="text/javascript">
+	var docsmenu=document.getElementById('docsmenu');
+	docsmenu.onchange = function() {
+	 window.open(this.options[this.selectedIndex].value, '_self');
+	}
+</script>
+    
 <script id="template" type="text/mustache">
-
-		<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-			<div class="navbar-header">
-					{{#environment.development}}
-						<a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
-					{{/environment.development}}
-					{{^environment.development}}
-						<a class="navbar-brand" href="${url.context}/service/ve/documents/${siteName}">${siteTitle} View Editor {{ title }}</a>
-					{{/environment.development}}
-			</div>
-			<ul class="nav navbar-nav">
-				<li><a href="/share/page/">EMS Dashboard</a></li>
-			</ul>
-
-
-			<div class="pull-right">
-				<img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
-			</div>
-
-	      <ul class="nav navbar-nav pull-right">
-       		<li><a href="#" class="submit-logout">logout</a></li>
-	      </ul>
-
-			<!-- 
-			<form class="navbar-form navbar-right" action="">
-	      <div class="form-group">
-	        <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
-	          <option value="modeler">Modeler</option>
-	          <option value="reviewer">Reviewer</option>
-	          <option value="manager">Manager</option>
-	        </select>
-	      </div>
-	    </form>
-	  -->
-
-		</nav>
 
     <div id="ie-alert" class="alert alert-warning alert-dismissable ie_warning">
       <button type="button" class="close no-print" proxy-click="hideIEMessage" aria-hidden="true">&times;</button>
