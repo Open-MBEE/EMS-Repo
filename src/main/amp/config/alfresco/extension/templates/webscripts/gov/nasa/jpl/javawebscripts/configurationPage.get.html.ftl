@@ -57,7 +57,11 @@
         <hr/>
       <div class="col-xs-4">
           
-     
+     	<div>
+            <span class="h5"><a ui-sref="latest">Latest Drafts</a></span>
+            <hr/>
+         </div>
+         
         <div ng-show="loading">Loading...</div>
         <div ng-repeat="config in configurations">
           <!-- <button class="btn btn-primary btn-sm" ng-click="toggle()">{{hideButton()}}</button> -->
@@ -104,6 +108,11 @@ angular.module('myApp', ['ui.router'])
             url: "/new",
             templateUrl: "${url.context}/scripts/docweb/partials/new.html",
             controller: 'NewCtrl'
+        })
+        .state('latest', {
+            url: "/latest",
+            templateUrl: "${url.context}/scripts/docweb/partials/latest.html",
+            controller: 'TagsCtrl'
         });
 
   })
