@@ -28,7 +28,7 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
             	<option selected="selected" value="${url.context}/service/ve/index/${siteName}">Document List</option>
             	<option value="${url.context}/service/ve/configurations/${siteName}">Released Document List</option>
             	<option value="${url.context}/service/ve/documents/${siteName}">In-Work Document List</option>
-            	<option value="${url.context}/share/page/${siteName}/dashboard">EMS Site Dashboard</option>
+            	<option value="/share/page/site/${siteName}/dashboard">EMS Site Dashboard</option>
         </select>
       </div>
 

@@ -19,7 +19,7 @@
             	<option value="${url.context}/service/ve/index/${site}">Document List</option>
             	<option selected="selected" value="${url.context}/service/ve/configurations/${site}">Released Document List</option>
             	<option value="${url.context}/service/ve/documents/${site}">In-Work Document List</option>
-            	<option value="${url.context}/share/page/${site}/dashboard">EMS Site Dashboard</option>
+            	<option value="/share/page/site/${site}/dashboard">EMS Site Dashboard</option>
         </select>
       </div>
 
