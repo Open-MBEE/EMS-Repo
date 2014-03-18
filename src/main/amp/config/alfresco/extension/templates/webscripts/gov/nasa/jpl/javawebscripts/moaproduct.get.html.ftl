@@ -23,15 +23,21 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 <div id="main"></div>
 
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="navbar-header">
-        <select name="docsmenu" id="docsmenu" style="margin-top:10%; font-size: 24px;">
-        		<option value="">${title}</option>
-            	<option value="${url.context}/service/ve/index/${siteName}">Document List</option>
-            	<option value="${url.context}/service/ve/configurations/${siteName}">Released Document List</option>
-            	<option value="${url.context}/service/ve/documents/${siteName}">In-Work Document List</option>
-            	<option value="/share/page/site/${siteName}/dashboard">EMS Site Dashboard</option>
-        </select>
-      </div>
+    	<div class="navbar-header">
+    		<a class="navbar-brand" href="/share/page/site/${siteName}/dashboard">${siteTitle}</a>
+    	</div>
+    	<ul class="nav navbar-nav">
+    	
+        <li class="dropdown" id="firstDropdown">
+        	<a href="#" class="dropdown-toggle" data-toggle="dropdown">${title} <b class="caret"></b></a>
+        	<ul class="dropdown-menu">
+        		<li><a href="${url.context}/service/ve/index/${siteName}">${siteTitle} Document List</a></li>
+        		<li><a href="${url.context}/service/ve/configurations/${siteName}">${siteTitle} DocWeb</a></li>
+        		<li><a href="${url.context}/service/ve/documents/${siteName}">${siteTitle} In-Work Document List</a></li>
+        		<li><a href="/share/page/site/${siteName}/dashboard">${siteTitle} Dashboard</a></li>
+   			</ul>
+   		</li>
+   	  </ul>
 
       <div class="pull-right">
         <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
@@ -41,13 +47,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
         <li><a href="#" class="submit-logout">logout</a></li>
       </ul>
     </nav>
-    
-<script type="text/javascript">
-	var docsmenu=document.getElementById('docsmenu');
-	docsmenu.onchange = function() {
-	 window.open(this.options[this.selectedIndex].value, '_self');
-	}
-</script>
+   
 
 <script id="template" type="text/mustache">
 
@@ -468,6 +468,33 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 $(document).ready(function() {
 	$('a.submit-logout').click(function() {
 		window.location.replace('${url.context}/service/logout/info?next=${url.full}');
+	});
+	$.getJSON('/alfresco/service/rest/sites').done(function(data) {
+		var sites = {};
+		for (var i = 0; i < data.length; i++) {
+			var site = data[i];
+			if (site.categories.length == 0)
+				site.categories.push("Other");
+			for (var j = 0; j < site.categories.length; j++) {
+				var cat = site.categories[j];
+				if (sites.hasOwnProperty(cat)) {
+					sites[cat].push(site);
+				} else {
+					sites[cat] = [site];
+				}
+			}
+		}
+		var stuff = "";
+		for (var key in sites) {
+			stuff += '<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">' + key + '<b class="caret"></b></a><ul class="dropdown-menu">';
+        	var ssites = sites[key];
+			for (var i = 0; i < ssites.length; i++) {
+				stuff += '<li><a href="/share/page/site/' + ssites[i].name + '/dashboard">' + ssites[i].title + '</a></li>';
+			}
+        	stuff += '</ul></li>';
+		};
+		$('#firstDropdown').after(stuff);
+		
 	});
 });
 </script>

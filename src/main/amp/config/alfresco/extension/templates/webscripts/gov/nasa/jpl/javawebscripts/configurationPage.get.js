@@ -1,1 +1,1 @@
-model['site'] = url.templateArgs.site;
+model['siteName'] = url.templateArgs.site;
