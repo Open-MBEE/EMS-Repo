@@ -11,7 +11,7 @@
   <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
   
 </head>
-<body ng-init="currentSite = '${site}'">
+<body ng-init="currentSite = '${siteName}'">
   <div class="main">
       <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="navbar-header">
@@ -78,6 +78,8 @@
   </div>
 </div>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
+<script src="${url.context}/scripts/vieweditor/vendor/bootstrap.min.js"></script>
+
 <script type="text/javascript">
 $(document).ready(function() {
 	$('a.submit-logout').click(function() {
