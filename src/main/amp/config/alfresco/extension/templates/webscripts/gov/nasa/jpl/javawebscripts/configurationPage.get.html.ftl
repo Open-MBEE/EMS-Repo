@@ -11,7 +11,7 @@
   <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
   
 </head>
-<body ng-init="currentSite = '${siteName}'">
+<body ng-init="currentSite = '${site}'">
   <div class="main">
       <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="navbar-header">
@@ -38,7 +38,7 @@
 
    <div class="container" ng-controller="TagsCtrl">
     <div class="row">
-      <span class="h3">DocWeb for site {{currentSite}}</span> &nbsp;
+      <span class="h3">DocWeb for site ${siteTitle}</span> &nbsp;
       <div ng-if="messages.message" class="alert alert-info">{{messages.message}}</div>
        <!-- <div class="col-xs-4">
           <form class="form-inline">
@@ -151,7 +151,7 @@ angular.module('myApp', ['ui.router'])
   .controller('TagsCtrl', ["$scope", "$http", "TagService", function($scope, $http, TagService) {
     $scope.messages = {message:""};
     $scope.loading = true;
-    TagService.get($scope.currentSite).then(function(result) {
+    TagService.get('${siteName}').then(function(result) {
         $scope.configurations = result.configurations;
         $scope.configurationsMap = result.configurationsMap;
         $scope.products = result.products;
@@ -175,7 +175,7 @@ angular.module('myApp', ['ui.router'])
     };
     $scope.change = function() {
         //$window.alert("sending " + $scope.newConfigName + " " + $scope.newConfigDesc + " " + $scope.nodeid);
-        $http.post('${url.context}/service/javawebscripts/configurations/' + $scope.currentSite, 
+        $http.post('${url.context}/service/javawebscripts/configurations/' + '${siteName}', 
             {"name": $scope.newConfigName, "description": $scope.newConfigDesc, "nodeid": $scope.nodeid}).
             success(function(data, status, headers, config) {
                 $scope.messages.message = "Change Successful";
@@ -195,7 +195,7 @@ angular.module('myApp', ['ui.router'])
     }
     $scope.update = function() {
         var post = {"nodeid": $scope.config.nodeid, "snapshots": $scope.selected};
-        $http.post('${url.context}/service/javawebscripts/configurations/' + $scope.currentSite, 
+        $http.post('${url.context}/service/javawebscripts/configurations/' + '${siteName}', 
             post).
             success(function(data, status, headers, config) {
                 $scope.messages.message = "Change Successful";
@@ -255,7 +255,7 @@ angular.module('myApp', ['ui.router'])
         if ($scope.selected.length > 1)
             send.products = $scope.selected;
         //$window.alert("sending " + $scope.newConfigName + " " + $scope.newConfigDesc);
-        $http.post('${url.context}/service/javawebscripts/configurations/' + $scope.currentSite, send).
+        $http.post('${url.context}/service/javawebscripts/configurations/' + '${siteName}', send).
             success(function(data, status, headers, config) {
                 //$window.alert("success, wait for email");
                 $scope.messages.message = "New Configuration Created! Please wait for an email notification.";
