@@ -1,10 +1,13 @@
+<!DOCTYPE html>
 <html>
   <head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge;chrome=1" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Editor</title>
+    <title>View Editor: ${title}</title>
     <link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
+    <link href="${url.context}/scripts/vieweditor/styles/snapshot.css" rel="stylesheet" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/print.css" rel="stylesheet" media="print">
     <link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
     <link href="${url.context}/scripts/vieweditor/vendor/css/whhg.css" rel="stylesheet" >
@@ -12,71 +15,143 @@
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>
   
 <script type="text/javascript">
-var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
+var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 </script>
 
 </head>
 
   <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
 <div id="main"></div>
-<script id="template" type="text/mustache">
 
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="navbar-header">
-          {{#environment.development}}
-            <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
-          {{/environment.development}}
-          {{^environment.development}}
-            <a class="navbar-brand" href="${url.context}/wcs/ui/">Europa View Editor {{ title }}</a>
-          {{/environment.development}}  
-      </div>
-
+    <div class="navbar-header">
+    		<a class="navbar-brand" href="/share/page/site/${siteName}/dashboard">${siteTitle}</a>
+    	</div>
       <ul class="nav navbar-nav">
-        <li><a  href="/share/page/">dashboard</a></li>
-      </ul>   
-        
+        <li class="dropdown" id="firstDropdown">
+        	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Version Report ${title} ${tag} <b class="caret"></b></a>
+        	<ul class="dropdown-menu">
+        		<li><a href="${url.context}/service/ve/products/${id}">Current Version of Document</a></li>
+        		<li><a href="${url.context}/service/ve/index/${siteName}">${siteTitle} Document List</a></li>
+        		<li><a href="${url.context}/service/ve/configurations/${siteName}">${siteTitle} DocWeb</a></li>
+        		<li><a href="${url.context}/service/ve/documents/${siteName}">${siteTitle} In-Work Document List</a></li>
+        		<li><a href="/share/page/site/${siteName}/dashboard">${siteTitle} Dashboard</a></li>
+   			</ul>
+   		</li>
+   	  </ul>
+
       <div class="pull-right">
-        <a href="#"><img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" /></a>
+        <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
       </div>
 
       <ul class="nav navbar-nav pull-right">
-       <!-- <li><a href="${url.context}/navigate/logout">logout</a></li> -->
+        <li><a href="#" class="submit-logout">logout</a></li>
       </ul>
+    </nav>
 
-      <ul class="nav navbar-nav pull-right">
-        {{#viewTree.snapshot}}
-          <li><a class="navbar-brand" href="#">Snapshot ({{viewTree.snapshoted}})</a></li>
-        {{/viewTree.snapshot}}
 
-      </ul>
+<script id="template" type="text/mustache">
 
-      <!-- 
-      <form class="navbar-form navbar-right" action="">
-        <div class="form-group">
-          <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
-            <option value="modeler">Modeler</option>
-            <option value="reviewer">Reviewer</option>
-            <option value="manager">Manager</option>
-          </select>
-        </div>
-      </form>
-    -->
 
     </nav>
     <div id="ie-alert" class="alert alert-warning alert-dismissable ie_warning">
-      <button type="button" class="close" proxy-click="hideIEMessage" aria-hidden="true">&times;</button>
-      <span class="message">Internet Explorer is not officially supported by View Editor.  Please use Firefox.</span>
+      <button type="button" class="close no-print" proxy-click="hideIEMessage" aria-hidden="true">&times;</button>
+      <span class="message no-print">Internet Explorer is not officially supported by View Editor.  Please use Firefox.</span>
     </div>
 
     <div id="top-alert" class="alert alert-danger alert-dismissable" style="display:none">
-      <button type="button" class="close" proxy-click="hideErrorMessage" aria-hidden="true">&times;</button>
-      <span class="message"></span>
+      <button type="button" class="close no-print" proxy-click="hideErrorMessage" aria-hidden="true">&times;</button>
+      <span class="message no-print"></span>
     </div>
 
     <div class="wrapper">
       <div class="row split-view">
 
-<div class="col-xs-8">
+
+  <div class="col-xs-3">
+    <div class="toggled-inspectors inspectors affix page  no-print" style="height:80%;">
+
+      <select class="form-control" value="{{ currentInspector }}">
+        <option value="document-info">Table of Contents</option>
+        <!-- <option value="history">History</option> -->
+        <!-- <option value="references">References</option> -->
+        <option value="transclusionList">Cross reference</option>
+        <option value="export">Model Versions</option>
+      </select>
+
+      <div id="document-info" class="inspector" style="height:100%;">
+        <h3>Document info</h3>
+<!--         <dl>
+          <dt>Author</dt><dd>Chris Delp</dd>
+          <dt>Last modified</dt><dd>8/14/13 2:04pm</dd>
+        </dl>
+ -->    
+        <div id="toc" style="height:100%;"></div>
+      </div>
+
+      <div id="transclusionList" class="inspector" style="height:100%;">
+        <h3>Elements</h3>
+        <input class="form-control" type="text" placeholder="search" id="search" value="{{transcludableQuery}}" />
+        <style id="search_style"></style>
+        <div class="transclusionList" style="display:block; height:80%; overflow-y: auto">
+          <div class="items">
+            {{#viewTree.elements}}
+              {{#name}}
+              <div class="body searchable" data-search-index="{{searchIndex}}">
+                <div class="qualifiedName" title="{{qualifiedName}}">{{qualifiedNameParentPreview}}</div>
+                <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable name">{{name}}</div>
+                {{#documentation}}
+                  <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable documentation">{{documentationPreview}}</div>
+                {{/documentation}}
+                {{#value}}
+                  <div proxy-click="transclusionClick" proxy-mousedown="transclusionDown" proxy-mouseup="transclusionUp" data-trans-id={{mdid}} class="transcludable dvalue">{{value}}</div>
+                {{/value}}
+              </div>
+              {{/name}}
+            {{/viewTree.elements}}
+          </div>
+        </div>
+      </div>
+
+      <div id="history" class="inspector" style="height:100%;">
+        <h3>History</h3>
+        <ul class="list-unstyled">
+          <li>v1 &mdash; Chris Delp</li>
+        </ul>
+      </div>
+
+<!--       <div id="references" class="inspector">
+        <h3>References</h3>
+        <ul>
+          {{#viewHierarchy.elements}}
+          <li>
+             {{ name }}
+          </li>
+          {{/viewHierarchy.elements}}
+        </ul>
+      </div>
+ -->
+      <div id="export" class="inspector" style="height:100%;">
+        <h3>Export</h3>
+        <ul class="list-unstyled">
+          <li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>         
+          <li><button type="button" class="btn btn-default" proxy-click="printPreview">Print Preview</button></li>
+          {{^viewTree.snapshot}}
+          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Mark Model Version </button></li>   
+          {{/viewTree.snapshot}}       
+        </ul>
+
+        <ul class="list-unstyled" style="display:block; height:50%; overflow-y: auto">
+        {{#viewTree.snapshots}}
+          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} ({{ creator }})  {{tag}}</a></li>
+        {{/viewTree.snapshots}}
+        </ul>
+      </div>
+
+    </div>
+  </div>
+  
+<div class="col-xs-9">
 
 <!-- Modal -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -89,26 +164,35 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 </div><!-- /.modal -->
 
   <div id="the-document">
-
+    <div id="printTOC" class="print-only">
+      Table of Contents
+      <ul>
+      {{#viewTree.orderedChildren}}
+        {{^viewData.noSection}}
+          <li style="margin-left: {{(depth*20)}}px;">{{ name }}</li>
+        {{/viewData.noSection}}
+      {{/viewTree.orderedChildren}}
+      </ul>
+      </div>
+    <button type="button" id="saveAll" class="btn btn-primary no-print">Save all</button>
     {{#viewTree.orderedChildren}}
-
-
+      {{^viewData.noSection}}
             <a name="{{id}}" style="display: block; position:relative; top:-60px; "></a>
             {{#(depth == 0) }}
-              {{{("<h1><span class='"+class+" section-header editable' data-property='NAME' data-section-id='" + id + "'>" +  name + "</span></h1>" )}}}
+              {{{("<h1 class='numbered-header'><span class='"+class+" section-header' data-property='name' data-section-id='" + id + "'>" +  name + "</span></h1>" )}}}
             {{/(depth == 0) }}
             {{^(depth == 0) }}
-              {{{("<h"+ (depth+1) + " class='"+class+"'><span class='section-header' data-section-id='" + id + "'><span class='editable' data-property='NAME' data-mdid='" + id + "'>" +  name + "</span></span></h"+ (depth+1) + ">" )}}}
+              {{{("<h"+ (depth+1) + " class='numbered-header "+class+"'><span class='section-header' data-section-id='" + id + "'><span class='editable' data-property='name' data-mdid='" + id + "'>" +  name + "</span></span></h"+ (depth+1) + ">" )}}}
             {{/(depth == 0) }}
            
-            <div class="author {{ class }}">Edited by <span class="author-name" data-mdid="{{id}}">{{ viewData.author }}</span></div>
-            <div class="modified {{ class }}" data-mdid="{{id}}">{{( viewData.modifiedFormatted )}}</div>
-             <a href="${'#'}{{id}}" title="permalink"><i class='glyphicon glyphicon-link'></i>&nbsp;</a>
-
+            <div class="no-print author {{ class }}">Edited by <span class="author-name" data-mdid="{{id}}">{{ viewData.author }}</span></div>
+            <div class="no-print modified {{ class }}" data-mdid="{{id}}">{{( viewData.modifiedFormatted )}}</div>
+             <a href="${'#'}{{id}}" title="permalink" class="no-print"><i class='glyphicon glyphicon-link'></i>&nbsp;</a>
+      {{/viewData.noSection}}
       <div class="page-sections {{ class }}">
         
         {{^(depth == 0) }}
-          <div class="section-wrapper" style="overflow-x: auto">
+          <div class="section-wrapper">
             
             <div class="section-actions pull-right btn-group no-print">
               {{^viewTree.snapshot}}
@@ -274,17 +358,17 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
               <div class="btn-group">
                 <a class="btn btn-default" title="Insert picture (or just drag &amp; drop)" id="pictureBtn{{id}}">img</a>
                 <input type="file" data-role="magic-overlay" data-target="#pictureBtn{{id}}" data-edit="insertImage">
-                <button type="button" class="btn btn-default" title="Insert SVG" onclick="insertSvg();">svg</button>
+                <button type="button" class="btn btn-default requires-selection" title="Insert SVG" onclick="insertSvg('{{id}}');">svg</button>
               </div>
               <a class="btn btn-default dummyButton" style="visibility:hidden" data-edit="insertHTML &nbsp;" title="dumb"></a>
 
 
               <div class="btn-group pull-right">
                 <button type="button" class="btn btn-default" proxy-click="cancelEditing">Cancel</button>
-                <button type="button" class="btn btn-primary" proxy-click="saveSection:{{ id }}">Save changes</button>
+                <button type="button" class="btn btn-primary saveSection" proxy-click="saveSection:{{ id }}">Save changes</button>
               </div>
             </div>
-            <div id="section{{ id }}" class="section page editing" data-section-id="{{ id }}" contenteditable="true" proxy-dblclick="sectionDoubleClick">
+            <div id="section{{ id }}" class="section page editing" data-section-id="{{ id }}" contenteditable="false" proxy-dblclick="sectionDoubleClick">
               {{{ content }}}
             </div>
             {{/editing}}
@@ -298,7 +382,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
                 {{#viewData.comments}}
                     <li class="comment list-group-item">
                       {{{ body }}}
-                      <div class="comment-info"><small>{{ author }}, {{ modified }}<small></div>
+                      <div class="comment-info"><small>{{ author }}, {{ lastModified }}<small></div>
                     </li>
                 {{/viewData.comments}}
                 <li class="list-group-item">
@@ -328,63 +412,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
   </div>
  </div> 
 
-  <div class="col-xs-4">
-    <div class="toggled-inspectors inspectors affix page col-xs-4 no-print" style="height:80%;">
 
-      <select class="form-control" value="{{ currentInspector }}">
-        <option value="document-info">Table of Contents</option>
-        <!-- <option value="history">History</option> -->
-        <!-- <option value="references">References</option> -->
-        <option value="export">Export</option>
-      </select>
-
-      <div id="document-info" class="inspector" style="height:100%;">
-        <h3>Document info</h3>
-<!--         <dl>
-          <dt>Author</dt><dd>Chris Delp</dd>
-          <dt>Last modified</dt><dd>8/14/13 2:04pm</dd>
-        </dl>
- -->    
-        <div id="toc" style="height:100%;"></div>
-      </div>
-
-      <div id="history" class="inspector">
-        <h3>History</h3>
-        <ul class="list-unstyled">
-          <li>v1 &mdash; Chris Delp</li>
-        </ul>
-      </div>
-
-<!--       <div id="references" class="inspector">
-        <h3>References</h3>
-        <ul>
-          {{#viewHierarchy.elements}}
-          <li>
-             {{ name }}
-          </li>
-          {{/viewHierarchy.elements}}
-        </ul>
-      </div>
- -->
-      <div id="export" class="inspector" style="height:100%;">
-        <h3>Export</h3>
-        <ul class="list-unstyled">
-          <li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>         
-          <li><button type="button" class="btn btn-default" proxy-click="printPreview">Print Preview</button></li>
-          {{^viewTree.snapshot}}
-          <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Snapshot</button></li>   
-          {{/viewTree.snapshot}}       
-        </ul>
-
-        <ul class="list-unstyled" style="display:block; height:50%; overflow-y: auto">
-        {{#viewTree.snapshots}}
-          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} &mdash; {{ creator }}</a></li>
-        {{/viewTree.snapshots}}
-        </ul>
-      </div>
-
-    </div>
-  </div>
 
 
 </div>
@@ -413,6 +441,40 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
 <script src="${url.context}/scripts/vieweditor/vendor/svgedit/embedapi.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/css_browser_selector.js"></script>
 <script type="text/javascript" src="${url.context}/scripts/vieweditor/vendor/Ractive.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$('a.submit-logout').click(function() {
+		window.location.replace('${url.context}/service/logout/info?next=${url.full}');
+	});
+	$.getJSON('/alfresco/service/rest/sites').done(function(data) {
+		var sites = {};
+		for (var i = 0; i < data.length; i++) {
+			var site = data[i];
+			if (site.categories.length == 0)
+				site.categories.push("Other");
+			for (var j = 0; j < site.categories.length; j++) {
+				var cat = site.categories[j];
+				if (sites.hasOwnProperty(cat)) {
+					sites[cat].push(site);
+				} else {
+					sites[cat] = [site];
+				}
+			}
+		}
+		var stuff = "";
+		for (var key in sites) {
+			stuff += '<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">' + key + '<b class="caret"></b></a><ul class="dropdown-menu">';
+        	var ssites = sites[key];
+			for (var i = 0; i < ssites.length; i++) {
+				stuff += '<li><a href="/share/page/site/' + ssites[i].name + '/dashboard">' + ssites[i].title + '</a></li>';
+			}
+        	stuff += '</ul></li>';
+		};
+		$('#firstDropdown').after(stuff);
+		
+	});
+});
+</script>
 <script type="text/javascript">var app = new Ractive({ el : "main", template : "#template", data : pageData });</script>
 <script type="text/javascript">
 var context = window;
@@ -429,12 +491,24 @@ var absoluteUrl = function(relativeUrl) {
 
 var ajaxWithHandlers = function(options, successMessage, errorMessage) {
   $.ajax(options)
-    .done(function() { app.fire('message', 'success', successMessage); })
+    .done(function(data) { 
+      if (data.indexOf("html") != -1) {
+        alert("Not saved! You've been logged out, login in a new window first!");
+          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/service/ui/relogin");
+      }
+      app.fire('message', 'success', successMessage); })
     .fail(function(e) { 
       if (e && e.status && e.status === 200) {
+        if (e.responseText.indexOf("html") != -1) {
+          alert("Not saved! You've been logged out, login in a new window first!");
+          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/service/ui/relogin");
+        }
         // we got a 200 back, but json parsing might have failed
         return;
       } else {
+        if(e && e.status && e.status === 401) {
+          errorMessage += ": user does not have authorization to perform this action";
+        }
         app.fire('message', 'error', errorMessage); 
         if (console && console.log) {
           console.log("ajax error:", e);
@@ -445,7 +519,9 @@ var ajaxWithHandlers = function(options, successMessage, errorMessage) {
 
 app.on('saveView', function(viewId, viewData) {
   var jsonData = JSON.stringify(viewData);
-  var url = absoluteUrl('/ui/views/' + viewId);
+  console.log("Saving ", jsonData);
+  //alfresco/service/javawebscripts/views/id/elements
+  var url = absoluteUrl('/javawebscripts/views/' + viewId + '/elements');
   ajaxWithHandlers({ 
     type: "POST",
     url: url,
@@ -455,12 +531,14 @@ app.on('saveView', function(viewId, viewData) {
 })
 
 app.on('saveComment', function(evt, viewId, commentBody) {
-  var url = absoluteUrl("/ui/views/"+viewId+"/comment");
+  var url = absoluteUrl("/javawebscripts/views/" + viewId + "/elements");
+  var jsonData = JSON.stringify({"elements": [{"id": "_comment_" + (new Date()).getTime(), "body": commentBody, "type": "Comment", "annotatedElements":[viewId]}]});
+  console.log(jsonData);
   ajaxWithHandlers({ 
     type: "POST",
     url: url,
-    data: commentBody,
-    contentType: "text/plain; charset=UTF-8"
+    data: jsonData,
+    contentType: "application/json; charset=UTF-8"
   }, "Saved comment", "Error saving comment"); 
 })
 
@@ -511,7 +589,7 @@ app.on('addComment', function(evt, mbid) {
   commentField.find('.placeholder').detach();
   var newCommentBody = commentField.cleanHtml();
   if (newCommentBody != "") {
-    app.get(evt.keypath+".viewData.comments").push({ author : 'You', body : newCommentBody, modified : new Date()});
+    app.get(evt.keypath+".viewData.comments").push({ author : 'You', body : newCommentBody, lastModified : new Date()});
 
     app.fire('saveComment', null, mbid, newCommentBody);
   }
@@ -524,12 +602,149 @@ app.getSelectedNode = function() {
   return document.selection ? document.selection.createRange().parentElement() : window.getSelection().anchorNode.parentNode;
 }
 
+window.pageExitManager = function() 
+{
+  var numOpenEditors = 0;
+
+  var confirmOnPageExit = function (e) 
+  {
+      // If we haven't been passed the event get the window.event
+      e = e || window.event;
+
+      var message = 'There are ' + numOpenEditors + ' unsaved sections.';
+
+      // For IE6-8 and Firefox prior to version 4
+      if (e) 
+      {
+          e.returnValue = message;
+      }
+
+      // For Chrome, Safari, IE8+ and Opera 12+
+      return message;
+  };
+
+  return {
+    editorOpened : function() {
+      numOpenEditors += 1;
+      app.updateSaveAllButton(numOpenEditors);
+      window.onbeforeunload = confirmOnPageExit;
+    },
+    editorClosed : function() {
+      numOpenEditors -= 1;
+      if(numOpenEditors < 0) {
+        numOpenEditors = 0;
+      }
+      if(numOpenEditors === 0)
+      {
+        window.onbeforeunload = null;
+      }
+      app.updateSaveAllButton(numOpenEditors);
+    }
+  }
+}();
+
+app.updateSaveAllButton = function(n) {
+  if(n === 0) {
+    $("#saveAll").hide();
+  } else {
+    $("#saveAll").show();
+    // When clicked, click all save section buttons
+    $("#saveAll").click( function() {
+      $(".saveSection").click(); 
+    });
+  }
+}
+
+app.transToText = function transToText(s) {
+  var t = "[";
+  var elem = $("[data-trans-id='"+s.attr("data-mdid")+"'].name");
+  var name = s.attr("data-name");
+  if(elem.length > 0) {
+    name = $("[data-trans-id='"+s.attr("data-mdid")+"'].name").text();
+  }
+  t += '"' + name + '":';
+  //var d = data[s.attr("mdid")];
+  //if(d) t += '"' + d.name + '":';
+  //else t += '"Element Not Found":';
+  t += s.attr("data-type") + ":";
+  t += s.attr("data-mdid") + "]";
+  return t;
+}
+
+app.replaceSpanWithBracket = function(section) {
+
+  section.find(".transclusion").each(function(){
+      var text = app.transToText($(this));
+      $(this).replaceWith(text);
+  }); 
+
+}
+
+var savedSel;
+
+
+function _saveSelection() {
+  //console.log("Start");
+    if (window.getSelection) {
+        sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+            var ranges = [];
+            for (var i = 0, len = sel.rangeCount; i < len; ++i) {
+                ranges.push(sel.getRangeAt(i));
+            }
+                        //console.log("End");
+            return ranges;
+
+        }
+    } else if (document.selection && document.selection.createRange) {
+                  console.log("End");
+        return document.selection.createRange();
+    }
+    //console.log("End");
+    return null;
+}
+
+function _restoreSelection(savedSel) {
+    if (savedSel) {
+        if (window.getSelection) {
+            sel = window.getSelection();
+            sel.removeAllRanges();
+            for (var i = 0, len = savedSel.length; i < len; ++i) {
+                sel.addRange(savedSel[i]);
+            }
+        } else if (document.selection && savedSel.select) {
+            savedSel.select();
+        }
+    }
+}
+
+app.getSavedSelection = function()
+{
+  return savedSel;
+}
+
+app.saveSelection = function()
+{
+  //console.log("SAVE");
+  savedSel = _saveSelection();
+}
+
+app.restoreSelection = function()
+{
+  _restoreSelection(savedSel);
+}
+
+
 app.on('editSection', function(e, sectionId) {
+  window.pageExitManager.editorOpened();
 
   e.original.preventDefault();
   // TODO turn editing off for all other sections?
   app.set(e.keypath+'.editing', true);
   var section = $("[data-section-id='" + sectionId + "']");
+  var toolbar =$('[data-role=editor-toolbar][data-target="#section' + sectionId + '"]');
+
+  section.find(".reference.editable").attr('contenteditable', true);
 
   var sectionHeader = section.filter('.section-header');
   sectionHeader.data('original-content', sectionHeader.html());
@@ -537,26 +752,99 @@ app.on('editSection', function(e, sectionId) {
   section.filter('.section.page').wysiwyg({toolbarSelector: '[data-role=editor-toolbar][data-target="#section' + sectionId + '"]'});
   section.filter('span').wysiwyg({toolbarSelector : '#no-toolbar'});
   
-  // TODO turn this listener off on save or cancel
-  section.on('keyup paste blur',function(evt) {
-    // we need to use the selection api because we're in a contenteditable
-    var editedElement = app.getSelectedNode();
-    var $el = $(editedElement);
-    var mdid = $el.attr('data-mdid');
-    var property = $el.attr('data-property');
-    var newValue = $(editedElement).html();
-    // TODO filter out html for name and dvalue?
-    // find others, set their values
-    $('[data-mdid='+mdid+'][data-property='+property+']').not($el).html(newValue);
+  // We will set the individual editable elements to contenteditable true.  If this root container is true than
+  // it will prevent sub elements from getting key events.
+  section.filter('.section.page').attr("contenteditable", false);
+
+  app.replaceSpanWithBracket(section);
+
+  app.set('currentInspector', 'transclusionList');
+
+
+  toolbar.find(".requires-selection").addClass("disabled");
+  var sectionPage = section.filter(".section.page");
+  // On focus, enable the button
+  sectionPage.on('focus', function(arg)
+  {
+    //console.log("Start Section focus")
+    toolbar.find(".requires-selection").removeClass("disabled");
+    // console.log("end Section focus")
   })
+  // On blur disable the button unless the object we clicked on was the button itself
+  // This code can only find the button in FF and Chrome
+  sectionPage.on('blur', function(arg)
+  {
+    //console.log("Start Section blur");
+    var target = arg.relatedTarget; // Chrome
+    // Guess what, relatedTarget doesn't work on FF, if this is the case, look for originalEvent
+    // Safari fails here, IE Unknown
+    if(target === null && arg.originalEvent !== null)
+    {
+      target = arg.originalEvent.explicitOriginalTarget; // FF
+    }
+    var clickedButton = $(target).filter(".requires-selection");
+    toolbar.find(".requires-selection").not(clickedButton).addClass("disabled");
+    //console.log("End Section blur");
+  })
+
+
+  // Wrap content inisde of p tags if it isn't already.  Without this, Chrome will create new DIVs when 
+  // enter is pressed and give them attributes from the parent div, including mdid
+  var unwrapped = section.find(".editable.reference.doc").not(".blank").filter(function() {
+    return $(this).find('p:first-child').length === 0;
+  });
+  unwrapped.wrapInner("<p class='pwrapper'></p>");
+
+  section.find("p").addClass("pwrapper");
+  
+  section.on('keyup paste click',function(evt) {
+    app.saveSelection();
+  });
+
+  // TODO: turn off this handler?
+  // Update other references to an element within this view on change
+  section.find("[data-mdid][data-property]").on('keyup paste blur', function(evt) 
+  {
+      var editedElement = evt.target;//app.getSelectedNode();
+      var $el = $(editedElement);
+      var mdid = $el.attr('data-mdid');
+      var property = $el.attr('data-property');
+      var newValue =  $el.html();
+      section.find("[data-mdid='"+mdid+"'][data-property='"+property+"']").not($el).html(newValue);
+  });
 
   // handle placeholder text
   // TODO remove this listener on cancel or save
-  section.click(function() {
-    var $el = $(app.getSelectedNode());
-    if ($el.is('.editable.reference.blank')) {
-      $el.html('&nbsp;');
+  section.find(".editable.reference.blank").on('keyup paste blur mousedown', function(evt) 
+  {
+      var editedElement = evt.target;//app.getSelectedNode();
+      var $el = $(editedElement);
+      if($el.is(".blank.doc")) {
+        console.log("Doc down");
+      $el.html("<p class='pwrapper'>&nbsp;</p>");
+        $el.removeClass('blank');
+
+      var range = document.createRange();//Create a range (a range is a like the selection but invisible)
+      range.setStart($el.find("p").get(0),0);
+      range.collapse(true);
+      var selection = window.getSelection();//get the selection object (allows you to change selection)
+      selection.removeAllRanges();//remove any selections already made
+      selection.addRange(range);//make the range you have just created the visible selection
+        $el.click();
+
+      } else if($el.is('.blank')) {
+        console.log("Other down");
+        $el.html("&nbsp;");
       $el.removeClass('blank');
+        
+        var range = document.createRange();
+        console.log("First", $el.first().get(0).firstChild);
+        range.setStart($el.first().get(0).firstChild,0);
+        range.collapse(true);
+        var selection = window.getSelection();//get the selection object (allows you to change selection)
+        selection.removeAllRanges();//remove any selections already made
+        selection.addRange(range);
+        $el.click();
     }
   });
 
@@ -605,7 +893,9 @@ $('[data-toggle=dropdown]').dropdown();
 })
 
 app.on('cancelEditing', function(e) {
+  window.pageExitManager.editorClosed();
   e.original.preventDefault();
+  //var section = $("[data-section-id='" + sectionId + "']");
   var sectionId = app.get(e.keypath+'.id');
   app.set(e.keypath+'.editing', false);
   // console.log("canceling", sectionId);
@@ -613,22 +903,162 @@ app.on('cancelEditing', function(e) {
   // console.log("canceled editing for section header", $sectionHeader);
   $sectionHeader.html($sectionHeader.data('original-content'));
   $sectionHeader.attr('contenteditable', false);
+
+  //section.find(".reference.editable").attr('contenteditable', false);
+
+  //section.find("p").removeClass("pwrapper");
   // app.set(e.keypath+'.content', app.get(e.keypath+'.previousContent'));
   // console.log("canceled", app.get(e.keypath));
 })
 
+app.spanContentToBracket = function(content) {
+  var contentDom = $('<div>' + content + '</div>');
+  contentDom.find(".transclusion").each(function(i){
+    var dom = $(this);
+    var t = app.transToText(dom);
+    dom.html(t);
+  });
+  return contentDom.html();
+}
+
+app.spanContentToValue = function(content, vtree, depth) {
+  var contentDom = $('<div>' + content + '</div>');
+  if(depth === undefined) {
+    depth = 0;
+  }
+  contentDom.find(".transclusion").each(function(i){
+
+      var dom = $(this);
+      var id = dom.attr("data-mdid");
+      var t = dom.attr("data-type");
+
+      var elem = _.filter(vtree.elements, function(curElem) {
+        return curElem.mdid === id;
+      })
+      elem = elem[0];
+      if(elem !== null && elem !== undefined) {
+        var innerVal = "Not Found";
+        if(t === "name"){
+          innerVal = elem.name;
+        } else if (t === "documentation") {
+          innerVal = elem.documentation;//"ASDFASF";//elem.documentation.text();
+        } else if (t === "value") {
+          innerVal = elem.value;
+        }
+
+        // TODO:  If the transcluded element has html in it, then we can't just include it in a span. 
+        // Using a div or p tag for transcluded elements creates its own set of joys because jquery
+        // has its own ideas about how things should change when these elements are nested.          
+        if(depth <= 3) {
+          innerVal = app.spanContentToValue(innerVal, vtree, depth + 1);
+        } else {
+          innerVal = " ERROR_MAX_NESTED_REF_DEPTH "
+        }
+        var docDom = $("<div>" + innerVal + "</div>");
+        //console.log(docDom.find(".transclusion"))
+        innerVal = docDom.text();
+
+        // Set the hovertext to display the fully qualified name if it exists
+        var hoverText = "[" + t + "]";
+        if(elem.qualifiedName)
+        {
+          hoverText = elem.qualifiedName + " " + hoverText;
+        }
+        dom.attr("title", hoverText);
+
+        dom.html(innerVal);
+      } else {
+        dom.addClass("missing-trans-ref");
+      }
+     
+  });
+  return contentDom.html();
+}
+
+app.replaceBracketWithSpan = function(content)
+{
+  content = content.replace(/(\[\"([^"]*)\":([^\s:]*):([^\s:]*)\])/g,"<span class='transclusion' data-mdid='$4' data-type='$3' data-name='$2'>$1</span>");
+  return app.spanContentToValue(content, app.get("viewTree"));//app.spanContentToValue(content);
+}
+
 app.on('saveSection', function(e, sectionId) {
+  window.pageExitManager.editorClosed();
+
+  var section = $("[data-section-id='" + sectionId + "']");
+  section.find(".reference.editable").attr('contenteditable', false);
+
+  //section.find("p").removeClass("pwrapper");
+
   e.original.preventDefault();
 
   $('.modified[data-mdid="' + sectionId+ '"]').text(app.formatDate(new Date()));
   $('.author-name[data-mdid="' + sectionId+ '"]').text("You");
 
-
-  var section = $("[data-section-id='" + sectionId + "']");
   //console.log("savesection", section);
   app.set(e.keypath+'.name', section.filter(".section-header").html());
-  app.set(e.keypath+'.content', section.filter(".section").html());
+
+
+  // update viewTree with changes
+  var viewTree = app.get("viewTree");
+  var elements = app.editableElements(section);
+  _.each(elements, function(e) {
+    _.each(viewTree.elements, function(cure) {
+      if(cure.mdid === e.mdid)
+      {
+        if(e.hasOwnProperty("documentation"))
+        {
+          cure.documentation = app.replaceBracketWithSpan(e.documentation);
+          var preview = app.generatePreviewDocumentation(cure.documentation);
+          if(preview) {
+            cure.documentationPreview = preview;
+          }
+          // update value in transclusion tab
+          $('[data-trans-id="'+cure.mdid+'"].transcludable.documentation').html(cure.documentationPreview);
+          // update other references to this element in document
+          $("[data-mdid='"+cure.mdid+"'][data-property='documentation']").html(cure.documentation);
+        }
+        if(e.hasOwnProperty("name"))
+        {
+          e.name = e.name.replace(/^((<br>)|(<\/br>)|\s)*|((<br>)|(<\/br>)|\s)*$/gi,"");
+          cure.name = app.replaceBracketWithSpan(e.name);
+          // update value in transclusion tab
+          $('[data-trans-id="'+cure.mdid+'"].transcludable.name').html(cure.name);
+          // update other references to this element in document
+          $("[data-mdid='"+cure.mdid+"'][data-property='name']").html(cure.name);
+        }
+        if(e.hasOwnProperty("value"))
+        {
+          cure.value = app.replaceBracketWithSpan(e.value);
+          // update value in transclusion tab
+          $('[data-trans-id="'+cure.mdid+'"].transcludable.dvalue').html(cure.value);
+          // update other references to this element in document
+          $("[data-mdid='"+cure.mdid+"'][data-property='value']").html(cure.value);
+        }
+      }
+    });
+  })
+
+  var content = section.filter(".section").html();
+
+  //content = app.replaceBracketWithSpan(content);
+ 
+  
+  app.set(e.keypath+'.content', content);//section.filter(".section").html());  
   app.set(e.keypath+'.editing', false);
+  app.set(viewTree);
+
+  // update all other transclusions 
+  $(".transclusion").each(function(){
+    var h = $(this)[0].outerHTML;
+    h = app.spanContentToValue(h, viewTree);
+    $(this).replaceWith(h);
+      //var text = app.transToText($(this));
+      //$(this).replaceWith(text);
+  }); 
+
+  //app.fire('saveSectionComplete', e, sectionId);
+  //If data is saved before references are converted to dom elements, 
+  //change realData saveSection to saveSectionComplete and fire event above
   //console.log("survived");
 })
 
@@ -662,7 +1092,9 @@ app.on('elementDetails', function(evt) {
 
 // export.js
 
-app.data.printPreviewTemplate = "\n<html>\n\t<head>\n\t\t<title>{{ documentTitle }}</title>\n\t\t<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>\n\t\t<style type=\"text/css\">\n\n\n\t\t  .no-section {\n\t\t    display: none;\n\t\t  }\n\n\t\t  .page-sections.no-section {\n\t\t    display: block;\n\t\t  }\n\n\t\t  .blank.reference {\n\t\t\t  display: none;\n\t\t\t}\n\n\t\t\t@page {\n\t\t\t  margin: 1cm;\n\t\t\t}\n\n\t\t\tbody {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t.page-sections, #the-document h1, #the-document h2, #the-document h3, #the-document h4, #the-document h5 {\n\t\t\t  font-family: 'PT Serif', Georgia, serif;\n\t\t\t}\n\t\t\t.navbar-brand, .page .inspector, .inspectors {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t#the-document {counter-reset: level1;}\n\t\t\t#toc:before, #toc:after {counter-reset: level1; content: \"\";}\n\t\t\t#toc h3:before{content: \"\"}\n\t\t\t \n\t\t\t#the-document h2, #toc > ul > li {counter-reset: level2;}\n\t\t\t#the-document h3, #toc > ul >  ul > li {counter-reset: level3;}\n\t\t\t#the-document h4, #toc > ul > ul > ul > li {counter-reset: level4;}\n\t\t\t#the-document h5, #toc > ul > ul > ul > ul > li {counter-reset: level5;}\n\t\t\t#the-document h6, #toc > ul > ul > ul > ul > ul > li {}\n\n\t\t\t#the-document h2:before,\n\t\t\t#toc > ul > li a:before {\n\t\t\t    content: counter(level1) \" \";\n\t\t\t    counter-increment: level1;\n\t\t\t}\n\t\t\t#the-document h3:before,\n\t\t\t#toc > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \" \";\n\t\t\t    counter-increment: level2;\n\t\t\t}\n\t\t\t#the-document h4:before,\n\t\t\t#toc > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \" \";\n\t\t\t    counter-increment: level3;\n\t\t\t}\n\t\t\t#the-document h5:before,\n\t\t\t#toc > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \" \";\n\t\t\t    counter-increment: level4;\n\t\t\t}\n\t\t\t#the-document h6:before,\n\t\t\t#toc > ul > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \".\" counter(level5) \" \";\n\t\t\t    counter-increment: level5;\n\t\t\t}\n\t\t</style>\n\t</head>\n\t<body>\n\t\t<div id=\"the-document\">\n\t\t\t{{ content }}\n\t\t</div>\n\t</body>\n</html>";
+app.data.printPreviewTemplate = "\n<html>\n\t<head>\n\t\t<style>img {max-width: 100%;}</style>\n\t\t<title>{{ documentTitle }}</title>\n\t\t<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>\n\t\t<style type=\"text/css\">.print-only{ display: block; } \n\n\n\t\t  .no-section {\n\t\t    display: none;\n\t\t  }\n\n\t\t  .page-sections.no-section {\n\t\t    display: block;\n\t\t  }\n\n\t\t  .blank.reference {\n\t\t\t  display: none;\n\t\t\t}\n\n\t\t\t@page {\n\t\t\t  margin: 1cm;\n\t\t\t}\n\n\t\t\tbody {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t.page-sections, #the-document h1, #the-document h2, #the-document h3, #the-document h4, #the-document h5 {\n\t\t\t  font-family: 'PT Serif', Georgia, serif;\n\t\t\t}\n\t\t\t.navbar-brand, .page .inspector, .inspectors {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t#the-document {counter-reset: level1;}\n\t\t\t#toc:before, #toc:after {counter-reset: level1; content: \"\";}\n\t\t\t#toc h3:before{content: \"\"}\n\t\t\t \n\t\t\t#the-document h2, #toc > ul > li {counter-reset: level2;}\n\t\t\t#the-document h3, #toc > ul >  ul > li {counter-reset: level3;}\n\t\t\t#the-document h4, #toc > ul > ul > ul > li {counter-reset: level4;}\n\t\t\t#the-document h5, #toc > ul > ul > ul > ul > li {counter-reset: level5;}\n\t\t\t#the-document h6, #toc > ul > ul > ul > ul > ul > li {}\n\n\t\t\t#the-document h2:before,\n\t\t\t#toc > ul > li a:before {\n\t\t\t    content: counter(level1) \" \";\n\t\t\t    counter-increment: level1;\n\t\t\t}\n\t\t\t#the-document h3:before,\n\t\t\t#toc > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \" \";\n\t\t\t    counter-increment: level2;\n\t\t\t}\n\t\t\t#the-document h4:before,\n\t\t\t#toc > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \" \";\n\t\t\t    counter-increment: level3;\n\t\t\t}\n\t\t\t#the-document h5:before,\n\t\t\t#toc > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \" \";\n\t\t\t    counter-increment: level4;\n\t\t\t}\n\t\t\t#the-document h6:before,\n\t\t\t#toc > ul > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \".\" counter(level5) \" \";\n\t\t\t    counter-increment: level5;\n\t\t\t}\n\t\t</style>\n\t</head>\n\t<body>\n\t\t<div id=\"the-document\">\n\t\t\t{{ content }}\n\t\t</div>\n\t</body>\n</html>";
+
+
 
 _.templateSettings = {
   interpolate: /\{\{(.+?)\}\}/g
@@ -671,7 +1103,7 @@ _.templateSettings = {
 var snapshotHTML = function()
 {
   var everything = $('#the-document').clone();
-  everything.find('.comments, .section-actions, .toolbar').remove();
+  everything.find('.comments, .section-actions, .toolbar, .no-print').remove();
   var innerHtml = everything.html();
   var fullPageTemplate = _.template(app.data.printPreviewTemplate);
   return fullPageTemplate({ content : innerHtml, documentTitle : app.data.viewTree.name });
@@ -748,6 +1180,30 @@ var viewTree = {
 
 }
 
+app.generatePreviewDocumentation = function(doc)
+{
+  //console.log("ASDFASD");
+  var d = doc.trim();
+  
+  var preview = "";
+  if(d.length > 0) {
+        //console.log(String(_.escape(e.documentation)));
+        //console.log($(String(_.escape(e.documentation)))); 
+        //e.documentationPreview =  "ASD";// $(e.documentation).text();
+        //e.documentationPreview = _.escape(e.documentation);
+        preview = "<div>" + d + "</div>";
+        //console.log($);
+        //var asdfasfd = $(e.documentationPreview);
+        preview = $(preview).text();//.substring(0, 50) + "...";
+        //e.documentationPreview = _.unescape(e.documentationPreview);
+        var dots = (preview.length > 200) ? "..." : "";
+        preview = preview.substring(0,200) + dots;
+        return preview;
+    }
+    
+    return false;
+}
+
 app.formatDate = function(d)
 {
   return moment(d).format('D MMM YYYY, h:mm a');
@@ -758,9 +1214,9 @@ var parseDate = function(dateString)
   return moment(dateString);
 }
 
-app.generateUpdates = function(section)
-{
+app.editableElements = function(section) {
   var elements = {};
+  //console.log("VT", viewTree);
   $('.editable[data-property]', section).each(function(i,el)
   {
       var $el = $(el);
@@ -770,12 +1226,33 @@ app.generateUpdates = function(section)
       }
       var mdid = $el.attr('data-mdid');
       var data = elements[mdid] || { mdid : mdid };
-      data[$el.attr('data-property').toLowerCase()] = el.innerHTML;
+      var prop = $el.attr('data-property').toLowerCase()
+      data[prop] = el.innerHTML;
       // result.push(data);
       elements[mdid] = data;
+
   });
+  return elements;
+}
+
+app.generateUpdates = function(section)
+{
+  var elements = app.editableElements(section);
+  _.each(elements, function(e) {
+    if(e.hasOwnProperty("documentation")) {
+      e.documentation = app.spanContentToBracket(e.documentation);
+    }
+    e.id = e.mdid;
+    delete e["mdid"];
+    var sourceEl =app.get("viewTree").elementsById[e.id];
+    if(sourceEl.hasOwnProperty("valueType")) {
+      e.valueType = sourceEl.valueType;
+    }
+  });
+
+  //console.log("VT2", viewTree);
   // console.log("elements by id", elements);
-  return _.values(elements);
+  return {"elements": _.values(elements)};
 }
 
 
@@ -807,7 +1284,7 @@ var writeBackCache = function()
 }();
 
 var buildList = function(object, elements, html) {
-  if (!html) html = "";
+  if (!html) html = "<div contenteditable='false'>";
   var listTag = object.ordered ? 'ol' : 'ul';
   html += '<'+listTag+'>';
   // items is a 2D array. first depth is lists, second is multiple values per item
@@ -831,29 +1308,35 @@ var buildList = function(object, elements, html) {
     })
 
   })
-  html += '</'+listTag+'>';
+  html += '</'+listTag+'></div>';
   return html;
 }
 
 var resolveValue = function(object, elements, listProcessor) {
+  
   if (Array.isArray(object)) {
     var valuesArray = _.map(object, function(obj) { return resolveValue(obj, elements) });
     return listProcessor ? listProcessor(valuesArray) : _.pluck(valuesArray, 'content').join("  ");
-  } else if (object.source === 'text') {
+  } else if (object.sourceType === 'text') {
     return { content : object.text, editable : false };
   // } else if (object.type === 'List') {
   //   return { content : '!! sublist !! ', editable : false };
-  } else {
-    // console.log("resolving ", object.useProperty, " for ", object.source, object);
+  } else if(object.sourceType === 'reference') {
+    // console.log("resolving ", object.sourceProperty, " for ", object.source, object);
+
     var source = elements[object.source];
     if (!source) {
       return { content : 'reference missing', mdid : object.source };
-    } else if (object.useProperty)
-      var referencedValue = source[object.useProperty.toLowerCase()];
-    else
-      console.warn("!! no useProperty for", object);
+    } else if (object.sourceProperty) {
+
+      var referencedValue = source[object.sourceProperty.toLowerCase()];
+    } else{
+      console.warn("!! no sourceProperty for", object);
+    }
     // console.log(referencedValue);
-    return { content : referencedValue, editable : true, mdid :  source.mdid, property: object.useProperty };
+    return { content : referencedValue, editable : true, mdid :  source.mdid, property: object.sourceProperty };
+  } else {
+    return {content: "Unknown source type", mdid: object.source};
   }
 }
 
@@ -866,13 +1349,20 @@ var renderEmbeddedValue = function(value, elements) {
   var ref = elements[value.mdid];
   var title = ref ? (ref.name || ref.mdid) +' ('+value.property.toLowerCase()+')' : '';
   var classes = ['reference'];
-  var blankContent = !value.content || value.content === "" || value.content.match(/^\s+$/);
+  var blankContent = false;
+  if(!value.content){
+    blankContent = !value.content || value.content === "" || value.content.match(/^\s+$/);
+  } 
   if (blankContent) {
     classes.push('blank')
   }
   if (value.editable) {
     classes.push('editable');
+    if (value.property == 'documentation') {
+      classes.push('doc');
+    }
     // TODO use something other than id here, since the same reference can appear multiple times
+    //contenteditable="true"
     h += '<div ' + classAttr(classes) + ' data-property="' + value.property + '" data-mdid="' + value.mdid +'" title="'+title+'">';
   } else {
     if (ref) {
@@ -885,6 +1375,7 @@ var renderEmbeddedValue = function(value, elements) {
     }
   }
   h += blankContent ? 'no content for ' + (ref.name || ref.id) + ' ' + value.property.toLowerCase() : value.content;
+  //h += blankContent ? '' : value.content;
   h += '</div>';
   return h;
 }
@@ -902,26 +1393,28 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
     child.content = "";
     child.depth = depth;
     child.class = child.viewData.noSection ? 'no-section' : '';
-    child.viewData.modifiedFormatted = app.formatDate(parseDate(child.viewData.modified));
+    child.viewData.modifiedFormatted = app.formatDate(parseDate(child.viewData.lastModified));
 
     // console.log("contains:", child.viewData.contains);
-    for (var cIdx in child.viewData.contains) {
-      
+    for (var cIdx in child.viewData.contains) {     
       var c = child.viewData.contains[cIdx];
       if (c.type == 'Table') {
         // console.log("skipping table...");
-        var table = '<table class="table table-striped">';
+        var table = '<div contenteditable="false"><table class="table table-striped">';
+        table += '<caption>'+c.title+'</caption>';
         table += "<thead>";
-        table += "<tr>";
-        for (var hIdx in c.header[0]) {
-          var cell = c.header[0][hIdx];
-          var value = resolveValue(cell.content, elements, function(valueList) {
-            return _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) }).join("");
-          });
-          // console.log("header value", value)
-          table += '<th colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '">' + value + "</th>";
+        for(var rIdx in c.header) {
+          table += "<tr>";
+          for (var hIdx in c.header[rIdx]) {
+            var cell = c.header[rIdx][hIdx];
+            var value = resolveValue(cell.content, elements, function(valueList) {
+              return _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) }).join("");
+            });
+            // console.log("header value", value)
+            table += '<th colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '">' + value + "</th>";
+          }
+          table += "</tr>";
         }
-        table += "</tr>";
         table += "</thead>"
         table += "<tbody>";
         for (var rIdx in c.body) {
@@ -930,11 +1423,11 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
             var cell = c.body[rIdx][cIdx];
             var value = resolveValue(cell.content, elements, function(valueList) {
               var listOfElements = _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) });
-              var stringResult = "<ul class='table-list'>";
+              var stringResult = ""; //<ul class='table-list'>";
               _.each(listOfElements, function(e){
-                stringResult += "<li>" + e + "</li>";
+                stringResult += e + "<br/>"; //"<li>" + e + "</li>";
               })
-              stringResult += "</ul>";
+              //stringResult += "</ul>";
               return stringResult;
             });
             // TODO need to pull out the renderer here so that we can do multiple divs in a cell
@@ -943,7 +1436,7 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
           table += "</tr>";
         }
         table += "</tbody>"
-        table += "</table>"
+        table += "</table></div>"
         child.content += table;
       } else if (c.type === 'List') {
         child.content += buildList(c, elements);        
@@ -1027,12 +1520,40 @@ app.observe('home', function(homeData)
  })
 
 app.observe('viewHierarchy', function(viewData) {
+
+  // Hack, add an mdid proprety to each view that is equal to it's id
+  _.each(viewData.views, function(curv) {
+    curv.mdid = curv.id;
+  })
+
+  // Hack, add an mdid proprety to each element  that is equal to it's id
+  _.each(viewData.elements, function(cure) {
+    cure.mdid = cure.id;
+    if(cure.hasOwnProperty("value")) {
+      cure.value = cure.value[0];
+    }
+
+  })
+
+    // Fill in values for all transcluded span tags in documentation fields
+  _.each(viewData.elements, function(cure) {
+    if(cure.hasOwnProperty('documentation')) {
+      cure.documentation = app.spanContentToValue(cure.documentation, viewData);
+    }
+  })
+  
   // index views by id
   var viewsById = {};
   for (var idx in viewData.views) {
     var view = viewData.views[idx];
+    view.noSection = false;
     viewsById[view.mdid] = view;
   }
+  _.each(viewData.noSections, function(id) {
+    viewsById[id].noSection = true;
+  });
+
+
   app.set('viewsById', viewsById);
   // index elements by id
   var elementsById = {};
@@ -1048,6 +1569,14 @@ app.observe('viewHierarchy', function(viewData) {
       snapshot.formattedDate = app.formatDate(snapshot.created);
     })
   }
+
+  // For now, just translate the new View2View api so that it looks like the old one
+  var viewMapping = {};
+  _.each(viewData.view2view, function(curv) {
+    viewMapping[curv.id] = curv.childrenViews;
+  })
+  viewData.view2view = viewMapping;
+  viewData.rootView = viewData.id;
 
   // // app.set('debug', JSON.stringify(viewData));
   // console.log(viewData);
@@ -1065,6 +1594,34 @@ app.observe('viewHierarchy', function(viewData) {
     viewTree.snapshoted = app.formatDate(parseDate(viewData.snapshoted));
   }
   viewTree.snapshots = viewData.snapshots;
+  viewTree.elements = viewData.elements;
+
+  viewTree.elements = _.sortBy(viewTree.elements, function(e){ return e.qualifiedName });
+
+
+  viewTree.elementsById = elementsById;
+  // Create a list of transcludable elements
+  _.each(viewTree.elements, function(e) {
+
+    // set string for client side searching
+    e.searchIndex = e.qualifiedName.toLowerCase();
+
+    // Remove name after last slash for   
+    if(e.hasOwnProperty('qualifiedName')) {
+      e.qualifiedNamePreview = e.qualifiedName.substr(0, e.qualifiedName.lastIndexOf("/"));
+      e.qualifiedNameParentPreview =  e.qualifiedNamePreview.substr(e.qualifiedNamePreview.lastIndexOf("/")+1, e.qualifiedNamePreview.length);
+    
+    }
+
+    //console.log(e);
+    if(e.hasOwnProperty('documentation')) {
+      var preview = app.generatePreviewDocumentation(e.documentation);
+      //console.log(preview);
+      if(preview){
+        e.documentationPreview = preview;
+      }
+    }
+  });
 
   app.set('viewTree', viewTree, function() {
     setTimeout(function() { 
@@ -1072,6 +1629,8 @@ app.observe('viewHierarchy', function(viewData) {
     }, 0);
   });
 })
+
+
 
 // rich-reference.js
 
@@ -1241,6 +1800,39 @@ app.createLiveTable = function($el, tableData) {
 }
 
 
+// search.js
+
+
+var search = _.debounce(
+  function(q){
+  var searchStyle = document.getElementById('search_style');
+  if (!q) {
+    searchStyle.innerHTML = "";
+    return;
+  }
+
+  // tokenize the search (to lower case so we're case insensitive matching how things are placed into index)
+  q = q.toLowerCase().replace('"',"");
+  var split = q.split(" ");
+  var selector = "";
+
+  // add a new css selector for each token to hide anyting that doesn't have that token
+  for(var i in split)
+  {
+    // don't do anything if there's no token
+    if(split[i].trim() == "")
+    {
+      continue;
+    }
+    selector += '.searchable:not([data-search-index*="' +split[i]+ '"]){ display : none; }';
+  }
+  searchStyle.innerHTML = selector; //".searchable:not([data-search-index*=\"" + q + "\"]) { display: none; }";
+}, 250);
+
+app.observe('transcludableQuery', function(q) {
+  search(q);
+})
+
 // sections.js
 
 app.observe('plan_sections', function(newText) {
@@ -1286,7 +1878,7 @@ window.svgEditManager = function()
     if(editorContainer === null) {
       editorContainer = $(".modal-body").html("<div class='editor-container'></div>").find(".editor-container");
       editorContainer.append('<div class="mini-toolbar"><button class="btn btn-default btn-sm" id="svgDelete">delete</button><div class="pull-right btn-group"><button class="btn btn-default btn-sm" id="svgCancel" type="button">Cancel</button><button class="btn btn-default btn-sm" type="button" id="svgSave">Save</button></div></div>');
-      editorContainer.append('<iframe id="svg-editor-iframe" src="${url.context}/scirpts/vieweditor/vendor/svgedit/svg-editor.html" width="100%" onload="editorOnLoad(this)" height="600px"></iframe>');
+      editorContainer.append('<iframe id="svg-editor-iframe" src="${url.context}/scripts/vieweditor/vendor/svgedit/svg-editor.html" width="100%" onload="editorOnLoad(this)" height="600px"></iframe>');
 
       // Helper
       var cleanupAndExit = function() {
@@ -1356,11 +1948,14 @@ window.svgEditManager = function()
   return {
     edit : function(docSvg, deleteOnCancel)
     {
-      $('#myModal').modal('show'); // Note this has to happen in FF before svg-edit can be initialized, just to make things exciting
+      // Register handler to ensure we don't continue on event chain until modal is shown.  FF bug prevents us from doing init while hidden
+      $('#myModal').on('shown.bs.modal', function () {
+        $('#myModal').on('shown.bs.modal', function () {}); // unregister handler
+        app.fire("svgEditCreate");      // Start event chain to lazily init svg-edit and update content
+      })
       curDocSvg = docSvg;
       curDeleteOnCancel = deleteOnCancel;
-      // Start event chain to lazily init svg-edit and update content
-      app.fire("svgEditCreate");     
+      $('#myModal').modal('show'); // Note this has to happen in FF before svg-edit can be initialized, just to make things exciting
     }
   }
   
@@ -1375,7 +1970,10 @@ app.on('initializeSvgEditor', function(el) {
 })
 
 // Called when svg button is pressed to insert new svg and open editor modal
-window.insertSvg = function() {
+window.insertSvg = function(sectionId) {
+  var dummyButton = $('[data-role=editor-toolbar][data-target="#section' + sectionId + '"]').find(".dummyButton");
+  dummyButton.click();
+
   document.execCommand('insertHTML', false,  '<svg class="new-svg" contenteditable="false" style="display: inline" width="640" height="480" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g></g></svg>');
   var svg = $('svg.new-svg');
   svg.removeAttr("class");    // jquery svg bug prevents simply svg.removeClass('new-svg');
@@ -1393,9 +1991,140 @@ window.addSvgClickHandler = function(el) {
 // toc.js
 
 app.on('makeToc', function() {
-  $("#toc").tocify({ selectors: "h2, h3, h4, h5", history : false, scrollTo: "60", hideEffect: "none", showEffect: "none", highlightOnScroll: true, highlightOffset : 0, context: "#the-document", smoothScroll:false, extendPage:false }).data("toc-tocify");  
+  $("#toc").tocify({ selectors: "h2.numbered-header, h3.numbered-header, h4.numbered-header, h5.numbered-header", history : false, scrollTo: "60", hideEffect: "none", showEffect: "none", highlightOnScroll: true, highlightOffset : 0, context: "#the-document", smoothScroll:false, extendPage:false }).data("toc-tocify");  
 })
 
+// Hack needed to fix inspector width due to bug in bootstrap affix when inspector is on the left side of the page
+app.resizeInspector = function() {
+    var $affixElement = $(".affix");
+    $affixElement.width($affixElement.parent().width());
+}
+$(window).resize(app.resizeInspector);
+app.resizeInspector();
+
+// note sure why but transclude.js doesn't load properly unless we have a log line here?
+console.log("");
+/*
+(function poll() {
+    setTimeout(function() {
+        $.ajax({
+            url: absoluteUrl('/ui/relogin'),
+            type: "GET",
+            success: function(data) {
+                if (data.indexOf("html") != -1) 
+                  alert("You've been logged out! Login in a new window first!");
+          window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/service/ui/relogin");
+            },
+            complete: poll,
+            timeout: 5000
+        })
+    }, 60000);
+})();
+*/
+
+// transclusion.js
+
+
+
+
+var lastTransLength = 0;
+
+//app.on("imcool", function(e)  {
+//  console.log("Thats right");
+  //saveSelection();
+//})
+
+app.on("viewTree", function(vt) {
+  console.log("Load", vt);
+})
+//transclusionClick
+app.on('transclusionDown', function(e) {
+  //restoreSelection();
+  //  document.execCommand("insertHTML", false, "IMAREFERENCE!!!");
+
+  //$(".transcludable").on('click', function() {
+    //console.log("-----");
+    //saveSelection();
+    //console.log("ASDF!!!", e);
+    
+    var savedSel = app.getSavedSelection();
+    //console.log("TransDown", savedSel);
+    if(savedSel.length > 0){
+      var section = $(savedSel[0].commonAncestorContainer).closest(".section.page.editing");
+      //var section = $(app.getSelectedNode()).closest(".section.page.editing");
+      var sectionId = section.attr("data-section-id");
+      //console.log(sectionId);
+      var tran = $(e.node);
+      //console.log("tran", tran);
+      var transId = tran.attr("data-trans-id");
+      //console.log("tid", transId);
+      
+      var refType = "";
+      if(tran.hasClass("name")){
+        refType = "name";
+      }else if(tran.hasClass("documentation")){
+        refType = "documentation";
+      } else if(tran.hasClass("dvalue")){
+        refType = "value";
+      }
+
+      //var dummyButton = $('[data-role=editor-toolbar][data-target="#section' + sectionId + '"]').find(".dummyButton");
+      //dummyButton.click();
+      
+      //var vtree = app.get("viewTree");
+      //var elem = _.filter(vtree.elements, function(curElem) {
+      // return curElem.mdid === transId;
+      //})
+      //elem = elem[0];
+      var name = $('[data-trans-id="'+transId+'"].transcludable.name').text();
+      //console.log(name);
+      var r = '["'+name+'":'+refType+':'+transId+'] ';
+      app.restoreSelection();
+      document.execCommand("insertHTML", false, r);
+      lastTransLength = r.length;
+
+
+    }  
+    //console.log("TransDown done");
+    
+    //console.log("-----");
+    //saveSelection();
+    //if(savedSel.length > 0){
+  //    var section = $(savedSel[0].commonAncestorContainer).closest(".section.page.editing");//$(savedSel.commonAncestorContainer).closest(".section.page.editing");
+  //    console.log(section.attr("data-section-id"));
+    //  restoreSelection();
+    //  document.execCommand("insertHTML", false, "IMAREFERENCE!!!");
+    //}
+    //*/
+  //})
+})
+
+app.on('transclusionUp', function(e) {
+  //console.log("Start Up");
+  app.restoreSelection();
+
+  //setTimeout(function() {
+      //var advanceLength = r.length;
+  if(lastTransLength !== 0) {
+
+    var range = window.getSelection().getRangeAt(0);
+    //console.log(range.startOffset, range.startContainer);
+    //console.log("target : " + (range.startOffset + lastTransLength) + " : ", range.startContainer );
+    range.setStart(range.startContainer, range.startOffset + lastTransLength);
+    //console.log("Good1");
+    range.setEnd(range.startContainer, range.startOffset + 0);
+
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+  }
+  lastTransLength = 0;
+ // },100);
+  app.saveSelection();
+
+  //console.log("End Up");
+})
+
+//console.log("ASDFASFD");
 </script>
 </body>
 </html>

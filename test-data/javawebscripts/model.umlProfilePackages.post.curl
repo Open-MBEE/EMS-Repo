@@ -1,0 +1,1 @@
+curl -H "Content-Type: application/json" --data @JsonData/UMLStandardProfilePackages.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/eee_1045467100313_135436_1/model?createRoots=true"

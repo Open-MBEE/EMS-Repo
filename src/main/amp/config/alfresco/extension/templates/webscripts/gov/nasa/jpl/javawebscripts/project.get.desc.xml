@@ -1,0 +1,18 @@
+<webscript> 
+  <shortname>Get Project</shortname> 
+  <description>
+  	Retrieves the project information in the following format:
+  	{
+  		"id": projectId,
+  		"name": projectName,
+  		"projectVersion": projectVersion if there is a version
+  	}
+  </description>
+  <url>/javawebscripts/sites/{siteName}/projects/{projectId}</url>
+  <format default="json">any</format> 
+  <authentication>user</authentication> 
+  <transaction allow="readonly">required</transaction>
+  <family>EMS Java Webscripts</family>
+  <args>
+  </args>
+</webscript>

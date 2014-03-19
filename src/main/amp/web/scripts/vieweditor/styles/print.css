@@ -6,6 +6,10 @@
   margin: 1cm;
 }
 
+img {
+	max-width: 100%;
+}
+
 p a:after {
   content: " (" attr(href) ")";
   font-size: 90%;
@@ -21,4 +25,8 @@ p a:after {
 
 .blank.reference {
   display: none;
+}
+
+.print-only {
+	display: block;
 }

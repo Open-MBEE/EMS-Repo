@@ -488,7 +488,8 @@ function getItem(siteId, containerId, pathParts, node)
       switch ("" + containerId)
       {
          // [CYL] : add ViewEditor site container as search path
-         case "ViewEditor":
+      	 case "ViewEditor":
+         case "Models":
          case "documentLibrary":
             item = getDocumentItem(siteId, containerId, pathParts, node);
             break;
