@@ -17,11 +17,14 @@
     limitations under the License.
 -->
 <beans>
+    <import resource="javawebscript-service-context.xml" />
     
     <bean id="view-repo_dictionaryBootstrap" parent="dictionaryModelBootstrap" depends-on="dictionaryBootstrap">
       <property name="models">
         <list>
           <value>alfresco/module/view-repo/viewModel.xml</value>
+          <value>alfresco/module/view-repo/sysmlModel.xml</value>
+          <value>alfresco/module/view-repo/emsModel.xml</value>
         </list>
       </property>
     </bean>
@@ -52,17 +55,24 @@
         <property name="nodeLocatorService" ref="nodeLocatorService" /> 
 	</bean>
 	
-	<!-- Java backed webscript for logout with redirection on login -->
-	<bean id="webscript.gov.nasa.jpl.utils.logout.get"
-		class="gov.nasa.jpl.view_repo.webscripts.LogoutWebScript"
-		parent="webscript"/>
-	
 	<!--  utility bean for checking user site permissions: also expose a webscript base object -->
 	<bean id="UserUtil" class="gov.nasa.jpl.view_repo.util.UserUtil" parent="baseJavaScriptExtension">
 		<property name="siteService" ref="SiteService"/>
 		<property name="personService" ref="PersonService"/>
 		<property name="siteName" value="europa"/>
 		<property name="extensionName" value="UserUtil" />
-		<property name="ignore" value="false" />
+		<property name="ignore" value="true" />
 	</bean>
+	
+	<!-- add in the Actions -->    
+    <bean id="modelLoad" class="gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter" parent="action-executer">
+	    <property name="services" ref="ServiceRegistry"/>
+	    <property name="repository" ref="repositoryHelper"/>
+    </bean>	
+
+    <bean id="configurationGeneration" class="gov.nasa.jpl.view_repo.actions.ConfigurationGenerationActionExecuter" parent="action-executer">
+	    <property name="services" ref="ServiceRegistry"/>
+	    <property name="repository" ref="repositoryHelper"/>
+    </bean>	
+
 </beans>

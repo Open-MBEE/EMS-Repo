@@ -23,7 +23,7 @@ h3 {
 
 nav {
 	font-family: "Trebuchet MS", "Helvetica", "Arial", sans-serif;
-  text-shadow: 0 0 3px rgba(0,0,0, .5);
+  //text-shadow: 0 0 3px rgba(0,0,0, .5);
 }
 
  div.ie_warning 
@@ -37,9 +37,20 @@ nav {
   	display:block; 
  }
 
+
 .table tr:first-child th, .table tr:first-child th, .table thead:first-child tr:first-child th, .table caption+thead tr:first-child td, .table colgroup+thead tr:first-child td, .table thead:first-child tr:first-child td 
 {
 	border: 1px solid black;
+}
+
+.table thead>tr>th {
+	border: 1px solid black;
+	vertical-align: middle;
+
+}
+
+table {
+	border-top: 1px solid black;
 }
 
 .table {
@@ -142,6 +153,7 @@ h1 {
 
 .inspector {
 	border-bottom: 1px solid #ddd;
+	z-index: 100;
 }
 
 .inspector:last-child {
@@ -335,16 +347,34 @@ h1 {
   height: auto;
 }
 
-[data-property=DOCUMENTATION].editable, [data-property=DOCUMENTATION].editable.reference * {
-	background: lightgray;
+[data-property=documentation].editable, [data-property=documentation].editable.reference * {
+	/*background: #F0F0F0;*/
+	/*border-bottom: 1px solid green;*/
 }
 
-[data-property=NAME].editable, [data-property=NAME].editable.reference * {
-	background: lightblue;
+[data-property=name].editable, [data-property=name].editable.reference * {
+	/*background: #E6E6FA;*/
+	border-bottom: 1px solid #E099FF;
 }
 
-[data-property=DVALUE].editable, [data-property=DVALUE].editable.reference * {
-	background: lightgreen;
+[data-property=value].editable, [data-property=value].editable.reference * {
+	/*background: lightgreen;*/
+	border-bottom: 1px solid #E099FF;
+}
+/*
+.editable.reference:empty
+{
+	padding-left: 10px;
+}
+*/
+.editable.reference:empty:after {
+	color: #aaa;
+	content: "no content";
+}
+
+.editable.reference p.pwrapper:empty:after {
+	color: #aaa;
+	content: "no content";
 }
 
 .not-editable.reference {
@@ -397,3 +427,174 @@ h1 {
 .mini-toolbar button {
   background: #fff !important;
 }
+
+
+.transclusionList .items
+{
+	height:600px;
+	/*overflow-y: scroll;*/
+}
+.transclusionList .items>div
+{
+	cursor: pointer;
+	position: relative;
+	margin-bottom: 10px;
+}
+.transclusionList .items>div:hover
+{
+	background:#fafafa;
+}
+.transclusionList .items>div .body>*
+{
+	padding:10px;
+}
+.transclusionList .body
+{
+	padding: 5px;
+}
+.transclusionList .items>div .body>*:hover
+{
+	background:#eee;
+}
+.transclusionList .items>div .qualifiedName
+{
+	color:#aaa;
+	font-size: 12px;
+	height: 0;
+	position: absolute;
+	padding-left: 2px;
+	top:4px;
+	z-index: 2;
+	white-space: nowrap;
+}
+
+/* transclusion type display */
+.transclusionList .items>div .name:hover:after,.transclusionList .items>div .documentation:hover:after,.transclusionList .items>div .dvalue:hover:after
+{
+	position: absolute;
+	top:6px;
+	right: 10px;
+	font-size: 12px;
+	font-weight: normal;
+	color: #aaa;
+}
+.transclusionList .items>div .name:hover:after
+{
+	content: "name";
+}
+.transclusionList .items>div .documentation:hover:after
+{
+	content: "documentation";
+}
+.transclusionList .items>div .dvalue:hover:after
+{
+	content: "value";
+}
+
+
+.transclusionList .items>div .name
+{
+	margin-bottom: 0;
+	padding-top: 15px;
+	padding-left: 2px;
+	font-size: 15px;
+	font-weight: bold;
+	text-transform: capitalize;
+	color:#666;
+}
+
+
+.transclusionList .items>div .dvalue
+{
+	font-size:14px;
+	color:#999;
+	padding-left:5px;
+	padding-bottom: 10px;
+}
+.transclusionList .items>div .documentation
+{
+	font-size:14px;
+	color:#666;
+	padding-left: 15px;
+}
+.transclusionList .items>div .name:hover
+{
+	background: #eee;
+	color:#666;
+}
+.transclusionList .items>div .dvalue:hover
+{
+	background: #eee;
+	color:#666;
+}
+.transclusionList .items>div .documentation:hover
+{
+	background: #eee;
+	color:#666;
+}
+
+[data-property=documentation].editable.reference .transclusion {
+	border-bottom: 1px solid blue;
+	/*background: lightgrey;*/
+}
+
+[data-property=documentation].editable.reference .transclusion:hover {
+	background: lightgrey;	
+}
+
+
+[data-property=name].editable.reference .transclusion {
+	border-bottom: 1px solid blue;
+	/*background: lightgrey;*/
+}
+
+[data-property=name].editable.reference .transclusion:hover {
+	background: lightgrey;	
+}
+
+[data-property=value].editable.reference .transclusion {
+	border-bottom: 1px solid blue;
+	/*background: lightgrey;*/
+}
+
+[data-property=value].editable.reference .transclusion:hover {
+	background: lightgrey;	
+}
+
+#saveAll {
+	display: none;
+	float: right;
+}
+
+.inspectors {
+	left: 0px;
+	z-index: 100;
+} 
+
+.print-only {
+	display: none;
+}
+
+.missing-trans-ref {
+	background-color: #E14A4A;
+}
+
+
+media="screen"
+.table-striped>tbody>tr:nth-child(even)>td, .table-striped>tbody>tr:nth-child(even)>th {
+background-color: #ffffff;
+}
+
+/*
+.transclusion .items>div .edit
+{
+	margin-top:1px;
+	width:100%;
+
+	text-align: right;
+	color:#999;
+	padding-top:1px;
+	padding-bottom:4px;
+}
+*/
+

@@ -74,7 +74,12 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/wcs" };
     </div>
 
     <div class="wrapper">
-      <div class="row split-view">
+<p>
+Please use the new Europa View Editor <a href="${url.context}/service/alfresco/ve/documents/europa">URL</a>.
+<br>
+Please note that this document may have not been exported to the new View Editor.
+</p>
+      <div class="row split-view" hidden>
 
 <div class="col-xs-8">
 
@@ -428,17 +433,17 @@ var absoluteUrl = function(relativeUrl) {
 var ajaxWithHandlers = function(options, successMessage, errorMessage) {
   $.ajax(options)
     .done(function(data) { 
-    	if (data.indexOf("html") != -1) {
-    		alert("Not saved! You've been logged out, login in a new window first!");
+      if (data.indexOf("html") != -1) {
+        alert("Not saved! You've been logged out, login in a new window first!");
       		window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
-    	}
-    	app.fire('message', 'success', successMessage); })
+      }
+      app.fire('message', 'success', successMessage); })
     .fail(function(e) { 
       if (e && e.status && e.status === 200) {
-      	if (e.responseText.indexOf("html") != -1) {
-      		alert("Not saved! You've been logged out, login in a new window first!");
+        if (e.responseText.indexOf("html") != -1) {
+          alert("Not saved! You've been logged out, login in a new window first!");
       		window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
-      	}
+        }
         // we got a 200 back, but json parsing might have failed
         return;
       } else {
@@ -449,7 +454,6 @@ var ajaxWithHandlers = function(options, successMessage, errorMessage) {
       }
     })
 }
-
 
 app.on('saveView', function(viewId, viewData) {
   var jsonData = JSON.stringify(viewData);
@@ -614,8 +618,6 @@ app.on('editSection', function(e, sectionId) {
   });
   unwrapped.wrapInner("<p class='pwrapper'></p>");
 
-  //console.log(unwrapped);
-  //unwrapped.wrapInner("<p class='pwrapper'></p>");
   // TODO turn this listener off on save or cancel
   section.on('keyup paste blur',function(evt) {
     // we need to use the selection api because we're in a contenteditable
@@ -961,8 +963,9 @@ var renderEmbeddedValue = function(value, elements) {
   }
   if (value.editable) {
     classes.push('editable');
-    if (value.property == 'DOCUMENTATION')
-    	classes.push('doc');
+    if (value.property == 'DOCUMENTATION') {
+      classes.push('doc');
+    }
     // TODO use something other than id here, since the same reference can appear multiple times
     h += '<div ' + classAttr(classes) + ' data-property="' + value.property + '" data-mdid="' + value.mdid +'" title="'+title+'">';
   } else {
@@ -1021,7 +1024,7 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
             var cell = c.body[rIdx][cIdx];
             var value = resolveValue(cell.content, elements, function(valueList) {
               var listOfElements = _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) });
-              var stringResult = "";//"<ul class='table-list'>";
+              var stringResult = ""; //<ul class='table-list'>";
               _.each(listOfElements, function(e){
                 stringResult += e + "<br/>"; //"<li>" + e + "</li>";
               })
@@ -1499,8 +1502,8 @@ app.on('makeToc', function() {
             url: absoluteUrl('/ui/relogin'),
             type: "GET",
             success: function(data) {
-                if (data.indexOf("html") != -1)
-                	alert("You've been logged out! Login in a new window first!");
+                if (data.indexOf("html") != -1) 
+                  alert("You've been logged out! Login in a new window first!");
       				window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/wcs/ui/relogin");
             },
             complete: poll,

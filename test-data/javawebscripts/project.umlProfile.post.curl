@@ -1,0 +1,2 @@
+# post uml standard profile project to europa site
+curl -X POST -u admin:admin -H "Content-Type:application/json" --data '{"name":"UML_Standard_Profile"}' "http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/eee_1045467100313_135436_1"

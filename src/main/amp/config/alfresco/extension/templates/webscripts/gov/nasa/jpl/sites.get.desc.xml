@@ -1,0 +1,27 @@
+<webscript> 
+  <shortname>Get Sites</shortname> 
+  <description>Return all sites user has permissions to
+  [
+  	{
+  		"name": name,
+  		"title": title
+  		"categories": [
+  			tag name,
+  			...
+  		]
+  	}, ...	
+  ]
+  </description>
+  <url>/rest/sites</url> 
+  <format default="json">any</format> 
+  <authentication>user</authentication> 
+  <transaction allow="readonly">required</transaction>
+  <family>EMS Java Webscripts</family>
+  <args>
+
+  	<arg>
+  		<name>recurse</name>
+  		<description>Whether posted content contains single view or all its children, if this is true, the view2view key is populated</description>
+  	</arg>
+  </args>
+</webscript>

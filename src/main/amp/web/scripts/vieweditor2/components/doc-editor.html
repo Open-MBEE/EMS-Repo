@@ -1,0 +1,41 @@
+<link rel="import" href="../vendor/polymer/polymer/polymer.html">
+
+<polymer-element name="doc-editor" attributes="" lightdom apply-author-styles>
+
+  <style>
+
+  </style>
+
+  <template>
+    <span id="container" class="">hello</span>
+
+    <div class="toolbar page" data-role="editor-toolbar" data-target="#section1">
+      <div class="btn-group">
+          <a class="btn btn-default" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><b>b</b></a>
+          <a class="btn btn-default" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i>i</i></a>
+          <a class="btn btn-default" data-edit="underline" title="Underline (Ctrl/Cmd+u)"><span style="text-decoration:underline">u</span></a>
+          <a class="btn btn-default" data-edit="strikethrough" title="Strike through"><span style="text-decoration:line-through">u</span></a>
+          <a class="btn btn-default" data-edit="superscript" title="Superscript">x<sup>y</sup></a>
+          <a class="btn btn-default" data-edit="subscript" title="Subscript">x<sub>y</sub></a>
+      </div>
+    </div>
+    <div id="section1" class="section page editing" data-section-id="" contenteditable="true" proxy-dblclick="sectionDoubleClick">
+      hello world
+    </div>
+
+
+    </div>
+  </template>
+
+  <script>
+    Polymer('doc-editor', {
+      ready: function() {
+        console.log(this.$.section1);
+        $(this.$.section1).wysiwyg();
+      },
+      
+
+    });
+  </script>
+
+</polymer-element>

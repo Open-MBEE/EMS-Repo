@@ -1,0 +1,24 @@
+{ "products":
+	[
+		{
+		"id": "301",
+		"view2view": [
+			{"id": "301", 
+			"childrenViews": ["302"]
+		}],
+		"noSections": [
+		"302", 
+		]
+		},
+		{
+		"id": "401",
+		"view2view": [
+			{"id": "401", 
+			"childrenViews": ["402"]
+		}],
+		"noSections": [
+		"402", 
+		]
+		}
+	]
+}

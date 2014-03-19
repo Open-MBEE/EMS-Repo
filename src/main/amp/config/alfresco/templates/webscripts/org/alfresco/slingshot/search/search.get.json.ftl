@@ -17,10 +17,6 @@
 			"modifiedBy": "${item.modifiedBy}",
 			"size": ${item.size?c},
 			"mimetype": "${item.mimetype!''}",
-			<#if item.viewMdid??>
-			"viewMdid": "${item.viewMdid}",
-			"viewName": "${item.viewName}",
-			</#if>
 			<#if item.site??>
 			"site":
 			{
