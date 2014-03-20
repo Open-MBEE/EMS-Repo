@@ -12,7 +12,5 @@
 {"documentation" : "4to", "id":"402", "isDerived":false, "name":"402", "owner"="401", "type": "Property", "value" : ["dlam"], "valueType" : "LiteralString"},
 {"documentation" : "4talk", "id":"403", "isDerived":false, "name":"403", "owner"="402", "type": "Property", "value" : ["dlam"], "valueType" : "LiteralString"},
 {"documentation" : "4about", "id":"404", "isDerived":false, "name":"404", "owner"="403", "type": "Property", "value" : ["dlam"], "valueType" : "LiteralString"},
-
-
-{"documentation" :"directed_relationship", "id":"500","owner":"300","type":"DirectedRelationship","source":"302","target":"303", "name":"500", "propertyType":null},
+{"documentation" :"directed_relationship", "id":"500","owner":"300","type":"DirectedRelationship","source":"302","target":"303", "name":"500", "propertyType":"null"},
 ]}

@@ -14,7 +14,6 @@ import java.util.Set;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
-import org.mozilla.javascript.Scriptable;
 import org.springframework.extensions.webscripts.Status;
 
 import sysml.AbstractSystemModel;

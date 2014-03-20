@@ -116,7 +116,7 @@ public class Acm {
     public static final String JSON_DURATION_MIN = "durationMin";
     public static final String JSON_ELEMENT_VALUE = "ElementValue";
     public static final String JSON_ELEMENT_VALUE_ELEMENT = "elementValueElement";
-    public static final String JSON_EXPRESSION = "expression";
+    public static final String JSON_EXPRESSION = "Expression";
     public static final String JSON_OPERAND = "operand";
     public static final String JSON_INSTANCE_VALUE = "InstanceValue";
     public static final String JSON_INSTANCE = "instance";
@@ -336,6 +336,9 @@ public class Acm {
             add(JSON_CONTAINS);
             add(JSON_VIEW_2_VIEW);
             add(JSON_NO_SECTIONS);
+            add(JSON_VALUE);
+            add(JSON_OPERATION_PARAMETER);
+            add(JSON_OPERAND);
         }
     };
     
