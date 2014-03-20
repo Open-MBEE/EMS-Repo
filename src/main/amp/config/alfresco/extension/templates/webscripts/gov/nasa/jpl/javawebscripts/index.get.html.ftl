@@ -30,8 +30,8 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
         <li class="dropdown" id="firstDropdown">
         	<a href="#" class="dropdown-toggle" data-toggle="dropdown">${siteTitle} Document List <b class="caret"></b></a>
         	<ul class="dropdown-menu">
-        		<li><a href="${url.context}/service/ve/documents/${siteName}">${siteTitle} In-Work Document List</a></li>
         		<li><a href="${url.context}/service/ve/configurations/${siteName}">${siteTitle} DocWeb</a></li>
+        		<li><a href="${url.context}/service/ve/documents/${siteName}">${siteTitle} In-Work Document List</a></li>
         		<li><a href="/share/page/site/${siteName}/dashboard">${siteTitle} Dashboard</a></li>
    			</ul>
    		</li>

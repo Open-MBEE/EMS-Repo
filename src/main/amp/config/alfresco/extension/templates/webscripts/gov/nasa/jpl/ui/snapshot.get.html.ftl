@@ -32,9 +32,13 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
         	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Version Report ${title} ${tag} <b class="caret"></b></a>
         	<ul class="dropdown-menu">
         		<li><a href="${url.context}/service/ve/products/${id}">Current Version of Document</a></li>
-        		<li><a href="${url.context}/service/ve/index/${siteName}">${siteTitle} Document List</a></li>
         		<li><a href="${url.context}/service/ve/configurations/${siteName}">${siteTitle} DocWeb</a></li>
+        	<#if siteName == 'europa'>
+        		<li><a href="${url.context}/service/ve/index/${siteName}">${siteTitle} Document List</a></li>
         		<li><a href="${url.context}/service/ve/documents/${siteName}">${siteTitle} In-Work Document List</a></li>
+        	<#else>
+        		<li><a href="${url.context}/service/ve/documents/${siteName}">${siteTitle} Document List</a></li>
+        	</#if>	
         		<li><a href="/share/page/site/${siteName}/dashboard">${siteTitle} Dashboard</a></li>
    			</ul>
    		</li>

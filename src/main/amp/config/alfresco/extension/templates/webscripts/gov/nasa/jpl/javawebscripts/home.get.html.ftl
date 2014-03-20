@@ -28,9 +28,15 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
     	</div>
       <ul class="nav navbar-nav">
         <li class="dropdown" id="firstDropdown">
+        	<#if siteName == 'europa'>
         	<a href="#" class="dropdown-toggle" data-toggle="dropdown">${siteTitle} In-Work Document List <b class="caret"></b></a>
+        	<#else>
+        	<a href="#" class="dropdown-toggle" data-toggle="dropdown">${siteTitle} Document List <b class="caret"></b></a>
+        	</#if>
         	<ul class="dropdown-menu">
+        	<#if siteName == 'europa'>
         		<li><a href="${url.context}/service/ve/index/${siteName}">${siteTitle} Document List</a></li>
+        	</#if>
         		<li><a href="${url.context}/service/ve/configurations/${siteName}">${siteTitle} DocWeb</a></li>
         		<li><a href="/share/page/site/${siteName}/dashboard">${siteTitle} Dashboard</a></li>
    			</ul>
