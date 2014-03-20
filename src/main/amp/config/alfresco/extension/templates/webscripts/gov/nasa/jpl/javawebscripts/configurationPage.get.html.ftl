@@ -79,7 +79,6 @@
 </div>
 <script src="${url.context}/scripts/vieweditor/vendor/jquery.min.js"></script>
 <script src="${url.context}/scripts/vieweditor/vendor/bootstrap.min.js"></script>
-
 <script type="text/javascript">
 $(document).ready(function() {
 	$('a.submit-logout').click(function() {
@@ -90,7 +89,7 @@ $(document).ready(function() {
 		for (var i = 0; i < data.length; i++) {
 			var site = data[i];
 			if (site.categories.length == 0)
-				site.categories.push("Other");
+				site.categories.push("Other Sites");
 			for (var j = 0; j < site.categories.length; j++) {
 				var cat = site.categories[j];
 				if (sites.hasOwnProperty(cat)) {
