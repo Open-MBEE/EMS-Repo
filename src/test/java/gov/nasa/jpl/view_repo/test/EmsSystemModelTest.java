@@ -81,8 +81,7 @@ public class EmsSystemModelTest {
                 
         System.out.println( "testExpressionEvaluation()" );
         
-        //Collection< EmsScriptNode > nodes = model.getElementWithName( null, "expr_32165" );
-        Collection< EmsScriptNode > nodes = model.getElementWithName( null, "arg_ev_33001" ); 
+        Collection< EmsScriptNode > nodes = model.getElementWithName( null, "expr_32165" );
 
         System.out.println( "*testExpressionEvaluation() nodes: "
                             + MoreToString.Helper.toLongString( nodes ) );
