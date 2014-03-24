@@ -221,14 +221,23 @@ $(document).ready(function() {
 			}
 		}
 		var stuff = "";
-		for (var key in sites) {
+		var keys = Object.keys(sites).sort();
+		for (var i = 0; i < keys.length; i++) {
+			var key = keys[i];
 			stuff += '<li class="dropdown dropdown-submenu"><a href="#" class="dropdown-toggle" data-toggle="dropdown">' + key + '</a>';
 			stuff += '<ul class="dropdown-menu">';
-        	var ssites = sites[key];
-			for (var i = 0; i < ssites.length; i++) {
-				stuff += '<li class="dropdown-submenu"><a href="#" class="dropdown-toggle" data-toggle="dropdown">' + ssites[i].title + '</a><ul class="dropdown-menu">';
-				stuff += '<li><a href="/share/page/site/' + ssites[i].name + '/dashboard">Dashboard</a></li>';
-				stuff += '<li><a href="/alfresco/service/ve/configurations/' + ssites[i].name + '">DocWeb</a></li>';
+        	var ssites = sites[key].sort(function(a,b) {
+        		if (a.title > b.title)
+        			return 1;
+        		if (a.title < b.title)
+        			return -1;
+        		return 0;
+        	});
+        
+			for (var j = 0; j < ssites.length; j++) {
+				stuff += '<li class="dropdown-submenu"><a href="#" class="dropdown-toggle" data-toggle="dropdown">' + ssites[j].title + '</a><ul class="dropdown-menu">';
+				stuff += '<li><a href="/share/page/site/' + ssites[j].name + '/dashboard">Dashboard</a></li>';
+				stuff += '<li><a href="/alfresco/service/ve/configurations/' + ssites[j].name + '">DocWeb</a></li>';
 				stuff += '</ul></li>';
 			}
         	stuff += '</ul></li>';
