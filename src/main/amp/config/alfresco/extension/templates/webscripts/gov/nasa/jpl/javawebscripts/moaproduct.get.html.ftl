@@ -1385,9 +1385,9 @@ var renderEmbeddedValue = function(value, elements) {
   var title = ref ? (ref.name || ref.mdid) +' ('+value.property.toLowerCase()+')' : '';
   var classes = ['reference'];
   var blankContent = false;
-  if(!value.content){
+  //if(!value.content){
     blankContent = !value.content || value.content === "" || value.content.match(/^\s+$/);
-  } 
+  //} 
   if (blankContent) {
     classes.push('blank')
   }
