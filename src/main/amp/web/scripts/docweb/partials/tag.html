@@ -24,7 +24,7 @@
       <div class="row">
         <div class="col-xs-6">
           
-            <div ng-repeat="doc in products" ng-controller="TagAddRemoveDocCtrl">
+            <div ng-repeat="doc in products | orderBy:'name'" ng-controller="TagAddRemoveDocCtrl">
               <a href="" ng-click="toggleShowSnapshots()"><h6><span ng-hide="showSnapshots">></span><span ng-show="showSnapshots">v</span> {{doc.name}}</h6></a>
               <div ng-show="showSnapshots">
                 <div ng-repeat="snapshot in snapshots">
