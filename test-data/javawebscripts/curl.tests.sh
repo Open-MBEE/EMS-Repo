@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 export CURL_STATUS="-w \"%{http_code}\""
 export CURL_POST_FLAGS_NO_DATA="-X POST"
@@ -80,10 +80,10 @@ echo ""
 echo SNAPSHOTS
 
 # post snapshot
-echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:text/html" --data @JsonData/snapshot.html http://localhost:8080/view-repo/service/ui/views/301/snapshot
+echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:text/html" --data @JsonData/snapshot.html http://localhost:8080/alfresco/service/ui/views/301/snapshot
 
 # get snapshots - this currently doesn't work
-#echo  curl -w "%{http_code}" -u admin:admin -X GET http://localhost:8080/view-repo/service/snapshots/301
+#echo  curl -w "%{http_code}" -u admin:admin -X GET http://localhost:8080/alfresco/service/snapshots/301
 
 echo ""
 echo CONFIGURATIONS
