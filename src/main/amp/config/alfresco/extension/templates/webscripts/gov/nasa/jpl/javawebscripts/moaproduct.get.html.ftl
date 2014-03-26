@@ -1460,7 +1460,7 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
               var listOfElements = _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) });
               var stringResult = ""; //<ul class='table-list'>";
               _.each(listOfElements, function(e){
-                stringResult += e + "<br/>"; //"<li>" + e + "</li>";
+                stringResult += e;// + "<br/>"; //"<li>" + e + "</li>";
               })
               //stringResult += "</ul>";
               return stringResult;
