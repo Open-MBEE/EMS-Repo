@@ -1102,28 +1102,36 @@ public class EmsScriptNode extends ScriptNode {
         siteNode = parent.getParent();
         return siteNode;
     }
+    
+    private EmsScriptNode convertIdToEmsScriptNode(String valueId) 
+    {
+    	ResultSet existingArtifacts = findNodeRefsByType( valueId, "@cm\\:name:\"" );
+    	Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
+    	existingArtifacts.close();
+    	
+        EmsScriptNode value = (nodeSet == null || nodeSet.size() <= 0) ? null : nodeSet.iterator().next();
+
+        return value;
+    }
 
     /**
      * Update or create element values (multiple noderefs ordered in a list)
      * 
      * @param jsonArray
      *            Array of the IDs that house the values for the element
-     * @param id
-     *            The ID of the element to add the values to
+     * @param property
+     *            The property to update or create
      * @throws JSONException
      */
     protected void updateOrCreateElementValues(JSONArray jsonArray, String property)
             throws JSONException {
-        // create an array of the values to be added in as the elementValue
-        // property
+    	
+        // This is based on ModelPost.updateOrCreateElementValues() 	
         ArrayList<NodeRef> values = new ArrayList<NodeRef>();
         for (int ii = 0; ii < jsonArray.length(); ii++) {
             String valueId = jsonArray.getString(ii);
-            ResultSet existingArtifacts = findNodeRefsByType( valueId, "@cm\\:name:\"" );
-            Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
-            existingArtifacts.close();
-
-            EmsScriptNode value = (nodeSet == null || nodeSet.size() <= 0) ? null : nodeSet.iterator().next();
+            EmsScriptNode value = convertIdToEmsScriptNode(valueId);
+            
             if (value != null
                     && value.checkPermissions(PermissionService.WRITE, response, status)) {
                 values.add(value.getNodeRef());
@@ -1147,6 +1155,35 @@ public class EmsScriptNode extends ScriptNode {
                     + "\n");
         }
     }
+    
+    /**
+     * Update or create element value (single NodeRef)
+     * 
+     * @param valueId
+     *            The ID that house the value for the element
+     * @param property
+     *            The property to update or create
+     * @throws JSONException
+     */
+    protected void updateOrCreateElementValue(String valueId, String property)
+            throws JSONException {
+    	
+        EmsScriptNode value = convertIdToEmsScriptNode(valueId);
+
+        if (value != null
+            && value.checkPermissions(PermissionService.WRITE, response, status)) {
+        	
+            // only change if old value is different than new value:
+        	NodeRef newValue = value.getNodeRef();
+        	if (!newValue.equals((NodeRef)getProperty(property))) {
+                setProperty(property, newValue);
+        	}
+        } 
+        else {
+            log("could not find element value node with id " + valueId + "\n");
+        }
+  
+    }
 	
 	public EmsScriptNode findScriptNodeByName( String id ) {
         ResultSet existingArtifacts = findNodeRefsByType( id, "@cm\\:name:\"" );
@@ -1169,14 +1206,16 @@ public class EmsScriptNode extends ScriptNode {
 	        String acmType = Acm.JSON2ACM.get(jsonType);
 	        if (jsonObject.has(jsonType)) {
                 if (Acm.JSON_NODEREFS.contains(jsonType)) {
-                    JSONArray array = null;
+                	// If its an array of NodeRefs, i.e. has multiple values of NodeRef
+                	// type:
                     if (Acm.JSON_ARRAYS.contains(jsonType)) {
-                        array = jsonObject.getJSONArray(jsonType);
-                    } else {
-                        array = new JSONArray();                      
-                        array.put( jsonObject.getString(jsonType) );
+                    	JSONArray array = jsonObject.getJSONArray(jsonType);
+                        updateOrCreateElementValues( array, acmType );
+                    } 
+                    // Otherwise it is a single NodeRef:
+                    else {
+                        updateOrCreateElementValue(jsonObject.getString(jsonType), acmType);
                     }
-                    updateOrCreateElementValues( array, acmType );
                 } else if (Acm.JSON_ARRAYS.contains(jsonType)) {
 	                JSONArray array = jsonObject.getJSONArray(jsonType);
 	                this.createOrUpdateProperty(acmType, array.toString());
