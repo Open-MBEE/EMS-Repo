@@ -109,7 +109,6 @@ public class EmsScriptNode extends ScriptNode {
     // TODO add nodeService and other member variables when no longer subclassing ScriptNode
     //	    extend Serializable after removing ScriptNode extension
     
-    
 	// for lucene search
 	//protected static final StoreRef SEARCH_STORE = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 
@@ -697,6 +696,7 @@ public class EmsScriptNode extends ScriptNode {
         // TODO replace w/ this.properties after no longer subclassing, maybe use QNameMap also
         Map<String, Object> finalProps =  new HashMap<String, Object>(); 
         
+        // Create map of string representation of QName to the value of the property:
         for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
         	finalProps.put(entry.getKey().toString(), entry.getValue());
         }
@@ -1181,8 +1181,28 @@ public class EmsScriptNode extends ScriptNode {
 	                JSONArray array = jsonObject.getJSONArray(jsonType);
 	                this.createOrUpdateProperty(acmType, array.toString());
 	            } else {
+	            	
 	                //System.out.println("creating or updating property: " + acmType + " = " + property );
-                    if ( jsonType.startsWith( "is" ) ) {
+	            	
+	            	if (jsonType.equals(Acm.JSON_INTEGER) ||
+	            		jsonType.equals(Acm.JSON_NATURAL_VALUE)) {
+	            		
+	            		Integer property = jsonObject.getInt(jsonType);
+	            		if (property != null) {
+	            			this.createOrUpdateProperty(acmType, property);
+	            		}
+	            	}
+	            	else if (jsonType.equals(Acm.JSON_DOUBLE) ||
+	            			 jsonType.equals(Acm.JSON_REAL)) {
+	            		
+	            		Double property = jsonObject.getDouble(jsonType);
+	            		if (property != null) {
+	            			this.createOrUpdateProperty(acmType, property);
+	            		}
+	            	}
+	            	else if (jsonType.startsWith( "is" ) ||
+	            			 jsonType.equals(Acm.JSON_BOOLEAN)) {
+	            		
                         //( property.equalsIgnoreCase( "true" ) || property.equalsIgnoreCase( "false" ) ) ) {
                         Boolean property = jsonObject.getBoolean( jsonType);
                         if ( property == null ) {
@@ -1192,10 +1212,15 @@ public class EmsScriptNode extends ScriptNode {
                         } else {
                             this.createOrUpdateProperty(acmType, property);
                         }
-	                } else {
+	                } 
+	            	else {
+	                	
 	                    String property = jsonObject.getString(jsonType);
-	                    this.createOrUpdateProperty(acmType, new String(property));
+	            		if (property != null) {
+	            			this.createOrUpdateProperty(acmType, new String(property));
+	            		}
 	                }
+	            	
 	            }
 	        }
 	    }
