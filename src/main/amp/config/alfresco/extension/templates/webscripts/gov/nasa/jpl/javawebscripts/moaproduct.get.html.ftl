@@ -1386,7 +1386,7 @@ var renderEmbeddedValue = function(value, elements) {
   var classes = ['reference'];
   var blankContent = false;
   //if(!value.content){
-    blankContent = !value.content || value.content === "" || value.content.match(/^\s+$/);
+  blankContent = !value.content || (value.content + "") === "" || (value.content + "").match(/^\s+$/);
   //} 
   if (blankContent) {
     classes.push('blank')
