@@ -124,12 +124,26 @@ public class EmsSystemModelTest {
         	
         	EmsScriptNode propNode = new EmsScriptNode(prop,services);
         	System.out.println("\n*testExpressionEvaluation() propNode: "+propNode);
-
-        	// TODO This returns null, why?  tried a mvn purge and resending json files after updating sysml.xml
-        	//		I dont think they are getting PUT correctly as they have no content after uploading
-        	System.out.println("\n*testExpressionEvaluation() propNode.elementValueOfElement: "+propNode.getProperty("elementValueOfElement"));
-        
         	System.out.println("\n*testExpressionEvaluation() propNode.name: "+propNode.getName() + " id: "+propNode.getId() + " type: "+propNode.getType());
+
+        	NodeRef valueOfElem = (NodeRef)propNode.getProperty(Acm.ACM_ELEMENT_VALUE_ELEMENT);
+        	System.out.println("\n*testExpressionEvaluation() propNode.elementValueOfElement: "+valueOfElem);
+        
+        	// This will get the name of the operator via ACM_NAME:
+        	EmsScriptNode valueOfElemNode = new EmsScriptNode(valueOfElem,services);
+        	System.out.println("\n*testExpressionEvaluation() valueOfElemNode.name: "+valueOfElemNode.getName() + " id: "+valueOfElemNode.getId() + " type: "+valueOfElemNode.getType() + " sysmlName: "+valueOfElemNode.getProperty(Acm.ACM_NAME));
+        	
+        	// If its not a Operation type, ie. Property type (the command arguments):
+        	if (!valueOfElemNode.getType().contains(Acm.JSON_OPERATION)) {
+        		
+        		ArrayList<NodeRef> argValues = (ArrayList<NodeRef>)valueOfElemNode.getProperty(Acm.ACM_VALUE);
+            	System.out.println("\n*testExpressionEvaluation() argValues: " +argValues);
+            	
+            	// The argument integer property:
+            	EmsScriptNode argValueNode = new EmsScriptNode(argValues.get(0),services);
+            	System.out.println("\n*testExpressionEvaluation() argValueNode.integer: " +argValueNode.getProperty(Acm.ACM_INTEGER));
+
+        	}
         }
         
 //        // playing:
