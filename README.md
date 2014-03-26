@@ -57,8 +57,6 @@ To run in embedded jetty container and H2 db, (with jrebel and remote debugging!
 	export MAVEN_OPTS='-Xms256m -Xmx1G -XX:PermSize=300m -Xdebug -Xrunjdwp:transport=dt_socket,address=10000,server=y,suspend=n -javaagent:/Applications/jrebel/jrebel.jar'
 	
     mvn integration-test -Pamp-to-war -Dmaven.test.skip=false
-
-NOTE: for Alfresco 4.2.e this currently requires a multi-step process. Run once and you'll get errors about MVCC. Kill and update the local/repository.properties and remove the MVCC=TRUE, then re-run. Things should work now...
     
 NOTE: It's possible that Eclipse can get in the way of the maven execution. So, when running maven, temporarily turn off the Eclipse->Project->Build Automatically". Once the Jetty server is up and running, turn it back on so you can make changes hot swap your code updates.
 If you get an error about avmRemote or something like that, you may need to update your /etc/hosts to with something like COMPUTER_NAME 127.0.0.1
