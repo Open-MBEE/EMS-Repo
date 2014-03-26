@@ -1332,12 +1332,12 @@ public class CmisModelInterfaceImpl
         
     }
 
-    @Override
-    public Collection< CmisObject >
-            getConstraintsOfContext( OperationContext arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+//    @Override
+//    public Collection< CmisObject >
+//            getConstraintsOfContext( OperationContext arg0 ) {
+//        // TODO Auto-generated method stub
+//        return null;
+//    }
 
     @Override
     public Collection< CmisObject > getConstraintsOfElement( CmisObject arg0,
@@ -1360,12 +1360,12 @@ public class CmisModelInterfaceImpl
         return null;
     }
 
-    @Override
-    public Collection< CmisObject >
-            getViolatedConstraintsOfContext( OperationContext arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+//    @Override
+//    public Collection< CmisObject >
+//            getViolatedConstraintsOfContext( OperationContext arg0 ) {
+//        // TODO Auto-generated method stub
+//        return null;
+//    }
 
     @Override
     public Collection< CmisObject >
@@ -1410,6 +1410,12 @@ public class CmisModelInterfaceImpl
 
     @Override
     public boolean versionsAreWritable() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean fixConstraintViolations( CmisObject element, String version ) {
         // TODO Auto-generated method stub
         return false;
     }
