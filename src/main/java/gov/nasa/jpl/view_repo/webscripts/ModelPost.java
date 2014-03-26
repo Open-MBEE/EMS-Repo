@@ -687,7 +687,9 @@ public class ModelPost extends AbstractJavaWebScript {
             
             JSONArray array = elementHierarchyJson.getJSONArray(id);
             if ( array != null ) {
-                for (int ii = 0; !ingest && ii < array.length(); ii++) {
+            	// GG: removed !ingest so children can have their metadata inserted
+                //for (int ii = 0; !ingest && ii < array.length(); ii++) {
+                for (int ii = 0; ii < array.length(); ii++) {
                     children.put(array.get(ii));
                 }
             }
