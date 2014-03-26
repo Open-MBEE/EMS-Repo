@@ -54,7 +54,7 @@ Eclipse/Maven
         mvn install:install-file -Dfile=lib/mbee_util.jar -DgroupId=gov.nasa.jpl -DartifactId=mbee_util -Dversion=1.0 -Dpackaging=jar
         mvn install:install-file -Dfile=lib/sysml.jar -DgroupId=gov.nasa.jpl -DartifactId=sysml -Dversion=1.0 -Dpackaging=jar
 
-    For the bae, sysml, and util projects you will need to update the build.properties file with your home directory and folder of where magic draw is installed.  For instance:
+    For the bae, sysml, and util projects you will need to update the build.properties file and rebel.xml file with your home directory and folder of where magic draw is installed.  For instance:
         home=/Users/gcgandhi
         md=/Applications/MD
 
@@ -87,7 +87,7 @@ To run in embedded jetty container and H2 db, (with jrebel and remote debugging!
 NOTE: It's possible that Eclipse can get in the way of the maven execution. So, when running maven, temporarily turn off the Eclipse->Project->Build Automatically". Once the Jetty server is up and running, turn it back on so you can make changes hot swap your code updates.
 If you get an error about avmRemote or something like that, you may need to update your /etc/hosts to with something like COMPUTER_NAME 127.0.0.1
     
-To clean all data and artifacts
+To clean all data and artifacts.  After doing this make sure to update the Maven project (right click on project folder->Maven->Update Project) and re-create/copy the sysml, util, bae .jar files.
 
     mvn clean -Ppurge
 
