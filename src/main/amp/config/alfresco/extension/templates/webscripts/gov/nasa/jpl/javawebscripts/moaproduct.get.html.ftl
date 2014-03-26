@@ -1385,9 +1385,9 @@ var renderEmbeddedValue = function(value, elements) {
   var title = ref ? (ref.name || ref.mdid) +' ('+value.property.toLowerCase()+')' : '';
   var classes = ['reference'];
   var blankContent = false;
-  if(!value.content){
-    blankContent = !value.content || value.content === "" || value.content.match(/^\s+$/);
-  } 
+  //if(!value.content){
+  blankContent = !value.content || (value.content + "") === "" || (value.content + "").match(/^\s+$/);
+  //} 
   if (blankContent) {
     classes.push('blank')
   }
@@ -1460,7 +1460,7 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
               var listOfElements = _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) });
               var stringResult = ""; //<ul class='table-list'>";
               _.each(listOfElements, function(e){
-                stringResult += e + "<br/>"; //"<li>" + e + "</li>";
+                stringResult += e;// + "<br/>"; //"<li>" + e + "</li>";
               })
               //stringResult += "</ul>";
               return stringResult;
