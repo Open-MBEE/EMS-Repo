@@ -115,7 +115,7 @@ public class Acm {
     public static final String JSON_DURATION_MAX = "durationMax";
     public static final String JSON_DURATION_MIN = "durationMin";
     public static final String JSON_ELEMENT_VALUE = "ElementValue";
-    public static final String JSON_ELEMENT_VALUE_ELEMENT = "elementValueElement";
+    public static final String JSON_ELEMENT_VALUE_ELEMENT = "elementValueOfElement";
     public static final String JSON_EXPRESSION = "Expression";
     public static final String JSON_OPERAND = "operand";
     public static final String JSON_INSTANCE_VALUE = "InstanceValue";
