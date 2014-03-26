@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.test;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.io.IOException;
 import java.util.Collection;
 
 import gov.nasa.jpl.ae.event.ConstraintExpression;
@@ -34,6 +35,28 @@ public class EmsSystemModelTest {
         //AuthenticationUtil.setRunAsUserSystem();
         AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
         
+        // Load model for testing:
+        //
+        // Assuming git directory is in home directory, so model is in:
+        // $HOME/git/alfresco-view-repo/test-data/javawebscripts/JsonData/expressionElements.json
+        // See $HOME/git/alfresco-view-repo/test-data/javawebscripts/curl.tests.sh for environment variables and sample curl commands
+        String userHome = System.getenv("HOME");
+        // curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:application/json" --data '{"name":"CY Test"}' "http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/123456?fix=true&createSite=true"
+        String curlCmd1 = "curl -w \"%{http_code}\" -u admin:admin -X POST -H \"Content-Type:application/json\" --data '{\"name\":\"CY Test\"}' \"http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/123456?fix=true&createSite=true\"";
+        //   curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/expressionElements.json $BASE_URL"sites/europa/projects/123456/elements\""
+        String curlCmdTemp = String.format("%s/git/alfresco-view-repo/test-data/javawebscripts/JsonData/expressionElements.json \"http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/123456/elements\"",userHome);
+        String curlCmd2 = "curl -w \"%{http_code}\" -u admin:admin -X POST -H \"Content-Type:application/json\" --data @"+curlCmdTemp;
+        
+        try {
+        	System.out.println("Executing command: "+curlCmd1);
+        	Runtime.getRuntime().exec(curlCmd1);
+        	System.out.println("Executing command: "+curlCmd2);
+        	Runtime.getRuntime().exec(curlCmd2);
+        }
+        catch (IOException e) {
+        	e.printStackTrace();	
+        }
+      
 //        System.out.println("LAUNCH DEBUGGER START!!!");
 //        try {
 //            Thread.sleep( 12000 );
@@ -53,18 +76,14 @@ public class EmsSystemModelTest {
     
     @Test
     public void testExpressionEvaluation() {
-        // This test assumes that the model in
-        // alfresco-view-repo/test-data/javawebscripts/JsonData/expressionElements.json
-        // has been loaded with the curl command:
-        //   curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/expressionElements.json $BASE_URL"sites/europa/projects/123456/elements\""
-        // TODO -- load the data in initAppContext() above!
-
+  
         //NodeRef node = NodeUtil.findNodeRefById( "expr_32165", model.getServices() );
                 
         System.out.println( "testExpressionEvaluation()" );
         
         Collection< EmsScriptNode > nodes = model.getElementWithName( null, "expr_32165" );
-        System.out.println( "testExpressionEvaluation() nodes: "
+
+        System.out.println( "*testExpressionEvaluation() nodes: "
                             + MoreToString.Helper.toLongString( nodes ) );
         if ( Utils.isNullOrEmpty( nodes ) ) {
             nodes = model.getElementWithName( null, "*" );
@@ -80,18 +99,18 @@ public class EmsSystemModelTest {
         EmsScriptNode node = nodes.iterator().next();
         assertNotNull( node );
         
-        Object evalResult = sysmlToAe.evaluateExpression( node );
-        System.out.println( "testExpressionEvaluation() evalResult: "
+        Object evalResult = sysmlToAe.evaluateExpression( node );  
+        System.out.println( "*testExpressionEvaluation() evalResult: "
                             + MoreToString.Helper.toLongString( evalResult ) );
         assertNotNull( evalResult );
         
         Expression< Boolean > expression = sysmlToAe.toAeExpression( node );
-        System.out.println( "testExpressionEvaluation() expression: "
+        System.out.println( "*testExpressionEvaluation() expression: "
                 + MoreToString.Helper.toLongString( expression ) );
-        assertNotNull( expression );
-        Assert.assertTrue( Boolean.class.isAssignableFrom( expression.getType() ) );
+        assertNotNull( expression ); 
+        Assert.assertTrue( Boolean.class.isAssignableFrom( expression.getType() ) );  // GG: this fails
         ConstraintExpression constraint = new ConstraintExpression( expression );
-        System.out.println( "testExpressionEvaluation() constraint: "
+        System.out.println( "*testExpressionEvaluation() constraint: "
                 + MoreToString.Helper.toLongString( constraint ) );
         assertNotNull( constraint );
         

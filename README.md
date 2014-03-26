@@ -59,15 +59,15 @@ Eclipse/Maven
         md=/Applications/MD
 
     If you are not using Eclispse yoxos, then you will need to install the IMCE Eclipse plug ins.  Do the following:
-        1. Get the .jar files from Brad or Dorris, and then place them in your eclipse installation plugins folder, i.e. "/Applications/eclipse/plugins".  
+        1. Get the .jar files from Brad or Doris, and then place them in your eclipse installation plugins folder, i.e. "/Applications/eclipse/plugins".  
         2. Restart Eclipse.  
-        3. For the mdk and bae projects rick click on the project folder and check that the library (IMCE MagicDraw Classpath Container) was added:  Properties->Java BuildPath->Libraries.  
+        3. For the mdk and bae projects right click on the project folder and check that the library (IMCE MagicDraw Classpath Container) was added:  Properties->Java BuildPath->Libraries.  
         4.Make sure that the library appears first in the list for the bae project (you can adjust this in the Order and Export tab).  
 
     Make sure that Java Buildpath for the view-repo project is using Java 1.7.
 
     Open up the Ant window by clicking on Window->Show View->Other->Ant.  For the bae, sysml, and util projects, 
-    drag the build.xml files into the Ant window.  Then expand each one in the Ant window, and run the makejar.
+    drag the build.xml files into the Ant window.  Then expand each one in the Ant window, and run the makejar.  You must do this everytime after you purge.
     
     
 # building, setting up maven, jrebel

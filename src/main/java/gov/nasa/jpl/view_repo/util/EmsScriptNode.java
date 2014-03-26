@@ -30,6 +30,7 @@
 package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -55,6 +56,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
+import org.alfresco.repo.jscript.ContentAwareScriptableQNameMap;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.AssociationRef;
@@ -80,6 +82,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
 
+import org.alfresco.service.namespace.QNameMap;
+
 /**
  * Extension of ScriptNode to support EMS needs
  * @author cinyoung
@@ -94,14 +98,17 @@ public class EmsScriptNode extends ScriptNode {
 	// provide status as necessary
 	private Status status = null;
 	
-	boolean useFoundationalApi = true;
+	boolean useFoundationalApi = true; // TODO this will be removed
 
     //protected static StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 
     protected EmsScriptNode companyHome = null;
     
     protected EmsScriptNode siteNode = null;
-
+    
+    // TODO add nodeService and other member variables when no longer subclassing ScriptNode
+    //	    extend Serializable after removing ScriptNode extension
+    
     
 	// for lucene search
 	//protected static final StoreRef SEARCH_STORE = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
@@ -681,7 +688,21 @@ public class EmsScriptNode extends ScriptNode {
 			return getProperties().get(acmType);
 		}
 	}
-
+	
+	@Override
+    public Map<String, Object> getProperties()
+    {
+		
+        Map<QName, Serializable> props =  services.getNodeService().getProperties(nodeRef);
+        // TODO replace w/ this.properties after no longer subclassing, maybe use QNameMap also
+        Map<String, Object> finalProps =  new HashMap<String, Object>(); 
+        
+        for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
+        	finalProps.put(entry.getKey().toString(), entry.getValue());
+        }
+                
+        return finalProps;
+    }
 	
 	public StringBuffer getResponse() {
 		return response;
@@ -1152,7 +1173,7 @@ public class EmsScriptNode extends ScriptNode {
                     if (Acm.JSON_ARRAYS.contains(jsonType)) {
                         array = jsonObject.getJSONArray(jsonType);
                     } else {
-                        array = new JSONArray();
+                        array = new JSONArray();                      
                         array.put( jsonObject.getString(jsonType) );
                     }
                     updateOrCreateElementValues( array, acmType );
