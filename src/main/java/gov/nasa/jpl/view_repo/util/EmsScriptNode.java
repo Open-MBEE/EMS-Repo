@@ -816,6 +816,16 @@ public class EmsScriptNode extends ScriptNode {
 	}
 	
 	
+    public String toString() {
+        try {
+            return "" + toJSONObject();
+        } catch ( JSONException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     /**
      * Convert node into our custom JSONObject with all possible keys
      * @return                     JSONObject serialization of node
@@ -846,10 +856,10 @@ public class EmsScriptNode extends ScriptNode {
 	    JSONObject element = new JSONObject();
 
 	    // add in all the properties
-        for (String acmType: Acm.ACM2JSON.keySet()) {
+        for (String acmType: Acm.getACM2JSON().keySet()) {
             Object elementValue = this.getProperty(acmType);
             if (elementValue != null) {
-                String jsonType = Acm.ACM2JSON.get(acmType);
+                String jsonType = Acm.getACM2JSON().get(acmType);
                 if (Acm.JSON_FILTER_MAP.get(renderType).contains(jsonType)) {
                     if (Acm.JSON_ARRAYS.contains(jsonType)) {
                         String elementString = elementValue.toString();

@@ -11,6 +11,7 @@ import gov.nasa.jpl.ae.event.Expression;
 import gov.nasa.jpl.ae.solver.ConstraintLoopSolver;
 import gov.nasa.jpl.ae.sysml.SystemModelSolver;
 import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.MoreToString;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
@@ -88,6 +89,8 @@ public class EmsSystemModelTest {
     	 * searching for Property will work....
     	 * 
     	 */
+        
+        Debug.turnOn();
   
         //NodeRef node = NodeUtil.findNodeRefById( "expr_32165", model.getServices() );
                 
@@ -128,11 +131,13 @@ public class EmsSystemModelTest {
 
         	NodeRef valueOfElem = (NodeRef)propNode.getProperty(Acm.ACM_ELEMENT_VALUE_ELEMENT);
         	System.out.println("\n*testExpressionEvaluation() propNode.elementValueOfElement: "+valueOfElem);
+
+        	if ( valueOfElem == null ) continue;
         
         	// This will get the name of the operator via ACM_NAME:
         	EmsScriptNode valueOfElemNode = new EmsScriptNode(valueOfElem,services);
         	System.out.println("\n*testExpressionEvaluation() valueOfElemNode.name: "+valueOfElemNode.getName() + " id: "+valueOfElemNode.getId() + " type: "+valueOfElemNode.getType() + " sysmlName: "+valueOfElemNode.getProperty(Acm.ACM_NAME));
-        	
+        	if ( valueOfElemNode.getType() == null ) continue;
         	// If its not a Operation type, ie. Property type (the command arguments):
         	if (!valueOfElemNode.getType().contains(Acm.JSON_OPERATION)) {
         		
@@ -152,19 +157,22 @@ public class EmsSystemModelTest {
 //        EmsScriptNode nodeTest = nodesTest.iterator().next();
 //        // This also returns an ArrayList<NodeRef> of size 1
 //        System.out.println("\n*testExpressionEvaluation() nodeTest.getProperty(sysml:value).getClass(): "
-//				+ MoreToString.Helper.toLongString(nodeTest.getProperty(Acm.ACM_VALUE).getClass()));
+//				+ nodeTest.getProperty(Acm.ACM_VALUE).getClass());
 
         
         Object evalResult = sysmlToAe.evaluateExpression( node );  
         System.out.println( "\n*testExpressionEvaluation() evalResult: "
-                            + MoreToString.Helper.toLongString( evalResult ) );
+                            + evalResult );
         assertNotNull( evalResult );
         
         Expression< Boolean > expression = sysmlToAe.toAeExpression( node );
         System.out.println( "\n*testExpressionEvaluation() expression: "
-                + MoreToString.Helper.toLongString( expression ) );
+                + expression );
         assertNotNull( expression ); 
-        Assert.assertTrue( Boolean.class.isAssignableFrom( expression.getType() ) );  // GG: this fails
+        Class< ? > type = expression.getType();
+        System.out.println( "\n*testExpressionEvaluation() expression type: "
+                            + type.getSimpleName() );
+        Assert.assertTrue( Boolean.class.isAssignableFrom( type ) );  // GG: this fails
         ConstraintExpression constraint = new ConstraintExpression( expression );
         System.out.println( "\n*testExpressionEvaluation() constraint: "
                 + MoreToString.Helper.toLongString( constraint ) );
