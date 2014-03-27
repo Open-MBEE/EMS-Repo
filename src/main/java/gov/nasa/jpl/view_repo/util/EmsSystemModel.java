@@ -740,17 +740,28 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     	
         // TODO finish this, just a partial implementation
     	
-    	// ScriptNode getType returns a QName or String, why does he want a collection
-    	// of EmsScriptNode?
+    	// TODO ScriptNode getType returns a QName or String, why does he want a collection
+    	// of EmsScriptNode?  I think we should change T to String.
     	
-    	// Brad started this:
-//        if (context instanceof EmsScriptNode) {
-//            return Utils.newList(new EmsScriptNode(
-//            		( (EmsScriptNode)context).getType(), services));
-//        }
-        
-
         return null;
+    }
+    
+    // TODO remove this once we fix getType()
+    @Override
+   public String getTypeString( Object context, Object specifier ) {
+    	
+        // TODO finish this, just a partial implementation
+    	
+ 
+        if (context instanceof EmsScriptNode) {
+        	EmsScriptNode node = (EmsScriptNode) context;
+        	
+        	return node.getType();
+            
+        }
+        
+        return null;
+        
     }
 
     @Override
@@ -1178,12 +1189,12 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         return null;
     }
 
-//    @Override
-//    public Collection< EmsScriptNode >
-//            getConstraintsOfContext( EmsScriptNode context ) {
-//        // TODO Auto-generated method stub
-//        return null;
-//    }
+    @Override
+    public Collection< EmsScriptNode >
+            getConstraintsOfContext( EmsScriptNode context ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
     public Collection< EmsScriptNode >
@@ -1193,12 +1204,12 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         return null;
     }
 
-//    @Override
-//    public Collection< EmsScriptNode >
-//            getViolatedConstraintsOfContext( EmsScriptNode context ) {
-//        // TODO Auto-generated method stub
-//        return null;
-//    }
+    @Override
+    public Collection< EmsScriptNode >
+            getViolatedConstraintsOfContext( EmsScriptNode context ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
     public void setOptimizationFunction( Method method, Object... arguments ) {
@@ -1216,12 +1227,12 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         return services;
     }
 
-    @Override
-    public boolean fixConstraintViolations( EmsScriptNode element,
-                                            String version ) {
-        // TODO Auto-generated method stub
-        return false;
-    }
+//    @Override
+//    public boolean fixConstraintViolations( EmsScriptNode element,
+//                                            String version ) {
+//        // TODO Auto-generated method stub
+//        return false;
+//    }
 
     
 }
