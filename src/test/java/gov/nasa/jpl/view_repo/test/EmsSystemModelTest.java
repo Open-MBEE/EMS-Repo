@@ -141,6 +141,7 @@ public class EmsSystemModelTest {
             	
             	// The argument integer property:
             	EmsScriptNode argValueNode = new EmsScriptNode(argValues.get(0),services);
+            	System.out.println("\n*testExpressionEvaluation() argValueNode.type: " +argValueNode.getType());
             	System.out.println("\n*testExpressionEvaluation() argValueNode.integer: " +argValueNode.getProperty(Acm.ACM_INTEGER));
 
         	}
