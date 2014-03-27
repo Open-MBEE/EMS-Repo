@@ -690,21 +690,21 @@ public class EmsScriptNode extends ScriptNode {
 		}
 	}
 	
-	@Override
-    public Map<String, Object> getProperties()
-    {
-		
-        Map<QName, Serializable> props =  services.getNodeService().getProperties(nodeRef);
-        // TODO replace w/ this.properties after no longer subclassing, maybe use QNameMap also
-        Map<String, Object> finalProps =  new HashMap<String, Object>(); 
-        
-        // Create map of string representation of QName to the value of the property:
-        for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
-        	finalProps.put(entry.getKey().toString(), entry.getValue());
-        }
-                
-        return finalProps;
-    }
+//	@Override
+//    public Map<String, Object> getProperties()
+//    {
+//		
+//        Map<QName, Serializable> props =  services.getNodeService().getProperties(nodeRef);
+//        // TODO replace w/ this.properties after no longer subclassing, maybe use QNameMap also
+//        Map<String, Object> finalProps =  new HashMap<String, Object>(); 
+//        
+//        // Create map of string representation of QName to the value of the property:
+//        for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
+//        	finalProps.put(entry.getKey().toString(), entry.getValue());
+//        }
+//                
+//        return finalProps;
+//    }
 	
     /**
      * Get the property of the specified type
