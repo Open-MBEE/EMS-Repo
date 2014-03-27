@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -503,10 +504,10 @@ public class EmsScriptNode extends ScriptNode {
      * @return          True if values updated/create, false if unchanged
      * @throws JSONException
      */
-    @SuppressWarnings("unchecked")
     public <T extends Serializable> boolean createOrUpdatePropertyValues(String type, JSONArray array) throws JSONException {
         ArrayList<T> values = new ArrayList<T>();
         for (int ii = 0; ii < array.length(); ii++) {
+            @SuppressWarnings( "unchecked" )
             T value = (T)array.get(ii);
             if ( value instanceof String ) {
                 @SuppressWarnings( "unchecked" )
@@ -516,6 +517,7 @@ public class EmsScriptNode extends ScriptNode {
             values.add(value);
         }
         
+        @SuppressWarnings( "unchecked" )
         ArrayList<T> oldValues = (ArrayList<T>) getProperty(type);
         if (!checkIfListsEquivalent(oldValues, values)) {
             setProperty(type, values);
@@ -683,6 +685,22 @@ public class EmsScriptNode extends ScriptNode {
 	}
 
 	
+    /**
+     * Get the property of the specified type
+     * @param acmType   Short name of property to get
+     * @return
+     */
+    @Override
+    public Map<String, Object> getProperties() {
+        if (useFoundationalApi) {
+            return Utils.toMap( services.getNodeService().getProperties( nodeRef ),
+                                String.class, Object.class );
+        } else {
+            return getProperties();
+        }
+    }
+
+    
 	public StringBuffer getResponse() {
 		return response;
 	}
@@ -709,7 +727,8 @@ public class EmsScriptNode extends ScriptNode {
 	 * @param acmType  Property short name for alfresco content model type 
 	 * @param value    Value to set property to
 	 */
-	public <T extends Serializable >void setProperty(String acmType, T value) {
+	public <T extends Serializable > void setProperty(String acmType, T value) {
+	    log( "setProperty(acmType=" + acmType + ", value=" + value + ")" );
 		if (useFoundationalApi) {
 		    try {
 		        services.getNodeService().setProperty(nodeRef, createQName(acmType), value);
@@ -824,11 +843,12 @@ public class EmsScriptNode extends ScriptNode {
 	public JSONObject toJSONObject(Acm.JSON_TYPE_FILTER renderType, boolean showQualifiedName, boolean showEditable) throws JSONException {
 	    JSONObject element = new JSONObject();
 
+	    System.out.println(this.getProperties());
 	    // add in all the properties
-        for (String acmType: Acm.ACM2JSON.keySet()) {
+        for (String acmType: Acm.getACM2JSON().keySet()) {
             Object elementValue = this.getProperty(acmType);
             if (elementValue != null) {
-                String jsonType = Acm.ACM2JSON.get(acmType);
+                String jsonType = Acm.getACM2JSON().get(acmType);
                 if (Acm.JSON_FILTER_MAP.get(renderType).contains(jsonType)) {
                     if (Acm.JSON_ARRAYS.contains(jsonType)) {
                         String elementString = elementValue.toString();
@@ -1144,6 +1164,7 @@ public class EmsScriptNode extends ScriptNode {
 	 */
 	public void ingestJSON(JSONObject jsonObject) throws JSONException {
 	    // fill in all the properties
+	    System.out.println( "ingestJSON(" + jsonObject + ")" );
 	    for (String jsonType: Acm.JSON2ACM.keySet()) {
 	        String acmType = Acm.JSON2ACM.get(jsonType);
 	        if (jsonObject.has(jsonType)) {

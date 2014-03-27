@@ -211,8 +211,8 @@ public class ModelPost extends AbstractJavaWebScript {
         } // end for (String rootElement: rootElements) {
     }
 
-    protected EmsScriptNode getOwner(String rootElement, EmsScriptNode projectNode, boolean createOwnerPkgIfNotFound) {
-        JSONObject element = elementMap.get(rootElement);
+    protected EmsScriptNode getOwner(String elementId, EmsScriptNode projectNode, boolean createOwnerPkgIfNotFound) {
+        JSONObject element = elementMap.get(elementId);
         if ( element == null ) {
             log(LogLevel.ERROR, "Trying to get owner of null element!", HttpServletResponse.SC_NOT_FOUND);
             return null;
@@ -231,7 +231,7 @@ public class ModelPost extends AbstractJavaWebScript {
         EmsScriptNode owner = null;
         EmsScriptNode reifiedPkg = null;
         if (ownerName == null || ownerName.equals("null")) {
-            EmsScriptNode elementNode = findScriptNodeById(rootElement);
+            EmsScriptNode elementNode = findScriptNodeById(elementId);
             if (elementNode == null || !elementNode.exists()) {
                 owner = projectNode;
             } else {
@@ -240,7 +240,7 @@ public class ModelPost extends AbstractJavaWebScript {
         } else {
             owner = findScriptNodeById(ownerName);
             if (owner == null || !owner.exists()) {
-                log(LogLevel.WARNING, "Could not find owner with name: " + ownerName + " putting into project", HttpServletResponse.SC_NOT_FOUND);
+                log(LogLevel.WARNING, "Could not find owner with name: " + ownerName + " putting " + elementId + " into project", HttpServletResponse.SC_NOT_FOUND);
                 owner = projectNode;
             }
             // really want to add pkg as owner
@@ -254,7 +254,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             owner = reifiedPkg;
         }
-        log( LogLevel.INFO, "\tgetOwner(" + rootElement + "): json element=("
+        log( LogLevel.INFO, "\tgetOwner(" + elementId + "): json element=("
                             + element + "), ownerName=" + ownerName
                             + ", reifiedPkg=(" + reifiedPkg + ", projectNode=("
                             + projectNode + "), returning owner=" + owner );
@@ -634,7 +634,7 @@ public class ModelPost extends AbstractJavaWebScript {
         if ( (node == null || !node.exists()) && newElements.contains( id ) ) {
             String type = null;
             String jsonType = elementJson.getString( Acm.JSON_TYPE );
-            if ( jsonType != null ) type = Acm.JSON2ACM.get( jsonType );
+            if ( jsonType != null ) type = Acm.getJSON2ACM().get( jsonType );
             if ( type == null || type.trim().isEmpty() ) {
                 System.out.println( "PREFIX: type not found for " + jsonType );
                 return null;
@@ -777,7 +777,8 @@ public class ModelPost extends AbstractJavaWebScript {
         
 //        Acm.ACM2JSON = null;
 //        Acm.JSON2ACM = null;
-        System.out.println(Acm.getACM2JSON());
+        System.out.println("Acm.getJSON2ACM() = " + Acm.getJSON2ACM());
+        System.out.println("Acm.getACM2JSON() = " + Acm.getACM2JSON());
         
         boolean runInBackground = checkArgEquals(req, "background", "true");
 

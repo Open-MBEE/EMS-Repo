@@ -268,11 +268,11 @@ public class Acm {
     /**
      *  JSON to Alfresco Content Model mapping
      */
-    public static Map<String, String> JSON2ACM = null; //getJSON2ACM();
+    protected static Map<String, String> JSON2ACM = null; //getJSON2ACM();
     /**
      *  Alfresco Content Model 2 JSON types
      */
-    public static Map<String, String> ACM2JSON = null; //getACM2JSON();
+    protected static Map<String, String> ACM2JSON = null; //getACM2JSON();
     
     {init();}
     
