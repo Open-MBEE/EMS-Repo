@@ -1335,13 +1335,6 @@ public class CmisModelInterfaceImpl
     }
 
     @Override
-    public Collection< CmisObject >
-            getConstraintsOfContext( OperationContext arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public Collection< CmisObject > getConstraintsOfElement( CmisObject arg0,
                                                              String arg1,
                                                              Object arg2 ) {
@@ -1358,13 +1351,6 @@ public class CmisModelInterfaceImpl
 
     @Override
     public Number getScore() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< CmisObject >
-            getViolatedConstraintsOfContext( OperationContext arg0 ) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -1428,6 +1414,12 @@ public class CmisModelInterfaceImpl
     
         return null;
         
+    }
+
+    @Override
+    public boolean fixConstraintViolations( CmisObject element, String version ) {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }

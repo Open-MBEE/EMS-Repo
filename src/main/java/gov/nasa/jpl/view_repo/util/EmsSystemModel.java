@@ -1191,22 +1191,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     @Override
     public Collection< EmsScriptNode >
-            getConstraintsOfContext( EmsScriptNode context ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< EmsScriptNode >
             getViolatedConstraintsOfElement( EmsScriptNode element,
                                              String version ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< EmsScriptNode >
-            getViolatedConstraintsOfContext( EmsScriptNode context ) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -1227,12 +1213,11 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         return services;
     }
 
-//    @Override
-//    public boolean fixConstraintViolations( EmsScriptNode element,
-//                                            String version ) {
-//        // TODO Auto-generated method stub
-//        return false;
-//    }
+    @Override
+    public boolean fixConstraintViolations( EmsScriptNode element,
+                                            String version ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
-    
 }
