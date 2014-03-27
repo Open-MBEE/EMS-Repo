@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -467,39 +468,105 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         // TODO Auto-generated method stub
         return null;
     }
+    
+    /**
+     * Attempts to convert propVal to a EmsScriptNode.  If conversion is possible, adds
+     * to the passed List.
+     * 
+     * @param propVal the property to try and convert
+     * @param returnList the list of nodes to possibly add to
+     */
+    private void convertToScriptNode(Object propVal, List<EmsScriptNode> returnList) {
+    	    	
+       	// The propVal can be a ArrayList<NodeRef>, ArrayList<Object>. Also, handling the case
+    	// that propVal is just a NodeRef, even though its not currently coded that way.
+    	
+ 		if (propVal instanceof ArrayList) {
+			 			
+			// Loop through the arrayList and convert each NodeRef to a EmsScriptNode
+			ArrayList<?> propValArray = (ArrayList<?>)propVal;
+			for (Object propValNode : propValArray) {
+				
+				// If its a NodeRef then convert:
+				if (propValNode instanceof NodeRef) {
+					
+					returnList.add(new EmsScriptNode((NodeRef)propValNode, services));
+				}
+				
+				// TODO what do we do for other objects?  For now, nothing....
+			}
+
+		} // ends if propVal is a ArrayList
+		
+		else if (propVal instanceof NodeRef) {
+			returnList.add(new EmsScriptNode((NodeRef)propVal, services));
+		}
+		
+		else {
+			// TODO what do we do for other objects?  For now, nothing....
+		}
+		
+ 
+    }
 
     @Override
     public Collection< EmsScriptNode > getProperty( Object context,
                                                     Object specifier ) {
+    	
+        ArrayList< EmsScriptNode > allProperties = new ArrayList< EmsScriptNode >();
+
         // find the specified property inside the context
         if ( context instanceof EmsScriptNode ) {
+        	
             EmsScriptNode node = (EmsScriptNode)context;
+
             if ( specifier == null ) {
                 // if no specifier, return all properties
                 Map< String, Object > props = node.getProperties();
-                if ( props == null ) return Utils.newList();
-                return Utils.asList( props.values(), EmsScriptNode.class );
-            } else {
+                if ( props != null ) {
+                
+                	// Loop through all of returned properties:
+                	Collection<Object> propValues = props.values();
+                	for (Object propVal : propValues) {
+                		
+                		// Attempt to convert to a EmsScriptNode and add to the list
+                		// to later return if conversion succeeded:
+                		convertToScriptNode(propVal, allProperties);
+
+                	} // ends for loop through properties
+                }
+                
+            } // ends if specifies is null
+            
+            else {
                 Object prop = node.getProperty( "" + specifier );
-                return Utils.asList( prop, EmsScriptNode.class );
-            }
+                
+        		// Attempt to converted to a EmsScriptNode and add to the list
+        		// to later return if conversion succeeded:
+                convertToScriptNode(prop, allProperties);
+
+        	}
+            
+            return allProperties;
         }
+        
         if ( context != null ) {
             // TODO -- error????  Are there any other contexts than an EmsScriptNode that would have a property?
             Debug.error("context is not an EmsScriptNode!");
             return null;
         }
+        
         // context is null; look for nodes of type Property that match the specifier
         if ( specifier != null ) {
             return getElementWithName( context, "" + specifier );
         }
+        
         // context and specifier are both be null
         // REVIEW -- error?
         // Debug.error("context and specifier cannot both be null!");
         // REVIEW -- What about returning all properties?
         Collection< EmsScriptNode > propertyTypes = getTypeWithName( context, "Property" );
         if ( !Utils.isNullOrEmpty( propertyTypes ) ) {
-            ArrayList< EmsScriptNode > allProperties = new ArrayList< EmsScriptNode >();
             for ( EmsScriptNode prop : propertyTypes ) {
                 allProperties.addAll( getElementWithType( context, propertyTypes.iterator().next() ) );
             }
@@ -670,8 +737,31 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     @Override
     public Collection< EmsScriptNode >
             getType( Object context, Object specifier ) {
-        // TODO Auto-generated method stub
+    	
+        // TODO finish this, just a partial implementation
+    	
+    	// TODO ScriptNode getType returns a QName or String, why does he want a collection
+    	// of EmsScriptNode?  I think we should change T to String.
+    	
         return null;
+    }
+    
+    // TODO remove this once we fix getType()
+    @Override
+   public String getTypeString( Object context, Object specifier ) {
+    	
+        // TODO finish this, just a partial implementation
+    	
+ 
+        if (context instanceof EmsScriptNode) {
+        	EmsScriptNode node = (EmsScriptNode) context;
+        	
+        	return node.getType();
+            
+        }
+        
+        return null;
+        
     }
 
     @Override
@@ -1101,22 +1191,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     @Override
     public Collection< EmsScriptNode >
-            getConstraintsOfContext( EmsScriptNode context ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< EmsScriptNode >
             getViolatedConstraintsOfElement( EmsScriptNode element,
                                              String version ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< EmsScriptNode >
-            getViolatedConstraintsOfContext( EmsScriptNode context ) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -1137,5 +1213,11 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         return services;
     }
 
-    
+    @Override
+    public boolean fixConstraintViolations( EmsScriptNode element,
+                                            String version ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }

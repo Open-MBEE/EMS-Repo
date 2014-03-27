@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -56,6 +57,7 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
+import org.alfresco.repo.jscript.ContentAwareScriptableQNameMap;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.AssociationRef;
@@ -81,6 +83,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
 
+import org.alfresco.service.namespace.QNameMap;
+
 /**
  * Extension of ScriptNode to support EMS needs
  * @author cinyoung
@@ -95,14 +99,16 @@ public class EmsScriptNode extends ScriptNode {
 	// provide status as necessary
 	private Status status = null;
 	
-	boolean useFoundationalApi = true;
+	boolean useFoundationalApi = true; // TODO this will be removed
 
     //protected static StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 
     protected EmsScriptNode companyHome = null;
     
     protected EmsScriptNode siteNode = null;
-
+    
+    // TODO add nodeService and other member variables when no longer subclassing ScriptNode
+    //	    extend Serializable after removing ScriptNode extension
     
 	// for lucene search
 	//protected static final StoreRef SEARCH_STORE = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
@@ -683,7 +689,22 @@ public class EmsScriptNode extends ScriptNode {
 			return getProperties().get(acmType);
 		}
 	}
-
+	
+	@Override
+    public Map<String, Object> getProperties()
+    {
+		
+        Map<QName, Serializable> props =  services.getNodeService().getProperties(nodeRef);
+        // TODO replace w/ this.properties after no longer subclassing, maybe use QNameMap also
+        Map<String, Object> finalProps =  new HashMap<String, Object>(); 
+        
+        // Create map of string representation of QName to the value of the property:
+        for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
+        	finalProps.put(entry.getKey().toString(), entry.getValue());
+        }
+                
+        return finalProps;
+    }
 	
     /**
      * Get the property of the specified type
@@ -814,6 +835,16 @@ public class EmsScriptNode extends ScriptNode {
 	}
 	
 	
+    public String toString() {
+        try {
+            return "" + toJSONObject();
+        } catch ( JSONException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     /**
      * Convert node into our custom JSONObject with all possible keys
      * @return                     JSONObject serialization of node
@@ -1101,28 +1132,36 @@ public class EmsScriptNode extends ScriptNode {
         siteNode = parent.getParent();
         return siteNode;
     }
+    
+    private EmsScriptNode convertIdToEmsScriptNode(String valueId) 
+    {
+    	ResultSet existingArtifacts = findNodeRefsByType( valueId, "@cm\\:name:\"" );
+    	Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
+    	existingArtifacts.close();
+    	
+        EmsScriptNode value = (nodeSet == null || nodeSet.size() <= 0) ? null : nodeSet.iterator().next();
+
+        return value;
+    }
 
     /**
      * Update or create element values (multiple noderefs ordered in a list)
      * 
      * @param jsonArray
      *            Array of the IDs that house the values for the element
-     * @param id
-     *            The ID of the element to add the values to
+     * @param property
+     *            The property to update or create
      * @throws JSONException
      */
     protected void updateOrCreateElementValues(JSONArray jsonArray, String property)
             throws JSONException {
-        // create an array of the values to be added in as the elementValue
-        // property
+    	
+        // This is based on ModelPost.updateOrCreateElementValues() 	
         ArrayList<NodeRef> values = new ArrayList<NodeRef>();
         for (int ii = 0; ii < jsonArray.length(); ii++) {
             String valueId = jsonArray.getString(ii);
-            ResultSet existingArtifacts = findNodeRefsByType( valueId, "@cm\\:name:\"" );
-            Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
-            existingArtifacts.close();
-
-            EmsScriptNode value = (nodeSet == null || nodeSet.size() <= 0) ? null : nodeSet.iterator().next();
+            EmsScriptNode value = convertIdToEmsScriptNode(valueId);
+            
             if (value != null
                     && value.checkPermissions(PermissionService.WRITE, response, status)) {
                 values.add(value.getNodeRef());
@@ -1145,6 +1184,35 @@ public class EmsScriptNode extends ScriptNode {
             log("no write permissions " + id
                     + "\n");
         }
+    }
+    
+    /**
+     * Update or create element value (single NodeRef)
+     * 
+     * @param valueId
+     *            The ID that house the value for the element
+     * @param property
+     *            The property to update or create
+     * @throws JSONException
+     */
+    protected void updateOrCreateElementValue(String valueId, String property)
+            throws JSONException {
+    	
+        EmsScriptNode value = convertIdToEmsScriptNode(valueId);
+
+        if (value != null
+            && value.checkPermissions(PermissionService.WRITE, response, status)) {
+        	
+            // only change if old value is different than new value:
+        	NodeRef newValue = value.getNodeRef();
+        	if (!newValue.equals((NodeRef)getProperty(property))) {
+                setProperty(property, newValue);
+        	}
+        } 
+        else {
+            log("could not find element value node with id " + valueId + "\n");
+        }
+  
     }
 	
 	public EmsScriptNode findScriptNodeByName( String id ) {
@@ -1169,20 +1237,42 @@ public class EmsScriptNode extends ScriptNode {
 	        String acmType = Acm.JSON2ACM.get(jsonType);
 	        if (jsonObject.has(jsonType)) {
                 if (Acm.JSON_NODEREFS.contains(jsonType)) {
-                    JSONArray array = null;
+                	// If its an array of NodeRefs, i.e. has multiple values of NodeRef
+                	// type:
                     if (Acm.JSON_ARRAYS.contains(jsonType)) {
-                        array = jsonObject.getJSONArray(jsonType);
-                    } else {
-                        array = new JSONArray();
-                        array.put( jsonObject.getString(jsonType) );
+                    	JSONArray array = jsonObject.getJSONArray(jsonType);
+                        updateOrCreateElementValues( array, acmType );
+                    } 
+                    // Otherwise it is a single NodeRef:
+                    else {
+                        updateOrCreateElementValue(jsonObject.getString(jsonType), acmType);
                     }
-                    updateOrCreateElementValues( array, acmType );
                 } else if (Acm.JSON_ARRAYS.contains(jsonType)) {
 	                JSONArray array = jsonObject.getJSONArray(jsonType);
 	                this.createOrUpdateProperty(acmType, array.toString());
 	            } else {
+	            	
 	                //System.out.println("creating or updating property: " + acmType + " = " + property );
-                    if ( jsonType.startsWith( "is" ) ) {
+	            	
+	            	if (jsonType.equals(Acm.JSON_INTEGER) ||
+	            		jsonType.equals(Acm.JSON_NATURAL_VALUE)) {
+	            		
+	            		Integer property = jsonObject.getInt(jsonType);
+	            		if (property != null) {
+	            			this.createOrUpdateProperty(acmType, property);
+	            		}
+	            	}
+	            	else if (jsonType.equals(Acm.JSON_DOUBLE) ||
+	            			 jsonType.equals(Acm.JSON_REAL)) {
+	            		
+	            		Double property = jsonObject.getDouble(jsonType);
+	            		if (property != null) {
+	            			this.createOrUpdateProperty(acmType, property);
+	            		}
+	            	}
+	            	else if (jsonType.startsWith( "is" ) ||
+	            			 jsonType.equals(Acm.JSON_BOOLEAN)) {
+	            		
                         //( property.equalsIgnoreCase( "true" ) || property.equalsIgnoreCase( "false" ) ) ) {
                         Boolean property = jsonObject.getBoolean( jsonType);
                         if ( property == null ) {
@@ -1192,10 +1282,15 @@ public class EmsScriptNode extends ScriptNode {
                         } else {
                             this.createOrUpdateProperty(acmType, property);
                         }
-	                } else {
+	                } 
+	            	else {
+	                	
 	                    String property = jsonObject.getString(jsonType);
-	                    this.createOrUpdateProperty(acmType, new String(property));
+	            		if (property != null) {
+	            			this.createOrUpdateProperty(acmType, new String(property));
+	            		}
 	                }
+	            	
 	            }
 	        }
 	    }

@@ -313,7 +313,7 @@
         <type name="sysml:ElementValue">
             <parent>sysml:ValueSpecification</parent>
             <properties>
-                <property name="sysml:elementValueElement">
+                <property name="sysml:elementValueOfElement">
                     <type>d:noderef</type>
                     <mandatory>false</mandatory>
                     <multiple>false</multiple>

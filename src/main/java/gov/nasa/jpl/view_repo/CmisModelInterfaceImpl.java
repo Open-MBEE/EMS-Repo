@@ -8,6 +8,8 @@ package gov.nasa.jpl.view_repo;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1333,13 +1335,6 @@ public class CmisModelInterfaceImpl
     }
 
     @Override
-    public Collection< CmisObject >
-            getConstraintsOfContext( OperationContext arg0 ) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     public Collection< CmisObject > getConstraintsOfElement( CmisObject arg0,
                                                              String arg1,
                                                              Object arg2 ) {
@@ -1356,13 +1351,6 @@ public class CmisModelInterfaceImpl
 
     @Override
     public Number getScore() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public Collection< CmisObject >
-            getViolatedConstraintsOfContext( OperationContext arg0 ) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -1414,5 +1402,24 @@ public class CmisModelInterfaceImpl
         return false;
     }
 
+//    @Override
+//    public boolean fixConstraintViolations( CmisObject element, String version ) {
+//        // TODO Auto-generated method stub
+//        return false;
+//    }
+
+    // TODO remove this once we fix getType()
+    @Override
+    public String getTypeString( Object context, Object specifier ) {
+    
+        return null;
+        
+    }
+
+    @Override
+    public boolean fixConstraintViolations( CmisObject element, String version ) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
 }

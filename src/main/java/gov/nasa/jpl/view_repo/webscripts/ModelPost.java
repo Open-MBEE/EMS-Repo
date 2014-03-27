@@ -348,6 +348,9 @@ public class ModelPost extends AbstractJavaWebScript {
     }
 
     /**
+     * TODO this may be outdated.  ElementValue is not longer a property.
+     * 		these should be done for ValueSpecification types
+     * 
      * Update or create element values (multiple noderefs ordered in a list)
      * 
      * @param jsonArray
@@ -687,7 +690,9 @@ public class ModelPost extends AbstractJavaWebScript {
             
             JSONArray array = elementHierarchyJson.getJSONArray(id);
             if ( array != null ) {
-                for (int ii = 0; !ingest && ii < array.length(); ii++) {
+            	// GG: removed !ingest so children can have their metadata inserted
+                //for (int ii = 0; !ingest && ii < array.length(); ii++) {
+                for (int ii = 0; ii < array.length(); ii++) {
                     children.put(array.get(ii));
                 }
             }

@@ -54,20 +54,20 @@ Eclipse/Maven
         mvn install:install-file -Dfile=lib/mbee_util.jar -DgroupId=gov.nasa.jpl -DartifactId=mbee_util -Dversion=1.0 -Dpackaging=jar
         mvn install:install-file -Dfile=lib/sysml.jar -DgroupId=gov.nasa.jpl -DartifactId=sysml -Dversion=1.0 -Dpackaging=jar
 
-    For the bae, sysml, and util projects you will need to update the build.properties file with your home directory and folder of where magic draw is installed.  For instance:
+    For the bae, sysml, and util projects you will need to update the build.properties file and rebel.xml file with your home directory and folder of where magic draw is installed.  For instance:
         home=/Users/gcgandhi
         md=/Applications/MD
 
     If you are not using Eclispse yoxos, then you will need to install the IMCE Eclipse plug ins.  Do the following:
-        1. Get the .jar files from Brad or Dorris, and then place them in your eclipse installation plugins folder, i.e. "/Applications/eclipse/plugins".  
+        1. Get the .jar files from Brad or Doris, and then place them in your eclipse installation plugins folder, i.e. "/Applications/eclipse/plugins".  
         2. Restart Eclipse.  
-        3. For the mdk and bae projects rick click on the project folder and check that the library (IMCE MagicDraw Classpath Container) was added:  Properties->Java BuildPath->Libraries.  
+        3. For the mdk and bae projects right click on the project folder and check that the library (IMCE MagicDraw Classpath Container) was added:  Properties->Java BuildPath->Libraries.  
         4.Make sure that the library appears first in the list for the bae project (you can adjust this in the Order and Export tab).  
 
     Make sure that Java Buildpath for the view-repo project is using Java 1.7.
 
     Open up the Ant window by clicking on Window->Show View->Other->Ant.  For the bae, sysml, and util projects, 
-    drag the build.xml files into the Ant window.  Then expand each one in the Ant window, and run the makejar.
+    drag the build.xml files into the Ant window.  Then expand each one in the Ant window, and run the makejar.  You must do this everytime after you purge.
     
     
 # building, setting up maven, jrebel
@@ -87,7 +87,7 @@ To run in embedded jetty container and H2 db, (with jrebel and remote debugging!
 NOTE: It's possible that Eclipse can get in the way of the maven execution. So, when running maven, temporarily turn off the Eclipse->Project->Build Automatically". Once the Jetty server is up and running, turn it back on so you can make changes hot swap your code updates.
 If you get an error about avmRemote or something like that, you may need to update your /etc/hosts to with something like COMPUTER_NAME 127.0.0.1
     
-To clean all data and artifacts
+To clean all data and artifacts.  After doing this make sure to update the Maven project (right click on project folder->Maven->Update Project) and re-create/copy the sysml, util, bae .jar files.
 
     mvn clean -Ppurge
 
