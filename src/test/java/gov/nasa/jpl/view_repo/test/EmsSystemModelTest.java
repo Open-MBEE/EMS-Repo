@@ -22,6 +22,7 @@ import gov.nasa.jpl.view_repo.util.NodeUtil;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -32,9 +33,17 @@ public class EmsSystemModelTest {
     public static SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, EmsSystemModel > sysmlToAe = null;
     public static ServiceRegistry services = NodeUtil.getServiceRegistry();
     protected static final String ADMIN_USER_NAME = "admin";
-
+    protected static boolean wasOn;
+    
+    @AfterClass
+    public static void cleanup() {
+        if ( !wasOn ) Debug.turnOff();        
+    }
     @BeforeClass
     public static void initAppContext() {
+        wasOn = Debug.isOn();
+        if ( !wasOn ) Debug.turnOn();
+  
         model = new EmsSystemModel( services );
         sysmlToAe = new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, EmsSystemModel >( model );
         //AuthenticationUtil.setRunAsUserSystem();
@@ -90,8 +99,6 @@ public class EmsSystemModelTest {
     	 * 
     	 */
         
-        Debug.turnOn();
-  
         //NodeRef node = NodeUtil.findNodeRefById( "expr_32165", model.getServices() );
                 
         System.out.println( "testExpressionEvaluation()" );
@@ -185,6 +192,8 @@ public class EmsSystemModelTest {
                             + MoreToString.Helper.toLongString( solver ) );
         boolean r = solver.solve( Utils.newList( constraint ) );
         // TODO -- dig solution out of solver (really out of constraint)!
+
+        if ( !wasOn ) Debug.turnOn();
     }
 
     @Test
