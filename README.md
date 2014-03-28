@@ -1,4 +1,21 @@
 # view amp for alfresco repository (overlay on alfresco.war)
+
+#AMI environment instructions
+
+import view-repo with git (same instructions as below)
+
+update maven project:
+	right click maven project
+	Maven -> Update Project...
+
+build with maventest in command line
+	cd /home/username/git/alfresco-view-repo
+	mvn integration-test -Pamp-to-w -Dmaven.test.skip=true
+
+restart eclipse
+
+#typical local environment instructions
+
 This project contains the content model and webscripts for accessing and modifying the alfresco repository. 
 
 Location of content model: src/main/amp/config/alfresco/module/view-repo/viewModel.xml
