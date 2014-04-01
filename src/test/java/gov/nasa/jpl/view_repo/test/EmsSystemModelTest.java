@@ -92,13 +92,6 @@ public class EmsSystemModelTest {
     @Test
     public void testExpressionEvaluation() {
     	
-    	/*
-    	 * There is no overall parent package that these all belong to besides the 123456, but I think
-    	 * that is a folder?  So I dont think their suggestion of finding the highest parent pkg and then
-    	 * searching for Property will work....
-    	 * 
-    	 */
-        
         //NodeRef node = NodeUtil.findNodeRefById( "expr_32165", model.getServices() );
                 
         System.out.println( "testExpressionEvaluation()" );
@@ -167,7 +160,7 @@ public class EmsSystemModelTest {
 //				+ nodeTest.getProperty(Acm.ACM_VALUE).getClass());
 
         
-        Object evalResult = sysmlToAe.evaluateExpression( node );  
+        Object evalResult = sysmlToAe.evaluateExpression( node, Boolean.class );  
         System.out.println( "\n*testExpressionEvaluation() evalResult: "
                             + evalResult );
         assertNotNull( evalResult );
@@ -179,7 +172,8 @@ public class EmsSystemModelTest {
         Class< ? > type = expression.getType();
         System.out.println( "\n*testExpressionEvaluation() expression type: "
                             + type.getSimpleName() );
-        Assert.assertTrue( Boolean.class.isAssignableFrom( type ) );  // GG: this fails
+        Assert.assertTrue( Boolean.class.isAssignableFrom( evalResult.getClass() ) ); 
+        
         ConstraintExpression constraint = new ConstraintExpression( expression );
         System.out.println( "\n*testExpressionEvaluation() constraint: "
                 + MoreToString.Helper.toLongString( constraint ) );
