@@ -725,10 +725,10 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
                 appendResponseStatusInfo(instance);
             } catch (JSONException e) {
-                log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
+                log("JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
                 e.printStackTrace();
             } catch (Exception e) {
-                log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log("Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 e.printStackTrace();
             }
         }
