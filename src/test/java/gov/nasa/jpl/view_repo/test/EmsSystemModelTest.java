@@ -30,7 +30,7 @@ import org.junit.Test;
 public class EmsSystemModelTest {
     
     public static EmsSystemModel model = null;
-    public static SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, EmsSystemModel > sysmlToAe = null;
+    public static SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAe = null;
     public static ServiceRegistry services = NodeUtil.getServiceRegistry();
     protected static final String ADMIN_USER_NAME = "admin";
     protected static boolean wasOn;
@@ -45,7 +45,7 @@ public class EmsSystemModelTest {
         if ( !wasOn ) Debug.turnOn();
   
         model = new EmsSystemModel( services );
-        sysmlToAe = new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, EmsSystemModel >( model );
+        sysmlToAe = new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( model );
         //AuthenticationUtil.setRunAsUserSystem();
         AuthenticationUtil.setFullyAuthenticatedUser(ADMIN_USER_NAME);
         
@@ -123,41 +123,41 @@ public class EmsSystemModelTest {
         EmsScriptNode node = nodes.iterator().next();
         assertNotNull( node );
         
-        System.out.println("\n*testExpressionEvaluation() node.getProperty(sysml:operand): "
-        					+ MoreToString.Helper.toLongString(node.getProperty(Acm.ACM_OPERAND)));
-        // this is an ArrayList but in EmsSystemModel it expects it to be a EmsScriptNode
-        System.out.println("\n*testExpressionEvaluation() node.getProperty(sysml:operand).getClass(): "
-				+ MoreToString.Helper.toLongString(node.getProperty(Acm.ACM_OPERAND).getClass()));
-        ArrayList<NodeRef> props = (ArrayList<NodeRef>)node.getProperty(Acm.ACM_OPERAND);
-        
-        for (NodeRef prop : props) {
-        	
-        	EmsScriptNode propNode = new EmsScriptNode(prop,services);
-        	System.out.println("\n*testExpressionEvaluation() propNode: "+propNode);
-        	System.out.println("\n*testExpressionEvaluation() propNode.name: "+propNode.getName() + " id: "+propNode.getId() + " type: "+propNode.getType());
-
-        	NodeRef valueOfElem = (NodeRef)propNode.getProperty(Acm.ACM_ELEMENT_VALUE_ELEMENT);
-        	System.out.println("\n*testExpressionEvaluation() propNode.elementValueOfElement: "+valueOfElem);
-
-        	if ( valueOfElem == null ) continue;
-        
-        	// This will get the name of the operator via ACM_NAME:
-        	EmsScriptNode valueOfElemNode = new EmsScriptNode(valueOfElem,services);
-        	System.out.println("\n*testExpressionEvaluation() valueOfElemNode.name: "+valueOfElemNode.getName() + " id: "+valueOfElemNode.getId() + " type: "+valueOfElemNode.getType() + " sysmlName: "+valueOfElemNode.getProperty(Acm.ACM_NAME));
-        	if ( valueOfElemNode.getType() == null ) continue;
-        	// If its not a Operation type, ie. Property type (the command arguments):
-        	if (!valueOfElemNode.getType().contains(Acm.JSON_OPERATION)) {
-        		
-        		ArrayList<NodeRef> argValues = (ArrayList<NodeRef>)valueOfElemNode.getProperty(Acm.ACM_VALUE);
-            	System.out.println("\n*testExpressionEvaluation() argValues: " +argValues);
-            	
-            	// The argument integer property:
-            	EmsScriptNode argValueNode = new EmsScriptNode(argValues.get(0),services);
-            	System.out.println("\n*testExpressionEvaluation() argValueNode.type: " +argValueNode.getType());
-            	System.out.println("\n*testExpressionEvaluation() argValueNode.integer: " +argValueNode.getProperty(Acm.ACM_INTEGER));
-
-        	}
-        }
+//        System.out.println("\n*testExpressionEvaluation() node.getProperty(sysml:operand): "
+//        					+ MoreToString.Helper.toLongString(node.getProperty(Acm.ACM_OPERAND)));
+//        // this is an ArrayList but in EmsSystemModel it expects it to be a EmsScriptNode
+//        System.out.println("\n*testExpressionEvaluation() node.getProperty(sysml:operand).getClass(): "
+//				+ MoreToString.Helper.toLongString(node.getProperty(Acm.ACM_OPERAND).getClass()));
+//        ArrayList<NodeRef> props = (ArrayList<NodeRef>)node.getProperty(Acm.ACM_OPERAND);
+//        
+//        for (NodeRef prop : props) {
+//        	
+//        	EmsScriptNode propNode = new EmsScriptNode(prop,services);
+//        	System.out.println("\n*testExpressionEvaluation() propNode: "+propNode);
+//        	System.out.println("\n*testExpressionEvaluation() propNode.name: "+propNode.getName() + " id: "+propNode.getId() + " type: "+propNode.getType());
+//
+//        	NodeRef valueOfElem = (NodeRef)propNode.getProperty(Acm.ACM_ELEMENT_VALUE_ELEMENT);
+//        	System.out.println("\n*testExpressionEvaluation() propNode.elementValueOfElement: "+valueOfElem);
+//
+//        	if ( valueOfElem == null ) continue;
+//        
+//        	// This will get the name of the operator via ACM_NAME:
+//        	EmsScriptNode valueOfElemNode = new EmsScriptNode(valueOfElem,services);
+//        	System.out.println("\n*testExpressionEvaluation() valueOfElemNode.name: "+valueOfElemNode.getName() + " id: "+valueOfElemNode.getId() + " type: "+valueOfElemNode.getType() + " sysmlName: "+valueOfElemNode.getProperty(Acm.ACM_NAME));
+//        	if ( valueOfElemNode.getType() == null ) continue;
+//        	// If its not a Operation type, ie. Property type (the command arguments):
+//        	if (!valueOfElemNode.getType().contains(Acm.JSON_OPERATION)) {
+//        		
+//        		ArrayList<NodeRef> argValues = (ArrayList<NodeRef>)valueOfElemNode.getProperty(Acm.ACM_VALUE);
+//            	System.out.println("\n*testExpressionEvaluation() argValues: " +argValues);
+//            	
+//            	// The argument integer property:
+//            	EmsScriptNode argValueNode = new EmsScriptNode(argValues.get(0),services);
+//            	System.out.println("\n*testExpressionEvaluation() argValueNode.type: " +argValueNode.getType());
+//            	System.out.println("\n*testExpressionEvaluation() argValueNode.integer: " +argValueNode.getProperty(Acm.ACM_INTEGER));
+//
+//        	}
+//        }
         
 //        // playing:
 //        Collection< EmsScriptNode > nodesTest = model.getElementWithName( null, "duration" );
@@ -193,7 +193,6 @@ public class EmsSystemModelTest {
         boolean r = solver.solve( Utils.newList( constraint ) );
         // TODO -- dig solution out of solver (really out of constraint)!
 
-        if ( !wasOn ) Debug.turnOn();
     }
 
     @Test

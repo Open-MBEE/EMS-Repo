@@ -874,7 +874,7 @@ public class EmsScriptNode extends ScriptNode {
 	public JSONObject toJSONObject(Acm.JSON_TYPE_FILTER renderType, boolean showQualifiedName, boolean showEditable) throws JSONException {
 	    JSONObject element = new JSONObject();
 
-	    System.out.println(this.getProperties());
+	    //System.out.println("toJSONObject(): "+this.getProperties());
 	    // add in all the properties
         for (String acmType: Acm.getACM2JSON().keySet()) {
             Object elementValue = this.getProperty(acmType);

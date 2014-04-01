@@ -21,7 +21,7 @@ import sysml.AbstractSystemModel;
 
 // <E, C, T, P, N, I, U, R, V, W, CT>
 //public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScriptNode, String, ? extends Serializable, String, String, Object, EmsScriptNode, String, String, EmsScriptNode > {
-public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, EmsScriptNode, EmsScriptNode, String, String, EmsScriptNode > {
+public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode > {
 
     protected ServiceRegistry services;
     protected EmsScriptNode serviceNode;
@@ -162,8 +162,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     }
 
     @Override
-    public Class< EmsScriptNode > getValueClass() {
-        return EmsScriptNode.class;
+    public Class< Object > getValueClass() {
+        return Object.class;
     }
 
     @Override
@@ -330,7 +330,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     @Override
     public Collection< EmsScriptNode >
-            getConstraintWithValue( Object context, EmsScriptNode specifier ) {
+            getConstraintWithValue( Object context, Object specifier ) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -424,7 +424,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     @Override
     public Collection< EmsScriptNode >
-            getElementWithValue( Object context, EmsScriptNode specifier ) {
+            getElementWithValue( Object context, Object specifier ) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -459,13 +459,30 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     @Override
     public Collection< String > getName( Object context ) {
-        // TODO Auto-generated method stub
-        return null;
+        
+    	// Assuming that we can only have EmsScriptNode context:
+    	if (context instanceof EmsScriptNode) {
+    		
+    		EmsScriptNode node = (EmsScriptNode) context;
+    		
+    		// Note: This returns the sysml:name not the cm:name, which is what we
+    		//		 want
+    		Object name = node.getProperty(Acm.ACM_NAME);
+    		
+    		return Utils.asList(name, String.class);
+    	}
+    	
+    	else {
+            // TODO -- error????  Are there any other contexts than an EmsScriptNode that would have a property?
+            Debug.error("context is not an EmsScriptNode!");
+            return null;
+        }
+        
     }
 
     @Override
     public Collection< String > getIdentifier( Object context ) {
-        // TODO Auto-generated method stub
+     
         return null;
     }
     
@@ -478,8 +495,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
      */
     private void convertToScriptNode(Object propVal, List<EmsScriptNode> returnList) {
     	    	
-       	// The propVal can be a ArrayList<NodeRef>, ArrayList<Object>. Also, handling the case
-    	// that propVal is just a NodeRef, even though its not currently coded that way.
+       	// The propVal can be a ArrayList<NodeRef>, ArrayList<Object>, NodeRef, or
+    	// Object
     	
  		if (propVal instanceof ArrayList) {
 			 			
@@ -613,7 +630,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     @Override
     public Collection< EmsScriptNode >
-            getPropertyWithValue( Object context, EmsScriptNode specifier ) {
+            getPropertyWithValue( Object context, Object specifier ) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -700,7 +717,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     @Override
     public Collection< EmsScriptNode >
-            getRelationshipWithValue( Object context, EmsScriptNode specifier ) {
+            getRelationshipWithValue( Object context, Object specifier ) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -737,9 +754,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     @Override
     public Collection< EmsScriptNode >
             getType( Object context, Object specifier ) {
-    	
-        // TODO finish this, just a partial implementation
-    	
+    	    	
     	// TODO ScriptNode getType returns a QName or String, why does he want a collection
     	// of EmsScriptNode?  I think we should change T to String.
     	
@@ -756,7 +771,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         if (context instanceof EmsScriptNode) {
         	EmsScriptNode node = (EmsScriptNode) context;
         	
-        	return node.getType();
+        	return node.getTypeShort();
             
         }
         
@@ -808,7 +823,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     @Override
     public Collection< EmsScriptNode >
-            getTypeWithValue( Object context, EmsScriptNode specifier ) {
+            getTypeWithValue( Object context, Object specifier ) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -842,84 +857,124 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     }
 
     @Override
-    public Collection< EmsScriptNode > getValue( Object context,
-                                                 Object specifier ) {
-        // TODO Auto-generated method stub
-        return null;
+    public Collection< Object > getValue( Object context,
+    									  Object specifier ) {
+    		
+    	// Assuming that we can only have EmsScriptNode context:
+    	if (context instanceof EmsScriptNode) {
+    		
+    		EmsScriptNode node = (EmsScriptNode) context;
+    		
+			// If it is a Property type, then the value is a NodeRef, which
+			// we convert to a EmsScriptNode:
+			if (node.getTypeShort().equals(Acm.ACM_PROPERTY)) {
+				
+		    	List<EmsScriptNode> returnList = new ArrayList<EmsScriptNode>();
+				Object valueNode = node.getProperty(Acm.ACM_VALUE);
+				convertToScriptNode(valueNode , returnList);
+				
+	    		return Utils.asList(returnList, Object.class);
+			}
+			
+			// Otherwise, return the Object for the value
+			else {
+			
+	    		// If no specifier is supplied:
+				if (specifier == null) {
+					// TODO what should we do here?
+	    		}
+				else {
+					
+					Object valueNode = node.getProperty("" + specifier);
+					return Utils.newList(valueNode);
+				}
+    			
+			}
+    		
+    	}
+    	
+    	else {
+            // TODO -- error????  Are there any other contexts than an EmsScriptNode that would have a property?
+            Debug.error("context is not an EmsScriptNode!");
+            return null;
+        }
+    	
+    	return null;
+    	
     }
 
     @Override
-    public Collection< EmsScriptNode >
+    public Collection< Object >
             getValueWithConstraint( Object context, EmsScriptNode specifier ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection< EmsScriptNode >
+    public Collection< Object >
             getValueWithElement( Object context, EmsScriptNode specifier ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection< EmsScriptNode >
+    public Collection< Object >
             getValueWithIdentifier( Object context, String specifier ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection< EmsScriptNode > getValueWithName( Object context,
+    public Collection< Object > getValueWithName( Object context,
                                                          String specifier ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection< EmsScriptNode >
+    public Collection< Object >
             getValueWithProperty( Object context, EmsScriptNode specifier ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection< EmsScriptNode >
+    public Collection< Object >
             getValueWithRelationship( Object context, EmsScriptNode specifier ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection< EmsScriptNode >
+    public Collection< Object >
             getValueWithType( Object context, EmsScriptNode specifier ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection< EmsScriptNode > getValueWithVersion( Object context,
+    public Collection< Object > getValueWithVersion( Object context,
                                                             String specifier ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection< EmsScriptNode >
+    public Collection< Object >
             getValueWithView( Object context, EmsScriptNode specifier ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection< EmsScriptNode >
+    public Collection< Object >
             getValueWithViewpoint( Object context, EmsScriptNode specifier ) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public Collection< EmsScriptNode > getValueWithWorkspace( Object context,
+    public Collection< Object > getValueWithWorkspace( Object context,
                                                               String specifier ) {
         // TODO Auto-generated method stub
         return null;
@@ -998,7 +1053,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     @Override
     public Collection< EmsScriptNode >
-            getViewpointWithValue( Object context, EmsScriptNode specifier ) {
+            getViewpointWithValue( Object context, Object specifier ) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -1075,7 +1130,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     @Override
     public Collection< EmsScriptNode >
-            getViewWithValue( Object context, EmsScriptNode specifier ) {
+            getViewWithValue( Object context, Object specifier ) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -1108,7 +1163,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     }
 
     @Override
-    public Object set( Object object, Object specifier, EmsScriptNode value ) {
+    public Object set( Object object, Object specifier, Object value ) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -1147,7 +1202,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     @Override
     public void addDomainConstraint( EmsScriptNode constraint, String version,
-                                     Set< EmsScriptNode > valueDomainSet,
+                                     Set< Object > valueDomainSet,
                                      String workspace ) {
         // TODO Auto-generated method stub
         
@@ -1158,7 +1213,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
             void
             addDomainConstraint( EmsScriptNode constraint,
                                  String version,
-                                 Pair< EmsScriptNode, EmsScriptNode > valueDomainRange,
+                                 Pair< Object, Object > valueDomainRange,
                                  String workspace ) {
         // TODO Auto-generated method stub
         
@@ -1166,7 +1221,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     @Override
     public void relaxDomain( EmsScriptNode constraint, String version,
-                             Set< EmsScriptNode > valueDomainSet,
+                             Set< Object > valueDomainSet,
                              String workspace ) {
         // TODO Auto-generated method stub
         
@@ -1175,7 +1230,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     @Override
     public void
             relaxDomain( EmsScriptNode constraint, String version,
-                         Pair< EmsScriptNode, EmsScriptNode > valueDomainRange,
+                         Pair< Object, Object > valueDomainRange,
                          String workspace ) {
         // TODO Auto-generated method stub
         
