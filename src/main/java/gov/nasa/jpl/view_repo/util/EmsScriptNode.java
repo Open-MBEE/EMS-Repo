@@ -1016,16 +1016,18 @@ public class EmsScriptNode extends ScriptNode {
         JSONArray array;
 
         if (jsonObject.has(Acm.JSON_VALUE_TYPE)) {
-            Object object = jsonObject.get(Acm.JSON_VALUE);
-            if (object instanceof String) {
-                array = new JSONArray();
-                array.put(object);
-            } else {
-                array = jsonObject.getJSONArray(Acm.JSON_VALUE);
-            }
-            if (jsonObject.get(Acm.JSON_VALUE_TYPE).equals(Acm.JSON_ELEMENT_VALUE)) {
-                elementValues.put(jsonObject.getString(Acm.JSON_ID), array);
-            }
+        		if (jsonObject.has(Acm.JSON_VALUE)) {
+	            Object object = jsonObject.get(Acm.JSON_VALUE);
+	            if (object instanceof String) {
+	                array = new JSONArray();
+	                array.put(object);
+	            } else {
+	                array = jsonObject.getJSONArray(Acm.JSON_VALUE);
+	            }
+	            if (jsonObject.get(Acm.JSON_VALUE_TYPE).equals(Acm.JSON_ELEMENT_VALUE)) {
+	                elementValues.put(jsonObject.getString(Acm.JSON_ID), array);
+	            }
+        		}
         }
         
         if (jsonObject.has(Acm.JSON_PROPERTY_TYPE)) {
