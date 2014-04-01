@@ -205,7 +205,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	}
 	
 	protected void log(LogLevel level, String msg, int code) {
-		if (level.value >= logLevel.value) {
+		if (level.value >= logLevel.value || level.value == LogLevel.ERROR.value) {
 			log("[" + level.name() + "]: " + msg + "\n", code);
 			if (level.value >= LogLevel.WARNING.value) {
 				System.out.println("[" + level.name() + "]: " + msg + "\n");

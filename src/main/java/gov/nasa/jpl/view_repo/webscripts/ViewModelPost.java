@@ -91,10 +91,10 @@ public class ViewModelPost extends ModelPost {
             instance.createOrUpdateModel(req, status);
             appendResponseStatusInfo(instance);
         } catch (JSONException e) {
-            log("JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
+            log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
             e.printStackTrace();
         } catch (Exception e) {
-            log("Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             e.printStackTrace();
         }
 
