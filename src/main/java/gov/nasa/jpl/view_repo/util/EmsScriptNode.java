@@ -1251,9 +1251,7 @@ public class EmsScriptNode extends ScriptNode {
 	                JSONArray array = jsonObject.getJSONArray(jsonType);
 	                this.createOrUpdateProperty(acmType, array.toString());
 	            } else {
-	            	
-	                //System.out.println("creating or updating property: " + acmType + " = " + property );
-	            	
+	            		            	
 	            	if (jsonType.equals(Acm.JSON_INTEGER) ||
 	            		jsonType.equals(Acm.JSON_NATURAL_VALUE)) {
 	            		

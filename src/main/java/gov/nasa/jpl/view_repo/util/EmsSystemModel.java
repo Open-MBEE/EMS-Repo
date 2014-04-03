@@ -498,31 +498,34 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
        	// The propVal can be a ArrayList<NodeRef>, ArrayList<Object>, NodeRef, or
     	// Object
     	
- 		if (propVal instanceof ArrayList) {
-			 			
-			// Loop through the arrayList and convert each NodeRef to a EmsScriptNode
-			ArrayList<?> propValArray = (ArrayList<?>)propVal;
-			for (Object propValNode : propValArray) {
-				
-				// If its a NodeRef then convert:
-				if (propValNode instanceof NodeRef) {
+    	if (propVal != null) {
+    	
+	 		if (propVal instanceof ArrayList) {
+				 			
+				// Loop through the arrayList and convert each NodeRef to a EmsScriptNode
+				ArrayList<?> propValArray = (ArrayList<?>)propVal;
+				for (Object propValNode : propValArray) {
 					
-					returnList.add(new EmsScriptNode((NodeRef)propValNode, services));
+					// If its a NodeRef then convert:
+					if (propValNode instanceof NodeRef) {
+						
+						returnList.add(new EmsScriptNode((NodeRef)propValNode, services));
+					}
+					
+					// TODO what do we do for other objects?  For now, nothing....
 				}
-				
+	
+			} // ends if propVal is a ArrayList
+			
+			else if (propVal instanceof NodeRef) {
+				returnList.add(new EmsScriptNode((NodeRef)propVal, services));
+			}
+			
+			else {
 				// TODO what do we do for other objects?  For now, nothing....
 			}
-
-		} // ends if propVal is a ArrayList
 		
-		else if (propVal instanceof NodeRef) {
-			returnList.add(new EmsScriptNode((NodeRef)propVal, services));
-		}
-		
-		else {
-			// TODO what do we do for other objects?  For now, nothing....
-		}
-		
+    	}
  
     }
 
@@ -886,7 +889,10 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 				else {
 					
 					Object valueNode = node.getProperty("" + specifier);
-					return Utils.newList(valueNode);
+					
+					if (valueNode != null) {
+						return Utils.newList(valueNode);
+					}
 				}
     			
 			}
