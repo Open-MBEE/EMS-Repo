@@ -40,6 +40,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.site.SiteService;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -111,7 +113,13 @@ public class ProjectGet extends AbstractJavaWebScript {
         if (siteName == null) {
             projectNode = findScriptNodeById(projectId);
         } else {
-            EmsScriptNode siteNode = new EmsScriptNode(services.getSiteService().getSite(siteName).getNodeRef(), services, response);
+        	SiteService siteService = services.getSiteService();
+        	SiteInfo site = siteService.getSite(siteName);
+            if (site == null) {
+                log(LogLevel.ERROR, "Could not find site, " + siteName, HttpServletResponse.SC_NOT_FOUND);
+                return null;
+            }
+            EmsScriptNode siteNode = new EmsScriptNode(site.getNodeRef(), services, response);
             projectNode = siteNode.childByNamePath("ViewEditor/" + projectId);
             if (projectNode == null) {
                 log(LogLevel.ERROR, "Could not find project", HttpServletResponse.SC_NOT_FOUND);
