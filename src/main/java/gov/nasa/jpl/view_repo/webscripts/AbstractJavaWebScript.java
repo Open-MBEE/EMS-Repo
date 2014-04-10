@@ -214,14 +214,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 */
 	protected boolean checkPermissions(EmsScriptNode node, String permissions) {
 	    return node.checkPermissions( permissions, response, responseStatus );
-//	    if (!node.hasPermission(permissions)) {
-//			Object property = node.getProperty(Acm.CM_NAME);
-//			if (property != null) {
-//			    log(LogLevel.WARNING, "No " + permissions + " priveleges to " + property.toString() + ".\n", HttpServletResponse.SC_UNAUTHORIZED);
-//			}
-//			return false;
-//		}
-//		return true;
 	}
 
 	/**

@@ -1424,7 +1424,7 @@ public class EmsScriptNode extends ScriptNode {
             if (property != null) {
                 String msg = "Warning! No " + permissions + " priveleges to " + property.toString() + ".\n";
                 response.append( msg );
-                status.setCode( HttpServletResponse.SC_UNAUTHORIZED, msg ); 
+                status.setCode( HttpServletResponse.SC_BAD_REQUEST, msg ); 
             }
             return false;
         }
