@@ -196,8 +196,8 @@ THIS DOESN'T WORK: To attempt to turn off indexing (maybe because it slows down 
 
 To evaluate a Java expression from a webpage, go to 
 
-    http://localhost:8080/view-repo/wcs/java_query
+    http://localhost:8080/alfresco/wcs/java_query
 
 To evaluate a Java expression, in this example, Math.Min(1,2), from the command line
 
-    curl -w "%{http_code}\n" -u admin:admin -X POST -H "Content-Type:text/plain" "http://localhost:8080/view-repo/service/java_query?verbose=false" --data 'Math.min(1,2)'
+    curl -w "%{http_code}\n" -u admin:admin -X POST -H "Content-Type:text/plain" "http://localhost:8080/alfresco/service/java_query?verbose=false" --data 'Math.min(1,2)'
