@@ -210,6 +210,19 @@ public class EmsScriptNode extends ScriptNode {
         return true;
 	}
 	
+	public void removeAssociations(String type) {
+        QName typeQName = createQName(type);
+        List<AssociationRef> refs = services.getNodeService().getTargetAssocs(nodeRef, RegexQNamePattern.MATCH_ALL );
+
+        if (refs != null) {
+            // check all associations to see if there's a matching association
+            for (AssociationRef ref: refs) {
+                if (ref.getTypeQName().equals(typeQName)) {
+                		services.getNodeService().removeAssociation(ref.getSourceRef(), ref.getTargetRef(), typeQName);
+                }
+            }
+        }
+	}
 	
 	/**
 	 * Create a child association between a parent and child node of the specified type
@@ -469,8 +482,9 @@ public class EmsScriptNode extends ScriptNode {
 	    while ( true ) {
     	    Pattern p = Pattern.compile("(.*)<img\\s*src\\s*=\\s*[\"']data:image/(\\w*);base64,([^\"']*)[\"'][^>]*>(.*)");
     	    Matcher m = p.matcher( v );
-    	    if ( !m.matches() ) break;
-    	    else {
+    	    if ( !m.matches() ) {
+    	    		break;
+    	    } else {
     	        if ( m.groupCount() != 4 ) {
     	            log( "Expected 4 match groups, got " + m.groupCount() + "! " + m );
     	            break;
@@ -493,6 +507,10 @@ public class EmsScriptNode extends ScriptNode {
         return v;
     }
 
+	public String getSiteTitle() {
+		EmsScriptNode siteNode = getSiteNode();
+		return (String) siteNode.getProperty(Acm.CM_TITLE);
+	}
 
 	public String getSiteName() {
         if ( siteName == null ) {
@@ -1109,7 +1127,7 @@ public class EmsScriptNode extends ScriptNode {
 
     /**
      * Retrieve the site folder containing this node. If this is a view, then it
-     * is the folder containing the ViewEditor folder. Otherwise, it is the
+     * is the folder containing the Models folder. Otherwise, it is the
      * parent folder contained by the Sites folder.
      * 
      * @return the site folder containing this node
@@ -1118,7 +1136,7 @@ public class EmsScriptNode extends ScriptNode {
         if ( siteNode != null ) return siteNode;
         EmsScriptNode parent = this;
         String parentName = (String) parent.getProperty(Acm.CM_NAME);
-        while (!parentName.equals("ViewEditor")) {
+        while (!parentName.equals("Models") || !parentName.equals("ViewEditor")) {
             EmsScriptNode oldparent = parent;
             parent = oldparent.getParent();
             if ( parent == null ) return null; // site not found!
@@ -1128,7 +1146,7 @@ public class EmsScriptNode extends ScriptNode {
                 return siteNode;
             }
         }
-        // The site is the folder containing the ViewEditor!
+        // The site is the folder containing the Models folder!
         siteNode = parent.getParent();
         return siteNode;
     }

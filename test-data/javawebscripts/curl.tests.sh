@@ -8,7 +8,7 @@ export CURL_GET_FLAGS="-X GET"
 
 export CURL_SECURITY=" -k -3" 
 
-#if [true] then
+#if [true]; then
 	export CURL_USER=" -u admin:admin"
 	export CURL_FLAGS=$CURL_STATUS$CURL_USER
 	export SERVICE_URL="\"http://localhost:8080/view-repo/service/"

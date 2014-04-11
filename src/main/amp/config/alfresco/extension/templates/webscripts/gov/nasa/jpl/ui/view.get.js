@@ -49,6 +49,7 @@ function main() {
 	info['snapshot'] = false;
 }
 
+/*
 if (UserUtil.hasWebScriptPermissions()) {
     status.code = 200;
     main();
@@ -72,3 +73,6 @@ if (status.code == 200) {
     status.message = response;
 }
 model['res'] = response;
+*/
+status.code = 200;
+model['res'] = '{}';

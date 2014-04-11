@@ -1,4 +1,21 @@
 # view amp for alfresco repository (overlay on alfresco.war)
+
+#AMI environment instructions
+
+import view-repo with git (same instructions as below)
+
+update maven project:
+	right click maven project
+	Maven -> Update Project...
+
+build with maventest in command line
+	cd /home/username/git/alfresco-view-repo
+	mvn integration-test -Pamp-to-w -Dmaven.test.skip=true
+
+restart eclipse
+
+#typical local environment instructions
+
 This project contains the content model and webscripts for accessing and modifying the alfresco repository. 
 
 Location of content model: src/main/amp/config/alfresco/module/view-repo/viewModel.xml
@@ -114,7 +131,9 @@ To attach an eclipse debugger, there's a view-repo.launch, you can use it to deb
 Jrebel is monitoring the target/classes and src/main/amp/config dir for changes, and the src/main/amp/web for static file changes, make sure the eclipse build automatically is on, and usually any changes to java classes or spring configs will be reloaded automagically
 
 # Testing
-Go to [http://localhost:8080/view-repo/](http://localhost:8080/view-repo/) for the alfresco explorer interface (it'll take a while to startup)
+Note: URL has changed for Alfresco 4.2.e to use alfresco instead of view-repo.
+
+Go to [http://localhost:8080/alfresco/](http://localhost:8080/alfresco/) for the alfresco explorer interface (it'll take a while to startup)
 
 In the repository, create a "/ViewEditor/model" folder and "/ViewEditor/snapshots" folder, the view information will be created in these spaces.
 
@@ -122,39 +141,39 @@ Use the view import/export from the latest dev release of mdk, or you can use cu
 
 Post test view:
 
-    curl -H "Content-Type: application/json" --data @test-data/postview.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/rest/views/_17_0_1_2_407019f_1340300322136_11866_17343?force=true&recurse=true&doc=true&user=dlam"
+    curl -H "Content-Type: application/json" --data @test-data/postview.json -X POST -u admin:admin "http://localhost:8080/alfresco/service/rest/views/_17_0_1_2_407019f_1340300322136_11866_17343?force=true&recurse=true&doc=true&user=dlam"
 
 Post view hierarchy:
 
-    curl -H "Content-Type: application/json" --data @test-data/postviewhierarchy.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/rest/views/_17_0_1_2_407019f_1340300322136_11866_17343/hierarchy"
+    curl -H "Content-Type: application/json" --data @test-data/postviewhierarchy.json -X POST -u admin:admin "http://localhost:8080/alfresco/service/rest/views/_17_0_1_2_407019f_1340300322136_11866_17343/hierarchy"
 
 Post DocGen Manual
 
-    curl -H "Content-Type: application/json" --data @test-data/docgenManual.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/rest/views/_17_0_3_244e03eb_1333856871739_813876_16836?force=true&recurse=true&doc=true&user=dlam"
+    curl -H "Content-Type: application/json" --data @test-data/docgenManual.json -X POST -u admin:admin "http://localhost:8080/alfresco/service/rest/views/_17_0_3_244e03eb_1333856871739_813876_16836?force=true&recurse=true&doc=true&user=dlam"
 
 Post comments
 
-	curl -H "Content-Type: application/json" --data @test-data/postcomment.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/rest/views/_17_0_1_2_407019f_1340300322136_11866_17343/comments?recurse=true"
+	curl -H "Content-Type: application/json" --data @test-data/postcomment.json -X POST -u admin:admin "http://localhost:8080/alfresco/service/rest/views/_17_0_1_2_407019f_1340300322136_11866_17343/comments?recurse=true"
 
 Post Project organization
 
-	curl -H "Content-Type: application/json" --data @test-data/postproject.json -X POST -u admin:admin "http://localhost:8080/view-repo/service/rest/projects/europa"
+	curl -H "Content-Type: application/json" --data @test-data/postproject.json -X POST -u admin:admin "http://localhost:8080/alfresco/service/rest/projects/europa"
 	
 Get test view
 
-	curl -u admin:admin "http://localhost:8080/view-repo/service/rest/views/_17_0_1_2_407019f_1340300322136_11866_17343?recurse=true"
+	curl -u admin:admin "http://localhost:8080/alfresco/service/rest/views/_17_0_1_2_407019f_1340300322136_11866_17343?recurse=true"
 
 Get DocGen Manual
 
-	curl -u admin:admin "http://localhost:8080/view-repo/service/rest/views/_17_0_3_244e03eb_1333856871739_813876_16836?recurse=true"
+	curl -u admin:admin "http://localhost:8080/alfresco/service/rest/views/_17_0_3_244e03eb_1333856871739_813876_16836?recurse=true"
 
 Get comments
 
-	curl -u admin:admin "http://localhost:8080/view-repo/service/rest/views/_17_0_1_2_407019f_1340300322136_11866_17343/comments?recurse=true"
+	curl -u admin:admin "http://localhost:8080/alfresco/service/rest/views/_17_0_1_2_407019f_1340300322136_11866_17343/comments?recurse=true"
 	
-To open the javascript debugger: [http://localhost:8080/view-repo/service/api/javascript/debugger](http://localhost:8080/view-repo/service/api/javascript/debugger) (you may have to close and reopen to get it to step through on consecutive script calls)
+To open the javascript debugger: [http://localhost:8080/alfresco/service/api/javascript/debugger](http://localhost:8080/alfresco/service/api/javascript/debugger) (you may have to close and reopen to get it to step through on consecutive script calls)
 
-To refresh changes to scripts (they have to be updated in the "target/view-repo-war/WEB-INF/classes/alfresco/extension/..."): [http://localhost:8080/view-repo/service/index](http://localhost:8080/view-repo/service/index) hit refresh at the botton
+To refresh changes to scripts (they have to be updated in the "target/view-repo-war/WEB-INF/classes/alfresco/extension/..."): [http://localhost:8080/alfresco/service/index](http://localhost:8080/alfresco/service/index) hit refresh at the botton
 
 Maven archetype from [Alfresco Maven SDK](https://artifacts.alfresco.com/nexus/content/repositories/alfresco-docs/alfresco-lifecycle-aggregator/latest/index.html)
 

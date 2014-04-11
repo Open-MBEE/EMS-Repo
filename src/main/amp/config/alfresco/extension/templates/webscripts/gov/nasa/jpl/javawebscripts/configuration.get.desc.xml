@@ -2,18 +2,36 @@
 <shortname>Get Configurations</shortname>
     <description>
     Format is:
-    { "configurations": [
-    		{"modified": modifiedTime,
-    		 "name": configurationName,
-    		 "description": configurationDescription,
-    		 "nodeid": alfresco node id,
-    		 "snapshots": [
-    		 	{ "url": snapshotUrl (e.g.  /alfresco/services/...)
-    		 	  "name": nameOfDocument
-    		 	}
-    		 ]
-    		}, ...
-    ]
+    {
+	    "configurations": [
+	    		{
+ 	    			 "modified": modifiedTime,
+		    		 "name": configurationName,
+		    		 "description": configurationDescription,
+		    		 "nodeid": alfresco node id,
+		    		 "snapshots": [
+		    		 	{ 
+		    		 		"url": snapshotUrl (e.g.  /alfresco/services/...),
+		    		 		"name": productName,
+		    		 		"id": snapshotId
+		    		 	}
+		    		 ]
+	    		},
+	    		...
+	    	],
+	    	"products": [
+	    		{
+	    			"name": productName,
+	    			"id": 	productId,
+	    			"snapshots": [
+	    				{
+	    					"id": snapshotId,
+	    					"created": snapshotCreatedTime,
+	    				}
+	    			]
+	    		},
+	    		...
+	    	]
     }
   	</description>
 		<url>/javawebscripts/configurations/{siteName}</url>

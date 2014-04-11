@@ -120,11 +120,15 @@ public class ProjectGet extends AbstractJavaWebScript {
                 return null;
             }
             EmsScriptNode siteNode = new EmsScriptNode(site.getNodeRef(), services, response);
-            projectNode = siteNode.childByNamePath("ViewEditor/" + projectId);
+            projectNode = siteNode.childByNamePath("/Models/" + projectId);
             if (projectNode == null) {
-                log(LogLevel.ERROR, "Could not find project", HttpServletResponse.SC_NOT_FOUND);
-                return null;
+            		// for backwards compatibility
+            		projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
             }
+        }
+        if (projectNode == null) {
+            log(LogLevel.ERROR, "Could not find project", HttpServletResponse.SC_NOT_FOUND);
+            return null;
         }
         
         if (checkPermissions(projectNode, PermissionService.READ)) {

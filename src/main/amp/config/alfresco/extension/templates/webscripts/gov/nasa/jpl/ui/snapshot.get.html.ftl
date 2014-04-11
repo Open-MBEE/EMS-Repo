@@ -1,10 +1,13 @@
+<!DOCTYPE html>
 <html>
   <head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge;chrome=1" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Editor: ${title}</title>
     <link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/jquery.tocify.css" rel="stylesheet" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/styles.css" rel="stylesheet" media="screen">
+    <link href="${url.context}/scripts/vieweditor/styles/snapshot.css" rel="stylesheet" media="screen">
     <link href="${url.context}/scripts/vieweditor/styles/print.css" rel="stylesheet" media="print">
     <link href="${url.context}/scripts/vieweditor/styles/fonts.css" rel="stylesheet">
     <link href="${url.context}/scripts/vieweditor/vendor/css/whhg.css" rel="stylesheet" >
@@ -20,49 +23,47 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
   <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
 <div id="main"></div>
 
-<script id="template" type="text/mustache">
-
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="navbar-header">
-          {{#environment.development}}
-            <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
-          {{/environment.development}}
-          {{^environment.development}}
-            <a class="navbar-brand" href="${url.context}/service/ve/documents/europa">Europa View Editor {{ title }}</a>
-          {{/environment.development}}  
-      </div>
-
+    <div class="navbar-header">
+    		<a class="navbar-brand" href="/share/page/site/${siteName}/dashboard">${siteTitle}</a>
+    	</div>
       <ul class="nav navbar-nav">
-        <li><a  href="/share/page/">Europa EMS Dashboard</a></li>
-      </ul>   
-        
+      	<li class="active"><a href="#">Version Report ${title} ${tag}</a></li>
+        <li class="dropdown" id="firstDropdown">
+        	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Goto <b class="caret"></b></a>
+        	<ul class="dropdown-menu">
+        		<li><a href="${url.context}/service/ve/products/${id}">Current Version of Document</a></li>
+        		<li><a href="${url.context}/service/ve/configurations/${siteName}">DocWeb</a></li>
+        	<#if siteName == 'europa'>
+        		<li><a href="${url.context}/service/ve/index/${siteName}">Document List</a></li>
+        		<li><a href="${url.context}/service/ve/documents/${siteName}">In-Work Document List</a></li>
+        	<#else>
+        		<li><a href="${url.context}/service/ve/documents/${siteName}">Document List</a></li>
+        	</#if>	
+        		<li><a href="/share/page/site/${siteName}/dashboard">Dashboard</a></li>
+   			</ul>
+   		</li>
+   		<li class="dropdown">
+   			<a href="#" class="dropdown-toggle" data-toggle="dropdown">Other Sites <b class="caret"></b></a>
+   			<ul class="dropdown-menu" id="otherSites">
+   			
+   			</ul>
+   		</li>
+   	  </ul>
+
       <div class="pull-right">
         <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
       </div>
 
       <ul class="nav navbar-nav pull-right">
-       <li><a href="#" class="submit-logout">logout</a></li>
+        <li><a href="/share/page/site/ems-training/dashboard">Support</a></li>
+        <li><a href="#" class="submit-logout">logout</a></li>
       </ul>
+    </nav>
 
-      <ul class="nav navbar-nav pull-right">
-        {{#viewTree.snapshot}}
-          <li><a class="navbar-brand" href="#">Snapshot ({{viewTree.snapshoted}})</a></li>
-          <li><a class="navbar-brand" href="${url.context}/service/ve/products/${id}">Latest Version</a></li> 
-        {{/viewTree.snapshot}}
 
-      </ul>
+<script id="template" type="text/mustache">
 
-      <!-- 
-      <form class="navbar-form navbar-right" action="">
-        <div class="form-group">
-          <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
-            <option value="modeler">Modeler</option>
-            <option value="reviewer">Reviewer</option>
-            <option value="manager">Manager</option>
-          </select>
-        </div>
-      </form>
-    -->
 
     </nav>
     <div id="ie-alert" class="alert alert-warning alert-dismissable ie_warning">
@@ -154,7 +155,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 
         <ul class="list-unstyled" style="display:block; height:50%; overflow-y: auto">
         {{#viewTree.snapshots}}
-          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} &mdash; {{ creator }}</a></li>
+          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} ({{ creator }})  {{tag}}</a></li>
         {{/viewTree.snapshots}}
         </ul>
       </div>
@@ -456,6 +457,67 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 $(document).ready(function() {
 	$('a.submit-logout').click(function() {
 		window.location.replace('${url.context}/service/logout/info?next=${url.full}');
+	});
+	$.getJSON('/alfresco/service/rest/sites').done(function(data) {
+		var sites = {};
+		for (var i = 0; i < data.length; i++) {
+			var site = data[i];
+			if (site.categories.length == 0)
+				site.categories.push("Uncategorized");
+			for (var j = 0; j < site.categories.length; j++) {
+				var cat = site.categories[j];
+				if (sites.hasOwnProperty(cat)) {
+					sites[cat].push(site);
+				} else {
+					sites[cat] = [site];
+				}
+			}
+		}
+		var stuff = "";
+		var keys = Object.keys(sites).sort();
+		for (var i = 0; i < keys.length; i++) {
+			var key = keys[i];
+			stuff += '<li class="dropdown dropdown-submenu"><a href="#" class="dropdown-toggle" data-toggle="dropdown">' + key + '</a>';
+			stuff += '<ul class="dropdown-menu">';
+        	var ssites = sites[key].sort(function(a,b) {
+        		if (a.title > b.title)
+        			return 1;
+        		if (a.title < b.title)
+        			return -1;
+        		return 0;
+        	});
+        
+			for (var j = 0; j < ssites.length; j++) {
+				stuff += '<li class="dropdown-submenu"><a href="#" class="dropdown-toggle" data-toggle="dropdown">' + ssites[j].title + '</a><ul class="dropdown-menu">';
+				stuff += '<li><a href="/share/page/site/' + ssites[j].name + '/dashboard">Dashboard</a></li>';
+				stuff += '<li><a href="/alfresco/service/ve/configurations/' + ssites[j].name + '">DocWeb</a></li>';
+				stuff += '</ul></li>';
+			}
+        	stuff += '</ul></li>';
+		};
+		$('#otherSites').append(stuff);
+		
+	});
+	$('ul.dropdown-menu [data-toggle=dropdown]').on('click', function(event) {
+    // Avoid following the href location when clicking
+    event.preventDefault(); 
+    // Avoid having the menu to close when clicking
+    event.stopPropagation(); 
+    // If a menu is already open we close it
+    //$('ul.dropdown-menu [data-toggle=dropdown]').parent().removeClass('open');
+    // opening the one you clicked on
+    $(this).parent().addClass('open');
+
+    var menu = $(this).parent().find("ul");
+    var menupos = menu.offset();
+  
+    if ((menupos.left + menu.width()) + 30 > $(window).width()) {
+        var newpos = - menu.width();      
+    } else {
+        var newpos = $(this).parent().width();
+    }
+    menu.css({ left:newpos });
+
 	});
 });
 </script>
@@ -1387,16 +1449,18 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
         var table = '<div contenteditable="false"><table class="table table-striped">';
         table += '<caption>'+c.title+'</caption>';
         table += "<thead>";
-        table += "<tr>";
-        for (var hIdx in c.header[0]) {
-          var cell = c.header[0][hIdx];
-          var value = resolveValue(cell.content, elements, function(valueList) {
-            return _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) }).join("");
-          });
-          // console.log("header value", value)
-          table += '<th colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '">' + value + "</th>";
+        for(var rIdx in c.header) {
+          table += "<tr>";
+          for (var hIdx in c.header[rIdx]) {
+            var cell = c.header[rIdx][hIdx];
+            var value = resolveValue(cell.content, elements, function(valueList) {
+              return _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) }).join("");
+            });
+            // console.log("header value", value)
+            table += '<th colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '">' + value + "</th>";
+          }
+          table += "</tr>";
         }
-        table += "</tr>";
         table += "</thead>"
         table += "<tbody>";
         for (var rIdx in c.body) {

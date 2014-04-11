@@ -1,5 +1,7 @@
+<!DOCTYPE html>
 <html>
   <head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge;chrome=1" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Editor: ${title}</title>
     <link rel="stylesheet" href="${url.context}/scripts/vieweditor/vendor/css/bootstrap.min.css" media="screen">
@@ -20,50 +22,46 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
   <body class="{{ meta.pageName }} {{ settings.currentWorkspace }}">
 <div id="main"></div>
 
-<script id="template" type="text/mustache">
-
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="navbar-header">
-          {{#environment.development}}
-            <a class="navbar-brand" href="/">Europa View Editor {{ title }}</a>
-          {{/environment.development}}
-          {{^environment.development}}
-            <a class="navbar-brand" href="${url.context}/service/ve/documents/europa">Europa View Editor {{ title }}</a>
-          {{/environment.development}}  
-      </div>
+    	<div class="navbar-header">
+    		<a class="navbar-brand" href="/share/page/site/${siteName}/dashboard">${siteTitle}</a>
+    	</div>
+    	<ul class="nav navbar-nav">
+    	<li class="active"><a href="#">${title}</a></li>
+        <li class="dropdown" id="firstDropdown">
+        	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Goto <b class="caret"></b></a>
+        	<ul class="dropdown-menu">
+        		<li><a href="${url.context}/service/ve/configurations/${siteName}">DocWeb</a></li>
+        	<#if siteName == 'europa'>
+        		<li><a href="${url.context}/service/ve/index/${siteName}">Document List</a></li>
+        		<li><a href="${url.context}/service/ve/documents/${siteName}">In-Work Document List</a></li>
+        	<#else>
+        		<li><a href="${url.context}/service/ve/documents/${siteName}">Document List</a></li>
+        	</#if>	
+        		<li><a href="/share/page/site/${siteName}/dashboard">Dashboard</a></li>
+   			</ul>
+   		</li>
+   		<li class="dropdown">
+   			<a href="#" class="dropdown-toggle" data-toggle="dropdown">Other Sites <b class="caret"></b></a>
+   			<ul class="dropdown-menu" id="otherSites">
+   			
+   			</ul>
+   		</li>
+   	  </ul>
 
-      <ul class="nav navbar-nav">
-        <li><a  href="/share/page/">Europa EMS Dashboard</a></li>
-      </ul>   
-        
       <div class="pull-right">
         <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
       </div>
 
       <ul class="nav navbar-nav pull-right">
-       <li><a href="#" class="submit-logout">logout</a></li>
+      	<li><a href="/share/page/site/ems-training/dashboard">Support</a></li>
+        <li><a href="#" class="submit-logout">logout</a></li>
       </ul>
-
-      <ul class="nav navbar-nav pull-right">
-        {{#viewTree.snapshot}}
-          <li><a class="navbar-brand" href="#">Snapshot ({{viewTree.snapshoted}})</a></li>
-        {{/viewTree.snapshot}}
-
-      </ul>
-
-      <!-- 
-      <form class="navbar-form navbar-right" action="">
-        <div class="form-group">
-          <select id="workspace-selector" class="form-control input-sm" value="{{ settings.currentWorkspace }}">
-            <option value="modeler">Modeler</option>
-            <option value="reviewer">Reviewer</option>
-            <option value="manager">Manager</option>
-          </select>
-        </div>
-      </form>
-    -->
-
     </nav>
+   
+
+<script id="template" type="text/mustache">
+
     <div id="ie-alert" class="alert alert-warning alert-dismissable ie_warning">
       <button type="button" class="close no-print" proxy-click="hideIEMessage" aria-hidden="true">&times;</button>
       <span class="message no-print">Internet Explorer is not officially supported by View Editor.  Please use Firefox.</span>
@@ -153,7 +151,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 
         <ul class="list-unstyled" style="display:block; height:50%; overflow-y: auto">
         {{#viewTree.snapshots}}
-          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} &mdash; {{ creator }}</a></li>
+          <li><a href="{{ url }}" target="_blank">{{ formattedDate }} ({{ creator }})  {{tag}}</a></li>
         {{/viewTree.snapshots}}
         </ul>
       </div>
@@ -225,7 +223,20 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
                   <a class="btn btn-default" data-edit="superscript" title="Superscript">x<sup>y</sup></a>
                   <a class="btn btn-default" data-edit="subscript" title="Subscript">x<sub>y</sub></a>
                   <div class="btn-group">
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                  <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Font Size">
+                    <i class="glyphicon glyphicon-text-height"></i>&nbsp;<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                      <li><a data-edit="fontSize 7"><font size="7">Biggest</font></a></li>
+                      <li><a data-edit="fontSize 6"><font size="6">Bigger</font></a></li>
+                      <li><a data-edit="fontSize 5"><font size="5">Big</font></a></li>
+                      <li><a data-edit="fontSize 4"><font size="4">Larger</font></a></li>
+                      <li><a data-edit="fontSize 3"><font size="3">Large</font></a></li>
+                      <li><a data-edit="fontSize 2"><font size="2">Normal</font></a></li>
+                      <li><a data-edit="fontSize 1"><font size="1">Small</font></a></li>
+                    </ul>
+                </div>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Background color">
                       <i class="glyphicon icon-ink">&nbsp;</i>
                       <span class="caret"></span>
                     </button>
@@ -235,6 +246,19 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
                       <li><a data-edit="backcolor blue"><i class="icon-tint"></i>Blue</a></li>
                       <li><a data-edit="backcolor black"><i class="icon-tint"></i>Black</a></li>
                       <li><a data-edit="backcolor transparent"><i class="icon-tint"></i>None</a></li>
+                    </ul>
+                  </div>
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Font color">
+                      <i class="glyphicon icon-tint">&nbsp;</i>
+                      <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li><a data-edit="foreColor red"><i class="icon-tint"></i>Red</a></li>
+                      <li><a data-edit="foreColor limegreen"><i class="icon-tint"></i>Green</a></li>
+                      <li><a data-edit="foreColor blue"><i class="icon-tint"></i>Blue</a></li>
+                      <li><a data-edit="foreColor black"><i class="icon-tint"></i>Black</a></li>
+                      <li><a data-edit="foreColor transparent"><i class="icon-tint"></i>None</a></li>
                     </ul>
                   </div>
                   <div class="btn-group">
@@ -407,7 +431,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
                     <div id="comment-form-{{id}}" class="comment-editor form-control" contenteditable="true">
                     </div>
                     <br/>
-                    <button type="button" class="btn btn-primary" proxy-click="addComment:{{id}}">Add comment</button>
+                    <button type="button" class="btn btn-primary add-comment" proxy-click="addComment:{{id}}">Add comment</button>
                   </div>
                 </li>
               </ul>
@@ -456,6 +480,67 @@ $(document).ready(function() {
 	$('a.submit-logout').click(function() {
 		window.location.replace('${url.context}/service/logout/info?next=${url.full}');
 	});
+	$.getJSON('/alfresco/service/rest/sites').done(function(data) {
+		var sites = {};
+		for (var i = 0; i < data.length; i++) {
+			var site = data[i];
+			if (site.categories.length == 0)
+				site.categories.push("Uncategorized");
+			for (var j = 0; j < site.categories.length; j++) {
+				var cat = site.categories[j];
+				if (sites.hasOwnProperty(cat)) {
+					sites[cat].push(site);
+				} else {
+					sites[cat] = [site];
+				}
+			}
+		}
+		var stuff = "";
+		var keys = Object.keys(sites).sort();
+		for (var i = 0; i < keys.length; i++) {
+			var key = keys[i];
+			stuff += '<li class="dropdown dropdown-submenu"><a href="#" class="dropdown-toggle" data-toggle="dropdown">' + key + '</a>';
+			stuff += '<ul class="dropdown-menu">';
+        	var ssites = sites[key].sort(function(a,b) {
+        		if (a.title > b.title)
+        			return 1;
+        		if (a.title < b.title)
+        			return -1;
+        		return 0;
+        	});
+        
+			for (var j = 0; j < ssites.length; j++) {
+				stuff += '<li class="dropdown-submenu"><a href="#" class="dropdown-toggle" data-toggle="dropdown">' + ssites[j].title + '</a><ul class="dropdown-menu">';
+				stuff += '<li><a href="/share/page/site/' + ssites[j].name + '/dashboard">Dashboard</a></li>';
+				stuff += '<li><a href="/alfresco/service/ve/configurations/' + ssites[j].name + '">DocWeb</a></li>';
+				stuff += '</ul></li>';
+			}
+        	stuff += '</ul></li>';
+		};
+		$('#otherSites').append(stuff);
+		
+	});
+	$('ul.dropdown-menu [data-toggle=dropdown]').on('click', function(event) {
+    // Avoid following the href location when clicking
+    event.preventDefault(); 
+    // Avoid having the menu to close when clicking
+    event.stopPropagation(); 
+    // If a menu is already open we close it
+    //$('ul.dropdown-menu [data-toggle=dropdown]').parent().removeClass('open');
+    // opening the one you clicked on
+    $(this).parent().addClass('open');
+
+    var menu = $(this).parent().find("ul");
+    var menupos = menu.offset();
+  
+    if ((menupos.left + menu.width()) + 30 > $(window).width()) {
+        var newpos = - menu.width();      
+    } else {
+        var newpos = $(this).parent().width();
+    }
+    menu.css({ left:newpos });
+
+	});
 });
 </script>
 <script type="text/javascript">var app = new Ractive({ el : "main", template : "#template", data : pageData });</script>
@@ -474,11 +559,13 @@ var absoluteUrl = function(relativeUrl) {
 
 var ajaxWithHandlers = function(options, successMessage, errorMessage) {
   $.ajax(options)
-    .done(function(data) { 
+    .done(function(data) {
+    /* 
       if (data.indexOf("html") != -1) {
         alert("Not saved! You've been logged out, login in a new window first!");
           window.open("/alfresco/faces/jsp/login.jsp?_alfRedirect=/alfresco/service/ui/relogin");
       }
+     */
       app.fire('message', 'success', successMessage); })
     .fail(function(e) { 
       if (e && e.status && e.status === 200) {
@@ -559,7 +646,10 @@ app.on('toggleComments', function(evt, id) {
   if (showing) {
     var commentField = comments.toggle().find('.comment-editor').wysiwyg();
     // app.placeholder(commentField, "Type your comment here");
-    commentField.focus();    
+    commentField.one("focus", function() {
+      window.pageExitManager.editorOpened();
+    })
+   
     selectBlank(commentField);
   } else {
     comments.hide();
@@ -567,8 +657,13 @@ app.on('toggleComments', function(evt, id) {
 });
 
 app.on('addComment', function(evt, mbid) {
+  window.pageExitManager.editorClosed();
   var commentFieldId = "#comment-form-" + mbid;
   var commentField = $(commentFieldId);
+  commentField.one("focus", function() {
+      window.pageExitManager.editorOpened();
+  }); 
+
   commentField.find('.placeholder').detach();
   var newCommentBody = commentField.cleanHtml();
   if (newCommentBody != "") {
@@ -634,6 +729,7 @@ app.updateSaveAllButton = function(n) {
     // When clicked, click all save section buttons
     $("#saveAll").click( function() {
       $(".saveSection").click(); 
+      $(".add-comment").click();
     });
   }
 }
@@ -747,7 +843,7 @@ app.on('editSection', function(e, sectionId) {
   toolbar.find(".requires-selection").addClass("disabled");
   var sectionPage = section.filter(".section.page");
   // On focus, enable the button
-  sectionPage.on('focus', function(arg)
+  section.find("[data-mdid][data-property='documentation']").on('focus', function(arg)
   {
     //console.log("Start Section focus")
     toolbar.find(".requires-selection").removeClass("disabled");
@@ -755,7 +851,7 @@ app.on('editSection', function(e, sectionId) {
   })
   // On blur disable the button unless the object we clicked on was the button itself
   // This code can only find the button in FF and Chrome
-  sectionPage.on('blur', function(arg)
+  section.find("[data-mdid][data-property='documentation']").on('blur', function(arg)
   {
     //console.log("Start Section blur");
     var target = arg.relatedTarget; // Chrome
@@ -989,7 +1085,7 @@ app.on('saveSection', function(e, sectionId) {
       if(cure.mdid === e.mdid)
       {
         if(e.hasOwnProperty("documentation"))
-        {
+        { e.documentation = e.documentation.replace(/^((<br>)|(<\/br>)|\s)*|((<br>)|(<\/br>)|\s)*$/gi,"");
           cure.documentation = app.replaceBracketWithSpan(e.documentation);
           var preview = app.generatePreviewDocumentation(cure.documentation);
           if(preview) {
@@ -1011,6 +1107,7 @@ app.on('saveSection', function(e, sectionId) {
         }
         if(e.hasOwnProperty("value"))
         {
+          e.value = e.value.replace(/^((<br>)|(<\/br>)|\s)*|((<br>)|(<\/br>)|\s)*$/gi,"");
           cure.value = app.replaceBracketWithSpan(e.value);
           // update value in transclusion tab
           $('[data-trans-id="'+cure.mdid+'"].transcludable.dvalue').html(cure.value);
@@ -1333,9 +1430,9 @@ var renderEmbeddedValue = function(value, elements) {
   var title = ref ? (ref.name || ref.mdid) +' ('+value.property.toLowerCase()+')' : '';
   var classes = ['reference'];
   var blankContent = false;
-  if(!value.content){
-    blankContent = !value.content || value.content === "" || value.content.match(/^\s+$/);
-  } 
+  //if(!value.content){
+  blankContent = !value.content || (value.content + "") === "" || (value.content + "").match(/^\s+$/);
+  //} 
   if (blankContent) {
     classes.push('blank')
   }
@@ -1386,16 +1483,18 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
         var table = '<div contenteditable="false"><table class="table table-striped">';
         table += '<caption>'+c.title+'</caption>';
         table += "<thead>";
-        table += "<tr>";
-        for (var hIdx in c.header[0]) {
-          var cell = c.header[0][hIdx];
-          var value = resolveValue(cell.content, elements, function(valueList) {
-            return _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) }).join("");
-          });
-          // console.log("header value", value)
-          table += '<th colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '">' + value + "</th>";
+        for(var rIdx in c.header) {
+          table += "<tr>";
+          for (var hIdx in c.header[rIdx]) {
+            var cell = c.header[rIdx][hIdx];
+            var value = resolveValue(cell.content, elements, function(valueList) {
+              return _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) }).join("");
+            });
+            // console.log("header value", value)
+            table += '<th colspan="'+ (cell.colspan || 1) + '" rowspan="' + (cell.rowspan || 1) + '">' + value + "</th>";
+          }
+          table += "</tr>";
         }
-        table += "</tr>";
         table += "</thead>"
         table += "<tbody>";
         for (var rIdx in c.body) {
@@ -1406,7 +1505,7 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
               var listOfElements = _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) });
               var stringResult = ""; //<ul class='table-list'>";
               _.each(listOfElements, function(e){
-                stringResult += e + "<br/>"; //"<li>" + e + "</li>";
+                stringResult += e;// + "<br/>"; //"<li>" + e + "</li>";
               })
               //stringResult += "</ul>";
               return stringResult;
@@ -1572,7 +1671,7 @@ app.observe('viewHierarchy', function(viewData) {
   viewTree.snapshot = viewData.snapshot;
   if(viewTree.snapshot === true)
   {
-    viewTree.snapshoted = app.formatDate(parseDate(viewData.snapshoted));
+    viewTree.snapshoted = app.formatDate(parseDate(viewData.lastModified));
   }
   viewTree.snapshots = viewData.snapshots;
   viewTree.elements = viewData.elements;

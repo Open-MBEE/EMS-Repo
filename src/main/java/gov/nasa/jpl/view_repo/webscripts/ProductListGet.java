@@ -125,10 +125,14 @@ public class ProductListGet extends AbstractJavaWebScript {
                 appendResponseStatusInfo(instance);
                 model.put("res", jsonObject.toString(4));
                 model.put("title", siteNode.getProperty(Acm.CM_TITLE));
+                model.put("siteName", siteNode.getProperty(Acm.CM_NAME));
+                model.put("siteTitle", siteNode.getProperty(Acm.CM_TITLE));
             } catch (JSONException e) {
                 log(LogLevel.ERROR, "Could not create JSON Object", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 model.put("res", response.toString());
                 model.put("title", "ERROR");
+                model.put("siteName", "");
+                model.put("siteTitle", "ERROR site not found");
                 e.printStackTrace();
             }
     		} else {
@@ -166,7 +170,7 @@ public class ProductListGet extends AbstractJavaWebScript {
                     volume2documents.put(parentId, new JSONArray());
                 }
                 ((JSONArray)volume2documents.get(parentId)).put(id);
-                handleParents(node, "ViewEditor");
+                handleParents(node);
             }
         }
         
@@ -192,7 +196,12 @@ public class ProductListGet extends AbstractJavaWebScript {
         return productJson;
 	}
 	
-	protected void handleParents(EmsScriptNode node, String stopName) throws JSONException {
+	/**
+	 * Work up the package hierarchy until the project folder is reached
+	 * @param node
+	 * @throws JSONException
+	 */
+	protected void handleParents(EmsScriptNode node) throws JSONException {
         String id = (String)node.getProperty(Acm.ACM_ID);
         String sysmlName = (String)node.getProperty(Acm.ACM_NAME);
         if (id == null) {
@@ -231,7 +240,7 @@ public class ProductListGet extends AbstractJavaWebScript {
                         array.put(id);
                     }
                 }
-                handleParents(parent, stopName);
+                handleParents(parent);
             }
         }
 	}

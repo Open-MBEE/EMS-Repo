@@ -104,14 +104,20 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		    json = generateMoaProduct(productId, req.getContextPath());
 		}
 
-      if (responseStatus.getCode() == HttpServletResponse.SC_OK && json != null) {
+		if (responseStatus.getCode() == HttpServletResponse.SC_OK && json != null) {
+			EmsScriptNode product = findScriptNodeById(productId);
 		    String jsonString = json.toString();
             model.put("res", jsonString);
             if (productId != null) {
-                model.put("title", findScriptNodeById(productId).getProperty(Acm.ACM_NAME));
+                model.put("title", product.getProperty(Acm.ACM_NAME));
+                model.put("siteTitle", product.getSiteTitle());
+                model.put("siteName", product.getSiteName());
             }
         } else {
             model.put("res", response.toString());
+            model.put("title", "Could not load");
+            model.put("siteTitle", "ERROR product not found");
+            model.put("siteName", "");
         }
 		
 		status.setCode(responseStatus.getCode());
@@ -189,6 +195,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
             jsonObject.put("created", EmsScriptNode.getIsoTime(date));
             jsonObject.put("url", contextPath + "/service/snapshots/" + id);
             jsonObject.put("creator", (String) snapshot.getProperty("cm:modifier"));
+            jsonObject.put("tag", (String)SnapshotGet.getConfigurationSet(snapshot));
             snapshotsJson.put(jsonObject);
         }
         productsJson.put("snapshots", snapshotsJson);

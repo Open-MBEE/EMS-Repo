@@ -35,6 +35,7 @@ import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +47,7 @@ import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -54,103 +56,165 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * Handle the creation of configuration sets for a particular site
+ * 
  * @author cinyoung
- *
+ * 
  */
 public class ConfigurationPost extends AbstractJavaWebScript {
-    public ConfigurationPost() {
-        super();
-    }
-    
-    public ConfigurationPost(Repository repositoryHelper, ServiceRegistry registry) {
-        super(repositoryHelper, registry);
-    }
+	public ConfigurationPost() {
+		super();
+	}
 
-    @Override
-    protected boolean validateRequest(WebScriptRequest req, Status status) {
-        // do nothing
-        return false;
-    }
+	public ConfigurationPost(Repository repositoryHelper,
+			ServiceRegistry registry) {
+		super(repositoryHelper, registry);
+	}
 
-    @Override
-    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-        Map<String, Object> model = new HashMap<String, Object>();
+	@Override
+	protected boolean validateRequest(WebScriptRequest req, Status status) {
+		// do nothing
+		return false;
+	}
 
-        clearCaches();
+	@Override
+	protected Map<String, Object> executeImpl(WebScriptRequest req,
+			Status status, Cache cache) {
+		Map<String, Object> model = new HashMap<String, Object>();
 
-        ConfigurationPost instance = new ConfigurationPost(repository, services);
-        
-        instance.saveAndStartAction(req, status);
-        appendResponseStatusInfo(instance);
-        
-        status.setCode(responseStatus.getCode());
-        model.put("res", response.toString());
-        return model;
-    }
+		clearCaches();
 
-    /**
-     * Save off the configuration set and kick off snapshot creation in background
-     * @param req
-     * @param status
-     */
-    private void saveAndStartAction(WebScriptRequest req, Status status) {
-        String siteName; 
-        String jobName = null;
-        String jobDescription = null;
-        SiteInfo siteInfo; 
-        EmsScriptNode siteNode;
-        EmsScriptNode jobNode = null;
+		ConfigurationPost instance = new ConfigurationPost(repository, services);
 
-        siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
-        if (siteName == null) {
-            log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-        
-        siteInfo = services.getSiteService().getSite(siteName);
-        if (siteInfo == null) {
-            log(LogLevel.ERROR, "Could not find site: " + siteName, HttpServletResponse.SC_NOT_FOUND);
-            return;
-        }
-        siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
-        
-        JSONObject postJson = (JSONObject) req.parseContent();
-        String nodeId;
-        if (postJson.has("name") && postJson.has("description")) {
-            try {
-                jobName = postJson.getString("name");
-                jobDescription = postJson.getString("description");
-                if (postJson.has("nodeid")) {
-                    nodeId = postJson.getString("nodeid");
-                    List<NodeRef> nodeRefs = NodeRef.getNodeRefs(nodeId);
-                    jobNode = new EmsScriptNode(nodeRefs.get(0), services, response);
-                    jobNode.createOrUpdateProperty(Acm.CM_NAME, "VERSION " + jobName);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } else {
-            log(LogLevel.ERROR, "JSON does not specify both name and description for the configuration",
-                    HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
+		instance.saveAndStartAction(req, status);
+		appendResponseStatusInfo(instance);
 
-        if (jobNode == null) {
-            jobNode = ActionUtil.getOrCreateJob(siteNode, jobName, "ems:ConfigurationSet", status, response);
-        }
-        if (jobNode == null) {
-            log(LogLevel.ERROR, "Could not create job node", HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
-            return;
-        }
-        jobNode.createOrUpdateProperty("cm:description", jobDescription);
-             
-        // only create snapshots once - can update names and descriptions any time
-        if (!postJson.has("nodeid")) {
-	        // kick off the action
-	        ActionService actionService = services.getActionService();
-	        Action configurationAction = actionService.createAction(ConfigurationGenerationActionExecuter.NAME);
-	        configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_SITE_NAME, siteName);
-	        services.getActionService().executeAction(configurationAction , jobNode.getNodeRef(), true, true);
-        }
-    }
+		status.setCode(responseStatus.getCode());
+		model.put("res", response.toString());
+		return model;
+	}
+
+	/**
+	 * Save off the configuration set and kick off snapshot creation in
+	 * background
+	 * 
+	 * @param req
+	 * @param status
+	 */
+	private void saveAndStartAction(WebScriptRequest req, Status status) {
+		String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+		if (siteName == null) {
+			log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
+			return;
+		}
+
+		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+		if (siteInfo == null) {
+			log(LogLevel.ERROR, "Could not find site: " + siteName, HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+		EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+
+		JSONObject postJson = (JSONObject) req.parseContent();
+		try {
+			if (postJson.has("nodeid")) {
+				handleUpdate(postJson, siteNode, status);
+			} else {
+				handleCreate(postJson, siteNode, status);
+			}
+		} catch (JSONException e) {
+			log(LogLevel.ERROR, "Could not parse JSON", HttpServletResponse.SC_BAD_REQUEST);
+			e.printStackTrace();
+			return;
+		}
+
+	}
+
+	
+	private HashSet<String> getProductList(JSONObject postJson) throws JSONException {
+		HashSet<String> productList = new HashSet<String>();
+		String keys[] = {"products", "snapshots"};
+		for (String key: keys) {
+			if (postJson.has(key)) {
+				JSONArray documents = postJson.getJSONArray(key);
+				for (int ii = 0; ii < documents.length(); ii++) {
+					productList.add(documents.getString(ii));
+				}
+			}
+		}
+		return productList;
+	}
+	
+	private boolean handleCreate(JSONObject postJson, EmsScriptNode siteNode, Status status) throws JSONException {
+		String siteName = (String)siteNode.getProperty(Acm.CM_NAME);
+		EmsScriptNode jobNode = null;
+		
+		if (postJson.has("name")) {
+			jobNode = ActionUtil.getOrCreateJob(siteNode, postJson.getString("name"), "ems:ConfigurationSet", status, response);
+			
+			if (jobNode != null) {
+				if (postJson.has("description")) {
+					jobNode.createOrUpdateProperty("cm:description", postJson.getString("description"));
+				}
+				startAction(jobNode, siteName, getProductList(postJson));
+			} else {
+				log(LogLevel.ERROR, "Couldn't create configuration job: " + postJson.getString("name"), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				return false;
+			}
+		} else {
+			log(LogLevel.ERROR, "Job name not specified", HttpServletResponse.SC_BAD_REQUEST);
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private boolean handleUpdate(JSONObject postJson, EmsScriptNode siteNode, Status status) throws JSONException {
+		String nodeId = postJson.getString("nodeid");
+		EmsScriptNode jobNode = null;
+		
+		List<NodeRef> nodeRefs = NodeRef.getNodeRefs(nodeId);
+		if (nodeRefs.size() > 0) {
+			jobNode = new EmsScriptNode(nodeRefs.get(0), services, response);
+			if (postJson.has("name")) {
+				jobNode.createOrUpdateProperty(Acm.CM_NAME, postJson.getString("name"));
+			}
+			if (postJson.has("description")) {
+				jobNode.createOrUpdateProperty("cm:description", postJson.getString("description"));
+			}
+			if (postJson.has("snapshots")) {
+				// clear out existing list of references
+				jobNode.removeAssociations("ems:configuredSnapshots");
+				
+				// get the snapshot folder
+				EmsScriptNode snapshotFolder = siteNode.childByNamePath("/snapshots");
+				
+				HashSet<String> productList = getProductList(postJson);
+				for (String product: productList) {
+					EmsScriptNode productNode = snapshotFolder.childByNamePath("/" + product);
+					if (productNode != null) {
+						jobNode.createOrUpdateAssociation(productNode, "ems:configuredSnapshots", true);
+					}
+				}
+			}
+		} else {
+			log(LogLevel.ERROR, "Could not find configuration to update for: " + nodeId, HttpServletResponse.SC_BAD_REQUEST);
+			return false;
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Kick off the actual action in the background
+	 * @param jobNode
+	 * @param siteName
+	 * @param productList
+	 */
+	private void startAction(EmsScriptNode jobNode, String siteName, HashSet<String> productList) {
+		ActionService actionService = services.getActionService();
+		Action configurationAction = actionService.createAction(ConfigurationGenerationActionExecuter.NAME);
+		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_SITE_NAME, siteName);
+		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_PRODUCT_LIST, productList);
+		services.getActionService().executeAction(configurationAction, jobNode.getNodeRef(), true, true);
+	}
 }

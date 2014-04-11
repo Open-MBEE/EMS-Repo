@@ -34,6 +34,7 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -51,7 +52,6 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
-@Deprecated
 public class SnapshotGet extends AbstractJavaWebScript {
     public SnapshotGet() {
         super();
@@ -78,15 +78,22 @@ public class SnapshotGet extends AbstractJavaWebScript {
         String id = req.getServiceMatch().getTemplateVars().get("id");
         Map<String, Object> model = new HashMap<String, Object>();
 
-        String snapshotString = getSnapshotString(id);
-        if (snapshotString != null) {
-            EmsScriptNode snapshot = findScriptNodeById(id);
+        EmsScriptNode snapshot = findScriptNodeById(id);
+        if (snapshot != null) {
+            String snapshotString = getSnapshotString(snapshot);
             Date date = (Date)snapshot.getProperty(Acm.ACM_LAST_MODIFIED);
             model.put("res", snapshotString);
             model.put("title", "Snapshot (" + EmsScriptNode.getIsoTime(date) + ")");
+            model.put("tag", getConfigurationSet(snapshot));
+            model.put("siteName", snapshot.getSiteName());
+            model.put("siteTitle", snapshot.getSiteTitle());
         } else {
+            log(LogLevel.ERROR, "Snapshot not found for id: " + id, HttpServletResponse.SC_NOT_FOUND);
             model.put("res", response.toString());
             model.put("title", "ERROR no snapshot found");
+            model.put("tag", "");
+            model.put("siteName", "");
+            model.put("siteTitle", "ERROR snapshot not found");
         }
         model.put("id", id.substring(0, id.lastIndexOf("_")));
 
@@ -94,14 +101,32 @@ public class SnapshotGet extends AbstractJavaWebScript {
         return model;
     }
 
-    private String getSnapshotString(String snapshotId) {
-        EmsScriptNode snapshot = findScriptNodeById(snapshotId);
-        if (snapshot != null) {
-            ContentReader reader = services.getContentService().getReader(snapshot.getNodeRef(), ContentModel.PROP_CONTENT);
-            return reader.getContentString();
-        }
-        log(LogLevel.ERROR, "Snapshot not found for id: " + snapshotId,
-                HttpServletResponse.SC_NOT_FOUND);
-        return null;
+    /**
+     * Load the snapshot from the saved JSON file and return as string
+     * @param snapshotId
+     * @return
+     */
+    private String getSnapshotString(EmsScriptNode snapshot) {
+        ContentReader reader = services.getContentService().getReader(snapshot.getNodeRef(), ContentModel.PROP_CONTENT);
+        return reader.getContentString();
+    }
+    
+    
+    /**
+     * Get the configuration set name associated with the snapshot, if available
+     * @param snapshotId
+     * @return
+     */
+    public static String getConfigurationSet(EmsScriptNode snapshot) {
+		if (snapshot != null) {
+			List<EmsScriptNode> configurationSets = snapshot.getSourceAssocsNodesByType("ems:configuredSnapshots");
+			if (!configurationSets.isEmpty()) {
+				EmsScriptNode configurationSet = configurationSets.get(0);
+				String configurationSetName = (String) configurationSet.getProperty(Acm.CM_NAME);
+				return configurationSetName;
+			}
+     	}
+
+		return "";
     }
 }

@@ -186,6 +186,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	protected void log(LogLevel level, String msg, int code) {
 		if (level.value >= logLevel.value) {
 			log("[" + level.name() + "]: " + msg + "\n", code);
+			if (level.value >= LogLevel.WARNING.value) {
+				System.out.println("[" + level.name() + "]: " + msg + "\n");
+			}
 		}
 	}
 	
@@ -224,7 +227,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 */
 	protected boolean checkPermissions(NodeRef nodeRef, String permissions) {
 		if (services.getPermissionService().hasPermission(nodeRef, permissions) != AccessStatus.ALLOWED) {
-			log(LogLevel.WARNING, "No " + permissions + " priveleges to " + nodeRef.toString() + ".\n", HttpServletResponse.SC_UNAUTHORIZED);
+			log(LogLevel.WARNING, "No " + permissions + " priveleges to " + nodeRef.toString() + ".\n", HttpServletResponse.SC_BAD_REQUEST);
 			return false;
 		}
 		return true;
@@ -323,5 +326,5 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     public void appendResponseStatusInfo(AbstractJavaWebScript instance) {
         response.append(instance.getResponse());
         responseStatus.setCode(instance.getResponseStatus().getCode());
-    }
+    }    
 }

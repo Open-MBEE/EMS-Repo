@@ -99,11 +99,6 @@
     </bean>
 
 	
-	<bean id="jwsUtil" class="gov.nasa.jpl.view_repo.webscripts.JwsUtil">
-		<property name="services" ref="ServiceRegistry" />
-		<property name="transactionInterval" value="500" />
-	</bean>
-
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.post"
 		class="gov.nasa.jpl.view_repo.webscripts.ViewPost"
 		parent="webscript">
