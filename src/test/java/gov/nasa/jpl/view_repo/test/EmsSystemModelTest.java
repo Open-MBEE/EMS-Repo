@@ -62,20 +62,23 @@ public class EmsSystemModelTest {
         // See $HOME/git/alfresco-view-repo/test-data/javawebscripts/curl.tests.sh for environment variables and sample curl commands
         String userHome = System.getenv("HOME");
         // curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:application/json" --data '{"name":"CY Test"}' "http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/123456?fix=true&createSite=true"
-        String curlCmd1 = "curl -w \"%{http_code}\" -u admin:admin -X POST -H \"Content-Type:application/json\" --data '{\"name\":\"CY Test\"}' \"http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/123456?fix=true&createSite=true\"";
+        String curlCmd1 = "curl -w \"%{http_code}\" -u admin:admin -X POST -H \"Content-Type:application/json\" --data '{\"name\":\"CY Test\"}' \"http://localhost:8080/alfresco/service/javawebscripts/sites/europa/projects/123456?fix=true&createSite=true\"";
         //   curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/expressionElements.json $BASE_URL"sites/europa/projects/123456/elements\""
-        String curlCmdTemp = String.format("%s/git/alfresco-view-repo/test-data/javawebscripts/JsonData/expressionElements.json \"http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/123456/elements\"",userHome);
+        String curlCmdTemp = String.format("%s/git/alfresco-view-repo/test-data/javawebscripts/JsonData/expressionElements.json \"http://localhost:8080/alfresco/service/javawebscripts/sites/europa/projects/123456/elements\"",userHome);
         String curlCmd2 = "curl -w \"%{http_code}\" -u admin:admin -X POST -H \"Content-Type:application/json\" --data @"+curlCmdTemp;
         
-        try {
-        	System.out.println("Executing command: "+curlCmd1);
-        	Runtime.getRuntime().exec(curlCmd1);
-        	System.out.println("Executing command: "+curlCmd2);
-        	Runtime.getRuntime().exec(curlCmd2);
-        }
-        catch (IOException e) {
-        	e.printStackTrace();	
-        }
+    	System.out.println("You must execute this command before running this test: "+curlCmd1);
+    	System.out.println("You must execute this command before running this test: "+curlCmd2);
+
+//        try {
+//        	System.out.println("Executing command: "+curlCmd1);
+//        	Runtime.getRuntime().exec(curlCmd1);
+//        	System.out.println("Executing command: "+curlCmd2);
+//        	Runtime.getRuntime().exec(curlCmd2);
+//        }
+//        catch (IOException e) {
+//        	e.printStackTrace();	
+//        }
       
 //        System.out.println("LAUNCH DEBUGGER START!!!");
 //        try {
@@ -190,17 +193,20 @@ public class EmsSystemModelTest {
         System.out.println( "\n*testExpressionEvaluation() solver: "
                             + MoreToString.Helper.toLongString( solver ) );
         
+        // Add the constraint to the auto-generated parameter listener:
         ClassData cd = sysmlToAe.getClassData();
         ParameterListenerImpl listener = cd.getAeClasses().values().iterator().next();
         listener.getConstraintExpressions().add(constraint);
         
+        // Solve the constraint:
         boolean r = solver.solve(listener.getConstraints(true, null) );
         // TODO -- dig solution out of solver (really out of constraint)!
         
+        System.out.println("\n*testExpressionEvaluation() creating a DurativeEvent and execute()....\n");
         DurativeEvent durEvent = new DurativeEvent("testDuration", listener);
         durEvent.execute();
         
-        System.out.println("\n*testExpressionEvaluation() solver: "+durEvent.executionToString());
+        System.out.println("\n*testExpressionEvaluation() durEvent.execution(): "+durEvent.executionToString());
     }
 
     @Test
