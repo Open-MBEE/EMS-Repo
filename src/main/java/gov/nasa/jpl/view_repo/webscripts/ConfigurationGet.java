@@ -238,7 +238,7 @@ public class ConfigurationGet extends AbstractJavaWebScript {
      * @throws JSONException
      */
 	private JSONArray getProductSnapshots(String productId, String contextPath) throws JSONException {
-	    EmsScriptNode product = findScriptNodeByName(productId);
+	    EmsScriptNode product = findScriptNodeById(productId);
 	    
         JSONArray snapshotsJson = new JSONArray();
         List<EmsScriptNode> snapshotsList = product.getTargetAssocsNodesByType("view2:snapshots");

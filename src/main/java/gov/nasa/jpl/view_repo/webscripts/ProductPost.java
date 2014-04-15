@@ -114,7 +114,7 @@ public class ProductPost extends AbstractJavaWebScript {
 			return;
 		}
 		
-		EmsScriptNode product = findScriptNodeByName(id);
+		EmsScriptNode product = findScriptNodeById(id);
 		if (product == null) {
 			log(LogLevel.ERROR, "could not find product with id: " + id, HttpServletResponse.SC_NOT_FOUND);
 			return;

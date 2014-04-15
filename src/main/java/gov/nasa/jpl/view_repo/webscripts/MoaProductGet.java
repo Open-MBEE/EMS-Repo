@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.Collections;
 import java.util.Date;
@@ -74,7 +75,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 			return false;
 		}
 		
-		EmsScriptNode product = findScriptNodeByName(productId);
+		EmsScriptNode product = findScriptNodeById(productId);
 		if (product == null) {
 			log(LogLevel.ERROR, "Product not found with id: " + productId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
@@ -104,7 +105,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		}
 
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK && json != null) {
-			EmsScriptNode product = findScriptNodeByName(productId);
+			EmsScriptNode product = findScriptNodeById(productId);
 		    String jsonString = json.toString();
             model.put("res", jsonString);
             if (productId != null) {
@@ -149,7 +150,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
      * @throws JSONException
      */
 	private JSONObject handleProduct(String productId) throws JSONException {
-		EmsScriptNode product = findScriptNodeByName(productId);
+		EmsScriptNode product = findScriptNodeById(productId);
 		JSONObject productsJson = null;
 		JSONArray viewsJson = new JSONArray();
 		JSONArray elementsJson = new JSONArray();
@@ -179,7 +180,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	 * @throws JSONException
 	 */
 	private void handleSnapshots(String productId, String contextPath, JSONObject productsJson) throws JSONException {
-	    EmsScriptNode product = findScriptNodeByName(productId);
+	    EmsScriptNode product = findScriptNodeById(productId);
 	    
         JSONArray snapshotsJson = new JSONArray();
         List<EmsScriptNode> snapshotsList = product.getTargetAssocsNodesByType("view2:snapshots");
@@ -218,7 +219,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	    
 	    // insert all the views and find all the elements
 	    for (String viewId: viewIds) {
-	        EmsScriptNode view = findScriptNodeByName(viewId);
+	        EmsScriptNode view = findScriptNodeById(viewId);
 	        if (view != null && checkPermissions(view, PermissionService.READ)) {
         	        JSONObject viewJson = view.toJSONObject(Acm.JSON_TYPE_FILTER.VIEW);
         	        
@@ -244,7 +245,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	    
 	    // insert all the elements
 	    for (String elementId: elementIds) {
-	        EmsScriptNode element = findScriptNodeByName(elementId);
+	        EmsScriptNode element = findScriptNodeById(elementId);
 	        if (element != null && checkPermissions(element, PermissionService.READ)) {
 	            JSONObject elementJson = element.toJSONObject(Acm.JSON_TYPE_FILTER.ELEMENT);
 	            elementsJson.put(elementJson);

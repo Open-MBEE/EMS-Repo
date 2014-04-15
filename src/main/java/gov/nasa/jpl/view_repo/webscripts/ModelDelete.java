@@ -81,7 +81,7 @@ public class ModelDelete extends AbstractJavaWebScript {
 			return false;
 		}
 		
-		modelRootNode = findScriptNodeByName(modelId);
+		modelRootNode = findScriptNodeById(modelId);
 		if (modelRootNode == null) {
 			log(LogLevel.ERROR, "Element not found with id: " + modelId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
@@ -109,7 +109,7 @@ public class ModelDelete extends AbstractJavaWebScript {
 		        handleElementHierarchy(modelRootNode, recurse);
 		    } else {
 		        delete(modelRootNode);
-		        EmsScriptNode pkgNode = findScriptNodeByName(modelId + "_pkg");
+		        EmsScriptNode pkgNode = findScriptNodeById(modelId + "_pkg");
 		        handleElementHierarchy(pkgNode, recurse);
 		    }
 		}

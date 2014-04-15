@@ -63,7 +63,7 @@ public class ProductGet extends AbstractJavaWebScript {
 			return false;
 		}
 		
-		EmsScriptNode product = findScriptNodeByName(productId);
+		EmsScriptNode product = findScriptNodeById(productId);
 		if (product == null) {
 			log(LogLevel.ERROR, "Product not found with id: " + productId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
@@ -106,10 +106,10 @@ public class ProductGet extends AbstractJavaWebScript {
 		return model;
 	}
 
-	
+
 	private JSONArray handleProduct(String productId) {
 	    JSONArray productsJson = new JSONArray();
-		EmsScriptNode product = findScriptNodeByName(productId);
+		EmsScriptNode product = findScriptNodeById(productId);
 		if (product == null) {
 			log(LogLevel.ERROR, "Product not found with ID: " + productId, HttpServletResponse.SC_NOT_FOUND);
 		}

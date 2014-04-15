@@ -78,7 +78,7 @@ public class SnapshotGet extends AbstractJavaWebScript {
         String id = req.getServiceMatch().getTemplateVars().get("id");
         Map<String, Object> model = new HashMap<String, Object>();
 
-        EmsScriptNode snapshot = findScriptNodeByName(id);
+        EmsScriptNode snapshot = findScriptNodeById(id);
         if (snapshot != null) {
             String snapshotString = getSnapshotString(snapshot);
             Date date = (Date)snapshot.getProperty(Acm.ACM_LAST_MODIFIED);
@@ -118,15 +118,15 @@ public class SnapshotGet extends AbstractJavaWebScript {
      * @return
      */
     public static String getConfigurationSet(EmsScriptNode snapshot) {
-    		if (snapshot != null) {
-    			List<EmsScriptNode> configurationSets = snapshot.getSourceAssocsNodesByType("ems:configuredSnapshots");
-    			if (!configurationSets.isEmpty()) {
-    				EmsScriptNode configurationSet = configurationSets.get(0);
-    				String configurationSetName = (String) configurationSet.getProperty(Acm.CM_NAME);
-    				return configurationSetName;
-    			}
+		if (snapshot != null) {
+			List<EmsScriptNode> configurationSets = snapshot.getSourceAssocsNodesByType("ems:configuredSnapshots");
+			if (!configurationSets.isEmpty()) {
+				EmsScriptNode configurationSet = configurationSets.get(0);
+				String configurationSetName = (String) configurationSet.getProperty(Acm.CM_NAME);
+				return configurationSetName;
+			}
      	}
-    		
-    		return "";
+
+		return "";
     }
 }
