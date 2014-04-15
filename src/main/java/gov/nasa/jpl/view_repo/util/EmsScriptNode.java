@@ -70,6 +70,7 @@ import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
@@ -1087,22 +1088,30 @@ public class EmsScriptNode extends ScriptNode {
 	/**
 	 * Update the node with the properties from the jsonObject
 	 * @param jsonObject
+	 * @return TODO
 	 * @throws JSONException 
 	 */
-	public void ingestJSON(JSONObject jsonObject) throws JSONException {
+	public boolean ingestJSON(JSONObject jsonObject) throws JSONException {
+		boolean changed = false;
 	    // fill in all the properties
 	    for (String jsonType: Acm.JSON2ACM.keySet()) {
 	        String acmType = Acm.JSON2ACM.get(jsonType);
 	        if (jsonObject.has(jsonType)) {
 	            if (Acm.JSON_ARRAYS.contains(jsonType)) {
 	                JSONArray array = jsonObject.getJSONArray(jsonType);
-	                this.createOrUpdateProperty(acmType, array.toString());
+	                if (this.createOrUpdateProperty(acmType, array.toString())) {
+	                		changed = true;
+	                }
 	            } else {
 	                String property = jsonObject.getString(jsonType);
 	                if (jsonType.startsWith("is")) {
-	                    this.createOrUpdateProperty(acmType, new Boolean(property));
+	                		if (this.createOrUpdateProperty(acmType, new Boolean(property))) {
+	                			changed = true;
+	                		}
 	                } else {
-	                    this.createOrUpdateProperty(acmType, new String(property));
+	                		if (this.createOrUpdateProperty(acmType, new String(property))) {
+	                			changed = true;
+	                		}
 	                }
 	            }
 	        }
@@ -1128,16 +1137,26 @@ public class EmsScriptNode extends ScriptNode {
                     array = jsonObject.getJSONArray(Acm.JSON_VALUE);
                 }
                 if (acmType.equals(Acm.ACM_LITERAL_BOOLEAN)) {
-                    this.createOrUpdatePropertyValues(acmType, array, new Boolean(true));
+                    if (this.createOrUpdatePropertyValues(acmType, array, new Boolean(true))) {
+                    		changed = true;
+                    }
                 } else if (acmType.equals(Acm.ACM_LITERAL_INTEGER)) {
-                    this.createOrUpdatePropertyValues(acmType, array, new Integer(0));
+                    if (this.createOrUpdatePropertyValues(acmType, array, new Integer(0))) {
+                    		changed = true;
+                    }
                 } else if (acmType.equals(Acm.ACM_LITERAL_REAL)) {
-                    this.createOrUpdatePropertyValues(acmType, array, new Double(0.0));
+                		if (this.createOrUpdatePropertyValues(acmType, array, new Double(0.0))) {
+                			changed = true;
+                		}
                 } else if (acmType.equals(Acm.ACM_LITERAL_STRING)) {
-                    this.createOrUpdatePropertyValues(acmType, array, new String(""));
+                    if (this.createOrUpdatePropertyValues(acmType, array, new String(""))) {
+                    		changed = true;
+                    }
                 }
             }
         }
+        
+        return changed;
 	}
 	
 	/**
@@ -1286,4 +1305,16 @@ public class EmsScriptNode extends ScriptNode {
         return fmt.print(dt);
     }
 
+    public EmsScriptNode getHeadVersion() {
+    		EmsScriptNode versionNode = null;
+	    	if (getIsVersioned())
+	        {
+	            VersionHistory history = this.services.getVersionService().getVersionHistory(this.nodeRef);
+	            if (history != null)
+	            {
+	            		versionNode = new EmsScriptNode(history.getHeadVersion().getVersionedNodeRef(), services);
+	            }
+	        }
+        return versionNode;
+  	}
 }
