@@ -475,6 +475,8 @@ public class ModelPost extends AbstractJavaWebScript {
     Map<String, JSONObject> elementMap = new HashMap<String, JSONObject>();
     Set<String> rootElements = new HashSet<String>();
 
+    protected WebScriptRequest lastReq = null;
+
     /**
      * Builds up the element map and hierarchy and returns true if valid
      * @param jsonArray         Takes in the elements JSONArray
@@ -845,7 +847,7 @@ public class ModelPost extends AbstractJavaWebScript {
     protected void saveAndStartAction(WebScriptRequest req, Status status) throws Exception {
         //String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
         //SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-        EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+        EmsScriptNode siteNode = new EmsScriptNode(getSiteInfo(req).getNodeRef(), services, response);
         String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
         
         String jobName = "Load Job " + projectId + ".json";
@@ -870,6 +872,9 @@ public class ModelPost extends AbstractJavaWebScript {
             return false;
         }
 
+        String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+        setSiteInfo( req );
+
         String elementId = req.getServiceMatch().getTemplateVars().get("elementid");
         if (elementId != null) {
             // TODO - move this to ViewModelPost - really non hierarchical post
@@ -877,13 +882,11 @@ public class ModelPost extends AbstractJavaWebScript {
                 return false;
             }
         } else {
-            String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
             // Handling for project/{id}/elements
             if (!checkRequestVariable(siteName, SITE_NAME)) {
                 return false;
             }
 
-            siteInfo = services.getSiteService().getSite(siteName);
             if (!checkRequestVariable(siteInfo, "Site")) {
                 return false;
             }
@@ -931,6 +934,23 @@ public class ModelPost extends AbstractJavaWebScript {
         runWithoutTransactions = withoutTransactions;           
     }
     
+    public void setSiteInfo( WebScriptRequest req ) {
+        if ( req == null ) return;
+        String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+        siteInfo = services.getSiteService().getSite(siteName);
+    }
+    public SiteInfo getSiteInfo() {
+        return getSiteInfo( null );
+    }
+    public SiteInfo getSiteInfo( WebScriptRequest req ) {
+        if ( req == null ) return siteInfo;
+        if ( lastReq == req ) {
+            if ( siteInfo != null ) return siteInfo;
+        }
+        setSiteInfo( req );
+        return siteInfo;
+    }
+
     @Override
     protected void clearCaches() {
         super.clearCaches();
