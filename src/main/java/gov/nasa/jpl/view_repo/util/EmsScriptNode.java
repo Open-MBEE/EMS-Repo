@@ -70,6 +70,7 @@ import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
@@ -1285,7 +1286,7 @@ public class EmsScriptNode extends ScriptNode {
         public int compare(EmsScriptNode x, EmsScriptNode y) {
             Date xModified;
             Date yModified;
-            
+             
             xModified = (Date) x.getProperty(Acm.ACM_LAST_MODIFIED);
             yModified = (Date) y.getProperty(Acm.ACM_LAST_MODIFIED);
             
@@ -1305,16 +1306,20 @@ public class EmsScriptNode extends ScriptNode {
         return fmt.print(dt);
     }
 
-    public EmsScriptNode getHeadVersion() {
-    		EmsScriptNode versionNode = null;
+    public Version getHeadVersion() {
+    		Version headVersion = null;
 	    	if (getIsVersioned())
 	        {
 	            VersionHistory history = this.services.getVersionService().getVersionHistory(this.nodeRef);
 	            if (history != null)
 	            {
-	            		versionNode = new EmsScriptNode(history.getHeadVersion().getVersionedNodeRef(), services);
+	            		headVersion = history.getHeadVersion();
 	            }
 	        }
-        return versionNode;
+        return headVersion;
   	}
+    
+    public String getNodeId() {
+    		return EmsScriptNode.getStoreRef().toString() + "/" + getNodeRef().getId();
+    }
 }

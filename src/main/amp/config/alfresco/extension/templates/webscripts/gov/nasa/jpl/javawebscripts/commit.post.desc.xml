@@ -1,0 +1,20 @@
+<webscript>
+	<shortname>Post a commit to revert</shortname>
+    <description>
+  		</description>
+  		<url>/javawebscripts/sites/{siteName}/commits/{commitId}</url>
+  		<format default="json">any</format>
+  		<authentication>user</authentication>
+  		<transaction allow="readwrite">required</transaction>
+  		<family>EMS Java Webscripts</family>
+        <args>
+            <arg>
+                <name>siteName</name>
+                <description>site to find documents for which snapshots will be created and linked to the configuration</description>
+            </arg>
+            <arg>
+                <name>commitId</name>
+                <description>ID of commit to revert</description>
+            </arg>
+        </args>    		
+ </webscript>

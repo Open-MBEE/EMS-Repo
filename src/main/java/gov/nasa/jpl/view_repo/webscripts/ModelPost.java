@@ -54,6 +54,7 @@ import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.version.Version;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -133,7 +134,7 @@ public class ModelPost extends AbstractJavaWebScript {
     /**
      * Keep track of update elements
      */
-    Set<EmsScriptNode> changeSet = new HashSet<EmsScriptNode>();
+    Set<Version> changeSet = new HashSet<Version>();
 
     /**
      * Create or update the model as necessary based on the request
@@ -206,7 +207,8 @@ public class ModelPost extends AbstractJavaWebScript {
         updateOrCreateAllRelationships(relationshipsJson);
         
         // create commit history
-        CommitUtil.commitChangeSet(changeSet, runWithoutTransactions, services);
+        // TODO add in commit message
+        CommitUtil.commitChangeSet(changeSet, "", runWithoutTransactions, services);
         
         now = new Date();
         end = System.currentTimeMillis();
@@ -672,9 +674,11 @@ public class ModelPost extends AbstractJavaWebScript {
             log(LogLevel.INFO, "\tinserting metadata");
             
             // Log any changes as a commit change set
-            EmsScriptNode head = node.getHeadVersion();
+            Version headVersion = node.getHeadVersion();
             if (node.ingestJSON(elementJson)) {
-            		changeSet.add(head);
+            		if (headVersion != null) {
+            			changeSet.add(headVersion);
+            		}
             }
         }
 

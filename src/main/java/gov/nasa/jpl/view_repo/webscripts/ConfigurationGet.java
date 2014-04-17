@@ -185,7 +185,7 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         json.put("modified", EmsScriptNode.getIsoTime(date));
         json.put("name", config.getProperty(Acm.CM_NAME));
         json.put("description", config.getProperty("cm:description"));
-        json.put("nodeid", EmsScriptNode.getStoreRef().toString() + "/" + config.getNodeRef().getId());
+        json.put("nodeid", config.getNodeId()); //EmsScriptNode.getStoreRef().toString() + "/" + config.getNodeRef().getId());
         
         List<EmsScriptNode> snapshots = config.getTargetAssocsNodesByType("ems:configuredSnapshots");
         for (EmsScriptNode snapshot: snapshots) {
