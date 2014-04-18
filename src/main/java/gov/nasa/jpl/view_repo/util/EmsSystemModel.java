@@ -669,7 +669,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     @Override
     public Collection< EmsScriptNode > getRelationship( Object context,
                                                         Object specifier ) {
-        // TODO Auto-generated method stub
+    	
+    	// TODO
         return null;
     }
 
@@ -754,6 +755,9 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         return null;
     }
 
+    /**
+     * Return a 
+     */
     @Override
     public Collection< EmsScriptNode >
             getType( Object context, Object specifier ) {
@@ -761,7 +765,19 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     	// TODO ScriptNode getType returns a QName or String, why does he want a collection
     	// of EmsScriptNode?  I think we should change T to String.
     	
-        return null;
+    	// Ignoring context b/c it doesnt make sense
+    	
+    	// Search for all elements with the specified type name:
+    	if (specifier instanceof String) {
+	        StringBuffer response = new StringBuffer();
+	        Status status = new Status();
+	        Map< String, EmsScriptNode > elements =
+	                NodeUtil.searchForElements( "@sysml\\:type:\"", (String)specifier, services, response,
+	                                            status );
+	        if ( elements != null ) return elements.values();
+    	}
+    	
+        return Collections.emptyList();
     }
     
     // TODO remove this once we fix getType()

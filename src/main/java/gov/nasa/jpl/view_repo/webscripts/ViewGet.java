@@ -31,7 +31,10 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.EmsSystemModel;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +42,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,6 +52,7 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ViewGet extends AbstractJavaWebScript {
+		
 	public ViewGet() {
 	    super();
 	}
@@ -130,6 +135,82 @@ public class ViewGet extends AbstractJavaWebScript {
             		}
         		}
 		}
+	}
+	
+	private EmsScriptNode getMatchingExposeConformElements(NodeRef viewNodeRef,
+														   Collection<EmsScriptNode> elements) {
+		
+		// Check if any of the nodes in the passed collection of Expose or Conform
+		// elements have the View as a sysml:source:
+		for (EmsScriptNode node : elements) {
+
+	        try {
+	
+	        	// The Expose element will always be the alfresco source for the association:
+	        	JSONArray sourceIds = node.getTargetAssocsIdsByType(Acm.ACM_SOURCE);
+	            
+	            for (int ii = 0; ii < sourceIds.length(); ii++) {
+	                String sourceId = sourceIds.getString(ii);
+	                EmsScriptNode source = findScriptNodeById(sourceId);
+	                if (source != null) {
+	                    
+	                	// Check if the source is the view node:
+	                	if (viewNodeRef.equals(source.getNodeRef())) {
+	                		return source;
+	                	}
+	                }
+	            }
+	                      
+	        } catch (JSONException e) {
+	            log(LogLevel.ERROR, "Could not create the View JSON", HttpServletResponse.SC_BAD_REQUEST);
+	            e.printStackTrace();
+	        }
+		}
+        
+        return null;
+	}
+	
+	private void viewToJSON(EmsScriptNode view) {
+		
+		// View editor uses this class to get the jason it needs for the view
+		// editor.
+		
+		EmsSystemModel model = new EmsSystemModel(services);
+		NodeRef viewNodeRef = view.getNodeRef();
+		
+		// Get all elements of Expose type:
+		Collection<EmsScriptNode> exposeElements = model.getType(null, "Expose");
+		
+		// Get all elements of Conform type:
+		Collection<EmsScriptNode> conformElements = model.getType(null, "Conform");
+		
+		// Get the unique Expose and Conform element with the View as a sysml:source:
+		EmsScriptNode myExposeElement = getMatchingExposeConformElements(viewNodeRef, exposeElements);
+		EmsScriptNode myConformElement = getMatchingExposeConformElements(viewNodeRef, conformElements);
+		
+		if (myExposeElement != null && myConformElement != null) {
+			
+			// Get the target of the Conform relationship (the Viewpoint):
+			
+			// Get the Method Property from the ViewPoint element
+			// 		The Method Property owner is the Viewpoint
+			
+			// Get the value of the elementValue of the Method Property, which is an
+			// Operation:
+						
+			// Parse and convert the Operation:
+			
+			// Get the target of the Expose relationship:
+			
+			// Set the function call arguments with the exposed model elements:
+			
+			// Return the converted JSON from the expression evaluation:
+			
+		}
+		else {
+			// TODO: error!
+		}
+
 	}
 	
 }
