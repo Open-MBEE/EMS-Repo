@@ -72,8 +72,8 @@ Eclipse/Maven
         mvn install:install-file -Dfile=lib/sysml.jar -DgroupId=gov.nasa.jpl -DartifactId=sysml -Dversion=1.0 -Dpackaging=jar
 
     For the bae, sysml, and util projects you will need to update the build.properties file and rebel.xml file with your home directory and folder of where magic draw is installed.  For instance:
-        home=/Users/gcgandhi
-        md=/Applications/MD
+        home=/home/gcgandhi
+        md=/opt/local/magicdraw
 
     If you are not using Eclispse yoxos, then you will need to install the IMCE Eclipse plug ins.  Do the following:
         1. Get the .jar files from Brad or Doris, and then place them in your eclipse installation plugins folder, i.e. "/Applications/eclipse/plugins".  
