@@ -137,6 +137,13 @@ public class ViewGet extends AbstractJavaWebScript {
 		}
 	}
 	
+	/**
+	 * Gets the matching Expose or Conform element for the passed View
+	 * 
+	 * @param viewNodeRef
+	 * @param elements
+	 * @return
+	 */
 	private EmsScriptNode getMatchingExposeConformElements(NodeRef viewNodeRef,
 														   Collection<EmsScriptNode> elements) {
 		
@@ -170,7 +177,13 @@ public class ViewGet extends AbstractJavaWebScript {
         return null;
 	}
 	
-	private void viewToJSON(EmsScriptNode view) {
+	/**
+	 * Processes that passes View and converts it to JSON object to be
+	 * processed by view editor.
+	 * 
+	 * @param view
+	 */
+	private JSONObject viewToJSON(EmsScriptNode view) {
 		
 		// View editor uses this class to get the jason it needs for the view
 		// editor.
@@ -210,6 +223,8 @@ public class ViewGet extends AbstractJavaWebScript {
 		else {
 			// TODO: error!
 		}
+		
+		return null;
 
 	}
 	
