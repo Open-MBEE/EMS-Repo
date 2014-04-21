@@ -136,47 +136,5 @@ public class ViewGet extends AbstractJavaWebScript {
         		}
 		}
 	}
-	
-	/**
-	 * Gets the matching Expose or Conform element for the passed View
-	 * 
-	 * @param viewNodeRef
-	 * @param elements
-	 * @return
-	 */
-	private EmsScriptNode getMatchingExposeOrConformElement(NodeRef viewNodeRef,
-														   Collection<EmsScriptNode> elements) {
 		
-		// Check if any of the nodes in the passed collection of Expose or Conform
-		// elements have the View as a sysml:source:
-		for (EmsScriptNode node : elements) {
-
-	        try {
-	
-	        	// The Expose/Conform element will always be the alfresco source for the association:
-	        	JSONArray sourceIds = node.getTargetAssocsIdsByType(Acm.ACM_PROPERTY_TYPE);
-	            
-	            for (int ii = 0; ii < sourceIds.length(); ii++) {
-	                String sourceId = sourceIds.getString(ii);
-	                EmsScriptNode source = findScriptNodeById(sourceId);
-	                if (source != null) {
-	                    
-	                	// Check if the source is the view node:
-	                	if (viewNodeRef.equals(source.getNodeRef())) {
-	                		return source;
-	                	}
-	                }
-	            }
-	                      
-	        } catch (JSONException e) {
-	            log(LogLevel.ERROR, "Could not create the View JSON", HttpServletResponse.SC_BAD_REQUEST);
-	            e.printStackTrace();
-	        }
-		}
-        
-        return null;
-	}
-	
-
-	
 }

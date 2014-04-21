@@ -132,8 +132,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     @Override
     public Collection< EmsScriptNode > getTarget( EmsScriptNode relationship ) {
-        // TODO Auto-generated method stub
-        return null;
+        
+        return getProperty(relationship, Acm.ACM_TARGET);
     }
 
     @Override
