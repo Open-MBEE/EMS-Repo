@@ -144,7 +144,7 @@ public class ViewGet extends AbstractJavaWebScript {
 	 * @param elements
 	 * @return
 	 */
-	private EmsScriptNode getMatchingExposeConformElements(NodeRef viewNodeRef,
+	private EmsScriptNode getMatchingExposeOrConformElement(NodeRef viewNodeRef,
 														   Collection<EmsScriptNode> elements) {
 		
 		// Check if any of the nodes in the passed collection of Expose or Conform
@@ -153,7 +153,7 @@ public class ViewGet extends AbstractJavaWebScript {
 
 	        try {
 	
-	        	// The Expose element will always be the alfresco source for the association:
+	        	// The Expose/Conform element will always be the alfresco source for the association:
 	        	JSONArray sourceIds = node.getTargetAssocsIdsByType(Acm.ACM_SOURCE);
 	            
 	            for (int ii = 0; ii < sourceIds.length(); ii++) {
@@ -198,8 +198,8 @@ public class ViewGet extends AbstractJavaWebScript {
 		Collection<EmsScriptNode> conformElements = model.getType(null, "Conform");
 		
 		// Get the unique Expose and Conform element with the View as a sysml:source:
-		EmsScriptNode myExposeElement = getMatchingExposeConformElements(viewNodeRef, exposeElements);
-		EmsScriptNode myConformElement = getMatchingExposeConformElements(viewNodeRef, conformElements);
+		EmsScriptNode myExposeElement = getMatchingExposeOrConformElement(viewNodeRef, exposeElements);
+		EmsScriptNode myConformElement = getMatchingExposeOrConformElement(viewNodeRef, conformElements);
 		
 		if (myExposeElement != null && myConformElement != null) {
 			
