@@ -5,6 +5,8 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.json.JSONObject;
+
 import sysml.Viewable;
 
 /**
@@ -58,7 +60,7 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
      * @see sysml.Viewable#toViewJson()
      */
     @Override
-    public String toViewJson() {
+    public JSONObject toViewJson() {
         // TODO Auto-generated method stub
         return null;
     }
@@ -72,4 +74,8 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
         return null;
     }
 
+    @Override
+    public String toString() {
+        return toViewJson().toString();
+    }
 }
