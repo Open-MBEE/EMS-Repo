@@ -82,7 +82,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
-
 import org.alfresco.service.namespace.QNameMap;
 
 /**
@@ -1472,6 +1471,26 @@ public class EmsScriptNode extends ScriptNode {
         DateTime dt = new DateTime(date);
         DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
         return fmt.print(dt);
+    }
+    
+    /**
+     * Override equals for EmsScriptNodes
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj)
+    {
+
+        if (obj instanceof EmsScriptNode)
+        {
+        	EmsScriptNode that = (EmsScriptNode) obj;
+            return this.nodeRef.equals(that.nodeRef);
+        }
+        else
+        {
+            return false;
+        }
     }
 
 }

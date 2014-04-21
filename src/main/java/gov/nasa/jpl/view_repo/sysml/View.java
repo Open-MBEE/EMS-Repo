@@ -169,8 +169,12 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         // Get all elements of Conform type:
         Collection<EmsScriptNode> conformElements = model.getType(null, "Conform");
         
+		// Check if any of the nodes in the passed collection of Expose or Conform
+		// elements have the View as a sysml:source:
         for ( EmsScriptNode node : exposeElements ) {
-            if ( model.getSource( node ).equals( viewNode ) ) { // TODO -- need to write equals for EmsScriptNode
+        	
+        	// If the sysml:source of the Expose element is the View:
+            if ( model.getSource( node ).equals( viewNode ) ) { 
                 
             }
         }

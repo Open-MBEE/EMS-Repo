@@ -154,7 +154,7 @@ public class ViewGet extends AbstractJavaWebScript {
 	        try {
 	
 	        	// The Expose/Conform element will always be the alfresco source for the association:
-	        	JSONArray sourceIds = node.getTargetAssocsIdsByType(Acm.ACM_SOURCE);
+	        	JSONArray sourceIds = node.getTargetAssocsIdsByType(Acm.ACM_PROPERTY_TYPE);
 	            
 	            for (int ii = 0; ii < sourceIds.length(); ii++) {
 	                String sourceId = sourceIds.getString(ii);
@@ -177,55 +177,6 @@ public class ViewGet extends AbstractJavaWebScript {
         return null;
 	}
 	
-	/**
-	 * Processes that passes View and converts it to JSON object to be
-	 * processed by view editor.
-	 * 
-	 * @param view
-	 */
-	private JSONObject viewToJSON(EmsScriptNode view) {
-		
-		// View editor uses this class to get the jason it needs for the view
-		// editor.
-		
-		EmsSystemModel model = new EmsSystemModel(services);
-		NodeRef viewNodeRef = view.getNodeRef();
-		
-		// Get all elements of Expose type:
-		Collection<EmsScriptNode> exposeElements = model.getType(null, "Expose");
-		
-		// Get all elements of Conform type:
-		Collection<EmsScriptNode> conformElements = model.getType(null, "Conform");
-		
-		// Get the unique Expose and Conform element with the View as a sysml:source:
-		EmsScriptNode myExposeElement = getMatchingExposeOrConformElement(viewNodeRef, exposeElements);
-		EmsScriptNode myConformElement = getMatchingExposeOrConformElement(viewNodeRef, conformElements);
-		
-		if (myExposeElement != null && myConformElement != null) {
-			
-			// Get the target of the Conform relationship (the Viewpoint):
-			
-			// Get the Method Property from the ViewPoint element
-			// 		The Method Property owner is the Viewpoint
-			
-			// Get the value of the elementValue of the Method Property, which is an
-			// Operation:
-						
-			// Parse and convert the Operation:
-			
-			// Get the target of the Expose relationship:
-			
-			// Set the function call arguments with the exposed model elements:
-			
-			// Return the converted JSON from the expression evaluation:
-			
-		}
-		else {
-			// TODO: error!
-		}
-		
-		return null;
 
-	}
 	
 }

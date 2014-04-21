@@ -3,6 +3,7 @@ package gov.nasa.jpl.view_repo.util;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -12,9 +13,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.springframework.extensions.webscripts.Status;
 
 import sysml.AbstractSystemModel;
@@ -121,8 +126,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     @Override
     public Collection< EmsScriptNode > getSource( EmsScriptNode relationship ) {
-        // TODO Auto-generated method stub
-        return null;
+        
+        return getProperty(relationship, Acm.ACM_SOURCE);
     }
 
     @Override
@@ -520,6 +525,14 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 			else if (propVal instanceof NodeRef) {
 				returnList.add(new EmsScriptNode((NodeRef)propVal, services));
 			}
+	 		
+			else if (propVal instanceof String) {
+				// Get the corresponding node with a name of the propVal:
+				Collection<EmsScriptNode> nodeList = getElementWithName(null, (String)propVal);
+				if (!Utils.isNullOrEmpty(nodeList)) {
+					returnList.add(nodeList.iterator().next());
+				}
+			}
 			
 			else {
 				// TODO what do we do for other objects?  For now, nothing....
@@ -774,6 +787,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 	        Map< String, EmsScriptNode > elements =
 	                NodeUtil.searchForElements( "@sysml\\:type:\"", (String)specifier, services, response,
 	                                            status );
+
 	        if ( elements != null ) return elements.values();
     	}
     	
