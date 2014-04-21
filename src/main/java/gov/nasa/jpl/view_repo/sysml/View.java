@@ -3,6 +3,7 @@
  */
 package gov.nasa.jpl.view_repo.sysml;
 
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 
@@ -16,8 +17,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * A View embeds {@link Viewable}s and itself is a {@link Viewable}.
- *
+ * A View embeds {@link Viewable}s and itself is a {@link Viewable}. View
+ * inherits from List so that it may contain Viewables in addition to having
+ * View children.
+ * 
  */
 public class View extends List implements sysml.View< EmsScriptNode > {
 
@@ -40,7 +43,7 @@ public class View extends List implements sysml.View< EmsScriptNode > {
      */
     public View( EmsScriptNode viewNode ) {
         this();
-        setViewNode( viewNode );
+        setElement( viewNode );
     }
 
     /**
@@ -59,17 +62,16 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         super( initialCapacity );
     }
 
-    /**
-     * @return the viewNode
-     */
-    public EmsScriptNode getViewNode() {
+    @Override
+    public EmsScriptNode getElement() {
         return viewNode;
     }
 
     /**
      * @param viewNode the viewNode to set
      */
-    public void setViewNode( EmsScriptNode viewNode ) {
+    @Override
+    public void setElement( EmsScriptNode viewNode ) {
         this.viewNode = viewNode;
     }
 
@@ -94,7 +96,7 @@ public class View extends List implements sysml.View< EmsScriptNode > {
     @Override
     public Collection< sysml.View< EmsScriptNode > > getChildViews() {
         // TODO Auto-generated method stub
-        return null;
+        return Utils.getEmptyList();
     }
     
     /** 
@@ -202,13 +204,43 @@ public class View extends List implements sysml.View< EmsScriptNode > {
 //            // TODO: error!
 //        }
 
+        
         JSONObject json = new JSONObject();
         JSONObject viewProperties = new JSONObject();
         JSONArray jsonArray = new JSONArray();
         try {
             json.append( "views", jsonArray );
             jsonArray.put( viewProperties );
-            viewProperties.put("id", viewNode.getName() );
+            viewProperties.put("id", viewNode.getId() );
+
+            JSONArray elements = new JSONArray();
+            viewProperties.put("displayedElements", elements );
+            for ( EmsScriptNode elem : getDisplayedElements() ) {
+                elements.put( elem.getId() );
+            }
+
+            elements = new JSONArray();
+            viewProperties.put("allowedElements", elements );
+            for ( EmsScriptNode elem : getDisplayedElements() ) {
+                elements.put( elem.getId() );
+            }
+
+            elements = new JSONArray();
+            viewProperties.put("childrenViews", elements );
+            for ( sysml.View<EmsScriptNode> view : getChildViews() ) {
+                if ( view instanceof View ) {
+                    elements.put( view.getElement().getId() );
+                }
+            }
+
+            JSONArray viewables = new JSONArray();
+            viewProperties.put("contains", viewables );
+            for ( Viewable viewable : this ) {
+                if ( viewable != null ) {
+                    viewables.put( viewable.toViewJson() );
+                }
+            }
+
         } catch ( JSONException e ) {
             // TODO Auto-generated catch block
             e.printStackTrace();

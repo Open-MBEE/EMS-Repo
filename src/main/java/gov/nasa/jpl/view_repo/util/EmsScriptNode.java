@@ -1099,7 +1099,8 @@ public class EmsScriptNode extends ScriptNode {
         }
         
         if (jsonObject.has(Acm.JSON_PROPERTY_TYPE)) {
-            String propertyType = jsonObject.getString(Acm.JSON_PROPERTY_TYPE);
+            Object o = jsonObject.get(Acm.JSON_PROPERTY_TYPE);
+            String propertyType = "" + o;//jsonObject.getString(Acm.JSON_PROPERTY_TYPE);
             if (!propertyType.equals("null")) {
                 propertyTypes.put(jsonObject.getString(Acm.JSON_ID), propertyType);
             }
@@ -1177,7 +1178,8 @@ public class EmsScriptNode extends ScriptNode {
         // This is based on ModelPost.updateOrCreateElementValues() 	
         ArrayList<NodeRef> values = new ArrayList<NodeRef>();
         for (int ii = 0; ii < jsonArray.length(); ii++) {
-            String valueId = jsonArray.getString(ii);
+            Object o = jsonArray.get(ii);
+            String valueId = "" + o;
             EmsScriptNode value = convertIdToEmsScriptNode(valueId);
             
             if (value != null
