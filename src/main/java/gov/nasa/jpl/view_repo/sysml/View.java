@@ -11,6 +11,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Vector;
 
@@ -166,9 +167,8 @@ public class View extends List implements sysml.View< EmsScriptNode > {
      */
     @Override
     public JSONObject toViewJson() {
+    	
         if ( viewNode == null ) return null;
-//        EmsSystemModel model = new EmsSystemModel(services);
-//        NodeRef viewNodeRef = view.getNodeRef();
         
         // Get all elements of Expose type:
         Collection<EmsScriptNode> exposeElements = model.getType(null, "Expose");
@@ -176,44 +176,61 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         // Get all elements of Conform type:
         Collection<EmsScriptNode> conformElements = model.getType(null, "Conform");
         
+        Collection<EmsScriptNode> matchingExposeElements = new ArrayList<EmsScriptNode>();
+        Collection<EmsScriptNode> exposed = new ArrayList<EmsScriptNode>();
+        EmsScriptNode viewpoint = null;
+
+		// Check if any of the nodes in the passed collection of Expose or Conform
+		// elements have the View as a sysml:source:
         for ( EmsScriptNode node : exposeElements ) {
-            if ( model.getSource( node ).equals( viewNode ) ) { // TODO -- need to write equals for EmsScriptNode
-                
+        	
+        	// If the sysml:source of the Expose element is the View, then
+        	// add it to our expose list (there can be multiple exposes for
+        	// a view):
+            if ( model.getSource( node ).equals( viewNode ) ) { 
+                matchingExposeElements.add(node);
             }
         }
         
-        // Get the unique Expose and Conform element with the View as a sysml:source:
-//        EmsScriptNode myExposeElement = getMatchingExposeConformElements(viewNode, exposeElements);
-//        EmsScriptNode myConformElement = getMatchingExposeConformElements(viewNode, conformElements);
+        for ( EmsScriptNode node : conformElements ) {
+        	
+        	// If the sysml:source of the Compose element is the View:
+            if ( model.getSource( node ).equals( viewNode ) ) { 
+            	
+                // Get the target of the Conform relationship (the Viewpoint):
+                Collection<EmsScriptNode> viewpointNodes = model.getTarget(node);
+                
+                if (!Utils.isNullOrEmpty(viewpointNodes)) {
+                	viewpoint = viewpointNodes.iterator().next();
+                }            	
+                break;
+            }
+        }
+                    
+        // Get the Method Property from the ViewPoint element
+        //      The Method Property owner is the Viewpoint
         
-//        if (myExposeElement != null && myConformElement != null) {
+        // Get the value of the elementValue of the Method Property, which is an
+        // Operation:
+                    
+        // Parse and convert the Operation:
+        
+        // Get the target(s) of the Expose relationship:
+        for (EmsScriptNode exposeNode : matchingExposeElements) {
+        	
+            Collection<EmsScriptNode> nodes = model.getTarget(exposeNode);
             
-            // Get the target of the Conform relationship (the Viewpoint):
+            if (!Utils.isNullOrEmpty(nodes)) {
+            	exposed.add(nodes.iterator().next());
+            }
             
-            // Get the Method Property from the ViewPoint element
-            //      The Method Property owner is the Viewpoint
-            
-            // Get the value of the elementValue of the Method Property, which is an
-            // Operation:
-                        
-            // Parse and convert the Operation:
-            
-            // Get the target of the Expose relationship:
-            
-            // Set the function call arguments with the exposed model elements:
-            
-            // Return the converted JSON from the expression evaluation:
-            
-//        }
-//        else {
-//            // TODO: error!
-//        }
-
+        }
+        
         SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAeExpr =
                 new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getModel() );
 
-        EmsScriptNode viewpoint = model.getTarget( model.getRelationship( viewNode, "Conform" ).iterator().next() ).iterator().next();
-        Collection<EmsScriptNode > exposed = model.getTarget( model.getRelationship( viewNode, "Expose" ).iterator().next() );
+//        EmsScriptNode viewpoint = model.getTarget( model.getRelationship( viewNode, "Conform" ).iterator().next() ).iterator().next();
+//        Collection<EmsScriptNode > exposed = model.getTarget( model.getRelationship( viewNode, "Expose" ).iterator().next() );
         Expression< Object > aeExpr = sysmlToAeExpr.toAeExpression( viewpoint  );
         if ( aeExpr.getForm() == Form.Function ) {
             Vector< Object > args = new Vector< Object >( exposed );
@@ -237,6 +254,10 @@ public class View extends List implements sysml.View< EmsScriptNode > {
             java.util.List< Viewable<EmsScriptNode> > viewables = (java.util.List< Viewable<EmsScriptNode> >)Utils.asList( c );
             addAll( viewables );
         }
+        // Set the function call arguments with the exposed model elements:
+        
+        // Return the converted JSON from the expression evaluation:
+            
 
         JSONObject json = new JSONObject();
         JSONObject viewProperties = new JSONObject();
