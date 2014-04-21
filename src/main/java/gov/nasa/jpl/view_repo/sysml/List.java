@@ -7,13 +7,17 @@ import java.util.Collection;
 
 import sysml.Viewable;
 
+/**
+ * @see sysml.List
+ *
+ */
 public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysml.List< EmsScriptNode > {
 
     private static final long serialVersionUID = 3954654861037876503L;
 
     /**
      * Create an empty List.
-     * @see java.util.List()
+     * @see java.util.List#List()
      */
     public List() {
         super();
@@ -22,7 +26,7 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
     /**
      * Create a List and add the {@link Viewable}s in the input {@link Collection}.
      * @param c
-     * @see java.util.List(Collection< ? extends Viewable >)
+     * @see java.util.List#List(Collection)
      */
     public List( Collection< ? extends Viewable< EmsScriptNode > > c ) {
         super( c );
@@ -31,7 +35,7 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
     /**
      * Create a List with a given number of null entries. 
      * @param initialCapacity
-     * @see java.util.List(int)
+     * @see java.util.List#List(int)
      */
     public List( int initialCapacity ) {
         super( initialCapacity );
