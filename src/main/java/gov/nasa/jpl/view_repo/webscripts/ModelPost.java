@@ -32,6 +32,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.version.Version;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -118,7 +120,22 @@ public class ModelPost extends AbstractJavaWebScript {
     protected JSONObject relationshipsJson;
 
     protected Set<String> newElements;
+
+    /**
+     * Keep track of all elements to be loaded
+     */
+    Map<String, JSONObject> elementMap = new HashMap<String, JSONObject>();
     
+    /**
+     * Keep track of root elements
+     */
+    Set<String> rootElements = new HashSet<String>();
+    
+    /**
+     * Keep track of update elements
+     */
+    Set<Version> changeSet = new HashSet<Version>();
+
     /**
      * Create or update the model as necessary based on the request
      * 
@@ -188,6 +205,10 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // handle the relationships
         updateOrCreateAllRelationships(relationshipsJson);
+        
+        // create commit history
+        // TODO add in commit message
+        CommitUtil.commitChangeSet(changeSet, "", runWithoutTransactions, services);
         
         now = new Date();
         end = System.currentTimeMillis();
@@ -436,9 +457,6 @@ public class ModelPost extends AbstractJavaWebScript {
     }
 
 
-    Map<String, JSONObject> elementMap = new HashMap<String, JSONObject>();
-    Set<String> rootElements = new HashSet<String>();
-
     /**
      * Builds up the element map and hierarchy and returns true if valid
      * @param jsonArray         Takes in the elements JSONArray
@@ -654,7 +672,14 @@ public class ModelPost extends AbstractJavaWebScript {
         // update metadata
         if (checkPermissions(node, PermissionService.WRITE)) {
             log(LogLevel.INFO, "\tinserting metadata");
-            node.ingestJSON(elementJson);
+            
+            // Log any changes as a commit change set
+            Version headVersion = node.getHeadVersion();
+            if (node.ingestJSON(elementJson)) {
+            		if (headVersion != null) {
+            			changeSet.add(headVersion);
+            		}
+            }
         }
 
         if (elementHierarchyJson.has(id)) {
@@ -857,4 +882,7 @@ public class ModelPost extends AbstractJavaWebScript {
         elementMap = new HashMap<String, JSONObject>();
         newElements = new HashSet<String>();
     }
+    
+    
+ 
 }
