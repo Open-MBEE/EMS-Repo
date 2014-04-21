@@ -1300,8 +1300,8 @@ public class EmsScriptNode extends ScriptNode {
                         }
 	                } 
 	            	else {
-	                	
-	                    String property = jsonObject.getString(jsonType);
+	            	    Object o = jsonObject.get(jsonType);
+	                    String property = "" + o; //jsonObject.getString(jsonType);
 	            		if (property != null) {
 	            			this.createOrUpdateProperty(acmType, new String(property));
 	            		}
