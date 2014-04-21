@@ -3,11 +3,16 @@
  */
 package gov.nasa.jpl.view_repo.sysml;
 
+import gov.nasa.jpl.ae.event.Expression;
+import gov.nasa.jpl.ae.event.Expression.Form;
+import gov.nasa.jpl.ae.event.FunctionCall;
+import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 
 import java.util.Collection;
+import java.util.Vector;
 
 import sysml.Viewable;
 
@@ -204,7 +209,35 @@ public class View extends List implements sysml.View< EmsScriptNode > {
 //            // TODO: error!
 //        }
 
+        SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAeExpr =
+                new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getModel() );
+
+        EmsScriptNode viewpoint = model.getTarget( model.getRelationship( viewNode, "Conform" ).iterator().next() ).iterator().next();
+        Collection<EmsScriptNode > exposed = model.getTarget( model.getRelationship( viewNode, "Expose" ).iterator().next() );
+        Expression< Object > aeExpr = sysmlToAeExpr.toAeExpression( viewpoint  );
+        if ( aeExpr.getForm() == Form.Function ) {
+            Vector< Object > args = new Vector< Object >( exposed );
+            ( (FunctionCall)aeExpr.expression ).setArguments( args  );
+        }
         
+        Object evalResult = aeExpr.evaluate( true );
+        if ( evalResult instanceof Viewable ) {
+            Viewable< EmsScriptNode > v = (Viewable< EmsScriptNode >)evalResult;
+            add( v );
+        } else if ( evalResult instanceof Collection ) {
+            Collection<?> c = (Collection<?>)evalResult;
+//            for ( Object o : c ) {
+//                try {
+//                    Viewable<EmsScriptNode> viewable = (Viewable< EmsScriptNode >)o;
+//                    add( viewable );
+//                } catch ( ClassCastException e ) {
+//                    e.printStackTrace();
+//                }
+//            }
+            java.util.List< Viewable<EmsScriptNode> > viewables = (java.util.List< Viewable<EmsScriptNode> >)Utils.asList( c );
+            addAll( viewables );
+        }
+
         JSONObject json = new JSONObject();
         JSONObject viewProperties = new JSONObject();
         JSONArray jsonArray = new JSONArray();
