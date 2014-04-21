@@ -138,8 +138,8 @@ public class ViewEditorDelete extends AbstractJavaWebScript {
             trx.commit();
         } catch (Throwable e) {
             try {
-                trx.rollback();
                 log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                trx.rollback();
             } catch (Throwable ee) {
                 log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
             }

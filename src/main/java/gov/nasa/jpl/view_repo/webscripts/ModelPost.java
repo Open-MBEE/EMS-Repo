@@ -165,11 +165,15 @@ public class ModelPost extends AbstractJavaWebScript {
                             trx.commit();
                         } catch (Throwable e) {
                             try {
-                                trx.rollback();
-                                log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                                if (e instanceof JSONException) {
+	                        			log(LogLevel.ERROR, "createOrUpdateModel: JSON malformed for: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+	                            } else {
+	                        			log(LogLevel.ERROR, "createOrUpdateModel: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	                            }
                                 e.printStackTrace();
+                                trx.rollback();
                             } catch (Throwable ee) {
-                                log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                                log(LogLevel.ERROR, "\tcreateOrUpdateModel: rollback failed: " + ee.getMessage());
                                 ee.printStackTrace();
                             }
                         }
@@ -255,10 +259,16 @@ public class ModelPost extends AbstractJavaWebScript {
                 trx.commit();
             } catch (Throwable e) {
                 try {
+                    if (e instanceof JSONException) {
+	                		log(LogLevel.ERROR, "updateOrCreateRelationships: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+	                } else {
+	                		log(LogLevel.ERROR, "updateOrCreateRelationships: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	                }
                     trx.rollback();
-                    log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                    e.printStackTrace();
                 } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                    log(LogLevel.ERROR, "\tupdateOrCreateRelationships: rollback failed: " + ee.getMessage());
+                    ee.printStackTrace();
                 }
             }
         }
@@ -451,10 +461,17 @@ public class ModelPost extends AbstractJavaWebScript {
                 trx.commit();
             } catch (Throwable e) {
                 try {
-                    trx.rollback();
                     log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                    if (e instanceof JSONException) {
+	                		log(LogLevel.ERROR, "buildElementMap: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+	                } else {
+	                		log(LogLevel.ERROR, "buildElementMap: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	                }
+                    trx.rollback();
+                    e.printStackTrace();
                 } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                    log(LogLevel.ERROR, "\tbuildElementMap: rollback failed: " + ee.getMessage());
+                    ee.printStackTrace();
                 }
                 isValid = false;
             }
@@ -577,11 +594,15 @@ public class ModelPost extends AbstractJavaWebScript {
                 trx.commit();
             } catch (Throwable e) {
                 try {
-                    trx.rollback();
-                    log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                    if (e instanceof JSONException) {
+                    		log(LogLevel.ERROR, "updateOrCreateElement: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+                    } else {
+                    		log(LogLevel.ERROR, "updateOrCreateElement: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    }
                     e.printStackTrace();
+                    trx.rollback();
                 } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                    log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
                 }
             }

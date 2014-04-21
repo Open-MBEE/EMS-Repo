@@ -27,12 +27,25 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
     		<a class="navbar-brand" href="/share/page/site/${siteName}/dashboard">${siteTitle}</a>
     	</div>
       <ul class="nav navbar-nav">
-        <li class="dropdown" id="firstDropdown">
-        	<a href="#" class="dropdown-toggle" data-toggle="dropdown">${siteTitle} In-Work Document List <b class="caret"></b></a>
+      	<#if siteName == 'europa'>
+        	<li class="active"><a href="#">In-Work Document List</a></li>
+        	<#else>
+        	<li class="active"><a href="#">Document List</a></li>
+        	</#if>
+        <li class="dropdown" id="firstDropdown"> 	
+        	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Goto <b class="caret"></b></a>
         	<ul class="dropdown-menu">
-        		<li><a href="${url.context}/service/ve/index/${siteName}">${siteTitle} Document List</a></li>
-        		<li><a href="${url.context}/service/ve/configurations/${siteName}">${siteTitle} DocWeb</a></li>
-        		<li><a href="/share/page/site/${siteName}/dashboard">${siteTitle} Dashboard</a></li>
+        		<li><a href="${url.context}/service/ve/configurations/${siteName}">DocWeb</a></li>
+        	<#if siteName == 'europa'>
+        		<li><a href="${url.context}/service/ve/index/${siteName}">Document List</a></li>
+        	</#if>
+        		<li><a href="/share/page/site/${siteName}/dashboard">Dashboard</a></li>
+   			</ul>
+   		</li>
+   		<li class="dropdown">
+   			<a href="#" class="dropdown-toggle" data-toggle="dropdown">Other Sites <b class="caret"></b></a>
+   			<ul class="dropdown-menu" id="otherSites">
+   			
    			</ul>
    		</li>
    	  </ul>
@@ -42,6 +55,7 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
       </div>
 
       <ul class="nav navbar-nav pull-right">
+      <li><a href="/share/page/site/ems-training/dashboard">Support</a></li>
         <li><a href="#" class="submit-logout">logout</a></li>
       </ul>
     </nav>
@@ -196,7 +210,7 @@ $(document).ready(function() {
 		for (var i = 0; i < data.length; i++) {
 			var site = data[i];
 			if (site.categories.length == 0)
-				site.categories.push("Other");
+				site.categories.push("Uncategorized");
 			for (var j = 0; j < site.categories.length; j++) {
 				var cat = site.categories[j];
 				if (sites.hasOwnProperty(cat)) {
@@ -207,16 +221,50 @@ $(document).ready(function() {
 			}
 		}
 		var stuff = "";
-		for (var key in sites) {
-			stuff += '<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown">' + key + '<b class="caret"></b></a><ul class="dropdown-menu">';
-        	var ssites = sites[key];
-			for (var i = 0; i < ssites.length; i++) {
-				stuff += '<li><a href="/share/page/site/' + ssites[i].name + '/dashboard">' + ssites[i].title + '</a></li>';
+		var keys = Object.keys(sites).sort();
+		for (var i = 0; i < keys.length; i++) {
+			var key = keys[i];
+			stuff += '<li class="dropdown dropdown-submenu"><a href="#" class="dropdown-toggle" data-toggle="dropdown">' + key + '</a>';
+			stuff += '<ul class="dropdown-menu">';
+        	var ssites = sites[key].sort(function(a,b) {
+        		if (a.title > b.title)
+        			return 1;
+        		if (a.title < b.title)
+        			return -1;
+        		return 0;
+        	});
+        
+			for (var j = 0; j < ssites.length; j++) {
+				stuff += '<li class="dropdown-submenu"><a href="#" class="dropdown-toggle" data-toggle="dropdown">' + ssites[j].title + '</a><ul class="dropdown-menu">';
+				stuff += '<li><a href="/share/page/site/' + ssites[j].name + '/dashboard">Dashboard</a></li>';
+				stuff += '<li><a href="/alfresco/service/ve/configurations/' + ssites[j].name + '">DocWeb</a></li>';
+				stuff += '</ul></li>';
 			}
         	stuff += '</ul></li>';
 		};
-		$('#firstDropdown').after(stuff);
+		$('#otherSites').append(stuff);
 		
+	});
+	$('ul.dropdown-menu [data-toggle=dropdown]').on('click', function(event) {
+    // Avoid following the href location when clicking
+    event.preventDefault(); 
+    // Avoid having the menu to close when clicking
+    event.stopPropagation(); 
+    // If a menu is already open we close it
+    //$('ul.dropdown-menu [data-toggle=dropdown]').parent().removeClass('open');
+    // opening the one you clicked on
+    $(this).parent().addClass('open');
+
+    var menu = $(this).parent().find("ul");
+    var menupos = menu.offset();
+  
+    if ((menupos.left + menu.width()) + 30 > $(window).width()) {
+        var newpos = - menu.width();      
+    } else {
+        var newpos = $(this).parent().width();
+    }
+    menu.css({ left:newpos });
+
 	});
 });
 </script>
