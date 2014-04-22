@@ -9,6 +9,7 @@ import gov.nasa.jpl.ae.event.FunctionCall;
 import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 
@@ -116,7 +117,7 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         EmsScriptNode viewpoint = null;
 
         // Get all elements of Conform type:
-        Collection<EmsScriptNode> conformElements = model.getType(null, "Conform");
+        Collection<EmsScriptNode> conformElements = model.getType(null, Acm.JSON_CONFORM);
 
         for ( EmsScriptNode node : conformElements ) {
             
@@ -141,33 +142,30 @@ public class View extends List implements sysml.View< EmsScriptNode > {
 
         Collection<EmsScriptNode> exposed = new ArrayList<EmsScriptNode>();
 
-        // Get all elements of Expose type:
-        Collection<EmsScriptNode> exposeElements = model.getType(null, "Expose");
+        // Get all relationship elements of Expose type:
+        Collection<EmsScriptNode> exposeElements = model.getType(null, Acm.JSON_EXPOSE);
+        //Collection<EmsScriptNode> exposeElements = model.getRelationship(null, "Expose");  // Can we call this?
+
+        Debug.outln( "Expose relationships of " + viewNode + ": "
+                     + exposeElements );
         
         // Check if any of the nodes in the passed collection of Expose or Conform
         // elements have the View as a sysml:source:
-        Collection<EmsScriptNode> matchingExposeElements =
-                new ArrayList<EmsScriptNode>();
         for ( EmsScriptNode node : exposeElements ) {
             
             // If the sysml:source of the Expose element is the View, then
             // add it to our expose list (there can be multiple exposes for
             // a view):
             if ( model.getSource( node ).equals( viewNode ) ) { 
-                matchingExposeElements.add(node);
+
+                // Get the target(s) of the Expose relationship:
+
+                Collection<EmsScriptNode> nodes = model.getTarget(node);
+                
+                if (!Utils.isNullOrEmpty(nodes)) {
+                    exposed.addAll(nodes);
+                }
             }
-        }
-        
-        // Get the target(s) of the Expose relationship:
-        
-        for (EmsScriptNode exposeNode : matchingExposeElements) {
-            
-            Collection<EmsScriptNode> nodes = model.getTarget(exposeNode);
-            
-            if (!Utils.isNullOrEmpty(nodes)) {
-                exposed.add(nodes.iterator().next());
-            }
-            
         }
         
         return exposed;
@@ -199,7 +197,7 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         //   model.getPropertyWithType( viewpointMethod,
         //                              getTypeWithName(null, "Expression" ) );
         Collection< EmsScriptNode > viewpointExprs =
-                model.getProperty( viewpointMethod, "Expression" );
+                model.getProperty( viewpointMethod, Acm.JSON_EXPRESSION );
         EmsScriptNode viewpointExpr = null;
         if ( !Utils.isNullOrEmpty( viewpointExprs ) ) {
             viewpointExpr = viewpointExprs.iterator().next();
