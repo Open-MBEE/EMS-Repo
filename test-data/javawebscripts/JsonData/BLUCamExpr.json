@@ -1870,7 +1870,7 @@
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "operationParameter": ["exposed_id"],
-        "expression":"vp_expression"
+        "operationExpression":"vp_expression"
         "type": "Operation"
     },
     {

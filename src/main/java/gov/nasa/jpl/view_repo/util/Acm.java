@@ -71,7 +71,7 @@ public class Acm {
     public static final String JSON_EXPRESSION_BODY = "expressionBody";
     public static final String JSON_ANNOTATED_ELEMENTS = "annotatedElements";
     public static String JSON_PROJECT_VERSION = "projectVersion";
-    
+
     
 //    public static final String JSON_TIME_MAX = "timeMax";
 //    public static final String JSON_TIME_MIN = "timeMin";
@@ -140,7 +140,8 @@ public class Acm {
     public static final String JSON_PARAMETER = "Parameter";
     public static final String JSON_PARAMETER_DIRECTION = "parameterDirection";
     public static final String JSON_PARAMETER_DEFAULT_VALUE = "parameterDefaultValue";
-    
+    public static final String JSON_OPERATION_EXPRESSION = "operationExpression";
+    public static final String JSON_METHOD = "method";
 
     // ACM types with the different name spaces
     public static final String SYSML = "sysml:";
@@ -245,7 +246,9 @@ public class Acm {
     public static final String ACM_PARAMETER = SYSML + JSON_PARAMETER;
     public static final String ACM_PARAMETER_DIRECTION = SYSML + JSON_PARAMETER_DIRECTION;
     public static final String ACM_PARAMETER_DEFAULT_VALUE = SYSML + JSON_PARAMETER_DEFAULT_VALUE;
- 
+    public static final String ACM_OPERATION_EXPRESSION = SYSML + JSON_OPERATION_EXPRESSION;
+    public static final String ACM_METHOD = SYSML + JSON_METHOD;
+
     
     public static String ACM_ELEMENT_FOLDER = SYSML + "ElementFolder";
     public static String ACM_PROJECT = SYSML + "Project";
@@ -361,6 +364,9 @@ public class Acm {
            add(JSON_INSTANCE_SPECIFICATION_SPECIFICATION);
            add(JSON_CONSTRAINT_SPECIFICATION);
            add(JSON_PARAMETER_DEFAULT_VALUE);
+           add(JSON_OPERATION_EXPRESSION);
+           add(JSON_METHOD);
+
        }
    };
 

@@ -504,7 +504,7 @@
                 		<tokenised>false</tokenised>
                 	</index>
                 </property>
-                <property name="sysml:expression">
+                <property name="sysml:operationExpression">
                     <type>d:noderef</type>
                     <mandatory>false</mandatory>
                     <multiple>true</multiple>
