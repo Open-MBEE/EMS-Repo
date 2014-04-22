@@ -14,8 +14,11 @@ import org.json.JSONObject;
 import sysml.Viewable;
 
 /**
+ * An implementation of a {@link Viewable} list of {@link Viewable}s subclassing
+ * {@link ArrayList}.
+ * 
  * @see sysml.List
- *
+ * 
  */
 public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysml.List< EmsScriptNode > {
 
@@ -105,6 +108,9 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
         return elements;
     }
 
+    /* (non-Javadoc)
+     * @see java.util.AbstractCollection#toString()
+     */
     @Override
     public String toString() {
         return toViewJson().toString();

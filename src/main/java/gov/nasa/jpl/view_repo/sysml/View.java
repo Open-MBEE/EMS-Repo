@@ -210,7 +210,8 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         // Get the Method Property from the ViewPoint element
         //      The Method Property owner is the Viewpoint
         
-        Collection< EmsScriptNode > viewpointMethods = model.getProperty( viewpoint, "method" );
+        Collection< EmsScriptNode > viewpointMethods =
+                model.getProperty( viewpoint, "method" );
         
         EmsScriptNode viewpointMethod = null;
         
@@ -220,10 +221,15 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         
         // Get the value of the elementValue of the Method Property, which is an
         // Operation:
-        //Collection< EmsScriptNode > viewpointExpr = model.getPropertyWithType( viewpointMethod, getTypeWithName(null, "Expression" ) );
-        Collection< EmsScriptNode > viewpointExpr = model.getProperty( viewpointMethod, "Expression" );
+
+        // Collection< EmsScriptNode > viewpointExpr =
+        //   model.getPropertyWithType( viewpointMethod,
+        //                              getTypeWithName(null, "Expression" ) );
+        Collection< EmsScriptNode > viewpointExpr =
+                model.getProperty( viewpointMethod, "Expression" );
 
         // Get the target(s) of the Expose relationship:
+        
         for (EmsScriptNode exposeNode : matchingExposeElements) {
         	
             Collection<EmsScriptNode> nodes = model.getTarget(exposeNode);
@@ -253,17 +259,19 @@ public class View extends List implements sysml.View< EmsScriptNode > {
             Viewable< EmsScriptNode > v = (Viewable< EmsScriptNode >)evalResult;
             add( v );
         } else if ( evalResult instanceof Collection ) {
-            Collection<?> c = (Collection<?>)evalResult;
-//            for ( Object o : c ) {
-//                try {
-//                    Viewable<EmsScriptNode> viewable = (Viewable< EmsScriptNode >)o;
-//                    add( viewable );
-//                } catch ( ClassCastException e ) {
-//                    e.printStackTrace();
-//                }
-//            }
-            java.util.List< Viewable<EmsScriptNode> > viewables = (java.util.List< Viewable<EmsScriptNode> >)Utils.asList( c );
-            addAll( viewables );
+            Collection< ? > c = (Collection< ? >)evalResult;
+            for ( Object o : c ) {
+                try {
+                    Viewable< EmsScriptNode > viewable =
+                            (Viewable< EmsScriptNode >)o;
+                    add( viewable );
+                } catch ( ClassCastException e ) {
+                    e.printStackTrace();
+                }
+            }
+//            java.util.List< Viewable<EmsScriptNode> > viewables =
+//                    (java.util.List< Viewable<EmsScriptNode> >)Utils.asList( c );
+//            addAll( viewables );
         }
 
         // Return the converted JSON from the expression evaluation:
@@ -298,7 +306,7 @@ public class View extends List implements sysml.View< EmsScriptNode > {
 
             JSONArray viewables = new JSONArray();
             viewProperties.put("contains", viewables );
-            for ( Viewable viewable : this ) {
+            for ( Viewable< EmsScriptNode > viewable : this ) {
                 if ( viewable != null ) {
                     viewables.put( viewable.toViewJson() );
                 }
@@ -308,7 +316,6 @@ public class View extends List implements sysml.View< EmsScriptNode > {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        // TODO Auto-generated method stub
         return json;
     }
 
