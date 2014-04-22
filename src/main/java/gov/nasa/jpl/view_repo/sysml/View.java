@@ -7,6 +7,7 @@ import gov.nasa.jpl.ae.event.Expression;
 import gov.nasa.jpl.ae.event.Expression.Form;
 import gov.nasa.jpl.ae.event.FunctionCall;
 import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
@@ -15,13 +16,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Vector;
 
+import sysml.SystemModel.ModelItem;
+import sysml.SystemModel.Operation;
 import sysml.Viewable;
 
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import sysml.SystemModel.Item;
 /**
  * A View embeds {@link Viewable}s and itself is a {@link Viewable}. View
  * inherits from List so that it may contain Viewables in addition to having
@@ -105,6 +108,134 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         return Utils.getEmptyList();
     }
     
+    /**
+     * Get the viewpoint to which this view conforms.
+     */
+    public EmsScriptNode getViewpoint() {
+        if ( viewNode == null ) return null;
+        EmsScriptNode viewpoint = null;
+
+        // Get all elements of Conform type:
+        Collection<EmsScriptNode> conformElements = model.getType(null, "Conform");
+
+        for ( EmsScriptNode node : conformElements ) {
+            
+            // If the sysml:source of the Compose element is the View:
+            if ( model.getSource( node ).equals( viewNode ) ) { 
+                
+                // Get the target of the Conform relationship (the Viewpoint):
+                Collection<EmsScriptNode> viewpointNodes = model.getTarget(node);
+                
+                if (!Utils.isNullOrEmpty(viewpointNodes)) {
+                    viewpoint = viewpointNodes.iterator().next();
+                }               
+                break;
+            }
+        }
+        
+        return viewpoint;
+    }
+    
+    public Collection< EmsScriptNode > getExposedElements() {
+        if ( viewNode == null ) return null;
+
+        Collection<EmsScriptNode> exposed = new ArrayList<EmsScriptNode>();
+
+        // Get all elements of Expose type:
+        Collection<EmsScriptNode> exposeElements = model.getType(null, "Expose");
+        
+        // Check if any of the nodes in the passed collection of Expose or Conform
+        // elements have the View as a sysml:source:
+        Collection<EmsScriptNode> matchingExposeElements =
+                new ArrayList<EmsScriptNode>();
+        for ( EmsScriptNode node : exposeElements ) {
+            
+            // If the sysml:source of the Expose element is the View, then
+            // add it to our expose list (there can be multiple exposes for
+            // a view):
+            if ( model.getSource( node ).equals( viewNode ) ) { 
+                matchingExposeElements.add(node);
+            }
+        }
+        
+        // Get the target(s) of the Expose relationship:
+        
+        for (EmsScriptNode exposeNode : matchingExposeElements) {
+            
+            Collection<EmsScriptNode> nodes = model.getTarget(exposeNode);
+            
+            if (!Utils.isNullOrEmpty(nodes)) {
+                exposed.add(nodes.iterator().next());
+            }
+            
+        }
+        
+        return exposed;
+    }
+    
+    
+    public EmsScriptNode getViewpointExpression() {
+        EmsScriptNode viewpoint = getViewpoint();
+        if ( viewpoint == null ) return null;
+        
+        // Get the Method Property from the ViewPoint element
+        //      The Method Property owner is the Viewpoint
+        
+        Collection< EmsScriptNode > viewpointMethods =
+                model.getProperty( viewpoint, "method" );
+        
+        EmsScriptNode viewpointMethod = null;
+        
+        if ( viewpointMethods.size() > 0 ) {
+            viewpointMethod = viewpointMethods.iterator().next();
+        }
+        
+        if ( viewpointMethod == null ) viewpointMethod = viewpoint;  // HACK -- TODO
+
+        // Get the value of the elementValue of the Method Property, which is an
+        // Operation:
+
+        // Collection< EmsScriptNode > viewpointExpr =
+        //   model.getPropertyWithType( viewpointMethod,
+        //                              getTypeWithName(null, "Expression" ) );
+        Collection< EmsScriptNode > viewpointExprs =
+                model.getProperty( viewpointMethod, "Expression" );
+        EmsScriptNode viewpointExpr = null;
+        if ( !Utils.isNullOrEmpty( viewpointExprs ) ) {
+            viewpointExpr = viewpointExprs.iterator().next();
+        }
+        if ( viewpointExpr == null ) {
+            if ( viewpointMethod != null ) {
+                Collection< Object > exprs =
+                        model.op( Operation.GET,
+                                  Utils.newList( ModelItem.PROPERTY ),
+                                  Utils.newList( new Item( viewpointMethod,
+                                                           ModelItem.PROPERTY ) ),
+                                  Utils.newList( new Item( "Expression",
+                                                           ModelItem.TYPE ) ),
+                                  null, false );
+                if ( !Utils.isNullOrEmpty( exprs ) ) {
+                    for ( Object o : exprs ) {
+                        if ( o instanceof EmsScriptNode ) {
+                            viewpointExpr = (EmsScriptNode)o;
+                        }
+                    }
+                }
+//                for ( EmsScriptNode node : model.getProperty( viewpointMethod, null ) ) {
+//                    for ( EmsScriptNode tNode : model.getType( node, null ) ) {
+//                        if ( )
+//                    }
+//                }
+            }
+        }
+        if ( viewpointExpr == null ) viewpointExpr = viewpointMethod;  // HACK -- TODO
+
+        if ( viewpointExpr == null ) {
+            Debug.error(true, "Could not find viewpoint expression in " + viewpoint);
+        }
+        return viewpointExpr;
+    }
+    
     /** 
      * Create a JSON String for the View with the following format:
      * <P>
@@ -170,81 +301,17 @@ public class View extends List implements sysml.View< EmsScriptNode > {
     	
         if ( viewNode == null ) return null;
         
-        // Get all elements of Expose type:
-        Collection<EmsScriptNode> exposeElements = model.getType(null, "Expose");
+        // Get the related elements that define the the view.
         
-        // Get all elements of Conform type:
-        Collection<EmsScriptNode> conformElements = model.getType(null, "Conform");
+        Collection<EmsScriptNode> exposed = getExposedElements();
+        //EmsScriptNode viewpoint = getViewpoint();
+        EmsScriptNode viewpointExpr = getViewpointExpression();
+        if ( viewpointExpr == null ) return null;
         
-        Collection<EmsScriptNode> matchingExposeElements = new ArrayList<EmsScriptNode>();
-        Collection<EmsScriptNode> exposed = new ArrayList<EmsScriptNode>();
-        EmsScriptNode viewpoint = null;
-
-		// Check if any of the nodes in the passed collection of Expose or Conform
-		// elements have the View as a sysml:source:
-        for ( EmsScriptNode node : exposeElements ) {
-        	
-        	// If the sysml:source of the Expose element is the View, then
-        	// add it to our expose list (there can be multiple exposes for
-        	// a view):
-            if ( model.getSource( node ).equals( viewNode ) ) { 
-                matchingExposeElements.add(node);
-            }
-        }
-        
-        for ( EmsScriptNode node : conformElements ) {
-        	
-        	// If the sysml:source of the Compose element is the View:
-            if ( model.getSource( node ).equals( viewNode ) ) { 
-            	
-                // Get the target of the Conform relationship (the Viewpoint):
-                Collection<EmsScriptNode> viewpointNodes = model.getTarget(node);
-                
-                if (!Utils.isNullOrEmpty(viewpointNodes)) {
-                	viewpoint = viewpointNodes.iterator().next();
-                }            	
-                break;
-            }
-        }
-                    
-        // Get the Method Property from the ViewPoint element
-        //      The Method Property owner is the Viewpoint
-        
-        Collection< EmsScriptNode > viewpointMethods =
-                model.getProperty( viewpoint, "method" );
-        
-        EmsScriptNode viewpointMethod = null;
-        
-        if ( viewpointMethods.size() > 0 ) {
-            viewpointMethod = viewpointMethods.iterator().next();
-        }
-        
-        // Get the value of the elementValue of the Method Property, which is an
-        // Operation:
-
-        // Collection< EmsScriptNode > viewpointExpr =
-        //   model.getPropertyWithType( viewpointMethod,
-        //                              getTypeWithName(null, "Expression" ) );
-        Collection< EmsScriptNode > viewpointExpr =
-                model.getProperty( viewpointMethod, "Expression" );
-
-        // Get the target(s) of the Expose relationship:
-        
-        for (EmsScriptNode exposeNode : matchingExposeElements) {
-        	
-            Collection<EmsScriptNode> nodes = model.getTarget(exposeNode);
-            
-            if (!Utils.isNullOrEmpty(nodes)) {
-            	exposed.add(nodes.iterator().next());
-            }
-            
-        }
-        
-        // Parse and convert the Operation:
+        // Translate the viewpoint Operation/Expression element into an AE Expression:
         
         SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAeExpr =
                 new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getModel() );
-
         Expression< Object > aeExpr = sysmlToAeExpr.toAeExpression( viewpointExpr );
 
         // Set the function call arguments with the exposed model elements:
@@ -253,7 +320,10 @@ public class View extends List implements sysml.View< EmsScriptNode > {
             Vector< Object > args = new Vector< Object >( exposed );
             ( (FunctionCall)aeExpr.expression ).setArguments( args  );
         }
-        
+
+        // Evaluate the expression to get the Viewables and add them to this View.
+
+        clear(); // make sure we clear out any old information
         Object evalResult = aeExpr.evaluate( true );
         if ( evalResult instanceof Viewable ) {
             Viewable< EmsScriptNode > v = (Viewable< EmsScriptNode >)evalResult;
@@ -274,7 +344,8 @@ public class View extends List implements sysml.View< EmsScriptNode > {
 //            addAll( viewables );
         }
 
-        // Return the converted JSON from the expression evaluation:
+        // Generate the JSON for the view now that the View is populated with
+        // Viewables.
 
         JSONObject json = new JSONObject();
         JSONObject viewProperties = new JSONObject();
