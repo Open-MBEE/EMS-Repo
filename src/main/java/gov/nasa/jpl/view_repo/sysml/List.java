@@ -5,6 +5,8 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import sysml.Viewable;
@@ -16,7 +18,8 @@ import sysml.Viewable;
 public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysml.List< EmsScriptNode > {
 
     private static final long serialVersionUID = 3954654861037876503L;
-
+    private boolean ordered = false;
+    
     /**
      * Create an empty List.
      * @see java.util.List#List()
@@ -56,13 +59,35 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
      *           "ordered": true/false
      *       }
      * </code>
-     * @returns a String in the JSON format above
+     * @returns a JSON object in the format above
      * @see sysml.Viewable#toViewJson()
      */
     @Override
     public JSONObject toViewJson() {
-        // TODO Auto-generated method stub
-        return null;
+
+        JSONObject json = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
+
+        try {
+        	
+            json.put("type", "List");
+            json.append("list", jsonArray);
+            
+            for ( Viewable<EmsScriptNode> viewable : this ) {
+                if ( viewable != null ) {
+                	jsonArray.put( viewable.toViewJson() );
+                }
+            }
+            
+            json.put("ordered", ordered);
+
+
+        } catch ( JSONException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        return json;
     }
 
     /* (non-Javadoc)
