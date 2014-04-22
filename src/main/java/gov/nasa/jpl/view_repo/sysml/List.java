@@ -1,9 +1,11 @@
 package gov.nasa.jpl.view_repo.sysml;
 
+import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.TreeSet;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -95,8 +97,12 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
      */
     @Override
     public Collection< EmsScriptNode > getDisplayedElements() {
-        // TODO Auto-generated method stub
-        return null;
+        TreeSet< EmsScriptNode > elements =
+                new TreeSet< EmsScriptNode >( CompareUtils.GenericComparator.instance() );
+        for ( Viewable< EmsScriptNode > v : this ) {
+            elements.addAll( v.getDisplayedElements() );
+        }
+        return elements;
     }
 
     @Override
