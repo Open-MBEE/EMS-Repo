@@ -197,7 +197,7 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         //   model.getPropertyWithType( viewpointMethod,
         //                              getTypeWithName(null, "Expression" ) );
         Collection< EmsScriptNode > viewpointExprs =
-                model.getProperty( viewpointMethod, Acm.JSON_EXPRESSION );
+                model.getProperty( viewpointMethod, "expression");
         EmsScriptNode viewpointExpr = null;
         if ( !Utils.isNullOrEmpty( viewpointExprs ) ) {
             viewpointExpr = viewpointExprs.iterator().next();
