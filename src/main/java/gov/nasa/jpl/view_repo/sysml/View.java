@@ -210,11 +210,19 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         // Get the Method Property from the ViewPoint element
         //      The Method Property owner is the Viewpoint
         
+        Collection< EmsScriptNode > viewpointMethods = model.getProperty( viewpoint, "method" );
+        
+        EmsScriptNode viewpointMethod = null;
+        
+        if ( viewpointMethods.size() > 0 ) {
+            viewpointMethod = viewpointMethods.iterator().next();
+        }
+        
         // Get the value of the elementValue of the Method Property, which is an
         // Operation:
-                    
-        // Parse and convert the Operation:
-        
+        //Collection< EmsScriptNode > viewpointExpr = model.getPropertyWithType( viewpointMethod, getTypeWithName(null, "Expression" ) );
+        Collection< EmsScriptNode > viewpointExpr = model.getProperty( viewpointMethod, "Expression" );
+
         // Get the target(s) of the Expose relationship:
         for (EmsScriptNode exposeNode : matchingExposeElements) {
         	
@@ -226,12 +234,15 @@ public class View extends List implements sysml.View< EmsScriptNode > {
             
         }
         
+        // Parse and convert the Operation:
+        
         SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAeExpr =
                 new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getModel() );
 
-//        EmsScriptNode viewpoint = model.getTarget( model.getRelationship( viewNode, "Conform" ).iterator().next() ).iterator().next();
-//        Collection<EmsScriptNode > exposed = model.getTarget( model.getRelationship( viewNode, "Expose" ).iterator().next() );
-        Expression< Object > aeExpr = sysmlToAeExpr.toAeExpression( viewpoint  );
+        Expression< Object > aeExpr = sysmlToAeExpr.toAeExpression( viewpointExpr );
+
+        // Set the function call arguments with the exposed model elements:
+        
         if ( aeExpr.getForm() == Form.Function ) {
             Vector< Object > args = new Vector< Object >( exposed );
             ( (FunctionCall)aeExpr.expression ).setArguments( args  );
@@ -254,10 +265,8 @@ public class View extends List implements sysml.View< EmsScriptNode > {
             java.util.List< Viewable<EmsScriptNode> > viewables = (java.util.List< Viewable<EmsScriptNode> >)Utils.asList( c );
             addAll( viewables );
         }
-        // Set the function call arguments with the exposed model elements:
-        
+
         // Return the converted JSON from the expression evaluation:
-            
 
         JSONObject json = new JSONObject();
         JSONObject viewProperties = new JSONObject();
