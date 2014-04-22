@@ -1,5 +1,5 @@
 #!/bin/sh
-# run this from the alfresco-view-repo directory 
+# run this from the alfresco-view-repo directory
 pushd
 cd ../util
 ant

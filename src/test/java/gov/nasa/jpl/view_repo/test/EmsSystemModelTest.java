@@ -105,7 +105,10 @@ public class EmsSystemModelTest {
         System.out.println( "testExpressionEvaluation()" );
         
         Collection< EmsScriptNode > nodes = model.getElementWithName( null, "expr_32165" );
-
+        
+        System.out.println("\n*testExpressionEvaluation() findNodeRefByType: "+
+        				  NodeUtil.findNodeRefByType("LiteralInteger", "@sysml\\:type:\"", services));
+        
         System.out.println( "\n*testExpressionEvaluation() nodes: "
                             + MoreToString.Helper.toLongString( nodes ) );
         System.out.println( "\n*testExpressionEvaluation() got " + nodes.size() + " nodes." );

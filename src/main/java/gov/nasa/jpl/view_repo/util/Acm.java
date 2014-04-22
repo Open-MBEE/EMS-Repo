@@ -400,6 +400,7 @@ public class Acm {
             add(JSON_DOCUMENTATION);
             add(JSON_PROPERTY_TYPE);
             add(JSON_IS_DERIVED);
+            // TODO: source/target should become noderefs at some point
             add(JSON_SOURCE);
             add(JSON_TARGET);
             add(JSON_PROPERTY_TYPE);

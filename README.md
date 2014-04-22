@@ -72,8 +72,8 @@ Eclipse/Maven
         mvn install:install-file -Dfile=lib/sysml.jar -DgroupId=gov.nasa.jpl -DartifactId=sysml -Dversion=1.0 -Dpackaging=jar
 
     For the bae, sysml, and util projects you will need to update the build.properties file and rebel.xml file with your home directory and folder of where magic draw is installed.  For instance:
-        home=/Users/gcgandhi
-        md=/Applications/MD
+        home=/home/gcgandhi
+        md=/opt/local/magicdraw
 
     If you are not using Eclispse yoxos, then you will need to install the IMCE Eclipse plug ins.  Do the following:
         1. Get the .jar files from Brad or Doris, and then place them in your eclipse installation plugins folder, i.e. "/Applications/eclipse/plugins".  
@@ -85,7 +85,11 @@ Eclipse/Maven
 
     Open up the Ant window by clicking on Window->Show View->Other->Ant.  For the bae, sysml, and util projects, 
     drag the build.xml files into the Ant window.  Then expand each one in the Ant window, and run the makejar.  You must do this everytime after you purge.
+    There is a way to get Eclipse to automatically do this when saving a file in those projects (talk to Brad).
     
+    In order to get Eclipse to find the source code for the sysml, util, and bae projects, and the source code
+    to the build path by adding the projects to build path.  Make sure that in Order and Export tab, that they are
+    above the Maven Dependencies.
     
 # building, setting up maven, jrebel
 Make sure to install both the JRebel plug-in for Eclipse and download the Jrebel .jar and store it somewhere like "/Applications/jrebel".  
