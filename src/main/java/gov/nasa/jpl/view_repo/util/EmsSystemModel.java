@@ -107,7 +107,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         if ( relationship == null ) return false;
         return services.getDictionaryService()
                        .isSubClass( relationship.getQNameType(),
-                                    QName.createQName( "sysml:DirectedRelationship" ) );
+                                    QName.createQName( Acm.ACM_DIRECTED_RELATIONSHIP ) );
     }
 
     @Override
@@ -548,12 +548,19 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     	
         ArrayList< EmsScriptNode > allProperties = new ArrayList< EmsScriptNode >();
 
+        Object mySpecifier = specifier;
+        // Convert specifier to add ACM type, ie prepend "sysml:":
+        Map<String, String> convertMap = Acm.getJSON2ACM();
+        if (specifier instanceof String && convertMap.containsKey(specifier)) {
+        	 mySpecifier = convertMap.get(specifier);
+        }
+
         // find the specified property inside the context
         if ( context instanceof EmsScriptNode ) {
         	
             EmsScriptNode node = (EmsScriptNode)context;
 
-            if ( specifier == null ) {
+            if ( mySpecifier == null ) {
                 // if no specifier, return all properties
                 Map< String, Object > props = node.getProperties();
                 if ( props != null ) {
@@ -572,7 +579,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
             } // ends if specifies is null
             
             else {
-                Object prop = node.getProperty( "" + specifier );
+                Object prop = node.getProperty( "" + mySpecifier );
                 
         		// Attempt to converted to a EmsScriptNode and add to the list
         		// to later return if conversion succeeded:
@@ -590,8 +597,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         }
         
         // context is null; look for nodes of type Property that match the specifier
-        if ( specifier != null ) {
-            return getElementWithName( context, "" + specifier );
+        if ( mySpecifier != null ) {
+            return getElementWithName( context, "" + mySpecifier );
         }
         
         // context and specifier are both be null
@@ -799,13 +806,16 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
    public String getTypeString( Object context, Object specifier ) {
     	
         // TODO finish this, just a partial implementation
-    	
- 
+    
         if (context instanceof EmsScriptNode) {
-        	EmsScriptNode node = (EmsScriptNode) context;
         	
-        	return node.getTypeShort();
-            
+        	EmsScriptNode node = (EmsScriptNode) context;
+        	String acmType = node.getTypeShort();
+        	
+        	// Return type w/o sysml prefix:
+        	if (acmType != null) {
+        		return Acm.getACM2JSON().get(acmType);
+        	}        
         }
         
         return null;
@@ -892,7 +902,14 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     @Override
     public Collection< Object > getValue( Object context,
     									  Object specifier ) {
-    		
+    	
+        Object mySpecifier = specifier;
+        // Convert specifier to add ACM type, ie prepend "sysml:":
+        Map<String, String> convertMap = Acm.getJSON2ACM();
+        if (specifier instanceof String && convertMap.containsKey(specifier)) {
+        	 mySpecifier = convertMap.get(specifier);
+        }
+        
     	// Assuming that we can only have EmsScriptNode context:
     	if (context instanceof EmsScriptNode) {
     		
@@ -913,12 +930,12 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 			else {
 			
 	    		// If no specifier is supplied:
-				if (specifier == null) {
+				if (mySpecifier == null) {
 					// TODO what should we do here?
 	    		}
 				else {
 					
-					Object valueNode = node.getProperty("" + specifier);
+					Object valueNode = node.getProperty("" + mySpecifier);
 					
 					if (valueNode != null) {
 						return Utils.newList(valueNode);
