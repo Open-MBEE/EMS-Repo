@@ -400,22 +400,24 @@ public class Acm {
     protected static final Set<String> ELEMENT_JSON = new HashSet<String>() {
         private static final long serialVersionUID = -6771999751087714932L;
         {
-            add(JSON_BODY);
-            add(JSON_TYPE);
-            add(JSON_NAME);
-            add(JSON_DOCUMENTATION);
-            add(JSON_PROPERTY_TYPE);
-            add(JSON_IS_DERIVED);
-            // TODO: source/target should become noderefs at some point
-            add(JSON_SOURCE);
-            add(JSON_TARGET);
-            add(JSON_PROPERTY_TYPE);
+            addAll( JSON2ACM.keySet() ); // Everything
 
-            add(JSON_OWNER);
-            add(JSON_VALUE_TYPE);
-            add(JSON_COMMENT);
-
-            addAll(COMMON_JSON);
+//            add(JSON_BODY);
+//            add(JSON_TYPE);
+//            add(JSON_NAME);
+//            add(JSON_DOCUMENTATION);
+//            add(JSON_PROPERTY_TYPE);
+//            add(JSON_IS_DERIVED);
+//            // TODO: source/target should become noderefs at some point
+//            add(JSON_SOURCE);
+//            add(JSON_TARGET);
+//            add(JSON_PROPERTY_TYPE);
+//
+//            add(JSON_OWNER);
+//            add(JSON_VALUE_TYPE);
+//            add(JSON_COMMENT);
+//
+//            addAll(COMMON_JSON);
         }
     };
     
