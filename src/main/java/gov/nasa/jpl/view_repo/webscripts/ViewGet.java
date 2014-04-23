@@ -54,7 +54,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ViewGet extends AbstractJavaWebScript {
 		
-	private boolean demoMode = false;
+	private boolean demoMode = true;
 	
 	public ViewGet() {
 	    super();
@@ -130,7 +130,6 @@ public class ViewGet extends AbstractJavaWebScript {
 		}
 		
 		if (demoMode) {
-			Map<String,Object> map = view.getProperties();
 			View mmsView = new View(view);
 			JSONObject json = mmsView.toViewJson();
 		}
