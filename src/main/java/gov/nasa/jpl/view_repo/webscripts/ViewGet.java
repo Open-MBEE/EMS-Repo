@@ -54,7 +54,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ViewGet extends AbstractJavaWebScript {
 		
-	private boolean demoMode = true;
+	private boolean demoMode = false;
 	
 	public ViewGet() {
 	    super();
