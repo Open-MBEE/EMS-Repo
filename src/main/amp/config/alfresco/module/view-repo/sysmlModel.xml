@@ -101,6 +101,17 @@
         </type>
         <type name="sysml:Viewpoint"> 
         	<parent>sysml:Element</parent>
+        	<properties>
+                <property name="sysml:method">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+             </properties>
         </type>
         <type name="sysml:Property"> 
             <parent>sysml:Element</parent>
@@ -491,6 +502,16 @@
                 		<stored>false</stored>
                 		<tokenised>false</tokenised>
                 	</index>
+                </property>
+                <property name="sysml:operationExpression">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
                 </property>
         	</properties>
         </type>
