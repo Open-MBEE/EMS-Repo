@@ -187,13 +187,11 @@ public class View extends List implements sysml.View< EmsScriptNode > {
     }
     
     
-    public EmsScriptNode getViewpointExpression() {
+    public EmsScriptNode getViewpointOperation() {
         EmsScriptNode viewpoint = getViewpoint();
         if ( viewpoint == null ) return null;
         
-        // Get the Method Property from the ViewPoint element
-        //      The Method Property owner is the Viewpoint
-        
+        // Get the Method property from the ViewPoint element:        
         Collection< EmsScriptNode > viewpointMethods =
                 getModel().getProperty( viewpoint, "method" );
         
@@ -205,48 +203,7 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         
         if ( viewpointMethod == null ) viewpointMethod = viewpoint;  // HACK -- TODO
 
-        // Get the value of the elementValue of the Method Property, which is an
-        // Operation:
-
-        // Collection< EmsScriptNode > viewpointExpr =
-        //   getModel().getPropertyWithType( viewpointMethod,
-        //                              getTypeWithName(null, "Expression" ) );
-        Collection< EmsScriptNode > viewpointExprs =
-                getModel().getProperty( viewpointMethod, Acm.JSON_OPERATION_EXPRESSION);
-        EmsScriptNode viewpointExpr = null;
-        if ( !Utils.isNullOrEmpty( viewpointExprs ) ) {
-            viewpointExpr = viewpointExprs.iterator().next();
-        }
-        if ( viewpointExpr == null ) {
-            if ( viewpointMethod != null ) {
-                Collection< Object > exprs =
-                        getModel().op( Operation.GET,
-                                  Utils.newList( ModelItem.PROPERTY ),
-                                  Utils.newList( new Item( viewpointMethod,
-                                                           ModelItem.PROPERTY ) ),
-                                  Utils.newList( new Item( "Expression",
-                                                           ModelItem.TYPE ) ),
-                                  null, false );
-                if ( !Utils.isNullOrEmpty( exprs ) ) {
-                    for ( Object o : exprs ) {
-                        if ( o instanceof EmsScriptNode ) {
-                            viewpointExpr = (EmsScriptNode)o;
-                        }
-                    }
-                }
-//                for ( EmsScriptNode node : getModel().getProperty( viewpointMethod, null ) ) {
-//                    for ( EmsScriptNode tNode : getModel().getType( node, null ) ) {
-//                        if ( )
-//                    }
-//                }
-            }
-        }
-        if ( viewpointExpr == null ) viewpointExpr = viewpointMethod;  // HACK -- TODO
-
-        if ( viewpointExpr == null ) {
-            Debug.error(true, "Could not find viewpoint expression in " + viewpoint);
-        }
-        return viewpointExpr;
+        return viewpointMethod;
     }
     
     /** 
@@ -317,15 +274,14 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         // Get the related elements that define the the view.
         
         Collection<EmsScriptNode> exposed = getExposedElements();
-        //EmsScriptNode viewpoint = getViewpoint();
-        EmsScriptNode viewpointExpr = getViewpointExpression();
-        if ( viewpointExpr == null ) return null;
+        EmsScriptNode viewpointOp = getViewpointOperation();
+        if ( viewpointOp == null ) return null;
         
         // Translate the viewpoint Operation/Expression element into an AE Expression:
         
         SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAeExpr =
                 new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getModel() );
-        Expression< Object > aeExpr = sysmlToAeExpr.toAeExpression( viewpointExpr );
+        Expression< Object > aeExpr = sysmlToAeExpr.toAeExpression(viewpointOp, exposed);
 
         // Set the function call arguments with the exposed model elements:
         
