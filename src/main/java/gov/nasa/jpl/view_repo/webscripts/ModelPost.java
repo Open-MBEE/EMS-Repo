@@ -545,6 +545,10 @@ public class ModelPost extends AbstractJavaWebScript {
         boolean isValid = true;
         for (int ii = 0; ii < jsonArray.length(); ii++) {
             JSONObject elementJson = jsonArray.getJSONObject(ii);
+            if (!elementJson.has(Acm.JSON_ID)) {
+                elementJson.put( Acm.JSON_ID, createId( services ) );
+                //return null;
+            }
             String sysmlId = null;
             try {
                 sysmlId = elementJson.getString( Acm.JSON_ID );
@@ -552,6 +556,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 // ignore
             }
             if ( sysmlId == null ) {
+
                 log( LogLevel.ERROR, "No id in element json!",
                      HttpServletResponse.SC_NOT_FOUND );
                 continue;
