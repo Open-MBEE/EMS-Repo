@@ -105,7 +105,6 @@
                 <property name="sysml:method">
                     <type>d:noderef</type>
                     <mandatory>false</mandatory>
-                    <default>false</default>
                     <index enabled="true">
                         <atomic>false</atomic>
                         <stored>false</stored>
@@ -507,7 +506,7 @@
                 <property name="sysml:operationExpression">
                     <type>d:noderef</type>
                     <mandatory>false</mandatory>
-                    <multiple>true</multiple>
+                    <multiple>false</multiple>
                     <index enabled="true">
                         <atomic>false</atomic>
                         <stored>false</stored>

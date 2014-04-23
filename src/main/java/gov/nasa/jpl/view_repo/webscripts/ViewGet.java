@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
@@ -53,6 +54,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ViewGet extends AbstractJavaWebScript {
 		
+	private boolean demoMode = false;
+	
 	public ViewGet() {
 	    super();
 	}
@@ -126,14 +129,21 @@ public class ViewGet extends AbstractJavaWebScript {
 			log(LogLevel.ERROR, "View not found with ID: " + viewId, HttpServletResponse.SC_NOT_FOUND);
 		}
 		
-		if (checkPermissions(view, PermissionService.READ)) { 
-		    viewsJson.put(view.toJSONObject(Acm.JSON_TYPE_FILTER.VIEW));
-        		if (recurse) {
-            		JSONArray childrenJson = view.getChildrenViewsJSONArray();
-            		for (int ii = 0; ii < childrenJson.length(); ii++) {
-            		    handleView(childrenJson.getString(ii), viewsJson, recurse);
-            		}
-        		}
+		if (demoMode) {
+			Map<String,Object> map = view.getProperties();
+			View mmsView = new View(view);
+			JSONObject json = mmsView.toViewJson();
+		}
+		else {
+			if (checkPermissions(view, PermissionService.READ)) { 
+			    viewsJson.put(view.toJSONObject(Acm.JSON_TYPE_FILTER.VIEW));
+	        		if (recurse) {
+	            		JSONArray childrenJson = view.getChildrenViewsJSONArray();
+	            		for (int ii = 0; ii < childrenJson.length(); ii++) {
+	            		    handleView(childrenJson.getString(ii), viewsJson, recurse);
+	            		}
+	        		}
+			}
 		}
 	}
 		
