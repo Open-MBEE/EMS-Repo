@@ -130,7 +130,6 @@ public class ViewGet extends AbstractJavaWebScript {
 		}
 		
 		if (demoMode) {
-			Map<String,Object> map = view.getProperties();
 			View mmsView = new View(view);
 			JSONObject json = mmsView.toViewJson();
 		}

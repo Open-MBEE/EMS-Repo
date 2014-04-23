@@ -145,7 +145,7 @@
 			<version>1.0</version>
 			<scope>system</scope>
 			<type>jar</type>
-			<systemPath>${project.basedir}/lib/AE.jar</systemPath>
+			<systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/AE.jar</systemPath>
  		</dependency>
         <dependency>
             <groupId>sysml</groupId>
@@ -153,7 +153,7 @@
             <version>1.0</version>
             <scope>system</scope>
             <type>jar</type>
-            <systemPath>${project.basedir}/lib/sysml.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/sysml.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>mbee_util</groupId>
@@ -161,7 +161,7 @@
             <version>1.0</version>
             <scope>system</scope>
             <type>jar</type>
-            <systemPath>${project.basedir}/lib/mbee_util.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/mbee_util.jar</systemPath>
         </dependency>
     </dependencies>
 

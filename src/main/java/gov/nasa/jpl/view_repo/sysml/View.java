@@ -110,6 +110,21 @@ public class View extends List implements sysml.View< EmsScriptNode > {
     }
     
     /**
+     * Helper method to get the source property for the passed node
+     */
+    private EmsScriptNode getSource(EmsScriptNode node) {
+    	
+    	Collection<EmsScriptNode> sources = getModel().getSource( node );
+
+    	if (!Utils.isNullOrEmpty(sources)) {
+    		return sources.iterator().next();
+    	}
+    	else {
+    		return null;
+    	}
+    }
+    
+    /**
      * Get the viewpoint to which this view conforms.
      */
     public EmsScriptNode getViewpoint() {
@@ -117,15 +132,15 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         EmsScriptNode viewpoint = null;
 
         // Get all elements of Conform type:
-        Collection<EmsScriptNode> conformElements = model.getType(null, Acm.JSON_CONFORM);
+        Collection<EmsScriptNode> conformElements = getModel().getType(null, Acm.JSON_CONFORM);
 
         for ( EmsScriptNode node : conformElements ) {
             
             // If the sysml:source of the Compose element is the View:
-            if ( model.getSource( node ).equals( viewNode ) ) { 
+            if (getSource(node).equals( viewNode ) ) { 
                 
                 // Get the target of the Conform relationship (the Viewpoint):
-                Collection<EmsScriptNode> viewpointNodes = model.getTarget(node);
+                Collection<EmsScriptNode> viewpointNodes = getModel().getTarget(node);
                 
                 if (!Utils.isNullOrEmpty(viewpointNodes)) {
                     viewpoint = viewpointNodes.iterator().next();
@@ -143,8 +158,8 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         Collection<EmsScriptNode> exposed = new ArrayList<EmsScriptNode>();
 
         // Get all relationship elements of Expose type:
-        Collection<EmsScriptNode> exposeElements = model.getType(null, Acm.JSON_EXPOSE);
-        //Collection<EmsScriptNode> exposeElements = model.getRelationship(null, "Expose");  // Can we call this?
+        Collection<EmsScriptNode> exposeElements = getModel().getType(null, Acm.JSON_EXPOSE);
+        //Collection<EmsScriptNode> exposeElements = getModel().getRelationship(null, "Expose");  // Can we call this?
 
         Debug.outln( "Expose relationships of " + viewNode + ": "
                      + exposeElements );
@@ -156,11 +171,11 @@ public class View extends List implements sysml.View< EmsScriptNode > {
             // If the sysml:source of the Expose element is the View, then
             // add it to our expose list (there can be multiple exposes for
             // a view):
-            if ( model.getSource( node ).equals( viewNode ) ) { 
+            if (getSource(node).equals( viewNode ) ) { 
 
                 // Get the target(s) of the Expose relationship:
 
-                Collection<EmsScriptNode> nodes = model.getTarget(node);
+                Collection<EmsScriptNode> nodes = getModel().getTarget(node);
                 
                 if (!Utils.isNullOrEmpty(nodes)) {
                     exposed.addAll(nodes);
@@ -180,7 +195,7 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         //      The Method Property owner is the Viewpoint
         
         Collection< EmsScriptNode > viewpointMethods =
-                model.getProperty( viewpoint, "method" );
+                getModel().getProperty( viewpoint, "method" );
         
         EmsScriptNode viewpointMethod = null;
         
@@ -194,10 +209,10 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         // Operation:
 
         // Collection< EmsScriptNode > viewpointExpr =
-        //   model.getPropertyWithType( viewpointMethod,
+        //   getModel().getPropertyWithType( viewpointMethod,
         //                              getTypeWithName(null, "Expression" ) );
         Collection< EmsScriptNode > viewpointExprs =
-                model.getProperty( viewpointMethod, Acm.JSON_OPERATION_EXPRESSION);
+                getModel().getProperty( viewpointMethod, Acm.JSON_OPERATION_EXPRESSION);
         EmsScriptNode viewpointExpr = null;
         if ( !Utils.isNullOrEmpty( viewpointExprs ) ) {
             viewpointExpr = viewpointExprs.iterator().next();
@@ -205,7 +220,7 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         if ( viewpointExpr == null ) {
             if ( viewpointMethod != null ) {
                 Collection< Object > exprs =
-                        model.op( Operation.GET,
+                        getModel().op( Operation.GET,
                                   Utils.newList( ModelItem.PROPERTY ),
                                   Utils.newList( new Item( viewpointMethod,
                                                            ModelItem.PROPERTY ) ),
@@ -219,8 +234,8 @@ public class View extends List implements sysml.View< EmsScriptNode > {
                         }
                     }
                 }
-//                for ( EmsScriptNode node : model.getProperty( viewpointMethod, null ) ) {
-//                    for ( EmsScriptNode tNode : model.getType( node, null ) ) {
+//                for ( EmsScriptNode node : getModel().getProperty( viewpointMethod, null ) ) {
+//                    for ( EmsScriptNode tNode : getModel().getType( node, null ) ) {
 //                        if ( )
 //                    }
 //                }

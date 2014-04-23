@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export CURL_STATUS="-w \"%{http_code}\""
+export CURL_STATUS="-w \"\\n%{http_code}\\n\""
 export CURL_POST_FLAGS_NO_DATA="-X POST"
 export CURL_POST_FLAGS="-X POST -H \"Content-Type:application/json\" --data"
 export CURL_PUT_FLAGS="-X PUT"
@@ -9,15 +9,15 @@ export CURL_GET_FLAGS="-X GET"
 export CURL_SECURITY=" -k -3" 
 
 #if [true]; then
-	export CURL_USER=" -u admin:admin"
-	export CURL_FLAGS=$CURL_STATUS$CURL_USER
-	export SERVICE_URL="\"http://localhost:8080/alfresco/service/"
-	export BASE_URL="\"http://localhost:8080/alfresco/service/javawebscripts/"
+	#export CURL_USER=" -u admin:admin"
+	#export CURL_FLAGS=$CURL_STATUS$CURL_USER
+#	export SERVICE_URL="\"http://localhost:8080/alfresco/service/"
+#	export BASE_URL="\"http://localhost:8080/alfresco/service/javawebscripts/"
 #else
-#	export CURL_USER=" -u cinyoung"
-#	export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
-#	export SERVICE_URL="\"https://sheldon/alfresco/service/"
-#	export BASE_URL="\"https://sheldon/alfresco/service/javawebscripts/"
+	export CURL_USER=" -u admin:admin"
+	export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
+	export SERVICE_URL="\"https://localhost:8080/alfresco/service/"
+	export BASE_URL="\"https://localhost:8080/alfresco/service/javawebscripts/"
 #fi
 
 # TODO: CURL commands aren't executed from bash using environment variables
