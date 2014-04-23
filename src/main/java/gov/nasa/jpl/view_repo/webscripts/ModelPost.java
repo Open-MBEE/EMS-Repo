@@ -29,10 +29,14 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.CompareUtils;
+import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,6 +45,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
@@ -65,7 +70,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts
  * /gov/nasa/jpl/javawebscripts/model.post.desc.xml
  * 
- * NOTE: Transactions are independently managed in this Jave webscript, so make
+ * NOTE: Transactions are independently managed in this Java webscript, so make
  * sure that the descriptor file has transactions set to none
  * 
  * @author cinyoung
@@ -130,11 +135,13 @@ public class ModelPost extends AbstractJavaWebScript {
      *            JSONObject used to create/update the model
      * @param status
      *            Status to be updated
+     * @return the created elements
      * @throws JSONException
      *             Parse error
      */
-    public void createOrUpdateModel(Object content, Status status, EmsScriptNode projectNode)
-            throws Exception {
+    public Set< EmsScriptNode >
+            createOrUpdateModel( Object content, Status status,
+                                 EmsScriptNode projectNode ) throws Exception {
         Date now = new Date();
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
@@ -145,9 +152,12 @@ public class ModelPost extends AbstractJavaWebScript {
 
         boolean singleElement = !postJson.has(ELEMENTS);
         
+        TreeSet<EmsScriptNode> elements =
+                new TreeSet<EmsScriptNode>( CompareUtils.GenericComparator.instance() );
+        
         // check whether single JSONObject to create or an array
         if (singleElement) {
-            updateOrCreateElement(postJson, projectNode, false);
+            elements.addAll( updateOrCreateElement(postJson, projectNode, false) );
         } else {
             // create the element map and hierarchies
             if (buildElementMap(postJson.getJSONArray(ELEMENTS), projectNode)) {
@@ -176,7 +186,8 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                         
                         if (owner != null) {
-                            updateOrCreateElement(elementMap.get(rootElement), owner, false);
+                            elements.addAll( updateOrCreateElement( elementMap.get( rootElement ),
+                                                                 owner, false ) );
                         }
                     }
                 } // end for (String rootElement: rootElements) {
@@ -186,17 +197,24 @@ public class ModelPost extends AbstractJavaWebScript {
         // handle the relationships
         updateOrCreateAllRelationships(relationshipsJson);
         
-        updateNodeReferences(singleElement, postJson, projectNode );
-        
+        elements.addAll( updateNodeReferences( singleElement, postJson,
+                                               projectNode ) );
+
         now = new Date();
         end = System.currentTimeMillis();
         total = end -start;
         log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
+        return elements;
     }
     
-    protected void updateNodeReferences(boolean singleElement, JSONObject postJson, EmsScriptNode projectNode ) throws Exception {
+    protected Set<EmsScriptNode> updateNodeReferences(boolean singleElement,
+                                                      JSONObject postJson,
+                                                      EmsScriptNode projectNode ) throws Exception {
+        TreeSet<EmsScriptNode> elements =
+                new TreeSet<EmsScriptNode>( CompareUtils.GenericComparator.instance() );
+
         if ( singleElement ) {
-            updateOrCreateElement(postJson, projectNode, true);
+            elements.addAll( updateOrCreateElement(postJson, projectNode, true) );
         }
         for (String rootElement : rootElements) {
             log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
@@ -204,18 +222,23 @@ public class ModelPost extends AbstractJavaWebScript {
                 EmsScriptNode owner = getOwner( rootElement, projectNode, false );
                 
                 try {
-                    updateOrCreateElement(elementMap.get(rootElement), owner, true);
+                    elements.addAll( updateOrCreateElement( elementMap.get( rootElement ),
+                                                            owner, true ) );
                 } catch ( JSONException e ) {
                     e.printStackTrace();
                 }
             }
         } // end for (String rootElement: rootElements) {
+        return elements;
     }
 
-    protected EmsScriptNode getOwner(String elementId, EmsScriptNode projectNode, boolean createOwnerPkgIfNotFound) {
+    protected EmsScriptNode getOwner( String elementId,
+                                      EmsScriptNode projectNode,
+                                      boolean createOwnerPkgIfNotFound ) {
         JSONObject element = elementMap.get(elementId);
-        if ( element == null ) {
-            log(LogLevel.ERROR, "Trying to get owner of null element!", HttpServletResponse.SC_NOT_FOUND);
+        if ( element == null || element.equals( "null" ) ) {
+            log(LogLevel.ERROR, "Trying to get owner of null element!",
+                HttpServletResponse.SC_NOT_FOUND);
             return null;
         }
         String ownerName = null;
@@ -228,7 +251,8 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         
         // get the owner so we can create node inside owner
-        // DirectedRelationships can be sent with no owners, so, if not specified look for its existing owner
+        // DirectedRelationships can be sent with no owners, so, if not
+        // specified look for its existing owner
         EmsScriptNode owner = null;
         EmsScriptNode reifiedPkg = null;
         if (ownerName == null || ownerName.equals("null")) {
@@ -242,7 +266,10 @@ public class ModelPost extends AbstractJavaWebScript {
        		boolean isOwnerParent = false;
             owner = findScriptNodeById(ownerName);
             if (owner == null || !owner.exists()) {
-                log(LogLevel.WARNING, "Could not find owner with name: " + ownerName + " putting " + elementId + " into project", HttpServletResponse.SC_BAD_REQUEST);
+                log( LogLevel.WARNING, "Could not find owner with name: "
+                                       + ownerName + " putting " + elementId
+                                       + " into project",
+                     HttpServletResponse.SC_BAD_REQUEST );
                 owner = projectNode;
                 isOwnerParent = true;
             }
@@ -250,9 +277,12 @@ public class ModelPost extends AbstractJavaWebScript {
             reifiedPkg = findScriptNodeById(ownerName + "_pkg");
             if (reifiedPkg == null || !reifiedPkg.exists()) {
                 if ( createOwnerPkgIfNotFound) {
-                    reifiedPkg = getOrCreateReifiedNode(owner, ownerName, isOwnerParent);
+                    reifiedPkg = getOrCreateReifiedNode(owner, ownerName,
+                                                        isOwnerParent);
                 } else {
-                    log(LogLevel.WARNING, "Could not find owner package: " + ownerName, HttpServletResponse.SC_NOT_FOUND);
+                    log( LogLevel.WARNING, "Could not find owner package: "
+                                           + ownerName,
+                         HttpServletResponse.SC_NOT_FOUND );
                 }
             }
             owner = reifiedPkg;
@@ -600,12 +630,26 @@ public class ModelPost extends AbstractJavaWebScript {
      *            Metadata to be added to element
      * @param key
      *            ID of element
+     * @return the created elements
      * @throws JSONException
      */
-    protected void updateOrCreateElement(JSONObject elementJson,
-                                         EmsScriptNode parent, boolean ingest) throws Exception {
+    protected Set<EmsScriptNode> updateOrCreateElement(JSONObject elementJson,
+                                         EmsScriptNode parent,
+                                         boolean ingest) throws Exception {
+        TreeSet<EmsScriptNode> elements =
+                new TreeSet<EmsScriptNode>( CompareUtils.GenericComparator.instance() );
+
+        EmsScriptNode element = null;
+        
+        Object jsonId = elementJson.get( Acm.JSON_ID );
+        element = findScriptNodeById( "" + jsonId );
+        if ( element != null ) {
+            elements.add( element );
+        }
+        
 		// check that parent is of folder type
-		if (!services.getDictionaryService().isSubClass(parent.getQNameType(), ContentModel.TYPE_FOLDER)) {
+		if (!services.getDictionaryService().isSubClass(parent.getQNameType(),
+		                                                ContentModel.TYPE_FOLDER)) {
 			String name = (String) parent.getProperty(Acm.ACM_NAME);
 			if (name == null) {
 				name = (String) parent.getProperty(Acm.CM_NAME);
@@ -615,7 +659,7 @@ public class ModelPost extends AbstractJavaWebScript {
 				id = "not sysml type";
 			}
 			log(LogLevel.WARNING, "Node " + name + " is not of type folder, so cannot create children [id=" + id + "]");
-			return;
+			return elements;
 		}
     	
         JSONArray children = new JSONArray();
@@ -623,20 +667,26 @@ public class ModelPost extends AbstractJavaWebScript {
         EmsScriptNode reifiedNode = null;
         
         if (runWithoutTransactions) {
-            reifiedNode = updateOrCreateTransactionableElement(elementJson, parent, children, ingest);
+            reifiedNode =
+                    updateOrCreateTransactionableElement( elementJson, parent,
+                                                          children, ingest );
         } else {
             UserTransaction trx;
             trx = services.getTransactionService().getNonPropagatingUserTransaction();
             try {
                 trx.begin();
                 log(LogLevel.INFO, "updateOrCreateElement begin transaction {");
-                reifiedNode = updateOrCreateTransactionableElement(elementJson, parent, children, ingest);
+                reifiedNode =
+                        updateOrCreateTransactionableElement( elementJson,
+                                                              parent, children,
+                                                              ingest );
                 log(LogLevel.INFO, "} updateOrCreateElement end transaction");
                 trx.commit();
             } catch (Throwable e) {
                 try {
                     trx.rollback();
-                    log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                    log( LogLevel.ERROR,
+                         "\t####### ERROR: Needed to rollback: " + e.getMessage() );
                     e.printStackTrace();
                 } catch (Throwable ee) {
                     log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
@@ -647,16 +697,25 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // create the children elements
         if (reifiedNode != null && reifiedNode.exists()) {
+            //elements.add( reifiedNode ); 
             for (int ii = 0; ii < children.length(); ii++) {
+                elements.addAll( 
                 updateOrCreateElement(elementMap.get(children.getString(ii)),
-                                      reifiedNode, ingest);
+                                                       reifiedNode, ingest) );
             }
         }
+        
+        return elements;
     }
 
-    protected EmsScriptNode updateOrCreateTransactionableElement(JSONObject elementJson, EmsScriptNode parent, JSONArray children, boolean ingest) throws Exception {
+    protected EmsScriptNode
+            updateOrCreateTransactionableElement( JSONObject elementJson,
+                                                  EmsScriptNode parent,
+                                                  JSONArray children,
+                                                  boolean ingest ) throws Exception {
         if (!elementJson.has(Acm.JSON_ID)) {
-            return null;
+            elementJson.put( Acm.JSON_ID, createId( services ) );
+            //return null;
         }
         String id = elementJson.getString(Acm.JSON_ID);
         long start = System.currentTimeMillis(), end;
@@ -677,7 +736,9 @@ public class ModelPost extends AbstractJavaWebScript {
                 log( LogLevel.INFO, "\tcreating node" );
                 try {
                     node = parent.createNode( id, type );
-                    if ( node == null || !node.exists() ) throw new Exception( "createNode() failed." );
+                    if ( node == null || !node.exists() ) {
+                        throw new Exception( "createNode() failed." );
+                    }
                     node.setProperty( Acm.CM_NAME, id );
                     node.setProperty( Acm.ACM_ID, id );
                 } catch ( Exception e ) {
@@ -758,6 +819,18 @@ public class ModelPost extends AbstractJavaWebScript {
         return reifiedNode;
     }
     
+    public static String createId( ServiceRegistry services ) {
+        for ( int i=0; i<10; ++i ) {
+            String id = "MMS_" + System.currentTimeMillis();
+            // Make sure id is not already used
+            if ( NodeUtil.findNodeRefById( id, services ) == null ) {
+                return id;
+            }
+        }
+        Debug.error( true, "Could not create a unique id!" );
+        return null;
+    }
+
     protected EmsScriptNode getOrCreateReifiedNode(EmsScriptNode node, String id, boolean useParent) {
         EmsScriptNode reifiedNode = null;
         if ( node == null || !node.exists() ) {
@@ -801,18 +874,16 @@ public class ModelPost extends AbstractJavaWebScript {
 
         return reifiedNode;
     }
-
+    
     /**
      * Entry point
      */
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req,
-            Status status, Cache cache) {
+                                              Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
         
-//        Acm.ACM2JSON = null;
-//        Acm.JSON2ACM = null;
         System.out.println("Acm.getJSON2ACM() = " + Acm.getJSON2ACM());
         System.out.println("Acm.getACM2JSON() = " + Acm.getACM2JSON());
         
@@ -820,6 +891,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         ModelPost instance = new ModelPost(repository, services);
         
+        JSONObject top = new JSONObject();
         if (validateRequest(req, status)) {
             try {
                 if (runInBackground) {
@@ -827,20 +899,32 @@ public class ModelPost extends AbstractJavaWebScript {
                     response.append("JSON uploaded, model load being processed in background.\n");
                     response.append("You will be notified via email when the model load has finished.\n");
                 } else {
-                    instance.createOrUpdateModel(req.parseContent(), status, getProjectNodeFromRequest(req));
+                    JSONObject postJson = (JSONObject)req.parseContent();
+                    Set< EmsScriptNode > elements = 
+                        instance.createOrUpdateModel( postJson,
+                                                      status,
+                                                      getProjectNodeFromRequest( req ) );
+                    if ( !Utils.isNullOrEmpty( elements ) ) {
+                        JSONArray elementsJson = new JSONArray();
+                        for ( EmsScriptNode element : elements ) {
+                            elementsJson.put( element.toJSONObject() );
+                        }
+                        top.put( "elements", elementsJson );
+                        model.put( "res", top.toString( 4 ) );
+                    }
                 }
                 appendResponseStatusInfo(instance);
             } catch (JSONException e) {
                 log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
                 e.printStackTrace();
+                model.put("res", response.toString());
             } catch (Exception e) {
                 log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 e.printStackTrace();
+                model.put("res", response.toString());
             }
         }
-
         status.setCode(responseStatus.getCode());
-        model.put("res", response.toString());
         return model;
     }
 
