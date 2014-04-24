@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) <2013>, California Institute of Technology ("Caltech").  
+ * Copyright (c) <2013>, California Institute of Technology ("Caltech").
  * U.S. Government sponsorship acknowledged.
  * 
  * All rights reserved.
@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 
 /**
  * Simple static class for keeping track of Alfresco Content Model types and JSON mappings
@@ -182,10 +183,10 @@ public class Acm {
     public static final String ACM_ANNOTATED_ELEMENTS = SYSML + JSON_ANNOTATED_ELEMENTS;
     public static String ACM_PROJECT_VERSION = SYSML + JSON_PROJECT_VERSION;
     
-//    public static final String ACM_TIME_MAX = SYSML + JSON_TIME_MAX;    
-//    public static final String ACM_TIME_MIN = SYSML + JSON_TIME_MIN;    
-//    public static final String ACM_DURATION_MAX = SYSML + JSON_DURATION_MAX;    
-//    public static final String ACM_DURATION_MIN = SYSML + JSON_DURATION_MIN;    
+//    public static final String ACM_TIME_MAX = SYSML + JSON_TIME_MAX;
+//    public static final String ACM_TIME_MIN = SYSML + JSON_TIME_MIN;
+//    public static final String ACM_DURATION_MAX = SYSML + JSON_DURATION_MAX;
+//    public static final String ACM_DURATION_MIN = SYSML + JSON_DURATION_MIN;
     
     public static final String ACM_ALLOWED_ELEMENTS = VIEW + JSON_ALLOWED_ELEMENTS;
     public static final String ACM_CHILDREN_VIEWS = VIEW + JSON_CHILDREN_VIEWS;
@@ -229,7 +230,7 @@ public class Acm {
     public static final String ACM_INTERVAL = SYSML + JSON_INTERVAL;
     public static final String ACM_LITERAL_BOOLEAN = SYSML + JSON_LITERAL_BOOLEAN;
     public static final String ACM_LITERAL_INTEGER = SYSML + JSON_LITERAL_INTEGER;
-    public static final String ACM_LITERAL_NULL = SYSML + JSON_LITERAL_NULL; 
+    public static final String ACM_LITERAL_NULL = SYSML + JSON_LITERAL_NULL;
     public static final String ACM_LITERAL_REAL = SYSML + JSON_LITERAL_REAL;
     public static final String ACM_LITERAL_UNLIMITED_NATURAL = SYSML + JSON_LITERAL_UNLIMITED_NATURAL;
     public static final String ACM_LITERAL_STRING = SYSML + JSON_LITERAL_STRING;
@@ -342,6 +343,7 @@ public class Acm {
             add(JSON_VALUE);
             add(JSON_OPERATION_PARAMETER);
             add(JSON_OPERAND);
+//            add(JSON_ANNOTATED_ELEMENTS);
         }
     };
     
@@ -366,7 +368,7 @@ public class Acm {
            add(JSON_PARAMETER_DEFAULT_VALUE);
            add(JSON_OPERATION_EXPRESSION);
            add(JSON_METHOD);
-
+//           add(JSON_ANNOTATED_ELEMENTS);
        }
    };
 
@@ -394,6 +396,64 @@ public class Acm {
         }
     };
     
+    /**
+     * Properties that are serialized when requesting Products
+     */
+    protected static final Set<String> PRODUCT_JSON = new HashSet<String>() {
+        private static final long serialVersionUID = 3335972461663141541L;
+        {
+            add(JSON_VIEW_2_VIEW);
+            add(JSON_NO_SECTIONS);
+
+            addAll(COMMON_JSON);
+        }
+    };
+    
+    /**
+     * Properties that are serialized when requesting Views
+     */
+    protected static final Set<String> VIEW_JSON = new HashSet<String>() {
+        private static final long serialVersionUID = -2080928480362524333L;
+        {
+            add(JSON_DISPLAYED_ELEMENTS);
+            add(JSON_ALLOWED_ELEMENTS);
+            add(JSON_CHILDREN_VIEWS);
+            add(JSON_CONTAINS);
+            addAll(COMMON_JSON);
+        }
+    };
+    
+    protected static final Set<String> MISC_PROPS_JSON = new HashSet<String>() {
+        private static final long serialVersionUID = -2069995088621697991L;
+        {
+            add(JSON_CONSTRAINT_SPECIFICATION);
+            add(JSON_EXPRESSION_BODY);
+            add(JSON_PROJECT_VERSION);
+            add(JSON_BOOLEAN);
+            add(JSON_DOUBLE);
+            add(JSON_INTEGER);
+            add(JSON_REAL);
+            add(JSON_NATURAL_VALUE);
+            add(JSON_STRING);
+            add(JSON_VALUE_EXPRESSION);
+            add(JSON_DURATION_MAX);
+            add(JSON_DURATION_MIN);
+            add(JSON_ELEMENT_VALUE_ELEMENT);
+            add(JSON_OPERAND);
+            add(JSON_INSTANCE);
+            add(JSON_INTERVAL);
+            add(JSON_TIME_INTERVAL_MAX);
+            add(JSON_TIME_INTERVAL_MIN);
+            add(JSON_OPERATION_PARAMETER);
+            add(JSON_INSTANCE_SPECIFICATION_SPECIFICATION);
+            add(JSON_PARAMETER_DIRECTION);
+            add(JSON_PARAMETER_DEFAULT_VALUE);
+            add(JSON_OPERATION_EXPRESSION);
+            add(JSON_METHOD);
+        }
+    };
+
+
     /**
      * Properties that are serialized when when requesting Elements
      */
@@ -424,33 +484,8 @@ public class Acm {
             
             addAll(VIEW_JSON);
             addAll(PRODUCT_JSON);
-        }
-    };
-    
-    /**
-     * Properties that are serialized when requesting Products
-     */
-    protected static final Set<String> PRODUCT_JSON = new HashSet<String>() {
-        private static final long serialVersionUID = 3335972461663141541L;
-        {
-            add(JSON_VIEW_2_VIEW);
-            add(JSON_NO_SECTIONS);
-
-            addAll(COMMON_JSON);
-        }
-    };
-    
-    /**
-     * Properties that are serialized when requesting Views
-     */
-    protected static final Set<String> VIEW_JSON = new HashSet<String>() {
-        private static final long serialVersionUID = -2080928480362524333L;
-        {
-            add(JSON_DISPLAYED_ELEMENTS);
-            add(JSON_ALLOWED_ELEMENTS);
-            add(JSON_CHILDREN_VIEWS);
-            add(JSON_CONTAINS);
-            addAll(COMMON_JSON);
+            
+            addAll(MISC_PROPS_JSON);
         }
     };
     
