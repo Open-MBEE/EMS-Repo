@@ -116,8 +116,9 @@ public class NodeUtil {
      * @return     NodeRef of first match, null otherwise
      */
     public static NodeRef findNodeRefById(String id, ServiceRegistry services) {
-//      return findNodeRefByType(name, "@cm\\:name:\"");
-        return findNodeRefByType(id, SearchType.ID, services); // TODO: temporarily search by ID
+        NodeRef r = findNodeRefByType(id, SearchType.ID, services); // TODO: temporarily search by ID
+        if ( r == null ) r = findNodeRefByType(id, "@cm\\:name:\"", services);
+        return r;
     }
     
     
