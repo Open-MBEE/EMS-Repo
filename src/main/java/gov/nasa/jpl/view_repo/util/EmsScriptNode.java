@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
@@ -39,6 +40,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -880,6 +882,26 @@ public class EmsScriptNode extends ScriptNode {
 	    return toJSONObject(renderType, true, true);
 	}
 	
+	public JSONArray nodeRefsToJSONArray( Collection<?> nodeRefs ) throws JSONException {
+        JSONArray jarr = new JSONArray();
+        for ( Object o : nodeRefs ) {
+            if ( !( o instanceof NodeRef ) ) {
+                jarr.put( "" + o );
+                Debug.error( false, "object is not a nodeRef, adding to json: " + o );
+            } else {
+                NodeRef ref = (NodeRef)o;
+                EmsScriptNode node = new EmsScriptNode( ref, services );
+                Object sysmlId = node.getProperty( Acm.ACM_ID );
+                if ( sysmlId != null ) {
+                    jarr.put( "" + sysmlId );
+                } else {
+                    Debug.error( false, "elementValue has no sysml id: " + ref );
+                    jarr.put( "" + ref.getId() );
+                }
+            }
+        }
+        return jarr;
+	}
 	
 	/**
 	 * Convert node into our custom JSONObject
@@ -898,9 +920,27 @@ public class EmsScriptNode extends ScriptNode {
             if (elementValue != null) {
                 String jsonType = Acm.getACM2JSON().get(acmType);
                 if (Acm.JSON_FILTER_MAP.get(renderType).contains(jsonType)) {
-                    if (Acm.JSON_ARRAYS.contains(jsonType)) {
+                    if (Acm.JSON_NODEREFS.contains(jsonType)) {
+                        if (!Acm.JSON_ARRAYS.contains(jsonType)) {
+                            elementValue = Utils.newList( elementValue );
+                        }
+                        if ( elementValue instanceof Collection ) {
+                            Collection< ? > c = (Collection< ? >)elementValue;
+                            JSONArray jarr = //new JSONArray();
+                                    nodeRefsToJSONArray(c);
+                            element.put(jsonType, jarr);
+                        } else {
+                            Debug.error( "Unexpected elementValue " + elementValue );
+                        }
+                    } else if (Acm.JSON_ARRAYS.contains(jsonType)) {
                         String elementString = elementValue.toString();
-                        element.put(jsonType, new JSONArray(elementString));
+                        try {
+                        //if ( elementString != null ) {
+                            element.put(jsonType, new JSONArray(elementString));
+                        //}
+                        } catch (Exception e ) {
+                            //throw e;
+                        }
                     } else {
                         if (elementValue instanceof String) {
                             String elementString = (String) elementValue;
@@ -936,11 +976,8 @@ public class EmsScriptNode extends ScriptNode {
                     @SuppressWarnings("unchecked")
                     List<NodeRef> elementValue = (List<NodeRef>) this.getProperty(Acm.ACM_ELEMENT_VALUE);
                     if (elementValue != null) {
-                        JSONArray array = new JSONArray();
-                        for (NodeRef evRef: elementValue) {
-                            EmsScriptNode ev = new EmsScriptNode(evRef, services, response);
-                            array.put(ev.getProperty(Acm.ACM_ID));
-                        }
+                        JSONArray array = //new JSONArray();
+                                nodeRefsToJSONArray( elementValue );
                         element.put("value", array);
                     }
                 } else {

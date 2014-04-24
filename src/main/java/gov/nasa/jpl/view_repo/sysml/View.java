@@ -281,14 +281,14 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         
         SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAeExpr =
                 new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getModel() );
-        Expression< Object > aeExpr = sysmlToAeExpr.toAeExpression(viewpointOp, exposed);
+        Expression< Object > aeExpr = sysmlToAeExpr.operationToAeExpression(viewpointOp, exposed);
 
-        // Set the function call arguments with the exposed model elements:
-        
-        if ( aeExpr.getForm() == Form.Function ) {
-            Vector< Object > args = new Vector< Object >( exposed );
-            ( (FunctionCall)aeExpr.expression ).setArguments( args  );
-        }
+//        // Set the function call arguments with the exposed model elements:
+//        
+//        if ( aeExpr.getForm() == Form.Function ) {
+//            Vector< Object > args = new Vector< Object >( exposed );
+//            ( (FunctionCall)aeExpr.expression ).setArguments( args  );
+//        }
 
         // Evaluate the expression to get the Viewables and add them to this View.
 
