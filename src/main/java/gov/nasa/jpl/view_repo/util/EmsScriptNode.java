@@ -1,29 +1,31 @@
 /*******************************************************************************
- * Copyright (c) <2013>, California Institute of Technology ("Caltech").  
- * U.S. Government sponsorship acknowledged.
+ * Copyright (c) <2013>, California Institute of Technology ("Caltech"). U.S.
+ * Government sponsorship acknowledged.
  * 
  * All rights reserved.
  * 
- * Redistribution and use in source and binary forms, with or without modification, are 
- * permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  * 
- *  - Redistributions of source code must retain the above copyright notice, this list of 
- *    conditions and the following disclaimer.
- *  - Redistributions in binary form must reproduce the above copyright notice, this list 
- *    of conditions and the following disclaimer in the documentation and/or other materials 
- *    provided with the distribution.
- *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory, 
- *    nor the names of its contributors may be used to endorse or promote products derived 
- *    from this software without specific prior written permission.
+ * - Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. - Redistributions in binary
+ * form must reproduce the above copyright notice, this list of conditions and
+ * the following disclaimer in the documentation and/or other materials provided
+ * with the distribution. - Neither the name of Caltech nor its operating
+ * division, the Jet Propulsion Laboratory, nor the names of its contributors
+ * may be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
- * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER  
- * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
@@ -88,217 +90,257 @@ import org.alfresco.service.namespace.QNameMap;
 
 /**
  * Extension of ScriptNode to support EMS needs
+ * 
  * @author cinyoung
- *
+ * 
  */
 public class EmsScriptNode extends ScriptNode {
-	private static final long serialVersionUID = 9132455162871185541L;
+    private static final long serialVersionUID = 9132455162871185541L;
 
-	// provide logging capability of what is done
-	private StringBuffer response = null;
-	
-	// provide status as necessary
-	private Status status = null;
-	
-	boolean useFoundationalApi = true; // TODO this will be removed
+    // provide logging capability of what is done
+    private StringBuffer response = null;
 
-    //protected static StoreRef storeRef = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
+    // provide status as necessary
+    private Status status = null;
+
+    boolean useFoundationalApi = true; // TODO this will be removed
+
+    // protected static StoreRef storeRef = new
+    // StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 
     protected EmsScriptNode companyHome = null;
-    
+
     protected EmsScriptNode siteNode = null;
-    
-    // TODO add nodeService and other member variables when no longer subclassing ScriptNode
-    //	    extend Serializable after removing ScriptNode extension
-    
-	// for lucene search
-	//protected static final StoreRef SEARCH_STORE = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 
-	public EmsScriptNode(NodeRef nodeRef, ServiceRegistry services) {
-		super(nodeRef, services);
-	}
+    // TODO add nodeService and other member variables when no longer
+    // subclassing ScriptNode
+    // extend Serializable after removing ScriptNode extension
 
+    // for lucene search
+    // protected static final StoreRef SEARCH_STORE = new
+    // StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
 
-	public EmsScriptNode(NodeRef nodeRef, ServiceRegistry services, StringBuffer response, Status status) {
-		this(nodeRef, services);
-		setStatus(status);
-	}
-
-	public EmsScriptNode(NodeRef nodeRef, ServiceRegistry services, StringBuffer response) {
-		this(nodeRef, services);
-		setResponse(response);
-	}
-
-	
-	@Override
-	public EmsScriptNode childByNamePath(String path) {
-		ScriptNode child = super.childByNamePath(path);
-		if (child == null) {
-			return null;
-		}
-		return new EmsScriptNode(child.getNodeRef(), services, response);
-	}
-
-    @Override
-    public EmsScriptNode createFile(String name) {
-        return new EmsScriptNode(super.createFile(name).getNodeRef(), services, response, status);
+    public EmsScriptNode( NodeRef nodeRef, ServiceRegistry services ) {
+        super( nodeRef, services );
     }
 
+    public EmsScriptNode( NodeRef nodeRef, ServiceRegistry services,
+                          StringBuffer response, Status status ) {
+        this( nodeRef, services );
+        setStatus( status );
+    }
 
-	@Override
-	public EmsScriptNode createFolder(String name) {
-		return new EmsScriptNode(super.createFolder(name).getNodeRef(), services, response, status);
-	}
+    public EmsScriptNode( NodeRef nodeRef, ServiceRegistry services,
+                          StringBuffer response ) {
+        this( nodeRef, services );
+        setResponse( response );
+    }
 
+    @Override
+    public EmsScriptNode childByNamePath( String path ) {
+        ScriptNode child = super.childByNamePath( path );
+        if ( child == null ) {
+            return null;
+        }
+        return new EmsScriptNode( child.getNodeRef(), services, response );
+    }
 
-	@Override
-	public EmsScriptNode createFolder(String name, String type) {
-		return new EmsScriptNode(super.createFolder(name, type).getNodeRef(), services, response, status);
-	}
+    @Override
+    public EmsScriptNode createFile( String name ) {
+        return new EmsScriptNode( super.createFile( name ).getNodeRef(),
+                                  services, response, status );
+    }
 
+    @Override
+    public EmsScriptNode createFolder( String name ) {
+        return new EmsScriptNode( super.createFolder( name ).getNodeRef(),
+                                  services, response, status );
+    }
 
-	/**
-	 * Check whether or not a node has the specified aspect, add it if not
-	 * @param string	Short name (e.g., sysml:View) of the aspect to look for
-	 * @return			true if node updated with aspect
-	 */
-	public boolean createOrUpdateAspect(String aspect) {
-		if (!hasAspect(aspect)) {
-			return addAspect(aspect);
-		}
-		return false;
-	}
+    @Override
+    public EmsScriptNode createFolder( String name, String type ) {
+        return new EmsScriptNode(
+                                  super.createFolder( name, type ).getNodeRef(),
+                                  services, response, status );
+    }
 
-	
-	/**
-	 * Check whether an association exists of the specified type between source and target, create/update as necessary
-	 * TODO: updating associations only works for singular associations, need to expand to multiple
-	 * NOTE: do not use for child associations
-	 * @param target	Target node of the association
-	 * @param type		Short name of the type of association to create 
-	 * @return			true if association updated or created
-	 */
-	public boolean createOrUpdateAssociation(ScriptNode target, String type) {
-	    return createOrUpdateAssociation(target, type, false);
-	}
-	
-	
-	public boolean createOrUpdateAssociation(ScriptNode target, String type, boolean isMultiple) {
-        QName typeQName = createQName(type);
-        List<AssociationRef> refs = services.getNodeService().getTargetAssocs(nodeRef, RegexQNamePattern.MATCH_ALL );
+    /**
+     * Check whether or not a node has the specified aspect, add it if not
+     * 
+     * @param string
+     *            Short name (e.g., sysml:View) of the aspect to look for
+     * @return true if node updated with aspect
+     */
+    public boolean createOrUpdateAspect( String aspect ) {
+        if ( !hasAspect( aspect ) ) {
+            return addAspect( aspect );
+        }
+        return false;
+    }
 
-        if (refs != null) {
+    /**
+     * Check whether an association exists of the specified type between source
+     * and target, create/update as necessary TODO: updating associations only
+     * works for singular associations, need to expand to multiple NOTE: do not
+     * use for child associations
+     * 
+     * @param target
+     *            Target node of the association
+     * @param type
+     *            Short name of the type of association to create
+     * @return true if association updated or created
+     */
+    public boolean createOrUpdateAssociation( ScriptNode target, String type ) {
+        return createOrUpdateAssociation( target, type, false );
+    }
+
+    public boolean createOrUpdateAssociation( ScriptNode target, String type,
+                                              boolean isMultiple ) {
+        QName typeQName = createQName( type );
+        List< AssociationRef > refs =
+                services.getNodeService()
+                        .getTargetAssocs( nodeRef, RegexQNamePattern.MATCH_ALL );
+
+        if ( refs != null ) {
             // check all associations to see if there's a matching association
-            for (AssociationRef ref: refs) {
-                if (ref.getTypeQName().equals(typeQName)) {
-                    if (ref.getSourceRef() != null && ref.getTargetRef() != null) {
-                        if (ref.getSourceRef().equals(nodeRef) && ref.getTargetRef().equals(target.getNodeRef())) {
+            for ( AssociationRef ref : refs ) {
+                if ( ref.getTypeQName().equals( typeQName ) ) {
+                    if ( ref.getSourceRef() != null
+                         && ref.getTargetRef() != null ) {
+                        if ( ref.getSourceRef().equals( nodeRef )
+                             && ref.getTargetRef().equals( target.getNodeRef() ) ) {
                             // found it, no need to update
-                            return false; 
+                            return false;
                         }
                     }
                     // TODO: need to check for multiple associations?
-                    if (!isMultiple) {
-                        // association doesn't match, no way to modify a ref, so need to remove then create
-                        services.getNodeService().removeAssociation(nodeRef, target.getNodeRef(), typeQName);
+                    if ( !isMultiple ) {
+                        // association doesn't match, no way to modify a ref, so
+                        // need to remove then create
+                        services.getNodeService()
+                                .removeAssociation( nodeRef,
+                                                    target.getNodeRef(),
+                                                    typeQName );
                         break;
                     }
                 }
             }
         }
-        
-        services.getNodeService().createAssociation(nodeRef, target.getNodeRef(), typeQName);
-        return true;
-	}
-	
-	public void removeAssociations(String type) {
-        QName typeQName = createQName(type);
-        List<AssociationRef> refs = services.getNodeService().getTargetAssocs(nodeRef, RegexQNamePattern.MATCH_ALL );
 
-        if (refs != null) {
+        services.getNodeService().createAssociation( nodeRef,
+                                                     target.getNodeRef(),
+                                                     typeQName );
+        return true;
+    }
+
+    public void removeAssociations( String type ) {
+        QName typeQName = createQName( type );
+        List< AssociationRef > refs =
+                services.getNodeService()
+                        .getTargetAssocs( nodeRef, RegexQNamePattern.MATCH_ALL );
+
+        if ( refs != null ) {
             // check all associations to see if there's a matching association
-            for (AssociationRef ref: refs) {
-                if (ref.getTypeQName().equals(typeQName)) {
-                		services.getNodeService().removeAssociation(ref.getSourceRef(), ref.getTargetRef(), typeQName);
+            for ( AssociationRef ref : refs ) {
+                if ( ref.getTypeQName().equals( typeQName ) ) {
+                    services.getNodeService()
+                            .removeAssociation( ref.getSourceRef(),
+                                                ref.getTargetRef(), typeQName );
                 }
             }
         }
-	}
-	
-	/**
-	 * Create a child association between a parent and child node of the specified type
-	 * 
-	 * // TODO investigate why alfresco repo deletion of node doesn't remove its reified package
-	 * 
-	 * NOTE: do not use for peer associations
-	 * @param child		Child node
-	 * @param type		Short name of the type of child association to create
-	 * @return			True if updated or created child relationship
-	 */
-	public boolean createOrUpdateChildAssociation(ScriptNode child, String type) {
-		List<ChildAssociationRef> refs = services.getNodeService().getChildAssocs(nodeRef);
-		QName typeQName = createQName(type);
+    }
 
-		if (refs != null) {
-        		// check all associations to see if there's a matching association
-        		for (ChildAssociationRef ref: refs) {
-        			if (ref.getTypeQName().equals(typeQName)) {
-        				if (ref.getParentRef().equals(nodeRef) && ref.getChildRef().equals(child.getNodeRef())) {
-        					// found it, no need to update
-        					return false; 
-        				} else {
-        					services.getNodeService().removeChildAssociation(ref);
-        					break;
-        				}
-        			}
-        		}
-		}
+    /**
+     * Create a child association between a parent and child node of the
+     * specified type
+     * 
+     * // TODO investigate why alfresco repo deletion of node doesn't remove its
+     * reified package
+     * 
+     * NOTE: do not use for peer associations
+     * 
+     * @param child
+     *            Child node
+     * @param type
+     *            Short name of the type of child association to create
+     * @return True if updated or created child relationship
+     */
+    public boolean
+            createOrUpdateChildAssociation( ScriptNode child, String type ) {
+        List< ChildAssociationRef > refs =
+                services.getNodeService().getChildAssocs( nodeRef );
+        QName typeQName = createQName( type );
 
-		services.getNodeService().addChild(nodeRef, child.getNodeRef(), typeQName, typeQName);
-		return true;		
-	}
-	
-	
-	/**
-	 * Check whether or not a node has a property, update or create as necessary
-	 * 
-	 * NOTE: this only works for non-collection properties - for collections handwrite (or see how it's done in ModelPost.java)
-	 * @param acmType	Short name for the Alfresco Content Model type
-	 * @param value		Value to set property to
-	 * @return			true if property updated, false otherwise (e.g., value did not change)
-	 */
-	public <T extends Serializable> boolean createOrUpdateProperty(String acmType, T value) {
-	    if ( value instanceof String ) {
-	        @SuppressWarnings( "unchecked" )
+        if ( refs != null ) {
+            // check all associations to see if there's a matching association
+            for ( ChildAssociationRef ref : refs ) {
+                if ( ref.getTypeQName().equals( typeQName ) ) {
+                    if ( ref.getParentRef().equals( nodeRef )
+                         && ref.getChildRef().equals( child.getNodeRef() ) ) {
+                        // found it, no need to update
+                        return false;
+                    } else {
+                        services.getNodeService().removeChildAssociation( ref );
+                        break;
+                    }
+                }
+            }
+        }
+
+        services.getNodeService().addChild( nodeRef, child.getNodeRef(),
+                                            typeQName, typeQName );
+        return true;
+    }
+
+    /**
+     * Check whether or not a node has a property, update or create as necessary
+     * 
+     * NOTE: this only works for non-collection properties - for collections
+     * handwrite (or see how it's done in ModelPost.java)
+     * 
+     * @param acmType
+     *            Short name for the Alfresco Content Model type
+     * @param value
+     *            Value to set property to
+     * @return true if property updated, false otherwise (e.g., value did not
+     *         change)
+     */
+    public < T extends Serializable > boolean
+            createOrUpdateProperty( String acmType, T value ) {
+        if ( value instanceof String ) {
+            @SuppressWarnings( "unchecked" )
             T t = (T)extractAndReplaceImageData( (String)value );
-	        value = t;
-	    }
-		@SuppressWarnings("unchecked")
-		T oldValue = (T) getProperty(acmType);
-		if (oldValue != null) {
-            if (!value.equals(oldValue)) {
-                setProperty(acmType, value);
-				log(getName() + ": " + acmType + " property updated to value = " + value);
+            value = t;
+        }
+        @SuppressWarnings( "unchecked" )
+        T oldValue = (T)getProperty( acmType );
+        if ( oldValue != null ) {
+            if ( !value.equals( oldValue ) ) {
+                setProperty( acmType, value );
+                log( getName() + ": " + acmType
+                     + " property updated to value = " + value );
                 return true;
             }
-		} else {
-			log(getName() + ": " + acmType + " property created with value = " + value);
-			setProperty(acmType, value);
-		}
-		return false;
-	}
+        } else {
+            log( getName() + ": " + acmType + " property created with value = "
+                 + value );
+            setProperty( acmType, value );
+        }
+        return false;
+    }
 
-	public EmsScriptNode getCompanyHome() {
-	    if ( companyHome == null ) {
-	        companyHome = NodeUtil.getCompanyHome( services );
-	    }
-	    return companyHome;
-	}
-	
-	public Set< NodeRef > getRootNodes() {
-	    return NodeUtil.getRootNodes( services );
-	}
-	
+    public EmsScriptNode getCompanyHome() {
+        if ( companyHome == null ) {
+            companyHome = NodeUtil.getCompanyHome( services );
+        }
+        return companyHome;
+    }
+
+    public Set< NodeRef > getRootNodes() {
+        return NodeUtil.getRootNodes( services );
+    }
+
     // TODO -- These utility functions are copied from
     // gov.nasa.jpl.mbee.util.ClassUtils -- should access from jar or linked
     // source.
@@ -306,12 +348,14 @@ public class EmsScriptNode extends ScriptNode {
         if ( method == null ) return false;
         return ( Modifier.isStatic( method.getModifiers() ) );
     }
+
     private static Field[] getAllFields( Class< ? extends Object > cls ) {
         List< Field > fieldList = getListOfAllFields( cls );
         Field[] fieldArr = new Field[ fieldList.size() ];
         fieldList.toArray( fieldArr );
         return fieldArr;
     }
+
     private static List< Field >
             getListOfAllFields( Class< ? extends Object > cls ) {
         if ( cls == null ) return null;
@@ -324,33 +368,32 @@ public class EmsScriptNode extends ScriptNode {
         if ( superFields != null ) fieldList.addAll( superFields );
         return fieldList;
     }
+
     // Check if string has really got something.
     private static boolean isNullOrEmpty( String s ) {
-      return ( s == null || s.isEmpty() ||
-               s.trim().toLowerCase().equals( "null" ) );
+        return ( s == null || s.isEmpty() || s.trim().toLowerCase()
+                                              .equals( "null" ) );
     }
-	
-	public static String getMimeType( String type ) {
-	    Field[] fields = getAllFields( MimetypeMap.class );
-	    for ( Field f : fields ) {
-	        if ( f.getName().startsWith( "MIMETYPE" ) ) {
+
+    public static String getMimeType( String type ) {
+        Field[] fields = getAllFields( MimetypeMap.class );
+        for ( Field f : fields ) {
+            if ( f.getName().startsWith( "MIMETYPE" ) ) {
                 if ( isStatic( f )
                      && f.getName().substring( 8 ).toLowerCase()
                          .contains( type.toLowerCase() ) ) {
-	                try {
+                    try {
                         return (String)f.get( null );
-                    } catch ( IllegalArgumentException e ) {
-                    } catch ( IllegalAccessException e ) {
-                    }
-	            }
-	        }
-	    }
-	    return null;
-	}
-	
+                    } catch ( IllegalArgumentException e ) {} catch ( IllegalAccessException e ) {}
+                }
+            }
+        }
+        return null;
+    }
+
     public long getChecksum( String dataString ) {
         byte[] data = null;
-        data = dataString.getBytes(); //( "UTF-8" );
+        data = dataString.getBytes(); // ( "UTF-8" );
         return getChecksum( data );
     }
 
@@ -361,80 +404,88 @@ public class EmsScriptNode extends ScriptNode {
         cs = checksum.getValue();
         return cs;
     }
-	
-	public Set<EmsScriptNode> toEmsScriptNodeSet( ResultSet resultSet ) {
-	    Set<EmsScriptNode> emsNodeSet = new TreeSet< EmsScriptNode >( new EmsScriptNodeComparator() );
+
+    public Set< EmsScriptNode > toEmsScriptNodeSet( ResultSet resultSet ) {
+        Set< EmsScriptNode > emsNodeSet =
+                new TreeSet< EmsScriptNode >( new EmsScriptNodeComparator() );
         for ( ResultSetRow row : resultSet ) {
             NodeRef ref = row.getNodeRef();
             if ( ref == null ) continue;
-            EmsScriptNode node = new EmsScriptNode( ref, services, response, status );
+            EmsScriptNode node =
+                    new EmsScriptNode( ref, services, response, status );
             emsNodeSet.add( node );
         }
         return emsNodeSet;
-	}
-	
-    public EmsScriptNode findOrCreateArtifact( String name,
-                                               String type,
+    }
+
+    public EmsScriptNode findOrCreateArtifact( String name, String type,
                                                String base64content,
                                                String targetSiteName,
                                                String subfolderName ) {
-        byte[] content = ( base64content == null ) ? 
-                         null :
-                         DatatypeConverter.parseBase64Binary( base64content );
+        byte[] content =
+                ( base64content == null )
+                                         ? null
+                                         : DatatypeConverter.parseBase64Binary( base64content );
         long cs = getChecksum( content );
-        
+
         // see if image already exists by looking up by checksum
         ResultSet existingArtifacts =
                 NodeUtil.findNodeRefsByType( "" + cs, SearchType.CHECKSUM,
                                              services );
         Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
         existingArtifacts.close();
-        
+
         EmsScriptNode matchingNode = null;
 
-        if (nodeSet != null && nodeSet.size() > 0) {
+        if ( nodeSet != null && nodeSet.size() > 0 ) {
             matchingNode = nodeSet.iterator().next();
         }
-        
-        EmsScriptNode targetSiteNode = NodeUtil.getSiteNode( targetSiteName, services, response );
-//        boolean nameMatch = false, subfolderMatch = false, siteMatch = false;
-//        for ( EmsScriptNode art : nodeSet ) {
-//            if ( art == null ) continue;
-//            byte[] artContent = art.getContent() == null ? null : art.getContent().getBytes(); 
-//            if ( artContent == null && content != null ) continue;
-//            // compare content to see if the file already exists
-//            if ( artContent == content || art.getContent().getBytes().equals( content ) ) {
-//                // In case there are multiple files that have identical content,
-//                // match based on name, site, and subfolder.
-//                boolean isBest = false;
-//                if ( matchingNode == null ) isBest = true;
-//                boolean nameMatches = art.getName().equals( name );
-//                if ( !isBest && !nameMatches && nameMatch ) continue;
-//                if ( !isBest && nameMatches && !nameMatch ) isBest = true;
-//                String artSiteName = art.getSiteName();
-//                boolean siteMatches = artSiteName != null && artSiteName.equals(targetSiteName);
-//                if ( !isBest && !siteMatches && siteMatch ) continue;
-//                if ( !isBest && siteMatches && !siteMatch ) isBest = true;
-//                boolean subfolderMatches = art.getDisplayPath().contains( subfolderName );
-//                if ( !isBest && !subfolderMatches && subfolderMatch ) continue;
-//                if ( !isBest && subfolderMatches && !subfolderMatch ) isBest = true;
-//                if ( isBest ) {
-//                    matchingNode = art;
-//                    nameMatch = nameMatches;
-//                    siteMatch = siteMatches;
-//                    subfolderMatch = subfolderMatches;
-//                }
-//            }
-//        }
-        
+
+        EmsScriptNode targetSiteNode =
+                NodeUtil.getSiteNode( targetSiteName, services, response );
+        // boolean nameMatch = false, subfolderMatch = false, siteMatch = false;
+        // for ( EmsScriptNode art : nodeSet ) {
+        // if ( art == null ) continue;
+        // byte[] artContent = art.getContent() == null ? null :
+        // art.getContent().getBytes();
+        // if ( artContent == null && content != null ) continue;
+        // // compare content to see if the file already exists
+        // if ( artContent == content || art.getContent().getBytes().equals(
+        // content ) ) {
+        // // In case there are multiple files that have identical content,
+        // // match based on name, site, and subfolder.
+        // boolean isBest = false;
+        // if ( matchingNode == null ) isBest = true;
+        // boolean nameMatches = art.getName().equals( name );
+        // if ( !isBest && !nameMatches && nameMatch ) continue;
+        // if ( !isBest && nameMatches && !nameMatch ) isBest = true;
+        // String artSiteName = art.getSiteName();
+        // boolean siteMatches = artSiteName != null &&
+        // artSiteName.equals(targetSiteName);
+        // if ( !isBest && !siteMatches && siteMatch ) continue;
+        // if ( !isBest && siteMatches && !siteMatch ) isBest = true;
+        // boolean subfolderMatches = art.getDisplayPath().contains(
+        // subfolderName );
+        // if ( !isBest && !subfolderMatches && subfolderMatch ) continue;
+        // if ( !isBest && subfolderMatches && !subfolderMatch ) isBest = true;
+        // if ( isBest ) {
+        // matchingNode = art;
+        // nameMatch = nameMatches;
+        // siteMatch = siteMatches;
+        // subfolderMatch = subfolderMatches;
+        // }
+        // }
+        // }
+
         if ( matchingNode != null ) return matchingNode;
 
         // create new artifact
 
-        // find subfolder in site or create it 
-        String artifactFolderName = "Artifacts"
-                                    + ( isNullOrEmpty( subfolderName )
-                                        ? "" : "/" + subfolderName );
+        // find subfolder in site or create it
+        String artifactFolderName =
+                "Artifacts"
+                        + ( isNullOrEmpty( subfolderName ) ? ""
+                                                          : "/" + subfolderName );
         // find site; it must exist!
         if ( targetSiteNode == null ) {
             log( "Can't find node for site: " + targetSiteName + "!" );
@@ -451,12 +502,13 @@ public class EmsScriptNode extends ScriptNode {
         }
 
         String artifactId = name + "." + type;
-        EmsScriptNode artifactNode = subfolder.createNode( artifactId, "cm:content" );
-        if (artifactNode == null) {
-          log( "Failed to create new artifact " + artifactId + "!" );
+        EmsScriptNode artifactNode =
+                subfolder.createNode( artifactId, "cm:content" );
+        if ( artifactNode == null ) {
+            log( "Failed to create new artifact " + artifactId + "!" );
             return null;
         }
-        
+
         artifactNode.addAspect( "cm:indexControl" );
         artifactNode.createOrUpdateProperty( "cm:isIndexed", true );
         artifactNode.createOrUpdateProperty( "cm:isContentIndexed", false );
@@ -465,55 +517,67 @@ public class EmsScriptNode extends ScriptNode {
         artifactNode.addAspect( "view:Checksummable" );
         artifactNode.createOrUpdateProperty( "view:cs", cs );
 
-        System.out.println("Creating artifact with indexing: " + artifactNode.getProperty("cm:isIndexed"));
-        ContentWriter writer = services.getContentService().getWriter(
-                artifactNode.getNodeRef(), ContentModel.PROP_CONTENT, true);
-        InputStream contentStream = new ByteArrayInputStream(content);
-        writer.putContent(contentStream);
-        
+        System.out.println( "Creating artifact with indexing: "
+                            + artifactNode.getProperty( "cm:isIndexed" ) );
+        ContentWriter writer =
+                services.getContentService()
+                        .getWriter( artifactNode.getNodeRef(),
+                                    ContentModel.PROP_CONTENT, true );
+        InputStream contentStream = new ByteArrayInputStream( content );
+        writer.putContent( contentStream );
+
         ContentData contentData = writer.getContentData();
-        contentData = ContentData.setMimetype(contentData, getMimeType( type ) );
-        services.getNodeService().setProperty(artifactNode.getNodeRef(), ContentModel.PROP_CONTENT, contentData);
+        contentData =
+                ContentData.setMimetype( contentData, getMimeType( type ) );
+        services.getNodeService().setProperty( artifactNode.getNodeRef(),
+                                               ContentModel.PROP_CONTENT,
+                                               contentData );
         return artifactNode;
     }
-	
-	public String extractAndReplaceImageData( String value ) {
-	    if ( value == null ) return null;
-	    String v = value;
-	    while ( true ) {
-    	    Pattern p = Pattern.compile("(.*)<img\\s*src\\s*=\\s*[\"']data:image/(\\w*);base64,([^\"']*)[\"'][^>]*>(.*)");
-    	    Matcher m = p.matcher( v );
-    	    if ( !m.matches() ) {
-    	    		break;
-    	    } else {
-    	        if ( m.groupCount() != 4 ) {
-    	            log( "Expected 4 match groups, got " + m.groupCount() + "! " + m );
-    	            break;
-    	        }
-    	        String extension = m.group(2);
-    	        String content = m.group(3);
+
+    public String extractAndReplaceImageData( String value ) {
+        if ( value == null ) return null;
+        String v = value;
+        while ( true ) {
+            Pattern p =
+                    Pattern.compile( "(.*)<img\\s*src\\s*=\\s*[\"']data:image/(\\w*);base64,([^\"']*)[\"'][^>]*>(.*)" );
+            Matcher m = p.matcher( v );
+            if ( !m.matches() ) {
+                break;
+            } else {
+                if ( m.groupCount() != 4 ) {
+                    log( "Expected 4 match groups, got " + m.groupCount()
+                         + "! " + m );
+                    break;
+                }
+                String extension = m.group( 2 );
+                String content = m.group( 3 );
                 String name = "img_" + System.currentTimeMillis();
-                EmsScriptNode artNode = findOrCreateArtifact( name, extension, content, getSiteName(), "images" );
+                EmsScriptNode artNode =
+                        findOrCreateArtifact( name, extension, content,
+                                              getSiteName(), "images" );
                 if ( artNode == null ) {
                     log( "Failed to pull out image data for value! " + value );
                     break;
                 }
-                
+
                 String url = artNode.getUrl();
-    	        String link = "<img src=\"" + url + "\"/>";
-    	        link = link.replace("/d/d/", "/alfresco/service/api/node/content/");
-    	        v = m.group( 1 ) + link + m.group( 4 );
-    	    }
-	    }
+                String link = "<img src=\"" + url + "\"/>";
+                link =
+                        link.replace( "/d/d/",
+                                      "/alfresco/service/api/node/content/" );
+                v = m.group( 1 ) + link + m.group( 4 );
+            }
+        }
         return v;
     }
 
-	public String getSiteTitle() {
-		EmsScriptNode siteNode = getSiteNode();
-		return (String) siteNode.getProperty(Acm.CM_TITLE);
-	}
+    public String getSiteTitle() {
+        EmsScriptNode siteNode = getSiteNode();
+        return (String)siteNode.getProperty( Acm.CM_TITLE );
+    }
 
-	public String getSiteName() {
+    public String getSiteName() {
         if ( siteName == null ) {
             EmsScriptNode siteNode = getSiteNode();
             if ( siteNode != null ) siteName = siteNode.getName();
@@ -523,256 +587,300 @@ public class EmsScriptNode extends ScriptNode {
 
     /**
      * Checks and updates properties that have multiple values
-     * @param type      Short name of the content model property to be updated
-     * @param array     New list of values to update
-     * @param valueType The value type (needed for casting and making things generic)
-     * @return          True if values updated/create, false if unchanged
+     * 
+     * @param type
+     *            Short name of the content model property to be updated
+     * @param array
+     *            New list of values to update
+     * @param valueType
+     *            The value type (needed for casting and making things generic)
+     * @return True if values updated/create, false if unchanged
      * @throws JSONException
      */
-    public <T extends Serializable> boolean createOrUpdatePropertyValues(String type, JSONArray array) throws JSONException {
-        ArrayList<T> values = new ArrayList<T>();
-        for (int ii = 0; ii < array.length(); ii++) {
+    public
+            < T extends Serializable >
+            boolean
+            createOrUpdatePropertyValues( String type, JSONArray array )
+                                                                        throws JSONException {
+        ArrayList< T > values = new ArrayList< T >();
+        for ( int ii = 0; ii < array.length(); ii++ ) {
             @SuppressWarnings( "unchecked" )
-            T value = (T)array.get(ii);
+            T value = (T)array.get( ii );
             if ( value instanceof String ) {
                 @SuppressWarnings( "unchecked" )
                 T t = (T)extractAndReplaceImageData( (String)value );
                 value = t;
             }
-            values.add(value);
+            values.add( value );
         }
-        
+
         @SuppressWarnings( "unchecked" )
-        ArrayList<T> oldValues = (ArrayList<T>) getProperty(type);
-        if (!checkIfListsEquivalent(oldValues, values)) {
-            setProperty(type, values);
+        ArrayList< T > oldValues = (ArrayList< T >)getProperty( type );
+        if ( !checkIfListsEquivalent( oldValues, values ) ) {
+            setProperty( type, values );
         } else {
             return false;
         }
-        
+
         return true;
     }
 
     /**
-	 * Checks and updates properties that have multiple values
-	 * @param type		Short name of the content model property to be updated
-	 * @param array		New list of values to update
-	 * @param valueType	The value type (needed for casting and making things generic)
-	 * @return			True if values updated/create, false if unchanged
-	 * @throws JSONException
-	 */
-	public <T extends Serializable> boolean createOrUpdatePropertyValues(String type, JSONArray array, T valueType) throws JSONException {
-		ArrayList<T> values = new ArrayList<T>();
-		for (int ii = 0; ii < array.length(); ii++) {
+     * Checks and updates properties that have multiple values
+     * 
+     * @param type
+     *            Short name of the content model property to be updated
+     * @param array
+     *            New list of values to update
+     * @param valueType
+     *            The value type (needed for casting and making things generic)
+     * @return True if values updated/create, false if unchanged
+     * @throws JSONException
+     */
+    public < T extends Serializable > boolean
+            createOrUpdatePropertyValues( String type, JSONArray array,
+                                          T valueType ) throws JSONException {
+        ArrayList< T > values = new ArrayList< T >();
+        for ( int ii = 0; ii < array.length(); ii++ ) {
             @SuppressWarnings( "unchecked" )
-		    T value = (T)array.get(ii);
+            T value = (T)array.get( ii );
             if ( value instanceof String ) {
                 @SuppressWarnings( "unchecked" )
                 T t = (T)extractAndReplaceImageData( (String)value );
                 value = t;
             }
-			values.add(value);
-		}
-		
+            values.add( value );
+        }
+
         @SuppressWarnings( "unchecked" )
-		ArrayList<T> oldValues = (ArrayList<T>) getProperty(type);
-		if (!checkIfListsEquivalent(oldValues, values)) {
-			setProperty(type, values);
-		} else {
-			return false;
-		}
-		
-		return true;
-	}
-	
-	/**
-	 * Utility to compare lists of node refs to one another
-	 * @param x	First list to compare
-	 * @param y	Second list to compare
-	 * @return	true if same, false otherwise
-	 */
-	public static <T extends Serializable> boolean checkIfListsEquivalent(ArrayList<T> x, ArrayList<T> y) {
-		if (x == null || y == null) {
-			return false;
-		}
-		if (x.size() != y.size()) {
-			return false;
-		}
-		for (int ii = 0; ii < x.size(); ii++) {
-			if (!x.get(ii).equals(ii)) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	
-	/**
-	 * Override createNode to return an EmsScriptNode
-	 * @param name     cm:name of node
-	 * @param type     Alfresco Content Model type of node to create
-	 * @return         created child EmsScriptNode
-	 */
-	@Override
-	public EmsScriptNode createNode(String name, String type) {
-		EmsScriptNode result = null;
-//		Date start = new Date(), end; 
+        ArrayList< T > oldValues = (ArrayList< T >)getProperty( type );
+        if ( !checkIfListsEquivalent( oldValues, values ) ) {
+            setProperty( type, values );
+        } else {
+            return false;
+        }
 
-//		if ( type == null ) {
-//		    type = "sysml:Element";
-//		}
-		if (!useFoundationalApi) {
-			result = new EmsScriptNode(super.createNode(name, type).getNodeRef(), services, response);
-		} else {
-			Map<QName, Serializable> props = new HashMap<QName, Serializable>(1, 1.0f);
-			// don't forget to set the name
-			props.put(ContentModel.PROP_NAME, name);
+        return true;
+    }
 
-			QName typeQName = createQName(type);
-			if (typeQName != null) {
-			    try {
-			    ChildAssociationRef assoc = 
-			            services.getNodeService().createNode(nodeRef,
-			                                                 ContentModel.ASSOC_CONTAINS,
-			                                                 QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI,
-			                                                                   QName.createValidLocalName(name)),
-			                                                                   createQName(type), props);
-                result = new EmsScriptNode(assoc.getChildRef(), services, response);
-	            } catch ( Exception e ) {
-	                System.out.println( "Got exception in "
-	                                    + "createNode(name=" + name
-	                                    + ", type=" + type
-	                                    + ") for EmsScriptNode(" + this
-	                                    + ") calling createNode(nodeRef=" + nodeRef
-	                                    + ", . . .)" );
-	                e.printStackTrace();
-	            }
+    /**
+     * Utility to compare lists of node refs to one another
+     * 
+     * @param x
+     *            First list to compare
+     * @param y
+     *            Second list to compare
+     * @return true if same, false otherwise
+     */
+    public static < T extends Serializable > boolean
+            checkIfListsEquivalent( ArrayList< T > x, ArrayList< T > y ) {
+        if ( x == null || y == null ) {
+            return false;
+        }
+        if ( x.size() != y.size() ) {
+            return false;
+        }
+        for ( int ii = 0; ii < x.size(); ii++ ) {
+            if ( !x.get( ii ).equals( ii ) ) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-			} else {
-			    log("Could not find type "  + type);
-			}
-		}
-		
-//		end = new Date(); System.out.println("\tcreateNode: " + (end.getTime()-start.getTime()));
-		return result;
-	}
+    /**
+     * Override createNode to return an EmsScriptNode
+     * 
+     * @param name
+     *            cm:name of node
+     * @param type
+     *            Alfresco Content Model type of node to create
+     * @return created child EmsScriptNode
+     */
+    @Override
+    public EmsScriptNode createNode( String name, String type ) {
+        EmsScriptNode result = null;
+        // Date start = new Date(), end;
 
-	/**
-	 * Return the first AssociationRef of a particular type
-	 * @param type	Short name for type to filter on
-	 * @return
-	 */
-	public EmsScriptNode getFirstAssociationByType(String type) {
-		List<AssociationRef> assocs = services.getNodeService().getTargetAssocs(nodeRef, RegexQNamePattern.MATCH_ALL);
-		if (assocs != null) {
-			// check all associations to see if there's a matching association
-			for (AssociationRef ref: assocs) {
-				if (ref.getTypeQName().equals(createQName(type))) {
-					return new EmsScriptNode(ref.getTargetRef(), services, response);
-				}
-			}
-		}
-		return null;
-	}
+        // if ( type == null ) {
+        // type = "sysml:Element";
+        // }
+        if ( !useFoundationalApi ) {
+            result =
+                    new EmsScriptNode( super.createNode( name, type )
+                                            .getNodeRef(), services, response );
+        } else {
+            Map< QName, Serializable > props =
+                    new HashMap< QName, Serializable >( 1, 1.0f );
+            // don't forget to set the name
+            props.put( ContentModel.PROP_NAME, name );
 
-	/**
-	 * Get list of ChildAssociationRefs
-	 * @return
-	 */
-	public List<ChildAssociationRef> getChildAssociationRefs() {
-		return services.getNodeService().getChildAssocs(nodeRef);
-	}
-	
-	
-	@Override
-	public String getName() {
-		return (String)getProperty(Acm.CM_NAME);
-	}
+            QName typeQName = createQName( type );
+            if ( typeQName != null ) {
+                try {
+                    ChildAssociationRef assoc =
+                            services.getNodeService()
+                                    .createNode( nodeRef,
+                                                 ContentModel.ASSOC_CONTAINS,
+                                                 QName.createQName( NamespaceService.CONTENT_MODEL_1_0_URI,
+                                                                    QName.createValidLocalName( name ) ),
+                                                 createQName( type ), props );
+                    result =
+                            new EmsScriptNode( assoc.getChildRef(), services,
+                                               response );
+                } catch ( Exception e ) {
+                    System.out.println( "Got exception in "
+                                        + "createNode(name=" + name + ", type="
+                                        + type + ") for EmsScriptNode(" + this
+                                        + ") calling createNode(nodeRef="
+                                        + nodeRef + ", . . .)" );
+                    e.printStackTrace();
+                }
 
+            } else {
+                log( "Could not find type " + type );
+            }
+        }
 
-	@Override
-	public EmsScriptNode getParent() {
-		return new EmsScriptNode(super.getParent().getNodeRef(), services, response);
-	}
+        // end = new Date(); System.out.println("\tcreateNode: " +
+        // (end.getTime()-start.getTime()));
+        return result;
+    }
 
+    /**
+     * Return the first AssociationRef of a particular type
+     * 
+     * @param type
+     *            Short name for type to filter on
+     * @return
+     */
+    public EmsScriptNode getFirstAssociationByType( String type ) {
+        List< AssociationRef > assocs =
+                services.getNodeService()
+                        .getTargetAssocs( nodeRef, RegexQNamePattern.MATCH_ALL );
+        if ( assocs != null ) {
+            // check all associations to see if there's a matching association
+            for ( AssociationRef ref : assocs ) {
+                if ( ref.getTypeQName().equals( createQName( type ) ) ) {
+                    return new EmsScriptNode( ref.getTargetRef(), services,
+                                              response );
+                }
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * Get the property of the specified type
-	 * @param acmType	Short name of property to get
-	 * @return
-	 */
-	public Object getProperty(String acmType) {
-		if (useFoundationalApi) {
-			return services.getNodeService().getProperty(nodeRef, createQName(acmType));
-		} else {
-			return getProperties().get(acmType);
-		}
-	}
-	
-//	@Override
-//    public Map<String, Object> getProperties()
-//    {
-//		
-//        Map<QName, Serializable> props =  services.getNodeService().getProperties(nodeRef);
-//        // TODO replace w/ this.properties after no longer subclassing, maybe use QNameMap also
-//        Map<String, Object> finalProps =  new HashMap<String, Object>(); 
-//        
-//        // Create map of string representation of QName to the value of the property:
-//        for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
-//        	finalProps.put(entry.getKey().toString(), entry.getValue());
-//        }
-//                
-//        return finalProps;
-//    }
-	
+    /**
+     * Get list of ChildAssociationRefs
+     * 
+     * @return
+     */
+    public List< ChildAssociationRef > getChildAssociationRefs() {
+        return services.getNodeService().getChildAssocs( nodeRef );
+    }
+
+    @Override
+    public String getName() {
+        return (String)getProperty( Acm.CM_NAME );
+    }
+
+    @Override
+    public EmsScriptNode getParent() {
+        return new EmsScriptNode( super.getParent().getNodeRef(), services,
+                                  response );
+    }
+
     /**
      * Get the property of the specified type
-     * @param acmType   Short name of property to get
+     * 
+     * @param acmType
+     *            Short name of property to get
+     * @return
+     */
+    public Object getProperty( String acmType ) {
+        if ( useFoundationalApi ) {
+            return services.getNodeService()
+                           .getProperty( nodeRef, createQName( acmType ) );
+        } else {
+            return getProperties().get( acmType );
+        }
+    }
+
+    // @Override
+    // public Map<String, Object> getProperties()
+    // {
+    //
+    // Map<QName, Serializable> props =
+    // services.getNodeService().getProperties(nodeRef);
+    // // TODO replace w/ this.properties after no longer subclassing, maybe use
+    // QNameMap also
+    // Map<String, Object> finalProps = new HashMap<String, Object>();
+    //
+    // // Create map of string representation of QName to the value of the
+    // property:
+    // for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
+    // finalProps.put(entry.getKey().toString(), entry.getValue());
+    // }
+    //
+    // return finalProps;
+    // }
+
+    /**
+     * Get the property of the specified type
+     * 
+     * @param acmType
+     *            Short name of property to get
      * @return
      */
     @Override
-    public Map<String, Object> getProperties() {
-        if (useFoundationalApi) {
-            return Utils.toMap( services.getNodeService().getProperties( nodeRef ),
+    public Map< String, Object > getProperties() {
+        if ( useFoundationalApi ) {
+            return Utils.toMap( services.getNodeService()
+                                        .getProperties( nodeRef ),
                                 String.class, Object.class );
         } else {
             return getProperties();
         }
     }
 
-    
-	public StringBuffer getResponse() {
-		return response;
-	}
+    public StringBuffer getResponse() {
+        return response;
+    }
 
+    public Status getStatus() {
+        return status;
+    }
 
-	public Status getStatus() {
-		return status;
-	}
+    /**
+     * Append onto the response for logging purposes
+     * 
+     * @param msg
+     *            Message to be appened to response TODO: fix logger for
+     *            EmsScriptNode
+     */
+    public void log( String msg ) {
+        // if (response != null) {
+        // response.append(msg + "\n");
+        // }
+    }
 
-	/**
-	 * Append onto the response for logging purposes
-	 * @param msg	Message to be appened to response
-	 * TODO: fix logger for EmsScriptNode
-	 */
-	public void log(String msg) {
-//		if (response != null) {
-//			response.append(msg + "\n");
-//		}
-	}
-
-	
-	/**
-	 * Genericized function to set property for non-collection types
-	 * @param acmType  Property short name for alfresco content model type 
-	 * @param value    Value to set property to
-	 */
-	public <T extends Serializable > void setProperty(String acmType, T value) {
-	    log( "setProperty(acmType=" + acmType + ", value=" + value + ")" );
-		if (useFoundationalApi) {
-		    try {
-		        services.getNodeService().setProperty(nodeRef, createQName(acmType), value);
-		    } catch ( Exception e ) {
+    /**
+     * Genericized function to set property for non-collection types
+     * 
+     * @param acmType
+     *            Property short name for alfresco content model type
+     * @param value
+     *            Value to set property to
+     */
+    public < T extends Serializable > void
+            setProperty( String acmType, T value ) {
+        log( "setProperty(acmType=" + acmType + ", value=" + value + ")" );
+        if ( useFoundationalApi ) {
+            try {
+                services.getNodeService().setProperty( nodeRef,
+                                                       createQName( acmType ),
+                                                       value );
+            } catch ( Exception e ) {
                 System.out.println( "Got exception in "
                                     + "setProperty(acmType=" + acmType
                                     + ", value=" + value
@@ -780,80 +888,81 @@ public class EmsScriptNode extends ScriptNode {
                                     + " calling setProperty(nodeRef=" + nodeRef
                                     + ", " + acmType + ", " + value + ")" );
                 e.printStackTrace();
-		    }
-		} else {
-			getProperties().put(acmType, value);
-			save();
-		}
-	}
-	
-	
-	public void setResponse(StringBuffer response) {
-		this.response = response;
-	}
+            }
+        } else {
+            getProperties().put( acmType, value );
+            save();
+        }
+    }
 
-	
-	public void setStatus(Status status) {
-		this.status = status;
-	}
-	
-	/**
+    public void setResponse( StringBuffer response ) {
+        this.response = response;
+    }
+
+    public void setStatus( Status status ) {
+        this.status = status;
+    }
+
+    /**
      * @return the storeRef
      */
     public static StoreRef getStoreRef() {
         return NodeUtil.SEARCH_STORE;
     }
 
-
     /**
-	 * Gets the SysML qualified name for an object - if not SysML, won't return anything
-	 * @return SysML qualified name (e.g., sysml:name qualified)
-	 */
-	public String getSysmlQName() {
+     * Gets the SysML qualified name for an object - if not SysML, won't return
+     * anything
+     * 
+     * @return SysML qualified name (e.g., sysml:name qualified)
+     */
+    public String getSysmlQName() {
         StringBuffer qname = new StringBuffer();
 
         NodeService nodeService = services.getNodeService();
-        Path path = nodeService.getPath(this.getNodeRef());
-        Iterator<Path.Element> pathElements = path.iterator();
-        while (pathElements.hasNext()) {
+        Path path = nodeService.getPath( this.getNodeRef() );
+        Iterator< Path.Element > pathElements = path.iterator();
+        while ( pathElements.hasNext() ) {
             Path.Element pathElement = pathElements.next();
-            if (pathElement instanceof ChildAssocElement) {
-                   ChildAssociationRef elementRef = ((ChildAssocElement)pathElement).getRef();
-                    if (elementRef.getParentRef() != null)
-                    {
-                        Serializable nameProp = null;
-                        nameProp = nodeService.getProperty(elementRef.getChildRef(), QName.createQName(Acm.ACM_NAME, services.getNamespaceService()));
-                        if (nameProp != null) {
-                            // use the name property if we are allowed access to it
-                            qname.append("/" + nameProp.toString());
-                        }
+            if ( pathElement instanceof ChildAssocElement ) {
+                ChildAssociationRef elementRef =
+                        ( (ChildAssocElement)pathElement ).getRef();
+                if ( elementRef.getParentRef() != null ) {
+                    Serializable nameProp = null;
+                    nameProp =
+                            nodeService.getProperty( elementRef.getChildRef(),
+                                                     QName.createQName( Acm.ACM_NAME,
+                                                                        services.getNamespaceService() ) );
+                    if ( nameProp != null ) {
+                        // use the name property if we are allowed access to it
+                        qname.append( "/" + nameProp.toString() );
                     }
+                }
             }
         }
 
         return qname.toString();
-	}
-	
+    }
 
-	/**
-	 * Get the children views as a JSONArray
-	 * @return
-	 */
-	public JSONArray getChildrenViewsJSONArray() {
-	    JSONArray childrenViews = new JSONArray();
+    /**
+     * Get the children views as a JSONArray
+     * 
+     * @return
+     */
+    public JSONArray getChildrenViewsJSONArray() {
+        JSONArray childrenViews = new JSONArray();
         try {
-            Object property = this.getProperty(Acm.ACM_CHILDREN_VIEWS);
-            if (property != null) {
-                childrenViews = new JSONArray(property.toString());
+            Object property = this.getProperty( Acm.ACM_CHILDREN_VIEWS );
+            if ( property != null ) {
+                childrenViews = new JSONArray( property.toString() );
             }
-        } catch (JSONException e) {
+        } catch ( JSONException e ) {
             e.printStackTrace();
         }
 
-	    return childrenViews;
-	}
-	
-	
+        return childrenViews;
+    }
+
     public String toString() {
         try {
             return "" + toJSONObject();
@@ -866,28 +975,37 @@ public class EmsScriptNode extends ScriptNode {
 
     /**
      * Convert node into our custom JSONObject with all possible keys
-     * @return                     JSONObject serialization of node
+     * 
+     * @return JSONObject serialization of node
      */
-	public JSONObject toJSONObject() throws JSONException {
-	    return toJSONObject(Acm.JSON_TYPE_FILTER.ALL);
-	}
+    public JSONObject toJSONObject() throws JSONException {
+        return toJSONObject( Acm.JSON_TYPE_FILTER.ALL );
+    }
 
-	
     /**
-     * Convert node into our custom JSONObject, showing qualifiedName and editable keys
-     * @param renderType           Type of JSONObject to render, this filters what keys are in JSONObject
-     * @return                     JSONObject serialization of node
+     * Convert node into our custom JSONObject, showing qualifiedName and
+     * editable keys
+     * 
+     * @param renderType
+     *            Type of JSONObject to render, this filters what keys are in
+     *            JSONObject
+     * @return JSONObject serialization of node
      */
-	public JSONObject toJSONObject(Acm.JSON_TYPE_FILTER renderType) throws JSONException {
-	    return toJSONObject(renderType, true, true);
-	}
-	
-	public JSONArray nodeRefsToJSONArray( Collection<?> nodeRefs ) throws JSONException {
+    public JSONObject
+            toJSONObject( Acm.JSON_TYPE_FILTER renderType )
+                                                           throws JSONException {
+        return toJSONObject( renderType, true, true );
+    }
+
+    public JSONArray
+            nodeRefsToJSONArray( Collection< ? > nodeRefs )
+                                                           throws JSONException {
         JSONArray jarr = new JSONArray();
         for ( Object o : nodeRefs ) {
             if ( !( o instanceof NodeRef ) ) {
                 jarr.put( "" + o );
-                Debug.error( false, "object is not a nodeRef, adding to json: " + o );
+                Debug.error( true, "object is not a nodeRef, adding to json: "
+                                   + o );
             } else {
                 NodeRef ref = (NodeRef)o;
                 EmsScriptNode node = new EmsScriptNode( ref, services );
@@ -895,225 +1013,286 @@ public class EmsScriptNode extends ScriptNode {
                 if ( sysmlId != null ) {
                     jarr.put( "" + sysmlId );
                 } else {
-                    Debug.error( false, "elementValue has no sysml id: " + ref );
+                    Debug.error( true, "elementValue has no sysml id: " + ref );
                     jarr.put( "" + ref.getId() );
                 }
             }
         }
         return jarr;
-	}
-	
-	/**
-	 * Convert node into our custom JSONObject
-	 * @param renderType           Type of JSONObject to render, this filters what keys are in JSONObject
-	 * @param showQualifiedName    If true, displays qualifiedName key
-	 * @param showEditable         If true, displays editable key
-	 * @return                     JSONObject serialization of node
-	 */
-	public JSONObject toJSONObject(Acm.JSON_TYPE_FILTER renderType, boolean showQualifiedName, boolean showEditable) throws JSONException {
-	    JSONObject element = new JSONObject();
+    }
 
-	    //System.out.println("toJSONObject(): "+this.getProperties());
-	    // add in all the properties
-        for (String acmType: Acm.getACM2JSON().keySet()) {
-            Object elementValue = this.getProperty(acmType);
-            if (elementValue != null) {
-                String jsonType = Acm.getACM2JSON().get(acmType);
-                if (Acm.JSON_FILTER_MAP.get(renderType).contains(jsonType)) {
-                    if (Acm.JSON_NODEREFS.contains(jsonType)) {
-                        if (!Acm.JSON_ARRAYS.contains(jsonType)) {
+    /**
+     * Convert node into our custom JSONObject
+     * 
+     * @param renderType
+     *            Type of JSONObject to render, this filters what keys are in
+     *            JSONObject
+     * @param showQualifiedName
+     *            If true, displays qualifiedName key
+     * @param showEditable
+     *            If true, displays editable key
+     * @return JSONObject serialization of node
+     */
+    public JSONObject toJSONObject( Acm.JSON_TYPE_FILTER renderType,
+                                    boolean showQualifiedName,
+                                    boolean showEditable ) throws JSONException {
+        JSONObject element = new JSONObject();
+
+        // System.out.println("toJSONObject(): "+this.getProperties());
+        // add in all the properties
+        for ( String acmType : Acm.getACM2JSON().keySet() ) {
+            Object elementValue = this.getProperty( acmType );
+            if ( elementValue != null ) {
+                String jsonType = Acm.getACM2JSON().get( acmType );
+                if ( Acm.JSON_FILTER_MAP.get( renderType ).contains( jsonType ) ) {
+                    if ( Acm.JSON_NODEREFS.contains( jsonType ) ) {
+                        if ( !Acm.JSON_ARRAYS.contains( jsonType ) ) {
                             elementValue = Utils.newList( elementValue );
                         }
                         if ( elementValue instanceof Collection ) {
                             Collection< ? > c = (Collection< ? >)elementValue;
-                            JSONArray jarr = //new JSONArray();
-                                    nodeRefsToJSONArray(c);
-                            element.put(jsonType, jarr);
+                            JSONArray jarr = // new JSONArray();
+                                    nodeRefsToJSONArray( c );
+                            element.put( jsonType, jarr );
                         } else {
-                            Debug.error( "Unexpected elementValue " + elementValue );
+                            Debug.error( true, "Unexpected elementValue "
+                                               + elementValue );
                         }
-                    } else if (Acm.JSON_ARRAYS.contains(jsonType)) {
+                    } else if ( Acm.JSON_ARRAYS.contains( jsonType ) ) {
                         String elementString = elementValue.toString();
                         try {
-                        //if ( elementString != null ) {
-                            element.put(jsonType, new JSONArray(elementString));
-                        //}
-                        } catch (Exception e ) {
-                            //throw e;
+                            // if ( elementString != null ) {
+                            element.put( jsonType,
+                                         new JSONArray( elementString ) );
+                            // }
+                        } catch ( Exception e ) {
+                            // throw e;
                         }
                     } else {
-                        if (elementValue instanceof String) {
-                            String elementString = (String) elementValue;
-                            element.put(jsonType, elementString);
-                        } else if (elementValue instanceof Date) {
-                            element.put(jsonType, getIsoTime((Date)elementValue));
+                        if ( elementValue instanceof String ) {
+                            String elementString = (String)elementValue;
+                            element.put( jsonType, elementString );
+                        } else if ( elementValue instanceof Date ) {
+                            element.put( jsonType,
+                                         getIsoTime( (Date)elementValue ) );
                         } else {
-                            element.put(jsonType, elementValue);
+                            element.put( jsonType, elementValue );
                         }
                     } // end if (Acm.JSON_ARRAYS.contains(jsonType)) {
-                } // end if (Acm.JSON_FILTER_MAP.get(renderType).contains(jsonType)) {
+                } // end if
+                  // (Acm.JSON_FILTER_MAP.get(renderType).contains(jsonType)) {
             } // end if (elementValue != null) {
         } // end for (String acmType: Acm.ACM2JSON.keySet()) {
 
         // add in content type
-        if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_TYPE)) {
-            element.put(Acm.JSON_TYPE,  this.getQNameType().getLocalName());
+        if ( Acm.JSON_FILTER_MAP.get( renderType ).contains( Acm.JSON_TYPE ) ) {
+            element.put( Acm.JSON_TYPE, this.getQNameType().getLocalName() );
         }
-        
+
         // add in property type(s)
-        if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_PROPERTY_TYPE)) {
-            JSONArray propertyTypes = getTargetAssocsIdsByType(Acm.ACM_PROPERTY_TYPE);
-            if (propertyTypes.length() > 0) {
-                element.put(Acm.JSON_PROPERTY_TYPE, propertyTypes.get(0));
+        if ( Acm.JSON_FILTER_MAP.get( renderType )
+                                .contains( Acm.JSON_PROPERTY_TYPE ) ) {
+            JSONArray propertyTypes =
+                    getTargetAssocsIdsByType( Acm.ACM_PROPERTY_TYPE );
+            if ( propertyTypes.length() > 0 ) {
+                element.put( Acm.JSON_PROPERTY_TYPE, propertyTypes.get( 0 ) );
             }
         }
 
         // add in value and value types
-        if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_VALUE_TYPE)) {
-            Object valueType = this.getProperty(Acm.ACM_VALUE_TYPE);
-            if (valueType != null) {
-                if (valueType.equals(Acm.JSON_ELEMENT_VALUE)) {
-                    @SuppressWarnings("unchecked")
-                    List<NodeRef> elementValue = (List<NodeRef>) this.getProperty(Acm.ACM_ELEMENT_VALUE);
-                    if (elementValue != null) {
-                        JSONArray array = //new JSONArray();
+        Object value = this.getProperty( Acm.ACM_VALUE );
+        if ( Acm.JSON_FILTER_MAP.get( renderType )
+                                .contains( Acm.JSON_VALUE_TYPE )
+             || Acm.JSON_FILTER_MAP.get( renderType ).contains( Acm.JSON_VALUE ) ) {
+            Object valueType = this.getProperty( Acm.ACM_VALUE_TYPE );
+            if ( valueType == null && value != null ) {
+
+                // This is the case for the new ValueSpecification.
+
+                if ( value instanceof NodeRef ) {
+                    value = Utils.newList( value );
+                }
+                if ( value instanceof Collection ) {
+                    Collection< ? > c = (Collection< ? >)value;
+                    JSONArray jarr = nodeRefsToJSONArray( c );
+                    element.put( Acm.JSON_VALUE, jarr );
+                } else {
+                    Debug.error( true, "Unexpected elementValue: " + value );
+                }
+
+            } else if ( valueType != null ) {
+
+                // This is the case for the old treatment of property values.
+
+                if ( valueType.equals( Acm.JSON_ELEMENT_VALUE ) ) {
+                    @SuppressWarnings( "unchecked" )
+                    List< NodeRef > elementValue =
+                            (List< NodeRef >)this.getProperty( Acm.ACM_ELEMENT_VALUE );
+                    if ( elementValue != null ) {
+                        JSONArray array = // new JSONArray();
                                 nodeRefsToJSONArray( elementValue );
-                        element.put("value", array);
+                        element.put( "value", array );
                     }
                 } else {
-                    Object property = this.getProperty(Acm.JSON2ACM.get((String) valueType));
-                    if (property != null) {
-                        element.put("value",  property);
+                    Object property =
+                            this.getProperty( Acm.JSON2ACM.get( (String)valueType ) );
+                    if ( property != null ) {
+                        element.put( "value", property );
                     }
                 }
-                element.put(Acm.JSON_VALUE_TYPE,  valueType);
+                element.put( Acm.JSON_VALUE_TYPE, valueType );
             } // if (valueType != null) {
-        } // if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_VALUE_TYPE)) {
-        
+        } // if
+          // (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_VALUE_TYPE))
+          // {
+
         // add in owner
-        if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_OWNER)) {
+        if ( Acm.JSON_FILTER_MAP.get( renderType ).contains( Acm.JSON_OWNER ) ) {
             EmsScriptNode parent = this.getParent();
-            if (parent != null) {
-                element.put(Acm.JSON_OWNER,  parent.getName().replace("_pkg", ""));
+            if ( parent != null ) {
+                element.put( Acm.JSON_OWNER,
+                             parent.getName().replace( "_pkg", "" ) );
             }
         }
 
         // add comment
-        if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_COMMENT)){ 
-            JSONArray annotatedElements = getTargetAssocsIdsByType(Acm.ACM_ANNOTATED_ELEMENTS);
-            if (annotatedElements.length() > 0) {
-                element.put(Acm.JSON_ANNOTATED_ELEMENTS, annotatedElements);
+        if ( Acm.JSON_FILTER_MAP.get( renderType ).contains( Acm.JSON_COMMENT ) ) {
+            JSONArray annotatedElements =
+                    getTargetAssocsIdsByType( Acm.ACM_ANNOTATED_ELEMENTS );
+            if ( annotatedElements.length() > 0 ) {
+                element.put( Acm.JSON_ANNOTATED_ELEMENTS, annotatedElements );
             }
         }
-        
+
         // show qualified name if toggled
-        if (showQualifiedName) {
-            element.put("qualifiedName",  this.getSysmlQName());
+        if ( showQualifiedName ) {
+            element.put( "qualifiedName", this.getSysmlQName() );
         }
-        
+
         // show editable if toggled
-        if (showEditable) {
-            element.put("editable", this.hasPermission(PermissionService.WRITE));
+        if ( showEditable ) {
+            element.put( "editable",
+                         this.hasPermission( PermissionService.WRITE ) );
         }
 
         String elementString = element.toString();
-        elementString = fixArtifactUrls(elementString, true);
-        element = new JSONObject(elementString);
- 
-	    return element;
-	}
-	
-	public JSONArray getTargetAssocsIdsByType(String acmType) {
-	    boolean isSource = false;
-	    return getAssocsIdsByDirection(acmType, isSource);
-	}
+        elementString = fixArtifactUrls( elementString, true );
+        element = new JSONObject( elementString );
 
-    public JSONArray getSourceAssocsIdsByType(String acmType) {
+        return element;
+    }
+
+    public JSONArray getTargetAssocsIdsByType( String acmType ) {
+        boolean isSource = false;
+        return getAssocsIdsByDirection( acmType, isSource );
+    }
+
+    public JSONArray getSourceAssocsIdsByType( String acmType ) {
         boolean isSource = true;
-        return getAssocsIdsByDirection(acmType, isSource);
+        return getAssocsIdsByDirection( acmType, isSource );
     }
 
     /**
      * Returns a JSONArray of the sysml:ids of the found associations
+     * 
      * @param acmType
      * @param isSource
-     * @return  JSONArray of the sysml:ids found
+     * @return JSONArray of the sysml:ids found
      */
-	protected JSONArray getAssocsIdsByDirection(String acmType, boolean isSource) {
+    protected JSONArray getAssocsIdsByDirection( String acmType,
+                                                 boolean isSource ) {
         JSONArray array = new JSONArray();
-        List<AssociationRef> assocs;
-        if (isSource) {
-            assocs = services.getNodeService().getSourceAssocs(nodeRef, RegexQNamePattern.MATCH_ALL);
+        List< AssociationRef > assocs;
+        if ( isSource ) {
+            assocs =
+                    services.getNodeService()
+                            .getSourceAssocs( nodeRef,
+                                              RegexQNamePattern.MATCH_ALL );
         } else {
-            assocs = services.getNodeService().getTargetAssocs(nodeRef, RegexQNamePattern.MATCH_ALL);
+            assocs =
+                    services.getNodeService()
+                            .getTargetAssocs( nodeRef,
+                                              RegexQNamePattern.MATCH_ALL );
         }
-        for (AssociationRef aref: assocs) {
-            QName typeQName = createQName(acmType); 
-            if (aref.getTypeQName().equals(typeQName)) {
+        for ( AssociationRef aref : assocs ) {
+            QName typeQName = createQName( acmType );
+            if ( aref.getTypeQName().equals( typeQName ) ) {
                 NodeRef targetRef;
-                if (isSource) {
+                if ( isSource ) {
                     targetRef = aref.getSourceRef();
                 } else {
                     targetRef = aref.getTargetRef();
                 }
-                array.put(services.getNodeService().getProperty(targetRef, createQName(Acm.ACM_ID)));
+                array.put( services.getNodeService()
+                                   .getProperty( targetRef,
+                                                 createQName( Acm.ACM_ID ) ) );
             }
         }
-        
-        return array;
-	}
-	
 
-    public List<EmsScriptNode> getTargetAssocsNodesByType(String acmType) {
-        boolean isSource = false;
-        return getAssocsNodesByDirection(acmType, isSource);
+        return array;
     }
 
-    public List<EmsScriptNode> getSourceAssocsNodesByType(String acmType) {
+    public List< EmsScriptNode > getTargetAssocsNodesByType( String acmType ) {
+        boolean isSource = false;
+        return getAssocsNodesByDirection( acmType, isSource );
+    }
+
+    public List< EmsScriptNode > getSourceAssocsNodesByType( String acmType ) {
         boolean isSource = true;
-        return getAssocsNodesByDirection(acmType, isSource);
+        return getAssocsNodesByDirection( acmType, isSource );
     }
 
     /**
      * Get a list of EmsScriptNodes of the specified association type
+     * 
      * @param acmType
      * @param isSource
      * @return
      */
-    protected List<EmsScriptNode> getAssocsNodesByDirection(String acmType,
-            boolean isSource) {
-        List<EmsScriptNode> list = new ArrayList<EmsScriptNode>();
-        List<AssociationRef> assocs;
-        if (isSource) {
-            assocs = services.getNodeService().getSourceAssocs(nodeRef, RegexQNamePattern.MATCH_ALL);
+    protected List< EmsScriptNode >
+            getAssocsNodesByDirection( String acmType, boolean isSource ) {
+        List< EmsScriptNode > list = new ArrayList< EmsScriptNode >();
+        List< AssociationRef > assocs;
+        if ( isSource ) {
+            assocs =
+                    services.getNodeService()
+                            .getSourceAssocs( nodeRef,
+                                              RegexQNamePattern.MATCH_ALL );
         } else {
-            assocs = services.getNodeService().getTargetAssocs(nodeRef, RegexQNamePattern.MATCH_ALL);
+            assocs =
+                    services.getNodeService()
+                            .getTargetAssocs( nodeRef,
+                                              RegexQNamePattern.MATCH_ALL );
         }
-        for (AssociationRef aref : assocs) {
-            QName typeQName = createQName(acmType);
-            if (aref.getTypeQName().equals(typeQName)) {
+        for ( AssociationRef aref : assocs ) {
+            QName typeQName = createQName( acmType );
+            if ( aref.getTypeQName().equals( typeQName ) ) {
                 NodeRef targetRef;
-                if (isSource) {
+                if ( isSource ) {
                     targetRef = aref.getSourceRef();
                 } else {
                     targetRef = aref.getTargetRef();
                 }
-                list.add(new EmsScriptNode(targetRef, services, response));
+                list.add( new EmsScriptNode( targetRef, services, response ) );
             }
         }
 
         return list;
-    }	
-	
-	
-	/**
-	 * Given an JSONObject, filters it to find the appropriate relationships to be provided into model post
-	 * TODO: filterRelationsJSONObject probably doesn't need to be in EmsScriptNode
-	 * @param jsonObject
-	 * @return
-	 * @throws JSONException 
-	 */
-	public static JSONObject filterRelationsJSONObject(JSONObject jsonObject) throws JSONException {
+    }
+
+    /**
+     * Given an JSONObject, filters it to find the appropriate relationships to
+     * be provided into model post TODO: filterRelationsJSONObject probably
+     * doesn't need to be in EmsScriptNode
+     * 
+     * @param jsonObject
+     * @return
+     * @throws JSONException
+     */
+    public static
+            JSONObject
+            filterRelationsJSONObject( JSONObject jsonObject )
+                                                              throws JSONException {
         JSONObject relations = new JSONObject();
         JSONObject elementValues = new JSONObject();
         JSONObject propertyTypes = new JSONObject();
@@ -1121,63 +1300,68 @@ public class EmsScriptNode extends ScriptNode {
         JSONObject relationshipElements = new JSONObject();
         JSONArray array;
 
-        if (jsonObject.has(Acm.JSON_VALUE_TYPE)) {
-            Object object = jsonObject.get(Acm.JSON_VALUE);
-            if (object instanceof String) {
+        if ( jsonObject.has( Acm.JSON_VALUE_TYPE ) ) {
+            Object object = jsonObject.get( Acm.JSON_VALUE );
+            if ( object instanceof String ) {
                 array = new JSONArray();
-                array.put(object);
+                array.put( object );
             } else {
-                array = jsonObject.getJSONArray(Acm.JSON_VALUE);
+                array = jsonObject.getJSONArray( Acm.JSON_VALUE );
             }
-            if (jsonObject.get(Acm.JSON_VALUE_TYPE).equals(Acm.JSON_ELEMENT_VALUE)) {
-                elementValues.put(jsonObject.getString(Acm.JSON_ID), array);
+            if ( jsonObject.get( Acm.JSON_VALUE_TYPE )
+                           .equals( Acm.JSON_ELEMENT_VALUE ) ) {
+                elementValues.put( jsonObject.getString( Acm.JSON_ID ), array );
             }
-        }
-        
-        if (jsonObject.has(Acm.JSON_PROPERTY_TYPE)) {
-            Object o = jsonObject.get(Acm.JSON_PROPERTY_TYPE);
-            String propertyType = "" + o;//jsonObject.getString(Acm.JSON_PROPERTY_TYPE);
-            if (!propertyType.equals("null")) {
-                propertyTypes.put(jsonObject.getString(Acm.JSON_ID), propertyType);
-            }
-        }
-        
-        if (jsonObject.has(Acm.JSON_SOURCE) && jsonObject.has(Acm.JSON_TARGET)) {
-            JSONObject relJson = new JSONObject();
-            String source = jsonObject.getString(Acm.JSON_SOURCE);
-            String target = jsonObject.getString(Acm.JSON_TARGET);
-            relJson.put(Acm.JSON_SOURCE, source);
-            relJson.put(Acm.JSON_TARGET, target);
-            relationshipElements.put(jsonObject.getString(Acm.JSON_ID), relJson);
-        } else if (jsonObject.has(Acm.JSON_ANNOTATED_ELEMENTS)) {
-            array = jsonObject.getJSONArray(Acm.JSON_ANNOTATED_ELEMENTS);
-            annotatedElements.put(jsonObject.getString(Acm.JSON_ID), array);
         }
 
-        relations.put("annotatedElements", annotatedElements);
-        relations.put("relationshipElements", relationshipElements);
-        relations.put("propertyTypes", propertyTypes);
-        relations.put("elementValues", elementValues);
-        
+        if ( jsonObject.has( Acm.JSON_PROPERTY_TYPE ) ) {
+            Object o = jsonObject.get( Acm.JSON_PROPERTY_TYPE );
+            String propertyType = "" + o;// jsonObject.getString(Acm.JSON_PROPERTY_TYPE);
+            if ( !propertyType.equals( "null" ) ) {
+                propertyTypes.put( jsonObject.getString( Acm.JSON_ID ),
+                                   propertyType );
+            }
+        }
+
+        if ( jsonObject.has( Acm.JSON_SOURCE )
+             && jsonObject.has( Acm.JSON_TARGET ) ) {
+            JSONObject relJson = new JSONObject();
+            String source = jsonObject.getString( Acm.JSON_SOURCE );
+            String target = jsonObject.getString( Acm.JSON_TARGET );
+            relJson.put( Acm.JSON_SOURCE, source );
+            relJson.put( Acm.JSON_TARGET, target );
+            relationshipElements.put( jsonObject.getString( Acm.JSON_ID ),
+                                      relJson );
+        } else if ( jsonObject.has( Acm.JSON_ANNOTATED_ELEMENTS ) ) {
+            array = jsonObject.getJSONArray( Acm.JSON_ANNOTATED_ELEMENTS );
+            annotatedElements.put( jsonObject.getString( Acm.JSON_ID ), array );
+        }
+
+        relations.put( "annotatedElements", annotatedElements );
+        relations.put( "relationshipElements", relationshipElements );
+        relations.put( "propertyTypes", propertyTypes );
+        relations.put( "elementValues", elementValues );
+
         return relations;
-	}
+    }
 
     /**
      * Retrieve the site folder containing this node. If this is a view, then it
-     * is the folder containing the Models folder. Otherwise, it is the
-     * parent folder contained by the Sites folder.
+     * is the folder containing the Models folder. Otherwise, it is the parent
+     * folder contained by the Sites folder.
      * 
      * @return the site folder containing this node
      */
     public EmsScriptNode getSiteNode() {
         if ( siteNode != null ) return siteNode;
         EmsScriptNode parent = this;
-        String parentName = (String) parent.getProperty(Acm.CM_NAME);
-        while (!parentName.equals("Models") || !parentName.equals("ViewEditor")) {
+        String parentName = (String)parent.getProperty( Acm.CM_NAME );
+        while ( !parentName.equals( "Models" )
+                || !parentName.equals( "ViewEditor" ) ) {
             EmsScriptNode oldparent = parent;
             parent = oldparent.getParent();
             if ( parent == null ) return null; // site not found!
-            parentName = (String) parent.getProperty(Acm.CM_NAME);
+            parentName = (String)parent.getProperty( Acm.CM_NAME );
             if ( parent.getName().toLowerCase().equals( "sites" ) ) {
                 siteNode = oldparent;
                 return siteNode;
@@ -1187,14 +1371,17 @@ public class EmsScriptNode extends ScriptNode {
         siteNode = parent.getParent();
         return siteNode;
     }
-    
-    private EmsScriptNode convertIdToEmsScriptNode(String valueId) 
-    {
-    	ResultSet existingArtifacts = findNodeRefsByType( valueId, "@cm\\:name:\"" );
-    	Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
-    	existingArtifacts.close();
-    	
-        EmsScriptNode value = (nodeSet == null || nodeSet.size() <= 0) ? null : nodeSet.iterator().next();
+
+    private EmsScriptNode convertIdToEmsScriptNode( String valueId ) {
+        ResultSet existingArtifacts =
+                findNodeRefsByType( valueId, "@cm\\:name:\"" );
+        Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
+        existingArtifacts.close();
+
+        EmsScriptNode value =
+                ( nodeSet == null || nodeSet.size() <= 0 ) ? null
+                                                          : nodeSet.iterator()
+                                                                   .next();
 
         return value;
     }
@@ -1208,40 +1395,43 @@ public class EmsScriptNode extends ScriptNode {
      *            The property to update or create
      * @throws JSONException
      */
-    protected void updateOrCreateElementValues(JSONArray jsonArray, String property)
-            throws JSONException {
-    	
-        // This is based on ModelPost.updateOrCreateElementValues() 	
-        ArrayList<NodeRef> values = new ArrayList<NodeRef>();
-        for (int ii = 0; ii < jsonArray.length(); ii++) {
-            Object o = jsonArray.get(ii);
+    protected
+            void
+            updateOrCreateElementValues( JSONArray jsonArray, String property )
+                                                                               throws JSONException {
+
+        // This is based on ModelPost.updateOrCreateElementValues()
+        ArrayList< NodeRef > values = new ArrayList< NodeRef >();
+        for ( int ii = 0; ii < jsonArray.length(); ii++ ) {
+            Object o = jsonArray.get( ii );
             String valueId = "" + o;
-            EmsScriptNode value = convertIdToEmsScriptNode(valueId);
-            
-            if (value != null
-                    && value.checkPermissions(PermissionService.WRITE, response, status)) {
-                values.add(value.getNodeRef());
+            EmsScriptNode value = convertIdToEmsScriptNode( valueId );
+
+            if ( value != null
+                 && value.checkPermissions( PermissionService.WRITE, response,
+                                            status ) ) {
+                values.add( value.getNodeRef() );
             } else {
-                log("could not find element value node with id " + valueId
-                                + "\n");
+                log( "could not find element value node with id " + valueId
+                     + "\n" );
             }
         }
 
         // only change if old list is different than new
-//        EmsScriptNode element = findScriptNodeByName(id);
-        if (//element != null &&
-                checkPermissions(PermissionService.WRITE, response, status)) {
-            @SuppressWarnings("unchecked")
-            ArrayList<NodeRef> oldValues = (ArrayList<NodeRef>)getProperty(property);
-            if (!EmsScriptNode.checkIfListsEquivalent(values, oldValues)) {
-                setProperty(property, values);
+        // EmsScriptNode element = findScriptNodeByName(id);
+        if ( // element != null &&
+        checkPermissions( PermissionService.WRITE, response, status ) ) {
+            @SuppressWarnings( "unchecked" )
+            ArrayList< NodeRef > oldValues =
+                    (ArrayList< NodeRef >)getProperty( property );
+            if ( !EmsScriptNode.checkIfListsEquivalent( values, oldValues ) ) {
+                setProperty( property, values );
             }
         } else {
-            log("no write permissions " + id
-                    + "\n");
+            log( "no write permissions " + id + "\n" );
         }
     }
-    
+
     /**
      * Update or create element value (single NodeRef)
      * 
@@ -1251,283 +1441,320 @@ public class EmsScriptNode extends ScriptNode {
      *            The property to update or create
      * @throws JSONException
      */
-    protected void updateOrCreateElementValue(String valueId, String property)
-            throws JSONException {
-    	
-        EmsScriptNode value = convertIdToEmsScriptNode(valueId);
+    protected
+            void
+            updateOrCreateElementValue( String valueId, String property )
+                                                                         throws JSONException {
 
-        if (value != null
-            && value.checkPermissions(PermissionService.WRITE, response, status)) {
-        	
+        EmsScriptNode value = convertIdToEmsScriptNode( valueId );
+
+        if ( value != null
+             && value.checkPermissions( PermissionService.WRITE, response,
+                                        status ) ) {
+
             // only change if old value is different than new value:
-        	NodeRef newValue = value.getNodeRef();
-        	if (!newValue.equals((NodeRef)getProperty(property))) {
-                setProperty(property, newValue);
-        	}
-        } 
-        else {
-            log("could not find element value node with id " + valueId + "\n");
+            NodeRef newValue = value.getNodeRef();
+            if ( !newValue.equals( (NodeRef)getProperty( property ) ) ) {
+                setProperty( property, newValue );
+            }
+        } else {
+            log( "could not find element value node with id " + valueId + "\n" );
         }
-  
+
     }
-	
-	public EmsScriptNode findScriptNodeByName( String id ) {
+
+    public EmsScriptNode findScriptNodeByName( String id ) {
         ResultSet existingArtifacts = findNodeRefsByType( id, "@cm\\:name:\"" );
         Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
         existingArtifacts.close();
 
-        EmsScriptNode value = (nodeSet == null || nodeSet.size() <= 0) ? null : nodeSet.iterator().next();
+        EmsScriptNode value =
+                ( nodeSet == null || nodeSet.size() <= 0 ) ? null
+                                                          : nodeSet.iterator()
+                                                                   .next();
         return value;
     }
 
-
     /**
-	 * Update the node with the properties from the jsonObject
-	 * @param jsonObject
-	 * @throws JSONException 
-	 */
-	public void ingestJSON(JSONObject jsonObject) throws JSONException {
-	    // fill in all the properties
-	    System.out.println( "ingestJSON(" + jsonObject + ")" );
-	    for (String jsonType: Acm.JSON2ACM.keySet()) {
-	        String acmType = Acm.JSON2ACM.get(jsonType);
-	        if (jsonObject.has(jsonType)) {
-                if (Acm.JSON_NODEREFS.contains(jsonType)) {
-                	// If its an array of NodeRefs, i.e. has multiple values of NodeRef
-                	// type:
-                    if (Acm.JSON_ARRAYS.contains(jsonType)) {
-                    	JSONArray array = jsonObject.getJSONArray(jsonType);
+     * Update the node with the properties from the jsonObject
+     * 
+     * @param jsonObject
+     * @throws JSONException
+     */
+    public void ingestJSON( JSONObject jsonObject ) throws JSONException {
+        // fill in all the properties
+        System.out.println( "ingestJSON(" + jsonObject + ")" );
+        for ( String jsonType : Acm.JSON2ACM.keySet() ) {
+            String acmType = Acm.JSON2ACM.get( jsonType );
+            if ( jsonObject.has( jsonType ) ) {
+                if ( Acm.JSON_NODEREFS.contains( jsonType ) ) {
+                    // If its an array of NodeRefs, i.e. has multiple values of
+                    // NodeRef
+                    // type:
+                    if ( Acm.JSON_ARRAYS.contains( jsonType ) ) {
+                        JSONArray array = jsonObject.getJSONArray( jsonType );
                         updateOrCreateElementValues( array, acmType );
-                    } 
+                    }
                     // Otherwise it is a single NodeRef:
                     else {
-                        updateOrCreateElementValue(jsonObject.getString(jsonType), acmType);
+                        updateOrCreateElementValue( jsonObject.getString( jsonType ),
+                                                    acmType );
                     }
-                } else if (Acm.JSON_ARRAYS.contains(jsonType)) {
-	                JSONArray array = jsonObject.getJSONArray(jsonType);
-	                this.createOrUpdateProperty(acmType, array.toString());
-	            } else {
-	            		            	
-	            	if (jsonType.equals(Acm.JSON_INTEGER) ||
-	            		jsonType.equals(Acm.JSON_NATURAL_VALUE)) {
-	            		
-	            		Integer property = jsonObject.getInt(jsonType);
-	            		if (property != null) {
-	            			this.createOrUpdateProperty(acmType, property);
-	            		}
-	            	}
-	            	else if (jsonType.equals(Acm.JSON_DOUBLE) ||
-	            			 jsonType.equals(Acm.JSON_REAL)) {
-	            		
-	            		Double property = jsonObject.getDouble(jsonType);
-	            		if (property != null) {
-	            			this.createOrUpdateProperty(acmType, property);
-	            		}
-	            	}
-	            	else if (jsonType.startsWith( "is" ) ||
-	            			 jsonType.equals(Acm.JSON_BOOLEAN)) {
-	            		
-                        //( property.equalsIgnoreCase( "true" ) || property.equalsIgnoreCase( "false" ) ) ) {
-                        Boolean property = jsonObject.getBoolean( jsonType);
-                        if ( property == null ) {
-                            String msg = "Error! Couldn't get boolean property " + jsonType + "=" + property + ".\n";
-                            response.append( msg );
-                            status.setCode( HttpServletResponse.SC_BAD_REQUEST, msg ); 
-                        } else {
-                            this.createOrUpdateProperty(acmType, property);
-                        }
-	                } 
-	            	else {
-	            	    Object o = jsonObject.get(jsonType);
-	                    String property = "" + o; //jsonObject.getString(jsonType);
-	            		if (property != null) {
-	            			this.createOrUpdateProperty(acmType, new String(property));
-	            		}
-	                }
-	            	
-	            }
-	        }
-	    }
-
-	    // if already existing, possible that value type isn't specified (e.g. from view editor)
-	    if (!jsonObject.has(Acm.JSON_VALUE_TYPE) && jsonObject.has(Acm.JSON_VALUE)) {
-	        String existing = (String)getProperty(Acm.ACM_VALUE_TYPE);
-	        if ( existing != null ) {
-	            jsonObject.put(Acm.JSON_VALUE_TYPE, existing);
-	        }
-	    }
-	    
-//	    // fill in the valueTypes and all relationships
-//        if ( jsonObject.has( Acm.JSON_VALUE ) &&
-//             !jsonObject.has( Acm.JSON_VALUE_TYPE ) ) {
-//            JSONArray array;
-//            array = new JSONArray();
-//            try {
-//                array = jsonObject.getJSONArray(Acm.JSON_VALUE);
-//                updateOrCreateElementValues( array, Acm.ACM_VALUE );
-//                //this.createOrUpdatePropertyValues(Acm.ACM_VALUE, array);
-//            } catch ( Exception e ) {
-//                e.printStackTrace();
-//            }
-//        }
-	    
-        // This should no longer be needed since properties no longer use this JSON tpye
-	    if (jsonObject.has(Acm.JSON_VALUE_TYPE)) {
-            JSONArray array;
-            
-            String acmType = Acm.JSON2ACM.get(jsonObject.get(Acm.JSON_VALUE_TYPE));
-            if (jsonObject.has(Acm.JSON_VALUE)) {
-                Object value = jsonObject.get(Acm.JSON_VALUE);
-                // view editor just sends a string for the value instead of an array
-                if (value instanceof String) {
-                    array = new JSONArray();
-                    array.put(jsonObject.get(Acm.JSON_VALUE));
+                } else if ( Acm.JSON_ARRAYS.contains( jsonType ) ) {
+                    JSONArray array = jsonObject.getJSONArray( jsonType );
+                    this.createOrUpdateProperty( acmType, array.toString() );
                 } else {
-                    array = jsonObject.getJSONArray(Acm.JSON_VALUE);
-                }
-                if (acmType.equals(Acm.ACM_LITERAL_BOOLEAN)) {
-                    this.createOrUpdatePropertyValues(acmType, array, new Boolean(true));
-                } else if (acmType.equals(Acm.ACM_LITERAL_INTEGER)) {
-                    this.createOrUpdatePropertyValues(acmType, array, new Integer(0));
-                } else if (acmType.equals(Acm.ACM_LITERAL_REAL)) {
-                    this.createOrUpdatePropertyValues(acmType, array, new Double(0.0));
-                } else if (acmType.equals(Acm.ACM_LITERAL_STRING)) {
-                    this.createOrUpdatePropertyValues(acmType, array, new String(""));
+
+                    if ( jsonType.equals( Acm.JSON_INTEGER )
+                         || jsonType.equals( Acm.JSON_NATURAL_VALUE ) ) {
+
+                        Integer property = jsonObject.getInt( jsonType );
+                        if ( property != null ) {
+                            this.createOrUpdateProperty( acmType, property );
+                        }
+                    } else if ( jsonType.equals( Acm.JSON_DOUBLE )
+                                || jsonType.equals( Acm.JSON_REAL ) ) {
+
+                        Double property = jsonObject.getDouble( jsonType );
+                        if ( property != null ) {
+                            this.createOrUpdateProperty( acmType, property );
+                        }
+                    } else if ( jsonType.startsWith( "is" )
+                                || jsonType.equals( Acm.JSON_BOOLEAN ) ) {
+
+                        // ( property.equalsIgnoreCase( "true" ) ||
+                        // property.equalsIgnoreCase( "false" ) ) ) {
+                        Boolean property = jsonObject.getBoolean( jsonType );
+                        if ( property == null ) {
+                            String msg =
+                                    "Error! Couldn't get boolean property "
+                                            + jsonType + "=" + property + ".\n";
+                            response.append( msg );
+                            status.setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                            msg );
+                        } else {
+                            this.createOrUpdateProperty( acmType, property );
+                        }
+                    } else {
+                        Object o = jsonObject.get( jsonType );
+                        String property = "" + o; // jsonObject.getString(jsonType);
+                        if ( property != null ) {
+                            this.createOrUpdateProperty( acmType,
+                                                         new String( property ) );
+                        }
+                    }
+
                 }
             }
         }
-	}
-	
-	/**
-	 * Wrapper for replaceArtifactUrl with different patterns if necessary
-	 * @param content
-	 * @param escape
-	 * @return
-	 */
-	public String fixArtifactUrls(String content, boolean escape) {
-	    String result = content;
-        result = replaceArtifactUrl(result, "src=\\\\\"/editor/images/docgen/", "src=\\\\\"/editor/images/docgen/.*?\\\\\"", escape);
-	    
+
+        // if already existing, possible that value type isn't specified (e.g.
+        // from view editor)
+        if ( !jsonObject.has( Acm.JSON_VALUE_TYPE )
+             && jsonObject.has( Acm.JSON_VALUE ) ) {
+            String existing = (String)getProperty( Acm.ACM_VALUE_TYPE );
+            if ( existing != null ) {
+                jsonObject.put( Acm.JSON_VALUE_TYPE, existing );
+            }
+        }
+
+        // // fill in the valueTypes and all relationships
+        // if ( jsonObject.has( Acm.JSON_VALUE ) &&
+        // !jsonObject.has( Acm.JSON_VALUE_TYPE ) ) {
+        // JSONArray array;
+        // array = new JSONArray();
+        // try {
+        // array = jsonObject.getJSONArray(Acm.JSON_VALUE);
+        // updateOrCreateElementValues( array, Acm.ACM_VALUE );
+        // //this.createOrUpdatePropertyValues(Acm.ACM_VALUE, array);
+        // } catch ( Exception e ) {
+        // e.printStackTrace();
+        // }
+        // }
+
+        // This should no longer be needed since properties no longer use this
+        // JSON tpye
+        if ( jsonObject.has( Acm.JSON_VALUE_TYPE ) ) {
+            JSONArray array;
+
+            String acmType =
+                    Acm.JSON2ACM.get( jsonObject.get( Acm.JSON_VALUE_TYPE ) );
+            if ( jsonObject.has( Acm.JSON_VALUE ) ) {
+                Object value = jsonObject.get( Acm.JSON_VALUE );
+                // view editor just sends a string for the value instead of an
+                // array
+                if ( value instanceof String ) {
+                    array = new JSONArray();
+                    array.put( jsonObject.get( Acm.JSON_VALUE ) );
+                } else {
+                    array = jsonObject.getJSONArray( Acm.JSON_VALUE );
+                }
+                if ( acmType.equals( Acm.ACM_LITERAL_BOOLEAN ) ) {
+                    this.createOrUpdatePropertyValues( acmType, array,
+                                                       new Boolean( true ) );
+                } else if ( acmType.equals( Acm.ACM_LITERAL_INTEGER ) ) {
+                    this.createOrUpdatePropertyValues( acmType, array,
+                                                       new Integer( 0 ) );
+                } else if ( acmType.equals( Acm.ACM_LITERAL_REAL ) ) {
+                    this.createOrUpdatePropertyValues( acmType, array,
+                                                       new Double( 0.0 ) );
+                } else if ( acmType.equals( Acm.ACM_LITERAL_STRING ) ) {
+                    this.createOrUpdatePropertyValues( acmType, array,
+                                                       new String( "" ) );
+                }
+            }
+        }
+    }
+
+    /**
+     * Wrapper for replaceArtifactUrl with different patterns if necessary
+     * 
+     * @param content
+     * @param escape
+     * @return
+     */
+    public String fixArtifactUrls( String content, boolean escape ) {
+        String result = content;
+        result =
+                replaceArtifactUrl( result,
+                                    "src=\\\\\"/editor/images/docgen/",
+                                    "src=\\\\\"/editor/images/docgen/.*?\\\\\"",
+                                    escape );
+
         return result;
-	}
-	
-	/**
-	 * Utility method that replaces the image links with references to the repository urls
-	 * @param content
-	 * @param prefix
-	 * @param pattern
-	 * @param escape
-	 * @return
-	 */
-	public String replaceArtifactUrl(String content, String prefix, String pattern, boolean escape) {
-	    if (content == null) {
-	        return content;
-	    }
-	    
-	    String result = content;
-	    Pattern p = Pattern.compile(pattern);
-	    Matcher matcher = p.matcher(content);
-	   
-        while (matcher.find()) {
-            String filename = matcher.group(0);
+    }
+
+    /**
+     * Utility method that replaces the image links with references to the
+     * repository urls
+     * 
+     * @param content
+     * @param prefix
+     * @param pattern
+     * @param escape
+     * @return
+     */
+    public String replaceArtifactUrl( String content, String prefix,
+                                      String pattern, boolean escape ) {
+        if ( content == null ) {
+            return content;
+        }
+
+        String result = content;
+        Pattern p = Pattern.compile( pattern );
+        Matcher matcher = p.matcher( content );
+
+        while ( matcher.find() ) {
+            String filename = matcher.group( 0 );
             // not sure why this can't be chained correctly
-            filename = filename.replace("\"", "");
-            filename = filename.replace("_latest", "");
-            filename = filename.replace("\\","");
-            filename = filename.replace("src=/editor/images/docgen/", "");
-            NodeRef nodeRef = findNodeRefByType(filename, "@cm\\:name:\"");
-            if (nodeRef != null) {
-                // this should grab whatever is the latest versions purl - so fine for snapshots
-                NodeRef versionedNodeRef = services.getVersionService().getCurrentVersion(nodeRef).getVersionedNodeRef();
-                EmsScriptNode versionedNode = new EmsScriptNode(versionedNodeRef, services, response);
+            filename = filename.replace( "\"", "" );
+            filename = filename.replace( "_latest", "" );
+            filename = filename.replace( "\\", "" );
+            filename = filename.replace( "src=/editor/images/docgen/", "" );
+            NodeRef nodeRef = findNodeRefByType( filename, "@cm\\:name:\"" );
+            if ( nodeRef != null ) {
+                // this should grab whatever is the latest versions purl - so
+                // fine for snapshots
+                NodeRef versionedNodeRef =
+                        services.getVersionService()
+                                .getCurrentVersion( nodeRef )
+                                .getVersionedNodeRef();
+                EmsScriptNode versionedNode =
+                        new EmsScriptNode( versionedNodeRef, services, response );
                 String nodeurl = "";
-                if (prefix.indexOf("src") >= 0) {
+                if ( prefix.indexOf( "src" ) >= 0 ) {
                     nodeurl = "src=\\\"";
                 }
                 // TODO: need to map context out in case we aren't at alfresco
                 String context = "/alfresco";
                 nodeurl += context + versionedNode.getUrl() + "\\\"";
                 // this is service api for getting the content information
-                nodeurl = nodeurl.replace("/d/d/", "/service/api/node/content/");
-                result = result.replace(matcher.group(0), nodeurl);
+                nodeurl =
+                        nodeurl.replace( "/d/d/", "/service/api/node/content/" );
+                result = result.replace( matcher.group( 0 ), nodeurl );
             }
         }
-        
-	    return result;
-	}
-	
-	protected NodeRef findNodeRefByType(String name, String type) {
-	    return NodeUtil.findNodeRefByType( name, type, services );
-	}
+
+        return result;
+    }
+
+    protected NodeRef findNodeRefByType( String name, String type ) {
+        return NodeUtil.findNodeRefByType( name, type, services );
+    }
 
     // TODO: make this utility function - used in AbstractJavaWebscript too
-    protected ResultSet findNodeRefsByType(String name, String type) {
+    protected ResultSet findNodeRefsByType( String name, String type ) {
         return NodeUtil.findNodeRefsByType( name, type, services );
-//        ResultSet results = null;
-//        results = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, type + name + "\"");
-//        return results;     
+        // ResultSet results = null;
+        // results = services.getSearchService().query(SEARCH_STORE,
+        // SearchService.LANGUAGE_LUCENE, type + name + "\"");
+        // return results;
     }
-    
+
     /**
-     * Checks whether user has permissions to the node and logs results and status as appropriate
-     * @param node         EmsScriptNode to check permissions on
-     * @param permissions  Permissions to check
-     * @return             true if user has specified permissions to node, false otherwise
+     * Checks whether user has permissions to the node and logs results and
+     * status as appropriate
+     * 
+     * @param node
+     *            EmsScriptNode to check permissions on
+     * @param permissions
+     *            Permissions to check
+     * @return true if user has specified permissions to node, false otherwise
      */
-    public boolean checkPermissions(String permissions, StringBuffer response, Status status) {
-        if (!hasPermission(permissions)) {
-            Object property = getProperty(Acm.CM_NAME);
-            if (property != null) {
-                String msg = "Warning! No " + permissions + " priveleges to " + property.toString() + ".\n";
+    public boolean checkPermissions( String permissions, StringBuffer response,
+                                     Status status ) {
+        if ( !hasPermission( permissions ) ) {
+            Object property = getProperty( Acm.CM_NAME );
+            if ( property != null ) {
+                String msg =
+                        "Warning! No " + permissions + " priveleges to "
+                                + property.toString() + ".\n";
                 response.append( msg );
-                status.setCode( HttpServletResponse.SC_BAD_REQUEST, msg ); 
+                status.setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
             }
             return false;
         }
         return true;
     }
 
-    public static class EmsScriptNodeComparator implements Comparator<EmsScriptNode> {
+    public static class EmsScriptNodeComparator implements
+                                               Comparator< EmsScriptNode > {
         @Override
-        public int compare(EmsScriptNode x, EmsScriptNode y) {
+        public int compare( EmsScriptNode x, EmsScriptNode y ) {
             Date xModified;
             Date yModified;
-            
-            xModified = (Date) x.getProperty(Acm.ACM_LAST_MODIFIED);
-            yModified = (Date) y.getProperty(Acm.ACM_LAST_MODIFIED);
-            
-            if (xModified == null) {
+
+            xModified = (Date)x.getProperty( Acm.ACM_LAST_MODIFIED );
+            yModified = (Date)y.getProperty( Acm.ACM_LAST_MODIFIED );
+
+            if ( xModified == null ) {
                 return -1;
-            } else if (yModified == null) {
+            } else if ( yModified == null ) {
                 return 1;
             } else {
-                return (xModified.compareTo(yModified));
+                return ( xModified.compareTo( yModified ) );
             }
         }
     }
-    
-    public static String getIsoTime(Date date) {
-        DateTime dt = new DateTime(date);
+
+    public static String getIsoTime( Date date ) {
+        DateTime dt = new DateTime( date );
         DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-        return fmt.print(dt);
+        return fmt.print( dt );
     }
-    
+
     /**
      * Override equals for EmsScriptNodes
      * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object obj)
-    {
+    public boolean equals( Object obj ) {
 
-        if (obj instanceof EmsScriptNode)
-        {
-        	EmsScriptNode that = (EmsScriptNode) obj;
-            return this.nodeRef.equals(that.nodeRef);
-        }
-        else
-        {
+        if ( obj instanceof EmsScriptNode ) {
+            EmsScriptNode that = (EmsScriptNode)obj;
+            return this.nodeRef.equals( that.nodeRef );
+        } else {
             return false;
         }
     }

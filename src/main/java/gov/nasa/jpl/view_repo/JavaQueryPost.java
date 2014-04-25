@@ -1,7 +1,6 @@
 package gov.nasa.jpl.view_repo;
 
 import gov.nasa.jpl.ae.event.Timepoint;
-import gov.nasa.jpl.ae.magicdrawPlugin.modelQuery.EmfUtils;
 import gov.nasa.jpl.mbee.util.ClassUtils;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.ae.util.JavaEvaluator;
@@ -112,7 +111,7 @@ public class JavaQueryPost extends AbstractJavaWebScript {
             Class< ? >[] testClasses = getJunitClasses();
             Result result = junit.run( testClasses );
             model.put( "query", "Run JUnit tests" );
-            model.put( "reply", (String)EmfUtils.spewObject( result, "--" ) );
+            model.put( "reply", (String)Utils.spewObject( result, "--" ) );
             return model;
         }
         
