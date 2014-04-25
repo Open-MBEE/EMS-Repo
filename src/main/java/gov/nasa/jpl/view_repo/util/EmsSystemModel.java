@@ -5,6 +5,7 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,6 +24,7 @@ import org.json.JSONException;
 import org.springframework.extensions.webscripts.Status;
 
 import sysml.AbstractSystemModel;
+import gov.nasa.jpl.ae.event.Call;
 
 // <E, C, T, P, N, I, U, R, V, W, CT>
 //public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScriptNode, String, ? extends Serializable, String, String, Object, EmsScriptNode, String, String, EmsScriptNode > {
@@ -1327,5 +1329,14 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         // TODO Auto-generated method stub
         return false;
     }
+    
+    // TODO dont like dependence on BAE for Call here....
+    public Collection< Object >
+    		map( Collection< Object > elements,
+    			 Call call) throws InvocationTargetException {
+		 
+    	return call.map( elements, 1 );
+    }
+
 
 }
