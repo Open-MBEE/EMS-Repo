@@ -1,0 +1,112 @@
+#%RAML 0.8
+---
+title: mms
+version: 1.0
+mediaType: application/json
+baseUri: https://{server}/alfresco/service
+
+schemas:
+    - Elements: !include elements.json
+    - Element: !include element.json
+
+resourceTypes:
+    - elements:
+        usage: used for one or more elements
+        description: getting elements
+        get:
+            responses:
+                200:
+                    body:
+                        schema: Elements
+        post:
+            body:
+                schema: Elements
+traits:
+    - recursable:
+        description: 
+
+
+/sites:
+    /{siteId}:
+        /projects:
+            /{projectId}:
+                /products:
+                    /{productId}:
+                        /elements:
+                            /{elementId}:
+                                /comments:
+                                /versions:
+                                    /{versionId}:
+                        /comments:
+                        /versions:
+                            /{versionId}:
+                /views:
+                    /{viewId}:
+                        /elements:
+                            /{elementId}:
+                                /comments:
+                                /versions:
+                                    /{versionId}:
+                        /comments:
+                        /versions:
+                            /{versionId}:
+                /elements:
+                    /{elementId}:
+                        /comments:
+                        /versions:
+                            /{versionId:
+/projects:
+    /{projectId}:
+        /products:
+            /{productId}:
+                /elements:
+                    /{elementId}:
+                        /comments:
+                        /versions:
+                            /{versionId}:
+                /comments:
+                /versions:
+                    /{versionId}:
+        /views:
+            /{viewId}:
+                /elements:
+                    /{elementId}:
+                        /comments:
+                        /versions:
+                            /{versionId}:
+                /comments:
+                /versions:
+                    /{versionId}:
+        /elements:
+            /{elementId}:
+                /comments:
+                /versions:
+                    /{versionId}:
+/products:
+    /{productId}:
+        /elements:
+            /{elementId}:
+                /comments:
+                /versions:
+                    /{versionId}:
+        /comments:
+        /versions:
+            /{versionId}:
+/views:
+    /{viewId}:
+        /elements:
+            /{elementId}:
+                /comments:
+                /versions:
+                    /{versionId}:
+        /comments:
+        /versions:
+            /{versionId}:
+/elements:
+    /{elementId}:
+        /comments:
+        /versions:
+            /{versionId}:
+
+
+    

@@ -1,0 +1,23 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "properties": {
+        "id": {
+            "type": "string"
+        },
+        "type": {
+            "enum": ["Element", "View", "Viewpoint", "Product", "Project",
+                    "Package", "Property", "Constraint", "DirectedRelationship",
+                    "Dependency", "Expose", "Conform", "Parameter", "LiteralString",
+                    "LiteralReal", "LiteralInteger", "LiteralBoolean", "ElementValue", 
+                    "Expression", "LiteralUnlimitedNatural"]
+        },
+        "name": {
+            "type": "string",
+        },
+        "documentation": {
+            "type": "string",
+        },
+        
+    },
+    "type": "object"
+}
