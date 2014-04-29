@@ -1337,6 +1337,14 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 		 
     	return call.map( elements, 1 );
     }
+    
+    public Collection< Object >
+			map( Collection< Object > elements,
+				 Call call,
+				 int indexOfObjectArgument) throws InvocationTargetException {
+		 
+		return call.map( elements, indexOfObjectArgument );
+	}
 
 
 }
