@@ -465,6 +465,8 @@ public class Acm {
             // now get rid of stuff that's handled special
             //removeAll()
 
+            add(JSON_VALUE);
+            
             add(JSON_BODY);
             add(JSON_TYPE);
             add(JSON_NAME);
@@ -474,7 +476,6 @@ public class Acm {
             // TODO: source/target should become noderefs at some point
             add(JSON_SOURCE);
             add(JSON_TARGET);
-            add(JSON_PROPERTY_TYPE);
 
             add(JSON_OWNER);
             add(JSON_VALUE_TYPE);

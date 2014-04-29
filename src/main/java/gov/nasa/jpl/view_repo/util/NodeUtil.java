@@ -1,7 +1,9 @@
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Utils;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -12,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService.FindNodeParameters;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
@@ -22,6 +25,8 @@ import org.alfresco.util.ApplicationContextHelper;
 import org.apache.commons.digester.SetRootRule;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
+
+import com.ibm.icu.impl.LinkedHashMap;
 
 public class NodeUtil {
     
@@ -221,7 +226,26 @@ public class NodeUtil {
         return services.getNodeService().getAllRootNodes( SEARCH_STORE );
     }
 
-       
+    /**
+     * Find an existing NodeRef with the input Alfresco id.
+     * 
+     * @param id
+     *            an id similar to
+     *            workspace://SpacesStore/e297594b-8c24-427a-9342-35ea702b06ff
+     * @return If there a node exists with the input id in the Alfresco
+     *         database, return a NodeRef to it; otherwise return null. An error
+     *         is printed if the id doesn't have the right syntax.
+     */
+    public static NodeRef findNodeRefByAlfrescoId(String id) {
+        if ( !NodeRef.isNodeRef( id ) ) {
+            Debug.error("Bad NodeRef id: " + id );
+            return null;
+        }
+        NodeRef n = new NodeRef(id);
+        EmsScriptNode node = new EmsScriptNode( n, getServices() );
+        if ( !node.exists() ) return null;
+        return n;
+    }
     /**
      * Find or create a folder
      * 
