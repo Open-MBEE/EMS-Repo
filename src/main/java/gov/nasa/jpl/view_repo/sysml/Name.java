@@ -47,7 +47,7 @@ public class Name implements sysml.Name<EmsScriptNode> {
         try {
         	
             json.put("sourceType", "reference");
-            json.put("source", reference.getId());
+            json.put("source", reference.getName());
             json.put("sourceProperty", "name");
 
         } catch ( JSONException e ) {
