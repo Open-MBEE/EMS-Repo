@@ -171,15 +171,15 @@ public class EmsSystemModelTest {
 //				+ nodeTest.getProperty(Acm.ACM_VALUE).getClass());
 
         
-        Object evalResult = sysmlToAe.evaluateExpression( node, Boolean.class );  
-        System.out.println( "\n*testExpressionEvaluation() evalResult: "
-                            + evalResult );
-        assertNotNull( evalResult );
-        
-        Expression< Boolean > expression = sysmlToAe.toAeExpression( node );
+        Expression<Boolean> expression = (Expression<Boolean>)sysmlToAe.evaluateExpression( node );  
         System.out.println( "\n*testExpressionEvaluation() expression: "
-                + expression );
-        assertNotNull( expression ); 
+                            + expression );
+        assertNotNull( expression );
+        
+//        Expression< Boolean > expression = sysmlToAe.toAeExpression( node );
+//        System.out.println( "\n*testExpressionEvaluation() expression: "
+//                + expression );
+//        assertNotNull( expression ); 
         Class< ? > type = expression.getType();
         System.out.println( "\n*testExpressionEvaluation() expression type: "
                             + type.getSimpleName() );
