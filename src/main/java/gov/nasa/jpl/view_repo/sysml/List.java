@@ -113,6 +113,8 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
      */
     @Override
     public String toString() {
-        return toViewJson().toString();
+        JSONObject jo = toViewJson();
+        if ( jo != null ) return jo.toString();
+        return super.toString();
     }
 }

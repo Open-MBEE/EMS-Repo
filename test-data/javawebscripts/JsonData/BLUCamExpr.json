@@ -1517,7 +1517,26 @@
         "name": "Components",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "type": "Element"
+        "type": "View"
+    },
+    {
+        "view2view": [
+            {
+                "id": "prod_id_1",
+                "childrenViews": ["_17_0_2_3_e610336_1394148311476_17302_29388"]
+            },
+            {
+                "id": "_17_0_2_3_e610336_1394148311476_17302_29388",
+                "childrenViews": []
+            }
+        ],
+        "id": "prod_id_1",
+        "name": "Spacecraft Doc",
+        "documentation": "",
+        "owner": "300",
+        "noSections": [],
+        "type": "Product",
+        "editable": true
     },
     {
         "id": "_17_0_2_4_f3a0363_1394143297852_560682_29481",

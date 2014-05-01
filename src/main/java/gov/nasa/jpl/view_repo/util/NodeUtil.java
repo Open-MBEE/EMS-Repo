@@ -4,6 +4,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Utils;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -48,7 +49,7 @@ public class NodeUtil {
     public static ServiceRegistry services = null;
     
     // needed for Lucene search
-    protected static final StoreRef SEARCH_STORE =
+    public static final StoreRef SEARCH_STORE =
             new StoreRef( StoreRef.PROTOCOL_WORKSPACE, "SpacesStore" );
 //    protected final static String[] searchTypes = {"@sysml\\:documentation:\"",
 //                                                   "@sysml\\:name:\"",
@@ -99,10 +100,24 @@ public class NodeUtil {
         try {
             results = findNodeRefsByType( name, prefix, services );
             if (results != null) {
+                //boolean nameMatches = false;
                 for (ResultSetRow row: results) {
-                    nodeRef = row.getNodeRef();
-                    break; // Assumption is things are uniquely named - TODO:
-                           // fix since snapshots have same name?...
+                    NodeRef nr = row.getNodeRef();
+//                    if ( nodeRef == null ) nodeRef = nr;
+//                    else {
+                        // Make sure we didn't just get a near match.
+                        EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
+                        try {
+                        String acmType = Utils.join( prefix.split( "[\\W]+" ), ":").replaceFirst( "^:", "" );
+                        Object o = esn.getProperty( acmType );
+                        if ( ( "" + o ).equals( name ) ) {
+                            nodeRef = nr;
+                            break;
+                        }
+                        } catch ( Throwable e ) {
+                            e.printStackTrace();
+                        }
+//                    }
                 }
             }
         } finally {
@@ -177,6 +192,8 @@ public class NodeUtil {
             if ( response != null || status != null ) {
                 String msg = "Error! Could not parse search: " + pattern + ".\n"
                              + e.getLocalizedMessage();
+                System.out.println(msg);
+                e.printStackTrace( System.out );
                 if ( response != null ) response.append( msg );
                 if ( status != null ) status.setCode( HttpServletResponse.SC_BAD_REQUEST,
                                                       msg );

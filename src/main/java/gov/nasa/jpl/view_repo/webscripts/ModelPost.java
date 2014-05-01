@@ -37,6 +37,7 @@ import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -52,14 +53,18 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
+import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.namespace.QName;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
+
+import com.sun.star.embed.Aspects;
 
 /**
  * Descriptor file:
@@ -702,6 +707,28 @@ public class ModelPost extends AbstractJavaWebScript {
         return elements;
     }
 
+    public boolean isAspect( String name ) {
+        DictionaryService dServ = services.getDictionaryService();
+        Collection< QName > aspects = dServ.getAllAspects();
+        for ( QName aspect : aspects ) {
+            if ( aspect.getLocalName().equals( name ) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean isType( String name ) {
+        DictionaryService dServ = services.getDictionaryService();
+        Collection< QName > types = dServ.getAllTypes();
+        for ( QName type : types ) {
+            if ( type.getLocalName().equals( name ) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     protected EmsScriptNode
             updateOrCreateTransactionableElement( JSONObject elementJson,
                                                   EmsScriptNode parent,
@@ -723,10 +750,13 @@ public class ModelPost extends AbstractJavaWebScript {
             node.setStatus( getResponseStatus() );
         }
         EmsScriptNode reifiedNode = null;
-        if ( (node == null || !node.exists()) ) {// && newElements.contains( id ) ) {
+        if ( node == null || !node.exists() ) {// && newElements.contains( id ) ) {
             String type = null;
             String jsonType = elementJson.getString( Acm.JSON_TYPE );
             if ( jsonType != null ) type = Acm.getJSON2ACM().get( jsonType );
+            if ( !isType( type ) ) {
+                type = Acm.ACM_ELEMENT;
+            }
             if ( type == null || type.trim().isEmpty() ) {
                 System.out.println( "PREFIX: type not found for " + jsonType );
                 return null;

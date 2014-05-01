@@ -778,12 +778,34 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     }
 
     /**
-     * Return a 
+     * Get matching types
+     * <p>
+     * Examples:
+     * <ul>
+     * <li>getType(elementA, "typeX") returns the types of elementA whose name
+     * or ID is "typeX."
+     * <li>getType(packageB, "typeX") returns the types located inside packageB
+     * whose name or id is "typeX."
+     * <li>getType(myWorkspace, "typeX") returns the types whose names or IDs
+     * are "typeX" for myWorkspace.
+     * </ul>
+     * 
+     * @param context
+     *            the element whose type is sought or a location as a package or
+     *            workspace within which the type is to be found
+     * @param specifier
+     *            the ID, name, version, workspace, etc. for the type element
+     * @return type elements that match any interpretation of the specifier for
+     *         any interpretation of the context or an empty list if there are
+     *         no such types
+     * @see sysml.SystemModel#getType(java.lang.Object, java.lang.Object)
      */
     @Override
     public Collection< EmsScriptNode >
             getType( Object context, Object specifier ) {
-    	    	
+        
+        // TODO -- the code below is relevant to getElementWithType(), not getType().
+        
     	// TODO ScriptNode getType returns a QName or String, why does he want a collection
     	// of EmsScriptNode?  I think we should change T to String.
     	
@@ -794,7 +816,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 	        StringBuffer response = new StringBuffer();
 	        Status status = new Status();
 	        Map< String, EmsScriptNode > elements =
-	                NodeUtil.searchForElements( "@sysml\\:type:\"", (String)specifier, services, response,
+	                NodeUtil.searchForElements( "@cm\\:type:\"", (String)specifier, services, response,
 	                                            status );
 
 	        if ( elements != null ) return elements.values();
@@ -810,14 +832,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         // TODO finish this, just a partial implementation
     
         if (context instanceof EmsScriptNode) {
-        	
         	EmsScriptNode node = (EmsScriptNode) context;
-        	String acmType = node.getTypeShort();
-        	
-        	// Return type w/o sysml prefix:
-        	if (acmType != null) {
-        		return Acm.getACM2JSON().get(acmType);
-        	}        
+        	return node.getTypeName();
         }
         
         return null;

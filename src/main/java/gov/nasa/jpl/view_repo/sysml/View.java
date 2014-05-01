@@ -8,6 +8,7 @@ import gov.nasa.jpl.ae.event.Expression.Form;
 import gov.nasa.jpl.ae.event.FunctionCall;
 import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.MoreToString;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -269,13 +270,21 @@ public class View extends List implements sysml.View< EmsScriptNode > {
     @Override
     public JSONObject toViewJson() {
     	
-        if ( viewNode == null ) return null;
+        if ( viewNode == null ) {
+            System.out.println("*** called View.toViewJson() without a view node! View = " + toBoringString() );
+            return null;
+        }
         
         // Get the related elements that define the the view.
         
         Collection<EmsScriptNode> exposed = getExposedElements();
-        EmsScriptNode viewpointOp = getViewpointOperation();
-        if ( viewpointOp == null ) return null;
+        // TODO -- need to handle case where viewpoint operation does not exist
+        //         and an external function (e.g., Java) is somehow specified.
+        EmsScriptNode viewpointOp = getViewpointOperation(); 
+        if ( viewpointOp == null ) {
+            System.out.println("*** View.toViewJson(): no viewpoint operation! View = " + toBoringString() );
+            return null;
+        }
         
         // Translate the viewpoint Operation/Expression element into an AE Expression:
         
@@ -350,6 +359,21 @@ public class View extends List implements sysml.View< EmsScriptNode > {
             e.printStackTrace();
         }
         return json;
+    }
+    
+    private String toBoringString() {
+        return "view node = "
+               + this.viewNode
+               + "; java.util.List = "
+               + MoreToString.Helper.toString( this, false, false, null, null,
+                                               MoreToString.PARENTHESES, true );
+    }
+
+    @Override
+    public String toString() {
+        JSONObject jo = toViewJson();
+        if ( jo != null ) return jo.toString();
+        return "toViewJson() FAILED: " + toBoringString();
     }
 
 }
