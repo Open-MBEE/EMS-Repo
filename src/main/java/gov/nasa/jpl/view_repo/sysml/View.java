@@ -278,10 +278,13 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         if ( viewpointOp == null ) return null;
         
         // Translate the viewpoint Operation/Expression element into an AE Expression:
-        
+        ArrayList<Object> paramValList = new ArrayList<Object>();
+        // This is a List of a collection of nodes, where the value of exposed 
+        // parameter is a collection of nodes:
+        paramValList.add( exposed );  
         SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAeExpr =
                 new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getModel() );
-        Expression< Object > aeExpr = sysmlToAeExpr.operationToAeExpression(viewpointOp, exposed);
+        Expression< Object > aeExpr = sysmlToAeExpr.operationToAeExpression(viewpointOp, paramValList);
 
         // Evaluate the expression to get the Viewables and add them to this View.
 

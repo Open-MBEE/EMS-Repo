@@ -69,7 +69,7 @@ public class Name implements sysml.Name<EmsScriptNode> {
 	
     @Override
     public String toString() {
-        return toViewJson().toString();
+        return "" + toViewJson();
     }
 
 }
