@@ -64,8 +64,6 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-import com.sun.star.embed.Aspects;
-
 /**
  * Descriptor file:
  * /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts
@@ -345,8 +343,11 @@ public class ModelPost extends AbstractJavaWebScript {
                 try {
                     trx.rollback();
                     log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                    e.printStackTrace();
                 } catch (Throwable ee) {
                     log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                    ee.printStackTrace();
+                    e.printStackTrace();
                 }
             }
         }
@@ -518,8 +519,11 @@ public class ModelPost extends AbstractJavaWebScript {
                 try {
                     trx.rollback();
                     log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                    e.printStackTrace();
                 } catch (Throwable ee) {
                     log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                    ee.printStackTrace();
+                    e.printStackTrace();
                 }
                 isValid = false;
             }
@@ -690,6 +694,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 } catch (Throwable ee) {
                     log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
                     ee.printStackTrace();
+                    e.printStackTrace();
                 }
             }
         }
@@ -707,28 +712,6 @@ public class ModelPost extends AbstractJavaWebScript {
         return elements;
     }
 
-    public boolean isAspect( String name ) {
-        DictionaryService dServ = services.getDictionaryService();
-        Collection< QName > aspects = dServ.getAllAspects();
-        for ( QName aspect : aspects ) {
-            if ( aspect.getLocalName().equals( name ) ) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public boolean isType( String name ) {
-        DictionaryService dServ = services.getDictionaryService();
-        Collection< QName > types = dServ.getAllTypes();
-        for ( QName type : types ) {
-            if ( type.getLocalName().equals( name ) ) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
     protected EmsScriptNode
             updateOrCreateTransactionableElement( JSONObject elementJson,
                                                   EmsScriptNode parent,
@@ -750,20 +733,21 @@ public class ModelPost extends AbstractJavaWebScript {
             node.setStatus( getResponseStatus() );
         }
         EmsScriptNode reifiedNode = null;
+
+        String jsonType = elementJson.getString( Acm.JSON_TYPE );
+        String acmSysmlType = null;
+        String type = null;
+        if ( jsonType != null ) acmSysmlType = Acm.getJSON2ACM().get( jsonType );
+        type = NodeUtil.getContentModelTypeName( acmSysmlType, services );
+        
         if ( node == null || !node.exists() ) {// && newElements.contains( id ) ) {
-            String type = null;
-            String jsonType = elementJson.getString( Acm.JSON_TYPE );
-            if ( jsonType != null ) type = Acm.getJSON2ACM().get( jsonType );
-            if ( !isType( type ) ) {
-                type = Acm.ACM_ELEMENT;
-            }
             if ( type == null || type.trim().isEmpty() ) {
                 System.out.println( "PREFIX: type not found for " + jsonType );
                 return null;
             } else {
                 log( LogLevel.INFO, "\tcreating node" );
                 try {
-                    node = parent.createNode( id, type );
+                    node = parent.createSysmlNode( id, acmSysmlType );
                     if ( node == null || !node.exists() ) {
                         throw new Exception( "createNode() failed." );
                     }
@@ -780,12 +764,20 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         } else {
             log(LogLevel.INFO, "\tmodifying node");
+            // TODO -- Need to be able to handle changed type unless everything
+            // is an element and only aspects are used for subclassing.
             try {
-                if (node != null && node.exists() && !node.getParent().equals(parent)) {
-                    node.move(parent);
-                    EmsScriptNode pkgNode = findScriptNodeById(id + "_pkg");
-                    if (pkgNode != null) {
-                        pkgNode.move(parent);
+                if (node != null && node.exists() ) {
+                    if (!node.getParent().equals(parent)) {
+                        node.move(parent);
+                        EmsScriptNode pkgNode = findScriptNodeById(id + "_pkg");
+                        if (pkgNode != null) {
+                            pkgNode.move(parent);
+                        }
+                    }
+                    if ( !type.equals( acmSysmlType )
+                            && NodeUtil.isAspect( acmSysmlType ) ) {
+                        node.createOrUpdateAspect( acmSysmlType );
                     }
                 }
             } catch (Exception e) {
@@ -978,6 +970,7 @@ public class ModelPost extends AbstractJavaWebScript {
             model.put( "res", response.toString() );
         }
         status.setCode(responseStatus.getCode());
+        System.out.println("*** Done with model post!");
         return model;
     }
 

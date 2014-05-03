@@ -107,7 +107,7 @@ public class JsonDiff {
     public static void main( String[] args ) {
         JSONObject o1=null, o2=null;
         String usage = "Usage: JsonDiff file1.json file2.json";
-        if ( args.length != 2 ) {
+        if ( args.length < 2 ) {
             System.err.println(usage);
             return;
         }

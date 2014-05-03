@@ -371,8 +371,8 @@ public class View extends List implements sysml.View< EmsScriptNode > {
 
     @Override
     public String toString() {
-        JSONObject jo = toViewJson();
-        if ( jo != null ) return jo.toString();
+//        JSONObject jo = toViewJson();
+//        if ( jo != null ) return jo.toString();
         return "toViewJson() FAILED: " + toBoringString();
     }
 

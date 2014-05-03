@@ -816,8 +816,10 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 	        StringBuffer response = new StringBuffer();
 	        Status status = new Status();
 	        Map< String, EmsScriptNode > elements =
-	                NodeUtil.searchForElements( "@cm\\:type:\"", (String)specifier, services, response,
+	                NodeUtil.searchForElements( "@sysml\\:type:\"", (String)specifier, services, response,
 	                                            status );
+//            NodeUtil.searchForElements( "TYPE:\"", (String)specifier, services, response,
+//                                        status );
 
 	        if ( elements != null ) return elements.values();
     	}

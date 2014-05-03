@@ -169,9 +169,12 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      *            Short name (e.g., sysml:View) of the aspect to look for
      * @return true if node updated with aspect
      */
-    public boolean createOrUpdateAspect( String aspect ) {
-        if ( !hasAspect( aspect ) ) {
-            return addAspect( aspect );
+    public boolean createOrUpdateAspect( String aspectName ) {
+        if ( Acm.getJSON2ACM().keySet().contains( aspectName ) ) {
+            aspectName = Acm.getACM2JSON().get( aspectName );
+        }
+        if ( !hasAspect( aspectName ) ) {
+            return addAspect( aspectName );
         }
         return false;
     }
@@ -685,10 +688,31 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
 
     /**
+     * Create an EmsScriptNode adding aspects based on the input sysml type
+     * name.
+     * 
+     * @param sysmlId
+     *            the @sysml:id which is also the @cm:name
+     * @param sysmlAcmType
+     *            Alfresco Content Model type of node to create or an aspect
+     * @return created child EmsScriptNode
+     */
+    public EmsScriptNode createSysmlNode( String sysmlId, String sysmlAcmType ) {
+        String type = NodeUtil.getContentModelTypeName( sysmlAcmType, services );
+        EmsScriptNode node = createNode( sysmlId, type );
+
+        if ( node != null && !type.equals( sysmlAcmType )
+             && NodeUtil.isAspect( sysmlAcmType ) ) {
+            node.createOrUpdateAspect( sysmlAcmType );
+        }
+        return node;
+    }
+    
+    /**
      * Override createNode to return an EmsScriptNode
      * 
      * @param name
-     *            cm:name of node
+     *            cm:name of node (which may also be the sysml:id) 
      * @param type
      *            Alfresco Content Model type of node to create
      * @return created child EmsScriptNode
@@ -903,7 +927,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      * @return the storeRef
      */
     public static StoreRef getStoreRef() {
-        return NodeUtil.SEARCH_STORE;
+        return NodeUtil.getStoreRef();
     }
 
     /**
@@ -1558,11 +1582,14 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             if ( Acm.ACM_ELEMENT_VALUE.equals( acmProperty ) ) {
                 values = getPropertyValuesFromJson( PropertyType.NODE_REF, array );
             } else {
-                Debug.error("*$*$*$ null array of property values for " + acmProperty );
+                Debug.error(true, false, "*$*$*$ null array of property values for " + acmProperty );
                 return;
             }
         }
-
+        if ( values == null ) {
+            System.out.println("null property values for " + acmProperty );
+        }
+        
         // only change if old list is different than new
         if ( checkPermissions( PermissionService.WRITE, response, status ) ) {
             @SuppressWarnings( "unchecked" )
@@ -1782,9 +1809,16 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 //Debug.error( "No content model type found for \"" + key + "\"!" );
                 continue;
             } else {
+                QName qName = createQName( acmType );
+                if ( acmType == Acm.ACM_VALUE ) {
+                    System.out.println("qName of " + acmType + " = " + qName.toString() );
+                }
                 PropertyDefinition propDef =
-                        dServ.getProperty( createQName( acmType ) );
-                if ( propDef == null ) continue; // skips type
+                        dServ.getProperty( qName );
+                if ( propDef == null ) {
+                    System.out.println("null PropertyDefinition for " + acmType );
+                    continue; // skips type
+                }
                 boolean isArray =
                         ( Acm.JSON_ARRAYS.contains( key ) || 
                         ( propDef != null && propDef.isMultiValued() ) );
