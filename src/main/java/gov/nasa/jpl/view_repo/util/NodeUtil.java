@@ -4,6 +4,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Utils;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -87,14 +88,54 @@ public class NodeUtil {
         return services;
     }
 
-    protected static ResultSet findNodeRefsByType(String name, SearchType type, ServiceRegistry services) {
+    public static Collection<EmsScriptNode> luceneSearchElements(String queryPattern ) {
+        ArrayList<EmsScriptNode> nodes = new ArrayList<EmsScriptNode>();
+        ResultSet resultSet = luceneSearch( queryPattern, (SearchService)null );
+        System.out.println( "luceneSearch(" + queryPattern + ") returns "
+                            + resultSet.length() + " matches." );
+       for ( ResultSetRow row : resultSet ) {
+            EmsScriptNode node =
+                    new EmsScriptNode( row.getNodeRef(), getServices() );
+            nodes.add( node );
+        }
+        return nodes;
+    }
+    
+    public static ResultSet luceneSearch(String queryPattern ) {
+        return luceneSearch( queryPattern, (SearchService)null );
+    }
+    public static ResultSet luceneSearch( String queryPattern,
+                                          ServiceRegistry services ) {
+        if ( services == null ) services = getServices();
+        return luceneSearch( queryPattern,
+                             services == null ? null
+                                              : services.getSearchService() );
+    }
+    public static ResultSet luceneSearch(String queryPattern,
+                                         SearchService searchService ) {
+        if ( searchService == null ) {
+            if ( getServiceRegistry() != null ) {
+                searchService = getServiceRegistry().getSearchService();
+            }
+        }
+        ResultSet results = null;
+        if ( searchService != null ) { 
+            results = searchService.query( getStoreRef(),
+                                           SearchService.LANGUAGE_LUCENE,
+                                           queryPattern );
+        }
+        return results;
+    }
+    
+    protected static ResultSet findNodeRefsByType(String name, SearchType type,
+                                                  ServiceRegistry services) {
         return findNodeRefsByType( name, type.prefix, services );
     }
-    protected static ResultSet findNodeRefsByType(String name, String prefix, ServiceRegistry services) {
+    protected static ResultSet findNodeRefsByType(String name, String prefix,
+                                                  ServiceRegistry services) {
         ResultSet results = null;
-        results = services.getSearchService().query( getStoreRef(),
-                                                     SearchService.LANGUAGE_LUCENE,
-                                                     prefix + name + "\"" );
+        String queryPattern = prefix + name + "\"";
+        results = luceneSearch( queryPattern, services );
         return results;
     }
 

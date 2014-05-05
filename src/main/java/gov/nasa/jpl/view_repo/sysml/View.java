@@ -134,7 +134,10 @@ public class View extends List implements sysml.View< EmsScriptNode > {
 
         // Get all elements of Conform type:
         Collection<EmsScriptNode> conformElements = getModel().getType(null, Acm.JSON_CONFORM);
-
+        System.out.println( "Got "
+                            + ( conformElements == null ? 0
+                                                        : conformElements.size() )
+                            + " elements of type " + Acm.JSON_CONFORM );
         for ( EmsScriptNode node : conformElements ) {
             
             // If the sysml:source of the Compose element is the View:

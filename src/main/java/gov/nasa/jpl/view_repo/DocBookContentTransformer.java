@@ -28,6 +28,8 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo;
 
+import gov.nasa.jpl.view_repo.util.NodeUtil;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -296,7 +298,8 @@ public class DocBookContentTransformer extends AbstractContentTransformer2 {
 	 * @return
 	 */
 	private ResultSet findNodeRef(String name) {
-		ResultSet query = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, "@cm\\:name:\"" + name + "\"");
+	    String pattern = "@cm\\:name:\"" + name + "\"";
+		ResultSet query = NodeUtil.luceneSearch( pattern, searchService);
 		return query;
 	}
 }

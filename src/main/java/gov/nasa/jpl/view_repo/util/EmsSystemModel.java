@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.List;
@@ -821,7 +822,15 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 //            NodeUtil.searchForElements( "TYPE:\"", (String)specifier, services, response,
 //                                        status );
 
-	        if ( elements != null ) return elements.values();
+	        if ( elements != null && !elements.isEmpty()) return elements.values();
+	        
+//	        if ( elements == null ) elements = new LinkedHashMap<String, EmsScriptNode>(); 
+	        Collection< EmsScriptNode > elementColl = NodeUtil.luceneSearchElements( "TYPE:*Conform" );
+//	        for ( EmsScriptNode e : elementColl ) {
+//	            elements.put( e.getId(), e );
+//	        }
+            if ( elementColl != null && !elementColl.isEmpty()) return elementColl;
+	        
     	}
     	
         return Collections.emptyList();

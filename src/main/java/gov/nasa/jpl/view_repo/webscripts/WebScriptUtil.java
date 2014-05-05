@@ -30,6 +30,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -60,7 +61,7 @@ public class WebScriptUtil {
         
         ResultSet resultSet = null;
         try {
-            resultSet = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, pattern);
+            resultSet = NodeUtil.luceneSearch( pattern, services );
             for (ResultSetRow row: resultSet) {
                 EmsScriptNode node = new EmsScriptNode(row.getNodeRef(), services, response);
                 // filter by project
