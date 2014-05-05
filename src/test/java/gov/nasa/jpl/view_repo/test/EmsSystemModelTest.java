@@ -171,7 +171,7 @@ public class EmsSystemModelTest {
 //				+ nodeTest.getProperty(Acm.ACM_VALUE).getClass());
 
         
-        Object evalResult = sysmlToAe.evaluateExpression( node, Boolean.class );  
+        Object evalResult = sysmlToAe.evaluateExpression( node );//, Boolean.class );  
         System.out.println( "\n*testExpressionEvaluation() evalResult: "
                             + evalResult );
         assertNotNull( evalResult );
