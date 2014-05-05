@@ -1,0 +1,24 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "description": "Version listing specification",
+    "properties": {
+        "versions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "oneOf": [
+                    {"$ref": "#/definitions/Version"}
+                ]
+            }
+        }
+    },
+
+    "definitions": {
+        "Version": {
+            "properties": {
+                
+            }
+        }
+    }
+}

@@ -20,7 +20,7 @@
                 "url": {
                     "type": "string",
                     "format": "uri",
-                    "description": "Resource's URL"    
+                    "description": "Resource URL that is fully qualified with the appropriate namespace (sites/workspace)"    
                 },
                 "id": {
                     "type": "string",
