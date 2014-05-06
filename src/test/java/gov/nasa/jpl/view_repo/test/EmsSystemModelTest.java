@@ -171,20 +171,20 @@ public class EmsSystemModelTest {
 //				+ nodeTest.getProperty(Acm.ACM_VALUE).getClass());
 
         
-        Expression<Boolean> expression = (Expression<Boolean>)sysmlToAe.evaluateExpression( node );  
-        System.out.println( "\n*testExpressionEvaluation() expression: "
-                            + expression );
-        assertNotNull( expression );
+        Object evalResult = sysmlToAe.evaluateExpression( node );//, Boolean.class );  
+        System.out.println( "\n*testExpressionEvaluation() evalResult: "
+                            + evalResult );
+        assertNotNull( evalResult );
         
-//        Expression< Boolean > expression = sysmlToAe.toAeExpression( node );
-//        System.out.println( "\n*testExpressionEvaluation() expression: "
-//                + expression );
-//        assertNotNull( expression ); 
+        Expression< Boolean > expression = sysmlToAe.toAeExpression( node );
+        System.out.println( "\n*testExpressionEvaluation() expression: "
+                + expression );
+        assertNotNull( expression ); 
         Class< ? > type = expression.getType();
         System.out.println( "\n*testExpressionEvaluation() expression type: "
                             + type.getSimpleName() );
         //Assert.assertTrue( Boolean.class.isAssignableFrom( evalResult.getClass() ) ); 
-        
+           
         ConstraintExpression constraint = new ConstraintExpression( expression );
         System.out.println( "\n*testExpressionEvaluation() constraint: "
                 + MoreToString.Helper.toLongString( constraint ) );
