@@ -1,9 +1,9 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "description": "Version listing specification",
+    "description": "Sites listing specification",
     "properties": {
-        "versions": {
+        "sites": {
             "type": "array",
             "items": {
                 "type": "object",
@@ -17,7 +17,21 @@
     "definitions": {
         "Sites": {
             "properties": {
-                
+              "name": {
+                "type": "string",
+                "description": "The Alfresco name used for URL resolution"
+              },
+              "title": {
+                "type": "string",
+                "description": "Human readable title for the site"
+              },
+              "categories": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "description": "Category name - sites can be organized in categories, which can be hierarchical"
+                }
+              }
             }
         }
     }

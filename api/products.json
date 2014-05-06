@@ -3,7 +3,7 @@
     "type": "object",
     "description": "Products listing specification",
     "properties": {
-        "versions": {
+        "products": {
             "type": "array",
             "items": {
                 "type": "object",
@@ -17,7 +17,48 @@
     "definitions": {
         "Product": {
             "properties": {
-                
+                "id": {
+                    "type": "string",
+                    "description": "Unique identifier of the element. Equivalent to MDID"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Human readable name of the product"
+                },
+                "snapshots": {
+                    "type": "array",
+                    "description": "All the snapshots of this product",
+                    "items": {
+                        "type": "object",
+                        "oneOf": [
+                            {"$ref": "#/definitions/Snapshot"}
+                        ]
+                    }
+                }
+            }
+        },
+        "Snapshot": {
+            "created": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Last modified time of snapshot"
+            },
+            "creator": {
+                "type": "string",
+                "description": "Username of creator of snapshot"
+            },
+            "id": {
+                "type": "string",
+                "description": "Unique identifier of the element."
+            },
+            "tag": {
+                "type": "string",
+                "description": "Shows associated configuration set, if any"
+            },
+            "url": {
+                "type": "string",
+                "format": "uri",
+                "description": "URL to the actual snapshot 'view'"
             }
         }
     }

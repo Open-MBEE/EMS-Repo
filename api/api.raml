@@ -31,10 +31,32 @@ schemas:
   # include post/ put and delete responses
   #- elementsResponse: !include postResponse.json
   #- viewsResponse: !include postResponse.json
+traits:
+  - recursable:
+      description: Aspect for resources that can be retrieved recursively
+      queryParameters:
+        recurse:
+          description: If true, finds all elements recursively based on containment hierarchy
+          type: boolean
+        recurseDepth:
+          description: Depth to recurse to. 0 specifies infinite recursion (e.g., until all leaf nodes are found).
+          type: integer
+  - searchable:
+      description: Aspect for resources that can be searched for any resource type
+      queryParameters:
+        search:
+          description: Regular expression of the search to be executed at the specified scope. Currently search is against sysml:id, sysml:name, sysml:documentation, sysml:body.
+  - sliceable:
+      description: Aspect for resources that can be queried via a timestamp
+      queryParameters:
+        timestamp:
+          description: Timestamp to find most recent version of <<resourcePathName>, specified in ISO8601 time format.
+          type: date
+
 resourceTypes:
   - readCollection:
       securedBy: [basic]
-      is: [recursable, searchable]
+      is: [recursable, searchable, sliceable]
       usage: Resources with read capabilities and standard responses
       description: Read operations for <<resourcePathName>>
       get:
@@ -74,7 +96,7 @@ resourceTypes:
           409:
             description: <<resourcePathName>> conflict detected (e.g., intervening update occurred between when user accessed resource and when user saved resource)
           500:
-            description: Could not append to <<resourcePathName>> due to internal server error            
+            description: Could not append to <<resourcePathName>> due to internal server error   
       put:
         description: Create/update operation for <<resourcePathName>>
         body:
@@ -95,7 +117,7 @@ resourceTypes:
           409:
             description: <<resourcePathName>> conflict detected (e.g., intervening update occurred between when user accessed resource and when user updated resource)
           500:
-            description: Could not append to <<resourcePathName>> due to internal server error            
+            description: Could not append to <<resourcePathName>> due to internal server error
       delete:
         description: Delete operation for <<resourcePathName>>
         responses:
@@ -111,23 +133,8 @@ resourceTypes:
             description: <<resourcePathName>> not found
           500:
             description: Could not delete <<resourcePathName>> due to internal server error
-traits:
-  - recursable:
-      description: Aspect for resources that can be retrieved recursively
-      queryParameters:
-        recurse:
-          description: If true, will find all <<resourcePathName>> recursively (in containment hierarchy)
-          type: boolean
-        recurseDepth:
-          description: Depth to restrict recursion, defaults to 0, which is equivalently infinite depth
-          type: integer
-  - searchable:
-      description: Aspect for resources that can be searched for any resource type
-      queryParameters:
-        search:
-          description: Regular expression of the search to be executed at the specified scope   
+
 /sites:
-  type: readCollection
   get:
     description: Retrieve all sites for which user has read permissions
     responses:
@@ -173,12 +180,7 @@ traits:
                 }
       /{projectId}:
         get:
-          description: Retrieve the specific project
-          responses:
-            200:
-              body:
-                example: |
-                  {
+          description: Retrieve the specific project information
         /products:
           type: collection
           get:
@@ -250,6 +252,5 @@ traits:
       type: collection
       description: Search is available at every collection level for scoping purposes
 /workspaces:
-  type: readCollection
   description: This is a parallel of the sites branch and used for namespacing purposes, all the methods respond
   /{workspaceId}:
