@@ -825,7 +825,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 	        if ( elements != null && !elements.isEmpty()) return elements.values();
 	        
 //	        if ( elements == null ) elements = new LinkedHashMap<String, EmsScriptNode>(); 
-	        Collection< EmsScriptNode > elementColl = NodeUtil.luceneSearchElements( "TYPE:*Conform" );
+	        Collection< EmsScriptNode > elementColl = NodeUtil.luceneSearchElements( "TYPE:\"sysml:Conform\"" );
 //	        for ( EmsScriptNode e : elementColl ) {
 //	            elements.put( e.getId(), e );
 //	        }

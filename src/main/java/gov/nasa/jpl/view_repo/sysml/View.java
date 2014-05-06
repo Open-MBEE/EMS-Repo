@@ -295,6 +295,8 @@ public class View extends List implements sysml.View< EmsScriptNode > {
                 new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getModel() );
         Expression< Object > aeExpr = sysmlToAeExpr.operationToAeExpression(viewpointOp, exposed);
 
+        if ( aeExpr == null ) return null;
+        
         // Evaluate the expression to get the Viewables and add them to this View.
 
         clear(); // make sure we clear out any old information

@@ -163,7 +163,14 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		    productsJson = new JSONObject(object, JSONObject.getNames(object));
 
 		    if (object.has(Acm.JSON_VIEW_2_VIEW)) {
-		        handleViews(object.getJSONArray(Acm.JSON_VIEW_2_VIEW), viewsJson, elementsJson);
+		        Object o = object.get( Acm.JSON_VIEW_2_VIEW );
+		        JSONArray jarr = null;
+		        if ( o instanceof String ) {
+                    jarr = new JSONArray( (String)o );
+		        } else {
+		            jarr = object.getJSONArray(Acm.JSON_VIEW_2_VIEW);
+		        }
+                handleViews(jarr, viewsJson, elementsJson);
 		    }
 		    
 		    productsJson.put("views", viewsJson);
@@ -233,7 +240,14 @@ public class MoaProductGet extends AbstractJavaWebScript {
         	        viewJson.put("comments", commentsJson);
         	        
         	        if (viewJson.has(Acm.JSON_ALLOWED_ELEMENTS)) {
-            	        JSONArray allowedElements = viewJson.getJSONArray(Acm.JSON_ALLOWED_ELEMENTS);
+                        JSONArray allowedElements = null;
+                        Object o = viewJson.get( Acm.JSON_ALLOWED_ELEMENTS );
+                        if ( o instanceof String ) {
+                            allowedElements = new JSONArray( (String)o );
+                        } else {
+                            allowedElements = viewJson.getJSONArray(Acm.JSON_ALLOWED_ELEMENTS);
+                        }
+            	        //JSONArray allowedElements = viewJson.getJSONArray(Acm.JSON_ALLOWED_ELEMENTS);
             	        for (int ii = 0; ii < allowedElements.length(); ii++) {
             	            elementIds.add(allowedElements.getString(ii));
             	        }
