@@ -184,7 +184,7 @@ public class EmsSystemModelTest {
         System.out.println( "\n*testExpressionEvaluation() expression type: "
                             + type.getSimpleName() );
         //Assert.assertTrue( Boolean.class.isAssignableFrom( evalResult.getClass() ) ); 
-        
+           
         ConstraintExpression constraint = new ConstraintExpression( expression );
         System.out.println( "\n*testExpressionEvaluation() constraint: "
                 + MoreToString.Helper.toLongString( constraint ) );
