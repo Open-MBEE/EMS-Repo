@@ -49,7 +49,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ViewGet extends AbstractJavaWebScript {
 		
-	private boolean demoMode = false;
+	private boolean demoMode = true;
 	
 	public ViewGet() {
 	    super();
@@ -121,23 +121,42 @@ public class ViewGet extends AbstractJavaWebScript {
 	private void handleView(String viewId, JSONArray viewsJson, boolean recurse) throws JSONException {
 		EmsScriptNode view = findScriptNodeById(viewId);
 		if (view == null) {
-			log(LogLevel.ERROR, "View not found with ID: " + viewId, HttpServletResponse.SC_NOT_FOUND);
+            log( LogLevel.ERROR, "View not found with ID: " + viewId,
+                 HttpServletResponse.SC_NOT_FOUND );
 		}
 		
-		if (demoMode) {
-			View mmsView = new View(view);
-			JSONObject json = mmsView.toViewJson();
-		}
-		else {
-			if (checkPermissions(view, PermissionService.READ)) { 
-			    viewsJson.put(view.toJSONObject(Acm.JSON_TYPE_FILTER.VIEW));
-	        		if (recurse) {
-	            		JSONArray childrenJson = view.getChildrenViewsJSONArray();
-	            		for (int ii = 0; ii < childrenJson.length(); ii++) {
-	            		    handleView(childrenJson.getString(ii), viewsJson, recurse);
-	            		}
-	        		}
-			}
+		if (checkPermissions(view, PermissionService.READ)) {
+		    int numThingsPut = 0;
+	        if (demoMode) {
+	            View mmsView = new View(view);
+	            JSONObject json = mmsView.toViewJson();
+                JSONArray jarr = null;
+	            if ( json != null ) {
+    	            jarr = json.getJSONArray( "views" );
+    	            if ( jarr != null ) {
+        	            for ( int i = 0; i < jarr.length(); ++i ) {
+                            viewsJson.put( jarr.get( i ) );
+                            ++numThingsPut;
+        	            }
+    	            }
+	            }
+	            System.out.println("*** added " + jarr);
+	            if ( numThingsPut == 0 ) {
+	                    System.out.println( "*** Generating views from expressions failed for viewId = "
+	                            + viewId );
+	                    System.out.println( "*** View = " + mmsView );
+	            }
+	        }
+            if ( numThingsPut == 0 ) {
+	            viewsJson.put(view.toJSONObject(Acm.JSON_TYPE_FILTER.VIEW));
+        		if (recurse) {
+            		JSONArray childrenJson = view.getChildrenViewsJSONArray();
+            		for (int ii = 0; ii < childrenJson.length(); ii++) {
+            		    handleView(childrenJson.getString(ii), viewsJson, recurse);
+            		    ++numThingsPut;
+            		}
+        		}
+	        }
 		}
 	}
 		

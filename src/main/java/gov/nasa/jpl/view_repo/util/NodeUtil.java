@@ -1,7 +1,12 @@
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Utils;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -11,17 +16,24 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.dictionary.AspectDefinition;
+import org.alfresco.service.cmr.dictionary.DictionaryService;
+import org.alfresco.service.cmr.dictionary.TypeDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService.FindNodeParameters;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ApplicationContextHelper;
 import org.apache.commons.digester.SetRootRule;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
+
+import com.ibm.icu.impl.LinkedHashMap;
 
 public class NodeUtil {
     
@@ -43,14 +55,17 @@ public class NodeUtil {
     public static ServiceRegistry services = null;
     
     // needed for Lucene search
-    protected static final StoreRef SEARCH_STORE =
-            new StoreRef( StoreRef.PROTOCOL_WORKSPACE, "SpacesStore" );
-//    protected final static String[] searchTypes = {"@sysml\\:documentation:\"",
-//                                                   "@sysml\\:name:\"",
-//                                                   "@sysml\\:id:\"",
-//                                                   "@sysml\\:string:\"",
-//                                                   "@sysml\\:body:\""};
+    public static StoreRef SEARCH_STORE = null;
+            //new StoreRef( StoreRef.PROTOCOL_WORKSPACE, "SpacesStore" );
 
+    public static StoreRef getStoreRef() {
+        if ( SEARCH_STORE == null ) {
+            SEARCH_STORE =
+                    new StoreRef( StoreRef.PROTOCOL_WORKSPACE, "SpacesStore" );
+        }
+        return SEARCH_STORE;
+    }
+    
     public static ApplicationContext getApplicationContext() {
         String[] contextPath =
                 new String[] { "classpath:alfresco/application-context.xml" };
@@ -73,17 +88,57 @@ public class NodeUtil {
         return services;
     }
 
-    protected static ResultSet findNodeRefsByType(String name, SearchType type, ServiceRegistry services) {
-        return findNodeRefsByType( name, type.prefix, services );
-    }
-    protected static ResultSet findNodeRefsByType(String name, String prefix, ServiceRegistry services) {
-        ResultSet results = null;
-        results = services.getSearchService().query( SEARCH_STORE,
-                                                     SearchService.LANGUAGE_LUCENE,
-                                                     prefix + name + "\"" );
-        return results;     
+    public static Collection<EmsScriptNode> luceneSearchElements(String queryPattern ) {
+        ArrayList<EmsScriptNode> nodes = new ArrayList<EmsScriptNode>();
+        ResultSet resultSet = luceneSearch( queryPattern, (SearchService)null );
+        System.out.println( "luceneSearch(" + queryPattern + ") returns "
+                            + resultSet.length() + " matches." );
+       for ( ResultSetRow row : resultSet ) {
+            EmsScriptNode node =
+                    new EmsScriptNode( row.getNodeRef(), getServices() );
+            nodes.add( node );
+        }
+        return nodes;
     }
     
+    public static ResultSet luceneSearch(String queryPattern ) {
+        return luceneSearch( queryPattern, (SearchService)null );
+    }
+    public static ResultSet luceneSearch( String queryPattern,
+                                          ServiceRegistry services ) {
+        if ( services == null ) services = getServices();
+        return luceneSearch( queryPattern,
+                             services == null ? null
+                                              : services.getSearchService() );
+    }
+    public static ResultSet luceneSearch(String queryPattern,
+                                         SearchService searchService ) {
+        if ( searchService == null ) {
+            if ( getServiceRegistry() != null ) {
+                searchService = getServiceRegistry().getSearchService();
+            }
+        }
+        ResultSet results = null;
+        if ( searchService != null ) { 
+            results = searchService.query( getStoreRef(),
+                                           SearchService.LANGUAGE_LUCENE,
+                                           queryPattern );
+        }
+        return results;
+    }
+    
+    protected static ResultSet findNodeRefsByType(String name, SearchType type,
+                                                  ServiceRegistry services) {
+        return findNodeRefsByType( name, type.prefix, services );
+    }
+    protected static ResultSet findNodeRefsByType(String name, String prefix,
+                                                  ServiceRegistry services) {
+        ResultSet results = null;
+        String queryPattern = prefix + name + "\"";
+        results = luceneSearch( queryPattern, services );
+        return results;
+    }
+
     public static NodeRef findNodeRefByType(String name, SearchType type, ServiceRegistry services) {
         return findNodeRefByType( name, type.prefix, services );
     }
@@ -94,10 +149,24 @@ public class NodeUtil {
         try {
             results = findNodeRefsByType( name, prefix, services );
             if (results != null) {
+                //boolean nameMatches = false;
                 for (ResultSetRow row: results) {
-                    nodeRef = row.getNodeRef();
-                    break; // Assumption is things are uniquely named - TODO:
-                           // fix since snapshots have same name?...
+                    NodeRef nr = row.getNodeRef();
+//                    if ( nodeRef == null ) nodeRef = nr;
+//                    else {
+                        // Make sure we didn't just get a near match.
+                        EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
+                        try {
+                        String acmType = Utils.join( prefix.split( "[\\W]+" ), ":").replaceFirst( "^:", "" );
+                        Object o = esn.getProperty( acmType );
+                        if ( ( "" + o ).equals( name ) ) {
+                            nodeRef = nr;
+                            break;
+                        }
+                        } catch ( Throwable e ) {
+                            e.printStackTrace();
+                        }
+//                    }
                 }
             }
         } finally {
@@ -153,11 +222,14 @@ public class NodeUtil {
 
         ResultSet resultSet = null;
         try {
-            pattern = type + pattern + "\"";
-            resultSet =
-                    services.getSearchService().query( SEARCH_STORE,
-                                                       SearchService.LANGUAGE_LUCENE,
-                                                       pattern );
+
+            resultSet = findNodeRefsByType(pattern, type, getServices());
+
+//            pattern = type + pattern + "\"";
+//            resultSet =
+//                    services.getSearchService().query( getStoreRef(),
+//                                                       SearchService.LANGUAGE_LUCENE,
+//                                                       pattern );
             for ( ResultSetRow row : resultSet ) {
                 EmsScriptNode node =
                         new EmsScriptNode( row.getNodeRef(), services, response );
@@ -172,6 +244,8 @@ public class NodeUtil {
             if ( response != null || status != null ) {
                 String msg = "Error! Could not parse search: " + pattern + ".\n"
                              + e.getLocalizedMessage();
+                System.out.println(msg);
+                e.printStackTrace( System.out );
                 if ( response != null ) response.append( msg );
                 if ( status != null ) status.setCode( HttpServletResponse.SC_BAD_REQUEST,
                                                       msg );
@@ -188,11 +262,276 @@ public class NodeUtil {
     }
     
     /**
+     * This method behaves the same as if calling
+     * {@link #isType(String, ServiceRegistry)} while passing null as the
+     * ServiceRegistry.
+     * 
+     * @param typeName
+     * @return true if and only if a type is defined in the content model with a
+     *         matching name.
+     */
+    public static boolean isType( String typeName ) {
+        return isType( typeName, null );
+    }
+
+    /**
+     * Determine whether the input type name is a type in the content model (as
+     * opposed to an aspect, for example).
+     * 
+     * @param typeName
+     * @param services
+     * @return true if and only if a type is defined in the content model with a
+     *         matching name.
+     */
+    public static boolean isType( String typeName, ServiceRegistry services ) {
+        if ( typeName == null ) return false;
+        if ( Acm.getJSON2ACM().keySet().contains( typeName ) ) {
+            typeName = Acm.getACM2JSON().get( typeName );
+        }
+//        String[] split = typeName.split( ":" );
+//        
+//        String nameSpace = null;
+//        String localName = null;
+//        if ( split.length == 2 ) {
+//            nameSpace = split[0];
+//            localName = split[1];
+//        } else if ( split.length == 1 ) {
+//            localName = split[0];
+//        } else {
+//            Debug.error(true, false, "Bad type name " + typeName );
+//            return false;
+//        }
+//        if ( localName == null ) {
+//            Debug.error(true, false, "Bad type name " + typeName );
+//            return false;
+//        }
+        if ( services == null ) services = getServices();
+        DictionaryService dServ = services.getDictionaryService();
+//        Collection< QName > types = dServ.getAllTypes();
+//        //{http://www.alfresco.org/model/transfer/1.0}
+        QName qName = createQName( typeName, services );
+        if ( qName != null ) {
+            TypeDefinition t = dServ.getType( qName );
+            if ( t != null ) {
+//              System.out.println("\n\n*** getType(" + typeName + ") worked!!!\n" );
+              return true;
+            }
+        }
+//        //        System.out.println("all types: " + types);
+////        TypeDefinition t = dServ.getType( QName.createQName( typeName ) );
+////        System.out.println("getType(" + typeName + ") = " + t );
+//        for ( QName type : types ) {
+////            System.out.println( "getLocalName() = " + type.getLocalName() );
+////            System.out.println( "getPrefixString() = " + type.getPrefixString() );
+////            System.out.println( "toPrefixString() = " + type.toPrefixString() );
+////            System.out.println( "toString() = " + type.toString() );
+//            if ( typeName.equals( type.getPrefixString() ) ) {
+//                System.out.println("isType(" + typeName + ") = true");
+//                return true;
+//            }
+//        }
+//        System.out.println("isType(" + typeName + ") = false");
+        return false;
+    }
+    
+    /**
+     * This method behaves the same as if calling
+     * {@link #isAspect(String, ServiceRegistry)} while passing null as the
+     * ServiceRegistry.
+     * 
+     * @param aspectName
+     * @return true if and only if an aspect is defined in the content model
+     *         with a matching name.
+     */
+    public static boolean isAspect( String aspectName ) {
+        return isAspect( aspectName, null );
+    }
+
+    /**
+     * Determine whether the input aspect name is an aspect in the content model
+     * (as opposed to a type, for example).
+     * 
+     * @param aspectName
+     * @param services
+     * @return true if and only if an aspect is defined in the content model
+     *         with a matching name.
+     */
+    public static boolean isAspect( String aspectName, ServiceRegistry services ) {
+        if ( Acm.getJSON2ACM().keySet().contains( aspectName ) ) {
+            aspectName = Acm.getACM2JSON().get( aspectName );
+        }
+        if ( services == null ) services = getServices();
+        DictionaryService dServ = services.getDictionaryService();
+
+        QName qName = createQName( aspectName, services );
+        if ( qName != null ) {
+            AspectDefinition t = dServ.getAspect( qName );
+            if ( t != null ) {
+              System.out.println("\n\n*** getAspect(" + aspectName + ") worked!!!\n" );
+              return true;
+            }
+        }
+        
+        Collection< QName > aspects = dServ.getAllAspects();
+        System.out.println("all aspects: " + aspects);
+
+        for ( QName aspect : aspects ) {
+            if ( aspect.getPrefixString().equals( aspectName ) ) {
+                System.out.println("\n\n*** getAspect(" + aspectName + ") returning true\n" );
+                return true;
+            }
+        }
+        System.out.println("\n\n*** getAspect(" + aspectName + ") returning false\n" );
+        return false;
+    }
+
+    /**
+     * Given a long-form QName, this method uses the namespace service to create a
+     * short-form QName string.
+     * <p>
+     * Copied from {@link ScriptNode#getShortQName(QName)}.
+     * @param longQName
+     * @return the short form of the QName string, e.g. "cm:content"
+     */
+    public static String getShortQName(QName longQName)
+    {
+        return longQName.toPrefixString(getServices().getNamespaceService());
+    }
+    
+    /**
+     * Helper to create a QName from either a fully qualified or short-name
+     * QName string
+     * <P>
+     * Copied from {@link ScriptNode#createQName(QName)}.
+     * 
+     * @param s
+     *            Fully qualified or short-name QName string
+     * 
+     * @return QName
+     */
+    public static QName createQName(String s) {
+        return createQName( s, null );
+    }
+    
+    /**
+     * Helper to create a QName from either a fully qualified or short-name
+     * QName string
+     * <P>
+     * Copied from {@link ScriptNode#createQName(QName)}.
+     * 
+     * @param s
+     *            Fully qualified or short-name QName string
+     * 
+     * @param services
+     *            ServiceRegistry for getting the service to resolve the name
+     *            space
+     * @return QName
+     */
+    public static QName createQName(String s, ServiceRegistry services )
+    {
+        if ( s == null ) return null;
+        if ( Acm.getJSON2ACM().keySet().contains( s ) ) {
+            s = Acm.getACM2JSON().get( s );
+        }
+        QName qname;
+        if (s.indexOf("{") != -1)
+        {
+            qname = QName.createQName(s);
+        }
+        else
+        {
+            if ( services == null ) services = getServices();
+            qname = QName.createQName(s, getServices().getNamespaceService());
+        }
+        return qname;
+    }
+
+    
+//    public static QName makeContentModelQName( String cmName ) {
+//        return makeContentModelQName( cmName, null );
+//    }
+//    public static QName makeContentModelQName( String cmName, ServiceRegistry services ) {
+//        if ( services == null ) services = getServices();
+//        
+//        if ( cmName == null ) return null;
+//        if ( Acm.getJSON2ACM().keySet().contains( cmName ) ) {
+//            cmName = Acm.getACM2JSON().get( cmName );
+//        }
+//        String[] split = cmName.split( ":" );
+//        
+//        String nameSpace = null;
+//        String localName = null;
+//        if ( split.length == 2 ) {
+//            nameSpace = split[0];
+//            localName = split[1];
+//        } else if ( split.length == 1 ) {
+//            localName = split[0];
+//        } else {
+//            return null;
+//        }
+//        if ( localName == null ) {
+//            return null;
+//        }
+//        DictionaryService dServ = services.getDictionaryService();
+//        QName qName = null;
+//        if ( nameSpace != null ) {
+//            if ( nameSpace.equals( "sysml" ) ) {
+//                qName = QName.createQName( "{http://jpl.nasa.gov/model/sysml-lite/1.0}"
+//                                           + localName );
+//            } else if ( nameSpace.equals( "view2" ) ) {
+//                qName = QName.createQName( "{http://jpl.nasa.gov/model/view/2.0}"
+//                                           + localName );
+//            } else if ( nameSpace.equals( "view" ) ) {
+//                qName = QName.createQName( "{http://jpl.nasa.gov/model/view/1.0}"
+//                                           + localName );
+//            }
+//        }
+//        return qName;
+//    }
+    
+    /**
+     * This method behaves the same as if calling
+     * {@link #getContentModelTypeName(String, ServiceRegistry)} while passing
+     * null as the ServiceRegistry.
+     * 
+     * @param typeOrAspectName
+     * @return the input type name if it matches a type; otherwise,
+     *         return the Element type, assuming that all nodes are Elements
+     */
+    public static String getContentModelTypeName( String typeOrAspectName ) {
+        return getContentModelTypeName( typeOrAspectName, null );
+    }
+
+    /**
+     * Get the type defined in the Alfresco content model. Return the input type
+     * name if it matches a type; otherwise, return the Element type, assuming
+     * that all nodes are Elements.
+     * 
+     * @param typeOrAspectName
+     * @return
+     */
+    public static String getContentModelTypeName( String typeOrAspectName,
+                                                  ServiceRegistry services ) {
+        if ( services == null ) services = getServices();
+        if ( Acm.getJSON2ACM().keySet().contains( typeOrAspectName ) ) {
+            typeOrAspectName = Acm.getACM2JSON().get( typeOrAspectName );
+        }
+        String type = typeOrAspectName;
+        boolean notType = !NodeUtil.isType( type, services ); 
+        if ( notType ) {
+            type = Acm.ACM_ELEMENT;
+        }
+        return type;
+    }
+    
+    /**
      * Get site of specified short name
      * @param siteName
      * @return  ScriptNode of site with name siteName
      */
-    public static EmsScriptNode getSiteNode(String siteName, ServiceRegistry services, StringBuffer response) {
+    public static EmsScriptNode getSiteNode( String siteName,
+                                             ServiceRegistry services,
+                                             StringBuffer response ) {
         if ( Utils.isNullOrEmpty( siteName ) ) return null;
         SiteInfo siteInfo = services.getSiteService().getSite(siteName);
         if (siteInfo != null) {
@@ -218,10 +557,29 @@ public class NodeUtil {
     }
     
     public static Set< NodeRef > getRootNodes(ServiceRegistry services ) {
-        return services.getNodeService().getAllRootNodes( SEARCH_STORE );
+        return services.getNodeService().getAllRootNodes( getStoreRef() );
     }
 
-       
+    /**
+     * Find an existing NodeRef with the input Alfresco id.
+     * 
+     * @param id
+     *            an id similar to
+     *            workspace://SpacesStore/e297594b-8c24-427a-9342-35ea702b06ff
+     * @return If there a node exists with the input id in the Alfresco
+     *         database, return a NodeRef to it; otherwise return null. An error
+     *         is printed if the id doesn't have the right syntax.
+     */
+    public static NodeRef findNodeRefByAlfrescoId(String id) {
+        if ( !NodeRef.isNodeRef( id ) ) {
+            Debug.error("Bad NodeRef id: " + id );
+            return null;
+        }
+        NodeRef n = new NodeRef(id);
+        EmsScriptNode node = new EmsScriptNode( n, getServices() );
+        if ( !node.exists() ) return null;
+        return n;
+    }
     /**
      * Find or create a folder
      * 

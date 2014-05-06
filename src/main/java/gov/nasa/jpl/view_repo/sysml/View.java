@@ -8,6 +8,7 @@ import gov.nasa.jpl.ae.event.Expression.Form;
 import gov.nasa.jpl.ae.event.FunctionCall;
 import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.MoreToString;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -133,7 +134,10 @@ public class View extends List implements sysml.View< EmsScriptNode > {
 
         // Get all elements of Conform type:
         Collection<EmsScriptNode> conformElements = getModel().getType(null, Acm.JSON_CONFORM);
-
+        System.out.println( "Got "
+                            + ( conformElements == null ? 0
+                                                        : conformElements.size() )
+                            + " elements of type " + Acm.JSON_CONFORM );
         for ( EmsScriptNode node : conformElements ) {
             
             // If the sysml:source of the Compose element is the View:
@@ -269,13 +273,21 @@ public class View extends List implements sysml.View< EmsScriptNode > {
     @Override
     public JSONObject toViewJson() {
     	
-        if ( viewNode == null ) return null;
+        if ( viewNode == null ) {
+            System.out.println("*** called View.toViewJson() without a view node! View = " + toBoringString() );
+            return null;
+        }
         
         // Get the related elements that define the the view.
         
         Collection<EmsScriptNode> exposed = getExposedElements();
-        EmsScriptNode viewpointOp = getViewpointOperation();
-        if ( viewpointOp == null ) return null;
+        // TODO -- need to handle case where viewpoint operation does not exist
+        //         and an external function (e.g., Java) is somehow specified.
+        EmsScriptNode viewpointOp = getViewpointOperation(); 
+        if ( viewpointOp == null ) {
+            System.out.println("*** View.toViewJson(): no viewpoint operation! View = " + toBoringString() );
+            return null;
+        }
         
         // Translate the viewpoint Operation/Expression element into an AE Expression:
         
@@ -283,13 +295,8 @@ public class View extends List implements sysml.View< EmsScriptNode > {
                 new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getModel() );
         Expression< Object > aeExpr = sysmlToAeExpr.operationToAeExpression(viewpointOp, exposed);
 
-//        // Set the function call arguments with the exposed model elements:
-//        
-//        if ( aeExpr.getForm() == Form.Function ) {
-//            Vector< Object > args = new Vector< Object >( exposed );
-//            ( (FunctionCall)aeExpr.expression ).setArguments( args  );
-//        }
-
+        if ( aeExpr == null ) return null;
+        
         // Evaluate the expression to get the Viewables and add them to this View.
 
         clear(); // make sure we clear out any old information
@@ -320,27 +327,27 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         JSONObject viewProperties = new JSONObject();
         JSONArray jsonArray = new JSONArray();
         try {
-            json.append( "views", jsonArray );
+            json.put("views", jsonArray);
             jsonArray.put( viewProperties );
-            viewProperties.put("id", viewNode.getId() );
+            viewProperties.put("id", viewNode.getName() );
 
             JSONArray elements = new JSONArray();
             viewProperties.put("displayedElements", elements );
             for ( EmsScriptNode elem : getDisplayedElements() ) {
-                elements.put( elem.getId() );
+                elements.put( elem.getName() );
             }
 
             elements = new JSONArray();
             viewProperties.put("allowedElements", elements );
             for ( EmsScriptNode elem : getDisplayedElements() ) {
-                elements.put( elem.getId() );
+                elements.put( elem.getName() );
             }
 
             elements = new JSONArray();
             viewProperties.put("childrenViews", elements );
             for ( sysml.View<EmsScriptNode> view : getChildViews() ) {
                 if ( view instanceof View ) {
-                    elements.put( view.getElement().getId() );
+                    elements.put( view.getElement().getName() );
                 }
             }
 
@@ -357,6 +364,21 @@ public class View extends List implements sysml.View< EmsScriptNode > {
             e.printStackTrace();
         }
         return json;
+    }
+    
+    private String toBoringString() {
+        return "view node = "
+               + this.viewNode
+               + "; java.util.List = "
+               + MoreToString.Helper.toString( this, false, false, null, null,
+                                               MoreToString.PARENTHESES, true );
+    }
+
+    @Override
+    public String toString() {
+//        JSONObject jo = toViewJson();
+//        if ( jo != null ) return jo.toString();
+        return "toViewJson() FAILED: " + toBoringString();
     }
 
 }

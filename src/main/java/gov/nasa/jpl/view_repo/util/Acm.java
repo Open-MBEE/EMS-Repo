@@ -86,6 +86,8 @@ public class Acm {
     public static final String JSON_DISPLAYED_ELEMENTS = "displayedElements";
     public static final String JSON_NO_SECTIONS = "noSections";
     public static final String JSON_VIEW_2_VIEW = "view2view";
+    public static final String JSON_PRODUCT = "Product";
+    public static final String JSON_VIEW = "View";
     
 //    public static final String JSON_EXPRESSION = "Expression";
 //    public static final String JSON_LITERAL_BOOLEAN = "LiteralBoolean";
@@ -177,7 +179,6 @@ public class Acm {
 //    public static final String ACM_OWNER = SYSML + JSON_OWNER;
     public static final String ACM_TYPE = SYSML + JSON_TYPE;
     public static final String ACM_REIFIED_CONTAINMENT = SYSML + "reifiedContainment";
-    public static final String ACM_VIEW = SYSML + "View";
     public static final String ACM_BODY = SYSML + JSON_BODY;
     public static final String ACM_EXPRESSION_BODY = SYSML + JSON_EXPRESSION_BODY;
     public static final String ACM_ANNOTATED_ELEMENTS = SYSML + JSON_ANNOTATED_ELEMENTS;
@@ -194,7 +195,8 @@ public class Acm {
     public static final String ACM_DISPLAYED_ELEMENTS = VIEW + JSON_DISPLAYED_ELEMENTS;
     public static final String ACM_NO_SECTIONS = VIEW + JSON_NO_SECTIONS;
     public static final String ACM_VIEW_2_VIEW = VIEW + JSON_VIEW_2_VIEW;
-    public static final String ACM_PRODUCT = VIEW + "Product";
+    public static final String ACM_PRODUCT = VIEW + JSON_PRODUCT;
+    public static final String ACM_VIEW = SYSML + JSON_VIEW; // yes, this starts with sysml instead of view2
     
 //    public static final String ACM_EXPRESSION = SYSML + JSON_EXPRESSION;
 //    public static final String ACM_LITERAL_BOOLEAN = SYSML + JSON_LITERAL_BOOLEAN;
@@ -465,6 +467,8 @@ public class Acm {
             // now get rid of stuff that's handled special
             //removeAll()
 
+            add(JSON_VALUE);
+            
             add(JSON_BODY);
             add(JSON_TYPE);
             add(JSON_NAME);
@@ -474,7 +478,6 @@ public class Acm {
             // TODO: source/target should become noderefs at some point
             add(JSON_SOURCE);
             add(JSON_TARGET);
-            add(JSON_PROPERTY_TYPE);
 
             add(JSON_OWNER);
             add(JSON_VALUE_TYPE);
@@ -482,8 +485,8 @@ public class Acm {
 
             addAll(COMMON_JSON);
             
-            addAll(VIEW_JSON);
-            addAll(PRODUCT_JSON);
+//            addAll(VIEW_JSON);
+//            addAll(PRODUCT_JSON);
             
             addAll(MISC_PROPS_JSON);
         }
