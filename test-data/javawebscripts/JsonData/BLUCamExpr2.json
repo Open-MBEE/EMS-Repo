@@ -19,6 +19,14 @@
         "type": "Property"
     },
     {
+        "id": "_17_0_2_3_e81034b_1399082859815_806410_28215",
+        "name": "definition1",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399082611722_728316_28208",
+        "type": "Constraint",
+        "constraintSpecification": "_17_0_2_3_e81034b_1399082859816_284526_28216"
+    },
+    {
         "id": "_17_0_2_4_f3a0363_1394141831980_671275_28387",
         "propertyType": "null",
         "isDerived": false,
@@ -55,6 +63,13 @@
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "type": "Element"
+    },
+    {
+        "id": "_17_0_2_3_e81034b_1399078698098_861393_28034",
+        "name": "Make Stuff",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "type": "Viewpoint"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394146030348_183558_30354",
@@ -121,6 +136,13 @@
         "type": "Element"
     },
     {
+        "id": "_17_0_2_3_e81034b_1399078877045_608424_28086",
+        "name": "operations",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "type": "Element"
+    },
+    {
         "id": "_17_0_2_4_f3a0363_1394140818165_563290_27952",
         "name": "Environment",
         "documentation": "",
@@ -133,6 +155,17 @@
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394142107742_559409_28432",
         "type": "Element"
+    },
+    {
+        "id": "_17_0_2_3_e610336_1394148084317_999095_29188-slot-_17_0_2_3_f4a035d_1366702935947_453687_36949",
+        "propertyType": "_17_0_2_3_f4a035d_1366702935947_453687_36949",
+        "isDerived": false,
+        "isSlot": true,
+        "name": "",
+        "value": ["_17_0_2_3_e81034b_1399075230340_633236_24246"],
+        "documentation": "",
+        "owner": "_17_0_2_3_e610336_1394148084317_999095_29188",
+        "type": "Property"
     },
     {
         "id": "_17_0_2_3_e610336_1394148986587_721210_29765",
@@ -156,11 +189,30 @@
         "type": "Element"
     },
     {
+        "id": "_17_0_2_4_f3a0363_1394141399783_943327_28357-slot-_11_5EAPbeta_be00301_1147431377925_245593_1615",
+        "propertyType": "_11_5EAPbeta_be00301_1147431377925_245593_1615",
+        "isDerived": false,
+        "isSlot": true,
+        "name": "",
+        "value": ["_17_0_2_3_e81034b_1399075230315_7922_24190"],
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394141399783_943327_28357",
+        "type": "Property"
+    },
+    {
         "id": "_17_0_2_3_e610336_1394148367691_391441_29494",
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "type": "Element"
+    },
+    {
+        "id": "_17_0_2_3_e81034b_1399081659468_588600_28167",
+        "name": "result",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399080032253_662356_28139",
+        "type": "Element",
+        "parameterDirection": "in"
     },
     {
         "id": "_17_0_2_3_e610336_1394148084317_280624_29187",
@@ -208,6 +260,17 @@
         "type": "Property"
     },
     {
+        "id": "_17_0_2_3_e81034b_1399084882350_517408_29567",
+        "propertyType": "null",
+        "isDerived": false,
+        "isSlot": false,
+        "name": "val",
+        "value": ["_17_0_2_3_e81034b_1399084945498_465485_29569"],
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399078877045_608424_28086",
+        "type": "Property"
+    },
+    {
         "id": "_17_0_2_3_e610336_1394148344635_236152_29421",
         "propertyType": "_17_0_2_3_e610336_1394148084317_280624_29187",
         "isDerived": false,
@@ -228,11 +291,31 @@
         "type": "Property"
     },
     {
+        "id": "_17_0_2_3_e81034b_1399078726896_173708_28057",
+        "source": "_17_0_2_3_e81034b_1399078605227_767466_27947",
+        "name": "",
+        "target": "_17_0_2_3_e81034b_1399078698098_861393_28034",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399078605227_767466_27947",
+        "type": "Conform"
+    },
+    {
         "id": "_17_0_2_4_f3a0363_1394144312699_830184_29843",
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394142107742_559409_28432",
         "type": "Element"
+    },
+    {
+        "id": "_17_0_2_3_e610336_1394148084317_999095_29188-slot-_17_0_2_3_e9f034d_1375464993159_319060_29362",
+        "propertyType": "_17_0_2_3_e9f034d_1375464993159_319060_29362",
+        "isDerived": false,
+        "isSlot": true,
+        "name": "",
+        "value": ["_17_0_2_3_e81034b_1399075230338_268245_24238"],
+        "documentation": "",
+        "owner": "_17_0_2_3_e610336_1394148084317_999095_29188",
+        "type": "Property"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394140393592_649798_27702",
@@ -300,6 +383,27 @@
         "type": "Property"
     },
     {
+        "id": "_17_0_2_3_e81034b_1399078656127_693273_28012",
+        "propertyType": "_17_0_2_3_e610336_1394148084317_280624_29187",
+        "isDerived": false,
+        "isSlot": false,
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399078656126_265953_28010",
+        "type": "Property"
+    },
+    {
+        "id": "_17_0_2_3_e81034b_1399078698098_156160_28035-slot-_17_0_2_3_e81034b_1399078471243_130311_27943",
+        "propertyType": "_17_0_2_3_e81034b_1399078471243_130311_27943",
+        "isDerived": false,
+        "isSlot": true,
+        "name": "",
+        "value": ["_17_0_2_3_e81034b_1399085074109_83967_29572"],
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399078698098_156160_28035",
+        "type": "Property"
+    },
+    {
         "id": "_17_0_2_4_f3a0363_1394145431840_747500_30162",
         "propertyType": "_17_0_2_4_f3a0363_1394145323170_250986_30049",
         "isDerived": false,
@@ -334,6 +438,14 @@
         "type": "InstanceSpecification"
     },
     {
+        "id": "_17_0_2_3_e81034b_1399080784914_969313_28151",
+        "operationParameter": ["_17_0_2_3_e81034b_1399081002428_509189_28156"],
+        "name": "List",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399078877045_608424_28086",
+        "type": "Operation"
+    },
+    {
         "id": "_17_0_2_4_f3a0363_1394143297852_449135_29478",
         "propertyType": "_17_0_2_4_f3a0363_1394143297837_334346_29440",
         "isDerived": false,
@@ -341,17 +453,6 @@
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394143297837_789411_29439",
-        "type": "Property"
-    },
-    {
-        "id": "_17_0_2_3_e610336_1394148084317_999095_29188-slot-_17_0_2_3_e9f034d_1375464914291_213939_29352",
-        "propertyType": "_17_0_2_3_e9f034d_1375464914291_213939_29352",
-        "isDerived": false,
-        "isSlot": true,
-        "name": "",
-        "value": ["_17_0_2_3_e81034b_1398117352967_895064_24174"],
-        "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394148084317_999095_29188",
         "type": "Property"
     },
     {
@@ -370,6 +471,14 @@
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394142589955_287368_28983",
         "type": "Property"
+    },
+    {
+        "id": "_17_0_2_3_e81034b_1399082611722_728316_28208",
+        "operationParameter": ["_17_0_2_3_e81034b_1399082644141_966115_28209"],
+        "name": "doIt",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399078877045_608424_28086",
+        "type": "Operation"
     },
     {
         "id": "_17_0_2_3_e610336_1394150100221_637043_30297",
@@ -403,6 +512,17 @@
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394140783150_426788_27844",
+        "type": "Property"
+    },
+    {
+        "id": "_17_0_2_3_e610336_1394152907873_24683_30671-slot-_17_0_1_244d03ea_1319491307068_218609_23569",
+        "propertyType": "_17_0_1_244d03ea_1319491307068_218609_23569",
+        "isDerived": false,
+        "isSlot": true,
+        "name": "",
+        "value": ["_17_0_2_3_e81034b_1399075230309_568230_24172"],
+        "documentation": "",
+        "owner": "_17_0_2_3_e610336_1394152907873_24683_30671",
         "type": "Property"
     },
     {
@@ -489,6 +609,16 @@
         "type": "Property"
     },
     {
+        "id": "_17_0_2_3_e81034b_1399078425422_67974_27939",
+        "propertyType": "_9_0_62a020a_1105704884807_371561_7741",
+        "isDerived": false,
+        "isSlot": false,
+        "name": "base_Element",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399078425412_704834_27937",
+        "type": "Property"
+    },
+    {
         "id": "_17_0_2_4_f3a0363_1394140806743_980579_27932",
         "propertyType": "_17_0_2_4_f3a0363_1394140393592_649798_27702",
         "isDerived": false,
@@ -542,13 +672,6 @@
         "type": "Property"
     },
     {
-        "id": "_17_0_2_3_e610336_1394147838399_945788_25481",
-        "name": "IMCE Ontology Bundles",
-        "documentation": "",
-        "owner": "null",
-        "type": "Package"
-    },
-    {
         "id": "_17_0_2_3_e610336_1394148365514_109293_29472",
         "propertyType": "_17_0_2_3_e610336_1394148084317_280624_29187",
         "isDerived": false,
@@ -589,13 +712,6 @@
         "type": "Property"
     },
     {
-        "id": "_17_0_2_3_e610336_1394147838397_253361_25478",
-        "name": "IMM",
-        "documentation": "",
-        "owner": "null",
-        "type": "Package"
-    },
-    {
         "id": "_17_0_2_3_e610336_1394149099048_902451_29829",
         "name": "",
         "documentation": "",
@@ -631,13 +747,6 @@
         "type": "InstanceSpecification"
     },
     {
-        "id": "_17_0_2_3_e610336_1394147838400_488970_25487",
-        "name": "SysML",
-        "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394147838400_999733_25486",
-        "type": "Package"
-    },
-    {
         "id": "_17_0_2_4_f3a0363_1394145994052_446838_30340",
         "name": "Check docking success",
         "documentation": "",
@@ -662,6 +771,14 @@
         "type": "Property"
     },
     {
+        "id": "_17_0_2_3_e81034b_1399081634631_157569_28166",
+        "name": "element2",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399080032253_662356_28139",
+        "type": "Element",
+        "parameterDirection": "in"
+    },
+    {
         "id": "_17_0_2_4_f3a0363_1394141407314_679740_28365",
         "name": "",
         "documentation": "",
@@ -683,6 +800,21 @@
         "type": "Element"
     },
     {
+        "id": "_17_0_2_3_e81034b_1399080061359_421238_28140",
+        "name": "element1",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399080032253_662356_28139",
+        "type": "Element",
+        "parameterDirection": "in"
+    },
+    {
+        "id": "_17_0_2_3_e81034b_1399079746685_850166_28130",
+        "name": "getNames",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
+        "type": "Element"
+    },
+    {
         "id": "_17_0_2_3_e610336_1394149840523_780502_30270",
         "name": "Concern",
         "documentation": "",
@@ -697,17 +829,6 @@
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394142592127_181567_29007",
-        "type": "Property"
-    },
-    {
-        "id": "_17_0_2_3_e610336_1394148084317_999095_29188-slot-_17_0_2_3_e9f034d_1375464775176_680884_29346",
-        "propertyType": "_17_0_2_3_e9f034d_1375464775176_680884_29346",
-        "isDerived": false,
-        "isSlot": true,
-        "name": "",
-        "value": ["_17_0_2_3_e81034b_1398117352964_855969_24164"],
-        "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394148084317_999095_29188",
         "type": "Property"
     },
     {
@@ -760,13 +881,6 @@
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394140783150_426788_27844",
         "type": "Element"
-    },
-    {
-        "id": "_17_0_2_3_e610336_1394147838399_764211_25483",
-        "name": "foundation",
-        "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394147838399_491108_25482",
-        "type": "Package"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394140452779_641658_27742",
@@ -828,6 +942,13 @@
         "type": "Element"
     },
     {
+        "id": "_17_0_2_3_e81034b_1399078924260_653224_28087",
+        "name": "operations",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399078877045_608424_28086",
+        "type": "Element"
+    },
+    {
         "id": "_17_0_2_3_e610336_1394148572249_468784_29635",
         "name": "",
         "documentation": "",
@@ -862,6 +983,17 @@
         "type": "Element"
     },
     {
+        "id": "_17_0_2_3_e610336_1394148084317_999095_29188-slot-_17_0_2_3_e9f034d_1375464914291_213939_29352",
+        "propertyType": "_17_0_2_3_e9f034d_1375464914291_213939_29352",
+        "isDerived": false,
+        "isSlot": true,
+        "name": "",
+        "value": ["_17_0_2_3_e81034b_1399075230339_197294_24244"],
+        "documentation": "",
+        "owner": "_17_0_2_3_e610336_1394148084317_999095_29188",
+        "type": "Property"
+    },
+    {
         "id": "_17_0_2_3_e610336_1394148012316_269554_29158",
         "name": "",
         "documentation": "",
@@ -893,17 +1025,6 @@
         "type": "Element"
     },
     {
-        "id": "_17_0_2_3_e610336_1394148084317_999095_29188-slot-_17_0_2_3_e9f034d_1375464993159_319060_29362",
-        "propertyType": "_17_0_2_3_e9f034d_1375464993159_319060_29362",
-        "isDerived": false,
-        "isSlot": true,
-        "name": "",
-        "value": ["_17_0_2_3_e81034b_1398117352966_90345_24172"],
-        "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394148084317_999095_29188",
-        "type": "Property"
-    },
-    {
         "id": "_17_0_2_3_e610336_1394148572236_426004_29624",
         "name": "ComponentViewPoint",
         "documentation": "",
@@ -911,18 +1032,18 @@
         "type": "Element"
     },
     {
+        "id": "_17_0_2_3_e81034b_1399078924267_612867_28098",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399078924260_653224_28087",
+        "type": "InstanceSpecification"
+    },
+    {
         "id": "_17_0_2_4_f3a0363_1394140377374_900991_27624",
         "name": "Earth",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394140452779_641658_27742",
         "type": "Element"
-    },
-    {
-        "id": "_17_0_2_3_e610336_1394147838398_71355_25479",
-        "name": "IMCE",
-        "documentation": "",
-        "owner": "null",
-        "type": "Package"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394143297837_982006_29449",
@@ -946,24 +1067,6 @@
         "type": "Element"
     },
     {
-        "id": "_17_0_2_3_e610336_1394148084317_999095_29188-slot-_17_0_2_3_f4a035d_1366647903992_983742_36991",
-        "propertyType": "_17_0_2_3_f4a035d_1366647903992_983742_36991",
-        "isDerived": false,
-        "isSlot": true,
-        "name": "",
-        "value": ["_17_0_2_3_e81034b_1398117352964_437993_24166"],
-        "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394148084317_999095_29188",
-        "type": "Property"
-    },
-    {
-        "id": "_17_0_2_3_e610336_1394147838400_942521_25488",
-        "name": "20120322",
-        "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394147838400_488970_25487",
-        "type": "Package"
-    },
-    {
         "id": "_17_0_2_4_f3a0363_1394141326112_917030_28177",
         "name": "",
         "documentation": "",
@@ -971,11 +1074,12 @@
         "type": "InstanceSpecification"
     },
     {
-        "id": "_11_5EAPbeta_be00301_1147424179914_458922_958",
-        "name": "Block",
-        "documentation": "A Block is a modular unit that describes the structure of a system or element. It may include both structural and behavioral features, such as properties and operations, that represent the state of the system and behavior that the system may exhibit. Some of these properties may hold parts of a system, which can also be described by blocks. A block may include a structure of connectors between its properties to indicate how its parts or other properties relate to one another. SysML blocks provide a general-purpose capability to describe the architecture of a system. They provide the ability to represent a system hierarchy, in which a system at one level is composed of systems at a more basic level. They can describe not only the connectivity relationships between the systems at any level, but also quantitative values or other information about a system. SysML does not restrict the kind of system or system element that may be described by a block. Any reusable form of description that may be applied to a system or a set of system characteristics may be described by a block. Such reusable descriptions, for example, may be applied to purely conceptual aspects of a system design, such as relationships that hold between parts or properties of a system. Connectors owned by SysML blocks may be used to define relationships between parts or other properties of the same containing block. The type of a connector or its connected ends may specify the semantic interpretation of a specific connector.",
-        "owner": "_12_0EAPbeta_be00301_1162212177466_124550_157_convert",
-        "type": "Element"
+        "id": "_17_0_2_3_e81034b_1399080974142_817267_28155",
+        "name": "y",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399080953405_524084_28153",
+        "type": "Element",
+        "parameterDirection": "in"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394145450090_828043_30210",
@@ -985,6 +1089,16 @@
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394145450090_931162_30208",
+        "type": "Property"
+    },
+    {
+        "id": "_17_0_2_3_e81034b_1399078471243_130311_27943",
+        "propertyType": "_12_0_be00301_1164123483951_695645_2041",
+        "isDerived": false,
+        "isSlot": false,
+        "name": "method",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399078425412_704834_27937",
         "type": "Property"
     },
     {
@@ -1002,13 +1116,6 @@
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394141938635_996396_28414",
-        "type": "InstanceSpecification"
-    },
-    {
-        "id": "_17_0_2_3_407019f_1375477753381_982747_29397",
-        "name": "Name",
-        "documentation": "",
-        "owner": "_17_0_2_3_407019f_1375477733200_156607_29379",
         "type": "InstanceSpecification"
     },
     {
@@ -1040,18 +1147,18 @@
         "type": "Element"
     },
     {
+        "id": "_17_0_2_3_e81034b_1399084627073_339706_29565",
+        "name": "Express",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
+        "type": "Element"
+    },
+    {
         "id": "_17_0_2_4_f3a0363_1394145125469_421951_30023",
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394142107742_559409_28432",
         "type": "Element"
-    },
-    {
-        "id": "_17_0_2_3_e610336_1394147838400_999733_25486",
-        "name": "spec",
-        "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394147838400_6064_25485",
-        "type": "Package"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394141121583_434600_28141",
@@ -1116,11 +1223,38 @@
         "type": "Property"
     },
     {
+        "id": "_17_0_2_3_e81034b_1399081033816_599182_28157",
+        "name": "element",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399080797025_20290_28152",
+        "type": "Element",
+        "parameterDirection": "in"
+    },
+    {
         "id": "_17_0_2_4_f3a0363_1394144734506_569167_29962",
         "name": "Fire Thrusters",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394142107742_559409_28432",
         "type": "Element"
+    },
+    {
+        "id": "_17_0_2_3_e610336_1394148084317_999095_29188-slot-_17_0_2_3_f4a035d_1366647903994_370992_36997",
+        "propertyType": "_17_0_2_3_f4a035d_1366647903994_370992_36997",
+        "isDerived": false,
+        "isSlot": true,
+        "name": "",
+        "value": ["_17_0_2_3_e81034b_1399075230337_205938_24234"],
+        "documentation": "",
+        "owner": "_17_0_2_3_e610336_1394148084317_999095_29188",
+        "type": "Property"
+    },
+    {
+        "id": "_17_0_2_3_e81034b_1399080965718_126047_28154",
+        "name": "x",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399080953405_524084_28153",
+        "type": "Element",
+        "parameterDirection": "in"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394145732055_588209_30257",
@@ -1140,11 +1274,15 @@
         "type": "Property"
     },
     {
-        "id": "_17_0_2_3_e610336_1394147838400_6064_25485",
-        "name": "www.omg.org",
+        "id": "_17_0_2_3_e81034b_1399082265996_740832_28192",
+        "propertyType": "_17_0_2_3_e81034b_1399078877045_608424_28086",
+        "isDerived": false,
+        "isSlot": false,
+        "name": "method",
+        "value": ["_17_0_2_3_e81034b_1399082525212_863287_28207"],
         "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394147838399_491108_25482",
-        "type": "Package"
+        "owner": "_17_0_2_3_e81034b_1399078877045_608424_28086",
+        "type": "Property"
     },
     {
         "id": "_17_0_2_3_e610336_1394150942710_820971_29274",
@@ -1194,17 +1332,6 @@
         "type": "Element"
     },
     {
-        "id": "_17_0_2_3_e610336_1394148084317_999095_29188-slot-_17_0_2_3_f4a035d_1366647903995_472834_36999",
-        "propertyType": "_17_0_2_3_f4a035d_1366647903995_472834_36999",
-        "isDerived": false,
-        "isSlot": true,
-        "name": "",
-        "value": ["_17_0_2_3_e81034b_1398117352963_366500_24162"],
-        "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394148084317_999095_29188",
-        "type": "Property"
-    },
-    {
         "id": "_17_0_2_3_e610336_1394149765242_174035_30266",
         "propertyType": "_9_0_62a020a_1105704884807_371561_7741",
         "isDerived": false,
@@ -1213,6 +1340,17 @@
         "documentation": "",
         "owner": "_17_0_2_3_e610336_1394149765240_260584_30264",
         "type": "Property"
+    },
+    {
+        "id": "_17_0_2_3_e81034b_1399080953405_524084_28153",
+        "operationParameter": [
+            "_17_0_2_3_e81034b_1399080965718_126047_28154",
+            "_17_0_2_3_e81034b_1399080974142_817267_28155"
+        ],
+        "name": "eq",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399078877045_608424_28086",
+        "type": "Operation"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394142107742_528845_28443",
@@ -1246,6 +1384,17 @@
         "type": "Property"
     },
     {
+        "id": "_17_0_2_3_e610336_1394148084317_999095_29188-slot-_17_0_2_3_e9f034d_1375464775176_680884_29346",
+        "propertyType": "_17_0_2_3_e9f034d_1375464775176_680884_29346",
+        "isDerived": false,
+        "isSlot": true,
+        "name": "",
+        "value": ["_17_0_2_3_e81034b_1399075230339_158875_24242"],
+        "documentation": "",
+        "owner": "_17_0_2_3_e610336_1394148084317_999095_29188",
+        "type": "Property"
+    },
+    {
         "id": "_17_0_2_4_f3a0363_1394145912725_887057_30322",
         "name": "Engage electromagnets",
         "documentation": "",
@@ -1268,6 +1417,18 @@
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
         "type": "Element"
+    },
+    {
+        "id": "_17_0_2_3_e81034b_1399080032253_662356_28139",
+        "operationParameter": [
+            "_17_0_2_3_e81034b_1399080061359_421238_28140",
+            "_17_0_2_3_e81034b_1399081634631_157569_28166",
+            "_17_0_2_3_e81034b_1399081659468_588600_28167"
+        ],
+        "name": "getNames",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399078877045_608424_28086",
+        "type": "Operation"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394142085258_695259_28430",
@@ -1364,13 +1525,6 @@
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394140326296_809805_27600",
         "type": "InstanceSpecification"
-    },
-    {
-        "id": "_17_0_2_3_e610336_1394147838399_491108_25482",
-        "name": "imce.jpl.nasa.gov",
-        "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394147838399_945788_25481",
-        "type": "Package"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394145175812_175426_30027",
@@ -1472,6 +1626,17 @@
         "type": "Element"
     },
     {
+        "id": "_17_0_2_3_e610336_1394148084317_999095_29188-slot-_17_0_2_3_e9f034d_1375464942934_241960_29357",
+        "propertyType": "_17_0_2_3_e9f034d_1375464942934_241960_29357",
+        "isDerived": false,
+        "isSlot": true,
+        "name": "",
+        "value": ["_17_0_2_3_e81034b_1399075230337_964651_24236"],
+        "documentation": "",
+        "owner": "_17_0_2_3_e610336_1394148084317_999095_29188",
+        "type": "Property"
+    },
+    {
         "id": "_17_0_2_4_f3a0363_1394145852523_752184_30306",
         "name": "",
         "documentation": "",
@@ -1517,26 +1682,7 @@
         "name": "Components",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "type": "View"
-    },
-    {
-        "view2view": [
-            {
-                "id": "prod_id_1",
-                "childrenViews": ["_17_0_2_3_e610336_1394148311476_17302_29388"]
-            },
-            {
-                "id": "_17_0_2_3_e610336_1394148311476_17302_29388",
-                "childrenViews": []
-            }
-        ],
-        "id": "prod_id_1",
-        "name": "Spacecraft Doc",
-        "documentation": "",
-        "owner": "300",
-        "noSections": [],
-        "type": "Product",
-        "editable": true
+        "type": "Element"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394143297852_560682_29481",
@@ -1563,6 +1709,28 @@
         "type": "Element"
     },
     {
+        "id": "_17_0_2_4_f3a0363_1394141938635_533015_28417-slot-_11_5EAPbeta_be00301_1147431377925_245593_1615",
+        "propertyType": "_11_5EAPbeta_be00301_1147431377925_245593_1615",
+        "isDerived": false,
+        "isSlot": true,
+        "name": "",
+        "value": ["_17_0_2_3_e81034b_1399075230308_440263_24170"],
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394141938635_533015_28417",
+        "type": "Property"
+    },
+    {
+        "id": "_17_0_2_3_e610336_1394148622492_269270_29717-slot-_17_0_2_3_407019f_1375478178682_543537_29439",
+        "propertyType": "_17_0_2_3_407019f_1375478178682_543537_29439",
+        "isDerived": false,
+        "isSlot": true,
+        "name": "",
+        "value": ["_17_0_2_3_e81034b_1399075230293_773442_24160"],
+        "documentation": "",
+        "owner": "_17_0_2_3_e610336_1394148622492_269270_29717",
+        "type": "Property"
+    },
+    {
         "id": "_17_0_2_4_f3a0363_1394142747703_461148_29185",
         "name": "",
         "documentation": "",
@@ -1577,17 +1745,6 @@
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "type": "Expose"
-    },
-    {
-        "id": "_17_0_2_3_e610336_1394148622492_269270_29717-slot-_17_0_2_3_407019f_1375478178682_543537_29439",
-        "propertyType": "_17_0_2_3_407019f_1375478178682_543537_29439",
-        "isDerived": false,
-        "isSlot": true,
-        "name": "",
-        "value": ["_17_0_2_3_e81034b_1398117352995_318395_24212"],
-        "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394148622492_269270_29717",
-        "type": "Property"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394142775781_166935_29205",
@@ -1614,6 +1771,13 @@
         "type": "Property"
     },
     {
+        "id": "_17_0_2_3_e81034b_1399078425412_704834_27937",
+        "name": "Viewpoint",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
+        "type": "Element"
+    },
+    {
         "id": "_17_0_2_3_e610336_1394148367691_950312_29495",
         "propertyType": "_17_0_2_3_e610336_1394148266274_887688_29360",
         "isDerived": false,
@@ -1631,17 +1795,6 @@
         "type": "Element"
     },
     {
-        "id": "_17_0_2_3_e610336_1394148084317_999095_29188-slot-_17_0_2_3_f4a035d_1366647903994_370992_36997",
-        "propertyType": "_17_0_2_3_f4a035d_1366647903994_370992_36997",
-        "isDerived": false,
-        "isSlot": true,
-        "name": "",
-        "value": ["_17_0_2_3_e81034b_1398117352966_127076_24170"],
-        "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394148084317_999095_29188",
-        "type": "Property"
-    },
-    {
         "id": "_17_0_2_4_f3a0363_1394141944635_146958_28426",
         "name": "",
         "documentation": "",
@@ -1654,6 +1807,16 @@
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "type": "Element"
+    },
+    {
+        "id": "_17_0_2_3_e81034b_1399078656126_460983_28011",
+        "propertyType": "_17_0_2_3_e81034b_1399078605227_767466_27947",
+        "isDerived": false,
+        "isSlot": false,
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_3_e610336_1394148084317_280624_29187",
+        "type": "Property"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394142348458_330000_28737",
@@ -1715,6 +1878,13 @@
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394142107742_559409_28432",
+        "type": "Element"
+    },
+    {
+        "id": "_17_0_2_3_e81034b_1399078605227_767466_27947",
+        "name": "New Stuff",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "type": "Element"
     },
     {
@@ -1783,15 +1953,12 @@
         "type": "Property"
     },
     {
-        "id": "_17_0_2_3_e610336_1394152907873_24683_30671-slot-_17_0_1_244d03ea_1319491307068_218609_23569",
-        "propertyType": "_17_0_1_244d03ea_1319491307068_218609_23569",
-        "isDerived": false,
-        "isSlot": true,
-        "name": "",
-        "value": ["_17_0_2_3_e81034b_1398117353010_168382_24238"],
+        "id": "_17_0_2_3_e81034b_1399080395294_30385_28144",
+        "name": "definition",
         "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394152907873_24683_30671",
-        "type": "Property"
+        "owner": "_17_0_2_3_e81034b_1399080032253_662356_28139",
+        "type": "Constraint",
+        "constraintSpecification": "_17_0_2_3_e81034b_1399080510084_78732_28147"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394142768156_137704_29199",
@@ -1808,6 +1975,17 @@
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394142593799_532762_29031",
+        "type": "Property"
+    },
+    {
+        "id": "_17_0_2_3_e610336_1394148084317_999095_29188-slot-_17_0_2_3_f4a035d_1366647903995_472834_36999",
+        "propertyType": "_17_0_2_3_f4a035d_1366647903995_472834_36999",
+        "isDerived": false,
+        "isSlot": true,
+        "name": "",
+        "value": ["_17_0_2_3_e81034b_1399075230336_474201_24232"],
+        "documentation": "",
+        "owner": "_17_0_2_3_e610336_1394148084317_999095_29188",
         "type": "Property"
     },
     {
@@ -1833,6 +2011,14 @@
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394145323170_250986_30049",
         "type": "Property"
+    },
+    {
+        "id": "_17_0_2_3_e81034b_1399082644141_966115_28209",
+        "name": "result",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399082611722_728316_28208",
+        "type": "Element",
+        "parameterDirection": "in"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394140783150_426788_27844",
@@ -1869,75 +2055,11 @@
         "type": "Property"
     },
     {
-        "id": "_17_0_2_3_e610336_1394147838399_527069_25484",
-        "name": "project",
-        "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394147838399_764211_25483",
-        "type": "Package"
-    },
-    {
         "id": "_17_0_2_3_e610336_1394148449252_91190_29556",
         "name": "ComponentViewPoint",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "method": "name_list",
         "type": "Viewpoint"
-    },
-    {
-        "id": "name_list",
-        "name": "viewpoint_op",
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "operationParameter": ["exposed_id"],
-        "operationExpression":"vp_expression",
-        "type": "Operation"
-    },
-    {
-        "id": "exposed_id",
-        "name": "exposed",
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "type": "Parameter"
-    },
-    {
-        "id": "vp_expression",
-        "name": "",
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "operand":["op_list",
-                   "op_map_arg"],
-        "type": "Expression"
-    },
-    {
-        "id": "op_list",
-        "name": "List",
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "type": "Operation"
-    },
-    {
-        "id": "op_map_arg",
-        "name": "",
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "operand":["op_map",
-                   "exposed_id",
-                   "op_name_arg"],
-        "type": "Expression"
-    },
-    {
-        "id": "op_map",
-        "name": "map",
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "type": "Operation"
-    },
-    {
-        "id": "op_name_arg",
-        "name": "Name",
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "type": "Operation"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394143297868_642703_29501",
@@ -1950,21 +2072,17 @@
         "type": "Property"
     },
     {
-        "id": "_17_0_2_4_f3a0363_1394141399783_943327_28357-slot-_11_5EAPbeta_be00301_1147431377925_245593_1615",
-        "propertyType": "_11_5EAPbeta_be00301_1147431377925_245593_1615",
-        "isDerived": false,
-        "isSlot": true,
-        "name": "",
-        "value": ["_17_0_2_3_e81034b_1398117352982_799299_24194"],
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394141399783_943327_28357",
-        "type": "Property"
-    },
-    {
         "id": "_17_0_2_4_f3a0363_1394142589955_287368_28983",
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+        "type": "Element"
+    },
+    {
+        "id": "_17_0_2_3_e81034b_1399078656126_265953_28010",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "type": "Element"
     },
     {
@@ -1978,29 +2096,11 @@
         "type": "Property"
     },
     {
-        "id": "_17_0_2_3_e610336_1394147838398_326837_25480",
-        "name": "OWL2-SysML Integration",
-        "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394147838398_71355_25479",
-        "type": "Package"
-    },
-    {
         "id": "_17_0_2_4_f3a0363_1394144831176_976955_29991",
         "name": "Coarse navigation",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394142107742_559409_28432",
         "type": "Element"
-    },
-    {
-        "id": "_17_0_2_4_f3a0363_1394141938635_533015_28417-slot-_11_5EAPbeta_be00301_1147431377925_245593_1615",
-        "propertyType": "_11_5EAPbeta_be00301_1147431377925_245593_1615",
-        "isDerived": false,
-        "isSlot": true,
-        "name": "",
-        "value": ["_17_0_2_3_e81034b_1398117352981_998047_24192"],
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394141938635_533015_28417",
-        "type": "Property"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
@@ -2025,6 +2125,14 @@
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394142107742_559409_28432",
         "type": "Element"
+    },
+    {
+        "id": "_17_0_2_3_e81034b_1399080797025_20290_28152",
+        "operationParameter": ["_17_0_2_3_e81034b_1399081033816_599182_28157"],
+        "name": "Name",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399078877045_608424_28086",
+        "type": "Operation"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394144674647_398397_29912",
@@ -2058,17 +2166,6 @@
         "type": "Element"
     },
     {
-        "id": "_17_0_2_3_e610336_1394148084317_999095_29188-slot-_17_0_2_3_f4a035d_1366702935947_453687_36949",
-        "propertyType": "_17_0_2_3_f4a035d_1366702935947_453687_36949",
-        "isDerived": false,
-        "isSlot": true,
-        "name": "",
-        "value": ["_17_0_2_3_e81034b_1398117352965_976290_24168"],
-        "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394148084317_999095_29188",
-        "type": "Property"
-    },
-    {
         "id": "_17_0_2_3_e610336_1394148266274_887688_29360",
         "name": "Docking Procedure",
         "documentation": "",
@@ -2081,6 +2178,14 @@
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394142107742_559409_28432",
         "type": "Element"
+    },
+    {
+        "id": "_17_0_2_3_e81034b_1399081002428_509189_28156",
+        "name": "viewables",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399080784914_969313_28151",
+        "type": "Element",
+        "parameterDirection": "in"
     },
     {
         "id": "_17_0_2_3_e610336_1394151337040_245061_30652",
@@ -2125,6 +2230,13 @@
         "type": "Element"
     },
     {
+        "id": "_17_0_2_3_e81034b_1399078698098_156160_28035",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_3_e81034b_1399078698098_861393_28034",
+        "type": "InstanceSpecification"
+    },
+    {
         "id": "_17_0_2_4_f3a0363_1394145117235_449368_30018",
         "name": "",
         "documentation": "",
@@ -2156,6 +2268,17 @@
         "type": "Element"
     },
     {
+        "id": "_17_0_2_3_e610336_1394148084317_999095_29188-slot-_17_0_2_3_f4a035d_1366647903992_983742_36991",
+        "propertyType": "_17_0_2_3_f4a035d_1366647903992_983742_36991",
+        "isDerived": false,
+        "isSlot": true,
+        "name": "",
+        "value": ["_17_0_2_3_e81034b_1399075230338_503035_24240"],
+        "documentation": "",
+        "owner": "_17_0_2_3_e610336_1394148084317_999095_29188",
+        "type": "Property"
+    },
+    {
         "id": "_17_0_2_4_f3a0363_1394141407314_193699_28366",
         "name": "",
         "documentation": "",
@@ -2181,76 +2304,7 @@
         "name": "ContextViewpoint",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "method": "get_two_names",
         "type": "Viewpoint"
-    },
-    {
-        "id": "get_two_names",
-        "name": "get_two_names_op",
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "operationExpression": "get_two_names_expression",
-        "type": "Operation" 
-    },
-    {
-        "id": "get_two_names_expression",
-        "name": "",
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "operand": ["get_names",
-                    "_17_0_2_4_f3a0363_1394141845089_115460_28389",
-                    "_17_0_2_4_f3a0363_1394140377374_900991_27624"],
-        "type": "Expression" 
-    },
-    {
-        "id": "get_names",
-        "name": "get_names_op",
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "operationParameter":["s1_param",
-                              "s2_param"],
-        "operationExpression": "vp_expression_2",
-        "type": "Operation" 
-    },
-    {
-        "id": "s1_param",
-        "name": "",
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "type": "Parameter" 
-    },
-    {
-        "id": "s2_param",
-        "name": "",
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "type": "Parameter" 
-    },
-    {
-        "id": "vp_expression_2",
-        "name": "",
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "operand": ["op_list",
-                    "op_name_arg_1",
-                    "op_name_arg_2"],
-        "type": "Expression" 
-    },    
-    {
-        "id": "op_name_arg_1",
-        "name": "Name",
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "operationParameter":["s1_param"],
-        "type": "Operation"
-    },
-    {
-        "id": "op_name_arg_2",
-        "name": "Name",
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "operationParameter":["s2_param"],
-        "type": "Operation"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394142599017_677571_29103",
@@ -2258,17 +2312,6 @@
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
         "type": "Element"
-    },
-    {
-        "id": "_17_0_2_3_e610336_1394148084317_999095_29188-slot-_17_0_2_3_e9f034d_1375464942934_241960_29357",
-        "propertyType": "_17_0_2_3_e9f034d_1375464942934_241960_29357",
-        "isDerived": false,
-        "isSlot": true,
-        "name": "",
-        "value": ["_17_0_2_3_e81034b_1398117352962_807760_24160"],
-        "documentation": "",
-        "owner": "_17_0_2_3_e610336_1394148084317_999095_29188",
-        "type": "Property"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394146121285_737921_30381",

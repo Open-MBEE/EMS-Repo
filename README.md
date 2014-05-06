@@ -10,7 +10,16 @@ update maven project:
 
 build with maventest in command line
 	cd /home/username/git/alfresco-view-repo
-	mvn integration-test -Pamp-to-w -Dmaven.test.skip=true
+	# for those that don't want to load bae/util/sysml projects
+	# also need to remove the src dependencies on those packages in .classpath
+	mvn integration-test -Pamp-to-war -Dmaven.test.skip=true -P mbee-dev
+	
+	# for those that do want load bae/util/sysml projects
+    mvn integration-test -Pamp-to-war -Dmaven.test.skip=true -P mms-dev
+    
+Set up magicdraw path
+    Window->Preferences->MagicDraw Installation
+    Set the root directory to "/opt/local/magicdraw"
 
 restart eclipse
 

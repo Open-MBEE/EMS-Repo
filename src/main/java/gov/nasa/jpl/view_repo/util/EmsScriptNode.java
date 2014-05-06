@@ -1094,37 +1094,46 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                     ( propDef == null ? Acm.JSON_ARRAYS.contains( jsonType )
                                       : propDef.isMultiValued() ); 
             if ( !isArray ) {
+                if ( Acm.JSON_ARRAYS.contains( jsonType ) && elementValue instanceof String && ((String)elementValue).trim().startsWith("[") ) {
+                    elementValue = new JSONArray( (String)elementValue );
+                }
                 elementValue = Utils.newList( elementValue );
             } else if ( !( elementValue instanceof Collection ) ) {
                 Debug.error( "Property value is not an array as specified by definition! value = " + elementValue );
             }
             Collection< ? > c = (Collection< ? >)elementValue;
-            JSONArray jarr = new JSONArray();
-            for ( Object o : c ) {
-                String s = null;
-                Boolean isString = true;
-                if ( o instanceof NodeRef ) {
-                    s = nodeRefToSysmlId( (NodeRef)o );
-                } else if ( isNodeRef ) {
-                    Debug.error( "Property value is not of type NodeRef as specified by definition! value = " + o );
-                } else if ( o instanceof String ) {
-                    s = (String)o;
-                } else if ( o instanceof Date ) {
-                    s = getIsoTime( (Date)o );
-                } else {
-                    isString = false;
-                }
-                if ( isArray ) {
-                    if ( isString ) {
-                        jarr.put( s );
+            
+            JSONArray jarr;// = new JSONArray();
+            if ( elementValue instanceof JSONArray ) {
+                jarr = (JSONArray)elementValue;
+            } else {
+                jarr = new JSONArray();
+                for ( Object o : c ) {
+                    String s = null;
+                    Boolean isString = true;
+                    if ( o instanceof NodeRef ) {
+                        s = nodeRefToSysmlId( (NodeRef)o );
+                    } else if ( isNodeRef ) {
+                        Debug.error( "Property value is not of type NodeRef as specified by definition! value = " + o );
+                    } else if ( o instanceof String ) {
+                        s = (String)o;
+                    } else if ( o instanceof Date ) {
+                        s = getIsoTime( (Date)o );
                     } else {
-                        jarr.put( o );
+                        isString = false;
                     }
-                } else {
-                    if ( isString ) {
-                        element.put( jsonType, s );
+                    if ( isArray ) {
+                        if ( isString ) {
+                            jarr.put( s );
+                        } else {
+                            jarr.put( o );
+                        }
                     } else {
-                        element.put( jsonType, o );
+                        if ( isString ) {
+                            element.put( jsonType, s );
+                        } else {
+                            element.put( jsonType, o );
+                        }
                     }
                 }
             }
