@@ -491,8 +491,8 @@ public class Acm {
 
             addAll(COMMON_JSON);
             
-//            addAll(VIEW_JSON);
-//            addAll(PRODUCT_JSON);
+            addAll(VIEW_JSON);
+            addAll(PRODUCT_JSON);
             
             addAll(MISC_PROPS_JSON);
         }
@@ -528,8 +528,8 @@ public class Acm {
             put(JSON_TYPE_FILTER.ALL, ALL_JSON);
             put(JSON_TYPE_FILTER.COMMENT, COMMENT_JSON);
             put(JSON_TYPE_FILTER.ELEMENT, ELEMENT_JSON);
-            put(JSON_TYPE_FILTER.PRODUCT, PRODUCT_JSON);
-            put(JSON_TYPE_FILTER.VIEW, VIEW_JSON);
+            put(JSON_TYPE_FILTER.PRODUCT, ELEMENT_JSON);//PRODUCT_JSON);
+            put(JSON_TYPE_FILTER.VIEW, ELEMENT_JSON); //VIEW_JSON);
         }
     };
 }
