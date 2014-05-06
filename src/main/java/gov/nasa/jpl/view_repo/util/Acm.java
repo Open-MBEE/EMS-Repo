@@ -145,6 +145,8 @@ public class Acm {
     public static final String JSON_PARAMETER_DEFAULT_VALUE = "parameterDefaultValue";
     public static final String JSON_OPERATION_EXPRESSION = "operationExpression";
     public static final String JSON_METHOD = "method";
+    public static final String JSON_CONNECTOR = "Connector";
+    public static final String JSON_CONNECTOR_ROLE = "connectorRole";
 
     // ACM types with the different name spaces
     public static final String SYSML = "sysml:";
@@ -251,7 +253,8 @@ public class Acm {
     public static final String ACM_PARAMETER_DEFAULT_VALUE = SYSML + JSON_PARAMETER_DEFAULT_VALUE;
     public static final String ACM_OPERATION_EXPRESSION = SYSML + JSON_OPERATION_EXPRESSION;
     public static final String ACM_METHOD = SYSML + JSON_METHOD;
-
+    public static final String ACM_CONNECTOR = SYSML + JSON_CONNECTOR;
+    public static final String ACM_CONNECTOR_ROLE = SYSML + JSON_CONNECTOR_ROLE;
     
     public static String ACM_ELEMENT_FOLDER = SYSML + "ElementFolder";
     public static String ACM_PROJECT = SYSML + "Project";
@@ -345,6 +348,7 @@ public class Acm {
             add(JSON_VALUE);
             add(JSON_OPERATION_PARAMETER);
             add(JSON_OPERAND);
+            add(JSON_CONNECTOR_ROLE);
 //            add(JSON_ANNOTATED_ELEMENTS);
         }
     };
@@ -370,6 +374,7 @@ public class Acm {
            add(JSON_PARAMETER_DEFAULT_VALUE);
            add(JSON_OPERATION_EXPRESSION);
            add(JSON_METHOD);
+           add(JSON_CONNECTOR_ROLE);
 //           add(JSON_ANNOTATED_ELEMENTS);
        }
    };
@@ -452,6 +457,7 @@ public class Acm {
             add(JSON_PARAMETER_DEFAULT_VALUE);
             add(JSON_OPERATION_EXPRESSION);
             add(JSON_METHOD);
+            add(JSON_CONNECTOR_ROLE);
         }
     };
 

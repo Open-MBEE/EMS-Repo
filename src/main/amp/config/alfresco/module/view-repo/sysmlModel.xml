@@ -615,6 +615,22 @@
             </properties>
         </type>
 
+        <type name="sysml:Connector">
+            <parent>sysml:Element</parent>
+            <properties>
+                <property name="sysml:roles">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>true</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+            </properties>
+        </type>
+        
         
     </types>
     <aspects>
