@@ -154,53 +154,48 @@ public class ModelPost extends AbstractJavaWebScript {
         TreeSet<EmsScriptNode> elements =
                 new TreeSet<EmsScriptNode>();
         
-        // check whether single JSONObject to create or an array
-        if (singleElement) {
-            elements.addAll( updateOrCreateElement(postJson, projectNode, false) );
-        } else {
-            // create the element map and hierarchies
-            if (buildElementMap(postJson.getJSONArray(ELEMENTS), projectNode)) {
-                // start building up elements from the root elements
-                for (String rootElement : rootElements) {
-                    log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
-                    if (!rootElement.equals((String) projectNode.getProperty(Acm.CM_NAME))) {
-                        
-                        EmsScriptNode owner = null;
+        // create the element map and hierarchies
+        if (buildElementMap(postJson.getJSONArray(ELEMENTS), projectNode)) {
+            // start building up elements from the root elements
+            for (String rootElement : rootElements) {
+                log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
+                if (!rootElement.equals((String) projectNode.getProperty(Acm.CM_NAME))) {
+                    
+                    EmsScriptNode owner = null;
 
-                        UserTransaction trx;
-                        trx = services.getTransactionService().getNonPropagatingUserTransaction();
+                    UserTransaction trx;
+                    trx = services.getTransactionService().getNonPropagatingUserTransaction();
+                    try {
+                        trx.begin();
+                        owner = getOwner(rootElement, projectNode, true);
+                        trx.commit();
+                    } catch (Throwable e) {
                         try {
-                            trx.begin();
-                            owner = getOwner(rootElement, projectNode, true);
-                            trx.commit();
-                        } catch (Throwable e) {
-                            try {
-                                trx.rollback();
-                                log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
-                                log(LogLevel.ERROR, "\t####### when calling getOwner(" + rootElement + ", " + projectNode + ", true)");
-                                e.printStackTrace();
-                            } catch (Throwable ee) {
-                                log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
-                                log(LogLevel.ERROR, "\tafter calling getOwner(" + rootElement + ", " + projectNode + ", true)");
-                                ee.printStackTrace();
+                            trx.rollback();
+                            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                            log(LogLevel.ERROR, "\t####### when calling getOwner(" + rootElement + ", " + projectNode + ", true)");
+                            e.printStackTrace();
+                        } catch (Throwable ee) {
+                            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                            log(LogLevel.ERROR, "\tafter calling getOwner(" + rootElement + ", " + projectNode + ", true)");
+                            ee.printStackTrace();
 //                                e.printStackTrace();
 //                                int cnt = 0;
 //                                while ( e != e.getCause() && e.getCause() != null && cnt++ < 5) {
 //                                    e.getCause().printStackTrace();
 //                                    e = e.getCause();
 //                                }
-                            }
-                        }
-                        
-                        if (owner != null && owner.exists()) {
-                            elements.addAll( updateOrCreateElement( elementMap.get( rootElement ),
-                                                                 owner, false ) );
                         }
                     }
-                } // end for (String rootElement: rootElements) {
-            } // end if (buildElementMap(postJson.getJSONArray(ELEMENTS))) {
-        }
-
+                    
+                    if (owner != null && owner.exists()) {
+                        elements.addAll( updateOrCreateElement( elementMap.get( rootElement ),
+                                                             owner, false ) );
+                    }
+                }
+            } // end for (String rootElement: rootElements) {
+        } // end if (buildElementMap(postJson.getJSONArray(ELEMENTS))) {
+    
         // handle the relationships
         updateOrCreateAllRelationships(relationshipsJson);
         
