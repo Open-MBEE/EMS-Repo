@@ -3,7 +3,7 @@
     "type": "object",
     "description": "Snapshots listing specification",
     "properties": {
-        "versions": {
+        "snapshots": {
             "type": "array",
             "items": {
                 "type": "object",
@@ -17,7 +17,31 @@
     "definitions": {
         "Snapshots": {
             "properties": {
-                
+	            "created": {
+	                "type": "string",
+	                "format": "date-time",
+	                "description": "Last modified time of snapshot"
+	            },
+	            "creator": {
+	                "type": "string",
+	                "description": "Username of creator of snapshot"
+	            },
+	            "id": {
+	                "type": "string",
+	                "description": "Unique identifier of the element."
+	            },
+	            "tag": {
+	                "type": "string",
+	                "description": "Shows associated configuration set, if any"
+	            },
+                "name": {
+                    "type": "string",
+                    "description": "Name of the product this is a snapshot for"
+                },
+                "url": {
+                    "type": "string",
+                    "description": "URL to the snapshot view"
+                }
             }
         }
     }
