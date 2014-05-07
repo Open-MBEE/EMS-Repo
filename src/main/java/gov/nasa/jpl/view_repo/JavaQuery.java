@@ -254,6 +254,13 @@ public class JavaQuery extends AbstractModuleComponent {
         return o.toString();
     }
     
+    /**
+     * Tells whether the input string is valid syntax for a NodeRef id.
+     * <p>
+     * For example, <code>JavaQuery.isNodeRef("workspace://SpacesStore/e297594b-8c24-427a-9342-35ea702b06ff")</code> may return true, but the node may not exist.
+     * @param refString
+     * @return
+     */
     private static boolean isNodeRef( String refString ) {
         boolean result = NodeRef.isNodeRef( refString );
         Debug.outln( refString + " is " + ( result ? "" : "not " )

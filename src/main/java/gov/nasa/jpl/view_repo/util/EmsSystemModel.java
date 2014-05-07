@@ -5,10 +5,12 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.List;
@@ -23,6 +25,7 @@ import org.json.JSONException;
 import org.springframework.extensions.webscripts.Status;
 
 import sysml.AbstractSystemModel;
+import gov.nasa.jpl.ae.event.Call;
 
 // <E, C, T, P, N, I, U, R, V, W, CT>
 //public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScriptNode, String, ? extends Serializable, String, String, Object, EmsScriptNode, String, String, EmsScriptNode > {
@@ -776,12 +779,34 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     }
 
     /**
-     * Return a 
+     * Get matching types
+     * <p>
+     * Examples:
+     * <ul>
+     * <li>getType(elementA, "typeX") returns the types of elementA whose name
+     * or ID is "typeX."
+     * <li>getType(packageB, "typeX") returns the types located inside packageB
+     * whose name or id is "typeX."
+     * <li>getType(myWorkspace, "typeX") returns the types whose names or IDs
+     * are "typeX" for myWorkspace.
+     * </ul>
+     * 
+     * @param context
+     *            the element whose type is sought or a location as a package or
+     *            workspace within which the type is to be found
+     * @param specifier
+     *            the ID, name, version, workspace, etc. for the type element
+     * @return type elements that match any interpretation of the specifier for
+     *         any interpretation of the context or an empty list if there are
+     *         no such types
+     * @see sysml.SystemModel#getType(java.lang.Object, java.lang.Object)
      */
     @Override
     public Collection< EmsScriptNode >
             getType( Object context, Object specifier ) {
-    	    	
+        
+        // TODO -- the code below is relevant to getElementWithType(), not getType().
+        
     	// TODO ScriptNode getType returns a QName or String, why does he want a collection
     	// of EmsScriptNode?  I think we should change T to String.
     	
@@ -791,11 +816,22 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     	if (specifier instanceof String) {
 	        StringBuffer response = new StringBuffer();
 	        Status status = new Status();
-	        Map< String, EmsScriptNode > elements =
-	                NodeUtil.searchForElements( "@sysml\\:type:\"", (String)specifier, services, response,
-	                                            status );
-
-	        if ( elements != null ) return elements.values();
+//	        Map< String, EmsScriptNode > elements =
+//	                NodeUtil.searchForElements( "@sysml\\:type:\"", (String)specifier, services, response,
+//	                                            status );
+////            NodeUtil.searchForElements( "TYPE:\"", (String)specifier, services, response,
+////                                        status );
+//
+//	        if ( elements != null && !elements.isEmpty()) return elements.values();
+	        
+//	        if ( elements == null ) elements = new LinkedHashMap<String, EmsScriptNode>(); 
+	        Collection< EmsScriptNode > elementColl = 
+	                NodeUtil.luceneSearchElements( "TYPE:\"sysml:" + specifier + "\"" );
+//	        for ( EmsScriptNode e : elementColl ) {
+//	            elements.put( e.getId(), e );
+//	        }
+            if ( elementColl != null && !elementColl.isEmpty()) return elementColl;
+	        
     	}
     	
         return Collections.emptyList();
@@ -808,14 +844,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         // TODO finish this, just a partial implementation
     
         if (context instanceof EmsScriptNode) {
-        	
         	EmsScriptNode node = (EmsScriptNode) context;
-        	String acmType = node.getTypeShort();
-        	
-        	// Return type w/o sysml prefix:
-        	if (acmType != null) {
-        		return Acm.getACM2JSON().get(acmType);
-        	}        
+        	return node.getTypeName();
         }
         
         return null;
@@ -1327,5 +1357,22 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         // TODO Auto-generated method stub
         return false;
     }
+    
+    // TODO dont like dependence on BAE for Call here....
+    public Collection< Object >
+    		map( Collection< Object > elements,
+    			 Call call) throws InvocationTargetException {
+		 
+    	return call.map( elements, 1 );
+    }
+    
+    public Collection< Object >
+			map( Collection< Object > elements,
+				 Call call,
+				 int indexOfObjectArgument) throws InvocationTargetException {
+		 
+		return call.map( elements, indexOfObjectArgument );
+	}
+
 
 }

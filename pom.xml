@@ -40,6 +40,59 @@
         <maven.test.skip>false</maven.test.skip>
     </properties>
 
+    <!-- profiles for specific dependencies for developers or users -->
+    <profiles>
+        <profile>
+            <id>mms-dev</id>
+            <dependencies>
+	        <dependency>
+	            <groupId>gov.nasa.jpl.ae</groupId>
+	            <artifactId>AE</artifactId>
+	            <version>1.0</version>
+	            <scope>system</scope>
+	            <type>jar</type>
+	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/AE.jar</systemPath>
+	        </dependency>
+	        <dependency>
+	            <groupId>sysml</groupId>
+	            <artifactId>sysml</artifactId>
+	            <version>1.0</version>
+	            <scope>system</scope>
+	            <type>jar</type>
+	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/sysml.jar</systemPath>
+	        </dependency>
+	        <dependency>
+	            <groupId>mbee_util</groupId>
+	            <artifactId>mbee_util</artifactId>
+	            <version>1.0</version>
+	            <scope>system</scope>
+	            <type>jar</type>
+	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/mbee_util.jar</systemPath>
+	        </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>mbee-dev</id>
+            <dependencies>
+                <dependency>
+			        <groupId>gov.nasa.jpl.mbee.util</groupId>
+			        <artifactId>mbee_util</artifactId>
+			        <version>0.0.2</version>
+			    </dependency>
+			    <dependency>
+			        <groupId>gov.nasa.jpl.mbee.bae</groupId>
+			        <artifactId>bae</artifactId>
+			        <version>0.0.2</version>
+			    </dependency>
+                <dependency>
+                    <groupId>gov.nasa.jpl.mbee.sysml</groupId>
+                    <artifactId>sysml</artifactId>
+                    <version>0.0.2</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+
     <!-- Here we realize the connection with the Alfresco selected platform 
         (e.g.version and edition) -->
     <dependencyManagement>
@@ -86,12 +139,7 @@
             <artifactId>alfresco-web-framework-commons</artifactId>
             <version>${alfresco.version}</version>
         </dependency>
-<!--          <dependency>
-            <groupId>${alfresco.groupId}</groupId>
-            <artifactId>alfresco-web-client</artifactId>
-            <version>${alfresco.version}</version>
-        </dependency>
- -->         <dependency>
+        <dependency>
             <groupId>${alfresco.groupId}</groupId>
             <artifactId>alfresco-remote-api</artifactId>
             <version>${alfresco.version}</version>
@@ -119,11 +167,6 @@
 			<artifactId>chemistry-opencmis-client-impl</artifactId>
 			<version>0.8.0</version>
 		</dependency>
-		<!-- apache chemistry opencmis SERVER <dependency> <groupId>org.apache.chemistry.opencmis</groupId> 
-			<artifactId>chemistry-opencmis-server-support</artifactId> <version>0.8.0</version> 
-			</dependency> Test dependencies cmis client dependencies <dependency> <groupId>org.alfresco.cmis.client</groupId> 
-			<artifactId>alfresco-opencmis-extension</artifactId> <version>0.2</version> 
-			<type>jar</type> </dependency> -->
         <!--  apache chemistry opencmis SERVER -->
 		<dependency>
 		    <groupId>org.apache.chemistry.opencmis</groupId>
@@ -135,34 +178,6 @@
 			<artifactId>chemistry-opencmis-commons-impl</artifactId>
 			<version>0.8.0</version>
 		</dependency>
-		<dependency>
-<!-- 			<groupId>gov.nasa.jpl</groupId> -->
-<!-- 			<artifactId>ae</artifactId> -->
-<!-- 			<version>1.0</version> -->
-<!-- 			<type>jar</type> -->
- 			<groupId>gov.nasa.jpl.ae</groupId>
-			<artifactId>AE</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<type>jar</type>
-			<systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/AE.jar</systemPath>
- 		</dependency>
-        <dependency>
-            <groupId>sysml</groupId>
-            <artifactId>sysml</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <type>jar</type>
-            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/sysml.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>mbee_util</groupId>
-            <artifactId>mbee_util</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <type>jar</type>
-            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/mbee_util.jar</systemPath>
-        </dependency>
     </dependencies>
 
 	
@@ -176,13 +191,14 @@
         -->
     <repositories>
         <repository>
+              <id>artifactory</id>
+              <name>releases</name>
+              <url>http://128.149.16.144:8082/artifactory/libs-release-local</url>
+        </repository>
+        <repository>
             <id>alfresco-public</id>
             <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
         </repository>
-<!--         <repository> -->
-<!--             <id>alfresco-public-maven</id> -->
-<!--             <url>https://maven.alfresco.com/nexus/content/repositories/releases</url> -->
-<!--         </repository> -->
         <repository>
             <id>alfresco-public-snapshots</id>
             <url>https://artifacts.alfresco.com/nexus/content/groups/public-snapshots</url>
@@ -191,11 +207,6 @@
                 <updatePolicy>daily</updatePolicy>
             </snapshots>
         </repository>
-		<!-- <repository> -->
-		<!-- <id>project.local</id> -->
-		<!-- <name>project</name> -->
-		<!-- <url>file:${project.basedir}/repo</url> -->
-		<!-- </repository> -->
     </repositories>
 
 	<build>

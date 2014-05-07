@@ -86,6 +86,8 @@ public class Acm {
     public static final String JSON_DISPLAYED_ELEMENTS = "displayedElements";
     public static final String JSON_NO_SECTIONS = "noSections";
     public static final String JSON_VIEW_2_VIEW = "view2view";
+    public static final String JSON_PRODUCT = "Product";
+    public static final String JSON_VIEW = "View";
     
 //    public static final String JSON_EXPRESSION = "Expression";
 //    public static final String JSON_LITERAL_BOOLEAN = "LiteralBoolean";
@@ -143,6 +145,8 @@ public class Acm {
     public static final String JSON_PARAMETER_DEFAULT_VALUE = "parameterDefaultValue";
     public static final String JSON_OPERATION_EXPRESSION = "operationExpression";
     public static final String JSON_METHOD = "method";
+    public static final String JSON_CONNECTOR = "Connector";
+    public static final String JSON_CONNECTOR_ROLE = "connectorRole";
 
     // ACM types with the different name spaces
     public static final String SYSML = "sysml:";
@@ -177,7 +181,6 @@ public class Acm {
 //    public static final String ACM_OWNER = SYSML + JSON_OWNER;
     public static final String ACM_TYPE = SYSML + JSON_TYPE;
     public static final String ACM_REIFIED_CONTAINMENT = SYSML + "reifiedContainment";
-    public static final String ACM_VIEW = SYSML + "View";
     public static final String ACM_BODY = SYSML + JSON_BODY;
     public static final String ACM_EXPRESSION_BODY = SYSML + JSON_EXPRESSION_BODY;
     public static final String ACM_ANNOTATED_ELEMENTS = SYSML + JSON_ANNOTATED_ELEMENTS;
@@ -194,7 +197,8 @@ public class Acm {
     public static final String ACM_DISPLAYED_ELEMENTS = VIEW + JSON_DISPLAYED_ELEMENTS;
     public static final String ACM_NO_SECTIONS = VIEW + JSON_NO_SECTIONS;
     public static final String ACM_VIEW_2_VIEW = VIEW + JSON_VIEW_2_VIEW;
-    public static final String ACM_PRODUCT = VIEW + "Product";
+    public static final String ACM_PRODUCT = VIEW + JSON_PRODUCT;
+    public static final String ACM_VIEW = SYSML + JSON_VIEW; // yes, this starts with sysml instead of view2
     
 //    public static final String ACM_EXPRESSION = SYSML + JSON_EXPRESSION;
 //    public static final String ACM_LITERAL_BOOLEAN = SYSML + JSON_LITERAL_BOOLEAN;
@@ -249,7 +253,8 @@ public class Acm {
     public static final String ACM_PARAMETER_DEFAULT_VALUE = SYSML + JSON_PARAMETER_DEFAULT_VALUE;
     public static final String ACM_OPERATION_EXPRESSION = SYSML + JSON_OPERATION_EXPRESSION;
     public static final String ACM_METHOD = SYSML + JSON_METHOD;
-
+    public static final String ACM_CONNECTOR = SYSML + JSON_CONNECTOR;
+    public static final String ACM_CONNECTOR_ROLE = SYSML + JSON_CONNECTOR_ROLE;
     
     public static String ACM_ELEMENT_FOLDER = SYSML + "ElementFolder";
     public static String ACM_PROJECT = SYSML + "Project";
@@ -343,6 +348,7 @@ public class Acm {
             add(JSON_VALUE);
             add(JSON_OPERATION_PARAMETER);
             add(JSON_OPERAND);
+            add(JSON_CONNECTOR_ROLE);
 //            add(JSON_ANNOTATED_ELEMENTS);
         }
     };
@@ -368,6 +374,7 @@ public class Acm {
            add(JSON_PARAMETER_DEFAULT_VALUE);
            add(JSON_OPERATION_EXPRESSION);
            add(JSON_METHOD);
+           add(JSON_CONNECTOR_ROLE);
 //           add(JSON_ANNOTATED_ELEMENTS);
        }
    };
@@ -450,6 +457,7 @@ public class Acm {
             add(JSON_PARAMETER_DEFAULT_VALUE);
             add(JSON_OPERATION_EXPRESSION);
             add(JSON_METHOD);
+            add(JSON_CONNECTOR_ROLE);
         }
     };
 
@@ -465,6 +473,8 @@ public class Acm {
             // now get rid of stuff that's handled special
             //removeAll()
 
+            add(JSON_VALUE);
+            
             add(JSON_BODY);
             add(JSON_TYPE);
             add(JSON_NAME);
@@ -474,7 +484,6 @@ public class Acm {
             // TODO: source/target should become noderefs at some point
             add(JSON_SOURCE);
             add(JSON_TARGET);
-            add(JSON_PROPERTY_TYPE);
 
             add(JSON_OWNER);
             add(JSON_VALUE_TYPE);
@@ -519,8 +528,8 @@ public class Acm {
             put(JSON_TYPE_FILTER.ALL, ALL_JSON);
             put(JSON_TYPE_FILTER.COMMENT, COMMENT_JSON);
             put(JSON_TYPE_FILTER.ELEMENT, ELEMENT_JSON);
-            put(JSON_TYPE_FILTER.PRODUCT, PRODUCT_JSON);
-            put(JSON_TYPE_FILTER.VIEW, VIEW_JSON);
+            put(JSON_TYPE_FILTER.PRODUCT, ELEMENT_JSON);//PRODUCT_JSON);
+            put(JSON_TYPE_FILTER.VIEW, ELEMENT_JSON); //VIEW_JSON);
         }
     };
 }

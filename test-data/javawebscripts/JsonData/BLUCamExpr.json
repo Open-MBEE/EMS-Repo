@@ -1517,7 +1517,26 @@
         "name": "Components",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "type": "Element"
+        "type": "View"
+    },
+    {
+        "view2view": [
+            {
+                "id": "prod_id_1",
+                "childrenViews": ["_17_0_2_3_e610336_1394148311476_17302_29388"]
+            },
+            {
+                "id": "_17_0_2_3_e610336_1394148311476_17302_29388",
+                "childrenViews": []
+            }
+        ],
+        "id": "prod_id_1",
+        "name": "Spacecraft Doc",
+        "documentation": "",
+        "owner": "300",
+        "noSections": [],
+        "type": "Product",
+        "editable": true
     },
     {
         "id": "_17_0_2_4_f3a0363_1394143297852_560682_29481",
@@ -2162,7 +2181,76 @@
         "name": "ContextViewpoint",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "method": "get_two_names",
         "type": "Viewpoint"
+    },
+    {
+        "id": "get_two_names",
+        "name": "get_two_names_op",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "operationExpression": "get_two_names_expression",
+        "type": "Operation" 
+    },
+    {
+        "id": "get_two_names_expression",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "operand": ["get_names",
+                    "_17_0_2_4_f3a0363_1394141845089_115460_28389",
+                    "_17_0_2_4_f3a0363_1394140377374_900991_27624"],
+        "type": "Expression" 
+    },
+    {
+        "id": "get_names",
+        "name": "get_names_op",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "operationParameter":["s1_param",
+                              "s2_param"],
+        "operationExpression": "vp_expression_2",
+        "type": "Operation" 
+    },
+    {
+        "id": "s1_param",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "type": "Parameter" 
+    },
+    {
+        "id": "s2_param",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "type": "Parameter" 
+    },
+    {
+        "id": "vp_expression_2",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "operand": ["op_list",
+                    "op_name_arg_1",
+                    "op_name_arg_2"],
+        "type": "Expression" 
+    },    
+    {
+        "id": "op_name_arg_1",
+        "name": "Name",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "operationParameter":["s1_param"],
+        "type": "Operation"
+    },
+    {
+        "id": "op_name_arg_2",
+        "name": "Name",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "operationParameter":["s2_param"],
+        "type": "Operation"
     },
     {
         "id": "_17_0_2_4_f3a0363_1394142599017_677571_29103",
