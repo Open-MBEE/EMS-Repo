@@ -816,16 +816,17 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     	if (specifier instanceof String) {
 	        StringBuffer response = new StringBuffer();
 	        Status status = new Status();
-	        Map< String, EmsScriptNode > elements =
-	                NodeUtil.searchForElements( "@sysml\\:type:\"", (String)specifier, services, response,
-	                                            status );
-//            NodeUtil.searchForElements( "TYPE:\"", (String)specifier, services, response,
-//                                        status );
-
-	        if ( elements != null && !elements.isEmpty()) return elements.values();
+//	        Map< String, EmsScriptNode > elements =
+//	                NodeUtil.searchForElements( "@sysml\\:type:\"", (String)specifier, services, response,
+//	                                            status );
+////            NodeUtil.searchForElements( "TYPE:\"", (String)specifier, services, response,
+////                                        status );
+//
+//	        if ( elements != null && !elements.isEmpty()) return elements.values();
 	        
 //	        if ( elements == null ) elements = new LinkedHashMap<String, EmsScriptNode>(); 
-	        Collection< EmsScriptNode > elementColl = NodeUtil.luceneSearchElements( "TYPE:\"sysml:Conform\"" );
+	        Collection< EmsScriptNode > elementColl = 
+	                NodeUtil.luceneSearchElements( "TYPE:\"sysml:" + specifier + "\"" );
 //	        for ( EmsScriptNode e : elementColl ) {
 //	            elements.put( e.getId(), e );
 //	        }
