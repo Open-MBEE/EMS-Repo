@@ -162,6 +162,27 @@ resourceTypes:
     uriParameters:
       siteId:
         description: Alfresco site identifier for the project under consideration
+    /elements:
+      type: collection
+      /{elementId}:
+        type: collection
+        uriParameters:
+          elementId:
+            description: Sysml ID for the element under consideration
+        /comments:
+          type: collection
+          /{commentId}:
+            type: collection
+            uriParameters:
+              commentId:
+                description: Sysml ID for comment under consideration
+        /versions:
+          type: collection
+          /{versionId}:
+            type: collection
+            uriParameters:
+              versionId:
+                description: Sysml ID for the version under consideration
     /projects:
       type: readCollection
       get:
@@ -222,6 +243,14 @@ resourceTypes:
             uriParameters:
               productId:
                 description: Sysml ID for the product (document) under consideration
+            /snapshots:
+              description: Scoped under /configurations and /products
+              type: collection
+              /{snapshotId}:
+                type: collection
+                uriParameters:
+                  snapshotId:
+                    description: ID for the snapshot under consideration
             /views:
               type: collection
               /{viewId}:
@@ -258,6 +287,7 @@ resourceTypes:
           configurationId:
             description: ID for the configuration under consideration
         /snapshots:
+          description: Scoped under /configurations and /products
           type: collection
           /{snapshotId}:
             type: collection
