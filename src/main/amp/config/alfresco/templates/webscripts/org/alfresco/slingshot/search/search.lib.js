@@ -18,6 +18,7 @@
  */
 
 const DEFAULT_MAX_RESULTS = 250;
+const DEFAULT_PAGE_SIZE = 20;
 const SITES_SPACE_QNAME_PATH = "/app:company_home/st:sites/";
 const DISCUSSION_QNAMEPATH = "/fm:discussion";
 const COMMENT_QNAMEPATH = DISCUSSION_QNAMEPATH + "/cm:Comments";
