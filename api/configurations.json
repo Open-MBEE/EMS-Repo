@@ -17,6 +17,19 @@
     "definitions": {
         "Configuration": {
             "properties": {
+                "created": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The time for the configuration set - that will be referenced by the snapshots"
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Description of the configuration set"
+                },
+                "id": {
+                    "type": "string",
+                    "description": "Alfresco node reference ID, which is immutable, used only for updates"
+                },
                 "modified": {
                     "type": "string",
                     "format": "date-time",
@@ -25,15 +38,6 @@
                 "name": {
                     "type": "string",
                     "description": "Human readable name for the configuration set"
-                },
-                "nodeid": {
-                    "type": "string",
-                    "description": "Alfresco node reference ID, which is immutable, used only for updates"
-                },
-                "timestamp": {
-                    "type": "string",
-                    "format": "date-time",
-                    "description": "The time for the configuration set - that will be referenced by the snapshots"
                 }
             }
         }

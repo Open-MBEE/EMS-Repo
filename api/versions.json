@@ -17,13 +17,9 @@
     "definitions": {
         "Version": {
             "properties": {
-                "id": {
+                "sysmlid": {
                     "type": "string",
                     "description": "Unique model identifier of the element. Equivalent to MDID"
-                },
-                "nodeid": {
-                    "type": "string",
-                    "description": "The Alfresco unique noderef ID, so the version can be retrieved. TODO: may be able to just use timestamp for this "
                 },
                 "timestamp": {
                     "type": "string",

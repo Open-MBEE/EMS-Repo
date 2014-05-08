@@ -17,17 +17,17 @@
     "definitions": {
         "Project": {
             "properties": {
-                "id": {
+                "sysmlid": {
                     "type": "string",
-                    "description": "Unique identifier of the element. Equivalent to MDID"
+                    "description": "Unique sysml identifier of the project"
                 },
                 "name": {
                     "type": "string",
-                    "description": "Human readable name of the product"
+                    "description": "Human readable name of the project"
                 },
-                "projectVersion": {
+                "sysmlVersion": {
                     "type": "string",
-                    "description": "MD project version last exported"
+                    "description": "MD project version last exported. TODO: may go away"
                 }
             }
         }

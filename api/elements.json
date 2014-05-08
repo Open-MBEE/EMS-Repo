@@ -17,12 +17,7 @@
     "definitions": {
         "Element": {
             "properties": {
-                "url": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "Resource URL that is fully qualified with the appropriate namespace (sites/workspace)"    
-                },
-                "id": {
+                "sysmlid": {
                     "type": "string",
                     "description": "Unique identifier of the element. Equivalent to MDID"
                 },
@@ -42,16 +37,16 @@
                     "type": "string",
                     "description": "Owner of the element - this indicates containment"
                 },
-                "author": {
+                "creator": {
                     "type": "string",
                     "description": "Last modifier of the element"
                 },
-                "lastModified": {
+                "modified": {
                     "type": "string",
                     "format": "date-time",
                     "description": "Last modified time of the element"
                 },
-                "lastAccessed": {
+                "read": {
                     "type": "string",
                     "format": "date-time",
                     "description": "On updating any element, the time when the data was loaded needs to be provided so conflicts can be detected and handled by the server"
@@ -152,6 +147,16 @@
                     "type": "string",
                     "description": "ID for the property type element"
                 },
+                
+                "valueType": {
+                    "enum": [ "ValueSpecification", "Duration", "DurationInterval",
+                                "ElementValue", "Expression", "OpaqueExpression",
+                                "InstanceValue", "Interval", "StringExpression",
+                                "LiteralBoolean", "LiteralNull", "LiteralInteger",
+                                "LiteralReal", "LiteralString", "LiteralUnlimitedNatural",
+                                "TimeExpression", "TimeInterval" ],
+                    "description": "type of the property value"
+                },
                 "value": {
                     "type": "array",
                     "items": {
@@ -183,7 +188,7 @@
         "Parameter": {
         },
         "View": {
-        	"properties": {
+            	"properties": {
                 "contains": {
                     "type": "array",
                     "items": {
