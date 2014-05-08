@@ -275,8 +275,8 @@
 							</resources>
 						</configuration>
 					</execution>
-					<!-- Alfresco Maven plugin corrupts libraries too - so make sure to copy them over -->
 					<execution>
+                        <!-- Alfresco Maven plugin corrupts libraries too - so make sure to copy them over -->
 						<id>copy-lib-resources</id>
 						<phase>compile</phase>
 						<goals>
@@ -292,6 +292,23 @@
 							</resources>
 						</configuration>
 					</execution>
+                    <execution>
+                        <!-- Copy the RAML API information into the scripts directory so it gets deployed  -->
+                        <id>copy-api-resources</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <overwrite>true</overwrite>
+                            <outputDirectory>${basedir}/src/main/amp/web/scripts/raml</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/api/html</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
 			</executions>
 			</plugin>
 		</plugins>

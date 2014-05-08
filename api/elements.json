@@ -3,76 +3,96 @@
     "type": "object",
     "description": "Element specification",
     "properties": {
-        "id": {
-            "type": "string"
-            "description": "Unique identifier of the element. Equivalent to MDID."
-        },
-        "name": {
-            "type": "string",
-            "description": "Name of the element",
-        },
-        "documentation": {
-            "type": "string",
-            "description": "Documentation of the element" ,
-        },
-        "editable": {
-            "type": "boolean",
-            "description": "Indicates whether user has permissions to edit the element (so GUI can toggle, server still checks on save though)"
-        },
-        "owner": {
-            "type": "string",
-            "description": "Owner of the element - this indicates containment",
-        },
-        "author": {
-            "type": "string",
-            "description": "Last modifier of the element",
-        },
-        "lastModified": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Last modified time of the element",
-        },
-        "lastAccessed": {
-            "type": "string",
-            "format": "date-time",
-            "description": "On updating any element, the time when the data was loaded needs to be provided so conflicts can be detected and handled by the server"
-        },
-        "qualifiedName": {
-            "type": "string",
-            "description": "Containment hierarchy of element based off of SysML names, currently provided as a convenience for context"
+        "elements": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "oneOf": [
+                    {"$ref": "#/definitions/Element"}
+                ]
+            }
         }
-        "type": {
-            "type": "object",
-            "description": "Specialized type of the element, if any, adds additional metadata per the references",
-            "oneOf": [
-                { "$ref": "#/definitions/Constraint"},
-                { "$ref": "#/definitions/InstanceSpecification"},
-                { "$ref": "#/definitions/Operation"},
-                { "$ref": "#/definitions/Package"},
-                { "$ref": "#/definitions/Product"},
-                { "$ref": "#/definitions/Project"},
-                { "$ref": "#/definitions/Property"},
-                { "$ref": "#/definitions/Parameter"},
-                { "$ref": "#/definitions/View"},
-                { "$ref": "#/definitions/ViewPoint"},
-
-                { "$ref": "#/definitions/DirectedRelationship"},
-                { "$ref": "#/definitions/Conform"},
-                { "$ref": "#/definitions/Dependency"},
-                { "$ref": "#/definitions/Expose"},
-            ]
-        },
     },
-    "required": ["type", "id"],
 
     "definitions": {
+        "Element": {
+            "properties": {
+                "url": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Resource URL that is fully qualified with the appropriate namespace (sites/workspace)"    
+                },
+                "id": {
+                    "type": "string",
+                    "description": "Unique identifier of the element. Equivalent to MDID"
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Name of the element"
+                },
+                "documentation": {
+                    "type": "string",
+                    "description": "Documentation of the element"
+                },
+                "editable": {
+                    "type": "boolean",
+                    "description": "Indicates whether user has permissions to edit the element (so GUI can toggle, server still checks on save though)"
+                },
+                "owner": {
+                    "type": "string",
+                    "description": "Owner of the element - this indicates containment"
+                },
+                "author": {
+                    "type": "string",
+                    "description": "Last modifier of the element"
+                },
+                "lastModified": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Last modified time of the element"
+                },
+                "lastAccessed": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "On updating any element, the time when the data was loaded needs to be provided so conflicts can be detected and handled by the server"
+                },
+                "qualifiedName": {
+                    "type": "string",
+                    "description": "Containment hierarchy of element based off of SysML names, currently provided as a convenience for context"
+                },
+                "type": {
+                    "type": "object",
+                    "description": "Specialized type of the element, if any, adds additional metadata per the references",
+                    "oneOf": [
+                        { "$ref": "#/definitions/Constraint"},
+                        { "$ref": "#/definitions/InstanceSpecification"},
+                        { "$ref": "#/definitions/Operation"},
+                        { "$ref": "#/definitions/Package"},
+                        { "$ref": "#/definitions/Product"},
+                        { "$ref": "#/definitions/Project"},
+                        { "$ref": "#/definitions/Property"},
+                        { "$ref": "#/definitions/Parameter"},
+                        { "$ref": "#/definitions/View"},
+                        { "$ref": "#/definitions/ViewPoint"},
+
+                        { "$ref": "#/definitions/DirectedRelationship"},
+                        { "$ref": "#/definitions/Conform"},
+                        { "$ref": "#/definitions/Dependency"},
+                        { "$ref": "#/definitions/Expose"}
+                    ]
+                }
+            },
+            "required": ["type", "id"]
+        },
+
+
         "Constraint": {
             "properties": {
                 "specification": {
                     "type": "string",
-                    "description": "ID of element that provides the constraint specification",
-                },
-            },
+                    "description": "ID of element that provides the constraint specification"
+                }
+            }
         },
         "InstanceSpecification": {
             "properties": {
@@ -122,11 +142,11 @@
             "properties": {
                 "isDerived": {
                     "type": "boolean",
-                    "description": "Indicates whether the property is a free variable (if true) or not (if false)",
+                    "description": "Indicates whether the property is a free variable (if true) or not (if false)"
                 },
                 "isSlot": {
                     "type": "boolean",
-                    "description": "Indicates whther or not the property refers to a slot value",
+                    "description": "Indicates whther or not the property refers to a slot value"
                 },
                 "propertyType": {
                     "type": "string",
@@ -152,8 +172,8 @@
                         { "$ref": "#/definitions/LiteralString"},
                         { "$ref": "#/definitions/LiteralUnlimitedNatural"},
                         { "$ref": "#/definitions/TimeExpression"},
-                        { "$ref": "#/definitions/TimeInterval"},
-                    ],
+                        { "$ref": "#/definitions/TimeInterval"}
+                    ]
                 }
             }
         },
@@ -163,66 +183,67 @@
             "contains": {
                 "type": "array",
                 "items": {
-                    "type": "object",
-                },
+                    "type": "object"
+                }
             },
             "displayedElements": {
                 "type": "array",
                 "items": {
                     "type": "string",
-                    "description": "ID of displayed element",
-                },
+                    "description": "ID of displayed element"
+                }
             },
             "allowedElements": {
                 "type": "array",
                 "items": {
                     "type": "string",
-                    "description": "ID of allowed element",
-                },
+                    "description": "ID of allowed element"
+                }
             },
             "childrenViews": {
                 "type": "array",
                 "items": {
                     "type": "string",
-                    "description": "ID of views",
-                },
-            },
+                    "description": "ID of views"
+                }
+            }
         },
         "Viewpoint": {
             "properties": {
                 "method": {
                     "type": "string",
-                    "description": "ID of the method element for the viewpoint",
-                },
-            },
+                    "description": "ID of the method element for the viewpoint"
+                }
+            }
         },
+
 
         "DirectedRelationship": {
             "properties": {
                 "source": {
                     "type": "string",
-                    "description": "ID of the source of the relationship",
+                    "description": "ID of the source of the relationship"
                 },
                 "target": {
                     "type": "string",
-                    "description": "ID of the target of the relationship",
-                },
-            },
+                    "description": "ID of the target of the relationship"
+                }
+            }
         },
         "Conform": {
             "allOf": [
-                {"$ref": "#/definitions/DirectedRelationship"},
-            ],
+                {"$ref": "#/definitions/DirectedRelationship"}
+            ]
         },
         "Dependency": {
             "allOf": [
-                {"$ref": "#/definitions/DirectedRelationship"},
-            ],
+                {"$ref": "#/definitions/DirectedRelationship"}
+            ]
         },
         "Expose": {
             "allOf": [
-                {"$ref": "#/definitions/DirectedRelationship"},
-            ],
+                {"$ref": "#/definitions/DirectedRelationship"}
+            ]
         },
 
 
@@ -233,14 +254,14 @@
                     "items": {
                         "type": "string",
                         "description": "ID of the expression elements for this value"
-                    },
-                },
-            },
+                    }
+                }
+            }
         },
         "Duration": {
             "allOf": [
-                {"$ref": "#/definitions/ValueSpecification"},
-            ],
+                {"$ref": "#/definitions/ValueSpecification"}
+            ]
         },
         "DurationInterval": {
             "properties": {
@@ -251,22 +272,22 @@
                 "min": {
                     "type": "string",
                     "description": "ID of the SysML element representing the duration min"
-                },
+                }
             },
             "allOf": [
-                {"$ref": "#/definitions/ValueSpecification"},
-            ],
+                {"$ref": "#/definitions/ValueSpecification"}
+            ]
         },
         "ElementValue": {
             "properties": {
                 "element": {
                     "type": "string",
-                    "description": "ID of the element that stores this element value",
-                },
+                    "description": "ID of the element that stores this element value"
+                }
             },
             "allOf": [
-                {"$ref": "#/definitions/ValueSpecification"},
-            ],
+                {"$ref": "#/definitions/ValueSpecification"}
+            ]
         },
         "Expression": {
             "properties": {
@@ -274,105 +295,105 @@
                     "type": "array",
                     "items": {
                         "type": "string",
-                        "description": "ID of the operand being referenced",
-                    },
-                },
+                        "description": "ID of the operand being referenced"
+                    }
+                }
             },
             "allOf": [
-                {"$ref": "#/definitions/ValueSpecification"},
-            ],
+                {"$ref": "#/definitions/ValueSpecification"}
+            ]
         },
         "OpaqueExpression": {
             "properties": {
                 "expressionBody": {
                     "type": "string",
-                    "description": "The opaque expression string",
-                },
+                    "description": "The opaque expression string"
+                }
             },
             "allOf": [
-                {"$ref": "#/definitions/ValueSpecification"},
-            ],
+                {"$ref": "#/definitions/ValueSpecification"}
+            ]
         },
         "InstanceValue": {
             "properties": {
                 "instance": {
                     "type": "string",
                     "description": "ID of the SysML element representing the instance"
-                },
+                }
             },
             "allOf": [
-                {"$ref": "#/definitions/ValueSpecification"},
-            ],
+                {"$ref": "#/definitions/ValueSpecification"}
+            ]
         },
         "Interval": {
             "allOf": [
-                {"$ref": "#/definitions/ValueSpecification"},
-            ],
+                {"$ref": "#/definitions/ValueSpecification"}
+            ]
         },
         "StringExpression": {
             "allOf": [
-                {"$ref": "#/definitions/ValueSpecification"},
-            ],
+                {"$ref": "#/definitions/ValueSpecification"}
+            ]
         },
         "LiteralBoolean": {
             "properties": {
                 "boolean": {
-                    "type": "boolean",
-                },
+                    "type": "boolean"
+                }
             },
             "allOf": [
-                {"$ref": "#/definitions/ValueSpecification"},
-            ],
+                {"$ref": "#/definitions/ValueSpecification"}
+            ]
         },
         "LiteralNull": {
             "allOf": [
-                {"$ref": "#/definitions/ValueSpecification"},
-            ],
+                {"$ref": "#/definitions/ValueSpecification"}
+            ]
         },
         "LiteralInteger": {
             "properties": {
                 "integer": {
-                    "type": "integer",
-                },
+                    "type": "integer"
+                }
             },
             "allOf": [
-                {"$ref": "#/definitions/ValueSpecification"},
-            ],
+                {"$ref": "#/definitions/ValueSpecification"}
+            ]
         },
         "LiteralReal": {
             "properties": {
                 "double": {
-                    "type": "number",
-                },
-            }
+                    "type": "number"
+                }
+            },
             "allOf": [
-                {"$ref": "#/definitions/ValueSpecification"},
-            ],
+                {"$ref": "#/definitions/ValueSpecification"}
+            ]
         },
         "LiteralString": {
             "properties": {
                 "string": {
-                    "type": "string",
-                },
+                    "type": "string"
+                }
             },
             "allOf": [
-                {"$ref": "#/definitions/ValueSpecification"},
-            ],
+                {"$ref": "#/definitions/ValueSpecification"}
+            ]
         },
         "LiteralUnlimitedNatural": {
             "properties": {
                 "naturalValue": {
-                    "type": "integer",
-                },
+                    "type": "integer"
+                }
             },
             "allOf": [
-                {"$ref": "#/definitions/ValueSpecification"},
-            ],
+                {"$ref": "#/definitions/ValueSpecification"}
+            ]
         },
         "TimeExpression": {
             "allOf": [
-                {"$ref": "#/definitions/ValueSpecification"},
-            ],
+                {"$ref": "#/definitions/ValueSpecification"}
+            ]
         },
         "TimeInterval": {
             "properties": {
@@ -383,11 +404,11 @@
                 "min": {
                     "type": "string",
                     "description": "ID of the SysML element representing the time interval min"
-                },
+                }
             },
             "allOf": [
-                {"$ref": "#/definitions/ValueSpecification"},
-            ],
-        },
+                {"$ref": "#/definitions/ValueSpecification"}
+            ]
+        }
     }
 }
