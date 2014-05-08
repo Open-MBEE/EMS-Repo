@@ -69,6 +69,8 @@ public class ProjectPost extends AbstractJavaWebScript {
 	 */
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        printHeader( req );
+
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -100,6 +102,9 @@ public class ProjectPost extends AbstractJavaWebScript {
 
 		status.setCode(statusCode);
 		model.put("res", response.toString());
+
+        printFooter();
+
 		return model;
 	}
 

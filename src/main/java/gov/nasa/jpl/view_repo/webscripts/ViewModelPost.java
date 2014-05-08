@@ -66,6 +66,8 @@ public class ViewModelPost extends ModelPost {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        printHeader( req );
+
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
 
@@ -100,6 +102,9 @@ public class ViewModelPost extends ModelPost {
 
         status.setCode(responseStatus.getCode());
         model.put("res", response.toString());
+
+        printFooter();
+
         return model;
     }
     

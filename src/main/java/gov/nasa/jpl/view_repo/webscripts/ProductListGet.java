@@ -113,6 +113,8 @@ public class ProductListGet extends AbstractJavaWebScript {
 	
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        printHeader( req );
+
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -141,6 +143,9 @@ public class ProductListGet extends AbstractJavaWebScript {
     		}
 
 		status.setCode(responseStatus.getCode());
+
+		printFooter();
+
 		return model;
 	}
 

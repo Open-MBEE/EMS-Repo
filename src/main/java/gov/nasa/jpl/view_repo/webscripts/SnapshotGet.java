@@ -73,6 +73,8 @@ public class SnapshotGet extends AbstractJavaWebScript {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        printHeader( req );
+
         clearCaches();
 
         String id = req.getServiceMatch().getTemplateVars().get("id");
@@ -98,6 +100,9 @@ public class SnapshotGet extends AbstractJavaWebScript {
         model.put("id", id.substring(0, id.lastIndexOf("_")));
 
         status.setCode(responseStatus.getCode());
+
+        printFooter();
+
         return model;
     }
 
