@@ -153,58 +153,63 @@
                     "description": "ID for the property type element"
                 },
                 "value": {
-                    "type": "object",
-                    "description": "The value of the property",
-                    "oneOf": [
-                        { "$ref": "#/definitions/ValueSpecification"},
-                        { "$ref": "#/definitions/Duration"},
-                        { "$ref": "#/definitions/DurationInterval"},
-                        { "$ref": "#/definitions/ElementValue"},
-                        { "$ref": "#/definitions/Expression"},
-                        { "$ref": "#/definitions/OpaqueExpression"},
-                        { "$ref": "#/definitions/InstanceValue"},
-                        { "$ref": "#/definitions/Interval"},
-                        { "$ref": "#/definitions/StringExpression"},
-                        { "$ref": "#/definitions/LiteralBoolean"},
-                        { "$ref": "#/definitions/LiteralNull"},
-                        { "$ref": "#/definitions/LiteralInteger"},
-                        { "$ref": "#/definitions/LiteralReal"},
-                        { "$ref": "#/definitions/LiteralString"},
-                        { "$ref": "#/definitions/LiteralUnlimitedNatural"},
-                        { "$ref": "#/definitions/TimeExpression"},
-                        { "$ref": "#/definitions/TimeInterval"}
-                    ]
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "description": "The value of the property",
+                        "oneOf": [
+                            { "$ref": "#/definitions/ValueSpecification"},
+                            { "$ref": "#/definitions/Duration"},
+                            { "$ref": "#/definitions/DurationInterval"},
+                            { "$ref": "#/definitions/ElementValue"},
+                            { "$ref": "#/definitions/Expression"},
+                            { "$ref": "#/definitions/OpaqueExpression"},
+                            { "$ref": "#/definitions/InstanceValue"},
+                            { "$ref": "#/definitions/Interval"},
+                            { "$ref": "#/definitions/StringExpression"},
+                            { "$ref": "#/definitions/LiteralBoolean"},
+                            { "$ref": "#/definitions/LiteralNull"},
+                            { "$ref": "#/definitions/LiteralInteger"},
+                            { "$ref": "#/definitions/LiteralReal"},
+                            { "$ref": "#/definitions/LiteralString"},
+                            { "$ref": "#/definitions/LiteralUnlimitedNatural"},
+                            { "$ref": "#/definitions/TimeExpression"},
+                            { "$ref": "#/definitions/TimeInterval"}
+                        ]
+                    }
                 }
             }
         },
         "Parameter": {
         },
         "View": {
-            "contains": {
-                "type": "array",
-                "items": {
-                    "type": "object"
-                }
-            },
-            "displayedElements": {
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "description": "ID of displayed element"
-                }
-            },
-            "allowedElements": {
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "description": "ID of allowed element"
-                }
-            },
-            "childrenViews": {
-                "type": "array",
-                "items": {
-                    "type": "string",
-                    "description": "ID of views"
+        	"properties": {
+                "contains": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                },
+                "displayedElements": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "ID of displayed element"
+                    }
+                },
+                "allowedElements": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "ID of allowed element"
+                    }
+                },
+                "childrenViews": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "ID of views"
+                    }
                 }
             }
         },
