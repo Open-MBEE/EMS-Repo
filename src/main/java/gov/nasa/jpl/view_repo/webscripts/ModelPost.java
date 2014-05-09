@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.ae.event.Call;
 import gov.nasa.jpl.ae.event.ConstraintExpression;
 import gov.nasa.jpl.ae.event.Expression;
 import gov.nasa.jpl.ae.event.ParameterListenerImpl;
@@ -960,16 +961,9 @@ public class ModelPost extends AbstractJavaWebScript {
                         // Fix constraints if desired:
                         if (fix) {
                             
-                            // TODO can pull all the contraints from the
-                            //      parameters and add to the contraint
-                            //      list so that we dont need to get a
-                            //      ParameterListenerImpl
-                            
-                            // TODO REVIEW
-                            //      this will not work if all the constraints are not
-                            //      posted at once.  There could be another constraint
-                            //      in the database that is violated and we will not know.
-                            //      Is this okay?
+                            // TODO 
+                            //      should be doing a lucene search to get all of the constraints and see if the elements
+                        	// 		posted are in that constraint.  Cant assume user will post the constraint.
                             
                             EmsSystemModel systemModel = new EmsSystemModel(this.services);
                             
@@ -998,10 +992,11 @@ public class ModelPost extends AbstractJavaWebScript {
                                         // This should always be of size 1:
                                         EmsScriptNode exprNode = expressions.iterator().next();
                                         
-                                        Expression<Boolean> expression = sysmlToAe.evaluateExpression( exprNode );
+                                        Expression<Call> expressionCall = sysmlToAe.toAeExpression( exprNode );
+                                        Call call = (Call) expressionCall.expression;
+                                        Expression<Boolean> expression = new Expression<Boolean>(call.evaluate(true, false));
                                         
-                                        if (expression != null && 
-                                            Boolean.class.isAssignableFrom( expression.getType().getClass() )) {
+                                        if (expression != null) {
                                             
                                             constraints.add(new ConstraintExpression( expression ));
                                         }
@@ -1025,10 +1020,15 @@ public class ModelPost extends AbstractJavaWebScript {
                                 }
                             
                                 // Solve!!!!
+                                Debug.turnOn();
                                 boolean result = solver.solve(constraints);
+                                Debug.turnOff();
                                 
                                 if (!result) {
                                     log( LogLevel.ERROR, "Was not able to solve all of the constraints!" );
+                                }
+                                else {
+                                    log( LogLevel.INFO, "Solved all of the constraints!" );
                                 }
                                 
                             }

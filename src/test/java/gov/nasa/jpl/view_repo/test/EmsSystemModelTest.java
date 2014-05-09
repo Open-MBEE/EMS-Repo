@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import gov.nasa.jpl.ae.event.Call;
 import gov.nasa.jpl.ae.event.ConstraintExpression;
 import gov.nasa.jpl.ae.event.DurativeEvent;
 import gov.nasa.jpl.ae.event.Expression;
@@ -171,12 +172,14 @@ public class EmsSystemModelTest {
 //				+ nodeTest.getProperty(Acm.ACM_VALUE).getClass());
 
         
-        Expression< Boolean > expression = sysmlToAe.evaluateExpression( node );//, Boolean.class );  
+//        Expression< Boolean > expression = sysmlToAe.evaluateExpression( node );//, Boolean.class );  
 //        System.out.println( "\n*testExpressionEvaluation() evalResult: "
 //                            + evalResult );
 //        assertNotNull( evalResult );
         
-//        Expression< Boolean > expression = sysmlToAe.toAeExpression( node );
+        Expression< Call > expressionCall = sysmlToAe.toAeExpression( node );
+        Call call = (Call) expressionCall.expression;
+        Expression<Boolean> expression = new Expression<Boolean>(call.evaluate(true, false));
         System.out.println( "\n*testExpressionEvaluation() expression: "
                 + expression );
         assertNotNull( expression ); 
