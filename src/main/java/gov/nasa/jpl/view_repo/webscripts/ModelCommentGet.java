@@ -63,6 +63,9 @@ public class ModelCommentGet extends ModelGet {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+
+        printHeader( req );
+        
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -90,6 +93,9 @@ public class ModelCommentGet extends ModelGet {
         }
 
         status.setCode(responseStatus.getCode());
+        
+        printFooter();
+
         return model;
     }
     

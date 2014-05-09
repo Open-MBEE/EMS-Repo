@@ -928,12 +928,11 @@ public class ModelPost extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
+        printHeader( req );
+
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
-        
-        System.out.println("Acm.getJSON2ACM() = " + Acm.getJSON2ACM());
-        System.out.println("Acm.getACM2JSON() = " + Acm.getACM2JSON());
-        
+
         boolean runInBackground = checkArgEquals(req, "background", "true");
         boolean fix = checkArgEquals(req, "fix", "true");
 
@@ -1059,7 +1058,9 @@ public class ModelPost extends AbstractJavaWebScript {
             model.put( "res", response.toString() );
         }
         status.setCode(responseStatus.getCode());
-        System.out.println("*** Done with model post!");
+
+        printFooter();
+
         return model;
     }
 
