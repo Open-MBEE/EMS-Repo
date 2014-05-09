@@ -29,14 +29,24 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.ae.event.ConstraintExpression;
+import gov.nasa.jpl.ae.event.Expression;
+import gov.nasa.jpl.ae.event.ParameterListenerImpl;
+import gov.nasa.jpl.ae.solver.Constraint;
+import gov.nasa.jpl.ae.solver.ConstraintLoopSolver;
+import gov.nasa.jpl.ae.sysml.SystemModelSolver;
+import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
+import gov.nasa.jpl.ae.util.ClassData;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -925,7 +935,12 @@ public class ModelPost extends AbstractJavaWebScript {
         System.out.println("Acm.getACM2JSON() = " + Acm.getACM2JSON());
         
         boolean runInBackground = checkArgEquals(req, "background", "true");
+        boolean fix = checkArgEquals(req, "fix", "true");
 
+        if (fix) {
+            log(LogLevel.INFO, "Constraint violations will be fixed if found!");
+        }
+        
         ModelPost instance = new ModelPost(repository, services);
         
         JSONObject top = new JSONObject();
@@ -942,6 +957,85 @@ public class ModelPost extends AbstractJavaWebScript {
                                                       status,
                                                       getProjectNodeFromRequest( req ) );
                     if ( !Utils.isNullOrEmpty( elements ) ) {
+                        
+                        // Fix constraints if desired:
+                        if (fix) {
+                            
+                            // TODO can pull all the contraints from the
+                            //      parameters and add to the contraint
+                            //      list so that we dont need to get a
+                            //      ParameterListenerImpl
+                            
+                            // TODO REVIEW
+                            //      this will not work if all the constraints are not
+                            //      posted at once.  There could be another constraint
+                            //      in the database that is violated and we will not know.
+                            //      Is this okay?
+                            
+                            EmsSystemModel systemModel = new EmsSystemModel(this.services);
+                            
+                            SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAe = 
+                                    new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( systemModel );
+                            
+                            SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  solver = 
+                                    new SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(systemModel, new ConstraintLoopSolver() );
+                            
+                            Collection<Constraint> constraints = new ArrayList<Constraint>();
+                            
+                            // Loop through all of the elements and create constraints
+                            // for the found Constraints:
+                            for (EmsScriptNode element : elements) {
+                                
+                                String type = systemModel.getTypeString(element, null);
+                                
+                                // If it is a constraint then add it to our constraints:
+                                if (type != null && type.equals( Acm.JSON_CONSTRAINT )) {
+                                    
+                                    // Get the constraint expression:
+                                    Collection<EmsScriptNode> expressions = systemModel.getProperty( element, Acm.JSON_CONSTRAINT_SPECIFICATION );
+                                    
+                                    if (!Utils.isNullOrEmpty( expressions )) {
+                                        
+                                        // This should always be of size 1:
+                                        EmsScriptNode exprNode = expressions.iterator().next();
+                                        
+                                        Expression<Boolean> expression = sysmlToAe.evaluateExpression( exprNode );
+                                        
+                                        if (expression != null && 
+                                            Boolean.class.isAssignableFrom( expression.getType().getClass() )) {
+                                            
+                                            constraints.add(new ConstraintExpression( expression ));
+                                        }
+                                    }
+                                    
+                                } // end if it is a constraint
+                            } 
+                            
+                            // Solve the constraints:
+                            if (!Utils.isNullOrEmpty( constraints )) {
+                                
+                                // Add all of the Parameter constraints:
+                                ClassData cd = sysmlToAe.getClassData();
+                                
+                                // Loop through all the listeners:
+                                for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
+                                    
+                                    // TODO: REVIEW
+                                    //       Can we get duplicate ParameterListeners in the aeClassses map?
+                                    constraints.addAll( listener.getConstraints( true, null ) );
+                                }
+                            
+                                // Solve!!!!
+                                boolean result = solver.solve(constraints);
+                                
+                                if (!result) {
+                                    log( LogLevel.ERROR, "Was not able to solve all of the constraints!" );
+                                }
+                                
+                            }
+                            
+                        } // end if fixing constraints
+                        
                         JSONArray elementsJson = new JSONArray();
                         for ( EmsScriptNode element : elements ) {
                             elementsJson.put( element.toJSONObject() );
