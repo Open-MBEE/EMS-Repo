@@ -65,6 +65,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
+import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.namespace.QName;
@@ -91,11 +92,13 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class ModelPost extends AbstractJavaWebScript {
     public ModelPost() {
         super();
+        setSystemModelAe();
     }
     
     public ModelPost(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
-    }
+        setSystemModelAe();
+     }
 
 
 //    private EmsScriptNode projectNode = null;
@@ -113,6 +116,10 @@ public class ModelPost extends AbstractJavaWebScript {
      * },
      */
     private JSONObject elementHierarchyJson;
+    
+    private EmsSystemModel systemModel;
+    
+    private SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAe;
 
     /**
      * JSONObject of the relationships
@@ -137,6 +144,14 @@ public class ModelPost extends AbstractJavaWebScript {
     protected Set<String> newElements;
 
     protected SiteInfo siteInfo;
+    
+    private void setSystemModelAe() {
+    	
+        systemModel = new EmsSystemModel(this.services);
+        sysmlToAe = 
+        		new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( systemModel );
+        
+    }
     
     /**
      * Create or update the model as necessary based on the request
@@ -924,6 +939,85 @@ public class ModelPost extends AbstractJavaWebScript {
     }
     
     /**
+     * Parses the expression for the passed constraint, and returns a set of all the node
+     * names in the expression.
+     * 
+     * @param constraintNode The node to parse
+     * @return Set of cm:name
+     */
+    private Set<String> getConstraintElementNames(EmsScriptNode constraintNode) {
+    	
+    	if (constraintNode == null) return null;
+
+    	Set<String> names = new HashSet<String>();
+    	
+    	// Add the name of the Constraint:
+    	names.add(constraintNode.getName());
+    	
+    	// Get the Expression for the Constraint:
+        EmsScriptNode exprNode = getConstraintExpression(constraintNode);
+        
+        // Add the names of all nodes in the Expression:
+        if (exprNode != null) {
+        	
+        	// TODO REVIEW
+        	// For now just adding all the children.  This wont work for ElementValue's elementValueOfElement
+        	for (ChildAssociationRef assoc: exprNode.getChildAssociationRefs()) {
+				EmsScriptNode child = new EmsScriptNode(assoc.getChildRef(), services, response);
+				if (checkPermissions(child, PermissionService.READ)) {
+					names.add(child.getName());		
+				}
+        	}
+        }
+        
+    	return names;
+    }
+    
+    /**
+     * Parse out the expression from the passed constraint node
+     * 
+     * @param constraintNode The node to parse
+     * @return The Expression node for the constraint
+     */
+    private EmsScriptNode getConstraintExpression(EmsScriptNode constraintNode) {
+    	
+    	if (constraintNode == null) return null;
+    	    	 
+        // Get the constraint expression:
+        Collection<EmsScriptNode> expressions = 
+        		systemModel.getProperty( constraintNode, Acm.JSON_CONSTRAINT_SPECIFICATION );
+        
+        // This should always be of size 1:
+        return Utils.isNullOrEmpty( expressions ) ? null :  expressions.iterator().next();
+        
+    }
+    
+    /**
+     * Creates a ConstraintExpression for the passed constraint node and adds to the passed constraints
+     * 
+     * @param constraintNode The node to parse and create a ConstraintExpression for
+     * @param constraints The list of Constraints to add to
+     */
+    private void addConstraintExpression(EmsScriptNode constraintNode, Collection<Constraint> constraints) {
+    	
+    	if (constraintNode == null || Utils.isNullOrEmpty(constraints)) return;
+    	
+        EmsScriptNode exprNode = getConstraintExpression(constraintNode);
+        
+        if (exprNode != null) {
+            
+            Expression<Call> expressionCall = sysmlToAe.toAeExpression( exprNode );
+            Call call = (Call) expressionCall.expression;
+            Expression<Boolean> expression = new Expression<Boolean>(call.evaluate(true, false));
+            
+            if (expression != null) {
+                
+                constraints.add(new ConstraintExpression( expression ));
+            }
+        }
+    }
+    
+    /**
      * Entry point
      */
     @Override
@@ -937,10 +1031,6 @@ public class ModelPost extends AbstractJavaWebScript {
         boolean runInBackground = checkArgEquals(req, "background", "true");
         boolean fix = checkArgEquals(req, "fix", "true");
 
-        if (fix) {
-            log(LogLevel.INFO, "Constraint violations will be fixed if found!");
-        }
-        
         ModelPost instance = new ModelPost(repository, services);
         
         JSONObject top = new JSONObject();
@@ -950,60 +1040,55 @@ public class ModelPost extends AbstractJavaWebScript {
                     instance.saveAndStartAction(req, status);
                     response.append("JSON uploaded, model load being processed in background.\n");
                     response.append("You will be notified via email when the model load has finished.\n");
-                } else {
+                } 
+                else {
+                	
                     JSONObject postJson = (JSONObject)req.parseContent();
                     Set< EmsScriptNode > elements = 
                         instance.createOrUpdateModel( postJson,
                                                       status,
                                                       getProjectNodeFromRequest( req ) );
+                    
                     if ( !Utils.isNullOrEmpty( elements ) ) {
                         
                         // Fix constraints if desired:
                         if (fix) {
-                            
-                            // TODO 
-                            //      should be doing a lucene search to get all of the constraints and see if the elements
-                        	// 		posted are in that constraint.  Cant assume user will post the constraint.
-                            
-                            EmsSystemModel systemModel = new EmsSystemModel(this.services);
-                            
-                            SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAe = 
-                                    new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( systemModel );
+                        	
+                            log(LogLevel.INFO, "Constraint violations will be fixed if found!");
                             
                             SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  solver = 
                                     new SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(systemModel, new ConstraintLoopSolver() );
                             
                             Collection<Constraint> constraints = new ArrayList<Constraint>();
                             
-                            // Loop through all of the elements and create constraints
-                            // for the found Constraints:
-                            for (EmsScriptNode element : elements) {
-                                
-                                String type = systemModel.getTypeString(element, null);
-                                
-                                // If it is a constraint then add it to our constraints:
-                                if (type != null && type.equals( Acm.JSON_CONSTRAINT )) {
-                                    
-                                    // Get the constraint expression:
-                                    Collection<EmsScriptNode> expressions = systemModel.getProperty( element, Acm.JSON_CONSTRAINT_SPECIFICATION );
-                                    
-                                    if (!Utils.isNullOrEmpty( expressions )) {
-                                        
-                                        // This should always be of size 1:
-                                        EmsScriptNode exprNode = expressions.iterator().next();
-                                        
-                                        Expression<Call> expressionCall = sysmlToAe.toAeExpression( exprNode );
-                                        Call call = (Call) expressionCall.expression;
-                                        Expression<Boolean> expression = new Expression<Boolean>(call.evaluate(true, false));
-                                        
-                                        if (expression != null) {
-                                            
-                                            constraints.add(new ConstraintExpression( expression ));
-                                        }
-                                    }
-                                    
-                                } // end if it is a constraint
-                            } 
+                            // Search for all constraints in the database:
+                            Collection<EmsScriptNode> constraintNodes = systemModel.getType(null, Acm.JSON_CONSTRAINT);
+                            
+                            if (!Utils.isNullOrEmpty(constraintNodes)) {
+                            	
+                            	// Loop through each found constraint and check if it contains any of the elements
+                            	// to be posted:
+                            	for (EmsScriptNode constraintNode : constraintNodes) {
+                            		
+                            		// Parse the constraint node for all of the cm:names of the nodes in its expression tree:
+                            		Set<String> constrElemNames = getConstraintElementNames(constraintNode);
+                            		
+                            		// Check if any of the posted elements are in the constraint expression tree, and add
+                            		// constraint if they are:
+                            		// Note: if a Constraint element is in elements then it will also get added here b/c it
+                            		//			will be in the database already via createOrUpdateMode()
+                            	    for (EmsScriptNode element : elements) {
+                            	    	  
+                            	    	if (constrElemNames.contains(element.getName())) {
+                            	    		addConstraintExpression(constraintNode, constraints);
+                            	    		break;
+                            	    	}
+
+                            	    } // Ends loop through elements
+                            		
+                            	} // Ends loop through constraintNodes
+                            	
+                            } // Ends if there was constraint nodes found in the database
                             
                             // Solve the constraints:
                             if (!Utils.isNullOrEmpty( constraints )) {
@@ -1025,16 +1110,17 @@ public class ModelPost extends AbstractJavaWebScript {
                                 Debug.turnOff();
                                 
                                 if (!result) {
-                                    log( LogLevel.ERROR, "Was not able to solve all of the constraints!" );
+                                    log( LogLevel.ERROR, "Was not able to satisfy all of the constraints!" );
                                 }
                                 else {
-                                    log( LogLevel.INFO, "Solved all of the constraints!" );
+                                    log( LogLevel.INFO, "Satisfied all of the constraints!" );
                                 }
                                 
-                            }
+                            } // End if constraints list is non-empty
                             
                         } // end if fixing constraints
                         
+                        // Create JSON object of the elements to return:
                         JSONArray elementsJson = new JSONArray();
                         for ( EmsScriptNode element : elements ) {
                             elementsJson.put( element.toJSONObject() );
