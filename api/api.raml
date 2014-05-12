@@ -38,10 +38,12 @@ schemas:
   #- viewsResponse: !include postResponse.json
 traits:
   - backgroundable:
-      description: Aspect for resources that can be created/updated in the background
+      description: Aspect for resources that can be created/updated in the asynchronously in
+                   the background. Mostly for large, long running creations.
       queryParameters:
         background:
-          description: Runs create/update in the asynchronously in the background if true, or synchronously if false or not specified
+          description: Runs create/update in the asynchronously in the background
+                       if true, or synchronously if false or not specified
           type: boolean
   - recursable:
       description: Aspect for resources that can be retrieved recursively
@@ -50,18 +52,21 @@ traits:
           description: If true, finds all elements recursively based on containment hierarchy
           type: boolean
         recurseDepth:
-          description: Depth to recurse to. 0 specifies infinite recursion (e.g., until all leaf nodes are found).
+          description: Recurse depth. 0 specifies infinite recursion (e.g., until all leaf
+                       nodes are found).
           type: integer
   - searchable:
       description: Aspect for resources that can be searched for any resource type
       queryParameters:
         search:
-          description: Regular expression of the search to be executed at the specified scope. Currently search is against sysml:id, sysml:name, sysml:documentation, sysml:body.
+          description: Regular expression of the search to be executed at the specified scope.
+                       Currently search is against id, name, documentation, body.
   - sliceable:
       description: Aspect for resources that can be queried via a timestamp
       queryParameters:
         timestamp:
-          description: Timestamp to find most recent version of <<resourcePathName>>, specified in ISO8601 time format.
+          description: Timestamp to find most recent version of <<resourcePathName>>,
+                       specified in ISO8601 time format.
           type: date
 
 resourceTypes:
@@ -88,7 +93,7 @@ resourceTypes:
   - collection:
       type: readCollection
       usage: Resources with CRUD capabilities
-      description: Create, Update, and Delete operations for <<resourcePathName>>
+      description: Create, Read, Update, and Delete operations for <<resourcePathName>>
       post:
         description: Append operation for <<resourcePathName>>
         body:
@@ -105,7 +110,9 @@ resourceTypes:
           404:
             description: <<resourcePathName>> not found
           409:
-            description: <<resourcePathName>> conflict detected (e.g., intervening update occurred between when user accessed resource and when user saved resource)
+            description: <<resourcePathName>> conflict detected (e.g., intervening update
+                         occurred between when user accessed resource and when user saved
+                         resource)
           500:
             description: Could not append to <<resourcePathName>> due to internal server error   
       put:
@@ -126,7 +133,9 @@ resourceTypes:
           404:
             description: <<resourcePathName>> not found
           409:
-            description: <<resourcePathName>> conflict detected (e.g., intervening update occurred between when user accessed resource and when user updated resource)
+            description: <<resourcePathName>> conflict detected (e.g., intervening update 
+                         occurred between when user accessed resource and when user updated
+                         resource)
           500:
             description: Could not append to <<resourcePathName>> due to internal server error
       delete:
@@ -146,8 +155,13 @@ resourceTypes:
             description: Could not delete <<resourcePathName>> due to internal server error
 
 /workspaces:
-  description: This is a parallel of the sites branch and used for namespacing purposes, all the methods respond
+  description: All resources are "namespaced" by the workspace (aka branch).
   /{workspaceId}:
+    uriParameters:
+      workspaceId:
+        description: Workspace ID under consideration. "master" is always defined and is the
+                     "trunk" workspace to whih all other workspaces should be merged.
+                     "master" is what is contained at the Alfresco sites level.
     /elements:
       is: [backgroundable]
       type: collection
