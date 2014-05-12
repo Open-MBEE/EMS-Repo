@@ -21,7 +21,7 @@
                 "type": "string",
                 "description": "Unique ID for the comment"
               },
-              "author": {
+              "creator": {
                 "type": "string",
                 "description": "Username of creator of comment"
               },
