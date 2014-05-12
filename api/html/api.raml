@@ -1,5 +1,7 @@
 #%RAML 0.8
 ---
+# NOTE: to import into SOAPUI, need to remove {server} reference from baseUri
+# and change all the schema references to '|'
 title: mms
 version: 1.0
 mediaType: application/json
@@ -20,21 +22,27 @@ schemas:
   # these all return elements - search may need to be paged
   - elements: !include elements.json
   - views:    !include elements.json
+  - products: !include elements.json
 
   - comments:       !include comments.json    
   - configurations: !include configurations.json
   - projects:       !include projects.json
-  - products:       !include products.json
   - snapshots:      !include snapshots.json
   - versions:       !include versions.json
     
   - sites:        !include sites.json
-  - workspaces:   !include sites.json
+  - workspaces:   !include workspaces.json
   
   # include post/ put and delete responses
   #- elementsResponse: !include postResponse.json
   #- viewsResponse: !include postResponse.json
 traits:
+  - backgroundable:
+      description: Aspect for resources that can be created/updated in the background
+      queryParameters:
+        background:
+          description: Runs create/update in the asynchronously in the background if true, or synchronously if false or not specified
+          type: boolean
   - recursable:
       description: Aspect for resources that can be retrieved recursively
       queryParameters:
@@ -53,7 +61,7 @@ traits:
       description: Aspect for resources that can be queried via a timestamp
       queryParameters:
         timestamp:
-          description: Timestamp to find most recent version of <<resourcePathName>, specified in ISO8601 time format.
+          description: Timestamp to find most recent version of <<resourcePathName>>, specified in ISO8601 time format.
           type: date
 
 resourceTypes:
@@ -137,32 +145,11 @@ resourceTypes:
           500:
             description: Could not delete <<resourcePathName>> due to internal server error
 
-/sites:
-  get:
-    description: Retrieve all sites for which user has read permissions
-    responses:
-      200:
-        body:
-          example: |
-            { "sites": 
-              [
-                {
-                  "name": "europa",
-                  "title": "Europa",
-                  "categories": [ "v1", "v2", "v3"]
-                } ,
-                {
-                  "name": "ems-support",
-                  "title": "EMS Support Site",
-                  "categories": []
-                }
-              ]
-            }
-  /{siteId}:
-    uriParameters:
-      siteId:
-        description: Alfresco site identifier for the project under consideration
+/workspaces:
+  description: This is a parallel of the sites branch and used for namespacing purposes, all the methods respond
+  /{workspaceId}:
     /elements:
+      is: [backgroundable]
       type: collection
       /{elementId}:
         type: collection
@@ -183,35 +170,61 @@ resourceTypes:
             uriParameters:
               versionId:
                 description: Sysml ID for the version under consideration
-    /projects:
+    /sites:
       type: readCollection
       get:
-        description: Retrieve all projects for which user has read permissions
+        description: Retrieve all sites for which user has read permissions
         responses:
           200:
             body:
               example: |
-                # taken from project.post.desc.xml (not currently implemented)
-                { 
-                  "projects": 
+                { "sites": 
                   [
                     {
-                      "id": "PROJECT-123456",
-                      "name": "Europa",
-                      "projectVersion": "v1"
-                    },
+                      "name": "europa",
+                      "title": "Europa",
+                      "categories": [ "v1", "v2", "v3"]
+                    } ,
                     {
-                      "id": "PROJECT-2468",
-                      "name": "Europa FS",
-                      "projectVersion": "v35"
+                      "name": "ems-support",
+                      "title": "EMS Support Site",
+                      "categories": []
                     }
                   ]
                 }
-      /{projectId}:
-        type: readCollection
+      /{siteId}:
         uriParameters:
-          projectId:
-            description: MD project ID for the project under consideration
+          siteId:
+            description: Alfresco site identifier for the project under consideration
+        /projects:
+          type: readCollection
+          get:
+            description: Retrieve all projects for which user has read permissions
+            responses:
+              200:
+                body:
+                  example: |
+                    # taken from project.post.desc.xml (not currently implemented)
+                    { 
+                      "projects": 
+                      [
+                        {
+                          "id": "PROJECT-123456",
+                          "name": "Europa",
+                          "projectVersion": "v1"
+                        },
+                        {
+                          "id": "PROJECT-2468",
+                          "name": "Europa FS",
+                          "projectVersion": "v35"
+                        }
+                      ]
+                    }
+          /{projectId}:
+            type: readCollection
+            uriParameters:
+              projectId:
+                description: MD project ID for the project under consideration
         /products:
           type: collection
           get:
@@ -251,34 +264,34 @@ resourceTypes:
                 uriParameters:
                   snapshotId:
                     description: ID for the snapshot under consideration
-            /views:
+    /views:
+      type: collection
+      /{viewId}:
+        type: collection
+        uriParameters:
+          viewId:
+            description: Sysml ID for the view under consideration
+        /elements:
+          type: collection
+          /{elementId}:
+            type: collection
+            uriParameters:
+              elementId:
+                description: Sysml ID for the element under consideration
+            /comments:
               type: collection
-              /{viewId}:
+              /{commentId}:
                 type: collection
                 uriParameters:
-                  viewId:
-                    description: Sysml ID for the view under consideration
-                /elements:
-                  type: collection
-                  /{elementId}:
-                    type: collection
-                    uriParameters:
-                      elementId:
-                        description: Sysml ID for the element under consideration
-                    /comments:
-                      type: collection
-                      /{commentId}:
-                        type: collection
-                        uriParameters:
-                          commentId:
-                            description: Sysml ID for comment under consideration
-                    /versions:
-                      type: collection
-                      /{versionId}:
-                        type: collection
-                        uriParameters:
-                          versionId:
-                            description: Sysml ID for the version under consideration
+                  commentId:
+                    description: Sysml ID for comment under consideration
+            /versions:
+              type: collection
+              /{versionId}:
+                type: collection
+                uriParameters:
+                  versionId:
+                    description: Sysml ID for the version under consideration
     /configurations:
       type: collection
       /{configurationId}:
@@ -297,6 +310,4 @@ resourceTypes:
     /changesets:
       type: collection
     /artifacts:
-/workspaces:
-  description: This is a parallel of the sites branch and used for namespacing purposes, all the methods respond
-  /{workspaceId}:
+    /constraints:
