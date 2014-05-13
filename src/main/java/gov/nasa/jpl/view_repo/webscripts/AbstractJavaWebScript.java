@@ -336,7 +336,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
     protected void printHeader( WebScriptRequest req ) {
         System.out.println("*** starting " + getClass().getSimpleName() );
-        String reqStr = req.toString();
+        String reqStr = req.getURL();
         System.out.println( "*** request = "
                             + ( reqStr.length() <= MAX_PRINT
                                 ? reqStr

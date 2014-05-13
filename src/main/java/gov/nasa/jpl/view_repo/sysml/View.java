@@ -13,18 +13,25 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.Vector;
 
 import sysml.SystemModel.ModelItem;
 import sysml.SystemModel.Operation;
 import sysml.Viewable;
 
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import sysml.SystemModel.Item;
 /**
@@ -33,7 +40,7 @@ import sysml.SystemModel.Item;
  * View children.
  * 
  */
-public class View extends List implements sysml.View< EmsScriptNode > {
+public class View extends List implements sysml.View< EmsScriptNode >, Comparator<View>, Comparable<View> {
 
     private static final long serialVersionUID = -7618965504816221446L;
     
@@ -101,13 +108,70 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         this.model = model;
     }
 
-    /* (non-Javadoc)
+    /**
+     * Override equals for EmsScriptNodes
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals( Object obj ) {
+        if ( this == obj ) return true;
+        if ( obj == null ) return false;
+        if ( obj instanceof View ) {
+            if ( ((View)obj).getElement().equals( getElement() ) ) return true; 
+        }
+        return false;
+    }
+
+    
+    /*
+     * (non-Javadoc)
+     * 
      * @see sysml.View#getChildViews()
      */
     @Override
     public Collection< sysml.View< EmsScriptNode > > getChildViews() {
-        // TODO Auto-generated method stub
-        return Utils.getEmptyList();
+        ArrayList< sysml.View< EmsScriptNode > > childViews =
+                new ArrayList< sysml.View< EmsScriptNode > >();
+        Object o = viewNode.getProperty( Acm.ACM_CHILDREN_VIEWS );
+        JSONArray jarr = null;
+        if ( o instanceof String ) {
+            String s = (String)o;
+            if ( s.length() > 0 && s.charAt( 0 ) == '[' ) {
+                try {
+                    jarr = new JSONArray( s );
+                } catch ( JSONException e ) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        } else if ( o instanceof JSONArray ) {
+            jarr = (JSONArray)o;
+        }
+        if ( jarr != null ) {
+            for ( int i = 0; i < jarr.length(); ++i ) {
+                Object o1 = null;
+                try {
+                    o1 = jarr.get( i );
+                } catch ( JSONException e ) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                if ( o1 instanceof String ) {
+                    NodeRef nodeRef =
+                            NodeUtil.findNodeRefById( (String)o1,
+                                                      getModel().getServices() );
+                    if ( nodeRef != null ) {
+                        EmsScriptNode node =
+                                new EmsScriptNode( nodeRef,
+                                                   getModel().getServices() );
+                        childViews.add( new View( node ) );
+                    }
+                }
+            }
+        }
+
+        return childViews;
     }
     
     /**
@@ -354,13 +418,8 @@ public class View extends List implements sysml.View< EmsScriptNode > {
                 }
             }
 
-            JSONArray viewables = new JSONArray();
+            JSONArray viewables = getContainsJson();
             viewProperties.put("contains", viewables );
-            for ( Viewable< EmsScriptNode > viewable : this ) {
-                if ( viewable != null ) {
-                    viewables.put( viewable.toViewJson() );
-                }
-            }
 
         } catch ( JSONException e ) {
             // TODO Auto-generated catch block
@@ -368,6 +427,148 @@ public class View extends List implements sysml.View< EmsScriptNode > {
         }
         return json;
     }
+    
+    public JSONArray getContainsJson() {
+        JSONArray viewables = new JSONArray();
+        for ( Viewable< EmsScriptNode > viewable : this ) {
+            if ( viewable != null ) {
+                viewables.put( viewable.toViewJson() );
+            }
+        }
+        if ( viewables.length() == 0 && getElement() != null ) {
+            Object contains = getElement().getProperty( Acm.ACM_CONTAINS );
+            if ( contains != null ) {
+                if ( contains instanceof JSONArray ) return (JSONArray)contains;
+
+                try {
+                    JSONArray jarr = new JSONArray( "" + contains );
+                    viewables = jarr;
+                } catch ( JSONException e ) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return viewables;
+    }
+    
+    @Override
+    public Collection<EmsScriptNode> getDisplayedElements() {
+        return getDisplayedElements( new HashSet<View>() );
+    }
+
+    public Collection<EmsScriptNode> getDisplayedElements( Set<View> seen) {
+        if ( seen.contains( this ) ) return Utils.getEmptySet();
+        seen.add( this );
+        LinkedHashSet<EmsScriptNode> set = new LinkedHashSet<EmsScriptNode>();
+        set.addAll(super.getDisplayedElements() );
+        for ( sysml.View< EmsScriptNode > v : getChildViews() ) {
+            if ( v instanceof View ) {
+                set.addAll( ((View)v).getDisplayedElements( seen ) );
+            } else {
+                set.addAll( v.getDisplayedElements() );
+            }
+        }
+        Collection< EmsScriptNode > v2vs = getViewToViewPropertyViews();
+        for ( EmsScriptNode node : v2vs ) {
+            if ( node.isView() ) {
+                View v = new View( node );
+                set.addAll( v.getDisplayedElements( seen ) );
+            }
+        }
+        Object dElems = getElement().getProperty( Acm.ACM_DISPLAYED_ELEMENTS );
+        set.addAll( getElementsForJson( dElems ) );
+        return set;
+    }
+    
+    public Collection<EmsScriptNode> getElementsForJson( Object obj ) {
+        LinkedHashSet<EmsScriptNode> nodes = new LinkedHashSet<EmsScriptNode>();
+        if ( obj instanceof JSONArray ) {
+            return getElementsForJson( (JSONArray)obj );
+        } 
+        if ( obj instanceof JSONObject ) {
+            return getElementsForJson( (JSONObject)obj );
+        }
+        String idString = "" + obj;
+        if ( idString.length() <= 0 ) return Utils.getEmptyList();
+        try {
+            if ( idString.trim().charAt( 0 ) == '[' ) {
+                JSONArray jArray = new JSONArray( idString );
+                return getElementsForJson( jArray );
+            }
+            if ( idString.trim().charAt( 0 ) == '{' ) {
+                JSONObject jsonObject =  new JSONObject( idString );
+                return getElementsForJson( jsonObject );
+            }
+        } catch ( JSONException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        EmsScriptNode node =
+                    EmsScriptNode.convertIdToEmsScriptNode( idString,
+                                                            getElement().getServices(),
+                                                            getElement().getResponse(),
+                                                            getElement().getStatus() );
+        if ( node != null ) nodes.add( node );
+        return nodes;
+    }
+    
+    public Collection<EmsScriptNode> getElementsForJson( JSONArray jsonArray ) {
+        if ( jsonArray == null ) return Utils.getEmptyList();
+        LinkedHashSet<EmsScriptNode> nodes = new LinkedHashSet<EmsScriptNode>();
+        for ( int i = 0; i < jsonArray.length(); ++i ) {
+            Object id = null;
+            try {
+                id = jsonArray.get(i);
+                nodes.addAll(getElementsForJson( id ) );
+            } catch ( JSONException e ) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        return nodes;
+    }
+
+    public Collection<EmsScriptNode> getElementsForJson( JSONObject o ) {
+        if ( o == null ) return Utils.getEmptyList();
+        LinkedHashSet<EmsScriptNode> nodes = new LinkedHashSet<EmsScriptNode>();
+        String[] names = JSONObject.getNames( o );
+        if ( names == null ) return nodes;
+        for ( String name : names ) {
+            try {
+                Object ids = o.get( name );
+                nodes.addAll( getElementsForJson( ids ) );
+            } catch ( JSONException e ) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        return nodes;
+    }
+    
+    public Collection<EmsScriptNode> getViewToViewPropertyViews() {
+        JSONArray jarr = getViewToViewPropertyJson();
+        return getElementsForJson( jarr );
+    }
+
+    public JSONArray getViewToViewPropertyJson() {
+        if ( getElement() == null ) return null;
+        Object v2vObj = getElement().getProperty( Acm.ACM_VIEW_2_VIEW );
+        if ( v2vObj == null ) return null;
+        if ( v2vObj instanceof JSONArray ) return (JSONArray)v2vObj;
+        String v2vStr = "" + v2vObj;
+        JSONArray json = null;
+        try {
+            json = new JSONArray( v2vStr );
+        } catch ( JSONException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return json;
+//        return getViewToViewJson( Set<View> seen ) 
+    }
+//    public JSONObject getViewToView(Set<View> seen) {
+//        
+//    }
     
     private String toBoringString() {
         return "view node = "
@@ -383,6 +584,19 @@ public class View extends List implements sysml.View< EmsScriptNode > {
 //        if ( jo != null ) return jo.toString();
         return //"toViewJson() FAILED: " + 
                 toBoringString();
+    }
+
+    @Override
+    public int compareTo( View o ) {
+        return compare( this, o );
+    }
+
+    @Override
+    public int compare( View o1, View o2 ) {
+        if ( o1 == o2 ) return 0;
+        if ( o1 == null ) return -1;
+        if ( o2 == null ) return 1;
+        return o1.getElement().compareTo( o2.getElement() );
     }
 
 }
