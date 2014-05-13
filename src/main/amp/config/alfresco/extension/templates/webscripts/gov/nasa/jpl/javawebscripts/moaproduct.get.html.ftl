@@ -226,13 +226,13 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
                   <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Font Size">
                     <i class="glyphicon glyphicon-text-height"></i>&nbsp;<b class="caret"></b></a>
                     <ul class="dropdown-menu">
-                      <li><a data-edit="fontSize 7"><font size="7">Biggest</font></a></li>
-                      <li><a data-edit="fontSize 6"><font size="6">Bigger</font></a></li>
-                      <li><a data-edit="fontSize 5"><font size="5">Big</font></a></li>
-                      <li><a data-edit="fontSize 4"><font size="4">Larger</font></a></li>
-                      <li><a data-edit="fontSize 3"><font size="3">Large</font></a></li>
-                      <li><a data-edit="fontSize 2"><font size="2">Normal</font></a></li>
-                      <li><a data-edit="fontSize 1"><font size="1">Small</font></a></li>
+                      <li><a class="fontButton" data-edit="fontSize 7"><font size="7">Biggest</font></a></li>
+                      <li><a class="fontButton" data-edit="fontSize 6"><font size="6">Bigger</font></a></li>
+                      <li><a class="fontButton" data-edit="fontSize 5"><font size="5">Big</font></a></li>
+                      <li><a class="fontButton" data-edit="fontSize 4"><font size="4">Larger</font></a></li>
+                      <li><a class="fontButton" data-edit="fontSize 3"><font size="3">Large</font></a></li>
+                      <li><a class="fontButton" data-edit="fontSize 2"><font size="2">Normal</font></a></li>
+                      <li><a class="fontButton" data-edit="fontSize 1"><font size="1">Small</font></a></li>
                     </ul>
                 </div>
                   <div class="btn-group">
@@ -866,6 +866,17 @@ app.on('editSection', function(e, sectionId) {
     //console.log("End Section blur");
   })
 
+  // content editable eats on change events so we need to detect when
+  // a font change button is pressed, wait for the event to complete,
+  // and then remove and font tags with size=2.  Bootstrap wysiwyg does not
+  // support setting font size in pixels so our only option is to remove the tag.
+  $(".fontButton").mouseup(function() {
+    setTimeout(function() {
+      var fontObjects = section.find('font[size=2]');
+      fontObjects.replaceWith(function() { return $(this).contents(); });
+      // /fontObjects.css( "color", "blue" );
+    }, 200);
+  });
 
   // Wrap content inisde of p tags if it isn't already.  Without this, Chrome will create new DIVs when 
   // enter is pressed and give them attributes from the parent div, including mdid
