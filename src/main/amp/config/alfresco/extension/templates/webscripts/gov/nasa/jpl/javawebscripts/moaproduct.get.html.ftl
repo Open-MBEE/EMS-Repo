@@ -1504,8 +1504,11 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
             var value = resolveValue(cell.content, elements, function(valueList) {
               var listOfElements = _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) });
               var stringResult = ""; //<ul class='table-list'>";
-              _.each(listOfElements, function(e){
+              _.each(listOfElements, function(e, i) {
                 stringResult += e;// + "<br/>"; //"<li>" + e + "</li>";
+                if(i < listOfElements.length - 1) {
+                  stringResult += "<br/>";
+                }
               })
               //stringResult += "</ul>";
               return stringResult;
