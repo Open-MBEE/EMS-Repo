@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -939,6 +940,168 @@ public class ModelPost extends AbstractJavaWebScript {
     }
     
     /**
+     * Parses the Property and returns a set of all the node names 
+     * in the property.
+     * 
+     * @param propertyNode The node to parse
+     * @return Set of cm:name
+     */
+    private Set<String> getPropertyElementNames(EmsScriptNode propertyNode) {
+    	
+    	Set<String> names = new HashSet<String>();
+    	
+    	// See if it has a value property:
+        Collection< EmsScriptNode > propertyValues = 
+              	systemModel.getProperty(propertyNode, Acm.JSON_VALUE);
+          
+		if (!Utils.isNullOrEmpty(propertyValues)) {
+			  for (EmsScriptNode value : propertyValues) {
+				  
+				  names.add(value.getName());
+				  
+				  // TODO REVIEW
+				  //	  need to be able to handle all ValueSpecification types?
+				  //	  some of them have properties that point to nodes, so
+				  //	  would need to process them also
+			  }
+		}
+              
+    	return names;
+    }
+    
+    /**
+     * Parses the Parameter and returns a set of all the node names 
+     * in the parameter.
+     * 
+     * @param paramNode The node to parse
+     * @return Set of cm:name
+     */
+    private Set<String> getParameterElementNames(EmsScriptNode paramNode) {
+    	
+    	Set<String> names = new HashSet<String>();
+    	
+    	// See if it has a defaultParamaterValue property:
+        Collection< EmsScriptNode > paramValues = 
+              	systemModel.getProperty(paramNode, Acm.JSON_PARAMETER_DEFAULT_VALUE);
+          
+		if (!Utils.isNullOrEmpty(paramValues)) {
+			  names.add(paramValues.iterator().next().getName());
+		}
+              
+    	return names;
+    }
+    
+    /**
+     * Parses the Operation and returns a set of all the node names 
+     * in the operation.
+     * 
+     * @param opNode The node to parse
+     * @return Set of cm:name
+     */
+    private Set<String> getOperationElementNames(EmsScriptNode opNode) {
+    	
+    	Set<String> names = new HashSet<String>();
+    	
+    	// See if it has a operationParameter and/or operationExpression property:
+        Collection< EmsScriptNode > opParamNodes = 
+              	systemModel.getProperty(opNode, Acm.JSON_OPERATION_PARAMETER);
+          
+		if (!Utils.isNullOrEmpty(opParamNodes)) {
+		  for (EmsScriptNode opParamNode : opParamNodes) {
+			  names.addAll(getParameterElementNames(opParamNode));
+		  }
+		}
+		
+	    Collection< EmsScriptNode > opExprNodes = 
+	    		systemModel.getProperty(opNode, Acm.JSON_OPERATION_EXPRESSION);
+	    
+	    if (!Utils.isNullOrEmpty(opExprNodes)) {
+	    	names.add(opExprNodes.iterator().next().getName());
+	    }
+              
+    	return names;
+    }
+    
+    /**
+     * Parses the expression and returns a set of all the node names 
+     * in the expression.
+     * 
+     * @param expressionNode The node to parse
+     * @return Set of cm:name
+     */
+    private Set<String> getExpressionElementNames(EmsScriptNode expressionNode) {
+    	
+    	Set<String> names = new HashSet<String>();
+    	
+    	// Add the name of the Expression itself:
+    	names.add(expressionNode.getName());
+    	
+    	// Process all of the operand properties:
+        Collection< EmsScriptNode > properties = 
+        		systemModel.getProperty( expressionNode, Acm.JSON_OPERAND);
+        
+        if (!Utils.isNullOrEmpty(properties)) {
+      
+          EmsScriptNode valueOfElementNode = null;
+
+          for (EmsScriptNode operandProp : properties) {
+             
+            // Get the valueOfElementProperty node:
+            Collection< EmsScriptNode > valueOfElemNodes = 
+            		systemModel.getProperty(operandProp, Acm.JSON_ELEMENT_VALUE_ELEMENT);
+            
+            // If it is a elementValue, then this will be non-empty:
+            if (!Utils.isNullOrEmpty(valueOfElemNodes)) {
+                            
+              // valueOfElemNodes should always be size 1 b/c elementValueOfElement
+              // is a single NodeRef
+              valueOfElementNode = valueOfElemNodes.iterator().next();
+              
+            }
+            
+            // Otherwise just use the node itself as we are not dealing with
+            // elementValue types:
+            else {
+              valueOfElementNode = operandProp;
+            }
+            
+            if (valueOfElementNode != null) {
+              
+              // Add the name of the property of the Expression:
+              names.add(valueOfElementNode.getName());
+              
+              String typeString = systemModel.getTypeString(valueOfElementNode, null);
+              
+              // If it is a Operation then see if it then process it:
+              if (typeString.equals(Acm.JSON_OPERATION)) {
+            	  names.addAll(getOperationElementNames(valueOfElementNode));
+              }
+              
+              // If it is a Expression then process it recursively:
+              else if (typeString.equals(Acm.JSON_EXPRESSION)) {
+            	  names.addAll(getExpressionElementNames(valueOfElementNode));
+              }
+              
+              // If it is a Parameter then process it:
+              else if (typeString.equals(Acm.JSON_PARAMETER)) {
+            	  names.addAll(getParameterElementNames(valueOfElementNode));
+              }
+              
+              // If it is a Property then process it:
+              else if (typeString.equals(Acm.JSON_PROPERTY)) {
+            	  names.addAll(getPropertyElementNames(valueOfElementNode));
+              }
+
+            } // ends if valueOfElementNode != null
+            
+          } // ends for loop through operand properties
+          
+        } // ends if operand properties not null or empty
+        
+    	return names;
+    }
+    
+    /**
      * Parses the expression for the passed constraint, and returns a set of all the node
      * names in the expression.
      * 
@@ -952,22 +1115,23 @@ public class ModelPost extends AbstractJavaWebScript {
     	Set<String> names = new HashSet<String>();
     	
     	// Add the name of the Constraint:
-    	names.add(constraintNode.getName());
+    	String name = constraintNode.getName();
+    	if (name != null) names.add(name);
     	
     	// Get the Expression for the Constraint:
         EmsScriptNode exprNode = getConstraintExpression(constraintNode);
         
         // Add the names of all nodes in the Expression:
         if (exprNode != null) {
+        	        	
+        	// Get elements names from the Expression:
+        	names.addAll(getExpressionElementNames(exprNode));
         	
-        	// TODO REVIEW
-        	// For now just adding all the children.  This wont work for ElementValue's elementValueOfElement
-        	for (ChildAssociationRef assoc: exprNode.getChildAssociationRefs()) {
-				EmsScriptNode child = new EmsScriptNode(assoc.getChildRef(), services, response);
-				if (checkPermissions(child, PermissionService.READ)) {
-					names.add(child.getName());		
-				}
-        	}
+        	// REVIEW: Not using the child associations b/c
+        	// ElementValue's elementValueOfElement has a different
+        	// owner, and wont work for our demo either b/c 
+        	// not everything is under one parent
+        	List<ChildAssociationRef> list = exprNode.getChildAssociationRefs();
         }
         
     	return names;
@@ -1079,7 +1243,8 @@ public class ModelPost extends AbstractJavaWebScript {
                             		//			will be in the database already via createOrUpdateMode()
                             	    for (EmsScriptNode element : elements) {
                             	    	  
-                            	    	if (constrElemNames.contains(element.getName())) {
+                            	    	String name = element.getName();
+                            	    	if (name != null && constrElemNames.contains(name)) {
                             	    		addConstraintExpression(constraintNode, constraints);
                             	    		break;
                             	    	}
