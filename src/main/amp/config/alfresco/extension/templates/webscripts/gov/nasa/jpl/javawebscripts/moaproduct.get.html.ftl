@@ -373,7 +373,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
               <br/>
               <div class="btn-group">
                   <a class="btn btn-default" data-edit="insertunorderedlist" title="Bullet list">&bull;</a>
-                  <a class="btn btn-default" data-edit="insertorderedlist" title="Bullet list">1.</a>
+                  <a class="btn btn-default" data-edit="insertorderedlist" title="Numbered list">1.</a>
                   <a class="btn btn-default" data-edit="indent" title="Indent (Tab)">&rarr;</a>
                   <a class="btn btn-default" data-edit="outdent" title="Reduct Indent (Shift-Tab)">&larr;</a>
               </div>
@@ -382,7 +382,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
               <a class="btn btn-default" data-edit="undo" title="Undo"><i class="glyphicon icon-undo"></i>&nbsp;</a>
               <a class="btn btn-default" data-edit="redo" title="Redo"><i class="glyphicon icon-repeat"></i>&nbsp;</a>
               <div class="btn-group">
-                <a class="btn dropdown-toggle btn-default " data-toggle="dropdown" title="Hyperlink"><i class="glyphicon icon-fullborders"></i>&nbsp;</a>
+                <a class="btn dropdown-toggle btn-default " data-toggle="dropdown" title="Insert Table"><i class="glyphicon icon-fullborders"></i>&nbsp;</a>
                 <div class="dropdown-menu input-append">
                   <input class="span2 tablerows" placeholder="Rows" type="text"/>
                   <input class="span2 tablecols" placeholder="Cols" type="text"/>
