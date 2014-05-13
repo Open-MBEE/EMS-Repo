@@ -4,7 +4,7 @@
         "id": "constraint_32165",
         "name": "",
         "owner": "e_32169",
-        "symbol": "",
+        "symbol":   "",
         "constraintSpecification":"expr_32165",
         "type": "Constraint"
     },
@@ -85,14 +85,6 @@
         "propertyType": "_11_5EAPbeta_be00301_1147431819399_50461_1671",
         "type": "Property",
         "value": ["durVal"]
-    },
-    {
-        "documentation": "",
-        "id": "durVal",
-        "integer": 22,
-        "name": "",
-        "owner": "arg_ev_33001",
-        "type": "LiteralInteger"
     },
     {
         "documentation": "",
