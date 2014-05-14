@@ -75,7 +75,7 @@
                     ]
                 }
             },
-            "required": ["type", "id"]
+            "required": ["specialization", "sysmlid"]
         },
 
 
