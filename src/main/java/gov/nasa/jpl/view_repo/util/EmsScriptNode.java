@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
 import java.io.ByteArrayInputStream;
@@ -110,6 +111,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     protected EmsScriptNode companyHome = null;
 
     protected EmsScriptNode siteNode = null;
+
+    private View view;
 
     // TODO add nodeService and other member variables when no longer
     // subclassing ScriptNode
@@ -406,7 +409,17 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         return cs;
     }
 
+
     public Set< EmsScriptNode > toEmsScriptNodeSet( ResultSet resultSet ) {
+        return toEmsScriptNodeSet( resultSet, services, response, status );
+    }
+    
+    // TODO -- move to NodeUtil or some other utility class
+    public static Set< EmsScriptNode > toEmsScriptNodeSet( ResultSet resultSet,
+                                                           ServiceRegistry services,
+                                                           StringBuffer response,
+                                                           Status status ) {
+        
         Set< EmsScriptNode > emsNodeSet =
                 new TreeSet< EmsScriptNode >( new EmsScriptNodeComparator() );
         for ( ResultSetRow row : resultSet ) {
@@ -1043,6 +1056,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     // add in all the properties
     protected static TreeSet< String > acmPropNames = new TreeSet<String>(Acm.getACM2JSON().keySet());
+//  acmPropNames.add( Acm.ACM_VALUE );
+//  acmPropNames.add( Acm.ACM_PROPERTY_TYPE );
 
     /**
      * Convert node into our custom JSONObject
@@ -1064,15 +1079,6 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
         DictionaryService dServ = services.getDictionaryService();
 
-//      Map< String, Object > props = getProperties();
-//      for ( Map.Entry< String, Object > entry : props.entrySet() ) {
-//          String type = entry.getKey();
-//          String jsonType = Acm.getACM2JSON().get( type );
-//          Object elementValue = entry.getValue();
-//          if ( Acm.getACM2JSON().keySet().contains( acmType ) ) {
-
-//        acmPropNames.add( Acm.ACM_VALUE );
-//        acmPropNames.add( Acm.ACM_PROPERTY_TYPE );
         for ( String acmType : acmPropNames ) {
             if ( Utils.isNullOrEmpty( acmType ) ) continue;
             
@@ -1080,27 +1086,59 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             if ( Utils.isNullOrEmpty( jsonType ) ) continue;
             
             Object elementValue = this.getProperty( acmType );
-            if ( elementValue == null ) continue;
             
             if ( !Acm.JSON_FILTER_MAP.get( renderType ).contains( jsonType ) ) {
                 continue;
             }
-
+            
             PropertyDefinition propDef = dServ.getProperty( createQName( acmType ) );
             boolean isNodeRef = ( propDef != null &&
                                   propDef.getDataType().getName() ==
                                   DataTypeDefinition.NODE_REF );
+            if ( isView() ) {
+                Collection< EmsScriptNode > elements = null;
+                if ( jsonType.equals( Acm.JSON_DISPLAYED_ELEMENTS ) ||
+                                   jsonType.equals( Acm.JSON_ALLOWED_ELEMENTS ) ) {
+                    elements = getView().getDisplayedElements();
+                } else if ( jsonType.equals( Acm.JSON_CHILDREN_VIEWS ) ) {
+                    Collection< sysml.View< EmsScriptNode > > views = 
+                            getView().getChildViews();
+                    elements = new ArrayList<EmsScriptNode>();
+                    for ( sysml.View< EmsScriptNode > v : views ) {
+                        elements.add( v.getElement() );
+                    }
+                } else if ( jsonType.equals( Acm.JSON_CONTAINS ) ) {
+                    elementValue = getView().getContainsJson();
+                }
+                if ( !Utils.isNullOrEmpty( elements ) &&
+                     ( elementValue == null
+                     || ( elementValue instanceof Collection 
+                          && ( (Collection< ? >)elementValue ).isEmpty() ) ) ) {
+                    ArrayList< NodeRef > refList = new ArrayList<NodeRef>();
+                    for ( EmsScriptNode emsNode : elements ) {
+                        if ( emsNode != null ) refList.add( emsNode.getNodeRef() );
+                    }
+                    elementValue = refList;
+                }
+            }
+            
+            if ( elementValue == null ) continue;
+
             boolean isArray = 
                     ( propDef == null ? Acm.JSON_ARRAYS.contains( jsonType )
-                                      : propDef.isMultiValued() ); 
+                                      : propDef.isMultiValued() );
             if ( !isArray ) {
-                if ( Acm.JSON_ARRAYS.contains( jsonType ) && elementValue instanceof String && ((String)elementValue).trim().startsWith("[") ) {
+                if ( Acm.JSON_ARRAYS.contains( jsonType )
+                     && elementValue instanceof String
+                     && ( (String)elementValue ).trim().startsWith( "[" ) ) {
                     elementValue = new JSONArray( (String)elementValue );
                 }
                 elementValue = Utils.newList( elementValue );
             } else if ( !( elementValue instanceof Collection ) ) {
-                Debug.error( "Property value is not an array as specified by definition! value = " + elementValue );
+                Debug.error( "Property value is not an array as specified by definition! value = "
+                             + elementValue );
             }
+
             Collection< ? > c = (Collection< ? >)elementValue;
             
             JSONArray jarr;// = new JSONArray();
@@ -1114,7 +1152,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                     if ( o instanceof NodeRef ) {
                         s = nodeRefToSysmlId( (NodeRef)o );
                     } else if ( isNodeRef ) {
-                        Debug.error( "Property value is not of type NodeRef as specified by definition! value = " + o );
+                        Debug.error( "Property value is not of type NodeRef as specified by definition! value = "
+                                     + o );
                     } else if ( o instanceof String ) {
                         s = (String)o;
                     } else if ( o instanceof Date ) {
@@ -1334,6 +1373,20 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 //        return element;
     }
 
+    public boolean isView() {
+        boolean isView = hasAspect( Acm.ACM_VIEW ) || hasAspect( Acm.ACM_PRODUCT );
+//        String sysmlId = getName();
+//        System.out.println(sysmlId + ".isView() = " + isView);
+        return isView;
+    }
+
+    public View getView() {
+        if ( view == null ) {
+            view = new View(this);
+        }
+        return view;
+    }
+
     public String getTypeName() {
         String typeName = null;
         final String[] aspects = new String[]{ Acm.ACM_PRODUCT, Acm.ACM_VIEW };
@@ -1547,9 +1600,18 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
 
     private EmsScriptNode convertIdToEmsScriptNode( String valueId ) {
+        return convertIdToEmsScriptNode( valueId, services, response, status );
+    }
+    
+    public  static EmsScriptNode convertIdToEmsScriptNode( String valueId,
+        ServiceRegistry services,
+        StringBuffer response,
+        Status status ) {
         ResultSet existingArtifacts =
-                findNodeRefsByType( valueId, "@cm\\:name:\"" );
-        Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
+                findNodeRefsByType( valueId, "@cm\\:name:\"", services );
+        Set< EmsScriptNode > nodeSet =
+                toEmsScriptNodeSet( existingArtifacts, services, response,
+                                    status );
         existingArtifacts.close();
 
         EmsScriptNode value =
@@ -1923,6 +1985,10 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         return NodeUtil.findNodeRefByType( name, type, services );
     }
 
+    protected static ResultSet findNodeRefsByType( String name, String type, ServiceRegistry services ) {
+        return NodeUtil.findNodeRefsByType( name, type, services );
+    }
+    
     // TODO: make this utility function - used in AbstractJavaWebscript too
     protected ResultSet findNodeRefsByType( String name, String type ) {
         return NodeUtil.findNodeRefsByType( name, type, services );
@@ -2051,6 +2117,10 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     @Override
     public int compareTo( EmsScriptNode o ) {
         return this.compare( this, o );
+    }
+
+    public ServiceRegistry getServices() {
+        return services;
     }
 
 }

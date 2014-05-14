@@ -517,7 +517,7 @@ public class Acm {
      */
     public static enum JSON_TYPE_FILTER {
         VIEW, ELEMENT, PRODUCT, COMMENT, ALL;
-     }
+    }
 
     /**
      * Map to filter the JSON keys for display purposes inside of EmsScriptNode

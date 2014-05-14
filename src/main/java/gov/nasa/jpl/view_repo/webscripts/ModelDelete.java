@@ -99,6 +99,8 @@ public class ModelDelete extends AbstractJavaWebScript {
 	@Override
 	protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
+        printHeader( req );
+        
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -117,6 +119,9 @@ public class ModelDelete extends AbstractJavaWebScript {
 		model.put("res", "okay");
 				
 		status.setCode(responseStatus.getCode());
+
+		printFooter();
+        
 		return model;
 	}
 

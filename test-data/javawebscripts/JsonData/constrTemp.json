@@ -1,0 +1,10 @@
+{ "elements" : [
+    {
+        "documentation": "",
+        "id": "durVal",
+        "integer": 22,
+        "name": "",
+        "owner": "arg_ev_33001",
+        "type": "LiteralInteger"
+    }
+]}
