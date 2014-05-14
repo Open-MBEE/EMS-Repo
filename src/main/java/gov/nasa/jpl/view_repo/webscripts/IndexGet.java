@@ -79,6 +79,9 @@ public class IndexGet extends AbstractJavaWebScript {
 
     @Override
     protected synchronized Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+
+        printHeader( req );
+        
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
 
@@ -111,10 +114,12 @@ public class IndexGet extends AbstractJavaWebScript {
             model.put("siteName", "");
             model.put("siteTitle", "ERROR site not found");
         }
-        
+
+        printFooter();
+
         return model;
     }
-    
+
     /**
      * Retrieve the index.json file if it exists and parse into JSONObject
      * @param site

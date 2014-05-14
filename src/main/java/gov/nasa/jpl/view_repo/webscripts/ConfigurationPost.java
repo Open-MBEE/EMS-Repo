@@ -81,7 +81,9 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 			Status status, Cache cache) {
 		Map<String, Object> model = new HashMap<String, Object>();
 
-		clearCaches();
+        printHeader( req );
+
+        clearCaches();
 
 		ConfigurationPost instance = new ConfigurationPost(repository, services);
 
@@ -90,6 +92,9 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
 		status.setCode(responseStatus.getCode());
 		model.put("res", response.toString());
+
+        printFooter();
+
 		return model;
 	}
 

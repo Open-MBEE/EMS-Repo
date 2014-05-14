@@ -29,9 +29,14 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.sysml.View;
+import gov.nasa.jpl.view_repo.util.Acm.JSON_TYPE_FILTER;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,7 +54,10 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ProductGet extends AbstractJavaWebScript {
-	public ProductGet() {
+	protected boolean gettingContainedElements = false;
+
+
+    public ProductGet() {
 	    super();
 	}
     
@@ -78,6 +87,8 @@ public class ProductGet extends AbstractJavaWebScript {
 	
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        printHeader( req );
+
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -85,6 +96,11 @@ public class ProductGet extends AbstractJavaWebScript {
 		JSONArray productsJson = null;
 		if (validateRequest(req, status)) {
 			String productId = req.getServiceMatch().getTemplateVars().get("id");
+			gettingContainedElements  = ( productId.toLowerCase().trim().endsWith("/elements") );
+			if ( gettingContainedElements ) {
+			    productId = productId.substring( 0, productId.lastIndexOf( "/elements" ) );
+			}
+			System.out.println("Got id = " + productId);
 			productsJson = handleProduct(productId);
 		}
 
@@ -103,10 +119,70 @@ public class ProductGet extends AbstractJavaWebScript {
 		}
 
 		status.setCode(responseStatus.getCode());
+
+		printFooter();
+
 		return model;
 	}
 
-
+	
+	public Collection<EmsScriptNode> getDisplayedElements(EmsScriptNode product) {
+	    ArrayList<EmsScriptNode> nodes = new ArrayList<EmsScriptNode>();
+        Object elementValue = product.getProperty( Acm.ACM_VIEW_2_VIEW );
+        if ( elementValue instanceof JSONArray ) {
+            JSONArray jarr = (JSONArray)elementValue;
+            for ( int i=0; i<jarr.length(); ++i ) {
+                Object o = null;
+                try {
+                    o = jarr.get( i );
+                } catch ( JSONException e ) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                if ( o instanceof JSONObject ) {
+                    JSONObject jo = (JSONObject)o;
+                    if ( jo.has( "id" ) ) {
+                        String id = null;
+                        try {
+                            id = jo.getString( "id" );
+                            if ( id != null && id.equals( product.getProperty( Acm.ACM_ID ) ) ) {
+                                if ( jo.has( "childrenViews" ) ) {
+                                    Object childrenViews = null;
+                                    childrenViews = jo.getString( "childrenViews" );
+                                    JSONArray jarr2 = null;
+                                    if ( childrenViews instanceof String ) {
+                                        jarr2 = new JSONArray( (String)childrenViews );
+                                    } else if ( childrenViews instanceof JSONArray ) {
+                                        jarr2 = (JSONArray)childrenViews;
+                                    } else if ( childrenViews instanceof Collection ) {
+                                        jarr2 = new JSONArray( (Collection<?>)childrenViews );
+                                    }
+                                    if ( jarr2 != null ) {
+                                        for ( int j=0; j<jarr2.length(); ++j ) {
+                                            Object oo = jarr2.get( j );
+                                            if ( oo instanceof String ) {
+                                                NodeRef ref = NodeUtil.findNodeRefById( (String)oo, services );
+                                                if ( ref != null ) {
+                                                    View v = new View( new EmsScriptNode( ref, services ) );
+                                                    // TODO -- need to check for infinite loop!
+                                                    nodes.addAll( v.getDisplayedElements() );
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } catch ( JSONException e ) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+        return nodes;
+	}
+	
 	private JSONArray handleProduct(String productId) {
 	    JSONArray productsJson = new JSONArray();
 		EmsScriptNode product = findScriptNodeById(productId);
@@ -115,10 +191,18 @@ public class ProductGet extends AbstractJavaWebScript {
 		}
 
 		if (checkPermissions(product, PermissionService.READ)){ 
-		    try {
-                productsJson.put(product.toJSONObject(Acm.JSON_TYPE_FILTER.PRODUCT));
-            } catch (JSONException e) {
-                log(LogLevel.ERROR, "Could not create products JSON array", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            try {
+                if ( gettingContainedElements ) {
+                    Collection< EmsScriptNode > elems = getDisplayedElements( product );
+                    for ( EmsScriptNode n : elems ) {
+                        productsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT ) );
+                    }
+                } else {
+                    productsJson.put( product.toJSONObject( Acm.JSON_TYPE_FILTER.PRODUCT ) );
+                }
+            } catch ( JSONException e ) {
+                log( LogLevel.ERROR, "Could not create products JSON array",
+                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
                 e.printStackTrace();
             }
 		}

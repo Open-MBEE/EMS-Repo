@@ -63,7 +63,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		}
 	}
 	
-	// injected members
+    public static final int MAX_PRINT = 200;
+
+    // injected members
 	protected ServiceRegistry services;		// get any of the Alfresco services
 	protected Repository repository;		// used for lucene search
 	protected LogLevel logLevel = LogLevel.WARNING;
@@ -326,5 +328,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     public void appendResponseStatusInfo(AbstractJavaWebScript instance) {
         response.append(instance.getResponse());
         responseStatus.setCode(instance.getResponseStatus().getCode());
+    }
+
+    protected void printFooter() {
+        System.out.println( "*** completed " + getClass().getSimpleName() );
+    }
+
+    protected void printHeader( WebScriptRequest req ) {
+        System.out.println("*** starting " + getClass().getSimpleName() );
+        String reqStr = req.getURL();
+        System.out.println( "*** request = "
+                            + ( reqStr.length() <= MAX_PRINT
+                                ? reqStr
+                                : reqStr.substring( 0, MAX_PRINT ) + "..." ) );
     }    
 }

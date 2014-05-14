@@ -69,8 +69,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	protected JSONArray elements = new JSONArray();
 	protected Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
 
-	
-	@Override
+    @Override
 	protected void clearCaches() {
 		super.clearCaches();
 		elementHierarchy = new JSONObject();
@@ -112,8 +111,10 @@ public class ModelGet extends AbstractJavaWebScript {
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
+	    printHeader( req );
+
 		clearCaches();
-		
+        
 		Map<String, Object> model = new HashMap<String, Object>();
 		ModelGet instance = new ModelGet(repository, services);
 		// make sure to pass down view request flag to instance
@@ -139,6 +140,9 @@ public class ModelGet extends AbstractJavaWebScript {
 		}
 				
 		status.setCode(responseStatus.getCode());
+		
+        printFooter();        
+
 		return model;
 	}
 	
