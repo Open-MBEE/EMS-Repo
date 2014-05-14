@@ -996,13 +996,16 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
 
     public String toString() {
-        try {
-            return "" + toJSONObject();
-        } catch ( JSONException e ) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return null;
+//        try {
+//            return "" + toJSONObject();
+//        } catch ( JSONException e ) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+//        return null;
+        String name = getName();
+        String type = getTypeName();
+        return "{type=" + type + ", id=" + name + "}";
     }
 
     /**
@@ -1133,18 +1136,30 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                      && ( (String)elementValue ).trim().startsWith( "[" ) ) {
                     elementValue = new JSONArray( (String)elementValue );
                 }
-                elementValue = Utils.newList( elementValue );
+                if ( !( elementValue instanceof Collection ) &&
+                     !( elementValue instanceof JSONArray ) ) {
+                    elementValue = Utils.newList( elementValue );
+                }
             } else if ( !( elementValue instanceof Collection ) ) {
                 Debug.error( "Property value is not an array as specified by definition! value = "
                              + elementValue );
             }
 
-            Collection< ? > c = (Collection< ? >)elementValue;
+            isArray = isArray || Acm.JSON_ARRAYS.contains( jsonType );
             
+
             JSONArray jarr;// = new JSONArray();
             if ( elementValue instanceof JSONArray ) {
                 jarr = (JSONArray)elementValue;
             } else {
+                Collection< ? > c = (Collection< ? >)elementValue;
+                if ( !isArray && c.size() > 1 ) {
+                    Debug.error( "isArray=false for multiple items in elementValue="
+                                 + elementValue
+                                 + ", jsonType="
+                                 + jsonType
+                                 + ", this=" + this );
+                }
                 jarr = new JSONArray();
                 for ( Object o : c ) {
                     String s = null;

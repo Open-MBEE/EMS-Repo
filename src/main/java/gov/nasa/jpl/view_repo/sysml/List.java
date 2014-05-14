@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.sysml;
 
 import gov.nasa.jpl.mbee.util.CompareUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.ArrayList;
@@ -103,7 +104,11 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
         TreeSet< EmsScriptNode > elements =
                 new TreeSet< EmsScriptNode >( CompareUtils.GenericComparator.instance() );
         for ( Viewable< EmsScriptNode > v : this ) {
-            elements.addAll( v.getDisplayedElements() );
+            if ( v == null ) continue;
+            Collection< EmsScriptNode > moreElements = v.getDisplayedElements();
+            if ( !Utils.isNullOrEmpty( moreElements ) ) {
+                elements.addAll( moreElements );
+            }
         }
         return elements;
     }

@@ -273,6 +273,53 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
 
         return viewpointMethod;
     }
+
+    public void generateViewables() {
+        // Get the related elements that define the the view.
+        
+        Collection<EmsScriptNode> exposed = getExposedElements();
+        // TODO -- need to handle case where viewpoint operation does not exist
+        //         and an external function (e.g., Java) is somehow specified.
+        EmsScriptNode viewpointOp = getViewpointOperation(); 
+        if ( viewpointOp == null ) {
+            System.out.println("*** View.toViewJson(): no viewpoint operation! View = " + toBoringString() );
+            return;
+        }
+        
+        // Translate the viewpoint Operation/Expression element into an AE Expression:
+        ArrayList<Object> paramValList = new ArrayList<Object>();
+        // This is a List of a collection of nodes, where the value of exposed 
+        // parameter is a collection of nodes:
+        paramValList.add( exposed );  
+        SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAeExpr =
+                new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getModel() );
+        Expression< Object > aeExpr = sysmlToAeExpr.operationToAeExpression(viewpointOp, paramValList);
+
+        if ( aeExpr == null ) return;
+        
+        // Evaluate the expression to get the Viewables and add them to this View.
+
+        clear(); // make sure we clear out any old information
+        Object evalResult = aeExpr.evaluate( true );
+        if ( evalResult instanceof Viewable ) {
+            Viewable< EmsScriptNode > v = (Viewable< EmsScriptNode >)evalResult;
+            add( v );
+        } else if ( evalResult instanceof Collection ) {
+            Collection< ? > c = (Collection< ? >)evalResult;
+            for ( Object o : c ) {
+                try {
+                    Viewable< EmsScriptNode > viewable =
+                            (Viewable< EmsScriptNode >)o;
+                    add( viewable );
+                } catch ( ClassCastException e ) {
+                    e.printStackTrace();
+                }
+            }
+//            java.util.List< Viewable<EmsScriptNode> > viewables =
+//                    (java.util.List< Viewable<EmsScriptNode> >)Utils.asList( c );
+//            addAll( viewables );
+        }
+    }
     
     /** 
      * Create a JSON String for the View with the following format:
@@ -343,49 +390,7 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
         }
         
         // Get the related elements that define the the view.
-        
-        Collection<EmsScriptNode> exposed = getExposedElements();
-        // TODO -- need to handle case where viewpoint operation does not exist
-        //         and an external function (e.g., Java) is somehow specified.
-        EmsScriptNode viewpointOp = getViewpointOperation(); 
-        if ( viewpointOp == null ) {
-            System.out.println("*** View.toViewJson(): no viewpoint operation! View = " + toBoringString() );
-            return null;
-        }
-        
-        // Translate the viewpoint Operation/Expression element into an AE Expression:
-        ArrayList<Object> paramValList = new ArrayList<Object>();
-        // This is a List of a collection of nodes, where the value of exposed 
-        // parameter is a collection of nodes:
-        paramValList.add( exposed );  
-        SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAeExpr =
-                new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getModel() );
-        Expression< Object > aeExpr = sysmlToAeExpr.operationToAeExpression(viewpointOp, paramValList);
-
-        if ( aeExpr == null ) return null;
-        
-        // Evaluate the expression to get the Viewables and add them to this View.
-
-        clear(); // make sure we clear out any old information
-        Object evalResult = aeExpr.evaluate( true );
-        if ( evalResult instanceof Viewable ) {
-            Viewable< EmsScriptNode > v = (Viewable< EmsScriptNode >)evalResult;
-            add( v );
-        } else if ( evalResult instanceof Collection ) {
-            Collection< ? > c = (Collection< ? >)evalResult;
-            for ( Object o : c ) {
-                try {
-                    Viewable< EmsScriptNode > viewable =
-                            (Viewable< EmsScriptNode >)o;
-                    add( viewable );
-                } catch ( ClassCastException e ) {
-                    e.printStackTrace();
-                }
-            }
-//            java.util.List< Viewable<EmsScriptNode> > viewables =
-//                    (java.util.List< Viewable<EmsScriptNode> >)Utils.asList( c );
-//            addAll( viewables );
-        }
+        generateViewables();
 
         // Generate the JSON for the view now that the View is populated with
         // Viewables.
@@ -406,7 +411,7 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
 
             elements = new JSONArray();
             viewProperties.put("allowedElements", elements );
-            for ( EmsScriptNode elem : getDisplayedElements() ) {
+            for ( EmsScriptNode elem : getAllowedElements() ) {
                 elements.put( elem.getName() );
             }
 
@@ -429,28 +434,44 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
     }
     
     public JSONArray getContainsJson() {
-        JSONArray viewables = new JSONArray();
+        JSONArray viewablesJson = new JSONArray();
+
+        if ( isEmpty() ) generateViewables();
+
         for ( Viewable< EmsScriptNode > viewable : this ) {
             if ( viewable != null ) {
-                viewables.put( viewable.toViewJson() );
+                viewablesJson.put( viewable.toViewJson() );
             }
         }
-        if ( viewables.length() == 0 && getElement() != null ) {
+        if ( viewablesJson.length() == 0 && getElement() != null ) {
             Object contains = getElement().getProperty( Acm.ACM_CONTAINS );
             if ( contains != null ) {
                 if ( contains instanceof JSONArray ) return (JSONArray)contains;
 
                 try {
                     JSONArray jarr = new JSONArray( "" + contains );
-                    viewables = jarr;
+                    viewablesJson = jarr;
                 } catch ( JSONException e ) {
                     e.printStackTrace();
                 }
             }
         }
-        return viewables;
+        return viewablesJson;
     }
     
+    /**
+     * This is a cache of the displayed elements to keep from having to
+     * recompute them as is done for allowed elements.
+     */
+    private Collection<EmsScriptNode> displayedElements = null;
+    
+    public Collection<EmsScriptNode> getAllowedElements() {
+        if ( displayedElements != null ) {
+            return displayedElements;
+        }
+        return getDisplayedElements();
+    }
+
     @Override
     public Collection<EmsScriptNode> getDisplayedElements() {
         return getDisplayedElements( new HashSet<View>() );
@@ -460,6 +481,13 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
         if ( seen.contains( this ) ) return Utils.getEmptySet();
         seen.add( this );
         LinkedHashSet<EmsScriptNode> set = new LinkedHashSet<EmsScriptNode>();
+        
+        if ( isEmpty() ) {
+            generateViewables(); 
+        } else if ( displayedElements != null ) {
+            return displayedElements;
+        }
+        
         set.addAll(super.getDisplayedElements() );
         for ( sysml.View< EmsScriptNode > v : getChildViews() ) {
             if ( v instanceof View ) {
@@ -477,14 +505,16 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
         }
         Object dElems = getElement().getProperty( Acm.ACM_DISPLAYED_ELEMENTS );
         set.addAll( getElementsForJson( dElems ) );
+        displayedElements = set;
         return set;
     }
     
     public Collection<EmsScriptNode> getElementsForJson( Object obj ) {
+        if ( obj == null ) return Utils.getEmptyList();
         LinkedHashSet<EmsScriptNode> nodes = new LinkedHashSet<EmsScriptNode>();
         if ( obj instanceof JSONArray ) {
             return getElementsForJson( (JSONArray)obj );
-        } 
+        }
         if ( obj instanceof JSONObject ) {
             return getElementsForJson( (JSONObject)obj );
         }
