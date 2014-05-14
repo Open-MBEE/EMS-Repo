@@ -7,9 +7,7 @@
             "type": "array",
             "items": {
                 "type": "object",
-                "oneOf": [
-                    {"$ref": "#/definitions/Element"}
-                ]
+                "$ref": "#/definitions/Element"
             }
         }
     },
@@ -57,7 +55,7 @@
                 },
                 "type": {
                     "type": "object",
-                    "description": "Specialized type of the element, if any, adds additional metadata per the references",
+                    "description": "Properties of the specialized type of the element, if any, adds additional metadata per the references",
                     "oneOf": [
                         { "$ref": "#/definitions/Constraint"},
                         { "$ref": "#/definitions/InstanceSpecification"},
@@ -132,7 +130,13 @@
                 }
             }
         },
-        "Project": {},
+        "Project": {
+            "properties": {
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
         "Property": {
             "properties": {
                 "isDerived": {
@@ -148,15 +152,6 @@
                     "description": "ID for the property type element"
                 },
                 
-                "valueType": {
-                    "enum": [ "ValueSpecification", "Duration", "DurationInterval",
-                                "ElementValue", "Expression", "OpaqueExpression",
-                                "InstanceValue", "Interval", "StringExpression",
-                                "LiteralBoolean", "LiteralNull", "LiteralInteger",
-                                "LiteralReal", "LiteralString", "LiteralUnlimitedNatural",
-                                "TimeExpression", "TimeInterval" ],
-                    "description": "type of the property value"
-                },
                 "value": {
                     "type": "array",
                     "items": {
@@ -186,13 +181,33 @@
             }
         },
         "Parameter": {
+            "properties": {
+                "direction": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "defaultValue": {
+                    "type": "string",
+                    "description": "Node ID"
+                }
+            }
         },
         "View": {
             	"properties": {
+            	    "type": { "enum": ["View"] },
                 "contains": {
                     "type": "array",
                     "items": {
-                        "type": "object"
+                        "type": "object",
+                        "oneOf": [
+                            {"$ref": "#/definitions/Paragraph"},
+                            {"$ref": "#/definitions/Table"},
+                            {"$ref": "#/definitions/List"},
+                            {"$ref": "#/definitions/Image"},
+                            {"$ref": "#/definitions/Section"}
+                        ]
                     }
                 },
                 "displayedElements": {
@@ -220,6 +235,7 @@
         },
         "Viewpoint": {
             "properties": {
+                "type": { "enum": ["Viewpoint"] },
                 "method": {
                     "type": "string",
                     "description": "ID of the method element for the viewpoint"
@@ -230,6 +246,7 @@
 
         "DirectedRelationship": {
             "properties": {
+                "type": { "enum": ["DirectedRelationship"] },
                 "source": {
                     "type": "string",
                     "description": "ID of the source of the relationship"
@@ -241,16 +258,19 @@
             }
         },
         "Conform": {
+            "type": { "enum": ["Conform"] },
             "allOf": [
                 {"$ref": "#/definitions/DirectedRelationship"}
             ]
         },
         "Dependency": {
+            "type": { "enum": ["Dependency"] },
             "allOf": [
                 {"$ref": "#/definitions/DirectedRelationship"}
             ]
         },
         "Expose": {
+            "type": { "enum": ["Expose"] },
             "allOf": [
                 {"$ref": "#/definitions/DirectedRelationship"}
             ]
@@ -258,22 +278,18 @@
 
 
         "ValueSpecification": {
+            "type": { "enum": ["ValueSpecification"] },
             "properties": {
-                "valueExpression": {
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "description": "ID of the expression elements for this value"
-                    }
-                }
             }
         },
         "Duration": {
+            "type": { "enum": ["Duration"] },
             "allOf": [
                 {"$ref": "#/definitions/ValueSpecification"}
             ]
         },
         "DurationInterval": {
+            "type": { "enum": ["DurationInterval"] },
             "properties": {
                 "max": {
                     "type": "string",
@@ -289,6 +305,7 @@
             ]
         },
         "ElementValue": {
+            "type": { "enum": ["ElementValue"] },
             "properties": {
                 "element": {
                     "type": "string",
@@ -300,12 +317,14 @@
             ]
         },
         "Expression": {
+            "type": { "enum": ["Expression"] },
             "properties": {
                 "operand": {
                     "type": "array",
                     "items": {
-                        "type": "string",
-                        "description": "ID of the operand being referenced"
+                        "type": "object",
+                        "description": "ID of the operand being referenced",
+                        "$ref": "#/definitions/Element"
                     }
                 }
             },
@@ -314,6 +333,7 @@
             ]
         },
         "OpaqueExpression": {
+            "type": { "enum": ["OpaqueExpression"] },
             "properties": {
                 "expressionBody": {
                     "type": "string",
@@ -325,6 +345,7 @@
             ]
         },
         "InstanceValue": {
+            "type": { "enum": ["InstanceValue"] },
             "properties": {
                 "instance": {
                     "type": "string",
@@ -336,16 +357,19 @@
             ]
         },
         "Interval": {
+            "type": { "enum": ["Interval"] },
             "allOf": [
                 {"$ref": "#/definitions/ValueSpecification"}
             ]
         },
         "StringExpression": {
+            "type": { "enum": ["StringExpression"] },
             "allOf": [
                 {"$ref": "#/definitions/ValueSpecification"}
             ]
         },
         "LiteralBoolean": {
+            "type": { "enum": ["LiteralBoolean"] },
             "properties": {
                 "boolean": {
                     "type": "boolean"
@@ -356,11 +380,13 @@
             ]
         },
         "LiteralNull": {
+            "type": { "enum": ["LiteralNull"] },
             "allOf": [
                 {"$ref": "#/definitions/ValueSpecification"}
             ]
         },
         "LiteralInteger": {
+            "type": { "enum": ["LiteralInteger"] },
             "properties": {
                 "integer": {
                     "type": "integer"
@@ -371,6 +397,7 @@
             ]
         },
         "LiteralReal": {
+            "type": { "enum": ["LiteralReal"] },
             "properties": {
                 "double": {
                     "type": "number"
@@ -381,6 +408,7 @@
             ]
         },
         "LiteralString": {
+            "type": { "enum": ["LiteralString"] },
             "properties": {
                 "string": {
                     "type": "string"
@@ -391,6 +419,7 @@
             ]
         },
         "LiteralUnlimitedNatural": {
+            "type": { "enum": ["LiteralUnlimitedNatural"] },
             "properties": {
                 "naturalValue": {
                     "type": "integer"
@@ -401,11 +430,13 @@
             ]
         },
         "TimeExpression": {
+            "type": { "enum": ["TimeExpression"] },
             "allOf": [
                 {"$ref": "#/definitions/ValueSpecification"}
             ]
         },
         "TimeInterval": {
+            "type": { "enum": ["TimeInterval"] },
             "properties": {
                 "max": {
                     "type": "string",
@@ -419,6 +450,90 @@
             "allOf": [
                 {"$ref": "#/definitions/ValueSpecification"}
             ]
+        },
+        
+        "Paragraph": {
+            "properties": {
+                "type": { "enum": ["Paragraph"] },
+                "sourceType": {
+                    "enum": ["reference", "text"],
+                    "description": "If reference, provides the source and sourceProperty, otherwise just the text"
+                },
+                "source": {
+                    "type": "string",
+                    "description": "Element ID" 
+                },
+                "sourceProperty": {
+                    "enum": ["documentation", "name", "value"]
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "Table": {
+            "properties": {
+                "type": { "enum": ["Table"] },
+                "title": { "type": "string" },
+                "body": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "content": {
+                                    "type": "array",
+                                    "items": {
+			                            "type": "object",
+			                            "oneOf": [
+			                                { "$ref": "Paragraph" },
+			                                { "$ref": "List" },
+			                                { "$ref": "Table" },
+			                                { "$ref": "Image" },
+			                                { "$ref": "Section" }
+			                            ]
+		                            }
+	                            }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "List": {
+            "properties": {
+                "type": { "enum": ["List"] },
+                "ordered": {
+                    "type": "boolean"
+                 },
+                 "list": {
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "oneOf": [
+                                { "$ref": "Paragraph" },
+                                { "$ref": "List" },
+                                { "$ref": "Table" },
+                                { "$ref": "Image" },
+                                { "$ref": "Section" }
+                            ]
+                        }
+                    }
+                }
+             }
+        },
+        "Image": {
+            "properties": {
+                "type": { "enum": ["Image"] }
+            }
+        },
+        "Section": {
+            "properties": {
+                "type": { "enum": ["Section"] }
+            }
         }
     }
 }
