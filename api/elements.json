@@ -53,7 +53,7 @@
                     "type": "string",
                     "description": "Containment hierarchy of element based off of SysML names, currently provided as a convenience for context"
                 },
-                "type": {
+                "specialization": {
                     "type": "object",
                     "description": "Properties of the specialized type of the element, if any, adds additional metadata per the references",
                     "oneOf": [
@@ -81,6 +81,7 @@
 
         "Constraint": {
             "properties": {
+                "type": { "enum": ["Constraint"] },
                 "specification": {
                     "type": "string",
                     "description": "ID of element that provides the constraint specification"
@@ -89,6 +90,7 @@
         },
         "InstanceSpecification": {
             "properties": {
+                "type": { "enum": ["InstanceSpecification"] },
                 "specification": {
                     "type": "string",
                     "description": "ID of element that provides the instance specification"
@@ -97,6 +99,7 @@
         },
         "Operation": {
             "properties": {
+                "type": { "enum": ["Operation"] },
                 "parameters": {
                     "type": "array",
                     "items": {
@@ -111,9 +114,14 @@
                 }
             }
         },
-        "Package": {},
+        "Package": {
+            "properties": {
+                "type": { "enum": ["Package"] }
+            }
+        },
         "Product": {
             "properties": {
+                "type": { "enum": ["Product"] },
                 "view2view": {
                     "type": "array",
                     "items": {
@@ -132,6 +140,7 @@
         },
         "Project": {
             "properties": {
+                "type": { "enum": ["Project"] },
                 "version": {
                     "type": "string"
                 }
@@ -139,6 +148,7 @@
         },
         "Property": {
             "properties": {
+                "type": { "enum": ["Property"] },
                 "isDerived": {
                     "type": "boolean",
                     "description": "Indicates whether the property is a free variable (if true) or not (if false)"
@@ -182,10 +192,11 @@
         },
         "Parameter": {
             "properties": {
+                "type": { "enum": ["Parameter"] },
                 "direction": {
                     "type": "string"
                 },
-                "type": {
+                "parameterType": {
                     "type": "string"
                 },
                 "defaultValue": {
