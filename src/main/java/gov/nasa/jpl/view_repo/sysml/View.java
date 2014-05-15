@@ -130,46 +130,59 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
      * @see sysml.View#getChildViews()
      */
     @Override
+    // TODO -- need to support a flag for recursion
     public Collection< sysml.View< EmsScriptNode > > getChildViews() {
         ArrayList< sysml.View< EmsScriptNode > > childViews =
                 new ArrayList< sysml.View< EmsScriptNode > >();
+        for ( EmsScriptNode node : getChildViewElements() ) {
+            childViews.add( new View( node ) );
+        }
+        return childViews;
+    }
+
+    // TODO -- need to support a flag for recursion
+    public Collection< EmsScriptNode > getChildViewElements() {
+//        ArrayList< EmsScriptNode > childViews =
+//                new ArrayList< EmsScriptNode >();
         Object o = viewNode.getProperty( Acm.ACM_CHILDREN_VIEWS );
-        JSONArray jarr = null;
-        if ( o instanceof String ) {
-            String s = (String)o;
-            if ( s.length() > 0 && s.charAt( 0 ) == '[' ) {
-                try {
-                    jarr = new JSONArray( s );
-                } catch ( JSONException e ) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        } else if ( o instanceof JSONArray ) {
-            jarr = (JSONArray)o;
-        }
-        if ( jarr != null ) {
-            for ( int i = 0; i < jarr.length(); ++i ) {
-                Object o1 = null;
-                try {
-                    o1 = jarr.get( i );
-                } catch ( JSONException e ) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                if ( o1 instanceof String ) {
-                    NodeRef nodeRef =
-                            NodeUtil.findNodeRefById( (String)o1,
-                                                      getModel().getServices() );
-                    if ( nodeRef != null ) {
-                        EmsScriptNode node =
-                                new EmsScriptNode( nodeRef,
-                                                   getModel().getServices() );
-                        childViews.add( new View( node ) );
-                    }
-                }
-            }
-        }
+        Collection< EmsScriptNode > childViews = getElementsForJson( o );
+      
+//        JSONArray jarr = null;
+//        if ( o instanceof String ) {
+//            String s = (String)o;
+//            if ( s.length() > 0 && s.charAt( 0 ) == '[' ) {
+//                try {
+//                    jarr = new JSONArray( s );
+//                } catch ( JSONException e ) {
+//                    // TODO Auto-generated catch block
+//                    e.printStackTrace();
+//                }
+//            }
+//        } else if ( o instanceof JSONArray ) {
+//            jarr = (JSONArray)o;
+//        }
+//        if ( jarr != null ) {
+//            for ( int i = 0; i < jarr.length(); ++i ) {
+//                Object o1 = null;
+//                try {
+//                    o1 = jarr.get( i );
+//                } catch ( JSONException e ) {
+//                    // TODO Auto-generated catch block
+//                    e.printStackTrace();
+//                }
+//                if ( o1 instanceof String ) {
+//                    NodeRef nodeRef =
+//                            NodeUtil.findNodeRefById( (String)o1,
+//                                                      getModel().getServices() );
+//                    if ( nodeRef != null ) {
+//                        EmsScriptNode node =
+//                                new EmsScriptNode( nodeRef,
+//                                                   getModel().getServices() );
+//                        childViews.add( node );
+//                    }
+//                }
+//            }
+//        }
 
         return childViews;
     }
@@ -473,10 +486,12 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
     }
 
     @Override
+    // TODO -- need to support a flag for recursion?
     public Collection<EmsScriptNode> getDisplayedElements() {
         return getDisplayedElements( new HashSet<View>() );
     }
 
+    // TODO -- need to support a flag for recursion?
     public Collection<EmsScriptNode> getDisplayedElements( Set<View> seen) {
         if ( seen.contains( this ) ) return Utils.getEmptySet();
         seen.add( this );
@@ -577,7 +592,9 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
     
     public Collection<EmsScriptNode> getViewToViewPropertyViews() {
         JSONArray jarr = getViewToViewPropertyJson();
-        return getElementsForJson( jarr );
+        Collection< EmsScriptNode > coll = getElementsForJson( jarr );
+        coll.remove( this );
+        return coll;
     }
 
     public JSONArray getViewToViewPropertyJson() {
@@ -594,11 +611,26 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
             e.printStackTrace();
         }
         return json;
-//        return getViewToViewJson( Set<View> seen ) 
     }
-//    public JSONObject getViewToView(Set<View> seen) {
-//        
-//    }
+
+    public Collection<EmsScriptNode> getContainedViews( boolean recurse, Set<EmsScriptNode> seen ) {
+        if ( getElement() == null ) return null;
+        if ( seen == null ) seen = new HashSet<EmsScriptNode>();
+        if ( seen.contains( getElement() ) ) return Utils.getEmptyList();
+        seen.add( getElement() );
+        LinkedHashSet<EmsScriptNode> views = new LinkedHashSet<EmsScriptNode>();
+        views.addAll(getViewToViewPropertyViews());
+        views.addAll(getChildViewElements());
+        views.remove( getElement() );
+        if ( recurse ) {
+            for ( EmsScriptNode e :  views ) {
+                View v = new View(e);
+                views.addAll( v.getContainedViews( recurse, seen ) );
+            }
+        }
+        return views;
+    }
+
     
     private String toBoringString() {
         return "view node = "
@@ -610,10 +642,7 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
 
     @Override
     public String toString() {
-//        JSONObject jo = toViewJson();
-//        if ( jo != null ) return jo.toString();
-        return //"toViewJson() FAILED: " + 
-                toBoringString();
+        return toBoringString();
     }
 
     @Override
