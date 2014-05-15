@@ -157,8 +157,11 @@ public class ModelGet extends AbstractJavaWebScript {
             if (modelId == null) {
                 modelId = req.getServiceMatch().getTemplateVars().get("elementid");
             }
+            System.out.println("modelId = " + modelId );
             EmsScriptNode modelRootNode = findScriptNodeById(modelId);
-
+            System.out.println("modelRootNode = " + modelRootNode );
+            
+            // recurse default is false
             boolean recurse = checkArgEquals(req, "recurse", "true") ? true : false;
             if (isViewRequest) {
                 handleViewHierarchy(modelRootNode, recurse);
