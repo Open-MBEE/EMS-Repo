@@ -68,7 +68,7 @@ public class ViewGet extends AbstractJavaWebScript {
 
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
-        String viewId = getViewId(req);
+        String viewId = getIdFromRequest(req);
         if (!checkRequestVariable(viewId, "id")) {
             return false;
         }
@@ -101,40 +101,7 @@ public class ViewGet extends AbstractJavaWebScript {
         System.out.println("Got raw id = " + viewId);
         return viewId;
     }
-    protected static String getViewId( WebScriptRequest req ) {
-        String viewId = getRawViewId( req );
-        if ( Utils.isNullOrEmpty( viewId ) ) {
-            return null;
-        }
-        boolean gotElementSuffix  = viewId.toLowerCase().trim().endsWith("/elements");
-        if ( gotElementSuffix ) {
-            viewId = viewId.substring( 0, viewId.lastIndexOf( "/elements" ) );
-        } else {
-            boolean gotViewSuffix  = viewId.toLowerCase().trim().endsWith("/views");
-            if ( gotViewSuffix ) {
-                viewId = viewId.substring( 0, viewId.lastIndexOf( "/views" ) );
-            }
-        }
-        System.out.println("viewId = " + viewId);
-        return viewId;
-    }
 
-    protected static boolean isDisplayedElementRequest( WebScriptRequest req ) {
-        if ( req == null ) return false;
-        String url = req.getURL();
-        if ( url == null ) return false;
-        boolean gotSuffix = ( url.toLowerCase().trim().endsWith("/elements") );
-        return gotSuffix;
-    }
-
-    protected static boolean isContainedViewRequest( WebScriptRequest req ) {
-        if ( req == null ) return false;
-        String url = req.getURL();
-        if ( url == null ) return false;
-        boolean gotSuffix = ( url.toLowerCase().trim().endsWith("/views") );
-        return gotSuffix;
-    }
-    
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
@@ -147,7 +114,7 @@ public class ViewGet extends AbstractJavaWebScript {
 
         JSONArray viewsJson = new JSONArray();
         if (validateRequest(req, status)) {
-            String viewId = getViewId( req );
+            String viewId = getIdFromRequest( req );
             gettingDisplayedElements = isDisplayedElementRequest( req );
             if ( !gettingDisplayedElements ) {
                 gettingContainedViews = isContainedViewRequest( req );
@@ -205,9 +172,6 @@ public class ViewGet extends AbstractJavaWebScript {
                 } else if ( gettingContainedViews ) {
                     System.out.println("+ + + + + gettingContainedViews");
                     Collection< EmsScriptNode > elems = v.getContainedViews( recurse, null );
-//                    LinkedHashSet< EmsScriptNode > elems = new LinkedHashSet<EmsScriptNode>();
-//                    elems.addAll(v.getViewToViewPropertyViews());
-//                    elems.addAll(v.getChildViewElements());
                     for ( EmsScriptNode n : elems ) {
                         viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW ) );
                     }

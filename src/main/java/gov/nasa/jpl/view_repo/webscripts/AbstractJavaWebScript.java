@@ -341,5 +341,43 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                             + ( reqStr.length() <= MAX_PRINT
                                 ? reqStr
                                 : reqStr.substring( 0, MAX_PRINT ) + "..." ) );
+    }
+
+    protected static String getIdFromRequest( WebScriptRequest req ) {
+        String productId = req.getServiceMatch().getTemplateVars().get("id");
+        if ( productId == null ) {
+            productId = req.getServiceMatch().getTemplateVars().get("modelid");
+        }
+        if ( productId == null ) {
+            productId = req.getServiceMatch().getTemplateVars().get("elementid");
+        }
+        System.out.println("Got id = " + productId);
+        boolean gotElementSuffix  = ( productId.toLowerCase().trim().endsWith("/elements") );
+        if ( gotElementSuffix ) {
+            productId = productId.substring( 0, productId.lastIndexOf( "/elements" ) );
+        } else {
+            boolean gotViewSuffix  = ( productId.toLowerCase().trim().endsWith("/views") );
+            if ( gotViewSuffix ) {
+                productId = productId.substring( 0, productId.lastIndexOf( "/views" ) );
+            }
+        }
+        System.out.println("productId = " + productId);
+        return productId;
+    }
+
+    protected static boolean isDisplayedElementRequest( WebScriptRequest req ) {
+        if ( req == null ) return false;
+        String url = req.getURL();
+        if ( url == null ) return false;
+        boolean gotSuffix = ( url.toLowerCase().trim().endsWith("/elements") );
+        return gotSuffix;
+    }
+
+    protected static boolean isContainedViewRequest( WebScriptRequest req ) {
+        if ( req == null ) return false;
+        String url = req.getURL();
+        if ( url == null ) return false;
+        boolean gotSuffix = ( url.toLowerCase().trim().endsWith("/views") );
+        return gotSuffix;
     }    
 }

@@ -67,7 +67,7 @@ public class ProductGet extends AbstractJavaWebScript {
 	
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		String productId = getProductId(req);
+		String productId = AbstractJavaWebScript.getIdFromRequest(req);
 		if (!checkRequestVariable(productId, "id")) {
 			return false;
 		}
@@ -85,44 +85,6 @@ public class ProductGet extends AbstractJavaWebScript {
 		return true;
 	}
 	
-	protected static String getProductId( WebScriptRequest req ) {
-        String productId = req.getServiceMatch().getTemplateVars().get("id");
-        if ( productId == null ) {
-            productId = req.getServiceMatch().getTemplateVars().get("modelid");
-        }
-        if ( productId == null ) {
-            productId = req.getServiceMatch().getTemplateVars().get("elementid");
-        }
-        System.out.println("Got id = " + productId);
-        boolean gotElementSuffix  = ( productId.toLowerCase().trim().endsWith("/elements") );
-        if ( gotElementSuffix ) {
-            productId = productId.substring( 0, productId.lastIndexOf( "/elements" ) );
-        } else {
-            boolean gotViewSuffix  = ( productId.toLowerCase().trim().endsWith("/views") );
-            if ( gotViewSuffix ) {
-                productId = productId.substring( 0, productId.lastIndexOf( "/views" ) );
-            }
-        }
-        System.out.println("productId = " + productId);
-        return productId;
-	}
-
-	protected static boolean isDisplayedElementRequest( WebScriptRequest req ) {
-	    if ( req == null ) return false;
-        String url = req.getURL();
-        if ( url == null ) return false;
-        boolean gotSuffix = ( url.toLowerCase().trim().endsWith("/elements") );
-        return gotSuffix;
-    }
-
-	protected static boolean isContainedViewRequest( WebScriptRequest req ) {
-	    if ( req == null ) return false;
-        String url = req.getURL();
-        if ( url == null ) return false;
-        boolean gotSuffix = ( url.toLowerCase().trim().endsWith("/views") );
-        return gotSuffix;
-    }
-	
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
@@ -133,7 +95,7 @@ public class ProductGet extends AbstractJavaWebScript {
 
 		JSONArray productsJson = null;
 		if (validateRequest(req, status)) {
-			String productId = getProductId( req );
+			String productId = getIdFromRequest( req );
 			gettingDisplayedElements = isDisplayedElementRequest( req );
 			if ( !gettingDisplayedElements ) {
 			    gettingContainedViews  = isContainedViewRequest( req );
@@ -191,9 +153,6 @@ public class ProductGet extends AbstractJavaWebScript {
                 } else if ( gettingContainedViews ) {
                     System.out.println("+ + + + + gettingContainedViews");
                     Collection< EmsScriptNode > elems = v.getContainedViews( recurse, null );
-//                    LinkedHashSet< EmsScriptNode > elems = new LinkedHashSet<EmsScriptNode>();
-//                    elems.addAll(v.getViewToViewPropertyViews());
-//                    elems.addAll(v.getChildViewElements());
                     for ( EmsScriptNode n : elems ) {
                         productsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW ) );
                     }
