@@ -342,8 +342,26 @@
                     "type": "array",
                     "items": {
                         "type": "object",
-                        "description": "The full element reference",
-                        "$ref": "#/definitions/Element"
+                        "description": "The value specs",
+                        "oneOf": [
+                            { "$ref": "#/definitions/ValueSpecification"},
+                            { "$ref": "#/definitions/Duration"},
+                            { "$ref": "#/definitions/DurationInterval"},
+                            { "$ref": "#/definitions/ElementValue"},
+                            { "$ref": "#/definitions/Expression"},
+                            { "$ref": "#/definitions/OpaqueExpression"},
+                            { "$ref": "#/definitions/InstanceValue"},
+                            { "$ref": "#/definitions/Interval"},
+                            { "$ref": "#/definitions/StringExpression"},
+                            { "$ref": "#/definitions/LiteralBoolean"},
+                            { "$ref": "#/definitions/LiteralNull"},
+                            { "$ref": "#/definitions/LiteralInteger"},
+                            { "$ref": "#/definitions/LiteralReal"},
+                            { "$ref": "#/definitions/LiteralString"},
+                            { "$ref": "#/definitions/LiteralUnlimitedNatural"},
+                            { "$ref": "#/definitions/TimeExpression"},
+                            { "$ref": "#/definitions/TimeInterval"}
+                        ]
                     }
                 }
             },
@@ -514,11 +532,10 @@
                                     "items": {
 			                            "type": "object",
 			                            "oneOf": [
-			                                { "$ref": "Paragraph" },
-			                                { "$ref": "List" },
-			                                { "$ref": "Table" },
-			                                { "$ref": "Image" },
-			                                { "$ref": "Section" }
+			                                { "$ref": "#/definitions/Paragraph" },
+			                                { "$ref": "#/definitions/List" },
+			                                { "$ref": "#/definitions/Table" },
+			                                { "$ref": "#/definitions/Image" },
 			                            ]
 		                            }
 	                            }
@@ -541,11 +558,10 @@
                         "items": {
                             "type": "object",
                             "oneOf": [
-                                { "$ref": "Paragraph" },
-                                { "$ref": "List" },
-                                { "$ref": "Table" },
-                                { "$ref": "Image" },
-                                { "$ref": "Section" }
+                                { "$ref": "#/definitions/Paragraph" },
+                                { "$ref": "#/definitions/List" },
+                                { "$ref": "#/definitions/Table" },
+                                { "$ref": "#/definitions/Image" },
                             ]
                         }
                     }
