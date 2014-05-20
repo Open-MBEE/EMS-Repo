@@ -70,6 +70,9 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.namespace.QName;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -215,6 +218,9 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                     }
                     
+                    // Create element, owner, and reified package folder as
+                    // necessary and place element with owner; don't update
+                    // properties on this first pass.
                     if (owner != null && owner.exists()) {
                         elements.addAll( updateOrCreateElement( elementMap.get( rootElement ),
                                                              owner, false ) );
@@ -226,6 +232,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // handle the relationships
         updateOrCreateAllRelationships(relationshipsJson);
         
+        // make another pass through the elements and update their properties
         elements.addAll( updateNodeReferences( singleElement, postJson,
                                                projectNode ) );
 
@@ -686,6 +693,26 @@ public class ModelPost extends AbstractJavaWebScript {
 			log(LogLevel.WARNING, "Node " + name + " is not of type folder, so cannot create children [id=" + id + "]");
 			return elements;
 		}
+        
+        // Check to see if the element has been updated since last read by the
+        // posting application.
+       if ( inConflict( element, elementJson ) ) {
+            if ( !ingest ) { // only generate error on first pass
+                String msg =
+                        "Error! Tried to post concurrent edit to element, "
+                                + element + ".\n";
+                if ( getResponse() == null || getResponseStatus() == null ) {
+                    Debug.error( msg );
+                } else {
+                    getResponse().append( msg );
+                    if ( getResponseStatus() != null ) {
+                        getResponseStatus().setCode( HttpServletResponse.SC_CONFLICT,
+                                                     msg );
+                    }
+                }
+            }
+           return elements;
+       }
 
         JSONArray children = new JSONArray();
         
@@ -732,6 +759,41 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         
         return elements;
+    }
+
+    /**
+     * Determine whether the post to the element is based on old information based on a "read" JSON attribute whose value is the date when the posting process originally read the element's data.
+     * @param element
+     * @param elementJson
+     * @return whether the "read" date is older than the last modification date.
+     */
+    public boolean inConflict( EmsScriptNode element, JSONObject elementJson ) {
+        // TODO -- could check for which properties changed since the "read"
+        // date to allow concurrent edits to different properties of the same
+        // element.
+        String readTime = null;
+        try {
+            readTime = elementJson.getString( "read" );
+        } catch ( JSONException e ) {
+            return false;
+        }
+        if ( readTime == null ) return false;
+        Date lastModified = (Date)element.getProperty( Acm.ACM_LAST_MODIFIED );
+        String lastModString = EmsScriptNode.getIsoTime( lastModified );
+        DateTimeFormatter parser = ISODateTimeFormat.dateParser();
+        DateTime readDateTime = parser.parseDateTime( readTime );
+        Date readDate = null;
+        if ( readDateTime != null ) { // return false;
+            readDate = readDateTime.toDate();
+            if ( readDate != null ) { // return false;
+                return readDate.compareTo( lastModified ) >= 0;
+            }
+        }
+        Debug.error( "Bad date format or parse bug! lastModified = "
+                     + lastModified + ", readDateTime = " + readDateTime
+                     + ", readDate = " + readDate + ", elementJson="
+                     + elementJson );
+        return readTime.compareTo( lastModString ) >= 0;
     }
 
     protected EmsScriptNode
