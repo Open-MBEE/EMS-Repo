@@ -24,39 +24,47 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
     	<div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
     		<a class="navbar-brand" href="/share/page/site/${siteName}/dashboard">${siteTitle}</a>
     	</div>
-    	<ul class="nav navbar-nav">
-    	<li class="active"><a href="#">${title}</a></li>
-        <li class="dropdown" id="firstDropdown">
-        	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Goto <b class="caret"></b></a>
-        	<ul class="dropdown-menu">
-        		<li><a href="${url.context}/service/ve/configurations/${siteName}">DocWeb</a></li>
-        	<#if siteName == 'europa'>
-        		<li><a href="${url.context}/service/ve/index/${siteName}">Document List</a></li>
-        		<li><a href="${url.context}/service/ve/documents/${siteName}">In-Work Document List</a></li>
-        	<#else>
-        		<li><a href="${url.context}/service/ve/documents/${siteName}">Document List</a></li>
-        	</#if>	
-        		<li><a href="/share/page/site/${siteName}/dashboard">Dashboard</a></li>
-   			</ul>
-   		</li>
-   		<li class="dropdown">
-   			<a href="#" class="dropdown-toggle" data-toggle="dropdown">Other Sites <b class="caret"></b></a>
-   			<ul class="dropdown-menu" id="otherSites">
-   			
-   			</ul>
-   		</li>
-   	  </ul>
+      <div class="navbar-collapse collapse">
+      	<ul class="nav navbar-nav">
+      	<li class="active"><a href="#">${title}</a></li>
+          <li class="dropdown" id="firstDropdown">
+          	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Goto <b class="caret"></b></a>
+          	<ul class="dropdown-menu">
+          		<li><a href="${url.context}/service/ve/configurations/${siteName}">DocWeb</a></li>
+          	<#if siteName == 'europa'>
+          		<li><a href="${url.context}/service/ve/index/${siteName}">Document List</a></li>
+          		<li><a href="${url.context}/service/ve/documents/${siteName}">In-Work Document List</a></li>
+          	<#else>
+          		<li><a href="${url.context}/service/ve/documents/${siteName}">Document List</a></li>
+          	</#if>	
+          		<li><a href="/share/page/site/${siteName}/dashboard">Dashboard</a></li>
+     			</ul>
+     		</li>
+     		<li class="dropdown">
+     			<a href="#" class="dropdown-toggle" data-toggle="dropdown">Other Sites <b class="caret"></b></a>
+     			<ul class="dropdown-menu" id="otherSites">
+     			
+     			</ul>
+     		</li>
+     	  </ul>
 
-      <div class="pull-right">
-        <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
+        <div class="pull-right">
+          <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
+        </div>
+
+        <ul class="nav navbar-nav pull-right">
+        	<li><a href="/share/page/site/ems-training/dashboard">Support</a></li>
+          <li><a href="#" class="submit-logout">logout</a></li>
+        </ul>
       </div>
-
-      <ul class="nav navbar-nav pull-right">
-      	<li><a href="/share/page/site/ems-training/dashboard">Support</a></li>
-        <li><a href="#" class="submit-logout">logout</a></li>
-      </ul>
     </nav>
    
 
