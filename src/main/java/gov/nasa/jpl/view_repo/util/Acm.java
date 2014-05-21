@@ -147,6 +147,9 @@ public class Acm {
     public static final String JSON_METHOD = "method";
     public static final String JSON_CONNECTOR = "Connector";
     public static final String JSON_CONNECTOR_ROLE = "connectorRole";
+    
+    public static final String JSON_READ = "read";
+
 
     // ACM types with the different name spaces
     public static final String SYSML = "sysml:";

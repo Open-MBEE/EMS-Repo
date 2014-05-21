@@ -39,6 +39,7 @@ import gov.nasa.jpl.ae.sysml.SystemModelSolver;
 import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
 import gov.nasa.jpl.ae.util.ClassData;
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
@@ -53,7 +54,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -65,14 +65,8 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
-import org.alfresco.service.cmr.dictionary.DictionaryService;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
-import org.alfresco.service.namespace.QName;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -773,26 +767,31 @@ public class ModelPost extends AbstractJavaWebScript {
         // element.
         String readTime = null;
         try {
-            readTime = elementJson.getString( "read" );
+            readTime = elementJson.getString( Acm.JSON_READ );//"read" );
         } catch ( JSONException e ) {
             return false;
         }
+        System.out.println( "%% %% %% readTime = " + readTime );
         if ( readTime == null ) return false;
         Date lastModified = (Date)element.getProperty( Acm.ACM_LAST_MODIFIED );
-        String lastModString = EmsScriptNode.getIsoTime( lastModified );
-        DateTimeFormatter parser = ISODateTimeFormat.dateParser();
-        DateTime readDateTime = parser.parseDateTime( readTime );
+        System.out.println( "%% %% %% lastModified = " + lastModified );
+        //DateTimeFormatter parser = ISODateTimeFormat.dateParser(); // format is different than what is printed
+       
+//        DateTime readDateTime = parser.parseDateTime( readTime );
         Date readDate = null;
-        if ( readDateTime != null ) { // return false;
-            readDate = readDateTime.toDate();
-            if ( readDate != null ) { // return false;
-                return readDate.compareTo( lastModified ) >= 0;
-            }
+        readDate = TimeUtils.dateFromTimestamp( readTime );
+        System.out.println( "%% %% %% readDate = " + readDate );
+//        if ( readDateTime != null ) { // return false;
+//            readDate = readDateTime.toDate();
+        if ( readDate != null ) { // return false;
+            return readDate.compareTo( lastModified ) < 0;
         }
+//        }
         Debug.error( "Bad date format or parse bug! lastModified = "
-                     + lastModified + ", readDateTime = " + readDateTime
+                     + lastModified //+ ", readDateTime = " + readDateTime
                      + ", readDate = " + readDate + ", elementJson="
                      + elementJson );
+        String lastModString = TimeUtils.toTimestamp( lastModified );
         return readTime.compareTo( lastModString ) >= 0;
     }
 
