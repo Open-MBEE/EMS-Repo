@@ -524,8 +524,7 @@ public class Acm {
      * Properties of an Element, ie not found via specialization
      */
     public static final Set<String> ELEMENT_PROPS_JSON = new HashSet<String>() {
-    	// TODO quickfix to add a compiler generated UID is failing
-        private static final long serialVersionUID = 494169408514256149L;
+    	// quickfix to add a compiler generated UID is failing
 		{
             addAll(COMMON_JSON);	// id, author, last modified
             add(JSON_NAME);
