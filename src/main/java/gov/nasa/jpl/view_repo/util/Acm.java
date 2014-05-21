@@ -43,10 +43,24 @@ import java.util.Set;
  *
  */
 public class Acm {
+	
+    // Additions with api.raml file:
+    public static final String SYSMLID = "sysmlid"; 
+    public static final String SPECIFICATION = "specification";
+    public static final String PARAMETERS = "parameters";
+    public static final String EXPRESSION = "expression";
+    public static final String MAX = "max";
+    public static final String MIN = "min";
+    public static final String ELEMENT = "element";
+    public static final String VERSION = "version";
+    public static final String DIRECTION = "direction";
+    public static final String DEFAULT_VALUE = "defaultValue";
+    public static final String JSON_SPECIALIZATION = "specialization";
+    
     // JSON types
     public static final String JSON_COMMENT = "Comment";
     public static final String JSON_CONSTRAINT = "Constraint";
-    public static final String JSON_CONSTRAINT_SPECIFICATION = "constraintSpecification";
+    public static final String JSON_CONSTRAINT_SPECIFICATION = SPECIFICATION; // Used to be "constraintSpecification";
     public static final String JSON_CONFORM = "Conform";
     public static final String JSON_DEPENDENCY = "Dependency";
     public static final String JSON_DIRECTED_RELATIONSHIP = "DirectedRelationship";
@@ -61,7 +75,7 @@ public class Acm {
     public static final String JSON_IS_DERIVED = "isDerived";
     public static final String JSON_IS_SLOT = "isSlot";
     public static final String JSON_DOCUMENTATION = "documentation";
-    public static final String JSON_ID = "id";
+    public static final String JSON_ID = SYSMLID; // Used to be "id"
     public static final String JSON_NAME = "name";
     public static final String JSON_SOURCE = "source";
     public static final String JSON_TARGET = "target";
@@ -71,7 +85,7 @@ public class Acm {
     public static final String JSON_BODY = "body";
     public static final String JSON_EXPRESSION_BODY = "expressionBody";
     public static final String JSON_ANNOTATED_ELEMENTS = "annotatedElements";
-    public static String JSON_PROJECT_VERSION = "projectVersion";
+    public static String JSON_PROJECT_VERSION = VERSION; // Used to be "projectVersion"
 
     
 //    public static final String JSON_TIME_MAX = "timeMax";
@@ -115,10 +129,10 @@ public class Acm {
     public static final String JSON_VALUE_EXPRESSION = "valueExpression";
     public static final String JSON_DURATION = "Duration";
     public static final String JSON_DURATION_INTERVAL = "DurationInterval";
-    public static final String JSON_DURATION_MAX = "durationMax";
-    public static final String JSON_DURATION_MIN = "durationMin";
+    public static final String JSON_DURATION_MAX = MAX; // Used to be "durationMax"
+    public static final String JSON_DURATION_MIN = MIN; // Used to be "durationMin"
     public static final String JSON_ELEMENT_VALUE = "ElementValue";
-    public static final String JSON_ELEMENT_VALUE_ELEMENT = "elementValueOfElement";
+    public static final String JSON_ELEMENT_VALUE_ELEMENT = ELEMENT; // Used to be "elementValueOfElement"
     public static final String JSON_EXPRESSION = "Expression";
     public static final String JSON_OPERAND = "operand";
     public static final String JSON_INSTANCE_VALUE = "InstanceValue";
@@ -134,20 +148,21 @@ public class Acm {
     public static final String JSON_STRING_EXPRESSION = "StringExpression";
     public static final String JSON_TIME_EXPRESSION = "TimeExpression";
     public static final String JSON_TIME_INTERVAL = "TimeInterval";
-    public static final String JSON_TIME_INTERVAL_MAX = "timeIntervalMax";
-    public static final String JSON_TIME_INTERVAL_MIN = "timeIntervalMin";
+    public static final String JSON_TIME_INTERVAL_MAX = MAX; // Used to be "timeIntervalMax"
+    public static final String JSON_TIME_INTERVAL_MIN = MIN; // Used to be "timeIntervalMin"
     public static final String JSON_OPERATION = "Operation";
-    public static final String JSON_OPERATION_PARAMETER = "operationParameter";
+    public static final String JSON_OPERATION_PARAMETER = PARAMETERS; // Used to be "operationParameter"
     public static final String JSON_INSTANCE_SPECIFICATION = "InstanceSpecification";
-    public static final String JSON_INSTANCE_SPECIFICATION_SPECIFICATION = "instanceSpecificationSpecification";
+    public static final String JSON_INSTANCE_SPECIFICATION_SPECIFICATION = SPECIFICATION; // Used to be "instanceSpecificationSpecification"
     public static final String JSON_PARAMETER = "Parameter";
-    public static final String JSON_PARAMETER_DIRECTION = "parameterDirection";
-    public static final String JSON_PARAMETER_DEFAULT_VALUE = "parameterDefaultValue";
-    public static final String JSON_OPERATION_EXPRESSION = "operationExpression";
+    public static final String JSON_PARAMETER_DIRECTION = DIRECTION; // Used to be "parameterDirection"
+    public static final String JSON_PARAMETER_DEFAULT_VALUE = DEFAULT_VALUE; // Used to be "parameterDefaultValue"
+    public static final String JSON_PARAMETER_TYPE = "parameterType";
+    public static final String JSON_OPERATION_EXPRESSION = EXPRESSION; // Used to be "operationExpression"
     public static final String JSON_METHOD = "method";
     public static final String JSON_CONNECTOR = "Connector";
     public static final String JSON_CONNECTOR_ROLE = "connectorRole";
-
+    
     // ACM types with the different name spaces
     public static final String SYSML = "sysml:";
     public static final String VIEW = "view2:";
@@ -155,7 +170,7 @@ public class Acm {
     
     public static final String ACM_COMMENT = SYSML + JSON_COMMENT;
     public static final String ACM_CONSTRAINT = SYSML + JSON_CONSTRAINT;
-    public static final String ACM_CONSTRAINT_SPECIFICATION = SYSML + JSON_CONSTRAINT_SPECIFICATION;
+    public static final String ACM_CONSTRAINT_SPECIFICATION = SYSML + "constraintSpecification";
     public static final String ACM_CONFORM = SYSML + JSON_CONFORM;
     public static final String ACM_DEPENDENCY = SYSML + JSON_DEPENDENCY;
     public static final String ACM_DIRECTED_RELATIONSHIP = SYSML + JSON_DIRECTED_RELATIONSHIP;
@@ -171,7 +186,7 @@ public class Acm {
     public static final String ACM_IS_SLOT = SYSML + JSON_IS_SLOT;
     public static final String ACM_DOCUMENTATION = SYSML + JSON_DOCUMENTATION;
     public static final String ACM_IDENTIFIABLE = SYSML + "Identifiable";
-    public static final String ACM_ID = SYSML + JSON_ID;
+    public static final String ACM_ID = SYSML + "id";
     public static final String ACM_NAME = SYSML + JSON_NAME;
     public static final String ACM_SOURCE = SYSML + JSON_SOURCE;
     public static final String ACM_TARGET = SYSML + JSON_TARGET;
@@ -184,7 +199,7 @@ public class Acm {
     public static final String ACM_BODY = SYSML + JSON_BODY;
     public static final String ACM_EXPRESSION_BODY = SYSML + JSON_EXPRESSION_BODY;
     public static final String ACM_ANNOTATED_ELEMENTS = SYSML + JSON_ANNOTATED_ELEMENTS;
-    public static String ACM_PROJECT_VERSION = SYSML + JSON_PROJECT_VERSION;
+    public static String ACM_PROJECT_VERSION = SYSML + "projectVersion";
     
 //    public static final String ACM_TIME_MAX = SYSML + JSON_TIME_MAX;
 //    public static final String ACM_TIME_MIN = SYSML + JSON_TIME_MIN;
@@ -223,10 +238,10 @@ public class Acm {
     public static final String ACM_VALUE_EXPRESSION = SYSML + JSON_VALUE_EXPRESSION;
     public static final String ACM_DURATION = SYSML + JSON_DURATION;
     public static final String ACM_DURATION_INTERVAL = SYSML + JSON_DURATION_INTERVAL;
-    public static final String ACM_DURATION_MAX = SYSML + JSON_DURATION_MAX;
-    public static final String ACM_DURATION_MIN = SYSML + JSON_DURATION_MIN;
+    public static final String ACM_DURATION_MAX = SYSML + "durationMax";
+    public static final String ACM_DURATION_MIN = SYSML + "durationMin";
     public static final String ACM_ELEMENT_VALUE = SYSML + JSON_ELEMENT_VALUE;
-    public static final String ACM_ELEMENT_VALUE_ELEMENT = SYSML + JSON_ELEMENT_VALUE_ELEMENT;
+    public static final String ACM_ELEMENT_VALUE_ELEMENT = SYSML + "elementValueOfElement";
     public static final String ACM_EXPRESSION = SYSML + JSON_EXPRESSION;
     public static final String ACM_OPERAND = SYSML + JSON_OPERAND;
     public static final String ACM_INSTANCE_VALUE = SYSML + JSON_INSTANCE_VALUE;
@@ -242,19 +257,23 @@ public class Acm {
     public static final String ACM_STRING_EXPRESSION = SYSML + JSON_STRING_EXPRESSION;
     public static final String ACM_TIME_EXPRESSION = SYSML + JSON_TIME_EXPRESSION;
     public static final String ACM_TIME_INTERVAL = SYSML + JSON_TIME_INTERVAL;
-    public static final String ACM_TIME_INTERVAL_MAX = SYSML + JSON_TIME_INTERVAL_MAX;
-    public static final String ACM_TIME_INTERVAL_MIN = SYSML + JSON_TIME_INTERVAL_MIN;
+    public static final String ACM_TIME_INTERVAL_MAX = SYSML + "timeIntervalMax";
+    public static final String ACM_TIME_INTERVAL_MIN = SYSML + "timeIntervalMin";
     public static final String ACM_OPERATION = SYSML + JSON_OPERATION;
-    public static final String ACM_OPERATION_PARAMETER = SYSML + JSON_OPERATION_PARAMETER;
+    public static final String ACM_OPERATION_PARAMETER = SYSML + "operationParameter";
     public static final String ACM_INSTANCE_SPECIFICATION = SYSML + JSON_INSTANCE_SPECIFICATION;
-    public static final String ACM_INSTANCE_SPECIFICATION_SPECIFICATION = SYSML + JSON_INSTANCE_SPECIFICATION_SPECIFICATION;
+    public static final String ACM_INSTANCE_SPECIFICATION_SPECIFICATION = SYSML + "instanceSpecificationSpecification";
     public static final String ACM_PARAMETER = SYSML + JSON_PARAMETER;
-    public static final String ACM_PARAMETER_DIRECTION = SYSML + JSON_PARAMETER_DIRECTION;
-    public static final String ACM_PARAMETER_DEFAULT_VALUE = SYSML + JSON_PARAMETER_DEFAULT_VALUE;
-    public static final String ACM_OPERATION_EXPRESSION = SYSML + JSON_OPERATION_EXPRESSION;
+    public static final String ACM_PARAMETER_DIRECTION = SYSML + "parameterDirection";
+    public static final String ACM_PARAMETER_DEFAULT_VALUE = SYSML + "parameterDefaultValue";
+    public static final String ACM_PARAMETER_TYPE = SYSML + JSON_PARAMETER_TYPE;
+    public static final String ACM_OPERATION_EXPRESSION = SYSML + "operationExpression";
     public static final String ACM_METHOD = SYSML + JSON_METHOD;
     public static final String ACM_CONNECTOR = SYSML + JSON_CONNECTOR;
     public static final String ACM_CONNECTOR_ROLE = SYSML + JSON_CONNECTOR_ROLE;
+    
+    // Additions with api.raml file:
+    public static final String ACM_SPECIALIZATION = SYSML + JSON_SPECIALIZATION;
     
     public static String ACM_ELEMENT_FOLDER = SYSML + "ElementFolder";
     public static String ACM_PROJECT = SYSML + "Project";
@@ -495,6 +514,23 @@ public class Acm {
             addAll(PRODUCT_JSON);
             
             addAll(MISC_PROPS_JSON);
+            
+            add(JSON_SPECIALIZATION);
+
+        }
+    };
+        
+    /**
+     * Properties of an Element, ie not found via specialization
+     */
+    public static final Set<String> ELEMENT_PROPS_JSON = new HashSet<String>() {
+    	// TODO quickfix to add a compiler generated UID is failing
+        private static final long serialVersionUID = 494169408514256149L;
+		{
+            addAll(COMMON_JSON);	// id, author, last modified
+            add(JSON_NAME);
+            add(JSON_DOCUMENTATION);
+            add(JSON_OWNER);
         }
     };
     
@@ -532,4 +568,5 @@ public class Acm {
             put(JSON_TYPE_FILTER.VIEW, ELEMENT_JSON); //VIEW_JSON);
         }
     };
+	
 }
