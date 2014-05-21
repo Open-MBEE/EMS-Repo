@@ -535,7 +535,7 @@
 			                                { "$ref": "#/definitions/Paragraph" },
 			                                { "$ref": "#/definitions/List" },
 			                                { "$ref": "#/definitions/Table" },
-			                                { "$ref": "#/definitions/Image" },
+			                                { "$ref": "#/definitions/Image" }
 			                            ]
 		                            }
 	                            }
@@ -561,7 +561,7 @@
                                 { "$ref": "#/definitions/Paragraph" },
                                 { "$ref": "#/definitions/List" },
                                 { "$ref": "#/definitions/Table" },
-                                { "$ref": "#/definitions/Image" },
+                                { "$ref": "#/definitions/Image" }
                             ]
                         }
                     }
