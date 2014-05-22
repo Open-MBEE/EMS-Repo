@@ -12,6 +12,13 @@
       </advanced-search>
    </config>
    
+    <config evaluator="string-compare" condition="Action Wizards">
+        <subtypes>
+            <type name="fm:post"/>
+            <type name="fm:topic"/>
+        </subtypes>
+    </config>
+   
    <config>
       <client>
          <simple-search-additional-attributes>
