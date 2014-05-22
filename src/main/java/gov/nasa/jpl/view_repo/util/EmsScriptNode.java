@@ -1900,7 +1900,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
     
     public static String getIsoTime( Date date ) {
-        return TimeUtils.toAspenTimeString( date );
+        return TimeUtils.toTimestamp( date );
 //        DateTime dt = new DateTime( date );
 //        DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
 //        return fmt.print( dt );
