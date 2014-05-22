@@ -1,15 +1,22 @@
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.mbee.util.CompareUtils.GenericComparator;
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,9 +34,12 @@ import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.version.Version;
+import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ApplicationContextHelper;
 import org.apache.commons.digester.SetRootRule;
+import org.mozilla.javascript.Scriptable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
 
@@ -580,6 +590,84 @@ public class NodeUtil {
         if ( !node.exists() ) return null;
         return n;
     }
+
+//    private static <T> int indexedBinarySearchLower(List<? extends T> l, T key, Comparator<? super T> c) {
+//        int low = 0;
+//        int high = l.size()-1;
+//
+//        while (low <= high) {
+//            int mid = (low + high) >>> 1;
+//            T midVal = l.get(mid);
+//            int cmp = c.compare(midVal, key);
+//
+//            if (cmp < 0)
+//                low = mid + 1;
+//            else if (cmp > 0)
+//                high = mid - 1;
+//            else
+//                return mid; // key found
+//        }
+//        return -(low + 1);  // key not found
+//    }
+
+
+    
+    public static class VersionLowerBoundComparator implements Comparator< Object > {
+        
+        @Override
+        public int compare( Object o1, Object o2 ) {
+            Date d1 = null;
+            Date d2 = null;
+            if ( o1 instanceof Version ) {
+                d1 = ((Version)o1).getFrozenModifiedDate();
+            } else if ( o1 instanceof Date ) {
+                d1 = (Date)o1;
+            } else if ( o1 instanceof Long ) {
+                d1 = new Date( (Long)o1 );
+            } else if ( o1 instanceof String ) {
+                d1 = TimeUtils.dateFromTimestamp( (String)o1 );
+            }
+            if ( o2 instanceof Version ) {
+                d2 = ((Version)o2).getFrozenModifiedDate();
+            } else if ( o2 instanceof Date ) {
+                d2 = (Date)o2;
+            } else if ( o2 instanceof Long ) {
+                d2 = new Date( (Long)o2 );
+            } else if ( o1 instanceof String ) {
+                d2 = TimeUtils.dateFromTimestamp( (String)o2 );
+            }
+            // more recent first
+            return -GenericComparator.instance().compare( d1, d2 );
+        }
+    }
+    
+    public static VersionLowerBoundComparator versionLowerBoundComparator =
+            new VersionLowerBoundComparator();
+    
+    public static NodeRef getNodeRefAtTime( String id, String timestamp ) {
+        NodeRef ref = findNodeRefById( id, getServices() );
+        return getNodeRefAtTime( ref, timestamp );
+    }
+
+    public static NodeRef getNodeRefAtTime( NodeRef ref, String timestamp ) {
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        return getNodeRefAtTime( ref, dateTime );
+    }
+    public static NodeRef getNodeRefAtTime( NodeRef ref, Date dateTime ) {
+        VersionHistory history = getServices().getVersionService().getVersionHistory( ref );
+        Collection< Version > versions = history.getAllVersions();
+        Vector<Version> vv = new Vector<Version>( versions );
+        int index = Collections.binarySearch( vv, dateTime, versionLowerBoundComparator );
+        Version v = null;
+        if ( index < 0 ) {
+            // search returned index = -(lowerBound+1), so lowerbound = -index-1
+            index = -index - 1;
+        }
+        v = vv.get( index );
+        return v.getVersionedNodeRef();
+    }
+
+    
     /**
      * Find or create a folder
      * 

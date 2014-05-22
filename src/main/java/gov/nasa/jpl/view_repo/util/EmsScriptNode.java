@@ -1822,7 +1822,16 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
         return result;
     }
-
+    
+    public EmsScriptNode getVersionAtTime( String timestamp ) {
+        return getVersionAtTime( TimeUtils.dateFromTimestamp( timestamp ) );
+    }
+    
+    public EmsScriptNode getVersionAtTime( Date dateTime ) {
+        NodeRef versionedRef = NodeUtil.getNodeRefAtTime( getNodeRef(), dateTime );
+        return new EmsScriptNode( versionedRef, getServices() );
+    }
+    
     protected NodeRef findNodeRefByType( String name, String type ) {
         return NodeUtil.findNodeRefByType( name, type, services );
     }
