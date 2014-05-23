@@ -725,6 +725,9 @@ window.pageExitManager = function()
         window.onbeforeunload = null;
       }
       app.updateSaveAllButton(numOpenEditors);
+    },
+    anyEditorsOpen : function () {
+      return numOpenEditors > 0;
     }
   }
 }();
@@ -1002,6 +1005,9 @@ app.on('cancelEditing', function(e) {
   $sectionHeader.html($sectionHeader.data('original-content'));
   $sectionHeader.attr('contenteditable', false);
 
+  if(!window.pageExitManager.anyEditorsOpen()) {
+    app.set('currentInspector', 'document-info');
+  }
   //section.find(".reference.editable").attr('contenteditable', false);
 
   //section.find("p").removeClass("pwrapper");
@@ -1155,6 +1161,9 @@ app.on('saveSection', function(e, sectionId) {
       //$(this).replaceWith(text);
   }); 
 
+  if(!window.pageExitManager.anyEditorsOpen()) {
+    app.set('currentInspector', 'document-info');
+  }
   //app.fire('saveSectionComplete', e, sectionId);
   //If data is saved before references are converted to dom elements, 
   //change realData saveSection to saveSectionComplete and fire event above
