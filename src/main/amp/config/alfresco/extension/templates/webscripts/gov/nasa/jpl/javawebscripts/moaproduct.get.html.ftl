@@ -410,7 +410,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
                 <button type="button" class="btn btn-primary saveSection" proxy-click="saveSection:{{ id }}">Save changes</button>
               </div>
             </div>
-            <div id="section{{ id }}" class="section page editing" data-section-id="{{ id }}" contenteditable="false" proxy-dblclick="sectionDoubleClick">
+            <div id="section{{ id }}" class="section page editing scrollable_section" data-section-id="{{ id }}" contenteditable="false" proxy-dblclick="sectionDoubleClick">
               {{{ content }}}
             </div>
             {{/editing}}

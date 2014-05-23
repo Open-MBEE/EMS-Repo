@@ -592,6 +592,11 @@ background-color: #ffffff;
  color: #222; 
 }
 
+.scrollable_section.section.page.editing {
+	max-height: 500px;
+	overflow-y: scroll;
+}
+
 .dropdown-submenu{position:relative;}
 .dropdown-submenu>.dropdown-menu{top:0;left:100%;margin-top:-6px;margin-left:-1px;-webkit-border-radius:0 6px 6px 6px;-moz-border-radius:0 6px 6px 6px;border-radius:0 6px 6px 6px;}
 .dropdown-submenu:hover>.dropdown-menu{display:block;}
