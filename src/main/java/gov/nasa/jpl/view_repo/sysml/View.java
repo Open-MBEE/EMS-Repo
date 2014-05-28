@@ -18,6 +18,7 @@ import gov.nasa.jpl.view_repo.util.NodeUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -549,7 +550,7 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
             e.printStackTrace();
         }
         EmsScriptNode node =
-                    EmsScriptNode.convertIdToEmsScriptNode( idString,
+                    EmsScriptNode.convertIdToEmsScriptNode( idString, null,//dateTime,
                                                             getElement().getServices(),
                                                             getElement().getResponse(),
                                                             getElement().getStatus() );

@@ -29,12 +29,14 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.Acm.JSON_TYPE_FILTER;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,7 +75,11 @@ public class ViewGet extends AbstractJavaWebScript {
             return false;
         }
 
-        EmsScriptNode view = findScriptNodeById(viewId);
+        // get timestamp if specified
+        String timestamp = req.getParameter("timestamp");
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+    
+        EmsScriptNode view = findScriptNodeById(viewId, dateTime);
         if (view == null) {
             log(LogLevel.ERROR, "View not found with id: " + viewId + ".\n", HttpServletResponse.SC_NOT_FOUND);
             return false;
@@ -120,8 +126,13 @@ public class ViewGet extends AbstractJavaWebScript {
                 gettingContainedViews = isContainedViewRequest( req );
             } 
             System.out.println("viewId = " + viewId);
+            
+            // get timestamp if specified
+            String timestamp = req.getParameter("timestamp");
+            Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        
             try {
-                handleView(viewId, viewsJson, recurse);
+                handleView(viewId, viewsJson, recurse, dateTime);
             } catch ( JSONException e ) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -151,8 +162,8 @@ public class ViewGet extends AbstractJavaWebScript {
     }
 
 
-    private void handleView(String viewId, JSONArray viewsJson, boolean recurse) throws JSONException {
-        EmsScriptNode view = findScriptNodeById(viewId);
+    private void handleView(String viewId, JSONArray viewsJson, boolean recurse, Date dateTime) throws JSONException {
+        EmsScriptNode view = findScriptNodeById(viewId, dateTime);
 
         if (view == null) {
             log( LogLevel.ERROR, "View not found with ID: " + viewId,

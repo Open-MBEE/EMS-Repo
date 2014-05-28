@@ -373,20 +373,41 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
 
 
-    public Set< EmsScriptNode > toEmsScriptNodeSet( ResultSet resultSet ) {
+//    public Set< EmsScriptNode > toEmsScriptNodeSet( ResultSet resultSet ) {
+//        return toEmsScriptNodeSet( resultSet, services, response, status );
+//    }
+//    
+//    // TODO -- move to NodeUtil or some other utility class
+//    public static Set< EmsScriptNode > toEmsScriptNodeSet( ResultSet resultSet,
+//                                                           ServiceRegistry services,
+//                                                           StringBuffer response,
+//                                                           Status status ) {
+//        
+//        Set< EmsScriptNode > emsNodeSet =
+//                new TreeSet< EmsScriptNode >( new EmsScriptNodeComparator() );
+//        for ( ResultSetRow row : resultSet ) {
+//            NodeRef ref = row.getNodeRef();
+//            if ( ref == null ) continue;
+//            EmsScriptNode node =
+//                    new EmsScriptNode( ref, services, response, status );
+//            emsNodeSet.add( node );
+//        }
+//        return emsNodeSet;
+//    }
+    public Set< EmsScriptNode > toEmsScriptNodeSet( ArrayList<NodeRef> resultSet ) {
         return toEmsScriptNodeSet( resultSet, services, response, status );
     }
     
-    // TODO -- move to NodeUtil or some other utility class
-    public static Set< EmsScriptNode > toEmsScriptNodeSet( ResultSet resultSet,
+    public static Set< EmsScriptNode > toEmsScriptNodeSet( ArrayList<NodeRef> resultSet,
+                                                           //Date dateTime,
                                                            ServiceRegistry services,
                                                            StringBuffer response,
                                                            Status status ) {
         
         Set< EmsScriptNode > emsNodeSet =
                 new TreeSet< EmsScriptNode >( new EmsScriptNodeComparator() );
-        for ( ResultSetRow row : resultSet ) {
-            NodeRef ref = row.getNodeRef();
+        for ( NodeRef ref : resultSet ) {
+            //NodeRef ref = row.getNodeRef();
             if ( ref == null ) continue;
             EmsScriptNode node =
                     new EmsScriptNode( ref, services, response, status );
@@ -406,11 +427,13 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         long cs = getChecksum( content );
 
         // see if image already exists by looking up by checksum
-        ResultSet existingArtifacts =
-                NodeUtil.findNodeRefsByType( "" + cs, SearchType.CHECKSUM,
-                                             services );
-        Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
-        existingArtifacts.close();
+        ArrayList<NodeRef> refs = NodeUtil.findNodeRefsByType( "" + cs, SearchType.CHECKSUM.prefix, null, false, false, services );
+//        ResultSet existingArtifacts =
+//                NodeUtil.findNodeRefsByType( "" + cs, SearchType.CHECKSUM,
+//                                             services );
+//        Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
+        Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( refs );
+//        existingArtifacts.close();
 
         EmsScriptNode matchingNode = null;
 
@@ -419,7 +442,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         }
 
         EmsScriptNode targetSiteNode =
-                NodeUtil.getSiteNode( targetSiteName, services, response );
+                NodeUtil.getSiteNode( targetSiteName, null, services, response );
         // boolean nameMatch = false, subfolderMatch = false, siteMatch = false;
         // for ( EmsScriptNode art : nodeSet ) {
         // if ( art == null ) continue;
@@ -1301,14 +1324,16 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         return array;
     }
 
-    public List< EmsScriptNode > getTargetAssocsNodesByType( String acmType ) {
+    public List< EmsScriptNode > getTargetAssocsNodesByType( String acmType,
+                                                             Date dateTime ) {
         boolean isSource = false;
-        return getAssocsNodesByDirection( acmType, isSource );
+        return getAssocsNodesByDirection( acmType, isSource, dateTime );
     }
 
-    public List< EmsScriptNode > getSourceAssocsNodesByType( String acmType ) {
+    public List< EmsScriptNode > getSourceAssocsNodesByType( String acmType,
+                                                             Date dateTime ) {
         boolean isSource = true;
-        return getAssocsNodesByDirection( acmType, isSource );
+        return getAssocsNodesByDirection( acmType, isSource, dateTime );
     }
 
     /**
@@ -1316,10 +1341,12 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      * 
      * @param acmType
      * @param isSource
+     * @param dateTime 
      * @return
      */
     protected List< EmsScriptNode >
-            getAssocsNodesByDirection( String acmType, boolean isSource ) {
+            getAssocsNodesByDirection( String acmType, boolean isSource,
+                                       Date dateTime ) {
         List< EmsScriptNode > list = new ArrayList< EmsScriptNode >();
         List< AssociationRef > assocs;
         if ( isSource ) {
@@ -1342,6 +1369,11 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 } else {
                     targetRef = aref.getTargetRef();
                 }
+                if ( targetRef == null ) continue;
+                if ( dateTime != null ) {
+                    targetRef = NodeUtil.getNodeRefAtTime( targetRef, dateTime );
+                }
+                if ( targetRef == null ) continue; // TODO -- error?!
                 list.add( new EmsScriptNode( targetRef, services, response ) );
             }
         }
@@ -1441,20 +1473,23 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         return siteNode;
     }
 
-    private EmsScriptNode convertIdToEmsScriptNode( String valueId ) {
-        return convertIdToEmsScriptNode( valueId, services, response, status );
+    private EmsScriptNode convertIdToEmsScriptNode( String valueId, Date dateTime ) {
+        return convertIdToEmsScriptNode( valueId, dateTime, services, response, status );
     }
     
-    public  static EmsScriptNode convertIdToEmsScriptNode( String valueId,
+    public static EmsScriptNode convertIdToEmsScriptNode( String valueId,
+                                                          Date dateTime,
         ServiceRegistry services,
         StringBuffer response,
         Status status ) {
-        ResultSet existingArtifacts =
-                findNodeRefsByType( valueId, "@cm\\:name:\"", services );
+        ArrayList<NodeRef> refs = NodeUtil.findNodeRefsByType( valueId, "@cm\\:name:\"", dateTime, true, true, services );
+//        ResultSet existingArtifacts =
+//                findNodeRefsByType( valueId, "@cm\\:name:\"", services );
         Set< EmsScriptNode > nodeSet =
-                toEmsScriptNodeSet( existingArtifacts, services, response,
-                                    status );
-        existingArtifacts.close();
+//                toEmsScriptNodeSet( existingArtifacts, dateTime, services, response,
+//                                    status );
+        toEmsScriptNodeSet( refs, services, response, status );
+//        existingArtifacts.close();
 
         EmsScriptNode value =
                 ( nodeSet == null || nodeSet.size() <= 0 ) ? null
@@ -1488,12 +1523,12 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             return;
         }
 
-        ArrayList< Serializable > values = getPropertyValuesFromJson( propDef, array );
+        ArrayList< Serializable > values = getPropertyValuesFromJson( propDef, array, null );
 
         // special handling for valueType == ElementValue
         if ( values == null ) {
             if ( Acm.ACM_ELEMENT_VALUE.equals( acmProperty ) ) {
-                values = getPropertyValuesFromJson( PropertyType.NODE_REF, array );
+                values = getPropertyValuesFromJson( PropertyType.NODE_REF, array, null );
             } else {
                 Debug.error(true, false, "*$*$*$ null array of property values for " + acmProperty );
                 return;
@@ -1516,16 +1551,22 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         }
     }
 
-    public EmsScriptNode findScriptNodeByName( String id ) {
-        ResultSet existingArtifacts = findNodeRefsByType( id, "@cm\\:name:\"" );
-        Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
-        existingArtifacts.close();
-
-        EmsScriptNode value =
-                ( nodeSet == null || nodeSet.size() <= 0 ) ? null
-                                                          : nodeSet.iterator()
-                                                                   .next();
-        return value;
+    public EmsScriptNode findScriptNodeByName( String id, Date dateTime ) {
+        return convertIdToEmsScriptNode( id, dateTime, services, response, status );
+////        ResultSet existingArtifacts = findNodeRefsByType( id, "@cm\\:name:\"" );
+////        Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts );
+//        ArrayList< NodeRef > refs =
+//                NodeUtil.findNodeRefsByType( id, "@cm\\:name:\"", dateTime,
+//                                             true, true, services );
+//        Set< EmsScriptNode > nodeSet =
+//                toEmsScriptNodeSet( refs, services, response, status );
+//        //        existingArtifacts.close();
+//
+//        EmsScriptNode value =
+//                ( nodeSet == null || nodeSet.size() <= 0 ) ? null
+//                                                          : nodeSet.iterator()
+//                                                                   .next();
+//        return value;
     }
 
     private enum PropertyType {INT, LONG, DOUBLE, BOOLEAN, TEXT, NODE_REF, UNKNOWN };
@@ -1544,7 +1585,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      * @throws JSONException
      */
     public ArrayList<Serializable> getPropertyValuesFromJson( PropertyDefinition propDef,
-                                                              JSONArray jsonArray )
+                                                              JSONArray jsonArray,
+                                                              Date dateTime )
                                                                       throws JSONException {
         ArrayList<Serializable> properties = new ArrayList<Serializable>();
 
@@ -1573,11 +1615,12 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         } else {
             type = PropertyType.UNKNOWN;
         }
-        return getPropertyValuesFromJson( type, jsonArray );
+        return getPropertyValuesFromJson( type, jsonArray, dateTime );
     }  
 
     public ArrayList<Serializable> getPropertyValuesFromJson( PropertyType type,
-                                                              JSONArray jsonArray )
+                                                              JSONArray jsonArray,
+                                                              Date dateTime)
                                                                       throws JSONException {
         ArrayList<Serializable> properties = new ArrayList<Serializable>();
 
@@ -1605,7 +1648,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                     break;
                 case NODE_REF:
                     String sysmlId = jsonArray.getString( i );
-                    EmsScriptNode node = convertIdToEmsScriptNode( sysmlId );
+                    EmsScriptNode node = convertIdToEmsScriptNode( sysmlId, dateTime );
                     if ( node != null ) {
                         property = node.getNodeRef();
                     } else {
@@ -1650,7 +1693,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     
     public Serializable getPropertyValueFromJson( PropertyDefinition propDef,
                                                   JSONObject jsonObject,
-                                                  String jsonKey )
+                                                  String jsonKey,
+                                                  Date dateTime)
                                                           throws JSONException {
         Serializable property = null;
         QName name = null;
@@ -1682,7 +1726,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             } catch ( JSONException e ) {
                 sysmlId = "" + jsonObject.get( jsonKey );
             }
-            EmsScriptNode node = convertIdToEmsScriptNode( sysmlId );
+            EmsScriptNode node = convertIdToEmsScriptNode( sysmlId, dateTime );
             property = node.getNodeRef();
         } else {
             property = jsonObject.getString( jsonKey );
@@ -1740,7 +1784,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                     createOrUpdateProperties( array, acmType );
                 } else {
                     Serializable propVal =
-                            getPropertyValueFromJson( propDef, jsonObject, key );
+                            getPropertyValueFromJson( propDef, jsonObject, key, null );
                     if ( propVal == badValue ) {
                         Debug.error("Got bad property value!");
                     } else {
@@ -1796,7 +1840,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             filename = filename.replace( "_latest", "" );
             filename = filename.replace( "\\", "" );
             filename = filename.replace( "src=/editor/images/docgen/", "" );
-            NodeRef nodeRef = findNodeRefByType( filename, "@cm\\:name:\"" );
+            NodeRef nodeRef = findNodeRefByType( filename, "@cm\\:name:\"", null );
             if ( nodeRef != null ) {
                 // this should grab whatever is the latest versions purl - so
                 // fine for snapshots
@@ -1832,43 +1876,57 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         return new EmsScriptNode( versionedRef, getServices() );
     }
     
-    protected NodeRef findNodeRefByType( String name, String type ) {
-        return NodeUtil.findNodeRefByType( name, type, services );
+    protected NodeRef findNodeRefByType( String name, String type, Date dateTime ) {
+        return NodeUtil.findNodeRefByType( name, type, dateTime, true, services );
     }
 
-    protected static ResultSet findNodeRefsByType( String name, String type, ServiceRegistry services ) {
-        return NodeUtil.findNodeRefsByType( name, type, services );
-    }
+//    protected static ResultSet findNodeRefsByType( String name, String type, ServiceRegistry services ) {
+//        return NodeUtil.findNodeRefsByType( name, type, services );
+//    }
     
-    // TODO: make this utility function - used in AbstractJavaWebscript too
-    protected ResultSet findNodeRefsByType( String name, String type ) {
-        return NodeUtil.findNodeRefsByType( name, type, services );
-        // ResultSet results = null;
-        // results = services.getSearchService().query(SEARCH_STORE,
-        // SearchService.LANGUAGE_LUCENE, type + name + "\"");
-        // return results;
-    }
+//    // TODO: make this utility function - used in AbstractJavaWebscript too
+//    protected ResultSet findNodeRefsByType( String name, String type ) {
+//        return NodeUtil.findNodeRefsByType( name, type, services );
+//        // ResultSet results = null;
+//        // results = services.getSearchService().query(SEARCH_STORE,
+//        // SearchService.LANGUAGE_LUCENE, type + name + "\"");
+//        // return results;
+//    }
 
     /**
      * Checks whether user has permissions to the node and logs results and
      * status as appropriate
      * 
-     * @param node
-     *            EmsScriptNode to check permissions on
      * @param permissions
      *            Permissions to check
      * @return true if user has specified permissions to node, false otherwise
      */
+    public boolean checkPermissions( String permissions ) {
+        return checkPermissions( permissions, null, null );
+    }
+    
+    /**
+     * Checks whether user has permissions to the node and logs results and
+     * status as appropriate
+     * 
+     * @param permissions
+     *            Permissions to check
+     * @param response
+     * @param status
+     * @return true if user has specified permissions to node, false otherwise
+     */
     public boolean checkPermissions( String permissions, StringBuffer response,
                                      Status status ) {
-        if ( !hasPermission( permissions ) ) {
+        if ( !hasPermission( permissions ) && response != null ) {
             Object property = getProperty( Acm.CM_NAME );
             if ( property != null ) {
                 String msg =
                         "Warning! No " + permissions + " priveleges to "
                                 + property.toString() + ".\n";
                 response.append( msg );
-                status.setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
+                if ( status != null ) {
+                    status.setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
+                }
             }
             return false;
         }
