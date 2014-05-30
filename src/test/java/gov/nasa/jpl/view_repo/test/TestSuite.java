@@ -10,7 +10,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ EmsSystemModelTest.class, JavaQueryTest.class, DemoComponentTest.class, TestLoadClass.class })
+@SuiteClasses({ EmsSystemModelTest.class })//, JavaQueryTest.class, DemoComponentTest.class, TestLoadClass.class })
 public class TestSuite {
 
     @BeforeClass

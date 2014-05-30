@@ -16,8 +16,9 @@ export CURL_SECURITY=" -k -3"
 #else
 	export CURL_USER=" -u admin:admin"
 	export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
-	export SERVICE_URL="\"http://localhost:8080/alfresco/service/"
-	export BASE_URL="\"http://localhost:8080/alfresco/service/javawebscripts/"
+	export SERVICE_URL="\"http://128.149.16.183:8080/alfresco/service/"
+	export BASE_URL="\"http://128.149.16.183:8080/alfresco/service/javawebscripts/"
+	#export BASE_URL="\"https://128.149.16.183:8443/alfresco/service/javawebscripts/"
 #fi
 
 # TODO: CURL commands aren't executed from bash using environment variables
