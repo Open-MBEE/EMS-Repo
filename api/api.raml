@@ -3,7 +3,7 @@
 # NOTE: to import into SOAPUI, need to remove {server} reference from baseUri
 # and change all the schema references to '|'
 title: mms
-version: 1.0
+version: v1.0
 mediaType: application/json
 baseUri: https://{server}/alfresco/service
 protocols: [HTTPS]
@@ -270,6 +270,8 @@ resourceTypes:
             uriParameters:
               productId:
                 description: Sysml ID for the product (document) under consideration
+            /views:
+              type: readCollection
             /snapshots:
               description: Scoped under /configurations and /products
               type: collection
