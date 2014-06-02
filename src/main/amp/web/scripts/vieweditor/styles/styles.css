@@ -580,11 +580,22 @@ h1 {
 }
 
 
-media="screen"
-.table-striped>tbody>tr:nth-child(even)>td, .table-striped>tbody>tr:nth-child(even)>th {
+.table-striped>tbody>tr:nth-child(even)>td {
 background-color: #ffffff;
 }
 
+.table-striped>thead>tr:first-child>th {
+background-color: #ffffff;
+}
+
+.navbar-inverse .navbar-nav .open .dropdown-menu>li>a {
+ color: #222; 
+}
+
+.scrollable_section.section.page.editing {
+	max-height: 500px;
+	overflow-y: scroll;
+}
 
 .dropdown-submenu{position:relative;}
 .dropdown-submenu>.dropdown-menu{top:0;left:100%;margin-top:-6px;margin-left:-1px;-webkit-border-radius:0 6px 6px 6px;-moz-border-radius:0 6px 6px 6px;border-radius:0 6px 6px 6px;}
