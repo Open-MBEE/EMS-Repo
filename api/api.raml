@@ -61,6 +61,10 @@ traits:
         search:
           description: Regular expression of the search to be executed at the specified scope.
                        Currently search is against id, name, documentation, body.
+          type: string
+        aspect:
+          description: Filter results based on specified type
+          type: string
   - sliceable:
       description: Aspect for resources that can be queried via a timestamp
       queryParameters:
@@ -324,6 +328,17 @@ resourceTypes:
               snapshotId:
                 description: ID for the snapshot under consideration
     /changesets:
-      type: collection
+      type: readCollection
+      description: Track groups of changes together so they can be rolled back together if
+                   necessary as well
+      /{changesetId}:
+        post:
+          description: Revert Alfresco to the specified change set
+          responses:
+            200:
+              description: Successfully reverted the changeset
     /artifacts:
+      /{artifactId}:
+        type: collection
     /constraints:
+      description: TBD
