@@ -53,7 +53,18 @@
         </type>
         <type name="ems:ConfigurationSet">
             <parent>ems:Job</parent>
-            <properties/>
+            <properties>
+               <property name="ems:timestamp">
+	               <type>d:datetime</type>
+	               <mandatory>true</mandatory>
+	               <multiple>false</multiple>
+	               <index enabled="true">
+	                  <atomic>false</atomic>
+	                  <stored>false</stored> 
+	                  <tokenised>false</tokenised>
+	               </index>
+	           </property>
+            </properties>
             <associations>
             		<association name="ems:configuredSnapshots">
             			<source>
