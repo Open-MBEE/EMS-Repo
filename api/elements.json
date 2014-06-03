@@ -269,19 +269,25 @@
             }
         },
         "Conform": {
-            "type": { "enum": ["Conform"] },
+            "properties": {
+                "type": { "enum": ["Conform"] }
+            },
             "allOf": [
                 {"$ref": "#/definitions/DirectedRelationship"}
             ]
         },
         "Dependency": {
-            "type": { "enum": ["Dependency"] },
+            "properties": {
+                "type": { "enum": ["Dependency"] }
+            },
             "allOf": [
                 {"$ref": "#/definitions/DirectedRelationship"}
             ]
         },
         "Expose": {
-            "type": { "enum": ["Expose"] },
+            "properties": {
+                "type": { "enum": ["Expose"] }
+            },
             "allOf": [
                 {"$ref": "#/definitions/DirectedRelationship"}
             ]
@@ -289,19 +295,21 @@
 
 
         "ValueSpecification": {
-            "type": { "enum": ["ValueSpecification"] },
             "properties": {
+                "type": { "enum": ["ValueSpecification"] }
             }
         },
         "Duration": {
-            "type": { "enum": ["Duration"] },
+            "properties": {
+                "type": { "enum": ["Duration"] }
+            },
             "allOf": [
                 {"$ref": "#/definitions/ValueSpecification"}
             ]
         },
         "DurationInterval": {
-            "type": { "enum": ["DurationInterval"] },
             "properties": {
+                "type": { "enum": ["DurationInterval"] },
                 "max": {
                     "type": "string",
                     "description": "ID of the SysML element representing the duration max"
@@ -316,8 +324,8 @@
             ]
         },
         "ElementValue": {
-            "type": { "enum": ["ElementValue"] },
             "properties": {
+                "type": { "enum": ["ElementValue"] },
                 "element": {
                     "type": "string",
                     "description": "ID of the element that stores this element value"
@@ -328,14 +336,32 @@
             ]
         },
         "Expression": {
-            "type": { "enum": ["Expression"] },
             "properties": {
+                "type": { "enum": ["Expression"] },
                 "operand": {
                     "type": "array",
                     "items": {
                         "type": "object",
-                        "description": "ID of the operand being referenced",
-                        "$ref": "#/definitions/Element"
+                        "description": "The value specs",
+                        "oneOf": [
+                            { "$ref": "#/definitions/ValueSpecification"},
+                            { "$ref": "#/definitions/Duration"},
+                            { "$ref": "#/definitions/DurationInterval"},
+                            { "$ref": "#/definitions/ElementValue"},
+                            { "$ref": "#/definitions/Expression"},
+                            { "$ref": "#/definitions/OpaqueExpression"},
+                            { "$ref": "#/definitions/InstanceValue"},
+                            { "$ref": "#/definitions/Interval"},
+                            { "$ref": "#/definitions/StringExpression"},
+                            { "$ref": "#/definitions/LiteralBoolean"},
+                            { "$ref": "#/definitions/LiteralNull"},
+                            { "$ref": "#/definitions/LiteralInteger"},
+                            { "$ref": "#/definitions/LiteralReal"},
+                            { "$ref": "#/definitions/LiteralString"},
+                            { "$ref": "#/definitions/LiteralUnlimitedNatural"},
+                            { "$ref": "#/definitions/TimeExpression"},
+                            { "$ref": "#/definitions/TimeInterval"}
+                        ]
                     }
                 }
             },
@@ -344,8 +370,8 @@
             ]
         },
         "OpaqueExpression": {
-            "type": { "enum": ["OpaqueExpression"] },
             "properties": {
+                "type": { "enum": ["OpaqueExpression"] },
                 "expressionBody": {
                     "type": "string",
                     "description": "The opaque expression string"
@@ -356,8 +382,8 @@
             ]
         },
         "InstanceValue": {
-            "type": { "enum": ["InstanceValue"] },
             "properties": {
+                "type": { "enum": ["InstanceValue"] },
                 "instance": {
                     "type": "string",
                     "description": "ID of the SysML element representing the instance"
@@ -368,20 +394,24 @@
             ]
         },
         "Interval": {
-            "type": { "enum": ["Interval"] },
+            "properties": {
+                "type": { "enum": ["Interval"] }
+            },
             "allOf": [
                 {"$ref": "#/definitions/ValueSpecification"}
             ]
         },
         "StringExpression": {
-            "type": { "enum": ["StringExpression"] },
+            "properties": {
+                "type": { "enum ": ["StringExpression"] }
+            },
             "allOf": [
                 {"$ref": "#/definitions/ValueSpecification"}
             ]
         },
         "LiteralBoolean": {
-            "type": { "enum": ["LiteralBoolean"] },
             "properties": {
+                "type": { "enum": ["LiteralBoolean"] },
                 "boolean": {
                     "type": "boolean"
                 }
@@ -391,14 +421,16 @@
             ]
         },
         "LiteralNull": {
-            "type": { "enum": ["LiteralNull"] },
+            "properties": {
+                "type": { "enum": ["LiteralNull"] }
+            },
             "allOf": [
                 {"$ref": "#/definitions/ValueSpecification"}
             ]
         },
         "LiteralInteger": {
-            "type": { "enum": ["LiteralInteger"] },
             "properties": {
+                "type": { "enum": ["LiteralInteger"] },
                 "integer": {
                     "type": "integer"
                 }
@@ -408,8 +440,8 @@
             ]
         },
         "LiteralReal": {
-            "type": { "enum": ["LiteralReal"] },
             "properties": {
+                "type": { "enum": ["LiteralReal"] },
                 "double": {
                     "type": "number"
                 }
@@ -419,8 +451,8 @@
             ]
         },
         "LiteralString": {
-            "type": { "enum": ["LiteralString"] },
             "properties": {
+                "type": { "enum": ["LiteralString"] },
                 "string": {
                     "type": "string"
                 }
@@ -430,8 +462,8 @@
             ]
         },
         "LiteralUnlimitedNatural": {
-            "type": { "enum": ["LiteralUnlimitedNatural"] },
             "properties": {
+                "type": { "enum": ["LiteralUnlimitedNatural"] },
                 "naturalValue": {
                     "type": "integer"
                 }
@@ -441,14 +473,16 @@
             ]
         },
         "TimeExpression": {
-            "type": { "enum": ["TimeExpression"] },
+            "properties": {
+                "type": { "enum": ["TimeExpression"] }
+            },
             "allOf": [
                 {"$ref": "#/definitions/ValueSpecification"}
             ]
         },
         "TimeInterval": {
-            "type": { "enum": ["TimeInterval"] },
             "properties": {
+                "type": { "enum": ["TimeInterval"] },
                 "max": {
                     "type": "string",
                     "description": "ID of the SysML element representing the time interval max"
@@ -498,11 +532,10 @@
                                     "items": {
 			                            "type": "object",
 			                            "oneOf": [
-			                                { "$ref": "Paragraph" },
-			                                { "$ref": "List" },
-			                                { "$ref": "Table" },
-			                                { "$ref": "Image" },
-			                                { "$ref": "Section" }
+			                                { "$ref": "#/definitions/Paragraph" },
+			                                { "$ref": "#/definitions/List" },
+			                                { "$ref": "#/definitions/Table" },
+			                                { "$ref": "#/definitions/Image" }
 			                            ]
 		                            }
 	                            }
@@ -525,11 +558,10 @@
                         "items": {
                             "type": "object",
                             "oneOf": [
-                                { "$ref": "Paragraph" },
-                                { "$ref": "List" },
-                                { "$ref": "Table" },
-                                { "$ref": "Image" },
-                                { "$ref": "Section" }
+                                { "$ref": "#/definitions/Paragraph" },
+                                { "$ref": "#/definitions/List" },
+                                { "$ref": "#/definitions/Table" },
+                                { "$ref": "#/definitions/Image" }
                             ]
                         }
                     }
