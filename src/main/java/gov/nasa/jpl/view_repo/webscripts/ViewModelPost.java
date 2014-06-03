@@ -75,7 +75,7 @@ public class ViewModelPost extends ModelPost {
         UserTransaction trx = services.getTransactionService().getUserTransaction();
         try {
             trx.begin();
-            EmsScriptNode view = findScriptNodeById(viewid);
+            EmsScriptNode view = findScriptNodeById(viewid, null);
             view.createOrUpdateProperty("cm:modifier", AuthenticationUtil.getFullyAuthenticatedUser());
             trx.commit();
         } catch (Throwable e) {
@@ -118,7 +118,7 @@ public class ViewModelPost extends ModelPost {
             JSONObject elementJson = array.getJSONObject(ii);
             
             String id = elementJson.getString(Acm.JSON_ID);
-            EmsScriptNode elementNode = findScriptNodeById(id);
+            EmsScriptNode elementNode = findScriptNodeById(id, null);
             if (elementNode != null) {
                 updateOrCreateElement(elementJson, elementNode.getParent(), false);
             } else {
@@ -132,7 +132,7 @@ public class ViewModelPost extends ModelPost {
                     if (annotatedJson.length() <= 0) {
                         parentFound = false;
                     } else {
-                        EmsScriptNode commentParent = findScriptNodeById(annotatedJson.getString(0));
+                        EmsScriptNode commentParent = findScriptNodeById(annotatedJson.getString(0), null);
                             if (commentParent == null) {
                                 parentFound = false;
                             } else {
@@ -160,7 +160,7 @@ public class ViewModelPost extends ModelPost {
             JSONObject elementJson = array.getJSONObject(ii);
             
             String id = elementJson.getString(Acm.JSON_ID);
-            EmsScriptNode elementNode = findScriptNodeById(id);
+            EmsScriptNode elementNode = findScriptNodeById(id, null);
             if (elementNode != null) {
                 updateOrCreateElement(elementJson, elementNode.getParent(), true);
             } else {
@@ -174,7 +174,7 @@ public class ViewModelPost extends ModelPost {
                     if (annotatedJson.length() <= 0) {
                         parentFound = false;
                     } else {
-                        EmsScriptNode commentParent = findScriptNodeById(annotatedJson.getString(0));
+                        EmsScriptNode commentParent = findScriptNodeById(annotatedJson.getString(0), null);
                             if (commentParent == null) {
                                 parentFound = false;
                             } else {

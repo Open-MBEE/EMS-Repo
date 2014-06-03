@@ -29,10 +29,13 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm.JSON_TYPE_FILTER;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,8 +74,12 @@ public class ProductGet extends AbstractJavaWebScript {
 		if (!checkRequestVariable(productId, "id")) {
 			return false;
 		}
-		
-		EmsScriptNode product = findScriptNodeById(productId);
+
+		// get timestamp if specified
+        String timestamp = req.getParameter("timestamp");
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+	
+		EmsScriptNode product = findScriptNodeById(productId, dateTime);
 		if (product == null) {
 			log(LogLevel.ERROR, "Product not found with id: " + productId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
@@ -104,7 +111,12 @@ public class ProductGet extends AbstractJavaWebScript {
 			
 			// default recurse=true but recurse only applies to displayed elements and contained views
             boolean recurse = checkArgEquals(req, "recurse", "false") ? false : true;
-			productsJson = handleProduct(productId, recurse);
+
+            // get timestamp if specified
+            String timestamp = req.getParameter("timestamp");
+            Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        
+			productsJson = handleProduct(productId, recurse, dateTime);
 		}
 
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK && productsJson != null) {
@@ -132,9 +144,9 @@ public class ProductGet extends AbstractJavaWebScript {
 	}
 
 	
-	private JSONArray handleProduct(String productId, boolean recurse) {
+	private JSONArray handleProduct(String productId, boolean recurse, Date dateTime) {
 	    JSONArray productsJson = new JSONArray();
-		EmsScriptNode product = findScriptNodeById(productId);
+		EmsScriptNode product = findScriptNodeById(productId, dateTime);
 		
 		if (product == null) {
 			log( LogLevel.ERROR, "Product not found with ID: " + productId,

@@ -287,7 +287,7 @@ public class ModelPost extends AbstractJavaWebScript {
         EmsScriptNode owner = null;
         EmsScriptNode reifiedPkg = null;
         if (Utils.isNullOrEmpty( ownerName ) ) {
-            EmsScriptNode elementNode = findScriptNodeById(elementId);
+            EmsScriptNode elementNode = findScriptNodeById(elementId, null);
             if (elementNode == null || !elementNode.exists()) {
                 owner = projectNode;
             } else {
@@ -295,7 +295,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         } else {
        		boolean foundOwnerElement = true;
-            owner = findScriptNodeById(ownerName);
+            owner = findScriptNodeById(ownerName, null);
             if (owner == null || !owner.exists()) {
                 log( LogLevel.WARNING, "Could not find owner with name: "
                                        + ownerName + " putting " + elementId
@@ -305,7 +305,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 foundOwnerElement = false;
             }
             // really want to add pkg as owner
-            reifiedPkg = findScriptNodeById(ownerName + "_pkg");
+            reifiedPkg = findScriptNodeById(ownerName + "_pkg", null);
             if (reifiedPkg == null || !reifiedPkg.exists()) {
                 if ( createOwnerPkgIfNotFound) {
                     // If we found the owner element, then it exists but not its
@@ -409,12 +409,12 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     protected void updateOrCreateAnnotatedElements(JSONArray jsonArray, String id)
             throws JSONException {
-        EmsScriptNode source = findScriptNodeById(id);
+        EmsScriptNode source = findScriptNodeById(id, null);
 
         if (checkPermissions(source, PermissionService.WRITE)) {
             for (int ii = 0; ii < jsonArray.length(); ii++) {
                 String targetId = jsonArray.getString(ii);
-                EmsScriptNode target = findScriptNodeById(targetId);
+                EmsScriptNode target = findScriptNodeById(targetId, null);
                 if (target != null) {
                     source.createOrUpdateAssociation(target, Acm.ACM_ANNOTATED_ELEMENTS, true);
                 }
@@ -436,7 +436,7 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     protected void updateOrCreateElementValues(JSONArray jsonArray, String id)
             throws JSONException {
-        EmsScriptNode element = findScriptNodeById(id);
+        EmsScriptNode element = findScriptNodeById(id, null);
         element.createOrUpdateProperties( jsonArray, Acm.ACM_ELEMENT_VALUE );
     }
 
@@ -450,8 +450,8 @@ public class ModelPost extends AbstractJavaWebScript {
      *            ID of the element
      */
     protected void updateOrCreatePropertyType(String typeId, String id) {
-        EmsScriptNode property = findScriptNodeById(id);
-        EmsScriptNode propertyType = findScriptNodeById(typeId);
+        EmsScriptNode property = findScriptNodeById(id, null);
+        EmsScriptNode propertyType = findScriptNodeById(typeId, null);
 
         if (property != null && propertyType != null) {
             if (checkPermissions(property, PermissionService.WRITE)
@@ -486,9 +486,9 @@ public class ModelPost extends AbstractJavaWebScript {
         String sourceId = jsonObject.getString(Acm.JSON_SOURCE);
         String targetId = jsonObject.getString(Acm.JSON_TARGET);
 
-        EmsScriptNode relationship = findScriptNodeById(id);
-        EmsScriptNode source = findScriptNodeById(sourceId);
-        EmsScriptNode target = findScriptNodeById(targetId);
+        EmsScriptNode relationship = findScriptNodeById(id, null);
+        EmsScriptNode source = findScriptNodeById(sourceId, null);
+        EmsScriptNode target = findScriptNodeById(targetId, null);
 
         if (relationship != null && source != null && target != null) {
             if (checkPermissions(relationship, PermissionService.WRITE)
@@ -581,7 +581,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             elementMap.put(sysmlId, elementJson);
 
-            if (findScriptNodeById(sysmlId) == null) {
+            if (findScriptNodeById(sysmlId, null) == null) {
                 newElements.add(sysmlId);
             }
 
@@ -606,7 +606,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // lets iterate through elements
        for (String elementId: elementMap.keySet()) {
             if (!newElements.contains(elementId)) {
-                EmsScriptNode element = findScriptNodeById(elementId);
+                EmsScriptNode element = findScriptNodeById(elementId, null);
                 if (element == null) {
                     log(LogLevel.ERROR, "Could not find node with id: " + elementId, HttpServletResponse.SC_BAD_REQUEST);
                 } else if (!checkPermissions(element, PermissionService.WRITE)) {
@@ -636,7 +636,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         
         for (String name: rootElements) {
-        		EmsScriptNode rootElement = findScriptNodeById(name);
+        		EmsScriptNode rootElement = findScriptNodeById(name, null);
         		if (rootElement != null) {
 	        		if (!checkPermissions(rootElement, PermissionService.WRITE)) {
 	        			log(LogLevel.WARNING, "\tskipping as root element since no write permissions", HttpServletResponse.SC_BAD_REQUEST);
@@ -665,7 +665,7 @@ public class ModelPost extends AbstractJavaWebScript {
         EmsScriptNode element = null;
         
         Object jsonId = elementJson.get( Acm.JSON_ID );
-        element = findScriptNodeById( "" + jsonId );
+        element = findScriptNodeById( "" + jsonId, null );
         if ( element != null ) {
             elements.add( element );
         }
@@ -919,7 +919,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // TODO Need to permission check on new node creation
         // find node if exists, otherwise create
-        EmsScriptNode node = findScriptNodeById( id );
+        EmsScriptNode node = findScriptNodeById( id, null );
         if ( node != null ) {
             node.setResponse( getResponse() );
             node.setStatus( getResponseStatus() );
@@ -976,7 +976,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 if (node != null && node.exists() ) {
                     if (!node.getParent().equals(parent)) {
                         node.move(parent);
-                        EmsScriptNode pkgNode = findScriptNodeById(id + "_pkg");
+                        EmsScriptNode pkgNode = findScriptNodeById(id + "_pkg", null);
                         if (pkgNode != null) {
                             pkgNode.move(parent);
                         }
@@ -1055,7 +1055,7 @@ public class ModelPost extends AbstractJavaWebScript {
         for ( int i=0; i<10; ++i ) {
             String id = "MMS_" + System.currentTimeMillis() + "_" + UUID.randomUUID().toString();
             // Make sure id is not already used
-            if ( NodeUtil.findNodeRefById( id, services ) == null ) {
+            if ( NodeUtil.findNodeRefById( id, null, services ) == null ) {
                 return id;
             }
         }
@@ -1084,7 +1084,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         if (checkPermissions(parent, PermissionService.WRITE)) {
             String pkgName = id + "_pkg";
-            reifiedNode = findScriptNodeById(pkgName);
+            reifiedNode = findScriptNodeById(pkgName, null);
             if (reifiedNode == null || !reifiedNode.exists()) {
                 try {
                     log( LogLevel.ERROR,
@@ -1548,7 +1548,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // write out the json
         ActionUtil.saveStringToFile(jobNode, "application/json", services, ((JSONObject)req.parseContent()).toString(4));
         
-        EmsScriptNode projectNode = findScriptNodeById(projectId);
+        EmsScriptNode projectNode = findScriptNodeById(projectId, null);
         // kick off the action
         ActionService actionService = services.getActionService();
         Action loadAction = actionService.createAction(ModelLoadActionExecuter.NAME);
@@ -1599,7 +1599,7 @@ public class ModelPost extends AbstractJavaWebScript {
         
         String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
         String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
-        EmsScriptNode siteNode = getSiteNode(siteName);
+        EmsScriptNode siteNode = getSiteNode(siteName, null);
         projectNode = siteNode.childByNamePath("/Models/" + projectId);
         if (projectNode == null) {
                 // for backwards compatibility
@@ -1612,7 +1612,7 @@ public class ModelPost extends AbstractJavaWebScript {
             if ( elementId != null ) {
                 
                 // projectNode is the node with the element id, right?
-                projectNode = findScriptNodeById( elementId );
+                projectNode = findScriptNodeById( elementId, null );
                 
                 if ( projectNode == null ) {
                     // projectNode should be the owner..., which should exist
@@ -1623,7 +1623,7 @@ public class ModelPost extends AbstractJavaWebScript {
                         JSONObject elementJson =
                                 elementsJson.getJSONObject( elementId );
                         projectNode =
-                                findScriptNodeById( elementJson.getString( Acm.JSON_OWNER ) );
+                                findScriptNodeById( elementJson.getString( Acm.JSON_OWNER ), null );
                     } catch ( JSONException e ) {
                         e.printStackTrace();
                     }
