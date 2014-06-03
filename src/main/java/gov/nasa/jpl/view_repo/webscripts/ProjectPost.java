@@ -109,7 +109,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 	}
 
 	private int updateOrCreateProject(JSONObject jsonObject, String projectId, boolean fix) throws JSONException {
-	      EmsScriptNode projectNode = findScriptNodeById(projectId);
+	      EmsScriptNode projectNode = findScriptNodeById(projectId, null);
 	      
 	      if (projectNode == null) {
 	          log(LogLevel.ERROR, "Could not find project\n", HttpServletResponse.SC_NOT_FOUND);
@@ -152,13 +152,13 @@ public class ProjectPost extends AbstractJavaWebScript {
     @SuppressWarnings("deprecation")
     private int updateOrCreateProject(JSONObject jsonObject, String projectId, String siteName, boolean createSite, boolean fix, boolean delete) throws JSONException {
 		// make sure site exists
-		EmsScriptNode siteNode = getSiteNode(siteName);
+		EmsScriptNode siteNode = getSiteNode(siteName, null);
 		if (siteNode == null) {
 		    if (createSite) {
 		        // TODO this is only for testing
 		        String SITE_NAME="europa";
 		        services.getSiteService().createSite(SITE_NAME, SITE_NAME, SITE_NAME, SITE_NAME, true);
-		        siteNode = getSiteNode(siteName);
+		        siteNode = getSiteNode(siteName, null);
 		    } else {
 		        log(LogLevel.ERROR, "Site not found for " + siteName + ".\n", HttpServletResponse.SC_NOT_FOUND);
 		        return HttpServletResponse.SC_NOT_FOUND;
@@ -180,7 +180,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		}
 		
 		// create project if doesn't exist or update if fix is specified 
-		EmsScriptNode projectNode = findScriptNodeById(projectId);
+		EmsScriptNode projectNode = findScriptNodeById(projectId, null);
 		String projectName = null;
 		if (jsonObject.has(Acm.JSON_NAME)) {
 		    projectName = jsonObject.getString(Acm.JSON_NAME);

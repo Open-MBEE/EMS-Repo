@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ConfigurationGenerationActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
@@ -161,6 +162,9 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 					jobNode.createOrUpdateProperty("cm:description", postJson.getString("description"));
 				}
 				startAction(jobNode, siteName, getProductList(postJson));
+	            if (postJson.has("timestamp")) {
+	                jobNode.createOrUpdateProperty("ems:timestamp", postJson.getString("timestamp"));
+	            }
 			} else {
 				log(LogLevel.ERROR, "Couldn't create configuration job: " + postJson.getString("name"), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				return false;
@@ -201,6 +205,13 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 					}
 				}
 			}
+            if (postJson.has("timestamp")) {
+                jobNode.createOrUpdateProperty("ems:timestamp", postJson.getString("timestamp"));
+            } else {
+                // timestamp is optional
+//                // If a timestamp isn't provided, assume that the current time is intended.
+//                jobNode.createOrUpdateProperty("ems:timestamp", TimeUtils.toTimestamp( System.currentTimeMillis() ));
+            }
 		} else {
 			log(LogLevel.ERROR, "Could not find configuration to update for: " + nodeId, HttpServletResponse.SC_BAD_REQUEST);
 			return false;

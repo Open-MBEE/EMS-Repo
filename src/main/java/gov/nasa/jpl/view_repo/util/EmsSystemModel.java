@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -390,7 +391,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     public Collection< EmsScriptNode >
             getElementWithIdentifier( Object context, String specifier ) {
         // TODO -- need to take into account the context!
-        NodeRef element = NodeUtil.findNodeRefById( specifier, services );
+        NodeRef element = NodeUtil.findNodeRefById( specifier, null, services );
         EmsScriptNode emsSN = new EmsScriptNode( element, services );
         return Utils.newList( emsSN );
     }
@@ -398,11 +399,16 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     @Override
     public Collection< EmsScriptNode > getElementWithName( Object context,
                                                            String specifier ) {
+        return getElementWithName(context, specifier, null);
+    }
+    public Collection< EmsScriptNode > getElementWithName( Object context,
+                                                           String specifier,
+                                                           Date dateTime ) {
         StringBuffer response = new StringBuffer();
         Status status = new Status();
         // TODO -- need to take into account the context!
         Map< String, EmsScriptNode > elements =
-                NodeUtil.searchForElements( specifier, services, response,
+                NodeUtil.searchForElements( specifier, dateTime, services, response,
                                             status );
         if ( elements != null ) return elements.values();
         return Collections.emptyList();

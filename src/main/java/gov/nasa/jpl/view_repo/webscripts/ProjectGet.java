@@ -29,9 +29,11 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -80,7 +82,12 @@ public class ProjectGet extends AbstractJavaWebScript {
             if (validateRequest(req, status)) {
                 String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
                 String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
-                json = handleProject(projectId, siteName);
+
+                // get timestamp if specified
+                String timestamp = req.getParameter("timestamp");
+                Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+                
+                json = handleProject(projectId, siteName, dateTime);
             }
         } catch (JSONException e) {
             log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -111,20 +118,14 @@ public class ProjectGet extends AbstractJavaWebScript {
      * @return HttpStatusResponse code for success of the POST request
      * @throws JSONException 
      */
-    private JSONObject handleProject(String projectId, String siteName) throws JSONException {
+    private JSONObject handleProject(String projectId, String siteName, Date dateTime) throws JSONException {
         EmsScriptNode projectNode;
         JSONObject json = null;
         
         if (siteName == null) {
-            projectNode = findScriptNodeById(projectId);
+            projectNode = findScriptNodeById(projectId, dateTime);
         } else {
-        	SiteService siteService = services.getSiteService();
-        	SiteInfo site = siteService.getSite(siteName);
-            if (site == null) {
-                log(LogLevel.ERROR, "Could not find site, " + siteName, HttpServletResponse.SC_NOT_FOUND);
-                return null;
-            }
-            EmsScriptNode siteNode = new EmsScriptNode(site.getNodeRef(), services, response);
+            EmsScriptNode siteNode = getSiteNode( siteName, dateTime );
             projectNode = siteNode.childByNamePath("/Models/" + projectId);
             if (projectNode == null) {
             		// for backwards compatibility

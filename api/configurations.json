@@ -38,6 +38,11 @@
                 "name": {
                     "type": "string",
                     "description": "Human readable name for the configuration set"
+                },
+               "timestamp": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "time of the configuration, the time point specifying the versions of the documents that snapshots are taken"
                 }
             }
         }
