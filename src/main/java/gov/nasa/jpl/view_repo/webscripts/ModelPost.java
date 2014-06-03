@@ -39,6 +39,7 @@ import gov.nasa.jpl.ae.sysml.SystemModelSolver;
 import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
 import gov.nasa.jpl.ae.util.ClassData;
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
@@ -53,10 +54,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
@@ -65,11 +66,8 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
-import org.alfresco.service.cmr.dictionary.DictionaryService;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
-import org.alfresco.service.namespace.QName;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -215,6 +213,9 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                     }
                     
+                    // Create element, owner, and reified package folder as
+                    // necessary and place element with owner; don't update
+                    // properties on this first pass.
                     if (owner != null && owner.exists()) {
                         elements.addAll( updateOrCreateElement( elementMap.get( rootElement ),
                                                              owner, false ) );
@@ -226,6 +227,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // handle the relationships
         updateOrCreateAllRelationships(relationshipsJson);
         
+        // make another pass through the elements and update their properties
         elements.addAll( updateNodeReferences( singleElement, postJson,
                                                projectNode ) );
 
@@ -556,8 +558,11 @@ public class ModelPost extends AbstractJavaWebScript {
 
     protected boolean buildTransactionableElementMap(JSONArray jsonArray, EmsScriptNode projectNode) throws JSONException {
         boolean isValid = true;
+                
         for (int ii = 0; ii < jsonArray.length(); ii++) {
             JSONObject elementJson = jsonArray.getJSONObject(ii);
+            
+            // If element does not have a ID, then create one for it using the alfresco id (cm:id):
             if (!elementJson.has(Acm.JSON_ID)) {
                 elementJson.put( Acm.JSON_ID, createId( services ) );
                 //return null;
@@ -686,6 +691,26 @@ public class ModelPost extends AbstractJavaWebScript {
 			log(LogLevel.WARNING, "Node " + name + " is not of type folder, so cannot create children [id=" + id + "]");
 			return elements;
 		}
+        
+        // Check to see if the element has been updated since last read by the
+        // posting application.
+       if ( inConflict( element, elementJson ) ) {
+            if ( !ingest ) { // only generate error on first pass
+                String msg =
+                        "Error! Tried to post concurrent edit to element, "
+                                + element + ".\n";
+                if ( getResponse() == null || getResponseStatus() == null ) {
+                    Debug.error( msg );
+                } else {
+                    getResponse().append( msg );
+                    if ( getResponseStatus() != null ) {
+                        getResponseStatus().setCode( HttpServletResponse.SC_CONFLICT,
+                                                     msg );
+                    }
+                }
+            }
+           return elements;
+       }
 
         JSONArray children = new JSONArray();
         
@@ -694,7 +719,7 @@ public class ModelPost extends AbstractJavaWebScript {
         if (runWithoutTransactions) {
             reifiedNode =
                     updateOrCreateTransactionableElement( elementJson, parent,
-                                                          children, ingest );
+                                                          children, ingest, false );
         } else {
             UserTransaction trx;
             trx = services.getTransactionService().getNonPropagatingUserTransaction();
@@ -704,7 +729,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 reifiedNode =
                         updateOrCreateTransactionableElement( elementJson,
                                                               parent, children,
-                                                              ingest );
+                                                              ingest, false );
                 log(LogLevel.INFO, "} updateOrCreateElement end transaction");
                 trx.commit();
             } catch (Throwable e) {
@@ -733,12 +758,157 @@ public class ModelPost extends AbstractJavaWebScript {
         
         return elements;
     }
+    
+    /**
+     * Special processing for Expression and Property elements.  Modifies the passed elementJson
+     * or specializeJson.
+     * 
+     * @param type
+     * @param nestedNode
+     * @param elementJson
+     * @param specializeJson
+     * @param node
+     * @param ingest
+     * @param reifiedNode
+     * @param parent
+     * @param id
+     * @throws Exception
+     */
+    private void processExpressionOrProperty(String type, boolean nestedNode, JSONObject elementJson,
+    										 JSONObject specializeJson, EmsScriptNode node, 
+    										 boolean ingest, EmsScriptNode reifiedNode, 
+    										 EmsScriptNode parent, String id) throws Exception {
+    	
+        // TODO REVIEW
+        //		Wanted to do a lot of processing in buildTransactionElementMap(), so that we make the 
+        //		node a owner and in the elementHierachyJson, so that the children will be processed
+        //		normally instead of having the code below.  That solution was not a neat as desired either
+        //		b/c you need the node itself to retrieve its properties, to see if it already has value or
+        //		operand property values stored.  This would involve duplicating a lot of the above code to
+        //		create a node if needed, etc.
+        //
+        //		This may be easier if the operand and values objects have their own sysmlid in them, so we dont
+        //		need to create one ourselves.  Brad didnt want this, but perhaps we should?
+        
+    	// If it is a value or operand property then need to convert
+        // the elementJson to just contain the sysmlid for the nodes,
+        // instead of the nodes themselves.  Also, need to create
+        // or modify nodes the properties map to.
+       
+        // If it is a nested node then it doesnt have a specialize property
+        JSONObject jsonToCheck = nestedNode ? elementJson : specializeJson;
+        
+        // If it is a Property or Expression and json has the properties of interest:
+        if ( (type.equals(Acm.ACM_PROPERTY) && jsonToCheck != null && jsonToCheck.has(Acm.JSON_VALUE)) ||
+        	 (type.equals(Acm.ACM_EXPRESSION) && jsonToCheck != null && jsonToCheck.has(Acm.JSON_OPERAND)) ) {
+        	
+        	boolean isProperty = type.equals(Acm.ACM_PROPERTY);
+        	String jsonKey = isProperty ? Acm.JSON_VALUE : Acm.JSON_OPERAND;
+        	Collection<EmsScriptNode> oldVals = isProperty ?
+        											Utils.asList(systemModel.getValue(node, null), EmsScriptNode.class) :
+        											systemModel.getProperty(node, Acm.ACM_OPERAND);
+        											
+            JSONArray newVals = jsonToCheck.getJSONArray(jsonKey);
+            Iterator<EmsScriptNode> iter = !Utils.isNullOrEmpty(oldVals) ?
+            									oldVals.iterator() : null;
+            ArrayList<String> nodeNames = new ArrayList<String>();
+
+            // Compare the existing values to the new ones
+            // in the JSON element.  Assume that they maintain the
+            // same ordering.  If there are more values in the
+            // JSON element, then make new nodes for them.
+            for (int i = 0; i < newVals.length(); ++i) {
+            	
+            	JSONObject newVal = newVals.getJSONObject(i);
+            	
+            	// Get the sysmlid of the old value if it exists:
+            	if (iter != null && iter.hasNext()) {
+            		
+            		EmsScriptNode oldValNode = iter.next();
+            		
+          			nodeNames.add(oldValNode.getName());
+        			
+        			// Ingest the JSON for the value
+        			// to set properties for the node:
+        			oldValNode.ingestJSON(newVal);
+        			
+            	}
+            	// Old value doesnt exists, so create a new node:
+            	else {
+            		
+            		//	The refiedNode will be null if the node is not in the elementHierachy, which
+            		//	will be the case if no other elements have it as a owner, so in that case
+            		//	we make a reifiedNode for it here.  If all of that fails, then use the parent
+            		EmsScriptNode nestedParent = null;
+            		if (reifiedNode == null) {
+            			 EmsScriptNode reifiedPkg = getOrCreateReifiedNode(node, id, true);
+            			 nestedParent = reifiedPkg == null ? parent : reifiedPkg;
+            		}
+            		else {
+            			nestedParent = reifiedNode;
+            		}
+            		
+            		EmsScriptNode newValNode = updateOrCreateTransactionableElement(newVal,nestedParent,
+            																		null, ingest, true);
+            		nodeNames.add(newValNode.getName());
+            	}
+            }
+            
+            // Replace the property in the JSON with the sysmlids
+            // before ingesting:
+        	JSONArray jsonArry = new JSONArray(nodeNames);
+        	jsonToCheck.put(jsonKey, jsonArry);
+
+        } // ends if Property and elementJson has a value or Expression and elementJson has a operand
+        
+    }
+
+    /**
+     * Determine whether the post to the element is based on old information based on a "read" JSON attribute whose value is the date when the posting process originally read the element's data.
+     * @param element
+     * @param elementJson
+     * @return whether the "read" date is older than the last modification date.
+     */
+    public boolean inConflict( EmsScriptNode element, JSONObject elementJson ) {
+        // TODO -- could check for which properties changed since the "read"
+        // date to allow concurrent edits to different properties of the same
+        // element.
+        String readTime = null;
+        try {
+            readTime = elementJson.getString( Acm.JSON_READ );//"read" );
+        } catch ( JSONException e ) {
+            return false;
+        }
+        System.out.println( "%% %% %% readTime = " + readTime );
+        if ( readTime == null ) return false;
+        Date lastModified = (Date)element.getProperty( Acm.ACM_LAST_MODIFIED );
+        System.out.println( "%% %% %% lastModified = " + lastModified );
+        //DateTimeFormatter parser = ISODateTimeFormat.dateParser(); // format is different than what is printed
+       
+//        DateTime readDateTime = parser.parseDateTime( readTime );
+        Date readDate = null;
+        readDate = TimeUtils.dateFromTimestamp( readTime );
+        System.out.println( "%% %% %% readDate = " + readDate );
+//        if ( readDateTime != null ) { // return false;
+//            readDate = readDateTime.toDate();
+        if ( readDate != null ) { // return false;
+            return readDate.compareTo( lastModified ) < 0;
+        }
+//        }
+        Debug.error( "Bad date format or parse bug! lastModified = "
+                     + lastModified //+ ", readDateTime = " + readDateTime
+                     + ", readDate = " + readDate + ", elementJson="
+                     + elementJson );
+        String lastModString = TimeUtils.toTimestamp( lastModified );
+        return readTime.compareTo( lastModString ) >= 0;
+    }
 
     protected EmsScriptNode
             updateOrCreateTransactionableElement( JSONObject elementJson,
                                                   EmsScriptNode parent,
                                                   JSONArray children,
-                                                  boolean ingest ) throws Exception {
+                                                  boolean ingest, 
+                                                  boolean nestedNode) throws Exception {
         if (!elementJson.has(Acm.JSON_ID)) {
             elementJson.put( Acm.JSON_ID, createId( services ) );
             //return null;
@@ -756,11 +926,25 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         EmsScriptNode reifiedNode = null;
 
-        String jsonType = elementJson.getString( Acm.JSON_TYPE );
+        String jsonType = null;    
+        JSONObject specializeJson = null;
+        // The type is now found by using the specialization key
+        // if its a non-nested node:
+        if (nestedNode && elementJson.has(Acm.JSON_TYPE)) {
+        	jsonType = elementJson.getString(Acm.JSON_TYPE);
+        }
+        else if (elementJson.has(Acm.JSON_SPECIALIZATION)) {
+        	specializeJson = elementJson.getJSONObject(Acm.JSON_SPECIALIZATION);
+	        if (specializeJson != null && specializeJson.has(Acm.JSON_TYPE)) {
+	        	jsonType = specializeJson.getString(Acm.JSON_TYPE);
+	        }
+        }
+        
         String acmSysmlType = null;
         String type = null;
         if ( jsonType != null ) acmSysmlType = Acm.getJSON2ACM().get( jsonType );
-        type = NodeUtil.getContentModelTypeName( acmSysmlType, services );
+        type = NodeUtil.getContentModelTypeName( acmSysmlType, services ); // If jsonType = acmSysmlType = null then this
+        																   // will return ACM_ELEMENT
         
         if ( node == null || !node.exists() ) {// && newElements.contains( id ) ) {
             if ( type == null || type.trim().isEmpty() ) {
@@ -811,26 +995,32 @@ public class ModelPost extends AbstractJavaWebScript {
         if (id != null && nodeExists ) {
             foundElements.put(id, node); // cache the found value
         }
-
-        // update metadata
-        if (ingest && nodeExists && checkPermissions(node, PermissionService.WRITE)) {
-            log(LogLevel.INFO, "\tinserting metadata");
-            node.ingestJSON(elementJson);
-        }
-
+        
+        // Note: Moved this before injesting the json b/c we need the reifiedNode
         if (nodeExists && elementHierarchyJson.has(id)) {
             log(LogLevel.INFO, "\tcreating reified package");
             reifiedNode = getOrCreateReifiedNode(node, id, true); // TODO -- Is last argument correct?
             
             JSONArray array = elementHierarchyJson.getJSONArray(id);
             if ( array != null ) {
-            	// GG: removed !ingest so children can have their metadata inserted
-                //for (int ii = 0; !ingest && ii < array.length(); ii++) {
                 for (int ii = 0; ii < array.length(); ii++) {
                     children.put(array.get(ii));
                 }
             }
         }
+
+        // update metadata
+        if (ingest && nodeExists && checkPermissions(node, PermissionService.WRITE)) {
+            log(LogLevel.INFO, "\tinserting metadata");
+            
+            // Special processing for Expression or Property:
+            //	Note: this will modify elementJson
+            processExpressionOrProperty(type, nestedNode, elementJson, specializeJson, node, 
+            							ingest, reifiedNode, parent, id);
+            
+            node.ingestJSON(elementJson);
+            
+        } // ends if (ingest && nodeExists && checkPermissions(node, PermissionService.WRITE))
 
         // add the relationships into our maps
         // REVIEW -- Should we skip this if the node or reified node does not exist?
@@ -858,12 +1048,12 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         end = System.currentTimeMillis(); log(LogLevel.INFO, "\tTotal: " + (end-start) + " ms");
-        return reifiedNode;
+        return nestedNode ? node : reifiedNode;
     }
     
     public static String createId( ServiceRegistry services ) {
         for ( int i=0; i<10; ++i ) {
-            String id = "MMS_" + System.currentTimeMillis();
+            String id = "MMS_" + System.currentTimeMillis() + "_" + UUID.randomUUID().toString();
             // Make sure id is not already used
             if ( NodeUtil.findNodeRefById( id, services ) == null ) {
                 return id;

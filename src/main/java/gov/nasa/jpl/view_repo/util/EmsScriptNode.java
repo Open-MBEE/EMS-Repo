@@ -29,7 +29,9 @@
 
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.mbee.util.ClassUtils;
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
@@ -38,13 +40,12 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -80,9 +81,6 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -345,45 +343,11 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         return NodeUtil.getRootNodes( services );
     }
 
-    // TODO -- These utility functions are copied from
-    // gov.nasa.jpl.mbee.util.ClassUtils -- should access from jar or linked
-    // source.
-    private static boolean isStatic( Member method ) {
-        if ( method == null ) return false;
-        return ( Modifier.isStatic( method.getModifiers() ) );
-    }
-
-    private static Field[] getAllFields( Class< ? extends Object > cls ) {
-        List< Field > fieldList = getListOfAllFields( cls );
-        Field[] fieldArr = new Field[ fieldList.size() ];
-        fieldList.toArray( fieldArr );
-        return fieldArr;
-    }
-
-    private static List< Field >
-            getListOfAllFields( Class< ? extends Object > cls ) {
-        if ( cls == null ) return null;
-        ArrayList< Field > fieldList = new ArrayList< Field >();
-        for ( Field f : cls.getDeclaredFields() ) {
-            f.setAccessible( true );
-            fieldList.add( f );
-        }
-        List< Field > superFields = getListOfAllFields( cls.getSuperclass() );
-        if ( superFields != null ) fieldList.addAll( superFields );
-        return fieldList;
-    }
-
-    // Check if string has really got something.
-    private static boolean isNullOrEmpty( String s ) {
-        return ( s == null || s.isEmpty() || s.trim().toLowerCase()
-                                              .equals( "null" ) );
-    }
-
     public static String getMimeType( String type ) {
-        Field[] fields = getAllFields( MimetypeMap.class );
+        Field[] fields = ClassUtils.getAllFields( MimetypeMap.class );
         for ( Field f : fields ) {
             if ( f.getName().startsWith( "MIMETYPE" ) ) {
-                if ( isStatic( f )
+                if ( ClassUtils.isStatic( f )
                      && f.getName().substring( 8 ).toLowerCase()
                          .contains( type.toLowerCase() ) ) {
                     try {
@@ -497,9 +461,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
         // find subfolder in site or create it
         String artifactFolderName =
-                "Artifacts"
-                        + ( isNullOrEmpty( subfolderName ) ? ""
-                                                          : "/" + subfolderName );
+                "Artifacts" + ( Utils.isNullOrEmpty( subfolderName )
+                                ? "" : "/" + subfolderName );
         // find site; it must exist!
         if ( targetSiteNode == null ) {
             log( "Can't find node for site: " + targetSiteName + "!" );
@@ -1028,7 +991,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      */
     public JSONObject toJSONObject( Acm.JSON_TYPE_FILTER renderType )
             throws JSONException {
-        return toJSONObject( renderType, true, true );
+        return toJSONObject( renderType, true, true, false );
     }
 
     public String nodeRefToSysmlId( NodeRef ref ) throws JSONException {
@@ -1072,21 +1035,34 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      *            If true, displays qualifiedName key
      * @param showEditable
      *            If true, displays editable key
+     * @param isExprOrProp
+     * 			  If true, does not add specialization key, as it is nested call to
+     * 			  process the Expression operand or Property value
      * @return JSONObject serialization of node
      */
     public JSONObject toJSONObject( Acm.JSON_TYPE_FILTER renderType,
                                     boolean showQualifiedName,
-                                    boolean showEditable ) throws JSONException {
+                                    boolean showEditable, 
+                                    boolean isExprOrProp ) throws JSONException {
         JSONObject element = new JSONObject();
+        JSONObject specializationJSON = new JSONObject();
+        
         if ( !exists() ) return element;
 
         DictionaryService dServ = services.getDictionaryService();
+        
+        Long readTime = null;
 
         for ( String acmType : acmPropNames ) {
+        	
             if ( Utils.isNullOrEmpty( acmType ) ) continue;
             
             String jsonType = Acm.getACM2JSON().get( acmType );
             if ( Utils.isNullOrEmpty( jsonType ) ) continue;
+            
+            if (isExprOrProp && Acm.ELEMENT_PROPS_JSON.contains(jsonType)) continue;
+
+            if ( readTime == null ) readTime = System.currentTimeMillis();
             
             Object elementValue = this.getProperty( acmType );
             
@@ -1149,6 +1125,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             
 
             JSONArray jarr;// = new JSONArray();
+            JSONObject updateJson = (Acm.ELEMENT_PROPS_JSON.contains(jsonType) || isExprOrProp) ? element : specializationJSON;
+
             if ( elementValue instanceof JSONArray ) {
                 jarr = (JSONArray)elementValue;
             } else {
@@ -1165,7 +1143,15 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                     String s = null;
                     Boolean isString = true;
                     if ( o instanceof NodeRef ) {
-                        s = nodeRefToSysmlId( (NodeRef)o );
+                    	// If it is a operand or value, must get a json object for the noderef:
+                    	if (jsonType.equals(Acm.JSON_VALUE) || jsonType.equals(Acm.JSON_OPERAND)) {
+                    		isString = false;
+                    		EmsScriptNode oNode = new EmsScriptNode((NodeRef)o, services);
+                    		o = oNode.toJSONObject(renderType, showQualifiedName, showEditable, true);
+                    	}
+                    	else {
+                    		s = nodeRefToSysmlId( (NodeRef)o );
+                    	}
                     } else if ( isNodeRef ) {
                         Debug.error( "Property value is not of type NodeRef as specified by definition! value = "
                                      + o );
@@ -1184,22 +1170,27 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                         }
                     } else {
                         if ( isString ) {
-                            element.put( jsonType, s );
+                        	updateJson.put( jsonType, s );
                         } else {
-                            element.put( jsonType, o );
+                        	updateJson.put( jsonType, o );
                         }
                     }
                 }
             }
             if ( isArray ) {
-                element.put( jsonType, jarr );
+            	updateJson.put( jsonType, jarr );
             }
         }
-
-        // add in content type
+        
+        // add in content type:
         if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_TYPE)) {
             String typeName = getTypeName();
-            element.put(Acm.JSON_TYPE, typeName );
+        	if (isExprOrProp) {
+        		element.put(Acm.JSON_TYPE, typeName );
+        	}
+        	else {
+        		specializationJSON.put(Acm.JSON_TYPE, typeName );
+        	}
         }
         
         // add in property type(s)
@@ -1210,182 +1201,52 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             }
         }
         
-        // add in owner
-        if ( Acm.JSON_FILTER_MAP.get( renderType ).contains( Acm.JSON_OWNER ) ) {
-            EmsScriptNode parent = this.getParent();
-            if ( parent != null ) {
-                element.put( Acm.JSON_OWNER,
-                             parent.getName().replace( "_pkg", "" ) );
-            }
+        if (!isExprOrProp) {
+        	
+	        // add in specialization:
+	        if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_SPECIALIZATION) &&
+	        	specializationJSON.length() > 0) {
+	            element.put(Acm.JSON_SPECIALIZATION, specializationJSON );
+	        }
+
+	        // add in owner
+	        if ( Acm.JSON_FILTER_MAP.get( renderType ).contains( Acm.JSON_OWNER ) ) {
+	            EmsScriptNode parent = this.getParent();
+	            if ( parent != null ) {
+	                element.put( Acm.JSON_OWNER,
+	                             parent.getName().replace( "_pkg", "" ) );
+	            }
+	        }
+	
+	        // add comment
+	        if ( Acm.JSON_FILTER_MAP.get( renderType ).contains( Acm.JSON_COMMENT ) ) {
+	            JSONArray annotatedElements =
+	                    getTargetAssocsIdsByType( Acm.ACM_ANNOTATED_ELEMENTS );
+	            if ( annotatedElements.length() > 0 ) {
+	                element.put( Acm.JSON_ANNOTATED_ELEMENTS, annotatedElements );
+	            }
+	        }
+	        
+	        // show qualified name if toggled
+	        if ( showQualifiedName ) {
+	            element.put( "qualifiedName", this.getSysmlQName() );
+	        }
+	
+	        // show editable if toggled
+	        if ( showEditable ) {
+	            element.put( "editable",
+	                         this.hasPermission( PermissionService.WRITE ) );
+	        }
         }
 
-        // add comment
-        if ( Acm.JSON_FILTER_MAP.get( renderType ).contains( Acm.JSON_COMMENT ) ) {
-            JSONArray annotatedElements =
-                    getTargetAssocsIdsByType( Acm.ACM_ANNOTATED_ELEMENTS );
-            if ( annotatedElements.length() > 0 ) {
-                element.put( Acm.JSON_ANNOTATED_ELEMENTS, annotatedElements );
-            }
-        }
+        // add read time
+        element.put( Acm.JSON_READ, getIsoTime( new Date( readTime ) ) );
         
-        // show qualified name if toggled
-        if ( showQualifiedName ) {
-            element.put( "qualifiedName", this.getSysmlQName() );
-        }
-
-        // show editable if toggled
-        if ( showEditable ) {
-            element.put( "editable",
-                         this.hasPermission( PermissionService.WRITE ) );
-        }
-
         String elementString = element.toString();
         elementString = fixArtifactUrls( elementString, true );
         element = new JSONObject( elementString );
         
         return element;
-//        // System.out.println("toJSONObject(): "+this.getProperties());
-//        // add in all the properties
-//        for ( String acmType : Acm.getACM2JSON().keySet() ) {
-//            Object elementValue = this.getProperty( acmType );
-//            if ( elementValue != null ) {
-//                String jsonType = Acm.getACM2JSON().get( acmType );
-//                if ( Acm.JSON_FILTER_MAP.get( renderType ).contains( jsonType ) ) {
-//                    if ( Acm.JSON_NODEREFS.contains( jsonType ) ) {
-//                        if ( !Acm.JSON_ARRAYS.contains( jsonType ) ) {
-//                            elementValue = Utils.newList( elementValue );
-//                        }
-//                        if ( elementValue instanceof Collection ) {
-//                            Collection< ? > c = (Collection< ? >)elementValue;
-//                            JSONArray jarr = // new JSONArray();
-//                                    nodeRefsToJSONArray( c );
-//                            element.put( jsonType, jarr );
-//                        } else {
-//                            Debug.error( true, "Unexpected elementValue "
-//                                               + elementValue );
-//                        }
-//                    } else if ( Acm.JSON_ARRAYS.contains( jsonType ) ) {
-//                        String elementString = elementValue.toString();
-//                        try {
-//                            // if ( elementString != null ) {
-//                            element.put( jsonType,
-//                                         new JSONArray( elementString ) );
-//                            // }
-//                        } catch ( Exception e ) {
-//                            // throw e;
-//                        }
-//                    } else {
-//                        if ( elementValue instanceof String ) {
-//                            String elementString = (String)elementValue;
-//                            element.put( jsonType, elementString );
-//                        } else if ( elementValue instanceof Date ) {
-//                            element.put( jsonType,
-//                                         getIsoTime( (Date)elementValue ) );
-//                        } else {
-//                            element.put( jsonType, elementValue );
-//                        }
-//                    } // end if (Acm.JSON_ARRAYS.contains(jsonType)) {
-//                } // end if
-//                  // (Acm.JSON_FILTER_MAP.get(renderType).contains(jsonType)) {
-//            } // end if (elementValue != null) {
-//        } // end for (String acmType: Acm.ACM2JSON.keySet()) {
-//
-//        // add in content type
-//        if ( Acm.JSON_FILTER_MAP.get( renderType ).contains( Acm.JSON_TYPE ) ) {
-//            element.put( Acm.JSON_TYPE, this.getQNameType().getLocalName() );
-//        }
-//
-//        // add in property type(s)
-//        if ( Acm.JSON_FILTER_MAP.get( renderType )
-//                                .contains( Acm.JSON_PROPERTY_TYPE ) ) {
-//            JSONArray propertyTypes =
-//                    getTargetAssocsIdsByType( Acm.ACM_PROPERTY_TYPE );
-//            if ( propertyTypes.length() > 0 ) {
-//                element.put( Acm.JSON_PROPERTY_TYPE, propertyTypes.get( 0 ) );
-//            }
-//        }
-//
-//        // add in value and value types
-//        Object value = this.getProperty( Acm.ACM_VALUE );
-//        if ( Acm.JSON_FILTER_MAP.get( renderType )
-//                                .contains( Acm.JSON_VALUE_TYPE )
-//             || Acm.JSON_FILTER_MAP.get( renderType ).contains( Acm.JSON_VALUE ) ) {
-//            Object valueType = this.getProperty( Acm.ACM_VALUE_TYPE );
-//            if ( valueType == null && value != null ) {
-//
-//                // This is the case for the new ValueSpecification.
-//
-//                if ( value instanceof NodeRef ) {
-//                    value = Utils.newList( value );
-//                }
-//                if ( value instanceof Collection ) {
-//                    Collection< ? > c = (Collection< ? >)value;
-//                    JSONArray jarr = nodeRefsToJSONArray( c );
-//                    element.put( Acm.JSON_VALUE, jarr );
-//                } else {
-//                    Debug.error( true, "Unexpected elementValue: " + value );
-//                }
-//
-//            } else if ( valueType != null ) {
-//
-//                // This is the case for the old treatment of property values.
-//
-//                if ( valueType.equals( Acm.JSON_ELEMENT_VALUE ) ) {
-//                    @SuppressWarnings( "unchecked" )
-//                    List< NodeRef > elementValue =
-//                            (List< NodeRef >)this.getProperty( Acm.ACM_ELEMENT_VALUE );
-//                    if ( elementValue != null ) {
-//                        JSONArray array = // new JSONArray();
-//                                nodeRefsToJSONArray( elementValue );
-//                        element.put( "value", array );
-//                    }
-//                } else {
-//                    Object property =
-//                            this.getProperty( Acm.JSON2ACM.get( (String)valueType ) );
-//                    if ( property != null ) {
-//                        element.put( "value", property );
-//                    }
-//                }
-//                element.put( Acm.JSON_VALUE_TYPE, valueType );
-//            } // if (valueType != null) {
-//        } // if
-//          // (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_VALUE_TYPE))
-//          // {
-//
-//        // add in owner
-//        if ( Acm.JSON_FILTER_MAP.get( renderType ).contains( Acm.JSON_OWNER ) ) {
-//            EmsScriptNode parent = this.getParent();
-//            if ( parent != null ) {
-//                element.put( Acm.JSON_OWNER,
-//                             parent.getName().replace( "_pkg", "" ) );
-//            }
-//        }
-//
-//        // add comment
-//        if ( Acm.JSON_FILTER_MAP.get( renderType ).contains( Acm.JSON_COMMENT ) ) {
-//            JSONArray annotatedElements =
-//                    getTargetAssocsIdsByType( Acm.ACM_ANNOTATED_ELEMENTS );
-//            if ( annotatedElements.length() > 0 ) {
-//                element.put( Acm.JSON_ANNOTATED_ELEMENTS, annotatedElements );
-//            }
-//        }
-//
-//        // show qualified name if toggled
-//        if ( showQualifiedName ) {
-//            element.put( "qualifiedName", this.getSysmlQName() );
-//        }
-//
-//        // show editable if toggled
-//        if ( showEditable ) {
-//            element.put( "editable",
-//                         this.hasPermission( PermissionService.WRITE ) );
-//        }
-//
-//        String elementString = element.toString();
-//        elementString = fixArtifactUrls( elementString, true );
-//        element = new JSONObject( elementString );
-//
-//        return element;
     }
 
     public boolean isView() {
@@ -1838,30 +1699,36 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 //            return "" + o;
         }
         
-        if ( name.equals( DataTypeDefinition.INT ) ) {
-            property = jsonObject.getInt( jsonKey );
-        } else if ( name.equals( DataTypeDefinition.LONG ) ) {
-            property = jsonObject.getLong( jsonKey );
-        } else if ( name.equals( DataTypeDefinition.DOUBLE ) ) {
-            property = jsonObject.getDouble( jsonKey );
-        } else if ( name.equals( DataTypeDefinition.BOOLEAN ) ) {
-            property = jsonObject.getBoolean( jsonKey );
-        } else if ( name.equals( DataTypeDefinition.TEXT ) ) {
-            property = jsonObject.getString( jsonKey );
-        } else if ( name.equals( DataTypeDefinition.NODE_REF ) ) {
-            String sysmlId = null; 
-            try {
-                sysmlId = jsonObject.getString( jsonKey );
-            } catch ( JSONException e ) {
-                sysmlId = "" + jsonObject.get( jsonKey );
-            }
-            EmsScriptNode node = convertIdToEmsScriptNode( sysmlId );
-            property = node.getNodeRef();
-        } else {
+        if (name != null) {
+	        if ( name.equals( DataTypeDefinition.INT ) ) {
+	            property = jsonObject.getInt( jsonKey );
+	        } else if ( name.equals( DataTypeDefinition.LONG ) ) {
+	            property = jsonObject.getLong( jsonKey );
+	        } else if ( name.equals( DataTypeDefinition.DOUBLE ) ) {
+	            property = jsonObject.getDouble( jsonKey );
+	        } else if ( name.equals( DataTypeDefinition.BOOLEAN ) ) {
+	            property = jsonObject.getBoolean( jsonKey );
+	        } else if ( name.equals( DataTypeDefinition.TEXT ) ) {
+	            property = jsonObject.getString( jsonKey );
+	        } else if ( name.equals( DataTypeDefinition.NODE_REF ) ) {
+	            String sysmlId = null; 
+	            try {
+	                sysmlId = jsonObject.getString( jsonKey );
+	            } catch ( JSONException e ) {
+	                sysmlId = "" + jsonObject.get( jsonKey );
+	            }
+	            EmsScriptNode node = convertIdToEmsScriptNode( sysmlId );
+	            property = node.getNodeRef();
+	        } else {
+	            property = jsonObject.getString( jsonKey );
+	        }
+        }
+        else {
             property = jsonObject.getString( jsonKey );
         }
+        
         if ( property == null ) {
-            String msg = "Error! Couldn't get boolean property "
+            String msg = "Error! Couldn't get property "
                          + propDef + "=" + property + ".\n";
             if ( getResponse() == null || getStatus() == null ) {
                 Debug.error( msg );
@@ -1895,31 +1762,46 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 //Debug.error( "No content model type found for \"" + key + "\"!" );
                 continue;
             } else {
+            	
                 QName qName = createQName( acmType );
-                if ( acmType == Acm.ACM_VALUE ) {
+                if ( acmType.equals(Acm.ACM_VALUE) ) {
                     System.out.println("qName of " + acmType + " = " + qName.toString() );
                 }
-                PropertyDefinition propDef =
-                        dServ.getProperty( qName );
-                if ( propDef == null ) {
-                    System.out.println("null PropertyDefinition for " + acmType );
-                    continue; // skips type
+                
+                // If it is a specialization, then process the json object it maps to:
+                if ( acmType.equals(Acm.ACM_SPECIALIZATION) ) {
+                	
+            	   JSONObject specializeJson = jsonObject.getJSONObject(Acm.JSON_SPECIALIZATION);
+            	   
+                   if (specializeJson != null) {
+                	   
+                       System.out.println("processing " + acmType );
+                	   ingestJSON(specializeJson);
+                   }
                 }
-                boolean isArray =
-                        ( Acm.JSON_ARRAYS.contains( key ) || 
-                        ( propDef != null && propDef.isMultiValued() ) );
-                if ( isArray ) {
-                    JSONArray array = jsonObject.getJSONArray( key );
-                    createOrUpdateProperties( array, acmType );
-                } else {
-                    Serializable propVal =
-                            getPropertyValueFromJson( propDef, jsonObject, key );
-                    if ( propVal == badValue ) {
-                        Debug.error("Got bad property value!");
-                    } else {
-                        createOrUpdateProperty( acmType, propVal );
-                    }
-                }
+                else {
+	                PropertyDefinition propDef =
+	                        dServ.getProperty( qName );
+	                if ( propDef == null ) {
+	                    System.out.println("null PropertyDefinition for " + acmType );
+	                    continue; // skips type
+	                }
+	                boolean isArray =
+	                        ( Acm.JSON_ARRAYS.contains( key ) || 
+	                        ( propDef != null && propDef.isMultiValued() ) );
+	                if ( isArray ) {
+	                    JSONArray array = jsonObject.getJSONArray( key );
+	                    createOrUpdateProperties( array, acmType );
+	                } else {
+	                    Serializable propVal =
+	                            getPropertyValueFromJson( propDef, jsonObject, key );
+	                    if ( propVal == badValue ) {
+	                        Debug.error("Got bad property value!");
+	                    } else {
+	                        createOrUpdateProperty( acmType, propVal );
+	                    }
+	                }
+                } // ends else (not a Specialization)
             }
         }
     }
@@ -1995,7 +1877,16 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
         return result;
     }
-
+    
+    public EmsScriptNode getVersionAtTime( String timestamp ) {
+        return getVersionAtTime( TimeUtils.dateFromTimestamp( timestamp ) );
+    }
+    
+    public EmsScriptNode getVersionAtTime( Date dateTime ) {
+        NodeRef versionedRef = NodeUtil.getNodeRefAtTime( getNodeRef(), dateTime );
+        return new EmsScriptNode( versionedRef, getServices() );
+    }
+    
     protected NodeRef findNodeRefByType( String name, String type ) {
         return NodeUtil.findNodeRefByType( name, type, services );
     }
@@ -2059,10 +1950,15 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         }
     }
 
+    public static Date dateFromIsoTime( String timestamp ) {
+        return TimeUtils.dateFromTimestamp( timestamp );
+    }
+    
     public static String getIsoTime( Date date ) {
-        DateTime dt = new DateTime( date );
-        DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
-        return fmt.print( dt );
+        return TimeUtils.toTimestamp( date );
+//        DateTime dt = new DateTime( date );
+//        DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+//        return fmt.print( dt );
     }
 
     /**
