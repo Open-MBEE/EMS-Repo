@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -191,24 +192,36 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         Date date = (Date)config.getProperty("cm:created");
         
         json.put("modified", EmsScriptNode.getIsoTime(date));
+        Object timestampObject = config.getProperty("ems:timestamp");
+        Date timestamp = null;
+        if ( timestampObject instanceof Date ) {
+            timestamp = (Date)timestampObject;
+        } else {
+            if ( timestampObject != null ) {
+                Debug.error( "timestamp is not a date! timestamp = " + timestampObject );
+            }
+            timestamp = new Date( System.currentTimeMillis() );
+        }
+        //Date timestamp = (Date)timestampObject;
+        json.put("timestamp", EmsScriptNode.getIsoTime(timestamp));
         json.put("name", config.getProperty(Acm.CM_NAME));
         json.put("description", config.getProperty("cm:description"));
         json.put("nodeid", EmsScriptNode.getStoreRef().toString() + "/" + config.getNodeRef().getId());
         
         List< EmsScriptNode > snapshots =
                 config.getTargetAssocsNodesByType( "ems:configuredSnapshots",
-                                                   dateTime );
+                                                   timestamp );
         for (EmsScriptNode snapshot: snapshots) {
             List< EmsScriptNode > views =
                     snapshot.getSourceAssocsNodesByType( "view2:snapshots",
-                                                         dateTime );
+                                                         timestamp );
             if (views.size() >= 1) {
                 JSONObject snapshotJson = new JSONObject();
-                snapshotJson.put("url", contextPath + "/service/snapshots/" + snapshot.getProperty(Acm.ACM_ID));
+                //snapshotJson.put("url", contextPath + "/service/snapshots/" + snapshot.getProperty(Acm.ACM_ID));
                 EmsScriptNode view = views.get(0);
-            		snapshotJson.put("name", view.getProperty(Acm.ACM_NAME));
-            		snapshotJson.put("id", snapshot.getProperty(Acm.CM_NAME));
-            		snapshotsJson.put(snapshotJson);
+        		snapshotJson.put("name", view.getProperty(Acm.ACM_NAME));
+        		snapshotJson.put("id", snapshot.getProperty(Acm.CM_NAME));
+        		snapshotsJson.put(snapshotJson);
             }
         }
         

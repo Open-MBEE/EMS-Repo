@@ -56,7 +56,7 @@
             <properties>
                <property name="ems:timestamp">
 	               <type>d:datetime</type>
-	               <mandatory>true</mandatory>
+	               <mandatory>false</mandatory>
 	               <multiple>false</multiple>
 	               <index enabled="true">
 	                  <atomic>false</atomic>
