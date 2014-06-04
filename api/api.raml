@@ -45,6 +45,15 @@ traits:
           description: Runs create/update in the asynchronously in the background
                        if true, or synchronously if false or not specified
           type: boolean
+  - constrainable:
+      description: Aspect for resources that are or can be constrained
+      queryParameters:
+        fix:
+          description: If true, fixes the constraint as scoped by the element (defaults false)
+          type: boolean
+        validate:
+          description: If true, validates the constraint as scoped by the element (defaults false). If specified with fix, overrides fix
+          type: boolean
   - recursable:
       description: Aspect for resources that can be retrieved recursively
       queryParameters:
@@ -170,6 +179,7 @@ resourceTypes:
       is: [backgroundable]
       type: collection
       /{elementId}:
+        is: [constrainable]
         type: collection
         uriParameters:
           elementId:
@@ -309,6 +319,7 @@ resourceTypes:
         /elements:
           type: collection
           /{elementId}:
+            is: [constrainable]
             type: collection
             uriParameters:
               elementId:
