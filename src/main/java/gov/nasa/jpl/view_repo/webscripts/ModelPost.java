@@ -931,12 +931,12 @@ public class ModelPost extends AbstractJavaWebScript {
         // The type is now found by using the specialization key
         // if its a non-nested node:
         if (nestedNode && elementJson.has(Acm.JSON_TYPE)) {
-        	jsonType = elementJson.getString(Acm.JSON_TYPE);
+        		jsonType = elementJson.getString(Acm.JSON_TYPE);
         }
         else if (elementJson.has(Acm.JSON_SPECIALIZATION)) {
         	specializeJson = elementJson.getJSONObject(Acm.JSON_SPECIALIZATION);
 	        if (specializeJson != null && specializeJson.has(Acm.JSON_TYPE)) {
-	        	jsonType = specializeJson.getString(Acm.JSON_TYPE);
+	        		jsonType = specializeJson.getString(Acm.JSON_TYPE);
 	        }
         }
         
@@ -1015,8 +1015,13 @@ public class ModelPost extends AbstractJavaWebScript {
             
             // Special processing for Expression or Property:
             //	Note: this will modify elementJson
-            processExpressionOrProperty(type, nestedNode, elementJson, specializeJson, node, 
-            							ingest, reifiedNode, parent, id);
+            if (acmSysmlType == null) {
+	            processExpressionOrProperty(type, nestedNode, elementJson, specializeJson, node, 
+	            							ingest, reifiedNode, parent, id);
+            } else {
+	            processExpressionOrProperty(acmSysmlType, nestedNode, elementJson, specializeJson, node, 
+						ingest, reifiedNode, parent, id);
+            }
             
             node.ingestJSON(elementJson);
             

@@ -169,34 +169,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         String timestamp = req.getParameter("timestamp");
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         
-        siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+        siteName = req.getServiceMatch().getTemplateVars().get("id");
 
         return getSiteNode( siteName, dateTime );
-
-//        SiteInfo siteInfo; 
-//        EmsScriptNode siteNode = null;
-//        
-//        siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
-//        if (siteName == null) {
-//            log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
-//        } else {
-//            siteInfo = services.getSiteService().getSite(siteName);
-//            if (siteInfo == null) {
-//                log(LogLevel.ERROR, "Could not find site: " + siteName, HttpServletResponse.SC_NOT_FOUND);
-//            } else {
-//                // get timestamp if specified
-//                String timestamp = req.getParameter("timestamp");
-//                Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-//                NodeRef siteRef = siteInfo.getNodeRef();
-//                if ( dateTime != null ) {
-//                    NodeRef vRef = NodeUtil.getNodeRefAtTime( siteRef, dateTime );
-//                    if ( vRef != null ) siteRef = vRef;
-//                }
-//                siteNode = new EmsScriptNode(siteRef, services, response);
-//            }
-//        }
-//        
-//        return siteNode;
     }
     
 	

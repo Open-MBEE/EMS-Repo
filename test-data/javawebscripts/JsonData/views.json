@@ -1,7 +1,7 @@
 { "views":
 	[
 		{
-		"id": "301",
+		"sysmlid": "301",
 		"displayedElements": ["301","302", "303"],
 		"allowedElements": ["301","302", "303"],
 		"childrenViews": ["304"],
@@ -15,7 +15,7 @@
 		]
 		},
 		{
-		"id": "401",
+		"sysmlid": "401",
 		"displayedElements": ["401","402", "403"],
 		"allowedElements": ["401","402", "403"],
 		"childrenViews": ["404"],

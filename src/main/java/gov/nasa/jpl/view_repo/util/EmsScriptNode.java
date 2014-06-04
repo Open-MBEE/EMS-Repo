@@ -1513,17 +1513,12 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     
     public static EmsScriptNode convertIdToEmsScriptNode( String valueId,
                                                           Date dateTime,
-        ServiceRegistry services,
-        StringBuffer response,
-        Status status ) {
+												        ServiceRegistry services,
+												        StringBuffer response,
+												        Status status ) {
         ArrayList<NodeRef> refs = NodeUtil.findNodeRefsByType( valueId, "@cm\\:name:\"", dateTime, true, true, services );
-//        ResultSet existingArtifacts =
-//                findNodeRefsByType( valueId, "@cm\\:name:\"", services );
         Set< EmsScriptNode > nodeSet =
-//                toEmsScriptNodeSet( existingArtifacts, dateTime, services, response,
-//                                    status );
         toEmsScriptNodeSet( refs, services, response, status );
-//        existingArtifacts.close();
 
         EmsScriptNode value =
                 ( nodeSet == null || nodeSet.size() <= 0 ) ? null
@@ -1928,6 +1923,9 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     
     public EmsScriptNode getVersionAtTime( Date dateTime ) {
         NodeRef versionedRef = NodeUtil.getNodeRefAtTime( getNodeRef(), dateTime );
+        if (versionedRef == null) {
+        		return new EmsScriptNode(getNodeRef(), getServices());
+        }
         return new EmsScriptNode( versionedRef, getServices() );
     }
     
