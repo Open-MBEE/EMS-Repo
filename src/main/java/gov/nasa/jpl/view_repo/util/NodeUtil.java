@@ -203,7 +203,7 @@ public class NodeUtil {
                                         Utils.join( prefix.split( "[\\W]+" ), ":" )
                                              .replaceFirst( "^:", "" );
                                 Object o = esn.getProperty( acmType );
-                                if ( ( "" + o ).equals( specifier ) ) {
+                                if ( !( "" + o ).equals( specifier ) ) {
                                     match = false;
                                 }
                             }
