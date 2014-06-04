@@ -734,6 +734,15 @@ public class NodeUtil {
             getServices().getVersionService().getCurrentVersion( ref );
         }
         VersionHistory history = getServices().getVersionService().getVersionHistory( ref );
+        if (history == null) {
+        		// Versioning doesn't make versions until the first save...
+        		EmsScriptNode node = new EmsScriptNode(ref, services);
+        		if (dateTime != null && dateTime.compareTo((Date)node.getProperty("cm:created")) < 0) {
+        			return null;
+        		}
+        		return ref;
+        }
+        
         Collection< Version > versions = history.getAllVersions();
         Vector<Version> vv = new Vector<Version>( versions );
         if ( Utils.isNullOrEmpty( vv ) ) {

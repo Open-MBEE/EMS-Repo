@@ -1557,17 +1557,17 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             return;
         }
 
-        ArrayList< Serializable > values = getPropertyValuesFromJson( propDef, array, null );
+        ArrayList< Serializable > values = getPropertyValuesFromJson( propDef, array, acmProperty.substring(acmProperty.indexOf(":")+1), null );
 
         // special handling for valueType == ElementValue
-        if ( values == null ) {
-            if ( Acm.ACM_ELEMENT_VALUE.equals( acmProperty ) ) {
-                values = getPropertyValuesFromJson( PropertyType.NODE_REF, array, null );
-            } else {
-                Debug.error(true, false, "*$*$*$ null array of property values for " + acmProperty );
-                return;
-            }
-        }
+//        if ( values == null ) {
+//            if ( Acm.ACM_ELEMENT_VALUE.equals( acmProperty ) ) {
+//                values = getPropertyValuesFromJson( PropertyType.NODE_REF, array, null );
+//            } else {
+//                Debug.error(true, false, "*$*$*$ null array of property values for " + acmProperty );
+//                return;
+//            }
+//        }
         if ( values == null ) {
             System.out.println("null property values for " + acmProperty );
         }
@@ -1620,10 +1620,9 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      */
     public ArrayList<Serializable> getPropertyValuesFromJson( PropertyDefinition propDef,
                                                               JSONArray jsonArray,
+                                                              String key,
                                                               Date dateTime )
                                                                       throws JSONException {
-        ArrayList<Serializable> properties = new ArrayList<Serializable>();
-
         if ( propDef == null ) {
             return null;
 //          Object o = jsonObject.get( jsonKey );
@@ -1631,25 +1630,30 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 //          return "" + o;
         }
         
-        QName name = propDef.getDataType().getName();
-        PropertyType type;
-        
-        if ( name.equals( DataTypeDefinition.INT ) ) {
-            type = PropertyType.INT;
-        } else if ( name.equals( DataTypeDefinition.LONG ) ) {
-            type = PropertyType.LONG;
-        } else if ( name.equals( DataTypeDefinition.DOUBLE ) ) {
-            type = PropertyType.DOUBLE;
-        } else if ( name.equals( DataTypeDefinition.BOOLEAN ) ) {
-            type = PropertyType.BOOLEAN;
-        } else if ( name.equals( DataTypeDefinition.TEXT ) ) {
-            type = PropertyType.TEXT;
-        } else if ( name.equals( DataTypeDefinition.NODE_REF ) ) {
-            type = PropertyType.NODE_REF;
-        } else {
-            type = PropertyType.UNKNOWN;
+        ArrayList<Serializable> properties = new ArrayList<Serializable>();
+        for (int ii=0; ii < jsonArray.length(); ii++) {
+        		properties.add(getPropertyValueFromJson(propDef, jsonArray.getJSONObject(ii), key, dateTime));
         }
-        return getPropertyValuesFromJson( type, jsonArray, dateTime );
+        return properties;
+//        QName name = propDef.getDataType().getName();
+//        PropertyType type;
+//        
+//        if ( name.equals( DataTypeDefinition.INT ) ) {
+//            type = PropertyType.INT;
+//        } else if ( name.equals( DataTypeDefinition.LONG ) ) {
+//            type = PropertyType.LONG;
+//        } else if ( name.equals( DataTypeDefinition.DOUBLE ) ) {
+//            type = PropertyType.DOUBLE;
+//        } else if ( name.equals( DataTypeDefinition.BOOLEAN ) ) {
+//            type = PropertyType.BOOLEAN;
+//        } else if ( name.equals( DataTypeDefinition.TEXT ) ) {
+//            type = PropertyType.TEXT;
+//        } else if ( name.equals( DataTypeDefinition.NODE_REF ) ) {
+//            type = PropertyType.NODE_REF;
+//        } else {
+//            type = PropertyType.UNKNOWN;
+//        }
+//        return getPropertyValuesFromJson( type, jsonArray, dateTime );
     }  
 
     public ArrayList<Serializable> getPropertyValuesFromJson( PropertyType type,
@@ -1928,6 +1932,9 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     
     public EmsScriptNode getVersionAtTime( Date dateTime ) {
         NodeRef versionedRef = NodeUtil.getNodeRefAtTime( getNodeRef(), dateTime );
+        if (versionedRef == null) {
+        		return new EmsScriptNode( getNodeRef(), getServices() );
+        }
         return new EmsScriptNode( versionedRef, getServices() );
     }
     
