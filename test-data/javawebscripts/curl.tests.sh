@@ -9,16 +9,16 @@ export CURL_GET_FLAGS="-X GET"
 export CURL_SECURITY=" -k -3" 
 
 #if [true]; then
-	#export CURL_USER=" -u admin:admin"
-	#export CURL_FLAGS=$CURL_STATUS$CURL_USER
-#	export SERVICE_URL="\"http://localhost:8080/alfresco/service/"
-#	export BASE_URL="\"http://localhost:8080/alfresco/service/javawebscripts/"
-#else
 	export CURL_USER=" -u admin:admin"
-	export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
-	export SERVICE_URL="\"http://128.149.16.183:8080/alfresco/service/"
-	export BASE_URL="\"http://128.149.16.183:8080/alfresco/service/javawebscripts/"
-	#export BASE_URL="\"https://128.149.16.183:8443/alfresco/service/javawebscripts/"
+	export CURL_FLAGS=$CURL_STATUS$CURL_USER
+	export SERVICE_URL="\"http://localhost:8080/alfresco/service/"
+	export BASE_URL="\"http://localhost:8080/alfresco/service/javawebscripts/"
+#else
+#	export CURL_USER=" -u admin:admin"
+#	export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
+#	export SERVICE_URL="\"http://128.149.16.183:8080/alfresco/service/"
+#	export BASE_URL="\"http://128.149.16.183:8080/alfresco/service/javawebscripts/"
+#	#export BASE_URL="\"https://128.149.16.183:8443/alfresco/service/javawebscripts/"
 #fi
 
 # TODO: CURL commands aren't executed from bash using environment variables
@@ -27,7 +27,7 @@ echo POSTS
 echo curl $CURL_FLAGS $CURL_POST_FLAGS \'{\"name\":\"CY Test\"}\' $BASE_URL"sites/europa/projects/123456?fix=true&createSite=true\""
 
 # post elements to project
-echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elements.json $BASE_URL"sites/europa/projects/123456/elements\""
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elementsNew.json $BASE_URL"sites/europa/projects/123456/elements\""
 
 # post views
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/views.json $BASE_URL"views\""
