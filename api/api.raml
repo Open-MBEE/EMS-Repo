@@ -85,10 +85,10 @@ traits:
 resourceTypes:
   - readCollection:
       securedBy: [basic]
-      is: [recursable, searchable, sliceable]
       usage: Resources with read capabilities and standard responses
       description: Read operations for <<resourcePathName>>
       get:
+          is: [recursable, searchable, sliceable]
           description: Read operation for <<resourcePathName>>
           responses:
               200:
@@ -176,10 +176,12 @@ resourceTypes:
                      "trunk" workspace to whih all other workspaces should be merged.
                      "master" is what is contained at the Alfresco sites level.
     /elements:
-      is: [backgroundable]
       type: collection
       /{elementId}:
-        is: [constrainable]
+        post:
+          is: [constrainable]
+        put:
+          is: [constrainable]
         type: collection
         uriParameters:
           elementId:
