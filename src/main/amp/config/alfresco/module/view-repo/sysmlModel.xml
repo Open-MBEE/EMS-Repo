@@ -81,23 +81,6 @@
 				<aspect>sysml:Named</aspect>
 			</mandatory-aspects>
 		</type>
-		<type name="sysml:Package">
-			<parent>sysml:Element</parent>
-		</type>
-		<type name="sysml:Viewpoint">
-			<parent>sysml:Element</parent>
-			<properties>
-				<property name="sysml:method">
-					<type>d:noderef</type>
-					<mandatory>false</mandatory>
-					<index enabled="true">
-						<atomic>false</atomic>
-						<stored>false</stored>
-						<tokenised>false</tokenised>
-					</index>
-				</property>
-			</properties>
-		</type>
 		<type name="view2:ConfigurationPoint">
 			<parent>cm:content</parent>
 			<properties>
@@ -169,6 +152,21 @@
 				</property>
 			</properties>
 		</aspect>
+        <aspect name="sysml:Package">
+        </aspect>
+        <aspect name="sysml:Viewpoint">
+            <properties>
+                <property name="sysml:method">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+            </properties>
+        </aspect>
 		<aspect name="sysml:View">
 			<properties>
 				<property name="view2:contains"> <!-- json string cache of the rendered view structure and element transclusion -->

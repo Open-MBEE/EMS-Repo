@@ -834,11 +834,11 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 	        
 	        Collection< EmsScriptNode > elementColl = null;
 	        try {
-	        		elementColl = NodeUtil.luceneSearchElements( "TYPE:\"sysml:" + specifier + "\"" );
+	        		elementColl = NodeUtil.luceneSearchElements( "ASPECT:\"sysml:" + specifier + "\"" );
 	        } catch (Exception e) {
-	        		// if lucene query fails, most likely due to non-existent type, we should look for aspect now
+	        		// if lucene query fails, most likely due to non-existent aspect, we should look for type now
 	        		try {
-	        			elementColl = NodeUtil.luceneSearchElements( "ASPECT:\"sysml:" + specifier + "\"");
+	        			elementColl = NodeUtil.luceneSearchElements( "TYPE:\"sysml:" + specifier + "\"");
 	        		} catch (Exception ee) {
 	        			// do nothing
 	        		}
