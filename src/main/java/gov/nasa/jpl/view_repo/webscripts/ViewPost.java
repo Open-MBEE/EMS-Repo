@@ -118,7 +118,7 @@ public class ViewPost extends AbstractJavaWebScript {
 			return;
 		}
 		
-		EmsScriptNode view = findScriptNodeById(id);
+		EmsScriptNode view = findScriptNodeById(id, null);
 		if (view == null) {
 			log(LogLevel.ERROR, "could not find view with id: " + id, HttpServletResponse.SC_NOT_FOUND);
 			return;

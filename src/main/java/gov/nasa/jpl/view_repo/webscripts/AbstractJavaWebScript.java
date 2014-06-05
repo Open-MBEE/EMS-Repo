@@ -28,9 +28,11 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +44,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessStatus;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -123,20 +126,54 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	abstract protected boolean validateRequest(WebScriptRequest req, Status status);
 	
 	
-	/**
-	 * Get site of specified short name
-	 * @param siteName
-	 * @return	ScriptNode of site with name siteName
-	 */
-	protected EmsScriptNode getSiteNode(String siteName) {
-	    return NodeUtil.getSiteNode( siteName, services, response );
-//		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-//		if (siteInfo != null) {
-//			return new EmsScriptNode(siteInfo.getNodeRef(), services, response);
-//		}
-//		return null;
-	}
+//	/**
+//	 * Get site of specified short name
+//	 * @param siteName
+//	 * @return	ScriptNode of site with name siteName
+//	 */
+//	protected EmsScriptNode getSiteNode(String siteName) {
+//	    return NodeUtil.getSiteNode( siteName, null, services, response );
+////		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+////		if (siteInfo != null) {
+////			return new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+////		}
+////		return null;
+//	}
 
+    protected EmsScriptNode getSiteNode(String siteName, Date dateTime) {
+        SiteInfo siteInfo; 
+        EmsScriptNode siteNode = null;
+        
+        if (siteName == null) {
+            log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
+        } else {
+            siteInfo = services.getSiteService().getSite(siteName);
+            if (siteInfo == null) {
+                log(LogLevel.ERROR, "Could not find site: " + siteName, HttpServletResponse.SC_NOT_FOUND);
+            } else {
+                NodeRef siteRef = siteInfo.getNodeRef();
+                if ( dateTime != null ) {
+                    NodeRef vRef = NodeUtil.getNodeRefAtTime( siteRef, dateTime );
+                    if ( vRef != null ) siteRef = vRef;
+                }
+                siteNode = new EmsScriptNode(siteRef, services, response);
+            }
+        }
+        
+        return siteNode;
+    }
+ 
+    protected EmsScriptNode getSiteNodeFromRequest(WebScriptRequest req) {
+        String siteName; 
+        // get timestamp if specified
+        String timestamp = req.getParameter("timestamp");
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        
+        siteName = req.getServiceMatch().getTemplateVars().get("id");
+
+        return getSiteNode( siteName, dateTime );
+    }
+    
 	
 	/**
 	 * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
@@ -146,13 +183,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @param id	Node id to search for
 	 * @return		ScriptNode with name if found, null otherwise
 	 */
-	protected EmsScriptNode findScriptNodeById(String id) {
+//    protected EmsScriptNode findScriptNodeById(String id) {
+//        return findScriptNodeById( id, null );
+//    }
+	protected EmsScriptNode findScriptNodeById(String id, Date dateTime) {
 //		long start=System.currentTimeMillis();
 		EmsScriptNode result = null;
 
 		// be smart about search if possible
 		if (foundElements.containsKey(id)) {
 			result = foundElements.get(id);
+			EmsScriptNode resultAtTime = result.getVersionAtTime( dateTime );
+			if ( resultAtTime != null ) result = resultAtTime;
 //		} else if (name.endsWith("_pkg")) {
 //			String elementName = name.replace("_pkg", "");
 //			EmsScriptNode elementNode = findScriptNodeByName(elementName);
@@ -160,7 +202,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 //			    result = elementNode.getParent().childByNamePath(name);
 //			}
 		} else {
-			NodeRef nodeRef = findNodeRefById(id);
+			NodeRef nodeRef = NodeUtil.findNodeRefById(id, dateTime, services);
 			if (nodeRef != null) {
 				result = new EmsScriptNode(nodeRef, services, response);
 				foundElements.put(id, result); // add to cache
@@ -171,20 +213,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		return result;
 	}
 
-	protected NodeRef findNodeRefByType(String name, String type) {
-	    return NodeUtil.findNodeRefByType( name, type, services );
-	}
-	
-	/**
-	 * Find a NodeReference by name (returns first match, assuming things are unique)
-	 * 
-	 * @param name Node name to search for
-	 * @return     NodeRef of first match, null otherwise
-	 */
-	protected NodeRef findNodeRefById(String name) {
-	    return NodeUtil.findNodeRefById( name, services );
-	}
-	
 	protected void log(LogLevel level, String msg, int code) {
 		if (level.value >= logLevel.value) {
 			log("[" + level.name() + "]: " + msg + "\n", code);
@@ -262,10 +290,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @param type		escaped ACM type for lucene search: e.g. "@sysml\\:documentation:\""
 	 * @param pattern   Pattern to look for
 	 */
-	protected Map<String, EmsScriptNode> searchForElements(String type, String pattern) {
+	protected Map<String, EmsScriptNode> searchForElements(String type,
+	                                                       String pattern,
+	                                                       Date dateTime) {
 		Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
 
-        searchResults.putAll( NodeUtil.searchForElements( type, pattern, services, response,
+        searchResults.putAll( NodeUtil.searchForElements( type, pattern,
+                                                          dateTime, services,
+                                                          response,
                                                           responseStatus ) );
         //foundElements.putAll(searchResults);
 //		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
@@ -341,5 +373,43 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                             + ( reqStr.length() <= MAX_PRINT
                                 ? reqStr
                                 : reqStr.substring( 0, MAX_PRINT ) + "..." ) );
+    }
+
+    protected static String getIdFromRequest( WebScriptRequest req ) {
+        String productId = req.getServiceMatch().getTemplateVars().get("id");
+        if ( productId == null ) {
+            productId = req.getServiceMatch().getTemplateVars().get("modelid");
+        }
+        if ( productId == null ) {
+            productId = req.getServiceMatch().getTemplateVars().get("elementid");
+        }
+        System.out.println("Got id = " + productId);
+        boolean gotElementSuffix  = ( productId.toLowerCase().trim().endsWith("/elements") );
+        if ( gotElementSuffix ) {
+            productId = productId.substring( 0, productId.lastIndexOf( "/elements" ) );
+        } else {
+            boolean gotViewSuffix  = ( productId.toLowerCase().trim().endsWith("/views") );
+            if ( gotViewSuffix ) {
+                productId = productId.substring( 0, productId.lastIndexOf( "/views" ) );
+            }
+        }
+        System.out.println("productId = " + productId);
+        return productId;
+    }
+
+    protected static boolean isDisplayedElementRequest( WebScriptRequest req ) {
+        if ( req == null ) return false;
+        String url = req.getURL();
+        if ( url == null ) return false;
+        boolean gotSuffix = ( url.toLowerCase().trim().endsWith("/elements") );
+        return gotSuffix;
+    }
+
+    protected static boolean isContainedViewRequest( WebScriptRequest req ) {
+        if ( req == null ) return false;
+        String url = req.getURL();
+        if ( url == null ) return false;
+        boolean gotSuffix = ( url.toLowerCase().trim().endsWith("/views") );
+        return gotSuffix;
     }    
 }

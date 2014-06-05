@@ -77,12 +77,12 @@
                 <dependency>
 			        <groupId>gov.nasa.jpl.mbee.util</groupId>
 			        <artifactId>mbee_util</artifactId>
-			        <version>0.0.2</version>
+			        <version>0.0.3</version>
 			    </dependency>
 			    <dependency>
 			        <groupId>gov.nasa.jpl.mbee.bae</groupId>
 			        <artifactId>bae</artifactId>
-			        <version>0.0.2</version>
+			        <version>0.0.3</version>
 			    </dependency>
                 <dependency>
                     <groupId>gov.nasa.jpl.mbee.sysml</groupId>

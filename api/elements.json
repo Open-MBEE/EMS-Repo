@@ -57,6 +57,7 @@
                     "type": "object",
                     "description": "Properties of the specialized type of the element, if any, adds additional metadata per the references",
                     "oneOf": [
+                        { "$ref": "#/definitions/Comment"},
                         { "$ref": "#/definitions/Constraint"},
                         { "$ref": "#/definitions/InstanceSpecification"},
                         { "$ref": "#/definitions/Operation"},
@@ -78,6 +79,11 @@
         },
 
 
+        "Comment": {
+            "properties": {
+                "type": { "enum": ["Comment"] }
+            }
+        },
         "Constraint": {
             "properties": {
                 "type": { "enum": ["Constraint"] },
@@ -252,7 +258,6 @@
                 }
             }
         },
-
 
         "DirectedRelationship": {
             "properties": {

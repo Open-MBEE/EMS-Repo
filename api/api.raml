@@ -24,7 +24,7 @@ schemas:
   - views:    !include elements.json
   - products: !include elements.json
 
-  - comments:       !include comments.json    
+  - comments:       !include elements.json    
   - configurations: !include configurations.json
   - projects:       !include projects.json
   - snapshots:      !include snapshots.json
@@ -226,6 +226,21 @@ resourceTypes:
         uriParameters:
           siteId:
             description: Alfresco site identifier for the project under consideration
+        /configurations:
+          type: collection
+          /{configurationId}:
+            type: collection
+            uriParameters:
+              configurationId:
+                description: ID for the configuration under consideration
+            /snapshots:
+              description: Scoped under /configurations and /products
+              type: collection
+              /{snapshotId}:
+                type: collection
+                uriParameters:
+                  snapshotId:
+                    description: ID for the snapshot under consideration
         /projects:
           type: readCollection
           get:
@@ -325,21 +340,6 @@ resourceTypes:
                 uriParameters:
                   versionId:
                     description: Sysml ID for the version under consideration
-    /configurations:
-      type: collection
-      /{configurationId}:
-        type: collection
-        uriParameters:
-          configurationId:
-            description: ID for the configuration under consideration
-        /snapshots:
-          description: Scoped under /configurations and /products
-          type: collection
-          /{snapshotId}:
-            type: collection
-            uriParameters:
-              snapshotId:
-                description: ID for the snapshot under consideration
     /changesets:
       type: readCollection
       description: Track groups of changes together so they can be rolled back together if

@@ -29,6 +29,9 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
+
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -98,8 +101,12 @@ public class ModelSearch extends ModelGet {
 	private JSONArray executeSearchRequest(WebScriptRequest req) throws JSONException {
         String keyword = req.getParameter("keyword");
         if (keyword != null) {
+            // get timestamp if specified
+            String timestamp = req.getParameter("timestamp");
+            Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        
             for (String searchType: searchTypes) {
-                elementsFound.putAll(searchForElements(searchType, keyword));
+                elementsFound.putAll(searchForElements(searchType, keyword, dateTime));
             }
                     
             handleElements();

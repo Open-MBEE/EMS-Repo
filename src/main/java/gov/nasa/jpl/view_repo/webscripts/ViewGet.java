@@ -29,12 +29,14 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.Acm.JSON_TYPE_FILTER;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,9 +53,11 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ViewGet extends AbstractJavaWebScript {
+    protected boolean gettingDisplayedElements = false;
+    protected boolean gettingContainedViews = false;
 
-    private boolean demoMode = true;
-    protected boolean gettingContainedElements = false;
+    // injected via spring configuration
+    protected boolean isViewRequest = false;
 
     public ViewGet() {
         super();
@@ -66,12 +70,16 @@ public class ViewGet extends AbstractJavaWebScript {
 
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
-        String viewId = req.getServiceMatch().getTemplateVars().get("id");
+        String viewId = getIdFromRequest(req);
         if (!checkRequestVariable(viewId, "id")) {
             return false;
         }
 
-        EmsScriptNode view = findScriptNodeById(viewId);
+        // get timestamp if specified
+        String timestamp = req.getParameter("timestamp");
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+    
+        EmsScriptNode view = findScriptNodeById(viewId, dateTime);
         if (view == null) {
             log(LogLevel.ERROR, "View not found with id: " + viewId + ".\n", HttpServletResponse.SC_NOT_FOUND);
             return false;
@@ -84,6 +92,21 @@ public class ViewGet extends AbstractJavaWebScript {
         return true;
     }
 
+    protected static String getRawViewId( WebScriptRequest req ) {
+        if ( req == null || req.getServiceMatch() == null ||
+             req.getServiceMatch().getTemplateVars() == null ) {
+            return null; 
+        }
+        String viewId = req.getServiceMatch().getTemplateVars().get("id");
+        if ( viewId == null ) {
+            viewId = req.getServiceMatch().getTemplateVars().get("modelid");
+        }
+        if ( viewId == null ) {
+            viewId = req.getServiceMatch().getTemplateVars().get("elementid");
+        }
+        System.out.println("Got raw id = " + viewId);
+        return viewId;
+    }
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
@@ -92,21 +115,25 @@ public class ViewGet extends AbstractJavaWebScript {
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
-        boolean recurse = checkArgEquals(req, "recurse", "true") ? true : false;
+        // default recurse=true but recurse only applies to displayed elements and contained views
+        boolean recurse = checkArgEquals(req, "recurse", "false") ? false : true;
 
         JSONArray viewsJson = new JSONArray();
         if (validateRequest(req, status)) {
+            String viewId = getIdFromRequest( req );
+            gettingDisplayedElements = isDisplayedElementRequest( req );
+            if ( !gettingDisplayedElements ) {
+                gettingContainedViews = isContainedViewRequest( req );
+            } 
+            System.out.println("viewId = " + viewId);
+            
+            // get timestamp if specified
+            String timestamp = req.getParameter("timestamp");
+            Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        
             try {
-                String viewId = req.getServiceMatch().getTemplateVars().get("id");
-
-                gettingContainedElements = ( viewId.toLowerCase().trim().endsWith("/elements") );
-                if ( gettingContainedElements ) {
-                    viewId = viewId.substring( 0, viewId.lastIndexOf( "/elements" ) );
-                }
-                System.out.println("Got id = " + viewId);
-
-                handleView(viewId, viewsJson, recurse);
-            } catch (JSONException e) {
+                handleView(viewId, viewsJson, recurse, dateTime);
+            } catch ( JSONException e ) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
@@ -115,12 +142,13 @@ public class ViewGet extends AbstractJavaWebScript {
         if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
             try {
                 JSONObject json = new JSONObject();
-                json.put("views", viewsJson);
+                json.put(gettingDisplayedElements ? "elements" : "views", viewsJson);
                 model.put("res", json.toString(4));
             } catch (JSONException e) {
                 e.printStackTrace();
                 log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 model.put("res", response.toString());
+                e.printStackTrace();
             }
         } else {
             model.put("res", response.toString());
@@ -134,9 +162,8 @@ public class ViewGet extends AbstractJavaWebScript {
     }
 
 
-    private void handleView(String viewId, JSONArray viewsJson, boolean recurse) throws JSONException {
-        EmsScriptNode view = findScriptNodeById(viewId);
-        View mmsView = new View(view);
+    private void handleView(String viewId, JSONArray viewsJson, boolean recurse, Date dateTime) throws JSONException {
+        EmsScriptNode view = findScriptNodeById(viewId, dateTime);
 
         if (view == null) {
             log( LogLevel.ERROR, "View not found with ID: " + viewId,
@@ -144,45 +171,39 @@ public class ViewGet extends AbstractJavaWebScript {
         }
 
         if (checkPermissions(view, PermissionService.READ)) {
-            if ( gettingContainedElements ) {
-                Collection< EmsScriptNode > elems = mmsView.getDisplayedElements();
-                for ( EmsScriptNode n : elems ) {
-                    viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT ) );
-                }
-                return;
-            }
-            
-            int numThingsPut = 0;
-            if (demoMode) {
-                JSONObject json = mmsView.toViewJson();
-                JSONArray jarr = null;
-                if ( json != null ) {
-                    jarr = json.getJSONArray( "views" );
-                    if ( jarr != null ) {
-                        for ( int i = 0; i < jarr.length(); ++i ) {
-                            viewsJson.put( jarr.get( i ) );
-                            ++numThingsPut;
-                        }
+            try {
+                View v = new View(view);
+                if ( gettingDisplayedElements ) {
+                    System.out.println("+ + + + + gettingDisplayedElements");
+                    // TODO -- need to use recurse flag!
+                    Collection< EmsScriptNode > elems = v.getDisplayedElements();
+                    for ( EmsScriptNode n : elems ) {
+                        viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT ) );
                     }
-                }
-                System.out.println("*** added " + jarr);
-                if ( numThingsPut == 0 ) {
-                    System.out.println( "*** Generating views from expressions failed for viewId = "
-                            + viewId );
-                    System.out.println( "*** View = " + mmsView );
-                }
-            }
-            if ( numThingsPut == 0 ) {
-                viewsJson.put(view.toJSONObject(Acm.JSON_TYPE_FILTER.VIEW));
-                if (recurse) {
-                    JSONArray childrenJson = view.getChildrenViewsJSONArray();
-                    for (int ii = 0; ii < childrenJson.length(); ii++) {
-                        handleView(childrenJson.getString(ii), viewsJson, recurse);
-                        ++numThingsPut;
+                } else if ( gettingContainedViews ) {
+                    System.out.println("+ + + + + gettingContainedViews");
+                    Collection< EmsScriptNode > elems = v.getContainedViews( recurse, null );
+                    for ( EmsScriptNode n : elems ) {
+                        viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW ) );
                     }
+                } else {
+                    System.out.println("+ + + + + just the view");
+                    viewsJson.put( view.toJSONObject( JSON_TYPE_FILTER.VIEW ) );
                 }
+            } catch ( JSONException e ) {
+                log( LogLevel.ERROR, "Could not create views JSON array",
+                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * Need to differentiate between View or Element request - specified during Spring configuration
+     * @param flag
+     */
+    public void setIsViewRequest(boolean flag) {
+        isViewRequest = flag;
     }
 
 }

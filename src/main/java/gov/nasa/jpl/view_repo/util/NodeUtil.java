@@ -1,15 +1,22 @@
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.mbee.util.CompareUtils.GenericComparator;
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,9 +34,12 @@ import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.version.Version;
+import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ApplicationContextHelper;
 import org.apache.commons.digester.SetRootRule;
+import org.mozilla.javascript.Scriptable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
 
@@ -139,30 +149,69 @@ public class NodeUtil {
         return results;
     }
 
-    public static NodeRef findNodeRefByType(String name, SearchType type, ServiceRegistry services) {
-        return findNodeRefByType( name, type.prefix, services );
+    public static NodeRef findNodeRefByType( String name, SearchType type,
+                                             Date dateTime, boolean exactMatch,
+                                             ServiceRegistry services ) {
+        return findNodeRefByType( name, type.prefix, dateTime, exactMatch,
+                                  services );
     }
     
-    public static NodeRef findNodeRefByType(String name, String prefix, ServiceRegistry services) {
+    public static NodeRef findNodeRefByType( String specifier, String prefix,
+                                             Date dateTime, boolean exactMatch,
+                                             ServiceRegistry services ) {
+        ArrayList< NodeRef > refs =
+                findNodeRefsByType( specifier, prefix, dateTime, true,
+                                    exactMatch, services );
+        if ( Utils.isNullOrEmpty( refs ) ) return null;
+        NodeRef ref = refs.get( 0 );
+        return ref;
+    }
+
+    public static ArrayList< NodeRef >
+            findNodeRefsByType( String specifier, String prefix, Date dateTime,
+                                boolean justFirst, boolean exactMatch,
+                                ServiceRegistry services ) {
         ResultSet results = null;
+        ArrayList<NodeRef> nodeRefs = new ArrayList<NodeRef>();
         NodeRef nodeRef = null;
+        boolean gotResults = false;
         try {
-            results = findNodeRefsByType( name, prefix, services );
+            results = findNodeRefsByType( specifier, prefix, services );
             if (results != null) {
                 //boolean nameMatches = false;
                 for (ResultSetRow row: results) {
                     NodeRef nr = row.getNodeRef();
-//                    if ( nodeRef == null ) nodeRef = nr;
-//                    else {
+                    if ( nr == null ) continue;
+                    gotResults = true;
+
+                    // Get the version for the date/time if specified.
+                    if ( dateTime != null ) {
+                        nr = getNodeRefAtTime( nr, dateTime );
+                    }
+
+                    if ( nr == null ) continue;
+                    
                         // Make sure we didn't just get a near match.
                         EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
                         try {
-                        String acmType = Utils.join( prefix.split( "[\\W]+" ), ":").replaceFirst( "^:", "" );
-                        Object o = esn.getProperty( acmType );
-                        if ( ( "" + o ).equals( name ) ) {
-                            nodeRef = nr;
-                            break;
-                        }
+                            if ( !esn.checkPermissions( PermissionService.READ ) ) {
+                                continue;
+                            }
+                            boolean match = true;
+                            if ( exactMatch ) {
+                                String acmType =
+                                        Utils.join( prefix.split( "[\\W]+" ), ":" )
+                                             .replaceFirst( "^:", "" );
+                                Object o = esn.getProperty( acmType );
+                                if ( !( "" + o ).equals( specifier ) ) {
+                                    match = false;
+                                }
+                            }
+                            if ( match ) {
+                                nodeRef = nr;
+                                nodeRefs.add( nodeRef );
+                                if ( justFirst ) break;
+                            }
                         } catch ( Throwable e ) {
                             e.printStackTrace();
                         }
@@ -174,19 +223,31 @@ public class NodeUtil {
                 results.close();
             }
         }
-
-        return nodeRef;     
+        // If we found a NodeRef but still have null (maybe because a version
+        // didn't exist at the time), try again for the latest.
+        if ( nodeRefs.isEmpty()//nodeRef == null 
+                && dateTime != null && gotResults) {
+            nodeRefs = findNodeRefsByType( specifier, prefix, null, justFirst,
+                                           exactMatch, services );
+            //nodeRef = findNodeRefByType( specifier, prefix, null, services );
+        }
+        return nodeRefs;     
     }
     
     /**
-     * Find a NodeReference by name (returns first match, assuming things are unique)
+     * Find a NodeReference by name (returns first match, assuming things are
+     * unique)
      * 
-     * @param id Node name to search for
-     * @return     NodeRef of first match, null otherwise
+     * @param id
+     *            Node name to search for
+     * @param dateTime
+     *            the time specifying which version of the NodeRef to find; null
+     *            defaults to the latest version
+     * @return NodeRef of first match, null otherwise
      */
-    public static NodeRef findNodeRefById(String id, ServiceRegistry services) {
-        NodeRef r = findNodeRefByType(id, SearchType.ID, services); // TODO: temporarily search by ID
-        if ( r == null ) r = findNodeRefByType(id, "@cm\\:name:\"", services);
+    public static NodeRef findNodeRefById(String id, Date dateTime, ServiceRegistry services) {
+        NodeRef r = findNodeRefByType(id, SearchType.ID, dateTime, true, services); // TODO: temporarily search by ID
+        if ( r == null ) r = findNodeRefByType(id, "@cm\\:name:\"", dateTime, true, services);
         return r;
     }
     
@@ -198,12 +259,12 @@ public class NodeUtil {
      * @param pattern   Pattern to look for
      */
     public static Map< String, EmsScriptNode >
-    searchForElements( String pattern,
+    searchForElements( String pattern, Date dateTime,
                        ServiceRegistry services, StringBuffer response,
                        Status status) {
         Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
         for (SearchType searchType: SearchType.values() ) {
-            elementsFound.putAll(searchForElements(searchType.prefix, pattern, services, response, status));
+            elementsFound.putAll(searchForElements(searchType.prefix, pattern, dateTime, services, response, status));
         }
         return elementsFound;
     }
@@ -215,24 +276,28 @@ public class NodeUtil {
      * @param pattern   Pattern to look for
      */
     public static Map< String, EmsScriptNode >
-            searchForElements( String type, String pattern,
+            searchForElements( String type, String pattern, Date dateTime,
                                ServiceRegistry services, StringBuffer response,
                                Status status ) {
         Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
 
-        ResultSet resultSet = null;
-        try {
+        
+        //ResultSet resultSet = null;
+        ArrayList<NodeRef> resultSet = null;
+        //try {
 
-            resultSet = findNodeRefsByType(pattern, type, getServices());
+            resultSet = findNodeRefsByType( pattern, type, dateTime, false, false, getServices() );
+            //resultSet = findNodeRefsByType(pattern, type, getServices());
 
 //            pattern = type + pattern + "\"";
 //            resultSet =
 //                    services.getSearchService().query( getStoreRef(),
 //                                                       SearchService.LANGUAGE_LUCENE,
 //                                                       pattern );
-            for ( ResultSetRow row : resultSet ) {
+            for ( NodeRef nodeRef : resultSet ) {
+            //for ( ResultSetRow row : resultSet ) {
                 EmsScriptNode node =
-                        new EmsScriptNode( row.getNodeRef(), services, response );
+                        new EmsScriptNode( nodeRef, services, response );
                 if ( node.checkPermissions( PermissionService.READ, response, status ) ) {
                     String id = (String)node.getProperty( Acm.ACM_ID );
                     if ( id != null ) {
@@ -240,23 +305,23 @@ public class NodeUtil {
                     }
                 }
             }
-        } catch (Exception e) {
-            if ( response != null || status != null ) {
-                String msg = "Error! Could not parse search: " + pattern + ".\n"
-                             + e.getLocalizedMessage();
-                System.out.println(msg);
-                e.printStackTrace( System.out );
-                if ( response != null ) response.append( msg );
-                if ( status != null ) status.setCode( HttpServletResponse.SC_BAD_REQUEST,
-                                                      msg );
-            } else {
-                e.printStackTrace();
-            }
-        } finally {
-            if (resultSet != null) {
-                resultSet.close();
-            }
-        }
+//        } catch (Exception e) {
+//            if ( response != null || status != null ) {
+//                String msg = "Error! Could not parse search: " + pattern + ".\n"
+//                             + e.getLocalizedMessage();
+//                System.out.println(msg);
+//                e.printStackTrace( System.out );
+//                if ( response != null ) response.append( msg );
+//                if ( status != null ) status.setCode( HttpServletResponse.SC_BAD_REQUEST,
+//                                                      msg );
+//            } else {
+//                e.printStackTrace();
+//            }
+//        } finally {
+//            if (resultSet != null) {
+//                resultSet.close();
+//            }
+//        }
 
         return searchResults;
     }
@@ -530,12 +595,20 @@ public class NodeUtil {
      * @return  ScriptNode of site with name siteName
      */
     public static EmsScriptNode getSiteNode( String siteName,
+                                             Date dateTime,
                                              ServiceRegistry services,
                                              StringBuffer response ) {
         if ( Utils.isNullOrEmpty( siteName ) ) return null;
         SiteInfo siteInfo = services.getSiteService().getSite(siteName);
         if (siteInfo != null) {
-            return new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+            NodeRef siteRef = siteInfo.getNodeRef();
+            if ( dateTime != null ) {
+                NodeRef vRef = NodeUtil.getNodeRefAtTime( siteRef, dateTime );
+                if ( vRef != null ) siteRef = vRef;
+            }
+
+            EmsScriptNode siteNode = new EmsScriptNode(siteRef, services, response);
+            return siteNode;
         }
         return null;
     }
@@ -580,6 +653,128 @@ public class NodeUtil {
         if ( !node.exists() ) return null;
         return n;
     }
+
+//    private static <T> int indexedBinarySearchLower(List<? extends T> l, T key, Comparator<? super T> c) {
+//        int low = 0;
+//        int high = l.size()-1;
+//
+//        while (low <= high) {
+//            int mid = (low + high) >>> 1;
+//            T midVal = l.get(mid);
+//            int cmp = c.compare(midVal, key);
+//
+//            if (cmp < 0)
+//                low = mid + 1;
+//            else if (cmp > 0)
+//                high = mid - 1;
+//            else
+//                return mid; // key found
+//        }
+//        return -(low + 1);  // key not found
+//    }
+
+
+    
+    public static class VersionLowerBoundComparator implements Comparator< Object > {
+        
+        @Override
+        public int compare( Object o1, Object o2 ) {
+            Date d1 = null;
+            Date d2 = null;
+            if ( o1 instanceof Version ) {
+                d1 = ((Version)o1).getFrozenModifiedDate();
+            } else if ( o1 instanceof Date ) {
+                d1 = (Date)o1;
+            } else if ( o1 instanceof Long ) {
+                d1 = new Date( (Long)o1 );
+            } else if ( o1 instanceof String ) {
+                d1 = TimeUtils.dateFromTimestamp( (String)o1 );
+            }
+            if ( o2 instanceof Version ) {
+                d2 = ((Version)o2).getFrozenModifiedDate();
+            } else if ( o2 instanceof Date ) {
+                d2 = (Date)o2;
+            } else if ( o2 instanceof Long ) {
+                d2 = new Date( (Long)o2 );
+            } else if ( o1 instanceof String ) {
+                d2 = TimeUtils.dateFromTimestamp( (String)o2 );
+            }
+            // more recent first
+            return -GenericComparator.instance().compare( d1, d2 );
+        }
+    }
+    
+    public static VersionLowerBoundComparator versionLowerBoundComparator =
+            new VersionLowerBoundComparator();
+    
+    public static NodeRef getNodeRefAtTime( String id, String timestamp ) {
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        NodeRef ref = findNodeRefById( id, dateTime, getServices() );
+        //return getNodeRefAtTime( ref, timestamp );
+        return ref;
+    }
+
+    public static NodeRef getNodeRefAtTime( NodeRef ref, String timestamp ) {
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        return getNodeRefAtTime( ref, dateTime );
+    }
+    
+    /**
+     * Get the version of the NodeRef that was the most current at the specified
+     * date/time.
+     * 
+     * @param ref
+     *            some version of the NodeRef
+     * @param dateTime
+     *            the date/time, specifying the version
+     * @return the version of the NodeRef that was the latest version at the specified time, or if before any version
+     */
+    public static NodeRef getNodeRefAtTime( NodeRef ref, Date dateTime ) {
+        if ( dateTime == null ) {
+            getServices().getVersionService().getCurrentVersion( ref );
+        }
+        VersionHistory history = getServices().getVersionService().getVersionHistory( ref );
+        if (history == null) {
+        		// Versioning doesn't make versions until the first save...
+        		EmsScriptNode node = new EmsScriptNode(ref, services);
+        		if (dateTime != null && dateTime.compareTo((Date)node.getProperty("cm:created")) < 0) {
+        			return null;
+        		}
+        		return ref;
+        }
+        
+        Collection< Version > versions = history.getAllVersions();
+        Vector<Version> vv = new Vector<Version>( versions );
+        if ( Utils.isNullOrEmpty( vv ) ) {
+            // TODO - throw error?!
+            return null;
+        }
+        int index = Collections.binarySearch( vv, dateTime, versionLowerBoundComparator );
+        Version v = null;
+        if ( index < 0 ) {
+            // search returned index = -(lowerBound+1), so lowerbound = -index-1
+            index = -index - 1;
+        }
+        if ( index < 0 ) {
+            v = vv.get( 0 );
+            if ( v != null ) {
+                Date d = v.getFrozenModifiedDate();
+                if ( d != null && d.after( dateTime ) ) {
+                    return v.getVersionedNodeRef();
+                }
+            }
+            // TODO -- throw error?!
+            return null;
+        } else if ( index >= vv.size() ) {
+            // TODO -- throw error?!
+            return null;
+        } else {
+            v = vv.get( index );
+        }
+        return v.getVersionedNodeRef();
+    }
+
+    
     /**
      * Find or create a folder
      * 
@@ -599,7 +794,7 @@ public class NodeUtil {
             Matcher m = p.matcher( path );
             if ( m.matches() ) {
                 String siteName = m.group( 1 ); 
-                source = getSiteNode( siteName, services, response );
+                source = getSiteNode( siteName, null, services, response );
                 if ( source != null ) {
                     result = mkdir( source, path, services, response, status );
                     if ( result != null ) return result;

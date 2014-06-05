@@ -29,14 +29,13 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm.JSON_TYPE_FILTER;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.Acm;
-import gov.nasa.jpl.view_repo.util.NodeUtil;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +43,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -53,8 +51,13 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+// TODO -- this should be a subclass of ViewGet
 public class ProductGet extends AbstractJavaWebScript {
-	protected boolean gettingContainedElements = false;
+	protected boolean gettingDisplayedElements = false;
+    protected boolean gettingContainedViews = false;
+
+    // injected via spring configuration
+    protected boolean isViewRequest = false;
 
 
     public ProductGet() {
@@ -67,12 +70,16 @@ public class ProductGet extends AbstractJavaWebScript {
 	
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		String productId = req.getServiceMatch().getTemplateVars().get("id");
+		String productId = AbstractJavaWebScript.getIdFromRequest(req);
 		if (!checkRequestVariable(productId, "id")) {
 			return false;
 		}
-		
-		EmsScriptNode product = findScriptNodeById(productId);
+
+		// get timestamp if specified
+        String timestamp = req.getParameter("timestamp");
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+	
+		EmsScriptNode product = findScriptNodeById(productId, dateTime);
 		if (product == null) {
 			log(LogLevel.ERROR, "Product not found with id: " + productId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
@@ -95,20 +102,31 @@ public class ProductGet extends AbstractJavaWebScript {
 
 		JSONArray productsJson = null;
 		if (validateRequest(req, status)) {
-			String productId = req.getServiceMatch().getTemplateVars().get("id");
-			gettingContainedElements  = ( productId.toLowerCase().trim().endsWith("/elements") );
-			if ( gettingContainedElements ) {
-			    productId = productId.substring( 0, productId.lastIndexOf( "/elements" ) );
-			}
-			System.out.println("Got id = " + productId);
-			productsJson = handleProduct(productId);
+			String productId = getIdFromRequest( req );
+			gettingDisplayedElements = isDisplayedElementRequest( req );
+			if ( !gettingDisplayedElements ) {
+			    gettingContainedViews  = isContainedViewRequest( req );
+			} 
+			System.out.println("productId = " + productId);
+			
+			// default recurse=true but recurse only applies to displayed elements and contained views
+            boolean recurse = checkArgEquals(req, "recurse", "false") ? false : true;
+
+            // get timestamp if specified
+            String timestamp = req.getParameter("timestamp");
+            Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        
+			productsJson = handleProduct(productId, recurse, dateTime);
 		}
 
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK && productsJson != null) {
 			try {
-			    JSONObject top = new JSONObject();
-			    top.put("products", productsJson);
-				model.put("res", top.toString(4));
+			    JSONObject json = new JSONObject();
+                json.put( gettingDisplayedElements ? "elements"
+                                                  : ( gettingContainedViews
+                                                      ? "views" : "products" ),
+                         productsJson );
+				model.put("res", json.toString(4));
 			} catch (JSONException e) {
 				log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				model.put("res", response.toString());
@@ -126,79 +144,33 @@ public class ProductGet extends AbstractJavaWebScript {
 	}
 
 	
-	public Collection<EmsScriptNode> getDisplayedElements(EmsScriptNode product) {
-	    ArrayList<EmsScriptNode> nodes = new ArrayList<EmsScriptNode>();
-        Object elementValue = product.getProperty( Acm.ACM_VIEW_2_VIEW );
-        if ( elementValue instanceof JSONArray ) {
-            JSONArray jarr = (JSONArray)elementValue;
-            for ( int i=0; i<jarr.length(); ++i ) {
-                Object o = null;
-                try {
-                    o = jarr.get( i );
-                } catch ( JSONException e ) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                if ( o instanceof JSONObject ) {
-                    JSONObject jo = (JSONObject)o;
-                    if ( jo.has( "id" ) ) {
-                        String id = null;
-                        try {
-                            id = jo.getString( "id" );
-                            if ( id != null && id.equals( product.getProperty( Acm.ACM_ID ) ) ) {
-                                if ( jo.has( "childrenViews" ) ) {
-                                    Object childrenViews = null;
-                                    childrenViews = jo.getString( "childrenViews" );
-                                    JSONArray jarr2 = null;
-                                    if ( childrenViews instanceof String ) {
-                                        jarr2 = new JSONArray( (String)childrenViews );
-                                    } else if ( childrenViews instanceof JSONArray ) {
-                                        jarr2 = (JSONArray)childrenViews;
-                                    } else if ( childrenViews instanceof Collection ) {
-                                        jarr2 = new JSONArray( (Collection<?>)childrenViews );
-                                    }
-                                    if ( jarr2 != null ) {
-                                        for ( int j=0; j<jarr2.length(); ++j ) {
-                                            Object oo = jarr2.get( j );
-                                            if ( oo instanceof String ) {
-                                                NodeRef ref = NodeUtil.findNodeRefById( (String)oo, services );
-                                                if ( ref != null ) {
-                                                    View v = new View( new EmsScriptNode( ref, services ) );
-                                                    // TODO -- need to check for infinite loop!
-                                                    nodes.addAll( v.getDisplayedElements() );
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        } catch ( JSONException e ) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-        }
-        return nodes;
-	}
-	
-	private JSONArray handleProduct(String productId) {
+	private JSONArray handleProduct(String productId, boolean recurse, Date dateTime) {
 	    JSONArray productsJson = new JSONArray();
-		EmsScriptNode product = findScriptNodeById(productId);
+		EmsScriptNode product = findScriptNodeById(productId, dateTime);
+		
 		if (product == null) {
-			log(LogLevel.ERROR, "Product not found with ID: " + productId, HttpServletResponse.SC_NOT_FOUND);
+			log( LogLevel.ERROR, "Product not found with ID: " + productId,
+			     HttpServletResponse.SC_NOT_FOUND );
 		}
 
 		if (checkPermissions(product, PermissionService.READ)){ 
             try {
-                if ( gettingContainedElements ) {
-                    Collection< EmsScriptNode > elems = getDisplayedElements( product );
+                View v = new View( product );
+                if ( gettingDisplayedElements ) {
+                    System.out.println("+ + + + + gettingDisplayedElements");
+                    Collection< EmsScriptNode > elems = v.getDisplayedElements();
                     for ( EmsScriptNode n : elems ) {
                         productsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT ) );
                     }
+                } else if ( gettingContainedViews ) {
+                    System.out.println("+ + + + + gettingContainedViews");
+                    Collection< EmsScriptNode > elems = v.getContainedViews( recurse, null );
+                    for ( EmsScriptNode n : elems ) {
+                        productsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW ) );
+                    }
                 } else {
-                    productsJson.put( product.toJSONObject( Acm.JSON_TYPE_FILTER.PRODUCT ) );
+                    System.out.println("+ + + + + just the product");
+                    productsJson.put( product.toJSONObject( JSON_TYPE_FILTER.PRODUCT ) );
                 }
             } catch ( JSONException e ) {
                 log( LogLevel.ERROR, "Could not create products JSON array",
@@ -209,5 +181,13 @@ public class ProductGet extends AbstractJavaWebScript {
 		
 		return productsJson;
 	}
+
+    /**
+     * Need to differentiate between View or Element request - specified during Spring configuration
+     * @param flag
+     */
+    public void setIsViewRequest(boolean flag) {
+        isViewRequest = flag;
+    }
 
 }

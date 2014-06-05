@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -390,7 +391,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     public Collection< EmsScriptNode >
             getElementWithIdentifier( Object context, String specifier ) {
         // TODO -- need to take into account the context!
-        NodeRef element = NodeUtil.findNodeRefById( specifier, services );
+        NodeRef element = NodeUtil.findNodeRefById( specifier, null, services );
         EmsScriptNode emsSN = new EmsScriptNode( element, services );
         return Utils.newList( emsSN );
     }
@@ -398,11 +399,16 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     @Override
     public Collection< EmsScriptNode > getElementWithName( Object context,
                                                            String specifier ) {
+        return getElementWithName(context, specifier, null);
+    }
+    public Collection< EmsScriptNode > getElementWithName( Object context,
+                                                           String specifier,
+                                                           Date dateTime ) {
         StringBuffer response = new StringBuffer();
         Status status = new Status();
         // TODO -- need to take into account the context!
         Map< String, EmsScriptNode > elements =
-                NodeUtil.searchForElements( specifier, services, response,
+                NodeUtil.searchForElements( specifier, dateTime, services, response,
                                             status );
         if ( elements != null ) return elements.values();
         return Collections.emptyList();
@@ -825,12 +831,24 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 //	        if ( elements != null && !elements.isEmpty()) return elements.values();
 	        
 //	        if ( elements == null ) elements = new LinkedHashMap<String, EmsScriptNode>(); 
-	        Collection< EmsScriptNode > elementColl = 
-	                NodeUtil.luceneSearchElements( "TYPE:\"sysml:" + specifier + "\"" );
+	        
+	        Collection< EmsScriptNode > elementColl = null;
+	        try {
+	        		elementColl = NodeUtil.luceneSearchElements( "TYPE:\"sysml:" + specifier + "\"" );
+	        } catch (Exception e) {
+	        		// if lucene query fails, most likely due to non-existent type, we should look for aspect now
+	        		try {
+	        			elementColl = NodeUtil.luceneSearchElements( "ASPECT:\"sysml:" + specifier + "\"");
+	        		} catch (Exception ee) {
+	        			// do nothing
+	        		}
+	        }
 //	        for ( EmsScriptNode e : elementColl ) {
 //	            elements.put( e.getId(), e );
 //	        }
-            if ( elementColl != null && !elementColl.isEmpty()) return elementColl;
+            if ( elementColl != null && !elementColl.isEmpty()) {
+            		return elementColl;
+            }
 	        
     	}
     	
@@ -947,7 +965,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     		
 			// If it is a Property type, then the value is a NodeRef, which
 			// we convert to a EmsScriptNode:
-			if (node.getTypeShort().equals(Acm.ACM_PROPERTY)) {
+    			if (node.hasAspect(Acm.ACM_PROPERTY)) {
 				
 		    	List<EmsScriptNode> returnList = new ArrayList<EmsScriptNode>();
 				Object valueNode = node.getProperty(Acm.ACM_VALUE);

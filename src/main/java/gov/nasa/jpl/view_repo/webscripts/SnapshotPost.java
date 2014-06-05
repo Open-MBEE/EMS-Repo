@@ -73,7 +73,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         clearCaches();
 
         String viewId = req.getServiceMatch().getTemplateVars().get("viewid");
-        EmsScriptNode topview = findScriptNodeById(viewId);
+        EmsScriptNode topview = findScriptNodeById(viewId, null);
         EmsScriptNode snapshotFolderNode = getSnapshotFolderNode(topview);
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -124,7 +124,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     public EmsScriptNode createSnapshot(EmsScriptNode view, String viewId) {
         String snapshotName = viewId + "_" + System.currentTimeMillis();
         String contextPath = "alfresco/service/";
-        EmsScriptNode viewNode = findScriptNodeById(viewId);
+        EmsScriptNode viewNode = findScriptNodeById(viewId, null);
         EmsScriptNode snapshotFolder = getSnapshotFolderNode(viewNode);
         return createSnapshot(view, viewId, snapshotName, contextPath, snapshotFolder);
     }
@@ -141,7 +141,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         MoaProductGet moaService = new MoaProductGet(repository, services);
         moaService.setRepositoryHelper(repository);
         moaService.setServices(services);
-        JSONObject snapshotJson = moaService.generateMoaProduct(viewId, contextPath);
+        JSONObject snapshotJson = moaService.generateMoaProduct(viewId, contextPath, null);
         if (snapshotJson == null) {
             log(LogLevel.ERROR, "Could not generate the snapshot JSON", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return null;
