@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>delete comments</shortname>
+    <description>
+    	delete comments
+	</description>
+  	<url>/workspaces/views/elements/comments</url>
+  	<format default="json">any</format>
+  	<authentication>user</authentication>
+  	<transaction allow="readwrite">required</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

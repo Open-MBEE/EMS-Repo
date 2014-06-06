@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>get configurations</shortname>
+    <description>
+    	get configurations
+	</description>
+  	<url>/workspaces/sites/configurations</url>
+  	<format default="json">any</format>
+  	<authentication>user</authentication>
+  	<transaction allow="read">required</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>get views</shortname>
+    <description>
+    	get views
+	</description>
+  	<url>/workspaces/sites/products/views</url>
+  	<format default="json">any</format>
+  	<authentication>user</authentication>
+  	<transaction allow="read">required</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

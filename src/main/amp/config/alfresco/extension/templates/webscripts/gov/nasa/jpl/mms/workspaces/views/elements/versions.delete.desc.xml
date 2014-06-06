@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>delete versions</shortname>
+    <description>
+    	delete versions
+	</description>
+  	<url>/workspaces/views/elements/versions</url>
+  	<format default="json">any</format>
+  	<authentication>user</authentication>
+  	<transaction allow="readwrite">required</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

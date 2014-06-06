@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>get product with {productId}</shortname>
+    <description>
+    	get product with {productId}
+	</description>
+  	<url>/workspaces/{workspaceId}/sites/{siteId}/products/{productId}</url>
+  	<format default="json">any</format>
+  	<authentication>user</authentication>
+  	<transaction allow="read">required</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>post elements</shortname>
+    <description>
+    	post elements
+	</description>
+  	<url>/workspaces/elements</url>
+  	<format default="json">any</format>
+  	<authentication>user</authentication>
+  	<transaction allow="readwrite">required</transaction>
+  	<family>MMS REST API</family>
+ </webscript>
