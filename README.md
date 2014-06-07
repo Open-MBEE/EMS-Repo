@@ -8,7 +8,15 @@ update maven project:
 	right click maven project
 	Maven -> Update Project...
 
+*This Eclipse project can be built with our without dependencies to the bae/uti/sysml projects. By default,
+this project depends on the BUS projects. To take them out:*
+* Remove the BUS projects from the build path (this will modify the .classpath file, which you shouldn't commit).
+ * Right click the project, select _Properties_, select _Java Build Path_, select _Projects_ tab and remove the projects.
+* Configure Eclipse to use the proper maven profile that uses the appropriate maven dependencies that pull from artifactory.
+ * Right click the project, select _Properties_, select _Maven_, set the Active Maven Profiles to _mbee-dev_. 
+
 build with maventest in command line
+	
 	cd /home/username/git/alfresco-view-repo
 	# for those that don't want to load bae/util/sysml projects
 	# also need to remove the src dependencies on those packages in .classpath
