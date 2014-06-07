@@ -3,7 +3,7 @@
     <description>
     	post comments
 	</description>
-  	<url>/workspaces/views/elements/comments</url>
+  	<url>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}/comments</url>
   	<format default="json">any</format>
   	<authentication>user</authentication>
   	<transaction allow="readwrite">required</transaction>

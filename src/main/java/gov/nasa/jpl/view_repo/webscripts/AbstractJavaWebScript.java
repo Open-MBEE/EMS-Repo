@@ -96,6 +96,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		this.services = registry;
 	}
 
+	public AbstractJavaWebScript( Repository repository,
+                                  ServiceRegistry services,
+                                  StringBuffer response ) {
+        this.setRepositoryHelper( repository );
+        this.setServices( services );
+        this.response = response ;
+    }
+	   
     public AbstractJavaWebScript(Repository repositoryHelper, ServiceRegistry registry) {
         this.setRepositoryHelper(repositoryHelper);
         this.setServices(registry);
@@ -106,7 +114,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         super();
     }
     
-	/**
+
+    /**
 	 * Utility for clearing out caches
 	 * TODO: do we need to clear caches if Spring isn't making singleton instances
 	 */
@@ -164,13 +173,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
  
     protected EmsScriptNode getSiteNodeFromRequest(WebScriptRequest req) {
-        String siteName; 
+        String siteName = null; 
         // get timestamp if specified
         String timestamp = req.getParameter("timestamp");
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         
-        siteName = req.getServiceMatch().getTemplateVars().get("id");
-
+        String[] siteKeys = {"id", "siteId", "siteName"};
+        
+        for (String siteKey: siteKeys) {
+            siteName = req.getServiceMatch().getTemplateVars().get( siteKey );
+            if (siteName != null) break;
+        }
+        
         return getSiteNode( siteName, dateTime );
     }
     
@@ -357,6 +371,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         logLevel = level;
     }
     
+    /**
+     * Should create the new instances with the response in constructor, so
+     * this can be removed every where
+     * @param instance
+     */
+    @Deprecated
     public void appendResponseStatusInfo(AbstractJavaWebScript instance) {
         response.append(instance.getResponse());
         responseStatus.setCode(instance.getResponseStatus().getCode());

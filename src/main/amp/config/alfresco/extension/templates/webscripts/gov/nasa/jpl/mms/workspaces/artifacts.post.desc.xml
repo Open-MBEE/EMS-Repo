@@ -3,7 +3,7 @@
     <description>
     	post artifacts
 	</description>
-  	<url>/workspaces/artifacts</url>
+  	<url>/workspaces/{workspaceId}/artifacts</url>
   	<format default="json">any</format>
   	<authentication>user</authentication>
   	<transaction allow="readwrite">required</transaction>

@@ -3,9 +3,9 @@
     <description>
     	get snapshots
 	</description>
-  	<url>/workspaces/sites/products/snapshots</url>
+  	<url>/workspaces/{workspaceId}/sites/{siteId}/products/{productId}/snapshots</url>
   	<format default="json">any</format>
   	<authentication>user</authentication>
-  	<transaction allow="read">required</transaction>
+  	<transaction allow="readonly">required</transaction>
   	<family>MMS REST API</family>
  </webscript>

@@ -3,7 +3,7 @@
     <description>
     	put snapshots
 	</description>
-  	<url>/workspaces/sites/configurations/snapshots</url>
+  	<url>/workspaces/{workspaceId}/sites/{siteId}/configurations/{configurationId}/snapshots</url>
   	<format default="json">any</format>
   	<authentication>user</authentication>
   	<transaction allow="readwrite">required</transaction>

@@ -6,6 +6,6 @@
   	<url>/workspaces/{workspaceId}/sites/{siteId}/configurations/{configurationId}</url>
   	<format default="json">any</format>
   	<authentication>user</authentication>
-  	<transaction allow="read">required</transaction>
+  	<transaction allow="readonly">required</transaction>
   	<family>MMS REST API</family>
  </webscript>

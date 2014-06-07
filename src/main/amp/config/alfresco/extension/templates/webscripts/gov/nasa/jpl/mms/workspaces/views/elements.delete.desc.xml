@@ -3,7 +3,7 @@
     <description>
     	delete elements
 	</description>
-  	<url>/workspaces/views/elements</url>
+  	<url>/workspaces/{workspaceId}/views/{viewId}/elements</url>
   	<format default="json">any</format>
   	<authentication>user</authentication>
   	<transaction allow="readwrite">required</transaction>

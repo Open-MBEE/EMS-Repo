@@ -3,7 +3,7 @@
     <description>
     	delete views
 	</description>
-  	<url>/workspaces/views</url>
+  	<url>/workspaces/{workspaceId}/views</url>
   	<format default="json">any</format>
   	<authentication>user</authentication>
   	<transaction allow="readwrite">required</transaction>

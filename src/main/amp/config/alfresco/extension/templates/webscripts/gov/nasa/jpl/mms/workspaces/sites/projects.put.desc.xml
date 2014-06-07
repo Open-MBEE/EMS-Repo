@@ -3,7 +3,7 @@
     <description>
     	put projects
 	</description>
-  	<url>/workspaces/sites/projects</url>
+  	<url>/workspaces/{workspaceId}/sites/{siteId}/projects</url>
   	<format default="json">any</format>
   	<authentication>user</authentication>
   	<transaction allow="readwrite">required</transaction>

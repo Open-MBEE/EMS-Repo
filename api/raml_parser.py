@@ -73,8 +73,7 @@ def createFiles(path, name, resource):
 		templateVars.add(name)
 		writeMethodFiles(path, name)
 	else:
-		path = cleanPath(path)
-		execCmd('mkdir -p ' + FILENAME_PREFIX + path + name)
+		execCmd('mkdir -p ' + FILENAME_PREFIX + cleanPath(path) + name)
 		writeMethodFiles(path, name)
 
 
@@ -103,7 +102,7 @@ def writeMethodFiles(path, name):
 
 def loadNameSpace(path, name, method):
 	if method == 'get':
-		permission = 'read'
+		permission = 'readonly'
 	else:
 		permission = 'readwrite'
 	if name.find('{') >= 0:

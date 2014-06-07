@@ -3,9 +3,9 @@
     <description>
     	get configurations
 	</description>
-  	<url>/workspaces/sites/configurations</url>
+  	<url>/workspaces/{workspaceId}/sites/{siteId}/configurations</url>
   	<format default="json">any</format>
   	<authentication>user</authentication>
-  	<transaction allow="read">required</transaction>
+  	<transaction allow="readonly">required</transaction>
   	<family>MMS REST API</family>
  </webscript>

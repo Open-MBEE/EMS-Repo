@@ -18,6 +18,7 @@
 -->
 <beans>
     <import resource="javawebscript-service-context.xml" />
+    <import resource="mms-service-context.xml" />
     
     <!-- A simple class that is initialized by Spring -->
     <bean id="changeme.exampleBean" class="gov.nasa.jpl.view_repo.Demo" init-method="init" />

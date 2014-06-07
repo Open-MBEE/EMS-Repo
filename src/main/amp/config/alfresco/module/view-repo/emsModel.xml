@@ -77,6 +77,17 @@
             				<many>true</many>
             			</target>
             		</association>
+            		<association name="ems:configuredProducts">
+            		  <source>
+            		      <mandatory>false</mandatory>
+            		      <many>true</many>
+            		  </source>
+            		  <target>
+            		      <class>view2:Product</class>
+            		      <mandatory>false</mandatory>
+            		      <many>true</many>
+            		  </target>
+            		</association>
             </associations>
             <overrides/>
             <mandatory-aspects/>
