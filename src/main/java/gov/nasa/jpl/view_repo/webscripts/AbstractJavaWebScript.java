@@ -197,11 +197,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @param id	Node id to search for
 	 * @return		ScriptNode with name if found, null otherwise
 	 */
-//    protected EmsScriptNode findScriptNodeById(String id) {
-//        return findScriptNodeById( id, null );
-//    }
 	protected EmsScriptNode findScriptNodeById(String id, Date dateTime) {
-//		long start=System.currentTimeMillis();
 		EmsScriptNode result = null;
 
 		// be smart about search if possible
@@ -209,12 +205,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			result = foundElements.get(id);
 			EmsScriptNode resultAtTime = result.getVersionAtTime( dateTime );
 			if ( resultAtTime != null ) result = resultAtTime;
-//		} else if (name.endsWith("_pkg")) {
-//			String elementName = name.replace("_pkg", "");
-//			EmsScriptNode elementNode = findScriptNodeByName(elementName);
-//			if (elementNode != null) {
-//			    result = elementNode.getParent().childByNamePath(name);
-//			}
 		} else {
 			NodeRef nodeRef = NodeUtil.findNodeRefById(id, dateTime, services);
 			if (nodeRef != null) {
@@ -223,7 +213,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			}
 		}
 		
-//		long end=System.currentTimeMillis(); System.out.println("\tfindScriptNodeByName " + name + ": " + (end-start) + " ms");
 		return result;
 	}
 

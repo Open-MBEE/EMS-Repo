@@ -29,7 +29,7 @@ public class MmsConfigurationsGet extends AbstractJavaWebScript {
 
         try {
             ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, response);
-            jsonObject.put("configurations", configWs.handleConfigurations(req));
+            jsonObject.put("configurations", configWs.handleConfigurations(req, true));
             model.put("res", jsonObject.toString(2));
         } catch (Exception e) {
             model.put("res", response.toString());

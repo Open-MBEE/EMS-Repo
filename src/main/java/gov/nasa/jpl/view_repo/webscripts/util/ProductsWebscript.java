@@ -46,30 +46,33 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         EmsScriptNode siteNode = getSiteNodeFromRequest( req );
         JSONArray productsJson = new JSONArray();
 
-        if ( siteNode != null ) {
-            // get timestamp if specified
-            String timestamp = req.getParameter( "timestamp" );
-            Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        if (siteNode == null) {
+            log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
+            return productsJson;
+        }
 
-            Set< EmsScriptNode > productSet =
-                    WebScriptUtil.getAllNodesInPath( siteNode.getQnamePath(),
-                                                     "ASPECT", Acm.ACM_PRODUCT,
-                                                     dateTime, services,
-                                                     response );
-            for ( EmsScriptNode product : productSet ) {
-                JSONObject productJson = new JSONObject();
-                String productId = (String)product.getProperty( Acm.ACM_ID );
+        // get timestamp if specified
+        String timestamp = req.getParameter( "timestamp" );
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
-                productJson.put( Acm.JSON_ID, productId );
-                productJson.put( Acm.JSON_NAME,
-                                 product.getProperty( Acm.ACM_NAME ) );
-                productJson.put( "snapshots",
-                                 getProductSnapshots( productId,
-                                                      req.getContextPath(),
-                                                      dateTime ) );
+        Set< EmsScriptNode > productSet =
+                WebScriptUtil.getAllNodesInPath( siteNode.getQnamePath(),
+                                                 "ASPECT", Acm.ACM_PRODUCT,
+                                                 dateTime, services,
+                                                 response );
+        for ( EmsScriptNode product : productSet ) {
+            JSONObject productJson = new JSONObject();
+            String productId = (String)product.getProperty( Acm.ACM_ID );
 
-                productsJson.put( productJson );
-            }
+            productJson.put( Acm.JSON_ID, productId );
+            productJson.put( Acm.JSON_NAME,
+                             product.getProperty( Acm.ACM_NAME ) );
+            productJson.put( "snapshots",
+                             getProductSnapshots( productId,
+                                                  req.getContextPath(),
+                                                  dateTime ) );
+
+            productsJson.put( productJson );
         }
 
         return productsJson;
