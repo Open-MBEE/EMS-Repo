@@ -1,1 +1,14 @@
-{"elements":[{"id":"_comment_303_a","body":"testing","type":"Comment","annotatedElements":["303"]}]}
+{
+	"elements": 
+	[
+		{
+			"sysmlid": "_comment_300",
+			"documentation": "change testing commnets",
+			"owner": "300",
+			"name": "New test",
+			"specialization": {
+			 "type": "Comment"
+			}
+		}
+	]
+}
