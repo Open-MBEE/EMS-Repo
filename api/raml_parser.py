@@ -5,6 +5,10 @@ Need to install the following Python packages for this to work.
 
 pyraml-parser: https://github.com/an2deg/pyraml-parser
 cheetah: http://pythonhosted.org//Cheetah/
+
+Note: for this to run against api.raml that the examples need to
+be stripped out his the JSON parsing doesn't appear to work
+properly.
 '''
 
 import pyraml.parser
