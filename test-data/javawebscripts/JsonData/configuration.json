@@ -1,6 +1,6 @@
 {
-"name":"changed name",
+"name":"product test",
 "description":"updating description",
-"snapshots":["301_1402099433351"],
-"nodeid": "workspace://SpacesStore/7a463a78-a352-42d6-a638-4e4d761ac019"
+"timestamp":"2014-06-09T09:03:45.834-0700",
+"products": ["401"]
 }

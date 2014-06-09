@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.webscripts.util;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.Acm.JSON_TYPE_FILTER;
@@ -43,20 +44,43 @@ public class ProductsWebscript extends AbstractJavaWebScript {
 
     public JSONArray handleProducts( WebScriptRequest req )
                                                            throws JSONException {
-        EmsScriptNode siteNode = getSiteNodeFromRequest( req );
         JSONArray productsJson = new JSONArray();
 
+        EmsScriptNode siteNode = getSiteNodeFromRequest( req );
         if (siteNode == null) {
             log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
             return productsJson;
         }
 
+        String configurationId = req.getServiceMatch().getTemplateVars().get( "configurationId" );
+        if (configurationId == null) {
+            // if no configuration id, get all products for site/context
+            return handleContextProducts(req, siteNode);
+        } else {
+            // if configuration exists, get products for configuration
+            EmsScriptNode configNode = ActionUtil.getJob( siteNode, configurationId);
+            return handleConfigurationProducts(req, configNode);
+        }
+    }
+    
+    
+    public JSONArray handleConfigurationProducts( WebScriptRequest req, EmsScriptNode config) throws JSONException {
+        String timestamp = req.getParameter( "timestamp" );
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+
+        ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
+        return configWs.getProducts( config, dateTime );
+    }
+    
+    public JSONArray handleContextProducts( WebScriptRequest req, EmsScriptNode context) throws JSONException {
+        JSONArray productsJson = new JSONArray();
+        
         // get timestamp if specified
         String timestamp = req.getParameter( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
         Set< EmsScriptNode > productSet =
-                WebScriptUtil.getAllNodesInPath( siteNode.getQnamePath(),
+                WebScriptUtil.getAllNodesInPath( context.getQnamePath(),
                                                  "ASPECT", Acm.ACM_PRODUCT,
                                                  dateTime, services,
                                                  response );
@@ -74,7 +98,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
 
             productsJson.put( productJson );
         }
-
+        
         return productsJson;
     }
 

@@ -70,7 +70,15 @@ public class SnapshotPost extends AbstractJavaWebScript {
     protected synchronized Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         clearCaches();
 
-        String viewId = req.getServiceMatch().getTemplateVars().get("viewid");
+        String viewId = null;
+        String[] viewKeys = {"viewid", "productId"};
+        for (String key: viewKeys) {
+            viewId = req.getServiceMatch().getTemplateVars().get(key);
+            if (viewId != null) {
+                break;
+            }
+        }
+
         EmsScriptNode topview = findScriptNodeById(viewId, null);
         EmsScriptNode snapshotFolderNode = getSnapshotFolderNode(topview);
 
@@ -133,7 +141,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
         snapshotNode.createOrUpdateProperty(Acm.ACM_ID, snapshotName);
         
         view.createOrUpdateAssociation(snapshotNode, "view2:snapshots");
-        
+
+        // This is deprecated so remove
 //        MoaProductGet moaService = new MoaProductGet(repository, services);
 //        moaService.setRepositoryHelper(repository);
 //        moaService.setServices(services);

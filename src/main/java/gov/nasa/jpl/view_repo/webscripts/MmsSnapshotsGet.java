@@ -91,7 +91,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         JSONArray snapshotsJson = new JSONArray();
         List< EmsScriptNode > snapshots = product.getTargetAssocsNodesByType( "view2:snapshots", timestamp );
         for (EmsScriptNode snapshot: snapshots) {
-            snapshotsJson.put( configWs.getSnapshotJson( snapshot, product, null ) );
+            snapshotsJson.put( configWs.getSnapshotJson( snapshot, product ) );
         }
         
         return snapshotsJson;

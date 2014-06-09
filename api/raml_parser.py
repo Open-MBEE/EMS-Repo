@@ -48,6 +48,15 @@ def main():
 
 
 def getResources(resources, parent=''):
+	'''
+	Recursive function that walks through the RAML resources creating files
+	as necessary at each resource level
+
+	@param	resources
+			Pyraml resources to be traversed
+	@param	string
+			String of the parent resource path
+	'''
 	for name in resources.keys():
 		resource = resources[name]
 		newparent = parent + name
@@ -101,6 +110,17 @@ def writeMethodFiles(path, name):
 
 
 def loadNameSpace(path, name, method):
+	'''
+	Load the Cheetah namespace.
+	@param	path 
+			Path of the raml resource
+
+	@param	name
+			Name of the raml resource
+
+	@param	method
+			Method for the raml resource
+	'''
 	if method == 'get':
 		permission = 'readonly'
 	else:

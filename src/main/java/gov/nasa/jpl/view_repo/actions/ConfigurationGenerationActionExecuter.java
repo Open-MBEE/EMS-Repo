@@ -106,7 +106,6 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         @SuppressWarnings("unchecked")
 		HashSet<String> productList = (HashSet<String>) action.getParameterValue(PARAM_PRODUCT_LIST);
         
-        // grab all documents in site
         String siteName = (String) action.getParameterValue(PARAM_SITE_NAME);
         System.out.println("ConfigurationGenerationActionExecuter started execution of " + siteName);
         SiteInfo siteInfo = services.getSiteService().getSite(siteName);

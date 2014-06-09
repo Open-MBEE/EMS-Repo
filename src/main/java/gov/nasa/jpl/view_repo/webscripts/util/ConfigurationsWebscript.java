@@ -62,6 +62,13 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         return null;
     }
     
+    /**
+     * Method to get Configurations within a specified context
+     * @param context
+     * @param timestamp
+     * @param sort
+     * @return
+     */
     public List<EmsScriptNode> getConfigurations(EmsScriptNode context, String timestamp, boolean sort) {
         List<EmsScriptNode> configurations = new ArrayList<EmsScriptNode>();
         if (context != null) {
@@ -84,7 +91,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
     }
     
     /**
-     * Create JSONObject of Configuration sets
+     * Create JSONObject of Configuration sets based on webrequest
      * @param req
      * @return
      * @throws JSONException
@@ -115,7 +122,14 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         return configJsonArray;
     }
     
-    
+    /**
+     * Retrieve just the MMS API configuration JSON
+     * @param config
+     * @param contextPath
+     * @param dateTime
+     * @return
+     * @throws JSONException
+     */
     public JSONObject getMmsConfigJson(EmsScriptNode config, String contextPath, Date dateTime) throws JSONException {
         JSONObject json = getConfigJson( config, contextPath, dateTime );
         
@@ -138,7 +152,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         Date date = (Date)config.getProperty("cm:created");
         
         json.put("modified", EmsScriptNode.getIsoTime(date));
-        Object timestampObject = config.getProperty("ems:timestamp");
+        Object timestampObject = config.getProperty("view2:timestamp");
         Date timestamp = null;
         if ( timestampObject instanceof Date ) {
             timestamp = (Date)timestampObject;
@@ -169,35 +183,114 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                     snapshot.getSourceAssocsNodesByType( "view2:snapshots",
                                                          timestamp );
             if (views.size() >= 1) {
-//                JSONObject snapshotJson = new JSONObject();
-//                //snapshotJson.put("url", contextPath + "/service/snapshots/" + snapshot.getProperty(Acm.ACM_ID));
-//                EmsScriptNode view = views.get(0);
-//                snapshotJson.put("sysmlid", view.getProperty(Acm.ACM_NAME));
-//                snapshotJson.put("id", snapshot.getProperty(Acm.CM_NAME));
-//                snapshotJson.put( "created",  EmsScriptNode.getIsoTime( (Date)snapshot.getProperty( "cm:created" )));
-//                snapshotJson.put( "creator", snapshot.getProperty( "cm:modifier" ) );
-//                snapshotJson.put( "configuration", config.getProperty( Acm.CM_NAME ) );
-//                snapshotsJson.put(snapshotJson);
-                snapshotsJson.put( getSnapshotJson(snapshot, views.get(0), config) );
+                snapshotsJson.put( getSnapshotJson(snapshot, views.get(0)) );
             }
         }
         
         return snapshotsJson;
     }
     
-    public JSONObject getSnapshotJson(EmsScriptNode snapshot, EmsScriptNode view, EmsScriptNode config) throws JSONException {
+    /**
+     * Based on a specified snapshot node and corresponding view and configuration returns the
+     * snapshot JSON - maybe put this in EmsScriptNode?
+     * @param snapshot
+     * @param view
+     * @param config
+     * @return
+     * @throws JSONException
+     */
+    public JSONObject getSnapshotJson(EmsScriptNode snapshot, EmsScriptNode view) throws JSONException {
         JSONObject snapshotJson = new JSONObject();
         //snapshotJson.put("url", contextPath + "/service/snapshots/" + snapshot.getProperty(Acm.ACM_ID));
         snapshotJson.put("sysmlid", view.getProperty(Acm.ACM_NAME));
         snapshotJson.put("id", snapshot.getProperty(Acm.CM_NAME));
         snapshotJson.put( "created",  EmsScriptNode.getIsoTime( (Date)snapshot.getProperty( "cm:created" )));
         snapshotJson.put( "creator", snapshot.getProperty( "cm:modifier" ) );
-        if (config != null) {
-            // TODO: look up configurations
-            snapshotJson.put( "configuration", config.getProperty( Acm.CM_NAME ) );
+
+        JSONArray configsJson = new JSONArray();
+        List< EmsScriptNode > configs =
+                snapshot.getSourceAssocsNodesByType( "ems:configuredSnapshots", null );
+        for (EmsScriptNode config: configs) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("name", config.getProperty(Acm.CM_NAME));
+            jsonObject.put("id", EmsScriptNode.getStoreRef().toString() + "/" + config.getNodeRef().getId());
+            configsJson.put( jsonObject );
         }
         
+        snapshotJson.put( "configurations", configsJson );
+            
         return snapshotJson;
+    }
+
+    public JSONArray getProducts(EmsScriptNode config, Date timestamp) throws JSONException {
+        JSONArray productsJson = new JSONArray();
+        
+        List< EmsScriptNode > products =
+                config.getTargetAssocsNodesByType( "ems:configuredProducts",
+                                                   timestamp );
+        for (EmsScriptNode product: products) {
+            productsJson.put( product.toJSONObject() );
+        }
+        
+        return productsJson;
+    }
+    
+    /**
+     * Based on a specified snapshot node and corresponding view and configuration returns the
+     * snapshot JSON - maybe put this in EmsScriptNode?
+     * @param product
+     * @param view
+     * @param config
+     * @return
+     * @throws JSONException
+     */
+    @Deprecated
+    public JSONObject getProductJson(EmsScriptNode product) throws JSONException {
+        JSONObject productJson = new JSONObject();
+        productJson.put("sysmlid", product.getProperty(Acm.CM_NAME));
+        productJson.put( "created",  EmsScriptNode.getIsoTime( (Date)product.getProperty( "cm:created" )));
+        productJson.put( "creator", product.getProperty( "cm:modifier" ) );
+            
+        return productJson;
+    }
+
+    
+    public void updateConfiguration(EmsScriptNode config, JSONObject postJson, EmsScriptNode context, Date date) throws JSONException {
+        if (postJson.has("name")) {
+            config.createOrUpdateProperty(Acm.CM_NAME, postJson.getString("name"));
+        }
+        if (postJson.has("description")) {
+            config.createOrUpdateProperty("cm:description", postJson.getString("description"));
+        }
+        if (postJson.has("timestamp")) {
+            // if timestamp specified always use
+            config.createOrUpdateProperty("view2:timestamp", TimeUtils.dateFromTimestamp(postJson.getString("timestamp")));
+        } else if (date != null && date.before( (Date)config.getProperty("cm:created") )) {
+            // add in timestamp if supplied date is before the created date
+            config.createOrUpdateProperty("view2:timestamp", date);
+        } 
+        
+        // these should be mutually exclusive
+        if (postJson.has( "products")) {
+            config.removeAssociations( "ems:configuredProducts" );
+            JSONArray productsJson = postJson.getJSONArray( "products" );
+            for (int ii = 0; ii < productsJson.length(); ii++) {
+                EmsScriptNode product = findScriptNodeById( productsJson.getString( ii ), null );
+                if (product != null) {
+                    config.createOrUpdateAssociation( product, "ems:configuredProducts", true );
+                }
+            }
+        } else if (postJson.has( "snapshots" )) {
+            config.removeAssociations("ems:configuredSnapshots");
+            JSONArray snapshotsJson = postJson.getJSONArray("snapshots");
+            EmsScriptNode snapshotFolder = context.childByNamePath("/snapshots");
+            for (int ii = 0; ii < snapshotsJson.length(); ii++) {
+                EmsScriptNode snapshot = snapshotFolder.childByNamePath("/" + snapshotsJson.getString(ii));
+                if (snapshot != null) {
+                    config.createOrUpdateAssociation(snapshot, "ems:configuredSnapshots", true);
+                }
+            }
+        }
     }
     
     /**
