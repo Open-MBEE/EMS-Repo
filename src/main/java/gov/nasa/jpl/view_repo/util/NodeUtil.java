@@ -5,9 +5,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,14 +18,12 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.http.HttpServletResponse;
-
+import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.TypeDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService.FindNodeParameters;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
@@ -38,12 +34,8 @@ import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ApplicationContextHelper;
-import org.apache.commons.digester.SetRootRule;
-import org.mozilla.javascript.Scriptable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
-
-import com.ibm.icu.impl.LinkedHashMap;
 
 public class NodeUtil {
     
@@ -855,5 +847,11 @@ public class NodeUtil {
 //      }
     }
 
-
+    public static NodeRef getNodeRefFromNodeId(String id) {
+        List<NodeRef> nodeRefs = NodeRef.getNodeRefs("workspace://SpacesStore/" + id);
+        if (nodeRefs.size() > 0) {
+            return nodeRefs.get( 0 );
+        }
+        return null;
+    }
 }

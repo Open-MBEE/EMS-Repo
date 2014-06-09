@@ -68,9 +68,8 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         
         String timestamp = req.getParameter("timestamp");
         
-        EmsScriptNode config = configWs.getConfiguration( configurationId, siteNode, timestamp );
+        EmsScriptNode config = configWs.getConfiguration( configurationId, timestamp );
         if (config == null) {
-            log( LogLevel.WARNING, "Could not find configuration", HttpServletResponse.SC_NOT_FOUND);
             return new JSONArray();
         }
         

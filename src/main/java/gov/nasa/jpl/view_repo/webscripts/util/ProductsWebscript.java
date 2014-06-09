@@ -1,9 +1,9 @@
 package gov.nasa.jpl.view_repo.webscripts.util;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
-import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.Acm.JSON_TYPE_FILTER;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,8 +59,14 @@ public class ProductsWebscript extends AbstractJavaWebScript {
             return handleContextProducts(req, siteNode);
         } else {
             // if configuration exists, get products for configuration
-            EmsScriptNode configNode = ActionUtil.getJob( siteNode, configurationId);
-            return handleConfigurationProducts(req, configNode);
+            NodeRef configNodeRef = NodeUtil.getNodeRefFromNodeId( configurationId );
+            if (configNodeRef != null) {
+                EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services);
+                return handleConfigurationProducts(req, configNode);
+            } else {
+                log(LogLevel.WARNING, "Could not find configuration with id " + configurationId, HttpServletResponse.SC_NOT_FOUND);
+                return productsJson;
+            }
         }
     }
     

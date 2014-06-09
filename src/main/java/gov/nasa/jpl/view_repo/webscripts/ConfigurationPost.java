@@ -33,6 +33,7 @@ import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ConfigurationGenerationActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 
 import java.util.Date;
@@ -44,6 +45,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.node.NodeUtils;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
@@ -200,13 +202,15 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		    return false;
 		}
 				
-		EmsScriptNode configNode = null;
 		
-		List<NodeRef> nodeRefs = NodeRef.getNodeRefs(nodeId);
-		if (nodeRefs.size() > 0) {
-			configNode = new EmsScriptNode(nodeRefs.get(0), services, response);
-			ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
-			configWs.updateConfiguration( configNode, postJson, siteNode, null );
+		NodeRef configNodeRef = NodeUtil.getNodeRefFromNodeId( nodeId );
+		if (configNodeRef != null) {
+	        EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services);
+	        ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
+	        configWs.updateConfiguration( configNode, postJson, siteNode, null );
+		} else {
+		    log(LogLevel.WARNING, "Could not find configuration with id " + nodeId, HttpServletResponse.SC_NOT_FOUND);
+		    return false;
 		}
 		
 		return true;

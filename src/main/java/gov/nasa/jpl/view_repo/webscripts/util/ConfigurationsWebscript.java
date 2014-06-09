@@ -4,6 +4,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 
@@ -18,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,16 +52,15 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         return handleConfigurations( req, false );
     }
     
-    public EmsScriptNode getConfiguration(String id, EmsScriptNode context, String timestamp) {
-        boolean noSort = false;
-        List<EmsScriptNode> configurations = getConfigurations(context, timestamp, noSort);
-        for (EmsScriptNode config: configurations) {
-            if (config.getProperty( "cm:name" ).equals( id )) {
-                return config;
-            }
+    public EmsScriptNode getConfiguration(String id, String timestamp) {
+        NodeRef configNodeRef = NodeUtil.getNodeRefFromNodeId( id );
+        if (configNodeRef != null) {
+            EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services);
+            return configNode;
+        } else {
+            log(LogLevel.WARNING, "Could not find configuration with id " + id, HttpServletResponse.SC_NOT_FOUND);
+            return null;
         }
-        
-        return null;
     }
     
     /**
@@ -165,7 +166,8 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         json.put("timestamp", EmsScriptNode.getIsoTime(timestamp));
         json.put("name", config.getProperty(Acm.CM_NAME));
         json.put("description", config.getProperty("cm:description"));
-        json.put("id", EmsScriptNode.getStoreRef().toString() + "/" + config.getNodeRef().getId());
+        // need to unravel id with the storeref, which by default is workspace://SpacesStore/
+        json.put("id", config.getNodeRef().getId());
         
         json.put("snapshots", getSnapshots(config, timestamp));
         
@@ -213,7 +215,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         for (EmsScriptNode config: configs) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("name", config.getProperty(Acm.CM_NAME));
-            jsonObject.put("id", EmsScriptNode.getStoreRef().toString() + "/" + config.getNodeRef().getId());
+            jsonObject.put("id", config.getNodeRef().getId());
             configsJson.put( jsonObject );
         }
         
