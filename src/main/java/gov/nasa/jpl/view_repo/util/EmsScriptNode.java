@@ -45,7 +45,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -75,8 +74,6 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.Path;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.repository.Path.ChildAssocElement;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
@@ -1208,12 +1205,12 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         // add in content type:
         if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_TYPE)) {
             String typeName = getTypeName();
-        	if (isExprOrProp) {
-        		element.put(Acm.JSON_TYPE, typeName );
-        	}
-        	else {
-        		specializationJSON.put(Acm.JSON_TYPE, typeName );
-        	}
+            	if (isExprOrProp) {
+            		element.put(Acm.JSON_TYPE, typeName );
+            	}
+            	else {
+            		specializationJSON.put(Acm.JSON_TYPE, typeName );
+            	}
         }
         
         // add in property type(s)
@@ -1288,8 +1285,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     public String getTypeName() {
         String typeName = null;
-        final String[] aspects = new String[]{ Acm.ACM_PRODUCT, Acm.ACM_VIEW };
-        for ( String aspect : aspects ) {
+        
+        for ( String aspect : Acm.ACM_ASPECTS ) {
             if ( hasAspect( aspect ) ) {
                 // statement below is safe if no ':' since -1 + 1 = 0
                 typeName = aspect.substring( aspect.lastIndexOf( ':' ) + 1 );
@@ -1617,7 +1614,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                                                               JSONArray jsonArray,
                                                               Date dateTime )
                                                                       throws JSONException {
-        ArrayList<Serializable> properties = new ArrayList<Serializable>();
+//        ArrayList<Serializable> properties = new ArrayList<Serializable>();
 
         if ( propDef == null ) {
             return null;

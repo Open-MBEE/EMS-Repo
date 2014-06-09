@@ -166,6 +166,15 @@ public class ActionUtil {
         return jobNode;
     }
     
+    public static EmsScriptNode getJob(EmsScriptNode siteNode, String jobName) {
+        EmsScriptNode jobPkgNode = siteNode.childByNamePath("Jobs");
+        if (jobPkgNode != null) {
+            return jobPkgNode.childByNamePath( jobName );
+        }
+        
+        return null;
+    }
+    
     public static void setJobStatus(EmsScriptNode jobNode, String value) {
         jobNode.createOrUpdateProperty("ems:job_status", value);
     }

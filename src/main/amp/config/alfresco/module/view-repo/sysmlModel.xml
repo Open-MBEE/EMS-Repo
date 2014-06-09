@@ -111,7 +111,7 @@
 		</type>
 		<type name="view2:Snapshot">
 			<parent>cm:content</parent>
-			<properties />
+			<properties/>
 			<associations />
 			<overrides />
 			<mandatory-aspects>
@@ -119,6 +119,7 @@
 				<aspect>cm:taggable</aspect>
 				<aspect>cm:indexControl</aspect>
 				<aspect>sysml:Identifiable</aspect>
+				<aspect>view2:timestamped</aspect>
 			</mandatory-aspects>
 		</type>
 	</types>
@@ -228,6 +229,16 @@
 			<associations />
 			<overrides />
 			<mandatory-aspects />
+		</aspect>
+		<aspect name="view2:timestamped">
+		  <properties>
+		      <property name="view2:timestamp">
+		          <type>d:datetime</type>
+		          <mandatory>false</mandatory>
+		          <multiple>false</multiple>
+		          <index enabled="false"/>
+		      </property>
+		  </properties>
 		</aspect>
 
 		<aspect name="sysml:Comment">

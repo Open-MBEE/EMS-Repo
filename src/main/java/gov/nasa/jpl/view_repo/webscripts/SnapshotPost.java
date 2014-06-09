@@ -68,11 +68,17 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     @Override
     protected synchronized Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-        printHeader( req );
-
         clearCaches();
 
-        String viewId = req.getServiceMatch().getTemplateVars().get("viewid");
+        String viewId = null;
+        String[] viewKeys = {"viewid", "productId"};
+        for (String key: viewKeys) {
+            viewId = req.getServiceMatch().getTemplateVars().get(key);
+            if (viewId != null) {
+                break;
+            }
+        }
+
         EmsScriptNode topview = findScriptNodeById(viewId, null);
         EmsScriptNode snapshotFolderNode = getSnapshotFolderNode(topview);
 
@@ -116,8 +122,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
             model.put("res", response.toString());
         }
 
-        printFooter();
-
         return model;
     }
 
@@ -137,16 +141,18 @@ public class SnapshotPost extends AbstractJavaWebScript {
         snapshotNode.createOrUpdateProperty(Acm.ACM_ID, snapshotName);
         
         view.createOrUpdateAssociation(snapshotNode, "view2:snapshots");
-        
-        MoaProductGet moaService = new MoaProductGet(repository, services);
-        moaService.setRepositoryHelper(repository);
-        moaService.setServices(services);
-        JSONObject snapshotJson = moaService.generateMoaProduct(viewId, contextPath, null);
-        if (snapshotJson == null) {
-            log(LogLevel.ERROR, "Could not generate the snapshot JSON", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return null;
-        }
-        
+
+        // This is deprecated so remove
+//        MoaProductGet moaService = new MoaProductGet(repository, services);
+//        moaService.setRepositoryHelper(repository);
+//        moaService.setServices(services);
+//        JSONObject snapshotJson = moaService.generateMoaProduct(viewId, contextPath, null);
+//        if (snapshotJson == null) {
+//            log(LogLevel.ERROR, "Could not generate the snapshot JSON", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+//            return null;
+//        }
+
+        JSONObject snapshotJson = new JSONObject();
         try {
             snapshotJson.put("snapshot", true);
             ActionUtil.saveStringToFile(snapshotNode, "application/json", services, snapshotJson.toString(4));
