@@ -39,13 +39,11 @@ import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
-import org.alfresco.repo.node.NodeUtils;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;

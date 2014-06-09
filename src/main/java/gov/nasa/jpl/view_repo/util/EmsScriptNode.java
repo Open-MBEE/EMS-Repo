@@ -45,7 +45,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -75,8 +74,6 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.Path;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.repository.Path.ChildAssocElement;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
@@ -1288,28 +1285,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     public String getTypeName() {
         String typeName = null;
-        final String[] aspects = new String[]{ Acm.ACM_PRODUCT, Acm.ACM_VIEW, Acm.ACM_COMMENT,
-                                               Acm.ACM_CONSTRAINT, Acm.ACM_CONFORM,
-                                               Acm.ACM_DEPENDENCY, Acm.ACM_DIRECTED_RELATIONSHIP,
-                                               Acm.ACM_EXPOSE, Acm.ACM_GENERALIZATION,
-                                               Acm.ACM_PACKAGE, Acm.ACM_PROPERTY, Acm.ACM_VIEWPOINT,
-//                                               Acm.ACM_BOOLEAN, Acm.ACM_DOUBLE, Acm.ACM_INTEGER,
-//                                               Acm.ACM_REAL, Acm.ACM_NATURAL_VALUE,
-//                                               Acm.ACM_STRING, 
-                                               Acm.ACM_VALUE_SPECIFICATION,
-                                               Acm.ACM_VALUE_EXPRESSION, Acm.ACM_DURATION,
-                                               Acm.ACM_DURATION_INTERVAL,
-                                               Acm.ACM_ELEMENT_VALUE, Acm.ACM_EXPRESSION,
-                                               Acm.ACM_INSTANCE_VALUE, Acm.ACM_INTERVAL,
-                                               Acm.ACM_LITERAL_BOOLEAN, Acm.ACM_LITERAL_INTEGER,
-                                               Acm.ACM_LITERAL_NULL, Acm.ACM_LITERAL_REAL,
-                                               Acm.ACM_LITERAL_STRING, Acm.ACM_LITERAL_UNLIMITED_NATURAL,
-                                               Acm.ACM_STRING_EXPRESSION, Acm.ACM_TIME_EXPRESSION,
-                                               Acm.ACM_TIME_INTERVAL,Acm.ACM_OPERATION_EXPRESSION,
-                                               Acm.ACM_INSTANCE_SPECIFICATION, Acm.ACM_CONSTRAINT,
-                                               Acm.ACM_PARAMETER, Acm.ACM_CONNECTOR};
         
-        for ( String aspect : aspects ) {
+        for ( String aspect : Acm.ACM_ASPECTS ) {
             if ( hasAspect( aspect ) ) {
                 // statement below is safe if no ':' since -1 + 1 = 0
                 typeName = aspect.substring( aspect.lastIndexOf( ':' ) + 1 );
@@ -1637,7 +1614,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                                                               JSONArray jsonArray,
                                                               Date dateTime )
                                                                       throws JSONException {
-        ArrayList<Serializable> properties = new ArrayList<Serializable>();
+//        ArrayList<Serializable> properties = new ArrayList<Serializable>();
 
         if ( propDef == null ) {
             return null;

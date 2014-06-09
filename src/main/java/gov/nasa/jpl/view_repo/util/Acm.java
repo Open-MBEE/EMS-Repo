@@ -569,5 +569,41 @@ public class Acm {
             put(JSON_TYPE_FILTER.VIEW, ELEMENT_JSON); //VIEW_JSON);
         }
     };
-	
+
+    public static final String[] ACM_ASPECTS = {
+        Acm.ACM_PRODUCT,
+        Acm.ACM_VIEW,
+        Acm.ACM_COMMENT,
+        Acm.ACM_CONSTRAINT,
+        Acm.ACM_CONFORM,
+        Acm.ACM_DEPENDENCY,
+        Acm.ACM_DIRECTED_RELATIONSHIP,
+        Acm.ACM_EXPOSE,
+        Acm.ACM_GENERALIZATION,
+        Acm.ACM_PACKAGE,
+        Acm.ACM_PROPERTY,
+        Acm.ACM_VIEWPOINT,
+        Acm.ACM_VALUE_SPECIFICATION,
+        Acm.ACM_VALUE_EXPRESSION,
+        Acm.ACM_DURATION,
+        Acm.ACM_DURATION_INTERVAL,
+        Acm.ACM_ELEMENT_VALUE,
+        Acm.ACM_EXPRESSION,
+        Acm.ACM_INSTANCE_VALUE,
+        Acm.ACM_INTERVAL,
+        Acm.ACM_LITERAL_BOOLEAN,
+        Acm.ACM_LITERAL_INTEGER,
+        Acm.ACM_LITERAL_NULL,
+        Acm.ACM_LITERAL_REAL,
+        Acm.ACM_LITERAL_STRING, 
+        Acm.ACM_LITERAL_UNLIMITED_NATURAL,
+        Acm.ACM_STRING_EXPRESSION, 
+        Acm.ACM_TIME_EXPRESSION,
+        Acm.ACM_TIME_INTERVAL,
+        Acm.ACM_OPERATION_EXPRESSION,
+        Acm.ACM_INSTANCE_SPECIFICATION,
+        Acm.ACM_CONSTRAINT,
+        Acm.ACM_PARAMETER,
+        Acm.ACM_CONNECTOR                                                
+    };
 }
