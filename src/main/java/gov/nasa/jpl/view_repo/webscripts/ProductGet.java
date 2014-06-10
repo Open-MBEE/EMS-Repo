@@ -30,11 +30,9 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
-import gov.nasa.jpl.view_repo.sysml.View;
-import gov.nasa.jpl.view_repo.util.Acm.JSON_TYPE_FILTER;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.webscripts.util.ProductsWebscript;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -116,7 +114,8 @@ public class ProductGet extends AbstractJavaWebScript {
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         
-			productsJson = handleProduct(productId, recurse, dateTime);
+            ProductsWebscript productsWs = new ProductsWebscript(repository, services, response);
+			productsJson = productsWs.handleProduct(productId, recurse, dateTime, gettingDisplayedElements, gettingContainedViews);
 		}
 
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK && productsJson != null) {
@@ -144,44 +143,6 @@ public class ProductGet extends AbstractJavaWebScript {
 	}
 
 	
-	private JSONArray handleProduct(String productId, boolean recurse, Date dateTime) {
-	    JSONArray productsJson = new JSONArray();
-		EmsScriptNode product = findScriptNodeById(productId, dateTime);
-		
-		if (product == null) {
-			log( LogLevel.ERROR, "Product not found with ID: " + productId,
-			     HttpServletResponse.SC_NOT_FOUND );
-		}
-
-		if (checkPermissions(product, PermissionService.READ)){ 
-            try {
-                View v = new View( product );
-                if ( gettingDisplayedElements ) {
-                    System.out.println("+ + + + + gettingDisplayedElements");
-                    Collection< EmsScriptNode > elems = v.getDisplayedElements();
-                    for ( EmsScriptNode n : elems ) {
-                        productsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT ) );
-                    }
-                } else if ( gettingContainedViews ) {
-                    System.out.println("+ + + + + gettingContainedViews");
-                    Collection< EmsScriptNode > elems = v.getContainedViews( recurse, null );
-                    for ( EmsScriptNode n : elems ) {
-                        productsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW ) );
-                    }
-                } else {
-                    System.out.println("+ + + + + just the product");
-                    productsJson.put( product.toJSONObject( JSON_TYPE_FILTER.PRODUCT ) );
-                }
-            } catch ( JSONException e ) {
-                log( LogLevel.ERROR, "Could not create products JSON array",
-                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
-                e.printStackTrace();
-            }
-		}
-		
-		return productsJson;
-	}
-
     /**
      * Need to differentiate between View or Element request - specified during Spring configuration
      * @param flag

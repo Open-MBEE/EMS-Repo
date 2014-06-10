@@ -233,14 +233,12 @@ resourceTypes:
             uriParameters:
               configurationId:
                 description: ID for the configuration under consideration
-            /snapshots:
-              description: Scoped under /configurations and /products
+            /products:
+              description: Get products for the specified configuration
               type: collection
-              /{snapshotId}:
-                type: collection
-                uriParameters:
-                  snapshotId:
-                    description: ID for the snapshot under consideration
+            /snapshots:
+              description: Get snapshots for the specified configuration
+              type: collection
         /projects:
           type: readCollection
           get:

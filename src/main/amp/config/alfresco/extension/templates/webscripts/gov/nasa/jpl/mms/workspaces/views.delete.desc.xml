@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>delete views</shortname>
+    <description>
+    	delete views
+	</description>
+  	<url>/workspaces/{workspaceId}/views</url>
+  	<format default="json">any</format>
+  	<authentication>user</authentication>
+  	<transaction allow="readwrite">required</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

@@ -53,18 +53,7 @@
         </type>
         <type name="ems:ConfigurationSet">
             <parent>ems:Job</parent>
-            <properties>
-               <property name="ems:timestamp">
-	               <type>d:datetime</type>
-	               <mandatory>false</mandatory>
-	               <multiple>false</multiple>
-	               <index enabled="true">
-	                  <atomic>false</atomic>
-	                  <stored>false</stored> 
-	                  <tokenised>false</tokenised>
-	               </index>
-	           </property>
-            </properties>
+            <properties/>
             <associations>
             		<association name="ems:configuredSnapshots">
             			<source>
@@ -77,9 +66,22 @@
             				<many>true</many>
             			</target>
             		</association>
+            		<association name="ems:configuredProducts">
+            		  <source>
+            		      <mandatory>false</mandatory>
+            		      <many>true</many>
+            		  </source>
+            		  <target>
+            		      <class>view2:Product</class>
+            		      <mandatory>false</mandatory>
+            		      <many>true</many>
+            		  </target>
+            		</association>
             </associations>
             <overrides/>
-            <mandatory-aspects/>
+            <mandatory-aspects>
+                <aspect>view2:timestamped</aspect>
+            </mandatory-aspects>
         </type>
      </types>
 </model>

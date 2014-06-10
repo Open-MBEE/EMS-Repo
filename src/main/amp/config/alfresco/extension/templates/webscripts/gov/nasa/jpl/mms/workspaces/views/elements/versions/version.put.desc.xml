@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>put version with {versionId}</shortname>
+    <description>
+    	put version with {versionId}
+	</description>
+  	<url>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}/versions/{versionId}</url>
+  	<format default="json">any</format>
+  	<authentication>user</authentication>
+  	<transaction allow="readwrite">required</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

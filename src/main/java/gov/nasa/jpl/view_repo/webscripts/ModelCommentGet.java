@@ -53,6 +53,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  * 
  */
+@Deprecated
 public class ModelCommentGet extends ModelGet {
     public ModelCommentGet() {
         super();
