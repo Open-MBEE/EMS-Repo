@@ -1260,7 +1260,9 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         }
 
         // add read time
-        element.put( Acm.JSON_READ, getIsoTime( new Date( readTime ) ) );
+        if ( !isExprOrProp ) {
+            element.put( Acm.JSON_READ, getIsoTime( new Date( readTime ) ) );
+        }
         
         String elementString = element.toString();
         elementString = fixArtifactUrls( elementString, true );
