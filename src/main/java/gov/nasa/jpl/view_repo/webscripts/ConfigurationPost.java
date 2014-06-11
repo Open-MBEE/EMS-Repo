@@ -89,11 +89,15 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
 		ConfigurationPost instance = new ConfigurationPost(repository, services);
 
-		instance.saveAndStartAction(req, status);
+		JSONObject result = instance.saveAndStartAction(req, status);
 		appendResponseStatusInfo(instance);
 
 		status.setCode(responseStatus.getCode());
-		model.put("res", response.toString());
+		if (result == null) {
+		    model.put("res", response.toString());
+		} else {
+		    model.put("res", result);
+		}
 
         printFooter();
 
@@ -107,7 +111,8 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	 * @param req
 	 * @param status
 	 */
-	private void saveAndStartAction(WebScriptRequest req, Status status) {
+	private JSONObject saveAndStartAction(WebScriptRequest req, Status status) {
+	    JSONObject jsonObject = null;
 	    String[] siteKeys = {SITE_NAME, "siteId"};
 	    
 		String siteName = null;
@@ -119,29 +124,39 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		}
 		if (siteName == null) {
 			log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
-			return;
+			return null;
 		}
 
 		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
 		if (siteInfo == null) {
 			log(LogLevel.ERROR, "Could not find site: " + siteName, HttpServletResponse.SC_NOT_FOUND);
-			return;
+			return null;
 		}
 		EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
 
-		JSONObject postJson = (JSONObject) req.parseContent();
+		JSONObject reqPostJson = (JSONObject) req.parseContent();
+		JSONObject postJson;
 		try {
+		    // for backwards compatibility
+		    if (reqPostJson.has( "configurations" )) {
+		        JSONArray configsJson = reqPostJson.getJSONArray( "configurations" );
+		        postJson = configsJson.getJSONObject( 0 );
+		    } else {
+		        postJson = reqPostJson;
+		    }
+		    
 			if (postJson.has("nodeid") || postJson.has( "id" )) {
-				handleUpdate(postJson, siteNode, status);
+				jsonObject = handleUpdate(postJson, siteNode, status);
 			} else {
-				handleCreate(postJson, siteNode, status);
+				jsonObject = handleCreate(postJson, siteNode, status);
 			}
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "Could not parse JSON", HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();
-			return;
+			return null;
 		}
-
+		
+		return jsonObject;
 	}
 
 	
@@ -159,7 +174,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		return productList;
 	}
 	
-	private boolean handleCreate(JSONObject postJson, EmsScriptNode siteNode, Status status) throws JSONException {
+	private JSONObject handleCreate(JSONObject postJson, EmsScriptNode siteNode, Status status) throws JSONException {
 		String siteName = (String)siteNode.getProperty(Acm.CM_NAME);
 		EmsScriptNode jobNode = null;
 		
@@ -172,19 +187,18 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	            configWs.updateConfiguration( jobNode, postJson, siteNode, date );
 
 				startAction(jobNode, siteName, getProductList(postJson));
+				return configWs.getConfigJson( jobNode, siteName, null );
 			} else {
 				log(LogLevel.ERROR, "Couldn't create configuration job: " + postJson.getString("name"), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				return false;
+				return null;
 			}
 		} else {
 			log(LogLevel.ERROR, "Job name not specified", HttpServletResponse.SC_BAD_REQUEST);
-			return false;
+			return null;
 		}
-		
-		return true;
 	}
 	
-	private boolean handleUpdate(JSONObject postJson, EmsScriptNode siteNode, Status status) throws JSONException {
+	private JSONObject handleUpdate(JSONObject postJson, EmsScriptNode siteNode, Status status) throws JSONException {
 		String[] idKeys = {"nodeid", "id"};
 	    String nodeId = null;
 		
@@ -197,7 +211,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		
 		if (nodeId == null) {
 		    log(LogLevel.WARNING, "JSON malformed does not include Alfresco id for configuration", HttpServletResponse.SC_BAD_REQUEST);
-		    return false;
+		    return null;
 		}
 				
 		
@@ -206,12 +220,11 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	        EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services);
 	        ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
 	        configWs.updateConfiguration( configNode, postJson, siteNode, null );
+            return configWs.getConfigJson( configNode, (String)siteNode.getProperty(Acm.CM_NAME), null );
 		} else {
 		    log(LogLevel.WARNING, "Could not find configuration with id " + nodeId, HttpServletResponse.SC_NOT_FOUND);
-		    return false;
+		    return null;
 		}
-		
-		return true;
 	}
 	
 	/**
