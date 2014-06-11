@@ -29,10 +29,13 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
+import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,9 +45,11 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.eclipse.jetty.util.log.Log;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -150,6 +155,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         try {
             snapshotJson.put("snapshot", true);
             ActionUtil.saveStringToFile(snapshotNode, "application/json", services, snapshotJson.toString(4));
+            createDocBook(view, viewId, snapshotName, contextPath, snapshotFolder);
         } catch (Exception e1) {
             e1.printStackTrace();
         }
@@ -157,7 +163,63 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshotNode;
     }
     
+    private EmsScriptNode getChildrenViews(EmsScriptNode node){
+    	log(LogLevel.INFO, "\ngetting " + node.getName() + " children views...");
+    	JSONArray jsonArray = node.getChildrenViewsJSONArray();
+    	for(int i = 0; i <  jsonArray.length(); i++){
+    		try {
+    			Object viewId = jsonArray.get(i);
+				System.out.println(viewId.toString());
+				EmsScriptNode viewNode = findScriptNodeById(viewId.toString(), null);
+				System.out.println(viewNode.toJSON());
+				View v = viewNode.getView();
+				Collection<EmsScriptNode> displayedElems = v.getDisplayedElements();
+				for(EmsScriptNode n: displayedElems){
+					System.out.println(n.toJSON());
+				}
+				Collection<EmsScriptNode> childViewElems = v.getChildViewElements();
+				for(EmsScriptNode n: childViewElems){
+					System.out.println(n.toJSON());
+				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
+//    	Object property = node.getProperty( Acm.ACM_CHILDREN_VIEWS );
+//    	System.out.println(jsonArray.toString());
+    	
+//    	System.out.println(property.toString());
+    	return null;
+    }
     
+    private void createDocBook(EmsScriptNode view, String viewId, String snapshotName, String contextPath, EmsScriptNode snapshotFolder) {
+    	log(LogLevel.INFO, "\ncreating DocBook snapshot for view Id: " + viewId);
+    	if(view == null){
+    		log(LogLevel.WARNING, "null [view] input parameter reference.");
+    		return;
+    	}
+    	
+    	View v = new View(view);
+    	Collection<EmsScriptNode> v2v = v.getViewToViewPropertyViews();
+    	EmsScriptNode childrenViews = null;
+    	for(EmsScriptNode node:v2v){
+    		
+    		if(node.isView()){
+    			System.out.println("View: " + node.getName());
+//    			System.out.println("node JSON: " + node.toJSON());
+    			childrenViews = node;
+    			getChildrenViews(childrenViews);
+    		}
+    	}
+    	
+    	if(childrenViews == null) {
+    		log(LogLevel.WARNING, "no children views found.");
+    		return;
+    	}
+    	
+    	//childrenViews.get
+    }
     /**
      * Retrieve the snapshot folder for the view (goes up chain until it hits ViewEditor)
      * 
