@@ -51,7 +51,13 @@ function replaceArtifactUrl(content, prefix, pattern, escape) {
  */
 function searchForFile(filename) {
 	filename = filename.replace(/\\/g, '');
-	return companyhome.childByNamePath('Sites/europa/Artifacts/magicdraw/' + filename);
+	var nodes = search.luceneSearch("@name:" + filename);
+	
+	if (nodes.length > 0) {
+		return nodes[0];
+	} else {
+		return null;
+	}
 }
 
 
@@ -82,8 +88,8 @@ function getExtension (args) {
         if (args.extension.charAt(0) != ".") {
             extension = ".";
         }
+        extension += args.extension;
     }
-    extension += args.extension;
     return extension;
 }
 
