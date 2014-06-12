@@ -1514,7 +1514,7 @@ public class ModelPost extends AbstractJavaWebScript {
                         // Create JSON object of the elements to return:
                         JSONArray elementsJson = new JSONArray();
                         for ( EmsScriptNode element : elements ) {
-                            elementsJson.put( element.toJSONObject() );
+                            elementsJson.put( element.toJSONObject(null) );
                         }
                         top.put( "elements", elementsJson );
                         model.put( "res", top.toString( 4 ) );

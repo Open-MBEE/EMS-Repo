@@ -77,6 +77,7 @@ public class WebScriptUtil {
                 if ( nr == null ) continue;
                 if ( dateTime != null ) {
                     nr = NodeUtil.getNodeRefAtTime( nr, dateTime );
+                    if ( nr == null ) continue;
                 }
                 EmsScriptNode node = new EmsScriptNode(nr, services, response);
                 // filter by project

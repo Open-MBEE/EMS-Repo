@@ -178,17 +178,17 @@ public class ViewGet extends AbstractJavaWebScript {
                     // TODO -- need to use recurse flag!
                     Collection< EmsScriptNode > elems = v.getDisplayedElements();
                     for ( EmsScriptNode n : elems ) {
-                        viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT ) );
+                        viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT, dateTime ) );
                     }
                 } else if ( gettingContainedViews ) {
                     System.out.println("+ + + + + gettingContainedViews");
                     Collection< EmsScriptNode > elems = v.getContainedViews( recurse, null );
                     for ( EmsScriptNode n : elems ) {
-                        viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW ) );
+                        viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW, dateTime ) );
                     }
                 } else {
                     System.out.println("+ + + + + just the view");
-                    viewsJson.put( view.toJSONObject( JSON_TYPE_FILTER.VIEW ) );
+                    viewsJson.put( view.toJSONObject( JSON_TYPE_FILTER.VIEW, dateTime ) );
                 }
             } catch ( JSONException e ) {
                 log( LogLevel.ERROR, "Could not create views JSON array",

@@ -993,11 +993,12 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     /**
      * Convert node into our custom JSONObject with all possible keys
+     * @param timestamp 
      * 
      * @return JSONObject serialization of node
      */
-    public JSONObject toJSONObject() throws JSONException {
-        return toJSONObject( Acm.JSON_TYPE_FILTER.ALL );
+    public JSONObject toJSONObject(Date dateTime) throws JSONException {
+        return toJSONObject( Acm.JSON_TYPE_FILTER.ALL, dateTime );
     }
 
     /**
@@ -1009,9 +1010,10 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      *            JSONObject
      * @return JSONObject serialization of node
      */
-    public JSONObject toJSONObject( Acm.JSON_TYPE_FILTER renderType )
+    public JSONObject toJSONObject( Acm.JSON_TYPE_FILTER renderType,
+                                    Date dateTime )
             throws JSONException {
-        return toJSONObject( renderType, true, true, false );
+        return toJSONObject( renderType, true, true, false, dateTime );
     }
 
     public String nodeRefToSysmlId( NodeRef ref ) throws JSONException {
@@ -1058,12 +1060,17 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      * @param isExprOrProp
      * 			  If true, does not add specialization key, as it is nested call to
      * 			  process the Expression operand or Property value
+     * @param dateTime
+     *            The time of the specialization, specifying the version.  This
+     *            should correspond the this EmsScriptNode's version, but that is
+     *            not checked.
      * @return JSONObject serialization of node
      */
     public JSONObject toJSONObject( Acm.JSON_TYPE_FILTER renderType,
                                     boolean showQualifiedName,
                                     boolean showEditable, 
-                                    boolean isExprOrProp ) throws JSONException {
+                                    boolean isExprOrProp,
+                                    Date dateTime ) throws JSONException {
         JSONObject element = new JSONObject();
         JSONObject specializationJSON = new JSONObject();
         
@@ -1163,11 +1170,26 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                     String s = null;
                     Boolean isString = true;
                     if ( o instanceof NodeRef ) {
+                        if ( dateTime != null ) {
+                            NodeRef ref = NodeUtil.getNodeRefAtTime( (NodeRef)o, dateTime );
+                            if ( ref == null ) {
+                                String msg = "Error! Element " + o + " did not exist at " + dateTime + ".\n";
+                                if ( getResponse() == null || getStatus() == null ) {
+                                    Debug.error( msg );
+                                } else {
+                                    getResponse().append( msg );
+                                    getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                                         msg );
+                                }
+                                continue;
+                            }
+                            o = ref;
+                        }
                     	// If it is a operand or value, must get a json object for the noderef:
                     	if (jsonType.equals(Acm.JSON_VALUE) || jsonType.equals(Acm.JSON_OPERAND)) {
                     		isString = false;
                     		EmsScriptNode oNode = new EmsScriptNode((NodeRef)o, services);
-                    		o = oNode.toJSONObject(renderType, showQualifiedName, showEditable, true);
+                    		o = oNode.toJSONObject(renderType, showQualifiedName, showEditable, true, dateTime);
                     	}
                     	else {
                     		s = nodeRefToSysmlId( (NodeRef)o );
@@ -1406,7 +1428,17 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 if ( dateTime != null ) {
                     targetRef = NodeUtil.getNodeRefAtTime( targetRef, dateTime );
                 }
-                if ( targetRef == null ) continue; // TODO -- error?!
+                if ( targetRef == null ) {
+                    String msg = "Error! Element " + targetRef + " did not exist at " + dateTime + ".\n";
+                    if ( getResponse() == null || getStatus() == null ) {
+                        Debug.error( msg );
+                    } else {
+                        getResponse().append( msg );
+                        getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                             msg );
+                    }
+                    continue; // TODO -- error?!
+                }
                 list.add( new EmsScriptNode( targetRef, services, response ) );
             }
         }
@@ -1650,6 +1682,9 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                                                               JSONArray jsonArray,
                                                               Date dateTime)
                                                                       throws JSONException {
+        System.out.println( "getPropertyValuesFromJson(" + type + ", "
+                            + jsonArray + ", " + dateTime + ")" );
+
         ArrayList<Serializable> properties = new ArrayList<Serializable>();
 
         Serializable property = null;
@@ -1923,7 +1958,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     public EmsScriptNode getVersionAtTime( Date dateTime ) {
         NodeRef versionedRef = NodeUtil.getNodeRefAtTime( getNodeRef(), dateTime );
         if (versionedRef == null) {
-        		return new EmsScriptNode(getNodeRef(), getServices());
+            return null;
+            //return new EmsScriptNode(getNodeRef(), getServices());
         }
         return new EmsScriptNode( versionedRef, getServices() );
     }
