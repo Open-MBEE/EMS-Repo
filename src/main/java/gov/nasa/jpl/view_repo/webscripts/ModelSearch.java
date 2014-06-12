@@ -109,7 +109,7 @@ public class ModelSearch extends ModelGet {
                 elementsFound.putAll(searchForElements(searchType, keyword, dateTime));
             }
                     
-            handleElements();
+            handleElements(dateTime);
         }
 	    
         return elements;

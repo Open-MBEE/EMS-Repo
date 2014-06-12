@@ -71,7 +71,7 @@ traits:
           description: Regular expression of the search to be executed at the specified scope.
                        Currently search is against id, name, documentation, body.
           type: string
-        aspect:
+        type:
           description: Filter results based on specified type
           type: string
   - sliceable:
@@ -319,7 +319,10 @@ resourceTypes:
         /elements:
           type: collection
           /{elementId}:
-            is: [constrainable]
+            post:
+              is: [constrainable]
+            put:
+              is: [constrainable]
             type: collection
             uriParameters:
               elementId:
