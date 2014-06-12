@@ -920,9 +920,11 @@ public class ModelPost extends AbstractJavaWebScript {
         // TODO Need to permission check on new node creation
         // find node if exists, otherwise create
         EmsScriptNode node = findScriptNodeById( id, null );
+        String existingNodeType = null;
         if ( node != null ) {
             node.setResponse( getResponse() );
             node.setStatus( getResponseStatus() );
+            existingNodeType = node.getTypeName();
         }
         EmsScriptNode reifiedNode = null;
 
@@ -930,21 +932,54 @@ public class ModelPost extends AbstractJavaWebScript {
         JSONObject specializeJson = null;
         // The type is now found by using the specialization key
         // if its a non-nested node:
-        if (nestedNode && elementJson.has(Acm.JSON_TYPE)) {
+        if (nestedNode) {
+        	if (elementJson.has(Acm.JSON_TYPE)) {
         		jsonType = elementJson.getString(Acm.JSON_TYPE);
+        	}
+        	
+    		// Put the type in Json if the was not supplied, but found in the existing node:
+        	if (existingNodeType != null && jsonType == null) {
+        		jsonType = existingNodeType;
+        		elementJson.put(Acm.JSON_TYPE, existingNodeType);
+        	}
         }
-        else if (elementJson.has(Acm.JSON_SPECIALIZATION)) {
-        	specializeJson = elementJson.getJSONObject(Acm.JSON_SPECIALIZATION);
-	        if (specializeJson != null && specializeJson.has(Acm.JSON_TYPE)) {
-	        		jsonType = specializeJson.getString(Acm.JSON_TYPE);
+        else {
+	        if (elementJson.has(Acm.JSON_SPECIALIZATION)) {
+	        	specializeJson = elementJson.getJSONObject(Acm.JSON_SPECIALIZATION);
+		        if (specializeJson != null) {
+		        	if (specializeJson.has(Acm.JSON_TYPE)) {
+		        		jsonType = specializeJson.getString(Acm.JSON_TYPE);
+		        	}
+		        	
+		        	// Put the type in Json if the was not supplied, but found in the existing node:
+		        	if (existingNodeType != null && jsonType == null) {
+		        		jsonType = existingNodeType;
+		        		specializeJson.put(Acm.JSON_TYPE, existingNodeType);
+		        	}
+		        }
 	        }
         }
         
+    	if (existingNodeType != null && !jsonType.equals(existingNodeType)) {
+    		log(LogLevel.WARNING, "The type supplied "+jsonType+" is different than the stored type "+existingNodeType);
+    	}
+        
         String acmSysmlType = null;
         String type = null;
-        if ( jsonType != null ) acmSysmlType = Acm.getJSON2ACM().get( jsonType );
-        type = NodeUtil.getContentModelTypeName( acmSysmlType, services ); // If jsonType = acmSysmlType = null then this
-        																   // will return ACM_ELEMENT
+        if ( jsonType != null ) {
+        	acmSysmlType = Acm.getJSON2ACM().get( jsonType );
+        }
+
+        // Error if could not determine the type and processing the non-nested node:
+        //	Note:  Must also have a specialization in case they are posting just a Element, whic
+        //		   doesnt need a specialization key
+        if (acmSysmlType == null && !nestedNode && elementJson.has(Acm.JSON_SPECIALIZATION)) {
+        	log(LogLevel.ERROR,"Type was not supplied and no existing node to query for the type", 
+        		HttpServletResponse.SC_BAD_REQUEST);
+        	return null;
+        }
+        
+        type = NodeUtil.getContentModelTypeName( acmSysmlType, services ); 
         
         if ( node == null || !node.exists() ) {// && newElements.contains( id ) ) {
             if ( type == null || type.trim().isEmpty() ) {
@@ -1015,14 +1050,9 @@ public class ModelPost extends AbstractJavaWebScript {
             
             // Special processing for Expression or Property:
             //	Note: this will modify elementJson
-            if (acmSysmlType == null) {
-	            processExpressionOrProperty(type, nestedNode, elementJson, specializeJson, node, 
-	            							ingest, reifiedNode, parent, id);
-            } else {
-	            processExpressionOrProperty(acmSysmlType, nestedNode, elementJson, specializeJson, node, 
-						ingest, reifiedNode, parent, id);
-            }
-            
+            processExpressionOrProperty(acmSysmlType, nestedNode, elementJson, specializeJson, node, 
+										ingest, reifiedNode, parent, id);
+              
             node.ingestJSON(elementJson);
             
         } // ends if (ingest && nodeExists && checkPermissions(node, PermissionService.WRITE))
