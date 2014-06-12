@@ -68,6 +68,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     @Override
     protected synchronized Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        printHeader( req );
+
         clearCaches();
 
         String viewId = null;
@@ -121,6 +123,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
         if (status.getCode() != HttpServletResponse.SC_OK) {
             model.put("res", response.toString());
         }
+
+        printFooter();
 
         return model;
     }

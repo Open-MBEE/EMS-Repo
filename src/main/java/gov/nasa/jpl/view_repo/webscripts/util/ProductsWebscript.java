@@ -122,7 +122,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                           new EmsScriptNode.EmsScriptNodeComparator() );
         for ( EmsScriptNode snapshot : snapshotsList ) {
             String id = (String)snapshot.getProperty( Acm.ACM_ID );
-            Date date = (Date)snapshot.getProperty( Acm.ACM_LAST_MODIFIED );
+            Date date = (Date)snapshot.getLastModified( dateTime );
 
             JSONObject jsonObject = new JSONObject();
             jsonObject.put( "id", id );
@@ -165,16 +165,16 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     Collection< EmsScriptNode > elems =
                             v.getDisplayedElements();
                     for ( EmsScriptNode n : elems ) {
-                        productsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT ) );
+                        productsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT, dateTime ) );
                     }
                 } else if ( gettingContainedViews ) {
                     Collection< EmsScriptNode > elems =
                             v.getContainedViews( recurse, null );
                     for ( EmsScriptNode n : elems ) {
-                        productsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW ) );
+                        productsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW, dateTime ) );
                     }
                 } else {
-                    productsJson.put( product.toJSONObject( JSON_TYPE_FILTER.PRODUCT ) );
+                    productsJson.put( product.toJSONObject( JSON_TYPE_FILTER.PRODUCT, dateTime ) );
                 }
             } catch ( JSONException e ) {
                 log( LogLevel.ERROR, "Could not create products JSON array",
