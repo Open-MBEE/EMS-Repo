@@ -881,7 +881,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         System.out.println( "%% %% %% readTime = " + readTime );
         if ( readTime == null ) return false;
-        Date lastModified = (Date)element.getProperty( Acm.ACM_LAST_MODIFIED );
+        Date lastModified = (Date)element.getLastModified( null );
         System.out.println( "%% %% %% lastModified = " + lastModified );
         //DateTimeFormatter parser = ISODateTimeFormat.dateParser(); // format is different than what is printed
        

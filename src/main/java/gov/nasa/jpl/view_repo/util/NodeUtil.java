@@ -705,7 +705,7 @@ public class NodeUtil {
         if ( Debug.isOn() ) Debug.outln("\n\n\ngetNodeRefAtTime( " + ref + ", " + dateTime + " )" );
 
         if ( dateTime == null ) {
-            getServices().getVersionService().getCurrentVersion( ref );
+            return ref;//getServices().getVersionService().getCurrentVersion( ref );
         }
         VersionHistory history = getServices().getVersionService().getVersionHistory( ref );
         if (history == null) {

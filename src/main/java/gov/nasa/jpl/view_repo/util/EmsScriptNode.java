@@ -822,6 +822,28 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         }
     }
 
+    
+    public Date getLastModified(Date dateTime) {
+        Date lastModifiedDate = (Date)getProperty( Acm.ACM_LAST_MODIFIED );
+
+        Object value = getProperty( Acm.ACM_VALUE );
+        ArrayList<NodeRef> dependentNodes = new ArrayList<NodeRef>();
+        if ( value instanceof Collection ) {
+            Collection< ? > c = (Collection< ? >)value;
+            dependentNodes.addAll( Utils.asList( c, NodeRef.class ) );
+        }
+        for ( NodeRef nodeRef : dependentNodes ) {
+            nodeRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
+            if ( nodeRef == null ) continue;
+            EmsScriptNode oNode = new EmsScriptNode(nodeRef, services);
+            Date modified = oNode.getLastModified( dateTime );
+            if ( modified.after( lastModifiedDate ) ) {
+                lastModifiedDate = modified;
+            }
+        }
+        return lastModifiedDate;
+    }
+    
     // @Override
     // public Map<String, Object> getProperties()
     // {
@@ -1200,6 +1222,9 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                     } else if ( o instanceof String ) {
                         s = (String)o;
                     } else if ( o instanceof Date ) {
+                        if ( jsonType.equals( Acm.JSON_LAST_MODIFIED ) ) {
+                            o = getLastModified( dateTime );
+                        }
                         s = getIsoTime( (Date)o );
                     } else {
                         isString = false;
@@ -2028,8 +2053,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             Date xModified;
             Date yModified;
 
-            xModified = (Date)x.getProperty( Acm.ACM_LAST_MODIFIED );
-            yModified = (Date)y.getProperty( Acm.ACM_LAST_MODIFIED );
+            xModified = x.getLastModified( null );
+            yModified = y.getLastModified( null );
 
             if ( xModified == null ) {
                 return -1;

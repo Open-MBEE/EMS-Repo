@@ -122,7 +122,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                           new EmsScriptNode.EmsScriptNodeComparator() );
         for ( EmsScriptNode snapshot : snapshotsList ) {
             String id = (String)snapshot.getProperty( Acm.ACM_ID );
-            Date date = (Date)snapshot.getProperty( Acm.ACM_LAST_MODIFIED );
+            Date date = (Date)snapshot.getLastModified( dateTime );
 
             JSONObject jsonObject = new JSONObject();
             jsonObject.put( "id", id );
