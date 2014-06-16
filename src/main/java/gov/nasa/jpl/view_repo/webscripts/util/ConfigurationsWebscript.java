@@ -204,7 +204,8 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
     public JSONObject getSnapshotJson(EmsScriptNode snapshot, EmsScriptNode view) throws JSONException {
         JSONObject snapshotJson = new JSONObject();
         //snapshotJson.put("url", contextPath + "/service/snapshots/" + snapshot.getProperty(Acm.ACM_ID));
-        snapshotJson.put("sysmlid", view.getProperty(Acm.ACM_NAME));
+        snapshotJson.put("sysmlid", view.getProperty(Acm.ACM_ID));
+        snapshotJson.put("sysmlname", view.getProperty(Acm.ACM_NAME));
         snapshotJson.put("id", snapshot.getProperty(Acm.CM_NAME));
         snapshotJson.put( "created",  EmsScriptNode.getIsoTime( (Date)snapshot.getProperty( "cm:created" )));
         snapshotJson.put( "creator", snapshot.getProperty( "cm:modifier" ) );
