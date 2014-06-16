@@ -203,8 +203,8 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	    String nodeId = null;
 		
 		for (String key: idKeys) {
-		    nodeId = postJson.getString(key);
-		    if (nodeId != null) {
+		    if (postJson.has(key)) {
+		        nodeId = postJson.getString(key);
 		        break;
 		    }
 		}

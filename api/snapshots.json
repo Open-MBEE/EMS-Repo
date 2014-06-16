@@ -34,9 +34,16 @@
 	                "type": "string",
 	                "description": "Sysml identifier of the document the snapshot is for"
 	            },
+	            "sysmlname": {
+	               "type": "string",
+	               "description": "Sysml name of the document the snapshot is for"
+	            },
 	            "configuration": {
-	                "type": "string",
-	                "description": "Shows associated configuration set, if any: TODO: maybe make an array"
+	                "type": "array",
+	                "items": {
+	                    "description": "Shows associated configuration set, if any: TODO: maybe make an array",
+	                    "type": "string"
+                    }
 	            }
             }
         }

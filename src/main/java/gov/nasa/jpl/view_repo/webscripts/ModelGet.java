@@ -84,12 +84,16 @@ public class ModelGet extends AbstractJavaWebScript {
 	
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		String modelId = req.getServiceMatch().getTemplateVars().get("modelid");
-		if (modelId == null) {
-			modelId = req.getServiceMatch().getTemplateVars().get("elementid");
-		}
+	    String[] idKeys = {"modelid", "elementid", "elementId"};
+	    String modelId = null;
+	    for (String idKey: idKeys) {
+	        modelId = req.getServiceMatch().getTemplateVars().get( idKey );
+	        if (modelId != null) {
+	            break;
+	        }
+	    }
 		
-		if (!checkRequestVariable(modelId, "modelid")) {
+		if (modelId == null) {
 			log(LogLevel.ERROR, "Element id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
 			return false;
 		}
@@ -165,10 +169,20 @@ public class ModelGet extends AbstractJavaWebScript {
 	 */
 	private JSONArray handleRequest(WebScriptRequest req) {
         try {
-            String modelId = req.getServiceMatch().getTemplateVars().get("modelid");
-            if (modelId == null) {
-                modelId = req.getServiceMatch().getTemplateVars().get("elementid");
+            String[] idKeys = {"modelid", "elementid", "elementId"};
+            String modelId = null;
+            for (String idKey: idKeys) {
+                modelId = req.getServiceMatch().getTemplateVars().get(idKey);
+                if (modelId != null) {
+                    break;
+                }
             }
+            
+            if (null == modelId) {
+                log(LogLevel.ERROR, "Could not find element " + modelId, HttpServletResponse.SC_NOT_FOUND );
+                return new JSONArray();
+            }
+            
 
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
@@ -183,6 +197,7 @@ public class ModelGet extends AbstractJavaWebScript {
                          "Element " + modelId
                          + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
                          HttpServletResponse.SC_NOT_FOUND );
+                    return new JSONArray();
             }
             
             // recurse default is false

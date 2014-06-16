@@ -366,7 +366,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * this can be removed every where
      * @param instance
      */
-    @Deprecated
     public void appendResponseStatusInfo(AbstractJavaWebScript instance) {
         response.append(instance.getResponse());
         responseStatus.setCode(instance.getResponseStatus().getCode());
