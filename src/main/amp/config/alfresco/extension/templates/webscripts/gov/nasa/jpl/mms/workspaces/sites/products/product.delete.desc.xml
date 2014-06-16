@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>delete product with {productId}</shortname>
+    <description>
+    	delete product with {productId}
+	</description>
+  	<url>/workspaces/{workspaceId}/sites/{siteId}/products/{productId}</url>
+  	<format default="json">any</format>
+  	<authentication>user</authentication>
+  	<transaction allow="readwrite">required</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

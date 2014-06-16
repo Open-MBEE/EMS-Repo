@@ -53,6 +53,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  * 
  */
+@Deprecated
 public class ModelCommentGet extends ModelGet {
     public ModelCommentGet() {
         super();
@@ -121,7 +122,7 @@ public class ModelCommentGet extends ModelGet {
                 }
             }
     
-            handleElements();
+            handleElements(dateTime);
         
             return elements;
         } catch (JSONException e) {

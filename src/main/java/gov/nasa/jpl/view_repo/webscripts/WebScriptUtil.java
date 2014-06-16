@@ -29,6 +29,8 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
@@ -42,6 +44,10 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * static class for webscript utilities
@@ -71,6 +77,7 @@ public class WebScriptUtil {
                 if ( nr == null ) continue;
                 if ( dateTime != null ) {
                     nr = NodeUtil.getNodeRefAtTime( nr, dateTime );
+                    if ( nr == null ) continue;
                 }
                 EmsScriptNode node = new EmsScriptNode(nr, services, response);
                 // filter by project

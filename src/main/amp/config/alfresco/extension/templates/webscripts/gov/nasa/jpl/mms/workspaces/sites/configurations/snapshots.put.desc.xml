@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>put snapshots</shortname>
+    <description>
+    	put snapshots
+	</description>
+  	<url>/workspaces/{workspaceId}/sites/{siteId}/configurations/{configurationId}/snapshots</url>
+  	<format default="json">any</format>
+  	<authentication>user</authentication>
+  	<transaction allow="readwrite">required</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

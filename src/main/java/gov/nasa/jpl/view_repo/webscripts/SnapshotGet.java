@@ -88,7 +88,7 @@ public class SnapshotGet extends AbstractJavaWebScript {
         EmsScriptNode snapshot = findScriptNodeById(id, dateTime);
         if (snapshot != null) {
             String snapshotString = getSnapshotString(snapshot);
-            Date date = (Date)snapshot.getProperty(Acm.ACM_LAST_MODIFIED);
+            Date date = (Date)snapshot.getLastModified( dateTime );
             model.put("res", snapshotString);
             model.put("title", "Snapshot (" + EmsScriptNode.getIsoTime(date) + ")");
             model.put("tag", getConfigurationSet(snapshot, dateTime));

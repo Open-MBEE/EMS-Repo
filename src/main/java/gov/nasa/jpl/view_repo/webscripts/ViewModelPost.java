@@ -71,7 +71,12 @@ public class ViewModelPost extends ModelPost {
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
 
-        String viewid = req.getServiceMatch().getTemplateVars().get("modelid");
+        String[] idKeys = {"modelid", "elementId"};
+        String viewid = null;
+
+        for (String idKey: idKeys) {
+            viewid = req.getServiceMatch().getTemplateVars().get(idKey);
+        }
         UserTransaction trx = services.getTransactionService().getUserTransaction();
         try {
             trx.begin();

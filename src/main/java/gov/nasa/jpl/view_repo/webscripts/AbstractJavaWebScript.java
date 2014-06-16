@@ -96,6 +96,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		this.services = registry;
 	}
 
+	public AbstractJavaWebScript( Repository repository,
+                                  ServiceRegistry services,
+                                  StringBuffer response ) {
+        this.setRepositoryHelper( repository );
+        this.setServices( services );
+        this.response = response ;
+    }
+	   
     public AbstractJavaWebScript(Repository repositoryHelper, ServiceRegistry registry) {
         this.setRepositoryHelper(repositoryHelper);
         this.setServices(registry);
@@ -106,7 +114,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         super();
     }
     
-	/**
+
+    /**
 	 * Utility for clearing out caches
 	 * TODO: do we need to clear caches if Spring isn't making singleton instances
 	 */
@@ -164,13 +173,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
  
     protected EmsScriptNode getSiteNodeFromRequest(WebScriptRequest req) {
-        String siteName; 
+        String siteName = null; 
         // get timestamp if specified
         String timestamp = req.getParameter("timestamp");
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         
-        siteName = req.getServiceMatch().getTemplateVars().get("id");
-
+        String[] siteKeys = {"id", "siteId", "siteName"};
+        
+        for (String siteKey: siteKeys) {
+            siteName = req.getServiceMatch().getTemplateVars().get( siteKey );
+            if (siteName != null) break;
+        }
+        
         return getSiteNode( siteName, dateTime );
     }
     
@@ -183,24 +197,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @param id	Node id to search for
 	 * @return		ScriptNode with name if found, null otherwise
 	 */
-//    protected EmsScriptNode findScriptNodeById(String id) {
-//        return findScriptNodeById( id, null );
-//    }
 	protected EmsScriptNode findScriptNodeById(String id, Date dateTime) {
-//		long start=System.currentTimeMillis();
 		EmsScriptNode result = null;
 
 		// be smart about search if possible
 		if (foundElements.containsKey(id)) {
 			result = foundElements.get(id);
 			EmsScriptNode resultAtTime = result.getVersionAtTime( dateTime );
-			if ( resultAtTime != null ) result = resultAtTime;
-//		} else if (name.endsWith("_pkg")) {
-//			String elementName = name.replace("_pkg", "");
-//			EmsScriptNode elementNode = findScriptNodeByName(elementName);
-//			if (elementNode != null) {
-//			    result = elementNode.getParent().childByNamePath(name);
-//			}
+			//if ( resultAtTime != null ) 
+			result = resultAtTime;
 		} else {
 			NodeRef nodeRef = NodeUtil.findNodeRefById(id, dateTime, services);
 			if (nodeRef != null) {
@@ -209,7 +214,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			}
 		}
 		
-//		long end=System.currentTimeMillis(); System.out.println("\tfindScriptNodeByName " + name + ": " + (end-start) + " ms");
 		return result;
 	}
 
@@ -357,6 +361,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         logLevel = level;
     }
     
+    /**
+     * Should create the new instances with the response in constructor, so
+     * this can be removed every where
+     * @param instance
+     */
     public void appendResponseStatusInfo(AbstractJavaWebScript instance) {
         response.append(instance.getResponse());
         responseStatus.setCode(instance.getResponseStatus().getCode());

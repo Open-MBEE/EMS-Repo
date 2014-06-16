@@ -45,7 +45,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -75,8 +74,6 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.Path;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.repository.Path.ChildAssocElement;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
@@ -825,6 +822,28 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         }
     }
 
+    
+    public Date getLastModified(Date dateTime) {
+        Date lastModifiedDate = (Date)getProperty( Acm.ACM_LAST_MODIFIED );
+
+        Object value = getProperty( Acm.ACM_VALUE );
+        ArrayList<NodeRef> dependentNodes = new ArrayList<NodeRef>();
+        if ( value instanceof Collection ) {
+            Collection< ? > c = (Collection< ? >)value;
+            dependentNodes.addAll( Utils.asList( c, NodeRef.class ) );
+        }
+        for ( NodeRef nodeRef : dependentNodes ) {
+            nodeRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
+            if ( nodeRef == null ) continue;
+            EmsScriptNode oNode = new EmsScriptNode(nodeRef, services);
+            Date modified = oNode.getLastModified( dateTime );
+            if ( modified.after( lastModifiedDate ) ) {
+                lastModifiedDate = modified;
+            }
+        }
+        return lastModifiedDate;
+    }
+    
     // @Override
     // public Map<String, Object> getProperties()
     // {
@@ -996,11 +1015,12 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     /**
      * Convert node into our custom JSONObject with all possible keys
+     * @param timestamp 
      * 
      * @return JSONObject serialization of node
      */
-    public JSONObject toJSONObject() throws JSONException {
-        return toJSONObject( Acm.JSON_TYPE_FILTER.ALL );
+    public JSONObject toJSONObject(Date dateTime) throws JSONException {
+        return toJSONObject( Acm.JSON_TYPE_FILTER.ALL, dateTime );
     }
 
     /**
@@ -1012,9 +1032,10 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      *            JSONObject
      * @return JSONObject serialization of node
      */
-    public JSONObject toJSONObject( Acm.JSON_TYPE_FILTER renderType )
+    public JSONObject toJSONObject( Acm.JSON_TYPE_FILTER renderType,
+                                    Date dateTime )
             throws JSONException {
-        return toJSONObject( renderType, true, true, false );
+        return toJSONObject( renderType, true, true, false, dateTime );
     }
 
     public String nodeRefToSysmlId( NodeRef ref ) throws JSONException {
@@ -1061,12 +1082,17 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      * @param isExprOrProp
      * 			  If true, does not add specialization key, as it is nested call to
      * 			  process the Expression operand or Property value
+     * @param dateTime
+     *            The time of the specialization, specifying the version.  This
+     *            should correspond the this EmsScriptNode's version, but that is
+     *            not checked.
      * @return JSONObject serialization of node
      */
     public JSONObject toJSONObject( Acm.JSON_TYPE_FILTER renderType,
                                     boolean showQualifiedName,
                                     boolean showEditable, 
-                                    boolean isExprOrProp ) throws JSONException {
+                                    boolean isExprOrProp,
+                                    Date dateTime ) throws JSONException {
         JSONObject element = new JSONObject();
         JSONObject specializationJSON = new JSONObject();
         
@@ -1166,11 +1192,26 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                     String s = null;
                     Boolean isString = true;
                     if ( o instanceof NodeRef ) {
+                        if ( dateTime != null ) {
+                            NodeRef ref = NodeUtil.getNodeRefAtTime( (NodeRef)o, dateTime );
+                            if ( ref == null ) {
+                                String msg = "Error! Element " + o + " did not exist at " + dateTime + ".\n";
+                                if ( getResponse() == null || getStatus() == null ) {
+                                    Debug.error( msg );
+                                } else {
+                                    getResponse().append( msg );
+                                    getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                                         msg );
+                                }
+                                continue;
+                            }
+                            o = ref;
+                        }
                     	// If it is a operand or value, must get a json object for the noderef:
                     	if (jsonType.equals(Acm.JSON_VALUE) || jsonType.equals(Acm.JSON_OPERAND)) {
                     		isString = false;
                     		EmsScriptNode oNode = new EmsScriptNode((NodeRef)o, services);
-                    		o = oNode.toJSONObject(renderType, showQualifiedName, showEditable, true);
+                    		o = oNode.toJSONObject(renderType, showQualifiedName, showEditable, true, dateTime);
                     	}
                     	else {
                     		s = nodeRefToSysmlId( (NodeRef)o );
@@ -1181,6 +1222,9 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                     } else if ( o instanceof String ) {
                         s = (String)o;
                     } else if ( o instanceof Date ) {
+                        if ( jsonType.equals( Acm.JSON_LAST_MODIFIED ) ) {
+                            o = getLastModified( dateTime );
+                        }
                         s = getIsoTime( (Date)o );
                     } else {
                         isString = false;
@@ -1208,12 +1252,12 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         // add in content type:
         if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_TYPE)) {
             String typeName = getTypeName();
-        	if (isExprOrProp) {
-        		element.put(Acm.JSON_TYPE, typeName );
-        	}
-        	else {
-        		specializationJSON.put(Acm.JSON_TYPE, typeName );
-        	}
+            	if (isExprOrProp) {
+            		element.put(Acm.JSON_TYPE, typeName );
+            	}
+            	else {
+            		specializationJSON.put(Acm.JSON_TYPE, typeName );
+            	}
         }
         
         // add in property type(s)
@@ -1263,7 +1307,9 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         }
 
         // add read time
-        element.put( Acm.JSON_READ, getIsoTime( new Date( readTime ) ) );
+        if ( !isExprOrProp ) {
+            element.put( Acm.JSON_READ, getIsoTime( new Date( readTime ) ) );
+        }
         
         String elementString = element.toString();
         elementString = fixArtifactUrls( elementString, true );
@@ -1288,8 +1334,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     public String getTypeName() {
         String typeName = null;
-        final String[] aspects = new String[]{ Acm.ACM_PRODUCT, Acm.ACM_VIEW };
-        for ( String aspect : aspects ) {
+        
+        for ( String aspect : Acm.ACM_ASPECTS ) {
             if ( hasAspect( aspect ) ) {
                 // statement below is safe if no ':' since -1 + 1 = 0
                 typeName = aspect.substring( aspect.lastIndexOf( ':' ) + 1 );
@@ -1407,7 +1453,17 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 if ( dateTime != null ) {
                     targetRef = NodeUtil.getNodeRefAtTime( targetRef, dateTime );
                 }
-                if ( targetRef == null ) continue; // TODO -- error?!
+                if ( targetRef == null ) {
+                    String msg = "Error! Element " + targetRef + " did not exist at " + dateTime + ".\n";
+                    if ( getResponse() == null || getStatus() == null ) {
+                        Debug.error( msg );
+                    } else {
+                        getResponse().append( msg );
+                        getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                             msg );
+                    }
+                    continue; // TODO -- error?!
+                }
                 list.add( new EmsScriptNode( targetRef, services, response ) );
             }
         }
@@ -1617,7 +1673,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                                                               JSONArray jsonArray,
                                                               Date dateTime )
                                                                       throws JSONException {
-        ArrayList<Serializable> properties = new ArrayList<Serializable>();
+//        ArrayList<Serializable> properties = new ArrayList<Serializable>();
 
         if ( propDef == null ) {
             return null;
@@ -1651,6 +1707,9 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                                                               JSONArray jsonArray,
                                                               Date dateTime)
                                                                       throws JSONException {
+        System.out.println( "getPropertyValuesFromJson(" + type + ", "
+                            + jsonArray + ", " + dateTime + ")" );
+
         ArrayList<Serializable> properties = new ArrayList<Serializable>();
 
         Serializable property = null;
@@ -1924,7 +1983,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     public EmsScriptNode getVersionAtTime( Date dateTime ) {
         NodeRef versionedRef = NodeUtil.getNodeRefAtTime( getNodeRef(), dateTime );
         if (versionedRef == null) {
-        		return new EmsScriptNode(getNodeRef(), getServices());
+            return null;
+            //return new EmsScriptNode(getNodeRef(), getServices());
         }
         return new EmsScriptNode( versionedRef, getServices() );
     }
@@ -1993,8 +2053,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             Date xModified;
             Date yModified;
 
-            xModified = (Date)x.getProperty( Acm.ACM_LAST_MODIFIED );
-            yModified = (Date)y.getProperty( Acm.ACM_LAST_MODIFIED );
+            xModified = x.getLastModified( null );
+            yModified = y.getLastModified( null );
 
             if ( xModified == null ) {
                 return -1;

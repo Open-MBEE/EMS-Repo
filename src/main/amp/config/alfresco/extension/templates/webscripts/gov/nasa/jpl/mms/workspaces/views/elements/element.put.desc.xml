@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>put element with {elementId}</shortname>
+    <description>
+    	put element with {elementId}
+	</description>
+  	<url>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}</url>
+  	<format default="json">any</format>
+  	<authentication>user</authentication>
+  	<transaction allow="readwrite">required</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

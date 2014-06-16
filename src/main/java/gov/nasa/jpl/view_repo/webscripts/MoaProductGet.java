@@ -29,10 +29,10 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.Collections;
 import java.util.Date;
@@ -176,7 +176,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		}
 
 		if (checkPermissions(product, PermissionService.READ)){
-		    JSONObject object = product.toJSONObject(Acm.JSON_TYPE_FILTER.PRODUCT);
+		    JSONObject object = product.toJSONObject(Acm.JSON_TYPE_FILTER.PRODUCT, dateTime);
 		    productsJson = new JSONObject(object, JSONObject.getNames(object));
 
 		    if (object.has(Acm.JSON_VIEW_2_VIEW)) {
@@ -216,12 +216,25 @@ public class MoaProductGet extends AbstractJavaWebScript {
         for (EmsScriptNode snapshot: snapshotsList) {
             if ( snapshot == null ) continue;
             if ( dateTime != null ) {
-                snapshot = snapshot.getVersionAtTime( dateTime );
+                EmsScriptNode snapshotV = snapshot.getVersionAtTime( dateTime );
+                if ( snapshotV != null ) {
+                    String msg = "Error! Snapshot " + snapshot + " did not exist at " + dateTime + ".\n";
+                    if ( getResponse() == null || this.getResponseStatus() == null ) {
+                        Debug.error( msg );
+                    } else {
+                        getResponse().append( msg );
+                        getResponseStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                                     msg );
+                    }
+                }
+                snapshot = snapshotV;
             }
-            if ( snapshot == null ) continue;
+            if ( snapshot == null ) {
+                continue;
+            }
 
             String id = (String)snapshot.getProperty(Acm.ACM_ID);
-            Date date = (Date)snapshot.getProperty(Acm.ACM_LAST_MODIFIED);
+            Date date = (Date)snapshot.getLastModified( dateTime );
             
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", id.substring(0, id.lastIndexOf("_")));
@@ -255,14 +268,14 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	    for (String viewId: viewIds) {
 	        EmsScriptNode view = findScriptNodeById(viewId, dateTime);
 	        if (view != null && checkPermissions(view, PermissionService.READ)) {
-        	        JSONObject viewJson = view.toJSONObject(Acm.JSON_TYPE_FILTER.VIEW);
+        	        JSONObject viewJson = view.toJSONObject(Acm.JSON_TYPE_FILTER.VIEW, dateTime);
         	        
         	        // add any related comments as part of the view
         	        JSONArray commentsJson = new JSONArray();
         	        List<EmsScriptNode> commentList = view.getSourceAssocsNodesByType(Acm.ACM_ANNOTATED_ELEMENTS, dateTime);//new ArrayList<EmsScriptNode>();
         	        Collections.sort(commentList, new EmsScriptNode.EmsScriptNodeComparator());
         	        for (EmsScriptNode comment: commentList) {
-        	            commentsJson.put(comment.toJSONObject(Acm.JSON_TYPE_FILTER.COMMENT));
+        	            commentsJson.put(comment.toJSONObject(Acm.JSON_TYPE_FILTER.COMMENT, dateTime));
         	        }
         	        viewJson.put("comments", commentsJson);
         	        
@@ -288,7 +301,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	    for (String elementId: elementIds) {
 	        EmsScriptNode element = findScriptNodeById(elementId, dateTime);
 	        if (element != null && checkPermissions(element, PermissionService.READ)) {
-	            JSONObject elementJson = element.toJSONObject(Acm.JSON_TYPE_FILTER.ELEMENT);
+	            JSONObject elementJson = element.toJSONObject(Acm.JSON_TYPE_FILTER.ELEMENT, dateTime);
 	            elementsJson.put(elementJson);
 	        }
 	    }
