@@ -22,6 +22,10 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class MmsSnapshotsGet extends AbstractJavaWebScript {
 
+    public MmsSnapshotsGet() {
+        super();
+    }
+    
     public MmsSnapshotsGet( Repository repository, ServiceRegistry services ) {
         this.repository = repository;
         this.services = services;

@@ -16,7 +16,10 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class MmsConfigurationsGet extends AbstractJavaWebScript {
-
+    public MmsConfigurationsGet() {
+        super();
+    }
+    
     public MmsConfigurationsGet( Repository repository, ServiceRegistry services ) {
         this.repository = repository;
         this.services = services;

@@ -16,6 +16,10 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class MmsProductsGet extends AbstractJavaWebScript {
+    public MmsProductsGet() {
+        super();
+    }
+    
     public MmsProductsGet( Repository repository, ServiceRegistry services ) {
         this.repository = repository;
         this.services = services;
