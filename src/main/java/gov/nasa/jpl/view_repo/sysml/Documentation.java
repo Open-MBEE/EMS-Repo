@@ -7,16 +7,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * An implementation of a {@link Name}
+ * An implementation of a {@link sysml.view.Documentation}
  * 
- * @see viewable.Name
+ * @see sysml.view.Documentation
  * 
  */
-public class Name implements sysml.view.Name<EmsScriptNode> {
+public class Documentation implements sysml.view.Documentation<EmsScriptNode> {
 
 	private EmsScriptNode reference = null;
 	
-	public Name(EmsScriptNode ref) {
+	public Documentation(EmsScriptNode ref) {
 		setReference(ref);
 	}
 	
@@ -48,8 +48,9 @@ public class Name implements sysml.view.Name<EmsScriptNode> {
         	
             json.put("type", "Paragraph");
             json.put("sourceType", "reference");
-            json.put("source", reference.getName());
-            json.put("sourceProperty", "name");
+            
+            json.put("source", reference.getPropertyValue("documentation"));
+            json.put("sourceProperty", "documentation");
 
         } catch ( JSONException e ) {
             // TODO Auto-generated catch block

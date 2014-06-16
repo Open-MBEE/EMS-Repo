@@ -26,7 +26,6 @@ import java.util.Vector;
 
 import sysml.SystemModel.ModelItem;
 import sysml.SystemModel.Operation;
-import sysml.Viewable;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
@@ -35,13 +34,14 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import sysml.SystemModel.Item;
+import sysml.view.Viewable;
 /**
  * A View embeds {@link Viewable}s and itself is a {@link Viewable}. View
  * inherits from List so that it may contain Viewables in addition to having
  * View children.
  * 
  */
-public class View extends List implements sysml.View< EmsScriptNode >, Comparator<View>, Comparable<View> {
+public class View extends List implements sysml.view.View< EmsScriptNode >, Comparator<View>, Comparable<View> {
 
     private static final long serialVersionUID = -7618965504816221446L;
     
@@ -132,9 +132,9 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
      */
     @Override
     // TODO -- need to support a flag for recursion
-    public Collection< sysml.View< EmsScriptNode > > getChildViews() {
-        ArrayList< sysml.View< EmsScriptNode > > childViews =
-                new ArrayList< sysml.View< EmsScriptNode > >();
+    public Collection< sysml.view.View< EmsScriptNode > > getChildViews() {
+        ArrayList< sysml.view.View< EmsScriptNode > > childViews =
+                new ArrayList< sysml.view.View< EmsScriptNode > >();
         for ( EmsScriptNode node : getChildViewElements() ) {
             childViews.add( new View( node ) );
         }
@@ -431,7 +431,7 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
 
             elements = new JSONArray();
             viewProperties.put("childrenViews", elements );
-            for ( sysml.View<EmsScriptNode> view : getChildViews() ) {
+            for ( sysml.view.View<EmsScriptNode> view : getChildViews() ) {
                 if ( view instanceof View ) {
                     elements.put( view.getElement().getName() );
                 }
@@ -505,7 +505,7 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
         }
         
         set.addAll(super.getDisplayedElements() );
-        for ( sysml.View< EmsScriptNode > v : getChildViews() ) {
+        for ( sysml.view.View< EmsScriptNode > v : getChildViews() ) {
             if ( v instanceof View ) {
                 set.addAll( ((View)v).getDisplayedElements( seen ) );
             } else {
