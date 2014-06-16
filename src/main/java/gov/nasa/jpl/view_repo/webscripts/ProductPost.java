@@ -113,10 +113,23 @@ public class ProductPost extends AbstractJavaWebScript {
 	}
 	
 	private void updateProduct(JSONObject productJson) throws JSONException {
-		String id = productJson.getString("id");
+	    
+		String id = null;
+		try { 
+		    id = productJson.getString("id");
+		} catch (Throwable e) {
+		    // ignore
+		}
 		if (id == null) {
-			log(LogLevel.ERROR, "product id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
-			return;
+	        try { 
+	            id = productJson.getString("sysmlid");
+	        } catch (Throwable e) {
+	            // ignore
+	        }
+	        if (id == null) {
+			  log(LogLevel.ERROR, "product id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
+			  return;
+	        }
 		}
 		
 		EmsScriptNode product = findScriptNodeById(id, null);
