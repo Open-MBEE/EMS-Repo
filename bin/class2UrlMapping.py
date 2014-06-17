@@ -21,7 +21,8 @@ def main():
 
 	html.write('<html><body><table>')
 	for key, value in od.items():
-		html.write('<tr><td>' + key + '</td><td>' + value + '</td></tr>')
+		for entry in value:
+			html.write('<tr><td>' + key + '</td><td>' + entry + '</td></tr>')
 	html.write('</body></table></html>')
 
 
@@ -32,7 +33,10 @@ def parseContext(filename):
 		beanClass = bean.getAttribute('class')
 		beanId = bean.getAttribute('id')
 		descFile = convertBeanId2DescFile(beanId)
-		url2class[getUrlFromDesc(descFile)]= beanClass
+		url = getUrlFromDesc(descFile)
+		if not url2class.has_key(url):
+			url2class[url] = []
+		url2class[url].append(beanClass)
 
 
 def getUrlFromDesc(descFile):
