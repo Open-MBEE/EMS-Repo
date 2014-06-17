@@ -108,7 +108,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		return model;
 	}
 
-	private int updateOrCreateProject(JSONObject jsonObject, String projectId, boolean fix) throws JSONException {
+	public int updateOrCreateProject(JSONObject jsonObject, String projectId, boolean fix) throws JSONException {
 	      EmsScriptNode projectNode = findScriptNodeById(projectId, null);
 	      
 	      if (projectNode == null) {
@@ -150,7 +150,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 	 * @throws JSONException
 	 */
     @SuppressWarnings("deprecation")
-    private int updateOrCreateProject(JSONObject jsonObject, String projectId, String siteName, boolean createSite, boolean fix, boolean delete) throws JSONException {
+    public int updateOrCreateProject(JSONObject jsonObject, String projectId, String siteName, boolean createSite, boolean fix, boolean delete) throws JSONException {
 		// make sure site exists
 		EmsScriptNode siteNode = getSiteNode(siteName, null);
 		if (siteNode == null) {
