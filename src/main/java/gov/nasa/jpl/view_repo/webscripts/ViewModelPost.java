@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
@@ -68,6 +69,8 @@ public class ViewModelPost extends ModelPost {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
+        Debug.error("\t####### ERROR: ViewModelPost  should not be called! : ");
+        if ( true ) return null; 
 
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();

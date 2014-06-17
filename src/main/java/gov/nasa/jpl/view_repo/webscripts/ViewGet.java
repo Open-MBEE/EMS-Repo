@@ -81,7 +81,7 @@ public class ViewGet extends AbstractJavaWebScript {
     
         EmsScriptNode view = findScriptNodeById(viewId, dateTime);
         if (view == null) {
-            log(LogLevel.ERROR, "View not found with id: " + viewId + ".\n", HttpServletResponse.SC_NOT_FOUND);
+            log(LogLevel.ERROR, "View not found with id: " + viewId + " at " + dateTime + ".\n", HttpServletResponse.SC_NOT_FOUND);
             return false;
         }
 
