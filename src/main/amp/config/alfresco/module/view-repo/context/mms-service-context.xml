@@ -34,6 +34,15 @@
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
+        <property name="type" value="MULTIPLE" />
+    </bean>
+
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.configurations.configuration.get"
+        class="gov.nasa.jpl.view_repo.webscripts.MmsConfigurationsGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+        <property name="type" value="SINGLE" />
     </bean>
 
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.configurations.post"

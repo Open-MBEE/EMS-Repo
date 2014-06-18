@@ -123,6 +123,32 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         return configJsonArray;
     }
     
+   
+    /**
+     * 
+     * @param req
+     * @param isMms
+     * @return
+     * @throws JSONException
+     */
+    public JSONArray handleConfiguration(WebScriptRequest req, boolean isMms) throws JSONException {
+        String configId = req.getServiceMatch().getTemplateVars().get("configurationId");
+        
+        JSONArray configsJsonArray = handleConfigurations(req, isMms);
+        JSONArray result = new JSONArray();
+        
+        for (int ii = 0; ii < configsJsonArray.length(); ii++) {
+            JSONObject configJson = configsJsonArray.getJSONObject( ii );
+            if (configJson.getString( "id" ).equals(configId)) {
+                result.put( configJson );
+                break;
+            }
+        }
+        
+        return result;
+    }
+    
+    
     /**
      * Retrieve just the MMS API configuration JSON
      * @param config
