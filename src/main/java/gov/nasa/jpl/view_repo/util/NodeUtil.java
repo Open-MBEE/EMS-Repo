@@ -779,12 +779,17 @@ public class NodeUtil {
         if ( Debug.isOn() ) Debug.outln( "versioned node ref " + vnr );
         
         NodeRef fnr = version.getFrozenStateNodeRef();
+        Debug.turnOn();
         if ( Debug.isOn() ) Debug.outln( "frozen node ref " + fnr );
-        if ( Debug.isOn() ) Debug.outln( "frozen node ref "
+        if ( Debug.isOn() ) Debug.outln( "frozen node ref properties: "
                                          + getServices().getNodeService()
                                                         .getProperties( fnr ) );
+        if ( Debug.isOn() ) Debug.outln( "frozen node ref "
+                + getServices().getNodeService()
+                               .getProperties( fnr ) );
 
         if ( Debug.isOn() ) Debug.outln( "returning frozen node ref " + fnr );
+        Debug.turnOff();
 
         return fnr;
     }
@@ -876,5 +881,27 @@ public class NodeUtil {
             return nodeRefs.get( 0 );
         }
         return null;
+    }
+
+    public static EmsScriptNode getVersionAtTime( EmsScriptNode element,
+                                                  Date dateTime ) {
+        EmsScriptNode versionedNode = null;
+        NodeRef ref = getNodeRefAtTime( element.getNodeRef(), dateTime );
+        if ( ref != null ) {
+            versionedNode = new EmsScriptNode( ref, element.getServices() );
+        }
+        return versionedNode;
+    }
+
+    public static Collection< EmsScriptNode >
+            getVersionAtTime( Collection< EmsScriptNode > moreElements, Date dateTime ) {
+        ArrayList<EmsScriptNode> elements = new ArrayList<EmsScriptNode>();
+        for ( EmsScriptNode n : moreElements ) {
+            EmsScriptNode versionedNode = getVersionAtTime( n, dateTime );
+            if ( versionedNode != null ) {
+                elements.add( versionedNode );
+            }
+        }
+        return elements;
     }
 }

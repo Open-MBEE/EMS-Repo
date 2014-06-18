@@ -90,7 +90,6 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * 
  */
 public class ModelPost extends AbstractJavaWebScript {
-    public static final String NO_PROJECT_ID = "sysml_no_project";
 
     public ModelPost() {
         super();
@@ -603,14 +602,14 @@ public class ModelPost extends AbstractJavaWebScript {
                         EmsScriptNode noProjetNode = findScriptNodeById( ownerId, null );
                         if ( noProjetNode == null ) {
                             String siteName = 
-                                    (getSiteInfo() == null ? null : getSiteInfo().getShortName() );
+                                    (getSiteInfo() == null ? NO_SITE_ID : getSiteInfo().getShortName() );
                             int statusCode;
                             ProjectPost pp = new ProjectPost( repository, services );
-                            if (siteName != null) {
-                                statusCode = pp.updateOrCreateProject(new JSONObject(), NO_PROJECT_ID, siteName, true, false, false);
-                            } else {
-                                statusCode = pp.updateOrCreateProject(new JSONObject(), NO_PROJECT_ID, false);
-                            }
+                            statusCode =
+                                    pp.updateOrCreateProject( new JSONObject(),
+                                                              NO_PROJECT_ID,
+                                                              siteName, true,
+                                                              false, false );
                         }
                     }
                     rootElements.add(sysmlId);
@@ -1486,10 +1485,11 @@ public class ModelPost extends AbstractJavaWebScript {
                 else {
                 	
                     JSONObject postJson = (JSONObject)req.parseContent();
+                    EmsScriptNode projectNode = getProjectNodeFromRequest( req, true );
                     Set< EmsScriptNode > elements = 
                         instance.createOrUpdateModel( postJson,
                                                       status,
-                                                      getProjectNodeFromRequest( req ) );
+                                                      projectNode );
                     
                     if ( !Utils.isNullOrEmpty( elements ) ) {
                         
@@ -1604,7 +1604,7 @@ public class ModelPost extends AbstractJavaWebScript {
         } else {
             siteNode = new EmsScriptNode(sInfo.getNodeRef(), services, response);
         }
-        String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
+        String projectId = getProjectId( req );
         
         String jobName = "Load Job " + projectId + ".json";
         EmsScriptNode jobNode = ActionUtil.getOrCreateJob(siteNode, jobName, "ems:Job", status, response);
@@ -1640,32 +1640,20 @@ public class ModelPost extends AbstractJavaWebScript {
                 return false;
             }
         } else {
-//            // Handling for project/{id}/elements
-//            if (!checkRequestVariable(siteName, SITE_NAME)) {
-//                return false;
-//            }
-//
-//            if (!checkRequestVariable(siteInfo, "Site")) {
-//                return false;
-//            }
         }
-        
-//        // check project
-//        EmsScriptNode projectNode = getProjectNodeFromRequest(req);
-//        if (projectNode == null) {
-//            log(LogLevel.ERROR, "Project not found.\n", HttpServletResponse.SC_NOT_FOUND);
-//            return false;
-//        }
         
         return true;
     }
 
-    private EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req) {
+    private EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req, boolean createIfNonexistent) {
         EmsScriptNode projectNode = null;
         
-        String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
-        String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
-        EmsScriptNode siteNode = getSiteNode(siteName, null);
+        String siteName = getSiteName(req);
+        //String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+        //String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
+        String projectId = getProjectId(req);
+        EmsScriptNode siteNode = createSite( siteName );
+        
         projectNode = siteNode.childByNamePath("/Models/" + projectId);
         if (projectNode == null) {
                 // for backwards compatibility
@@ -1696,6 +1684,19 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
             } else {}
         }
+        
+        if ( projectNode == null ) {
+            ProjectPost pp = new ProjectPost( repository, services );
+            JSONObject json = new JSONObject();
+            try {
+                pp.updateOrCreateProject( json, projectId, siteName,
+                                          createIfNonexistent, false, false );
+                projectNode = findScriptNodeById( projectId, null );
+            } catch ( JSONException e ) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
         return projectNode;
     }
     
@@ -1705,7 +1706,7 @@ public class ModelPost extends AbstractJavaWebScript {
     
     public void setSiteInfo( WebScriptRequest req ) {
         if ( req == null ) return;
-        String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+        String siteName = getSiteName( req );
         siteInfo = services.getSiteService().getSite(siteName);
     }
     public SiteInfo getSiteInfo() {
