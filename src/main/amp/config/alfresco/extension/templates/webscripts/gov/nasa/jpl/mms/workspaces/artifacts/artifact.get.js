@@ -28,7 +28,26 @@ function main() {
 	
 	var timestamp = null;
 	if ("timestamp" in args) {
-		timestamp = utils.fromISO8601(args.timestamp);
+		offset = args.timestamp.substring(23,29);
+		tsString = args.timestamp.substring(0,23) + 'Z'; 
+		timestamp = utils.fromISO8601(tsString);
+		
+		ms = timestamp.getTime();
+		
+		if (offset[0] == '+' || offset[0] == '-') {
+			hrOffset = parseInt(offset.substring(1,3));
+			hrOffset = hrOffset * 60 * 60 * 1000;
+			
+			minOffset = parseInt(offset.substring(3,5));
+			minOffset = minOffset * 60 * 1000;
+			if (offset[0]=='+') {
+				ms = ms - hrOffset - minOffset;
+			} else {
+				ms = ms + hrOffset + minOffset;
+			}
+			
+			timestamp = new Date(ms);
+		}
 	}
 	
 	//Template Args exposes URL template parameters 
@@ -48,6 +67,8 @@ function main() {
 	  } else {
 	    status.message = "File " + filename + " not found";
 	  }
+	  model.id = 'none';
+	  model.link = 'none';
 	}
 }
 
@@ -63,7 +84,7 @@ function getVersionedUrl(matchNode, timestamp) {
 	}
 	
 	var versions = matchNode.getVersionHistory();
-	for each(var ii = versions.length-1; ii >= 0; ii--) {
+	for each(var ii = 0; ii < versions.length; ii++) {
 		var version = versions[ii];
 		if (version.getCreatedDate().compareTo(timestamp) <= 0) {
 			return version.getNode().getUrl();
