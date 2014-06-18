@@ -4,8 +4,6 @@
 package gov.nasa.jpl.view_repo.sysml;
 
 import gov.nasa.jpl.ae.event.Expression;
-import gov.nasa.jpl.ae.event.Expression.Form;
-import gov.nasa.jpl.ae.event.FunctionCall;
 import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.MoreToString;
@@ -22,26 +20,17 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.Vector;
-
-import sysml.SystemModel.ModelItem;
-import sysml.SystemModel.Operation;
-import sysml.Viewable;
-
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
-
-import sysml.SystemModel.Item;
+import sysml.view.Viewable;
 /**
  * A View embeds {@link Viewable}s and itself is a {@link Viewable}. View
  * inherits from List so that it may contain Viewables in addition to having
  * View children.
  * 
  */
-public class View extends List implements sysml.View< EmsScriptNode >, Comparator<View>, Comparable<View> {
+public class View extends List implements sysml.view.View< EmsScriptNode >, Comparator<View>, Comparable<View> {
 
     private static final long serialVersionUID = -7618965504816221446L;
     
@@ -132,9 +121,9 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
      */
     @Override
     // TODO -- need to support a flag for recursion
-    public Collection< sysml.View< EmsScriptNode > > getChildViews() {
-        ArrayList< sysml.View< EmsScriptNode > > childViews =
-                new ArrayList< sysml.View< EmsScriptNode > >();
+    public Collection< sysml.view.View< EmsScriptNode > > getChildViews() {
+        ArrayList< sysml.view.View< EmsScriptNode > > childViews =
+                new ArrayList< sysml.view.View< EmsScriptNode > >();
         for ( EmsScriptNode node : getChildViewElements( null ) ) {
             childViews.add( new View( node ) );
         }
@@ -272,6 +261,7 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
     public EmsScriptNode getViewpointOperation() {
         EmsScriptNode viewpoint = getViewpoint();
         if ( viewpoint == null ) return null;
+        //if ( viewpoint == null || !viewpoint.exists() ) return null;
         
         // Get the Method property from the ViewPoint element:        
         Collection< EmsScriptNode > viewpointMethods =
@@ -431,7 +421,7 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
 
             elements = new JSONArray();
             viewProperties.put("childrenViews", elements );
-            for ( sysml.View<EmsScriptNode> view : getChildViews() ) {
+            for ( sysml.view.View<EmsScriptNode> view : getChildViews() ) {
                 if ( view instanceof View ) {
                     elements.put( view.getElement().getName() );
                 }
@@ -507,7 +497,7 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
         Collection< EmsScriptNode > versionedElements = super.getDisplayedElements();
         versionedElements = NodeUtil.getVersionAtTime( versionedElements, dateTime );
         set.addAll( versionedElements );
-        for ( sysml.View< EmsScriptNode > v : getChildViews() ) {
+        for ( sysml.view.View< EmsScriptNode > v : getChildViews() ) {
             EmsScriptNode n = NodeUtil.getVersionAtTime( v.getElement(), dateTime );
             if ( n == null ) continue;
             v = new View( n );
