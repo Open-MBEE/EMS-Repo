@@ -164,12 +164,13 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                 if ( gettingDisplayedElements ) {
                     Collection< EmsScriptNode > elems =
                             v.getDisplayedElements();
+                    elems = NodeUtil.getVersionAtTime( elems, dateTime );
                     for ( EmsScriptNode n : elems ) {
                         productsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT, dateTime ) );
                     }
                 } else if ( gettingContainedViews ) {
                     Collection< EmsScriptNode > elems =
-                            v.getContainedViews( recurse, null );
+                            v.getContainedViews( recurse, dateTime, null );
                     for ( EmsScriptNode n : elems ) {
                         productsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW, dateTime ) );
                     }

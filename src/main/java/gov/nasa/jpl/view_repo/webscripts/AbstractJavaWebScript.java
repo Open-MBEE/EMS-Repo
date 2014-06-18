@@ -271,6 +271,45 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     protected static final String WORKSPACE_ID = "workspaceId";
 	protected static final String PROJECT_ID = "projectId";
     protected static final String SITE_NAME = "siteName";
+    protected static final String SITE_NAME2 = "siteId";
+    
+    public static final String NO_PROJECT_ID = "no_project";
+    public static final String NO_SITE_ID = "no_site";
+
+    
+    public String getSiteName( WebScriptRequest req ) {
+        return getSiteName( req, false );
+    }
+    public String getSiteName( WebScriptRequest req, boolean createIfNonexistent ) {
+        String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+        if ( siteName == null ) {
+            siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME2);
+        }
+        if ( siteName == null || siteName.length() <= 0 ) {
+            siteName = NO_SITE_ID;
+        }
+        if ( createIfNonexistent ) {
+            createSite( siteName );
+        }
+        return siteName;
+    }
+    
+    public EmsScriptNode createSite( String siteName ) {
+        EmsScriptNode siteNode = getSiteNode( siteName, null );
+        if ( siteNode == null || !siteNode.exists() ) {
+            SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, true );
+            siteNode = new EmsScriptNode( foo.getNodeRef(), services );
+        }
+        return siteNode;
+    }
+    
+    public String getProjectId( WebScriptRequest req ) {
+        String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
+        if ( projectId == null || projectId.length() <= 0 ) {
+            projectId = NO_PROJECT_ID;
+        }
+        return projectId;
+    }
     
     protected boolean checkRequestContent(WebScriptRequest req) {
         if (req.getContent() == null) {
@@ -386,20 +425,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
 
     protected static String getIdFromRequest( WebScriptRequest req ) {
-        String id = req.getServiceMatch().getTemplateVars().get("id");
-        if ( id == null ) {
-            id = req.getServiceMatch().getTemplateVars().get("modelid");
-        }
-        if ( id == null ) {
-            id = req.getServiceMatch().getTemplateVars().get("viewid");
-        }
-        if ( id == null ) {
-            id = req.getServiceMatch().getTemplateVars().get("elementid");
-        }
-        if ( id == null ) {
-            id = req.getServiceMatch().getTemplateVars().get("elementId");
+        String[] ids = new String[] { "id", "modelid", "viewid", "workspaceId",
+                                      "workspaceid", "elementid", "elementId" };
+        String id = null;
+        for ( String idv : ids ) {
+            id = req.getServiceMatch().getTemplateVars().get(idv);
+            if ( id != null ) break;
         }
         System.out.println("Got id = " + id);
+        if ( id == null ) return null;
         boolean gotElementSuffix  = ( id.toLowerCase().trim().endsWith("/elements") );
         if ( gotElementSuffix ) {
             id = id.substring( 0, id.lastIndexOf( "/elements" ) );
@@ -409,7 +443,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 id = id.substring( 0, id.lastIndexOf( "/views" ) );
             }
         }
-        System.out.println("productId = " + id);
+        System.out.println("id = " + id);
         return id;
     }
 
