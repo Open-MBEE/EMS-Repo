@@ -779,7 +779,6 @@ public class NodeUtil {
         if ( Debug.isOn() ) Debug.outln( "versioned node ref " + vnr );
         
         NodeRef fnr = version.getFrozenStateNodeRef();
-        Debug.turnOn();
         if ( Debug.isOn() ) Debug.outln( "frozen node ref " + fnr );
         if ( Debug.isOn() ) Debug.outln( "frozen node ref properties: "
                                          + getServices().getNodeService()
@@ -789,7 +788,6 @@ public class NodeUtil {
                                .getProperties( fnr ) );
 
         if ( Debug.isOn() ) Debug.outln( "returning frozen node ref " + fnr );
-        Debug.turnOff();
 
         return fnr;
     }
