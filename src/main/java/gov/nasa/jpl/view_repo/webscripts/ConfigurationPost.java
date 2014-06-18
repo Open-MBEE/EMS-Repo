@@ -113,19 +113,8 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	 */
 	private JSONObject saveAndStartAction(WebScriptRequest req, Status status) {
 	    JSONObject jsonObject = null;
-	    String[] siteKeys = {SITE_NAME, "siteId"};
-	    
-		String siteName = null;
-		for (String key: siteKeys) {
-		    siteName = req.getServiceMatch().getTemplateVars().get(key);
-		    if (siteName != null) {
-		        break;
-		    }
-		}
-		if (siteName == null) {
-			log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
-			return null;
-		}
+
+	    String siteName = getSiteName( req );
 
 		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
 		if (siteInfo == null) {

@@ -29,11 +29,13 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
@@ -67,6 +69,8 @@ public class ViewModelPost extends ModelPost {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
+        Debug.error("\t####### ERROR: ViewModelPost  should not be called! : ");
+        if ( true ) return null; 
 
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
@@ -95,7 +99,8 @@ public class ViewModelPost extends ModelPost {
         ViewModelPost instance = new ViewModelPost(repository, services);
         
         try {
-            instance.createOrUpdateModel(req, status);
+//            Set< EmsScriptNode > elements = 
+                    instance.createOrUpdateModel(req, status);
             appendResponseStatusInfo(instance);
         } catch (JSONException e) {
             log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
@@ -105,6 +110,16 @@ public class ViewModelPost extends ModelPost {
             e.printStackTrace();
         }
 
+        // UNCOMMENT THIS
+        // Create JSON object of the elements to return:
+//        JSONObject top = new JSONObject();
+//        JSONArray elementsJson = new JSONArray();
+//        for ( EmsScriptNode element : elements ) {
+//            elementsJson.put( element.toJSONObject(null) );
+//        }
+//        top.put( "elements", elementsJson );
+//        model.put( "res", top.toString( 4 ) );
+        
         status.setCode(responseStatus.getCode());
         model.put("res", response.toString());
 
@@ -122,7 +137,12 @@ public class ViewModelPost extends ModelPost {
         for (int ii = 0; ii < array.length(); ii++) {
             JSONObject elementJson = array.getJSONObject(ii);
             
+            // If element does not have a ID, then create one for it using the alfresco id (cm:id):
+            if (!elementJson.has(Acm.JSON_ID)) {
+                elementJson.put( Acm.JSON_ID, createId( services ) );
+            }
             String id = elementJson.getString(Acm.JSON_ID);
+            
             EmsScriptNode elementNode = findScriptNodeById(id, null);
             if (elementNode != null) {
                 updateOrCreateElement(elementJson, elementNode.getParent(), false);

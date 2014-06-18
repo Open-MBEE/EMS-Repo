@@ -9,7 +9,7 @@
     </bean>
 
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.elements.post"
-        class="gov.nasa.jpl.view_repo.webscripts.ViewModelPost" parent="webscript"
+        class="gov.nasa.jpl.view_repo.webscripts.ModelPost" parent="webscript"
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
