@@ -208,7 +208,8 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         for ( EmsScriptNode node : conformElements ) {
             
             // If the sysml:source of the Compose element is the View:
-            if (getSource(node).equals( viewNode ) ) { 
+            EmsScriptNode source = getSource(node);
+            if (source != null && source.equals( viewNode ) ) { 
                 
                 // Get the target of the Conform relationship (the Viewpoint):
                 Collection<EmsScriptNode> viewpointNodes = getModel().getTarget(node);
@@ -242,7 +243,8 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
             // If the sysml:source of the Expose element is the View, then
             // add it to our expose list (there can be multiple exposes for
             // a view):
-            if (getSource(node).equals( viewNode ) ) { 
+            EmsScriptNode source = getSource(node);
+            if (source != null && source.equals( viewNode ) ) { 
 
                 // Get the target(s) of the Expose relationship:
 
