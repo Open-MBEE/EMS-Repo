@@ -1,76 +1,17 @@
 package gov.nasa.jpl.view_repo.sysml;
 
-import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import java.util.Collection;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
- * An implementation of a {@link Name}
+ * An implementation of a {@link sysml.view.Name}
  * 
- * @see viewable.Name
+ * @see sysml.view.Name
  * 
  */
-public class Name implements sysml.view.Name<EmsScriptNode> {
+public class Name extends ElementReference implements sysml.view.Name<EmsScriptNode> {
 
-	private EmsScriptNode reference = null;
-	
-	public Name(EmsScriptNode ref) {
-		setReference(ref);
+	public Name( EmsScriptNode element ) {
+	    super( element, ElementReference.Attribute.NAME );
 	}
-	
-	public EmsScriptNode getReference() {
-		return reference;
-	}
-
-	public void setReference(EmsScriptNode reference) {
-		this.reference = reference;
-	}
-	
-	/*
-	 * <code>
-	 *  "sourceType": "reference" 
-     *  "source": element id,
-     *  "sourceProperty": "name"
-     * </code>
-     * @returns a JSON object in the format above         
-	 * @see sysml.Viewable#toViewJson()
-	 */
-	@Override
-	public JSONObject toViewJson() {
-		
-		if (reference == null) return null;
-		
-        JSONObject json = new JSONObject();
-
-        try {
-        	
-            json.put("type", "Paragraph");
-            json.put("sourceType", "reference");
-            json.put("source", reference.getName());
-            json.put("sourceProperty", "name");
-
-        } catch ( JSONException e ) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        
-        return json;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see sysml.Viewable#getDisplayedElements()
-	 */
-	@Override
-	public Collection<EmsScriptNode> getDisplayedElements() {
-		return Utils.asList(reference, EmsScriptNode.class);
-	}
-	
-    @Override
-    public String toString() {
-        return "" + toViewJson();
-    }
 
 }

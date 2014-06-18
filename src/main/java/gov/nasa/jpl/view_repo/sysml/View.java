@@ -261,6 +261,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     public EmsScriptNode getViewpointOperation() {
         EmsScriptNode viewpoint = getViewpoint();
         if ( viewpoint == null ) return null;
+        //if ( viewpoint == null || !viewpoint.exists() ) return null;
         
         // Get the Method property from the ViewPoint element:        
         Collection< EmsScriptNode > viewpointMethods =
