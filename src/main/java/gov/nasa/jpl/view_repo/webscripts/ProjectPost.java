@@ -78,8 +78,8 @@ public class ProjectPost extends AbstractJavaWebScript {
 
 		try {
 			if (validateRequest(req, status)) {
-			    String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
-		        String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
+			    String siteName = getSiteName( req, true );
+		        String projectId = getProjectId( req );
 		        boolean delete = checkArgEquals(req, "delete", "true") ? true : false;
 		        boolean fix = checkArgEquals(req, "fix", "true") ? true : false;
 		        boolean createSite = checkArgEquals(req, "createSite", "true") ? true : false;
@@ -108,7 +108,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		return model;
 	}
 
-	private int updateOrCreateProject(JSONObject jsonObject, String projectId, boolean fix) throws JSONException {
+	public int updateOrCreateProject(JSONObject jsonObject, String projectId, boolean fix) throws JSONException {
 	      EmsScriptNode projectNode = findScriptNodeById(projectId, null);
 	      
 	      if (projectNode == null) {
@@ -150,15 +150,15 @@ public class ProjectPost extends AbstractJavaWebScript {
 	 * @throws JSONException
 	 */
     @SuppressWarnings("deprecation")
-    private int updateOrCreateProject(JSONObject jsonObject, String projectId, String siteName, boolean createSite, boolean fix, boolean delete) throws JSONException {
+    public int updateOrCreateProject(JSONObject jsonObject, String projectId, String siteName, boolean createSite, boolean fix, boolean delete) throws JSONException {
 		// make sure site exists
 		EmsScriptNode siteNode = getSiteNode(siteName, null);
 		if (siteNode == null) {
 		    if (createSite) {
-		        // TODO this is only for testing
-		        String SITE_NAME="europa";
-		        services.getSiteService().createSite(SITE_NAME, SITE_NAME, SITE_NAME, SITE_NAME, true);
-		        siteNode = getSiteNode(siteName, null);
+		        if ( siteName == null || siteName.length() == 0 ) {
+	                siteName="europa";
+		        }
+		        siteNode = createSite( siteName );
 		    } else {
 		        log(LogLevel.ERROR, "Site not found for " + siteName + ".\n", HttpServletResponse.SC_NOT_FOUND);
 		        return HttpServletResponse.SC_NOT_FOUND;

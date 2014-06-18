@@ -81,7 +81,8 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         		ProductsWebscript productWs = new ProductsWebscript(repository, services, response);
         		jsonObject.put("products", productWs.handleProducts(req));
         		model.put("res", jsonObject.toString(2));
-            model.put("title", req.getServiceMatch().getTemplateVars().get(SITE_NAME));
+        		String siteName = getSiteName(req);
+        		model.put("title", siteName);
         } catch (Exception e) {
         		model.put("res", response.toString());
         		model.put("title", "ERROR could not load");

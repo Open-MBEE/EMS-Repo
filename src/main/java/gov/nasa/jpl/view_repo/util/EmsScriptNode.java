@@ -800,6 +800,10 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         return (String)getProperty( Acm.CM_NAME );
     }
 
+    public String getSysmlName() {
+        return (String)getProperty( Acm.ACM_NAME );
+    }
+
     @Override
     public EmsScriptNode getParent() {
         return new EmsScriptNode( super.getParent().getNodeRef(), services,
@@ -1009,8 +1013,9 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 //        }
 //        return null;
         String name = getName();
+        String sysmlName = getSysmlName();
         String type = getTypeName();
-        return "{type=" + type + ", id=" + name + "}";
+        return "{type=" + type + ", id=" + name + ", name=" + sysmlName + "}";
     }
 
     /**

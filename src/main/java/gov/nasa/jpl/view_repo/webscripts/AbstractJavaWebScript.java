@@ -268,8 +268,48 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	}
 
 	
+    protected static final String WORKSPACE_ID = "workspaceId";
 	protected static final String PROJECT_ID = "projectId";
     protected static final String SITE_NAME = "siteName";
+    protected static final String SITE_NAME2 = "siteId";
+    
+    public static final String NO_PROJECT_ID = "no_project";
+    public static final String NO_SITE_ID = "no_site";
+
+    
+    public String getSiteName( WebScriptRequest req ) {
+        return getSiteName( req, false );
+    }
+    public String getSiteName( WebScriptRequest req, boolean createIfNonexistent ) {
+        String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+        if ( siteName == null ) {
+            siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME2);
+        }
+        if ( siteName == null || siteName.length() <= 0 ) {
+            siteName = NO_SITE_ID;
+        }
+        if ( createIfNonexistent ) {
+            createSite( siteName );
+        }
+        return siteName;
+    }
+    
+    public EmsScriptNode createSite( String siteName ) {
+        EmsScriptNode siteNode = getSiteNode( siteName, null );
+        if ( siteNode == null || !siteNode.exists() ) {
+            SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, true );
+            siteNode = new EmsScriptNode( foo.getNodeRef(), services );
+        }
+        return siteNode;
+    }
+    
+    public String getProjectId( WebScriptRequest req ) {
+        String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
+        if ( projectId == null || projectId.length() <= 0 ) {
+            projectId = NO_PROJECT_ID;
+        }
+        return projectId;
+    }
     
     protected boolean checkRequestContent(WebScriptRequest req) {
         if (req.getContent() == null) {
@@ -366,7 +406,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * this can be removed every where
      * @param instance
      */
-    @Deprecated
     public void appendResponseStatusInfo(AbstractJavaWebScript instance) {
         response.append(instance.getResponse());
         responseStatus.setCode(instance.getResponseStatus().getCode());
@@ -386,40 +425,49 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
 
     protected static String getIdFromRequest( WebScriptRequest req ) {
-        String productId = req.getServiceMatch().getTemplateVars().get("id");
-        if ( productId == null ) {
-            productId = req.getServiceMatch().getTemplateVars().get("modelid");
+        String[] ids = new String[] { "id", "modelid", "viewid", "workspaceId",
+                                      "workspaceid", "elementid", "elementId" };
+        String id = null;
+        for ( String idv : ids ) {
+            id = req.getServiceMatch().getTemplateVars().get(idv);
+            if ( id != null ) break;
         }
-        if ( productId == null ) {
-            productId = req.getServiceMatch().getTemplateVars().get("elementid");
-        }
-        System.out.println("Got id = " + productId);
-        boolean gotElementSuffix  = ( productId.toLowerCase().trim().endsWith("/elements") );
+        System.out.println("Got id = " + id);
+        if ( id == null ) return null;
+        boolean gotElementSuffix  = ( id.toLowerCase().trim().endsWith("/elements") );
         if ( gotElementSuffix ) {
-            productId = productId.substring( 0, productId.lastIndexOf( "/elements" ) );
+            id = id.substring( 0, id.lastIndexOf( "/elements" ) );
         } else {
-            boolean gotViewSuffix  = ( productId.toLowerCase().trim().endsWith("/views") );
+            boolean gotViewSuffix  = ( id.toLowerCase().trim().endsWith("/views") );
             if ( gotViewSuffix ) {
-                productId = productId.substring( 0, productId.lastIndexOf( "/views" ) );
+                id = id.substring( 0, id.lastIndexOf( "/views" ) );
             }
         }
-        System.out.println("productId = " + productId);
-        return productId;
+        System.out.println("id = " + id);
+        return id;
     }
 
+    
+    protected static boolean urlEndsWith( String url, String suffix ) {
+        if ( url == null ) return false;
+        url = url.toLowerCase().trim();
+        suffix = suffix.toLowerCase().trim();
+        if ( suffix.startsWith( "/" ) ) suffix = suffix.substring( 1 );
+        int pos = url.lastIndexOf( '/' );
+        if (url.substring( pos+1 ).startsWith( suffix ) ) return true;
+        return false;
+    }
     protected static boolean isDisplayedElementRequest( WebScriptRequest req ) {
         if ( req == null ) return false;
         String url = req.getURL();
-        if ( url == null ) return false;
-        boolean gotSuffix = ( url.toLowerCase().trim().endsWith("/elements") );
+        boolean gotSuffix = urlEndsWith( url, "elements" );
         return gotSuffix;
     }
 
     protected static boolean isContainedViewRequest( WebScriptRequest req ) {
         if ( req == null ) return false;
         String url = req.getURL();
-        if ( url == null ) return false;
-        boolean gotSuffix = ( url.toLowerCase().trim().endsWith("/views") );
+        boolean gotSuffix = urlEndsWith( url, "views" );
         return gotSuffix;
     }    
 }

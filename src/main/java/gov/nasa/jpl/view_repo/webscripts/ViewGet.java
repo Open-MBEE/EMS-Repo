@@ -34,6 +34,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.Acm.JSON_TYPE_FILTER;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.Collection;
 import java.util.Date;
@@ -81,7 +82,7 @@ public class ViewGet extends AbstractJavaWebScript {
     
         EmsScriptNode view = findScriptNodeById(viewId, dateTime);
         if (view == null) {
-            log(LogLevel.ERROR, "View not found with id: " + viewId + ".\n", HttpServletResponse.SC_NOT_FOUND);
+            log(LogLevel.ERROR, "View not found with id: " + viewId + " at " + dateTime + ".\n", HttpServletResponse.SC_NOT_FOUND);
             return false;
         }
 
@@ -177,12 +178,13 @@ public class ViewGet extends AbstractJavaWebScript {
                     System.out.println("+ + + + + gettingDisplayedElements");
                     // TODO -- need to use recurse flag!
                     Collection< EmsScriptNode > elems = v.getDisplayedElements();
+                    elems = NodeUtil.getVersionAtTime( elems, dateTime );
                     for ( EmsScriptNode n : elems ) {
                         viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT, dateTime ) );
                     }
                 } else if ( gettingContainedViews ) {
                     System.out.println("+ + + + + gettingContainedViews");
-                    Collection< EmsScriptNode > elems = v.getContainedViews( recurse, null );
+                    Collection< EmsScriptNode > elems = v.getContainedViews( recurse, dateTime, null );
                     for ( EmsScriptNode n : elems ) {
                         viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW, dateTime ) );
                     }
