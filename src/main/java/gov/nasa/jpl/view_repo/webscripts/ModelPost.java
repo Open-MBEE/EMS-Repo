@@ -981,6 +981,10 @@ public class ModelPost extends AbstractJavaWebScript {
 	        }
         }
         
+        if ( jsonType == null ) {
+            jsonType = ( existingNodeType == null ? "Element" : existingNodeType );
+        }
+        
     	if (existingNodeType != null && !jsonType.equals(existingNodeType)) {
     		log(LogLevel.WARNING, "The type supplied "+jsonType+" is different than the stored type "+existingNodeType);
     	}
