@@ -6,6 +6,6 @@
   	<url>$url</url>
   	<format default="json">any</format>
   	<authentication>user</authentication>
-  	<transaction allow="$permission">required</transaction>
+  	<transaction>none</transaction>
   	<family>MMS REST API</family>
  </webscript>
