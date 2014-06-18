@@ -1134,10 +1134,10 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                                    jsonType.equals( Acm.JSON_ALLOWED_ELEMENTS ) ) {
                     elements = getView().getDisplayedElements();
                 } else if ( jsonType.equals( Acm.JSON_CHILDREN_VIEWS ) ) {
-                    Collection< sysml.View< EmsScriptNode > > views = 
+                    Collection< sysml.view.View< EmsScriptNode > > views = 
                             getView().getChildViews();
                     elements = new ArrayList<EmsScriptNode>();
-                    for ( sysml.View< EmsScriptNode > v : views ) {
+                    for ( sysml.view.View< EmsScriptNode > v : views ) {
                         elements.add( v.getElement() );
                     }
                 } else if ( jsonType.equals( Acm.JSON_CONTAINS ) ) {
@@ -2153,6 +2153,20 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     public ServiceRegistry getServices() {
         return services;
+    }
+
+    // HERE!!
+    public Object getPropertyValue( String propertyName ) {
+        Object o = getProperty( propertyName );
+        Object value = o; // default if case is not handled below
+        
+        if ( o instanceof NodeRef ) {
+            EmsScriptNode property = new EmsScriptNode((NodeRef)o, getServices());
+            if ( property.hasAspect( "Property" ) ) {
+                value = property.getProperty("value");
+            }
+        }
+        return value;
     }
 
 }
