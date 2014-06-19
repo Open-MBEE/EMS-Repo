@@ -203,9 +203,10 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
     public JSONArray getSnapshots(EmsScriptNode config, Date timestamp) throws JSONException {
         JSONArray snapshotsJson = new JSONArray();
         
+        // Need to put in null timestamp so we always get latest version of snapshot
         List< EmsScriptNode > snapshots =
                 config.getTargetAssocsNodesByType( "ems:configuredSnapshots",
-                                                   timestamp );
+                                                   null );
         for (EmsScriptNode snapshot: snapshots) {
             List< EmsScriptNode > views =
                     snapshot.getSourceAssocsNodesByType( "view2:snapshots",
