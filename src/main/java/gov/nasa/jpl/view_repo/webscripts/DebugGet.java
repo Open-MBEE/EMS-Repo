@@ -46,19 +46,22 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
-public class DebugPost extends DeclarativeWebScript {
+public class DebugGet extends DeclarativeWebScript {
 	
 	protected Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
-	    String turnOn = req.getParameter( "on" );
+	    Map<String, Object> model = new HashMap<String, Object>();
 	    
-	    if (turnOn == null || turnOn.toLowerCase().equals( "false" )) {
+	    String turnOn = req.getParameter( "on" );
+	    if (turnOn == null ) {
 	        Debug.turnOff();
+	        model.put( "res", "debug off" );
 	    } else {
 	        Debug.turnOn();
+	        model.put( "res", "debug on" );
 	    }
 	    
-		return new HashMap<String, Object>();
+		return model;
 	}
 
 }

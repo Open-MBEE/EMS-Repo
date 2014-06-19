@@ -1,6 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
 <beans>
+    <!--  enable toggling of our debug -->
+    <bean id="webscript.gov.nasa.jpl.utils.debug.get"
+        class="gov.nasa.jpl.view_repo.webscripts.DebugGet"
+        parent="webscript">
+    </bean>
+        
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.elements.element.get"
         class="gov.nasa.jpl.view_repo.webscripts.ModelGet" parent="webscript"
         singleton="false">

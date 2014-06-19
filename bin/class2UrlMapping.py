@@ -35,6 +35,8 @@ def main():
 				beanClass = entry[1]
 			else:
 				beanClass = 'None'
+			if not key:
+				key = 'None'
 			html.write('<tr><td>' + key + '</td><td>' + descFile + '</td><td>' + beanClass + '</td></tr>\n')
 	html.write('</body></table></html>\n')
 	html.close()
