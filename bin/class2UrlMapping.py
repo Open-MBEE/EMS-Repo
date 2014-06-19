@@ -19,11 +19,13 @@ def main():
 
 	html = open('class2url.html', 'w')
 
-	html.write('<html><body><table>')
+	html.write('<html><body><table>\n')
 	for key, value in od.items():
 		for entry in value:
-			html.write('<tr><td>' + key + '</td><td>' + entry + '</td></tr>')
-	html.write('</body></table></html>')
+			descFile = entry[0][entry[0].find('jpl/')+4:]
+			className = entry[1][entry[1].rfind('.')+1:]
+			html.write('<tr><td>' + key + '</td><td>' + descFile + '</td><td>' + className + '</td></tr>\n')
+	html.write('</body></table></html>\n')
 
 
 def parseContext(filename):
@@ -36,7 +38,7 @@ def parseContext(filename):
 		url = getUrlFromDesc(descFile)
 		if not url2class.has_key(url):
 			url2class[url] = []
-		url2class[url].append(beanClass)
+		url2class[url].append([descFile, beanClass])
 
 
 def getUrlFromDesc(descFile):
