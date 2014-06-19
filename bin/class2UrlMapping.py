@@ -11,11 +11,13 @@ CONTEXT_FILES = [CONTEXT_PATH + 'javawebscript-service-context.xml',
 
 DESC_PATH = '../src/main/amp/config/alfresco/extension/templates/webscripts/'
 url2class = {}
+urlBacked = set([])
 
 def main():
 	parseAllJs()
 	for filename in CONTEXT_FILES:
 		parseContext(filename)
+	parseAllDescFiles()
 
 	od = collections.OrderedDict(sorted(url2class.items()))
 
@@ -25,11 +27,14 @@ def main():
 	for key, value in od.items():
 		for entry in value:
 			descFile = entry[0][entry[0].find('jpl/')+4:]
-			if entry[1].endswith('js'):
-				beanClass = entry[1][entry[1].find('jpl/')+4:]
+			# if entry[1].endswith('js'):
+			# 	beanClass = entry[1][entry[1].find('jpl/')+4:]
+			# else:
+			# 	beanClass = entry[1][entry[1].rfind('.')+1:]
+			if entry[1]:
+				beanClass = entry[1]
 			else:
-				beanClass = entry[1][entry[1].rfind('.')+1:]
-			beanClass = entry[1]
+				beanClass = 'None'
 			html.write('<tr><td>' + key + '</td><td>' + descFile + '</td><td>' + beanClass + '</td></tr>\n')
 	html.write('</body></table></html>\n')
 	html.close()
@@ -57,6 +62,7 @@ def parseContext(filename):
 		url = getUrlFromDesc(descFile)
 		if not url2class.has_key(url):
 			url2class[url] = []
+			urlBacked.add(url)
 		url2class[url].append([descFile, beanClass])
 
 
@@ -104,9 +110,28 @@ def parseAllJs():
 		if url:
 			if not url2class.has_key(url):
 				url2class[url] = []
+				urlBacked.add(url)
 			url2class[url].append([descFile, jsFile])
 		else:
 			print jsFile, descFile
+
+
+def parseAllDescFiles():
+	'''
+	Parse all the descriptor files that aren't backed by JS or
+	Java files and inject them into url2class
+	'''
+	cmd = 'find ' + DESC_PATH[:-1] + ' -name "*.desc.xml"'
+	filenames = execCmd(cmd)
+	for descFile in filenames:
+		url = getUrlFromDesc(descFile)
+
+		if url:
+			# print descFile, url
+			if url not in urlBacked:
+				if not url2class.has_key(url):
+					url2class[url] = []
+				url2class[url].append([descFile, None])
 
 
 # execute command and return results
