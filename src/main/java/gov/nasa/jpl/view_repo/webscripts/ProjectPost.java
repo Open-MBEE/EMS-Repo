@@ -84,7 +84,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		        boolean fix = checkArgEquals(req, "fix", "true") ? true : false;
 		        boolean createSite = checkArgEquals(req, "createSite", "true") ? true : false;
 
-			    if (siteName != null) {
+                if ( siteName != null && !siteName.equals( NO_SITE_ID ) ) {
 			        statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId, siteName, createSite, fix, delete);
 			    } else {
 			        statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId, fix);
