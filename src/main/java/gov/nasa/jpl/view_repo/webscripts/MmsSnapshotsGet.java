@@ -39,6 +39,8 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
     
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        clearCaches();
+
         Map<String, Object> model = new HashMap<String, Object>();
 
         MmsSnapshotsGet instance = new MmsSnapshotsGet(repository, services);
