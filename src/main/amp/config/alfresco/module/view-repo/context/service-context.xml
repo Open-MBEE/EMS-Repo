@@ -96,8 +96,4 @@
 	    <property name="services" ref="ServiceRegistry"/>
 	    <property name="repository" ref="repositoryHelper"/>
     </bean>	
-
-    <bean id="webscript.gov.nasa.jpl.utils.debug.post"
-        class="gov.nasa.jpl.view_repo.webscripts.DebugPost"
-        parent="webscript"></bean>
 </beans>
