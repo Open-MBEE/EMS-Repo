@@ -33,6 +33,8 @@ public class MmsProductsGet extends AbstractJavaWebScript {
 
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        clearCaches();
+
         Map<String, Object> model = new HashMap<String, Object>();
         
         MmsProductsGet instance = new MmsProductsGet(repository, services);
