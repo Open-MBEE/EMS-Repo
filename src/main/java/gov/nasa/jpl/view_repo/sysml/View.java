@@ -201,7 +201,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 
         // Get all elements of Conform type:
         Collection<EmsScriptNode> conformElements = getModel().getType(null, Acm.JSON_CONFORM);
-        System.out.println( "Got "
+        if (Debug.isOn()) System.out.println( "Got "
                             + ( conformElements == null ? 0
                                                         : conformElements.size() )
                             + " elements of type " + Acm.JSON_CONFORM );
@@ -233,7 +233,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         Collection<EmsScriptNode> exposeElements = getModel().getType(null, Acm.JSON_EXPOSE);
         //Collection<EmsScriptNode> exposeElements = getModel().getRelationship(null, "Expose");  // Can we call this?
 
-        Debug.outln( "Expose relationships of " + viewNode + ": "
+        if (Debug.isOn()) Debug.outln( "Expose relationships of " + viewNode + ": "
                      + exposeElements );
         
         // Check if any of the nodes in the passed collection of Expose or Conform
@@ -288,7 +288,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         //         and an external function (e.g., Java) is somehow specified.
         EmsScriptNode viewpointOp = getViewpointOperation(); 
         if ( viewpointOp == null ) {
-            System.out.println("*** View.toViewJson(): no viewpoint operation! View = " + toBoringString() );
+            if (Debug.isOn()) System.out.println("*** View.toViewJson(): no viewpoint operation! View = " + toBoringString() );
             return;
         }
         
@@ -391,7 +391,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     public JSONObject toViewJson() {
     	
         if ( viewNode == null ) {
-            System.out.println("*** called View.toViewJson() without a view node! View = " + toBoringString() );
+            if (Debug.isOn()) System.out.println("*** called View.toViewJson() without a view node! View = " + toBoringString() );
             return null;
         }
         

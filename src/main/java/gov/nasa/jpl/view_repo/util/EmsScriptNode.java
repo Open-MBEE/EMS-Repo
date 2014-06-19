@@ -514,7 +514,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         artifactNode.addAspect( "view:Checksummable" );
         artifactNode.createOrUpdateProperty( "view:cs", cs );
 
-        System.out.println( "Creating artifact with indexing: "
+        if (Debug.isOn()) System.out.println( "Creating artifact with indexing: "
                             + artifactNode.getProperty( "cm:isIndexed" ) );
         ContentWriter writer =
                 services.getContentService()
@@ -745,7 +745,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                             new EmsScriptNode( assoc.getChildRef(), services,
                                                response );
                 } catch ( Exception e ) {
-                    System.out.println( "Got exception in "
+                    if (Debug.isOn()) System.out.println( "Got exception in "
                                         + "createNode(name=" + name + ", type="
                                         + type + ") for EmsScriptNode(" + this
                                         + ") calling createNode(nodeRef="
@@ -758,7 +758,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             }
         }
 
-        // end = new Date(); System.out.println("\tcreateNode: " +
+        // end = new Date(); if (Debug.isOn()) System.out.println("\tcreateNode: " +
         // (end.getTime()-start.getTime()));
         return result;
     }
@@ -923,7 +923,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                                                        createQName( acmType ),
                                                        value );
             } catch ( Exception e ) {
-                System.out.println( "Got exception in "
+                if (Debug.isOn()) System.out.println( "Got exception in "
                                     + "setProperty(acmType=" + acmType
                                     + ", value=" + value
                                     + ") for EmsScriptNode " + this
@@ -1326,7 +1326,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     public boolean isView() {
         boolean isView = hasAspect( Acm.ACM_VIEW ) || hasAspect( Acm.ACM_PRODUCT );
 //        String sysmlId = getName();
-//        System.out.println(sysmlId + ".isView() = " + isView);
+//        if (Debug.isOn()) System.out.println(sysmlId + ".isView() = " + isView);
         return isView;
     }
 
@@ -1625,7 +1625,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             }
         }
         if ( values == null ) {
-            System.out.println("null property values for " + acmProperty );
+            if (Debug.isOn()) System.out.println("null property values for " + acmProperty );
         }
         
         // only change if old list is different than new
@@ -1712,7 +1712,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                                                               JSONArray jsonArray,
                                                               Date dateTime)
                                                                       throws JSONException {
-        System.out.println( "getPropertyValuesFromJson(" + type + ", "
+        if (Debug.isOn()) System.out.println( "getPropertyValuesFromJson(" + type + ", "
                             + jsonArray + ", " + dateTime + ")" );
 
         ArrayList<Serializable> properties = new ArrayList<Serializable>();
@@ -1852,7 +1852,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      */
     public void ingestJSON( JSONObject jsonObject ) throws JSONException {
         // fill in all the properties
-        System.out.println( "ingestJSON(" + jsonObject + ")" );
+        if (Debug.isOn()) System.out.println( "ingestJSON(" + jsonObject + ")" );
         
         DictionaryService dServ = services.getDictionaryService();
         
@@ -1868,7 +1868,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             	
                 QName qName = createQName( acmType );
                 if ( acmType.equals(Acm.ACM_VALUE) ) {
-                    System.out.println("qName of " + acmType + " = " + qName.toString() );
+                    if (Debug.isOn()) System.out.println("qName of " + acmType + " = " + qName.toString() );
                 }
                 
                 // If it is a specialization, then process the json object it maps to:
@@ -1878,7 +1878,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             	   
                    if (specializeJson != null) {
                 	   
-                       System.out.println("processing " + acmType );
+                       if (Debug.isOn()) System.out.println("processing " + acmType );
                 	   ingestJSON(specializeJson);
                    }
                 }
@@ -1886,7 +1886,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 	                PropertyDefinition propDef =
 	                        dServ.getProperty( qName );
 	                if ( propDef == null ) {
-	                    System.out.println("null PropertyDefinition for " + acmType );
+	                    if (Debug.isOn()) System.out.println("null PropertyDefinition for " + acmType );
 	                    continue; // skips type
 	                }
 	                boolean isArray =
@@ -2102,7 +2102,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         try {
             services.getNodeService().getType( this.getNodeRef() );
         } catch ( Throwable e ) {
-            System.out.println( "Call to services.getNodeService().getType(nodeRef=" + this.getNodeRef() + ") for this = "
+            if (Debug.isOn()) System.out.println( "Call to services.getNodeService().getType(nodeRef=" + this.getNodeRef() + ") for this = "
                                 + this + " failed!" );
             e.printStackTrace();
         }
@@ -2110,7 +2110,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             if ( isSubType( "cm:folder" ) ) return true;
             return false;
         } catch ( Throwable e ) {
-            System.out.println( "Call to isSubType() on this = "
+            if (Debug.isOn()) System.out.println( "Call to isSubType() on this = "
                                 + this + " failed!" );
             e.printStackTrace();
         }
@@ -2122,7 +2122,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             }
             return false;
         } catch ( Throwable e ) {
-            System.out.println( "Trying to call getQNameType() on parent = "
+            if (Debug.isOn()) System.out.println( "Trying to call getQNameType() on parent = "
                                 + parent + "." );
             e.printStackTrace();
         }
@@ -2133,7 +2133,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             }
             return false;
         } catch ( Throwable e ) {
-            System.out.println( "Trying to call getQNameType() on parent = "
+            if (Debug.isOn()) System.out.println( "Trying to call getQNameType() on parent = "
                                 + parent + "." );
             e.printStackTrace();
         }

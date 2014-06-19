@@ -900,16 +900,16 @@ public class ModelPost extends AbstractJavaWebScript {
         } catch ( JSONException e ) {
             return false;
         }
-        System.out.println( "%% %% %% readTime = " + readTime );
+        if (Debug.isOn()) System.out.println( "%% %% %% readTime = " + readTime );
         if ( readTime == null ) return false;
         Date lastModified = (Date)element.getLastModified( null );
-        System.out.println( "%% %% %% lastModified = " + lastModified );
+        if (Debug.isOn()) System.out.println( "%% %% %% lastModified = " + lastModified );
         //DateTimeFormatter parser = ISODateTimeFormat.dateParser(); // format is different than what is printed
        
 //        DateTime readDateTime = parser.parseDateTime( readTime );
         Date readDate = null;
         readDate = TimeUtils.dateFromTimestamp( readTime );
-        System.out.println( "%% %% %% readDate = " + readDate );
+        if (Debug.isOn()) System.out.println( "%% %% %% readDate = " + readDate );
 //        if ( readDateTime != null ) { // return false;
 //            readDate = readDateTime.toDate();
         if ( readDate != null ) { // return false;
@@ -1008,7 +1008,7 @@ public class ModelPost extends AbstractJavaWebScript {
         
         if ( node == null || !node.exists() ) {// && newElements.contains( id ) ) {
             if ( type == null || type.trim().isEmpty() ) {
-                System.out.println( "PREFIX: type not found for " + jsonType );
+                if (Debug.isOn()) System.out.println( "PREFIX: type not found for " + jsonType );
                 return null;
             } else {
                 log( LogLevel.INFO, "\tcreating node" );
@@ -1020,7 +1020,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     node.setProperty( Acm.CM_NAME, id );
                     node.setProperty( Acm.ACM_ID, id );
                 } catch ( Exception e ) {
-                    System.out.println( "Got exception in "
+                    if (Debug.isOn()) System.out.println( "Got exception in "
                                         + "updateOrCreateTransactionableElement(elementJson="
                                         + elementJson + ", parent=("
                                         + parent + "), children=(" + children

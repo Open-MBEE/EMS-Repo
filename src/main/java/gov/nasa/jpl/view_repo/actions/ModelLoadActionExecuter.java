@@ -28,6 +28,7 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo.actions;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 import gov.nasa.jpl.view_repo.webscripts.ModelPost;
@@ -81,7 +82,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         String projectId = (String) action.getParameterValue(PARAM_PROJECT_ID);
         String projectName = (String) action.getParameterValue(PARAM_PROJECT_NAME);
         EmsScriptNode projectNode = (EmsScriptNode) action.getParameterValue(PARAM_PROJECT_NODE);
-        System.out.println("ModelLoadActionExecuter started execution of " + projectName + " [id: " + projectId + "]");
+        if (Debug.isOn()) System.out.println("ModelLoadActionExecuter started execution of " + projectName + " [id: " + projectId + "]");
         clearCache();
 
         // Parse the stored file for loading
@@ -134,7 +135,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         String msg = "Log URL: " + contextUrl + logNode.getUrl();
         ActionUtil.sendEmailToModifier(jsonNode, msg, subject, services, response);
 
-        System.out.println("ModelLoadActionExecuter completed execution of " + projectName + " [id: " + projectId + "]");
+        if (Debug.isOn()) System.out.println("ModelLoadActionExecuter completed execution of " + projectName + " [id: " + projectId + "]");
     }
 
     protected void clearCache() {

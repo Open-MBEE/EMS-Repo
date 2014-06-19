@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -188,9 +189,9 @@ public class ModelGet extends AbstractJavaWebScript {
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
             
-            System.out.println("modelId = " + modelId );
+            if (Debug.isOn()) System.out.println("modelId = " + modelId );
             EmsScriptNode modelRootNode = findScriptNodeById(modelId, dateTime);
-            System.out.println("modelRootNode = " + modelRootNode );
+            if (Debug.isOn()) System.out.println("modelRootNode = " + modelRootNode );
             
             if ( modelRootNode == null ) {
                     log( LogLevel.ERROR,
