@@ -275,7 +275,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
             viewpointMethod = viewpointMethods.iterator().next();
         }
         
-        if ( viewpointMethod == null ) viewpointMethod = viewpoint;  // HACK -- TODO
+        //if ( viewpointMethod == null ) viewpointMethod = viewpoint;  // HACK -- TODO
 
         return viewpointMethod;
     }
