@@ -28,6 +28,7 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -221,7 +222,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		if (level.value >= logLevel.value) {
 			log("[" + level.name() + "]: " + msg + "\n", code);
 			if (level.value >= LogLevel.WARNING.value) {
-				System.out.println("[" + level.name() + "]: " + msg + "\n");
+				if (Debug.isOn()) System.out.println("[" + level.name() + "]: " + msg + "\n");
 			}
 		}
 	}
@@ -230,7 +231,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	    if (level.value >= logLevel.value) {
 	        log("[" + level.name() + "]: " + msg);
 	    }
-        System.out.println(msg);
+        if (Debug.isOn()) System.out.println(msg);
 	}
 	
 	protected void log(String msg, int code) {
@@ -412,13 +413,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
 
     protected void printFooter() {
-        System.out.println( "*** completed " + getClass().getSimpleName() );
+        if (Debug.isOn()) System.out.println( "*** completed " + (new Date()) + " " + getClass().getSimpleName() );
     }
 
     protected void printHeader( WebScriptRequest req ) {
-        System.out.println("*** starting " + getClass().getSimpleName() );
+        if (Debug.isOn()) System.out.println("*** starting " + (new Date()) + " " + getClass().getSimpleName() );
         String reqStr = req.getURL();
-        System.out.println( "*** request = "
+        if (Debug.isOn()) System.out.println( "*** request = "
                             + ( reqStr.length() <= MAX_PRINT
                                 ? reqStr
                                 : reqStr.substring( 0, MAX_PRINT ) + "..." ) );
@@ -432,7 +433,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             id = req.getServiceMatch().getTemplateVars().get(idv);
             if ( id != null ) break;
         }
-        System.out.println("Got id = " + id);
+        if (Debug.isOn()) System.out.println("Got id = " + id);
         if ( id == null ) return null;
         boolean gotElementSuffix  = ( id.toLowerCase().trim().endsWith("/elements") );
         if ( gotElementSuffix ) {
@@ -443,7 +444,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 id = id.substring( 0, id.lastIndexOf( "/views" ) );
             }
         }
-        System.out.println("id = " + id);
+        if (Debug.isOn()) System.out.println("id = " + id);
         return id;
     }
 

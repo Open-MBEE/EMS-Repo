@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.webscripts.util.ProductsWebscript;
@@ -105,7 +106,7 @@ public class ProductGet extends AbstractJavaWebScript {
 			if ( !gettingDisplayedElements ) {
 			    gettingContainedViews  = isContainedViewRequest( req );
 			} 
-			System.out.println("productId = " + productId);
+			if (Debug.isOn()) System.out.println("productId = " + productId);
 			
 			// default recurse=true but recurse only applies to displayed elements and contained views
             boolean recurse = checkArgEquals(req, "recurse", "false") ? false : true;

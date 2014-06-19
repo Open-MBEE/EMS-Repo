@@ -1,0 +1,18 @@
+<webscript>
+  <shortname>Toggle debug on or off</shortname>
+  <description>toggle debug off</description>
+  <url>/debug?on={on?}&off={off?}</url>
+  <authentication>user</authentication>
+  <format default="html">any</format>
+  <family>EMS Utils</family>
+  <args>
+    <arg>
+        <name>on</name>
+        <description>Optional, if specified will turn debug on</description>
+    </arg>
+    <arg>
+        <name>off</name>
+        <description>Optional, if specified will turn debug off</description>
+    </arg>
+  </args>
+</webscript>

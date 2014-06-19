@@ -30,6 +30,8 @@
 package gov.nasa.jpl.view_repo.util;
 
 
+import gov.nasa.jpl.mbee.util.Debug;
+
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -342,7 +344,7 @@ public class Acm {
                         }
                     } catch (Throwable t) {
                         if ( t instanceof NoSuchFieldException ) {
-                            System.out.println( t.getLocalizedMessage() );
+                            if (Debug.isOn()) System.out.println( t.getLocalizedMessage() );
                         } else {
                             t.printStackTrace();
                         }

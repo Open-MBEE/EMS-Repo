@@ -28,6 +28,7 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo.actions;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -107,10 +108,10 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
 		HashSet<String> productList = (HashSet<String>) action.getParameterValue(PARAM_PRODUCT_LIST);
         
         String siteName = (String) action.getParameterValue(PARAM_SITE_NAME);
-        System.out.println("ConfigurationGenerationActionExecuter started execution of " + siteName);
+        if (Debug.isOn()) System.out.println("ConfigurationGenerationActionExecuter started execution of " + siteName);
         SiteInfo siteInfo = services.getSiteService().getSite(siteName);
         if (siteInfo == null) {
-        		System.out.println("[ERROR]: could not find site: " + siteName);
+        		if (Debug.isOn()) System.out.println("[ERROR]: could not find site: " + siteName);
             return;
         }
         NodeRef siteRef = siteInfo.getNodeRef();
@@ -178,7 +179,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         // TODO: NOTE!!! The following needs to be commented out for local testing....
         ActionUtil.sendEmailToModifier(jobNode, msg, subject, services, response);
         
-        System.out.println("Completed configuration set");
+        if (Debug.isOn()) System.out.println("Completed configuration set");
     }
 
     protected void clearCache() {

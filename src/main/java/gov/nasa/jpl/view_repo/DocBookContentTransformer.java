@@ -28,6 +28,7 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.io.BufferedReader;
@@ -145,7 +146,7 @@ public class DocBookContentTransformer extends AbstractContentTransformer2 {
 			}
 			String zipDir = "docbook" + File.separator + zipFile.getName().substring(0, zipFile.getName().indexOf("."));
 			srcFile = new File(tmpDirName + File.separator + zipDir + File.separator + "out.xml");
-			System.out.println("ZIP DIR: " + srcFile.getAbsolutePath());
+			if (Debug.isOn()) System.out.println("ZIP DIR: " + srcFile.getAbsolutePath());
 		} else {
 			// Create directories for DB and images
 			if ( !(new File(dbDirName).mkdirs()) ) {
@@ -244,9 +245,9 @@ public class DocBookContentTransformer extends AbstractContentTransformer2 {
 		command.add("-pdf");
 		command.add(target);
 
-		System.out.println("DO_TRANSFORM source: " + source);
-		System.out.println("DO_TRANSFORM target: " + target);
-		System.out.println("DO_TRANSFROM cmd: " + command);
+		if (Debug.isOn()) System.out.println("DO_TRANSFORM source: " + source);
+		if (Debug.isOn()) System.out.println("DO_TRANSFORM target: " + target);
+		if (Debug.isOn()) System.out.println("DO_TRANSFROM cmd: " + command);
 		
 		re.setCommand(list2Array(command));
 		ExecutionResult result = re.execute();

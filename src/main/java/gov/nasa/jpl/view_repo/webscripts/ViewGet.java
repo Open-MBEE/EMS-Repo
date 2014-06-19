@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
@@ -105,7 +106,7 @@ public class ViewGet extends AbstractJavaWebScript {
         if ( viewId == null ) {
             viewId = req.getServiceMatch().getTemplateVars().get("elementid");
         }
-        System.out.println("Got raw id = " + viewId);
+        if (Debug.isOn()) System.out.println("Got raw id = " + viewId);
         return viewId;
     }
 
@@ -126,7 +127,7 @@ public class ViewGet extends AbstractJavaWebScript {
             if ( !gettingDisplayedElements ) {
                 gettingContainedViews = isContainedViewRequest( req );
             } 
-            System.out.println("viewId = " + viewId);
+            if (Debug.isOn()) System.out.println("viewId = " + viewId);
             
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
@@ -175,7 +176,7 @@ public class ViewGet extends AbstractJavaWebScript {
             try {
                 View v = new View(view);
                 if ( gettingDisplayedElements ) {
-                    System.out.println("+ + + + + gettingDisplayedElements");
+                    if (Debug.isOn()) System.out.println("+ + + + + gettingDisplayedElements");
                     // TODO -- need to use recurse flag!
                     Collection< EmsScriptNode > elems = v.getDisplayedElements();
                     elems = NodeUtil.getVersionAtTime( elems, dateTime );
@@ -183,13 +184,13 @@ public class ViewGet extends AbstractJavaWebScript {
                         viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT, dateTime ) );
                     }
                 } else if ( gettingContainedViews ) {
-                    System.out.println("+ + + + + gettingContainedViews");
+                    if (Debug.isOn()) System.out.println("+ + + + + gettingContainedViews");
                     Collection< EmsScriptNode > elems = v.getContainedViews( recurse, dateTime, null );
                     for ( EmsScriptNode n : elems ) {
                         viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW, dateTime ) );
                     }
                 } else {
-                    System.out.println("+ + + + + just the view");
+                    if (Debug.isOn()) System.out.println("+ + + + + just the view");
                     viewsJson.put( view.toJSONObject( JSON_TYPE_FILTER.VIEW, dateTime ) );
                 }
             } catch ( JSONException e ) {

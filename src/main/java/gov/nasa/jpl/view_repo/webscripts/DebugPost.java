@@ -26,28 +26,39 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package gov.nasa.jpl.view_repo;
+package gov.nasa.jpl.view_repo.webscripts;
 
-import org.alfresco.repo.processor.BaseProcessorExtension;
+import gov.nasa.jpl.mbee.util.Debug;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.extensions.webscripts.Cache;
+import org.springframework.extensions.webscripts.DeclarativeWebScript;
+import org.springframework.extensions.webscripts.Status;
+import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
- * Simple Java based component that exposes a Javascript library
+ * Provides the WWW-Authenticate response header that browsers need to
+ * clear authentication caches...
+ * 
+ * Extends AbstractWebScript that provides access to response header
  * @author cinyoung
  *
  */
-public class DemoJavascriptComponent extends BaseProcessorExtension {
-	private DemoComponent demoComponent;
-
-	public DemoJavascriptComponent() {
-		
-	}
+public class DebugPost extends DeclarativeWebScript {
 	
-	public DemoComponent getDemoComponent() {
-		return demoComponent;
+	protected Map<String, Object> executeImpl(WebScriptRequest req,
+			Status status, Cache cache) {
+	    String turnOn = req.getParameter( "on" );
+	    
+	    if (turnOn == null || turnOn.toLowerCase().equals( "false" )) {
+	        Debug.turnOff();
+	    } else {
+	        Debug.turnOn();
+	    }
+	    
+		return new HashMap<String, Object>();
 	}
 
-	public void setDemoComponent(DemoComponent demoComponent) {
-		this.demoComponent = demoComponent;
-	}
-	
 }

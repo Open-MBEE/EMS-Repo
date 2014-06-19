@@ -94,7 +94,7 @@ public class NodeUtil {
     public static Collection<EmsScriptNode> luceneSearchElements(String queryPattern ) {
         ArrayList<EmsScriptNode> nodes = new ArrayList<EmsScriptNode>();
         ResultSet resultSet = luceneSearch( queryPattern, (SearchService)null );
-        System.out.println( "luceneSearch(" + queryPattern + ") returns "
+        if (Debug.isOn()) System.out.println( "luceneSearch(" + queryPattern + ") returns "
                             + resultSet.length() + " matches." );
        for ( ResultSetRow row : resultSet ) {
             EmsScriptNode node =
@@ -302,8 +302,8 @@ public class NodeUtil {
 //            if ( response != null || status != null ) {
 //                String msg = "Error! Could not parse search: " + pattern + ".\n"
 //                             + e.getLocalizedMessage();
-//                System.out.println(msg);
-//                e.printStackTrace( System.out );
+//                if (Debug.isOn()) System.out.println(msg);
+//                e.printStackTrace( if (Debug.isOn()) System.out );
 //                if ( response != null ) response.append( msg );
 //                if ( status != null ) status.setCode( HttpServletResponse.SC_BAD_REQUEST,
 //                                                      msg );
@@ -371,24 +371,24 @@ public class NodeUtil {
         if ( qName != null ) {
             TypeDefinition t = dServ.getType( qName );
             if ( t != null ) {
-//              System.out.println("\n\n*** getType(" + typeName + ") worked!!!\n" );
+//              if (Debug.isOn()) System.out.println("\n\n*** getType(" + typeName + ") worked!!!\n" );
               return true;
             }
         }
-//        //        System.out.println("all types: " + types);
+//        //        if (Debug.isOn()) System.out.println("all types: " + types);
 ////        TypeDefinition t = dServ.getType( QName.createQName( typeName ) );
-////        System.out.println("getType(" + typeName + ") = " + t );
+////        if (Debug.isOn()) System.out.println("getType(" + typeName + ") = " + t );
 //        for ( QName type : types ) {
-////            System.out.println( "getLocalName() = " + type.getLocalName() );
-////            System.out.println( "getPrefixString() = " + type.getPrefixString() );
-////            System.out.println( "toPrefixString() = " + type.toPrefixString() );
-////            System.out.println( "toString() = " + type.toString() );
+////            if (Debug.isOn()) System.out.println( "getLocalName() = " + type.getLocalName() );
+////            if (Debug.isOn()) System.out.println( "getPrefixString() = " + type.getPrefixString() );
+////            if (Debug.isOn()) System.out.println( "toPrefixString() = " + type.toPrefixString() );
+////            if (Debug.isOn()) System.out.println( "toString() = " + type.toString() );
 //            if ( typeName.equals( type.getPrefixString() ) ) {
-//                System.out.println("isType(" + typeName + ") = true");
+//                if (Debug.isOn()) System.out.println("isType(" + typeName + ") = true");
 //                return true;
 //            }
 //        }
-//        System.out.println("isType(" + typeName + ") = false");
+//        if (Debug.isOn()) System.out.println("isType(" + typeName + ") = false");
         return false;
     }
     
@@ -425,21 +425,21 @@ public class NodeUtil {
         if ( qName != null ) {
             AspectDefinition t = dServ.getAspect( qName );
             if ( t != null ) {
-              System.out.println("\n\n*** getAspect(" + aspectName + ") worked!!!\n" );
+              if (Debug.isOn()) System.out.println("\n\n*** getAspect(" + aspectName + ") worked!!!\n" );
               return true;
             }
         }
         
         Collection< QName > aspects = dServ.getAllAspects();
-        System.out.println("all aspects: " + aspects);
+        if (Debug.isOn()) System.out.println("all aspects: " + aspects);
 
         for ( QName aspect : aspects ) {
             if ( aspect.getPrefixString().equals( aspectName ) ) {
-                System.out.println("\n\n*** getAspect(" + aspectName + ") returning true\n" );
+                if (Debug.isOn()) System.out.println("\n\n*** getAspect(" + aspectName + ") returning true\n" );
                 return true;
             }
         }
-        System.out.println("\n\n*** getAspect(" + aspectName + ") returning false\n" );
+        if (Debug.isOn()) System.out.println("\n\n*** getAspect(" + aspectName + ") returning false\n" );
         return false;
     }
 
@@ -610,7 +610,7 @@ public class NodeUtil {
         EmsScriptNode companyHome = null;
         if ( services == null ) services = getServiceRegistry();
         if ( services == null || services.getNodeLocatorService() == null ) {
-            System.out.println( "getCompanyHome() failed, no services or no nodeLocatorService: "
+            if (Debug.isOn()) System.out.println( "getCompanyHome() failed, no services or no nodeLocatorService: "
                                 + services );
         }
         NodeRef companyHomeNodeRef =
@@ -702,7 +702,7 @@ public class NodeUtil {
      * @return the version of the NodeRef that was the latest version at the specified time, or if before any version
      */
     public static NodeRef getNodeRefAtTime( NodeRef ref, Date dateTime ) {
-        if ( Debug.isOn() ) Debug.outln("\n\n\ngetNodeRefAtTime( " + ref + ", " + dateTime + " )" );
+        if (Debug.isOn())  Debug.outln("\n\n\ngetNodeRefAtTime( " + ref + ", " + dateTime + " )" );
 
         if ( dateTime == null ) {
             return ref;//getServices().getVersionService().getCurrentVersion( ref );
@@ -713,81 +713,81 @@ public class NodeUtil {
     		EmsScriptNode node = new EmsScriptNode(ref, services);
     		Date createdTime = (Date)node.getProperty("cm:created");
             if ( dateTime != null && dateTime.compareTo( createdTime ) < 0 ) {
-                if ( Debug.isOn() ) Debug.outln( "no history! dateTime " + dateTime
+                if (Debug.isOn())  Debug.outln( "no history! dateTime " + dateTime
                                     + " before created " + createdTime );
     			return null;
     		}
-            if ( Debug.isOn() ) Debug.outln( "no history! created " + createdTime );
+            if (Debug.isOn())  Debug.outln( "no history! created " + createdTime );
     		return ref;
         }
         
         Collection< Version > versions = history.getAllVersions();
         Vector<Version> vv = new Vector<Version>( versions );
-        if ( Debug.isOn() ) Debug.outln("versions = " + vv );
+        if (Debug.isOn())  Debug.outln("versions = " + vv );
         if ( Utils.isNullOrEmpty( vv ) ) {
             // TODO - throw error?!
             return null;
         }
         int index = Collections.binarySearch( vv, dateTime, versionLowerBoundComparator );
-        if ( Debug.isOn() ) Debug.outln( "binary search returns index " + index );
+        if (Debug.isOn())  Debug.outln( "binary search returns index " + index );
         Version version = null;
         if ( index < 0 ) {
             // search returned index = -(lowerBound+1), so lowerbound = -index-1
             index = -index - 1;
-            if ( Debug.isOn() ) Debug.outln( "index converted to lowerbound " + index );
+            if (Debug.isOn())  Debug.outln( "index converted to lowerbound " + index );
 //            // But, since the order is newest to oldest, we want the one after the lowerbound
 //            if ( index >= 0 && index < vv.size()-1 ) {
 //                index = index + 1;
-//                if ( Debug.isOn() ) Debug.outln( "index converted to upperbound " + index );
+//                if (Debug.isOn())  Debug.outln( "index converted to upperbound " + index );
 //            }
         }
         if ( index < 0 ) {
             version = vv.get( 0 );
             if ( version != null ) {
                 Date d = version.getFrozenModifiedDate();
-                if ( Debug.isOn() ) Debug.outln( "first frozen modified date " + d );
+                if (Debug.isOn())  Debug.outln( "first frozen modified date " + d );
                 if ( d != null && d.after( dateTime ) ) {
                     NodeRef fnr = version.getFrozenStateNodeRef();
-                    if ( Debug.isOn() ) Debug.outln( "returning first frozen node ref " + fnr );
+                    if (Debug.isOn())  Debug.outln( "returning first frozen node ref " + fnr );
                     return fnr;
                 }
             }
             // TODO -- throw error?!
-            if ( Debug.isOn() ) Debug.outln( "version is null; returning null!" );
+            if (Debug.isOn())  Debug.outln( "version is null; returning null!" );
             return null;
         } else if ( index >= vv.size() ) {
-            if ( Debug.isOn() ) Debug.outln( "index is too large, outside bounds!" );
+            if (Debug.isOn())  Debug.outln( "index is too large, outside bounds!" );
             // TODO -- throw error?!
             return null;
         } else {
             version = vv.get( index );
         }
-        if ( Debug.isOn() ) Debug.outln( "picking version " + version );
-        if ( Debug.isOn() ) Debug.outln( "version properties " + version.getVersionProperties() );
+        if (Debug.isOn())  Debug.outln( "picking version " + version );
+        if (Debug.isOn())  Debug.outln( "version properties " + version.getVersionProperties() );
         String versionLabel = version.getVersionLabel();
         EmsScriptNode emsNode = new EmsScriptNode( ref, getServices() );
         ScriptVersion scriptVersion = emsNode.getVersion( versionLabel );
-        if ( Debug.isOn() ) Debug.outln( "scriptVersion " + scriptVersion );
+        if (Debug.isOn())  Debug.outln( "scriptVersion " + scriptVersion );
         ScriptNode node = scriptVersion.getNode();
-        if ( Debug.isOn() ) Debug.outln( "script node " + node );
+        if (Debug.isOn())  Debug.outln( "script node " + node );
         //can't get script node properties--generates exception
-        //if ( Debug.isOn() ) Debug.outln( "script node properties " + node.getProperties() );
+        //if (Debug.isOn())  Debug.outln( "script node properties " + node.getProperties() );
         NodeRef scriptVersionNodeRef = scriptVersion.getNodeRef();
-        if ( Debug.isOn() ) Debug.outln( "ScriptVersion node ref "
+        if (Debug.isOn())  Debug.outln( "ScriptVersion node ref "
                                          + scriptVersionNodeRef );
         NodeRef vnr = version.getVersionedNodeRef();
-        if ( Debug.isOn() ) Debug.outln( "versioned node ref " + vnr );
+        if (Debug.isOn())  Debug.outln( "versioned node ref " + vnr );
         
         NodeRef fnr = version.getFrozenStateNodeRef();
-        if ( Debug.isOn() ) Debug.outln( "frozen node ref " + fnr );
-        if ( Debug.isOn() ) Debug.outln( "frozen node ref properties: "
+        if (Debug.isOn())  Debug.outln( "frozen node ref " + fnr );
+        if (Debug.isOn())  Debug.outln( "frozen node ref properties: "
                                          + getServices().getNodeService()
                                                         .getProperties( fnr ) );
-        if ( Debug.isOn() ) Debug.outln( "frozen node ref "
+        if (Debug.isOn())  Debug.outln( "frozen node ref "
                 + getServices().getNodeService()
                                .getProperties( fnr ) );
 
-        if ( Debug.isOn() ) Debug.outln( "returning frozen node ref " + fnr );
+        if (Debug.isOn())  Debug.outln( "returning frozen node ref " + fnr );
 
         return fnr;
     }

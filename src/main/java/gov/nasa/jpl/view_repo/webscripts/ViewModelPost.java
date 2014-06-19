@@ -89,10 +89,10 @@ public class ViewModelPost extends ModelPost {
             trx.commit();
         } catch (Throwable e) {
             try {
-                System.out.println("\t####### ERROR: Needed to ViewModelPost rollback: " + e.getMessage());
+                if (Debug.isOn()) System.out.println("\t####### ERROR: Needed to ViewModelPost rollback: " + e.getMessage());
                 trx.rollback();
             } catch (Throwable ee) {
-                System.out.println("\tRollback ViewModelPost failed: " + ee.getMessage());
+                if (Debug.isOn()) System.out.println("\tRollback ViewModelPost failed: " + ee.getMessage());
             }
         }
         
