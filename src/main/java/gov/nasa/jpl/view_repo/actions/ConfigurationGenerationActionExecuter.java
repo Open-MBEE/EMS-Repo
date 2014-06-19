@@ -166,7 +166,11 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         // Save off the log
         EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
 
-        String contextUrl = "https://" + ActionUtil.getHostName() + ".jpl.nasa.gov/alfresco";
+        String hostname = ActionUtil.getHostName();
+        if (!hostname.endsWith( ".jpl.nasa.gov" )) {
+            hostname += ".jpl.nasa.gov";
+        }
+        String contextUrl = "https://" + hostname + "/alfresco";
         
         // Send off notification email
         String subject = "[EuropaEMS] Configuration " + siteName + " Generation " + jobStatus;
