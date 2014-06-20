@@ -224,10 +224,12 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	 * @param productList
 	 */
 	public void startAction(EmsScriptNode jobNode, String siteName, HashSet<String> productList) {
-		ActionService actionService = services.getActionService();
-		Action configurationAction = actionService.createAction(ConfigurationGenerationActionExecuter.NAME);
-		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_SITE_NAME, siteName);
-		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_PRODUCT_LIST, productList);
-		services.getActionService().executeAction(configurationAction, jobNode.getNodeRef(), true, true);
+	    if (productList.size() > 0) {
+        		ActionService actionService = services.getActionService();
+        		Action configurationAction = actionService.createAction(ConfigurationGenerationActionExecuter.NAME);
+        		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_SITE_NAME, siteName);
+        		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_PRODUCT_LIST, productList);
+        		services.getActionService().executeAction(configurationAction, jobNode.getNodeRef(), true, true);
+	    }
 	}
 }

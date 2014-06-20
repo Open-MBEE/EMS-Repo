@@ -6,6 +6,7 @@ import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -80,10 +81,10 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
         EmsScriptNode config = new EmsScriptNode(configNode, services);
         
         ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
-        boolean requiresAction = configWs.updateConfiguration( config, (JSONObject)req.parseContent(), siteNode, null );
-        if (requiresAction) {
-            // TODO: kick off action to create snapshot
-        }
+        HashSet<String> productSet = configWs.updateConfiguration( config, (JSONObject)req.parseContent(), siteNode, null );
+        ConfigurationPost configPost = new ConfigurationPost( repository, services );
+        configPost.startAction( config, (String)siteNode.getProperty( Acm.CM_NAME ), productSet );
+        
         return configWs.getConfigJson( config, (String)siteNode.getProperty( Acm.CM_NAME ), null );
     }
 }

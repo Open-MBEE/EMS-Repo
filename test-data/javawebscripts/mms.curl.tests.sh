@@ -43,6 +43,7 @@ echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"workspaces/master/sites/europ
 echo ""
 echo SNAPSHOTS
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/snapshot.html $SERVICE_URL"workspaces/master/sites/europa/products/301/snapshots\""
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/config.snapshots.json $SERVICEURL"workspaces/master/sites/europa/configurations/4ca5dac8-85a7-4598-8897-d8ab4ee38b24/snapshots"
 
 
 # images
