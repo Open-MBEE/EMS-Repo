@@ -186,6 +186,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 			return null;
 		}
 	}
+
 	
 	private JSONObject handleUpdate(JSONObject postJson, EmsScriptNode siteNode, Status status) throws JSONException {
 		String[] idKeys = {"nodeid", "id"};
@@ -202,7 +203,6 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		    log(LogLevel.WARNING, "JSON malformed does not include Alfresco id for configuration", HttpServletResponse.SC_BAD_REQUEST);
 		    return null;
 		}
-				
 		
 		NodeRef configNodeRef = NodeUtil.getNodeRefFromNodeId( nodeId );
 		if (configNodeRef != null) {
@@ -216,13 +216,14 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		}
 	}
 	
+	
 	/**
 	 * Kick off the actual action in the background
 	 * @param jobNode
 	 * @param siteName
 	 * @param productList
 	 */
-	private void startAction(EmsScriptNode jobNode, String siteName, HashSet<String> productList) {
+	public void startAction(EmsScriptNode jobNode, String siteName, HashSet<String> productList) {
 		ActionService actionService = services.getActionService();
 		Action configurationAction = actionService.createAction(ConfigurationGenerationActionExecuter.NAME);
 		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_SITE_NAME, siteName);

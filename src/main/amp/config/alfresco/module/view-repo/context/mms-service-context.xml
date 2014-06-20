@@ -58,8 +58,22 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
 
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.configurations.snapshots.post"
+        class="gov.nasa.jpl.view_repo.webscripts.MmsConfigurationsPost" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.configurations.snapshots.get"
         class="gov.nasa.jpl.view_repo.webscripts.MmsSnapshotsGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.configurations.products.post"
+        class="gov.nasa.jpl.view_repo.webscripts.MmsConfigurationsPost" parent="webscript"
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
@@ -79,5 +93,6 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
 
+    
    
 </beans>
