@@ -285,7 +285,18 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
     }
 
     
-    public void updateConfiguration(EmsScriptNode config, JSONObject postJson, EmsScriptNode context, Date date) throws JSONException {
+    /**
+     * Updates the specified configuration with the posted JSON. Returns true if
+     * a snapshot needs to be created (e.g., products have been selected).
+     * @param config
+     * @param postJson
+     * @param context
+     * @param date
+     * @return
+     * @throws JSONException
+     */
+    public boolean updateConfiguration(EmsScriptNode config, JSONObject postJson, EmsScriptNode context, Date date) throws JSONException {
+        boolean requiresSnapshotBuild = false;
         if (postJson.has("name")) {
             config.createOrUpdateProperty(Acm.CM_NAME, postJson.getString("name"));
         }
@@ -302,10 +313,18 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         
         // these should be mutually exclusive
         if (postJson.has( "products")) {
+            requiresSnapshotBuild = true;
             config.removeAssociations( "ems:configuredProducts" );
             JSONArray productsJson = postJson.getJSONArray( "products" );
             for (int ii = 0; ii < productsJson.length(); ii++) {
-                EmsScriptNode product = findScriptNodeById( productsJson.getString( ii ), null );
+                Object productObject = productsJson.get( ii );
+                String productId = "";
+                if (productObject instanceof String) {
+                    productId = (String) productObject;
+                } else if (productObject instanceof JSONObject) {
+                    productId = ((JSONObject)productObject).getString( "sysmlid" );
+                }
+                EmsScriptNode product = findScriptNodeById(productId, null);
                 if (product != null) {
                     config.createOrUpdateAssociation( product, "ems:configuredProducts", true );
                 }
@@ -315,12 +334,21 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             JSONArray snapshotsJson = postJson.getJSONArray("snapshots");
             EmsScriptNode snapshotFolder = context.childByNamePath("/snapshots");
             for (int ii = 0; ii < snapshotsJson.length(); ii++) {
-                EmsScriptNode snapshot = snapshotFolder.childByNamePath("/" + snapshotsJson.getString(ii));
+                Object snapshotObject = snapshotsJson.get( ii );
+                String snapshotId = "";
+                if (snapshotObject instanceof String) {
+                    snapshotId = (String) snapshotObject;
+                } else if (snapshotObject instanceof JSONObject) {
+                    snapshotId = ((JSONObject)snapshotObject).getString( "id" );
+                }
+                EmsScriptNode snapshot = snapshotFolder.childByNamePath("/" + snapshotId);
                 if (snapshot != null) {
                     config.createOrUpdateAssociation(snapshot, "ems:configuredSnapshots", true);
                 }
             }
         }
+        
+        return requiresSnapshotBuild;
     }
     
     /**
