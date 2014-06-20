@@ -46,6 +46,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.site.SiteVisibility;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -298,7 +299,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     public EmsScriptNode createSite( String siteName ) {
         EmsScriptNode siteNode = getSiteNode( siteName, null );
         if ( siteNode == null || !siteNode.exists() ) {
-            SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, true );
+            SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, SiteVisibility.PUBLIC );
             siteNode = new EmsScriptNode( foo.getNodeRef(), services );
         }
         return siteNode;
