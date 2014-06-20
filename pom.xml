@@ -366,6 +366,24 @@
 						</lifecycleMappingMetadata>
 					</configuration>
 				</plugin>
+				<!-- Max's plugin for regression testing -->
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>exec-maven-plugin</artifactId>
+					<version>1.2.1</version>
+						<executions>
+							<execution>
+								<id>diff-test</id>
+								<phase>integration-test</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>test-data/javawebscripts/diff.sh</executable>
+								</configuration>
+							</execution>
+						</executions>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>

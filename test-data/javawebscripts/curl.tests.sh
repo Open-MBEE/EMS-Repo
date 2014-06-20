@@ -9,16 +9,16 @@ export CURL_GET_FLAGS="-X GET"
 export CURL_SECURITY=" -k -3" 
 
 #if [true]; then
-	export CURL_USER=" -u admin:admin"
-	export CURL_FLAGS=$CURL_STATUS$CURL_USER
-	export SERVICE_URL="\"http://localhost:8080/alfresco/service/"
-	export BASE_URL="\"http://localhost:8080/alfresco/service/javawebscripts/"
+#	export CURL_USER=" -u admin:admin"
+#	export CURL_FLAGS=$CURL_STATUS$CURL_USER
+#	export SERVICE_URL="\"http://localhost:8080/alfresco/service/"
+#	export BASE_URL="\"http://localhost:8080/alfresco/service/javawebscripts/"
 #else
-#	export CURL_USER=" -u cinyoung"
-#	export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
-#	export SERVICE_URL="\"http://europaems-dev-staging-a:8443/alfresco/service/"
+	export CURL_USER=" -u shatkhin"
+	export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
+	export SERVICE_URL="\"http://europaems-dev-staging-a:8443/alfresco/service/"
 #	export BASE_URL="\"http://europaems-dev-staging-a:8443/alfresco/service/javawebscripts/"
-#	export BASE_URL="\"https://europaems-dev-staging-a:8443/alfresco/service/javawebscripts/"
+	export BASE_URL="\"https://europaems-dev-staging-a/alfresco/service/javawebscripts/"
 #fi
 
 # TODO: CURL commands aren't executed from bash using environment variables
