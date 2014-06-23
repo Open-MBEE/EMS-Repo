@@ -1261,7 +1261,10 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             		element.put(Acm.JSON_TYPE, typeName );
             	}
             	else {
-            		specializationJSON.put(Acm.JSON_TYPE, typeName );
+            		// TODO: figure out why value specs aren't getting here
+            		if (typeName.length() > 0) {
+            			specializationJSON.put(Acm.JSON_TYPE, typeName );
+            		}
             	}
         }
         
