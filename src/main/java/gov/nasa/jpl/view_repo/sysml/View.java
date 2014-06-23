@@ -111,6 +111,34 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     }
 
     /**
+     * @return the generate
+     */
+    public boolean isGenerate() {
+        return generate;
+    }
+
+    /**
+     * @param generate the generate to set
+     */
+    public void setGenerate( boolean generate ) {
+        this.generate = generate;
+    }
+
+    /**
+     * @return the recurse
+     */
+    public boolean isRecurse() {
+        return recurse;
+    }
+
+    /**
+     * @param recurse the recurse to set
+     */
+    public void setRecurse( boolean recurse ) {
+        this.recurse = recurse;
+    }
+
+    /**
      * Override equals for EmsScriptNodes
      * 
      * @see java.lang.Object#equals(java.lang.Object)
@@ -401,6 +429,9 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
      */
     @Override
     public JSONObject toViewJson() {
+        return toViewJson( generate, recurse );
+    }
+    public JSONObject toViewJson( boolean doGenerate, boolean doRecurse ) {
     	
         if ( viewNode == null ) {
             if (Debug.isOn()) System.out.println("*** called View.toViewJson() without a view node! View = " + toBoringString() );
@@ -408,7 +439,9 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         }
         
         // Get the related elements that define the the view.
-        generateViewables();
+        if ( doGenerate ) {
+            generateViewables();
+        }
 
         // Generate the JSON for the view now that the View is populated with
         // Viewables.
@@ -423,7 +456,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 
             JSONArray elements = new JSONArray();
             viewProperties.put("displayedElements", elements );
-            for ( EmsScriptNode elem : getDisplayedElements() ) {
+            for ( EmsScriptNode elem : getDisplayedElements( null, doGenerate, doRecurse, null ) ) {
                 elements.put( elem.getName() );
             }
 
@@ -441,7 +474,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
                 }
             }
 
-            JSONArray viewables = getContainsJson();
+            JSONArray viewables = getContainsJson( doGenerate );
             viewProperties.put("contains", viewables );
 
         } catch ( JSONException e ) {
@@ -452,9 +485,12 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     }
     
     public JSONArray getContainsJson() {
+        return getContainsJson( generate );
+    }
+    public JSONArray getContainsJson( boolean doGenerate ) {
         JSONArray viewablesJson = new JSONArray();
 
-        if ( isEmpty() ) generateViewables();
+        if ( doGenerate && isEmpty() ) generateViewables();
 
         for ( Viewable< EmsScriptNode > viewable : this ) {
             if ( viewable != null ) {

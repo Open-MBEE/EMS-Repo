@@ -177,6 +177,8 @@ public class ViewGet extends AbstractJavaWebScript {
         if (checkPermissions(view, PermissionService.READ)) {
             try {
                 View v = new View(view);
+                v.setGenerate( generate );
+                v.setRecurse( recurse );
                 if ( gettingDisplayedElements ) {
                     if (Debug.isOn()) System.out.println("+ + + + + gettingDisplayedElements");
                     // TODO -- need to use recurse flag!
