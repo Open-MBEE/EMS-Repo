@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -286,8 +287,8 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
 
     
     /**
-     * Updates the specified configuration with the posted JSON. Returns true if
-     * a snapshot needs to be created (e.g., products have been selected).
+     * Updates the specified configuration with the posted JSON. Returns set of products to
+     * be generated.
      * @param config
      * @param postJson
      * @param context
@@ -295,8 +296,8 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
      * @return
      * @throws JSONException
      */
-    public boolean updateConfiguration(EmsScriptNode config, JSONObject postJson, EmsScriptNode context, Date date) throws JSONException {
-        boolean requiresSnapshotBuild = false;
+    public HashSet<String> updateConfiguration(EmsScriptNode config, JSONObject postJson, EmsScriptNode context, Date date) throws JSONException {
+        HashSet<String> productSet = new HashSet<String>();
         if (postJson.has("name")) {
             config.createOrUpdateProperty(Acm.CM_NAME, postJson.getString("name"));
         }
@@ -313,7 +314,6 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         
         // these should be mutually exclusive
         if (postJson.has( "products")) {
-            requiresSnapshotBuild = true;
             config.removeAssociations( "ems:configuredProducts" );
             JSONArray productsJson = postJson.getJSONArray( "products" );
             for (int ii = 0; ii < productsJson.length(); ii++) {
@@ -327,6 +327,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                 EmsScriptNode product = findScriptNodeById(productId, null);
                 if (product != null) {
                     config.createOrUpdateAssociation( product, "ems:configuredProducts", true );
+                    productSet.add( productId );
                 }
             }
         } else if (postJson.has( "snapshots" )) {
@@ -348,7 +349,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             }
         }
         
-        return requiresSnapshotBuild;
+        return productSet;
     }
     
     /**

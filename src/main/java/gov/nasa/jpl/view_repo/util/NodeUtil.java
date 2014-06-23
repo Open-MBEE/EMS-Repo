@@ -167,7 +167,7 @@ public class NodeUtil {
         ResultSet results = null;
         ArrayList<NodeRef> nodeRefs = new ArrayList<NodeRef>();
         NodeRef nodeRef = null;
-        boolean gotResults = false;
+//        boolean gotResults = false;
         try {
             results = findNodeRefsByType( specifier, prefix, services );
             if (results != null) {
@@ -175,7 +175,7 @@ public class NodeUtil {
                 for (ResultSetRow row: results) {
                     NodeRef nr = row.getNodeRef();
                     if ( nr == null ) continue;
-                    gotResults = true;
+//                    gotResults = true;
 
                     // Get the version for the date/time if specified.
                     if ( dateTime != null ) {

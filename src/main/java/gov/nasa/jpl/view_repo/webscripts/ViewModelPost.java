@@ -35,7 +35,6 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
@@ -69,8 +68,6 @@ public class ViewModelPost extends ModelPost {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
-        Debug.error("\t####### ERROR: ViewModelPost  should not be called! : ");
-        if ( true ) return null; 
 
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();

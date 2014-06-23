@@ -8,7 +8,6 @@ package gov.nasa.jpl.view_repo;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
