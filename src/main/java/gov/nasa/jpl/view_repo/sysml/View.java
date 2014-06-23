@@ -625,8 +625,9 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         views.addAll(getViewToViewPropertyViews(dateTime));
         views.addAll(getChildViewElements(dateTime));
         views.remove( getElement() );
+        ArrayList<EmsScriptNode> viewsCopy = new ArrayList<EmsScriptNode>(views);
         if ( recurse ) {
-            for ( EmsScriptNode e :  views ) {
+            for ( EmsScriptNode e :  viewsCopy ) {
                 View v = new View(e);
                 views.addAll( v.getContainedViews( recurse, dateTime, seen ) );
             }
