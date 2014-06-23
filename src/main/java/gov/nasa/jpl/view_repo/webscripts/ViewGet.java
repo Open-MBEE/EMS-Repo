@@ -116,8 +116,10 @@ public class ViewGet extends AbstractJavaWebScript {
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
-        // default recurse=true but recurse only applies to displayed elements and contained views
-        boolean recurse = checkArgEquals(req, "recurse", "false") ? false : true;
+        // default recurse=false but recurse only applies to displayed elements and contained views
+        boolean recurse = checkArgEquals(req, "recurse", "true") ? true : false;
+        // default generate=false
+        boolean generate = checkArgEquals(req, "generate", "true") ? true : false;
 
         JSONArray viewsJson = new JSONArray();
         if (validateRequest(req, status)) {
@@ -133,7 +135,7 @@ public class ViewGet extends AbstractJavaWebScript {
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         
             try {
-                handleView(viewId, viewsJson, recurse, dateTime);
+                handleView(viewId, viewsJson, generate, recurse, dateTime);
             } catch ( JSONException e ) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -163,7 +165,7 @@ public class ViewGet extends AbstractJavaWebScript {
     }
 
 
-    private void handleView(String viewId, JSONArray viewsJson, boolean recurse, Date dateTime) throws JSONException {
+    private void handleView(String viewId, JSONArray viewsJson, boolean generate, boolean recurse, Date dateTime) throws JSONException {
         EmsScriptNode view = findScriptNodeById(viewId, dateTime);
 
         if (view == null) {
@@ -174,10 +176,12 @@ public class ViewGet extends AbstractJavaWebScript {
         if (checkPermissions(view, PermissionService.READ)) {
             try {
                 View v = new View(view);
+                v.setGenerate( generate );
+                v.setRecurse( recurse );
                 if ( gettingDisplayedElements ) {
                     if (Debug.isOn()) System.out.println("+ + + + + gettingDisplayedElements");
                     // TODO -- need to use recurse flag!
-                    Collection< EmsScriptNode > elems = v.getDisplayedElements();
+                    Collection< EmsScriptNode > elems = v.getDisplayedElements(dateTime, generate, recurse, null);
                     elems = NodeUtil.getVersionAtTime( elems, dateTime );
                     for ( EmsScriptNode n : elems ) {
                         viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT, dateTime ) );
