@@ -37,6 +37,18 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     protected EmsScriptNode viewNode = null;
     
     protected EmsSystemModel model = null;
+    
+    /**
+     * This is a cache of the displayed elements to keep from having to
+     * recompute them as is done for allowed elements.
+     */
+    protected Collection<EmsScriptNode> displayedElements = null;
+
+    protected boolean generate = false;
+
+    protected boolean recurse = false;
+    
+
 
     /**
      * @see List#List() 
@@ -465,12 +477,6 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         return viewablesJson;
     }
     
-    /**
-     * This is a cache of the displayed elements to keep from having to
-     * recompute them as is done for allowed elements.
-     */
-    private Collection<EmsScriptNode> displayedElements = null;
-    
     public Collection<EmsScriptNode> getAllowedElements() {
         if ( displayedElements != null ) {
             return displayedElements;
@@ -481,46 +487,68 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     @Override
     // TODO -- need to support a flag for recursion?
     public Collection<EmsScriptNode> getDisplayedElements() {
-        return getDisplayedElements( null, new HashSet<View>() );
+        return getDisplayedElements( null, generate, recurse, null );
     }
 
     // TODO -- need to support a flag for recursion?
-    public Collection<EmsScriptNode> getDisplayedElements( Date dateTime, Set<View> seen) {
-        if ( seen.contains( this ) ) return Utils.getEmptySet();
-        seen.add( this );
+    public Collection<EmsScriptNode> getDisplayedElements( Date dateTime, boolean doGenerate, boolean doRecurse, Set<View> seen) {
+        if ( doRecurse ) {
+            if ( seen == null ) seen = new HashSet<View>(); 
+            if ( seen.contains( this ) ) return Utils.getEmptySet();
+            seen.add( this );
+        }
+        
         LinkedHashSet<EmsScriptNode> set = new LinkedHashSet<EmsScriptNode>();
         
-        if ( isEmpty() ) {
+        // Generate Viewables from Viewpoint method, but don't overwrite cached
+        // values.
+        if ( doGenerate && isEmpty() ) {
             generateViewables(); 
         } else if ( displayedElements != null ) {
+            // Return cached value which won't change since it's from hardcoded JSON.
             return displayedElements;
         }
         
+        // get contained Viewables
+        // REVIEW -- should this only be done when generate == true?
         Collection< EmsScriptNode > versionedElements = super.getDisplayedElements();
         versionedElements = NodeUtil.getVersionAtTime( versionedElements, dateTime );
         set.addAll( versionedElements );
-        for ( sysml.view.View< EmsScriptNode > v : getChildViews() ) {
-            EmsScriptNode n = NodeUtil.getVersionAtTime( v.getElement(), dateTime );
-            if ( n == null ) continue;
-            v = new View( n );
-            if ( v instanceof View ) {
-                set.addAll( ((View)v).getDisplayedElements( dateTime, seen ) );
-            } else {
-             // REVIEW -- this case seems impossible to reach since v is assigned a View
-                Collection<EmsScriptNode> moreElements = v.getDisplayedElements();
-                Collection<EmsScriptNode> vElems = NodeUtil.getVersionAtTime( moreElements, dateTime );
-                set.addAll( vElems );
-            }
-        }
-        Collection< EmsScriptNode > v2vs = getViewToViewPropertyViews(dateTime);
-        for ( EmsScriptNode node : v2vs ) {
-            if ( node.isView() ) {
-                View v = new View( node );
-                set.addAll( v.getDisplayedElements( dateTime, seen ) );
-            }
-        }
+
+        // get elements specified in JSON in the displayed elements property 
         Object dElems = getElement().getProperty( Acm.ACM_DISPLAYED_ELEMENTS );
         set.addAll( getElementsForJson( dElems, dateTime ) );
+
+        if ( doRecurse ) {
+            
+            // get recursively from child views
+            for ( sysml.view.View< EmsScriptNode > v : getChildViews() ) {
+                EmsScriptNode n = NodeUtil.getVersionAtTime( v.getElement(), dateTime );
+                if ( n == null ) continue;
+                v = new View( n );
+                if ( v instanceof View ) {
+                    set.addAll( ((View)v).getDisplayedElements( dateTime,
+                                                                doGenerate,
+                                                                doRecurse,
+                                                                seen ) );
+                } else {
+                    // REVIEW -- this case seems impossible to reach since v is assigned a View
+                    Collection<EmsScriptNode> moreElements = v.getDisplayedElements();
+                    Collection<EmsScriptNode> vElems = NodeUtil.getVersionAtTime( moreElements, dateTime );
+                    set.addAll( vElems );
+                }
+            }
+            
+            // get recursively from viewToView property
+            Collection< EmsScriptNode > v2vs = getViewToViewPropertyViews(dateTime);
+            for ( EmsScriptNode node : v2vs ) {
+                if ( node.isView() ) {
+                    View v = new View( node );
+                    set.addAll( v.getDisplayedElements( dateTime, doGenerate, doRecurse, seen ) );
+                }
+            }
+        }
+
         displayedElements = set;
         return set;
     }
