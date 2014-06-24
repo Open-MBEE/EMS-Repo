@@ -2,6 +2,8 @@
 #Script for running all of the curl commands.  Put into one script so that you can
 # easily change the server/user preferences.
 
+mkdir -p output
+
 export CURL_STATUS='-w \n%{http_code}\n'
 export CURL_POST_FLAGS_NO_DATA="-X POST"
 export CURL_POST_FLAGS='-X POST -H Content-Type:application/json --data'
@@ -38,7 +40,7 @@ echo 'testPost 2'
 #post elements to project
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elementsNew.json $BASE_URL"sites/europa/projects/123456/elements" 
 curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elements.json $BASE_URL"sites/europa/projects/123456/elements" | grep -v '"read":'| grep -v '"lastModified"' > output/post2.json
-java -cp .:/home/shatkhin/git/util/src/:/home/shatkhin/git/alfresco-view-repo/src/main/amp/web/WEB-INF/lib:/home/shatkhin/.m2/repository/org/json/json/20090211/json-20090211.jar JsonDiff baselineoutput/post2.json output/post2.json | grep -v '"sysmlid"' | grep -v '"author"'| grep -v '}' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+"
+java -cp .:../../src/main/amp/web/WEB-INF/lib/mbee_util.jar:../../target/view-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes gov.nasa.jpl.view_repo.util.JsonDiff baselineoutput/post2.json output/post2.json  | grep -v '"sysmlid"' | grep -v '"author"'| grep -v '}' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+"
 echo
 echo
 
@@ -83,7 +85,7 @@ echo 'testGET2'
 # get elements
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/123456?recurse=true\""
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/123456?recurse=true" | grep -v '"read":'| grep -v '"lastModified"' > output/get2.jsonjava 
-java -cp .:/home/shatkhin/git/util/src/:/home/shatkhin/git/alfresco-view-repo/src/main/amp/web/WEB-INF/lib:/home/shatkhin/.m2/repository/org/json/json/20090211/json-20090211.jar JsonDiff baselineoutput/get2.json output/get2.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---'
+java -cp .:../../src/main/amp/web/WEB-INF/lib/mbee_util.jar:../../target/view-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes gov.nasa.jpl.view_repo.util.JsonDiff baselineoutput/post2.json output/post2.json  | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---'
 echo
 echo
 
