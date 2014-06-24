@@ -1,0 +1,143 @@
+{
+  "configurations": [
+    {
+      "timestamp": "2014-06-09T09:03:45.834-0700",
+      "description": "updating description",
+      "name": "product test",
+      "snapshots": [],
+    },
+    {
+      "timestamp": "2014-06-19T13:00:37.049-0700",
+      "description": "config",
+      "name": "hmmm",
+      "snapshots": [],
+    },
+    {
+      "timestamp": "2014-06-19T12:59:36.725-0700",
+      "description": "config",
+      "name": "new",
+      "snapshots": [],
+    },
+    {
+      "timestamp": "2014-06-18T16:51:57.420-0700",
+      "description": "asdfsdfjkjjjjjsdfsfsdfd",
+      "name": "asdfs",
+      "snapshots": [
+        {
+          "sysmlname": "Test",
+          "configurations": [{
+            "name": "asdfs"
+          }],
+          "creator": "dlam"
+        },
+        {
+          "sysmlname": "401",
+          "configurations": [{
+            "name": "asdfs"
+          }],
+          "creator": "dlam"
+        },
+        {
+          "sysmlname": "301",
+          "configurations": [{
+            "name": "asdfs"
+          }],
+          "creator": "dlam"
+        }
+      ],
+    },
+    {
+      "timestamp": "2014-06-18T16:51:36.520-0700",
+      "description": "asdfsf dsfsdfdsfdsf",
+      "name": "nes",
+      "snapshots": [{
+        "sysmlname": "Test",
+        "configurations": [{
+          "name": "nes"
+        }],
+        "creator": "dlam"
+      }],
+    }
+  ],
+  "products": [
+    {
+      "name": "401",
+      "snapshots": [{
+        "tag": "asdfs",
+        "creator": "dlam"
+      }]
+    },
+    {
+      "name": "301",
+      "snapshots": [
+        {
+          "tag": "asdfs",
+          "creator": "dlam"
+        },
+        {
+          "tag": "",
+          "creator": "shatkhin"
+        },
+        {
+          "tag": "",
+          "creator": "shatkhin"
+        },
+        {
+          "tag": "",
+          "creator": "shatkhin"
+        },
+        {
+          "tag": "",
+          "creator": "shatkhin"
+        },
+        {
+          "tag": "",
+          "creator": "shatkhin"
+        },
+        {
+          "tag": "",
+          "creator": "shatkhin"
+        }
+      ]
+    },
+    {
+      "name": "Test",
+      "snapshots": [
+        {
+          "tag": "asdfs",
+          "creator": "dlam"
+        },
+        {
+          "tag": "nes",
+          "creator": "dlam"
+        },
+        {
+          "tag": "",
+          "creator": "cinyoung"
+        },
+        {
+          "tag": "",
+          "creator": "dlam"
+        },
+        {
+          "tag": "",
+          "creator": "dlam"
+        },
+        {
+          "tag": "",
+          "creator": "dlam"
+        },
+        {
+          "tag": "",
+          "creator": "dlam"
+        },
+        {
+          "tag": "",
+          "creator": "dlam"
+        }
+      ]
+    }
+  ]
+}
+
+200

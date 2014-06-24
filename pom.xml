@@ -379,7 +379,12 @@
 									<goal>exec</goal>
 								</goals>
 								<configuration>
-									<executable>test-data/javawebscripts/diff.sh</executable>
+									<executable>./diff2.sh</executable>
+									<workingDirectory>/test-data/javawebscripts</workingDirectory>
+<!-- 									<arguments> -->
+<!-- 										<argument>+x</argument> -->
+<!-- 										<argument>diff2.sh</argument> -->
+<!-- 									</arguments> -->
 								</configuration>
 							</execution>
 						</executions>

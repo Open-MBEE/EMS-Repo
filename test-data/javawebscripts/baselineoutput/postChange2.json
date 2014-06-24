@@ -1,0 +1,16 @@
+{"elements": [{
+    "author": "admin",
+    "name": "500",
+    "qualifiedName": "/////CY Test//500",
+    "documentation": "directed_relationship",
+    "sysmlid": "500",
+    "owner": "300",
+    "specialization": {
+        "source": "302",
+        "target": "303",
+        "type": "DirectedRelationship"
+    },
+    "editable": true
+}]}
+
+200

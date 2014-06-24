@@ -1,0 +1,18 @@
+{"elements": [{
+    "author": "admin",
+    "name": "300",
+    "qualifiedName": "/////CY Test/300",
+    "documentation": "something",
+    "owner": "123456",
+    "specialization": {
+        "isDerived": false,
+        "value": [{
+            "string": "dlam_string",
+            "type": "LiteralString"
+        }],
+        "type": "Property"
+    },
+    "editable": true
+}]}
+
+200

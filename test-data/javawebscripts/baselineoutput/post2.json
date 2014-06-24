@@ -1,0 +1,288 @@
+{"elements": [
+    {
+        "author": "admin",
+        "name": "305",
+        "qualifiedName": "/////CY Test/999/305",
+        "documentation": "no owner",
+        "owner": "999",
+        "specialization": {
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "301",
+        "qualifiedName": "/////CY Test//301",
+        "documentation": "else",
+        "owner": "300",
+        "specialization": {
+            "childrenViews": ["304"],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "view2view": [{
+                "childrenViews": ["302"],
+                "id": "301"
+            }],
+            "isDerived": false,
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "301",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "noSections": ["302"],
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "401",
+        "qualifiedName": "/////CY Test//401",
+        "documentation": "4else",
+        "owner": "4000",
+        "specialization": {
+            "childrenViews": ["404"],
+            "displayedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "view2view": [{
+                "childrenViews": ["402"],
+                "id": "401"
+            }],
+            "isDerived": false,
+            "allowedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "401",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "noSections": ["402"],
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "400",
+        "qualifiedName": "/////CY Test/400",
+        "documentation": "4something",
+        "owner": "123456",
+        "specialization": {
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "302",
+        "qualifiedName": "/////CY Test///302",
+        "documentation": "to",
+        "owner": "301",
+        "specialization": {
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "600",
+        "qualifiedName": "/////CY Test/600",
+        "documentation": "element values",
+        "owner": "123456",
+        "specialization": {
+            "isDerived": false,
+            "value": [
+                {
+                    "element": "300",
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "302",
+                    "type": "ElementValue"
+                }
+            ],
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "303",
+        "qualifiedName": "/////CY Test////303",
+        "documentation": "talk",
+        "owner": "302",
+        "specialization": {
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "304",
+        "qualifiedName": "/////CY Test/////304",
+        "documentation": "about",
+        "owner": "303",
+        "specialization": {
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "500",
+        "qualifiedName": "/////CY Test//500",
+        "documentation": "directed_relationship",
+        "owner": "300",
+        "specialization": {
+            "source": "302",
+            "target": "303",
+            "type": "DirectedRelationship"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "dlam",
+        "qualifiedName": "/////CY Test/cdelp/dlam",
+        "documentation": "to make compatible with value specs (this is just a Element)",
+        "owner": "cdelp",
+        "specialization": {"type": "Element"},
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "6666_name",
+        "qualifiedName": "/////CY Test/6666_name",
+        "documentation": "",
+        "owner": "123456",
+        "specialization": {
+            "operand": [
+                {
+                    "element": "300",
+                    "type": "ElementValue"
+                },
+                {
+                    "element": "302",
+                    "type": "ElementValue"
+                }
+            ],
+            "type": "Expression"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "402",
+        "qualifiedName": "/////CY Test///402",
+        "documentation": "4to",
+        "owner": "401",
+        "specialization": {
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "300",
+        "qualifiedName": "/////CY Test/300",
+        "documentation": "something",
+        "owner": "123456",
+        "specialization": {
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "404",
+        "qualifiedName": "/////CY Test/////404",
+        "documentation": "4about",
+        "owner": "403",
+        "specialization": {
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "403",
+        "qualifiedName": "/////CY Test////403",
+        "documentation": "4talk",
+        "owner": "402",
+        "specialization": {
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true
+    }
+]}
+400
