@@ -18,7 +18,7 @@ export CURL_SECURITY=" -k -3"
 #       export SERVICE_URL="http://localhost:8080/alfresco/service/"
 #       export BASE_URL="http://localhost:8080/alfresco/service/javawebscripts/"
 #else
-        export CURL_USER=" -u shatkhin"
+        export CURL_USER=" -u cinyoung"
         export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
         export SERVICE_URL="https://europaems-dev-staging-a/alfresco/service/" 
 #       export BASE_URL="http://europaems-dev-staging-a:8443/alfresco/service/javawebscripts/"
