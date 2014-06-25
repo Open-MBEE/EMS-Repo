@@ -24,7 +24,7 @@ import sysml.view.Viewable;
 public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysml.view.List< EmsScriptNode > {
 
     private static final long serialVersionUID = 3954654861037876503L;
-    private boolean ordered = false;
+    protected boolean ordered = false;
     
     /**
      * Create an empty List.
