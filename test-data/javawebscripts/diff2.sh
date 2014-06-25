@@ -10,19 +10,19 @@ export CURL_POST_FLAGS='-X POST -H Content-Type:application/json --data'
 export CURL_PUT_FLAGS="-X PUT"
 export CURL_GET_FLAGS="-X GET"
 
-export CURL_SECURITY=" -k -3"
+#export CURL_SECURITY=" -k -3"
 
 #if [true]; then
-#       export CURL_USER=" -u admin:admin"
-#       export CURL_FLAGS=$CURL_STATUS$CURL_USER
-#       export SERVICE_URL="http://localhost:8080/alfresco/service/"
-#       export BASE_URL="http://localhost:8080/alfresco/service/javawebscripts/"
+       export CURL_USER=" -u admin:admin"
+       export CURL_FLAGS=$CURL_STATUS$CURL_USER
+       export SERVICE_URL="http://localhost:8080/alfresco/service/"
+       export BASE_URL="http://localhost:8080/alfresco/service/javawebscripts/"
 #else
-        export CURL_USER=" -u cinyoung"
-        export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
-        export SERVICE_URL="https://europaems-dev-staging-a/alfresco/service/" 
+#        export CURL_USER=" -u shatkhin"
+#        export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
+#        export SERVICE_URL="https://europaems-dev-staging-a/alfresco/service/" 
 #       export BASE_URL="http://europaems-dev-staging-a:8443/alfresco/service/javawebscripts/"
-        export BASE_URL="https://europaems-dev-staging-a/alfresco/service/javawebscripts/"
+#        export BASE_URL="https://europaems-dev-staging-a/alfresco/service/javawebscripts/"
 #fi
 
 ###################################    POST CURL COMMANDS   ############################################
@@ -85,7 +85,7 @@ echo 'testGET2'
 # get elements
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/123456?recurse=true\""
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/123456?recurse=true" | grep -v '"read":'| grep -v '"lastModified"' > output/get2.jsonjava 
-java -cp .:../../src/main/amp/web/WEB-INF/lib/mbee_util.jar:../../target/view-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes gov.nasa.jpl.view_repo.util.JsonDiff baselineoutput/post2.json output/post2.json  | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---'
+java -cp .:../../src/main/amp/web/WEB-INF/lib/mbee_util.jar:../../target/view-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes gov.nasa.jpl.view_repo.util.JsonDiff baselineoutput/post2.json output/post2.json  | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"author"'
 echo
 echo
 
