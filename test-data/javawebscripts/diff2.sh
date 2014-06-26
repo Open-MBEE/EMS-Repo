@@ -15,8 +15,8 @@ export CURL_GET_FLAGS="-X GET"
 #if [true]; then
        export CURL_USER=" -u admin:admin"
        export CURL_FLAGS=$CURL_STATUS$CURL_USER
-       export SERVICE_URL="http://localhost:8080/alfresco/service/"
-       export BASE_URL="http://localhost:8080/alfresco/service/javawebscripts/"
+       export SERVICE_URL="http://128.149.16.140:8080/alfresco/service/"
+       export BASE_URL="http://128.149.16.140:8080/alfresco/service/javawebscripts/"
 #else
 #        export CURL_USER=" -u shatkhin"
 #        export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
@@ -91,8 +91,8 @@ echo
 
 echo 'testGET3'
 # get views
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"views/301\""
-curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"views/301" | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > output/get3.json
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"views/301_pkg\""
+curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"views/301_pkg" | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > output/get3.json
 diff baselineoutput/get3.json output/get3.json | grep -v '"author"' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+" 
 echo 
 echo
@@ -159,8 +159,8 @@ echo
 
 echo 'testPOSTCHANGE2'
 # get changed element to see if source/target changed
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/500\""
-curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/500" | grep -v '"read":' | grep -v '"lastModified"' > output/postChange2.json
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/4000\""
+curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/4000" | grep -v '"read":' | grep -v '"lastModified"' > output/postChange2.json
 diff baselineoutput/postChange2.json output/postChange2.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"author"'
 echo
 echo
