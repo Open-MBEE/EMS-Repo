@@ -374,21 +374,53 @@
 						<executions>
 							<execution>
 								<id>diff-test</id>
-								<phase>integration-test</phase>
+								<phase>pre-integration-test</phase>
 								<goals>
 									<goal>exec</goal>
 								</goals>
 								<configuration>
 									<executable>./diff2.sh</executable>
-									<workingDirectory>/test-data/javawebscripts</workingDirectory>
-<!-- 									<arguments> -->
-<!-- 										<argument>+x</argument> -->
-<!-- 										<argument>diff2.sh</argument> -->
-<!-- 									</arguments> -->
+									<workingDirectory>${basedir}/test-data/javawebscripts</workingDirectory>
 								</configuration>
 							</execution>
 						</executions>
 				</plugin>
+				<!--  Max Regression test #2 -->
+<!-- 				<plugin> -->
+<!-- 					<groupId>org.codehaus.gmaven</groupId> -->
+<!-- 					<artifactId>gmaven-plugin</artifactId> -->
+<!-- 					<version>1.6</version> -->
+<!-- 					<executions> -->
+<!-- 						<execution> -->
+<!-- 							<id>wait script</id> -->
+<!-- 							<phase>pre-integration-test</phase> -->
+<!-- 							<goals> -->
+<!-- 								<goal>execute</goal> -->
+<!-- 							</goals> -->
+<!-- 							<configuration> -->
+<!-- 								<source> <![CDATA[ -->
+<!-- import static com.jayway.restassured.RestAssured.*; -->
+<!-- println("wait for server to start") -->
+<!-- for(int i = 0; i < 30; i++) { -->
+<!--     try{ -->
+<!--         def response = with().get("http://localhost:8080/alfresco") -->
+<!--         def status = response.getStatusLine() -->
+<!--         println(status) -->
+<!--         } catch(Exception e){ -->
+<!--             Thread.sleep(1000) -->
+<!--             continue -->
+<!--         }finally{ -->
+<!--             print(".") -->
+<!--         } -->
+<!--         if( !(status ==~ /.*OK.*/) ) -->
+<!--             Thread.sleep(1000) -->
+ 
+<!-- } -->
+<!-- ]]> -->
+<!-- 									</source></configuration> -->
+<!-- 						</execution> -->
+<!-- 					</executions> -->
+<!-- 				</plugin> -->
 			</plugins>
 		</pluginManagement>
 	</build>
