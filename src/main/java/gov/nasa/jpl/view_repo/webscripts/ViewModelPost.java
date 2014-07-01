@@ -86,10 +86,17 @@ public class ViewModelPost extends ModelPost {
             trx.commit();
         } catch (Throwable e) {
             try {
+                if (e instanceof JSONException) {
+            			log(LogLevel.ERROR, "ViewModelPost: JSON malformed for: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+                } else {
+            			log(LogLevel.ERROR, "ViewModelPost: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                }
+                e.printStackTrace();
                 if (Debug.isOn()) System.out.println("\t####### ERROR: Needed to ViewModelPost rollback: " + e.getMessage());
                 trx.rollback();
             } catch (Throwable ee) {
-                if (Debug.isOn()) System.out.println("\tRollback ViewModelPost failed: " + ee.getMessage());
+                log(LogLevel.ERROR, "\tViewModelPost: Rollback failed: " + ee.getMessage());
+                ee.printStackTrace();
             }
         }
         

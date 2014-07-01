@@ -25,7 +25,7 @@ echo ""
 echo SNAPSHOTS
 
 # post snapshot
-echo  curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/snapshot.html $SERVICE_URL"workspaces/master/sites/europa/products/301\""
+echo  curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/snapshot.html $SERVICE_URL"workspaces/master/sites/europa/products/301/snapshots\""
 
 # get snapshots - this currently doesn't work
 #echo  curl -w "%{http_code}" -u admin:admin -X GET http://localhost:8080/alfresco/service/snapshots/301
@@ -49,5 +49,5 @@ echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/config.snapshots.json $SERVICEU
 # images
 echo ""
 echo ARTIFACTS
-echo curl -w $CURL_FLAGS $CURL_POST_FLAGS_NO_DATA $SERVICE_URL"workspaces/master/sites/europa/artifacts/screenshot1?extension=.png&cs=200" -F content=@/Users/cinyoung/Desktop/screenshot1.png
-echo curl -w $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"workspaces/master/artifacts/screenshot1?extension=.png&timestamp=2014-06-18T10:22:32.999-0700"
+echo curl $CURL_FLAGS $CURL_POST_FLAGS_NO_DATA $SERVICE_URL"workspaces/master/sites/europa/artifacts/screenshot1?extension=.png&cs=200\"" -F content=@/Users/cinyoung/Desktop/screenshot1.png
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"workspaces/master/artifacts/screenshot1?extension=.png&timestamp=2014-06-18T10:22:32.999-0700\""

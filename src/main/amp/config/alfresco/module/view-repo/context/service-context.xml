@@ -96,4 +96,17 @@
 	    <property name="services" ref="ServiceRegistry"/>
 	    <property name="repository" ref="repositoryHelper"/>
     </bean>	
+
+	<bean id="discussionsEmailNotification" class="gov.nasa.jpl.view_repo.actions.DiscussionsEmailNotificationActionExecutor" parent="action-executer">
+   		<property name="publicAction"><value>true</value></property>
+   		<property name="nodeService" ref="NodeService" />
+   		<property name="personService" ref="PersonService" />
+   		<property name="services" ref="ServiceRegistry" />
+   		<property name="discussionService" ref="DiscussionService" />
+   		<property name="siteService" ref="SiteService" />
+  	</bean>
+
+	<bean id="extendPermissionModel" parent="permissionModelBootstrap">
+   		<property name="model" value="alfresco/extension/permissionDefinitionsExtension.xml" /> 
+	</bean>
 </beans>

@@ -188,6 +188,20 @@
 		<property name="services" ref="ServiceRegistry" />
 	</bean>
 
+    <bean id="webscript.gov.nasa.jpl.javawebscripts.commit.post"
+        class="gov.nasa.jpl.view_repo.webscripts.CommitPost" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+
+    <bean id="webscript.gov.nasa.jpl.javawebscripts.commit.get"
+        class="gov.nasa.jpl.view_repo.webscripts.CommitGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+
 	<!-- Create proxies for the service beans: Interceptors don't work... -->
 	<!-- 
 	<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
