@@ -1,0 +1,53 @@
+{"elements": [
+    {
+        "documentation": "<p>A spacecraft doesn't need wheels, but what the heck.</p>",
+        "id": "_17_0_2_3_407019f_1390507392384_798171_29256",
+        "name": "Wheel",
+        "owner": "300",
+        "type": "Element"
+    },
+    {
+        "documentation": "<p>This is a thing that flies in space. </p>",
+        "id": "_17_0_2_3_407019f_1386871355202_825879_26310",
+        "name": "Spacecraft",
+        "owner": "300",
+        "type": "Element"
+    },
+    {
+        "documentation": "",
+        "id": "_17_0_2_3_407019f_1390507415007_980263_29329",
+        "isDerived": false,
+        "name": "mass",
+        "owner": "300",
+        "type": "Property",
+        "value": ["test1"]
+    },
+    {
+        "id": "test1",
+        "type": "LiteralReal",
+        "double": 33,
+        "owner": "_17_0_2_3_407019f_1390507415007_980263_29329"
+    },
+    {
+        "documentation": "",
+        "id": "_17_0_2_3_407019f_1387309243448_48276_29113",
+        "isDerived": false,
+        "name": "mass",
+        "owner": "300",
+        "type": "Property",
+        "value": ["test2"]
+    },
+    {
+        "id": "test2",
+        "type": "LiteralReal",
+        "double": 33.4,
+        "owner": "_17_0_2_3_407019f_1387309243448_48276_29113"
+    },
+    {
+        "documentation": "<p>this is showing components of the spacecraft which include the</p>",
+        "id": "_17_0_2_3_407019f_1390507595220_102072_29439",
+        "name": "Components",
+        "owner": "300",
+        "type": "Element"
+    }
+]}

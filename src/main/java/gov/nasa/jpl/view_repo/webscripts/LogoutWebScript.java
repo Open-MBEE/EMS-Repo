@@ -56,6 +56,7 @@ public class LogoutWebScript extends AbstractWebScript {
 	
 	protected Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
+
 	    // No need to do anything for basic authentication since server will handle bad
 	    // credentials being sent by client
 //		logout(req, status);

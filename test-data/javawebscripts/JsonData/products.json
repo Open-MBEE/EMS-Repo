@@ -1,23 +1,23 @@
 { "products":
 	[
 		{
-		"id": "301",
+		"sysmlid": "301",
 		"view2view": [
-			{"id": "301", 
-			"childrenViews": ["302"]
+			{"sysmlid": "301", 
+			"childrenViews": ["301","302"]
 		}],
 		"noSections": [
-		"302", 
+		"302" 
 		]
 		},
 		{
-		"id": "401",
+		"sysmlid": "401",
 		"view2view": [
-			{"id": "401", 
-			"childrenViews": ["402"]
+			{"sysmlid": "401", 
+			"childrenViews": ["401","402"]
 		}],
 		"noSections": [
-		"402", 
+		"402"
 		]
 		}
 	]

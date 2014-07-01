@@ -2,7 +2,7 @@ package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
-import gov.nasa.jpl.view_repo.webscripts.ConfigurationGet.EmsScriptNodeCreatedAscendingComparator;
+import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,10 +35,10 @@ public class CommitUtil {
 		List<EmsScriptNode> changeSets = new ArrayList<EmsScriptNode>();
 		if (context != null) {
 			changeSets.addAll(WebScriptUtil.getAllNodesInPath(
-					context.getQnamePath(), "TYPE", "cm:content", services,
-					response));
+					context.getQnamePath(), "TYPE", "cm:content",
+					null, services, response));
 			Collections.sort(changeSets,
-					new EmsScriptNodeCreatedAscendingComparator());
+					new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator());
 		}
 
 		return changeSets;

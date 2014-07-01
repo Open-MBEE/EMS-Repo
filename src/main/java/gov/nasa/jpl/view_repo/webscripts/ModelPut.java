@@ -66,6 +66,8 @@ public class ModelPut extends ModelPost {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req,
             Status status, Cache cache) {
+        printHeader( req );
+        
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
 
@@ -84,6 +86,9 @@ public class ModelPut extends ModelPost {
 
         status.setCode(responseStatus.getCode());
         model.put("res", response.toString());
+
+        printFooter();
+        
         return model;
     }
     
@@ -103,7 +108,7 @@ public class ModelPut extends ModelPost {
             String newId = postJson.getString(oldId);
             
             if (oldId != null && newId != null && oldId != newId) {
-                EmsScriptNode elementNode = findScriptNodeByName(oldId);
+                EmsScriptNode elementNode = findScriptNodeById(oldId, null);
                 if (checkPermissions(elementNode, PermissionService.WRITE)) {
                     if (elementNode != null) {
                         elementNode.setProperty(Acm.ACM_ID, newId);

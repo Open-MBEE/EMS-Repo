@@ -3,4 +3,9 @@
 /alf_data
 *.log
 *.log.*
-/target
+*~
+output*.txt
+debug*.txt
+debug*.out
+.classpath
+/src/main/amp/web/scripts/raml/

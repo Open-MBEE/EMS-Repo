@@ -66,6 +66,8 @@ public class ProductPost extends AbstractJavaWebScript {
 	
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        printHeader( req );
+
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -79,6 +81,9 @@ public class ProductPost extends AbstractJavaWebScript {
 		
         status.setCode(responseStatus.getCode());
 		model.put("res", response.toString());
+
+		printFooter();
+
 		return model;
 	}
 	
@@ -108,13 +113,26 @@ public class ProductPost extends AbstractJavaWebScript {
 	}
 	
 	private void updateProduct(JSONObject productJson) throws JSONException {
-		String id = productJson.getString("id");
+	    
+		String id = null;
+		try { 
+		    id = productJson.getString("id");
+		} catch (Throwable e) {
+		    // ignore
+		}
 		if (id == null) {
-			log(LogLevel.ERROR, "product id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
-			return;
+	        try { 
+	            id = productJson.getString("sysmlid");
+	        } catch (Throwable e) {
+	            // ignore
+	        }
+	        if (id == null) {
+			  log(LogLevel.ERROR, "product id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
+			  return;
+	        }
 		}
 		
-		EmsScriptNode product = findScriptNodeByName(id);
+		EmsScriptNode product = findScriptNodeById(id, null);
 		if (product == null) {
 			log(LogLevel.ERROR, "could not find product with id: " + id, HttpServletResponse.SC_NOT_FOUND);
 			return;

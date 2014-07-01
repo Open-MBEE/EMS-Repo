@@ -69,6 +69,8 @@ public class ProjectPost extends AbstractJavaWebScript {
 	 */
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        printHeader( req );
+
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -76,13 +78,13 @@ public class ProjectPost extends AbstractJavaWebScript {
 
 		try {
 			if (validateRequest(req, status)) {
-			    String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
-		        String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
+			    String siteName = getSiteName( req, true );
+		        String projectId = getProjectId( req );
 		        boolean delete = checkArgEquals(req, "delete", "true") ? true : false;
 		        boolean fix = checkArgEquals(req, "fix", "true") ? true : false;
 		        boolean createSite = checkArgEquals(req, "createSite", "true") ? true : false;
 
-			    if (siteName != null) {
+                if ( siteName != null && !siteName.equals( NO_SITE_ID ) ) {
 			        statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId, siteName, createSite, fix, delete);
 			    } else {
 			        statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId, fix);
@@ -100,11 +102,14 @@ public class ProjectPost extends AbstractJavaWebScript {
 
 		status.setCode(statusCode);
 		model.put("res", response.toString());
+
+        printFooter();
+
 		return model;
 	}
 
-	private int updateOrCreateProject(JSONObject jsonObject, String projectId, boolean fix) throws JSONException {
-	      EmsScriptNode projectNode = findScriptNodeByName(projectId);
+	public int updateOrCreateProject(JSONObject jsonObject, String projectId, boolean fix) throws JSONException {
+	      EmsScriptNode projectNode = findScriptNodeById(projectId, null);
 	      
 	      if (projectNode == null) {
 	          log(LogLevel.ERROR, "Could not find project\n", HttpServletResponse.SC_NOT_FOUND);
@@ -144,16 +149,15 @@ public class ProjectPost extends AbstractJavaWebScript {
 	 * @return				HttpStatusResponse code for success of the POST request
 	 * @throws JSONException
 	 */
-    @SuppressWarnings("deprecation")
-    private int updateOrCreateProject(JSONObject jsonObject, String projectId, String siteName, boolean createSite, boolean fix, boolean delete) throws JSONException {
+    public int updateOrCreateProject(JSONObject jsonObject, String projectId, String siteName, boolean createSite, boolean fix, boolean delete) throws JSONException {
 		// make sure site exists
-		EmsScriptNode siteNode = getSiteNode(siteName);
+		EmsScriptNode siteNode = getSiteNode(siteName, null);
 		if (siteNode == null) {
 		    if (createSite) {
-		        // TODO this is only for testing
-		        String SITE_NAME="europa";
-		        services.getSiteService().createSite(SITE_NAME, SITE_NAME, SITE_NAME, SITE_NAME, true);
-		        siteNode = getSiteNode(siteName);
+		        if ( siteName == null || siteName.length() == 0 ) {
+	                siteName="europa";
+		        }
+		        siteNode = createSite( siteName );
 		    } else {
 		        log(LogLevel.ERROR, "Site not found for " + siteName + ".\n", HttpServletResponse.SC_NOT_FOUND);
 		        return HttpServletResponse.SC_NOT_FOUND;
@@ -175,7 +179,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		}
 		
 		// create project if doesn't exist or update if fix is specified 
-		EmsScriptNode projectNode = findScriptNodeByName(projectId);
+		EmsScriptNode projectNode = findScriptNodeById(projectId, null);
 		String projectName = null;
 		if (jsonObject.has(Acm.JSON_NAME)) {
 		    projectName = jsonObject.getString(Acm.JSON_NAME);

@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
@@ -73,18 +74,24 @@ public class SnapshotGet extends AbstractJavaWebScript {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        printHeader( req );
+
         clearCaches();
+
+        // get timestamp if specified
+        String timestamp = req.getParameter("timestamp");
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
         String id = req.getServiceMatch().getTemplateVars().get("id");
         Map<String, Object> model = new HashMap<String, Object>();
 
-        EmsScriptNode snapshot = findScriptNodeByName(id);
+        EmsScriptNode snapshot = findScriptNodeById(id, dateTime);
         if (snapshot != null) {
             String snapshotString = getSnapshotString(snapshot);
-            Date date = (Date)snapshot.getProperty(Acm.ACM_LAST_MODIFIED);
+            Date date = (Date)snapshot.getLastModified( dateTime );
             model.put("res", snapshotString);
             model.put("title", "Snapshot (" + EmsScriptNode.getIsoTime(date) + ")");
-            model.put("tag", getConfigurationSet(snapshot));
+            model.put("tag", getConfigurationSet(snapshot, dateTime));
             model.put("siteName", snapshot.getSiteName());
             model.put("siteTitle", snapshot.getSiteTitle());
         } else {
@@ -98,6 +105,9 @@ public class SnapshotGet extends AbstractJavaWebScript {
         model.put("id", id.substring(0, id.lastIndexOf("_")));
 
         status.setCode(responseStatus.getCode());
+
+        printFooter();
+
         return model;
     }
 
@@ -114,19 +124,22 @@ public class SnapshotGet extends AbstractJavaWebScript {
     
     /**
      * Get the configuration set name associated with the snapshot, if available
+     * @param dateTime 
      * @param snapshotId
      * @return
      */
-    public static String getConfigurationSet(EmsScriptNode snapshot) {
-    		if (snapshot != null) {
-    			List<EmsScriptNode> configurationSets = snapshot.getSourceAssocsNodesByType("ems:configuredSnapshots");
-    			if (!configurationSets.isEmpty()) {
-    				EmsScriptNode configurationSet = configurationSets.get(0);
-    				String configurationSetName = (String) configurationSet.getProperty(Acm.CM_NAME);
-    				return configurationSetName;
-    			}
+    public static String getConfigurationSet(EmsScriptNode snapshot, Date dateTime) {
+		if (snapshot != null) {
+            List< EmsScriptNode > configurationSets =
+                    snapshot.getSourceAssocsNodesByType( "ems:configuredSnapshots",
+                                                         dateTime );
+			if (!configurationSets.isEmpty()) {
+				EmsScriptNode configurationSet = configurationSets.get(0);
+				String configurationSetName = (String) configurationSet.getProperty(Acm.CM_NAME);
+				return configurationSetName;
+			}
      	}
-    		
-    		return "";
+
+		return "";
     }
 }

@@ -28,9 +28,12 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,12 +44,9 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.ResultSetRow;
-import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessStatus;
-import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.site.SiteVisibility;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -68,7 +68,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		}
 	}
 	
-	// injected members
+    public static final int MAX_PRINT = 200;
+
+    // injected members
 	protected ServiceRegistry services;		// get any of the Alfresco services
 	protected Repository repository;		// used for lucene search
 	protected LogLevel logLevel = LogLevel.WARNING;
@@ -96,6 +98,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		this.services = registry;
 	}
 
+	public AbstractJavaWebScript( Repository repository,
+                                  ServiceRegistry services,
+                                  StringBuffer response ) {
+        this.setRepositoryHelper( repository );
+        this.setServices( services );
+        this.response = response ;
+    }
+	   
     public AbstractJavaWebScript(Repository repositoryHelper, ServiceRegistry registry) {
         this.setRepositoryHelper(repositoryHelper);
         this.setServices(registry);
@@ -106,7 +116,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         super();
     }
     
-	/**
+
+    /**
 	 * Utility for clearing out caches
 	 * TODO: do we need to clear caches if Spring isn't making singleton instances
 	 */
@@ -126,89 +137,93 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	abstract protected boolean validateRequest(WebScriptRequest req, Status status);
 	
 	
-	/**
-	 * Get site of specified short name
-	 * @param siteName
-	 * @return	ScriptNode of site with name siteName
-	 */
-	protected EmsScriptNode getSiteNode(String siteName) {
-		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-		if (siteInfo != null) {
-			return new EmsScriptNode(siteInfo.getNodeRef(), services, response);
-		}
-		return null;
-	}
+//	/**
+//	 * Get site of specified short name
+//	 * @param siteName
+//	 * @return	ScriptNode of site with name siteName
+//	 */
+//	protected EmsScriptNode getSiteNode(String siteName) {
+//	    return NodeUtil.getSiteNode( siteName, null, services, response );
+////		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+////		if (siteInfo != null) {
+////			return new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+////		}
+////		return null;
+//	}
 
+    protected EmsScriptNode getSiteNode(String siteName, Date dateTime) {
+        SiteInfo siteInfo; 
+        EmsScriptNode siteNode = null;
+        
+        if (siteName == null) {
+            log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
+        } else {
+            siteInfo = services.getSiteService().getSite(siteName);
+            if (siteInfo == null) {
+                log(LogLevel.ERROR, "Could not find site: " + siteName, HttpServletResponse.SC_NOT_FOUND);
+            } else {
+                NodeRef siteRef = siteInfo.getNodeRef();
+                if ( dateTime != null ) {
+                    NodeRef vRef = NodeUtil.getNodeRefAtTime( siteRef, dateTime );
+                    if ( vRef != null ) siteRef = vRef;
+                }
+                siteNode = new EmsScriptNode(siteRef, services, response);
+            }
+        }
+        
+        return siteNode;
+    }
+ 
+    protected EmsScriptNode getSiteNodeFromRequest(WebScriptRequest req) {
+        String siteName = null; 
+        // get timestamp if specified
+        String timestamp = req.getParameter("timestamp");
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        
+        String[] siteKeys = {"id", "siteId", "siteName"};
+        
+        for (String siteKey: siteKeys) {
+            siteName = req.getServiceMatch().getTemplateVars().get( siteKey );
+            if (siteName != null) break;
+        }
+        
+        return getSiteNode( siteName, dateTime );
+    }
+    
 	
 	/**
 	 * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
 	 * This does caching of found elements so they don't need to be looked up with a different API each time.
 	 * 
 	 * TODO extend so search context can be specified
-	 * @param name	Node name to search for
+	 * @param id	Node id to search for
 	 * @return		ScriptNode with name if found, null otherwise
 	 */
-	protected EmsScriptNode findScriptNodeByName(String name) {
-//		long start=System.currentTimeMillis();
+	protected EmsScriptNode findScriptNodeById(String id, Date dateTime) {
 		EmsScriptNode result = null;
 
 		// be smart about search if possible
-		if (foundElements.containsKey(name)) {
-			result = foundElements.get(name);
-//		} else if (name.endsWith("_pkg")) {
-//			String elementName = name.replace("_pkg", "");
-//			EmsScriptNode elementNode = findScriptNodeByName(elementName);
-//			if (elementNode != null) {
-//			    result = elementNode.getParent().childByNamePath(name);
-//			}
+		if (foundElements.containsKey(id)) {
+			result = foundElements.get(id);
+			EmsScriptNode resultAtTime = result.getVersionAtTime( dateTime );
+			//if ( resultAtTime != null ) 
+			result = resultAtTime;
 		} else {
-			NodeRef nodeRef = findNodeRefByName(name);
+			NodeRef nodeRef = NodeUtil.findNodeRefById(id, dateTime, services);
 			if (nodeRef != null) {
 				result = new EmsScriptNode(nodeRef, services, response);
-				foundElements.put(name, result); // add to cache
+				foundElements.put(id, result); // add to cache
 			}
 		}
 		
-//		long end=System.currentTimeMillis(); System.out.println("\tfindScriptNodeByName " + name + ": " + (end-start) + " ms");
 		return result;
 	}
 
-	protected NodeRef findNodeRefByType(String name, String type) {
-        ResultSet results = null;
-        NodeRef nodeRef = null;
-        try {
-            results = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, type + name + "\"");
-            if (results != null) {
-                for (ResultSetRow row: results) {
-                    nodeRef = row.getNodeRef();
-                    break ; //Assumption is things are uniquely named - TODO: fix since snapshots have same name?...
-                }
-            }
-        } finally {
-            if (results != null) {
-                results.close();
-            }
-        }
-
-        return nodeRef;     
-	}
-	
-	/**
-	 * Find a NodeReference by name (returns first match, assuming things are unique)
-	 * 
-	 * @param name Node name to search for
-	 * @return     NodeRef of first match, null otherwise
-	 */
-	protected NodeRef findNodeRefByName(String name) {
-//	    return findNodeRefByType(name, "@cm\\:name:\"");
-        return findNodeRefByType(name, "@sysml\\:id:\""); // TODO: temporarily search by ID
-	}
-	
 	protected void log(LogLevel level, String msg, int code) {
 		if (level.value >= logLevel.value || level.value == LogLevel.ERROR.value) {
 			log("[" + level.name() + "]: " + msg + "\n", code);
 			if (level.value >= LogLevel.WARNING.value) {
-				System.out.println("[" + level.name() + "]: " + msg + "\n");
+				if (Debug.isOn()) System.out.println("[" + level.name() + "]: " + msg + "\n");
 			}
 		}
 	}
@@ -217,7 +232,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	    if (level.value >= logLevel.value) {
 	        log("[" + level.name() + "]: " + msg);
 	    }
-        System.out.println(msg);
+        if (Debug.isOn()) System.out.println(msg);
 	}
 	
 	protected void log(String msg, int code) {
@@ -237,14 +252,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @return             true if user has specified permissions to node, false otherwise
 	 */
 	protected boolean checkPermissions(EmsScriptNode node, String permissions) {
-	    if (!node.hasPermission(permissions)) {
-			Object property = node.getProperty(Acm.CM_NAME);
-			if (property != null) {
-			    log(LogLevel.WARNING, "No " + permissions + " priveleges to " + property.toString() + ".", HttpServletResponse.SC_BAD_REQUEST);
-			}
-			return false;
-		}
-		return true;
+	    return node.checkPermissions( permissions, response, responseStatus );
 	}
 
 	/**
@@ -262,8 +270,48 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	}
 
 	
+    protected static final String WORKSPACE_ID = "workspaceId";
 	protected static final String PROJECT_ID = "projectId";
     protected static final String SITE_NAME = "siteName";
+    protected static final String SITE_NAME2 = "siteId";
+    
+    public static final String NO_PROJECT_ID = "no_project";
+    public static final String NO_SITE_ID = "no_site";
+
+    
+    public String getSiteName( WebScriptRequest req ) {
+        return getSiteName( req, false );
+    }
+    public String getSiteName( WebScriptRequest req, boolean createIfNonexistent ) {
+        String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+        if ( siteName == null ) {
+            siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME2);
+        }
+        if ( siteName == null || siteName.length() <= 0 ) {
+            siteName = NO_SITE_ID;
+        }
+        if ( createIfNonexistent ) {
+            createSite( siteName );
+        }
+        return siteName;
+    }
+    
+    public EmsScriptNode createSite( String siteName ) {
+        EmsScriptNode siteNode = getSiteNode( siteName, null );
+        if ( siteNode == null || !siteNode.exists() ) {
+            SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, SiteVisibility.PUBLIC );
+            siteNode = new EmsScriptNode( foo.getNodeRef(), services );
+        }
+        return siteNode;
+    }
+    
+    public String getProjectId( WebScriptRequest req ) {
+        String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
+        if ( projectId == null || projectId.length() <= 0 ) {
+            projectId = NO_PROJECT_ID;
+        }
+        return projectId;
+    }
     
     protected boolean checkRequestContent(WebScriptRequest req) {
         if (req.getContent() == null) {
@@ -288,31 +336,38 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @param type		escaped ACM type for lucene search: e.g. "@sysml\\:documentation:\""
 	 * @param pattern   Pattern to look for
 	 */
-	protected Map<String, EmsScriptNode> searchForElements(String type, String pattern) {
+	protected Map<String, EmsScriptNode> searchForElements(String type,
+	                                                       String pattern,
+	                                                       Date dateTime) {
 		Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
 
-		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
-			ResultSet resultSet = null;
-			try {
-				pattern = type + pattern + "\"";
-				resultSet = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, pattern);
-				for (ResultSetRow row: resultSet) {
-					EmsScriptNode node = new EmsScriptNode(row.getNodeRef(), services, response);
-					if (checkPermissions(node, PermissionService.READ)) {
-    					String id = (String) node.getProperty(Acm.ACM_ID);
-        					if (id != null) {
-        						searchResults.put(id, node);
-        					}
-					}
-				}
-			} catch (Exception e) {
-				log(LogLevel.ERROR, "Could not parse search: " + pattern + ".\n", HttpServletResponse.SC_BAD_REQUEST);  
-			} finally {
-				if (resultSet != null) {
-					resultSet.close();
-				}
-			}
-		}
+        searchResults.putAll( NodeUtil.searchForElements( type, pattern,
+                                                          dateTime, services,
+                                                          response,
+                                                          responseStatus ) );
+        //foundElements.putAll(searchResults);
+//		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
+//			ResultSet resultSet = null;
+//			try {
+//				pattern = type + pattern + "\"";
+//				resultSet = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, pattern);
+//				for (ResultSetRow row: resultSet) {
+//					EmsScriptNode node = new EmsScriptNode(row.getNodeRef(), services, response);
+//					if (checkPermissions(node, PermissionService.READ)) {
+//    					String id = (String) node.getProperty(Acm.ACM_ID);
+//        					if (id != null) {
+//        						searchResults.put(id, node);
+//        					}
+//					}
+//				}
+//			} catch (Exception e) {
+//				log(LogLevel.ERROR, "Could not parse search: " + pattern + ".\n", HttpServletResponse.SC_BAD_REQUEST);  
+//			} finally {
+//				if (resultSet != null) {
+//					resultSet.close();
+//				}
+//			}
+//		}
 
 		return searchResults;
 	}
@@ -348,8 +403,73 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         logLevel = level;
     }
     
+    /**
+     * Should create the new instances with the response in constructor, so
+     * this can be removed every where
+     * @param instance
+     */
     public void appendResponseStatusInfo(AbstractJavaWebScript instance) {
         response.append(instance.getResponse());
         responseStatus.setCode(instance.getResponseStatus().getCode());
+    }
+
+    protected void printFooter() {
+        if (Debug.isOn()) System.out.println( "*** completed " + (new Date()) + " " + getClass().getSimpleName() );
+    }
+
+    protected void printHeader( WebScriptRequest req ) {
+        if (Debug.isOn()) System.out.println("*** starting " + (new Date()) + " " + getClass().getSimpleName() );
+        String reqStr = req.getURL();
+        if (Debug.isOn()) System.out.println( "*** request = "
+                            + ( reqStr.length() <= MAX_PRINT
+                                ? reqStr
+                                : reqStr.substring( 0, MAX_PRINT ) + "..." ) );
+    }
+
+    protected static String getIdFromRequest( WebScriptRequest req ) {
+        String[] ids = new String[] { "id", "modelid", "viewid", "workspaceId",
+                                      "workspaceid", "elementid", "elementId" };
+        String id = null;
+        for ( String idv : ids ) {
+            id = req.getServiceMatch().getTemplateVars().get(idv);
+            if ( id != null ) break;
+        }
+        if (Debug.isOn()) System.out.println("Got id = " + id);
+        if ( id == null ) return null;
+        boolean gotElementSuffix  = ( id.toLowerCase().trim().endsWith("/elements") );
+        if ( gotElementSuffix ) {
+            id = id.substring( 0, id.lastIndexOf( "/elements" ) );
+        } else {
+            boolean gotViewSuffix  = ( id.toLowerCase().trim().endsWith("/views") );
+            if ( gotViewSuffix ) {
+                id = id.substring( 0, id.lastIndexOf( "/views" ) );
+            }
+        }
+        if (Debug.isOn()) System.out.println("id = " + id);
+        return id;
+    }
+
+    
+    protected static boolean urlEndsWith( String url, String suffix ) {
+        if ( url == null ) return false;
+        url = url.toLowerCase().trim();
+        suffix = suffix.toLowerCase().trim();
+        if ( suffix.startsWith( "/" ) ) suffix = suffix.substring( 1 );
+        int pos = url.lastIndexOf( '/' );
+        if (url.substring( pos+1 ).startsWith( suffix ) ) return true;
+        return false;
+    }
+    protected static boolean isDisplayedElementRequest( WebScriptRequest req ) {
+        if ( req == null ) return false;
+        String url = req.getURL();
+        boolean gotSuffix = urlEndsWith( url, "elements" );
+        return gotSuffix;
+    }
+
+    protected static boolean isContainedViewRequest( WebScriptRequest req ) {
+        if ( req == null ) return false;
+        String url = req.getURL();
+        boolean gotSuffix = urlEndsWith( url, "views" );
+        return gotSuffix;
     }    
 }

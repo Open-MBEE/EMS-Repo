@@ -66,6 +66,8 @@ public class ViewPost extends AbstractJavaWebScript {
 	
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        printHeader( req );
+
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -79,6 +81,8 @@ public class ViewPost extends AbstractJavaWebScript {
 		
         status.setCode(responseStatus.getCode());
 		model.put("res", response.toString());
+		
+		printFooter();
 		return model;
 	}
 	
@@ -114,7 +118,7 @@ public class ViewPost extends AbstractJavaWebScript {
 			return;
 		}
 		
-		EmsScriptNode view = findScriptNodeByName(id);
+		EmsScriptNode view = findScriptNodeById(id, null);
 		if (view == null) {
 			log(LogLevel.ERROR, "could not find view with id: " + id, HttpServletResponse.SC_NOT_FOUND);
 			return;

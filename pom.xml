@@ -40,14 +40,69 @@
         <maven.test.skip>false</maven.test.skip>
     </properties>
 
+    <!-- profiles for specific dependencies for developers or users -->
+    <profiles>
+        <profile>
+            <id>mms-dev</id>
+            <dependencies>
+	        <dependency>
+	            <groupId>gov.nasa.jpl.ae</groupId>
+	            <artifactId>AE</artifactId>
+	            <version>1.0</version>
+	            <scope>system</scope>
+	            <type>jar</type>
+	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/AE.jar</systemPath>
+	        </dependency>
+	        <dependency>
+	            <groupId>sysml</groupId>
+	            <artifactId>sysml</artifactId>
+	            <version>1.0</version>
+	            <scope>system</scope>
+	            <type>jar</type>
+	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/sysml.jar</systemPath>
+	        </dependency>
+	        <dependency>
+	            <groupId>mbee_util</groupId>
+	            <artifactId>mbee_util</artifactId>
+	            <version>1.0</version>
+	            <scope>system</scope>
+	            <type>jar</type>
+	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/mbee_util.jar</systemPath>
+	        </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>mbee-dev</id>
+            <dependencies>
+                <dependency>
+			        <groupId>gov.nasa.jpl.mbee.util</groupId>
+			        <artifactId>mbee_util</artifactId>
+			        <version>0.0.3</version>
+			    </dependency>
+			    <dependency>
+			        <groupId>gov.nasa.jpl.mbee.bae</groupId>
+			        <artifactId>bae</artifactId>
+			        <version>0.0.5</version>
+			    </dependency>
+                <dependency>
+                    <groupId>gov.nasa.jpl.mbee.sysml</groupId>
+                    <artifactId>sysml</artifactId>
+                    <version>0.0.6</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+
     <!-- Here we realize the connection with the Alfresco selected platform 
         (e.g.version and edition) -->
     <dependencyManagement>
         <dependencies>
-            <!-- This will import the dependencyManagement for all artifacts in the selected Alfresco version/edition
-                (see http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Importing_Dependencies) 
-                NOTE: You still need to define dependencies in your POM, but you can omit version as it's enforced by this dependencyManagement. NOTE: It defaults 
-                to the latest version this SDK pom has been tested with, but alfresco version can/should be overridden in your project's pom -->
+			<!-- This will import the dependencyManagement for all artifacts in the 
+				selected Alfresco version/edition (see http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Importing_Dependencies) 
+				NOTE: You still need to define dependencies in your POM, but you can omit 
+				version as it's enforced by this dependencyManagement. NOTE: It defaults 
+				to the latest version this SDK pom has been tested with, but alfresco version 
+				can/should be overridden in your project's pom -->
             <dependency>
                 <groupId>${alfresco.groupId}</groupId>
                 <artifactId>alfresco-platform-distribution</artifactId>
@@ -58,8 +113,8 @@
         </dependencies>
     </dependencyManagement>
     <!-- Following dependencies are needed for compiling Java code in src/main/java; 
-         <scope>provided</scope> is inherited for each of the following; 
-         for more info, please refer to alfresco-platform-distribution POM -->
+		<scope>provided</scope> is inherited for each of the following; for more 
+		info, please refer to alfresco-platform-distribution POM -->
     <dependencies>
         <dependency>
             <groupId>${alfresco.groupId}</groupId>
@@ -71,7 +126,7 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.8.1</version>
-            <scope>test</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
 			<groupId>org.mockito</groupId>
@@ -79,6 +134,16 @@
 			<version>1.8.4</version>
 			<scope>test</scope>
 		</dependency>
+         <dependency>
+            <groupId>${alfresco.groupId}</groupId>
+            <artifactId>alfresco-web-framework-commons</artifactId>
+            <version>${alfresco.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${alfresco.groupId}</groupId>
+            <artifactId>alfresco-remote-api</artifactId>
+            <version>${alfresco.version}</version>
+        </dependency>
         <dependency>
 	        	<groupId>${alfresco.groupId}</groupId>
 	        	<artifactId>alfresco-web-client</artifactId>
@@ -90,6 +155,28 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
 			<version>1.5.11</version>
+		</dependency>
+        <dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>3.0.6.RELEASE</version>
+		</dependency>
+		<!-- apache chemistry opencmis CLIENT -->
+		<dependency>
+			<groupId>org.apache.chemistry.opencmis</groupId>
+			<artifactId>chemistry-opencmis-client-impl</artifactId>
+			<version>0.8.0</version>
+		</dependency>
+        <!--  apache chemistry opencmis SERVER -->
+		<dependency>
+		    <groupId>org.apache.chemistry.opencmis</groupId>
+		    <artifactId>chemistry-opencmis-server-support</artifactId>
+		    <version>0.8.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.chemistry.opencmis</groupId>
+			<artifactId>chemistry-opencmis-commons-impl</artifactId>
+			<version>0.8.0</version>
 		</dependency>
     </dependencies>
 
@@ -103,6 +190,11 @@
         if you are a Enterprise customer or Partner  
         -->
     <repositories>
+        <repository>
+              <id>artifactory</id>
+              <name>releases</name>
+              <url>http://128.149.16.144:8082/artifactory/libs-release-local</url>
+        </repository>
         <repository>
             <id>alfresco-public</id>
             <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
@@ -119,6 +211,14 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.8</version>
+				<!-- <executions> <execution> <phase>gather-sources</phase> <goals><goal>add-source</goal></goals> 
+					<configuration> <sources> <source>/CS/src/gov/nasa/jpl/ae</source> <source>/CS/src/thirdParty</source> 
+					</sources> </configuration> </execution> </executions> -->
+			</plugin>
 			<plugin>
 				<groupId>org.zeroturnaround</groupId>
 				<artifactId>jrebel-maven-plugin</artifactId>
@@ -175,8 +275,8 @@
 							</resources>
 						</configuration>
 					</execution>
-					<!-- Alfresco Maven plugin corrupts libraries too - so make sure to copy them over -->
 					<execution>
+                        <!-- Alfresco Maven plugin corrupts libraries too - so make sure to copy them over -->
 						<id>copy-lib-resources</id>
 						<phase>compile</phase>
 						<goals>
@@ -192,6 +292,23 @@
 							</resources>
 						</configuration>
 					</execution>
+                    <execution>
+                        <!-- Copy the RAML API information into the scripts directory so it gets deployed  -->
+                        <id>copy-api-resources</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <overwrite>true</overwrite>
+                            <outputDirectory>${basedir}/src/main/amp/web/scripts/raml</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/api/html</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
 			</executions>
 			</plugin>
 		</plugins>

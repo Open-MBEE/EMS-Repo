@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>delete project with {projectId}</shortname>
+    <description>
+    	delete project with {projectId}
+	</description>
+  	<url>/workspaces/{workspaceId}/sites/{siteId}/projects/{projectId}</url>
+  	<format default="json">any</format>
+  	<authentication>user</authentication>
+  	<transaction>none</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

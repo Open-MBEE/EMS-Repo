@@ -44,7 +44,7 @@
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.view.element.get"
-		class="gov.nasa.jpl.view_repo.webscripts.ModelGet" parent="webscript"
+		class="gov.nasa.jpl.view_repo.webscripts.ViewGet" parent="webscript"
 		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />

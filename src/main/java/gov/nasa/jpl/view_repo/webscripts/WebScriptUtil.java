@@ -30,15 +30,17 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
-import org.alfresco.service.cmr.search.SearchService;
 
 /**
  * static class for webscript utilities
@@ -54,15 +56,23 @@ public class WebScriptUtil {
         // do nothing
     }
     
-    public static Set<EmsScriptNode> getAllNodesInPath(String qnamePath, String luceneContext, String acmType, ServiceRegistry services, StringBuffer response) {
+    public static Set<EmsScriptNode> getAllNodesInPath(String qnamePath, String luceneContext, String acmType, Date dateTime, ServiceRegistry services, StringBuffer response) {
         String pattern = luceneContext + ":\"" + acmType + "\"";
         Set<EmsScriptNode> set = new HashSet<EmsScriptNode>();
         
         ResultSet resultSet = null;
         try {
-            resultSet = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, pattern);
+            // TODO -- REVIEW -- Will lucene return deleted nodes that may have
+            // existed at the specified date/time?
+            resultSet = NodeUtil.luceneSearch( pattern, services ); 
             for (ResultSetRow row: resultSet) {
-                EmsScriptNode node = new EmsScriptNode(row.getNodeRef(), services, response);
+                NodeRef nr = row.getNodeRef();
+                if ( nr == null ) continue;
+                if ( dateTime != null ) {
+                    nr = NodeUtil.getNodeRefAtTime( nr, dateTime );
+                    if ( nr == null ) continue;
+                }
+                EmsScriptNode node = new EmsScriptNode(nr, services, response);
                 // filter by project
                 if (node.getQnamePath().startsWith(qnamePath)) {
                     set.add(node);

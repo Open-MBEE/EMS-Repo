@@ -29,9 +29,11 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,6 +69,8 @@ public class ProjectGet extends AbstractJavaWebScript {
      */
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        printHeader( req );
+
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -74,9 +78,15 @@ public class ProjectGet extends AbstractJavaWebScript {
 
         try {
             if (validateRequest(req, status)) {
-                String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
-                String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
-                json = handleProject(projectId, siteName);
+                
+                String siteName = getSiteName( req );
+                String projectId = getProjectId( req );
+
+                // get timestamp if specified
+                String timestamp = req.getParameter("timestamp");
+                Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+                
+                json = handleProject(projectId, siteName, dateTime);
             }
         } catch (JSONException e) {
             log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -91,6 +101,9 @@ public class ProjectGet extends AbstractJavaWebScript {
             model.put("res", json.toString());
         }
         status.setCode(responseStatus.getCode());
+
+        printFooter();
+
         return model;
     }
 
@@ -104,14 +117,14 @@ public class ProjectGet extends AbstractJavaWebScript {
      * @return HttpStatusResponse code for success of the POST request
      * @throws JSONException 
      */
-    private JSONObject handleProject(String projectId, String siteName) throws JSONException {
+    private JSONObject handleProject(String projectId, String siteName, Date dateTime) throws JSONException {
         EmsScriptNode projectNode;
         JSONObject json = null;
         
         if (siteName == null) {
-            projectNode = findScriptNodeByName(projectId);
+            projectNode = findScriptNodeById(projectId, dateTime);
         } else {
-            EmsScriptNode siteNode = new EmsScriptNode(services.getSiteService().getSite(siteName).getNodeRef(), services, response);
+            EmsScriptNode siteNode = getSiteNode( siteName, dateTime );
             projectNode = siteNode.childByNamePath("/Models/" + projectId);
             if (projectNode == null) {
             		// for backwards compatibility

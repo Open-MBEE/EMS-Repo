@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
@@ -66,14 +67,21 @@ public class ViewModelPost extends ModelPost {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        printHeader( req );
+
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
 
-        String viewid = req.getServiceMatch().getTemplateVars().get("modelid");
+        String[] idKeys = {"modelid", "elementId"};
+        String viewid = null;
+
+        for (String idKey: idKeys) {
+            viewid = req.getServiceMatch().getTemplateVars().get(idKey);
+        }
         UserTransaction trx = services.getTransactionService().getUserTransaction();
         try {
             trx.begin();
-            EmsScriptNode view = findScriptNodeByName(viewid);
+            EmsScriptNode view = findScriptNodeById(viewid, null);
             view.createOrUpdateProperty("cm:modifier", AuthenticationUtil.getFullyAuthenticatedUser());
             trx.commit();
         } catch (Throwable e) {
@@ -84,6 +92,7 @@ public class ViewModelPost extends ModelPost {
             			log(LogLevel.ERROR, "ViewModelPost: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 }
                 e.printStackTrace();
+                if (Debug.isOn()) System.out.println("\t####### ERROR: Needed to ViewModelPost rollback: " + e.getMessage());
                 trx.rollback();
             } catch (Throwable ee) {
                 log(LogLevel.ERROR, "\tViewModelPost: Rollback failed: " + ee.getMessage());
@@ -94,7 +103,8 @@ public class ViewModelPost extends ModelPost {
         ViewModelPost instance = new ViewModelPost(repository, services);
         
         try {
-            instance.createOrUpdateModel(req, status);
+//            Set< EmsScriptNode > elements = 
+                    instance.createOrUpdateModel(req, status);
             appendResponseStatusInfo(instance);
         } catch (JSONException e) {
             log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
@@ -104,8 +114,21 @@ public class ViewModelPost extends ModelPost {
             e.printStackTrace();
         }
 
+        // UNCOMMENT THIS
+        // Create JSON object of the elements to return:
+//        JSONObject top = new JSONObject();
+//        JSONArray elementsJson = new JSONArray();
+//        for ( EmsScriptNode element : elements ) {
+//            elementsJson.put( element.toJSONObject(null) );
+//        }
+//        top.put( "elements", elementsJson );
+//        model.put( "res", top.toString( 4 ) );
+        
         status.setCode(responseStatus.getCode());
         model.put("res", response.toString());
+
+        printFooter();
+
         return model;
     }
     
@@ -118,10 +141,15 @@ public class ViewModelPost extends ModelPost {
         for (int ii = 0; ii < array.length(); ii++) {
             JSONObject elementJson = array.getJSONObject(ii);
             
+            // If element does not have a ID, then create one for it using the alfresco id (cm:id):
+            if (!elementJson.has(Acm.JSON_ID)) {
+                elementJson.put( Acm.JSON_ID, createId( services ) );
+            }
             String id = elementJson.getString(Acm.JSON_ID);
-            EmsScriptNode elementNode = findScriptNodeByName(id);
+            
+            EmsScriptNode elementNode = findScriptNodeById(id, null);
             if (elementNode != null) {
-                updateOrCreateElement(elementJson, elementNode.getParent());
+                updateOrCreateElement(elementJson, elementNode.getParent(), false);
             } else {
                 // new element, we need a proper parent
                 boolean parentFound = true;
@@ -133,13 +161,13 @@ public class ViewModelPost extends ModelPost {
                     if (annotatedJson.length() <= 0) {
                         parentFound = false;
                     } else {
-                        EmsScriptNode commentParent = findScriptNodeByName(annotatedJson.getString(0));
+                        EmsScriptNode commentParent = findScriptNodeById(annotatedJson.getString(0), null);
                             if (commentParent == null) {
                                 parentFound = false;
                             } else {
                                 if (checkPermissions(commentParent, PermissionService.WRITE)) {
                                     newElements.add(id);
-                                    updateOrCreateElement(elementJson, commentParent.getParent());
+                                    updateOrCreateElement(elementJson, commentParent.getParent(), false);
                                 }
                             }
                     }
@@ -152,5 +180,44 @@ public class ViewModelPost extends ModelPost {
         }
         
         updateOrCreateAllRelationships(relationshipsJson);
+        
+        updateNodeReferencesForView( array );
+    }
+
+    protected void updateNodeReferencesForView( JSONArray array ) throws Exception {
+        for (int ii = 0; ii < array.length(); ii++) {
+            JSONObject elementJson = array.getJSONObject(ii);
+            
+            String id = elementJson.getString(Acm.JSON_ID);
+            EmsScriptNode elementNode = findScriptNodeById(id, null);
+            if (elementNode != null) {
+                updateOrCreateElement(elementJson, elementNode.getParent(), true);
+            } else {
+                // new element, we need a proper parent
+                boolean parentFound = true;
+                
+                // for now only support new comments
+                if (elementJson.has(Acm.JSON_ANNOTATED_ELEMENTS)) {
+                    JSONArray annotatedJson = elementJson.getJSONArray(Acm.JSON_ANNOTATED_ELEMENTS);
+                    // lets make parent first annotated element
+                    if (annotatedJson.length() <= 0) {
+                        parentFound = false;
+                    } else {
+                        EmsScriptNode commentParent = findScriptNodeById(annotatedJson.getString(0), null);
+                            if (commentParent == null) {
+                                parentFound = false;
+                            } else {
+                                if (checkPermissions(commentParent, PermissionService.WRITE)) {
+                                    updateOrCreateElement(elementJson, commentParent.getParent(), true);
+                                }
+                            }
+                    }
+
+                    if (!parentFound) {
+                        log(LogLevel.WARNING, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
+                    }
+                }
+            }
+        }
     }
 }

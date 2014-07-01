@@ -70,8 +70,16 @@ public class SnapshotPost extends AbstractJavaWebScript {
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         clearCaches();
 
-        String viewId = req.getServiceMatch().getTemplateVars().get("viewid");
-        EmsScriptNode topview = findScriptNodeByName(viewId);
+        String viewId = null;
+        String[] viewKeys = {"viewid", "productId"};
+        for (String key: viewKeys) {
+            viewId = req.getServiceMatch().getTemplateVars().get(key);
+            if (viewId != null) {
+                break;
+            }
+        }
+
+        EmsScriptNode topview = findScriptNodeById(viewId, null);
         EmsScriptNode snapshotFolderNode = getSnapshotFolderNode(topview);
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -116,13 +124,16 @@ public class SnapshotPost extends AbstractJavaWebScript {
         if (status.getCode() != HttpServletResponse.SC_OK) {
             model.put("res", response.toString());
         }
+
+        printFooter();
+
         return model;
     }
 
     public EmsScriptNode createSnapshot(EmsScriptNode view, String viewId) {
         String snapshotName = viewId + "_" + System.currentTimeMillis();
         String contextPath = "alfresco/service/";
-        EmsScriptNode viewNode = findScriptNodeByName(viewId);
+        EmsScriptNode viewNode = findScriptNodeById(viewId, null);
         EmsScriptNode snapshotFolder = getSnapshotFolderNode(viewNode);
         return createSnapshot(view, viewId, snapshotName, contextPath, snapshotFolder);
     }
@@ -135,16 +146,18 @@ public class SnapshotPost extends AbstractJavaWebScript {
         snapshotNode.createOrUpdateProperty(Acm.ACM_ID, snapshotName);
         
         view.createOrUpdateAssociation(snapshotNode, "view2:snapshots");
-        
-        MoaProductGet moaService = new MoaProductGet(repository, services);
-        moaService.setRepositoryHelper(repository);
-        moaService.setServices(services);
-        JSONObject snapshotJson = moaService.generateMoaProduct(viewId, contextPath);
-        if (snapshotJson == null) {
-            log(LogLevel.ERROR, "Could not generate the snapshot JSON", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return null;
-        }
-        
+
+        // This is deprecated so remove
+//        MoaProductGet moaService = new MoaProductGet(repository, services);
+//        moaService.setRepositoryHelper(repository);
+//        moaService.setServices(services);
+//        JSONObject snapshotJson = moaService.generateMoaProduct(viewId, contextPath, null);
+//        if (snapshotJson == null) {
+//            log(LogLevel.ERROR, "Could not generate the snapshot JSON", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+//            return null;
+//        }
+
+        JSONObject snapshotJson = new JSONObject();
         try {
             snapshotJson.put("snapshot", true);
             ActionUtil.saveStringToFile(snapshotNode, "application/json", services, snapshotJson.toString(4));

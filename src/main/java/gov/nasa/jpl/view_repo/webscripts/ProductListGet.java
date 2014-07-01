@@ -29,9 +29,10 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -43,7 +44,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -76,18 +76,14 @@ public class ProductListGet extends AbstractJavaWebScript {
 	
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
+
         String siteId = req.getServiceMatch().getTemplateVars().get("id");
         if (!checkRequestVariable(siteId, "id")) {
             return false;
         }
         
-        SiteInfo siteInfo = services.getSiteService().getSite(siteId);
-        if (siteInfo == null) {
-            log(LogLevel.ERROR, "Project not found with id: " + siteId + ".\n", HttpServletResponse.SC_NOT_FOUND);
-            return false;
-        }
-        siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
-        
+        siteNode = getSiteNodeFromRequest(req);
+
         if (!checkPermissions(siteNode, PermissionService.READ)) {
             return false;
         }
@@ -113,6 +109,8 @@ public class ProductListGet extends AbstractJavaWebScript {
 	
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        printHeader( req );
+
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -121,7 +119,11 @@ public class ProductListGet extends AbstractJavaWebScript {
 		
 		if (validateRequest(req, status)) {
         		try {
-                JSONObject jsonObject = instance.handleProductList(siteNode);
+        	        // get timestamp if specified
+        	        String timestamp = req.getParameter("timestamp");
+        	        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+
+                JSONObject jsonObject = instance.handleProductList(siteNode, dateTime);
                 appendResponseStatusInfo(instance);
                 model.put("res", jsonObject.toString(4));
                 model.put("title", siteNode.getProperty(Acm.CM_TITLE));
@@ -141,18 +143,24 @@ public class ProductListGet extends AbstractJavaWebScript {
     		}
 
 		status.setCode(responseStatus.getCode());
+
+		printFooter();
+
 		return model;
 	}
 
-	public Set<EmsScriptNode> getProductSet(String qnamePath) {
-	    productSet = WebScriptUtil.getAllNodesInPath(qnamePath, "ASPECT", Acm.ACM_PRODUCT, services, response);
+	public Set<EmsScriptNode> getProductSet(String qnamePath, Date dateTime) {
+        productSet =
+                WebScriptUtil.getAllNodesInPath( qnamePath, "ASPECT",
+                                                 Acm.ACM_PRODUCT, dateTime,
+                                                 services, response );
         
         return productSet;
 	}
 		
-	public JSONObject handleProductList(EmsScriptNode pnode) throws JSONException {
+	public JSONObject handleProductList(EmsScriptNode pnode, Date dateTime) throws JSONException {
 	    initDataStructs();
-	    getProductSet(pnode.getQnamePath());
+	    getProductSet(pnode.getQnamePath(), dateTime);
                 
         for (EmsScriptNode node: productSet) {
             if (checkPermissions(node, PermissionService.READ)) {
