@@ -3,7 +3,7 @@
 # NOTE: to import into SOAPUI, need to remove {server} reference from baseUri
 # and change all the schema references to '|'
 title: mms
-version: 1.0
+version: v1.0
 mediaType: application/json
 baseUri: https://{server}/alfresco/service
 protocols: [HTTPS]
@@ -24,7 +24,7 @@ schemas:
   - views:    !include elements.json
   - products: !include elements.json
 
-  - comments:       !include comments.json    
+  - comments:       !include elements.json    
   - configurations: !include configurations.json
   - projects:       !include projects.json
   - snapshots:      !include snapshots.json
@@ -38,10 +38,21 @@ schemas:
   #- viewsResponse: !include postResponse.json
 traits:
   - backgroundable:
-      description: Aspect for resources that can be created/updated in the background
+      description: Aspect for resources that can be created/updated in the asynchronously in
+                   the background. Mostly for large, long running creations.
       queryParameters:
         background:
-          description: Runs create/update in the asynchronously in the background if true, or synchronously if false or not specified
+          description: Runs create/update in the asynchronously in the background
+                       if true, or synchronously if false or not specified
+          type: boolean
+  - constrainable:
+      description: Aspect for resources that are or can be constrained
+      queryParameters:
+        fix:
+          description: If true, fixes the constraint as scoped by the element (defaults false)
+          type: boolean
+        validate:
+          description: If true, validates the constraint as scoped by the element (defaults false). If specified with fix, overrides fix
           type: boolean
   - recursable:
       description: Aspect for resources that can be retrieved recursively
@@ -50,27 +61,34 @@ traits:
           description: If true, finds all elements recursively based on containment hierarchy
           type: boolean
         recurseDepth:
-          description: Depth to recurse to. 0 specifies infinite recursion (e.g., until all leaf nodes are found).
+          description: Recurse depth. 0 specifies infinite recursion (e.g., until all leaf
+                       nodes are found).
           type: integer
   - searchable:
       description: Aspect for resources that can be searched for any resource type
       queryParameters:
         search:
-          description: Regular expression of the search to be executed at the specified scope. Currently search is against sysml:id, sysml:name, sysml:documentation, sysml:body.
+          description: Regular expression of the search to be executed at the specified scope.
+                       Currently search is against id, name, documentation, body.
+          type: string
+        type:
+          description: Filter results based on specified type
+          type: string
   - sliceable:
       description: Aspect for resources that can be queried via a timestamp
       queryParameters:
         timestamp:
-          description: Timestamp to find most recent version of <<resourcePathName>>, specified in ISO8601 time format.
+          description: Timestamp to find most recent version of <<resourcePathName>>,
+                       specified in ISO8601 time format.
           type: date
 
 resourceTypes:
   - readCollection:
       securedBy: [basic]
-      is: [recursable, searchable, sliceable]
       usage: Resources with read capabilities and standard responses
       description: Read operations for <<resourcePathName>>
       get:
+          is: [recursable, searchable, sliceable]
           description: Read operation for <<resourcePathName>>
           responses:
               200:
@@ -88,7 +106,7 @@ resourceTypes:
   - collection:
       type: readCollection
       usage: Resources with CRUD capabilities
-      description: Create, Update, and Delete operations for <<resourcePathName>>
+      description: Create, Read, Update, and Delete operations for <<resourcePathName>>
       post:
         description: Append operation for <<resourcePathName>>
         body:
@@ -105,7 +123,9 @@ resourceTypes:
           404:
             description: <<resourcePathName>> not found
           409:
-            description: <<resourcePathName>> conflict detected (e.g., intervening update occurred between when user accessed resource and when user saved resource)
+            description: <<resourcePathName>> conflict detected (e.g., intervening update
+                         occurred between when user accessed resource and when user saved
+                         resource)
           500:
             description: Could not append to <<resourcePathName>> due to internal server error   
       put:
@@ -126,7 +146,9 @@ resourceTypes:
           404:
             description: <<resourcePathName>> not found
           409:
-            description: <<resourcePathName>> conflict detected (e.g., intervening update occurred between when user accessed resource and when user updated resource)
+            description: <<resourcePathName>> conflict detected (e.g., intervening update 
+                         occurred between when user accessed resource and when user updated
+                         resource)
           500:
             description: Could not append to <<resourcePathName>> due to internal server error
       delete:
@@ -146,12 +168,20 @@ resourceTypes:
             description: Could not delete <<resourcePathName>> due to internal server error
 
 /workspaces:
-  description: This is a parallel of the sites branch and used for namespacing purposes, all the methods respond
+  description: All resources are "namespaced" by the workspace (aka branch).
   /{workspaceId}:
+    uriParameters:
+      workspaceId:
+        description: Workspace ID under consideration. "master" is always defined and is the
+                     "trunk" workspace to whih all other workspaces should be merged.
+                     "master" is what is contained at the Alfresco sites level.
     /elements:
-      is: [backgroundable]
       type: collection
       /{elementId}:
+        post:
+          is: [constrainable]
+        put:
+          is: [constrainable]
         type: collection
         uriParameters:
           elementId:
@@ -196,6 +226,19 @@ resourceTypes:
         uriParameters:
           siteId:
             description: Alfresco site identifier for the project under consideration
+        /configurations:
+          type: collection
+          /{configurationId}:
+            type: collection
+            uriParameters:
+              configurationId:
+                description: ID for the configuration under consideration
+            /products:
+              description: Get products for the specified configuration
+              type: collection
+            /snapshots:
+              description: Get snapshots for the specified configuration
+              type: collection
         /projects:
           type: readCollection
           get:
@@ -256,6 +299,8 @@ resourceTypes:
             uriParameters:
               productId:
                 description: Sysml ID for the product (document) under consideration
+            /views:
+              type: readCollection
             /snapshots:
               description: Scoped under /configurations and /products
               type: collection
@@ -274,6 +319,10 @@ resourceTypes:
         /elements:
           type: collection
           /{elementId}:
+            post:
+              is: [constrainable]
+            put:
+              is: [constrainable]
             type: collection
             uriParameters:
               elementId:
@@ -292,22 +341,18 @@ resourceTypes:
                 uriParameters:
                   versionId:
                     description: Sysml ID for the version under consideration
-    /configurations:
-      type: collection
-      /{configurationId}:
-        type: collection
-        uriParameters:
-          configurationId:
-            description: ID for the configuration under consideration
-        /snapshots:
-          description: Scoped under /configurations and /products
-          type: collection
-          /{snapshotId}:
-            type: collection
-            uriParameters:
-              snapshotId:
-                description: ID for the snapshot under consideration
     /changesets:
-      type: collection
+      type: readCollection
+      description: Track groups of changes together so they can be rolled back together if
+                   necessary as well
+      /{changesetId}:
+        post:
+          description: Revert Alfresco to the specified change set
+          responses:
+            200:
+              description: Successfully reverted the changeset
     /artifacts:
-    /constraints:
+      /{artifactId}:
+        type: collection
+/operations:
+  description: Service for executing operations, e.g., like the OCL Execution capabilities in MDK. Details still TBD.
