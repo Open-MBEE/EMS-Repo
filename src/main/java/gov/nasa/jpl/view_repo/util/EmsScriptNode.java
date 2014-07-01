@@ -1257,15 +1257,15 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         // add in content type:
         if (Acm.JSON_FILTER_MAP.get(renderType).contains(Acm.JSON_TYPE)) {
             String typeName = getTypeName();
-            	if (isExprOrProp) {
-            		element.put(Acm.JSON_TYPE, typeName );
-            	}
-            	else {
-            		// TODO: figure out why value specs aren't getting here
-            		if (typeName.length() > 0) {
-            			specializationJSON.put(Acm.JSON_TYPE, typeName );
-            		}
-            	}
+        	if (isExprOrProp) {
+        		element.put(Acm.JSON_TYPE, typeName );
+        	}
+        	else {
+        		// TODO: figure out why value specs aren't getting here
+        		if (typeName != null && typeName.length() > 0) {
+        			specializationJSON.put(Acm.JSON_TYPE, typeName );
+        		}
+        	}
         }
         
         // add in property type(s)
