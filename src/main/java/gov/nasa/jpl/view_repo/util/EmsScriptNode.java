@@ -84,6 +84,7 @@ import org.alfresco.service.namespace.RegexQNamePattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Assert;
 import org.springframework.extensions.webscripts.Status;
 
 /**
@@ -2176,7 +2177,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
     
     public static class NodeByTypeComparator implements Comparator< Object > {
-        public static NodeByTypeComparator instance = new NodeByTypeComparator();
+        public static final NodeByTypeComparator instance =
+                new NodeByTypeComparator();
 
         @Override
         public int compare( Object o1, Object o2 ) {
@@ -2190,13 +2192,13 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 type1 = (String)o1;
             } else if ( o1 instanceof NodeRef ) {
                 EmsScriptNode n1 = new EmsScriptNode( (NodeRef)o1, null );
-                type1 = "" + n1.getProperty( Acm.ACM_TYPE );
+                type1 = n1.getTypeName();
             }
             if ( o2 instanceof String ) {
                 type2 = (String)o2;
             } else if ( o2 instanceof NodeRef ) {
                 EmsScriptNode n2 = new EmsScriptNode( (NodeRef)o2, null );
-                type2 = "" + n2.getProperty( Acm.ACM_TYPE );
+                type2 = n2.getTypeName();
             }
             int comp = CompareUtils.GenericComparator.instance().compare( type1, type2 );
             if ( comp != 0 ) return comp;
@@ -2212,15 +2214,15 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         
     }
  
-    public List<NodeRef> getPropertyNodeRefs( String acmProperty ) {
+    public ArrayList< NodeRef > getPropertyNodeRefs( String acmProperty ) {
         Object o = getProperty(acmProperty);
-        List< NodeRef > refs = null;
+        ArrayList< NodeRef > refs = null;
         if ( ! ( o instanceof Collection ) ) {
             if ( o instanceof NodeRef ) {
                 refs = new ArrayList<NodeRef>();
                 refs.add( (NodeRef)o );
             } else {
-                return Utils.getEmptyList();
+                return Utils.getEmptyArrayList();
             }
         } else {
             refs = Utils.asList( (Collection<?>)o, NodeRef.class );
@@ -2239,14 +2241,54 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     public Set<EmsScriptNode> getRelationships() {
         Set<EmsScriptNode> set = new LinkedHashSet< EmsScriptNode >();
-        set.addAll( getPropertyElements( Acm.ACM_RELATIONSHIPS_AS_SOURCE ) );
-        set.addAll( getPropertyElements( Acm.ACM_RELATIONSHIPS_AS_TARGET ) );
-        set.addAll( getPropertyElements( Acm.ACM_UNDIRECTED_RELATIONSHIPS ) );
+        for ( Map.Entry< String, String > e :
+              Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.entrySet() ) {
+            set.addAll( getPropertyElements( e.getValue() ) );
+        }
         return set;
     }
 
     public Set<EmsScriptNode> getRelationshipsOfType(String typeName) {
-        
+        Set<EmsScriptNode> set = new LinkedHashSet< EmsScriptNode >();
+        for ( Map.Entry< String, String > e :
+            Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.entrySet() ) {
+            set.addAll( getRelationshipsOfType( typeName, e.getKey() ) );
+        }
+        return set;
+    }
+    
+    public ArrayList<EmsScriptNode> getRelationshipsOfType(String typeName,
+                                                           String acmAspect) {
+        if ( !hasAspect( acmAspect ) ) return Utils.getEmptyArrayList();
+        String acmProperty = 
+                Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.get( acmAspect );
+
+        ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty );
+        int index = Collections.binarySearch( relationships, typeName,
+                                              //this.getNodeRef(),
+                                              NodeByTypeComparator.instance );
+        if ( Debug.isOn() ) Debug.outln( "binary search returns index " + index );
+        if ( index >= 0 ) {
+            Debug.error( true, true, "Index " + index + " for search for "
+                                     + typeName + " in " + relationships
+                                     + " should be negative!" );
+        }
+        if ( index < 0 ) {
+            // binarySearch returns index = -(insertion point) - 1
+            // So, insertion point = -index - 1.
+            index = -index - 1;
+        }
+        ArrayList< EmsScriptNode > matches = new ArrayList< EmsScriptNode >();
+        for ( ; index < relationships.size(); ++index ) {
+            NodeRef ref = relationships.get( index );
+            EmsScriptNode node = new EmsScriptNode( ref, getServices() );
+            int comp = typeName.compareTo( node.getTypeName() );
+            if ( comp < 0 ) break;
+            if ( comp == 0 ) {
+                matches.add( node );
+            }
+        }
+        return matches;
     }
     
     /**
@@ -2258,14 +2300,16 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      * @return true if the NodeRef is already in the property or was
      *         successfully added.
      */
-    public boolean addRelationshipToProperty(NodeRef relationship, String acmProperty ) {
-        createOrUpdateAspect(acmProperty);
-        List< NodeRef > relationships = getPropertyNodeRefs( acmProperty );
+    public boolean addRelationshipToProperty( NodeRef relationship,
+                                              String acmAspect ) {
+        createOrUpdateAspect(acmAspect);
+        String acmProperty = Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.get( acmAspect );
+        ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty );
         int index = Collections.binarySearch( relationships,
                                               this.getNodeRef(),
                                               NodeByTypeComparator.instance );
-        if (Debug.isOn())  Debug.outln( "binary search returns index " + index );
-        if ( index > 0 ) {
+        if ( Debug.isOn() ) Debug.outln( "binary search returns index " + index );
+        if ( index >= 0 ) {
             // the relationship is already in the list, so nothing to do.
             return true;
         }
@@ -2289,7 +2333,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     
     public void addRelationshipToPropertiesOfParticipants() {
         if ( hasAspect( Acm.ACM_DIRECTED_RELATIONSHIP )
-             || hasAspect( Acm.ACM_DEPENDENCY ) 
+             || hasAspect( Acm.ACM_DEPENDENCY )
              || hasAspect( Acm.ACM_EXPOSE )
              || hasAspect( Acm.ACM_CONFORM )
              || hasAspect( Acm.ACM_GENERALIZATION ) ) {

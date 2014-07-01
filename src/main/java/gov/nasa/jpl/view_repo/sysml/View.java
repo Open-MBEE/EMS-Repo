@@ -239,8 +239,14 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         if ( viewNode == null ) return null;
         EmsScriptNode viewpoint = null;
 
+        Set< EmsScriptNode > conformElements = 
+                this.getElement().getRelationshipsOfType( Acm.JSON_CONFORM );
+        if ( Utils.isNullOrEmpty( conformElements ) ) {
+            return null;
+        }
+        
         // Get all elements of Conform type:
-        Collection<EmsScriptNode> conformElements = getModel().getType(null, Acm.JSON_CONFORM);
+        //Collection<EmsScriptNode> conformElements = getModel().getType(null, Acm.JSON_CONFORM);
         if (Debug.isOn()) System.out.println( "Got "
                             + ( conformElements == null ? 0
                                                         : conformElements.size() )
@@ -248,17 +254,17 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         for ( EmsScriptNode node : conformElements ) {
             
             // If the sysml:source of the Compose element is the View:
-            EmsScriptNode source = getSource(node);
-            if (source != null && source.equals( viewNode ) ) { 
+//            EmsScriptNode source = getSource(node);
+//            if ( source != null && source.equals( viewNode ) ) { 
                 
                 // Get the target of the Conform relationship (the Viewpoint):
                 Collection<EmsScriptNode> viewpointNodes = getModel().getTarget(node);
                 
                 if (!Utils.isNullOrEmpty(viewpointNodes)) {
                     viewpoint = viewpointNodes.iterator().next();
-                }               
+                }
                 break;
-            }
+//            }
         }
         
         return viewpoint;
@@ -267,11 +273,16 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     public Collection< EmsScriptNode > getExposedElements() {
         if ( viewNode == null ) return null;
 
+        Set< EmsScriptNode > exposeElements = 
+                this.getElement().getRelationshipsOfType( Acm.JSON_EXPOSE );
+        if ( Utils.isNullOrEmpty( exposeElements ) ) {
+            return null;
+        }
         Collection<EmsScriptNode> exposed = new ArrayList<EmsScriptNode>();
 
-        // Get all relationship elements of Expose type:
-        Collection<EmsScriptNode> exposeElements = getModel().getType(null, Acm.JSON_EXPOSE);
-        //Collection<EmsScriptNode> exposeElements = getModel().getRelationship(null, "Expose");  // Can we call this?
+//        // Get all relationship elements of Expose type:
+//        Collection<EmsScriptNode> exposeElements = getModel().getType(null, Acm.JSON_EXPOSE);
+//        //Collection<EmsScriptNode> exposeElements = getModel().getRelationship(null, "Expose");  // Can we call this?
 
         if (Debug.isOn()) Debug.outln( "Expose relationships of " + viewNode + ": "
                      + exposeElements );
@@ -280,11 +291,11 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         // elements have the View as a sysml:source:
         for ( EmsScriptNode node : exposeElements ) {
             
-            // If the sysml:source of the Expose element is the View, then
-            // add it to our expose list (there can be multiple exposes for
-            // a view):
-            EmsScriptNode source = getSource(node);
-            if (source != null && source.equals( viewNode ) ) { 
+//            // If the sysml:source of the Expose element is the View, then
+//            // add it to our expose list (there can be multiple exposes for
+//            // a view):
+//            EmsScriptNode source = getSource(node);
+//            if (source != null && source.equals( viewNode ) ) { 
 
                 // Get the target(s) of the Expose relationship:
 
@@ -293,7 +304,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
                 if (!Utils.isNullOrEmpty(nodes)) {
                     exposed.addAll(nodes);
                 }
-            }
+//            }
         }
         
         return exposed;
