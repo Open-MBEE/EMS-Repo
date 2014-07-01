@@ -276,6 +276,10 @@ public class Acm {
     public static final String ACM_CONNECTOR = SYSML + JSON_CONNECTOR;
     public static final String ACM_CONNECTOR_ROLE = SYSML + JSON_CONNECTOR_ROLE;
     
+    public static final String ACM_RELATIONSHIPS_AS_SOURCE = "sysml:relationshipsAsSource";
+    public static final String ACM_RELATIONSHIPS_AS_TARGET = "sysml:relationshipsAsTarget";
+    public static final String ACM_UNDIRECTED_RELATIONSHIPS = "sysml:undirectedRelationships";
+    
     // Additions with api.raml file:
     public static final String ACM_SPECIALIZATION = SYSML + JSON_SPECIALIZATION;
     

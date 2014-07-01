@@ -1493,7 +1493,7 @@ public class ModelPost extends AbstractJavaWebScript {
                         instance.createOrUpdateModel( postJson,
                                                       status,
                                                       projectNode );
-                    
+                    addRelationshipsToProperties( elements );
                     if ( !Utils.isNullOrEmpty( elements ) ) {
                         
                         // Fix constraints if desired:
@@ -1594,6 +1594,12 @@ public class ModelPost extends AbstractJavaWebScript {
         printFooter();
 
         return model;
+    }
+
+    public void addRelationshipsToProperties( Set< EmsScriptNode > elems ) {
+        for ( EmsScriptNode element : elems ) {
+            element.addRelationshipToPropertiesOfParticipants();
+        }
     }
 
     protected void saveAndStartAction(WebScriptRequest req, Status status) throws Exception {
