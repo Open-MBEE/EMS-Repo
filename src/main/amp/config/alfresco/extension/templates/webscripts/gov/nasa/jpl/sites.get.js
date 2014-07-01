@@ -9,14 +9,16 @@ sites.forEach(function (site) {
   
   var node = site.node;
   var tags = node.tags;
-  siteJson["name"] = node.name;
-  siteJson["title"] = site.title;
-  siteJson["categories"] = [];
-  tags.forEach(function(tag) {
-	  siteJson["categories"].push(tag);
-  });
-  
-  sitesJson.push(siteJson);
+  if (node.name != "no_site") {
+	  siteJson["name"] = node.name;
+	  siteJson["title"] = site.title;
+	  siteJson["categories"] = [];
+	  tags.forEach(function(tag) {
+		  siteJson["categories"].push(tag);
+	  });
+	  
+	  sitesJson.push(siteJson);
+  }
 });
 
 var response;
