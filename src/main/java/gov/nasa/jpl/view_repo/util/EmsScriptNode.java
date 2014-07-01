@@ -1571,7 +1571,6 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         return siteNode;
     }
 
-
     private EmsScriptNode convertIdToEmsScriptNode( String valueId, Date dateTime ) {
         return convertIdToEmsScriptNode( valueId, dateTime, services, response, status );
     }

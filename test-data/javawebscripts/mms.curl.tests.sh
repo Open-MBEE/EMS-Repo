@@ -49,5 +49,5 @@ echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/config.snapshots.json $SERVICEU
 # images
 echo ""
 echo ARTIFACTS
-echo curl -w $CURL_FLAGS $CURL_POST_FLAGS_NO_DATA $SERVICE_URL"workspaces/master/sites/europa/artifacts/screenshot1?extension=.png&cs=200" -F content=@/Users/cinyoung/Desktop/screenshot1.png
-echo curl -w $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"workspaces/master/artifacts/screenshot1?extension=.png&timestamp=2014-06-18T10:22:32.999-0700"
+echo curl $CURL_FLAGS $CURL_POST_FLAGS_NO_DATA $SERVICE_URL"workspaces/master/sites/europa/artifacts/screenshot1?extension=.png&cs=200\"" -F content=@/Users/cinyoung/Desktop/screenshot1.png
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"workspaces/master/artifacts/screenshot1?extension=.png&timestamp=2014-06-18T10:22:32.999-0700\""
