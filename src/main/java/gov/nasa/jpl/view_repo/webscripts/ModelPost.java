@@ -46,7 +46,7 @@ import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
-import gov.nasa.jpl.view_repo.util.NodeUtil;import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -779,6 +779,10 @@ public class ModelPost extends AbstractJavaWebScript {
         return elements;
     }
     
+    public void updateOperands( JSONArray jarr ) {
+        
+    }
+    
     /**
      * Special processing for Expression and Property elements.  Modifies the passed elementJson
      * or specializeJson.
@@ -839,7 +843,22 @@ public class ModelPost extends AbstractJavaWebScript {
             // JSON element, then make new nodes for them.
             for (int i = 0; i < newVals.length(); ++i) {
             	
-            	JSONObject newVal = newVals.getJSONObject(i);
+                //Object nv = newVals.get( i );
+                Object newVal = null;
+                newVal = newVals.optString( i );
+            	if ( newVal == null ) {
+            	    newVal = newVals.optJSONObject(i);
+            	} else {
+                    newVal = EmsScriptNode.convertIdToEmsScriptNode( (String)newVal,
+                                                                     null,
+                                                                     services,
+                                                                     getResponse(),
+                                                                     getResponseStatus() );
+                    if ( newVal != null ) {
+                        nodeNames.add(((EmsScriptNode)newVal).getName());
+                    }
+                    continue;
+            	}
             	
             	// Get the sysmlid of the old value if it exists:
             	if (iter != null && iter.hasNext()) {
@@ -850,7 +869,7 @@ public class ModelPost extends AbstractJavaWebScript {
         			
         			// Ingest the JSON for the value
         			// to set properties for the node:
-        			oldValNode.ingestJSON(newVal);
+        			oldValNode.ingestJSON((JSONObject)newVal);
         			
             	}
             	// Old value doesnt exists, so create a new node:
@@ -868,7 +887,7 @@ public class ModelPost extends AbstractJavaWebScript {
             			nestedParent = reifiedNode;
             		}
             		
-            		EmsScriptNode newValNode = updateOrCreateTransactionableElement(newVal,nestedParent,
+            		EmsScriptNode newValNode = updateOrCreateTransactionableElement((JSONObject)newVal,nestedParent,
             																		null, ingest, true);
             		nodeNames.add(newValNode.getName());
             	}
