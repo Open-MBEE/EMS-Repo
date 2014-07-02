@@ -33,8 +33,8 @@
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
     "specialization" : {
-        "operationParameter": ["exposed_id__6"],
-        "operationExpression":"vp_expression__6",
+        "parameters": ["exposed_id__6"],
+        "expression":"vp_expression__6",
         "type": "Operation"
     }
     },
@@ -53,8 +53,15 @@
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
     "specialization" : {
-        "operand":["op_list__6",
-                   "op_map_arg__6"],
+        "operand":[{"type":"ElementValue",
+                    "element":"op_list__6"},
+                   {"type":"Expression",
+                    "operand":[{"type":"ElementValue",
+                                "element":"op_map__6"},
+                               {"type":"ElementValue",
+                                "element":"exposed_id__6"},
+                               {"type":"ElementValue",
+                                "element":"op_name_arg__6"}]}],
         "type": "Expression"
     }
     },
@@ -73,9 +80,12 @@
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
     "specialization" : {
-        "operand":["op_map__6",
-                   "exposed_id__6",
-                   "op_name_arg__6"],
+        "operand":[{"type":"ElementValue",
+                    "element":"op_map__6"},
+                   {"type":"ElementValue",
+                    "element":"exposed_id__6"},
+                   {"type":"ElementValue",
+                    "element":"op_name_arg__6"}],
         "type": "Expression"
     }
     },    

@@ -843,23 +843,8 @@ public class ModelPost extends AbstractJavaWebScript {
             // JSON element, then make new nodes for them.
             for (int i = 0; i < newVals.length(); ++i) {
             	
-                //Object nv = newVals.get( i );
-                Object newVal = null;
-                newVal = newVals.optString( i );
-            	if ( newVal == null ) {
-            	    newVal = newVals.optJSONObject(i);
-            	} else {
-                    newVal = EmsScriptNode.convertIdToEmsScriptNode( (String)newVal,
-                                                                     null,
-                                                                     services,
-                                                                     getResponse(),
-                                                                     getResponseStatus() );
-                    if ( newVal != null ) {
-                        nodeNames.add(((EmsScriptNode)newVal).getName());
-                    }
-                    continue;
-            	}
-            	
+        	    Object newVal = newVals.optJSONObject(i);
+
             	// Get the sysmlid of the old value if it exists:
             	if (iter != null && iter.hasNext()) {
             		

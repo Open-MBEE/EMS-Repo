@@ -613,14 +613,16 @@ public class Acm {
         Acm.ACM_LITERAL_REAL,
         Acm.ACM_LITERAL_STRING, 
         Acm.ACM_LITERAL_UNLIMITED_NATURAL,
+        Acm.ACM_OPAQUE_EXPRESSION,
         Acm.ACM_STRING_EXPRESSION, 
         Acm.ACM_TIME_EXPRESSION,
         Acm.ACM_TIME_INTERVAL,
-        Acm.ACM_OPERATION_EXPRESSION,
+        Acm.ACM_OPERATION,
         Acm.ACM_INSTANCE_SPECIFICATION,
         Acm.ACM_CONSTRAINT,
         Acm.ACM_PARAMETER,
-        Acm.ACM_CONNECTOR
+        Acm.ACM_CONNECTOR,
+
     };
     
     public static final String[] ACM_RELATIONSHIP_PROPERTY_ASPECTS = {
