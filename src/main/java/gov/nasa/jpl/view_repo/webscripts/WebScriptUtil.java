@@ -62,8 +62,6 @@ public class WebScriptUtil {
         
         ResultSet resultSet = null;
         try {
-            // TODO -- REVIEW -- Will lucene return deleted nodes that may have
-            // existed at the specified date/time?
             resultSet = NodeUtil.luceneSearch( pattern, services ); 
             for (ResultSetRow row: resultSet) {
                 NodeRef nr = row.getNodeRef();
@@ -73,12 +71,17 @@ public class WebScriptUtil {
                     if ( nr == null ) continue;
                 }
                 EmsScriptNode node = new EmsScriptNode(nr, services, response);
-                // filter by project
-                if (node.getQnamePath().startsWith(qnamePath)) {
-                    set.add(node);
+                try {
+                    // filter by project
+                    if (node.getQnamePath().startsWith(qnamePath)) {
+                        set.add(node);
+                    }
+                } catch (Exception ee) {
+                    // do nothing, exception is most likely that the nodeRef doesn't exist
                 }
             }
         } catch (Exception e) {
+            // do nothing, exception is most likely bad lucene query
             e.printStackTrace();  
         } finally {
             if (resultSet != null) {
