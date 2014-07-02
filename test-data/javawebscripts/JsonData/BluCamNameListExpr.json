@@ -1,0 +1,101 @@
+{ "elements":[
+    {
+        "sysmlid": "_17_0_2_3_e610336_1394148449252_91190_29556",
+        "name": "ComponentViewPoint",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+	"specialization" : {
+        "method": "name_list",
+        "type": "Viewpoint"
+	}
+    },
+    {
+        "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388",
+        "name": "Components",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+	"specialization" : {
+        "type": "Element"
+	}
+    },
+    {
+        "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+        "name": "BLUCam CubeSat A",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
+	"specialization" : {
+        "type": "Package"
+	}
+    },
+  {
+        "sysmlid": "name_list",
+        "name": "viewpoint_op",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+	"specialization" : {
+        "operationParameter": ["exposed_id"],
+        "operationExpression":"vp_expression",
+        "type": "Operation"
+	}
+    },
+    {
+        "sysmlid": "exposed_id",
+        "name": "exposed",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+	"specialization" : {
+        "type": "Parameter"
+	}
+    },
+    {
+        "sysmlid": "vp_expression",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+	"specialization" : {
+        "operand":["op_list",
+                   "op_map_arg"],
+        "type": "Expression"
+	}
+    },
+    {
+        "sysmlid": "op_list",
+        "name": "List",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+	"specialization" : {
+        "type": "Operation"
+	}
+    },
+    {
+        "sysmlid": "op_map_arg",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+	"specialization" : {
+        "operand":["op_map",
+                   "exposed_id",
+                   "op_name_arg"],
+        "type": "Expression"
+	}
+    },    
+   {
+        "sysmlid": "op_map",
+        "name": "map",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+	"specialization" : {
+        "type": "Operation"
+	}
+    },
+    {
+        "sysmlid": "op_name_arg",
+        "name": "Name",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+	"specialization" : {
+        "type": "Operation"
+	}
+    }
+]}
+
