@@ -275,6 +275,15 @@ public class Acm {
     public static final String ACM_METHOD = SYSML + JSON_METHOD;
     public static final String ACM_CONNECTOR = SYSML + JSON_CONNECTOR;
     public static final String ACM_CONNECTOR_ROLE = SYSML + JSON_CONNECTOR_ROLE;
+
+    // relationship property aspect names
+    public static final String ACM_RELATIONSHIPS_AS_SOURCE = "sysml:relationshipsAsSource";
+    public static final String ACM_RELATIONSHIPS_AS_TARGET = "sysml:relationshipsAsTarget";
+    public static final String ACM_UNDIRECTED_RELATIONSHIPS = "sysml:undirectedRelationships";
+    // properties for above aspects
+    public static final String ACM_REL_AS_SOURCE = "sysml:relAsSource";
+    public static final String ACM_REL_AS_TARGET = "sysml:relAsTarget";
+    public static final String ACM_UNDIRECTED_REL = "sysml:undirectedRel";
     
     // Additions with api.raml file:
     public static final String ACM_SPECIALIZATION = SYSML + JSON_SPECIALIZATION;
@@ -575,6 +584,9 @@ public class Acm {
     };
 
     public static final String[] ACM_ASPECTS = {
+        // relationship aspects such as ACM_RELATIONSHIPS_AS_SOURCE are left
+        // out intentionally since they are not intended to be sysml types
+        // like those above.
         Acm.ACM_PRODUCT,
         Acm.ACM_VIEW,
         Acm.ACM_COMMENT,
@@ -601,13 +613,28 @@ public class Acm {
         Acm.ACM_LITERAL_REAL,
         Acm.ACM_LITERAL_STRING, 
         Acm.ACM_LITERAL_UNLIMITED_NATURAL,
+        Acm.ACM_OPAQUE_EXPRESSION,
         Acm.ACM_STRING_EXPRESSION, 
         Acm.ACM_TIME_EXPRESSION,
         Acm.ACM_TIME_INTERVAL,
-        Acm.ACM_OPERATION_EXPRESSION,
+        Acm.ACM_OPERATION,
         Acm.ACM_INSTANCE_SPECIFICATION,
         Acm.ACM_CONSTRAINT,
         Acm.ACM_PARAMETER,
-        Acm.ACM_CONNECTOR                                                
+        Acm.ACM_CONNECTOR
     };
+    
+    public static final String[] ACM_RELATIONSHIP_PROPERTY_ASPECTS = {
+        ACM_RELATIONSHIPS_AS_SOURCE,
+        ACM_RELATIONSHIPS_AS_TARGET,
+        ACM_UNDIRECTED_RELATIONSHIPS
+    };
+
+    public static HashMap<String,String> PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS = new HashMap<String,String>(3);
+    {
+        PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.put( ACM_RELATIONSHIPS_AS_SOURCE, ACM_REL_AS_SOURCE );
+        PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.put( ACM_RELATIONSHIPS_AS_TARGET, ACM_REL_AS_TARGET );
+        PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.put( ACM_UNDIRECTED_RELATIONSHIPS, ACM_UNDIRECTED_REL );
+    }
+
 }

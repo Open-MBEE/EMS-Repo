@@ -855,8 +855,8 @@ public class ModelPost extends AbstractJavaWebScript {
             // JSON element, then make new nodes for them.
             for (int i = 0; i < newVals.length(); ++i) {
             	
-            	JSONObject newVal = newVals.getJSONObject(i);
-            	
+        	    Object newVal = newVals.optJSONObject(i);
+
             	// Get the sysmlid of the old value if it exists:
             	if (iter != null && iter.hasNext()) {
             		
@@ -866,7 +866,7 @@ public class ModelPost extends AbstractJavaWebScript {
         			
         			// Ingest the JSON for the value
         			// to set properties for the node:
-        			oldValNode.ingestJSON(newVal);
+        			oldValNode.ingestJSON((JSONObject)newVal);
         			
             	}
             	// Old value doesnt exists, so create a new node:
@@ -884,7 +884,7 @@ public class ModelPost extends AbstractJavaWebScript {
             			nestedParent = reifiedNode;
             		}
             		
-            		EmsScriptNode newValNode = updateOrCreateTransactionableElement(newVal,nestedParent,
+            		EmsScriptNode newValNode = updateOrCreateTransactionableElement((JSONObject)newVal,nestedParent,
             																		null, ingest, true);
             		nodeNames.add(newValNode.getName());
             	}
@@ -1509,7 +1509,7 @@ public class ModelPost extends AbstractJavaWebScript {
                         instance.createOrUpdateModel( postJson,
                                                       status,
                                                       projectNode );
-                    
+                    addRelationshipsToProperties( elements );
                     if ( !Utils.isNullOrEmpty( elements ) ) {
                         
                         // Fix constraints if desired:
@@ -1610,6 +1610,12 @@ public class ModelPost extends AbstractJavaWebScript {
         printFooter();
 
         return model;
+    }
+
+    public void addRelationshipsToProperties( Set< EmsScriptNode > elems ) {
+        for ( EmsScriptNode element : elems ) {
+            element.addRelationshipToPropertiesOfParticipants();
+        }
     }
 
     protected void saveAndStartAction(WebScriptRequest req, Status status) throws Exception {

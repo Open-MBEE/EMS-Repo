@@ -344,7 +344,7 @@ public class NodeUtil {
     public static boolean isType( String typeName, ServiceRegistry services ) {
         if ( typeName == null ) return false;
         if ( Acm.getJSON2ACM().keySet().contains( typeName ) ) {
-            typeName = Acm.getACM2JSON().get( typeName );
+            typeName = Acm.getJSON2ACM().get( typeName );
         }
 //        String[] split = typeName.split( ":" );
 //        
@@ -572,7 +572,7 @@ public class NodeUtil {
                                                   ServiceRegistry services ) {
         if ( services == null ) services = getServices();
         if ( Acm.getJSON2ACM().keySet().contains( typeOrAspectName ) ) {
-            typeOrAspectName = Acm.getACM2JSON().get( typeOrAspectName );
+            typeOrAspectName = Acm.getJSON2ACM().get( typeOrAspectName );
         }
         String type = typeOrAspectName;
         boolean notType = !NodeUtil.isType( type, services ); 
