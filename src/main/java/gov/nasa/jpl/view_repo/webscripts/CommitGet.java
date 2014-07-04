@@ -29,66 +29,68 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.NodeUtil;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.cmr.search.ResultSetRow;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.extensions.webscripts.Cache;
+import org.springframework.extensions.webscripts.Status;
+import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
- * static class for webscript utilities
+ * Retrieve all Configuration Sets for a site
  * @author cinyoung
  *
  */
-public class WebScriptUtil {
-    // needed for Lucene search
-    protected static final StoreRef SEARCH_STORE = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
-
-    // defeat instantiation
-    private WebScriptUtil() {
-        // do nothing
+public class CommitGet extends AbstractJavaWebScript {
+    public CommitGet() {
+        super();
     }
-    
-    public static Set<EmsScriptNode> getAllNodesInPath(String qnamePath, String luceneContext, String acmType, Date dateTime, ServiceRegistry services, StringBuffer response) {
-        String pattern = luceneContext + ":\"" + acmType + "\"";
-        Set<EmsScriptNode> set = new HashSet<EmsScriptNode>();
         
-        ResultSet resultSet = null;
+    public CommitGet(Repository repositoryHelper, ServiceRegistry registry) {
+        super(repositoryHelper, registry);
+    }
+
+    @Override
+    protected boolean validateRequest(WebScriptRequest req, Status status) {
+        // Do nothing
+        return false;
+    }
+
+    @Override
+    protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        Map<String, Object> model = new HashMap<String, Object>();
+
+        clearCaches();
+
+        String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+        EmsScriptNode siteNode = new EmsScriptNode(services.getSiteService().getSite(siteName).getNodeRef(), services, response);
+        JSONObject changeSets = null;
         try {
-            resultSet = NodeUtil.luceneSearch( pattern, services ); 
-            for (ResultSetRow row: resultSet) {
-                NodeRef nr = row.getNodeRef();
-                if ( nr == null ) continue;
-                if ( dateTime != null ) {
-                    nr = NodeUtil.getNodeRefAtTime( nr, dateTime );
-                    if ( nr == null ) continue;
-                }
-                EmsScriptNode node = new EmsScriptNode(nr, services, response);
-                try {
-                    // filter by project
-                    if (node.getQnamePath().startsWith(qnamePath)) {
-                        set.add(node);
-                    }
-                } catch (Exception ee) {
-                    // do nothing, exception is most likely that the nodeRef doesn't exist
-                }
-            }
+			changeSets = CommitUtil.getJsonChangeSets(siteNode, services, response);
+
+			model.put("res", changeSets.toString(2));
+            model.put("title", siteName);
         } catch (Exception e) {
-            // do nothing, exception is most likely bad lucene query
-            e.printStackTrace();  
-        } finally {
-            if (resultSet != null) {
-                resultSet.close();
-            }
-        }
+        		model.put("res", response.toString());
+        		model.put("title", "ERROR could not load");
+        		if (e instanceof JSONException) {
+        			log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        		} else {
+        			log(LogLevel.ERROR, "Internal server error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        		}
+        		e.printStackTrace();
+        } 
         
-        return set;
+        status.setCode(responseStatus.getCode());
+        return model;
     }
 }

@@ -44,6 +44,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -68,6 +69,7 @@ import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.version.Version;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -152,7 +154,12 @@ public class ModelPost extends AbstractJavaWebScript {
         		new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( systemModel );
         
     }
-    
+        
+    /**
+     * Keep track of update elements
+     */
+    Set<Version> changeSet = new HashSet<Version>();
+
     /**
      * Create or update the model as necessary based on the request
      * 
@@ -205,12 +212,6 @@ public class ModelPost extends AbstractJavaWebScript {
                             log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
                             log(LogLevel.ERROR, "\tafter calling getOwner(" + rootElement + ", " + projectNode + ", true)");
                             ee.printStackTrace();
-//                                e.printStackTrace();
-//                                int cnt = 0;
-//                                while ( e != e.getCause() && e.getCause() != null && cnt++ < 5) {
-//                                    e.getCause().printStackTrace();
-//                                    e = e.getCause();
-//                                }
                         }
                     }
                     
@@ -227,6 +228,10 @@ public class ModelPost extends AbstractJavaWebScript {
     
         // handle the relationships
         updateOrCreateAllRelationships(relationshipsJson);
+        
+        // create commit history
+        // TODO add in commit message
+        CommitUtil.commitChangeSet(changeSet, "", runWithoutTransactions, services);
         
         // make another pass through the elements and update their properties
         elements.addAll( updateNodeReferences( singleElement, postJson,
@@ -366,11 +371,16 @@ public class ModelPost extends AbstractJavaWebScript {
                 trx.commit();
             } catch (Throwable e) {
                 try {
+                    if (e instanceof JSONException) {
+	                		log(LogLevel.ERROR, "updateOrCreateRelationships: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+	                } else {
+	                		log(LogLevel.ERROR, "updateOrCreateRelationships: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	                }
                     trx.rollback();
                     log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
                     e.printStackTrace();
                 } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                    log(LogLevel.ERROR, "\tupdateOrCreateRelationships: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
                     e.printStackTrace();
                 }
@@ -542,11 +552,16 @@ public class ModelPost extends AbstractJavaWebScript {
                 trx.commit();
             } catch (Throwable e) {
                 try {
-                    trx.rollback();
                     log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                    if (e instanceof JSONException) {
+	                		log(LogLevel.ERROR, "buildElementMap: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+	                } else {
+	                		log(LogLevel.ERROR, "buildElementMap: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	                }
+                    trx.rollback();
                     e.printStackTrace();
                 } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                    log(LogLevel.ERROR, "\tbuildElementMap: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
                     e.printStackTrace();
                 }
@@ -602,13 +617,11 @@ public class ModelPost extends AbstractJavaWebScript {
                         if ( noProjetNode == null ) {
                             String siteName = 
                                     (getSiteInfo() == null ? NO_SITE_ID : getSiteInfo().getShortName() );
-                            int statusCode;
                             ProjectPost pp = new ProjectPost( repository, services );
-                            statusCode =
-                                    pp.updateOrCreateProject( new JSONObject(),
-                                                              NO_PROJECT_ID,
-                                                              siteName, true,
-                                                              false, false );
+                            pp.updateOrCreateProject( new JSONObject(),
+                                                      NO_PROJECT_ID,
+                                                      siteName, true,
+                                                      false, false );
                         }
                     }
                     rootElements.add(sysmlId);
@@ -754,12 +767,15 @@ public class ModelPost extends AbstractJavaWebScript {
                 trx.commit();
             } catch (Throwable e) {
                 try {
-                    trx.rollback();
-                    log( LogLevel.ERROR,
-                         "\t####### ERROR: Needed to rollback: " + e.getMessage() );
+                    if (e instanceof JSONException) {
+                    		log(LogLevel.ERROR, "updateOrCreateElement: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+                    } else {
+                    		log(LogLevel.ERROR, "updateOrCreateElement: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    }
                     e.printStackTrace();
+                    trx.rollback();
                 } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                    log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
                     e.printStackTrace();
                 }
@@ -1739,4 +1755,7 @@ public class ModelPost extends AbstractJavaWebScript {
         elementMap = new HashMap<String, JSONObject>();
         newElements = new HashSet<String>();
     }
+    
+    
+ 
 }

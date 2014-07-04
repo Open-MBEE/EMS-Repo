@@ -24,39 +24,47 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
     	<div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
     		<a class="navbar-brand" href="/share/page/site/${siteName}/dashboard">${siteTitle}</a>
     	</div>
-    	<ul class="nav navbar-nav">
-    	<li class="active"><a href="#">${title}</a></li>
-        <li class="dropdown" id="firstDropdown">
-        	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Goto <b class="caret"></b></a>
-        	<ul class="dropdown-menu">
-        		<li><a href="${url.context}/service/ve/configurations/${siteName}">DocWeb</a></li>
-        	<#if siteName == 'europa'>
-        		<li><a href="${url.context}/service/ve/index/${siteName}">Document List</a></li>
-        		<li><a href="${url.context}/service/ve/documents/${siteName}">In-Work Document List</a></li>
-        	<#else>
-        		<li><a href="${url.context}/service/ve/documents/${siteName}">Document List</a></li>
-        	</#if>	
-        		<li><a href="/share/page/site/${siteName}/dashboard">Dashboard</a></li>
-   			</ul>
-   		</li>
-   		<li class="dropdown">
-   			<a href="#" class="dropdown-toggle" data-toggle="dropdown">Other Sites <b class="caret"></b></a>
-   			<ul class="dropdown-menu" id="otherSites">
-   			
-   			</ul>
-   		</li>
-   	  </ul>
+      <div class="navbar-collapse collapse">
+      	<ul class="nav navbar-nav">
+      	<li class="active"><a href="#">${title}</a></li>
+          <li class="dropdown" id="firstDropdown">
+          	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Goto <b class="caret"></b></a>
+          	<ul class="dropdown-menu">
+          		<li><a href="${url.context}/service/ve/configurations/${siteName}">DocWeb</a></li>
+          	<#if siteName == 'europa'>
+          		<li><a href="${url.context}/service/ve/index/${siteName}">Document List</a></li>
+          		<li><a href="${url.context}/service/ve/documents/${siteName}">In-Work Document List</a></li>
+          	<#else>
+          		<li><a href="${url.context}/service/ve/documents/${siteName}">Document List</a></li>
+          	</#if>	
+          		<li><a href="/share/page/site/${siteName}/dashboard">Dashboard</a></li>
+     			</ul>
+     		</li>
+     		<li class="dropdown">
+     			<a href="#" class="dropdown-toggle" data-toggle="dropdown">Other Sites <b class="caret"></b></a>
+     			<ul class="dropdown-menu" id="otherSites">
+     			
+     			</ul>
+     		</li>
+     	  </ul>
 
-      <div class="pull-right">
-        <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
+        <div class="pull-right">
+          <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
+        </div>
+
+        <ul class="nav navbar-nav pull-right">
+        	<li><a href="/share/page/site/ems-training/dashboard">Support</a></li>
+          <li><a href="#" class="submit-logout">logout</a></li>
+        </ul>
       </div>
-
-      <ul class="nav navbar-nav pull-right">
-      	<li><a href="/share/page/site/ems-training/dashboard">Support</a></li>
-        <li><a href="#" class="submit-logout">logout</a></li>
-      </ul>
     </nav>
    
 
@@ -226,13 +234,13 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
                   <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" title="Font Size">
                     <i class="glyphicon glyphicon-text-height"></i>&nbsp;<b class="caret"></b></a>
                     <ul class="dropdown-menu">
-                      <li><a data-edit="fontSize 7"><font size="7">Biggest</font></a></li>
-                      <li><a data-edit="fontSize 6"><font size="6">Bigger</font></a></li>
-                      <li><a data-edit="fontSize 5"><font size="5">Big</font></a></li>
-                      <li><a data-edit="fontSize 4"><font size="4">Larger</font></a></li>
-                      <li><a data-edit="fontSize 3"><font size="3">Large</font></a></li>
-                      <li><a data-edit="fontSize 2"><font size="2">Normal</font></a></li>
-                      <li><a data-edit="fontSize 1"><font size="1">Small</font></a></li>
+                      <li><a class="fontButton" data-edit="fontSize 7"><font size="7">Biggest</font></a></li>
+                      <li><a class="fontButton" data-edit="fontSize 6"><font size="6">Bigger</font></a></li>
+                      <li><a class="fontButton" data-edit="fontSize 5"><font size="5">Big</font></a></li>
+                      <li><a class="fontButton" data-edit="fontSize 4"><font size="4">Larger</font></a></li>
+                      <li><a class="fontButton" data-edit="fontSize 3"><font size="3">Large</font></a></li>
+                      <li><a class="fontButton" data-edit="fontSize 2"><font size="2">Normal</font></a></li>
+                      <li><a class="fontButton" data-edit="fontSize 1"><font size="1">Small</font></a></li>
                     </ul>
                 </div>
                   <div class="btn-group">
@@ -373,7 +381,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
               <br/>
               <div class="btn-group">
                   <a class="btn btn-default" data-edit="insertunorderedlist" title="Bullet list">&bull;</a>
-                  <a class="btn btn-default" data-edit="insertorderedlist" title="Bullet list">1.</a>
+                  <a class="btn btn-default" data-edit="insertorderedlist" title="Numbered list">1.</a>
                   <a class="btn btn-default" data-edit="indent" title="Indent (Tab)">&rarr;</a>
                   <a class="btn btn-default" data-edit="outdent" title="Reduct Indent (Shift-Tab)">&larr;</a>
               </div>
@@ -382,7 +390,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
               <a class="btn btn-default" data-edit="undo" title="Undo"><i class="glyphicon icon-undo"></i>&nbsp;</a>
               <a class="btn btn-default" data-edit="redo" title="Redo"><i class="glyphicon icon-repeat"></i>&nbsp;</a>
               <div class="btn-group">
-                <a class="btn dropdown-toggle btn-default " data-toggle="dropdown" title="Hyperlink"><i class="glyphicon icon-fullborders"></i>&nbsp;</a>
+                <a class="btn dropdown-toggle btn-default " data-toggle="dropdown" title="Insert Table"><i class="glyphicon icon-fullborders"></i>&nbsp;</a>
                 <div class="dropdown-menu input-append">
                   <input class="span2 tablerows" placeholder="Rows" type="text"/>
                   <input class="span2 tablecols" placeholder="Cols" type="text"/>
@@ -402,7 +410,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
                 <button type="button" class="btn btn-primary saveSection" proxy-click="saveSection:{{ id }}">Save changes</button>
               </div>
             </div>
-            <div id="section{{ id }}" class="section page editing" data-section-id="{{ id }}" contenteditable="false" proxy-dblclick="sectionDoubleClick">
+            <div id="section{{ id }}" class="section page editing scrollable_section" data-section-id="{{ id }}" contenteditable="false" proxy-dblclick="sectionDoubleClick">
               {{{ content }}}
             </div>
             {{/editing}}
@@ -717,6 +725,9 @@ window.pageExitManager = function()
         window.onbeforeunload = null;
       }
       app.updateSaveAllButton(numOpenEditors);
+    },
+    anyEditorsOpen : function () {
+      return numOpenEditors > 0;
     }
   }
 }();
@@ -866,6 +877,17 @@ app.on('editSection', function(e, sectionId) {
     //console.log("End Section blur");
   })
 
+  // content editable eats on change events so we need to detect when
+  // a font change button is pressed, wait for the event to complete,
+  // and then remove and font tags with size=2.  Bootstrap wysiwyg does not
+  // support setting font size in pixels so our only option is to remove the tag.
+  $(".fontButton").mouseup(function() {
+    setTimeout(function() {
+      var fontObjects = section.find('font[size=2]');
+      fontObjects.replaceWith(function() { return $(this).contents(); });
+      // /fontObjects.css( "color", "blue" );
+    }, 200);
+  });
 
   // Wrap content inisde of p tags if it isn't already.  Without this, Chrome will create new DIVs when 
   // enter is pressed and give them attributes from the parent div, including mdid
@@ -983,6 +1005,9 @@ app.on('cancelEditing', function(e) {
   $sectionHeader.html($sectionHeader.data('original-content'));
   $sectionHeader.attr('contenteditable', false);
 
+  if(!window.pageExitManager.anyEditorsOpen()) {
+    app.set('currentInspector', 'document-info');
+  }
   //section.find(".reference.editable").attr('contenteditable', false);
 
   //section.find("p").removeClass("pwrapper");
@@ -1136,6 +1161,9 @@ app.on('saveSection', function(e, sectionId) {
       //$(this).replaceWith(text);
   }); 
 
+  if(!window.pageExitManager.anyEditorsOpen()) {
+    app.set('currentInspector', 'document-info');
+  }
   //app.fire('saveSectionComplete', e, sectionId);
   //If data is saved before references are converted to dom elements, 
   //change realData saveSection to saveSectionComplete and fire event above
@@ -1504,8 +1532,11 @@ var addChildren = function(parentNode, childIds, view2view, views, elements, dep
             var value = resolveValue(cell.content, elements, function(valueList) {
               var listOfElements = _.map(valueList, function(v) { return renderEmbeddedValue(v, elements) });
               var stringResult = ""; //<ul class='table-list'>";
-              _.each(listOfElements, function(e){
+              _.each(listOfElements, function(e, i) {
                 stringResult += e;// + "<br/>"; //"<li>" + e + "</li>";
+                if(i < listOfElements.length - 1) {
+                  stringResult += "<br/>";
+                }
               })
               //stringResult += "</ul>";
               return stringResult;

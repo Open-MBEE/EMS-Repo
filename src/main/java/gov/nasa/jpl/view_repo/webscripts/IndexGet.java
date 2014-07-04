@@ -80,10 +80,7 @@ public class IndexGet extends AbstractJavaWebScript {
     }
 
     @Override
-    protected synchronized Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-
-        printHeader( req );
-        
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
 

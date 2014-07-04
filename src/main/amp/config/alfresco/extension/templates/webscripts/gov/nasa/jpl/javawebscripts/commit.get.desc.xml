@@ -1,0 +1,27 @@
+<webscript>
+<shortname>Get Commits</shortname>
+    <description>
+    Get all commits for a specified site or workspace, returns array of
+    commit nodes.
+    Format is:
+    {
+	    "commits": [
+	    		{
+ 	    			 "nodeid": nodeId (alfresco node id),
+	    		},
+	    		...
+	    	]
+    }
+  	</description>
+		<url>/javawebscripts/sites/{siteName}/commits</url>
+		<format default="json">any</format>
+		<authentication>user</authentication>
+		<transaction allow="readonly">required</transaction>
+		<family>EMS Java Read Webscripts</family>
+		<args>
+			<arg>
+				<name>siteName</name>
+				<description>site to find documents for which snapshots will be created and linked to the configuration</description>
+			</arg>
+		</args>  		
+ </webscript>

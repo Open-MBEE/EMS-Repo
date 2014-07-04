@@ -67,9 +67,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     @Override
-    protected synchronized Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-        printHeader( req );
-
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         clearCaches();
 
         String viewId = null;
@@ -86,6 +84,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
         Map<String, Object> model = new HashMap<String, Object>();
 
+        SnapshotPost instance = new SnapshotPost(repository, services);
+        
         // Don't do anything with the HTML, we just save off a copy of the generated JSON
 //        String html;
 //        try {
@@ -100,7 +100,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         String snapshotName = viewId + "_" + now.getMillis();
         EmsScriptNode snapshotNode = null;
         if (checkPermissions(snapshotFolderNode, PermissionService.WRITE)) {
-            snapshotNode = createSnapshot(topview, viewId, snapshotName, req.getContextPath(), snapshotFolderNode);
+            snapshotNode = instance.createSnapshot(topview, viewId, snapshotName, req.getContextPath(), snapshotFolderNode);
         }
 
         if (snapshotNode != null) {
@@ -111,6 +111,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 snapshoturl.put("created", fmt.print(now));
                 snapshoturl.put("url", req.getContextPath() + "/service/snapshots/" + snapshotName);
                 model.put("res", snapshoturl.toString(4));
+                appendResponseStatusInfo(instance);
             } catch (JSONException e) {
                 e.printStackTrace();
                 log(LogLevel.ERROR, "Error generating JSON for snapshot", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
