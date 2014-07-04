@@ -779,10 +779,6 @@ public class ModelPost extends AbstractJavaWebScript {
         return elements;
     }
     
-    public void updateOperands( JSONArray jarr ) {
-        
-    }
-    
     /**
      * Special processing for Expression and Property elements.  Modifies the passed elementJson
      * or specializeJson.

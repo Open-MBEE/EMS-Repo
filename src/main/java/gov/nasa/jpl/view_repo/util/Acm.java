@@ -621,8 +621,7 @@ public class Acm {
         Acm.ACM_INSTANCE_SPECIFICATION,
         Acm.ACM_CONSTRAINT,
         Acm.ACM_PARAMETER,
-        Acm.ACM_CONNECTOR,
-
+        Acm.ACM_CONNECTOR
     };
     
     public static final String[] ACM_RELATIONSHIP_PROPERTY_ASPECTS = {

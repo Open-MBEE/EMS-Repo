@@ -118,8 +118,8 @@ public class ViewGet extends AbstractJavaWebScript {
         Map<String, Object> model = new HashMap<String, Object>();
         // default recurse=false but recurse only applies to displayed elements and contained views
         boolean recurse = checkArgEquals(req, "recurse", "true") ? true : false;
-        // default generate=false
-        boolean generate = checkArgEquals(req, "generate", "true") ? true : false;
+        // default generate=true
+        boolean generate = checkArgEquals(req, "generate", "false") ? false : true;
 
         JSONArray viewsJson = new JSONArray();
         if (validateRequest(req, status)) {
