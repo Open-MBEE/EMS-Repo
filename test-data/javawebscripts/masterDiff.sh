@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #start up the server
-#cd ./../..
+cd ./../..
 ./runserver.sh > serverLog.txt &
 echo 'STARTING UP SERVER'
-sleep 20s
+sleep 60s
 
 #poll to see if the server is up
 cd ./test-data/javawebscripts
@@ -38,3 +38,7 @@ fi
 if [ $server -eq 2 ]; then
 	echo 'SERVER TIME-OUT'
 fi
+
+#shutdown the tomcat srever process
+pkill -fn 'integration-test'
+echo 'KILLING SERVER'
