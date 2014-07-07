@@ -2,8 +2,7 @@
 
 #start up the server
 #cd ./../..
-#./runserver.sh &
-/home/shatkhin/git/alfresco-view-repo/runserver.sh &
+./runserver.sh &
 echo 'STARTING UP SERVER'
 sleep 20s
 
@@ -20,7 +19,7 @@ while [ $server -eq 0 ]; do
 	fi
 	
 	#time-out condition
-	serverCount = $((serverCount+1))
+	serverCount = $(($serverCount+1))
 	if [ $serverCount -gt 10000 ];then
 		server=2
 	fi
