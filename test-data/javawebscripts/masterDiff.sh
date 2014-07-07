@@ -2,7 +2,7 @@
 
 #start up the server
 #cd ./../..
-./runserver.sh &
+./runserver.sh > serverLog.txt &
 echo 'STARTING UP SERVER'
 sleep 20s
 
@@ -19,13 +19,13 @@ while [ $server -eq 0 ]; do
 	fi
 	
 	#time-out condition
-	serverCount = $(($serverCount+1))
+	serverCount=$(($serverCount+1))
 	if [ $serverCount -gt 10000 ];then
 		server=2
 	fi
 done
 
-if [$server -eq 1]; then
+if [ $server -eq 1 ]; then
 	echo 'SERVER CONNECTED'
 	sleep 10s
 
@@ -34,6 +34,6 @@ if [$server -eq 1]; then
 	./diff2.sh
 
 fi
-if [$server -eq 2]; then
+if [ $server -eq 2 ]; then
 	echo 'SERVER TIME-OUT'
 fi
