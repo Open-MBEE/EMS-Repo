@@ -9,20 +9,20 @@ sleep 10s
 
 #poll to see if the server is up
 cd ./test-data/javawebscripts
-server=0;
-serverCount=0;
+server=0
+serverCount=0
 echo 'POLLING SERVER'
 while [ $server -eq 0 ]; do
 	netstat -ln | grep '8080' > tempMasterDiff
 	count=`sed -n '$=' tempMasterDiff`
 	if [ $count -gt 0 ]; then
-		server=1;
+		server=1
 	fi
 	
 	#time-out condition
-	$serverCount = $serverCount + 1;
+	serverCount = $[serverCount + 1]
 	if [ $serverCount -gt 10000 ];then
-		server=2;
+		server=2
 	fi
 done
 
