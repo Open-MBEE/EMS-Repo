@@ -15,8 +15,8 @@ export CURL_GET_FLAGS="-X GET"
 #if [true]; then
        export CURL_USER=" -u admin:admin"
        export CURL_FLAGS=$CURL_STATUS$CURL_USER
-       export SERVICE_URL="http://128.149.16.140:8080/alfresco/service/"
-       export BASE_URL="http://128.149.16.140:8080/alfresco/service/javawebscripts/"
+       export SERVICE_URL="http://localhost:8080/alfresco/service/"
+       export BASE_URL="http://localhost:8080/alfresco/service/javawebscripts/"
 #else
 #        export CURL_USER=" -u shatkhin"
 #        export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
