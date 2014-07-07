@@ -12,6 +12,7 @@ server=0
 serverCount=0
 echo 'POLLING SERVER'
 while [ $server -eq 0 ]; do
+	> tempMasterDiff
 	netstat -ln | grep '8080' > tempMasterDiff
 	count=`sed -n '$=' tempMasterDiff`
 	if [ $count -gt 0 ]; then
