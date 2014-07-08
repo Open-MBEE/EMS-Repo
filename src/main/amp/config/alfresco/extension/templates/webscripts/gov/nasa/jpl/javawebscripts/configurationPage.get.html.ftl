@@ -15,8 +15,15 @@
   <div class="main">
       <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
     		<a class="navbar-brand" href="/share/page/site/${siteName}/dashboard">${siteTitle}</a>
     	</div>
+      <div class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
       	<li class="active"><a href="#">DocWeb</a></li>
         <li class="dropdown" id="firstDropdown">
@@ -46,6 +53,7 @@
       	<li><a href="/share/page/site/ems-training/dashboard">Support</a></li>
         <li><a href="#" class="submit-logout">logout</a></li>
       </ul>
+      </div>
     </nav>
 
    <div class="container" ng-controller="TagsCtrl">

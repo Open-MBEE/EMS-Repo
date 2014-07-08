@@ -28,6 +28,7 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -45,6 +46,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.site.SiteVisibility;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -204,7 +206,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		if (foundElements.containsKey(id)) {
 			result = foundElements.get(id);
 			EmsScriptNode resultAtTime = result.getVersionAtTime( dateTime );
-			if ( resultAtTime != null ) result = resultAtTime;
+			//if ( resultAtTime != null ) 
+			result = resultAtTime;
 		} else {
 			NodeRef nodeRef = NodeUtil.findNodeRefById(id, dateTime, services);
 			if (nodeRef != null) {
@@ -217,10 +220,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	}
 
 	protected void log(LogLevel level, String msg, int code) {
-		if (level.value >= logLevel.value) {
+		if (level.value >= logLevel.value || level.value == LogLevel.ERROR.value) {
 			log("[" + level.name() + "]: " + msg + "\n", code);
 			if (level.value >= LogLevel.WARNING.value) {
-				System.out.println("[" + level.name() + "]: " + msg + "\n");
+				if (Debug.isOn()) System.out.println("[" + level.name() + "]: " + msg + "\n");
 			}
 		}
 	}
@@ -229,7 +232,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	    if (level.value >= logLevel.value) {
 	        log("[" + level.name() + "]: " + msg);
 	    }
-        System.out.println(msg);
+        if (Debug.isOn()) System.out.println(msg);
 	}
 	
 	protected void log(String msg, int code) {
@@ -267,8 +270,48 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	}
 
 	
+    protected static final String WORKSPACE_ID = "workspaceId";
 	protected static final String PROJECT_ID = "projectId";
     protected static final String SITE_NAME = "siteName";
+    protected static final String SITE_NAME2 = "siteId";
+    
+    public static final String NO_PROJECT_ID = "no_project";
+    public static final String NO_SITE_ID = "no_site";
+
+    
+    public String getSiteName( WebScriptRequest req ) {
+        return getSiteName( req, false );
+    }
+    public String getSiteName( WebScriptRequest req, boolean createIfNonexistent ) {
+        String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
+        if ( siteName == null ) {
+            siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME2);
+        }
+        if ( siteName == null || siteName.length() <= 0 ) {
+            siteName = NO_SITE_ID;
+        }
+        if ( createIfNonexistent ) {
+            createSite( siteName );
+        }
+        return siteName;
+    }
+    
+    public EmsScriptNode createSite( String siteName ) {
+        EmsScriptNode siteNode = getSiteNode( siteName, null );
+        if ( siteNode == null || !siteNode.exists() ) {
+            SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, SiteVisibility.PUBLIC );
+            siteNode = new EmsScriptNode( foo.getNodeRef(), services );
+        }
+        return siteNode;
+    }
+    
+    public String getProjectId( WebScriptRequest req ) {
+        String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
+        if ( projectId == null || projectId.length() <= 0 ) {
+            projectId = NO_PROJECT_ID;
+        }
+        return projectId;
+    }
     
     protected boolean checkRequestContent(WebScriptRequest req) {
         if (req.getContent() == null) {
@@ -365,60 +408,68 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * this can be removed every where
      * @param instance
      */
-    @Deprecated
     public void appendResponseStatusInfo(AbstractJavaWebScript instance) {
         response.append(instance.getResponse());
         responseStatus.setCode(instance.getResponseStatus().getCode());
     }
 
     protected void printFooter() {
-        System.out.println( "*** completed " + getClass().getSimpleName() );
+        if (Debug.isOn()) System.out.println( "*** completed " + (new Date()) + " " + getClass().getSimpleName() );
     }
 
     protected void printHeader( WebScriptRequest req ) {
-        System.out.println("*** starting " + getClass().getSimpleName() );
+        if (Debug.isOn()) System.out.println("*** starting " + (new Date()) + " " + getClass().getSimpleName() );
         String reqStr = req.getURL();
-        System.out.println( "*** request = "
+        if (Debug.isOn()) System.out.println( "*** request = "
                             + ( reqStr.length() <= MAX_PRINT
                                 ? reqStr
                                 : reqStr.substring( 0, MAX_PRINT ) + "..." ) );
     }
 
     protected static String getIdFromRequest( WebScriptRequest req ) {
-        String productId = req.getServiceMatch().getTemplateVars().get("id");
-        if ( productId == null ) {
-            productId = req.getServiceMatch().getTemplateVars().get("modelid");
+        String[] ids = new String[] { "id", "modelid", "viewid", "workspaceId",
+                                      "workspaceid", "elementid", "elementId" };
+        String id = null;
+        for ( String idv : ids ) {
+            id = req.getServiceMatch().getTemplateVars().get(idv);
+            if ( id != null ) break;
         }
-        if ( productId == null ) {
-            productId = req.getServiceMatch().getTemplateVars().get("elementid");
-        }
-        System.out.println("Got id = " + productId);
-        boolean gotElementSuffix  = ( productId.toLowerCase().trim().endsWith("/elements") );
+        if (Debug.isOn()) System.out.println("Got id = " + id);
+        if ( id == null ) return null;
+        boolean gotElementSuffix  = ( id.toLowerCase().trim().endsWith("/elements") );
         if ( gotElementSuffix ) {
-            productId = productId.substring( 0, productId.lastIndexOf( "/elements" ) );
+            id = id.substring( 0, id.lastIndexOf( "/elements" ) );
         } else {
-            boolean gotViewSuffix  = ( productId.toLowerCase().trim().endsWith("/views") );
+            boolean gotViewSuffix  = ( id.toLowerCase().trim().endsWith("/views") );
             if ( gotViewSuffix ) {
-                productId = productId.substring( 0, productId.lastIndexOf( "/views" ) );
+                id = id.substring( 0, id.lastIndexOf( "/views" ) );
             }
         }
-        System.out.println("productId = " + productId);
-        return productId;
+        if (Debug.isOn()) System.out.println("id = " + id);
+        return id;
     }
 
+    
+    protected static boolean urlEndsWith( String url, String suffix ) {
+        if ( url == null ) return false;
+        url = url.toLowerCase().trim();
+        suffix = suffix.toLowerCase().trim();
+        if ( suffix.startsWith( "/" ) ) suffix = suffix.substring( 1 );
+        int pos = url.lastIndexOf( '/' );
+        if (url.substring( pos+1 ).startsWith( suffix ) ) return true;
+        return false;
+    }
     protected static boolean isDisplayedElementRequest( WebScriptRequest req ) {
         if ( req == null ) return false;
         String url = req.getURL();
-        if ( url == null ) return false;
-        boolean gotSuffix = ( url.toLowerCase().trim().endsWith("/elements") );
+        boolean gotSuffix = urlEndsWith( url, "elements" );
         return gotSuffix;
     }
 
     protected static boolean isContainedViewRequest( WebScriptRequest req ) {
         if ( req == null ) return false;
         String url = req.getURL();
-        if ( url == null ) return false;
-        boolean gotSuffix = ( url.toLowerCase().trim().endsWith("/views") );
+        boolean gotSuffix = urlEndsWith( url, "views" );
         return gotSuffix;
     }    
 }

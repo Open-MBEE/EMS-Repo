@@ -12,19 +12,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import sysml.Viewable;
+import sysml.view.Viewable;
 
 /**
  * An implementation of a {@link Viewable} list of {@link Viewable}s subclassing
  * {@link ArrayList}.
  * 
- * @see sysml.List
+ * @see viewable.List
  * 
  */
-public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysml.List< EmsScriptNode > {
+public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysml.view.List< EmsScriptNode > {
 
     private static final long serialVersionUID = 3954654861037876503L;
-    private boolean ordered = false;
+    protected boolean ordered = false;
     
     /**
      * Create an empty List.

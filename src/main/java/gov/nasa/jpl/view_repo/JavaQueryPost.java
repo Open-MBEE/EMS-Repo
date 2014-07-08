@@ -88,7 +88,7 @@ public class JavaQueryPost extends AbstractJavaWebScript {
 //		    model.put( "query", req.getParameter("query") );
 //            model.put( "reply", req.getParameter("reply") );
 //            
-//            System.out.println( "\n\n\nDOING JUNIT TESTS!\n\n" );
+//            if (Debug.isOn()) System.out.println( "\n\n\nDOING JUNIT TESTS!\n\n" );
 //            JUnitCore junit = new JUnitCore();
 //            Class< ? >[] testClasses = getJunitClasses();
 //            Result result = junit.run( testClasses );
@@ -106,7 +106,7 @@ public class JavaQueryPost extends AbstractJavaWebScript {
             return model;
         }
         if (qString.equals( "dojunittest" ) ) {
-            System.out.println( "\n\n\nDOING JUNIT TESTS!\n\n" );
+            if (Debug.isOn()) System.out.println( "\n\n\nDOING JUNIT TESTS!\n\n" );
             JUnitCore junit = new JUnitCore();
             Class< ? >[] testClasses = getJunitClasses();
             Result result = junit.run( testClasses );
@@ -117,7 +117,7 @@ public class JavaQueryPost extends AbstractJavaWebScript {
         
         String packageName = JavaQueryPost.class.getPackage().toString().replace( "package ", "" );
 		model.put( "query", qString );
-		System.out.println("\n\n\n" + Timepoint.now().toTimestamp() + "\nEvaluating: \"" + qString + "\"\n\n");
+		if (Debug.isOn()) System.out.println("\n\n\n" + Timepoint.now().toTimestamp() + "\nEvaluating: \"" + qString + "\"\n\n");
 		Object reply = null;
 		try {
 		    reply = JavaEvaluator.evaluate( qString,  packageName );
@@ -127,7 +127,7 @@ public class JavaQueryPost extends AbstractJavaWebScript {
 		}
 		String replyString = "null";
 		if ( reply != null ) replyString = MoreToString.Helper.toString( reply ); 
-        System.out.println("\n\n\n" + Timepoint.now().toTimestamp() + "\nResult = : \"" + replyString + "\"\n\n");
+        if (Debug.isOn()) System.out.println("\n\n\n" + Timepoint.now().toTimestamp() + "\nResult = : \"" + replyString + "\"\n\n");
 		model.put("reply", replyString );
 		model.put( "verbose", verbose );
 		return model;

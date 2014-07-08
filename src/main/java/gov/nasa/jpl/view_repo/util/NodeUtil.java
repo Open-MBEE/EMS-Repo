@@ -19,6 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.alfresco.repo.jscript.ScriptNode;
+import org.alfresco.repo.jscript.ScriptVersion;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
@@ -93,7 +94,7 @@ public class NodeUtil {
     public static Collection<EmsScriptNode> luceneSearchElements(String queryPattern ) {
         ArrayList<EmsScriptNode> nodes = new ArrayList<EmsScriptNode>();
         ResultSet resultSet = luceneSearch( queryPattern, (SearchService)null );
-        System.out.println( "luceneSearch(" + queryPattern + ") returns "
+        if (Debug.isOn()) System.out.println( "luceneSearch(" + queryPattern + ") returns "
                             + resultSet.length() + " matches." );
        for ( ResultSetRow row : resultSet ) {
             EmsScriptNode node =
@@ -166,7 +167,7 @@ public class NodeUtil {
         ResultSet results = null;
         ArrayList<NodeRef> nodeRefs = new ArrayList<NodeRef>();
         NodeRef nodeRef = null;
-        boolean gotResults = false;
+//        boolean gotResults = false;
         try {
             results = findNodeRefsByType( specifier, prefix, services );
             if (results != null) {
@@ -174,7 +175,7 @@ public class NodeUtil {
                 for (ResultSetRow row: results) {
                     NodeRef nr = row.getNodeRef();
                     if ( nr == null ) continue;
-                    gotResults = true;
+//                    gotResults = true;
 
                     // Get the version for the date/time if specified.
                     if ( dateTime != null ) {
@@ -215,14 +216,14 @@ public class NodeUtil {
                 results.close();
             }
         }
-        // If we found a NodeRef but still have null (maybe because a version
-        // didn't exist at the time), try again for the latest.
-        if ( nodeRefs.isEmpty()//nodeRef == null 
-                && dateTime != null && gotResults) {
-            nodeRefs = findNodeRefsByType( specifier, prefix, null, justFirst,
-                                           exactMatch, services );
-            //nodeRef = findNodeRefByType( specifier, prefix, null, services );
-        }
+//        // If we found a NodeRef but still have null (maybe because a version
+//        // didn't exist at the time), try again for the latest.
+//        if ( nodeRefs.isEmpty()//nodeRef == null 
+//                && dateTime != null && gotResults) {
+//            nodeRefs = findNodeRefsByType( specifier, prefix, null, justFirst,
+//                                           exactMatch, services );
+//            //nodeRef = findNodeRefByType( specifier, prefix, null, services );
+//        }
         return nodeRefs;     
     }
     
@@ -301,8 +302,8 @@ public class NodeUtil {
 //            if ( response != null || status != null ) {
 //                String msg = "Error! Could not parse search: " + pattern + ".\n"
 //                             + e.getLocalizedMessage();
-//                System.out.println(msg);
-//                e.printStackTrace( System.out );
+//                if (Debug.isOn()) System.out.println(msg);
+//                e.printStackTrace( if (Debug.isOn()) System.out );
 //                if ( response != null ) response.append( msg );
 //                if ( status != null ) status.setCode( HttpServletResponse.SC_BAD_REQUEST,
 //                                                      msg );
@@ -343,7 +344,7 @@ public class NodeUtil {
     public static boolean isType( String typeName, ServiceRegistry services ) {
         if ( typeName == null ) return false;
         if ( Acm.getJSON2ACM().keySet().contains( typeName ) ) {
-            typeName = Acm.getACM2JSON().get( typeName );
+            typeName = Acm.getJSON2ACM().get( typeName );
         }
 //        String[] split = typeName.split( ":" );
 //        
@@ -370,24 +371,24 @@ public class NodeUtil {
         if ( qName != null ) {
             TypeDefinition t = dServ.getType( qName );
             if ( t != null ) {
-//              System.out.println("\n\n*** getType(" + typeName + ") worked!!!\n" );
+//              if (Debug.isOn()) System.out.println("\n\n*** getType(" + typeName + ") worked!!!\n" );
               return true;
             }
         }
-//        //        System.out.println("all types: " + types);
+//        //        if (Debug.isOn()) System.out.println("all types: " + types);
 ////        TypeDefinition t = dServ.getType( QName.createQName( typeName ) );
-////        System.out.println("getType(" + typeName + ") = " + t );
+////        if (Debug.isOn()) System.out.println("getType(" + typeName + ") = " + t );
 //        for ( QName type : types ) {
-////            System.out.println( "getLocalName() = " + type.getLocalName() );
-////            System.out.println( "getPrefixString() = " + type.getPrefixString() );
-////            System.out.println( "toPrefixString() = " + type.toPrefixString() );
-////            System.out.println( "toString() = " + type.toString() );
+////            if (Debug.isOn()) System.out.println( "getLocalName() = " + type.getLocalName() );
+////            if (Debug.isOn()) System.out.println( "getPrefixString() = " + type.getPrefixString() );
+////            if (Debug.isOn()) System.out.println( "toPrefixString() = " + type.toPrefixString() );
+////            if (Debug.isOn()) System.out.println( "toString() = " + type.toString() );
 //            if ( typeName.equals( type.getPrefixString() ) ) {
-//                System.out.println("isType(" + typeName + ") = true");
+//                if (Debug.isOn()) System.out.println("isType(" + typeName + ") = true");
 //                return true;
 //            }
 //        }
-//        System.out.println("isType(" + typeName + ") = false");
+//        if (Debug.isOn()) System.out.println("isType(" + typeName + ") = false");
         return false;
     }
     
@@ -424,21 +425,21 @@ public class NodeUtil {
         if ( qName != null ) {
             AspectDefinition t = dServ.getAspect( qName );
             if ( t != null ) {
-              System.out.println("\n\n*** getAspect(" + aspectName + ") worked!!!\n" );
+              if (Debug.isOn()) System.out.println("\n\n*** getAspect(" + aspectName + ") worked!!!\n" );
               return true;
             }
         }
         
         Collection< QName > aspects = dServ.getAllAspects();
-        System.out.println("all aspects: " + aspects);
+        if (Debug.isOn()) System.out.println("all aspects: " + aspects);
 
         for ( QName aspect : aspects ) {
             if ( aspect.getPrefixString().equals( aspectName ) ) {
-                System.out.println("\n\n*** getAspect(" + aspectName + ") returning true\n" );
+                if (Debug.isOn()) System.out.println("\n\n*** getAspect(" + aspectName + ") returning true\n" );
                 return true;
             }
         }
-        System.out.println("\n\n*** getAspect(" + aspectName + ") returning false\n" );
+        if (Debug.isOn()) System.out.println("\n\n*** getAspect(" + aspectName + ") returning false\n" );
         return false;
     }
 
@@ -571,7 +572,7 @@ public class NodeUtil {
                                                   ServiceRegistry services ) {
         if ( services == null ) services = getServices();
         if ( Acm.getJSON2ACM().keySet().contains( typeOrAspectName ) ) {
-            typeOrAspectName = Acm.getACM2JSON().get( typeOrAspectName );
+            typeOrAspectName = Acm.getJSON2ACM().get( typeOrAspectName );
         }
         String type = typeOrAspectName;
         boolean notType = !NodeUtil.isType( type, services ); 
@@ -609,7 +610,7 @@ public class NodeUtil {
         EmsScriptNode companyHome = null;
         if ( services == null ) services = getServiceRegistry();
         if ( services == null || services.getNodeLocatorService() == null ) {
-            System.out.println( "getCompanyHome() failed, no services or no nodeLocatorService: "
+            if (Debug.isOn()) System.out.println( "getCompanyHome() failed, no services or no nodeLocatorService: "
                                 + services );
         }
         NodeRef companyHomeNodeRef =
@@ -646,27 +647,6 @@ public class NodeUtil {
         return n;
     }
 
-//    private static <T> int indexedBinarySearchLower(List<? extends T> l, T key, Comparator<? super T> c) {
-//        int low = 0;
-//        int high = l.size()-1;
-//
-//        while (low <= high) {
-//            int mid = (low + high) >>> 1;
-//            T midVal = l.get(mid);
-//            int cmp = c.compare(midVal, key);
-//
-//            if (cmp < 0)
-//                low = mid + 1;
-//            else if (cmp > 0)
-//                high = mid - 1;
-//            else
-//                return mid; // key found
-//        }
-//        return -(low + 1);  // key not found
-//    }
-
-
-    
     public static class VersionLowerBoundComparator implements Comparator< Object > {
         
         @Override
@@ -722,48 +702,94 @@ public class NodeUtil {
      * @return the version of the NodeRef that was the latest version at the specified time, or if before any version
      */
     public static NodeRef getNodeRefAtTime( NodeRef ref, Date dateTime ) {
+        if (Debug.isOn())  Debug.outln("\n\n\ngetNodeRefAtTime( " + ref + ", " + dateTime + " )" );
+
         if ( dateTime == null ) {
-            getServices().getVersionService().getCurrentVersion( ref );
+            return ref;//getServices().getVersionService().getCurrentVersion( ref );
         }
         VersionHistory history = getServices().getVersionService().getVersionHistory( ref );
         if (history == null) {
-        		// Versioning doesn't make versions until the first save...
-        		EmsScriptNode node = new EmsScriptNode(ref, services);
-        		if (dateTime != null && dateTime.compareTo((Date)node.getProperty("cm:created")) < 0) {
-        			return null;
-        		}
-        		return ref;
+    		// Versioning doesn't make versions until the first save...
+    		EmsScriptNode node = new EmsScriptNode(ref, services);
+    		Date createdTime = (Date)node.getProperty("cm:created");
+            if ( dateTime != null && dateTime.compareTo( createdTime ) < 0 ) {
+                if (Debug.isOn())  Debug.outln( "no history! dateTime " + dateTime
+                                    + " before created " + createdTime );
+    			return null;
+    		}
+            if (Debug.isOn())  Debug.outln( "no history! created " + createdTime );
+    		return ref;
         }
         
         Collection< Version > versions = history.getAllVersions();
         Vector<Version> vv = new Vector<Version>( versions );
+        if (Debug.isOn())  Debug.outln("versions = " + vv );
         if ( Utils.isNullOrEmpty( vv ) ) {
             // TODO - throw error?!
             return null;
         }
         int index = Collections.binarySearch( vv, dateTime, versionLowerBoundComparator );
-        Version v = null;
+        if (Debug.isOn())  Debug.outln( "binary search returns index " + index );
+        Version version = null;
         if ( index < 0 ) {
             // search returned index = -(lowerBound+1), so lowerbound = -index-1
             index = -index - 1;
+            if (Debug.isOn())  Debug.outln( "index converted to lowerbound " + index );
+//            // But, since the order is newest to oldest, we want the one after the lowerbound
+//            if ( index >= 0 && index < vv.size()-1 ) {
+//                index = index + 1;
+//                if (Debug.isOn())  Debug.outln( "index converted to upperbound " + index );
+//            }
         }
         if ( index < 0 ) {
-            v = vv.get( 0 );
-            if ( v != null ) {
-                Date d = v.getFrozenModifiedDate();
+            version = vv.get( 0 );
+            if ( version != null ) {
+                Date d = version.getFrozenModifiedDate();
+                if (Debug.isOn())  Debug.outln( "first frozen modified date " + d );
                 if ( d != null && d.after( dateTime ) ) {
-                    return v.getVersionedNodeRef();
+                    NodeRef fnr = version.getFrozenStateNodeRef();
+                    if (Debug.isOn())  Debug.outln( "returning first frozen node ref " + fnr );
+                    return fnr;
                 }
             }
             // TODO -- throw error?!
+            if (Debug.isOn())  Debug.outln( "version is null; returning null!" );
             return null;
         } else if ( index >= vv.size() ) {
+            if (Debug.isOn())  Debug.outln( "index is too large, outside bounds!" );
             // TODO -- throw error?!
             return null;
         } else {
-            v = vv.get( index );
+            version = vv.get( index );
         }
-        return v.getVersionedNodeRef();
+        if (Debug.isOn())  Debug.outln( "picking version " + version );
+        if (Debug.isOn())  Debug.outln( "version properties " + version.getVersionProperties() );
+        String versionLabel = version.getVersionLabel();
+        EmsScriptNode emsNode = new EmsScriptNode( ref, getServices() );
+        ScriptVersion scriptVersion = emsNode.getVersion( versionLabel );
+        if (Debug.isOn())  Debug.outln( "scriptVersion " + scriptVersion );
+        ScriptNode node = scriptVersion.getNode();
+        if (Debug.isOn())  Debug.outln( "script node " + node );
+        //can't get script node properties--generates exception
+        //if (Debug.isOn())  Debug.outln( "script node properties " + node.getProperties() );
+        NodeRef scriptVersionNodeRef = scriptVersion.getNodeRef();
+        if (Debug.isOn())  Debug.outln( "ScriptVersion node ref "
+                                         + scriptVersionNodeRef );
+        NodeRef vnr = version.getVersionedNodeRef();
+        if (Debug.isOn())  Debug.outln( "versioned node ref " + vnr );
+        
+        NodeRef fnr = version.getFrozenStateNodeRef();
+        if (Debug.isOn())  Debug.outln( "frozen node ref " + fnr );
+        if (Debug.isOn())  Debug.outln( "frozen node ref properties: "
+                                         + getServices().getNodeService()
+                                                        .getProperties( fnr ) );
+        if (Debug.isOn())  Debug.outln( "frozen node ref "
+                + getServices().getNodeService()
+                               .getProperties( fnr ) );
+
+        if (Debug.isOn())  Debug.outln( "returning frozen node ref " + fnr );
+
+        return fnr;
     }
 
     
@@ -853,5 +879,27 @@ public class NodeUtil {
             return nodeRefs.get( 0 );
         }
         return null;
+    }
+
+    public static EmsScriptNode getVersionAtTime( EmsScriptNode element,
+                                                  Date dateTime ) {
+        EmsScriptNode versionedNode = null;
+        NodeRef ref = getNodeRefAtTime( element.getNodeRef(), dateTime );
+        if ( ref != null ) {
+            versionedNode = new EmsScriptNode( ref, element.getServices() );
+        }
+        return versionedNode;
+    }
+
+    public static Collection< EmsScriptNode >
+            getVersionAtTime( Collection< EmsScriptNode > moreElements, Date dateTime ) {
+        ArrayList<EmsScriptNode> elements = new ArrayList<EmsScriptNode>();
+        for ( EmsScriptNode n : moreElements ) {
+            EmsScriptNode versionedNode = getVersionAtTime( n, dateTime );
+            if ( versionedNode != null ) {
+                elements.add( versionedNode );
+            }
+        }
+        return elements;
     }
 }

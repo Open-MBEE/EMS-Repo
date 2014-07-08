@@ -29,9 +29,11 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -42,6 +44,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -82,12 +85,16 @@ public class ModelGet extends AbstractJavaWebScript {
 	
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		String modelId = req.getServiceMatch().getTemplateVars().get("modelid");
-		if (modelId == null) {
-			modelId = req.getServiceMatch().getTemplateVars().get("elementid");
-		}
+	    String[] idKeys = {"modelid", "elementid", "elementId"};
+	    String modelId = null;
+	    for (String idKey: idKeys) {
+	        modelId = req.getServiceMatch().getTemplateVars().get( idKey );
+	        if (modelId != null) {
+	            break;
+	        }
+	    }
 		
-		if (!checkRequestVariable(modelId, "modelid")) {
+		if (modelId == null) {
 			log(LogLevel.ERROR, "Element id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
 			return false;
 		}
@@ -98,7 +105,10 @@ public class ModelGet extends AbstractJavaWebScript {
         
 		EmsScriptNode modelRootNode = findScriptNodeById(modelId, dateTime);
 		if (modelRootNode == null) {
-			log(LogLevel.ERROR, "Element not found with id: " + modelId + ".\n", HttpServletResponse.SC_NOT_FOUND);
+            log( LogLevel.ERROR,
+                 "Element with id, " + modelId
+                 + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
+                 HttpServletResponse.SC_NOT_FOUND );
 			return false;
 		}
 		
@@ -138,7 +148,8 @@ public class ModelGet extends AbstractJavaWebScript {
 		        top.put("elements", elementsJson);
 	            model.put("res", top.toString(4));
 		    } else {
-		        log(LogLevel.WARNING, "Element not found", HttpServletResponse.SC_NOT_FOUND);
+		        log(LogLevel.WARNING, "No elements found",
+		            HttpServletResponse.SC_NOT_FOUND);
 		        model.put("res", response.toString());
 		    }
 		} catch (JSONException e) {
@@ -159,18 +170,36 @@ public class ModelGet extends AbstractJavaWebScript {
 	 */
 	private JSONArray handleRequest(WebScriptRequest req) {
         try {
-            String modelId = req.getServiceMatch().getTemplateVars().get("modelid");
-            if (modelId == null) {
-                modelId = req.getServiceMatch().getTemplateVars().get("elementid");
+            String[] idKeys = {"modelid", "elementid", "elementId"};
+            String modelId = null;
+            for (String idKey: idKeys) {
+                modelId = req.getServiceMatch().getTemplateVars().get(idKey);
+                if (modelId != null) {
+                    break;
+                }
             }
+            
+            if (null == modelId) {
+                log(LogLevel.ERROR, "Could not find element " + modelId, HttpServletResponse.SC_NOT_FOUND );
+                return new JSONArray();
+            }
+            
 
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
             
-            System.out.println("modelId = " + modelId );
+            if (Debug.isOn()) System.out.println("modelId = " + modelId );
             EmsScriptNode modelRootNode = findScriptNodeById(modelId, dateTime);
-            System.out.println("modelRootNode = " + modelRootNode );
+            if (Debug.isOn()) System.out.println("modelRootNode = " + modelRootNode );
+            
+            if ( modelRootNode == null ) {
+                    log( LogLevel.ERROR,
+                         "Element " + modelId
+                         + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
+                         HttpServletResponse.SC_NOT_FOUND );
+                    return new JSONArray();
+            }
             
             // recurse default is false
             boolean recurse = checkArgEquals(req, "recurse", "true") ? true : false;
@@ -181,7 +210,7 @@ public class ModelGet extends AbstractJavaWebScript {
                 handleElementHierarchy(modelRootNode, recurse, dateTime);
             }
             
-            handleElements();
+            handleElements(dateTime);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -207,9 +236,15 @@ public class ModelGet extends AbstractJavaWebScript {
 				
 				// TODO Need to report that allowedElements can't be found
 				if (childElement != null) {
-        				if (checkPermissions(childElement, PermissionService.READ)) {
-        				    elementsFound.put(id, childElement);
-        				}
+                    if ( checkPermissions( childElement, PermissionService.READ ) ) {
+                        elementsFound.put( id, childElement );
+                    } // TODO -- REVIEW -- Warning if no permissions?
+				} else {
+                    log( LogLevel.WARNING,
+                         "Element " + id
+                         + ( dateTime == null ? "" : " at " + dateTime )
+                         + " not found",
+                         HttpServletResponse.SC_NOT_FOUND );
 				}
 			}
 			if (recurse) {
@@ -220,9 +255,15 @@ public class ModelGet extends AbstractJavaWebScript {
 						String id = childViewJson.getString(ii);
 						EmsScriptNode childView = findScriptNodeById(id, dateTime);
 						if (childView != null) {
-        						if (checkPermissions(childView, PermissionService.READ)) {
-        						    handleViewHierarchy(childView, recurse, dateTime);
-        						}
+						    if (checkPermissions(childView, PermissionService.READ)) {
+						        handleViewHierarchy(childView, recurse, dateTime);
+						    } // TODO -- REVIEW -- Warning if no permissions?
+						} else {
+		                    log( LogLevel.WARNING,
+		                         "Element " + id
+		                         + ( dateTime == null ? "" : " at " + dateTime )
+                                 + " not found",
+                                 HttpServletResponse.SC_NOT_FOUND );
 						}
 					}
 				}
@@ -257,23 +298,34 @@ public class ModelGet extends AbstractJavaWebScript {
 		        EmsScriptNode reifiedNode = findScriptNodeById(rootName + "_pkg", dateTime);
 		        if (reifiedNode != null) {
 		            handleElementHierarchy(reifiedNode, recurse, dateTime);
-		        }
+		        } // TODO -- REVIEW -- Warning or error?
 		    }
 			for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
-				EmsScriptNode child = new EmsScriptNode(assoc.getChildRef(), services, response);
-				if (checkPermissions(child, PermissionService.READ)) {
-			       if (child.getTypeShort().equals(Acm.ACM_ELEMENT_FOLDER)) {
-						handleElementHierarchy(child, recurse, dateTime);
-    			       } else {
-        					String value = (String)child.getProperty(Acm.ACM_ID);
-        					if (value != null) {
-        						array.put(value);
-        						elementsFound.put(value, child);
-        						// add empty hierarchies as well
-        						elementHierarchy.put(value, new JSONArray());
-        					}
-    			       }
-				}
+			    NodeRef childRef = assoc.getChildRef();
+			    NodeRef vChildRef = NodeUtil.getNodeRefAtTime( childRef, dateTime );
+                if ( vChildRef == null ) {
+                    log( LogLevel.WARNING,
+                         "Element " + childRef
+                         + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
+                         HttpServletResponse.SC_NOT_FOUND );
+			        continue;
+			    }
+                childRef = vChildRef;
+                EmsScriptNode child =
+                        new EmsScriptNode( childRef, services, response );
+                if ( checkPermissions( child, PermissionService.READ ) ) {
+                    if ( child.getTypeShort().equals( Acm.ACM_ELEMENT_FOLDER ) ) {
+                        handleElementHierarchy( child, recurse, dateTime );
+                    } else {
+                        String value = (String)child.getProperty( Acm.ACM_ID );
+                        if ( value != null ) {
+                            array.put( value );
+                            elementsFound.put( value, child );
+                            // add empty hierarchies as well
+                            elementHierarchy.put( value, new JSONArray() );
+                        }
+                    }
+                }
 			}
 	    	
 			// if there were any children add them to the hierarchy object
@@ -291,13 +343,13 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * Build up the element JSONObject
 	 * @throws JSONException
 	 */
-	protected void handleElements() throws JSONException {
+	protected void handleElements(Date dateTime) throws JSONException {
 		for (String id: elementsFound.keySet()) {
 			EmsScriptNode node = elementsFound.get(id);
 
 			if (checkPermissions(node, PermissionService.READ)){ 
-                elements.put(node.toJSONObject(Acm.JSON_TYPE_FILTER.ELEMENT));
-			}
+                elements.put(node.toJSONObject(Acm.JSON_TYPE_FILTER.ELEMENT, dateTime));
+			} // TODO -- REVIEW -- Warning if no permissions?
 		}
 	}
 		

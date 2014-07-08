@@ -1,287 +1,114 @@
 {"elements": [
     {
         "author": "admin",
-        "documentation": "",
         "editable": true,
-        "name": "6666_name",
         "owner": "123456",
-        "qualifiedName": "/////CY Test/6666_name",
-        "specialization": {
-            "operand": [
-                {
-                    "element": "300",
-                    "type": "ElementValue"
-                },
-                {
-                    "element": "302",
-                    "type": "ElementValue"
-                }
-            ],
-            "type": "Expression"
-        }
+        "qualifiedName": "/////CY Test/",
+        "specialization": {"type": "Element"},
+        "sysmlid": "MMS_1404775488038_defe5d61-e808-44e3-b5a4-26344105218e"
     },
     {
         "author": "admin",
-        "documentation": "4about",
         "editable": true,
-        "name": "404",
-        "owner": "403",
-        "qualifiedName": "/////CY Test/////404",
-        "specialization": {
-            "isDerived": false,
-            "type": "Property",
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }]
-        }
-    },
-    {
-        "author": "admin",
-        "documentation": "4else",
-        "editable": true,
-        "name": "401",
-        "owner": "4000",
-        "qualifiedName": "/////CY Test//401",
-        "specialization": {
-            "allowedElements": [
-                "401",
-                "402",
-                "403"
-            ],
-            "childrenViews": ["404"],
-            "contains": [{
-                "source": "401",
-                "sourceProperty": "documentation",
-                "sourceType": "reference",
-                "type": "Paragraph"
-            }],
-            "displayedElements": [
-                "401",
-                "402",
-                "403"
-            ],
-            "isDerived": false,
-            "noSections": ["402"],
-            "type": "Property",
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "view2view": [{
-                "childrenViews": ["402"],
-                "id": "401"
-            }]
-        }
-    },
-    {
-        "author": "admin",
-        "documentation": "4something",
-        "editable": true,
-        "name": "400",
         "owner": "123456",
-        "qualifiedName": "/////CY Test/400",
-        "specialization": {
-            "isDerived": false,
-            "type": "Property",
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }]
-        }
+        "qualifiedName": "/////CY Test/",
+        "specialization": {"type": "Element"},
+        "sysmlid": "MMS_1404775488073_ae039e91-6385-473d-899e-dc3c29df9035"
     },
     {
         "author": "admin",
-        "documentation": "4talk",
         "editable": true,
-        "name": "403",
-        "owner": "402",
-        "qualifiedName": "/////CY Test////403",
-        "specialization": {
-            "isDerived": false,
-            "type": "Property",
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }]
-        }
+        "owner": "123456",
+        "qualifiedName": "/////CY Test/",
+        "specialization": {"type": "Element"},
+        "sysmlid": "MMS_1404775488117_99874b7a-0bd9-4fdf-8c37-7685ec8f0b52"
     },
     {
         "author": "admin",
-        "documentation": "4to",
         "editable": true,
-        "name": "402",
-        "owner": "401",
-        "qualifiedName": "/////CY Test///402",
-        "specialization": {
-            "isDerived": false,
-            "type": "Property",
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }]
-        }
-    },
-    {
-        "author": "admin",
-        "documentation": "about",
-        "editable": true,
-        "name": "304",
-        "owner": "303",
-        "qualifiedName": "/////CY Test/////304",
-        "specialization": {
-            "isDerived": false,
-            "type": "Property",
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }]
-        }
-    },
-    {
-        "author": "admin",
-        "documentation": "directed_relationship",
-        "editable": true,
-        "name": "500",
         "owner": "300",
-        "qualifiedName": "/////CY Test//500",
-        "specialization": {
-            "source": "302",
-            "target": "303",
-            "type": "DirectedRelationship"
-        }
+        "qualifiedName": "/////CY Test/300/",
+        "specialization": {"type": "Element"},
+        "sysmlid": "MMS_1404775488048_0108de24-d373-40a9-9949-b3bc5a9428a5"
     },
     {
         "author": "admin",
-        "documentation": "element values",
         "editable": true,
-        "name": "600",
-        "owner": "123456",
-        "qualifiedName": "/////CY Test/600",
-        "specialization": {
-            "isDerived": false,
-            "type": "Property",
-            "value": [
-                {
-                    "element": "300",
-                    "type": "ElementValue"
-                },
-                {
-                    "element": "302",
-                    "type": "ElementValue"
-                }
-            ]
-        }
-    },
-    {
-        "author": "admin",
-        "documentation": "else",
-        "editable": true,
-        "name": "301",
         "owner": "300",
-        "qualifiedName": "/////CY Test//301",
-        "specialization": {
-            "allowedElements": [
-                "301",
-                "302",
-                "303"
-            ],
-            "childrenViews": ["304"],
-            "contains": [{
-                "source": "301",
-                "sourceProperty": "documentation",
-                "sourceType": "reference",
-                "type": "Paragraph"
-            }],
-            "displayedElements": [
-                "301",
-                "302",
-                "303"
-            ],
-            "isDerived": false,
-            "noSections": ["302"],
-            "type": "Property",
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "view2view": [{
-                "childrenViews": ["302"],
-                "id": "301"
-            }]
-        }
+        "qualifiedName": "/////CY Test/300/",
+        "specialization": {"type": "Element"},
+        "sysmlid": "MMS_1404775488111_58d88d5d-f962-4ae7-b944-8109c3eb2f11"
     },
     {
         "author": "admin",
-        "documentation": "no owner",
         "editable": true,
-        "name": "305",
-        "owner": "999",
-        "qualifiedName": "/////CY Test/999/305",
-        "specialization": {
-            "isDerived": false,
-            "type": "Property",
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }]
-        }
-    },
-    {
-        "author": "admin",
-        "documentation": "something",
-        "editable": true,
-        "name": "300",
-        "owner": "123456",
-        "qualifiedName": "/////CY Test/300",
-        "specialization": {
-            "isDerived": false,
-            "type": "Property",
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }]
-        }
-    },
-    {
-        "author": "admin",
-        "documentation": "talk",
-        "editable": true,
-        "name": "303",
-        "owner": "302",
-        "qualifiedName": "/////CY Test////303",
-        "specialization": {
-            "isDerived": false,
-            "type": "Property",
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }]
-        }
-    },
-    {
-        "author": "admin",
-        "documentation": "to make compatible with value specs (this is just a Element)",
-        "editable": true,
-        "name": "dlam",
-        "owner": "cdelp",
-        "qualifiedName": "/////CY Test/cdelp/dlam",
-        "specialization": {"type": "Element"}
-    },
-    {
-        "author": "admin",
-        "documentation": "to",
-        "editable": true,
-        "name": "302",
         "owner": "301",
-        "qualifiedName": "/////CY Test///302",
-        "specialization": {
-            "isDerived": false,
-            "type": "Property",
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }]
-        }
+        "qualifiedName": "/////CY Test/301/",
+        "specialization": {"type": "Element"},
+        "sysmlid": "MMS_1404775488053_00895458-267b-4dee-bb37-c8df203e02fd"
+    },
+    {
+        "author": "admin",
+        "editable": true,
+        "owner": "302",
+        "qualifiedName": "/////CY Test/302/",
+        "specialization": {"type": "Element"},
+        "sysmlid": "MMS_1404775488059_c5c5cc04-4caf-4b8d-a6e4-e20db98a2583"
+    },
+    {
+        "author": "admin",
+        "editable": true,
+        "owner": "303",
+        "qualifiedName": "/////CY Test/303/",
+        "specialization": {"type": "Element"},
+        "sysmlid": "MMS_1404775488064_d1500573-513a-4a0e-8e10-a0f2e1cd4c20"
+    },
+    {
+        "author": "admin",
+        "editable": true,
+        "owner": "4000",
+        "qualifiedName": "/////CY Test/4000/",
+        "specialization": {"type": "Element"},
+        "sysmlid": "MMS_1404775488078_8cf8b187-8665-49f3-9efc-173ebaeaad8e"
+    },
+    {
+        "author": "admin",
+        "editable": true,
+        "owner": "401",
+        "qualifiedName": "/////CY Test/401/",
+        "specialization": {"type": "Element"},
+        "sysmlid": "MMS_1404775488083_916f920f-6fd0-400f-9ece-73968b21a072"
+    },
+    {
+        "author": "admin",
+        "editable": true,
+        "owner": "402",
+        "qualifiedName": "/////CY Test/402/",
+        "specialization": {"type": "Element"},
+        "sysmlid": "MMS_1404775488088_9ddcf842-1137-417a-aaad-38619be73741"
+    },
+    {
+        "author": "admin",
+        "editable": true,
+        "owner": "403",
+        "qualifiedName": "/////CY Test/403/",
+        "specialization": {"type": "Element"},
+        "sysmlid": "MMS_1404775488104_55229612-10d7-4683-8238-b3e3ec344c61"
+    },
+    {
+        "author": "admin",
+        "editable": true,
+        "owner": "999",
+        "qualifiedName": "/////CY Test/999/",
+        "specialization": {"type": "Element"},
+        "sysmlid": "MMS_1404775488069_34893850-950e-485f-9fe7-d76003789ece"
+    },
+    {
+        "author": "admin",
+        "editable": true,
+        "owner": "cdelp",
+        "qualifiedName": "/////CY Test/cdelp/",
+        "specialization": {"type": "Element"},
+        "sysmlid": "MMS_1404775488124_ed2243c6-7a91-4a00-bd70-8dbfef875482"
     }
 ]}

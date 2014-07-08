@@ -4,8 +4,6 @@
 package gov.nasa.jpl.view_repo.sysml;
 
 import gov.nasa.jpl.ae.event.Expression;
-import gov.nasa.jpl.ae.event.Expression.Form;
-import gov.nasa.jpl.ae.event.FunctionCall;
 import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.MoreToString;
@@ -22,32 +20,35 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.Vector;
-
-import sysml.SystemModel.ModelItem;
-import sysml.SystemModel.Operation;
-import sysml.Viewable;
-
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
-
-import sysml.SystemModel.Item;
+import sysml.view.Viewable;
 /**
  * A View embeds {@link Viewable}s and itself is a {@link Viewable}. View
  * inherits from List so that it may contain Viewables in addition to having
  * View children.
  * 
  */
-public class View extends List implements sysml.View< EmsScriptNode >, Comparator<View>, Comparable<View> {
+public class View extends List implements sysml.view.View< EmsScriptNode >, Comparator<View>, Comparable<View> {
 
     private static final long serialVersionUID = -7618965504816221446L;
     
     protected EmsScriptNode viewNode = null;
     
     protected EmsSystemModel model = null;
+    
+    /**
+     * This is a cache of the displayed elements to keep from having to
+     * recompute them as is done for allowed elements.
+     */
+    protected Collection<EmsScriptNode> displayedElements = null;
+
+    protected boolean generate = false;
+
+    protected boolean recurse = false;
+    
+
 
     /**
      * @see List#List() 
@@ -110,6 +111,34 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
     }
 
     /**
+     * @return the generate
+     */
+    public boolean isGenerate() {
+        return generate;
+    }
+
+    /**
+     * @param generate the generate to set
+     */
+    public void setGenerate( boolean generate ) {
+        this.generate = generate;
+    }
+
+    /**
+     * @return the recurse
+     */
+    public boolean isRecurse() {
+        return recurse;
+    }
+
+    /**
+     * @param recurse the recurse to set
+     */
+    public void setRecurse( boolean recurse ) {
+        this.recurse = recurse;
+    }
+
+    /**
      * Override equals for EmsScriptNodes
      * 
      * @see java.lang.Object#equals(java.lang.Object)
@@ -132,21 +161,21 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
      */
     @Override
     // TODO -- need to support a flag for recursion
-    public Collection< sysml.View< EmsScriptNode > > getChildViews() {
-        ArrayList< sysml.View< EmsScriptNode > > childViews =
-                new ArrayList< sysml.View< EmsScriptNode > >();
-        for ( EmsScriptNode node : getChildViewElements() ) {
+    public Collection< sysml.view.View< EmsScriptNode > > getChildViews() {
+        ArrayList< sysml.view.View< EmsScriptNode > > childViews =
+                new ArrayList< sysml.view.View< EmsScriptNode > >();
+        for ( EmsScriptNode node : getChildViewElements( null ) ) {
             childViews.add( new View( node ) );
         }
         return childViews;
     }
 
     // TODO -- need to support a flag for recursion
-    public Collection< EmsScriptNode > getChildViewElements() {
+    public Collection< EmsScriptNode > getChildViewElements(Date dateTime) {
 //        ArrayList< EmsScriptNode > childViews =
 //                new ArrayList< EmsScriptNode >();
         Object o = viewNode.getProperty( Acm.ACM_CHILDREN_VIEWS );
-        Collection< EmsScriptNode > childViews = getElementsForJson( o );
+        Collection< EmsScriptNode > childViews = getElementsForJson( o, dateTime );
       
 //        JSONArray jarr = null;
 //        if ( o instanceof String ) {
@@ -210,25 +239,32 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
         if ( viewNode == null ) return null;
         EmsScriptNode viewpoint = null;
 
+        Set< EmsScriptNode > conformElements = 
+                this.getElement().getRelationshipsOfType( Acm.JSON_CONFORM );
+        if ( Utils.isNullOrEmpty( conformElements ) ) {
+            return null;
+        }
+        
         // Get all elements of Conform type:
-        Collection<EmsScriptNode> conformElements = getModel().getType(null, Acm.JSON_CONFORM);
-        System.out.println( "Got "
+        //Collection<EmsScriptNode> conformElements = getModel().getType(null, Acm.JSON_CONFORM);
+        if (Debug.isOn()) System.out.println( "Got "
                             + ( conformElements == null ? 0
                                                         : conformElements.size() )
                             + " elements of type " + Acm.JSON_CONFORM );
         for ( EmsScriptNode node : conformElements ) {
             
             // If the sysml:source of the Compose element is the View:
-            if (getSource(node).equals( viewNode ) ) { 
+//            EmsScriptNode source = getSource(node);
+//            if ( source != null && source.equals( viewNode ) ) { 
                 
                 // Get the target of the Conform relationship (the Viewpoint):
                 Collection<EmsScriptNode> viewpointNodes = getModel().getTarget(node);
                 
                 if (!Utils.isNullOrEmpty(viewpointNodes)) {
                     viewpoint = viewpointNodes.iterator().next();
-                }               
+                }
                 break;
-            }
+//            }
         }
         
         return viewpoint;
@@ -237,23 +273,29 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
     public Collection< EmsScriptNode > getExposedElements() {
         if ( viewNode == null ) return null;
 
+        Set< EmsScriptNode > exposeElements = 
+                this.getElement().getRelationshipsOfType( Acm.JSON_EXPOSE );
+        if ( Utils.isNullOrEmpty( exposeElements ) ) {
+            return null;
+        }
         Collection<EmsScriptNode> exposed = new ArrayList<EmsScriptNode>();
 
-        // Get all relationship elements of Expose type:
-        Collection<EmsScriptNode> exposeElements = getModel().getType(null, Acm.JSON_EXPOSE);
-        //Collection<EmsScriptNode> exposeElements = getModel().getRelationship(null, "Expose");  // Can we call this?
+//        // Get all relationship elements of Expose type:
+//        Collection<EmsScriptNode> exposeElements = getModel().getType(null, Acm.JSON_EXPOSE);
+//        //Collection<EmsScriptNode> exposeElements = getModel().getRelationship(null, "Expose");  // Can we call this?
 
-        Debug.outln( "Expose relationships of " + viewNode + ": "
+        if (Debug.isOn()) Debug.outln( "Expose relationships of " + viewNode + ": "
                      + exposeElements );
         
         // Check if any of the nodes in the passed collection of Expose or Conform
         // elements have the View as a sysml:source:
         for ( EmsScriptNode node : exposeElements ) {
             
-            // If the sysml:source of the Expose element is the View, then
-            // add it to our expose list (there can be multiple exposes for
-            // a view):
-            if (getSource(node).equals( viewNode ) ) { 
+//            // If the sysml:source of the Expose element is the View, then
+//            // add it to our expose list (there can be multiple exposes for
+//            // a view):
+//            EmsScriptNode source = getSource(node);
+//            if (source != null && source.equals( viewNode ) ) { 
 
                 // Get the target(s) of the Expose relationship:
 
@@ -262,7 +304,7 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
                 if (!Utils.isNullOrEmpty(nodes)) {
                     exposed.addAll(nodes);
                 }
-            }
+//            }
         }
         
         return exposed;
@@ -272,6 +314,7 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
     public EmsScriptNode getViewpointOperation() {
         EmsScriptNode viewpoint = getViewpoint();
         if ( viewpoint == null ) return null;
+        //if ( viewpoint == null || !viewpoint.exists() ) return null;
         
         // Get the Method property from the ViewPoint element:        
         Collection< EmsScriptNode > viewpointMethods =
@@ -283,7 +326,7 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
             viewpointMethod = viewpointMethods.iterator().next();
         }
         
-        if ( viewpointMethod == null ) viewpointMethod = viewpoint;  // HACK -- TODO
+        //if ( viewpointMethod == null ) viewpointMethod = viewpoint;  // HACK -- TODO
 
         return viewpointMethod;
     }
@@ -296,7 +339,7 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
         //         and an external function (e.g., Java) is somehow specified.
         EmsScriptNode viewpointOp = getViewpointOperation(); 
         if ( viewpointOp == null ) {
-            System.out.println("*** View.toViewJson(): no viewpoint operation! View = " + toBoringString() );
+            if (Debug.isOn()) System.out.println("*** View.toViewJson(): no viewpoint operation! View = " + toBoringString() );
             return;
         }
         
@@ -397,14 +440,19 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
      */
     @Override
     public JSONObject toViewJson() {
+        return toViewJson( generate, recurse );
+    }
+    public JSONObject toViewJson( boolean doGenerate, boolean doRecurse ) {
     	
         if ( viewNode == null ) {
-            System.out.println("*** called View.toViewJson() without a view node! View = " + toBoringString() );
+            if (Debug.isOn()) System.out.println("*** called View.toViewJson() without a view node! View = " + toBoringString() );
             return null;
         }
         
         // Get the related elements that define the the view.
-        generateViewables();
+        if ( doGenerate ) {
+            generateViewables();
+        }
 
         // Generate the JSON for the view now that the View is populated with
         // Viewables.
@@ -419,7 +467,7 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
 
             JSONArray elements = new JSONArray();
             viewProperties.put("displayedElements", elements );
-            for ( EmsScriptNode elem : getDisplayedElements() ) {
+            for ( EmsScriptNode elem : getDisplayedElements( null, doGenerate, doRecurse, null ) ) {
                 elements.put( elem.getName() );
             }
 
@@ -431,13 +479,13 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
 
             elements = new JSONArray();
             viewProperties.put("childrenViews", elements );
-            for ( sysml.View<EmsScriptNode> view : getChildViews() ) {
+            for ( sysml.view.View<EmsScriptNode> view : getChildViews() ) {
                 if ( view instanceof View ) {
                     elements.put( view.getElement().getName() );
                 }
             }
 
-            JSONArray viewables = getContainsJson();
+            JSONArray viewables = getContainsJson( doGenerate );
             viewProperties.put("contains", viewables );
 
         } catch ( JSONException e ) {
@@ -448,9 +496,12 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
     }
     
     public JSONArray getContainsJson() {
+        return getContainsJson( generate );
+    }
+    public JSONArray getContainsJson( boolean doGenerate ) {
         JSONArray viewablesJson = new JSONArray();
 
-        if ( isEmpty() ) generateViewables();
+        if ( doGenerate && isEmpty() ) generateViewables();
 
         for ( Viewable< EmsScriptNode > viewable : this ) {
             if ( viewable != null ) {
@@ -473,12 +524,6 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
         return viewablesJson;
     }
     
-    /**
-     * This is a cache of the displayed elements to keep from having to
-     * recompute them as is done for allowed elements.
-     */
-    private Collection<EmsScriptNode> displayedElements = null;
-    
     public Collection<EmsScriptNode> getAllowedElements() {
         if ( displayedElements != null ) {
             return displayedElements;
@@ -489,68 +534,98 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
     @Override
     // TODO -- need to support a flag for recursion?
     public Collection<EmsScriptNode> getDisplayedElements() {
-        return getDisplayedElements( new HashSet<View>() );
+        return getDisplayedElements( null, generate, recurse, null );
     }
 
     // TODO -- need to support a flag for recursion?
-    public Collection<EmsScriptNode> getDisplayedElements( Set<View> seen) {
-        if ( seen.contains( this ) ) return Utils.getEmptySet();
-        seen.add( this );
+    public Collection<EmsScriptNode> getDisplayedElements( Date dateTime, boolean doGenerate, boolean doRecurse, Set<View> seen) {
+        if ( doRecurse ) {
+            if ( seen == null ) seen = new HashSet<View>(); 
+            if ( seen.contains( this ) ) return Utils.getEmptySet();
+            seen.add( this );
+        }
+        
         LinkedHashSet<EmsScriptNode> set = new LinkedHashSet<EmsScriptNode>();
         
-        if ( isEmpty() ) {
+        // Generate Viewables from Viewpoint method, but don't overwrite cached
+        // values.
+        if ( doGenerate && isEmpty() ) {
             generateViewables(); 
         } else if ( displayedElements != null ) {
+            // Return cached value which won't change since it's from hardcoded JSON.
             return displayedElements;
         }
         
-        set.addAll(super.getDisplayedElements() );
-        for ( sysml.View< EmsScriptNode > v : getChildViews() ) {
-            if ( v instanceof View ) {
-                set.addAll( ((View)v).getDisplayedElements( seen ) );
-            } else {
-                set.addAll( v.getDisplayedElements() );
-            }
-        }
-        Collection< EmsScriptNode > v2vs = getViewToViewPropertyViews();
-        for ( EmsScriptNode node : v2vs ) {
-            if ( node.isView() ) {
-                View v = new View( node );
-                set.addAll( v.getDisplayedElements( seen ) );
-            }
-        }
+        // get contained Viewables
+        // REVIEW -- should this only be done when generate == true?
+        Collection< EmsScriptNode > versionedElements = super.getDisplayedElements();
+        versionedElements = NodeUtil.getVersionAtTime( versionedElements, dateTime );
+        set.addAll( versionedElements );
+
+        // get elements specified in JSON in the displayed elements property 
         Object dElems = getElement().getProperty( Acm.ACM_DISPLAYED_ELEMENTS );
-        set.addAll( getElementsForJson( dElems ) );
+        set.addAll( getElementsForJson( dElems, dateTime ) );
+
+        if ( doRecurse ) {
+            
+            // get recursively from child views
+            for ( sysml.view.View< EmsScriptNode > v : getChildViews() ) {
+                EmsScriptNode n = NodeUtil.getVersionAtTime( v.getElement(), dateTime );
+                if ( n == null ) continue;
+                v = new View( n );
+                if ( v instanceof View ) {
+                    set.addAll( ((View)v).getDisplayedElements( dateTime,
+                                                                doGenerate,
+                                                                doRecurse,
+                                                                seen ) );
+                } else {
+                    // REVIEW -- this case seems impossible to reach since v is assigned a View
+                    Collection<EmsScriptNode> moreElements = v.getDisplayedElements();
+                    Collection<EmsScriptNode> vElems = NodeUtil.getVersionAtTime( moreElements, dateTime );
+                    set.addAll( vElems );
+                }
+            }
+            
+            // get recursively from viewToView property
+            Collection< EmsScriptNode > v2vs = getViewToViewPropertyViews(dateTime);
+            for ( EmsScriptNode node : v2vs ) {
+                if ( node.isView() ) {
+                    View v = new View( node );
+                    set.addAll( v.getDisplayedElements( dateTime, doGenerate, doRecurse, seen ) );
+                }
+            }
+        }
+
         displayedElements = set;
         return set;
     }
     
-    public Collection<EmsScriptNode> getElementsForJson( Object obj ) {
+    public Collection<EmsScriptNode> getElementsForJson( Object obj, Date dateTime ) {
         if ( obj == null ) return Utils.getEmptyList();
         LinkedHashSet<EmsScriptNode> nodes = new LinkedHashSet<EmsScriptNode>();
         if ( obj instanceof JSONArray ) {
-            return getElementsForJson( (JSONArray)obj );
+            return getElementsForJson( (JSONArray)obj, dateTime );
         }
         if ( obj instanceof JSONObject ) {
-            return getElementsForJson( (JSONObject)obj );
+            return getElementsForJson( (JSONObject)obj, dateTime );
         }
         String idString = "" + obj;
         if ( idString.length() <= 0 ) return Utils.getEmptyList();
         try {
             if ( idString.trim().charAt( 0 ) == '[' ) {
                 JSONArray jArray = new JSONArray( idString );
-                return getElementsForJson( jArray );
+                return getElementsForJson( jArray, dateTime );
             }
             if ( idString.trim().charAt( 0 ) == '{' ) {
                 JSONObject jsonObject =  new JSONObject( idString );
-                return getElementsForJson( jsonObject );
+                return getElementsForJson( jsonObject, dateTime );
             }
         } catch ( JSONException e ) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         EmsScriptNode node =
-                    EmsScriptNode.convertIdToEmsScriptNode( idString, null,//dateTime,
+                    EmsScriptNode.convertIdToEmsScriptNode( idString, dateTime,
                                                             getElement().getServices(),
                                                             getElement().getResponse(),
                                                             getElement().getStatus() );
@@ -558,14 +633,14 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
         return nodes;
     }
     
-    public Collection<EmsScriptNode> getElementsForJson( JSONArray jsonArray ) {
+    public Collection<EmsScriptNode> getElementsForJson( JSONArray jsonArray, Date dateTime ) {
         if ( jsonArray == null ) return Utils.getEmptyList();
         LinkedHashSet<EmsScriptNode> nodes = new LinkedHashSet<EmsScriptNode>();
         for ( int i = 0; i < jsonArray.length(); ++i ) {
             Object id = null;
             try {
                 id = jsonArray.get(i);
-                nodes.addAll(getElementsForJson( id ) );
+                nodes.addAll(getElementsForJson( id, dateTime ) );
             } catch ( JSONException e ) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -574,7 +649,7 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
         return nodes;
     }
 
-    public Collection<EmsScriptNode> getElementsForJson( JSONObject o ) {
+    public Collection<EmsScriptNode> getElementsForJson( JSONObject o, Date dateTime ) {
         if ( o == null ) return Utils.getEmptyList();
         LinkedHashSet<EmsScriptNode> nodes = new LinkedHashSet<EmsScriptNode>();
         String[] names = JSONObject.getNames( o );
@@ -582,7 +657,7 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
         for ( String name : names ) {
             try {
                 Object ids = o.get( name );
-                nodes.addAll( getElementsForJson( ids ) );
+                nodes.addAll( getElementsForJson( ids, dateTime ) );
             } catch ( JSONException e ) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -591,9 +666,9 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
         return nodes;
     }
     
-    public Collection<EmsScriptNode> getViewToViewPropertyViews() {
+    public Collection<EmsScriptNode> getViewToViewPropertyViews( Date dateTime ) {
         JSONArray jarr = getViewToViewPropertyJson();
-        Collection< EmsScriptNode > coll = getElementsForJson( jarr );
+        Collection< EmsScriptNode > coll = getElementsForJson( jarr, dateTime );
         coll.remove( this );
         return coll;
     }
@@ -614,19 +689,22 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
         return json;
     }
 
-    public Collection<EmsScriptNode> getContainedViews( boolean recurse, Set<EmsScriptNode> seen ) {
+    public Collection<EmsScriptNode> getContainedViews( boolean recurse,
+                                                        Date dateTime,
+                                                        Set<EmsScriptNode> seen ) {
         if ( getElement() == null ) return null;
         if ( seen == null ) seen = new HashSet<EmsScriptNode>();
         if ( seen.contains( getElement() ) ) return Utils.getEmptyList();
         seen.add( getElement() );
         LinkedHashSet<EmsScriptNode> views = new LinkedHashSet<EmsScriptNode>();
-        views.addAll(getViewToViewPropertyViews());
-        views.addAll(getChildViewElements());
+        views.addAll(getViewToViewPropertyViews(dateTime));
+        views.addAll(getChildViewElements(dateTime));
         views.remove( getElement() );
+        ArrayList<EmsScriptNode> viewsCopy = new ArrayList<EmsScriptNode>(views);
         if ( recurse ) {
-            for ( EmsScriptNode e :  views ) {
+            for ( EmsScriptNode e :  viewsCopy ) {
                 View v = new View(e);
-                views.addAll( v.getContainedViews( recurse, seen ) );
+                views.addAll( v.getContainedViews( recurse, dateTime, seen ) );
             }
         }
         return views;

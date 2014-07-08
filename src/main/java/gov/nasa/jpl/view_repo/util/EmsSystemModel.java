@@ -3,7 +3,6 @@ package gov.nasa.jpl.view_repo.util;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -11,18 +10,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.namespace.QName;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.springframework.extensions.webscripts.Status;
 
 import sysml.AbstractSystemModel;
@@ -41,7 +36,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     public EmsSystemModel( ServiceRegistry services ) {
         this.services = ( services == null ? NodeUtil.getServiceRegistry() : services );
-        System.out.println("ServiceRegistry = " + this.services);
+        if (Debug.isOn()) System.out.println("ServiceRegistry = " + this.services);
         if ( this.services == null ) {
             // TODO -- complain!
         } else {
@@ -617,7 +612,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         Collection< EmsScriptNode > propertyTypes = getTypeWithName( context, "Property" );
         if ( !Utils.isNullOrEmpty( propertyTypes ) ) {
             for ( EmsScriptNode prop : propertyTypes ) {
-                allProperties.addAll( getElementWithType( context, propertyTypes.iterator().next() ) );
+                allProperties.addAll( getElementWithType( context, prop ) );
             }
             return allProperties;
         }
@@ -820,8 +815,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     	
     	// Search for all elements with the specified type name:
     	if (specifier instanceof String) {
-	        StringBuffer response = new StringBuffer();
-	        Status status = new Status();
+//	        StringBuffer response = new StringBuffer();
+//	        Status status = new Status();
 //	        Map< String, EmsScriptNode > elements =
 //	                NodeUtil.searchForElements( "@sysml\\:type:\"", (String)specifier, services, response,
 //	                                            status );

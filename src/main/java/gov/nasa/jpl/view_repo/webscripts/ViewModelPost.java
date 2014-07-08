@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
@@ -71,7 +72,12 @@ public class ViewModelPost extends ModelPost {
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
 
-        String viewid = req.getServiceMatch().getTemplateVars().get("modelid");
+        String[] idKeys = {"modelid", "elementId"};
+        String viewid = null;
+
+        for (String idKey: idKeys) {
+            viewid = req.getServiceMatch().getTemplateVars().get(idKey);
+        }
         UserTransaction trx = services.getTransactionService().getUserTransaction();
         try {
             trx.begin();
@@ -80,17 +86,25 @@ public class ViewModelPost extends ModelPost {
             trx.commit();
         } catch (Throwable e) {
             try {
-                System.out.println("\t####### ERROR: Needed to ViewModelPost rollback: " + e.getMessage());
+                if (e instanceof JSONException) {
+            			log(LogLevel.ERROR, "ViewModelPost: JSON malformed for: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+                } else {
+            			log(LogLevel.ERROR, "ViewModelPost: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                }
+                e.printStackTrace();
+                if (Debug.isOn()) System.out.println("\t####### ERROR: Needed to ViewModelPost rollback: " + e.getMessage());
                 trx.rollback();
             } catch (Throwable ee) {
-                System.out.println("\tRollback ViewModelPost failed: " + ee.getMessage());
+                log(LogLevel.ERROR, "\tViewModelPost: Rollback failed: " + ee.getMessage());
+                ee.printStackTrace();
             }
         }
         
         ViewModelPost instance = new ViewModelPost(repository, services);
         
         try {
-            instance.createOrUpdateModel(req, status);
+//            Set< EmsScriptNode > elements = 
+                    instance.createOrUpdateModel(req, status);
             appendResponseStatusInfo(instance);
         } catch (JSONException e) {
             log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
@@ -100,6 +114,16 @@ public class ViewModelPost extends ModelPost {
             e.printStackTrace();
         }
 
+        // UNCOMMENT THIS
+        // Create JSON object of the elements to return:
+//        JSONObject top = new JSONObject();
+//        JSONArray elementsJson = new JSONArray();
+//        for ( EmsScriptNode element : elements ) {
+//            elementsJson.put( element.toJSONObject(null) );
+//        }
+//        top.put( "elements", elementsJson );
+//        model.put( "res", top.toString( 4 ) );
+        
         status.setCode(responseStatus.getCode());
         model.put("res", response.toString());
 
@@ -117,7 +141,12 @@ public class ViewModelPost extends ModelPost {
         for (int ii = 0; ii < array.length(); ii++) {
             JSONObject elementJson = array.getJSONObject(ii);
             
+            // If element does not have a ID, then create one for it using the alfresco id (cm:id):
+            if (!elementJson.has(Acm.JSON_ID)) {
+                elementJson.put( Acm.JSON_ID, createId( services ) );
+            }
             String id = elementJson.getString(Acm.JSON_ID);
+            
             EmsScriptNode elementNode = findScriptNodeById(id, null);
             if (elementNode != null) {
                 updateOrCreateElement(elementJson, elementNode.getParent(), false);

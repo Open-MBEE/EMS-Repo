@@ -38,6 +38,9 @@ echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/comments.json $BASE_URL"sites/e
 # post products
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/products.json $BASE_URL"products\""
 
+# post elements to project
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elements.json.change $BASE_URL"sites/europa/projects/123456/elements\""
+
 echo ""
 echo GET
 # get project - should just return 200
@@ -67,6 +70,9 @@ echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"ve/documents/europa?format=js
 # TODO - fix these URLs? change search to just search
 # get search
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"element/search?keyword=some*\""
+
+# get commits list
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"javawebscripts/sites/europa/commits\""
 
 echo ""
 echo POST changes

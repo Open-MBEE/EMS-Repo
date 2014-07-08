@@ -1,7 +1,7 @@
 {"elements": [
     {
-        "qualifiedName": "/////CY Test//",
-        "owner": "300",
+        "qualifiedName": "/////CY Test/////",
+        "owner": "303",
         "specialization": {
             "string": "dlam_string",
             "type": "LiteralString"
@@ -9,8 +9,35 @@
         "editable": true
     },
     {
+        "qualifiedName": "/////CY Test//",
+        "owner": "6666",
+        "specialization": {
+            "element": "300",
+            "type": "ElementValue"
+        },
+        "editable": true
+    },
+    {
         "qualifiedName": "/////CY Test///",
         "owner": "301",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
+        "editable": true
+    },
+    {
+        "qualifiedName": "/////CY Test//",
+        "owner": "600",
+        "specialization": {
+            "element": "302",
+            "type": "ElementValue"
+        },
+        "editable": true
+    },
+    {
+        "qualifiedName": "/////CY Test/999//",
+        "owner": "305",
         "specialization": {
             "string": "dlam_string",
             "type": "LiteralString"
@@ -29,6 +56,42 @@
                 "type": "LiteralString"
             }],
             "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "qualifiedName": "/////CY Test////",
+        "owner": "302",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
+        "editable": true
+    },
+    {
+        "qualifiedName": "/////CY Test////",
+        "owner": "402",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
+        "editable": true
+    },
+    {
+        "qualifiedName": "/////CY Test/////",
+        "owner": "403",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
+        "editable": true
+    },
+    {
+        "qualifiedName": "/////CY Test//////",
+        "owner": "404",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString"
         },
         "editable": true
     },
@@ -54,29 +117,29 @@
         "editable": true
     },
     {
-        "qualifiedName": "/////CY Test//",
-        "owner": "600",
-        "specialization": {
-            "element": "300",
-            "type": "ElementValue"
-        },
-        "editable": true
-    },
-    {
-        "qualifiedName": "/////CY Test//",
-        "owner": "600",
-        "specialization": {
-            "element": "302",
-            "type": "ElementValue"
-        },
-        "editable": true
-    },
-    {
         "qualifiedName": "/////CY Test///",
         "owner": "401",
         "specialization": {
             "string": "dlam_string",
             "type": "LiteralString"
+        },
+        "editable": true
+    },
+    {
+        "qualifiedName": "/////CY Test//",
+        "owner": "4000",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
+        "editable": true
+    },
+    {
+        "qualifiedName": "/////CY Test//",
+        "owner": "600",
+        "specialization": {
+            "element": "300",
+            "type": "ElementValue"
         },
         "editable": true
     },
@@ -148,15 +211,6 @@
         "editable": true
     },
     {
-        "qualifiedName": "/////CY Test//////",
-        "owner": "304",
-        "specialization": {
-            "string": "dlam_string",
-            "type": "LiteralString"
-        },
-        "editable": true
-    },
-    {
         "name": "304",
         "qualifiedName": "/////CY Test/////304",
         "documentation": "about",
@@ -216,6 +270,15 @@
         "editable": true
     },
     {
+        "qualifiedName": "/////CY Test//////",
+        "owner": "304",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString"
+        },
+        "editable": true
+    },
+    {
         "name": "dlam",
         "qualifiedName": "/////CY Test/cdelp/dlam",
         "documentation": "to make compatible with value specs (this is just a Element)",
@@ -227,15 +290,6 @@
         "owner": "6666",
         "specialization": {
             "element": "302",
-            "type": "ElementValue"
-        },
-        "editable": true
-    },
-    {
-        "qualifiedName": "/////CY Test//",
-        "owner": "6666",
-        "specialization": {
-            "element": "300",
             "type": "ElementValue"
         },
         "editable": true
@@ -273,15 +327,6 @@
         "editable": true
     },
     {
-        "qualifiedName": "/////CY Test////",
-        "owner": "302",
-        "specialization": {
-            "string": "dlam_string",
-            "type": "LiteralString"
-        },
-        "editable": true
-    },
-    {
         "name": "404",
         "qualifiedName": "/////CY Test/////404",
         "documentation": "4about",
@@ -293,6 +338,15 @@
                 "type": "LiteralString"
             }],
             "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "qualifiedName": "/////CY Test//",
+        "owner": "300",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString"
         },
         "editable": true
     },
@@ -334,24 +388,6 @@
         "editable": true
     },
     {
-        "qualifiedName": "/////CY Test//////",
-        "owner": "404",
-        "specialization": {
-            "string": "dlam_string",
-            "type": "LiteralString"
-        },
-        "editable": true
-    },
-    {
-        "qualifiedName": "/////CY Test/////",
-        "owner": "303",
-        "specialization": {
-            "string": "dlam_string",
-            "type": "LiteralString"
-        },
-        "editable": true
-    },
-    {
         "name": "403",
         "qualifiedName": "/////CY Test////403",
         "documentation": "4talk",
@@ -378,42 +414,6 @@
                 "type": "LiteralString"
             }],
             "type": "Property"
-        },
-        "editable": true
-    },
-    {
-        "qualifiedName": "/////CY Test/999//",
-        "owner": "305",
-        "specialization": {
-            "string": "dlam_string",
-            "type": "LiteralString"
-        },
-        "editable": true
-    },
-    {
-        "qualifiedName": "/////CY Test//",
-        "owner": "4000",
-        "specialization": {
-            "string": "dlam_string",
-            "type": "LiteralString"
-        },
-        "editable": true
-    },
-    {
-        "qualifiedName": "/////CY Test////",
-        "owner": "402",
-        "specialization": {
-            "string": "dlam_string",
-            "type": "LiteralString"
-        },
-        "editable": true
-    },
-    {
-        "qualifiedName": "/////CY Test/////",
-        "owner": "403",
-        "specialization": {
-            "string": "dlam_string",
-            "type": "LiteralString"
         },
         "editable": true
     }

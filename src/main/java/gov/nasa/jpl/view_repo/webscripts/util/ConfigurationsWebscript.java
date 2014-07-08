@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -123,6 +124,32 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         return configJsonArray;
     }
     
+   
+    /**
+     * 
+     * @param req
+     * @param isMms
+     * @return
+     * @throws JSONException
+     */
+    public JSONArray handleConfiguration(WebScriptRequest req, boolean isMms) throws JSONException {
+        String configId = req.getServiceMatch().getTemplateVars().get("configurationId");
+        
+        JSONArray configsJsonArray = handleConfigurations(req, isMms);
+        JSONArray result = new JSONArray();
+        
+        for (int ii = 0; ii < configsJsonArray.length(); ii++) {
+            JSONObject configJson = configsJsonArray.getJSONObject( ii );
+            if (configJson.getString( "id" ).equals(configId)) {
+                result.put( configJson );
+                break;
+            }
+        }
+        
+        return result;
+    }
+    
+    
     /**
      * Retrieve just the MMS API configuration JSON
      * @param config
@@ -177,9 +204,10 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
     public JSONArray getSnapshots(EmsScriptNode config, Date timestamp) throws JSONException {
         JSONArray snapshotsJson = new JSONArray();
         
+        // Need to put in null timestamp so we always get latest version of snapshot
         List< EmsScriptNode > snapshots =
                 config.getTargetAssocsNodesByType( "ems:configuredSnapshots",
-                                                   timestamp );
+                                                   null );
         for (EmsScriptNode snapshot: snapshots) {
             List< EmsScriptNode > views =
                     snapshot.getSourceAssocsNodesByType( "view2:snapshots",
@@ -204,7 +232,8 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
     public JSONObject getSnapshotJson(EmsScriptNode snapshot, EmsScriptNode view) throws JSONException {
         JSONObject snapshotJson = new JSONObject();
         //snapshotJson.put("url", contextPath + "/service/snapshots/" + snapshot.getProperty(Acm.ACM_ID));
-        snapshotJson.put("sysmlid", view.getProperty(Acm.ACM_NAME));
+        snapshotJson.put("sysmlid", view.getProperty(Acm.ACM_ID));
+        snapshotJson.put("sysmlname", view.getProperty(Acm.ACM_NAME));
         snapshotJson.put("id", snapshot.getProperty(Acm.CM_NAME));
         snapshotJson.put( "created",  EmsScriptNode.getIsoTime( (Date)snapshot.getProperty( "cm:created" )));
         snapshotJson.put( "creator", snapshot.getProperty( "cm:modifier" ) );
@@ -231,7 +260,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                 config.getTargetAssocsNodesByType( "ems:configuredProducts",
                                                    timestamp );
         for (EmsScriptNode product: products) {
-            productsJson.put( product.toJSONObject() );
+            productsJson.put( product.toJSONObject(timestamp) );
         }
         
         return productsJson;
@@ -257,7 +286,18 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
     }
 
     
-    public void updateConfiguration(EmsScriptNode config, JSONObject postJson, EmsScriptNode context, Date date) throws JSONException {
+    /**
+     * Updates the specified configuration with the posted JSON. Returns set of products to
+     * be generated.
+     * @param config
+     * @param postJson
+     * @param context
+     * @param date
+     * @return
+     * @throws JSONException
+     */
+    public HashSet<String> updateConfiguration(EmsScriptNode config, JSONObject postJson, EmsScriptNode context, Date date) throws JSONException {
+        HashSet<String> productSet = new HashSet<String>();
         if (postJson.has("name")) {
             config.createOrUpdateProperty(Acm.CM_NAME, postJson.getString("name"));
         }
@@ -277,9 +317,17 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             config.removeAssociations( "ems:configuredProducts" );
             JSONArray productsJson = postJson.getJSONArray( "products" );
             for (int ii = 0; ii < productsJson.length(); ii++) {
-                EmsScriptNode product = findScriptNodeById( productsJson.getString( ii ), null );
+                Object productObject = productsJson.get( ii );
+                String productId = "";
+                if (productObject instanceof String) {
+                    productId = (String) productObject;
+                } else if (productObject instanceof JSONObject) {
+                    productId = ((JSONObject)productObject).getString( "sysmlid" );
+                }
+                EmsScriptNode product = findScriptNodeById(productId, null);
                 if (product != null) {
                     config.createOrUpdateAssociation( product, "ems:configuredProducts", true );
+                    productSet.add( productId );
                 }
             }
         } else if (postJson.has( "snapshots" )) {
@@ -287,12 +335,21 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             JSONArray snapshotsJson = postJson.getJSONArray("snapshots");
             EmsScriptNode snapshotFolder = context.childByNamePath("/snapshots");
             for (int ii = 0; ii < snapshotsJson.length(); ii++) {
-                EmsScriptNode snapshot = snapshotFolder.childByNamePath("/" + snapshotsJson.getString(ii));
+                Object snapshotObject = snapshotsJson.get( ii );
+                String snapshotId = "";
+                if (snapshotObject instanceof String) {
+                    snapshotId = (String) snapshotObject;
+                } else if (snapshotObject instanceof JSONObject) {
+                    snapshotId = ((JSONObject)snapshotObject).getString( "id" );
+                }
+                EmsScriptNode snapshot = snapshotFolder.childByNamePath("/" + snapshotId);
                 if (snapshot != null) {
                     config.createOrUpdateAssociation(snapshot, "ems:configuredSnapshots", true);
                 }
             }
         }
+        
+        return productSet;
     }
     
     /**
