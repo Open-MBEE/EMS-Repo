@@ -36,7 +36,7 @@ echo curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/euro
 curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/europa/projects/123456?fix=true&createSite=true" > output/post1.json
 DIFF=$(diff baselineoutput/post1.json output/post1.json)
 if [ "$DIFF" != "" ];then
-	passTest=0
+	passTest=1
 	echo 'SOMETHING IS WRONG'
 	echo "$DIFF"
 fi
