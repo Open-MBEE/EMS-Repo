@@ -3,7 +3,7 @@
 passTest=0
 
 #start up the server
-cd ./../..
+#cd ./../..
 ./runserver.sh > serverLog.txt &
 echo 'STARTING UP SERVER'
 sleep 60s
