@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 passTest=0
 
 #start up the server
