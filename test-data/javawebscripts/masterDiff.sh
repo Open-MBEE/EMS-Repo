@@ -38,13 +38,13 @@ if [ $server -eq 1 ]; then
 	passTest=$?
 	echo 'PASSTEST?'
 	echo "$passTest"
+
+	#shutdown the tomcat server process
+	pkill -fn 'integration-test'
+	echo 'KILLING SERVER'
 	exit $passTest
 
 fi
 if [ $server -eq 2 ]; then
 	echo 'SERVER TIME-OUT'
 fi
-
-#shutdown the tomcat server process
-pkill -fn 'integration-test'
-echo 'KILLING SERVER'
