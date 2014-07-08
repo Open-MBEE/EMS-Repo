@@ -1351,6 +1351,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             if ( hasAspect( aspect ) ) {
                 // statement below is safe if no ':' since -1 + 1 = 0
                 typeName = aspect.substring( aspect.lastIndexOf( ':' ) + 1 );
+                if ( !Utils.isNullOrEmpty( typeName ) ) break;
             }
         }
         if ( typeName == null ) {
