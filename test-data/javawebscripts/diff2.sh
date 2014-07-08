@@ -37,7 +37,6 @@ curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/europa/pr
 DIFF=$(diff baselineoutput/post1.json output/post1.json)
 if [ "$DIFF" != "" ];then
 	passTest=1
-	echo 'SOMETHING IS WRONG'
 	echo "$DIFF"
 fi
 echo
@@ -56,7 +55,11 @@ echo 'testPost 3'
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/views.json $BASE_URL"views" 
 echo
 curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/views.json $BASE_URL"views" | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > output/post3.json
-diff baselineoutput/post3.json output/post3.json
+DIFF=$(diff baselineoutput/post3.json output/post3.json)
+if [ "$DIFF" != "" ];then
+        passTest=1
+        echo "$DIFF"
+fi
 echo
 echo
 
@@ -66,7 +69,11 @@ echo
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/comments.json $BASE_URL"sites/europa/projects/123456/elements"  
 echo
 curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/comments.json $BASE_URL"sites/europa/projects/123456/elements"  | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"'| grep -v '"author"' > output/post4.json
-diff -I 'author' baselineoutput/post4.json output/post4.json | grep -v '"author"'
+DIFF=$(diff -I 'author' baselineoutput/post4.json output/post4.json | grep -v '"author"')
+if [ "$DIFF" != "" ];then
+        passTest=1
+        echo "$DIFF"
+fi
 echo
 echo
 
@@ -75,7 +82,11 @@ echo 'testPost 5'
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/products.json $BASE_URL"products" 
 echo
 curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/products.json $BASE_URL"products" | grep -v '"read":'| grep -v '"lastModified"'| grep -v '"sysmlid"' > output/post5.json
-diff baselineoutput/post5.json output/post5.json
+DIFF=$(diff baselineoutput/post5.json output/post5.json)
+if [ "$DIFF" != "" ];then
+        passTest=1
+        echo "$DIFF"
+fi
 echo
 echo
 
@@ -100,7 +111,11 @@ echo 'testGET3'
 # get views
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"views/301_pkg\""
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"views/301_pkg" | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > output/get3.json
-diff baselineoutput/get3.json output/get3.json | grep -v '"author"' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+" 
+DIFF=$(diff baselineoutput/get3.json output/get3.json | grep -v '"author"' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+")
+if [ "$DIFF" != "" ];then
+        passTest=1
+        echo "$DIFF"
+fi 
 echo 
 echo
 
@@ -108,7 +123,11 @@ echo 'testGET4'
 # get view elements
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"views/301/elements\""
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"views/301/elements" | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > output/get4.json
-diff baselineoutput/get4.json output/get4.json | grep -v '"author"' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+" 
+DIFF=$(diff baselineoutput/get4.json output/get4.json | grep -v '"author"' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+")
+if [ "$DIFF" != "" ];then
+        passTest=1
+        echo "$DIFF"
+fi 
 echo
 echo
 
@@ -116,7 +135,11 @@ echo 'testGET5'
 # get comments for element
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/303/comments\""
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/303/comments"  | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > output/get5.json
-diff baselineoutput/get5.json output/get5.json
+DIFF=$(diff baselineoutput/get5.json output/get5.json)
+if [ "$DIFF" != "" ];then
+        passTest=1
+        echo "$DIFF"
+fi
 echo 
 echo
 
@@ -124,7 +147,11 @@ echo 'testGET6'
 # get product
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"products/301\""
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"products/301"  | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > output/get6.json
-diff baselineoutput/get6.json output/get6.json | grep -v '"author"' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+" 
+DIFF=$(diff baselineoutput/get6.json output/get6.json | grep -v '"author"' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+")
+if [ "$DIFF" != "" ];then
+        passTest=1
+        echo "$DIFF"
+fi 
 echo
 echo
 
@@ -132,7 +159,11 @@ echo 'testGET7'
 # get moaproducts
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"ve/products/301?format=json\""
 curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"ve/products/301?format=json" | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > output/get7.json
-diff baselineoutput/get7.json output/get7.json | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+"
+DIFF=$(diff baselineoutput/get7.json output/get7.json | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+")
+if [ "$DIFF" != "" ];then
+        passTest=1
+        echo "$DIFF"
+fi
 echo
 echo
 
@@ -140,7 +171,11 @@ echo 'testGET8'
 # get product list
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"ve/documents/europa?format=json\""
 curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"ve/documents/europa?format=json" | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > output/get8.json
-diff baselineoutput/get8.json output/get8.json | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+"
+DIFF=$(diff baselineoutput/get8.json output/get8.json | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+")
+if [ "$DIFF" != "" ];then
+        passTest=1
+        echo "$DIFF"
+fi
 echo
 echo
 
@@ -148,7 +183,11 @@ echo 'testGET9'
 # get search
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"element/search?keyword=some*\""
 #curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"element/search?keyword=some*" | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > output/get9.json
-#diff baselineoutput/get9.json output/get9.json
+#DIFF=$(diff baselineoutput/get9.json output/get9.json)
+#if [ "$DIFF" != "" ];then
+#        passTest=1
+#        echo "$DIFF"
+#fi
 echo
 echo
 
@@ -160,7 +199,11 @@ echo 'testPOSTCHANGE1'
 # post changes to directed relationships only (without owners)
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/directedrelationships.json $BASE_URL"sites/europa/projects/123456/elements\""
 curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/directedrelationships.json $BASE_URL"sites/europa/projects/123456/elements" | grep -v '"read":' | grep -v '"lastModified"' | grep -v '"sysmlid"' > output/postChange1.json
-diff baselineoutput/postChange1.json output/postChange1.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' |grep -v '"author"'
+DIFF=$(diff baselineoutput/postChange1.json output/postChange1.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' |grep -v '"author"')
+if [ "$DIFF" != "" ];then
+        passTest=1
+        echo "$DIFF"
+fi
 echo
 echo
 
@@ -168,7 +211,11 @@ echo 'testPOSTCHANGE2'
 # get changed element to see if source/target changed
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/4000\""
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/4000" | grep -v '"read":' | grep -v '"lastModified"' > output/postChange2.json
-diff baselineoutput/postChange2.json output/postChange2.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"author"'
+DIFF=$(diff baselineoutput/postChange2.json output/postChange2.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"author"')
+if [ "$DIFF" != "" ];then
+        passTest=1
+        echo "$DIFF"
+fi
 echo
 echo
 
@@ -183,7 +230,11 @@ curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/snapshot.html $SERVICE_URL"ui/views/
 #then diff the grepped files
 grep -vE '"id":*' output/snap.json | grep -vE '"url": "/alfresco/service/snapshots/*' | grep -vE '"created":' > baselineoutput/tempSnap2.json
 grep -vE '"id":*' baselineoutput/snap.json | grep -vE '"url": "/alfresco/service/snapshots/*' | grep -vE '"created":' > baselineoutput/tempSnap1.json
-diff baselineoutput/tempSnap1.json baselineoutput/tempSnap2.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"creator"' | grep -v '"time"'
+DIFF=$(diff baselineoutput/tempSnap1.json baselineoutput/tempSnap2.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"creator"' | grep -v '"time"')
+if [ "$DIFF" != "" ];then
+        passTest=1
+        echo "$DIFF"
+fi
 echo
 
 #update the configurations
@@ -200,7 +251,11 @@ echo
 echo 'testCONFIG1'
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/configuration.json $BASE_URL"configurations/europa\""
 #curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/configuration.json $BASE_URL"configurations/europa" | grep -v '"read":' | grep -v '"lastModified"' | grep -v '"sysmlid"' > output/config1.json
-#diff baselineoutput/config1.json output/config1.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---'
+#DIFF=$(diff baselineoutput/config1.json output/config1.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---')
+#if [ "$DIFF" != "" ];then
+#        passTest=1
+#        echo "$DIFF"
+#fi
 echo
 echo
 
@@ -213,7 +268,11 @@ curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"configurations/europa" | grep -v '"re
 #as long as outputs/baselines match these regex - output is conceptually correct
 grep -vE '"id":*' output/config2.json | grep -vE '"url": "/alfresco/service/snapshots/*' | grep -vE '"created":'  > baselineoutput/tempConfig2_1.json
 grep -vE '"read":' baselineoutput/config2.json  | grep -v '"modified"' | grep -v '"sysmlid"' | grep -vE '"id":*'| grep -vE '"url": "/alfresco/service/snapshots/*' | grep -vE '"created":'  > baselineoutput/tempConfig2_2.json
-diff baselineoutput/tempConfig2_2.json baselineoutput/tempConfig2_1.json
+DIFF=$(diff baselineoutput/tempConfig2_2.json baselineoutput/tempConfig2_1.json)
+if [ "$DIFF" != "" ];then
+        passTest=1
+        echo "$DIFF"
+fi
 echo
 echo
 
