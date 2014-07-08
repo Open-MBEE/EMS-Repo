@@ -1,16 +1,6 @@
-{"elements": [{
-    "author": "admin",
-    "name": "500",
-    "qualifiedName": "/////CY Test//500",
-    "documentation": "directed_relationship",
-    "sysmlid": "500",
-    "owner": "300",
-    "specialization": {
-        "source": "302",
-        "target": "303",
-        "type": "DirectedRelationship"
-    },
-    "editable": true
-}]}
+[ERROR]: Element not found with id: 4000.
 
-200
+[WARNING]: Element not found
+
+
+404

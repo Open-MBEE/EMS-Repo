@@ -1,7 +1,10 @@
 #!/bin/bash
 
+
+passTest=0
+
 #start up the server
-#cd ./../..
+cd ./../..
 ./runserver.sh > serverLog.txt &
 echo 'STARTING UP SERVER'
 sleep 60s
@@ -21,7 +24,7 @@ while [ $server -eq 0 ]; do
 	
 	#time-out condition
 	serverCount=$(($serverCount+1))
-	if [ $serverCount -gt 10000 ];then
+	if [ $serverCount -gt 50000 ];then
 		server=2
 	fi
 done
@@ -33,12 +36,16 @@ if [ $server -eq 1 ]; then
 	#run the diff script
 	echo 'RUNNING DIFF SCRIPT'
 	./diff2.sh
+	passTest=$?
+	echo 'PASSTEST?'
+	echo "$passTest"
+	exit $passTest
 
 fi
 if [ $server -eq 2 ]; then
 	echo 'SERVER TIME-OUT'
 fi
 
-#shutdown the tomcat srever process
+#shutdown the tomcat server process
 pkill -fn 'integration-test'
 echo 'KILLING SERVER'

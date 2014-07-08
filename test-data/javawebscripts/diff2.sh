@@ -4,6 +4,8 @@
 
 mkdir -p output
 
+passTest=0
+
 export CURL_STATUS='-w \n%{http_code}\n'
 export CURL_POST_FLAGS_NO_DATA="-X POST"
 export CURL_POST_FLAGS='-X POST -H Content-Type:application/json --data'
@@ -32,7 +34,12 @@ echo 'testPost1'
 # create project and site
 echo curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/europa/projects/123456?fix=true&createSite=true" 
 curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/europa/projects/123456?fix=true&createSite=true" > output/post1.json
-diff baselineoutput/post1.json output/post1.json
+DIFF=$(diff baselineoutput/post1.json output/post1.json)
+if [ "$DIFF" != "" ];then
+	passTest=1
+	echo 'SOMETHING IS WRONG'
+	echo "$DIFF"
+fi
 echo
 echo
 
@@ -85,7 +92,7 @@ echo 'testGET2'
 # get elements
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/123456?recurse=true\""
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/123456?recurse=true" | grep -v '"read":'| grep -v '"lastModified"' > output/get2.jsonjava 
-java -cp .:../../src/main/amp/web/WEB-INF/lib/mbee_util.jar:../../target/view-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes gov.nasa.jpl.view_repo.util.JsonDiff baselineoutput/post2.json output/post2.json  | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"author"'
+java -cp .:../../src/main/amp/web/WEB-INF/lib/mbee_util.jar:../../target/view-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes gov.nasa.jpl.view_repo.util.JsonDiff baselineoutput/post2.json output/post2.json  | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"author"' | grep -v '"sysmlid":'
 echo
 echo
 
@@ -176,7 +183,7 @@ curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/snapshot.html $SERVICE_URL"ui/views/
 #then diff the grepped files
 grep -vE '"id":*' output/snap.json | grep -vE '"url": "/alfresco/service/snapshots/*' | grep -vE '"created":' > baselineoutput/tempSnap2.json
 grep -vE '"id":*' baselineoutput/snap.json | grep -vE '"url": "/alfresco/service/snapshots/*' | grep -vE '"created":' > baselineoutput/tempSnap1.json
-diff baselineoutput/tempSnap1.json baselineoutput/tempSnap2.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"creator"'
+diff baselineoutput/tempSnap1.json baselineoutput/tempSnap2.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"creator"' | grep -v '"time"'
 echo
 
 #update the configurations
@@ -210,4 +217,4 @@ diff baselineoutput/tempConfig2_2.json baselineoutput/tempConfig2_1.json
 echo
 echo
 
-
+exit $passTest
