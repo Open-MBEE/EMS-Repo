@@ -587,41 +587,43 @@ public class Acm {
         // relationship aspects such as ACM_RELATIONSHIPS_AS_SOURCE are left
         // out intentionally since they are not intended to be sysml types
         // like those above.
+
+        // The type written to element json is the first of these found for
+        // an element, so subclasses should precede parents, and more
+        // likely matches should precede less likely ones.
         Acm.ACM_PRODUCT,
         Acm.ACM_VIEW,
+        Acm.ACM_PROPERTY,
+        Acm.ACM_PACKAGE,
+        Acm.ACM_ELEMENT_VALUE,
+        Acm.ACM_LITERAL_STRING, 
+        Acm.ACM_LITERAL_INTEGER,
+        Acm.ACM_LITERAL_REAL,
+        Acm.ACM_LITERAL_BOOLEAN,
+        Acm.ACM_LITERAL_UNLIMITED_NATURAL,
+        Acm.ACM_LITERAL_NULL,
+        Acm.ACM_VIEWPOINT,
         Acm.ACM_COMMENT,
         Acm.ACM_CONSTRAINT,
         Acm.ACM_CONFORM,
-        Acm.ACM_DEPENDENCY,
-        Acm.ACM_DIRECTED_RELATIONSHIP,
         Acm.ACM_EXPOSE,
         Acm.ACM_GENERALIZATION,
-        Acm.ACM_PACKAGE,
-        Acm.ACM_PROPERTY,
-        Acm.ACM_VIEWPOINT,
-        Acm.ACM_VALUE_SPECIFICATION,
-        Acm.ACM_VALUE_EXPRESSION,
         Acm.ACM_DURATION,
         Acm.ACM_DURATION_INTERVAL,
-        Acm.ACM_ELEMENT_VALUE,
         Acm.ACM_EXPRESSION,
         Acm.ACM_INSTANCE_VALUE,
         Acm.ACM_INTERVAL,
-        Acm.ACM_LITERAL_BOOLEAN,
-        Acm.ACM_LITERAL_INTEGER,
-        Acm.ACM_LITERAL_NULL,
-        Acm.ACM_LITERAL_REAL,
-        Acm.ACM_LITERAL_STRING, 
-        Acm.ACM_LITERAL_UNLIMITED_NATURAL,
         Acm.ACM_OPAQUE_EXPRESSION,
         Acm.ACM_STRING_EXPRESSION, 
         Acm.ACM_TIME_EXPRESSION,
         Acm.ACM_TIME_INTERVAL,
         Acm.ACM_OPERATION,
         Acm.ACM_INSTANCE_SPECIFICATION,
-        Acm.ACM_CONSTRAINT,
         Acm.ACM_PARAMETER,
-        Acm.ACM_CONNECTOR
+        Acm.ACM_CONNECTOR,
+        Acm.ACM_DEPENDENCY,
+        Acm.ACM_DIRECTED_RELATIONSHIP,
+        Acm.ACM_VALUE_SPECIFICATION
     };
     
     public static final String[] ACM_RELATIONSHIP_PROPERTY_ASPECTS = {
