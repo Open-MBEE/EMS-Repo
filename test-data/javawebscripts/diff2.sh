@@ -239,6 +239,7 @@ echo
 
 #update the configurations
 ##########Need to update##############
+echo 'TEST BREAK'
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"configurations/europa" > baselineoutput/config2.json
 echo
 sleep 3s

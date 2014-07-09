@@ -36,15 +36,16 @@ if [ $server -eq 1 ]; then
 	echo 'RUNNING DIFF SCRIPT'
 	./diff2.sh
 	passTest=$?
-	echo 'PASSTEST?'
-	echo "$passTest"
 
 	#shutdown the tomcat server process
 	pkill -fn 'integration-test'
 	echo 'KILLING SERVER'
-	exit $passTest
 
+	echo 'PASSTEST?'
+        echo "$passTest"
+	exit $passTest
 fi
+
 if [ $server -eq 2 ]; then
 	echo 'SERVER TIME-OUT'
 fi
