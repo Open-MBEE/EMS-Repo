@@ -230,7 +230,7 @@ curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/snapshot.html $SERVICE_URL"ui/views/
 #then diff the grepped files
 grep -vE '"id":*' output/snap.json | grep -vE '"url": "/alfresco/service/snapshots/*' | grep -vE '"created":' > baselineoutput/tempSnap2.json
 grep -vE '"id":*' baselineoutput/snap.json | grep -vE '"url": "/alfresco/service/snapshots/*' | grep -vE '"created":' > baselineoutput/tempSnap1.json
-DIFF=$(diff baselineoutput/tempSnap1.json baselineoutput/tempSnap2.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"creator"' | grep -v '"time"')
+DIFF=$(diff baselineoutput/tempSnap1.json baselineoutput/tempSnap2.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"creator"' | grep -vi 'time' | grep -v 'WebScriptException' | grep -v 'snapshot does not map to a')
 if [ "$DIFF" != "" ];then
         passTest=1
         echo "$DIFF"
@@ -241,7 +241,7 @@ echo
 ##########Need to update##############
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"configurations/europa" > baselineoutput/config2.json
 echo
-
+sleep 3s
 
 
 ####################################   		CONFIGURATIONS CURL COMMANDS     ###########################################
@@ -250,12 +250,12 @@ echo
 # post configuration
 echo 'testCONFIG1'
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/configuration.json $BASE_URL"configurations/europa\""
-#curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/configuration.json $BASE_URL"configurations/europa" | grep -v '"read":' | grep -v '"lastModified"' | grep -v '"sysmlid"' > output/config1.json
-#DIFF=$(diff baselineoutput/config1.json output/config1.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---')
-#if [ "$DIFF" != "" ];then
-#        passTest=1
-#        echo "$DIFF"
-#fi
+curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/configuration.json $BASE_URL"configurations/europa" | grep -v '"read":' | grep -v '"lastModified"' | grep -v '"sysmlid"' > output/config1.json
+DIFF=$(diff baselineoutput/config1.json output/config1.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v 'time')
+if [ "$DIFF" != "" ];then
+        passTest=1
+        echo "$DIFF"
+fi
 echo
 echo
 

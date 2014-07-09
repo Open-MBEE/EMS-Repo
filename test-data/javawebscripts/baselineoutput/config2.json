@@ -1,5 +1,12 @@
 {
-  "configurations": [],
+  "configurations": [{
+    "id": "48141ef2-d20a-45e6-b316-a7c0a07df095",
+    "timestamp": "2014-06-09T09:03:45.834-0700",
+    "description": "updating description",
+    "name": "product test",
+    "snapshots": [],
+    "modified": "2014-07-09T09:34:26.307-0700"
+  }],
   "products": []
 }
 
