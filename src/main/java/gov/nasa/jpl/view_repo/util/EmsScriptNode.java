@@ -2212,8 +2212,9 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         super( nodeRef, services );
     }
 
-    // HERE!!
+    // HERE!!  This is wrong.
     public Object getPropertyValue( String propertyName ) {
+        Debug.error("ERROR!  EmsScriptNode.getPropertyValue() doesn't work!");
         Object o = getProperty( propertyName );
         Object value = o; // default if case is not handled below
         
