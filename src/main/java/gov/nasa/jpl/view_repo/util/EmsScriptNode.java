@@ -112,6 +112,11 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     private View view;
 
+    protected EmsScriptNode workspace = null;
+    protected EmsScriptNode parentWorkspace = null;
+    //protected String workspaceId = null;
+    //protected String parentWorkspaceId = null;
+    
     // TODO add nodeService and other member variables when no longer
     // subclassing ScriptNode
     // extend Serializable after removing ScriptNode extension
@@ -119,10 +124,6 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     // for lucene search
     // protected static final StoreRef SEARCH_STORE = new
     // StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
-
-    public EmsScriptNode( NodeRef nodeRef, ServiceRegistry services ) {
-        super( nodeRef, services );
-    }
 
     public EmsScriptNode( NodeRef nodeRef, ServiceRegistry services,
                           StringBuffer response, Status status ) {
@@ -2160,6 +2161,55 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     public ServiceRegistry getServices() {
         return services;
+    }
+
+    
+    /**
+     * @return the workspace
+     */
+    public EmsScriptNode getWorkspace() {
+        if ( workspace == null ) {
+            if ( hasAspect( "sysml:HasWorkspace" ) ) {
+                NodeRef ref = (NodeRef)getProperty( "sysml:workspace" );
+                EmsScriptNode ws = new EmsScriptNode( ref, getServices() );
+                setWorkspace( ws );
+            }
+        }
+        return workspace;
+    }
+
+    /**
+     * @return the workspaceId
+     */
+    public String getWorkspaceName() {
+        String workspaceName = null;
+        EmsScriptNode ws = getWorkspace();
+        if ( ws != null ) {
+            ws.getName();
+        }
+        return workspaceName;
+    }
+
+    /**
+     * @param workspaceId the workspaceId to set
+     */
+    public void setWorkspace( EmsScriptNode workspace ) {
+        this.workspace = workspace;
+    }
+
+    /**
+     * @return the parentWorkspaceId
+     */
+    public EmsScriptNode getParentWorkspace() {
+        EmsScriptNode ws = getWorkspace();
+        NodeRef ref = (NodeRef)ws.getProperty("sysml:parent");
+        EmsScriptNode parentWs = new EmsScriptNode( ref, getServices() );
+        return parentWs;
+    }
+
+
+    public EmsScriptNode( NodeRef nodeRef, ServiceRegistry services ) {
+        super( nodeRef, services );
     }
 
     // HERE!!

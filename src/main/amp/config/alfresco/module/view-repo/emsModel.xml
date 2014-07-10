@@ -84,4 +84,77 @@
             </mandatory-aspects>
         </type>
      </types>
+     <aspects>
+         <aspect name="sysml:TreeNode">
+            <parent>sysml:HasChildren</parent>
+            <properties>
+                <property name="sysml:parent">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+            </properties>
+        </aspect>
+        <aspect name="sysml:HasChildren">
+            <properties>
+                <property name="sysml:children">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>true</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+            </properties>
+        </aspect>
+        <aspect name="sysml:Workspace">
+            <parent>sysml:TreeNode</parent>
+            <properties>
+                <property name="sysml:lastTimeSyncParent">
+                    <type>d:datetime</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
+        </aspect>
+        <aspect name="sysml:HasWorkspace">
+            <properties>
+                <property name="sysml:workspace">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
+        </aspect>
+
+        <!-- Trashed is to implement a trash can in case we need something that 
+             we would lose if deleting from Alfresco -->
+        <aspect name="sysml:Trashed"/>
+        
+        <aspect name="sysml:Added"/>
+        <aspect name="sysml:Deleted"/>
+        <aspect name="sysml:Moved"/>
+
+        <!-- The merge source is a node that overwrote this one when merged from 
+        a child workspace. -->
+        <aspect name="sysml:MergeSource">
+            <properties>
+                <property name="sysml:mergeSource">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
+        </aspect>
+     </aspects>
 </model>
