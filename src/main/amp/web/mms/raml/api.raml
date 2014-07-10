@@ -185,7 +185,9 @@ resourceTypes:
             description: Could not delete <<resourcePathName>> due to internal server error
 /workspaces:
   description: All resources are "namespaced" by the workspace (aka branch).
+  type: collection
   /{workspaceId}:
+    type: readCollection
     uriParameters:
       workspaceId:
         description: Workspace ID under consideration. "master" is always defined and is the
@@ -222,22 +224,6 @@ resourceTypes:
         description: Retrieve all sites for which user has read permissions
         responses:
           200:
-            body:
-              example: |
-                { "sites": 
-                  [
-                    {
-                      "name": "europa",
-                      "title": "Europa",
-                      "categories": [ "v1", "v2", "v3"]
-                    } ,
-                    {
-                      "name": "ems-support",
-                      "title": "EMS Support Site",
-                      "categories": []
-                    }
-                  ]
-                }
       /{siteId}:
         uriParameters:
           siteId:
@@ -261,24 +247,6 @@ resourceTypes:
             description: Retrieve all projects for which user has read permissions
             responses:
               200:
-                body:
-                  example: |
-                    # taken from project.post.desc.xml (not currently implemented)
-                    { 
-                      "projects": 
-                      [
-                        {
-                          "id": "PROJECT-123456",
-                          "name": "Europa",
-                          "projectVersion": "v1"
-                        },
-                        {
-                          "id": "PROJECT-2468",
-                          "name": "Europa FS",
-                          "projectVersion": "v35"
-                        }
-                      ]
-                    }
           /{projectId}:
             type: readCollection
             uriParameters:
@@ -290,26 +258,6 @@ resourceTypes:
             description: Retrieve all products for which user has read permissions
             responses:
               200:
-                body:
-                  example: |
-                    # taken from configuration.get.desc.xml
-                    {
-                      "products": [
-                        {
-                          "id": "_17_0_2_3_8af0285_1397502950809_504517_66083",
-                          "name": "Flight System",
-                          "snapshots": [
-                              {
-                              "created": "2014-04-21T17:00:16.645-07:00",
-                              "creator": "gdubos",
-                              "id": "_17_0_2_3_8af0285_1397502950809_504517_66083_1398124815059",
-                              "tag": "",
-                              "url": "/alfresco/service/snapshots/_17_0_2_3_8af0285_1397502950809_504517_66083_1398124815059"
-                            }
-                          ]
-                        }
-                      ]
-                    }
           /{productId}:
             type: collection
             uriParameters:
@@ -384,6 +332,9 @@ resourceTypes:
       targetTimestamp:
         description: The target workspace timestamp to use in comparison (if not specified, gets latest)
         type: date
+/merge:
+  post:
+    is: [diffable]
 /client:
   post:
     queryParameters:
