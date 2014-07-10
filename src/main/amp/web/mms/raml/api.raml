@@ -30,8 +30,11 @@ schemas:
   - snapshots:      !include snapshots.json
   - versions:       !include versions.json
     
-  - sites:        !include sites.json
-  - workspaces:   !include workspaces.json
+  - sites:       !include sites.json
+  - workspaces:  !include workspaces.json
+    
+  - diff:        !include diff.json
+  - client:      !include client.json
   
   # include post/ put and delete responses
   #- elementsResponse: !include postResponse.json
@@ -81,7 +84,15 @@ traits:
           description: Timestamp to find most recent version of <<resourcePathName>>,
                        specified in ISO8601 time format.
           type: date
-
+  - diffable:
+      description: Aspect for resources that can be diffed or merged
+      queryParameters:
+        sourceWs:
+          description: The source workspaces to compare against
+          type: string
+        targetWs:
+          description: The target workspaces to compare
+          type: string
 resourceTypes:
   - readCollection:
       securedBy: [basic]
@@ -94,7 +105,8 @@ resourceTypes:
               200:
                 description: <<resourcePathName>> read successful
                 body:
-                  schema: <<resourcePathName>>
+                  application/json:
+                    schema: <<resourcePathName>>
               400:
                 description: Malformed request by client
               401:
@@ -110,11 +122,13 @@ resourceTypes:
       post:
         description: Append operation for <<resourcePathName>>
         body:
-          schema: <<resourcePathName>>
+          application/json:
+            schema: <<resourcePathName>>
         responses:
           200:
             body:
-              schema: <<resourcePathName>>PostResponse
+              application/json:
+                schema: <<resourcePathName>>PostResponse
             description: <<resourcePathName>> append successful
           202:
             description: <<resourcePathName>> append started, but not yet completed
@@ -131,12 +145,14 @@ resourceTypes:
       put:
         description: Create/update operation for <<resourcePathName>>
         body:
-          schema: <<resourcePathName>>
+          application/json:
+            schema: <<resourcePathName>>
         responses:
           200:
             description: <<resourcePathName>> update successful
             body:
-              schema: <<resourcePathName>>PutResponse
+              application/json:
+                schema: <<resourcePathName>>PutResponse
           201:
             description: <<resourcePathName>> create successful
           202:
@@ -157,7 +173,8 @@ resourceTypes:
           200:
             description: <<resourcePathName>> delete successful
             body:
-              schema:  <<resourcePathName>>DeleteResponse
+              application/json:
+                schema:  <<resourcePathName>>DeleteResponse
           202:
             description: <<resourcePathName>> delete started, but not yet completed
           401:
@@ -166,7 +183,6 @@ resourceTypes:
             description: <<resourcePathName>> not found
           500:
             description: Could not delete <<resourcePathName>> due to internal server error
-
 /workspaces:
   description: All resources are "namespaced" by the workspace (aka branch).
   /{workspaceId}:
@@ -356,3 +372,25 @@ resourceTypes:
         type: collection
 /operations:
   description: Service for executing operations, e.g., like the OCL Execution capabilities in MDK. Details still TBD.
+/diff:
+  description: Service for diffing between two model versions between projects
+  type: collection
+  get:
+    is: [diffable]
+    queryParameters:      
+      sourceTimestamp:
+        description: The source workspace timestamp to use in comparison (if not specified, gets latest)
+        type: date
+      targetTimestamp:
+        description: The target workspace timestamp to use in comparison (if not specified, gets latest)
+        type: date
+/client:
+  post:
+    queryParameters:
+      unregister:
+        description: if specified, indicates deregistration, otherwise if not specified, always registration or update 
+        type: boolean
+    body:
+      application/json:
+        schema:
+          client

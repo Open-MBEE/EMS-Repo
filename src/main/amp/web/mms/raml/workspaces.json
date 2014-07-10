@@ -1,21 +1,21 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "description": "Workspaces listing specification",
+    "description": "List of workspaces user has access to",
     "properties": {
         "workspaces": {
             "type": "array",
             "items": {
                 "type": "object",
                 "oneOf": [
-                    {"$ref": "#/definitions/Workspaces"}
+                    {"$ref": "#/definitions/Workspace"}
                 ]
             }
         }
     },
 
     "definitions": {
-        "Workspaces": {
+        "Workspace": {
             "properties": {
               "creator": {
                 "type": "string",
@@ -32,6 +32,16 @@
               "name": {
                 "type": "string",
                 "description": "Human readable name for the workspace"
+              },
+              "parent": {
+                "type": "string",
+                "description": "Parent off of which the workspace is based" 
+              },
+              "branched": {
+                "type": "date",
+                "description": "Last time workspace pulled from base branch, used for calculating conflicts"
+              },
+              "permissions": {
               }
             }
         }

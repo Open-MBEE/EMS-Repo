@@ -1,0 +1,49 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "description": "Specification for diffing two workspaces, WS1 and WS2",
+    "properties": {
+        "elements": {
+            "type": "array",
+            "description": "List of elements in WS1",
+            "items": {
+                "type": "object",
+                "$ref": "file:///../elements.json#/definitions/Element"
+            }
+        },
+        "updatedElements": {
+            "type": "array",
+            "description": "List of elements in changed from WS1 in WS2",
+            "items": {
+                "type": "object",
+                "$ref": "file:///../elements.json#/definitions/Element"
+            }
+        },
+        "deletedElements": {
+            "type": "array",
+            "description": "List of elements in WS1 and not in WS2, e.g. deleted. only contains ids",
+            "items": {
+                "type": "object",
+                "$ref": "file:///../elements.json#/definitions/Element"
+            }
+        },
+        "addedElements": {
+            "type": "array",
+            "description": "List of elements in WS2 and not in WS1, e.g. added",
+            "items": {
+                "type": "object",
+                "$ref": "file:///../elements.json#/definitions/Element"
+            }
+        },
+        "workspace1": {
+            "type": "object",
+            "description": "Specification of WS1",
+            "$ref": "file:///../workspaces.json#/definitions/Workspace"
+        },
+        "workspace2": {
+            "type": "object",
+            "description": "Specification of WS2",
+            "$ref": "file:///../workspaces.json#/definitions/Workspace"
+        }
+    }
+}
