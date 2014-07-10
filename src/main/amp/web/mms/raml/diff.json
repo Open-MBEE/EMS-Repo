@@ -44,6 +44,33 @@
             "type": "object",
             "description": "Specification of WS2",
             "$ref": "file:///../workspaces.json#/definitions/Workspace"
+        },
+        "graph": {
+            "type": "array",
+            "description": "A map of the graph for WS1",
+            "items": {
+                "type": "object",
+                "$ref": "#/definitions/Graph"
+            }
+        },
+        
+        "definitions": {
+            "Graph": {
+                "properties": {
+                    "sysmlid": {
+                        "type": "string",
+                        "description": "Unique identifier of element"
+                    },
+                    "edges": {
+                        "type": "array",
+                        "description": "List of target nodes of the edge (source is specified by sysmlid)",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                    
+                }
+            }
         }
     }
 }
