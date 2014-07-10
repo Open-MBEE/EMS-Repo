@@ -84,7 +84,6 @@ import org.alfresco.service.namespace.RegexQNamePattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Assert;
 import org.springframework.extensions.webscripts.Status;
 
 /**
