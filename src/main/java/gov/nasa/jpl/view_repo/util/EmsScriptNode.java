@@ -2320,7 +2320,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         if ( index < 0 ) {
             Debug.error( true, true, "Error! Expecting an insertion point >= 0 but got " + index + "!" );
             return false;
-        } else if ( index >= relationships.size() ) {
+        } else if ( index >= relationships.size() && index != 0 ) {
             Debug.error( true, true, "Error! Insertion point is beyond the length of the list: point = " + index + ", length = " + relationships.size() );
             return false;
         } else {
