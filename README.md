@@ -122,9 +122,9 @@ To run in embedded jetty container and H2 db, (with jrebel and remote debugging!
 	
     mvn integration-test -Pamp-to-war -Dmaven.test.skip=false
 
-*IMPORTANT:* Check that /etc/hosts has the appropriate IP address for your machine, e.g., the line that starts with 128.149.16.... should match your instance's IP address
+**IMPORTANT:** Check that /etc/hosts has the appropriate IP address for your machine, e.g., the line that starts with 128.149.16.... should match your instance's IP address
     
-*NOTE:* It's possible that Eclipse can get in the way of the maven execution. So, when running maven, temporarily turn off the Eclipse->Project->Build Automatically". Once the Jetty server is up and running, turn it back on so you can make changes hot swap your code updates.
+**NOTE:** It's possible that Eclipse can get in the way of the maven execution. So, when running maven, temporarily turn off the Eclipse->Project->Build Automatically". Once the Jetty server is up and running, turn it back on so you can make changes hot swap your code updates.
     
 To clean all data and artifacts.  After doing this make sure to update the Maven project (right click on project folder->Maven->Update Project) and re-create/copy the sysml, util, bae .jar files.
 
