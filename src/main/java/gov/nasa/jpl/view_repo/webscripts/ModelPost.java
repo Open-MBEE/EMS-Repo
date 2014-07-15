@@ -94,12 +94,12 @@ public class ModelPost extends AbstractJavaWebScript {
 
     public ModelPost() {
         super();
-        setSystemModelAe();
+        //setSystemModelAe();
     }
     
     public ModelPost(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
-        setSystemModelAe();
+        //setSystemModelAe();
      }
 
 
@@ -147,11 +147,23 @@ public class ModelPost extends AbstractJavaWebScript {
 
     protected SiteInfo siteInfo;
     
+    
+    private EmsSystemModel getSystemModel() {
+        if ( systemModel == null ) {
+            systemModel = new EmsSystemModel(this.services);
+        }
+        return systemModel;
+    }
+    private SystemModelToAeExpression getSystemModelAe() {
+        if ( sysmlToAe == null ) {
+            setSystemModelAe();
+        }
+        return sysmlToAe;
+    }
     private void setSystemModelAe() {
     	
-        systemModel = new EmsSystemModel(this.services);
         sysmlToAe = 
-        		new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( systemModel );
+        		new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getSystemModel() );
         
     }
         
@@ -841,8 +853,8 @@ public class ModelPost extends AbstractJavaWebScript {
         	boolean isProperty = type.equals(Acm.ACM_PROPERTY);
         	String jsonKey = isProperty ? Acm.JSON_VALUE : Acm.JSON_OPERAND;
         	Collection<EmsScriptNode> oldVals = isProperty ?
-        											Utils.asList(systemModel.getValue(node, null), EmsScriptNode.class) :
-        											systemModel.getProperty(node, Acm.ACM_OPERAND);
+        											Utils.asList(getSystemModel().getValue(node, null), EmsScriptNode.class) :
+        											getSystemModel().getProperty(node, Acm.ACM_OPERAND);
         											
             JSONArray newVals = jsonToCheck.getJSONArray(jsonKey);
             Iterator<EmsScriptNode> iter = !Utils.isNullOrEmpty(oldVals) ?
@@ -1223,7 +1235,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	    	
 	    	// See if it has a value property:
 	        Collection< EmsScriptNode > propertyValues = 
-	              	systemModel.getProperty(propertyNode, Acm.JSON_VALUE);
+	              	getSystemModel().getProperty(propertyNode, Acm.JSON_VALUE);
 	          
 			if (!Utils.isNullOrEmpty(propertyValues)) {
 				  for (EmsScriptNode value : propertyValues) {
@@ -1260,7 +1272,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	    	
 	    	// See if it has a defaultParamaterValue property:
 	        Collection< EmsScriptNode > paramValues = 
-	              	systemModel.getProperty(paramNode, Acm.JSON_PARAMETER_DEFAULT_VALUE);
+	              	getSystemModel().getProperty(paramNode, Acm.JSON_PARAMETER_DEFAULT_VALUE);
 	          
 			if (!Utils.isNullOrEmpty(paramValues)) {
 				  names.add(paramValues.iterator().next().getName());
@@ -1289,7 +1301,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	    	
 	    	// See if it has a operationParameter and/or operationExpression property:
 	        Collection< EmsScriptNode > opParamNodes = 
-	              	systemModel.getProperty(opNode, Acm.JSON_OPERATION_PARAMETER);
+	              	getSystemModel().getProperty(opNode, Acm.JSON_OPERATION_PARAMETER);
 	          
 			if (!Utils.isNullOrEmpty(opParamNodes)) {
 			  for (EmsScriptNode opParamNode : opParamNodes) {
@@ -1298,7 +1310,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			}
 			
 		    Collection< EmsScriptNode > opExprNodes = 
-		    		systemModel.getProperty(opNode, Acm.JSON_OPERATION_EXPRESSION);
+		    		getSystemModel().getProperty(opNode, Acm.JSON_OPERATION_EXPRESSION);
 		    
 		    if (!Utils.isNullOrEmpty(opExprNodes)) {
 		    	names.add(opExprNodes.iterator().next().getName());
@@ -1328,7 +1340,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	    	
 	    	// Process all of the operand properties:
 	        Collection< EmsScriptNode > properties = 
-	        		systemModel.getProperty( expressionNode, Acm.JSON_OPERAND);
+	        		getSystemModel().getProperty( expressionNode, Acm.JSON_OPERAND);
 	        
 	        if (!Utils.isNullOrEmpty(properties)) {
 	      
@@ -1342,7 +1354,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		
 		            // Get the valueOfElementProperty node:
 		            Collection< EmsScriptNode > valueOfElemNodes = 
-		            		systemModel.getProperty(operandProp, Acm.JSON_ELEMENT_VALUE_ELEMENT);
+		            		getSystemModel().getProperty(operandProp, Acm.JSON_ELEMENT_VALUE_ELEMENT);
 		            
 		            // If it is a elementValue, then this will be non-empty:
 		            if (!Utils.isNullOrEmpty(valueOfElemNodes)) {
@@ -1360,7 +1372,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		            
 		            if (valueOfElementNode != null) {
 		              
-		              String typeString = systemModel.getTypeString(valueOfElementNode, null);
+		              String typeString = getSystemModel().getTypeString(valueOfElementNode, null);
 		              
 		              // If it is a Operation then see if it then process it:
 		              if (typeString.equals(Acm.JSON_OPERATION)) {
@@ -1445,7 +1457,7 @@ public class ModelPost extends AbstractJavaWebScript {
     	    	 
         // Get the constraint expression:
         Collection<EmsScriptNode> expressions = 
-        		systemModel.getProperty( constraintNode, Acm.JSON_CONSTRAINT_SPECIFICATION );
+        		getSystemModel().getProperty( constraintNode, Acm.JSON_CONSTRAINT_SPECIFICATION );
         
         // This should always be of size 1:
         return Utils.isNullOrEmpty( expressions ) ? null :  expressions.iterator().next();
@@ -1466,7 +1478,7 @@ public class ModelPost extends AbstractJavaWebScript {
         
         if (exprNode != null) {
             
-            Expression<Call> expressionCall = sysmlToAe.toAeExpression( exprNode );
+            Expression<Call> expressionCall = getSystemModelAe().toAeExpression( exprNode );
             Call call = (Call) expressionCall.expression;
             Expression<Boolean> expression = new Expression<Boolean>(call.evaluate(true, false));
             
@@ -1518,12 +1530,12 @@ public class ModelPost extends AbstractJavaWebScript {
                             log(LogLevel.INFO, "Constraint violations will be fixed if found!");
                             
                             SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  solver = 
-                                    new SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(systemModel, new ConstraintLoopSolver() );
+                                    new SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(getSystemModel(), new ConstraintLoopSolver() );
                             
                             Collection<Constraint> constraints = new ArrayList<Constraint>();
                             
                             // Search for all constraints in the database:
-                            Collection<EmsScriptNode> constraintNodes = systemModel.getType(null, Acm.JSON_CONSTRAINT);
+                            Collection<EmsScriptNode> constraintNodes = getSystemModel().getType(null, Acm.JSON_CONSTRAINT);
                             
                             if (!Utils.isNullOrEmpty(constraintNodes)) {
                             	
@@ -1556,7 +1568,7 @@ public class ModelPost extends AbstractJavaWebScript {
                             if (!Utils.isNullOrEmpty( constraints )) {
                                 
                                 // Add all of the Parameter constraints:
-                                ClassData cd = sysmlToAe.getClassData();
+                                ClassData cd = getSystemModelAe().getClassData();
                                 
                                 // Loop through all the listeners:
                                 for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
