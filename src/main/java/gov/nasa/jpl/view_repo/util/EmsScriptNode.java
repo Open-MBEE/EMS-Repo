@@ -2179,7 +2179,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
 
     /**
-     * @return the workspaceId
+     * @return the sysml id (cm name) of the workspace
      */
     public String getWorkspaceName() {
         String workspaceName = null;
@@ -2191,14 +2191,14 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
 
     /**
-     * @param workspaceId the workspaceId to set
+     * @param workspace the workspace to set
      */
     public void setWorkspace( EmsScriptNode workspace ) {
         this.workspace = workspace;
     }
 
     /**
-     * @return the parentWorkspaceId
+     * @return the parentWorkspace
      */
     public EmsScriptNode getParentWorkspace() {
         EmsScriptNode ws = getWorkspace();
@@ -2212,7 +2212,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         super( nodeRef, services );
     }
 
-    // HERE!!  This is wrong.
+    // HERE!!  This is wrong. FIXME or remove
     public Object getPropertyValue( String propertyName ) {
         Debug.error("ERROR!  EmsScriptNode.getPropertyValue() doesn't work!");
         Object o = getProperty( propertyName );
