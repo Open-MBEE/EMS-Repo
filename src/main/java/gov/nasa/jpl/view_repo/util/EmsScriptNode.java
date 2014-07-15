@@ -1830,6 +1830,16 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 	            EmsScriptNode node = convertIdToEmsScriptNode( sysmlId, dateTime );
 	            if ( node != null ) {
 	                property = node.getNodeRef();
+	            } else if ( !Utils.isNullOrEmpty( sysmlId ) ) {
+	                String msg = "Error! Could not find element for sysml id = "
+	                         + sysmlId + ".\n";
+    	            if ( getResponse() == null || getStatus() == null ) {
+    	                Debug.error( msg );
+    	            } else {
+    	                getResponse().append( msg );
+    	                getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+    	                                     msg );
+    	            }
 	            }
 	        } else {
 	            property = jsonObject.getString( jsonKey );
