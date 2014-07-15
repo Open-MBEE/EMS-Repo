@@ -1829,7 +1829,9 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 	                sysmlId = "" + jsonObject.get( jsonKey );
 	            }
 	            EmsScriptNode node = convertIdToEmsScriptNode( sysmlId, dateTime );
-	            property = node.getNodeRef();
+	            if ( node != null ) {
+	                property = node.getNodeRef();
+	            }
 	        } else {
 	            property = jsonObject.getString( jsonKey );
 	        }
@@ -2242,13 +2244,13 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             if ( o1 instanceof String ) {
                 type1 = (String)o1;
             } else if ( o1 instanceof NodeRef ) {
-                EmsScriptNode n1 = new EmsScriptNode( (NodeRef)o1, null );
+                EmsScriptNode n1 = new EmsScriptNode( (NodeRef)o1, NodeUtil.getServices() );
                 type1 = n1.getTypeName();
             }
             if ( o2 instanceof String ) {
                 type2 = (String)o2;
             } else if ( o2 instanceof NodeRef ) {
-                EmsScriptNode n2 = new EmsScriptNode( (NodeRef)o2, null );
+                EmsScriptNode n2 = new EmsScriptNode( (NodeRef)o2, NodeUtil.getServices() );
                 type2 = n2.getTypeName();
             }
             int comp = CompareUtils.GenericComparator.instance().compare( type1, type2 );
@@ -2371,7 +2373,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         if ( index < 0 ) {
             Debug.error( true, true, "Error! Expecting an insertion point >= 0 but got " + index + "!" );
             return false;
-        } else if ( index >= relationships.size() ) {
+        } else if ( index > relationships.size() ) {
             Debug.error( true, true, "Error! Insertion point is beyond the length of the list: point = " + index + ", length = " + relationships.size() );
             return false;
         } else {
