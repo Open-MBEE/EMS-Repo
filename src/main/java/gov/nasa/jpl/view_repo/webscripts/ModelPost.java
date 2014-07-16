@@ -1083,7 +1083,7 @@ public class ModelPost extends AbstractJavaWebScript {
             foundElements.put(id, node); // cache the found value
         }
         
-        // Note: Moved this before injesting the json b/c we need the reifiedNode
+        // Note: Moved this before ingesting the json b/c we need the reifiedNode
         if (nodeExists && elementHierarchyJson.has(id)) {
             log(LogLevel.INFO, "\tcreating reified package");
             reifiedNode = getOrCreateReifiedNode(node, id, true); // TODO -- Is last argument correct?
