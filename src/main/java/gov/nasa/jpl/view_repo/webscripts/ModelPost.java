@@ -48,6 +48,7 @@ import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
+import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.ArrayList;
@@ -95,19 +96,15 @@ public class ModelPost extends AbstractJavaWebScript {
 
     public ModelPost() {
         super();
-        //setSystemModelAe();
     }
     
     public ModelPost(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
-        //setSystemModelAe();
      }
 
 
-//    private EmsScriptNode projectNode = null;
     // when run in background as an action, this needs to be false
     private boolean runWithoutTransactions = false;
-//    protected String projectId;
 
     private final String ELEMENTS = "elements";
 
@@ -119,6 +116,9 @@ public class ModelPost extends AbstractJavaWebScript {
      * },
      */
     private JSONObject elementHierarchyJson;
+
+    private JSONArray addedElements = new JSONArray();
+    private JSONArray updatedElements = new JSONArray();
     
     private EmsSystemModel systemModel;
     
@@ -147,8 +147,7 @@ public class ModelPost extends AbstractJavaWebScript {
     protected Set<String> newElements;
 
     protected SiteInfo siteInfo;
-    
-    
+        
     private EmsSystemModel getSystemModel() {
         if ( systemModel == null ) {
             systemModel = new EmsSystemModel(this.services);
@@ -256,7 +255,10 @@ public class ModelPost extends AbstractJavaWebScript {
         log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
         
         JmsConnection jmsConnection = JmsConnection.getInstance();
-        jmsConnection.publishTopic( "model posted", "MODEL.POST" );
+        JSONObject deltaJson = new JSONObject();
+        deltaJson.put( "added", addedElements );
+        deltaJson.put( "updated", updatedElements );
+        jmsConnection.publishTopic( deltaJson.toString( 2 ), "master" );
         return elements;
     }
     
@@ -764,11 +766,12 @@ public class ModelPost extends AbstractJavaWebScript {
         JSONArray children = new JSONArray();
         
         EmsScriptNode reifiedNode = null;
+        ModStatus modStatus = new ModStatus();
 
         if (runWithoutTransactions) {
             reifiedNode =
                     updateOrCreateTransactionableElement( elementJson, parent,
-                                                          children, ingest, false );
+                                                          children, ingest, false, modStatus );
         } else {
             UserTransaction trx;
             trx = services.getTransactionService().getNonPropagatingUserTransaction();
@@ -778,7 +781,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 reifiedNode =
                         updateOrCreateTransactionableElement( elementJson,
                                                               parent, children,
-                                                              ingest, false );
+                                                              ingest, false, modStatus );
                 log(LogLevel.INFO, "} updateOrCreateElement end transaction");
                 trx.commit();
             } catch (Throwable e) {
@@ -806,6 +809,21 @@ public class ModelPost extends AbstractJavaWebScript {
                 updateOrCreateElement(elementMap.get(children.getString(ii)),
                                                        reifiedNode, ingest) );
             }
+        }
+
+        switch (modStatus.getState()) {
+            case ADDED:
+                if (!ingest) {
+                    addedElements.put( elementJson );
+                }
+                break;
+            case UPDATED:
+                if (ingest) {
+                    updatedElements.put( elementJson );
+                }
+                break;
+            default:
+                // do nothing
         }
         
         return elements;
@@ -870,40 +888,40 @@ public class ModelPost extends AbstractJavaWebScript {
             // same ordering.  If there are more values in the
             // JSON element, then make new nodes for them.
             for (int i = 0; i < newVals.length(); ++i) {
-            	
-        	    Object newVal = newVals.optJSONObject(i);
-
-            	// Get the sysmlid of the old value if it exists:
-            	if (iter != null && iter.hasNext()) {
-            		
-            		EmsScriptNode oldValNode = iter.next();
-            		
-          			nodeNames.add(oldValNode.getName());
-        			
-        			// Ingest the JSON for the value
-        			// to set properties for the node:
-        			oldValNode.ingestJSON((JSONObject)newVal);
-        			
-            	}
-            	// Old value doesnt exists, so create a new node:
-            	else {
-            		
-            		//	The refiedNode will be null if the node is not in the elementHierachy, which
-            		//	will be the case if no other elements have it as a owner, so in that case
-            		//	we make a reifiedNode for it here.  If all of that fails, then use the parent
-            		EmsScriptNode nestedParent = null;
-            		if (reifiedNode == null) {
-            			 EmsScriptNode reifiedPkg = getOrCreateReifiedNode(node, id, true);
-            			 nestedParent = reifiedPkg == null ? parent : reifiedPkg;
-            		}
-            		else {
-            			nestedParent = reifiedNode;
-            		}
-            		
-            		EmsScriptNode newValNode = updateOrCreateTransactionableElement((JSONObject)newVal,nestedParent,
-            																		null, ingest, true);
-            		nodeNames.add(newValNode.getName());
-            	}
+            	    Object newVal = newVals.optJSONObject(i);
+    
+                	// Get the sysmlid of the old value if it exists:
+                	if (iter != null && iter.hasNext()) {
+                		
+                		EmsScriptNode oldValNode = iter.next();
+                		
+              			nodeNames.add(oldValNode.getName());
+            			
+            			// Ingest the JSON for the value
+            			// to set properties for the node:
+            			oldValNode.ingestJSON((JSONObject)newVal);
+            			
+                	}
+                	// Old value doesnt exists, so create a new node:
+                	else {
+                		
+                		//	The refiedNode will be null if the node is not in the elementHierachy, which
+                		//	will be the case if no other elements have it as a owner, so in that case
+                		//	we make a reifiedNode for it here.  If all of that fails, then use the parent
+                		EmsScriptNode nestedParent = null;
+                		if (reifiedNode == null) {
+                			 EmsScriptNode reifiedPkg = getOrCreateReifiedNode(node, id, true);
+                			 nestedParent = reifiedPkg == null ? parent : reifiedPkg;
+                		}
+                		else {
+                			nestedParent = reifiedNode;
+                		}
+                		
+                		ModStatus modStatus = new ModStatus();
+                		EmsScriptNode newValNode = updateOrCreateTransactionableElement((JSONObject)newVal,nestedParent,
+                																		null, ingest, true, modStatus);
+                		nodeNames.add(newValNode.getName());
+                	}
             }
             
             // Replace the property in the JSON with the sysmlids
@@ -960,7 +978,8 @@ public class ModelPost extends AbstractJavaWebScript {
                                                   EmsScriptNode parent,
                                                   JSONArray children,
                                                   boolean ingest, 
-                                                  boolean nestedNode) throws Exception {
+                                                  boolean nestedNode,
+                                                  ModStatus modStatus) throws Exception {
         if (!elementJson.has(Acm.JSON_ID)) {
             elementJson.put( Acm.JSON_ID, createId( services ) );
             //return null;
@@ -985,29 +1004,29 @@ public class ModelPost extends AbstractJavaWebScript {
         // The type is now found by using the specialization key
         // if its a non-nested node:
         if (nestedNode) {
-        	if (elementJson.has(Acm.JSON_TYPE)) {
-        		jsonType = elementJson.getString(Acm.JSON_TYPE);
-        	}
-        	
-    		// Put the type in Json if the was not supplied, but found in the existing node:
-        	if (existingNodeType != null && jsonType == null) {
-        		jsonType = existingNodeType;
-        		elementJson.put(Acm.JSON_TYPE, existingNodeType);
-        	}
+            	if (elementJson.has(Acm.JSON_TYPE)) {
+            		jsonType = elementJson.getString(Acm.JSON_TYPE);
+            	}
+            	
+        		// Put the type in Json if the was not supplied, but found in the existing node:
+            	if (existingNodeType != null && jsonType == null) {
+            		jsonType = existingNodeType;
+            		elementJson.put(Acm.JSON_TYPE, existingNodeType);
+            	}
         }
         else {
 	        if (elementJson.has(Acm.JSON_SPECIALIZATION)) {
-	        	specializeJson = elementJson.getJSONObject(Acm.JSON_SPECIALIZATION);
+	        	    specializeJson = elementJson.getJSONObject(Acm.JSON_SPECIALIZATION);
 		        if (specializeJson != null) {
-		        	if (specializeJson.has(Acm.JSON_TYPE)) {
-		        		jsonType = specializeJson.getString(Acm.JSON_TYPE);
-		        	}
-		        	
-		        	// Put the type in Json if the was not supplied, but found in the existing node:
-		        	if (existingNodeType != null && jsonType == null) {
-		        		jsonType = existingNodeType;
-		        		specializeJson.put(Acm.JSON_TYPE, existingNodeType);
-		        	}
+        		        	if (specializeJson.has(Acm.JSON_TYPE)) {
+        		        		jsonType = specializeJson.getString(Acm.JSON_TYPE);
+        		        	}
+        		        	
+        		        	// Put the type in Json if the was not supplied, but found in the existing node:
+        		        	if (existingNodeType != null && jsonType == null) {
+        		        		jsonType = existingNodeType;
+        		        		specializeJson.put(Acm.JSON_TYPE, existingNodeType);
+        		        	}
 		        }
 	        }
         }
@@ -1016,23 +1035,23 @@ public class ModelPost extends AbstractJavaWebScript {
             jsonType = ( existingNodeType == null ? "Element" : existingNodeType );
         }
         
-    	if (existingNodeType != null && !jsonType.equals(existingNodeType)) {
-    		log(LogLevel.WARNING, "The type supplied "+jsonType+" is different than the stored type "+existingNodeType);
-    	}
+        	if (existingNodeType != null && !jsonType.equals(existingNodeType)) {
+        		log(LogLevel.WARNING, "The type supplied "+jsonType+" is different than the stored type "+existingNodeType);
+        	}
         
         String acmSysmlType = null;
         String type = null;
         if ( jsonType != null ) {
-        	acmSysmlType = Acm.getJSON2ACM().get( jsonType );
+            acmSysmlType = Acm.getJSON2ACM().get( jsonType );
         }
 
         // Error if could not determine the type and processing the non-nested node:
         //	Note:  Must also have a specialization in case they are posting just a Element, whic
         //		   doesnt need a specialization key
         if (acmSysmlType == null && !nestedNode && elementJson.has(Acm.JSON_SPECIALIZATION)) {
-        	log(LogLevel.ERROR,"Type was not supplied and no existing node to query for the type", 
-        		HttpServletResponse.SC_BAD_REQUEST);
-        	return null;
+            	log(LogLevel.ERROR,"Type was not supplied and no existing node to query for the type", 
+            		HttpServletResponse.SC_BAD_REQUEST);
+            	return null;
         }
         
         type = NodeUtil.getContentModelTypeName( acmSysmlType, services ); 
@@ -1050,6 +1069,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
                     node.setProperty( Acm.CM_NAME, id );
                     node.setProperty( Acm.ACM_ID, id );
+                    modStatus.setState( ModStatus.State.ADDED  );
                 } catch ( Exception e ) {
                     if (Debug.isOn()) System.out.println( "Got exception in "
                                         + "updateOrCreateTransactionableElement(elementJson="
@@ -1069,12 +1089,16 @@ public class ModelPost extends AbstractJavaWebScript {
                         node.move(parent);
                         EmsScriptNode pkgNode = findScriptNodeById(id + "_pkg", null);
                         if (pkgNode != null) {
-                            pkgNode.move(parent);
+                            if ( pkgNode.move(parent) ) {
+                                modStatus.setState( ModStatus.State.UPDATED  );
+                            }
                         }
                     }
                     if ( !type.equals( acmSysmlType )
                             && NodeUtil.isAspect( acmSysmlType ) ) {
-                        node.createOrUpdateAspect( acmSysmlType );
+                        if (node.createOrUpdateAspect( acmSysmlType )) {
+                            modStatus.setState( ModStatus.State.UPDATED  );
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -1087,7 +1111,7 @@ public class ModelPost extends AbstractJavaWebScript {
             foundElements.put(id, node); // cache the found value
         }
         
-        // Note: Moved this before injesting the json b/c we need the reifiedNode
+        // Note: Moved this before ingesting the json b/c we need the reifiedNode
         if (nodeExists && elementHierarchyJson.has(id)) {
             log(LogLevel.INFO, "\tcreating reified package");
             reifiedNode = getOrCreateReifiedNode(node, id, true); // TODO -- Is last argument correct?
@@ -1109,8 +1133,9 @@ public class ModelPost extends AbstractJavaWebScript {
             processExpressionOrProperty(acmSysmlType, nestedNode, elementJson, specializeJson, node, 
 										ingest, reifiedNode, parent, id);
               
-            node.ingestJSON(elementJson);
-            
+            if ( node.ingestJSON(elementJson) ) {
+                modStatus.setState( ModStatus.State.UPDATED );
+            }
         } // ends if (ingest && nodeExists && checkPermissions(node, PermissionService.WRITE))
 
         // add the relationships into our maps

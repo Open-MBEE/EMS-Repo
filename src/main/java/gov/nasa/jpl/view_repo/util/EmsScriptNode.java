@@ -124,7 +124,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     // for lucene search
     // protected static final StoreRef SEARCH_STORE = new
     // StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
-
+    
     public EmsScriptNode( NodeRef nodeRef, ServiceRegistry services,
                           StringBuffer response, Status status ) {
         this( nodeRef, services );
@@ -1606,9 +1606,10 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      *            The property to update or create
      * @throws JSONException
      */
-    public void createOrUpdateProperties( JSONArray array,
+    public boolean createOrUpdateProperties( JSONArray array,
                                           String acmProperty )
                                                      throws JSONException {
+        boolean changed = false;
         // Need to check if we're trying to stuff an array into a single-valued
         // property. This happens with the contains and other properties of
         // view.
@@ -1617,8 +1618,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         boolean singleValued =  propDef != null && !propDef.isMultiValued();
 
         if ( singleValued ) {
-            createOrUpdateProperty( acmProperty, array.toString(4) );
-            return;
+            return createOrUpdateProperty( acmProperty, array.toString(4) );
         }
 
         ArrayList< Serializable > values = getPropertyValuesFromJson( propDef, array, null );
@@ -1629,7 +1629,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 values = getPropertyValuesFromJson( PropertyType.NODE_REF, array, null );
             } else {
                 Debug.error(true, false, "*$*$*$ null array of property values for " + acmProperty );
-                return;
+                return changed;
             }
         }
         if ( values == null ) {
@@ -1643,10 +1643,13 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                     (ArrayList< Serializable >)getProperty( acmProperty );
             if ( !EmsScriptNode.checkIfListsEquivalent( values, oldValues ) ) {
                 setProperty( acmProperty, values );
+                changed = true;
             }
         } else {
             log( "no write permissions " + id + "\n" );
         }
+        
+        return changed;
     }
 
     public EmsScriptNode findScriptNodeByName( String id, Date dateTime ) {
@@ -1860,7 +1863,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      * @param jsonObject
      * @throws JSONException
      */
-    public void ingestJSON( JSONObject jsonObject ) throws JSONException {
+    public boolean ingestJSON( JSONObject jsonObject ) throws JSONException {
+        boolean changed = false;
         // fill in all the properties
         if (Debug.isOn()) System.out.println( "ingestJSON(" + jsonObject + ")" );
         
@@ -1887,9 +1891,10 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             	   JSONObject specializeJson = jsonObject.getJSONObject(Acm.JSON_SPECIALIZATION);
             	   
                    if (specializeJson != null) {
-                	   
                        if (Debug.isOn()) System.out.println("processing " + acmType );
-                	   ingestJSON(specializeJson);
+                	       if ( ingestJSON(specializeJson) ) {
+                	           changed = true;
+                	       }
                    }
                 }
                 else {
@@ -1904,19 +1909,25 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 	                        ( propDef != null && propDef.isMultiValued() ) );
 	                if ( isArray ) {
 	                    JSONArray array = jsonObject.getJSONArray( key );
-	                    createOrUpdateProperties( array, acmType );
+	                    if ( createOrUpdateProperties( array, acmType ) ) {
+	                        changed = true;
+	                    }
 	                } else {
 	                    Serializable propVal =
 	                            getPropertyValueFromJson( propDef, jsonObject, key, null );
 	                    if ( propVal == badValue ) {
 	                        Debug.error("Got bad property value!");
 	                    } else {
-	                        createOrUpdateProperty( acmType, propVal );
+	                        if ( createOrUpdateProperty( acmType, propVal ) ) {
+	                            changed = true;
+	                        }
 	                    }
 	                }
                 } // ends else (not a Specialization)
             }
         }
+        
+        return changed;
     }
 
     /**
@@ -2405,5 +2416,4 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
            }
         }
     }
-
 }
