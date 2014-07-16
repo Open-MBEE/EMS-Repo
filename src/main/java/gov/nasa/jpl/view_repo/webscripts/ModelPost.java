@@ -178,13 +178,14 @@ public class ModelPost extends AbstractJavaWebScript {
      *            JSONObject used to create/update the model
      * @param status
      *            Status to be updated
+     * @param workspaceId 
      * @return the created elements
      * @throws JSONException
      *             Parse error
      */
     public Set< EmsScriptNode >
             createOrUpdateModel( Object content, Status status,
-                                 EmsScriptNode projectNode ) throws Exception {
+                                 EmsScriptNode projectNode, String workspaceId ) throws Exception {
         Date now = new Date();
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
@@ -1542,7 +1543,6 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             
         } // End if constraints list is non-empty
-        
 
     }
     
@@ -1559,25 +1559,30 @@ public class ModelPost extends AbstractJavaWebScript {
 
         boolean runInBackground = checkArgEquals(req, "background", "true");
         boolean fix = checkArgEquals(req, "fix", "true");
+
+        String workspaceId = getWorkspaceId( req );
         
         ModelPost instance = new ModelPost(repository, services);
-        
+
         JSONObject top = new JSONObject();
         if (validateRequest(req, status)) {
             try {
                 if (runInBackground) {
                     instance.saveAndStartAction(req, status);
+                    // REVIEW -- TODO -- shouldn't response be called from
+                    // instance? Maybe move the bulk of this method to a new
+                    // method and call from instance.
                     response.append("JSON uploaded, model load being processed in background.\n");
                     response.append("You will be notified via email when the model load has finished.\n");
-                } 
+                }
                 else {
                 	
                     JSONObject postJson = (JSONObject)req.parseContent();
                     EmsScriptNode projectNode = getProjectNodeFromRequest( req, true );
                     Set< EmsScriptNode > elements = 
-                        instance.createOrUpdateModel( postJson,
-                                                      status,
-                                                      projectNode );
+                        instance.createOrUpdateModel( postJson, status,
+                                                      projectNode, workspaceId );
+                    // REVIEW -- TODO -- shouldn't this be called from instance?
                     addRelationshipsToProperties( elements );
                     if ( !Utils.isNullOrEmpty( elements ) ) {
                         
@@ -1595,20 +1600,27 @@ public class ModelPost extends AbstractJavaWebScript {
                         model.put( "res", top.toString( 4 ) );
                     }
                 }
+                // REVIEW -- TODO -- shouldn't this be called from instance?
                 appendResponseStatusInfo(instance);
             } catch (JSONException e) {
                 log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
                 e.printStackTrace();
+                // REVIEW -- TODO -- shouldn't response be called from
+                // instance? Maybe move the bulk of this method to a new
+                // method and call from instance.
                 model.put("res", response.toString());
             } catch (Exception e) {
                 log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 e.printStackTrace();
+                // REVIEW -- TODO -- shouldn't response be called from instance?
                 model.put("res", response.toString());
             }
         }
+        // REVIEW -- TODO -- shouldn't response be called from instance?
         if ( !model.containsKey( "res" ) ) {
             model.put( "res", response.toString() );
         }
+        // REVIEW -- TODO -- shouldn't responseStatus be called from instance?
         status.setCode(responseStatus.getCode());
 
         printFooter();
@@ -1650,6 +1662,10 @@ public class ModelPost extends AbstractJavaWebScript {
             loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_NAME, (String)projectNode.getProperty(Acm.ACM_NAME));
         }
         loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_NODE, projectNode);
+
+        String workspaceId = getWorkspaceId( req );
+        loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_WORKSPACE_ID, workspaceId);
+
         services.getActionService().executeAction(loadAction , jobNode.getNodeRef(), true, true);
     }
     
