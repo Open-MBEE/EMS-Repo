@@ -8,7 +8,7 @@ pkill -fn 'integration-test'
 echo 'KILLING SERVER IF ONE IS RUNNING'
 
 
-cd ./../..
+#cd ./../..
 ./runserver.sh > serverLog.txt &
 echo 'STARTING UP SERVER'
 sleep 60s
