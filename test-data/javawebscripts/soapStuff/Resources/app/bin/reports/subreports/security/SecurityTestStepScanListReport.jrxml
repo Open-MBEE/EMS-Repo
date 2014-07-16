@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="SecurityTestStepScanListReport" language="groovy" pageWidth="535" pageHeight="842" columnWidth="535" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<template><![CDATA["../../styles.jrtx"]]></template>
+	<field name="securityScanNames" class="java.lang.String"/>
+	<field name="testStepName" class="java.lang.String"/>
+	<field name="securityTestName" class="java.lang.String"/>
+	<field name="icon" class="java.lang.String"/>
+	<columnHeader>
+		<band height="57">
+			<staticText>
+				<reportElement style="ColumnHeader" x="253" y="37" width="280" height="20"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<text><![CDATA[SecurityScan List]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="ColumnHeader" x="0" y="37" width="253" height="20"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
+				<text><![CDATA[TestStep Name]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement style="SmallHeader" x="0" y="0" width="535" height="37"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA["SecurityTest TestSteps"]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="21" splitType="Prevent">
+			<textField isStretchWithOverflow="true">
+				<reportElement x="253" y="5" width="282" height="14"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{securityScanNames}]]></textFieldExpression>
+			</textField>
+			<textField pattern="">
+				<reportElement stretchType="RelativeToTallestObject" x="20" y="4" width="233" height="14"/>
+				<box topPadding="1" leftPadding="1"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{testStepName}]]></textFieldExpression>
+			</textField>
+			<image scaleImage="RealSize" isUsingCache="true" onErrorType="Blank">
+				<reportElement x="0" y="3" width="16" height="16"/>
+				<imageExpression class="java.lang.String"><![CDATA["logo:" + $F{icon}.substring( $F{icon}.lastIndexOf( '/'))]]></imageExpression>
+			</image>
+		</band>
+	</detail>
+</jasperReport>
