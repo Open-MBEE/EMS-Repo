@@ -35,6 +35,14 @@
                 "$ref": "file:///../elements.json#/definitions/Element"
             }
         },
+        "movedElements": {
+            "type": "array",
+            "description": "List of elements moved in WS2 from WS1",
+            "items": {
+                "type": "object",
+                "$ref": "file:///../elements.json#/definitions/Element"
+            }
+        },
         "workspace1": {
             "type": "object",
             "description": "Specification of WS1",

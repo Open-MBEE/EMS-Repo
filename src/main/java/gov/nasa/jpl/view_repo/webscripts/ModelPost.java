@@ -119,6 +119,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
     private JSONArray addedElements = new JSONArray();
     private JSONArray updatedElements = new JSONArray();
+    private JSONArray movedElements = new JSONArray();
     
     private EmsSystemModel systemModel;
     
@@ -258,6 +259,7 @@ public class ModelPost extends AbstractJavaWebScript {
         JSONObject deltaJson = new JSONObject();
         deltaJson.put( "added", addedElements );
         deltaJson.put( "updated", updatedElements );
+        deltaJson.put( "moved", movedElements );
         jmsConnection.publishTopic( deltaJson.toString( 2 ), "master" );
         return elements;
     }
@@ -822,6 +824,18 @@ public class ModelPost extends AbstractJavaWebScript {
                     updatedElements.put( elementJson );
                 }
                 break;
+            case MOVED:
+                if (!ingest) {
+                    movedElements.put( elementJson );
+                }
+                break;
+            case UPDATED_AND_MOVED:
+                if (ingest) {
+                    updatedElements.put( elementJson );
+                } else {
+                    movedElements.put( elementJson );
+                }
+                break;
             default:
                 // do nothing
         }
@@ -1086,12 +1100,13 @@ public class ModelPost extends AbstractJavaWebScript {
             try {
                 if (node != null && node.exists() ) {
                     if (!node.getParent().equals(parent)) {
-                        node.move(parent);
+                        if ( node.move(parent) ) {
+                            modStatus.setState( ModStatus.State.MOVED  );
+                        }
+                        
                         EmsScriptNode pkgNode = findScriptNodeById(id + "_pkg", null);
                         if (pkgNode != null) {
-                            if ( pkgNode.move(parent) ) {
-                                modStatus.setState( ModStatus.State.UPDATED  );
-                            }
+                            pkgNode.move(parent);
                         }
                     }
                     if ( !type.equals( acmSysmlType )
