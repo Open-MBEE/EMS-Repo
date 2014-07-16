@@ -1,9 +1,14 @@
 #!/bin/bash
 
 passTest=0
+soapServer="128.149.16.xxx:8080"
 
 #start up the server
-#cd ./../..
+pkill -fn 'integration-test'
+echo 'KILLING SERVER IF ONE IS RUNNING'
+
+
+cd ./../..
 ./runserver.sh > serverLog.txt &
 echo 'STARTING UP SERVER'
 sleep 60s
@@ -37,9 +42,19 @@ if [ $server -eq 1 ]; then
 	./diff2.sh
 	passTest=$?
 
-	#shutdown the tomcat server process
-	pkill -fn 'integration-test'
-	echo 'KILLING SERVER'
+        #connect to soapUI -- WORK STILL NEEDED
+        echo 'RUNNING SOAP UI TESTS'
+        #ssh $soapServer 'cd /classPath/; ./soapScript;'
+        #classPath=??
+        #TestSuite="??"
+        #TestCase="??"
+        #./testrunner.sh -f ./soapTestData -s $TestSuite -c $TestCase $classpath
+        cd ./soapStuff
+        ./Resources/app/bin/testrunner.sh ./maxRegression-soapui-project.xml
+
+        #shutdown the tomcat server process
+        pkill -fn 'integration-test'
+        echo 'KILLING SERVER'
 
 	echo 'PASSTEST?'
         echo "$passTest"
