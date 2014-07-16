@@ -1861,6 +1861,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      * Update the node with the properties from the jsonObject
      * 
      * @param jsonObject
+     * 
+     * return   true if Element was changed, false otherwise
      * @throws JSONException
      */
     public boolean ingestJSON( JSONObject jsonObject ) throws JSONException {
