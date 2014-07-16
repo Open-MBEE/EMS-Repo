@@ -188,16 +188,16 @@
 <!--             <artifactId>httpclient</artifactId> -->
 <!--             <version>4.2.5</version> -->
 <!--         </dependency> -->
-        <dependency>
-            <groupId>com.jayway.restassured</groupId>
-            <artifactId>rest-assured</artifactId>
-            <version>1.8.1</version>
-        </dependency>
-		<dependency>
-			<groupId>org.codehaus.groovy</groupId>
-			<artifactId>groovy-all</artifactId>
-			<version>2.2.1</version>
-		</dependency>
+<!--         <dependency> -->
+<!--             <groupId>com.jayway.restassured</groupId> -->
+<!--             <artifactId>rest-assured</artifactId> -->
+<!--             <version>1.8.1</version> -->
+<!--         </dependency> -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.codehaus.groovy</groupId> -->
+<!-- 			<artifactId>groovy-all</artifactId> -->
+<!-- 			<version>2.2.1</version> -->
+<!-- 		</dependency> -->
     </dependencies>
 
 	
@@ -226,6 +226,12 @@
                 <enabled>true</enabled>
                 <updatePolicy>daily</updatePolicy>
             </snapshots>
+        </repository>
+        
+        <!-- soap ui plugin -->
+        <repository>
+            <id>smartbear-sweden-plugin-repository</id>
+            <url>http://www.soapui.org/repository/maven2/</url>
         </repository>
     </repositories>
 
@@ -331,6 +337,32 @@
                     </execution>
 			</executions>
 			</plugin>
+			
+			<!-- soap UI plugin -->
+<!-- 			<plugin> -->
+<!-- 			    <groupId>com.smartbear.soapui</groupId> -->
+<!-- 			    <artifactId>soapui-maven-plugin</artifactId> -->
+<!-- 			    <version>4.6.1</version> -->
+<!-- 			    <dependencies> -->
+<!--                     <dependency> -->
+<!--                         <groupId>mysql</groupId> -->
+<!--                         <artifactId>mysql-connector-java</artifactId> -->
+<!--                         <version>5.1.6</version> -->
+<!--                     </dependency> -->
+<!--                 </dependencies> -->
+<!-- 			    <executions> -->
+<!-- 			        <execution> -->
+<!-- 			            <phase>integration-test</phase> -->
+<!-- 			            <goals> -->
+<!-- 			                <goal>test</goal> -->
+<!-- 		                </goals> -->
+<!-- 		                <configuration> -->
+<!-- 					         <projectFile>simple-test-soapui-project.xml</projectFile> -->
+<!-- 					         <testSuite>TestSuite1</testSuite> -->
+<!-- 			            </configuration> -->
+<!-- 	                </execution> -->
+<!-- 			    </executions> -->
+<!-- 			</plugin> -->
 			
 			
 	   <!-- Max's plugin for regression testing -->
