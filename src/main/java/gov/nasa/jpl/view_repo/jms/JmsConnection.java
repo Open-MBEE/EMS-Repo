@@ -58,7 +58,8 @@ public class JmsConnection {
             producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 
             // Create a message
-            TextMessage message = session.createTextMessage(sequenceId + ": " + msg);
+            // TODO: add in the sequence ID
+            TextMessage message = session.createTextMessage(msg);
 
             // Tell the producer to send the message
             System.out.println("Sent message: "+ message.hashCode() + " : " + Thread.currentThread().getName());
