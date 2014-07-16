@@ -257,9 +257,9 @@ public class ModelPost extends AbstractJavaWebScript {
         
         JmsConnection jmsConnection = JmsConnection.getInstance();
         JSONObject deltaJson = new JSONObject();
-        deltaJson.put( "added", addedElements );
-        deltaJson.put( "updated", updatedElements );
-        deltaJson.put( "moved", movedElements );
+        deltaJson.put( "addedElements", addedElements );
+        deltaJson.put( "updatedElements", updatedElements );
+        deltaJson.put( "movedElements", movedElements );
         jmsConnection.publishTopic( deltaJson.toString( 2 ), "master" );
         return elements;
     }
