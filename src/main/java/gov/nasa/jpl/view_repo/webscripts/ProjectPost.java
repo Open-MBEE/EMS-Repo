@@ -149,7 +149,10 @@ public class ProjectPost extends AbstractJavaWebScript {
 	 * @return				HttpStatusResponse code for success of the POST request
 	 * @throws JSONException
 	 */
-    public int updateOrCreateProject(JSONObject jsonObject, String projectId, String siteName, boolean createSite, boolean fix, boolean delete) throws JSONException {
+    public int updateOrCreateProject(JSONObject jsonObject, //String workspaceId,
+                                     String projectId, String siteName,
+                                     boolean createSite, boolean fix,
+                                     boolean delete) throws JSONException {
 		// make sure site exists
 		EmsScriptNode siteNode = getSiteNode(siteName, null);
 		if (siteNode == null) {

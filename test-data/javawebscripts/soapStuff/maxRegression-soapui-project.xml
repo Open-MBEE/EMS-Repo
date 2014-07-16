@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project activeEnvironment="Default" name="maxRegression" resourceRoot="" soapui-version="5.0.0" abortOnError="false" runType="SEQUENTIAL" id="e415ddd9-7ebb-4a09-b538-3854d82a598a" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:testSuite name="getProject" id="eac5fad9-98cd-4613-bcc1-e9d09621eb8e"><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="TestCase 1" searchProperties="true" id="06dd2f09-42e7-4f68-8974-5ff012ac390e"><con:settings/><con:testStep type="httprequest" name="getCurl1" id="bac22f8a-9a5f-4500-ba0e-193969ecf738"><con:settings/><con:config method="GET" xsi:type="con:HttpRequest" name="getCurl1" id="a1e01c66-11a3-4d44-b302-269aa1b1f99c" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://${#Project#server}/alfresco/service/javawebscripts/sites/${#TestCase#siteId}/projects/${#TestCase#projectId}</con:endpoint><con:request/><con:assertion type="Simple Contains" name="Contains name" id="cd76b4b0-44f7-40d6-a312-ca26730ee052"><con:configuration><token>"name"</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="Simple Contains" name="Contains sysmlid" id="707912b8-4803-430a-979d-3c70a9928e95"><con:configuration><token>"sysmlid"</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:credentials><con:username>admin</con:username><con:password>admin</con:password><con:selectedAuthProfile>Basic</con:selectedAuthProfile><con:addedBasicAuthenticationTypes>Basic</con:addedBasicAuthenticationTypes><con:preemptive>true</con:preemptive><con:authType>Preemptive</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><con:parameter><con:name>params</con:name><con:value>[siteId, projectId]</con:value><con:style>QUERY</con:style></con:parameter><con:parameter><con:name>expectedReturn</con:name><con:value>Expects to receive a JSON object with two properties: name and sysmlid.</con:value><con:style>QUERY</con:style></con:parameter><con:parameter><con:name>expectedResp</con:name><con:value>200</con:value><con:style>QUERY</con:style></con:parameter><con:parameter><con:name>method</con:name><con:value>/sites/{sitesId}/projects/{projectId}</con:value><con:style>QUERY</con:style></con:parameter></con:parameters></con:config></con:testStep><con:testStep type="httprequest" name="getCurl2" id="e81c6ba7-c223-4922-a23c-9b09e749b902"><con:settings/><con:config method="GET" xsi:type="con:HttpRequest" id="f6033daa-5a76-4419-a497-9a67c3582f1b" name="getCurl2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>http://${#Project#server}/alfresco/service/javawebscripts/elements/${#TestCase#elementId}?${#TestCase#recurseTrue}</con:endpoint><con:request/><con:assertion type="Simple Contains" name="Contains"><con:configuration><token>"elements"</token><ignoreCase>false</ignoreCase><useRegEx>false</useRegEx></con:configuration></con:assertion><con:assertion type="GroovyScriptAssertion" name="Script Assertion"><con:configuration/></con:assertion><con:credentials><con:username>admin</con:username><con:password>admin</con:password><con:selectedAuthProfile>Basic</con:selectedAuthProfile><con:addedBasicAuthenticationTypes>Basic</con:addedBasicAuthenticationTypes><con:preemptive>true</con:preemptive><con:authType>Preemptive</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters><con:parameter><con:name>params</con:name><con:value>[elementId, recurse]</con:value><con:style>QUERY</con:style></con:parameter><con:parameter><con:name>expectedReturn</con:name><con:value/><con:style>QUERY</con:style></con:parameter><con:parameter><con:name>expectedResp</con:name><con:value/><con:style>QUERY</con:style></con:parameter><con:parameter><con:name>method</con:name><con:value>elements/{elementId}/?{recurse}</con:value></con:parameter></con:parameters></con:config></con:testStep><con:setupScript/><con:tearDownScript>for (testStep in testCase.getTestStepList()) {
+	
+	String documentation = ""
+
+	documentation += "Parameters: " + testStep.getPropertyValue("params") + "\n"
+
+	documentation += "Method: " + testStep.getPropertyValue("method") + "\n"
+
+	documentation += 
+
+	log.info "about to log"
+
+	log.info documentation
+}
+</con:tearDownScript><con:properties><con:property><con:name>siteId</con:name><con:value>europa</con:value></con:property><con:property><con:name>projectId</con:name><con:value>123456</con:value></con:property><con:property><con:name>elementId</con:name><con:value>123456</con:value></con:property><con:property><con:name>recurseTrue</con:name><con:value>recurse=true</con:value></con:property></con:properties><con:reportScript/><con:reportParameters/><con:breakPoints><con:testStepId>bac22f8a-9a5f-4500-ba0e-193969ecf738</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e81c6ba7-c223-4922-a23c-9b09e749b902</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:tearDownScript>for (testCaseResult in runner.results){
+	log.info "stuff"
+	testCaseName = testCaseResult.getTestCase().name
+	
+	for (testStepResult in testCaseResult.getResults()) {
+		log.info("testing")
+		log.info("response: " + testStepResult.getTestStep().testRequest.getResponse().getContentAsString())	
+	}
+//		testStepResult.messages.each() { msg -> log.info msg }
+}
+
+
+</con:tearDownScript><con:reportParameters/></con:testSuite><con:restMockService port="8080" path="/" name="REST MockService 1" id="b79f316f-b321-47ed-89d9-04c62eed5e6c"><con:settings/><con:properties/><con:restMockAction name="/afresco/service/javawebscripts/sites/europa/projects/123456" method="GET" resourcePath="/afresco/service/javawebscripts/sites/europa/projects/123456" id="ed72b54b-d2b8-4dc3-82d6-caa7df3fb328"><con:settings/><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:dispatchPath>/*
+// Examples showing how to match based on path, query param and header
+// Match based on path
+def requestPath = mockRequest.getPath()
+log.info "Path: "+ requestPath
+
+if( requestPath.contains("json") )
+{
+    // return the name of the response you want to dispatch
+    return "JSON Response"
+}
+
+
+// Match based on query parameter
+def queryString = mockRequest.getRequest().getQueryString()
+log.info "QueryString: " + queryString
+
+if( queryString.contains("stockholm") )
+{
+    // return the name of the response you want to dispatch
+    return "Response Stockholm"
+}
+else if( queryString.contains("london") )
+{
+    // return the name of the response you want to dispatch
+    return "Response London"
+}
+
+
+// Match based on header
+def acceptEncodingHeadeList = mockRequest.getRequestHeaders().get("Accept-Encoding")
+log.info "AcceptEncodig Header List: " + acceptEncodingHeadeList
+
+if( acceptEncodingHeadeList.contains("gzip,deflate") )
+{
+    // return the name of the response you want to dispatch
+    return "GZiped Response"
+}
+
+*/
+</con:dispatchPath></con:restMockAction></con:restMockService><con:requirements/><con:properties><con:property><con:name>server</con:name><con:value>localhost:8080</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>

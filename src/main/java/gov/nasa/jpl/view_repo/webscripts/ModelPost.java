@@ -60,7 +60,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
@@ -180,13 +179,14 @@ public class ModelPost extends AbstractJavaWebScript {
      *            JSONObject used to create/update the model
      * @param status
      *            Status to be updated
+     * @param workspaceId 
      * @return the created elements
      * @throws JSONException
      *             Parse error
      */
     public Set< EmsScriptNode >
             createOrUpdateModel( Object content, Status status,
-                                 EmsScriptNode projectNode ) throws Exception {
+                                 EmsScriptNode projectNode, String workspaceId ) throws Exception {
         Date now = new Date();
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
@@ -243,8 +243,8 @@ public class ModelPost extends AbstractJavaWebScript {
         updateOrCreateAllRelationships(relationshipsJson);
         
         // create commit history
-        // TODO add in commit message
-        CommitUtil.commitChangeSet(changeSet, "", runWithoutTransactions, services);
+        // TODO Need to fix - add in the versions when committing a node
+//        CommitUtil.commitChangeSet(changeSet, "", runWithoutTransactions, services);
         
         // make another pass through the elements and update their properties
         elements.addAll( updateNodeReferences( singleElement, postJson,
@@ -600,7 +600,7 @@ public class ModelPost extends AbstractJavaWebScript {
             
             // If element does not have a ID, then create one for it using the alfresco id (cm:id):
             if (!elementJson.has(Acm.JSON_ID)) {
-                elementJson.put( Acm.JSON_ID, createId( services ) );
+                elementJson.put( Acm.JSON_ID, NodeUtil.createId( services ) );
                 //return null;
             }
             String sysmlId = null;
@@ -995,7 +995,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                                   boolean nestedNode,
                                                   ModStatus modStatus) throws Exception {
         if (!elementJson.has(Acm.JSON_ID)) {
-            elementJson.put( Acm.JSON_ID, createId( services ) );
+            elementJson.put( Acm.JSON_ID, NodeUtil.createId( services ) );
             //return null;
         }
         String id = elementJson.getString(Acm.JSON_ID);
@@ -1182,18 +1182,6 @@ public class ModelPost extends AbstractJavaWebScript {
         return nestedNode ? node : reifiedNode;
     }
     
-    public static String createId( ServiceRegistry services ) {
-        for ( int i=0; i<10; ++i ) {
-            String id = "MMS_" + System.currentTimeMillis() + "_" + UUID.randomUUID().toString();
-            // Make sure id is not already used
-            if ( NodeUtil.findNodeRefById( id, null, services ) == null ) {
-                return id;
-            }
-        }
-        Debug.error( true, "Could not create a unique id!" );
-        return null;
-    }
-
     protected EmsScriptNode getOrCreateReifiedNode(EmsScriptNode node, String id, boolean useParent) {
         EmsScriptNode reifiedNode = null;
         if ( node == null || !node.exists() ) {
@@ -1533,6 +1521,75 @@ public class ModelPost extends AbstractJavaWebScript {
         }
     }
     
+    protected void fix( Set< EmsScriptNode > elements ) {
+        
+        log(LogLevel.INFO, "Constraint violations will be fixed if found!");
+        
+        SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  solver = 
+                new SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(getSystemModel(), new ConstraintLoopSolver() );
+        
+        Collection<Constraint> constraints = new ArrayList<Constraint>();
+        
+        // Search for all constraints in the database:
+        Collection<EmsScriptNode> constraintNodes = getSystemModel().getType(null, Acm.JSON_CONSTRAINT);
+        
+        if (!Utils.isNullOrEmpty(constraintNodes)) {
+            
+            // Loop through each found constraint and check if it contains any of the elements
+            // to be posted:
+            for (EmsScriptNode constraintNode : constraintNodes) {
+                
+                // Parse the constraint node for all of the cm:names of the nodes in its expression tree:
+                Set<String> constrElemNames = getConstraintElementNames(constraintNode);
+                
+                // Check if any of the posted elements are in the constraint expression tree, and add
+                // constraint if they are:
+                // Note: if a Constraint element is in elements then it will also get added here b/c it
+                //          will be in the database already via createOrUpdateMode()
+                for (EmsScriptNode element : elements) {
+                      
+                    String name = element.getName();
+                    if (name != null && constrElemNames.contains(name)) {
+                        addConstraintExpression(constraintNode, constraints);
+                        break;
+                    }
+
+                } // Ends loop through elements
+                
+            } // Ends loop through constraintNodes
+            
+        } // Ends if there was constraint nodes found in the database
+        
+        // Solve the constraints:
+        if (!Utils.isNullOrEmpty( constraints )) {
+            
+            // Add all of the Parameter constraints:
+            ClassData cd = getSystemModelAe().getClassData();
+            
+            // Loop through all the listeners:
+            for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
+                
+                // TODO: REVIEW
+                //       Can we get duplicate ParameterListeners in the aeClassses map?
+                constraints.addAll( listener.getConstraints( true, null ) );
+            }
+        
+            // Solve!!!!
+            Debug.turnOn();
+            boolean result = solver.solve(constraints);
+            Debug.turnOff();
+            
+            if (!result) {
+                log( LogLevel.ERROR, "Was not able to satisfy all of the constraints!" );
+            }
+            else {
+                log( LogLevel.INFO, "Satisfied all of the constraints!" );
+            }
+            
+        } // End if constraints list is non-empty
+
+    }
+    
     /**
      * Entry point
      */
@@ -1547,96 +1604,36 @@ public class ModelPost extends AbstractJavaWebScript {
         boolean runInBackground = checkArgEquals(req, "background", "true");
         boolean fix = checkArgEquals(req, "fix", "true");
 
-        ModelPost instance = new ModelPost(repository, services);
+        String workspaceId = getWorkspaceId( req );
         
+        ModelPost instance = new ModelPost(repository, services);
+
         JSONObject top = new JSONObject();
         if (validateRequest(req, status)) {
             try {
                 if (runInBackground) {
                     instance.saveAndStartAction(req, status);
+                    // REVIEW -- TODO -- shouldn't response be called from
+                    // instance? Maybe move the bulk of this method to a new
+                    // method and call from instance.
                     response.append("JSON uploaded, model load being processed in background.\n");
                     response.append("You will be notified via email when the model load has finished.\n");
-                } 
+                }
                 else {
                 	
                     JSONObject postJson = (JSONObject)req.parseContent();
                     EmsScriptNode projectNode = getProjectNodeFromRequest( req, true );
                     Set< EmsScriptNode > elements = 
-                        instance.createOrUpdateModel( postJson,
-                                                      status,
-                                                      projectNode );
+                        instance.createOrUpdateModel( postJson, status,
+                                                      projectNode, workspaceId );
+                    // REVIEW -- TODO -- shouldn't this be called from instance?
                     addRelationshipsToProperties( elements );
                     if ( !Utils.isNullOrEmpty( elements ) ) {
                         
                         // Fix constraints if desired:
                         if (fix) {
-                        	
-                            log(LogLevel.INFO, "Constraint violations will be fixed if found!");
-                            
-                            SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  solver = 
-                                    new SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(getSystemModel(), new ConstraintLoopSolver() );
-                            
-                            Collection<Constraint> constraints = new ArrayList<Constraint>();
-                            
-                            // Search for all constraints in the database:
-                            Collection<EmsScriptNode> constraintNodes = getSystemModel().getType(null, Acm.JSON_CONSTRAINT);
-                            
-                            if (!Utils.isNullOrEmpty(constraintNodes)) {
-                            	
-                            	// Loop through each found constraint and check if it contains any of the elements
-                            	// to be posted:
-                            	for (EmsScriptNode constraintNode : constraintNodes) {
-                            		
-                            		// Parse the constraint node for all of the cm:names of the nodes in its expression tree:
-                            		Set<String> constrElemNames = getConstraintElementNames(constraintNode);
-                            		
-                            		// Check if any of the posted elements are in the constraint expression tree, and add
-                            		// constraint if they are:
-                            		// Note: if a Constraint element is in elements then it will also get added here b/c it
-                            		//			will be in the database already via createOrUpdateMode()
-                            	    for (EmsScriptNode element : elements) {
-                            	    	  
-                            	    	String name = element.getName();
-                            	    	if (name != null && constrElemNames.contains(name)) {
-                            	    		addConstraintExpression(constraintNode, constraints);
-                            	    		break;
-                            	    	}
-
-                            	    } // Ends loop through elements
-                            		
-                            	} // Ends loop through constraintNodes
-                            	
-                            } // Ends if there was constraint nodes found in the database
-                            
-                            // Solve the constraints:
-                            if (!Utils.isNullOrEmpty( constraints )) {
-                                
-                                // Add all of the Parameter constraints:
-                                ClassData cd = getSystemModelAe().getClassData();
-                                
-                                // Loop through all the listeners:
-                                for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
-                                    
-                                    // TODO: REVIEW
-                                    //       Can we get duplicate ParameterListeners in the aeClassses map?
-                                    constraints.addAll( listener.getConstraints( true, null ) );
-                                }
-                            
-                                // Solve!!!!
-                                Debug.turnOn();
-                                boolean result = solver.solve(constraints);
-                                Debug.turnOff();
-                                
-                                if (!result) {
-                                    log( LogLevel.ERROR, "Was not able to satisfy all of the constraints!" );
-                                }
-                                else {
-                                    log( LogLevel.INFO, "Satisfied all of the constraints!" );
-                                }
-                                
-                            } // End if constraints list is non-empty
-                            
-                        } // end if fixing constraints
+                        	instance.fix(elements);
+                        }
                         
                         // Create JSON object of the elements to return:
                         JSONArray elementsJson = new JSONArray();
@@ -1647,20 +1644,27 @@ public class ModelPost extends AbstractJavaWebScript {
                         model.put( "res", top.toString( 4 ) );
                     }
                 }
+                // REVIEW -- TODO -- shouldn't this be called from instance?
                 appendResponseStatusInfo(instance);
             } catch (JSONException e) {
                 log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
                 e.printStackTrace();
+                // REVIEW -- TODO -- shouldn't response be called from
+                // instance? Maybe move the bulk of this method to a new
+                // method and call from instance.
                 model.put("res", response.toString());
             } catch (Exception e) {
                 log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 e.printStackTrace();
+                // REVIEW -- TODO -- shouldn't response be called from instance?
                 model.put("res", response.toString());
             }
         }
+        // REVIEW -- TODO -- shouldn't response be called from instance?
         if ( !model.containsKey( "res" ) ) {
             model.put( "res", response.toString() );
         }
+        // REVIEW -- TODO -- shouldn't responseStatus be called from instance?
         status.setCode(responseStatus.getCode());
 
         printFooter();
@@ -1702,6 +1706,10 @@ public class ModelPost extends AbstractJavaWebScript {
             loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_NAME, (String)projectNode.getProperty(Acm.ACM_NAME));
         }
         loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_NODE, projectNode);
+
+        String workspaceId = getWorkspaceId( req );
+        loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_WORKSPACE_ID, workspaceId);
+
         services.getActionService().executeAction(loadAction , jobNode.getNodeRef(), true, true);
     }
     

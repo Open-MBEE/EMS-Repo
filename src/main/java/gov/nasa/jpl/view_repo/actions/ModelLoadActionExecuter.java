@@ -68,6 +68,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
     public static final String PARAM_PROJECT_NAME = "projectName";
     public static final String PARAM_PROJECT_ID = "projectId";
     public static final String PARAM_PROJECT_NODE = "projectNode";
+    public static final String PARAM_WORKSPACE_ID = "workspaceId";
 
     public void setRepository(Repository rep) {
         repository = rep;
@@ -82,6 +83,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         String projectId = (String) action.getParameterValue(PARAM_PROJECT_ID);
         String projectName = (String) action.getParameterValue(PARAM_PROJECT_NAME);
         EmsScriptNode projectNode = (EmsScriptNode) action.getParameterValue(PARAM_PROJECT_NODE);
+        String workspaceId = (String) action.getParameterValue(PARAM_WORKSPACE_ID);
         if (Debug.isOn()) System.out.println("ModelLoadActionExecuter started execution of " + projectName + " [id: " + projectId + "]");
         clearCache();
 
@@ -110,7 +112,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
             modelService.setRunWithoutTransactions(false);
             Status status = new Status();
             try {
-                modelService.createOrUpdateModel(content, status, projectNode);
+                modelService.createOrUpdateModel(content, status, projectNode, workspaceId);
             } catch (Exception e) {
                 status.setCode(HttpServletResponse.SC_BAD_REQUEST);
                 response.append("ERROR: could not parse request\n");
@@ -131,11 +133,13 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         String contextUrl = "https://" + ActionUtil.getHostName() + ".jpl.nasa.gov/alfresco";
         	
         // Send off the notification email
-        String subject = "[EuropaEMS] Project " + projectName + " Load " + jobStatus;
+        String subject =
+                "[EuropaEMS] Workspace " + workspaceId + " Project "
+                        + projectName + " Load " + jobStatus;
         String msg = "Log URL: " + contextUrl + logNode.getUrl();
         ActionUtil.sendEmailToModifier(jsonNode, msg, subject, services, response);
 
-        if (Debug.isOn()) System.out.println("ModelLoadActionExecuter completed execution of " + projectName + " [id: " + projectId + "]");
+        if (Debug.isOn()) System.out.println("ModelLoadActionExecuter completed execution of " + workspaceId + " - "+ projectName + " [id: " + projectId + "]");
     }
 
     protected void clearCache() {

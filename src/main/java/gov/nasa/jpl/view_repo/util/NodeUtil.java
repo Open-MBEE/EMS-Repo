@@ -14,10 +14,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.alfresco.model.ContentModel;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.jscript.ScriptVersion;
 import org.alfresco.service.ServiceRegistry;
@@ -25,11 +27,13 @@ import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.TypeDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
@@ -901,5 +905,28 @@ public class NodeUtil {
             }
         }
         return elements;
+    }
+
+    public static EmsScriptNode getUserHomeFolder( String userName ) {
+        PersonService personService = getServices().getPersonService();
+        NodeService nodeService = getServices().getNodeService();
+        NodeRef personNode = personService.getPerson(userName);
+        NodeRef homeFolderNode =
+                (NodeRef)nodeService.getProperty( personNode,
+                                                  ContentModel.PROP_HOMEFOLDER );
+        return new EmsScriptNode( homeFolderNode, getServices() );
+    }
+
+    // REVIEW -- should this be in AbstractJavaWebScript?
+    public static String createId( ServiceRegistry services ) {
+        for ( int i=0; i<10; ++i ) {
+            String id = "MMS_" + System.currentTimeMillis() + "_" + UUID.randomUUID().toString();
+            // Make sure id is not already used
+            if ( findNodeRefById( id, null, services ) == null ) {
+                return id;
+            }
+        }
+        Debug.error( true, "Could not create a unique id!" );
+        return null;
     }
 }

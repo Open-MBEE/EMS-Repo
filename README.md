@@ -25,9 +25,10 @@ build with maventest in command line
 	# for those that do want load bae/util/sysml projects
     mvn integration-test -Pamp-to-war -Dmaven.test.skip=true -P mms-dev
     
-Set up magicdraw path
+if using the mdk or bae MagicDraw plugins, set up magicdraw path
     Window->Preferences->MagicDraw Installation
     Set the root directory to "/opt/local/magicdraw"
+    There are separate mdk and bae setup instructions, which can be ignored for view-repo development and test.
 
 restart eclipse
 
@@ -192,14 +193,18 @@ Get DocGen Manual
 Get comments
 
 	curl -u admin:admin "http://localhost:8080/alfresco/service/rest/views/_17_0_1_2_407019f_1340300322136_11866_17343/comments?recurse=true"
-	
+
+
+
+# Other debug
+
 To open the javascript debugger: [http://localhost:8080/alfresco/service/api/javascript/debugger](http://localhost:8080/alfresco/service/api/javascript/debugger) (you may have to close and reopen to get it to step through on consecutive script calls)
 
 To refresh changes to scripts (they have to be updated in the "target/view-repo-war/WEB-INF/classes/alfresco/extension/..."): [http://localhost:8080/alfresco/service/index](http://localhost:8080/alfresco/service/index) hit refresh at the botton
 
 Maven archetype from [Alfresco Maven SDK](https://artifacts.alfresco.com/nexus/content/repositories/alfresco-docs/alfresco-lifecycle-aggregator/latest/index.html)
 
-Documentation links:
+# Documentation links:
 
 * [Web Scripts](http://docs.alfresco.com/4.2/index.jsp?topic=%2Fcom.alfresco.enterprise.doc%2Fconcepts%2Fws-architecture.html)
 * [AMP modules](http://docs.alfresco.com/4.2/index.jsp?topic=%2Fcom.alfresco.enterprise.doc%2Fconcepts%2Fdev-extensions-modules-intro.html)
@@ -212,7 +217,18 @@ Get a directory of available services including the REST API
     https://sheldon.jpl.nasa.gov/alfresco/service/index
     https://europaems.jpl.nasa.gov/alfresco/service/index
 
-THIS DOESN'T WORK: To attempt to turn off indexing (maybe because it slows down junit test runs), change VALIDATE to NONE for index.recovery.mode in
+# Miscellaneous
+
+Sometimes, eclipse will lock the GUI with a popup saying that the user operation is waiting on other tasks, typically a rebuild.
+If this is annoying because the rebuild takes a long time, you can create a ram disk to store the target directory and create a soft link to it.
+This should speed up the rebuild significantly.
+
+     sudo mount -t tmpfs -o size=1024m tmpfs /mnt/ramdisk
+     cd ~/git/alfresco-view-repo
+     mv target /mnt/ramdisk
+     ln -s /mnt/ramdisk/target .
+
+THE FOLLOWING DOESN'T WORK: To attempt to turn off indexing (maybe because it slows down junit test runs), change VALIDATE to NONE for index.recovery.mode in
  
     target/view-repo-war/WEB-INF/classes/alfresco/repository.properties
 

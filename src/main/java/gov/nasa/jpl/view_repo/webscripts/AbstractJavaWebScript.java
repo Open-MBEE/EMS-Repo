@@ -275,6 +275,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     protected static final String SITE_NAME = "siteName";
     protected static final String SITE_NAME2 = "siteId";
     
+    public static final String NO_WORKSPACE_ID = "master"; // default is master if unspecified
     public static final String NO_PROJECT_ID = "no_project";
     public static final String NO_SITE_ID = "no_site";
 
@@ -311,6 +312,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             projectId = NO_PROJECT_ID;
         }
         return projectId;
+    }
+    
+    public String getWorkspaceId( WebScriptRequest req ) {
+        String workspaceId = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
+        if ( workspaceId == null || workspaceId.length() <= 0 ) {
+            workspaceId = NO_WORKSPACE_ID;
+        }
+        return workspaceId;
     }
     
     protected boolean checkRequestContent(WebScriptRequest req) {

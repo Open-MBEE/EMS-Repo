@@ -19,6 +19,11 @@ export CURL_SECURITY=" -k -3"
 #	export SERVICE_URL="\"http://ems.jpl.nasa.gov/alfresco/service/"
 #	export BASE_URL="\"http://ems.jpl.nasa.gov/alfresco/service/javawebscripts/"
 #	export BASE_URL="\"https://ems.jpl.nasa.gov/alfresco/service/javawebscripts/"
+#	export CURL_USER=" -u shatkhin"
+#	export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
+#	export SERVICE_URL="\"http://europaems-dev-staging-a:8443/alfresco/service/"
+#	export BASE_URL="\"http://europaems-dev-staging-a:8443/alfresco/service/javawebscripts/"
+#	export BASE_URL="\"https://europaems-dev-staging-a/alfresco/service/javawebscripts/"
 #fi
 
 # TODO: CURL commands aren't executed from bash using environment variables
