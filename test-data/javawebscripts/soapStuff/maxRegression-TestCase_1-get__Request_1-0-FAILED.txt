@@ -1,0 +1,37 @@
+Status: FAILED
+Time Taken: 123
+Size: 0
+Timestamp: Tue Jul 15 11:16:09 PDT 2014
+TestStep: get - Request 1
+
+----------------- Messages ------------------------------
+[name] null/empty response
+[sysmlid] null/empty response
+
+----------------- Properties ------------------------------
+StatusCode: 404
+Method: GET
+Password: admin
+Username: admin
+HTTP Version: HTTP/1.1
+Endpoint: http://128.149.16.140:8080
+URL: http://128.149.16.140:8080/
+
+---------------- Request ---------------------------
+Host: [128.149.16.140:8080]
+Accept-Encoding: [gzip,deflate]
+User-Agent: [Apache-HttpClient/4.1.1 (java 1.5)]
+Connection: [Keep-Alive]
+
+GET http://128.149.16.140:8080/ HTTP/1.1
+Accept-Encoding: gzip,deflate
+Host: 128.149.16.140:8080
+Connection: Keep-Alive
+User-Agent: Apache-HttpClient/4.1.1 (java 1.5)
+
+
+---------------- Response --------------------------
+Date: [Tue, 15 Jul 2014 18:16:09 GMT]
+#status#: [HTTP/1.1 404 Not Found]
+Content-Length: [0]
+Server: [Apache-Coyote/1.1]

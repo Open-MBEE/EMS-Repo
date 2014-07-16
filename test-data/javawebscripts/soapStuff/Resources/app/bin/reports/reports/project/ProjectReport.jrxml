@@ -1,0 +1,317 @@
+<jasperReport xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ProjectReport" language="groovy" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="30" bottomMargin="30" xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <property name="ireport.encoding" value="UTF-8"/>
+   <template>"../../styles.jrtx"</template>
+   <parameter name="IncludeOverview" class="java.lang.Boolean">
+      <property name="interactive" value="true"/>
+      <property name="label" value="Include Project Overview"/>
+      <parameterDescription>Includes Project Overview information in report</parameterDescription>
+      <defaultValueExpression>true</defaultValueExpression>
+   </parameter>
+   <parameter name="IncludeResults" class="java.lang.Boolean">
+      <property name="interactive" value="true"/>
+      <property name="label" value="Include Latest Results"/>
+      <property name="depends" value="ProjectTestSuiteResults"/>
+      <parameterDescription>Includes Latest Test Results in report</parameterDescription>
+      <defaultValueExpression>true</defaultValueExpression>
+   </parameter>
+   <parameter name="FlowLayout" class="java.lang.Boolean">
+      <property name="interactive" value="true"/>
+      <property name="label" value="Flow Layout"/>
+      <parameterDescription>Choose flow layout for report</parameterDescription>
+      <defaultValueExpression>false</defaultValueExpression>
+   </parameter>
+   <parameter name="ErrorDetails" class="java.lang.Boolean">
+      <property name="interactive" value="true"/>
+      <property name="label" value="Detailed Error Information"/>
+      <property name="depends" value="ProjectFailedTestSteps"/>
+      <parameterDescription>Adds details for failed test items to report</parameterDescription>
+      <defaultValueExpression>true</defaultValueExpression>
+   </parameter>
+   <parameter name="IncludeCoverage" class="java.lang.Boolean">
+      <property name="interactive" value="true"/>
+      <property name="label" value="Include Project Coverage"/>
+      <property name="depends" value="ProjectCoverage"/>
+      <parameterDescription>Includes Project Coverage information in report</parameterDescription>
+      <defaultValueExpression>true</defaultValueExpression>
+   </parameter>
+   <parameter name="HeaderLogo" class="java.lang.String" isForPrompting="false">
+      <defaultValueExpression>"../../logos/header_logo.jpg"</defaultValueExpression>
+   </parameter>
+   <pageHeader>
+      <band height="51">
+         <printWhenExpression>$V{PAGE_NUMBER} == 1 || !$P{FlowLayout}</printWhenExpression>
+         <image scaleImage="Clip" hAlign="Right" onErrorType="Blank">
+            <reportElement x="0" y="0" width="535" height="51"/>
+            <imageExpression class="java.lang.String">$P{HeaderLogo}</imageExpression>
+         </image>
+      </band>
+   </pageHeader>
+   <columnHeader>
+      <band height="68">
+         <printWhenExpression>$V{PAGE_NUMBER} == 1 || !$P{FlowLayout}</printWhenExpression>
+         <staticText>
+            <reportElement style="MainHeader" x="1" y="0" width="534" height="34"/>
+            <textElement/>
+            <text>Project Results for</text>
+         </staticText>
+         <textField isStretchWithOverflow="true">
+            <reportElement style="MainHeader" x="0" y="34" width="535" height="34"/>
+            <textElement/>
+            <textFieldExpression class="java.lang.String">"${=project.name}"</textFieldExpression>
+         </textField>
+      </band>
+   </columnHeader>
+   <detail>
+      <band height="292">
+         <subreport isUsingCache="true">
+            <reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="1" width="535" height="30" isRemoveLineWhenBlank="true">
+               <printWhenExpression>$P{IncludeOverview}</printWhenExpression>
+            </reportElement>
+            <subreportParameter name="IncludeOverview">
+               <subreportParameterExpression>$P{IncludeOverview}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="Type">
+               <subreportParameterExpression>"Project"</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="IncludeResults">
+               <subreportParameterExpression>$P{IncludeResults}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="FlowLayout">
+               <subreportParameterExpression>$P{FlowLayout}</subreportParameterExpression>
+            </subreportParameter>
+            <dataSourceExpression>$P{ReportMetrics}</dataSourceExpression>
+            <subreportExpression class="java.lang.String">"subreport:MetricsReport"</subreportExpression>
+         </subreport>
+         <subreport isUsingCache="true">
+            <reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="32" width="536" height="30" isRemoveLineWhenBlank="true">
+               <printWhenExpression>$P{IncludeOverview}</printWhenExpression>
+            </reportElement>
+            <subreportParameter name="IncludeOverview">
+               <subreportParameterExpression>$P{IncludeOverview}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="Type">
+               <subreportParameterExpression>"Project"</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="IncludeResults">
+               <subreportParameterExpression>$P{IncludeResults}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="FlowLayout">
+               <subreportParameterExpression>$P{FlowLayout}</subreportParameterExpression>
+            </subreportParameter>
+            <dataSourceExpression>$P{TestProperties}</dataSourceExpression>
+            <subreportExpression class="java.lang.String">"subreport:PropertiesReport"</subreportExpression>
+         </subreport>
+         <break>
+            <reportElement positionType="Float" x="0" y="63" width="534" height="1">
+               <printWhenExpression>$P{IncludeOverview} &amp;&amp; !$P{FlowLayout} &amp;&amp; $P{ProjectRequirements}.hasData()</printWhenExpression>
+            </reportElement>
+         </break>
+         <subreport>
+            <reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="65" width="535" height="30" isRemoveLineWhenBlank="true">
+               <printWhenExpression>$P{IncludeOverview}</printWhenExpression>
+            </reportElement>
+            <subreportParameter name="IncludeOverview">
+               <subreportParameterExpression>$P{IncludeOverview}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="Type">
+               <subreportParameterExpression>"TestSuite"</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="IncludeResults">
+               <subreportParameterExpression>$P{IncludeResults}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="FlowLayout">
+               <subreportParameterExpression>$P{FlowLayout}</subreportParameterExpression>
+            </subreportParameter>
+            <dataSourceExpression>$P{ProjectRequirements}</dataSourceExpression>
+            <subreportExpression class="java.lang.String">"subreport:RequirementsReport"</subreportExpression>
+         </subreport>
+         <break>
+            <reportElement positionType="Float" x="0" y="96" width="100" height="1">
+               <printWhenExpression>$P{IncludeOverview} &amp;&amp; !$P{FlowLayout}</printWhenExpression>
+            </reportElement>
+         </break>
+         <subreport>
+            <reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="98" width="535" height="30" isRemoveLineWhenBlank="true">
+               <printWhenExpression>$P{IncludeOverview}</printWhenExpression>
+            </reportElement>
+            <subreportParameter name="IncludeOverview">
+               <subreportParameterExpression>$P{IncludeOverview}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="Type">
+               <subreportParameterExpression>"TestSuite"</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="IncludeResults">
+               <subreportParameterExpression>$P{IncludeResults}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="FlowLayout">
+               <subreportParameterExpression>$P{FlowLayout}</subreportParameterExpression>
+            </subreportParameter>
+            <dataSourceExpression>$P{ProjectTestSuites}</dataSourceExpression>
+            <subreportExpression class="java.lang.String">"subreport:ModelItemListReport"</subreportExpression>
+         </subreport>
+         <break>
+            <reportElement positionType="Float" x="0" y="129" width="100" height="1">
+               <printWhenExpression>$P{IncludeOverview} &amp;&amp; !$P{FlowLayout} &amp;&amp; ($P{ProjectMockServices}.getRecordCount() > 0 )</printWhenExpression>
+            </reportElement>
+         </break>
+         <subreport>
+            <reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="131" width="535" height="30" isRemoveLineWhenBlank="true">
+               <printWhenExpression>$P{IncludeOverview}</printWhenExpression>
+            </reportElement>
+            <subreportParameter name="IncludeOverview">
+               <subreportParameterExpression>$P{IncludeOverview}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="Type">
+               <subreportParameterExpression>"MockService"</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="IncludeResults">
+               <subreportParameterExpression>$P{IncludeResults}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="FlowLayout">
+               <subreportParameterExpression>$P{FlowLayout}</subreportParameterExpression>
+            </subreportParameter>
+            <dataSourceExpression>$P{ProjectMockServices}</dataSourceExpression>
+            <subreportExpression class="java.lang.String">"subreport:ModelItemListReport"</subreportExpression>
+         </subreport>
+         <break>
+             <reportElement positionType="Float" x="0" y="129" width="100" height="1">
+                 <printWhenExpression>$P{IncludeOverview} &amp;&amp; !$P{FlowLayout} &amp;&amp; ($P{ProjectRESTMockServices}.getRecordCount() > 0 )</printWhenExpression>
+             </reportElement>
+         </break>
+			<subreport>
+		     	<reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="131" width="535" height="30" isRemoveLineWhenBlank="true">
+					<printWhenExpression>$P{IncludeOverview}</printWhenExpression>
+				</reportElement>
+				<subreportParameter name="IncludeOverview">
+					<subreportParameterExpression>$P{IncludeOverview}</subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Type">
+					<subreportParameterExpression>"MockService"</subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="IncludeResults">
+					<subreportParameterExpression>$P{IncludeResults}</subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="FlowLayout">
+					<subreportParameterExpression>$P{FlowLayout}</subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression>$P{ProjectRESTMockServices}</dataSourceExpression>
+				<subreportExpression class="java.lang.String">"subreport:ModelItemListReport"</subreportExpression>
+			</subreport>
+         <break>
+            <reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="164" width="100" height="1" isRemoveLineWhenBlank="true">
+               <printWhenExpression>!$P{FlowLayout} &amp;&amp; $P{IncludeResults} &amp;&amp; $P{ProjectResultMetrics}.hasData()</printWhenExpression>
+            </reportElement>
+         </break>
+         <subreport isUsingCache="true" runToBottom="false">
+            <reportElement positionType="Float" isPrintRepeatedValues="false" x="1" y="161" width="535" height="30" isRemoveLineWhenBlank="true">
+               <printWhenExpression>$P{IncludeResults}</printWhenExpression>
+            </reportElement>
+            <subreportParameter name="IncludeOverview">
+               <subreportParameterExpression>$P{IncludeOverview}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="Type">
+               <subreportParameterExpression>"Result"</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="IncludeResults">
+               <subreportParameterExpression>$P{IncludeResults}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="FlowLayout">
+               <subreportParameterExpression>$P{FlowLayout}</subreportParameterExpression>
+            </subreportParameter>
+            <dataSourceExpression>$P{ProjectResultMetrics}</dataSourceExpression>
+            <subreportExpression class="java.lang.String">"subreport:MetricsReport"</subreportExpression>
+         </subreport>
+         <break>
+            <reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="197" width="535" height="1" isRemoveLineWhenBlank="true">
+               <printWhenExpression>!$P{FlowLayout} &amp;&amp; $P{IncludeResults} &amp;&amp; $P{ProjectTestSuiteResults}.hasData()</printWhenExpression>
+            </reportElement>
+         </break>
+         <subreport isUsingCache="false" runToBottom="true">
+            <reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="198" width="535" height="30" isRemoveLineWhenBlank="true">
+               <printWhenExpression>$P{IncludeResults}</printWhenExpression>
+            </reportElement>
+            <subreportParameter name="IncludeOverview">
+               <subreportParameterExpression>$P{IncludeOverview}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="IncludeResults">
+               <subreportParameterExpression>$P{IncludeResults}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="FlowLayout">
+               <subreportParameterExpression>$P{FlowLayout}</subreportParameterExpression>
+            </subreportParameter>
+            <dataSourceExpression>$P{ProjectTestSuiteResults}</dataSourceExpression>
+            <subreportExpression class="java.lang.String">"subreport:ProjectTestSuiteResultsOverviewReport"</subreportExpression>
+         </subreport>
+         <break>
+            <reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="228" width="535" height="1" isRemoveLineWhenBlank="true">
+               <printWhenExpression>!$P{FlowLayout} &amp;&amp; $P{IncludeResults} &amp;&amp; $P{ProjectTestSuiteResults}.hasData()</printWhenExpression>
+            </reportElement>
+         </break>
+         <subreport>
+            <reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="229" width="535" height="30" isRemoveLineWhenBlank="true">
+               <printWhenExpression>$P{IncludeResults}</printWhenExpression>
+            </reportElement>
+            <subreportParameter name="IncludeOverview">
+               <subreportParameterExpression>$P{IncludeOverview}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="IncludeResults">
+               <subreportParameterExpression>$P{IncludeResults}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="FlowLayout">
+               <subreportParameterExpression>$P{FlowLayout}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="ErrorDetails">
+               <subreportParameterExpression>$P{ErrorDetails}</subreportParameterExpression>
+            </subreportParameter>
+            <dataSourceExpression>$P{ProjectTestSuiteResults}.cloneDataSource()</dataSourceExpression>
+            <subreportExpression class="java.lang.String">"subreport:ProjectTestSuiteResultsReport"</subreportExpression>
+         </subreport>
+         <break>
+            <reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="259" width="535" height="1" isRemoveLineWhenBlank="true">
+               <printWhenExpression>!$P{FlowLayout} &amp;&amp; $P{ProjectCoverage}.hasData()</printWhenExpression>
+            </reportElement>
+         </break>
+         <subreport>
+            <reportElement positionType="Float" isPrintRepeatedValues="false" x="1" y="260" width="535" height="30" isRemoveLineWhenBlank="true">
+               <printWhenExpression>$P{IncludeCoverage}</printWhenExpression>
+            </reportElement>
+            <subreportParameter name="IncludeOverview">
+               <subreportParameterExpression>$P{IncludeOverview}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="ProjectCoverage">
+               <subreportParameterExpression>$P{ProjectCoverage}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="IncludeResults">
+               <subreportParameterExpression>$P{IncludeResults}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="FlowLayout">
+               <subreportParameterExpression>$P{FlowLayout}</subreportParameterExpression>
+            </subreportParameter>
+            <subreportParameter name="ErrorDetails">
+               <subreportParameterExpression>$P{ErrorDetails}</subreportParameterExpression>
+            </subreportParameter>
+            <dataSourceExpression>$P{ProjectCoverage}</dataSourceExpression>
+            <subreportExpression class="java.lang.String">"subreport:ProjectCoverageChart"</subreportExpression>
+         </subreport>
+      </band>
+   </detail>
+   <pageFooter>
+      <band height="23">
+         <printWhenExpression>!$P{FlowLayout}</printWhenExpression>
+         <textField>
+            <reportElement x="0" y="0" width="535" height="20" forecolor="#999999"/>
+            <textElement textAlignment="Center" verticalAlignment="Middle"/>
+            <textFieldExpression class="java.lang.String">"created with SoapUI Pro on " + new Date()</textFieldExpression>
+         </textField>
+      </band>
+   </pageFooter>
+   <lastPageFooter>
+      <band height="23">
+         <textField>
+            <reportElement x="0" y="0" width="535" height="20" forecolor="#999999"/>
+            <textElement textAlignment="Center" verticalAlignment="Middle"/>
+            <textFieldExpression class="java.lang.String">"created with SoapUI Pro on " + new Date()</textFieldExpression>
+         </textField>
+      </band>
+   </lastPageFooter>
+</jasperReport>

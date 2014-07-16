@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:soapui-listeners xmlns:tns="http://eviware.com/soapui/config">
+
+	<!-- The below demo-listeners are described in the extensions overview at
+	     http://www.soapui.org/architecture/extensions.html  -->
+
+	<!-- This demo-listener is not reloadable -->
+<!-- 
+    <tns:listener id="DemoListener" listenerClass="soapui.demo.DemoListener" 
+    	listenerInterface="com.eviware.soapui.model.testsuite.TestRunListener" />	
+ -->
+ 
+ 	<!-- This demo-listener is reloadable -->
+ <!-- 
+  <tns:listener id="DemoListener" 
+	    	listenerClass="com.eviware.soapui.support.scripting.listeners.ScriptTestRunListener"
+	    	groovyClass="soapui.demo.DemoListener" 
+    		listenerInterface="com.eviware.soapui.model.testsuite.TestRunListener"/>	
+    -->
+</tns:soapui-listeners>
