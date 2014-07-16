@@ -51,11 +51,14 @@ public class WorkspaceNode extends EmsScriptNode {
     }
     
     public static WorkspaceNode createWorskpaceInFolder( String sysmlId,
+                                                         //String wsName,
                                                          EmsScriptNode folder,
                                                          ServiceRegistry services,
                                                          StringBuffer response,
                                                          Status status ) {
-        
+        if ( sysmlId == null ) {
+            sysmlId = NodeUtil.createId( services );
+        }
         WorkspaceNode ws = new WorkspaceNode( folder.createFolder( sysmlId ).getNodeRef(),
                                               services, response, status );
         if ( folder == null || !folder.exists() ) {
@@ -100,7 +103,7 @@ public class WorkspaceNode extends EmsScriptNode {
         if (parent != null && parent.exists() && !contains( parent ) ) {
             parent = replicateFolderWithChain( parent );
             newFolder.move( parent );
-        }
+        } // REVIEW -- what if parent != null && !parent.exists()
         return folder;
     }
     
@@ -110,6 +113,7 @@ public class WorkspaceNode extends EmsScriptNode {
     // When updating a node, if it is not in the specified workspace, copy it
     // with the same name into a folder chain replicated in the workspace.
     
-    // When copying a node, check and see if the other end of each relationship is in the new workspace, and copy the relationship if it is.
+    // When copying a node, check and see if the other end of each relationship
+    // is in the new workspace, and copy the relationship if it is.
     
 }

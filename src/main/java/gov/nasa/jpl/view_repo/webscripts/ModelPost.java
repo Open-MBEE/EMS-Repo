@@ -58,7 +58,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
@@ -592,7 +591,7 @@ public class ModelPost extends AbstractJavaWebScript {
             
             // If element does not have a ID, then create one for it using the alfresco id (cm:id):
             if (!elementJson.has(Acm.JSON_ID)) {
-                elementJson.put( Acm.JSON_ID, createId( services ) );
+                elementJson.put( Acm.JSON_ID, NodeUtil.createId( services ) );
                 //return null;
             }
             String sysmlId = null;
@@ -958,7 +957,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                                   boolean ingest, 
                                                   boolean nestedNode) throws Exception {
         if (!elementJson.has(Acm.JSON_ID)) {
-            elementJson.put( Acm.JSON_ID, createId( services ) );
+            elementJson.put( Acm.JSON_ID, NodeUtil.createId( services ) );
             //return null;
         }
         String id = elementJson.getString(Acm.JSON_ID);
@@ -1138,18 +1137,6 @@ public class ModelPost extends AbstractJavaWebScript {
         return nestedNode ? node : reifiedNode;
     }
     
-    public static String createId( ServiceRegistry services ) {
-        for ( int i=0; i<10; ++i ) {
-            String id = "MMS_" + System.currentTimeMillis() + "_" + UUID.randomUUID().toString();
-            // Make sure id is not already used
-            if ( NodeUtil.findNodeRefById( id, null, services ) == null ) {
-                return id;
-            }
-        }
-        Debug.error( true, "Could not create a unique id!" );
-        return null;
-    }
-
     protected EmsScriptNode getOrCreateReifiedNode(EmsScriptNode node, String id, boolean useParent) {
         EmsScriptNode reifiedNode = null;
         if ( node == null || !node.exists() ) {
@@ -1489,6 +1476,76 @@ public class ModelPost extends AbstractJavaWebScript {
         }
     }
     
+    protected void fix( Set< EmsScriptNode > elements ) {
+        
+        log(LogLevel.INFO, "Constraint violations will be fixed if found!");
+        
+        SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  solver = 
+                new SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(getSystemModel(), new ConstraintLoopSolver() );
+        
+        Collection<Constraint> constraints = new ArrayList<Constraint>();
+        
+        // Search for all constraints in the database:
+        Collection<EmsScriptNode> constraintNodes = getSystemModel().getType(null, Acm.JSON_CONSTRAINT);
+        
+        if (!Utils.isNullOrEmpty(constraintNodes)) {
+            
+            // Loop through each found constraint and check if it contains any of the elements
+            // to be posted:
+            for (EmsScriptNode constraintNode : constraintNodes) {
+                
+                // Parse the constraint node for all of the cm:names of the nodes in its expression tree:
+                Set<String> constrElemNames = getConstraintElementNames(constraintNode);
+                
+                // Check if any of the posted elements are in the constraint expression tree, and add
+                // constraint if they are:
+                // Note: if a Constraint element is in elements then it will also get added here b/c it
+                //          will be in the database already via createOrUpdateMode()
+                for (EmsScriptNode element : elements) {
+                      
+                    String name = element.getName();
+                    if (name != null && constrElemNames.contains(name)) {
+                        addConstraintExpression(constraintNode, constraints);
+                        break;
+                    }
+
+                } // Ends loop through elements
+                
+            } // Ends loop through constraintNodes
+            
+        } // Ends if there was constraint nodes found in the database
+        
+        // Solve the constraints:
+        if (!Utils.isNullOrEmpty( constraints )) {
+            
+            // Add all of the Parameter constraints:
+            ClassData cd = getSystemModelAe().getClassData();
+            
+            // Loop through all the listeners:
+            for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
+                
+                // TODO: REVIEW
+                //       Can we get duplicate ParameterListeners in the aeClassses map?
+                constraints.addAll( listener.getConstraints( true, null ) );
+            }
+        
+            // Solve!!!!
+            Debug.turnOn();
+            boolean result = solver.solve(constraints);
+            Debug.turnOff();
+            
+            if (!result) {
+                log( LogLevel.ERROR, "Was not able to satisfy all of the constraints!" );
+            }
+            else {
+                log( LogLevel.INFO, "Satisfied all of the constraints!" );
+            }
+            
+        } // End if constraints list is non-empty
+        
+
+    }
+    
     /**
      * Entry point
      */
@@ -1502,7 +1559,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         boolean runInBackground = checkArgEquals(req, "background", "true");
         boolean fix = checkArgEquals(req, "fix", "true");
-
+        
         ModelPost instance = new ModelPost(repository, services);
         
         JSONObject top = new JSONObject();
@@ -1526,73 +1583,8 @@ public class ModelPost extends AbstractJavaWebScript {
                         
                         // Fix constraints if desired:
                         if (fix) {
-                        	
-                            log(LogLevel.INFO, "Constraint violations will be fixed if found!");
-                            
-                            SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  solver = 
-                                    new SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(getSystemModel(), new ConstraintLoopSolver() );
-                            
-                            Collection<Constraint> constraints = new ArrayList<Constraint>();
-                            
-                            // Search for all constraints in the database:
-                            Collection<EmsScriptNode> constraintNodes = getSystemModel().getType(null, Acm.JSON_CONSTRAINT);
-                            
-                            if (!Utils.isNullOrEmpty(constraintNodes)) {
-                            	
-                            	// Loop through each found constraint and check if it contains any of the elements
-                            	// to be posted:
-                            	for (EmsScriptNode constraintNode : constraintNodes) {
-                            		
-                            		// Parse the constraint node for all of the cm:names of the nodes in its expression tree:
-                            		Set<String> constrElemNames = getConstraintElementNames(constraintNode);
-                            		
-                            		// Check if any of the posted elements are in the constraint expression tree, and add
-                            		// constraint if they are:
-                            		// Note: if a Constraint element is in elements then it will also get added here b/c it
-                            		//			will be in the database already via createOrUpdateMode()
-                            	    for (EmsScriptNode element : elements) {
-                            	    	  
-                            	    	String name = element.getName();
-                            	    	if (name != null && constrElemNames.contains(name)) {
-                            	    		addConstraintExpression(constraintNode, constraints);
-                            	    		break;
-                            	    	}
-
-                            	    } // Ends loop through elements
-                            		
-                            	} // Ends loop through constraintNodes
-                            	
-                            } // Ends if there was constraint nodes found in the database
-                            
-                            // Solve the constraints:
-                            if (!Utils.isNullOrEmpty( constraints )) {
-                                
-                                // Add all of the Parameter constraints:
-                                ClassData cd = getSystemModelAe().getClassData();
-                                
-                                // Loop through all the listeners:
-                                for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
-                                    
-                                    // TODO: REVIEW
-                                    //       Can we get duplicate ParameterListeners in the aeClassses map?
-                                    constraints.addAll( listener.getConstraints( true, null ) );
-                                }
-                            
-                                // Solve!!!!
-                                Debug.turnOn();
-                                boolean result = solver.solve(constraints);
-                                Debug.turnOff();
-                                
-                                if (!result) {
-                                    log( LogLevel.ERROR, "Was not able to satisfy all of the constraints!" );
-                                }
-                                else {
-                                    log( LogLevel.INFO, "Satisfied all of the constraints!" );
-                                }
-                                
-                            } // End if constraints list is non-empty
-                            
-                        } // end if fixing constraints
+                        	instance.fix(elements);
+                        }
                         
                         // Create JSON object of the elements to return:
                         JSONArray elementsJson = new JSONArray();

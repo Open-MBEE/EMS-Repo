@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -914,5 +915,18 @@ public class NodeUtil {
                 (NodeRef)nodeService.getProperty( personNode,
                                                   ContentModel.PROP_HOMEFOLDER );
         return new EmsScriptNode( homeFolderNode, getServices() );
+    }
+
+    // REVIEW -- should this be in AbstractJavaWebScript?
+    public static String createId( ServiceRegistry services ) {
+        for ( int i=0; i<10; ++i ) {
+            String id = "MMS_" + System.currentTimeMillis() + "_" + UUID.randomUUID().toString();
+            // Make sure id is not already used
+            if ( findNodeRefById( id, null, services ) == null ) {
+                return id;
+            }
+        }
+        Debug.error( true, "Could not create a unique id!" );
+        return null;
     }
 }

@@ -32,6 +32,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -143,7 +144,7 @@ public class ViewModelPost extends ModelPost {
             
             // If element does not have a ID, then create one for it using the alfresco id (cm:id):
             if (!elementJson.has(Acm.JSON_ID)) {
-                elementJson.put( Acm.JSON_ID, createId( services ) );
+                elementJson.put( Acm.JSON_ID, NodeUtil.createId( services ) );
             }
             String id = elementJson.getString(Acm.JSON_ID);
             
