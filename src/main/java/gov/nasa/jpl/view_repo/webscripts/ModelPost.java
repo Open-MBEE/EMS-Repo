@@ -43,6 +43,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
+import gov.nasa.jpl.view_repo.jms.JmsConnection;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -253,6 +254,9 @@ public class ModelPost extends AbstractJavaWebScript {
         end = System.currentTimeMillis();
         total = end -start;
         log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
+        
+        JmsConnection jmsConnection = JmsConnection.getInstance();
+        jmsConnection.publishTopic( "model posted", "MODEL.POST" );
         return elements;
     }
     
