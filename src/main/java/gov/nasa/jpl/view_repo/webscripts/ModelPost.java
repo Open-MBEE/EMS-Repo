@@ -243,8 +243,8 @@ public class ModelPost extends AbstractJavaWebScript {
         updateOrCreateAllRelationships(relationshipsJson);
         
         // create commit history
-        // TODO add in commit message
-        CommitUtil.commitChangeSet(changeSet, "", runWithoutTransactions, services);
+        // TODO Need to fix - add in the versions when committing a node
+//        CommitUtil.commitChangeSet(changeSet, "", runWithoutTransactions, services);
         
         // make another pass through the elements and update their properties
         elements.addAll( updateNodeReferences( singleElement, postJson,

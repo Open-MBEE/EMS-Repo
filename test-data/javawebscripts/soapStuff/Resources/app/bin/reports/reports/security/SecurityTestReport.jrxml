@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="SecurityTestReport" language="groovy" pageWidth="595" pageHeight="842" columnWidth="535" leftMargin="30" rightMargin="30" topMargin="30" bottomMargin="30">
+	<property name="ireport.encoding" value="UTF-8"/>
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<template><![CDATA["../../styles.jrtx"]]></template>
+	<parameter name="IncludeOverview" class="java.lang.Boolean">
+		<property name="interactive" value="true"/>
+		<property name="label" value="Include Project Overview"/>
+		<parameterDescription><![CDATA[Includes TestCase Overview information in report]]></parameterDescription>
+		<defaultValueExpression><![CDATA[true]]></defaultValueExpression>
+	</parameter>
+	<parameter name="IncludeResults" class="java.lang.Boolean">
+		<property name="interactive" value="true"/>
+		<property name="label" value="Include Latest Results"/>
+		<parameterDescription><![CDATA[Includes Latest TestCase Results in report]]></parameterDescription>
+		<defaultValueExpression><![CDATA[true]]></defaultValueExpression>
+	</parameter>
+	<parameter name="IncludeSecurityTestOverview" class="java.lang.Boolean">
+		<property name="interactive" value="true"/>
+		<property name="label" value="Include SecurityTest Overview"/>
+		<parameterDescription><![CDATA[Include SecurityTestOverview]]></parameterDescription>
+		<defaultValueExpression><![CDATA[true]]></defaultValueExpression>
+	</parameter>
+	<parameter name="FlowLayout" class="java.lang.Boolean">
+		<property name="interactive" value="true"/>
+		<property name="label" value="Flow Layout"/>
+		<parameterDescription><![CDATA[Choose flow layout for report]]></parameterDescription>
+		<defaultValueExpression><![CDATA[false]]></defaultValueExpression>
+	</parameter>
+	<parameter name="HeaderLogo" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["../../logos/header_logo.jpg"]]></defaultValueExpression>
+	</parameter>
+	<pageHeader>
+		<band height="51">
+			<printWhenExpression><![CDATA[$V{PAGE_NUMBER} == 1 || !$P{FlowLayout}]]></printWhenExpression>
+			<image scaleImage="Clip" hAlign="Right" onErrorType="Blank">
+				<reportElement x="0" y="0" width="535" height="51"/>
+				<imageExpression class="java.lang.String"><![CDATA[$P{HeaderLogo}]]></imageExpression>
+			</image>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="77">
+			<printWhenExpression><![CDATA[$V{PAGE_NUMBER} == 1 || $P{FlowLayout}]]></printWhenExpression>
+			<staticText>
+				<reportElement style="MainHeader" x="0" y="0" width="535" height="35"/>
+				<textElement/>
+				<text><![CDATA[SecurityTest Results for]]></text>
+			</staticText>
+			<textField>
+				<reportElement style="MainHeader" x="1" y="35" width="535" height="40"/>
+				<textElement/>
+				<textFieldExpression class="java.lang.String"><![CDATA["${=securityTest.name}"]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="246">
+			<subreport isUsingCache="true">
+				<reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="1" width="535" height="30" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$P{IncludeOverview}]]></printWhenExpression>
+				</reportElement>
+				<subreportParameter name="IncludeOverview">
+					<subreportParameterExpression><![CDATA[$P{IncludeOverview}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Type">
+					<subreportParameterExpression><![CDATA["SecurityTest"]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="FlowLayout">
+					<subreportParameterExpression><![CDATA[$P{FlowLayout}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[$P{ReportMetrics}]]></dataSourceExpression>
+				<subreportExpression class="java.lang.String"><![CDATA["subreport:MetricsReport"]]></subreportExpression>
+			</subreport>
+			<break>
+				<reportElement x="0" y="32" width="535" height="1">
+					<printWhenExpression><![CDATA[$P{IncludeOverview} && !$P{FlowLayout}]]></printWhenExpression>
+				</reportElement>
+			</break>
+			<subreport isUsingCache="true">
+				<reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="34" width="535" height="36" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$P{IncludeOverview}]]></printWhenExpression>
+				</reportElement>
+				<subreportParameter name="IncludeOverview">
+					<subreportParameterExpression><![CDATA[$P{IncludeOverview}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="FlowLayout">
+					<subreportParameterExpression><![CDATA[$P{FlowLayout}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[$P{SecurityTestStepScanList}]]></dataSourceExpression>
+				<subreportExpression class="java.lang.String"><![CDATA["subreport:SecurityTestStepScanListReport"]]></subreportExpression>
+			</subreport>
+			<subreport isUsingCache="true">
+				<reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="71" width="535" height="30" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$P{IncludeOverview}]]></printWhenExpression>
+				</reportElement>
+				<subreportParameter name="IncludeOverview">
+					<subreportParameterExpression><![CDATA[$P{IncludeOverview}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Type">
+					<subreportParameterExpression><![CDATA["SecurityTest"]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="IncludeResults">
+					<subreportParameterExpression><![CDATA[$P{IncludeResults}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="FlowLayout">
+					<subreportParameterExpression><![CDATA[$P{FlowLayout}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[$P{TestProperties}]]></dataSourceExpression>
+				<subreportExpression class="java.lang.String"><![CDATA["subreport:PropertiesReport"]]></subreportExpression>
+			</subreport>
+			<break>
+				<reportElement isPrintRepeatedValues="false" x="0" y="102" width="535" height="1" isRemoveLineWhenBlank="true"/>
+			</break>
+			<subreport isUsingCache="false">
+				<reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="104" width="535" height="32" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$P{IncludeOverview}]]></printWhenExpression>
+				</reportElement>
+				<subreportParameter name="IncludeOverview">
+					<subreportParameterExpression><![CDATA[$P{IncludeOverview}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="Type">
+					<subreportParameterExpression><![CDATA["Result"]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="IncludeResults">
+					<subreportParameterExpression><![CDATA[$P{IncludeResults}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="FlowLayout">
+					<subreportParameterExpression><![CDATA[$P{FlowLayout}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[$P{SecurityTestMetrics}]]></dataSourceExpression>
+				<subreportExpression class="java.lang.String"><![CDATA["subreport:MetricsReport"]]></subreportExpression>
+			</subreport>
+			<break>
+				<reportElement isPrintRepeatedValues="false" x="0" y="137" width="535" height="1" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$P{IncludeSecurityTestOverview} && !$P{FlowLayout} ]]></printWhenExpression>
+				</reportElement>
+			</break>
+			<subreport isUsingCache="false" runToBottom="false">
+				<reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="139" width="535" height="41" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$P{IncludeSecurityTestOverview}]]></printWhenExpression>
+				</reportElement>
+				<subreportParameter name="IncludeResults">
+					<subreportParameterExpression><![CDATA[$P{IncludeResults}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[$P{SecurityTestStepOverviewResults}]]></dataSourceExpression>
+				<subreportExpression class="java.lang.String"><![CDATA["subreport:SecurityTestStepOverviewReport"]]></subreportExpression>
+			</subreport>
+			<break>
+				<reportElement isPrintRepeatedValues="false" x="0" y="181" width="535" height="1" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$P{IncludeResults} && !$P{FlowLayout}]]></printWhenExpression>
+				</reportElement>
+			</break>
+			<subreport isUsingCache="false" runToBottom="false">
+				<reportElement positionType="Float" isPrintRepeatedValues="false" x="0" y="183" width="535" height="41" isRemoveLineWhenBlank="true">
+					<printWhenExpression><![CDATA[$P{IncludeResults}]]></printWhenExpression>
+				</reportElement>
+				<subreportParameter name="IncludeResults">
+					<subreportParameterExpression><![CDATA[$P{IncludeResults}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[$P{SecurityTestStepResults}]]></dataSourceExpression>
+				<subreportExpression class="java.lang.String"><![CDATA["subreport:SecurityTestStepReport"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+	<pageFooter>
+		<band>
+			<printWhenExpression><![CDATA[!$P{FlowLayout}]]></printWhenExpression>
+		</band>
+	</pageFooter>
+	<lastPageFooter>
+		<band height="24">
+			<textField>
+				<reportElement x="1" y="0" width="535" height="20" forecolor="#999999"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression class="java.lang.String"><![CDATA["created with SoapUI Pro on " + new Date()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="0" width="535" height="20" forecolor="#999999"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression class="java.lang.String"><![CDATA["created with SoapUI Pro on " + new Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</lastPageFooter>
+</jasperReport>
