@@ -2240,7 +2240,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 refs = new ArrayList<NodeRef>();
                 refs.add( (NodeRef)o );
             } else {
-                //return Utils.getEmptyArrayList();
+                //return Utils.getEmptyArrayList(); // FIXME The array returned here is later modified, and a common empty array is
+            										// is used.  This makes it non-empty.
                 return new ArrayList<NodeRef>();
                 
             }
