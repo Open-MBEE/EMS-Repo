@@ -48,6 +48,7 @@ import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -584,7 +585,10 @@ public class ModelPost extends AbstractJavaWebScript {
         return isValid;
     }
 
-    protected boolean buildTransactionableElementMap(JSONArray jsonArray, EmsScriptNode projectNode) throws JSONException {
+    protected boolean buildTransactionableElementMap( JSONArray jsonArray,
+                                                      EmsScriptNode projectNode,
+                                                      WorkspaceNode workspace )
+                                                              throws JSONException {
         boolean isValid = true;
                 
         for (int ii = 0; ii < jsonArray.length(); ii++) {
@@ -609,7 +613,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             elementMap.put(sysmlId, elementJson);
 
-            if (findScriptNodeById(sysmlId, null) == null) {
+            if (findScriptNodeById(sysmlId, workspace, null) == null) {
                 newElements.add(sysmlId);
             }
 
