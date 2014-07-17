@@ -7,7 +7,96 @@
     "snapshots": [],
     "modified": "2014-07-09T09:34:26.307-0700"
   }],
-  "products": []
+  "products": [
+    {
+      "author": "admin",
+      "lastModified": "2014-07-17T11:34:34.439-0700",
+      "name": "401",
+      "qualifiedName": "/////CY Test/4000/401",
+      "documentation": "4else",
+      "sysmlid": "401",
+      "owner": "4000",
+      "read": "2014-07-17T13:42:35.431-0700",
+      "specialization": {
+        "childrenViews": ["404"],
+        "displayedElements": [
+          "401",
+          "402",
+          "403"
+        ],
+        "view2view": [{
+          "childrenViews": [
+            "401",
+            "402"
+          ],
+          "sysmlid": "401"
+        }],
+        "isDerived": false,
+        "allowedElements": [
+          "401",
+          "402",
+          "403"
+        ],
+        "value": [{
+          "string": "dlam_string",
+          "type": "LiteralString"
+        }],
+        "contains": [{
+          "sourceType": "reference",
+          "source": "401",
+          "sourceProperty": "documentation",
+          "type": "Paragraph"
+        }],
+        "noSections": ["402"],
+        "type": "Product"
+      },
+      "editable": true
+    },
+    {
+      "author": "admin",
+      "lastModified": "2014-07-17T11:34:34.297-0700",
+      "name": "301",
+      "qualifiedName": "/////CY Test/300/301",
+      "documentation": "else",
+      "sysmlid": "301",
+      "owner": "300",
+      "read": "2014-07-17T13:42:35.465-0700",
+      "specialization": {
+        "childrenViews": ["304"],
+        "displayedElements": [
+          "301",
+          "302",
+          "303"
+        ],
+        "view2view": [{
+          "childrenViews": [
+            "301",
+            "302"
+          ],
+          "sysmlid": "301"
+        }],
+        "isDerived": false,
+        "allowedElements": [
+          "301",
+          "302",
+          "303"
+        ],
+        "value": [{
+          "string": "dlam_string",
+          "type": "LiteralString"
+        }],
+        "contains": [{
+          "sourceType": "reference",
+          "source": "301",
+          "sourceProperty": "documentation",
+          "type": "Paragraph"
+        }],
+        "noSections": ["302"],
+        "type": "Product"
+      },
+      "editable": true
+    }
+  ]
 }
 
 200
