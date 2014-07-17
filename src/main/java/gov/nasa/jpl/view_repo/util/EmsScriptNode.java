@@ -2205,6 +2205,12 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             int comp = CompareUtils.GenericComparator.instance().compare( type1, type2 );
             if ( comp != 0 ) return comp;
             if ( o1.getClass() != o2.getClass() ) {
+            	if (o1.getClass().equals(String.class)) {
+            		return -1;
+            	}
+            	if (o2.getClass().equals(String.class)) {
+            		return 1;
+            	}
                 type1 = o1.getClass().getSimpleName();
                 type2 = o2.getClass().getSimpleName();
                 comp = CompareUtils.GenericComparator.instance().compare( type1, type2 );
@@ -2224,7 +2230,9 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 refs = new ArrayList<NodeRef>();
                 refs.add( (NodeRef)o );
             } else {
-                return Utils.getEmptyArrayList();
+                //return Utils.getEmptyArrayList();
+                return new ArrayList<NodeRef>();
+                
             }
         } else {
             refs = Utils.asList( (Collection<?>)o, NodeRef.class );
@@ -2254,18 +2262,24 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         Set<EmsScriptNode> set = new LinkedHashSet< EmsScriptNode >();
         for ( Map.Entry< String, String > e :
             Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.entrySet() ) {
-            set.addAll( getRelationshipsOfType( typeName, e.getKey() ) );
+        	ArrayList<EmsScriptNode> relationships = getRelationshipsOfType( typeName, e.getKey() );
+        	if (!Utils.isNullOrEmpty(relationships)) {
+        		set.addAll( relationships );
+        	}
         }
         return set;
     }
     
     public ArrayList<EmsScriptNode> getRelationshipsOfType(String typeName,
                                                            String acmAspect) {
-        if ( !hasAspect( acmAspect ) ) return Utils.getEmptyArrayList();
+        if ( !hasAspect( acmAspect ) ) return new ArrayList<EmsScriptNode>();
         String acmProperty = 
                 Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.get( acmAspect );
 
         ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty );
+        // Searching for the beginning of the relationships with this typeName
+        // b/c relationships are ordered by typeName.  Therefore, the search
+        // is expected to not find a matching element.
         int index = Collections.binarySearch( relationships, typeName,
                                               //this.getNodeRef(),
                                               NodeByTypeComparator.instance );
@@ -2308,7 +2322,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         String acmProperty = Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.get( acmAspect );
         ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty );
         int index = Collections.binarySearch( relationships,
-                                              this.getNodeRef(),
+                                              //this.getNodeRef(),
+        									  relationship,
                                               NodeByTypeComparator.instance );
         if ( Debug.isOn() ) Debug.outln( "binary search returns index " + index );
         if ( index >= 0 ) {
