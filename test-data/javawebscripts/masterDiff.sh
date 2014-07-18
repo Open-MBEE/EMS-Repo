@@ -6,7 +6,7 @@ soapServer="128.149.16.xxx:8080"
 #start up the server
 pkill -fn 'integration-test'
 echo 'KILLING SERVER IF ONE IS RUNNING'
-
+sleep 3s
 
 #cd ./../..
 ./runserver.sh > serverLog.txt &
