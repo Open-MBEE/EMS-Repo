@@ -1208,7 +1208,6 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                             if ( ref != null ) {
                                 esn = new EmsScriptNode( ref, getServices() );
                             }
-                            if ( !esn.exists() ) continue;
 
                             if ( ref == null || !esn.exists() ) {
                                 String msg = "Error! Element " + o + " did not exist at " + dateTime + ".\n";
