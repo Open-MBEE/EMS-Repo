@@ -139,7 +139,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     @Override
     public EmsScriptNode childByNamePath( String path ) {
         ScriptNode child = super.childByNamePath( path );
-        if ( child == null ) {
+        if ( child == null || !child.exists() ) {
             return null;
         }
         return new EmsScriptNode( child.getNodeRef(), services, response );
@@ -412,6 +412,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             if ( ref == null ) continue;
             EmsScriptNode node =
                     new EmsScriptNode( ref, services, response, status );
+            if ( !node.exists() ) continue;
             emsNodeSet.add( node );
         }
         return emsNodeSet;
@@ -487,7 +488,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 "Artifacts" + ( Utils.isNullOrEmpty( subfolderName )
                                 ? "" : "/" + subfolderName );
         // find site; it must exist!
-        if ( targetSiteNode == null ) {
+        if ( targetSiteNode == null || !targetSiteNode.exists() ) {
             log( "Can't find node for site: " + targetSiteName + "!" );
             return null;
         }
@@ -495,7 +496,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         EmsScriptNode subfolder =
                 NodeUtil.mkdir( targetSiteNode, artifactFolderName, services,
                                 response, status );
-        if ( subfolder == null ) {
+        if ( subfolder == null || !subfolder.exists() ) {
             log( "Can't create subfolder for site, " + targetSiteName
                  + ", in artifact folder, " + artifactFolderName + "!" );
             return null;
@@ -504,7 +505,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         String artifactId = name + "." + type;
         EmsScriptNode artifactNode =
                 subfolder.createNode( artifactId, "cm:content" );
-        if ( artifactNode == null ) {
+        if ( artifactNode == null || !artifactNode.exists() ) {
             log( "Failed to create new artifact " + artifactId + "!" );
             return null;
         }
@@ -556,7 +557,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 EmsScriptNode artNode =
                         findOrCreateArtifact( name, extension, content,
                                               getSiteName(), "images" );
-                if ( artNode == null ) {
+                if ( artNode == null || !artNode.exists() ) {
                     log( "Failed to pull out image data for value! " + value );
                     break;
                 }
@@ -843,6 +844,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             nodeRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
             if ( nodeRef == null ) continue;
             EmsScriptNode oNode = new EmsScriptNode(nodeRef, services);
+            if ( !oNode.exists() ) continue;
             Date modified = oNode.getLastModified( dateTime );
             if ( modified.after( lastModifiedDate ) ) {
                 lastModifiedDate = modified;
@@ -1152,7 +1154,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                           && ( (Collection< ? >)elementValue ).isEmpty() ) ) ) {
                     ArrayList< NodeRef > refList = new ArrayList<NodeRef>();
                     for ( EmsScriptNode emsNode : elements ) {
-                        if ( emsNode != null ) refList.add( emsNode.getNodeRef() );
+                        if ( emsNode != null && emsNode.exists() ) refList.add( emsNode.getNodeRef() );
                     }
                     elementValue = refList;
                 }
@@ -1202,7 +1204,13 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                     if ( o instanceof NodeRef ) {
                         if ( dateTime != null ) {
                             NodeRef ref = NodeUtil.getNodeRefAtTime( (NodeRef)o, dateTime );
-                            if ( ref == null ) {
+                            EmsScriptNode esn = null;
+                            if ( ref != null ) {
+                                esn = new EmsScriptNode( ref, getServices() );
+                            }
+                            if ( !esn.exists() ) continue;
+
+                            if ( ref == null || !esn.exists() ) {
                                 String msg = "Error! Element " + o + " did not exist at " + dateTime + ".\n";
                                 if ( getResponse() == null || getStatus() == null ) {
                                     Debug.error( msg );
