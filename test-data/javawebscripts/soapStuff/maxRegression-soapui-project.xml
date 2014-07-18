@@ -224,13 +224,14 @@ log.info("here")
 testStepDoc = ""
 
 for (testCase in testSuite.getTestCaseList()) {
+	testStepDoc += "Test Case: " + testCase.name
 	for (testStep in testCase.getTestStepList()) {
 
 	log.info "here2"
 	
 	testStepDoc += "Test Name:\t" + testStep.name + "\n"
 	log.info testStep.name
-	//testStepDoc += "URL Called:\t" + testStep.endpoint
+	testStepDoc += "URL Called:\t" //+ testStep.resource
 	//log.info testStep.resource
 	testStepDoc += "Type:   typeVal" + "\n"// + testStep.restMethod.name.toUpperCase()
 	testStepDoc += "Params:"
@@ -256,6 +257,7 @@ for (testCase in testSuite.getTestCaseList()) {
 		testStepDoc += "\n   Label:   " + assertion.LABEL
 		testStepDoc += "\n   misc :   " + assertion.toString()
 	}
+	testStepDoc += "\n"
 	}
 }
 
@@ -310,4 +312,4 @@ if( acceptEncodingHeadeList.contains("gzip,deflate") )
 }
 
 */
-</con:dispatchPath></con:restMockAction></con:restMockService><con:requirements/><con:properties><con:property><con:name>server</con:name><con:value>128.149.16.140:8080</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>
+</con:dispatchPath></con:restMockAction></con:restMockService><con:requirements/><con:properties><con:property><con:name>server</con:name><con:value>localhost:8080</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>

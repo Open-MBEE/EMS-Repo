@@ -16,7 +16,7 @@
       "documentation": "4else",
       "sysmlid": "401",
       "owner": "4000",
-      "read": "2014-07-17T13:42:35.431-0700",
+      "read": "2014-07-18T14:26:54.332-0700",
       "specialization": {
         "childrenViews": ["404"],
         "displayedElements": [
@@ -60,7 +60,7 @@
       "documentation": "else",
       "sysmlid": "301",
       "owner": "300",
-      "read": "2014-07-17T13:42:35.465-0700",
+      "read": "2014-07-18T14:26:54.385-0700",
       "specialization": {
         "childrenViews": ["304"],
         "displayedElements": [
