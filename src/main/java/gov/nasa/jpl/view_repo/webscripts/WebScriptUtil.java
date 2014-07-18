@@ -71,13 +71,10 @@ public class WebScriptUtil {
                     if ( nr == null ) continue;
                 }
                 EmsScriptNode node = new EmsScriptNode(nr, services, response);
-                try {
-                    // filter by project
+                if (node != null && node.exists()) { 
                     if (node.getQnamePath().startsWith(qnamePath)) {
                         set.add(node);
                     }
-                } catch (Exception ee) {
-                    // do nothing, exception is most likely that the nodeRef doesn't exist
                 }
             }
         } catch (Exception e) {

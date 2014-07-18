@@ -119,6 +119,7 @@ public class ModelPost extends AbstractJavaWebScript {
     private JSONArray addedElements = new JSONArray();
     private JSONArray updatedElements = new JSONArray();
     private JSONArray movedElements = new JSONArray();
+    private Set<String> addedElementsSet = new HashSet<String>();
     
     private EmsSystemModel systemModel;
     
@@ -260,7 +261,7 @@ public class ModelPost extends AbstractJavaWebScript {
         deltaJson.put( "addedElements", addedElements );
         deltaJson.put( "updatedElements", updatedElements );
         deltaJson.put( "movedElements", movedElements );
-        jmsConnection.publishTopic( deltaJson.toString( 2 ), "master" );
+        jmsConnection.publishTopic( deltaJson, "master" );
         return elements;
     }
     
@@ -716,9 +717,12 @@ public class ModelPost extends AbstractJavaWebScript {
                 new TreeSet<EmsScriptNode>();
 
         EmsScriptNode element = null;
-        
-        Object jsonId = elementJson.get( Acm.JSON_ID );
-        element = findScriptNodeById( "" + jsonId, null );
+
+        if ( !elementJson.has( Acm.JSON_ID ) ) {
+            return elements;
+        }
+        String jsonId = elementJson.getString( Acm.JSON_ID );
+        element = findScriptNodeById( jsonId, null );
         if ( element != null ) {
             elements.add( element );
         }
@@ -817,20 +821,22 @@ public class ModelPost extends AbstractJavaWebScript {
             case ADDED:
                 if (!ingest) {
                     addedElements.put( elementJson );
+                    addedElementsSet.add( jsonId );
                 }
                 break;
             case UPDATED:
-                if (ingest) {
+                if (ingest && !addedElementsSet.contains( jsonId )) {
                     updatedElements.put( elementJson );
                 }
                 break;
             case MOVED:
-                if (!ingest) {
+                if (!ingest && !addedElementsSet.contains( jsonId )) {
+//                    elementJson.put( "qualifiedId",  );
                     movedElements.put( elementJson );
                 }
                 break;
             case UPDATED_AND_MOVED:
-                if (ingest) {
+                if (ingest && !addedElementsSet.contains( jsonId )) {
                     updatedElements.put( elementJson );
                 } else {
                     movedElements.put( elementJson );
@@ -1509,7 +1515,6 @@ public class ModelPost extends AbstractJavaWebScript {
         EmsScriptNode exprNode = getConstraintExpression(constraintNode);
         
         if (exprNode != null) {
-            
             Expression<Call> expressionCall = getSystemModelAe().toAeExpression( exprNode );
             Call call = (Call) expressionCall.expression;
             Expression<Boolean> expression = new Expression<Boolean>(call.evaluate(true, false));

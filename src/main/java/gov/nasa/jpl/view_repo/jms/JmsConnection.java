@@ -7,6 +7,8 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 public class JmsConnection {
@@ -36,6 +38,19 @@ public class JmsConnection {
         }
     }
     
+    public boolean publishTopic(JSONObject json, String topic) {
+        boolean result = false;
+        try {
+            json.put( "sequence", sequenceId++ );
+            result = publishTopic(json.toString( 2 ), topic);
+        } catch ( JSONException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        return result;
+    }
+    
     public boolean publishTopic(String msg, String topic) {
         if (connectionFactory == null) {
             init();
@@ -58,11 +73,9 @@ public class JmsConnection {
             producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 
             // Create a message
-            // TODO: add in the sequence ID
             TextMessage message = session.createTextMessage(msg);
 
             // Tell the producer to send the message
-            System.out.println("Sent message: "+ message.hashCode() + " : " + Thread.currentThread().getName());
             producer.send(message);
 
             // Clean up
