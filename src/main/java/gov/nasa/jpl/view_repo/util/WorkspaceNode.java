@@ -3,7 +3,11 @@
  */
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.mbee.util.Debug;
+
 import java.util.Date;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -50,6 +54,33 @@ public class WorkspaceNode extends EmsScriptNode {
         addAspect( "ems:Workspace" );
     }
     
+    @Override
+    public WorkspaceNode getWorkspace() {
+        return this; // This allow
+    }
+    
+    @Override
+    public WorkspaceNode getParentWorkspace() {
+        NodeRef ref = (NodeRef)getProperty("sysml:parent");
+        if ( ref == null ) return null;
+        WorkspaceNode parentWs = new WorkspaceNode( ref, getServices() );
+        return parentWs;
+    }
+    
+    @Override
+    public void setWorkspace( WorkspaceNode workspace ) {
+        String msg = "Cannot set the workspace of a workspace!";
+        if ( getResponse() != null ) {
+            getResponse().append( msg + "\n" );
+            if ( getStatus() != null ) {
+                getStatus().setCode( HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                                     msg );
+            }
+        }
+        Debug.error( msg );
+    }
+        
+    
     public static WorkspaceNode createWorskpaceInFolder( String sysmlId,
                                                          //String wsName,
                                                          EmsScriptNode folder,
@@ -66,7 +97,7 @@ public class WorkspaceNode extends EmsScriptNode {
             folder = NodeUtil.getUserHomeFolder( userName );
         }
         ws.setProperty( "ems:parent", folder );
-        if ( folder.hasAspect( "ems:Workspace" ) ) {
+        if ( folder.isWorkspace() ) {
             WorkspaceNode parentWorkspace =
                     new WorkspaceNode( folder.getNodeRef(), services, response,
                                        status );
@@ -82,7 +113,11 @@ public class WorkspaceNode extends EmsScriptNode {
     }
     
     public boolean contains( EmsScriptNode node ) {
-        return node.getWorkspace().equals( this );
+        WorkspaceNode nodeWs = node.getWorkspace();
+        if ( nodeWs == null || nodeWs.equals( this ) ) return true;
+        WorkspaceNode parentWs = getParentWorkspace();
+        if ( parentWs == null ) return false;
+        return parentWs.contains( node );
     }
     
     // Replicate this folder and its parent/grandparents in this workspace.
@@ -104,7 +139,7 @@ public class WorkspaceNode extends EmsScriptNode {
             parent = replicateFolderWithChain( parent );
             newFolder.move( parent );
         } // REVIEW -- what if parent != null && !parent.exists()
-        return folder;
+        return newFolder;
     }
     
     // When creating a node, create it in the workspace with the owner (and

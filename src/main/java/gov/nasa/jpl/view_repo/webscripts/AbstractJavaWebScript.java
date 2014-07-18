@@ -32,6 +32,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -197,19 +198,27 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * 
 	 * TODO extend so search context can be specified
 	 * @param id	Node id to search for
+	 * @param workspace 
+     * @param dateTime 
 	 * @return		ScriptNode with name if found, null otherwise
 	 */
-	protected EmsScriptNode findScriptNodeById(String id, Date dateTime) {
+	protected EmsScriptNode findScriptNodeById(String id,
+	                                           WorkspaceNode workspace,
+	                                           Date dateTime) {
 		EmsScriptNode result = null;
 
 		// be smart about search if possible
 		if (foundElements.containsKey(id)) {
-			result = foundElements.get(id);
-			EmsScriptNode resultAtTime = result.getVersionAtTime( dateTime );
-			//if ( resultAtTime != null ) 
-			result = resultAtTime;
-		} else {
-			NodeRef nodeRef = NodeUtil.findNodeRefById(id, dateTime, services);
+            EmsScriptNode resultAtTime =
+                    foundElements.get( id ).getVersionAtTime( dateTime );
+			if ( resultAtTime != null &&
+			     ( workspace == null || resultAtTime.getWorkspace().equals( workspace ) ) ) {
+			    //if ( resultAtTime != null ) 
+			    result = resultAtTime;
+			}
+		}
+		if ( result == null ) {
+			NodeRef nodeRef = NodeUtil.findNodeRefById(id, workspace, dateTime, services);
 			if (nodeRef != null) {
 				result = new EmsScriptNode(nodeRef, services, response);
 				foundElements.put(id, result); // add to cache

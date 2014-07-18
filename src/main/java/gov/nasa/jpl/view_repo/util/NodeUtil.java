@@ -47,6 +47,7 @@ public class NodeUtil {
     public enum SearchType {
         DOCUMENTATION( "@sysml\\:documentation:\"" ),
         NAME( "@sysml\\:name:\"" ),
+        CM_NAME( "@cm\\:name:\"" ),
         ID( "@sysml\\:id:\"" ),
         STRING( "@sysml\\:string:\"" ),
         BODY( "@sysml\\:body:\"" ),
@@ -147,17 +148,19 @@ public class NodeUtil {
     }
 
     public static NodeRef findNodeRefByType( String name, SearchType type,
+                                             WorkspaceNode workspace,
                                              Date dateTime, boolean exactMatch,
                                              ServiceRegistry services ) {
-        return findNodeRefByType( name, type.prefix, dateTime, exactMatch,
-                                  services );
+        return findNodeRefByType( name, type.prefix, workspace, dateTime,
+                                  exactMatch, services );
     }
     
     public static NodeRef findNodeRefByType( String specifier, String prefix,
+                                             WorkspaceNode workspace,
                                              Date dateTime, boolean exactMatch,
                                              ServiceRegistry services ) {
         ArrayList< NodeRef > refs =
-                findNodeRefsByType( specifier, prefix, dateTime, true,
+                findNodeRefsByType( specifier, prefix, workspace, dateTime, true,
                                     exactMatch, services );
         if ( Utils.isNullOrEmpty( refs ) ) return null;
         NodeRef ref = refs.get( 0 );
@@ -165,7 +168,8 @@ public class NodeUtil {
     }
 
     public static ArrayList< NodeRef >
-            findNodeRefsByType( String specifier, String prefix, Date dateTime,
+            findNodeRefsByType( String specifier, String prefix,
+                                WorkspaceNode workspace, Date dateTime,
                                 boolean justFirst, boolean exactMatch,
                                 ServiceRegistry services ) {
         ResultSet results = null;
@@ -188,8 +192,12 @@ public class NodeUtil {
 
                     if ( nr == null ) continue;
                     
-                        // Make sure we didn't just get a near match.
                         EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
+
+                        // Make sure it's in the right workspace.
+                        if ( workspace != null && !workspace.contains( esn ) ) continue;
+                        
+                        // Make sure we didn't just get a near match.
                         try {
                             if ( !esn.checkPermissions( PermissionService.READ ) ) {
                                 continue;
@@ -237,14 +245,16 @@ public class NodeUtil {
      * 
      * @param id
      *            Node name to search for
+     * @param workspace 
      * @param dateTime
      *            the time specifying which version of the NodeRef to find; null
      *            defaults to the latest version
      * @return NodeRef of first match, null otherwise
      */
-    public static NodeRef findNodeRefById(String id, Date dateTime, ServiceRegistry services) {
-        NodeRef r = findNodeRefByType(id, SearchType.ID, dateTime, true, services); // TODO: temporarily search by ID
-        if ( r == null ) r = findNodeRefByType(id, "@cm\\:name:\"", dateTime, true, services);
+    public static NodeRef findNodeRefById(String id, WorkspaceNode workspace,
+                                          Date dateTime, ServiceRegistry services) {
+        NodeRef r = findNodeRefByType(id, SearchType.ID, workspace, dateTime, true, services); // TODO: temporarily search by ID
+        if ( r == null ) r = findNodeRefByType(id, "@cm\\:name:\"", workspace, dateTime, true, services);
         return r;
     }
     
@@ -256,12 +266,15 @@ public class NodeUtil {
      * @param pattern   Pattern to look for
      */
     public static Map< String, EmsScriptNode >
-    searchForElements( String pattern, Date dateTime,
+    searchForElements( String pattern, WorkspaceNode workspace, Date dateTime,
                        ServiceRegistry services, StringBuffer response,
                        Status status) {
         Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
         for (SearchType searchType: SearchType.values() ) {
-            elementsFound.putAll(searchForElements(searchType.prefix, pattern, dateTime, services, response, status));
+            elementsFound.putAll( searchForElements( searchType.prefix,
+                                                     pattern, workspace,
+                                                     dateTime, services,
+                                                     response, status ) );
         }
         return elementsFound;
     }
@@ -273,7 +286,8 @@ public class NodeUtil {
      * @param pattern   Pattern to look for
      */
     public static Map< String, EmsScriptNode >
-            searchForElements( String type, String pattern, Date dateTime,
+            searchForElements( String type, String pattern,
+                               WorkspaceNode workspace, Date dateTime,
                                ServiceRegistry services, StringBuffer response,
                                Status status ) {
         Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
@@ -283,7 +297,8 @@ public class NodeUtil {
         ArrayList<NodeRef> resultSet = null;
         //try {
 
-            resultSet = findNodeRefsByType( pattern, type, dateTime, false, false, getServices() );
+        resultSet = findNodeRefsByType( pattern, type, workspace, dateTime,
+                                        false, false, getServices() );
             //resultSet = findNodeRefsByType(pattern, type, getServices());
 
 //            pattern = type + pattern + "\"";
@@ -592,6 +607,7 @@ public class NodeUtil {
      * @return  ScriptNode of site with name siteName
      */
     public static EmsScriptNode getSiteNode( String siteName,
+                                             WorkspaceNode workspace,
                                              Date dateTime,
                                              ServiceRegistry services,
                                              StringBuffer response ) {
@@ -605,7 +621,19 @@ public class NodeUtil {
             }
 
             EmsScriptNode siteNode = new EmsScriptNode(siteRef, services, response);
-            return siteNode;
+            if ( siteNode != null
+                 && ( workspace == null || workspace.contains( siteNode ) ) ) {
+                return siteNode;
+            }
+        }
+        ArrayList< NodeRef > refs =
+                findNodeRefsByType( siteName, SearchType.CM_NAME.prefix, workspace,
+                                   dateTime, true, true, getServices() );
+        for ( NodeRef ref : refs ) {
+            EmsScriptNode siteNode = new EmsScriptNode(ref, services, response);
+            if ( siteNode.isSite() ) {
+                return siteNode;
+            }
         }
         return null;
     }
@@ -683,9 +711,10 @@ public class NodeUtil {
     public static VersionLowerBoundComparator versionLowerBoundComparator =
             new VersionLowerBoundComparator();
     
-    public static NodeRef getNodeRefAtTime( String id, String timestamp ) {
+    public static NodeRef getNodeRefAtTime( String id, WorkspaceNode workspace,
+                                            String timestamp ) {
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-        NodeRef ref = findNodeRefById( id, dateTime, getServices() );
+        NodeRef ref = findNodeRefById( id, workspace, dateTime, getServices() );
         //return getNodeRefAtTime( ref, timestamp );
         return ref;
     }
@@ -705,7 +734,8 @@ public class NodeUtil {
      *            the date/time, specifying the version
      * @return the version of the NodeRef that was the latest version at the specified time, or if before any version
      */
-    public static NodeRef getNodeRefAtTime( NodeRef ref, Date dateTime ) {
+    public static NodeRef getNodeRefAtTime( NodeRef ref,
+                                            Date dateTime ) {
         if (Debug.isOn())  Debug.outln("\n\n\ngetNodeRefAtTime( " + ref + ", " + dateTime + " )" );
 
         if ( dateTime == null ) {
@@ -766,22 +796,23 @@ public class NodeUtil {
         } else {
             version = vv.get( index );
         }
-        if (Debug.isOn())  Debug.outln( "picking version " + version );
-        if (Debug.isOn())  Debug.outln( "version properties " + version.getVersionProperties() );
-        String versionLabel = version.getVersionLabel();
-        EmsScriptNode emsNode = new EmsScriptNode( ref, getServices() );
-        ScriptVersion scriptVersion = emsNode.getVersion( versionLabel );
-        if (Debug.isOn())  Debug.outln( "scriptVersion " + scriptVersion );
-        ScriptNode node = scriptVersion.getNode();
-        if (Debug.isOn())  Debug.outln( "script node " + node );
-        //can't get script node properties--generates exception
-        //if (Debug.isOn())  Debug.outln( "script node properties " + node.getProperties() );
-        NodeRef scriptVersionNodeRef = scriptVersion.getNodeRef();
-        if (Debug.isOn())  Debug.outln( "ScriptVersion node ref "
-                                         + scriptVersionNodeRef );
-        NodeRef vnr = version.getVersionedNodeRef();
-        if (Debug.isOn())  Debug.outln( "versioned node ref " + vnr );
-        
+        if ( Debug.isOn() ) {
+            if (Debug.isOn())  Debug.outln( "picking version " + version );
+            if (Debug.isOn())  Debug.outln( "version properties " + version.getVersionProperties() );
+            String versionLabel = version.getVersionLabel();
+            EmsScriptNode emsNode = new EmsScriptNode( ref, getServices() );
+            ScriptVersion scriptVersion = emsNode.getVersion( versionLabel );
+            if (Debug.isOn())  Debug.outln( "scriptVersion " + scriptVersion );
+            ScriptNode node = scriptVersion.getNode();
+            if (Debug.isOn())  Debug.outln( "script node " + node );
+            //can't get script node properties--generates exception
+            //if (Debug.isOn())  Debug.outln( "script node properties " + node.getProperties() );
+            NodeRef scriptVersionNodeRef = scriptVersion.getNodeRef();
+            if (Debug.isOn())  Debug.outln( "ScriptVersion node ref "
+                                             + scriptVersionNodeRef );
+            NodeRef vnr = version.getVersionedNodeRef();
+            if (Debug.isOn())  Debug.outln( "versioned node ref " + vnr );
+        }
         NodeRef fnr = version.getFrozenStateNodeRef();
         if (Debug.isOn())  Debug.outln( "frozen node ref " + fnr );
         if (Debug.isOn())  Debug.outln( "frozen node ref properties: "
@@ -816,7 +847,7 @@ public class NodeUtil {
             Matcher m = p.matcher( path );
             if ( m.matches() ) {
                 String siteName = m.group( 1 ); 
-                source = getSiteNode( siteName, null, services, response );
+                source = getSiteNode( siteName, null, null, services, response );
                 if ( source != null ) {
                     result = mkdir( source, path, services, response, status );
                     if ( result != null ) return result;
@@ -921,8 +952,8 @@ public class NodeUtil {
     public static String createId( ServiceRegistry services ) {
         for ( int i=0; i<10; ++i ) {
             String id = "MMS_" + System.currentTimeMillis() + "_" + UUID.randomUUID().toString();
-            // Make sure id is not already used
-            if ( findNodeRefById( id, null, services ) == null ) {
+            // Make sure id is not already used (extremely unlikely)
+            if ( findNodeRefById( id, null, null, services ) == null ) {
                 return id;
             }
         }

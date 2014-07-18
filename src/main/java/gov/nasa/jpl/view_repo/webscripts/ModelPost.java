@@ -186,7 +186,7 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     public Set< EmsScriptNode >
             createOrUpdateModel( Object content, Status status,
-                                 EmsScriptNode projectNode, String workspaceId ) throws Exception {
+                                 EmsScriptNode projectNode, WorkspaceNode workspace ) throws Exception {
         Date now = new Date();
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
@@ -213,7 +213,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     trx = services.getTransactionService().getNonPropagatingUserTransaction();
                     try {
                         trx.begin();
-                        owner = getOwner(rootElement, projectNode, true);
+                        owner = getOwner(rootElement, projectNode, workspace, true);
                         trx.commit();
                     } catch (Throwable e) {
                         try {
@@ -259,7 +259,8 @@ public class ModelPost extends AbstractJavaWebScript {
     
     protected Set<EmsScriptNode> updateNodeReferences(boolean singleElement,
                                                       JSONObject postJson,
-                                                      EmsScriptNode projectNode ) throws Exception {
+                                                      EmsScriptNode projectNode,
+                                                      WorkspaceNode workspace) throws Exception {
         TreeSet<EmsScriptNode> elements =
                 new TreeSet<EmsScriptNode>();
 
@@ -269,11 +270,11 @@ public class ModelPost extends AbstractJavaWebScript {
         for (String rootElement : rootElements) {
             log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
             if (!rootElement.equals((String) projectNode.getProperty(Acm.CM_NAME))) {
-                EmsScriptNode owner = getOwner( rootElement, projectNode, false );
+                EmsScriptNode owner = getOwner( rootElement, projectNode, workspace, false );
                 
                 try {
                     elements.addAll( updateOrCreateElement( elementMap.get( rootElement ),
-                                                            owner, true ) );
+                                                            owner, workspace, true ) );
                 } catch ( JSONException e ) {
                     e.printStackTrace();
                 }
@@ -284,6 +285,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
     protected EmsScriptNode getOwner( String elementId,
                                       EmsScriptNode projectNode,
+                                      WorkspaceNode workspace,
                                       boolean createOwnerPkgIfNotFound ) {
         JSONObject element = elementMap.get(elementId);
         if ( element == null || element.equals( "null" ) ) {
@@ -306,7 +308,7 @@ public class ModelPost extends AbstractJavaWebScript {
         EmsScriptNode owner = null;
         EmsScriptNode reifiedPkg = null;
         if (Utils.isNullOrEmpty( ownerName ) ) {
-            EmsScriptNode elementNode = findScriptNodeById(elementId, null);
+            EmsScriptNode elementNode = findScriptNodeById(elementId, workspace, null);
             if (elementNode == null || !elementNode.exists()) {
                 owner = projectNode;
             } else {
@@ -314,7 +316,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         } else {
        		boolean foundOwnerElement = true;
-            owner = findScriptNodeById(ownerName, null);
+            owner = findScriptNodeById(ownerName, workspace, null);
             if (owner == null || !owner.exists()) {
                 log( LogLevel.WARNING, "Could not find owner with name: "
                                        + ownerName + " putting " + elementId
@@ -324,7 +326,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 foundOwnerElement = false;
             }
             // really want to add pkg as owner
-            reifiedPkg = findScriptNodeById(ownerName + "_pkg", null);
+            reifiedPkg = findScriptNodeById(ownerName + "_pkg", workspace, null);
             if (reifiedPkg == null || !reifiedPkg.exists()) {
                 if ( createOwnerPkgIfNotFound) {
                     // If we found the owner element, then it exists but not its
@@ -333,7 +335,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     // true into useParent parameter. Else, it's owner is the
                     // project folder, the actual folder in which to create the
                     // pkg, so pass false.
-                    reifiedPkg = getOrCreateReifiedNode(owner, ownerName,
+                    reifiedPkg = getOrCreateReifiedNode(owner, ownerName, workspace,
                                                         foundOwnerElement);
                 } else {
                     log( LogLevel.WARNING, "Could not find owner package: "
@@ -697,6 +699,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
     /**
      * Update or create element with specified metadata
+     * @param workspace 
      * 
      * @param jsonObject
      *            Metadata to be added to element
@@ -705,16 +708,18 @@ public class ModelPost extends AbstractJavaWebScript {
      * @return the created elements
      * @throws JSONException
      */
-    protected Set<EmsScriptNode> updateOrCreateElement(JSONObject elementJson,
-                                         EmsScriptNode parent,
-                                         boolean ingest) throws Exception {
+    protected Set< EmsScriptNode > updateOrCreateElement( JSONObject elementJson,
+                                                          EmsScriptNode parent,
+                                                          WorkspaceNode workspace,
+                                                          boolean ingest )
+                                                                  throws Exception {
         TreeSet<EmsScriptNode> elements =
                 new TreeSet<EmsScriptNode>();
 
         EmsScriptNode element = null;
         
         Object jsonId = elementJson.get( Acm.JSON_ID );
-        element = findScriptNodeById( "" + jsonId, null );
+        element = findScriptNodeById( "" + jsonId, workspace, null );
         if ( element != null ) {
             elements.add( element );
         }
@@ -768,7 +773,7 @@ public class ModelPost extends AbstractJavaWebScript {
         if (runWithoutTransactions) {
             reifiedNode =
                     updateOrCreateTransactionableElement( elementJson, parent,
-                                                          children, ingest, false );
+                                                          children, workspace, ingest, false );
         } else {
             UserTransaction trx;
             trx = services.getTransactionService().getNonPropagatingUserTransaction();
@@ -959,6 +964,7 @@ public class ModelPost extends AbstractJavaWebScript {
             updateOrCreateTransactionableElement( JSONObject elementJson,
                                                   EmsScriptNode parent,
                                                   JSONArray children,
+                                                  WorkspaceNode workspace,
                                                   boolean ingest, 
                                                   boolean nestedNode) throws Exception {
         if (!elementJson.has(Acm.JSON_ID)) {
@@ -971,7 +977,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // TODO Need to permission check on new node creation
         // find node if exists, otherwise create
-        EmsScriptNode node = findScriptNodeById( id, null );
+        EmsScriptNode node = findScriptNodeById( id, workspace, null );
         String existingNodeType = null;
         if ( node != null ) {
             node.setResponse( getResponse() );
@@ -1036,6 +1042,15 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         
         type = NodeUtil.getContentModelTypeName( acmSysmlType, services ); 
+
+        parent = workspace.replicateFolderWithChain( parent );
+        
+        // clone an existing node into the new workspace
+        if ( workspace != null && ( node != null || node.exists() ) &&
+             !node.isWorkspace() ) {
+            node = node.clone();
+            node.setWorkspace( workspace );
+        }
         
         if ( node == null || !node.exists() ) {// && newElements.contains( id ) ) {
             if ( type == null || type.trim().isEmpty() ) {
@@ -1067,7 +1082,8 @@ public class ModelPost extends AbstractJavaWebScript {
                 if (node != null && node.exists() ) {
                     if (!node.getParent().equals(parent)) {
                         node.move(parent);
-                        EmsScriptNode pkgNode = findScriptNodeById(id + "_pkg", null);
+                        EmsScriptNode pkgNode =
+                                findScriptNodeById( id + "_pkg", workspace, null );
                         if (pkgNode != null) {
                             pkgNode.move(parent);
                         }
@@ -1090,7 +1106,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // Note: Moved this before ingesting the json b/c we need the reifiedNode
         if (nodeExists && elementHierarchyJson.has(id)) {
             log(LogLevel.INFO, "\tcreating reified package");
-            reifiedNode = getOrCreateReifiedNode(node, id, true); // TODO -- Is last argument correct?
+            reifiedNode = getOrCreateReifiedNode(node, id, workspace, true); // TODO -- Is last argument correct?
             
             JSONArray array = elementHierarchyJson.getJSONArray(id);
             if ( array != null ) {
@@ -1142,7 +1158,10 @@ public class ModelPost extends AbstractJavaWebScript {
         return nestedNode ? node : reifiedNode;
     }
     
-    protected EmsScriptNode getOrCreateReifiedNode(EmsScriptNode node, String id, boolean useParent) {
+    protected EmsScriptNode getOrCreateReifiedNode( EmsScriptNode node,
+                                                    String id,
+                                                    WorkspaceNode workspace,
+                                                    boolean useParent ) {
         EmsScriptNode reifiedNode = null;
         if ( node == null || !node.exists() ) {
             log( LogLevel.ERROR,
@@ -1160,10 +1179,12 @@ public class ModelPost extends AbstractJavaWebScript {
                  "Trying to create reified node folder in missing parent folder for node " + node );
             return null;
         }
+        
+        parent = workspace.replicateFolderWithChain( parent );
 
         if (checkPermissions(parent, PermissionService.WRITE)) {
             String pkgName = id + "_pkg";
-            reifiedNode = findScriptNodeById(pkgName, null);
+            reifiedNode = findScriptNodeById(pkgName, workspace, null);
             if (reifiedNode == null || !reifiedNode.exists()) {
                 try {
                     log( LogLevel.ERROR,
