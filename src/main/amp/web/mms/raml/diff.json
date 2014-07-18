@@ -61,6 +61,10 @@
                 "$ref": "#/definitions/Graph"
             }
         },
+        "sequence": {
+            "type": "integer",
+            "description": "Sequence ID so OSB knows what order messages should appear in"
+        },
         
         "definitions": {
             "Graph": {
