@@ -145,9 +145,6 @@
 
 	documentation += 
 
-	log.info "about to log"
-
-	log.info documentation
 }
 </con:tearDownScript><con:properties><con:property><con:name>siteId</con:name><con:value>europa</con:value></con:property><con:property><con:name>projectId</con:name><con:value>123456</con:value></con:property><con:property><con:name>elementId</con:name><con:value>123456</con:value></con:property><con:property><con:name>recurseTrue</con:name><con:value>recurse=true</con:value></con:property></con:properties><con:reportScript/><con:reportParameters/><con:breakPoints><con:testStepId>bac22f8a-9a5f-4500-ba0e-193969ecf738</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints><con:breakPoints><con:testStepId>e81c6ba7-c223-4922-a23c-9b09e749b902</con:testStepId><con:status>NONE</con:status><con:properties/></con:breakPoints></con:testCase><con:properties/><con:tearDownScript>for (testCaseResult in runner.results){
 	testCaseName = testCaseResult.getTestCase().name
