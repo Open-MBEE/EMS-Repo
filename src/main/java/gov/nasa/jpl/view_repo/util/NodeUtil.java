@@ -176,7 +176,7 @@ public class NodeUtil {
                     NodeRef nr = row.getNodeRef();
                     if ( nr == null ) continue;
                     EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
-                    if ( !esn.exists() ) continue;
+                    //if ( !esn.exists() ) continue;
 
 //                    gotResults = true;
 
