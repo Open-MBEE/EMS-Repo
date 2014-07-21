@@ -866,6 +866,21 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                             nodeService.getProperty( elementRef.getChildRef(),
                                                      QName.createQName( Acm.ACM_NAME,
                                                                         services.getNamespaceService() ) );
+                        if (nameProp == null) {
+                            String cmName = (String)
+                                    nodeService.getProperty( elementRef.getChildRef(),
+                                                             QName.createQName( Acm.CM_NAME,
+                                                                                services.getNamespaceService() ) );
+                            if (cmName != null) {
+                                if (cmName.contains( "_pkg" )) {
+                                    cmName = cmName.replace("_pkg", "");
+                                    EmsScriptNode node = findScriptNodeByName( cmName, null );
+                                    if (node != null && node.exists()) {
+                                        nameProp = (String) node.getProperty( Acm.ACM_NAME );
+                                    }
+                                }
+                            }
+                        }
                     } else {
                         // looking for id, so need to replace _pkg from reified nodes
                         nameProp = (String)
@@ -1051,7 +1066,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         Long readTime = null;
 
         // switch between old and new
-        boolean doNew = false;
+        boolean doNew = true;
         if ( readTime == null ) readTime = System.currentTimeMillis();
         if (doNew) {
             addElementJSON(element);
