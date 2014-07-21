@@ -1066,7 +1066,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         Long readTime = null;
 
         // switch between old and new
-        boolean doNew = true;
+        boolean doNew = false;
         if ( readTime == null ) readTime = System.currentTimeMillis();
         if (doNew) {
             addElementJSON(element);
