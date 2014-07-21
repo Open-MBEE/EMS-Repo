@@ -12,14 +12,20 @@ public class ModStatus {
         ADDED, DELETED, UPDATED, MOVED, UPDATED_AND_MOVED, NONE
     }
     
-    private State state = State.NONE;
+    private State state;
+    
+    public ModStatus() {
+        state = State.NONE;
+    }
     
     public void setState(State newState) {
         if ( ( newState.equals( State.MOVED ) && state.equals( State.UPDATED ) )  ||
-             ( newState.equals( State.UPDATED ) && state.equals( State.MOVED ))  ) {
+             ( newState.equals( State.UPDATED ) && state.equals( State.MOVED )) ) {
             state = State.UPDATED_AND_MOVED;
         } else {
-            state = newState;
+            if ( !state.equals( State.ADDED )) {
+                state = newState;
+            }
         }
     }
     

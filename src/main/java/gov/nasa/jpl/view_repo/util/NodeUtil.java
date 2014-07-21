@@ -373,6 +373,7 @@ public class NodeUtil {
 //        //{http://www.alfresco.org/model/transfer/1.0}
         QName qName = createQName( typeName, services );
         if ( qName != null ) {
+            // TODO: this prints out a warning, maybe better way to check?
             TypeDefinition t = dServ.getType( qName );
             if ( t != null ) {
 //              if (Debug.isOn()) System.out.println("\n\n*** getType(" + typeName + ") worked!!!\n" );
@@ -713,16 +714,16 @@ public class NodeUtil {
         }
         VersionHistory history = getServices().getVersionService().getVersionHistory( ref );
         if (history == null) {
-    		// Versioning doesn't make versions until the first save...
-    		EmsScriptNode node = new EmsScriptNode(ref, services);
-    		Date createdTime = (Date)node.getProperty("cm:created");
-            if ( dateTime != null && dateTime.compareTo( createdTime ) < 0 ) {
-                if (Debug.isOn())  Debug.outln( "no history! dateTime " + dateTime
-                                    + " before created " + createdTime );
-    			return null;
-    		}
-            if (Debug.isOn())  Debug.outln( "no history! created " + createdTime );
-    		return ref;
+        		// Versioning doesn't make versions until the first save...
+        		EmsScriptNode node = new EmsScriptNode(ref, services);
+        		Date createdTime = (Date)node.getProperty("cm:created");
+                if ( dateTime != null && dateTime.compareTo( createdTime ) < 0 ) {
+                    if (Debug.isOn())  Debug.outln( "no history! dateTime " + dateTime
+                                        + " before created " + createdTime );
+        			return null;
+        		}
+                if (Debug.isOn())  Debug.outln( "no history! created " + createdTime );
+        		return ref;
         }
         
         Collection< Version > versions = history.getAllVersions();

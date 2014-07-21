@@ -41,6 +41,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -550,7 +552,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             return false;
         }
         for ( int ii = 0; ii < x.size(); ii++ ) {
-            if ( !x.get( ii ).equals( ii ) ) {
+            if ( !x.get( ii ).equals( y.get(ii) ) ) {
                 return false;
             }
         }
@@ -828,14 +830,26 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         return NodeUtil.getStoreRef();
     }
 
+        
+    public String getSysmlQName() {
+        return getSysmlPath(true);
+    }
+    
+    public String getSysmlQId() {
+        return getSysmlPath(false);
+    }
+    
     /**
      * Gets the SysML qualified name for an object - if not SysML, won't return
      * anything
      * 
+     * @param   isName  If true, returns the names, otherwise returns ids
+     * 
      * @return SysML qualified name (e.g., sysml:name qualified)
      */
-    public String getSysmlQName() {
+    public String getSysmlPath(boolean isName) {
         StringBuffer qname = new StringBuffer();
+        boolean sysmlIdFound = false;
 
         NodeService nodeService = services.getNodeService();
         Path path = nodeService.getPath( this.getNodeRef() );
@@ -846,19 +860,33 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 ChildAssociationRef elementRef =
                         ( (ChildAssocElement)pathElement ).getRef();
                 if ( elementRef.getParentRef() != null ) {
-                    Serializable nameProp = null;
-                    nameProp =
+                    String nameProp = null;
+                    if (isName) {
+                        nameProp = (String)
                             nodeService.getProperty( elementRef.getChildRef(),
                                                      QName.createQName( Acm.ACM_NAME,
                                                                         services.getNamespaceService() ) );
-                    // add '/' and the name of the child or just the '/' if the
-                    // name is missing or unavailable.
-                    qname.append( "/" + (nameProp == null ? "" : "" + nameProp));
+                    } else {
+                        // looking for id, so need to replace _pkg from reified nodes
+                        nameProp = (String)
+                            nodeService.getProperty( elementRef.getChildRef(),
+                                                     QName.createQName( Acm.ACM_ID,
+                                                                        services.getNamespaceService() ) );
+                    }
+                    // ignore things in tree until a sysmlId is found
+                    if (nameProp != null) {
+                        sysmlIdFound = true;
+                    }
+                    if (sysmlIdFound) {
+                        // add '/' and the name of the child or just the '/' if the
+                        // name is missing or unavailable.
+                        qname.append( "/" + nameProp);
+                    }
                 }
             }
         }
 
-        return qname.toString();
+        return qname.toString().replace("_pkg", "");
     }
 
     /**
@@ -947,9 +975,50 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     // add in all the properties
     protected static TreeSet< String > acmPropNames = new TreeSet<String>(Acm.getACM2JSON().keySet());
-//  acmPropNames.add( Acm.ACM_VALUE );
-//  acmPropNames.add( Acm.ACM_PROPERTY_TYPE );
 
+    protected void addElementJSON(JSONObject elementJson) throws JSONException {
+        elementJson.put( Acm.JSON_ID, this.getProperty( Acm.ACM_ID ) );
+        elementJson.put( Acm.JSON_NAME, this.getProperty( Acm.ACM_NAME ) );
+        elementJson.put( Acm.JSON_DOCUMENTATION, this.getProperty( Acm.ACM_DOCUMENTATION) );
+        elementJson.put( "qualifiedName", this.getSysmlQName() );
+        String qid = (String) this.getSysmlQId();
+        elementJson.put( "qualifiedId", qid.replace( "_pkg", "" ) );
+        elementJson.put( "editable", this.hasPermission( PermissionService.WRITE ) );
+        EmsScriptNode parent = this.getParent();
+        if ( parent != null && parent.exists() ) {
+            elementJson.put( Acm.JSON_OWNER, parent.getName().replace( "_pkg", "" ) );
+        }
+        elementJson.put(  "creator", this.getProperty("cm:modifier") );
+        elementJson.put(  "modified", getLastModified((Date)this.getProperty("cm:modified")));
+    }
+    
+    private void addSpecializationJSON(JSONObject json) throws JSONException {
+        String typeName = getTypeName();
+        if (typeName != null) {
+            json.put( "type", typeName );
+        }
+        for (String aspect: Acm.ACM_ASPECTS) {
+            if (this.hasAspect(aspect)) {
+                String methodName = "add" + aspect.substring( aspect.indexOf( ":" ) + 1 ) + "JSON";
+                Method method = null;
+                try {
+                    method = this.getClass().getDeclaredMethod( methodName, JSONObject.class );
+                } catch ( NoSuchMethodException | SecurityException e ) {
+                    // do nothing, method isn't implemented yet
+                }
+                
+                if (method != null) {
+                    try {
+                        method.invoke(this, json);
+                    } catch ( IllegalAccessException | IllegalArgumentException
+                              | InvocationTargetException e ) {
+                        // do nothing, internal server error
+                    }
+                }
+            }
+        }
+    }
+    
     /**
      * Convert node into our custom JSONObject
      * 
@@ -961,8 +1030,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      * @param showEditable
      *            If true, displays editable key
      * @param isExprOrProp
-     * 			  If true, does not add specialization key, as it is nested call to
-     * 			  process the Expression operand or Property value
+     *              If true, does not add specialization key, as it is nested call to
+     *              process the Expression operand or Property value
      * @param dateTime
      *            The time of the specialization, specifying the version.  This
      *            should correspond the this EmsScriptNode's version, but that is
@@ -979,14 +1048,21 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         
         if ( !exists() ) return element;
 
-        DictionaryService dServ = services.getDictionaryService();
-        
         Long readTime = null;
+
+        // switch between old and new
+        boolean doNew = false;
+        if ( readTime == null ) readTime = System.currentTimeMillis();
+        if (doNew) {
+            addElementJSON(element);
+            addSpecializationJSON( specializationJSON );
+        } else {
+        DictionaryService dServ = services.getDictionaryService();
 
         Set< String > renderTypeProperties = Acm.JSON_FILTER_MAP.get(renderType);
         
         for ( String acmType : acmPropNames ) {
-        	
+            
             if ( Utils.isNullOrEmpty( acmType ) ) continue;
             
             String jsonType = Acm.getACM2JSON().get( acmType );
@@ -1090,15 +1166,15 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                             }
                             o = ref;
                         }
-                    	// If it is a operand or value, must get a json object for the noderef:
-                    	if (jsonType.equals(Acm.JSON_VALUE) || jsonType.equals(Acm.JSON_OPERAND)) {
-                    		isString = false;
-                    		EmsScriptNode oNode = new EmsScriptNode((NodeRef)o, services);
-                    		o = oNode.toJSONObject(renderType, showQualifiedName, showEditable, true, dateTime);
-                    	}
-                    	else {
-                    		s = nodeRefToSysmlId( (NodeRef)o );
-                    	}
+                            // If it is a operand or value, must get a json object for the noderef:
+                            if (jsonType.equals(Acm.JSON_VALUE) || jsonType.equals(Acm.JSON_OPERAND)) {
+                                isString = false;
+                                EmsScriptNode oNode = new EmsScriptNode((NodeRef)o, services);
+                                o = oNode.toJSONObject(renderType, showQualifiedName, showEditable, true, dateTime);
+                            }
+                            else {
+                                s = nodeRefToSysmlId( (NodeRef)o );
+                            }
                     } else if ( isNodeRef ) {
                         Debug.error( "Property value is not of type NodeRef as specified by definition! value = "
                                      + o );
@@ -1120,78 +1196,79 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                         }
                     } else {
                         if ( isString ) {
-                        	updateJson.put( jsonType, s );
+                            updateJson.put( jsonType, s );
                         } else {
-                        	updateJson.put( jsonType, o );
+                            updateJson.put( jsonType, o );
                         }
                     }
                 }
             }
             if ( isArray ) {
-            	updateJson.put( jsonType, jarr );
+                updateJson.put( jsonType, jarr );
             }
         }
         
         // add in content type:
-        if (renderTypeProperties.contains(Acm.JSON_TYPE)) {
+//        if (renderTypeProperties.contains(Acm.JSON_TYPE)) {
             String typeName = getTypeName();
-        	if (isExprOrProp) {
-        		element.put(Acm.JSON_TYPE, typeName );
-        	}
-        	else {
-        		// TODO: figure out why value specs aren't getting here
-        		if (typeName != null && typeName.length() > 0) {
-        			specializationJSON.put(Acm.JSON_TYPE, typeName );
-        		}
-        	}
-        }
+                if (isExprOrProp) {
+                    element.put(Acm.JSON_TYPE, typeName );
+                }
+                else {
+                    // TODO: figure out why value specs aren't getting here
+                    if (typeName != null && typeName.length() > 0) {
+                        specializationJSON.put(Acm.JSON_TYPE, typeName );
+                    }
+                }
+//        }
         
         // add in property type(s)
-        if (renderTypeProperties.contains(Acm.JSON_PROPERTY_TYPE)) {
+//        if (renderTypeProperties.contains(Acm.JSON_PROPERTY_TYPE)) {
             JSONArray propertyTypes = getTargetAssocsIdsByType(Acm.ACM_PROPERTY_TYPE);
             if (propertyTypes.length() > 0) {
                 element.put(Acm.JSON_PROPERTY_TYPE, propertyTypes.get(0));
             }
-        }
+//        }
         
         if (!isExprOrProp) {
-        	
-	        // add in specialization:
-	        if ( renderTypeProperties.contains(Acm.JSON_SPECIALIZATION) &&
-	        	specializationJSON.length() > 0) {
-	            element.put(Acm.JSON_SPECIALIZATION, specializationJSON );
-	        }
+          
+          // add in specialization:
+//            if ( renderTypeProperties.contains(Acm.JSON_SPECIALIZATION) &&
+              if (specializationJSON.length() > 0) {
+              element.put(Acm.JSON_SPECIALIZATION, specializationJSON );
+          }
 
-	        // add in owner
-	        if ( renderTypeProperties.contains( Acm.JSON_OWNER ) ) {
-	            EmsScriptNode parent = this.getParent();
-	            if ( parent != null ) {
-	                element.put( Acm.JSON_OWNER,
-	                             parent.getName().replace( "_pkg", "" ) );
-	            }
-	        }
-	
-	        // add comment
-	        if ( renderTypeProperties.contains( Acm.JSON_COMMENT ) ) {
-	            JSONArray annotatedElements =
-	                    getTargetAssocsIdsByType( Acm.ACM_ANNOTATED_ELEMENTS );
-	            if ( annotatedElements.length() > 0 ) {
-	                element.put( Acm.JSON_ANNOTATED_ELEMENTS, annotatedElements );
-	            }
-	        }
-	        
-	        // show qualified name if toggled
-	        if ( showQualifiedName ) {
-	            element.put( "qualifiedName", this.getSysmlQName() );
-	        }
-	
-	        // show editable if toggled
-	        if ( showEditable ) {
-	            element.put( "editable",
-	                         this.hasPermission( PermissionService.WRITE ) );
-	        }
+//            // add in owner
+//            if ( renderTypeProperties.contains( Acm.JSON_OWNER ) ) {
+                EmsScriptNode parent = this.getParent();
+                if ( parent != null ) {
+                    element.put( Acm.JSON_OWNER,
+                                 parent.getName().replace( "_pkg", "" ) );
+                }
+//            }
+  
+          // add comment
+//            if ( renderTypeProperties.contains( Acm.JSON_COMMENT ) ) {
+              JSONArray annotatedElements =
+                      getTargetAssocsIdsByType( Acm.ACM_ANNOTATED_ELEMENTS );
+              if ( annotatedElements.length() > 0 ) {
+                  element.put( Acm.JSON_ANNOTATED_ELEMENTS, annotatedElements );
+              }
+//            }
+          
+          // show qualified name if toggled
+//            if ( showQualifiedName ) {
+                element.put( "qualifiedName", this.getSysmlQName() );
+                element.put( "qualifiedId" , this.getSysmlQId() );
+//            }
+//    
+//            // show editable if toggled
+//            if ( showEditable ) {
+                element.put( "editable",
+                             this.hasPermission( PermissionService.WRITE ) );
+//            }
         }
-
+    } // end doNew
         // add read time
         if ( !isExprOrProp ) {
             element.put( Acm.JSON_READ, getIsoTime( new Date( readTime ) ) );
@@ -1456,9 +1533,9 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     
     public static EmsScriptNode convertIdToEmsScriptNode( String valueId,
                                                           Date dateTime,
-												        ServiceRegistry services,
-												        StringBuffer response,
-												        Status status ) {
+                                                      ServiceRegistry services,
+                                                      StringBuffer response,
+                                                      Status status ) {
         ArrayList<NodeRef> refs = NodeUtil.findNodeRefsByType( valueId, "@cm\\:name:\"", dateTime, true, true, services );
         Set< EmsScriptNode > nodeSet =
         toEmsScriptNodeSet( refs, services, response, status );
@@ -1697,46 +1774,46 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         }
         
         if (name != null) {
-	        if ( name.equals( DataTypeDefinition.INT ) ) {
-	            property = jsonObject.getInt( jsonKey );
-	        } else if ( name.equals( DataTypeDefinition.LONG ) ) {
-	            property = jsonObject.getLong( jsonKey );
-	        } else if ( name.equals( DataTypeDefinition.DOUBLE ) ) {
-	            property = jsonObject.getDouble( jsonKey );
-	        } else if ( name.equals( DataTypeDefinition.BOOLEAN ) ) {
-	            property = jsonObject.getBoolean( jsonKey );
-	        } else if ( name.equals( DataTypeDefinition.TEXT ) ) {
-	            property = jsonObject.getString( jsonKey );
+          if ( name.equals( DataTypeDefinition.INT ) ) {
+              property = jsonObject.getInt( jsonKey );
+          } else if ( name.equals( DataTypeDefinition.LONG ) ) {
+              property = jsonObject.getLong( jsonKey );
+          } else if ( name.equals( DataTypeDefinition.DOUBLE ) ) {
+              property = jsonObject.getDouble( jsonKey );
+          } else if ( name.equals( DataTypeDefinition.BOOLEAN ) ) {
+              property = jsonObject.getBoolean( jsonKey );
+          } else if ( name.equals( DataTypeDefinition.TEXT ) ) {
+              property = jsonObject.getString( jsonKey );
             // properties of type date include timestamp and
             // creation/modified dates and are not stored by MMS
-	            //            } else if ( name.equals( DataTypeDefinition.DATE ) ) {
+              //            } else if ( name.equals( DataTypeDefinition.DATE ) ) {
 //                property = jsonObject.getString( jsonKey );
 //            } else if ( name.equals( DataTypeDefinition.DATETIME ) ) {
 //                property = jsonObject.getString( jsonKey );
-	        } else if ( name.equals( DataTypeDefinition.NODE_REF ) ) {
-	            String sysmlId = null; 
-	            try {
-	                sysmlId = jsonObject.getString( jsonKey );
-	            } catch ( JSONException e ) {
-	                sysmlId = "" + jsonObject.get( jsonKey );
-	            }
-	            EmsScriptNode node = convertIdToEmsScriptNode( sysmlId, dateTime );
-	            if ( node != null ) {
-	                property = node.getNodeRef();
-	            } else if ( !Utils.isNullOrEmpty( sysmlId ) ) {
-	                String msg = "Error! Could not find element for sysml id = "
-	                         + sysmlId + ".\n";
-    	            if ( getResponse() == null || getStatus() == null ) {
-    	                Debug.error( msg );
-    	            } else {
-    	                getResponse().append( msg );
-    	                getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
-    	                                     msg );
-    	            }
-	            }
-	        } else {
-	            property = jsonObject.getString( jsonKey );
-	        }
+          } else if ( name.equals( DataTypeDefinition.NODE_REF ) ) {
+              String sysmlId = null; 
+              try {
+                  sysmlId = jsonObject.getString( jsonKey );
+              } catch ( JSONException e ) {
+                  sysmlId = "" + jsonObject.get( jsonKey );
+              }
+              EmsScriptNode node = convertIdToEmsScriptNode( sysmlId, dateTime );
+              if ( node != null ) {
+                  property = node.getNodeRef();
+              } else if ( !Utils.isNullOrEmpty( sysmlId ) ) {
+                  String msg = "Error! Could not find element for sysml id = "
+                           + sysmlId + ".\n";
+                  if ( getResponse() == null || getStatus() == null ) {
+                      Debug.error( msg );
+                  } else {
+                      getResponse().append( msg );
+                      getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                           msg );
+                  }
+              }
+          } else {
+              property = jsonObject.getString( jsonKey );
+          }
         }
         else {
             property = jsonObject.getString( jsonKey );
@@ -1780,7 +1857,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 //Debug.error( "No content model type found for \"" + key + "\"!" );
                 continue;
             } else {
-            	
+              
                 QName qName = createQName( acmType );
                 if ( acmType.equals(Acm.ACM_VALUE) ) {
                     if (Debug.isOn()) System.out.println("qName of " + acmType + " = " + qName.toString() );
@@ -1788,42 +1865,42 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 
                 // If it is a specialization, then process the json object it maps to:
                 if ( acmType.equals(Acm.ACM_SPECIALIZATION) ) {
-                	
-            	   JSONObject specializeJson = jsonObject.getJSONObject(Acm.JSON_SPECIALIZATION);
-            	   
+                  
+                 JSONObject specializeJson = jsonObject.getJSONObject(Acm.JSON_SPECIALIZATION);
+                 
                    if (specializeJson != null) {
                        if (Debug.isOn()) System.out.println("processing " + acmType );
-                	       if ( ingestJSON(specializeJson) ) {
-                	           changed = true;
-                	       }
+                         if ( ingestJSON(specializeJson) ) {
+                             changed = true;
+                         }
                    }
                 }
                 else {
-	                PropertyDefinition propDef =
-	                        dServ.getProperty( qName );
-	                if ( propDef == null ) {
-	                    if (Debug.isOn()) System.out.println("null PropertyDefinition for " + acmType );
-	                    continue; // skips type
-	                }
-	                boolean isArray =
-	                        ( Acm.JSON_ARRAYS.contains( key ) || 
-	                        ( propDef != null && propDef.isMultiValued() ) );
-	                if ( isArray ) {
-	                    JSONArray array = jsonObject.getJSONArray( key );
-	                    if ( createOrUpdateProperties( array, acmType ) ) {
-	                        changed = true;
-	                    }
-	                } else {
-	                    Serializable propVal =
-	                            getPropertyValueFromJson( propDef, jsonObject, key, null );
-	                    if ( propVal == badValue ) {
-	                        Debug.error("Got bad property value!");
-	                    } else {
-	                        if ( createOrUpdateProperty( acmType, propVal ) ) {
-	                            changed = true;
-	                        }
-	                    }
-	                }
+                  PropertyDefinition propDef =
+                          dServ.getProperty( qName );
+                  if ( propDef == null ) {
+                      if (Debug.isOn()) System.out.println("null PropertyDefinition for " + acmType );
+                      continue; // skips type
+                  }
+                  boolean isArray =
+                          ( Acm.JSON_ARRAYS.contains( key ) || 
+                          ( propDef != null && propDef.isMultiValued() ) );
+                  if ( isArray ) {
+                      JSONArray array = jsonObject.getJSONArray( key );
+                      if ( createOrUpdateProperties( array, acmType ) ) {
+                          changed = true;
+                      }
+                  } else {
+                      Serializable propVal =
+                              getPropertyValueFromJson( propDef, jsonObject, key, null );
+                      if ( propVal == badValue ) {
+                          Debug.error("Got bad property value!");
+                      } else {
+                          if ( createOrUpdateProperty( acmType, propVal ) ) {
+                              changed = true;
+                          }
+                      }
+                  }
                 } // ends else (not a Specialization)
             }
         }
@@ -2349,5 +2426,70 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     public boolean isWorkspaceTop() {
         return getParent() == null;
+    }
+    
+    
+    protected void addLiteralStringJSON(JSONObject json) throws JSONException {
+        json.put( "string", this.getProperty("sysml:string") );
+    }
+    
+    protected void addProductStringJSON(JSONObject json) throws JSONException {
+        json.put( "view2view", this.getProperty( Acm.ACM_VIEW_2_VIEW ) );
+        json.put( "noSections", this.getProperty( Acm.ACM_NO_SECTIONS) );
+    }
+    
+    private String getIdFromNodeRef(NodeRef nodeRef) {
+        if (nodeRef != null) {
+            EmsScriptNode node = new EmsScriptNode(nodeRef, services, response);
+            if (node != null && node.exists()) {
+                return (String) node.getProperty(Acm.ACM_ID);
+            }
+        }
+        return null;
+    }
+    
+    private ArrayList<String> getIdsFromNodeRefs(ArrayList<NodeRef> nodeRefs) {
+        ArrayList<String> ids = new ArrayList<String>();
+        if (nodeRefs != null) {
+            for (NodeRef nodeRef: nodeRefs) {
+                ids.add( getIdFromNodeRef(nodeRef) );
+            }
+        }
+        return ids;
+    }
+    
+    protected void addConstraintStringJSON(JSONObject json) throws JSONException {
+        NodeRef specNodeRef = (NodeRef) this.getProperty( Acm.ACM_CONSTRAINT_SPECIFICATION );
+        String specId = getIdFromNodeRef( specNodeRef );
+        if (specId != null) {
+            json.put( "specification", specId );
+        }
+    }
+    
+    protected void addInstanceSpecificationStringJSON(JSONObject json) throws JSONException {
+        json.put( "specification", this.getProperty( Acm.ACM_INSTANCE_SPECIFICATION) );
+    }
+    
+    private JSONArray addNodeRefIdsJSON(ArrayList<NodeRef> nodeRefs) {
+        ArrayList<String> nodeIds = getIdsFromNodeRefs( nodeRefs );
+        JSONArray ids = new JSONArray();
+        for (String nodeId: nodeIds) {
+            ids.put( nodeId );
+        }
+        return ids;
+    }
+    
+    protected void addOperationStringJSON(JSONObject json) throws JSONException {
+        ArrayList<NodeRef> nodeRefs = (ArrayList<NodeRef>) this.getProperty( Acm.ACM_OPERATION_PARAMETER );
+        JSONArray ids = addNodeRefIdsJSON( nodeRefs );
+        json.put( "parameters", ids );
+        
+        nodeRefs = (ArrayList<NodeRef>) this.getProperty( Acm.ACM_OPERATION_PARAMETER );
+        ids = addNodeRefIdsJSON( nodeRefs );
+        json.put( "expression", ids );
+    }
+    
+    protected void addConformStringJSON(JSONObject json) throws JSONException {
+        // do nothing
     }
 }

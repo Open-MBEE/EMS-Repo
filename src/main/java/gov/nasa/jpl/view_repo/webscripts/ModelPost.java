@@ -45,7 +45,7 @@ import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.jms.JmsConnection;
 import gov.nasa.jpl.view_repo.util.Acm;
-import gov.nasa.jpl.view_repo.util.CommitUtil;
+//import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.ModStatus;
@@ -256,12 +256,21 @@ public class ModelPost extends AbstractJavaWebScript {
         total = end -start;
         log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
         
-        JmsConnection jmsConnection = JmsConnection.getInstance();
-        JSONObject deltaJson = new JSONObject();
-        deltaJson.put( "addedElements", addedElements );
-        deltaJson.put( "updatedElements", updatedElements );
-        deltaJson.put( "movedElements", movedElements );
-        jmsConnection.publishTopic( deltaJson, "master" );
+        if (addedElements.length() > 0 || updatedElements.length() > 0 || movedElements.length() > 0) {
+            JmsConnection jmsConnection = JmsConnection.getInstance();
+            JSONObject deltaJson = new JSONObject();
+            if (addedElements.length() > 0) {
+                deltaJson.put( "addedElements", addedElements );
+            }
+            if (updatedElements.length() > 0) {
+                deltaJson.put( "updatedElements", updatedElements );
+            }
+            if (movedElements.length() > 0) {
+                deltaJson.put( "movedElements", movedElements );
+            }
+            jmsConnection.publishTopic( deltaJson, "master" );
+        }
+        
         return elements;
     }
     
@@ -722,9 +731,11 @@ public class ModelPost extends AbstractJavaWebScript {
             return elements;
         }
         String jsonId = elementJson.getString( Acm.JSON_ID );
+        String originalQualifiedId = null;
         element = findScriptNodeById( jsonId, null );
         if ( element != null ) {
             elements.add( element );
+            originalQualifiedId = element.getSysmlQId();
         }
         
 		// check that parent is of folder type
@@ -817,33 +828,38 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
 
-        switch (modStatus.getState()) {
-            case ADDED:
-                if (!ingest) {
-                    addedElements.put( elementJson );
-                    addedElementsSet.add( jsonId );
-                }
-                break;
-            case UPDATED:
-                if (ingest && !addedElementsSet.contains( jsonId )) {
-                    updatedElements.put( elementJson );
-                }
-                break;
-            case MOVED:
-                if (!ingest && !addedElementsSet.contains( jsonId )) {
-//                    elementJson.put( "qualifiedId",  );
-                    movedElements.put( elementJson );
-                }
-                break;
-            case UPDATED_AND_MOVED:
-                if (ingest && !addedElementsSet.contains( jsonId )) {
-                    updatedElements.put( elementJson );
-                } else {
-                    movedElements.put( elementJson );
-                }
-                break;
-            default:
-                // do nothing
+        element = findScriptNodeById( jsonId, null );
+        if (element != null && element.exists()) {
+            JSONObject newElementJson = element.toJSONObject( null );
+            switch (modStatus.getState()) {
+                case ADDED:
+                    if (!ingest) {
+                        addedElementsSet.add( jsonId );
+                        addedElements.put( newElementJson );
+                    }
+                    break;
+                case UPDATED:
+                    if (ingest && !addedElementsSet.contains( jsonId )) {
+                        updatedElements.put( newElementJson );
+                    }
+                    break;
+                case MOVED:
+                    if (!ingest && !addedElementsSet.contains( jsonId )) {
+                        newElementJson.put( "originalQualifiedId",  originalQualifiedId);
+                        movedElements.put( newElementJson );
+                    }
+                    break;
+                case UPDATED_AND_MOVED:
+                    if (ingest && !addedElementsSet.contains( jsonId )) {
+                        updatedElements.put( newElementJson );
+                    } else {
+                        newElementJson.put( "originalQualifiedId",  originalQualifiedId);
+                        movedElements.put( newElementJson );
+                    }
+                    break;
+                default:
+                    // do nothing
+            }
         }
         
         return elements;
