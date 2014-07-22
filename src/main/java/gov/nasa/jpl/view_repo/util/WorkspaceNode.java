@@ -6,6 +6,8 @@ package gov.nasa.jpl.view_repo.util;
 import gov.nasa.jpl.mbee.util.Debug;
 
 import java.util.Date;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -68,7 +70,7 @@ public class WorkspaceNode extends EmsScriptNode {
     }
     
     @Override
-    public void setWorkspace( WorkspaceNode workspace ) {
+    public void setWorkspace( WorkspaceNode workspace, NodeRef source ) {
         String msg = "Cannot set the workspace of a workspace!";
         if ( getResponse() != null ) {
             getResponse().append( msg + "\n" );
@@ -79,8 +81,7 @@ public class WorkspaceNode extends EmsScriptNode {
         }
         Debug.error( msg );
     }
-        
-    
+
     public static WorkspaceNode createWorskpaceInFolder( String sysmlId,
                                                          //String wsName,
                                                          EmsScriptNode folder,
@@ -128,7 +129,7 @@ public class WorkspaceNode extends EmsScriptNode {
         // If the folder is not already in this workspace, clone it.
         if ( !contains( folder ) ) {
             newFolder = folder.clone();
-            newFolder.setWorkspace( this );
+            newFolder.setWorkspace( this, folder.getNodeRef() );
         }
         
         if ( folder.isWorkspaceTop() ) return newFolder;
@@ -150,5 +151,20 @@ public class WorkspaceNode extends EmsScriptNode {
     
     // When copying a node, check and see if the other end of each relationship
     // is in the new workspace, and copy the relationship if it is.
+    
+    /**
+     * Find the differences between this workspace and another.
+     * 
+     * @param other
+     *            the workspace to compare
+     * @return a map of elements in this workspace to changed elements in the
+     *         other workspace
+     */
+    public Map<EmsScriptNode, EmsScriptNode> diff( WorkspaceNode other ) {
+        TreeMap<EmsScriptNode, EmsScriptNode> map = new TreeMap<EmsScriptNode, EmsScriptNode>();
+        // TODO
+        
+        return map;
+    }
     
 }

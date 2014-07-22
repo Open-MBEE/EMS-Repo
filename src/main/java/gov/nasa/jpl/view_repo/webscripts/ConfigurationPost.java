@@ -29,11 +29,13 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ConfigurationGenerationActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 
 import java.util.Date;
@@ -114,14 +116,9 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	private JSONObject saveAndStartAction(WebScriptRequest req, Status status) {
 	    JSONObject jsonObject = null;
 
-	    String siteName = getSiteName( req );
+        WorkspaceNode workspace = getWorkspace( req );
 
-		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-		if (siteInfo == null) {
-			log(LogLevel.ERROR, "Could not find site: " + siteName, HttpServletResponse.SC_NOT_FOUND);
-			return null;
-		}
-		EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+        EmsScriptNode siteNode = getSiteNodeFromRequest( req );
 
 		JSONObject reqPostJson = (JSONObject) req.parseContent();
 		JSONObject postJson;
@@ -135,9 +132,9 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		    }
 		    
 			if (postJson.has("nodeid") || postJson.has( "id" )) {
-				jsonObject = handleUpdate(postJson, siteNode, status);
+				jsonObject = handleUpdate(postJson, siteNode, workspace, status);
 			} else {
-				jsonObject = handleCreate(postJson, siteNode, status);
+				jsonObject = handleCreate(postJson, siteNode, workspace, status);
 			}
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "Could not parse JSON", HttpServletResponse.SC_BAD_REQUEST);
@@ -163,7 +160,9 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		return productList;
 	}
 	
-	private JSONObject handleCreate(JSONObject postJson, EmsScriptNode siteNode, Status status) throws JSONException {
+	private JSONObject handleCreate(JSONObject postJson, EmsScriptNode siteNode,
+                                    WorkspaceNode workspace, Status status)
+                                            throws JSONException {
 		String siteName = (String)siteNode.getProperty(Acm.CM_NAME);
 		EmsScriptNode jobNode = null;
 		
@@ -173,10 +172,10 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 			
 			if (jobNode != null) {
 	            ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
-	            configWs.updateConfiguration( jobNode, postJson, siteNode, date );
+	            configWs.updateConfiguration( jobNode, postJson, siteNode, workspace, date );
 
 				startAction(jobNode, siteName, getProductList(postJson));
-				return configWs.getConfigJson( jobNode, siteName, null );
+				return configWs.getConfigJson( jobNode, siteName, workspace, null );
 			} else {
 				log(LogLevel.ERROR, "Couldn't create configuration job: " + postJson.getString("name"), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				return null;
@@ -188,7 +187,9 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	}
 
 	
-	private JSONObject handleUpdate(JSONObject postJson, EmsScriptNode siteNode, Status status) throws JSONException {
+	private JSONObject handleUpdate(JSONObject postJson, EmsScriptNode siteNode,
+	                                WorkspaceNode workspace, Status status)
+	                                        throws JSONException {
 		String[] idKeys = {"nodeid", "id"};
 	    String nodeId = null;
 		
@@ -208,8 +209,11 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		if (configNodeRef != null) {
 	        EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services);
 	        ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
-	        configWs.updateConfiguration( configNode, postJson, siteNode, null );
-            return configWs.getConfigJson( configNode, (String)siteNode.getProperty(Acm.CM_NAME), null );
+            configWs.updateConfiguration( configNode, postJson, siteNode,
+                                          workspace, null );
+            return configWs.getConfigJson( configNode,
+                                           (String)siteNode.getProperty( Acm.CM_NAME ),
+                                           workspace, null );
 		} else {
 		    log(LogLevel.WARNING, "Could not find configuration with id " + nodeId, HttpServletResponse.SC_NOT_FOUND);
 		    return null;

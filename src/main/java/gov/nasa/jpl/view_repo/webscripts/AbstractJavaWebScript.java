@@ -30,12 +30,15 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -48,9 +51,11 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
+import org.mozilla.javascript.Scriptable;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
+import org.springframework.web.context.request.WebRequest;
 
 /**
  * Base class for all EMS Java backed webscripts. Provides helper functions and
@@ -138,38 +143,26 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	abstract protected boolean validateRequest(WebScriptRequest req, Status status);
 	
 	
-//	/**
-//	 * Get site of specified short name
-//	 * @param siteName
-//	 * @return	ScriptNode of site with name siteName
-//	 */
-//	protected EmsScriptNode getSiteNode(String siteName) {
-//	    return NodeUtil.getSiteNode( siteName, null, services, response );
-////		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-////		if (siteInfo != null) {
-////			return new EmsScriptNode(siteInfo.getNodeRef(), services, response);
-////		}
-////		return null;
-//	}
-
-    protected EmsScriptNode getSiteNode(String siteName, Date dateTime) {
-        SiteInfo siteInfo; 
+    /**
+     * Get site by name, workspace, and time
+     * 
+     * @param siteName
+     *            short name of site
+     * @param workspace
+     *            the workspace of the version of the site to return
+     * @param dateTime
+     *            the point in time for the version of the site to return
+     * @return
+     */
+    protected EmsScriptNode getSiteNode(String siteName, WorkspaceNode workspace,
+                                        Date dateTime) {
         EmsScriptNode siteNode = null;
         
         if (siteName == null) {
             log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
         } else {
-            siteInfo = services.getSiteService().getSite(siteName);
-            if (siteInfo == null) {
-                log(LogLevel.ERROR, "Could not find site: " + siteName, HttpServletResponse.SC_NOT_FOUND);
-            } else {
-                NodeRef siteRef = siteInfo.getNodeRef();
-                if ( dateTime != null ) {
-                    NodeRef vRef = NodeUtil.getNodeRefAtTime( siteRef, dateTime );
-                    if ( vRef != null ) siteRef = vRef;
-                }
-                siteNode = new EmsScriptNode(siteRef, services, response);
-            }
+            siteNode = NodeUtil.getSiteNode( siteName, workspace, dateTime,
+                                             services, response );
         }
         
         return siteNode;
@@ -181,6 +174,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         String timestamp = req.getParameter("timestamp");
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         
+        WorkspaceNode workspace = getWorkspace( req );
+        
         String[] siteKeys = {"id", "siteId", "siteName"};
         
         for (String siteKey: siteKeys) {
@@ -188,7 +183,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             if (siteName != null) break;
         }
         
-        return getSiteNode( siteName, dateTime );
+        return getSiteNode( siteName, workspace, dateTime );
     }
     
 	
@@ -301,16 +296,52 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             siteName = NO_SITE_ID;
         }
         if ( createIfNonexistent ) {
-            createSite( siteName );
+            WorkspaceNode workspace = getWorkspace( req );
+            createSite( siteName, workspace );
         }
         return siteName;
     }
     
-    public EmsScriptNode createSite( String siteName ) {
-        EmsScriptNode siteNode = getSiteNode( siteName, null );
+    public EmsScriptNode createSite( String siteName, WorkspaceNode workspace ) {
+        EmsScriptNode siteNode = getSiteNode( siteName, workspace, null );
         if ( siteNode == null || !siteNode.exists() ) {
-            SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, SiteVisibility.PUBLIC );
-            siteNode = new EmsScriptNode( foo.getNodeRef(), services );
+            if ( workspace == null || !workspace.exists() ) {
+                SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, SiteVisibility.PUBLIC );
+                siteNode = new EmsScriptNode( foo.getNodeRef(), services );
+            } else {
+                EmsScriptNode sitesFolder = null;
+                // check and see if the Sites folder already exists
+                NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, workspace, null, true, services );
+                if ( sitesNodeRef != null ) {
+                    sitesFolder = new EmsScriptNode( sitesNodeRef, services );
+                } else {
+                    // get Sites folder and replicate in workspace with new site folder
+                    EmsScriptNode root = NodeUtil.getCompanyHome( services );
+                    Scriptable folders = root.childFileFolders( false, true );
+                    List<Object> folderObjs = root.getValuesFromScriptable( folders );
+                    for ( Object folderObj : folderObjs ) {
+                        if ( folderObj instanceof NodeRef ) {
+                            EmsScriptNode folder = new EmsScriptNode( (NodeRef)folderObj, services );
+                            if ( folder.getName().equals( "Sites" ) ) {
+                                sitesFolder = folder;
+                                break;
+                            }
+                        } else {
+                            Debug.error( "Can't get child folders for creating site in workspace!" );
+                        }
+                    }
+                    // now replicate sites folder
+                    if ( sitesFolder != null ) {
+                        EmsScriptNode newSitesFolder = workspace.replicateFolderWithChain( sitesFolder );
+                        sitesFolder = newSitesFolder;
+                    }
+                }
+                if (sitesFolder == null ) {
+                    Debug.error("Could not create site " + siteName + "!");
+                } else {
+                    siteNode = sitesFolder.createFolder( siteName );
+                }
+            }
         }
         return siteNode;
     }
@@ -323,12 +354,38 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return projectId;
     }
     
-    public String getWorkspaceId( WebScriptRequest req ) {
+    public static String getWorkspaceId( WebScriptRequest req ) {
         String workspaceId = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
         if ( workspaceId == null || workspaceId.length() <= 0 ) {
             workspaceId = NO_WORKSPACE_ID;
         }
         return workspaceId;
+    }
+    
+    public WorkspaceNode getWorkspace( WebScriptRequest req ) {
+        return getWorkspace( req, services, response, responseStatus );
+    }
+
+    public static WorkspaceNode getWorkspace( WebScriptRequest req,
+                                              ServiceRegistry services,
+                                              StringBuffer response,
+                                              Status responseStatus ) {
+        String nameOrId = getWorkspaceId( req );
+        return getWorkspaceFromId( nameOrId, services, response, responseStatus );
+    }
+
+    public static WorkspaceNode getWorkspaceFromId( String nameOrId,
+                                                    ServiceRegistry services,
+                                                    StringBuffer response,
+                                                    Status responseStatus ) {
+        if ( !Utils.isNullOrEmpty( nameOrId ) ) {
+            NodeRef ref = NodeUtil.findNodeRefById( nameOrId, null,
+                                                    null, services );
+            WorkspaceNode workspace =
+                    new WorkspaceNode( ref, services, response, responseStatus );
+            return workspace;
+        }
+        return null;
     }
     
     protected boolean checkRequestContent(WebScriptRequest req) {
@@ -356,10 +413,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 */
 	protected Map<String, EmsScriptNode> searchForElements(String type,
 	                                                       String pattern,
+	                                                       WorkspaceNode workspace,
 	                                                       Date dateTime) {
 		Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
 
-        searchResults.putAll( NodeUtil.searchForElements( type, pattern,
+        searchResults.putAll( NodeUtil.searchForElements( type, pattern, workspace,
                                                           dateTime, services,
                                                           response,
                                                           responseStatus ) );
@@ -489,5 +547,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         String url = req.getURL();
         boolean gotSuffix = urlEndsWith( url, "views" );
         return gotSuffix;
-    }    
+    }
+
 }

@@ -29,9 +29,12 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,11 +74,18 @@ public class CommitGet extends AbstractJavaWebScript {
 
         clearCaches();
 
+        // get timestamp if specified
+        String timestamp = req.getParameter("timestamp");
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        
+        WorkspaceNode workspace = getWorkspace( req );
+
         String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
-        EmsScriptNode siteNode = new EmsScriptNode(services.getSiteService().getSite(siteName).getNodeRef(), services, response);
+        EmsScriptNode siteNode = getSiteNode( siteName, workspace, dateTime );
+        //EmsScriptNode siteNode = new EmsScriptNode(services.getSiteService().getSite(siteName).getNodeRef(), services, response);
         JSONObject changeSets = null;
         try {
-			changeSets = CommitUtil.getJsonChangeSets(siteNode, services, response);
+			changeSets = CommitUtil.getJsonChangeSets(siteNode, workspace, services, response);
 
 			model.put("res", changeSets.toString(2));
             model.put("title", siteName);

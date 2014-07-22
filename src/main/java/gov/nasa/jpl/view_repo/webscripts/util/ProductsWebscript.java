@@ -6,6 +6,7 @@ import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.Acm.JSON_TYPE_FILTER;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotGet;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
@@ -75,8 +76,10 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         String timestamp = req.getParameter( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
+        WorkspaceNode workspace = getWorkspace( req );
+        
         ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
-        return configWs.getProducts( config, dateTime );
+        return configWs.getProducts( config, workspace, dateTime );
     }
     
     public JSONArray handleContextProducts( WebScriptRequest req, EmsScriptNode context) throws JSONException {
@@ -85,10 +88,12 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         // get timestamp if specified
         String timestamp = req.getParameter( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-
+        WorkspaceNode workspace = getWorkspace( req );
+        
         Set< EmsScriptNode > productSet =
                 WebScriptUtil.getAllNodesInPath( context.getQnamePath(),
                                                  "ASPECT", Acm.ACM_PRODUCT,
+                                                 workspace,
                                                  dateTime, services,
                                                  response );
         for ( EmsScriptNode product : productSet ) {
@@ -100,12 +105,14 @@ public class ProductsWebscript extends AbstractJavaWebScript {
 
     public JSONArray
             getProductSnapshots( String productId, String contextPath,
-                                 Date dateTime ) throws JSONException {
-        EmsScriptNode product = findScriptNodeById( productId, dateTime );
+                                 WorkspaceNode workspace, Date dateTime ) throws JSONException {
+        EmsScriptNode product = findScriptNodeById( productId, workspace,
+                                                    dateTime );
 
         JSONArray snapshotsJson = new JSONArray();
         List< EmsScriptNode > snapshotsList =
-                product.getTargetAssocsNodesByType( "view2:snapshots", dateTime );
+                product.getTargetAssocsNodesByType( "view2:snapshots",
+                                                    workspace, dateTime );
 
         Collections.sort( snapshotsList,
                           new EmsScriptNode.EmsScriptNodeComparator() );
@@ -120,9 +127,9 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                             (String)snapshot.getProperty( "cm:modifier" ) );
             jsonObject.put( "url", contextPath + "/service/snapshots/"
                                    + snapshot.getProperty( Acm.ACM_ID ) );
-            jsonObject.put( "tag",
-                            (String)SnapshotGet.getConfigurationSet( snapshot,
-                                                                     dateTime ) );
+            jsonObject.put( "tag", (String)SnapshotGet.getConfigurationSet( snapshot,
+                                                                            workspace,
+                                                                            dateTime ) );
             snapshotsJson.put( jsonObject );
         }
 
@@ -136,11 +143,12 @@ public class ProductsWebscript extends AbstractJavaWebScript {
     }
 
     public JSONArray handleProduct( String productId, boolean recurse,
+                                    WorkspaceNode workspace,
                                     Date dateTime,
                                     boolean gettingDisplayedElements,
                                     boolean gettingContainedViews ) {
         JSONArray productsJson = new JSONArray();
-        EmsScriptNode product = findScriptNodeById( productId, dateTime );
+        EmsScriptNode product = findScriptNodeById( productId, workspace, dateTime );
 
         if ( product == null ) {
             log( LogLevel.ERROR, "Product not found with ID: " + productId,
@@ -159,7 +167,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     }
                 } else if ( gettingContainedViews ) {
                     Collection< EmsScriptNode > elems =
-                            v.getContainedViews( recurse, dateTime, null );
+                            v.getContainedViews( recurse, workspace, dateTime, null );
                     for ( EmsScriptNode n : elems ) {
                         productsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW, dateTime ) );
                     }

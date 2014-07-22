@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -72,8 +73,10 @@ public class ProductPost extends AbstractJavaWebScript {
 		
 		Map<String, Object> model = new HashMap<String, Object>();
 		
+        WorkspaceNode workspace = getWorkspace( req );
+        
 		try {
-			updateProducts((JSONObject)req.parseContent());
+			updateProducts((JSONObject)req.parseContent(), workspace);
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();
@@ -87,12 +90,13 @@ public class ProductPost extends AbstractJavaWebScript {
 		return model;
 	}
 	
-	private void updateProducts(JSONObject jsonObject) throws JSONException {
+	private void updateProducts(JSONObject jsonObject, WorkspaceNode workspace)
+	        throws JSONException {
 		if (jsonObject.has("products")) {
 			JSONArray productsJson = jsonObject.getJSONArray("products");
 			
 			for (int ii = 0; ii < productsJson.length(); ii++) {
-			    updateProduct(productsJson, ii);
+			    updateProduct(productsJson, ii, workspace);
 			}
 			
 //			jwsUtil.splitTransactions(new JwsFunctor() {
@@ -107,12 +111,13 @@ public class ProductPost extends AbstractJavaWebScript {
 	}
 	
 	
-	private void updateProduct(JSONArray productsJson, int index) throws JSONException {
+	private void updateProduct(JSONArray productsJson, int index,
+	                           WorkspaceNode workspace) throws JSONException {
 		JSONObject productJson = productsJson.getJSONObject(index);
-		updateProduct(productJson);
+		updateProduct(productJson, workspace);
 	}
 	
-	private void updateProduct(JSONObject productJson) throws JSONException {
+	private void updateProduct(JSONObject productJson, WorkspaceNode workspace) throws JSONException {
 	    
 		String id = null;
 		try { 
@@ -121,7 +126,7 @@ public class ProductPost extends AbstractJavaWebScript {
 		    // ignore
 		}
 		if (id == null) {
-	        try { 
+	        try {
 	            id = productJson.getString("sysmlid");
 	        } catch (Throwable e) {
 	            // ignore
@@ -132,7 +137,7 @@ public class ProductPost extends AbstractJavaWebScript {
 	        }
 		}
 		
-		EmsScriptNode product = findScriptNodeById(id, null);
+		EmsScriptNode product = findScriptNodeById(id, workspace, null);
 		if (product == null) {
 			log(LogLevel.ERROR, "could not find product with id: " + id, HttpServletResponse.SC_NOT_FOUND);
 			return;

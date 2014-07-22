@@ -33,6 +33,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.util.Acm.JSON_TYPE_FILTER;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
@@ -80,7 +81,9 @@ public class ViewGet extends AbstractJavaWebScript {
         String timestamp = req.getParameter("timestamp");
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
     
-        EmsScriptNode view = findScriptNodeById(viewId, dateTime);
+        WorkspaceNode workspace = getWorkspace( req );
+
+        EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime);
         if (view == null) {
             log(LogLevel.ERROR, "View not found with id: " + viewId + " at " + dateTime + ".\n", HttpServletResponse.SC_NOT_FOUND);
             return false;
@@ -134,8 +137,10 @@ public class ViewGet extends AbstractJavaWebScript {
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         
+            WorkspaceNode workspace = getWorkspace( req );
+
             try {
-                handleView(viewId, viewsJson, generate, recurse, dateTime);
+                handleView(viewId, viewsJson, generate, recurse, workspace, dateTime);
             } catch ( JSONException e ) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -165,8 +170,11 @@ public class ViewGet extends AbstractJavaWebScript {
     }
 
 
-    private void handleView(String viewId, JSONArray viewsJson, boolean generate, boolean recurse, Date dateTime) throws JSONException {
-        EmsScriptNode view = findScriptNodeById(viewId, dateTime);
+    private void handleView( String viewId, JSONArray viewsJson,
+                             boolean generate, boolean recurse,
+                             WorkspaceNode workspace, Date dateTime )
+                                     throws JSONException {
+        EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime);
 
         if (view == null) {
             log( LogLevel.ERROR, "View not found with ID: " + viewId,
@@ -181,14 +189,18 @@ public class ViewGet extends AbstractJavaWebScript {
                 if ( gettingDisplayedElements ) {
                     if (Debug.isOn()) System.out.println("+ + + + + gettingDisplayedElements");
                     // TODO -- need to use recurse flag!
-                    Collection< EmsScriptNode > elems = v.getDisplayedElements(dateTime, generate, recurse, null);
+                    Collection< EmsScriptNode > elems =
+                            v.getDisplayedElements( workspace, dateTime,
+                                                    generate, recurse, null );
                     elems = NodeUtil.getVersionAtTime( elems, dateTime );
                     for ( EmsScriptNode n : elems ) {
                         viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT, dateTime ) );
                     }
                 } else if ( gettingContainedViews ) {
                     if (Debug.isOn()) System.out.println("+ + + + + gettingContainedViews");
-                    Collection< EmsScriptNode > elems = v.getContainedViews( recurse, dateTime, null );
+                    Collection< EmsScriptNode > elems =
+                            v.getContainedViews( recurse, workspace, dateTime,
+                                                 null );
                     for ( EmsScriptNode n : elems ) {
                         viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW, dateTime ) );
                     }

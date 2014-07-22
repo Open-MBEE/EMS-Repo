@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,7 +82,9 @@ public class ModelDelete extends AbstractJavaWebScript {
 			return false;
 		}
 		
-		modelRootNode = findScriptNodeById(modelId, null);
+		WorkspaceNode workspace = getWorkspace( req );
+		
+		modelRootNode = findScriptNodeById(modelId, workspace, null);
 		if (modelRootNode == null) {
 			log(LogLevel.ERROR, "Element not found with id: " + modelId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
@@ -107,12 +110,14 @@ public class ModelDelete extends AbstractJavaWebScript {
 
 		boolean recurse = true;
 		if (validateRequest(req, status)) {
+	        WorkspaceNode workspace = getWorkspace( req );
+	        
 		    if (services.getDictionaryService().isSubClass(modelRootNode.getQNameType(), ContentModel.TYPE_FOLDER)) {
-		        handleElementHierarchy(modelRootNode, recurse);
+		        handleElementHierarchy(modelRootNode, workspace, recurse);
 		    } else {
-		        delete(modelRootNode);
-		        EmsScriptNode pkgNode = findScriptNodeById(modelId + "_pkg", null);
-		        handleElementHierarchy(pkgNode, recurse);
+		        delete(modelRootNode, workspace);
+		        EmsScriptNode pkgNode = findScriptNodeById(modelId + "_pkg", workspace, null);
+		        handleElementHierarchy(pkgNode, workspace, recurse);
 		    }
 		}
 		
@@ -129,12 +134,25 @@ public class ModelDelete extends AbstractJavaWebScript {
 	/**
 	 * Deletes a node in a transaction
 	 * @param node
+	 * @param workspace 
 	 */
-	private void delete(EmsScriptNode node) {
+	private void delete(EmsScriptNode node, WorkspaceNode workspace) {
+	    if ( node == null || !node.exists() ) {
+	        log(LogLevel.ERROR, "Trying to delete a non-existent node! " + node);
+	        return;
+	    }
+	    
 	    // don't delete a _pkg node since it will be automatically deleted by its refied component
 	    String id = (String) node.getProperty(Acm.ACM_ID);
 	    if (id.endsWith("_pkg")) {
 	        return;
+	    }
+	    
+        // Add the element to the specified workspace to be deleted from there.
+        if ( workspace != null && workspace.exists() && node != null
+             && node.exists() && !node.isWorkspace() ) {
+	        EmsScriptNode newNodeToDelete = workspace.replicateFolderWithChain( node );
+	        node = newNodeToDelete;
 	    }
 	    
         UserTransaction trx;
@@ -160,15 +178,18 @@ public class ModelDelete extends AbstractJavaWebScript {
 	/**
 	 * Build up the element hierarchy from the specified root
 	 * @param root		Root node to get children for
+	 * @param workspace 
 	 * @throws JSONException
 	 */
-	protected void handleElementHierarchy(EmsScriptNode root, boolean recurse) {
+    protected void handleElementHierarchy( EmsScriptNode root,
+                                           WorkspaceNode workspace,
+                                           boolean recurse ) {
 		if (recurse) {
 			for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
 				EmsScriptNode child = new EmsScriptNode(assoc.getChildRef(), services, response);
-				handleElementHierarchy(child, recurse);
+				handleElementHierarchy(child, workspace, recurse);
 			}
 		}
-		delete(root);
+		delete(root, workspace);
 	}	
 }

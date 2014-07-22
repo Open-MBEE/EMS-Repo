@@ -32,6 +32,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,7 +80,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
             }
         }
 
-        EmsScriptNode topview = findScriptNodeById(viewId, null);
+        WorkspaceNode workspace = getWorkspace( req );
+        
+        EmsScriptNode topview = findScriptNodeById(viewId, workspace, null);
         EmsScriptNode snapshotFolderNode = getSnapshotFolderNode(topview);
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -130,10 +133,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return model;
     }
 
-    public EmsScriptNode createSnapshot(EmsScriptNode view, String viewId) {
+    public EmsScriptNode createSnapshot( EmsScriptNode view, String viewId,
+                                         WorkspaceNode workspace ) {
         String snapshotName = viewId + "_" + System.currentTimeMillis();
         String contextPath = "alfresco/service/";
-        EmsScriptNode viewNode = findScriptNodeById(viewId, null);
+        EmsScriptNode viewNode = findScriptNodeById(viewId, workspace, null);
         EmsScriptNode snapshotFolder = getSnapshotFolderNode(viewNode);
         return createSnapshot(view, viewId, snapshotName, contextPath, snapshotFolder);
     }
@@ -188,6 +192,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
         parent = parent.getParent();
         
         EmsScriptNode snapshotNode = parent.childByNamePath("snapshots");
+        if ( viewNode.getWorkspace() != null && viewNode.getWorkspace().exists() &&
+                !viewNode.getWorkspace().contains(snapshotNode) ) {
+            viewNode.getWorkspace().replicateFolderWithChain( snapshotNode );
+        }
+       
         if (snapshotNode == null) {
             snapshotNode = parent.createFolder("snapshots");
         }

@@ -30,6 +30,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -105,8 +106,11 @@ public class ModelSearch extends ModelGet {
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         
+            WorkspaceNode workspace = getWorkspace( req );
+            
             for (String searchType: searchTypes) {
-                elementsFound.putAll(searchForElements(searchType, keyword, dateTime));
+                elementsFound.putAll( searchForElements( searchType, keyword,
+                                                         workspace, dateTime ) );
             }
                     
             handleElements(dateTime);

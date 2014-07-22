@@ -33,6 +33,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Collections;
 import java.util.Date;
@@ -80,7 +81,9 @@ public class MoaProductGet extends AbstractJavaWebScript {
         String timestamp = req.getParameter("timestamp");
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         
-		EmsScriptNode product = findScriptNodeById(productId, dateTime);
+        WorkspaceNode workspace = getWorkspace( req );
+
+		EmsScriptNode product = findScriptNodeById(productId, workspace, dateTime);
 		if (product == null) {
 			log(LogLevel.ERROR, "Product not found with id: " + productId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
@@ -109,15 +112,19 @@ public class MoaProductGet extends AbstractJavaWebScript {
         String timestamp = req.getParameter("timestamp");
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         
+        WorkspaceNode workspace = getWorkspace( req );
+        
 		String productId = null;
 		JSONObject json = null;
 		if (validateRequest(req, status)) {
             productId = req.getServiceMatch().getTemplateVars().get("id");
-		    json = generateMoaProduct(productId, req.getContextPath(), dateTime);
+            json = generateMoaProduct( productId, req.getContextPath(),
+                                       workspace, dateTime );
 		}
 
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK && json != null) {
-			EmsScriptNode product = findScriptNodeById(productId, dateTime);
+	        EmsScriptNode product = findScriptNodeById(productId, workspace, dateTime);
+
 		    String jsonString = json.toString();
             model.put("res", jsonString);
             if (productId != null) {
@@ -146,12 +153,14 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	 * @param dateTime 
 	 * @return             JSON object of the entire product
 	 */
-    public JSONObject generateMoaProduct(String productId, String contextPath, Date dateTime) {
+    public JSONObject generateMoaProduct( String productId, String contextPath,
+                                          WorkspaceNode workspace,
+                                          Date dateTime ) {
         clearCaches();
         JSONObject productsJson = null;
         try {
-            productsJson = handleProduct(productId, dateTime);
-            handleSnapshots(productId, contextPath, productsJson, dateTime);
+            productsJson = handleProduct(productId, workspace, dateTime);
+            handleSnapshots(productId, contextPath, productsJson, workspace, dateTime);
         } catch (JSONException e) {
             e.printStackTrace();
             return null;
@@ -166,8 +175,8 @@ public class MoaProductGet extends AbstractJavaWebScript {
      * @param dateTime 
      * @throws JSONException
      */
-	private JSONObject handleProduct(String productId, Date dateTime) throws JSONException {
-		EmsScriptNode product = findScriptNodeById(productId, dateTime);
+	private JSONObject handleProduct(String productId, WorkspaceNode workspace, Date dateTime) throws JSONException {
+		EmsScriptNode product = findScriptNodeById(productId, workspace, dateTime);
 		JSONObject productsJson = null;
 		JSONArray viewsJson = new JSONArray();
 		JSONArray elementsJson = new JSONArray();
@@ -187,7 +196,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		        } else {
 		            jarr = object.getJSONArray(Acm.JSON_VIEW_2_VIEW);
 		        }
-                handleViews(jarr, viewsJson, elementsJson, dateTime);
+                handleViews(jarr, viewsJson, elementsJson, workspace, dateTime);
 		    }
 		    
 		    productsJson.put("views", viewsJson);
@@ -205,12 +214,14 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	 * @throws JSONException
 	 */
 	private void handleSnapshots(String productId, String contextPath,
-	                             JSONObject productsJson, Date dateTime) throws JSONException {
-	    EmsScriptNode product = findScriptNodeById(productId, dateTime);
+	                             JSONObject productsJson, WorkspaceNode workspace,
+	                             Date dateTime) throws JSONException {
+	    EmsScriptNode product = findScriptNodeById(productId, workspace, dateTime);
 	    
         JSONArray snapshotsJson = new JSONArray();
         List<EmsScriptNode> snapshotsList = 
-                product.getTargetAssocsNodesByType("view2:snapshots", dateTime);
+                product.getTargetAssocsNodesByType("view2:snapshots", workspace,
+                                                   dateTime);
 
         Collections.sort(snapshotsList, new EmsScriptNode.EmsScriptNodeComparator());
         for (EmsScriptNode snapshot: snapshotsList) {
@@ -242,13 +253,16 @@ public class MoaProductGet extends AbstractJavaWebScript {
             jsonObject.put("url", contextPath + "/service/snapshots/" + id);
             jsonObject.put("creator", (String) snapshot.getProperty("cm:modifier"));
             jsonObject.put("tag", (String)SnapshotGet.getConfigurationSet(snapshot,
+                                                                          workspace,
                                                                           dateTime));
             snapshotsJson.put(jsonObject);
         }
         productsJson.put("snapshots", snapshotsJson);
     }
 	
-	private void handleViews(JSONArray view2view, JSONArray viewsJson, JSONArray elementsJson, Date dateTime) throws JSONException {
+    private void handleViews( JSONArray view2view, JSONArray viewsJson,
+                              JSONArray elementsJson, WorkspaceNode workspace,
+                              Date dateTime ) throws JSONException {
 	    Set<String> viewIds = new HashSet<String>();
 	    Set<String> elementIds = new HashSet<String>();
 	    
@@ -266,13 +280,15 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	    
 	    // insert all the views and find all the elements
 	    for (String viewId: viewIds) {
-	        EmsScriptNode view = findScriptNodeById(viewId, dateTime);
+	        EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime);
 	        if (view != null && checkPermissions(view, PermissionService.READ)) {
         	        JSONObject viewJson = view.toJSONObject(Acm.JSON_TYPE_FILTER.VIEW, dateTime);
         	        
         	        // add any related comments as part of the view
         	        JSONArray commentsJson = new JSONArray();
-        	        List<EmsScriptNode> commentList = view.getSourceAssocsNodesByType(Acm.ACM_ANNOTATED_ELEMENTS, dateTime);//new ArrayList<EmsScriptNode>();
+                List< EmsScriptNode > commentList =
+                        view.getSourceAssocsNodesByType( Acm.ACM_ANNOTATED_ELEMENTS,
+                                                         workspace, dateTime );// new ArrayList<EmsScriptNode>();
         	        Collections.sort(commentList, new EmsScriptNode.EmsScriptNodeComparator());
         	        for (EmsScriptNode comment: commentList) {
         	            commentsJson.put(comment.toJSONObject(Acm.JSON_TYPE_FILTER.COMMENT, dateTime));
@@ -299,7 +315,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	    
 	    // insert all the elements
 	    for (String elementId: elementIds) {
-	        EmsScriptNode element = findScriptNodeById(elementId, dateTime);
+	        EmsScriptNode element = findScriptNodeById(elementId, workspace, dateTime);
 	        if (element != null && checkPermissions(element, PermissionService.READ)) {
 	            JSONObject elementJson = element.toJSONObject(Acm.JSON_TYPE_FILTER.ELEMENT, dateTime);
 	            elementsJson.put(elementJson);

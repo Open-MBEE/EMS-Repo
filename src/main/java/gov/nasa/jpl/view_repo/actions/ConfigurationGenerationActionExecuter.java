@@ -33,6 +33,8 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
@@ -52,7 +54,7 @@ import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.springframework.extensions.webscripts.Status;
-import org.springframework.web.context.request.WebRequest;
+import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * Action for loading the project model in the background asynchronously
@@ -66,6 +68,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
     private Repository repository;
 
     private StringBuffer response;
+    private Status responseStatus;
 
     // Parameter values to be passed in when the action is created
     public static final String NAME = "configurationGeneration";
@@ -87,9 +90,11 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         // Get timestamp if specified. This is for the products, not the
         // snapshots or configuration.
         Date dateTime = null;
-        if ( action instanceof WebRequest) {
-            WebRequest req = (WebRequest)action;
+        WorkspaceNode workspace = null;
+        if ( action instanceof WebScriptRequest) {
+            WebScriptRequest req = (WebScriptRequest)action;
             String timestamp = req.getParameter("timestamp");
+            workspace = AbstractJavaWebScript.getWorkspace( req, services, response, responseStatus );
             dateTime = TimeUtils.dateFromTimestamp( timestamp );
         }
 
@@ -128,8 +133,8 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
 
         Set< EmsScriptNode > productSet =
                 WebScriptUtil.getAllNodesInPath( site.getQnamePath(), "ASPECT",
-                                                 Acm.ACM_PRODUCT, dateTime,
-                                                 services, response );
+                                                 Acm.ACM_PRODUCT, workspace,
+                                                 dateTime, services, response );
         
         // create snapshots of all documents
         // TODO: perhaps roll these in their own transactions
@@ -143,7 +148,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
 	            snapshotService.setServices(services);
 	            snapshotService.setLogLevel(LogLevel.DEBUG);
 	            Status status = new Status();
-	            EmsScriptNode snapshot = snapshotService.createSnapshot(product, (String)product.getProperty(Acm.ACM_ID));
+	            EmsScriptNode snapshot = snapshotService.createSnapshot(product, (String)product.getProperty(Acm.ACM_ID), workspace);
 	            if (status.getCode() != HttpServletResponse.SC_OK) {
 	                jobStatus = "Failed";
 	                response.append("[ERROR]: could not make snapshot for " + product.getProperty(Acm.ACM_NAME));

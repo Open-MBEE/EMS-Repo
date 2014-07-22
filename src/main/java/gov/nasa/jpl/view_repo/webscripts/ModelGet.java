@@ -34,6 +34,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -103,7 +104,9 @@ public class ModelGet extends AbstractJavaWebScript {
         String timestamp = req.getParameter("timestamp");
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         
-		EmsScriptNode modelRootNode = findScriptNodeById(modelId, dateTime);
+        WorkspaceNode workspace = getWorkspace( req );
+        
+        EmsScriptNode modelRootNode = findScriptNodeById(modelId, workspace, dateTime);
 		if (modelRootNode == null) {
             log( LogLevel.ERROR,
                  "Element with id, " + modelId
@@ -189,8 +192,10 @@ public class ModelGet extends AbstractJavaWebScript {
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
             
+            WorkspaceNode workspace = getWorkspace( req );
+            
             if (Debug.isOn()) System.out.println("modelId = " + modelId );
-            EmsScriptNode modelRootNode = findScriptNodeById(modelId, dateTime);
+            EmsScriptNode modelRootNode = findScriptNodeById(modelId, workspace, dateTime);
             if (Debug.isOn()) System.out.println("modelRootNode = " + modelRootNode );
             
             if ( modelRootNode == null ) {
@@ -205,9 +210,9 @@ public class ModelGet extends AbstractJavaWebScript {
             boolean recurse = checkArgEquals(req, "recurse", "true") ? true : false;
             
             if (isViewRequest) {
-                handleViewHierarchy(modelRootNode, recurse, dateTime);
+                handleViewHierarchy(modelRootNode, recurse, workspace, dateTime);
             } else {
-                handleElementHierarchy(modelRootNode, recurse, dateTime);
+                handleElementHierarchy(modelRootNode, recurse, workspace, dateTime);
             }
             
             handleElements(dateTime);
@@ -226,13 +231,14 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * @throws JSONException	JSON element creation error
 	 */
 	protected void handleViewHierarchy(EmsScriptNode root, boolean recurse,
-	                                   Date dateTime) throws JSONException {
+	                                   WorkspaceNode workspace, Date dateTime)
+	                                           throws JSONException {
 		Object allowedElements = root.getProperty(Acm.ACM_ALLOWED_ELEMENTS);
 		if (allowedElements != null) {
 			JSONArray childElementJson = new JSONArray(allowedElements.toString());
 			for (int ii = 0; ii < childElementJson.length(); ii++) {
 				String id = childElementJson.getString(ii);
-				EmsScriptNode childElement = findScriptNodeById(id, dateTime);
+				EmsScriptNode childElement = findScriptNodeById(id, workspace, dateTime);
 				
 				// TODO Need to report that allowedElements can't be found
 				if (childElement != null) {
@@ -253,10 +259,12 @@ public class ModelGet extends AbstractJavaWebScript {
 					JSONArray childViewJson = new JSONArray(childrenViews.toString());
 					for (int ii = 0; ii < childViewJson.length(); ii++) {
 						String id = childViewJson.getString(ii);
-						EmsScriptNode childView = findScriptNodeById(id, dateTime);
+                        EmsScriptNode childView =
+                                findScriptNodeById( id, workspace, dateTime );
 						if (childView != null) {
 						    if (checkPermissions(childView, PermissionService.READ)) {
-						        handleViewHierarchy(childView, recurse, dateTime);
+                                handleViewHierarchy( childView, recurse,
+                                                     workspace, dateTime );
 						    } // TODO -- REVIEW -- Warning if no permissions?
 						} else {
 		                    log( LogLevel.WARNING,
@@ -275,10 +283,13 @@ public class ModelGet extends AbstractJavaWebScript {
 	/**
 	 * Build up the element hierarchy from the specified root
 	 * @param root		Root node to get children for
+	 * @param workspace 
 	 * @param dateTime 
 	 * @throws JSONException
 	 */
-	protected void handleElementHierarchy(EmsScriptNode root, boolean recurse, Date dateTime) throws JSONException {
+	protected void handleElementHierarchy(EmsScriptNode root, boolean recurse,
+	                                      WorkspaceNode workspace, Date dateTime)
+	                                              throws JSONException {
 		JSONArray array = new JSONArray();
 		
 		// add root element to elementsFound if its not already there (if it's there, it's probably because the root is a reified pkg node)
@@ -295,9 +306,12 @@ public class ModelGet extends AbstractJavaWebScript {
 		    // TODO: figure out why the child association creation from the reification isn't being picked up
 		    String rootName = (String)root.getProperty(Acm.CM_NAME);
 		    if (!rootName.contains("_pkg")) {
-		        EmsScriptNode reifiedNode = findScriptNodeById(rootName + "_pkg", dateTime);
+                EmsScriptNode reifiedNode =
+                        findScriptNodeById( rootName + "_pkg", workspace,
+                                            dateTime );
 		        if (reifiedNode != null) {
-		            handleElementHierarchy(reifiedNode, recurse, dateTime);
+                    handleElementHierarchy( reifiedNode, recurse, workspace,
+                                            dateTime );
 		        } // TODO -- REVIEW -- Warning or error?
 		    }
 			for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
@@ -315,7 +329,8 @@ public class ModelGet extends AbstractJavaWebScript {
                         new EmsScriptNode( childRef, services, response );
                 if ( checkPermissions( child, PermissionService.READ ) ) {
                     if ( child.getTypeShort().equals( Acm.ACM_ELEMENT_FOLDER ) ) {
-                        handleElementHierarchy( child, recurse, dateTime );
+                        handleElementHierarchy( child, recurse, workspace,
+                                                dateTime );
                     } else {
                         String value = (String)child.getProperty( Acm.ACM_ID );
                         if ( value != null ) {

@@ -36,6 +36,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -64,6 +65,7 @@ import javax.xml.bind.DatatypeConverter;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.jscript.ScriptNode;
+import org.alfresco.repo.jscript.ScriptNode.NodeValueConverter;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
@@ -84,6 +86,7 @@ import org.alfresco.service.namespace.RegexQNamePattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mozilla.javascript.Scriptable;
 import org.springframework.extensions.webscripts.Status;
 
 /**
@@ -137,10 +140,49 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         setResponse( response );
     }
 
+    public EmsScriptNode childByNamePath( String path, WorkspaceNode workspace ) {
+        // Make sure this node is in the target workspace.
+        EmsScriptNode node = this;
+        if ( workspace != null && !workspace.equals( getWorkspace())) {
+            node = findScriptNodeByName( getName(), workspace, null );
+        }
+        // See if the path/child is in this workspace.
+        EmsScriptNode child = node.childByNamePath( path );
+        if ( child != null && child.exists() ) {
+            return child;
+        }
+        // Find the path/child in a parent workspace.
+        EmsScriptNode source = node.getWorkspaceSource();
+        while ( source != null && source.exists() && (child == null || !child.exists() ) ) {
+            child = source.childByNamePath( path );
+            source = source.getWorkspaceSource();
+        }
+        if ( child != null && child.exists() ) {
+            return child;
+        }
+        return null;
+    }
+    
+    public EmsScriptNode getWorkspaceSource() {
+        if ( !hasAspect( "ems:HasWorkspace" ) ) return null;
+        NodeRef ref = (NodeRef)getProperty( "ems:source" );
+        if ( ref != null ) {
+            return new EmsScriptNode( ref, getServices() );
+        }
+        String msg = "Error! Node has HasWorkspace aspect but no source node!";
+        log( msg );
+        Debug.error( msg );
+        return null;
+    }
+
+    /**
+     * Use {@link #childByNamePath(String, WorkspaceNode)} instead.
+     * @see org.alfresco.repo.jscript.ScriptNode#childByNamePath(java.lang.String)
+     */
     @Override
     public EmsScriptNode childByNamePath( String path ) {
         ScriptNode child = super.childByNamePath( path );
-        if ( child == null ) {
+        if ( child == null || !child.exists() ) {
             return null;
         }
         return new EmsScriptNode( child.getNodeRef(), services, response );
@@ -152,12 +194,22 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                                   services, response, status );
     }
 
+//    @Override
+//    public Scriptable getChildren() {
+//        Scriptable myChildren = super.getChildren();
+//        //myChildren.
+//        //if ( )
+//    }
+
     @Override
     public EmsScriptNode createFolder( String name ) {
         EmsScriptNode folder = new EmsScriptNode( super.createFolder( name ).getNodeRef(),
                                   services, response, status );
         WorkspaceNode ws = getWorkspace();
-        if ( ws != null && !folder.isWorkspace() ) folder.setWorkspace( ws );
+        EmsScriptNode source = getWorkspaceSource();
+        // TODO -- the folder is not getting a source here!  is that okay?
+//        Scriptable myChildren = source.getChildren();
+        if ( ws != null && !folder.isWorkspace() ) folder.setWorkspace( ws, null );
         return folder;
     }
 
@@ -168,7 +220,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                                         .getNodeRef(), services, response,
                                    status );
         WorkspaceNode ws = getWorkspace();
-        if ( ws != null && !folder.isWorkspace() ) folder.setWorkspace( ws );
+        // TODO -- the folder is not getting a source here!
+        if ( ws != null && !folder.isWorkspace() ) folder.setWorkspace( ws, null );
         return folder;
     }
 
@@ -400,6 +453,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             if ( ref == null ) continue;
             EmsScriptNode node =
                     new EmsScriptNode( ref, services, response, status );
+            if ( !node.exists() ) continue;
             emsNodeSet.add( node );
         }
         return emsNodeSet;
@@ -449,7 +503,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 "Artifacts" + ( Utils.isNullOrEmpty( subfolderName )
                                 ? "" : "/" + subfolderName );
         // find site; it must exist!
-        if ( targetSiteNode == null ) {
+        if ( targetSiteNode == null || !targetSiteNode.exists() ) {
             log( "Can't find node for site: " + targetSiteName + "!" );
             return null;
         }
@@ -457,7 +511,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         EmsScriptNode subfolder =
                 NodeUtil.mkdir( targetSiteNode, artifactFolderName, services,
                                 response, status );
-        if ( subfolder == null ) {
+        if ( subfolder == null || !subfolder.exists() ) {
             log( "Can't create subfolder for site, " + targetSiteName
                  + ", in artifact folder, " + artifactFolderName + "!" );
             return null;
@@ -466,7 +520,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         String artifactId = name + "." + type;
         EmsScriptNode artifactNode =
                 subfolder.createNode( artifactId, "cm:content" );
-        if ( artifactNode == null ) {
+        if ( artifactNode == null || !artifactNode.exists() ) {
             log( "Failed to create new artifact " + artifactId + "!" );
             return null;
         }
@@ -519,7 +573,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                         findOrCreateArtifact( name, extension, content,
                                               getSiteName(), "images",
                                               getWorkspace(), null );
-                if ( artNode == null ) {
+                if ( artNode == null || !artNode.exists() ) {
                     log( "Failed to pull out image data for value! " + value );
                     break;
                 }
@@ -653,7 +707,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         if ( result != null ) {
             WorkspaceNode parentWs = getWorkspace();
             if ( parentWs != null && !result.isWorkspace() ) {
-                result.setWorkspace( parentWs );
+                result.setWorkspace( parentWs, null );
             }
         }
 
@@ -662,6 +716,16 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         return result;
     }
 
+    public List<Object> getValuesFromScriptable(Scriptable values) {
+        NodeValueConverter nvc = new NodeValueConverter();
+        Object res = nvc.convertValueForRepo( (Serializable)values );
+        if ( res instanceof List ) {
+            return (List<Object>)res;
+        }
+        return null;
+    }
+
+    
     /**
      * Return the first AssociationRef of a particular type
      * 
@@ -703,6 +767,14 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         return (String)getProperty( Acm.ACM_NAME );
     }
 
+    public String getSysmlId() {
+        String id = (String)getProperty( Acm.ACM_ID );
+        if ( id == null ) {
+            id = getName();
+        }
+        return id;
+    }
+
     @Override
     public EmsScriptNode getParent() {
         ScriptNode myParent = super.getParent();
@@ -741,6 +813,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             nodeRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
             if ( nodeRef == null ) continue;
             EmsScriptNode oNode = new EmsScriptNode(nodeRef, services);
+            if ( !oNode.exists() ) continue;
             Date modified = oNode.getLastModified( dateTime );
             if ( modified.after( lastModifiedDate ) ) {
                 lastModifiedDate = modified;
@@ -1052,7 +1125,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                           && ( (Collection< ? >)elementValue ).isEmpty() ) ) ) {
                     ArrayList< NodeRef > refList = new ArrayList<NodeRef>();
                     for ( EmsScriptNode emsNode : elements ) {
-                        if ( emsNode != null ) refList.add( emsNode.getNodeRef() );
+                        if ( emsNode != null && emsNode.exists() ) refList.add( emsNode.getNodeRef() );
                     }
                     elementValue = refList;
                 }
@@ -1102,7 +1175,12 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                     if ( o instanceof NodeRef ) {
                         if ( dateTime != null ) {
                             NodeRef ref = NodeUtil.getNodeRefAtTime( (NodeRef)o, dateTime );
-                            if ( ref == null ) {
+                            EmsScriptNode esn = null;
+                            if ( ref != null ) {
+                                esn = new EmsScriptNode( ref, getServices() );
+                            }
+
+                            if ( ref == null || !esn.exists() ) {
                                 String msg = "Error! Element " + o + " did not exist at " + dateTime + ".\n";
                                 if ( getResponse() == null || getStatus() == null ) {
                                     Debug.error( msg );
@@ -1317,15 +1395,17 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
 
     public List< EmsScriptNode > getTargetAssocsNodesByType( String acmType,
+                                                             WorkspaceNode workspace,
                                                              Date dateTime ) {
         boolean isSource = false;
-        return getAssocsNodesByDirection( acmType, isSource, dateTime );
+        return getAssocsNodesByDirection( acmType, isSource, workspace, dateTime );
     }
 
     public List< EmsScriptNode > getSourceAssocsNodesByType( String acmType,
+                                                             WorkspaceNode workspace,
                                                              Date dateTime ) {
         boolean isSource = true;
-        return getAssocsNodesByDirection( acmType, isSource, dateTime );
+        return getAssocsNodesByDirection( acmType, isSource, workspace, dateTime );
     }
 
     /**
@@ -1333,24 +1413,21 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      * 
      * @param acmType
      * @param isSource
+     * @param workspace 
      * @param dateTime 
      * @return
      */
     protected List< EmsScriptNode >
             getAssocsNodesByDirection( String acmType, boolean isSource,
-                                       Date dateTime ) {
+                                       WorkspaceNode workspace, Date dateTime ) {
         List< EmsScriptNode > list = new ArrayList< EmsScriptNode >();
         List< AssociationRef > assocs;
         if ( isSource ) {
-            assocs =
-                    services.getNodeService()
-                            .getSourceAssocs( nodeRef,
-                                              RegexQNamePattern.MATCH_ALL );
+            assocs = services.getNodeService().getSourceAssocs( nodeRef,
+                                                                RegexQNamePattern.MATCH_ALL );
         } else {
-            assocs =
-                    services.getNodeService()
-                            .getTargetAssocs( nodeRef,
-                                              RegexQNamePattern.MATCH_ALL );
+            assocs = services.getNodeService().getTargetAssocs( nodeRef,
+                                                                RegexQNamePattern.MATCH_ALL );
         }
         for ( AssociationRef aref : assocs ) {
             QName typeQName = createQName( acmType );
@@ -1363,10 +1440,15 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 }
                 if ( targetRef == null ) continue;
                 if ( dateTime != null ) {
-                    targetRef = NodeUtil.getNodeRefAtTime( targetRef, dateTime );
+                    targetRef = NodeUtil.getNodeRefAtTime( targetRef, workspace,
+                                                           dateTime );
                 }
                 if ( targetRef == null ) {
-                    String msg = "Error! Element " + targetRef + " did not exist at " + dateTime + ".\n";
+                    String msg =
+                            "Error! Element " + targetRef
+                                    + " did not exist in workspace "
+                                    + workspace.getName() + " at " + dateTime
+                                    + ".\n";
                     if ( getResponse() == null || getStatus() == null ) {
                         Debug.error( msg );
                     } else {
@@ -2128,7 +2210,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             if ( hasAspect( "sysml:HasWorkspace" ) ) {
                 NodeRef ref = (NodeRef)getProperty( "sysml:workspace" );
                 WorkspaceNode ws = new WorkspaceNode( ref, getServices() );
-                setWorkspace( ws );
+                setWorkspace( ws, null );
             }
         }
         return workspace;
@@ -2149,10 +2231,13 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     /**
      * @param workspace the workspace to set
      */
-    public void setWorkspace( WorkspaceNode workspace ) {
+    public void setWorkspace( WorkspaceNode workspace, NodeRef source ) {
         this.workspace = workspace;
         createOrUpdateAspect( "ems:HasWorkspace" );
         setProperty( "ems:workspace", workspace.getNodeRef() );
+        if ( source != null ) {
+            setProperty( "ems:source", source );
+        }
     }
 
     /**
@@ -2237,6 +2322,12 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             int comp = CompareUtils.GenericComparator.instance().compare( type1, type2 );
             if ( comp != 0 ) return comp;
             if ( o1.getClass() != o2.getClass() ) {
+            	if (o1.getClass().equals(String.class)) {
+            		return -1;
+            	}
+            	if (o2.getClass().equals(String.class)) {
+            		return 1;
+            	}
                 type1 = o1.getClass().getSimpleName();
                 type2 = o2.getClass().getSimpleName();
                 comp = CompareUtils.GenericComparator.instance().compare( type1, type2 );
@@ -2256,7 +2347,10 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 refs = new ArrayList<NodeRef>();
                 refs.add( (NodeRef)o );
             } else {
-                return Utils.getEmptyArrayList();
+                //return Utils.getEmptyArrayList(); // FIXME The array returned here is later modified, and a common empty array is
+            										// is used.  This makes it non-empty.
+                return new ArrayList<NodeRef>();
+                
             }
         } else {
             refs = Utils.asList( (Collection<?>)o, NodeRef.class );
@@ -2286,18 +2380,24 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         Set<EmsScriptNode> set = new LinkedHashSet< EmsScriptNode >();
         for ( Map.Entry< String, String > e :
             Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.entrySet() ) {
-            set.addAll( getRelationshipsOfType( typeName, e.getKey() ) );
+        	ArrayList<EmsScriptNode> relationships = getRelationshipsOfType( typeName, e.getKey() );
+        	if (!Utils.isNullOrEmpty(relationships)) {
+        		set.addAll( relationships );
+        	}
         }
         return set;
     }
     
     public ArrayList<EmsScriptNode> getRelationshipsOfType(String typeName,
                                                            String acmAspect) {
-        if ( !hasAspect( acmAspect ) ) return Utils.getEmptyArrayList();
+        if ( !hasAspect( acmAspect ) ) return new ArrayList<EmsScriptNode>();
         String acmProperty = 
                 Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.get( acmAspect );
 
         ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty );
+        // Searching for the beginning of the relationships with this typeName
+        // b/c relationships are ordered by typeName.  Therefore, the search
+        // is expected to not find a matching element.
         int index = Collections.binarySearch( relationships, typeName,
                                               //this.getNodeRef(),
                                               NodeByTypeComparator.instance );
@@ -2340,7 +2440,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         String acmProperty = Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.get( acmAspect );
         ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty );
         int index = Collections.binarySearch( relationships,
-                                              this.getNodeRef(),
+                                              //this.getNodeRef(),
+        									  relationship,
                                               NodeByTypeComparator.instance );
         if ( Debug.isOn() ) Debug.outln( "binary search returns index " + index );
         if ( index >= 0 ) {

@@ -44,7 +44,6 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
-import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -201,7 +200,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 new TreeSet<EmsScriptNode>();
         
         // create the element map and hierarchies
-        if (buildElementMap(postJson.getJSONArray(ELEMENTS), projectNode)) {
+        if (buildElementMap(postJson.getJSONArray(ELEMENTS), projectNode, workspace)) {
             // start building up elements from the root elements
             for (String rootElement : rootElements) {
                 log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
@@ -233,14 +232,14 @@ public class ModelPost extends AbstractJavaWebScript {
                     // properties on this first pass.
                     if (owner != null && owner.exists()) {
                         elements.addAll( updateOrCreateElement( elementMap.get( rootElement ),
-                                                             owner, false ) );
+                                                                owner, workspace, false ) );
                     }
                 }
             } // end for (String rootElement: rootElements) {
         } // end if (buildElementMap(postJson.getJSONArray(ELEMENTS))) {
     
         // handle the relationships
-        updateOrCreateAllRelationships(relationshipsJson);
+        updateOrCreateAllRelationships(relationshipsJson, workspace);
         
         // create commit history
         // TODO Need to fix - add in the versions when committing a node
@@ -248,7 +247,7 @@ public class ModelPost extends AbstractJavaWebScript {
         
         // make another pass through the elements and update their properties
         elements.addAll( updateNodeReferences( singleElement, postJson,
-                                               projectNode ) );
+                                               projectNode, workspace ) );
 
         now = new Date();
         end = System.currentTimeMillis();
@@ -265,7 +264,8 @@ public class ModelPost extends AbstractJavaWebScript {
                 new TreeSet<EmsScriptNode>();
 
         if ( singleElement ) {
-            elements.addAll( updateOrCreateElement(postJson, projectNode, true) );
+            elements.addAll( updateOrCreateElement( postJson, projectNode,
+                                                    workspace, true ) );
         }
         for (String rootElement : rootElements) {
             log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
@@ -352,11 +352,11 @@ public class ModelPost extends AbstractJavaWebScript {
         return owner;
     }
     
-    protected void updateOrCreateAllRelationships(JSONObject jsonObject) throws JSONException {
-        updateOrCreateRelationships(jsonObject, "relationshipElements");
-        updateOrCreateRelationships(jsonObject, "propertyTypes");
-        updateOrCreateRelationships(jsonObject, "elementValues");
-        updateOrCreateRelationships(jsonObject, "annotatedElements");
+    protected void updateOrCreateAllRelationships(JSONObject jsonObject, WorkspaceNode workspace) throws JSONException {
+        updateOrCreateRelationships(jsonObject, "relationshipElements", workspace);
+        updateOrCreateRelationships(jsonObject, "propertyTypes", workspace);
+        updateOrCreateRelationships(jsonObject, "elementValues", workspace);
+        updateOrCreateRelationships(jsonObject, "annotatedElements", workspace);
     }
 
     /**
@@ -369,19 +369,20 @@ public class ModelPost extends AbstractJavaWebScript {
      *            projectTypes, or elementValues)
      * @throws JSONException
      */
-    protected void updateOrCreateRelationships(JSONObject jsonObject, String key)
+    protected void updateOrCreateRelationships(JSONObject jsonObject, String key,
+                                               WorkspaceNode workspace)
             throws JSONException {
         long start = System.currentTimeMillis(), end;
         log(LogLevel.INFO, "updateOrCreateRelationships" + key + ": ");
         if (runWithoutTransactions) {
-            updateOrCreateTransactionableRelationships(jsonObject, key);
+            updateOrCreateTransactionableRelationships(jsonObject, key, workspace);
         } else {
             UserTransaction trx;
             trx = services.getTransactionService().getNonPropagatingUserTransaction();
             try {
                 trx.begin();
                 log(LogLevel.INFO, "updateOrCreateRelationships: beginning transaction {");
-                updateOrCreateTransactionableRelationships(jsonObject, key);
+                updateOrCreateTransactionableRelationships(jsonObject, key, workspace);
                 log(LogLevel.INFO, "} updateOrCreateRelationships committing: " + key);
                 trx.commit();
             } catch (Throwable e) {
@@ -405,20 +406,20 @@ public class ModelPost extends AbstractJavaWebScript {
         log(LogLevel.INFO, (end - start) + "ms");
     }
     
-    protected void updateOrCreateTransactionableRelationships(JSONObject jsonObject, String key) throws JSONException {
+    protected void updateOrCreateTransactionableRelationships(JSONObject jsonObject, String key, WorkspaceNode workspace) throws JSONException {
         if (jsonObject.has(key)) {
             JSONObject object = jsonObject.getJSONObject(key);
             Iterator<?> ids = object.keys();
             while (ids.hasNext()) {
                 String id = (String) ids.next();
                 if (key.equals("relationshipElements")) {
-                    updateOrCreateRelationship(object.getJSONObject(id), id);
+                    updateOrCreateRelationship(object.getJSONObject(id), id, workspace);
                 } else if (key.equals("propertyTypes")) {
-                    updateOrCreatePropertyType(object.getString(id), id);
+                    updateOrCreatePropertyType(object.getString(id), id, workspace);
                 } else if (key.equals("elementValues")) {
-                    updateOrCreateElementValues(object.getJSONArray(id), id);
+                    updateOrCreateElementValues(object.getJSONArray(id), id, workspace);
                 } else if (key.equals("annotatedElements")) {
-                    updateOrCreateAnnotatedElements(object.getJSONArray(id), id);
+                    updateOrCreateAnnotatedElements(object.getJSONArray(id), id, workspace);
                 }
             }
         }
@@ -433,14 +434,14 @@ public class ModelPost extends AbstractJavaWebScript {
      *            The ID of the element to add the values to
      * @throws JSONException
      */
-    protected void updateOrCreateAnnotatedElements(JSONArray jsonArray, String id)
+    protected void updateOrCreateAnnotatedElements(JSONArray jsonArray, String id, WorkspaceNode workspace)
             throws JSONException {
-        EmsScriptNode source = findScriptNodeById(id, null);
+        EmsScriptNode source = findScriptNodeById(id, workspace, null);
 
         if (checkPermissions(source, PermissionService.WRITE)) {
             for (int ii = 0; ii < jsonArray.length(); ii++) {
                 String targetId = jsonArray.getString(ii);
-                EmsScriptNode target = findScriptNodeById(targetId, null);
+                EmsScriptNode target = findScriptNodeById(targetId, workspace, null);
                 if (target != null) {
                     source.createOrUpdateAssociation(target, Acm.ACM_ANNOTATED_ELEMENTS, true);
                 }
@@ -460,9 +461,9 @@ public class ModelPost extends AbstractJavaWebScript {
      *            The ID of the element to add the values to
      * @throws JSONException
      */
-    protected void updateOrCreateElementValues(JSONArray jsonArray, String id)
+    protected void updateOrCreateElementValues(JSONArray jsonArray, String id, WorkspaceNode workspace)
             throws JSONException {
-        EmsScriptNode element = findScriptNodeById(id, null);
+        EmsScriptNode element = findScriptNodeById(id, workspace, null);
         element.createOrUpdateProperties( jsonArray, Acm.ACM_ELEMENT_VALUE );
     }
 
@@ -475,9 +476,9 @@ public class ModelPost extends AbstractJavaWebScript {
      * @param id
      *            ID of the element
      */
-    protected void updateOrCreatePropertyType(String typeId, String id) {
-        EmsScriptNode property = findScriptNodeById(id, null);
-        EmsScriptNode propertyType = findScriptNodeById(typeId, null);
+    protected void updateOrCreatePropertyType(String typeId, String id, WorkspaceNode workspace) {
+        EmsScriptNode property = findScriptNodeById(id, workspace, null);
+        EmsScriptNode propertyType = findScriptNodeById(typeId, workspace, null);
 
         if (property != null && propertyType != null) {
             if (checkPermissions(property, PermissionService.WRITE)
@@ -507,14 +508,14 @@ public class ModelPost extends AbstractJavaWebScript {
      *            Id of the directed relationship element
      * @throws JSONException
      */
-    protected void updateOrCreateRelationship(JSONObject jsonObject, String id)
+    protected void updateOrCreateRelationship(JSONObject jsonObject, String id, WorkspaceNode workspace)
             throws JSONException {
         String sourceId = jsonObject.getString(Acm.JSON_SOURCE);
         String targetId = jsonObject.getString(Acm.JSON_TARGET);
 
-        EmsScriptNode relationship = findScriptNodeById(id, null);
-        EmsScriptNode source = findScriptNodeById(sourceId, null);
-        EmsScriptNode target = findScriptNodeById(targetId, null);
+        EmsScriptNode relationship = findScriptNodeById(id, workspace, null);
+        EmsScriptNode source = findScriptNodeById(sourceId, workspace, null);
+        EmsScriptNode target = findScriptNodeById(targetId, workspace, null);
 
         if (relationship != null && source != null && target != null) {
             if (checkPermissions(relationship, PermissionService.WRITE)
@@ -550,11 +551,11 @@ public class ModelPost extends AbstractJavaWebScript {
      * @param jsonArray         Takes in the elements JSONArray
      * @return                  True if all elements and owners can be found with write permissions, false otherwise
      */
-    protected boolean buildElementMap(JSONArray jsonArray, EmsScriptNode projectNode) throws JSONException {
+    protected boolean buildElementMap(JSONArray jsonArray, EmsScriptNode projectNode, WorkspaceNode workspace) throws JSONException {
         boolean isValid = true;
 
         if (runWithoutTransactions) {
-            isValid =  buildTransactionableElementMap(jsonArray, projectNode);
+            isValid =  buildTransactionableElementMap(jsonArray, projectNode, workspace);
         } else {
             UserTransaction trx;
             // building element map is a read-only transaction
@@ -562,7 +563,7 @@ public class ModelPost extends AbstractJavaWebScript {
             try {
                 trx.begin();
                 log(LogLevel.INFO, "buildElementMap begin transaction {");
-                isValid = buildTransactionableElementMap(jsonArray, projectNode);
+                isValid = buildTransactionableElementMap(jsonArray, projectNode, workspace);
                 log(LogLevel.INFO, "} buildElementMap committing");
                 trx.commit();
             } catch (Throwable e) {
@@ -631,13 +632,13 @@ public class ModelPost extends AbstractJavaWebScript {
 
                         // TODO -- REVIEW -- this probably deserves a warning--we should never get here, right?
                         ownerId = NO_PROJECT_ID;
-                        EmsScriptNode noProjetNode = findScriptNodeById( ownerId, null );
+                        EmsScriptNode noProjetNode = findScriptNodeById( ownerId, workspace, null );
                         if ( noProjetNode == null ) {
                             String siteName = 
                                     (getSiteInfo() == null ? NO_SITE_ID : getSiteInfo().getShortName() );
                             ProjectPost pp = new ProjectPost( repository, services );
                             pp.updateOrCreateProject( new JSONObject(),
-                                                      NO_PROJECT_ID,
+                                                      workspace, NO_PROJECT_ID,
                                                       siteName, true,
                                                       false, false );
                         }
@@ -657,7 +658,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // lets iterate through elements
        for (String elementId: elementMap.keySet()) {
             if (!newElements.contains(elementId)) {
-                EmsScriptNode element = findScriptNodeById(elementId, null);
+                EmsScriptNode element = findScriptNodeById(elementId, workspace, null);
                 if (element == null) {
                     log(LogLevel.ERROR, "Could not find node with id: " + elementId, HttpServletResponse.SC_BAD_REQUEST);
                 } else if (!checkPermissions(element, PermissionService.WRITE)) {
@@ -667,13 +668,13 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         
        	if (isValid) {
-    	   		isValid = fillRootElements();
+    	   		isValid = fillRootElements(workspace);
        	}
         
         return isValid;
     }
 
-    protected boolean fillRootElements() throws JSONException {
+    protected boolean fillRootElements(WorkspaceNode workspace) throws JSONException {
         Iterator<?> iter = elementHierarchyJson.keys();
         while (iter.hasNext()) {
             String ownerId = (String) iter.next();
@@ -687,7 +688,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         
         for (String name: rootElements) {
-        		EmsScriptNode rootElement = findScriptNodeById(name, null);
+        		EmsScriptNode rootElement = findScriptNodeById(name, workspace, null);
         		if (rootElement != null) {
 	        		if (!checkPermissions(rootElement, PermissionService.WRITE)) {
 	        			log(LogLevel.WARNING, "\tskipping as root element since no write permissions", HttpServletResponse.SC_BAD_REQUEST);
@@ -783,6 +784,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 reifiedNode =
                         updateOrCreateTransactionableElement( elementJson,
                                                               parent, children,
+                                                              workspace,
                                                               ingest, false );
                 log(LogLevel.INFO, "} updateOrCreateElement end transaction");
                 trx.commit();
@@ -809,7 +811,7 @@ public class ModelPost extends AbstractJavaWebScript {
             for (int ii = 0; ii < children.length(); ii++) {
                 elements.addAll( 
                 updateOrCreateElement(elementMap.get(children.getString(ii)),
-                                                       reifiedNode, ingest) );
+                                                       reifiedNode, workspace, ingest) );
             }
         }
         
@@ -834,7 +836,8 @@ public class ModelPost extends AbstractJavaWebScript {
     private void processExpressionOrProperty(String type, boolean nestedNode, JSONObject elementJson,
     										 JSONObject specializeJson, EmsScriptNode node, 
     										 boolean ingest, EmsScriptNode reifiedNode, 
-    										 EmsScriptNode parent, String id) throws Exception {
+    										 EmsScriptNode parent, String id,
+    										 WorkspaceNode workspace) throws Exception {
     	
         // TODO REVIEW
         //		Wanted to do a lot of processing in buildTransactionElementMap(), so that we make the 
@@ -898,7 +901,7 @@ public class ModelPost extends AbstractJavaWebScript {
             		//	we make a reifiedNode for it here.  If all of that fails, then use the parent
             		EmsScriptNode nestedParent = null;
             		if (reifiedNode == null) {
-            			 EmsScriptNode reifiedPkg = getOrCreateReifiedNode(node, id, true);
+            			 EmsScriptNode reifiedPkg = getOrCreateReifiedNode(node, id, workspace, true);
             			 nestedParent = reifiedPkg == null ? parent : reifiedPkg;
             		}
             		else {
@@ -906,7 +909,7 @@ public class ModelPost extends AbstractJavaWebScript {
             		}
             		
             		EmsScriptNode newValNode = updateOrCreateTransactionableElement((JSONObject)newVal,nestedParent,
-            																		null, ingest, true);
+            																		null, workspace, ingest, true);
             		nodeNames.add(newValNode.getName());
             	}
             }
@@ -1043,15 +1046,16 @@ public class ModelPost extends AbstractJavaWebScript {
         
         type = NodeUtil.getContentModelTypeName( acmSysmlType, services ); 
 
-        parent = workspace.replicateFolderWithChain( parent );
-        
-        // clone an existing node into the new workspace
-        if ( workspace != null && ( node != null || node.exists() ) &&
-             !node.isWorkspace() ) {
+        // Move the node to the specified workspace if the node is not a
+        // workspace itself.
+        if ( workspace != null && workspace.exists() && node != null
+             && node.exists() && !node.isWorkspace() && !workspace.equals( node.getWorkspace() ) ) {
+            parent = workspace.replicateFolderWithChain( parent );
+            EmsScriptNode oldNode = node;
             node = node.clone();
-            node.setWorkspace( workspace );
+            node.setWorkspace( workspace, oldNode.getNodeRef() );
         }
-        
+
         if ( node == null || !node.exists() ) {// && newElements.contains( id ) ) {
             if ( type == null || type.trim().isEmpty() ) {
                 if (Debug.isOn()) System.out.println( "PREFIX: type not found for " + jsonType );
@@ -1123,7 +1127,7 @@ public class ModelPost extends AbstractJavaWebScript {
             // Special processing for Expression or Property:
             //	Note: this will modify elementJson
             processExpressionOrProperty(acmSysmlType, nestedNode, elementJson, specializeJson, node, 
-										ingest, reifiedNode, parent, id);
+										ingest, reifiedNode, parent, id, workspace);
               
             node.ingestJSON(elementJson);
             
@@ -1585,7 +1589,7 @@ public class ModelPost extends AbstractJavaWebScript {
         boolean runInBackground = checkArgEquals(req, "background", "true");
         boolean fix = checkArgEquals(req, "fix", "true");
 
-        String workspaceId = getWorkspaceId( req );
+        WorkspaceNode workspace = getWorkspace( req );
         
         ModelPost instance = new ModelPost(repository, services);
 
@@ -1593,7 +1597,7 @@ public class ModelPost extends AbstractJavaWebScript {
         if (validateRequest(req, status)) {
             try {
                 if (runInBackground) {
-                    instance.saveAndStartAction(req, status);
+                    instance.saveAndStartAction(req, workspace, status);
                     // REVIEW -- TODO -- shouldn't response be called from
                     // instance? Maybe move the bulk of this method to a new
                     // method and call from instance.
@@ -1606,7 +1610,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     EmsScriptNode projectNode = getProjectNodeFromRequest( req, true );
                     Set< EmsScriptNode > elements = 
                         instance.createOrUpdateModel( postJson, status,
-                                                      projectNode, workspaceId );
+                                                      projectNode, workspace );
                     // REVIEW -- TODO -- shouldn't this be called from instance?
                     addRelationshipsToProperties( elements );
                     if ( !Utils.isNullOrEmpty( elements ) ) {
@@ -1659,11 +1663,13 @@ public class ModelPost extends AbstractJavaWebScript {
         }
     }
 
-    protected void saveAndStartAction(WebScriptRequest req, Status status) throws Exception {
+    protected void saveAndStartAction( WebScriptRequest req,
+                                       WorkspaceNode workspace,
+                                       Status status ) throws Exception {
         //String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
         //SiteInfo siteInfo = services.getSiteService().getSite(siteName);
         SiteInfo sInfo = getSiteInfo(req);
-        EmsScriptNode siteNode = null;
+        EmsScriptNode siteNode = getSiteNodeFromRequest( req );
         if ( sInfo == null ) {
             log(LogLevel.ERROR, "No site to start model load!", HttpServletResponse.SC_BAD_REQUEST);
             return;
@@ -1678,7 +1684,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // write out the json
         ActionUtil.saveStringToFile(jobNode, "application/json", services, ((JSONObject)req.parseContent()).toString(4));
         
-        EmsScriptNode projectNode = findScriptNodeById(projectId, null);
+        EmsScriptNode projectNode = findScriptNodeById(projectId, workspace, null);
         // kick off the action
         ActionService actionService = services.getActionService();
         Action loadAction = actionService.createAction(ModelLoadActionExecuter.NAME);
@@ -1718,25 +1724,27 @@ public class ModelPost extends AbstractJavaWebScript {
     private EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req, boolean createIfNonexistent) {
         EmsScriptNode projectNode = null;
         
+        WorkspaceNode workspace = getWorkspace( req );
+
         String siteName = getSiteName(req);
         //String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
         //String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
         String projectId = getProjectId(req);
-        EmsScriptNode siteNode = createSite( siteName );
+        EmsScriptNode siteNode = createSite( siteName, workspace );
         
         projectNode = siteNode.childByNamePath("/Models/" + projectId);
         if (projectNode == null) {
                 // for backwards compatibility
                 projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
         }
-
+        
         if ( projectNode == null ) {
             String elementId =
                     req.getServiceMatch().getTemplateVars().get( "elementid" );
             if ( elementId != null ) {
                 
                 // projectNode is the node with the element id, right?
-                projectNode = findScriptNodeById( elementId, null );
+                projectNode = findScriptNodeById( elementId, workspace, null );
                 
                 if ( projectNode == null ) {
                     // projectNode should be the owner..., which should exist
@@ -1747,7 +1755,7 @@ public class ModelPost extends AbstractJavaWebScript {
                         JSONObject elementJson =
                                 elementsJson.getJSONObject( elementId );
                         projectNode =
-                                findScriptNodeById( elementJson.getString( Acm.JSON_OWNER ), null );
+                                findScriptNodeById( elementJson.getString( Acm.JSON_OWNER ), workspace, null );
                     } catch ( JSONException e ) {
                         e.printStackTrace();
                     }
@@ -1759,9 +1767,9 @@ public class ModelPost extends AbstractJavaWebScript {
             ProjectPost pp = new ProjectPost( repository, services );
             JSONObject json = new JSONObject();
             try {
-                pp.updateOrCreateProject( json, projectId, siteName,
+                pp.updateOrCreateProject( json, workspace, projectId, siteName,
                                           createIfNonexistent, false, false );
-                projectNode = findScriptNodeById( projectId, null );
+                projectNode = findScriptNodeById( projectId, workspace, null );
             } catch ( JSONException e ) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

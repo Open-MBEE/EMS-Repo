@@ -1,10 +1,13 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -66,6 +69,8 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
     }
     
     private JSONObject handleUpdate(WebScriptRequest req) throws JSONException {
+        WorkspaceNode workspace = getWorkspace( req );
+
         EmsScriptNode siteNode = getSiteNodeFromRequest(req);
         if (siteNode == null) {
             log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
@@ -81,10 +86,12 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
         EmsScriptNode config = new EmsScriptNode(configNode, services);
         
         ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
-        HashSet<String> productSet = configWs.updateConfiguration( config, (JSONObject)req.parseContent(), siteNode, null );
+        HashSet<String> productSet = configWs.updateConfiguration( config, (JSONObject)req.parseContent(), siteNode, workspace, null );
         ConfigurationPost configPost = new ConfigurationPost( repository, services );
         configPost.startAction( config, (String)siteNode.getProperty( Acm.CM_NAME ), productSet );
         
-        return configWs.getConfigJson( config, (String)siteNode.getProperty( Acm.CM_NAME ), null );
+        return configWs.getConfigJson( config,
+                                       (String)siteNode.getProperty( Acm.CM_NAME ),
+                                       workspace, null );
     }
 }

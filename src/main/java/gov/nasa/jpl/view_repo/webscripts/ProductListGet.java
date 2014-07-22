@@ -32,6 +32,8 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -122,8 +124,9 @@ public class ProductListGet extends AbstractJavaWebScript {
         	        // get timestamp if specified
         	        String timestamp = req.getParameter("timestamp");
         	        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-
-                JSONObject jsonObject = instance.handleProductList(siteNode, dateTime);
+        	    WorkspaceNode workspace = getWorkspace( req );
+                JSONObject jsonObject =
+                        instance.handleProductList( siteNode, workspace, dateTime );
                 appendResponseStatusInfo(instance);
                 model.put("res", jsonObject.toString(4));
                 model.put("title", siteNode.getProperty(Acm.CM_TITLE));
@@ -149,18 +152,24 @@ public class ProductListGet extends AbstractJavaWebScript {
 		return model;
 	}
 
-	public Set<EmsScriptNode> getProductSet(String qnamePath, Date dateTime) {
-        productSet =
+	public Set<EmsScriptNode> getProductSet(String qnamePath,
+	                                        WorkspaceNode workspace,
+	                                        Date dateTime) {
+        // TODO -- need to pass in workspace to getAllNodesInPath()
+	    productSet =
                 WebScriptUtil.getAllNodesInPath( qnamePath, "ASPECT",
-                                                 Acm.ACM_PRODUCT, dateTime,
+                                                 Acm.ACM_PRODUCT, workspace,
+                                                 dateTime,
                                                  services, response );
         
         return productSet;
 	}
 		
-	public JSONObject handleProductList(EmsScriptNode pnode, Date dateTime) throws JSONException {
+	public JSONObject handleProductList(EmsScriptNode pnode,
+	                                    WorkspaceNode workspace,
+	                                    Date dateTime) throws JSONException {
 	    initDataStructs();
-	    getProductSet(pnode.getQnamePath(), dateTime);
+	    getProductSet(pnode.getQnamePath(), workspace, dateTime);
                 
         for (EmsScriptNode node: productSet) {
             if (checkPermissions(node, PermissionService.READ)) {
