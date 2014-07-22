@@ -1184,7 +1184,9 @@ public class ModelPost extends AbstractJavaWebScript {
             return null;
         }
         
-        parent = workspace.replicateFolderWithChain( parent );
+        if ( workspace != null && workspace.exists() ) {
+            parent = workspace.replicateFolderWithChain( parent );
+        }
 
         if (checkPermissions(parent, PermissionService.WRITE)) {
             String pkgName = id + "_pkg";

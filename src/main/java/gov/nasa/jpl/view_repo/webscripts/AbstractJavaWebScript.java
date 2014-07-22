@@ -379,8 +379,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                                                     StringBuffer response,
                                                     Status responseStatus ) {
         if ( !Utils.isNullOrEmpty( nameOrId ) ) {
+            // Use null to indicate master workspace
+            if ( nameOrId.toLowerCase().equals( "master" ) ) {
+                return null;
+            }
             NodeRef ref = NodeUtil.findNodeRefById( nameOrId, null,
                                                     null, services );
+            if ( ref == null ) return null;
             WorkspaceNode workspace =
                     new WorkspaceNode( ref, services, response, responseStatus );
             return workspace;
