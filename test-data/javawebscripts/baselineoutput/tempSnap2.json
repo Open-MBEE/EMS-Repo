@@ -20,9 +20,9 @@
          <table>
             <tr><td><b>404 Description:</b></td><td> Requested resource is not available.</td></tr>
             <tr><td>&nbsp;</td></tr>
-            <tr><td><b>Message:</b></td><td>06220029 Script url /ui/views/301/snapshot does not map to a Web Script.</td></tr>
+            <tr><td><b>Message:</b></td><td>06220001 Script url /ui/views/301/snapshot does not map to a Web Script.</td></tr>
             <tr><td></td><td>&nbsp;</td></tr>
-   <tr><td><b>Exception:</b></td><td>org.springframework.extensions.webscripts.WebScriptException - 06220029 Script url /ui/views/301/snapshot does not map to a Web Script.</td></tr>
+   <tr><td><b>Exception:</b></td><td>org.springframework.extensions.webscripts.WebScriptException - 06220001 Script url /ui/views/301/snapshot does not map to a Web Script.</td></tr>
    <tr><td></td><td>&nbsp;</td></tr>
          <tr><td></td><td>org.springframework.extensions.webscripts.AbstractRuntime.executeScript(AbstractRuntime.java:173)</td></tr>
          <tr><td></td><td>org.springframework.extensions.webscripts.servlet.WebScriptServlet.service(WebScriptServlet.java:132)</td></tr>
@@ -52,7 +52,7 @@
          <tr><td></td><td>java.lang.Thread.run(Thread.java:744)</td></tr>
    <tr><td></td><td>&nbsp;</td></tr>
             <tr><td><b>Server</b>:</td><td>Community v4.2.0 (r56674-b4848) schema 6,033</td></tr>
-            <tr><td><b>Time</b>:</td><td>Jul 22, 2014 10:17:20 AM</td></tr>
+            <tr><td><b>Time</b>:</td><td>Jul 22, 2014 1:24:11 PM</td></tr>
             <tr><td></td><td>&nbsp;</td></tr>
          </table>
       </div>
