@@ -105,9 +105,6 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     boolean useFoundationalApi = true; // TODO this will be removed
 
-    // protected static StoreRef storeRef = new
-    // StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
-
     protected EmsScriptNode companyHome = null;
 
     protected EmsScriptNode siteNode = null;
@@ -116,17 +113,11 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     protected WorkspaceNode workspace = null;
     protected WorkspaceNode parentWorkspace = null;
-    //protected String workspaceId = null;
-    //protected String parentWorkspaceId = null;
     
     // TODO add nodeService and other member variables when no longer
     // subclassing ScriptNode
     // extend Serializable after removing ScriptNode extension
 
-    // for lucene search
-    // protected static final StoreRef SEARCH_STORE = new
-    // StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
-    
     public EmsScriptNode( NodeRef nodeRef, ServiceRegistry services,
                           StringBuffer response, Status status ) {
         this( nodeRef, services );
@@ -1070,7 +1061,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         Long readTime = null;
 
         // switch between old and new
-        boolean doNew = false;
+        boolean doNew = true;
         if ( readTime == null ) readTime = System.currentTimeMillis();
         if (doNew) {
             if (isExprOrProp) {
@@ -1311,8 +1302,6 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     public boolean isView() {
         boolean isView = hasAspect( Acm.ACM_VIEW ) || hasAspect( Acm.ACM_PRODUCT );
-//        String sysmlId = getName();
-//        if (Debug.isOn()) System.out.println(sysmlId + ".isView() = " + isView);
         return isView;
     }
 
@@ -2029,15 +2018,6 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 //        return NodeUtil.findNodeRefsByType( name, type, services );
 //    }
     
-//    // TODO: make this utility function - used in AbstractJavaWebscript too
-//    protected ResultSet findNodeRefsByType( String name, String type ) {
-//        return NodeUtil.findNodeRefsByType( name, type, services );
-//        // ResultSet results = null;
-//        // results = services.getSearchService().query(SEARCH_STORE,
-//        // SearchService.LANGUAGE_LUCENE, type + name + "\"");
-//        // return results;
-//    }
-
     /**
      * Checks whether user has permissions to the node and logs results and
      * status as appropriate
@@ -2494,15 +2474,21 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
     
     protected void addProductJSON(JSONObject json) throws JSONException {
-        json.put( "view2view", this.getProperty( "view2:view2view" ) );
-        json.put( "noSections", this.getProperty( "view2:noSections") );
+        json.put( "view2view", new JSONArray((String)this.getProperty( "view2:view2view" )) );
+        json.put( "noSections", new JSONArray((String)this.getProperty( "view2:noSections")) );
+        addViewJSON(json);
     }
     
     protected void addViewJSON(JSONObject json) throws JSONException {
-        json.put( "contains", getView().getContainsJson() );
-        json.put( "displayedElements", getView().getDisplayedElements() );
-        json.put( "allowedElements", getView().getDisplayedElements() );
-        json.put( "childrenViews", getView().getChildViews() );
+        // TODO: figure out why this isn't working
+//        json.put( "contains", getView().getContainsJson() );
+//        json.put( "displayedElements", getView().getDisplayedElements() );
+//        json.put( "allowedElements", getView().getDisplayedElements() );
+//        json.put( "childrenViews", getView().getChildViews() );
+        json.put( "contains", new JSONArray((String)this.getProperty( "view2:contains" )) );
+        json.put( "displayedElements", new JSONArray((String)this.getProperty( "view2:displayedElements" )) );
+        json.put( "allowedElements", new JSONArray((String)this.getProperty( "view2:allowedElements" )) );
+        json.put( "childrenViews", new JSONArray((String)this.getProperty( "view2:childrenViews" )) );
     }
     
     protected void addPropertyJSON(JSONObject json) throws JSONException {
@@ -2520,6 +2506,39 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             json.put( "element", element.getProperty( "sysml:id" ));
         }
         // TODO: Error output as well as date time checking
+    }
+    
+    protected void addExpressionJSON(JSONObject json) throws JSONException {
+        ArrayList<NodeRef> nodeRefs = (ArrayList<NodeRef>) this.getProperty( "sysml:operand" );
+        JSONArray array = new JSONArray();
+        for (NodeRef nodeRef: nodeRefs) {
+            if (services.getNodeService().exists( nodeRef )) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("type", "ElementValue");
+                EmsScriptNode node = new EmsScriptNode(nodeRef, services, response);
+                node.addElementValueJSON( jsonObject );
+                array.put( jsonObject );
+            }
+        }
+        json.put( "operand", array );
+    }
+    
+    protected void addDirectedRelationshipJSON(JSONObject json) throws JSONException {
+        // TODO: Error output as well as date time checking
+        NodeRef elementRef;
+        EmsScriptNode element;
+        
+        elementRef = (NodeRef) this.getProperty("sysml:source");
+        element = new EmsScriptNode(elementRef, services, response);
+        if (element != null && element.exists()) {
+            json.put( "source", element.getProperty( "sysml:id" ));
+        }
+        
+        elementRef = (NodeRef) this.getProperty("sysml:target");
+        element = new EmsScriptNode(elementRef, services, response);
+        if (element != null && element.exists()) {
+            json.put( "target", element.getProperty( "sysml:id" ));
+        }
     }
     
     protected void addConstraintJSON(JSONObject json) throws JSONException {
