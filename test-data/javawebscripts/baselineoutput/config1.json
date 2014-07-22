@@ -1,22 +1,2 @@
-{
-    "status" : 
-  {
-    "code" : 500,
-    "name" : "Internal Error",
-    "description" : "An error inside the HTTP server which prevented it from fulfilling the request."
-  },  
-  
-  "message" : "Previous job is still active.",  
-  "exception" : "",
-  
-  "callstack" : 
-  [ 
-  	   
-  ],
-  
-  "server" : "Community v4.2.0 (r56674-b4848) schema 6,033",
-  "time" : "Jun 24, 2014 10:23:36 AM"
-}
-
-
-500**
+{"id":"cbd5abf4-3679-41a9-bb5d-4f621aae78a5","timestamp":"2014-06-09T09:03:45.834-0700","description":"updating description","name":"product test","snapshots":[],"modified":"2014-07-18T15:27:55.006-0700"}
+200

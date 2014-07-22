@@ -16,7 +16,7 @@ export BASE_URL="\"http://localhost:8080/alfresco/service/workspaces/master/"
 echo POSTS
 
 # post elements to project
-echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/element.json $BASE_URL"elements\""
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elements.json $BASE_URL"elements\""
 
 echo GET
 
