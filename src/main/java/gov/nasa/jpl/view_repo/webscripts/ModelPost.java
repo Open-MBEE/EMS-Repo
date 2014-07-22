@@ -116,14 +116,16 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     private JSONObject elementHierarchyJson;
 
-    private JSONArray addedElements = new JSONArray();
-    private JSONArray updatedElements = new JSONArray();
-    private JSONArray movedElements = new JSONArray();
     private Set<String> addedElementsSet = new HashSet<String>();
+    private Set<String> movedElementsSet = new HashSet<String>();
+    private Set<String> updatedElementsSet = new HashSet<String>();
     
     private EmsSystemModel systemModel;
     
     private SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAe;
+    
+    // maps sysmlid to the fully qualified id
+    private Map<String, String> originalElementMap = new HashMap<String, String>();
 
     /**
      * JSONObject of the relationships
@@ -256,24 +258,63 @@ public class ModelPost extends AbstractJavaWebScript {
         total = end -start;
         log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
         
-        if (addedElements.length() > 0 || updatedElements.length() > 0 || movedElements.length() > 0) {
+        if (addedElementsSet.size() > 0 || updatedElementsSet.size() > 0 || movedElementsSet.size() > 0) {
+            JSONObject ws1 = new JSONObject();
+            JSONObject ws2 = new JSONObject();
+            
+            // add original information for workspace 1
+            JSONArray array = new JSONArray();
+            for (String sysmlid: originalElementMap.keySet()) {
+                // TODO figure out why this check is necessary
+                if (!addedElementsSet.contains( sysmlid )) {
+                    JSONObject elementJson = new JSONObject();
+                    elementJson.put( "qualifiedId", originalElementMap.get( sysmlid ) );
+                    elementJson.put( "sysmlid", sysmlid );
+                    array.put( elementJson );
+                }
+            }
+            ws1.put( "elements", array );
+            ws1.put( "name", "master" );
+            ws1.put( "timestamp", TimeUtils.toTimestamp( start ));
+            
+            // add deltas for ws2
+            if (addedElementsSet.size() > 0) {
+                JSONArray addedElements = convertElementsToJSONArray(addedElementsSet);
+                ws2.put( "addedElements", addedElements );
+            }
+            if (updatedElementsSet.size() > 0) {
+                JSONArray updatedElements = convertElementsToJSONArray(addedElementsSet);
+                ws2.put( "updatedElements", updatedElements );
+            }
+            if (movedElementsSet.size() > 0) {
+                JSONArray movedElements = convertElementsToJSONArray(addedElementsSet);
+                ws2.put( "movedElements", movedElements );
+            }
+            ws2.put( "name", "master" );
+            ws2.put( "timestamp", TimeUtils.toTimestamp( end ) );
+
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put( "workspace1", ws1 );
+            jsonObject.put( "workspace2", ws2 );
             JmsConnection jmsConnection = JmsConnection.getInstance();
-            JSONObject deltaJson = new JSONObject();
-            if (addedElements.length() > 0) {
-                deltaJson.put( "addedElements", addedElements );
-            }
-            if (updatedElements.length() > 0) {
-                deltaJson.put( "updatedElements", updatedElements );
-            }
-            if (movedElements.length() > 0) {
-                deltaJson.put( "movedElements", movedElements );
-            }
-            jmsConnection.publishTopic( deltaJson, "master" );
+            jmsConnection.publishTopic( jsonObject, "master" );
         }
         
         return elements;
     }
     
+    private JSONArray
+            convertElementsToJSONArray( Set< String > elementSet ) throws JSONException {
+        JSONArray array = new JSONArray();
+        for (String elementId: elementSet) {
+            EmsScriptNode node = findScriptNodeById( elementId, null );
+            if (node != null && node.exists()) {
+                array.put( node.toJSONObject( null ) );
+            }
+        }
+        return array;
+    }
+
     protected Set<EmsScriptNode> updateNodeReferences(boolean singleElement,
                                                       JSONObject postJson,
                                                       EmsScriptNode projectNode ) throws Exception {
@@ -731,11 +772,12 @@ public class ModelPost extends AbstractJavaWebScript {
             return elements;
         }
         String jsonId = elementJson.getString( Acm.JSON_ID );
-        String originalQualifiedId = null;
         element = findScriptNodeById( jsonId, null );
         if ( element != null ) {
             elements.add( element );
-            originalQualifiedId = element.getSysmlQId();
+            if (!originalElementMap.containsKey( jsonId )) {
+                originalElementMap.put( jsonId, element.getSysmlQId() );
+            }
         }
         
 		// check that parent is of folder type
@@ -830,31 +872,28 @@ public class ModelPost extends AbstractJavaWebScript {
 
         element = findScriptNodeById( jsonId, null );
         if (element != null && element.exists()) {
-            JSONObject newElementJson = element.toJSONObject( null );
+            // can't add the node JSON yet since properties haven't been tied in yet
             switch (modStatus.getState()) {
                 case ADDED:
                     if (!ingest) {
                         addedElementsSet.add( jsonId );
-                        addedElements.put( newElementJson );
                     }
                     break;
                 case UPDATED:
                     if (ingest && !addedElementsSet.contains( jsonId )) {
-                        updatedElements.put( newElementJson );
+                        updatedElementsSet.add(jsonId);
                     }
                     break;
                 case MOVED:
                     if (!ingest && !addedElementsSet.contains( jsonId )) {
-                        newElementJson.put( "originalQualifiedId",  originalQualifiedId);
-                        movedElements.put( newElementJson );
+                        movedElementsSet.add(jsonId);
                     }
                     break;
                 case UPDATED_AND_MOVED:
                     if (ingest && !addedElementsSet.contains( jsonId )) {
-                        updatedElements.put( newElementJson );
+                        updatedElementsSet.add(jsonId);
                     } else {
-                        newElementJson.put( "originalQualifiedId",  originalQualifiedId);
-                        movedElements.put( newElementJson );
+                        movedElementsSet.add(jsonId);
                     }
                     break;
                 default:
