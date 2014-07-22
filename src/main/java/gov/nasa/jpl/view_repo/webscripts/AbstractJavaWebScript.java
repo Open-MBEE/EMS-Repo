@@ -163,7 +163,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 //			}
 		} else {
 			NodeRef nodeRef = findNodeRefByName(name);
-			if (nodeRef != null) {
+			if (nodeRef != null && services.getNodeService().exists( nodeRef )) {
 				result = new EmsScriptNode(nodeRef, services, response);
 				foundElements.put(name, result); // add to cache
 			}
@@ -181,7 +181,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             if (results != null) {
                 for (ResultSetRow row: results) {
                     nodeRef = row.getNodeRef();
-                    break ; //Assumption is things are uniquely named - TODO: fix since snapshots have same name?...
+                    // can find deleted nodes, so check that it exists first
+                    if ( services.getNodeService().exists( nodeRef ) ) {
+                        break ; //Assumption is things are uniquely named - TODO: fix since snapshots have same name?...
+                    } else {
+                        nodeRef = null;
+                    }
                 }
             }
         } finally {

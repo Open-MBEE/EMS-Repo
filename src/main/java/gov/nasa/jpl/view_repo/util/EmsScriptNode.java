@@ -431,7 +431,7 @@ public class EmsScriptNode extends ScriptNode {
 	    Set<EmsScriptNode> emsNodeSet = new TreeSet< EmsScriptNode >( new EmsScriptNodeComparator() );
         for ( ResultSetRow row : resultSet ) {
             NodeRef ref = row.getNodeRef();
-            if ( ref == null ) continue;
+            if ( ref == null || !services.getNodeService().exists( ref )) continue;
             EmsScriptNode node = new EmsScriptNode( ref, services, response, status );
             emsNodeSet.add( node );
         }
@@ -1227,7 +1227,11 @@ public class EmsScriptNode extends ScriptNode {
             if (results != null) {
                 for (ResultSetRow row: results) {
                     nodeRef = row.getNodeRef();
-                    break ; //Assumption is things are uniquely named - TODO: fix since snapshots have same name?...
+                    if (services.getNodeService().exists( nodeRef )) {
+                        break ; //Assumption is things are uniquely named - TODO: fix since snapshots have same name?...
+                    } else {
+                        nodeRef = null;
+                    }
                 }
             }
         } catch (Exception e) {
