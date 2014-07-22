@@ -1,88 +1,21 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "description": "Specification for diffing two workspaces, WS1 and WS2",
+    "description": "Specification for diffing two workspaces, WS1 and WS2, where WS1 is original and WS2 are deltas to get to WS2.",
     "properties": {
-        "elements": {
-            "type": "array",
-            "description": "List of elements in WS1",
-            "items": {
-                "type": "object",
-                "$ref": "file:///../elements.json#/definitions/Element"
-            }
-        },
-        "updatedElements": {
-            "type": "array",
-            "description": "List of elements in changed from WS1 in WS2",
-            "items": {
-                "type": "object",
-                "$ref": "file:///../elements.json#/definitions/Element"
-            }
-        },
-        "deletedElements": {
-            "type": "array",
-            "description": "List of elements in WS1 and not in WS2, e.g. deleted. only contains ids",
-            "items": {
-                "type": "object",
-                "$ref": "file:///../elements.json#/definitions/Element"
-            }
-        },
-        "addedElements": {
-            "type": "array",
-            "description": "List of elements in WS2 and not in WS1, e.g. added",
-            "items": {
-                "type": "object",
-                "$ref": "file:///../elements.json#/definitions/Element"
-            }
-        },
-        "movedElements": {
-            "type": "array",
-            "description": "List of elements moved in WS2 from WS1",
-            "items": {
-                "type": "object",
-                "$ref": "file:///../elements.json#/definitions/Element"
-            }
-        },
         "workspace1": {
             "type": "object",
-            "description": "Specification of WS1",
+            "description": "Specification of WS1. This contains the original element hierarchy.",
             "$ref": "file:///../workspaces.json#/definitions/Workspace"
         },
         "workspace2": {
             "type": "object",
-            "description": "Specification of WS2",
+            "description": "Specification of WS2. This contains all the deltas, so updated, moved, deleted, and added.",
             "$ref": "file:///../workspaces.json#/definitions/Workspace"
-        },
-        "graph": {
-            "type": "array",
-            "description": "A map of the graph for WS1",
-            "items": {
-                "type": "object",
-                "$ref": "#/definitions/Graph"
-            }
         },
         "sequence": {
             "type": "integer",
             "description": "Sequence ID so OSB knows what order messages should appear in"
-        },
-        
-        "definitions": {
-            "Graph": {
-                "properties": {
-                    "sysmlid": {
-                        "type": "string",
-                        "description": "Unique identifier of element"
-                    },
-                    "edges": {
-                        "type": "array",
-                        "description": "List of target nodes of the edge (source is specified by sysmlid)",
-                        "items": {
-                            "type": "string"
-                        }
-                    }
-                    
-                }
-            }
         }
     }
 }
