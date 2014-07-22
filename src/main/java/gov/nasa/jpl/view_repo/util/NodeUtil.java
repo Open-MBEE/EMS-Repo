@@ -175,6 +175,9 @@ public class NodeUtil {
                 for (ResultSetRow row: results) {
                     NodeRef nr = row.getNodeRef();
                     if ( nr == null ) continue;
+                    EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
+                    //if ( !esn.exists() ) continue;
+
 //                    gotResults = true;
 
                     // Get the version for the date/time if specified.
@@ -185,7 +188,8 @@ public class NodeUtil {
                     if ( nr == null ) continue;
                     
                         // Make sure we didn't just get a near match.
-                        EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
+                        esn = new EmsScriptNode( nr, getServices() );
+                        if ( !esn.exists() ) continue;
                         try {
                             if ( !esn.checkPermissions( PermissionService.READ ) ) {
                                 continue;
@@ -240,7 +244,11 @@ public class NodeUtil {
      */
     public static NodeRef findNodeRefById(String id, Date dateTime, ServiceRegistry services) {
         NodeRef r = findNodeRefByType(id, SearchType.ID, dateTime, true, services); // TODO: temporarily search by ID
-        if ( r == null ) r = findNodeRefByType(id, "@cm\\:name:\"", dateTime, true, services);
+        EmsScriptNode esn = null;
+        if ( r != null ) {
+            esn = new EmsScriptNode( r, getServices() );
+        }
+        if ( r == null || !esn.exists() ) r = findNodeRefByType(id, "@cm\\:name:\"", dateTime, true, services);
         return r;
     }
     
