@@ -137,30 +137,48 @@
 						"type": "object",
 						"$ref": "#/definitions/Graph"
 					}
-				}
-			},
-
-			"Graph": 
-			{
-				"properties": 
+				},
+				
+				"conflicts":
 				{
-					"sysmlid": 
-					{
-						"type": "string",
-						"description": "Unique identifier of element"
-					},
+				    "type": "array",
+				    "description": "A list of conflicts between the workspaces",
+				    "items":
+				    {
+				        "type": "object",
+				        "$ref": "#/definitions/Conflict"
+			        }
+				}
+			}
+        },
+        
+		"Graph": 
+		{
+			"properties": 
+			{
+				"sysmlid": 
+				{
+					"type": "string",
+					"description": "Unique identifier of element"
+				},
 
-					"edges": 
+				"edges": 
+				{
+					"type": "array",
+					"description": "List of target nodes of the edge (source is specified by sysmlid)",
+					"items": 
 					{
-						"type": "array",
-						"description": "List of target nodes of the edge (source is specified by sysmlid)",
-						"items": 
-						{
-							"type": "string"
-						}
+						"type": "string"
 					}
 				}
 			}
+		},
+		
+		"Conflict":
+		{
+		  "properties":
+		  {
+		  }
 		}
 	}
 }
