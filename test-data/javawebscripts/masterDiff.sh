@@ -38,9 +38,14 @@ if [ $server -eq 1 ]; then
 	sleep 60s
 
 	#run the diff script
-	echo 'RUNNING DIFF SCRIPT'
-	./diff2.sh
-	passTest=$?
+	echo 'RUNNING OLD API DIFF SCRIPT'
+	#./diff2.sh
+	#passTest=$?
+
+	echo 'RUNNING WORKSPACES DIFF SCRIPT'
+        #./diffWorkspaces.sh
+        #passTest=$?
+
 
         #connect to soapUI -- WORK STILL NEEDED
         echo 'RUNNING SOAP UI TESTS'
