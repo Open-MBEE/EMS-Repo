@@ -84,7 +84,6 @@ import org.alfresco.service.namespace.RegexQNamePattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Assert;
 import org.springframework.extensions.webscripts.Status;
 
 /**
@@ -140,7 +139,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     @Override
     public EmsScriptNode childByNamePath( String path ) {
         ScriptNode child = super.childByNamePath( path );
-        if ( child == null ) {
+        if ( child == null || !child.exists() ) {
             return null;
         }
         return new EmsScriptNode( child.getNodeRef(), services, response );
@@ -413,6 +412,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             if ( ref == null ) continue;
             EmsScriptNode node =
                     new EmsScriptNode( ref, services, response, status );
+            if ( !node.exists() ) continue;
             emsNodeSet.add( node );
         }
         return emsNodeSet;
@@ -488,7 +488,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 "Artifacts" + ( Utils.isNullOrEmpty( subfolderName )
                                 ? "" : "/" + subfolderName );
         // find site; it must exist!
-        if ( targetSiteNode == null ) {
+        if ( targetSiteNode == null || !targetSiteNode.exists() ) {
             log( "Can't find node for site: " + targetSiteName + "!" );
             return null;
         }
@@ -496,7 +496,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         EmsScriptNode subfolder =
                 NodeUtil.mkdir( targetSiteNode, artifactFolderName, services,
                                 response, status );
-        if ( subfolder == null ) {
+        if ( subfolder == null || !subfolder.exists() ) {
             log( "Can't create subfolder for site, " + targetSiteName
                  + ", in artifact folder, " + artifactFolderName + "!" );
             return null;
@@ -505,7 +505,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         String artifactId = name + "." + type;
         EmsScriptNode artifactNode =
                 subfolder.createNode( artifactId, "cm:content" );
-        if ( artifactNode == null ) {
+        if ( artifactNode == null || !artifactNode.exists() ) {
             log( "Failed to create new artifact " + artifactId + "!" );
             return null;
         }
@@ -557,7 +557,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 EmsScriptNode artNode =
                         findOrCreateArtifact( name, extension, content,
                                               getSiteName(), "images" );
-                if ( artNode == null ) {
+                if ( artNode == null || !artNode.exists() ) {
                     log( "Failed to pull out image data for value! " + value );
                     break;
                 }
@@ -844,6 +844,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             nodeRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
             if ( nodeRef == null ) continue;
             EmsScriptNode oNode = new EmsScriptNode(nodeRef, services);
+            if ( !oNode.exists() ) continue;
             Date modified = oNode.getLastModified( dateTime );
             if ( modified.after( lastModifiedDate ) ) {
                 lastModifiedDate = modified;
@@ -1153,7 +1154,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                           && ( (Collection< ? >)elementValue ).isEmpty() ) ) ) {
                     ArrayList< NodeRef > refList = new ArrayList<NodeRef>();
                     for ( EmsScriptNode emsNode : elements ) {
-                        if ( emsNode != null ) refList.add( emsNode.getNodeRef() );
+                        if ( emsNode != null && emsNode.exists() ) refList.add( emsNode.getNodeRef() );
                     }
                     elementValue = refList;
                 }
@@ -1203,7 +1204,12 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                     if ( o instanceof NodeRef ) {
                         if ( dateTime != null ) {
                             NodeRef ref = NodeUtil.getNodeRefAtTime( (NodeRef)o, dateTime );
-                            if ( ref == null ) {
+                            EmsScriptNode esn = null;
+                            if ( ref != null ) {
+                                esn = new EmsScriptNode( ref, getServices() );
+                            }
+
+                            if ( ref == null || !esn.exists() ) {
                                 String msg = "Error! Element " + o + " did not exist at " + dateTime + ".\n";
                                 if ( getResponse() == null || getStatus() == null ) {
                                     Debug.error( msg );
@@ -1829,7 +1835,19 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 	                sysmlId = "" + jsonObject.get( jsonKey );
 	            }
 	            EmsScriptNode node = convertIdToEmsScriptNode( sysmlId, dateTime );
-	            property = node.getNodeRef();
+	            if ( node != null ) {
+	                property = node.getNodeRef();
+	            } else if ( !Utils.isNullOrEmpty( sysmlId ) ) {
+	                String msg = "Error! Could not find element for sysml id = "
+	                         + sysmlId + ".\n";
+    	            if ( getResponse() == null || getStatus() == null ) {
+    	                Debug.error( msg );
+    	            } else {
+    	                getResponse().append( msg );
+    	                getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+    	                                     msg );
+    	            }
+	            }
 	        } else {
 	            property = jsonObject.getString( jsonKey );
 	        }
@@ -2192,18 +2210,24 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             if ( o1 instanceof String ) {
                 type1 = (String)o1;
             } else if ( o1 instanceof NodeRef ) {
-                EmsScriptNode n1 = new EmsScriptNode( (NodeRef)o1, null );
+                EmsScriptNode n1 = new EmsScriptNode( (NodeRef)o1, NodeUtil.getServices() );
                 type1 = n1.getTypeName();
             }
             if ( o2 instanceof String ) {
                 type2 = (String)o2;
             } else if ( o2 instanceof NodeRef ) {
-                EmsScriptNode n2 = new EmsScriptNode( (NodeRef)o2, null );
+                EmsScriptNode n2 = new EmsScriptNode( (NodeRef)o2, NodeUtil.getServices() );
                 type2 = n2.getTypeName();
             }
             int comp = CompareUtils.GenericComparator.instance().compare( type1, type2 );
             if ( comp != 0 ) return comp;
             if ( o1.getClass() != o2.getClass() ) {
+            	if (o1.getClass().equals(String.class)) {
+            		return -1;
+            	}
+            	if (o2.getClass().equals(String.class)) {
+            		return 1;
+            	}
                 type1 = o1.getClass().getSimpleName();
                 type2 = o2.getClass().getSimpleName();
                 comp = CompareUtils.GenericComparator.instance().compare( type1, type2 );
@@ -2223,7 +2247,10 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 refs = new ArrayList<NodeRef>();
                 refs.add( (NodeRef)o );
             } else {
-                return Utils.getEmptyArrayList();
+                //return Utils.getEmptyArrayList(); // FIXME The array returned here is later modified, and a common empty array is
+            										// is used.  This makes it non-empty.
+                return new ArrayList<NodeRef>();
+                
             }
         } else {
             refs = Utils.asList( (Collection<?>)o, NodeRef.class );
@@ -2253,18 +2280,24 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         Set<EmsScriptNode> set = new LinkedHashSet< EmsScriptNode >();
         for ( Map.Entry< String, String > e :
             Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.entrySet() ) {
-            set.addAll( getRelationshipsOfType( typeName, e.getKey() ) );
+        	ArrayList<EmsScriptNode> relationships = getRelationshipsOfType( typeName, e.getKey() );
+        	if (!Utils.isNullOrEmpty(relationships)) {
+        		set.addAll( relationships );
+        	}
         }
         return set;
     }
     
     public ArrayList<EmsScriptNode> getRelationshipsOfType(String typeName,
                                                            String acmAspect) {
-        if ( !hasAspect( acmAspect ) ) return Utils.getEmptyArrayList();
+        if ( !hasAspect( acmAspect ) ) return new ArrayList<EmsScriptNode>();
         String acmProperty = 
                 Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.get( acmAspect );
 
         ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty );
+        // Searching for the beginning of the relationships with this typeName
+        // b/c relationships are ordered by typeName.  Therefore, the search
+        // is expected to not find a matching element.
         int index = Collections.binarySearch( relationships, typeName,
                                               //this.getNodeRef(),
                                               NodeByTypeComparator.instance );
@@ -2307,7 +2340,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         String acmProperty = Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.get( acmAspect );
         ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty );
         int index = Collections.binarySearch( relationships,
-                                              this.getNodeRef(),
+                                              //this.getNodeRef(),
+        									  relationship,
                                               NodeByTypeComparator.instance );
         if ( Debug.isOn() ) Debug.outln( "binary search returns index " + index );
         if ( index >= 0 ) {
@@ -2321,7 +2355,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         if ( index < 0 ) {
             Debug.error( true, true, "Error! Expecting an insertion point >= 0 but got " + index + "!" );
             return false;
-        } else if ( index >= relationships.size() ) {
+        } else if ( index > relationships.size() ) {
             Debug.error( true, true, "Error! Insertion point is beyond the length of the list: point = " + index + ", length = " + relationships.size() );
             return false;
         } else {
