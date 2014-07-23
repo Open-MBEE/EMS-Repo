@@ -35,7 +35,7 @@ done
 
 if [ $server -eq 1 ]; then
 	echo 'SERVER CONNECTED'
-	sleep 10s
+	sleep 60s
 
 	#run the diff script
 	echo 'RUNNING DIFF SCRIPT'
@@ -46,19 +46,22 @@ if [ $server -eq 1 ]; then
         echo 'RUNNING SOAP UI TESTS'
         #ssh $soapServer 'cd /classPath/; ./soapScript;'
         #classPath=??
-        #TestSuite="??"
+        TestSuite="WorkspacesTesting"
         #TestCase="??"
         #./testrunner.sh -f ./soapTestData -s $TestSuite -c $TestCase $classpath
         cd ./soapStuff
-        ./Resources/app/bin/testrunner.sh ./maxRegression-soapui-project.xml
+	for i in $(ls . | grep "soapui-project.xml"); do
+	         echo RUNNING TEST $i
+                ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i
+        done
 
         #shutdown the tomcat server process
         pkill -fn 'integration-test'
         echo 'KILLING SERVER'
 
-	echo 'PASSTEST?'
-        echo "$passTest"
-	exit $passTest
+	#echo 'PASSTEST?'
+        #echo "$passTest"
+	#exit $passTest
 fi
 
 if [ $server -eq 2 ]; then

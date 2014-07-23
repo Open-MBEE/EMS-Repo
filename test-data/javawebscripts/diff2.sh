@@ -209,8 +209,8 @@ echo
 
 echo 'testPOSTCHANGE2'
 # get changed element to see if source/target changed
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/4000\""
-curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/4000" | grep -v '"read":' | grep -v '"lastModified"' > output/postChange2.json
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/401?recurse=true\""
+curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/401?recurse=true" | grep -v '"read":' | grep -v '"lastModified"' > output/postChange2.json
 DIFF=$(diff baselineoutput/postChange2.json output/postChange2.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"author"')
 if [ "$DIFF" != "" ];then
         passTest=1
