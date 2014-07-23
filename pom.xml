@@ -178,6 +178,7 @@
 			<artifactId>chemistry-opencmis-commons-impl</artifactId>
 			<version>0.8.0</version>
 		</dependency>
+		<!-- Temporary dependencies for connecting directly to JMS -->
 		<dependency>
 			<groupId>javax.jms</groupId>
 			<artifactId>javax.jms-api</artifactId>
@@ -187,6 +188,12 @@
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-core</artifactId>
 			<version>5.7.0</version>
+		</dependency>
+		<!-- REST client dependencies -->
+		<dependency>
+		    <groupId>com.sun.jersey</groupId>
+		    <artifactId>jersey-client</artifactId>
+		    <version>1.18.1</version>
 		</dependency>
 		
 		<!-- dependency for max regression test (groovy script) -->

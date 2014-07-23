@@ -43,7 +43,8 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
-import gov.nasa.jpl.view_repo.jms.JmsConnection;
+import gov.nasa.jpl.view_repo.connections.JmsConnection;
+import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 import gov.nasa.jpl.view_repo.util.Acm;
 //import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -77,6 +78,7 @@ import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
+
 
 /**
  * Descriptor file:
@@ -296,12 +298,29 @@ public class ModelPost extends AbstractJavaWebScript {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put( "workspace1", ws1 );
             jsonObject.put( "workspace2", ws2 );
-            JmsConnection jmsConnection = JmsConnection.getInstance();
-            jmsConnection.publishTopic( jsonObject, "master" );
+            
+            sendDeltas(jsonObject);
         }
         
         return elements;
     }
+    
+    /**
+     * Send off the deltas to various endpoints
+     * @param deltas    JSONObject of the deltas to be published
+     * @return          true if publish completed
+     */
+    private boolean sendDeltas(JSONObject deltas) {
+        boolean jmsStatus;
+        boolean restStatus;
+
+        jmsStatus = JmsConnection.getInstance().publish( deltas, "master" );
+                
+        restStatus = RestPostConnection.getInstance().publish( deltas, "MMS" );
+        
+        return jmsStatus && restStatus ? true : false;
+    }
+    
     
     private JSONArray
             convertElementsToJSONArray( Set< String > elementSet ) throws JSONException {

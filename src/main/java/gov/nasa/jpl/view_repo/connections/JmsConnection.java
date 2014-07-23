@@ -1,4 +1,4 @@
-package gov.nasa.jpl.view_repo.jms;
+package gov.nasa.jpl.view_repo.connections;
 
 import javax.jms.Connection;
 import javax.jms.DeliveryMode;
@@ -11,7 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
-public class JmsConnection {
+public class JmsConnection implements AbstractConnection {
     private long sequenceId = 0;
     private volatile static JmsConnection INSTANCE = null;
     
@@ -38,7 +38,7 @@ public class JmsConnection {
         }
     }
     
-    public boolean publishTopic(JSONObject json, String topic) {
+    public boolean publish(JSONObject json, String topic) {
         boolean result = false;
         try {
             json.put( "sequence", sequenceId++ );
