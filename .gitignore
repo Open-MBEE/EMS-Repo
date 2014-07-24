@@ -9,3 +9,4 @@ debug*.txt
 debug*.out
 .classpath
 /src/main/amp/web/scripts/raml/
+activemq-data/
