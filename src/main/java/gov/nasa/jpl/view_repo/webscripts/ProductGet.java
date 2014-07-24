@@ -32,6 +32,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.util.ProductsWebscript;
 
 import java.util.Date;
@@ -77,8 +78,10 @@ public class ProductGet extends AbstractJavaWebScript {
 		// get timestamp if specified
         String timestamp = req.getParameter("timestamp");
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-	
-		EmsScriptNode product = findScriptNodeById(productId, dateTime);
+        
+        WorkspaceNode workspace = getWorkspace( req );
+
+		EmsScriptNode product = findScriptNodeById(productId, workspace, dateTime);
 		if (product == null) {
 			log(LogLevel.ERROR, "Product not found with id: " + productId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
@@ -114,9 +117,9 @@ public class ProductGet extends AbstractJavaWebScript {
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-        
+            WorkspaceNode workspace = getWorkspace( req );
             ProductsWebscript productsWs = new ProductsWebscript(repository, services, response);
-			productsJson = productsWs.handleProduct(productId, recurse, dateTime, gettingDisplayedElements, gettingContainedViews);
+			productsJson = productsWs.handleProduct(productId, recurse, workspace, dateTime, gettingDisplayedElements, gettingContainedViews);
 		}
 
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK && productsJson != null) {

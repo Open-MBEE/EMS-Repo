@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -101,6 +102,8 @@ public class ModelPut extends ModelPost {
     protected void createOrUpdateModel(WebScriptRequest req, Status status)
             throws Exception {
         JSONObject postJson = (JSONObject) req.parseContent();
+
+        WorkspaceNode workspace = getWorkspace( req );
         
         Iterator<?> oldIds = postJson.keys();
         while(oldIds.hasNext()) {
@@ -108,7 +111,7 @@ public class ModelPut extends ModelPost {
             String newId = postJson.getString(oldId);
             
             if (oldId != null && newId != null && oldId != newId) {
-                EmsScriptNode elementNode = findScriptNodeById(oldId, null);
+                EmsScriptNode elementNode = findScriptNodeById(oldId, workspace, null);
                 if (checkPermissions(elementNode, PermissionService.WRITE)) {
                     if (elementNode != null) {
                         elementNode.setProperty(Acm.ACM_ID, newId);

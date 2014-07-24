@@ -381,7 +381,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     public Collection< EmsScriptNode >
             getElementWithIdentifier( Object context, String specifier ) {
         // TODO -- need to take into account the context!
-        NodeRef element = NodeUtil.findNodeRefById( specifier, null, services );
+        NodeRef element = NodeUtil.findNodeRefById( specifier, null, null, services );
         EmsScriptNode emsSN = new EmsScriptNode( element, services );
         return Utils.newList( emsSN );
     }
@@ -398,8 +398,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         Status status = new Status();
         // TODO -- need to take into account the context!
         Map< String, EmsScriptNode > elements =
-                NodeUtil.searchForElements( specifier, dateTime, services, response,
-                                            status );
+                NodeUtil.searchForElements( specifier, null, dateTime,
+                                            services, response, status );
         if ( elements != null ) return elements.values();
         return Collections.emptyList();
     }

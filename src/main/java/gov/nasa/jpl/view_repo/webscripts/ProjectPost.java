@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -84,10 +85,15 @@ public class ProjectPost extends AbstractJavaWebScript {
 		        boolean fix = checkArgEquals(req, "fix", "true") ? true : false;
 		        boolean createSite = checkArgEquals(req, "createSite", "true") ? true : false;
 
+                WorkspaceNode workspace = getWorkspace( req );
                 if ( siteName != null && !siteName.equals( NO_SITE_ID ) ) {
-			        statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId, siteName, createSite, fix, delete);
+                    statusCode = updateOrCreateProject( (JSONObject)req.parseContent(),
+                                                        workspace, projectId,
+                                                        siteName, createSite, fix,
+                                                        delete );
 			    } else {
-			        statusCode = updateOrCreateProject((JSONObject)req.parseContent(), projectId, fix);
+                    statusCode = updateOrCreateProject( (JSONObject)req.parseContent(),
+                                                        workspace, projectId, fix );
 			    }
 			} else {
 				statusCode = responseStatus.getCode();
@@ -108,8 +114,8 @@ public class ProjectPost extends AbstractJavaWebScript {
 		return model;
 	}
 
-	public int updateOrCreateProject(JSONObject jsonObject, String projectId, boolean fix) throws JSONException {
-	      EmsScriptNode projectNode = findScriptNodeById(projectId, null);
+	public int updateOrCreateProject(JSONObject jsonObject, WorkspaceNode workspace, String projectId, boolean fix) throws JSONException {
+	      EmsScriptNode projectNode = findScriptNodeById(projectId, workspace, null);
 	      
 	      if (projectNode == null) {
 	          log(LogLevel.ERROR, "Could not find project\n", HttpServletResponse.SC_NOT_FOUND);
@@ -149,18 +155,18 @@ public class ProjectPost extends AbstractJavaWebScript {
 	 * @return				HttpStatusResponse code for success of the POST request
 	 * @throws JSONException
 	 */
-    public int updateOrCreateProject(JSONObject jsonObject, //String workspaceId,
+    public int updateOrCreateProject(JSONObject jsonObject, WorkspaceNode workspace,
                                      String projectId, String siteName,
                                      boolean createSite, boolean fix,
                                      boolean delete) throws JSONException {
 		// make sure site exists
-		EmsScriptNode siteNode = getSiteNode(siteName, null);
+		EmsScriptNode siteNode = getSiteNode(siteName, workspace, null);
 		if (siteNode == null) {
 		    if (createSite) {
 		        if ( siteName == null || siteName.length() == 0 ) {
 	                siteName="europa";
 		        }
-		        siteNode = createSite( siteName );
+		        siteNode = createSite( siteName, workspace );
 		    } else {
 		        log(LogLevel.ERROR, "Site not found for " + siteName + ".\n", HttpServletResponse.SC_NOT_FOUND);
 		        return HttpServletResponse.SC_NOT_FOUND;
@@ -168,7 +174,8 @@ public class ProjectPost extends AbstractJavaWebScript {
 		}
 		
 		// make sure Model package under site exists
-		EmsScriptNode modelContainerNode = siteNode.childByNamePath(MODEL_PATH_SEARCH);
+        EmsScriptNode modelContainerNode =
+                siteNode.childByNamePath( MODEL_PATH_SEARCH, workspace );
 		if (modelContainerNode == null) {
 		    // always create
 		    fix = true;
@@ -182,7 +189,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		}
 		
 		// create project if doesn't exist or update if fix is specified 
-		EmsScriptNode projectNode = findScriptNodeById(projectId, null);
+		EmsScriptNode projectNode = findScriptNodeById(projectId, workspace, null);
 		String projectName = null;
 		if (jsonObject.has(Acm.JSON_NAME)) {
 		    projectName = jsonObject.getString(Acm.JSON_NAME);

@@ -32,6 +32,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -86,7 +87,9 @@ public class ProjectGet extends AbstractJavaWebScript {
                 String timestamp = req.getParameter("timestamp");
                 Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
                 
-                json = handleProject(projectId, siteName, dateTime);
+                WorkspaceNode workspace = getWorkspace( req );
+                
+                json = handleProject(projectId, siteName, workspace, dateTime);
             }
         } catch (JSONException e) {
             log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -117,14 +120,16 @@ public class ProjectGet extends AbstractJavaWebScript {
      * @return HttpStatusResponse code for success of the POST request
      * @throws JSONException 
      */
-    private JSONObject handleProject(String projectId, String siteName, Date dateTime) throws JSONException {
+    private JSONObject handleProject( String projectId, String siteName,
+                                      WorkspaceNode workspace, Date dateTime )
+                                              throws JSONException {
         EmsScriptNode projectNode;
         JSONObject json = null;
         
         if (siteName == null) {
-            projectNode = findScriptNodeById(projectId, dateTime);
+            projectNode = findScriptNodeById(projectId, workspace, dateTime);
         } else {
-            EmsScriptNode siteNode = getSiteNode( siteName, dateTime );
+            EmsScriptNode siteNode = getSiteNode( siteName, workspace, dateTime );
             projectNode = siteNode.childByNamePath("/Models/" + projectId);
             if (projectNode == null) {
             		// for backwards compatibility

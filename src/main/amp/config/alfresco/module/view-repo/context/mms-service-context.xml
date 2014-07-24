@@ -14,6 +14,13 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
 
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.projects.project.get"
+        class="gov.nasa.jpl.view_repo.webscripts.ProjectGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.elements.post"
         class="gov.nasa.jpl.view_repo.webscripts.ModelPost" parent="webscript"
         singleton="false">
@@ -30,6 +37,13 @@
 
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.products.get"
         class="gov.nasa.jpl.view_repo.webscripts.MmsProductsGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.products.post"
+        class="gov.nasa.jpl.view_repo.webscripts.MmsProductsPost" parent="webscript"
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />

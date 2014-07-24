@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -56,7 +57,11 @@ public class WebScriptUtil {
         // do nothing
     }
     
-    public static Set<EmsScriptNode> getAllNodesInPath(String qnamePath, String luceneContext, String acmType, Date dateTime, ServiceRegistry services, StringBuffer response) {
+    public static Set< EmsScriptNode >
+            getAllNodesInPath( String qnamePath, String luceneContext,
+                               String acmType, WorkspaceNode workspace,
+                               Date dateTime, ServiceRegistry services,
+                               StringBuffer response ) {
         String pattern = luceneContext + ":\"" + acmType + "\"";
         Set<EmsScriptNode> set = new HashSet<EmsScriptNode>();
         
@@ -67,14 +72,19 @@ public class WebScriptUtil {
                 NodeRef nr = row.getNodeRef();
                 if ( nr == null ) continue;
                 if ( dateTime != null ) {
-                    nr = NodeUtil.getNodeRefAtTime( nr, dateTime );
+                    nr = NodeUtil.getNodeRefAtTime( nr, workspace, dateTime );
                     if ( nr == null ) continue;
                 }
                 EmsScriptNode node = new EmsScriptNode(nr, services, response);
-                if (node != null && node.exists()) { 
-                    if (node.getQnamePath().startsWith(qnamePath)) {
-                        set.add(node);
-                    }
+                // filter by project
+                if ( ( node.exists() && 
+                        node.getQnamePath().contains( qnamePath ) ) &&
+                        ( workspace == null || !workspace.exists() ||
+                       workspace.contains( node ) ) 
+                        ) {
+                    //                    if (node.getQnamePath().startsWith(qnamePath)) {
+                    set.add(node);
+                    // TODO -- Couldn't a node in a workspace and its source both be added to set?
                 }
             }
         } catch (Exception e) {

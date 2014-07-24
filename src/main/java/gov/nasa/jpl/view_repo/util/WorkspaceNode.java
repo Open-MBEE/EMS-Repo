@@ -3,7 +3,13 @@
  */
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.mbee.util.Debug;
+
 import java.util.Date;
+import java.util.Map;
+import java.util.TreeMap;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -27,7 +33,6 @@ public class WorkspaceNode extends EmsScriptNode {
     public WorkspaceNode( NodeRef nodeRef, ServiceRegistry services,
                           StringBuffer response, Status status ) {
         super( nodeRef, services, response, status );
-        addAspect( "ems:Workspace" );
     }
 
     /**
@@ -38,7 +43,6 @@ public class WorkspaceNode extends EmsScriptNode {
     public WorkspaceNode( NodeRef nodeRef, ServiceRegistry services,
                           StringBuffer response ) {
         super( nodeRef, services, response );
-        addAspect( "ems:Workspace" );
     }
 
     /**
@@ -47,11 +51,54 @@ public class WorkspaceNode extends EmsScriptNode {
      */
     public WorkspaceNode( NodeRef nodeRef, ServiceRegistry services ) {
         super( nodeRef, services );
-        addAspect( "ems:Workspace" );
     }
     
+    @Override
+    public WorkspaceNode getWorkspace() {
+        return this; // This allow
+    }
+    
+    @Override
+    public WorkspaceNode getParentWorkspace() {
+        NodeRef ref = (NodeRef)getProperty("sysml:parent");
+        if ( ref == null ) return null;
+        WorkspaceNode parentWs = new WorkspaceNode( ref, getServices() );
+        return parentWs;
+    }
+    
+    @Override
+    public void setWorkspace( WorkspaceNode workspace, NodeRef source ) {
+        String msg = "Cannot set the workspace of a workspace!";
+        if ( getResponse() != null ) {
+            getResponse().append( msg + "\n" );
+            if ( getStatus() != null ) {
+                getStatus().setCode( HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                                     msg );
+            }
+        }
+        Debug.error( msg );
+    }
+
+    /**
+     * Create a workspace folder within the specified folder or (if the folder
+     * is null) within the specified user's home folder.
+     * 
+     * @param sysmlId
+     *            the name/identifier of the workspace
+     * @param userName
+     *            the name of the user that is creating the workspace
+     * @param folder
+     *            the folder within which to create the workspace
+     * @param services
+     * @param response
+     * @param status
+     * @return the new workspace or null if the workspace could not be created
+     *         because both the containing folder and the user name were both
+     *         unspecified (non-existent)
+     */
     public static WorkspaceNode createWorskpaceInFolder( String sysmlId,
                                                          //String wsName,
+                                                         String userName,
                                                          EmsScriptNode folder,
                                                          ServiceRegistry services,
                                                          StringBuffer response,
@@ -59,14 +106,24 @@ public class WorkspaceNode extends EmsScriptNode {
         if ( sysmlId == null ) {
             sysmlId = NodeUtil.createId( services );
         }
+        if ( folder == null || !folder.exists() ) {
+            //String userName = ws.getOwner();
+            if ( userName != null && userName.length() > 0 ) {
+                folder = NodeUtil.getUserHomeFolder( userName );
+            }
+        }
+        if ( folder == null || !folder.exists() ) {
+            Debug.error( true, false, "\n%%% Error! no folder, " + folder
+                                      + ", within which to create workspace, "
+                                      + sysmlId );
+        }
+
         WorkspaceNode ws = new WorkspaceNode( folder.createFolder( sysmlId ).getNodeRef(),
                                               services, response, status );
-        if ( folder == null || !folder.exists() ) {
-            String userName = ws.getOwner();
-            folder = NodeUtil.getUserHomeFolder( userName );
-        }
+        ws.addAspect( "ems:Workspace" );
+        
         ws.setProperty( "ems:parent", folder );
-        if ( folder.hasAspect( "ems:Workspace" ) ) {
+        if ( folder.isWorkspace() ) {
             WorkspaceNode parentWorkspace =
                     new WorkspaceNode( folder.getNodeRef(), services, response,
                                        status );
@@ -75,14 +132,29 @@ public class WorkspaceNode extends EmsScriptNode {
         ws.setProperty( "ems:lastTimeSyncParent", new Date() );
         return ws;
     }
+
+    // A workspace is not created inside the folder of another workspace, so
+    // this method is commented out.
+//    public WorkspaceNode createWorskpace( String sysmlId ) {
+//        return createWorskpaceInFolder( sysmlId, this.getOwner(), this,
+//                                        getServices(), getResponse(),
+//                                        getStatus() );
+//    }
     
-    public WorkspaceNode createWorskpace( String sysmlId ) {
-        return createWorskpaceInFolder( sysmlId, this, getServices(),
-                                        getResponse(), getStatus() );
-    }
-    
+    /**
+     * Determine whether the given node is correct for this workspace, meaning
+     * that it is either modified in this workspace or is contained by the
+     * parent workspace and unmodified in this workspace.
+     * 
+     * @param node
+     * @return true iff the node is in this workspace
+     */
     public boolean contains( EmsScriptNode node ) {
-        return node.getWorkspace().equals( this );
+        WorkspaceNode nodeWs = node.getWorkspace();
+        if ( this.equals( nodeWs ) ) return true;
+        WorkspaceNode parentWs = getParentWorkspace();
+        if ( parentWs == null ) return ( nodeWs == null );
+        return parentWs.contains( node );
     }
     
     // Replicate this folder and its parent/grandparents in this workspace.
@@ -93,7 +165,7 @@ public class WorkspaceNode extends EmsScriptNode {
         // If the folder is not already in this workspace, clone it.
         if ( !contains( folder ) ) {
             newFolder = folder.clone();
-            newFolder.setWorkspace( this );
+            newFolder.setWorkspace( this, folder.getNodeRef() );
         }
         
         if ( folder.isWorkspaceTop() ) return newFolder;
@@ -104,7 +176,7 @@ public class WorkspaceNode extends EmsScriptNode {
             parent = replicateFolderWithChain( parent );
             newFolder.move( parent );
         } // REVIEW -- what if parent != null && !parent.exists()
-        return folder;
+        return newFolder;
     }
     
     // When creating a node, create it in the workspace with the owner (and
@@ -115,5 +187,20 @@ public class WorkspaceNode extends EmsScriptNode {
     
     // When copying a node, check and see if the other end of each relationship
     // is in the new workspace, and copy the relationship if it is.
+    
+    /**
+     * Find the differences between this workspace and another.
+     * 
+     * @param other
+     *            the workspace to compare
+     * @return a map of elements in this workspace to changed elements in the
+     *         other workspace
+     */
+    public Map<EmsScriptNode, EmsScriptNode> diff( WorkspaceNode other ) {
+        TreeMap<EmsScriptNode, EmsScriptNode> map = new TreeMap<EmsScriptNode, EmsScriptNode>();
+        // TODO
+        
+        return map;
+    }
     
 }

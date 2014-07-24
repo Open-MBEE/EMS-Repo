@@ -33,6 +33,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,8 +82,9 @@ public class ViewModelPost extends ModelPost {
         }
         UserTransaction trx = services.getTransactionService().getUserTransaction();
         try {
+            WorkspaceNode workspace = getWorkspace( req );
             trx.begin();
-            EmsScriptNode view = findScriptNodeById(viewid, null);
+            EmsScriptNode view = findScriptNodeById(viewid, workspace, null);
             view.createOrUpdateProperty("cm:modifier", AuthenticationUtil.getFullyAuthenticatedUser());
             trx.commit();
         } catch (Throwable e) {
@@ -139,6 +141,8 @@ public class ViewModelPost extends ModelPost {
         JSONObject postJson = (JSONObject) req.parseContent();
         JSONArray array = postJson.getJSONArray("elements");
         
+        WorkspaceNode workspace = getWorkspace( req );
+
         for (int ii = 0; ii < array.length(); ii++) {
             JSONObject elementJson = array.getJSONObject(ii);
             
@@ -148,9 +152,9 @@ public class ViewModelPost extends ModelPost {
             }
             String id = elementJson.getString(Acm.JSON_ID);
             
-            EmsScriptNode elementNode = findScriptNodeById(id, null);
+            EmsScriptNode elementNode = findScriptNodeById(id, workspace, null);
             if (elementNode != null) {
-                updateOrCreateElement(elementJson, elementNode.getParent(), false);
+                updateOrCreateElement(elementJson, elementNode.getParent(), workspace, false);
             } else {
                 // new element, we need a proper parent
                 boolean parentFound = true;
@@ -162,13 +166,13 @@ public class ViewModelPost extends ModelPost {
                     if (annotatedJson.length() <= 0) {
                         parentFound = false;
                     } else {
-                        EmsScriptNode commentParent = findScriptNodeById(annotatedJson.getString(0), null);
+                        EmsScriptNode commentParent = findScriptNodeById(annotatedJson.getString(0), workspace, null);
                             if (commentParent == null) {
                                 parentFound = false;
                             } else {
                                 if (checkPermissions(commentParent, PermissionService.WRITE)) {
                                     newElements.add(id);
-                                    updateOrCreateElement(elementJson, commentParent.getParent(), false);
+                                    updateOrCreateElement(elementJson, commentParent.getParent(), workspace, false);
                                 }
                             }
                     }
@@ -180,19 +184,21 @@ public class ViewModelPost extends ModelPost {
             }
         }
         
-        updateOrCreateAllRelationships(relationshipsJson);
+        updateOrCreateAllRelationships(relationshipsJson, workspace);
         
-        updateNodeReferencesForView( array );
+        updateNodeReferencesForView( array, workspace );
     }
 
-    protected void updateNodeReferencesForView( JSONArray array ) throws Exception {
+    protected void updateNodeReferencesForView( JSONArray array,
+                                                WorkspaceNode workspace )
+                                                        throws Exception {
         for (int ii = 0; ii < array.length(); ii++) {
             JSONObject elementJson = array.getJSONObject(ii);
             
             String id = elementJson.getString(Acm.JSON_ID);
-            EmsScriptNode elementNode = findScriptNodeById(id, null);
+            EmsScriptNode elementNode = findScriptNodeById(id, workspace, null);
             if (elementNode != null) {
-                updateOrCreateElement(elementJson, elementNode.getParent(), true);
+                updateOrCreateElement(elementJson, elementNode.getParent(), workspace, true);
             } else {
                 // new element, we need a proper parent
                 boolean parentFound = true;
@@ -204,12 +210,12 @@ public class ViewModelPost extends ModelPost {
                     if (annotatedJson.length() <= 0) {
                         parentFound = false;
                     } else {
-                        EmsScriptNode commentParent = findScriptNodeById(annotatedJson.getString(0), null);
+                        EmsScriptNode commentParent = findScriptNodeById(annotatedJson.getString(0), workspace, null);
                             if (commentParent == null) {
                                 parentFound = false;
                             } else {
                                 if (checkPermissions(commentParent, PermissionService.WRITE)) {
-                                    updateOrCreateElement(elementJson, commentParent.getParent(), true);
+                                    updateOrCreateElement(elementJson, commentParent.getParent(), workspace, true);
                                 }
                             }
                     }

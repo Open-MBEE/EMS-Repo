@@ -31,11 +31,14 @@ public class CommitUtil {
 	}
 
 	public static List<EmsScriptNode> getChangeSets(EmsScriptNode context,
-			ServiceRegistry services, StringBuffer response) {
+	                                                WorkspaceNode workspace,
+	                                                ServiceRegistry services,
+	                                                StringBuffer response ) {
 		List<EmsScriptNode> changeSets = new ArrayList<EmsScriptNode>();
 		if (context != null) {
-			changeSets.addAll(WebScriptUtil.getAllNodesInPath(
+            changeSets.addAll(WebScriptUtil.getAllNodesInPath(
 					context.getQnamePath(), "TYPE", "cm:content",
+					workspace,
 					null, services, response));
 			Collections.sort(changeSets,
 					new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator());
@@ -45,11 +48,13 @@ public class CommitUtil {
 	}
 
 	public static JSONObject getJsonChangeSets(EmsScriptNode context,
-			ServiceRegistry services, StringBuffer response)
+	                                           WorkspaceNode workspace,
+	                                           ServiceRegistry services,
+	                                           StringBuffer response)
 			throws JSONException {
 		EmsScriptNode commitPkg = context.childByNamePath("Commits");
-		List<EmsScriptNode> changeSets = getChangeSets(commitPkg, services,
-				response);
+		List<EmsScriptNode> changeSets = getChangeSets(commitPkg, workspace,
+		                                               services, response);
 		
 		JSONObject jsonChangeSets = new JSONObject();
 		JSONArray array = new JSONArray();

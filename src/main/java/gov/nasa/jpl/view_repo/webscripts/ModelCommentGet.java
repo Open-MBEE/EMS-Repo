@@ -32,6 +32,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -77,15 +78,18 @@ public class ModelCommentGet extends ModelGet {
         String timestamp = req.getParameter("timestamp");
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
+        WorkspaceNode workspace = getWorkspace( req );
+        
         ModelCommentGet instance = new ModelCommentGet(repository, services);
         String elementId = req.getServiceMatch().getTemplateVars().get("id");
-        EmsScriptNode element = findScriptNodeById(elementId, dateTime);
+        EmsScriptNode element = findScriptNodeById(elementId, workspace, dateTime);
 
         if (element == null) {
             log(LogLevel.ERROR, "Could not find element", HttpServletResponse.SC_NOT_FOUND);
             model.put("res", response);
         } else {
-            JSONArray elementsJson = instance.getCommentElements(element, dateTime);
+            JSONArray elementsJson =
+                    instance.getCommentElements( element, workspace, dateTime );
             appendResponseStatusInfo(instance);
             if (elementsJson != null) {
                 JSONObject top = new JSONObject();
@@ -111,12 +115,14 @@ public class ModelCommentGet extends ModelGet {
      * @param element
      * @return
      */
-    private JSONArray getCommentElements(EmsScriptNode element, Date dateTime) {
+    private JSONArray getCommentElements( EmsScriptNode element,
+                                          WorkspaceNode workspace,
+                                          Date dateTime ) {
         try {
             JSONArray commentIds = element.getSourceAssocsIdsByType(Acm.ACM_ANNOTATED_ELEMENTS);
             for (int ii = 0; ii < commentIds.length(); ii++) {
                 String commentId = commentIds.getString(ii);
-                EmsScriptNode comment = findScriptNodeById(commentId, dateTime);
+                EmsScriptNode comment = findScriptNodeById(commentId, workspace, dateTime);
                 if (comment != null) {
                     elementsFound.put(commentId, comment);
                 }
