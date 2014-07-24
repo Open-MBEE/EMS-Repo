@@ -234,7 +234,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      */
     public boolean createOrUpdateAspect( String aspectName ) {
         if ( Acm.getJSON2ACM().keySet().contains( aspectName ) ) {
-            aspectName = Acm.getACM2JSON().get( aspectName );
+            aspectName = Acm.getJSON2ACM().get( aspectName );
         }
         if ( !hasAspect( aspectName ) ) {
             return addAspect( aspectName );

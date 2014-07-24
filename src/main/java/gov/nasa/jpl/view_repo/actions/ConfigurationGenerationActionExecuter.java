@@ -94,7 +94,10 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         if ( action instanceof WebScriptRequest) {
             WebScriptRequest req = (WebScriptRequest)action;
             String timestamp = req.getParameter("timestamp");
-            workspace = AbstractJavaWebScript.getWorkspace( req, services, response, responseStatus );
+            workspace = AbstractJavaWebScript.getWorkspace( req, services,
+                                                            response,
+                                                            responseStatus,
+                                                            false, null );
             dateTime = TimeUtils.dateFromTimestamp( timestamp );
         }
 

@@ -97,7 +97,8 @@ import org.springframework.extensions.webscripts.Status;
                         AbstractJavaWebScript.getWorkspaceFromId( workspaceId,
                                                                   services,
                                                                   response,
-                                                                  responseStatus );
+                                                                  responseStatus,
+                                                                  false, null );
                 
                 // Parse the stored file for loading
                 EmsScriptNode jsonNode = new EmsScriptNode(nodeRef, services, response);

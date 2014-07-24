@@ -63,6 +63,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
@@ -1591,7 +1592,8 @@ public class ModelPost extends AbstractJavaWebScript {
         boolean runInBackground = checkArgEquals(req, "background", "true");
         boolean fix = checkArgEquals(req, "fix", "true");
 
-        WorkspaceNode workspace = getWorkspace( req );
+        String user = AuthenticationUtil.getRunAsUser();
+        WorkspaceNode workspace = getWorkspace( req, true, user );
         
         ModelPost instance = new ModelPost(repository, services);
 

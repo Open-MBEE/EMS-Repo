@@ -49,6 +49,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessStatus;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
 import org.mozilla.javascript.Scriptable;
@@ -207,7 +208,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             EmsScriptNode resultAtTime =
                     foundElements.get( id ).getVersionAtTime( dateTime );
 			if ( resultAtTime != null &&
-			     ( workspace == null || resultAtTime.getWorkspace().equals( workspace ) ) ) {
+			     ( workspace == null || workspace.equals( resultAtTime.getWorkspace() ) ) ) {
 			    //if ( resultAtTime != null ) 
 			    result = resultAtTime;
 			}
@@ -363,31 +364,55 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
     
     public WorkspaceNode getWorkspace( WebScriptRequest req ) {
-        return getWorkspace( req, services, response, responseStatus );
+        return getWorkspace( req, false, null );
+    }
+    
+    public WorkspaceNode getWorkspace( WebScriptRequest req,
+                                       boolean createIfNotFound,
+                                       String userName ) {
+        return getWorkspace( req, services, response, responseStatus, createIfNotFound, userName );
     }
 
     public static WorkspaceNode getWorkspace( WebScriptRequest req,
                                               ServiceRegistry services,
                                               StringBuffer response,
-                                              Status responseStatus ) {
+                                              Status responseStatus,
+                                              boolean createIfNotFound,
+                                              String userName ) {
         String nameOrId = getWorkspaceId( req );
-        return getWorkspaceFromId( nameOrId, services, response, responseStatus );
+        return getWorkspaceFromId( nameOrId, services, response, responseStatus,
+                                   createIfNotFound, userName );
     }
 
     public static WorkspaceNode getWorkspaceFromId( String nameOrId,
                                                     ServiceRegistry services,
                                                     StringBuffer response,
-                                                    Status responseStatus ) {
+                                                    Status responseStatus,
+                                                    boolean createIfNotFound,
+                                                    String userName ) {
         if ( !Utils.isNullOrEmpty( nameOrId ) ) {
             // Use null to indicate master workspace
             if ( nameOrId.toLowerCase().equals( "master" ) ) {
                 return null;
             }
+            WorkspaceNode workspace = null;
+            
             NodeRef ref = NodeUtil.findNodeRefById( nameOrId, null,
                                                     null, services );
-            if ( ref == null ) return null;
-            WorkspaceNode workspace =
-                    new WorkspaceNode( ref, services, response, responseStatus );
+            if ( ref != null ) {
+                workspace = new WorkspaceNode( ref, services, response,
+                                               responseStatus );
+                if ( workspace.exists() && workspace.hasAspect( "ems:Workspace" ) ) {
+                    // TODO -- check read permissions
+                    if ( workspace.checkPermissions( PermissionService.READ ) ) {
+                        return workspace;
+                    }
+                }
+            }
+            if ( !createIfNotFound ) return null;
+            WorkspaceNode.createWorskpaceInFolder( nameOrId, userName,
+                                                   null, services,
+                                                   response, responseStatus );
             return workspace;
         }
         return null;

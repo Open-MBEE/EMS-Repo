@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 import gov.nasa.jpl.mbee.util.CompareUtils;
-import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.FileUtils;
 
 import org.json.JSONArray;

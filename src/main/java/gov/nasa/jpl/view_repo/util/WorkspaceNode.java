@@ -33,7 +33,6 @@ public class WorkspaceNode extends EmsScriptNode {
     public WorkspaceNode( NodeRef nodeRef, ServiceRegistry services,
                           StringBuffer response, Status status ) {
         super( nodeRef, services, response, status );
-        addAspect( "ems:Workspace" );
     }
 
     /**
@@ -44,7 +43,6 @@ public class WorkspaceNode extends EmsScriptNode {
     public WorkspaceNode( NodeRef nodeRef, ServiceRegistry services,
                           StringBuffer response ) {
         super( nodeRef, services, response );
-        addAspect( "ems:Workspace" );
     }
 
     /**
@@ -53,7 +51,6 @@ public class WorkspaceNode extends EmsScriptNode {
      */
     public WorkspaceNode( NodeRef nodeRef, ServiceRegistry services ) {
         super( nodeRef, services );
-        addAspect( "ems:Workspace" );
     }
     
     @Override
@@ -82,8 +79,26 @@ public class WorkspaceNode extends EmsScriptNode {
         Debug.error( msg );
     }
 
+    /**
+     * Create a workspace folder within the specified folder or (if the folder
+     * is null) within the specified user's home folder.
+     * 
+     * @param sysmlId
+     *            the name/identifier of the workspace
+     * @param userName
+     *            the name of the user that is creating the workspace
+     * @param folder
+     *            the folder within which to create the workspace
+     * @param services
+     * @param response
+     * @param status
+     * @return the new workspace or null if the workspace could not be created
+     *         because both the containing folder and the user name were both
+     *         unspecified (non-existent)
+     */
     public static WorkspaceNode createWorskpaceInFolder( String sysmlId,
                                                          //String wsName,
+                                                         String userName,
                                                          EmsScriptNode folder,
                                                          ServiceRegistry services,
                                                          StringBuffer response,
@@ -91,12 +106,22 @@ public class WorkspaceNode extends EmsScriptNode {
         if ( sysmlId == null ) {
             sysmlId = NodeUtil.createId( services );
         }
+        if ( folder == null || !folder.exists() ) {
+            //String userName = ws.getOwner();
+            if ( userName != null && userName.length() > 0 ) {
+                folder = NodeUtil.getUserHomeFolder( userName );
+            }
+        }
+        if ( folder == null || !folder.exists() ) {
+            Debug.error( true, false, "\n%%% Error! no folder, " + folder
+                                      + ", within which to create workspace, "
+                                      + sysmlId );
+        }
+
         WorkspaceNode ws = new WorkspaceNode( folder.createFolder( sysmlId ).getNodeRef(),
                                               services, response, status );
-        if ( folder == null || !folder.exists() ) {
-            String userName = ws.getOwner();
-            folder = NodeUtil.getUserHomeFolder( userName );
-        }
+        ws.addAspect( "ems:Workspace" );
+        
         ws.setProperty( "ems:parent", folder );
         if ( folder.isWorkspace() ) {
             WorkspaceNode parentWorkspace =
@@ -107,17 +132,28 @@ public class WorkspaceNode extends EmsScriptNode {
         ws.setProperty( "ems:lastTimeSyncParent", new Date() );
         return ws;
     }
+
+    // A workspace is not created inside the folder of another workspace, so
+    // this method is commented out.
+//    public WorkspaceNode createWorskpace( String sysmlId ) {
+//        return createWorskpaceInFolder( sysmlId, this.getOwner(), this,
+//                                        getServices(), getResponse(),
+//                                        getStatus() );
+//    }
     
-    public WorkspaceNode createWorskpace( String sysmlId ) {
-        return createWorskpaceInFolder( sysmlId, this, getServices(),
-                                        getResponse(), getStatus() );
-    }
-    
+    /**
+     * Determine whether the given node is correct for this workspace, meaning
+     * that it is either modified in this workspace or is contained by the
+     * parent workspace and unmodified in this workspace.
+     * 
+     * @param node
+     * @return true iff the node is in this workspace
+     */
     public boolean contains( EmsScriptNode node ) {
         WorkspaceNode nodeWs = node.getWorkspace();
-        if ( nodeWs == null || nodeWs.equals( this ) ) return true;
+        if ( this.equals( nodeWs ) ) return true;
         WorkspaceNode parentWs = getParentWorkspace();
-        if ( parentWs == null ) return false;
+        if ( parentWs == null ) return ( nodeWs == null );
         return parentWs.contains( node );
     }
     
