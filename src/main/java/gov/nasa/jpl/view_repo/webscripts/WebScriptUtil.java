@@ -76,17 +76,15 @@ public class WebScriptUtil {
                     if ( nr == null ) continue;
                 }
                 EmsScriptNode node = new EmsScriptNode(nr, services, response);
-                try {
-                    // filter by project
-                    if ( ( workspace == null || !workspace.exists() ||
-                           workspace.contains( node ) ) && 
-                         node.getQnamePath().contains( qnamePath ) ) {
-                        //                    if (node.getQnamePath().startsWith(qnamePath)) {
-                        set.add(node);
-                        // TODO -- Couldn't a node in a workspace and its source both be added to set?
-                    }
-                } catch (Exception ee) {
-                    // do nothing, exception is most likely that the nodeRef doesn't exist
+                // filter by project
+                if ( ( node.exists() && 
+                        node.getQnamePath().contains( qnamePath ) ) &&
+                        ( workspace == null || !workspace.exists() ||
+                       workspace.contains( node ) ) 
+                        ) {
+                    //                    if (node.getQnamePath().startsWith(qnamePath)) {
+                    set.add(node);
+                    // TODO -- Couldn't a node in a workspace and its source both be added to set?
                 }
             }
         } catch (Exception e) {
