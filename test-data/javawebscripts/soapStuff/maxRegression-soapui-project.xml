@@ -383,4 +383,4 @@ if( acceptEncodingHeadeList.contains("gzip,deflate") )
 }
 
 */
-</con:dispatchPath></con:restMockAction></con:restMockService><con:requirements/><con:properties><con:property><con:name>server</con:name><con:value>localhost:8080</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>
+</con:dispatchPath></con:restMockAction></con:restMockService><con:requirements/><con:properties><con:property><con:name>server</con:name><con:value>128.149.16.140:8080</con:value></con:property></con:properties><con:wssContainer/><con:databaseConnectionContainer/><con:oAuth2ProfileContainer/><con:reporting><con:reportTemplates/><con:xmlTemplates/><con:parameters/></con:reporting><con:sensitiveInformation/></con:soapui-project>
