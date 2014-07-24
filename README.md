@@ -248,43 +248,43 @@ To evaluate a Java expression, in this example, Math.Min(1,2), from the command 
 	To add redo shortcut: Window > Preferences > General > Keys > Search "redo" > Change binding to Ctrl+Y or your choice
 	
 	Note: For easier debugging, copy-paste stacktrace on console window to access lines referenced in error message
-	
+
 ###Eclipse Shortcuts:
 
-	Note: Following shortcuts are mainly for Linux.
+Note: Following shortcuts are mainly for Linux.
 	
-	|       **ShortCut**      |       **Description**    |
-	|-------------------------|--------------------------|
-	| Ctrl+Shift+R            | Resource/File finder     |
-	| Ctrl+l                  | Go to line               |
-	| f3                      | Go to Definition         |
-	| f4                      | Type Hierarchy           |
-	| Ctrl+Alt+h              | Call Hierachy            |
+|       **ShortCut**      |       **Description**    |
+|-------------------------|--------------------------|
+| Ctrl+Shift+R            | Resource/File finder     |
+| Ctrl+L                  | Go to line               |
+| F3                      | Go to Definition         |
+| F4                      | Type Hierarchy           |
+| Ctrl+Alt+H              | Call Hierachy            |
 
 
 ##Code Summary
 
 ### Main Files
 
-	[../alfresco-view-repo/src/main/amp/config/alfresco/module/view-repo/context](https://github.jpl.nasa.gov/mbee-dev/alfresco-view-repo/blob/develop/src/main/amp/config/alfresco/module/view-repo/context/mms-service-context.xml?source=cc)
+	[../alfresco-view-repo/src/main/amp/config/alfresco/module/view-repo/context] :
 		- mms-service-context.xml : bean scripts used for linking Java or Javascript classes with CRUD requests for various URLs on alfresco
-			..* Changes made to mms-service-context.xml can be viewed in class2url.html
-			..* Make sure to run class2UrlMapping.py in the same directory to update class2url.html
+			* Changes made to mms-service-context.xml can be viewed in class2url.html
+			* Make sure to run class2UrlMapping.py in the same directory to update class2url.html
 	
-	[../alfresco-view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/view/] (https://github.jpl.nasa.gov/mbee-dev/alfresco-view-repo/blob/develop/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/)
+	[../alfresco-view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/view/] :
 		- contains descriptor files for various URLs and bean scripts
 			
-	[../alfresco-view-repo/src/main/java/gov/nasa/jpl/view_repo/webscripts/] (https://github.jpl.nasa.gov/mbee-dev/alfresco-view-repo/blob/develop/src/main/java/gov/nasa/jpl/view_repo/webscripts/)
+	[../alfresco-view-repo/src/main/java/gov/nasa/jpl/view_repo/webscripts/] :
 		- contains Java classes (webscripts) used by the webservice when CRUD requests are made 
 	
-	[../alfresco-view-repo/src/main/amp/config/alfresco/module/view-repo/] (https://github.jpl.nasa.gov/mbee-dev/alfresco-view-repo/blob/develop/src/main/amp/config/alfresco/module/view-repo/)	
+	[../alfresco-view-repo/src/main/amp/config/alfresco/module/view-repo/] 	:
 		- sysmlModel.xml - dictionary/specifications for all SysML types and aspects, and their respective properties; defines content model
 		- emsModel.xml - also defines the content model
 	
-	[../alfresco-view-repo/src/main/java/gov/nasa/jpl/view_repo/util/] (https://github.jpl.nasa.gov/mbee-dev/alfresco-view-repo/blob/develop/src/main/java/gov/nasa/jpl/view_repo/util/)
+	[../alfresco-view-repo/src/main/java/gov/nasa/jpl/view_repo/util/] :
 		- EmsScriptNode.java : class for model elements 
-			..* ingestJson() - for reading from Json object and updating node
-			..* toJsonObject () - for writing to Json objects from node
+			* ingestJson() - for reading from Json object and updating node
+			* toJsonObject () - for writing to Json objects from node
 		- Acm.java : acm = "alfersco content model"; is a static class that has json property names and the alfresco content model types that correspond to them (like DictionaryService)
 	
 ### Supporting Items:
