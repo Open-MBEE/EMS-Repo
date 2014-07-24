@@ -232,7 +232,7 @@ To evaluate a Java expression, in this example, Math.Min(1,2), from the command 
 ##Eclipse Environment
 
 ###Set-Up:
-	Add view-repo debug configuration in eclipse:
+   Add view-repo debug configuration in eclipse:
 		Run > Debug Configurations > Remote Java Application > view-repo > change port to alfresco port (usually 8080) > Apply
 		Click on bug icon (select view-repo under drop-down menu by clicking on the arrow key)
 	
