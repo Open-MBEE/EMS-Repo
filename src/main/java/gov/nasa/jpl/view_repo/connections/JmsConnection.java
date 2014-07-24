@@ -15,7 +15,7 @@ public class JmsConnection implements AbstractConnection {
     private long sequenceId = 0;
     private volatile static JmsConnection INSTANCE = null;
     
-    private String uri = "tcp://localhost:61616";
+    private String uri = "tcp://localhost:61616"; // TODO: Springify
     private ActiveMQConnectionFactory connectionFactory = null;
     
     private JmsConnection() {
@@ -44,7 +44,6 @@ public class JmsConnection implements AbstractConnection {
             json.put( "sequence", sequenceId++ );
             result = publishTopic(json.toString( 2 ), topic);
         } catch ( JSONException e ) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         

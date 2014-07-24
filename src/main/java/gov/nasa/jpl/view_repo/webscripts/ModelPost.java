@@ -247,20 +247,33 @@ public class ModelPost extends AbstractJavaWebScript {
     
         // handle the relationships
         updateOrCreateAllRelationships(relationshipsJson, workspace);
-        
-        // create commit history
-        // TODO Need to fix - add in the versions when committing a node
-//        CommitUtil.commitChangeSet(changeSet, "", runWithoutTransactions, services);
-        
+                
         // make another pass through the elements and update their properties
         elements.addAll( updateNodeReferences( singleElement, postJson,
                                                projectNode, workspace ) );
 
         now = new Date();
         end = System.currentTimeMillis();
-        total = end -start;
+        total = end - start;
         log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
         
+        if ( !sendDeltas(workspace, start, end) ) {
+            log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
+        }
+        
+        return elements;
+    }
+    
+    /**
+     * Send off the deltas to various endpoints
+     * @param deltas    JSONObject of the deltas to be published
+     * @return          true if publish completed
+     * @throws JSONException 
+     */
+    private boolean sendDeltas(WorkspaceNode workspace, long start, long end) throws JSONException {
+        boolean jmsStatus = false;
+        boolean restStatus = false;
+
         if (addedElementsSet.size() > 0 || updatedElementsSet.size() > 0 || movedElementsSet.size() > 0) {
             JSONObject ws1 = new JSONObject();
             JSONObject ws2 = new JSONObject();
@@ -286,38 +299,23 @@ public class ModelPost extends AbstractJavaWebScript {
                 ws2.put( "addedElements", addedElements );
             }
             if (updatedElementsSet.size() > 0) {
-                JSONArray updatedElements = convertElementsToJSONArray(addedElementsSet, workspace);
+                JSONArray updatedElements = convertElementsToJSONArray(updatedElementsSet, workspace);
                 ws2.put( "updatedElements", updatedElements );
             }
             if (movedElementsSet.size() > 0) {
-                JSONArray movedElements = convertElementsToJSONArray(addedElementsSet, workspace);
+                JSONArray movedElements = convertElementsToJSONArray(movedElementsSet, workspace);
                 ws2.put( "movedElements", movedElements );
             }
             ws2.put( "name", "master" );
             ws2.put( "timestamp", TimeUtils.toTimestamp( end ) );
 
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put( "workspace1", ws1 );
-            jsonObject.put( "workspace2", ws2 );
-            
-            sendDeltas(jsonObject);
-        }
+            JSONObject deltaJson = new JSONObject();
+            deltaJson.put( "workspace1", ws1 );
+            deltaJson.put( "workspace2", ws2 );
         
-        return elements;
-    }
-    
-    /**
-     * Send off the deltas to various endpoints
-     * @param deltas    JSONObject of the deltas to be published
-     * @return          true if publish completed
-     */
-    private boolean sendDeltas(JSONObject deltas) {
-        boolean jmsStatus;
-        boolean restStatus;
-
-        jmsStatus = JmsConnection.getInstance().publish( deltas, "master" );
-                
-        restStatus = RestPostConnection.getInstance().publish( deltas, "MMS" );
+            jmsStatus = JmsConnection.getInstance().publish( deltaJson, "master" );
+            restStatus = RestPostConnection.getInstance().publish( deltaJson, "MMS" );
+        }
         
         return jmsStatus && restStatus ? true : false;
     }
