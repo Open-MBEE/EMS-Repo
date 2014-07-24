@@ -207,7 +207,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		if (foundElements.containsKey(id)) {
             EmsScriptNode resultAtTime =
                     foundElements.get( id ).getVersionAtTime( dateTime );
-			if ( resultAtTime != null &&
+			if ( resultAtTime != null && resultAtTime.exists() &&
 			     ( workspace == null || workspace.equals( resultAtTime.getWorkspace() ) ) ) {
 			    //if ( resultAtTime != null ) 
 			    result = resultAtTime;
