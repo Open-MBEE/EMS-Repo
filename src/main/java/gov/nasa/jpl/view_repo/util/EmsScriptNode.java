@@ -80,6 +80,7 @@ import org.alfresco.service.cmr.repository.Path;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.repository.Path.ChildAssocElement;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.namespace.NamespacePrefixResolver;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
@@ -2207,8 +2208,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      */
     public WorkspaceNode getWorkspace() {
         if ( workspace == null ) {
-            if ( hasAspect( "sysml:HasWorkspace" ) ) {
-                NodeRef ref = (NodeRef)getProperty( "sysml:workspace" );
+            if ( hasAspect( "ems:HasWorkspace" ) ) {
+                NodeRef ref = (NodeRef)getProperty( "ems:workspace" );
                 WorkspaceNode ws = new WorkspaceNode( ref, getServices() );
                 setWorkspace( ws, null );
             }
@@ -2263,7 +2264,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         NodeService nodeService = getServices().getNodeService();
         Set< QName > myAspects = nodeService.getAspects( getNodeRef() );
         for ( QName qName : myAspects ) {
-            node.createOrUpdateAspect( qName.getLocalName() );
+            node.createOrUpdateAspect( qName.toString() );
         }
         Map< QName, Serializable > properties = nodeService.getProperties( getNodeRef() );
         nodeService.setProperties( node.getNodeRef(), properties );
