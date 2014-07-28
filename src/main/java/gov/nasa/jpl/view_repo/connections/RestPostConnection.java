@@ -15,6 +15,8 @@ public class RestPostConnection implements AbstractConnection {
     
     private static long sequenceId = 1;
     
+    private String uri = "https://orasoa-dev07.jpl.nasa.gov:8121/PublishMessageRestful"; // TODO: Springify
+    
     private RestPostConnection() {
         
     }
@@ -31,8 +33,7 @@ public class RestPostConnection implements AbstractConnection {
         Client client = Client.create();
         String msg = jsonObject.toString( );
         
-        WebResource webResource = client.resource("https://orasoa-dev07.jpl.nasa.gov:8121/PublishMessageRestful");
-//        ClientResponse response = webResource.accept("application/json").type("application/json").header("MessageID", sequenceId).header("MessageSource", "MMS").header( "MessageRecipient", "TMS" ).header( "MessageType", "JSON" ).post(ClientResponse.class, msg);
+        WebResource webResource = client.resource(uri);
         ClientResponse response = getResourceBuilder(webResource, dst).post( ClientResponse.class, msg);
         if (response.getStatus() != 200) {
             status = false;
@@ -45,7 +46,7 @@ public class RestPostConnection implements AbstractConnection {
     
     
     /**
-     * Create builder
+     * Create web resource builder with the default settings
      *  
      * @param webResource
      * @param dst

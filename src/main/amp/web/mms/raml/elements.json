@@ -308,7 +308,11 @@
 
         "ValueSpecification": {
             "properties": {
-                "type": { "enum": ["ValueSpecification"] }
+                "type": { "enum": ["ValueSpecification"] },
+                "expression": {
+                    "type": "string",
+                    "description": "ID of the SysML element expression of the value specification"
+                }
             }
         },
         "Duration": {
@@ -507,6 +511,18 @@
             "allOf": [
                 {"$ref": "#/definitions/ValueSpecification"}
             ]
+        },
+        "Connector": {
+            "properties": {
+                "type": { "enum": ["Connector"] },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "ID of the role elements"
+                    }
+                }
+            }
         },
         
         "Paragraph": {
