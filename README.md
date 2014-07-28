@@ -304,9 +304,20 @@ Note: Following shortcuts are mainly for Linux.
 	
 	executeImpl - gets called first when you invoke webserver with a HTTP request (crud request - e.g. during test cases)
 	
-	Alfresco share (in progress):
+### Alfresco-View-Share In Parallel With View-Repo:
+
 	clone alfresco-view-share repository
-	echo $MAVEN_OPTS - change address# to something else (ex: 10000, to 10001)
-	run runserver.sh and if needed change port address to something else
-	open localhost:<port#>/alfresco/share/
+	change JVM environment address variable to something else (ex: change 10000 to 10001)
+		echo $MAVEN_OPTS
+		copy output and change the address to some other number
+		export MAVEN_OPTS="PASTE OUTPUT HERE WITH NEW ADDRESS VARIABLE"     (Note: Include quotation marks)
+	change directory to alfresco-view-share
+	mvn package                                   (only needed the first time around)
+	mvn integration-test -Pamp-to-war             (needed every time view-share is to be displayed)
+	open localhost:8081/alfresco/share/
 	sign in as admin:admin
+	
+	run curl commands/test cases against view-repo database
+	refresh view-share page
+	the final, integrated content model is displayed in view-share in your dashboard (under sites) and in Repository
+	
