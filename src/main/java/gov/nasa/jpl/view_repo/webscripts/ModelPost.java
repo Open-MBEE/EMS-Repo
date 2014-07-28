@@ -153,7 +153,18 @@ public class ModelPost extends AbstractJavaWebScript {
     protected Set<String> newElements;
 
     protected SiteInfo siteInfo;
-        
+
+    private JmsConnection jmsConnection = null;
+    private RestPostConnection restConnection = null;
+    
+    public void setJmsConnection(JmsConnection jmsConnection) {
+        this.jmsConnection = jmsConnection;
+    }
+    
+    public void setRestConnection(RestPostConnection restConnection) {
+        this.restConnection = restConnection;
+    }
+    
     private EmsSystemModel getSystemModel() {
         if ( systemModel == null ) {
             systemModel = new EmsSystemModel(this.services);
@@ -313,8 +324,12 @@ public class ModelPost extends AbstractJavaWebScript {
             deltaJson.put( "workspace1", ws1 );
             deltaJson.put( "workspace2", ws2 );
         
-            jmsStatus = JmsConnection.getInstance().publish( deltaJson, "master" );
-            restStatus = RestPostConnection.getInstance().publish( deltaJson, "MMS" );
+            if (jmsConnection != null) {
+                jmsStatus = jmsConnection.publish( deltaJson, "master" );
+            }
+            if (restConnection != null) {
+                restStatus = restConnection.publish( deltaJson, "MMS" );
+            }
         }
         
         return jmsStatus && restStatus ? true : false;
