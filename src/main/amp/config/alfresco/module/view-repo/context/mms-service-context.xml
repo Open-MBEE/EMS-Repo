@@ -110,6 +110,11 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
 
-    
-   
+    <bean id="webscript.gov.nasa.jpl.mms.diff.get"
+        class="gov.nasa.jpl.view_repo.webscripts.MmsDiffGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+       
 </beans>
