@@ -56,7 +56,6 @@ import org.mozilla.javascript.Scriptable;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
-import org.springframework.web.context.request.WebRequest;
 
 /**
  * Base class for all EMS Java backed webscripts. Provides helper functions and
@@ -226,7 +225,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 	protected void log(LogLevel level, String msg, int code) {
 		if (level.value >= logLevel.value || level.value == LogLevel.ERROR.value) {
-			log("[" + level.name() + "]: " + msg + "\n", code);
+			updateResponse("[" + level.name() + "]: " + msg + "\n", code);
 			if (level.value >= LogLevel.WARNING.value) {
 				if (Debug.isOn()) System.out.println("[" + level.name() + "]: " + msg + "\n");
 			}
@@ -240,7 +239,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         if (Debug.isOn()) System.out.println(msg);
 	}
 	
-	protected void log(String msg, int code) {
+	protected void updateResponse(String msg, int code) {
 		response.append(msg);
 		responseStatus.setCode(code);
 		responseStatus.setMessage(msg);
