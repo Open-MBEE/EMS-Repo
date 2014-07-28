@@ -327,9 +327,15 @@ log.info "done"
   <con:entry key="siteId" value="europa"/>
 </con:parameters><con:parameterOrder><con:entry>server</con:entry><con:entry>workspaceId</con:entry><con:entry>siteId</con:entry><con:entry>recurse</con:entry><con:entry>recurseDepth</con:entry><con:entry>search</con:entry><con:entry>type</con:entry><con:entry>timestamp</con:entry><con:entry>createSite</con:entry></con:parameterOrder></con:restRequest></con:config></con:testStep><con:testStep type="restrequest" name="productPost"><con:settings/><con:config service="mms" resourcePath="/alfresco/service/workspaces/{workspaceId}/sites/{siteId}/products" methodName="post" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="productPost" mediaType="application/json" postQueryString="false"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="Accept" value="application/json" xmlns="http://eviware.com/soapui/config"/></con:setting></con:settings><con:endpoint>http://${#Project#server}</con:endpoint><con:request>{ "products" : [
 
-    {"name" : "300", 
+    {"documentation" : "something", 
      "sysmlid":"300", 
-    }
+     "name":"300", 
+     "owner":"null", 
+     "specialization": {"type":"Product",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
 ]}</con:request><con:originalUri>http://128.149.16.140/alfresco/service/workspaces/master/sites/europa/products</con:originalUri><con:credentials><con:username>admin</con:username><con:password>admin</con:password><con:selectedAuthProfile>Basic</con:selectedAuthProfile><con:addedBasicAuthenticationTypes>Basic</con:addedBasicAuthenticationTypes><con:preemptive>true</con:preemptive><con:authType>Preemptive</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters>
   <con:entry key="workspaceId" value="master"/>
   <con:entry key="siteId" value="europa"/>
@@ -343,7 +349,7 @@ log.info "done"
   <con:entry key="workspaceId" value="master"/>
   <con:entry key="siteId" value="europa"/>
   <con:entry key="productId" value="123456"/>
-</con:parameters><con:parameterOrder><con:entry>server</con:entry><con:entry>workspaceId</con:entry><con:entry>siteId</con:entry><con:entry>productId</con:entry><con:entry>recurse</con:entry><con:entry>recurseDepth</con:entry><con:entry>search</con:entry><con:entry>type</con:entry><con:entry>timestamp</con:entry><con:entry>createSite</con:entry></con:parameterOrder></con:restRequest></con:config></con:testStep><con:properties/><con:reportParameters/></con:testCase><con:properties><con:property><con:name>recurseDepth</con:name></con:property></con:properties><con:reportParameters/></con:testSuite><con:restMockService port="8080" path="/" name="REST MockService 1" id="b79f316f-b321-47ed-89d9-04c62eed5e6c"><con:settings/><con:properties/><con:restMockAction name="/afresco/service/javawebscripts/sites/europa/projects/123456" method="GET" resourcePath="/afresco/service/javawebscripts/sites/europa/projects/123456" id="ed72b54b-d2b8-4dc3-82d6-caa7df3fb328"><con:settings/><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:dispatchPath>/*
+</con:parameters><con:parameterOrder><con:entry>server</con:entry><con:entry>workspaceId</con:entry><con:entry>siteId</con:entry><con:entry>productId</con:entry><con:entry>recurse</con:entry><con:entry>recurseDepth</con:entry><con:entry>search</con:entry><con:entry>type</con:entry><con:entry>timestamp</con:entry><con:entry>createSite</con:entry></con:parameterOrder></con:restRequest></con:config></con:testStep><con:properties/><con:reportParameters/></con:testCase><con:properties><con:property><con:name>recurseDepth</con:name></con:property></con:properties><con:setupScript>log.info("connecting to ... " + testSuite.getProject().getProperty("server").getValue())</con:setupScript><con:reportParameters/></con:testSuite><con:restMockService port="8080" path="/" name="REST MockService 1" id="b79f316f-b321-47ed-89d9-04c62eed5e6c"><con:settings/><con:properties/><con:restMockAction name="/afresco/service/javawebscripts/sites/europa/projects/123456" method="GET" resourcePath="/afresco/service/javawebscripts/sites/europa/projects/123456" id="ed72b54b-d2b8-4dc3-82d6-caa7df3fb328"><con:settings/><con:dispatchStyle>SEQUENCE</con:dispatchStyle><con:dispatchPath>/*
 // Examples showing how to match based on path, query param and header
 // Match based on path
 def requestPath = mockRequest.getPath()
