@@ -3,6 +3,7 @@ package gov.nasa.jpl.view_repo.connections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import com.sun.jersey.api.client.Client;
@@ -11,21 +12,21 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 
 public class RestPostConnection implements AbstractConnection {
-    private static RestPostConnection INSTANCE = null;
-    
-    private static long sequenceId = 1;
+    static Logger logger = Logger.getLogger(RestPostConnection.class);
+
+    private long sequenceId = 1;
     
     private String uri = "https://orasoa-dev07.jpl.nasa.gov:8121/PublishMessageRestful"; // TODO: Springify
     
-    private RestPostConnection() {
+    public RestPostConnection() {
         
     }
     
-    public static RestPostConnection getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new RestPostConnection();
+    public void setUri(String uri) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("uri set to: " + uri);
         }
-        return INSTANCE;
+        this.uri = uri;
     }
     
     public boolean publish(JSONObject jsonObject, String dst) {
@@ -38,8 +39,10 @@ public class RestPostConnection implements AbstractConnection {
         if (response.getStatus() != 200) {
             status = false;
         }
-        System.out.println("\n#### Response From Server ####\n");
-        System.out.println(response.getEntity( String.class ));
+        if (logger.isDebugEnabled()) {
+            logger.debug("\n#### Response From Server ####\n");
+            logger.debug(response.getEntity( String.class ));
+        }
         
         return status;
     }
