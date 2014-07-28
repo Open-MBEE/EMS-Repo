@@ -304,7 +304,6 @@ Note: Following shortcuts are mainly for Linux.
 	
 	executeImpl - gets called first when you invoke webserver with a HTTP request (crud request - e.g. during test cases)
 	
-	
 	Alfresco share (in progress):
 	clone alfresco-view-share repository
 	echo $MAVEN_OPTS - change address# to something else (ex: 10000, to 10001)
