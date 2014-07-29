@@ -51,6 +51,7 @@ import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1172,7 +1173,7 @@ public class ModelPost extends AbstractJavaWebScript {
              && node.exists() && !node.isWorkspace() && !workspace.equals( node.getWorkspace() ) ) {
             parent = workspace.replicateFolderWithChain( parent );
             EmsScriptNode oldNode = node;
-            node = node.clone();
+            node = node.clone(parent);
             node.setWorkspace( workspace, oldNode.getNodeRef() );
         }
 
@@ -1183,13 +1184,23 @@ public class ModelPost extends AbstractJavaWebScript {
             } else {
                 log( LogLevel.INFO, "\tcreating node" );
                 try {
-                    node = parent.createSysmlNode( id, acmSysmlType );
-                    if ( node == null || !node.exists() ) {
-                        throw new Exception( "createNode() failed." );
-                    }
-                    node.setProperty( Acm.CM_NAME, id );
-                    node.setProperty( Acm.ACM_ID, id );
-                    modStatus.setState( ModStatus.State.ADDED  );
+//                    if ( parent != null && parent.exists() ) {
+                        node = parent.createSysmlNode( id, acmSysmlType );
+                        if ( node == null || !node.exists() ) {
+                            throw new Exception( "createNode() failed." );
+                        }
+                        node.setProperty( Acm.CM_NAME, id );
+                        node.setProperty( Acm.ACM_ID, id );
+                        modStatus.setState( ModStatus.State.ADDED  );
+                        if ( workspace != null && workspace.exists() ) {
+                            node.setWorkspace( workspace, null );
+                        }
+//                    } else {
+//                        Debug.error( true, true,
+//                                     "Error! Attempt to create node, " + id
+//                                             + ", from non-existent parent, "
+//                                             + parent );
+//                    }
                 } catch ( Exception e ) {
                     if (Debug.isOn()) System.out.println( "Got exception in "
                                         + "updateOrCreateTransactionableElement(elementJson="
@@ -1205,16 +1216,24 @@ public class ModelPost extends AbstractJavaWebScript {
             // is an element and only aspects are used for subclassing.
             try {
                 if (node != null && node.exists() ) {
-                    if (!node.getParent().equals(parent)) {
+//                    if ( parent != null && parent.exists()
+//                         && !node.getParent().equals( parent ) ) {
+                    if ( Debug.isOn() ) Debug.outln("moving node <<<" + node + ">>>");
+                    if ( Debug.isOn() ) Debug.outln("to parent <<<" + parent + ">>>");
                         if ( node.move(parent) ) {
                             modStatus.setState( ModStatus.State.MOVED  );
                         }
                         
                         EmsScriptNode pkgNode = findScriptNodeById(id + "_pkg", workspace, null);
-                        if (pkgNode != null) {
+                        if (pkgNode != null && pkgNode.exists()) {
                             pkgNode.move(parent);
                         }
-                    }
+//                    } else if (parent == null || parent.exists()) {
+//                        Debug.error( true, true, "Error! Could not move node, "
+//                                                 + node
+//                                                 + ", to non-existent parent, "
+//                                                 + parent );
+//                    }
                     if ( !type.equals( acmSysmlType )
                             && NodeUtil.isAspect( acmSysmlType ) ) {
                         if (node.createOrUpdateAspect( acmSysmlType )) {
@@ -1717,12 +1736,26 @@ public class ModelPost extends AbstractJavaWebScript {
         boolean fix = checkArgEquals(req, "fix", "true");
 
         String user = AuthenticationUtil.getRunAsUser();
+        String wsId = null;
         WorkspaceNode workspace = getWorkspace( req, true, user );
-        
+        boolean wsFound = workspace != null;
+        if ( !wsFound ) {
+            wsId = getWorkspaceId( req );
+            if ( wsId != null && wsId.equalsIgnoreCase( "master" ) ) {
+                wsFound = true;
+            }
+        }
+        if ( !wsFound ) {
+            log( LogLevel.ERROR,
+                 "Could not find or create " + wsId + " workspace.\n",
+                 Utils.isNullOrEmpty( wsId ) ? HttpServletResponse.SC_BAD_REQUEST
+                                             : HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+        }
+
         ModelPost instance = new ModelPost(repository, services);
 
         JSONObject top = new JSONObject();
-        if (validateRequest(req, status)) {
+        if (wsFound && validateRequest(req, status)) {
             try {
                 if (runInBackground) {
                     instance.saveAndStartAction(req, workspace, status);
@@ -1843,7 +1876,6 @@ public class ModelPost extends AbstractJavaWebScript {
             if (!checkRequestVariable(elementId, "elementid")) {
                 return false;
             }
-        } else {
         }
         
         return true;

@@ -110,6 +110,7 @@ public class WorkspaceNode extends EmsScriptNode {
             //String userName = ws.getOwner();
             if ( userName != null && userName.length() > 0 ) {
                 folder = NodeUtil.getUserHomeFolder( userName );
+                if ( Debug.isOn() ) Debug.outln( "user home folder: " + folder );
             }
         }
         if ( folder == null || !folder.exists() ) {
@@ -124,12 +125,15 @@ public class WorkspaceNode extends EmsScriptNode {
         
         ws.setProperty( "ems:parent", folder );
         if ( folder.isWorkspace() ) {
+            if ( Debug.isOn() ) Debug.outln( "folder is a workspace: " + folder );
             WorkspaceNode parentWorkspace =
                     new WorkspaceNode( folder.getNodeRef(), services, response,
                                        status );
+            if ( Debug.isOn() ) Debug.outln( "parent workspace: " + parentWorkspace );
             parentWorkspace.appendToPropertyNodeRefs( "ems:children", ws.getNodeRef() );
         }
         ws.setProperty( "ems:lastTimeSyncParent", new Date() );
+        if ( Debug.isOn() ) Debug.outln( "created workspace " + ws + " in folder " + folder );
         return ws;
     }
 
@@ -159,23 +163,32 @@ public class WorkspaceNode extends EmsScriptNode {
     
     // Replicate this folder and its parent/grandparents in this workspace.
     public EmsScriptNode replicateFolderWithChain( EmsScriptNode folder ) {
+        if ( Debug.isOn() ) Debug.outln( "replicateFolderWithChain( " + folder + " )" );
         if ( folder == null ) return null;
         EmsScriptNode newFolder = folder;
 
+        // make sure the folder's parent is replicated
+        EmsScriptNode parent = folder.getParent();
+        if ( parent != null && parent.exists() && !this.equals( parent.getWorkspace() ) ) {
+            parent = replicateFolderWithChain( parent );
+            if ( Debug.isOn() ) Debug.outln( "moving newFolder " + newFolder + " to parent " + parent );
+            newFolder.move( parent );
+        } else if ( parent == null || !parent.exists() ) {
+            Debug.error("Error! Bad parent when replicating folder chain! " + parent );
+        }
+
         // If the folder is not already in this workspace, clone it.
-        if ( !contains( folder ) ) {
-            newFolder = folder.clone();
+        if ( folder.getWorkspace() == null || !folder.getWorkspace().equals( this ) ) {
+            newFolder = folder.clone(parent);
             newFolder.setWorkspace( this, folder.getNodeRef() );
         }
         
-        if ( folder.isWorkspaceTop() ) return newFolder;
+        if ( folder.isWorkspaceTop() ) {
+            if ( Debug.isOn() ) Debug.outln( "returning newFolder for workspace top: " + newFolder );
+            return newFolder;
+        }
         
-        // make sure the folder's parent is replicated
-        EmsScriptNode parent = newFolder.getParent();
-        if (parent != null && parent.exists() && !contains( parent ) ) {
-            parent = replicateFolderWithChain( parent );
-            newFolder.move( parent );
-        } // REVIEW -- what if parent != null && !parent.exists()
+        if ( Debug.isOn() ) Debug.outln( "returning newFolder: " + newFolder );
         return newFolder;
     }
     
