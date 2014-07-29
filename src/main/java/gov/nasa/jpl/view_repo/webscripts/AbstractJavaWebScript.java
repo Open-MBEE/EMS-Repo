@@ -56,7 +56,6 @@ import org.mozilla.javascript.Scriptable;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
-import org.springframework.web.context.request.WebRequest;
 
 /**
  * Base class for all EMS Java backed webscripts. Provides helper functions and
