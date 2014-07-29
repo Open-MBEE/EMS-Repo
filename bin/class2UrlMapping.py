@@ -75,7 +75,9 @@ def getUrlFromDesc(descFile):
 	try:
 		dom = parse(descFile)
 		urls = dom.getElementsByTagName('url')
-		return urls[0].toxml().replace('<url>','').replace('</url>','')
+		urlString = urls[0].toxml().replace('<url>','').replace('</url>','')
+		print urlString, descFile
+		return urlString
 	except:
 		return None
 
@@ -91,7 +93,7 @@ def convertBeanId2DescFile(id):
 	filename = DESC_PATH
 	for ii in range(len(tokens)-1):
 		filename += tokens[ii] + '/'
-	filename = filename[:-1] + '.' + tokens[ii+1] + '.desc.xml'
+	filename = filename[:-1] + '.desc.xml'
 
 	return filename
 
