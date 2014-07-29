@@ -10,10 +10,11 @@ import javax.jms.TextMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.log4j.Logger;
 
 public class JmsConnection implements AbstractConnection {
-    private long sequenceId = 0;
-    private volatile static JmsConnection INSTANCE = null;
+    static Logger logger = Logger.getLogger(JmsConnection.class);
+    long sequenceId = 0;
     
     private String uri = "tcp://localhost:61616";
     private ActiveMQConnectionFactory connectionFactory = null;
@@ -21,14 +22,10 @@ public class JmsConnection implements AbstractConnection {
     private JmsConnection() {
     }
 
-    public static JmsConnection getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new JmsConnection();
-        }
-        return INSTANCE;
-    }
-        
     public void setUri(String uri) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("uri set to: " + uri);
+        }
         this.uri = uri;
     }
     
@@ -44,7 +41,6 @@ public class JmsConnection implements AbstractConnection {
             json.put( "sequence", sequenceId++ );
             result = publishTopic(json.toString( 2 ), topic);
         } catch ( JSONException e ) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         
@@ -83,7 +79,7 @@ public class JmsConnection implements AbstractConnection {
             connection.close();
         }
         catch (Exception e) {
-            System.out.println("Caught: " + e);
+            logger.error( "Caught, but doing nothing: " + e);
             e.printStackTrace();
             status = false;
         }

@@ -3,6 +3,7 @@ package gov.nasa.jpl.view_repo.connections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import com.sun.jersey.api.client.Client;
@@ -11,19 +12,21 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 
 public class RestPostConnection implements AbstractConnection {
-    private static RestPostConnection INSTANCE = null;
+    static Logger logger = Logger.getLogger(RestPostConnection.class);
+
+    private long sequenceId = 1;
     
-    private static long sequenceId = 1;
+    private String uri = "https://orasoa-dev07.jpl.nasa.gov:8121/PublishMessageRestful"; // TODO: Springify
     
-    private RestPostConnection() {
+    public RestPostConnection() {
         
     }
     
-    public static RestPostConnection getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new RestPostConnection();
+    public void setUri(String uri) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("uri set to: " + uri);
         }
-        return INSTANCE;
+        this.uri = uri;
     }
     
     public boolean publish(JSONObject jsonObject, String dst) {
@@ -31,21 +34,22 @@ public class RestPostConnection implements AbstractConnection {
         Client client = Client.create();
         String msg = jsonObject.toString( );
         
-        WebResource webResource = client.resource("https://orasoa-dev07.jpl.nasa.gov:8121/PublishMessageRestful");
-//        ClientResponse response = webResource.accept("application/json").type("application/json").header("MessageID", sequenceId).header("MessageSource", "MMS").header( "MessageRecipient", "TMS" ).header( "MessageType", "JSON" ).post(ClientResponse.class, msg);
+        WebResource webResource = client.resource(uri);
         ClientResponse response = getResourceBuilder(webResource, dst).post( ClientResponse.class, msg);
         if (response.getStatus() != 200) {
             status = false;
         }
-        System.out.println("\n#### Response From Server ####\n");
-        System.out.println(response.getEntity( String.class ));
+        if (logger.isDebugEnabled()) {
+            logger.debug("\n#### Response From Server ####\n");
+            logger.debug(response.getEntity( String.class ));
+        }
         
         return status;
     }
     
     
     /**
-     * Create builder
+     * Create web resource builder with the default settings
      *  
      * @param webResource
      * @param dst
