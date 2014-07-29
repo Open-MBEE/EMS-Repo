@@ -101,12 +101,21 @@ public class ModelGet extends AbstractJavaWebScript {
 		}
 		
         // get timestamp if specified
-        String timestamp = req.getParameter("timestamp");
+        String timestamp = req.getParameter( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         
-        WorkspaceNode workspace = getWorkspace( req );
+        EmsScriptNode modelRootNode = null;
         
-        EmsScriptNode modelRootNode = findScriptNodeById(modelId, workspace, dateTime);
+        WorkspaceNode workspace = getWorkspace( req );
+        boolean wsFound = workspace != null;
+        if ( !wsFound ) {
+            String wsId = getWorkspaceId( req );
+            if ( wsId != null && wsId.equalsIgnoreCase( "master" ) ) {
+                wsFound = true;
+            }
+        }
+        if ( wsFound ) modelRootNode = findScriptNodeById(modelId, workspace, dateTime);
+        
 		if (modelRootNode == null) {
             log( LogLevel.ERROR,
                  "Element with id, " + modelId
@@ -316,7 +325,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		    }
 			for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
 			    NodeRef childRef = assoc.getChildRef();
-			    NodeRef vChildRef = NodeUtil.getNodeRefAtTime( childRef, dateTime );
+			    NodeRef vChildRef = NodeUtil.getNodeRefAtTime( childRef, workspace, dateTime );
                 if ( vChildRef == null ) {
                     log( LogLevel.WARNING,
                          "Element " + childRef

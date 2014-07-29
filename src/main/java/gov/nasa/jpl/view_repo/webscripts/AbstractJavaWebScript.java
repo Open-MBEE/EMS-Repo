@@ -210,6 +210,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			if ( resultAtTime != null && resultAtTime.exists() &&
 			     ( workspace == null || workspace.equals( resultAtTime.getWorkspace() ) ) ) {
 			    //if ( resultAtTime != null ) 
+                if ( Debug.isOn() ) {
+                    Debug.outln( "findScriptNodeById(" + id + ", " + workspace
+                                 + ", " + dateTime
+                                 + "): found in foundElements: " + resultAtTime );
+                }
 			    result = resultAtTime;
 			}
 		}
@@ -221,6 +226,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			}
 		}
 		
+        if ( Debug.isOn() ) {
+            Debug.outln( "findScriptNodeById(" + id + ", " + workspace
+                         + ", " + dateTime
+                         + "): returning " + result );
+        }
 		return result;
 	}
 
@@ -405,15 +415,30 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 if ( workspace.exists() && workspace.hasAspect( "ems:Workspace" ) ) {
                     // TODO -- check read permissions
                     if ( workspace.checkPermissions( PermissionService.READ ) ) {
+                        if ( Debug.isOn() ) Debug.outln( "workspace exists: " + workspace );
                         return workspace;
                     }
                 }
             }
-            if ( !createIfNotFound ) return null;
-            WorkspaceNode.createWorskpaceInFolder( nameOrId, userName,
-                                                   null, services,
-                                                   response, responseStatus );
+            if ( !createIfNotFound ) {
+                if ( Debug.isOn() ) {
+                    Debug.outln( "workspace does not exist and is not to be created: "
+                                 + nameOrId );
+                }
+                return null;
+            }
+            workspace = WorkspaceNode.createWorskpaceInFolder( nameOrId, userName,
+                                                               null, services,
+                                                               response,
+                                                               responseStatus );
+            if ( Debug.isOn() ) {
+                Debug.outln( "created workspace in " + userName
+                             + " home folder: " + workspace );
+            }
             return workspace;
+        }
+        if ( Debug.isOn() ) {
+            Debug.outln( "no workspace for bad id: " + nameOrId );
         }
         return null;
     }

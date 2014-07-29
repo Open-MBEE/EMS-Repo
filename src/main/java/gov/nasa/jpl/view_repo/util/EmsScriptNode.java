@@ -204,6 +204,10 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         // TODO -- the folder is not getting a source here!  is that okay?
 //        Scriptable myChildren = source.getChildren();
         if ( ws != null && !folder.isWorkspace() ) folder.setWorkspace( ws, null );
+        if ( Debug.isOn() ) {
+            Debug.outln( "createFolder(" + name + "): returning " + folder );
+        }
+
         return folder;
     }
 
@@ -1054,8 +1058,11 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 //        return null;
         String name = getName();
         String sysmlName = getSysmlName();
+        String qualifiedName = getSysmlQName();
         String type = getTypeName();
-        return "{type=" + type + ", id=" + name + ", name=" + sysmlName + "}";
+        String workspaceName = getWorkspaceName();
+        return "{type=" + type + ", id=" + name + ", name=" + sysmlName + 
+                ", qualified name=" + qualifiedName + ", workspace=" + workspaceName + "}";
     }
 
     /**
@@ -2107,7 +2114,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         String workspaceName = null;
         EmsScriptNode ws = getWorkspace();
         if ( ws != null ) {
-            ws.getName();
+            workspaceName = ws.getName();
         }
         return workspaceName;
     }
@@ -2116,6 +2123,11 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      * @param workspace the workspace to set
      */
     public void setWorkspace( WorkspaceNode workspace, NodeRef source ) {
+        if ( Debug.isOn() ) {
+            Debug.outln( "setWorkspace( workspace=" + workspace + ", source="
+                         + source + " ) for node " + this );
+        }
+
         this.workspace = workspace;
         createOrUpdateAspect( "ems:HasWorkspace" );
         setProperty( "ems:workspace", workspace.getNodeRef() );
@@ -2137,8 +2149,23 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         super( nodeRef, services );
     }
 
-    public EmsScriptNode clone() {
-        EmsScriptNode node = createNode( getName(), getTypeShort() );
+    public EmsScriptNode clone(EmsScriptNode parent) {
+        if ( !exists() ) {
+            Debug.error( true, false, "Warning! cloning non-existent node!" );
+        }
+        if ( Debug.isOn() ) {
+            Debug.outln( "making clone() of " + this + " under parent " + parent );
+        }
+        if ( parent == null || !parent.exists() ) {
+            Debug.error( "Error! Trying to clone a node under a bad parent: "
+                         + parent + "; changing parent to node being cloned "
+                         + this );
+            parent = this;
+            if ( !exists() ) {
+                Debug.error( "Error! Can't clone under non-existent parent!" );
+            }
+        }
+        EmsScriptNode node = parent.createNode( getName(), getTypeShort() );
         NodeService nodeService = getServices().getNodeService();
         Set< QName > myAspects = nodeService.getAspects( getNodeRef() );
         for ( QName qName : myAspects ) {
