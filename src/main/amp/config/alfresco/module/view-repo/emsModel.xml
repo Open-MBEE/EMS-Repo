@@ -162,5 +162,55 @@
                 </property>
             </properties>
         </aspect>
+        
+        <aspect name="ems:Owned">
+          <properties>
+              <property name="ems:owner">
+                  <type>d:noderef</type>
+                  <mandatory>false</mandatory>
+                  <multiple>false</multiple>
+                  <index enabled="false">
+                      <atomic>false</atomic>
+                      <stored>false</stored>
+                      <tokenised>false</tokenised>
+                  </index>
+              </property>
+              <property name="ems:ownedChildren">
+                  <type>d:noderef</type>
+                  <mandatory>false</mandatory>
+                  <multiple>true</multiple>
+                  <index enabled="false">
+                      <atomic>false</atomic>
+                      <stored>false</stored>
+                      <tokenised>false</tokenised>
+                  </index>
+              </property>
+          </properties>
+        </aspect>
+        
+        <aspect name="ems:Reified">
+          <properties>
+              <property name="ems:reifiedNode">
+                  <type>d:noderef</type>
+                  <mandatory>false</mandatory>
+                  <multiple>false</multiple>
+                  <index enabled="false">
+                      <atomic>false</atomic>
+                      <stored>false</stored>
+                      <tokenised>false</tokenised>
+                  </index>
+              </property>
+              <property name="ems:reifiedPkg">
+                  <type>d:noderef</type>
+                  <mandatory>false</mandatory>
+                  <multiple>false</multiple>
+                  <index enabled="false">
+                      <atomic>false</atomic>
+                      <stored>false</stored>
+                      <tokenised>false</tokenised>
+                  </index>
+              </property>
+          </properties>
+        </aspect>
      </aspects>
 </model>

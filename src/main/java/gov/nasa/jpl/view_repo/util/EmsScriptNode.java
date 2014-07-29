@@ -634,12 +634,43 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     public EmsScriptNode createSysmlNode( String sysmlId, String sysmlAcmType ) {
         String type = NodeUtil.getContentModelTypeName( sysmlAcmType, services );
         EmsScriptNode node = createNode( sysmlId, type );
-
+        
         if ( node != null && !type.equals( sysmlAcmType )
              && NodeUtil.isAspect( sysmlAcmType ) ) {
+            // everything is created in a reified package, so need to make
+            // relations to the reified node rather than the package
             node.createOrUpdateAspect( sysmlAcmType );
+            
+            EmsScriptNode reifiedNode = this.getReifiedNode();
+            if (reifiedNode != null) {
+                // store owner with created node
+                node.createOrUpdateAspect( "ems:Owned" );
+                node.createOrUpdateProperty( "ems:owner", reifiedNode.getNodeRef() );
+                
+                // add child to the parent as necessary
+                reifiedNode.createOrUpdateAspect( "ems:Owned" );
+                reifiedNode.appendToPropertyNodeRefs( "ems:ownedChildren", node.getNodeRef());
+            } else {
+                // TODO error handling
+            }
         }
         return node;
+    }
+       
+    private EmsScriptNode getReifiedNode() {
+        NodeRef nodeRef = (NodeRef) getProperty("ems:reifiedNode");
+        if (nodeRef != null) {
+            return new EmsScriptNode(nodeRef, services, response);
+        }
+        return null;
+    }
+    
+    private EmsScriptNode getReifiedPkg() {
+        NodeRef nodeRef = (NodeRef) getProperty("ems:reifiedPkg");
+        if (nodeRef != null) {
+            return new EmsScriptNode(nodeRef, services, response);
+        }
+        return null;
     }
     
     /**
@@ -1767,7 +1798,6 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 //Debug.error( "No content model type found for \"" + key + "\"!" );
                 continue;
             } else {
-              
                 QName qName = createQName( acmType );
                 if ( acmType.equals(Acm.ACM_VALUE) ) {
                     if (Debug.isOn()) System.out.println("qName of " + acmType + " = " + qName.toString() );
@@ -2120,13 +2150,58 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
 
     public void appendToPropertyNodeRefs( String acmProperty, NodeRef ref ) {
-        ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty );
-        if ( Utils.isNullOrEmpty( relationships ) ) {
-            relationships = Utils.newList( ref );
+        if ( checkPermissions( PermissionService.WRITE, response, status)) {
+            ArrayList< NodeRef > relationships = getPropertyNodeRefs( acmProperty );
+            if ( Utils.isNullOrEmpty( relationships ) ) {
+                relationships = Utils.newList( ref );
+            } else {
+                relationships.add( ref );
+            }
+            setProperty( acmProperty, relationships );
         } else {
-            relationships.add( ref );
+            log( "no write permissions to append " + acmProperty + " to " + id + "\n");
         }
-        setProperty( acmProperty, relationships );
+    }
+
+    private void removeFromPropertyNodeRefs( String acmProperty, NodeRef ref ) {
+        if ( checkPermissions( PermissionService.WRITE, response, status ) ) {
+            ArrayList<NodeRef> relationships = getPropertyNodeRefs(acmProperty);
+            if ( Utils.isNullOrEmpty( relationships ) ) {
+                relationships = Utils.newList( ref );
+            } else {
+                relationships.remove( ref );
+            }
+            setProperty( acmProperty, relationships );
+        } else {
+            log( "no write permissions to remove " + acmProperty + " from " + id + "\n");
+        }
+    }
+
+    @Override
+    public boolean move(ScriptNode destination) {
+        EmsScriptNode oldParentPkg = new EmsScriptNode(getParent().getNodeRef(), services, response);
+        boolean status = super.move(destination);
+        
+        if (status) {
+            // keep track of owners and children
+            EmsScriptNode oldParentReifiedNode = oldParentPkg.getReifiedNode();
+
+            oldParentReifiedNode.removeFromPropertyNodeRefs( "ems:ownedChildren", this.getNodeRef() );
+            
+            EmsScriptNode newParent = new EmsScriptNode(destination.getNodeRef(), services, response);
+            EmsScriptNode newReifiedNode = newParent.getReifiedNode();
+            newReifiedNode.appendToPropertyNodeRefs( "ems:ownedChildren", this.getNodeRef() );
+            
+            this.createOrUpdateProperty( "ems:owner", newReifiedNode.getNodeRef() );
+            
+            // make sure to move package as well
+            EmsScriptNode reifiedPkg = getReifiedPkg();
+            if (reifiedPkg != null) {
+                reifiedPkg.move( destination );
+            }
+        }
+        
+        return status;
     }
     
     // HERE!!  REVIEW -- Is this right?

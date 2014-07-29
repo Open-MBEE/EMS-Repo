@@ -1222,11 +1222,12 @@ public class ModelPost extends AbstractJavaWebScript {
                         if ( node.move(parent) ) {
                             modStatus.setState( ModStatus.State.MOVED  );
                         }
-                        
-                        EmsScriptNode pkgNode = findScriptNodeById(id + "_pkg", workspace, null);
-                        if (pkgNode != null) {
-                            pkgNode.move(parent);
-                        }
+
+                        // removed - handled inside node.move now
+//                        EmsScriptNode pkgNode = findScriptNodeById(id + "_pkg", workspace, null);
+//                        if (pkgNode != null) {
+//                            pkgNode.move(parent);
+//                        }
                     }
                     if ( !type.equals( acmSysmlType )
                             && NodeUtil.isAspect( acmSysmlType ) ) {
@@ -1366,8 +1367,13 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
                 foundElements.put(pkgName, reifiedNode);
-                // this reification containment association is more trouble than it's worth...
-//                node.createOrUpdateChildAssociation(reifiedNode, Acm.ACM_REIFIED_CONTAINMENT);
+                
+                // lets keep track of reification
+                node.createOrUpdateAspect( "ems:Reified" );
+                node.createOrUpdateProperty( "ems:reifiedPkg", reifiedNode.getNodeRef() );
+                
+                reifiedNode.createOrUpdateAspect( "ems:Reified" );
+                reifiedNode.createOrUpdateProperty( "ems:reifiedNode", node.getNodeRef() );
             }
         }
 
