@@ -71,6 +71,7 @@ public class CommitUtil {
 		return jsonChangeSets;
 	}
 
+	// TODO: need to convert this to use workspaces
 	public static void commitChangeSet(Set<Version> changeSet, String message,
 			boolean runWithoutTransactions, ServiceRegistry services) {
 		if (runWithoutTransactions) {

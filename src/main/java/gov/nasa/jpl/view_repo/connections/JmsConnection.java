@@ -19,7 +19,7 @@ public class JmsConnection implements AbstractConnection {
     private String uri = "tcp://localhost:61616";
     private ActiveMQConnectionFactory connectionFactory = null;
     
-    private JmsConnection() {
+    public JmsConnection() {
     }
 
     public void setUri(String uri) {

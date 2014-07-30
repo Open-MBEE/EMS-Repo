@@ -1,10 +1,10 @@
 package gov.nasa.jpl.view_repo.util;
 
-import gov.nasa.jpl.mbee.util.ClassUtils;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.json.JSONArray;
@@ -22,16 +22,22 @@ public class WorkspaceDiff {
     private Set<EmsScriptNode> movedElements;
     private Set<EmsScriptNode> updatedElements;
 
-    public WorkspaceDiff(EmsScriptNode ws1, EmsScriptNode ws2) {
-        this.ws1 = ws1;
-        this.ws2 = ws2;
-        
+    public WorkspaceDiff() {
         elements = new HashSet<EmsScriptNode>();
         
         addedElements = new HashSet<EmsScriptNode>();
         movedElements = new HashSet<EmsScriptNode>();
         deletedElements = new HashSet<EmsScriptNode>();
         updatedElements = new HashSet<EmsScriptNode>();
+        
+        ws1 = null;
+        ws2 = null;
+    }
+    
+    public WorkspaceDiff(EmsScriptNode ws1, EmsScriptNode ws2) {
+        this();
+        this.ws1 = ws1;
+        this.ws2 = ws2;
     }
 
     public Set< EmsScriptNode > getAddedElements() {
@@ -111,13 +117,27 @@ public class WorkspaceDiff {
     }
     
     private void addWorkspaceMetadata(JSONObject jsonObject, EmsScriptNode ws, Date dateTime) throws JSONException {
-        jsonObject.put("name", ws.getName());
+        if (ws == null) {
+            jsonObject.put( "name", "master" );
+        } else {
+            jsonObject.put("name", ws.getName());
+        }
         jsonObject.put( "timestamp", TimeUtils.toTimestamp( dateTime ) );
     }
     
     private void addJSONArray(JSONObject jsonObject, String key, Date dateTime) throws JSONException {
-        @SuppressWarnings( "unchecked" )
-        Set<EmsScriptNode> set = (Set<EmsScriptNode>) ClassUtils.getFieldValue( this, key );
+        Set<EmsScriptNode> set = null;
+        if (key.equals( "elements" )) {
+            set = elements;
+        } else if (key.equals( "addedElements" )) {
+            set = addedElements;
+        } else if (key.equals( "deletedElements" )) {
+            set = deletedElements;
+        } else if (key.equals( "movedElements" )) {
+            set = movedElements;
+        } else if (key.equals( "updatedElements" )) {
+            set = updatedElements;
+        }
         if (set != null && set.size() > 0) {
             jsonObject.put( key, convertSetToJSONArray( set, dateTime ) );
         }
@@ -144,5 +164,13 @@ public class WorkspaceDiff {
         Scriptable json = node.getChildren();
         
         json.getIds();
+    }
+    
+    public static Set<EmsScriptNode> convertMapValuesToSet(Map<String, EmsScriptNode> map) {
+        Set<EmsScriptNode> set = new HashSet<EmsScriptNode>();
+        for (EmsScriptNode node: map.values()) {
+            set.add( node );
+        }
+        return set;
     }
 }
