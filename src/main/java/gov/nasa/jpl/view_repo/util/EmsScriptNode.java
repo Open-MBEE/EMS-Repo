@@ -49,6 +49,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -70,6 +71,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
+import org.alfresco.service.cmr.dictionary.TypeDefinition;
 import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentData;
@@ -691,9 +693,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         // type = "sysml:Element";
         // }
         if ( !useFoundationalApi ) {
-            result =
-                    new EmsScriptNode( super.createNode( name, type )
-                                            .getNodeRef(), services, response );
+            ScriptNode scriptNode = super.createNode( name, type );
+            result = new EmsScriptNode( scriptNode.getNodeRef(), services, response );
         } else {
             Map< QName, Serializable > props =
                     new HashMap< QName, Serializable >( 1, 1.0f );
@@ -1031,7 +1032,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         String sysmlName = getSysmlName();
         String qualifiedName = getSysmlQName();
         String type = getTypeName();
-        String workspaceName = getWorkspaceName();
+        String workspaceName = getWorkspaceName(false);
         return "{type=" + type + ", id=" + name + ", name=" + sysmlName + 
                 ", qualified name=" + qualifiedName + ", workspace=" + workspaceName + "}";
     }
@@ -1477,7 +1478,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                                              workspace, dateTime, true, true,
                                              services );
         Set< EmsScriptNode > nodeSet =
-        toEmsScriptNodeSet( refs, services, response, status );
+                toEmsScriptNodeSet( refs, services, response, status );
 
         EmsScriptNode value =
                 ( nodeSet == null || nodeSet.size() <= 0 ) ? null
@@ -2087,8 +2088,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     /**
      * @return the workspace
      */
-    public WorkspaceNode getWorkspace() {
-        if ( workspace == null ) {
+    public WorkspaceNode getWorkspace( boolean setIfNull ) {
+        if ( workspace == null && setIfNull ) {
             if ( hasAspect( "ems:HasWorkspace" ) ) {
                 NodeRef ref = (NodeRef)getProperty( "ems:workspace" );
                 WorkspaceNode ws = new WorkspaceNode( ref, getServices() );
@@ -2098,18 +2099,25 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         return workspace;
     }
 
+    public WorkspaceNode getWorkspace() {
+        return getWorkspace( true );
+    }
+
+    
     /**
      * @return the sysml id (cm name) of the workspace
      */
-    public String getWorkspaceName() {
+    public String getWorkspaceName( boolean setIfNull ) {
         String workspaceName = null;
-        EmsScriptNode ws = getWorkspace();
+        EmsScriptNode ws = getWorkspace( setIfNull );
         if ( ws != null ) {
             workspaceName = ws.getName();
         }
         return workspaceName;
     }
-
+    public String getWorkspaceName() {
+        return getWorkspaceName( true );
+    }
     /**
      * @param workspace the workspace to set
      */
@@ -2156,13 +2164,38 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 Debug.error( "Error! Can't clone under non-existent parent!" );
             }
         }
-        EmsScriptNode node = parent.createNode( getName(), getTypeShort() );
+        
+        // create node of same type, except a site will be of type cm:folder.
+        String type = getTypeShort();
+        boolean isSite = type.equals( "st:site" ); 
+        if ( isSite ) {
+            type = "cm:folder";
+        }
+        EmsScriptNode node = parent.createNode( getName(), type );
+        
+        // add missing aspects
         NodeService nodeService = getServices().getNodeService();
         Set< QName > myAspects = nodeService.getAspects( getNodeRef() );
         for ( QName qName : myAspects ) {
             node.createOrUpdateAspect( qName.toString() );
         }
+        
+        // copy properties except those of a site.
         Map< QName, Serializable > properties = nodeService.getProperties( getNodeRef() );
+        if ( isSite ) {
+            properties.remove( createQName( "st:sitePreset" ) );
+        }
+//            DictionaryService ds = getServices().getDictionaryService();
+//            TypeDefinition siteTypeDef = ds.getType( QName.createQName( "st:site" ) );
+//            Map< QName, PropertyDefinition > propss = siteTypeDef.getProperties();
+//            
+//            for ( Map.Entry<QName, PropertyDefinition> e : propss.entrySet() ) {
+//                PropertyDefinition propDef = e.getValue();
+//                if ( propDef.)
+//            }
+//            Set<QName> props = new HashSet<QName>(propss.keySet());
+//            
+//        }
         nodeService.setProperties( node.getNodeRef(), properties );
         return node;
     }
@@ -2443,8 +2476,28 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     public boolean isWorkspaceTop() {
         EmsScriptNode myParent = getParent();
-        if ( myParent == null ) return true;
-        if ( myParent.isWorkspace() ) return true;
+        if ( myParent == null ) {
+            if ( Debug.isOn() ) {
+                Debug.outln( "isWorkspaceTop() = true for node with null parent: " + this );
+            }
+            return true;
+        }
+        if ( myParent.isWorkspace() ) {
+            if ( Debug.isOn() ) {
+                Debug.outln( "isWorkspaceTop() = true for since node is a workspace: " + this );
+            }
+            return true;
+        }
+        if ( equals( getCompanyHome() ) ) {
+            if ( Debug.isOn() ) {
+                Debug.outln( "isWorkspaceTop() = true for company home node: " + this );
+            }
+            return true;
+        }
+        if ( Debug.isOn() ) {
+            Debug.outln( "isWorkspaceTop() = false for node " + this );
+        }
+
         return false;
     }
     

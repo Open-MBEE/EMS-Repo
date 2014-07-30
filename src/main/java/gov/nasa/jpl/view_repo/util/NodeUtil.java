@@ -28,6 +28,7 @@ import org.alfresco.repo.jscript.ValueConverter;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
+import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.dictionary.TypeDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -500,6 +501,11 @@ public class NodeUtil {
      *         with a matching name.
      */
     public static boolean isAspect( String aspectName, ServiceRegistry services ) {
+        AspectDefinition aspect = getAspect( aspectName, services );
+        return aspect != null;
+    }
+    
+    public static AspectDefinition getAspect( String aspectName, ServiceRegistry services ) {
         if ( Acm.getJSON2ACM().keySet().contains( aspectName ) ) {
             aspectName = Acm.getACM2JSON().get( aspectName );
         }
@@ -510,8 +516,8 @@ public class NodeUtil {
         if ( qName != null ) {
             AspectDefinition t = dServ.getAspect( qName );
             if ( t != null ) {
-              if (Debug.isOn()) System.out.println("\n\n*** getAspect(" + aspectName + ") worked!!!\n" );
-              return true;
+              if (Debug.isOn()) System.out.println("*** getAspect(" + aspectName + ") worked!!!" );
+              return t;
             }
         }
         
@@ -520,12 +526,27 @@ public class NodeUtil {
 
         for ( QName aspect : aspects ) {
             if ( aspect.getPrefixString().equals( aspectName ) ) {
-                if (Debug.isOn()) System.out.println("\n\n*** getAspect(" + aspectName + ") returning true\n" );
-                return true;
+                AspectDefinition t = dServ.getAspect( aspect );
+                if ( t != null ) {
+                    if (Debug.isOn()) System.out.println("*** getAspect(" + aspectName + ") returning " + t + "" );
+                    return t;
+                }
             }
         }
-        if (Debug.isOn()) System.out.println("\n\n*** getAspect(" + aspectName + ") returning false\n" );
-        return false;
+        if (Debug.isOn()) System.out.println("*** getAspect(" + aspectName + ") returning null" );
+        return null;
+
+    }
+    
+    public static Collection< PropertyDefinition >
+            getAspectProperties( String aspectName, ServiceRegistry services ) {
+        AspectDefinition aspect = getAspect( aspectName, services );
+        if ( aspect == null ) {
+            return Utils.newList();
+        }
+        Map< QName, PropertyDefinition > props = aspect.getProperties();
+        if ( props == null ) return Utils.getEmptyList();
+        return props.values();
     }
 
     /**

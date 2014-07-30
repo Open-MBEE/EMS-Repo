@@ -259,10 +259,17 @@
 						<tokenised>false</tokenised>
 					</index>
 				</property>
+	<!-- TODO - FIXME - multiple false like it used to be from propertyType! 
+		BTW, Brad says that he is won over by Doris on the necessity of propertyType 
+		since, if a property has no value, you still might want to have the type 
+		specified, and it will implicitly constrain the type of the value. If the 
+		element is an instance of a class element, the corresponding property in 
+		the class could have its value point to the type, but then it couldn't be 
+		interpreted as a default value (not that a default is a must-have). -->
                 <property name="sysml:propertyType">
                     <type>d:noderef</type>
                     <mandatory>false</mandatory>
-                    <multiple>true</multiple>
+                    <multiple>false</multiple>
                     <index enabled="true">
                         <atomic>false</atomic>
                         <stored>false</stored>
