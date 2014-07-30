@@ -7,6 +7,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletResponse;
@@ -169,10 +170,16 @@ public class WorkspaceNode extends EmsScriptNode {
 
         // make sure the folder's parent is replicated
         EmsScriptNode parent = folder.getParent();
+
+        if ( parent == null || parent.isWorkspaceTop() ) {
+            parent = this;
+//            if ( Debug.isOn() ) Debug.outln( "returning newFolder for workspace top: " + newFolder );
+//            return newFolder;
+        }
         if ( parent != null && parent.exists() && !this.equals( parent.getWorkspace() ) ) {
             parent = replicateFolderWithChain( parent );
-            if ( Debug.isOn() ) Debug.outln( "moving newFolder " + newFolder + " to parent " + parent );
-            newFolder.move( parent );
+            //if ( Debug.isOn() ) Debug.outln( "moving newFolder " + newFolder + " to parent " + parent );
+            //newFolder.move( parent );
         } else if ( parent == null || !parent.exists() ) {
             Debug.error("Error! Bad parent when replicating folder chain! " + parent );
         }
@@ -183,21 +190,16 @@ public class WorkspaceNode extends EmsScriptNode {
             newFolder.setWorkspace( this, folder.getNodeRef() );
         }
         
-        if ( folder.isWorkspaceTop() ) {
-            if ( Debug.isOn() ) Debug.outln( "returning newFolder for workspace top: " + newFolder );
-            return newFolder;
-        }
-        
         if ( Debug.isOn() ) Debug.outln( "returning newFolder: " + newFolder );
         return newFolder;
     }
     
     // When creating a node, create it in the workspace with the owner (and
     // parent chain up to company home) replicated in the workspace.
-    
+
     // When updating a node, if it is not in the specified workspace, copy it
     // with the same name into a folder chain replicated in the workspace.
-    
+
     // When copying a node, check and see if the other end of each relationship
     // is in the new workspace, and copy the relationship if it is.
     
@@ -212,6 +214,21 @@ public class WorkspaceNode extends EmsScriptNode {
     public Map<EmsScriptNode, EmsScriptNode> diff( WorkspaceNode other ) {
         TreeMap<EmsScriptNode, EmsScriptNode> map = new TreeMap<EmsScriptNode, EmsScriptNode>();
         // TODO
+        
+        // find deepest common parent
+        
+        // Collect the sysmlids of elements changed in this and the other
+        // workspace as well as those of their parents up to (but not including
+        // the deepest common parent). These should also include deleted
+        // elements.
+        
+        // For each sysmlid, get the corresponding element from each of the two
+        // workspaces. Map the one from this workspace to that from the other
+        // workspace.
+        
+        // NOTE: This doesn't specify the changes and conflicts explicitly.  
+        
+        //Set<EmsScriptNode> myElements = getLocalChanges();
         
         return map;
     }
