@@ -178,7 +178,16 @@
 		{
 		  "properties":
 		  {
+		      "sysmlids":
+		      {
+		          "type": "array",
+		          "description": "List of SysML IDs that are in conflict between the two workspaces",
+		          "items":
+		          {
+		              "type": "string"
+	              }
+		      }
 		  }
-		}
-	}
+	   }
+   }  
 }
