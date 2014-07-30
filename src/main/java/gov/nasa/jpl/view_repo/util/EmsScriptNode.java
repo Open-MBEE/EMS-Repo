@@ -1132,7 +1132,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 String methodName = "add" + aspectQname.getLocalName() + "JSON";
                 Method method = null;
                 try {
-                    method = this.getClass().getDeclaredMethod( methodName, JSONObject.class, Date.class );
+                    // make sure that the method signature here matches all the add methods
+                    method = this.getClass().getDeclaredMethod( methodName, JSONObject.class, EmsScriptNode.class, Date.class );
                 } catch ( NoSuchMethodException | SecurityException e ) {
                     // do nothing, method isn't implemented yet
 //                    System.out.println("Method not yet implemented: " + methodName);
