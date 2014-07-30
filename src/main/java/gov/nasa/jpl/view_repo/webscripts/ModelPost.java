@@ -46,10 +46,12 @@ import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.connections.JmsConnection;
 import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
@@ -103,6 +105,9 @@ public class ModelPost extends AbstractJavaWebScript {
     
     public ModelPost(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
+        // FIX: Need to figure out why spring dependency injection doesn't work
+        jmsConnection = new JmsConnection();
+        restConnection = new RestPostConnection();
      }
 
 
@@ -120,16 +125,15 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     private JSONObject elementHierarchyJson;
 
-    private Set<String> addedElementsSet = new HashSet<String>();
-    private Set<String> movedElementsSet = new HashSet<String>();
-    private Set<String> updatedElementsSet = new HashSet<String>();
+    private Map<String, EmsScriptNode> addedElementsMap = new HashMap<String, EmsScriptNode>();
+    private Map<String, EmsScriptNode> movedElementsMap = new HashMap<String, EmsScriptNode>();
+    private Map<String, EmsScriptNode> updatedElementsMap = new HashMap<String, EmsScriptNode>();
+    private Map<String, EmsScriptNode> originalElementMap = new HashMap<String, EmsScriptNode>();
     
     private EmsSystemModel systemModel;
     
     private SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAe;
     
-    // maps sysmlid to the fully qualified id
-    private Map<String, String> originalElementMap = new HashMap<String, String>();
 
     /**
      * JSONObject of the relationships
@@ -286,45 +290,16 @@ public class ModelPost extends AbstractJavaWebScript {
         boolean jmsStatus = false;
         boolean restStatus = false;
 
-        if (addedElementsSet.size() > 0 || updatedElementsSet.size() > 0 || movedElementsSet.size() > 0) {
-            JSONObject ws1 = new JSONObject();
-            JSONObject ws2 = new JSONObject();
+        if (addedElementsMap.size() > 0 || updatedElementsMap.size() > 0 || movedElementsMap.size() > 0) {
+            WorkspaceDiff wsDiff = new WorkspaceDiff();
+            wsDiff.setElements( WorkspaceDiff.convertMapValuesToSet( originalElementMap ) );
+            wsDiff.setAddedElements( WorkspaceDiff.convertMapValuesToSet( addedElementsMap ) );
+            wsDiff.setMovedElements( WorkspaceDiff.convertMapValuesToSet( movedElementsMap ) );
+            wsDiff.setUpdatedElements( WorkspaceDiff.convertMapValuesToSet( updatedElementsMap ) );
             
-            // add original information for workspace 1
-            JSONArray array = new JSONArray();
-            for (String sysmlid: originalElementMap.keySet()) {
-                // TODO figure out why this check is necessary
-                if (!addedElementsSet.contains( sysmlid )) {
-                    JSONObject elementJson = new JSONObject();
-                    elementJson.put( "qualifiedId", originalElementMap.get( sysmlid ) );
-                    elementJson.put( "sysmlid", sysmlid );
-                    array.put( elementJson );
-                }
-            }
-            ws1.put( "elements", array );
-            ws1.put( "name", "master" );
-            ws1.put( "timestamp", TimeUtils.toTimestamp( start ));
-            
-            // add deltas for ws2
-            if (addedElementsSet.size() > 0) {
-                JSONArray addedElements = convertElementsToJSONArray(addedElementsSet, workspace);
-                ws2.put( "addedElements", addedElements );
-            }
-            if (updatedElementsSet.size() > 0) {
-                JSONArray updatedElements = convertElementsToJSONArray(updatedElementsSet, workspace);
-                ws2.put( "updatedElements", updatedElements );
-            }
-            if (movedElementsSet.size() > 0) {
-                JSONArray movedElements = convertElementsToJSONArray(movedElementsSet, workspace);
-                ws2.put( "movedElements", movedElements );
-            }
-            ws2.put( "name", "master" );
-            ws2.put( "timestamp", TimeUtils.toTimestamp( end ) );
-
-            JSONObject deltaJson = new JSONObject();
-            deltaJson.put( "workspace1", ws1 );
-            deltaJson.put( "workspace2", ws2 );
-        
+            Date t1 = new Date(start);
+            Date t2 = new Date(end);
+            JSONObject deltaJson = wsDiff.toJSONObject( t1, t2 );
             if (jmsConnection != null) {
                 jmsStatus = jmsConnection.publish( deltaJson, "master" );
             }
@@ -337,18 +312,6 @@ public class ModelPost extends AbstractJavaWebScript {
     }
     
     
-    private JSONArray
-            convertElementsToJSONArray( Set< String > elementSet, WorkspaceNode workspace ) throws JSONException {
-        JSONArray array = new JSONArray();
-        for (String elementId: elementSet) {
-            EmsScriptNode node = findScriptNodeById( elementId, workspace, null );
-            if (node != null && node.exists()) {
-                array.put( node.toJSONObject( null ) );
-            }
-        }
-        return array;
-    }
-
     protected Set<EmsScriptNode> updateNodeReferences(boolean singleElement,
                                                       JSONObject postJson,
                                                       EmsScriptNode projectNode,
@@ -819,8 +782,11 @@ public class ModelPost extends AbstractJavaWebScript {
         element = findScriptNodeById( jsonId, workspace, null );
         if ( element != null ) {
             elements.add( element );
-            if (!originalElementMap.containsKey( jsonId )) {
-                originalElementMap.put( jsonId, element.getSysmlQId() );
+            // only add to original element map if it exists on first pass
+            if (!ingest) {
+                if (!originalElementMap.containsKey( jsonId )) {
+                    originalElementMap.put( jsonId, element );
+                }
             }
         }
         
@@ -921,24 +887,24 @@ public class ModelPost extends AbstractJavaWebScript {
             switch (modStatus.getState()) {
                 case ADDED:
                     if (!ingest) {
-                        addedElementsSet.add( jsonId );
+                        addedElementsMap.put( jsonId, element );
                     }
                     break;
                 case UPDATED:
-                    if (ingest && !addedElementsSet.contains( jsonId )) {
-                        updatedElementsSet.add(jsonId);
+                    if (ingest && !addedElementsMap.containsKey( jsonId )) {
+                        updatedElementsMap.put( jsonId, element );
                     }
                     break;
                 case MOVED:
-                    if (!ingest && !addedElementsSet.contains( jsonId )) {
-                        movedElementsSet.add(jsonId);
+                    if (!ingest && !addedElementsMap.containsKey( jsonId )) {
+                        movedElementsMap.put( jsonId, element );
                     }
                     break;
                 case UPDATED_AND_MOVED:
-                    if (ingest && !addedElementsSet.contains( jsonId )) {
-                        updatedElementsSet.add(jsonId);
+                    if (ingest && !addedElementsMap.containsKey( jsonId )) {
+                        updatedElementsMap.put( jsonId, element );
                     } else {
-                        movedElementsSet.add(jsonId);
+                        movedElementsMap.put( jsonId, element );
                     }
                     break;
                 default:
@@ -1229,24 +1195,11 @@ public class ModelPost extends AbstractJavaWebScript {
             // is an element and only aspects are used for subclassing.
             try {
                 if (node != null && node.exists() ) {
-//                    if ( parent != null && parent.exists()
-//                         && !node.getParent().equals( parent ) ) {
                     if ( Debug.isOn() ) Debug.outln("moving node <<<" + node + ">>>");
                     if ( Debug.isOn() ) Debug.outln("to parent <<<" + parent + ">>>");
                         if ( node.move(parent) ) {
                             modStatus.setState( ModStatus.State.MOVED  );
                         }
-                        
-                        EmsScriptNode pkgNode = findScriptNodeById(id + "_pkg", workspace, null);
-                        if (pkgNode != null && pkgNode.exists()) {
-                            pkgNode.move(parent);
-                        }
-//                    } else if (parent == null || parent.exists()) {
-//                        Debug.error( true, true, "Error! Could not move node, "
-//                                                 + node
-//                                                 + ", to non-existent parent, "
-//                                                 + parent );
-//                    }
                     if ( !type.equals( acmSysmlType )
                             && NodeUtil.isAspect( acmSysmlType ) ) {
                         if (node.createOrUpdateAspect( acmSysmlType )) {
@@ -1385,8 +1338,22 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             if (checkPermissions(reifiedNode, PermissionService.WRITE)) {
                 foundElements.put(pkgName, reifiedNode);
-                // this reification containment association is more trouble than it's worth...
-//                node.createOrUpdateChildAssociation(reifiedNode, Acm.ACM_REIFIED_CONTAINMENT);
+
+                // check for the case where the id isn't the same as the node
+                // reference - this happens when creating a root level package
+                // for example
+                if ( !id.equals( node.getProperty( "sysml:id" ) )) {
+                    node = findScriptNodeById(id, workspace, null);
+                }
+
+                if (node != null) {
+                    // lets keep track of reification
+                    node.createOrUpdateAspect( "ems:Reified" );
+                    node.createOrUpdateProperty( "ems:reifiedPkg", reifiedNode.getNodeRef() );
+                    
+                    reifiedNode.createOrUpdateAspect( "ems:Reified" );
+                    reifiedNode.createOrUpdateProperty( "ems:reifiedNode", node.getNodeRef() );
+                }
             }
         }
 

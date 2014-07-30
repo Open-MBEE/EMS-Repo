@@ -109,4 +109,12 @@
 	<bean id="extendPermissionModel" parent="permissionModelBootstrap">
    		<property name="model" value="alfresco/extension/permissionDefinitionsExtension.xml" /> 
 	</bean>
+
+    <!-- Definitions for sending active sync messages -->
+    <bean id="jmsConnection" class="gov.nasa.jpl.view_repo.connections.JmsConnection">
+        <property name="uri" value="tcp://localhost:61616" />
+    </bean>
+    <bean id="restConnection" class="gov.nasa.jpl.view_repo.connections.RestPostConnection">
+        <property name="uri" value="https://orasoa-dev07.jpl.nasa.gov:8121/PublishMessageRestful" />
+    </bean>
 </beans>
