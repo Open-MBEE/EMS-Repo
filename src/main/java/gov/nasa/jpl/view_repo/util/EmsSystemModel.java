@@ -955,11 +955,12 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     		
 			// If it is a Property type, then the value is a NodeRef, which
 			// we convert to a EmsScriptNode:
-    			if (node.hasAspect(Acm.ACM_PROPERTY)) {
+    		if (node.hasAspect(Acm.ACM_PROPERTY)) {
 				
 		    	List<EmsScriptNode> returnList = new ArrayList<EmsScriptNode>();
-				Object valueNode = node.getProperty(Acm.ACM_VALUE);
-				convertToScriptNode(valueNode , returnList);
+				Collection<NodeRef> valueNodes =
+				        (Collection< NodeRef >)node.getProperty(Acm.ACM_VALUE);
+				convertToScriptNode(valueNodes, returnList);
 				
 	    		return Utils.asList(returnList, Object.class);
 			}

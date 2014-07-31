@@ -162,14 +162,20 @@ public class WorkspaceNode extends EmsScriptNode {
         return parentWs.contains( node );
     }
     
-    // Replicate this folder and its parent/grandparents in this workspace.
-    public EmsScriptNode replicateFolderWithChain( EmsScriptNode folder ) {
-        if ( Debug.isOn() ) Debug.outln( "replicateFolderWithChain( " + folder + " )" );
-        if ( folder == null ) return null;
-        EmsScriptNode newFolder = folder;
+    /**
+     * Replicate this node and its parent/grandparent folders into this
+     * workspace if not already present.
+     * 
+     * @param node
+     * @return
+     */
+    public EmsScriptNode replicateWithParentFolders( EmsScriptNode node ) {
+        if ( Debug.isOn() ) Debug.outln( "replicateFolderWithChain( " + node + " )" );
+        if ( node == null ) return null;
+        EmsScriptNode newFolder = node;
 
         // make sure the folder's parent is replicated
-        EmsScriptNode parent = folder.getParent();
+        EmsScriptNode parent = node.getParent();
 
         if ( parent == null || parent.isWorkspaceTop() ) {
             parent = this;
@@ -177,7 +183,7 @@ public class WorkspaceNode extends EmsScriptNode {
 //            return newFolder;
         }
         if ( parent != null && parent.exists() && !this.equals( parent.getWorkspace() ) ) {
-            parent = replicateFolderWithChain( parent );
+            parent = replicateWithParentFolders( parent );
             //if ( Debug.isOn() ) Debug.outln( "moving newFolder " + newFolder + " to parent " + parent );
             //newFolder.move( parent );
         } else if ( parent == null || !parent.exists() ) {
@@ -185,9 +191,9 @@ public class WorkspaceNode extends EmsScriptNode {
         }
 
         // If the folder is not already in this workspace, clone it.
-        if ( folder.getWorkspace() == null || !folder.getWorkspace().equals( this ) ) {
-            newFolder = folder.clone(parent);
-            newFolder.setWorkspace( this, folder.getNodeRef() );
+        if ( node.getWorkspace() == null || !node.getWorkspace().equals( this ) ) {
+            newFolder = node.clone(parent);
+            newFolder.setWorkspace( this, node.getNodeRef() );
         }
         
         if ( Debug.isOn() ) Debug.outln( "returning newFolder: " + newFolder );

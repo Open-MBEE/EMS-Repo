@@ -194,7 +194,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         EmsScriptNode snapshotNode = parent.childByNamePath("snapshots");
         if ( viewNode.getWorkspace() != null && viewNode.getWorkspace().exists() &&
                 !viewNode.getWorkspace().contains(snapshotNode) ) {
-            viewNode.getWorkspace().replicateFolderWithChain( snapshotNode );
+            viewNode.getWorkspace().replicateWithParentFolders( snapshotNode );
         }
        
         if (snapshotNode == null) {

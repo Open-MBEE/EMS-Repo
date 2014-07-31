@@ -151,7 +151,7 @@ public class ModelDelete extends AbstractJavaWebScript {
         // Add the element to the specified workspace to be deleted from there.
         if ( workspace != null && workspace.exists() && node != null
              && node.exists() && !node.isWorkspace() ) {
-	        EmsScriptNode newNodeToDelete = workspace.replicateFolderWithChain( node );
+	        EmsScriptNode newNodeToDelete = workspace.replicateWithParentFolders( node );
 	        node = newNodeToDelete;
 	    }
 	    

@@ -342,7 +342,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                     }
                     // now replicate sites folder
                     if ( sitesFolder != null ) {
-                        EmsScriptNode newSitesFolder = workspace.replicateFolderWithChain( sitesFolder );
+                        EmsScriptNode newSitesFolder = workspace.replicateWithParentFolders( sitesFolder );
                         sitesFolder = newSitesFolder;
                     }
                 }

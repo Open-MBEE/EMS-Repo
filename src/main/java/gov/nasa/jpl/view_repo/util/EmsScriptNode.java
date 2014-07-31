@@ -156,7 +156,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     
     public EmsScriptNode getWorkspaceSource() {
         if ( !hasAspect( "ems:HasWorkspace" ) ) return null;
-        NodeRef ref = (NodeRef)getProperty( "ems:source" );
+        NodeRef ref = (NodeRef)getProperty( "ems:source", true );
         if ( ref != null ) {
             return new EmsScriptNode( ref, getServices() );
         }
@@ -373,7 +373,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             value = t;
         }
         @SuppressWarnings( "unchecked" )
-        T oldValue = (T)getProperty( acmType );
+        T oldValue = (T)getProperty( acmType, true );
         if ( oldValue != null ) {
             if ( !value.equals( oldValue ) ) {
                 setProperty( acmType, value );
@@ -529,7 +529,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         artifactNode.createOrUpdateProperty( "view:cs", cs );
 
         if (Debug.isOn()) System.out.println( "Creating artifact with indexing: "
-                            + artifactNode.getProperty( "cm:isIndexed" ) );
+                            + artifactNode.getProperty( "cm:isIndexed", false ) );
         ContentWriter writer =
                 services.getContentService()
                         .getWriter( artifactNode.getNodeRef(),
@@ -586,7 +586,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     public String getSiteTitle() {
         EmsScriptNode siteNode = getSiteNode();
-        return (String)siteNode.getProperty( Acm.CM_TITLE );
+        return (String)siteNode.getProperty( Acm.CM_TITLE, false );
     }
 
     public String getSiteName() {
@@ -660,7 +660,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
        
     private EmsScriptNode getReifiedNode() {
-        NodeRef nodeRef = (NodeRef) getProperty("ems:reifiedNode");
+        NodeRef nodeRef = (NodeRef) getProperty("ems:reifiedNode", true);
         if (nodeRef != null) {
             return new EmsScriptNode(nodeRef, services, response);
         }
@@ -668,7 +668,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
     
     private EmsScriptNode getReifiedPkg() {
-        NodeRef nodeRef = (NodeRef) getProperty("ems:reifiedPkg");
+        NodeRef nodeRef = (NodeRef) getProperty("ems:reifiedPkg", true);
         if (nodeRef != null) {
             return new EmsScriptNode(nodeRef, services, response);
         }
@@ -786,15 +786,15 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     @Override
     public String getName() {
-        return (String)getProperty( Acm.CM_NAME );
+        return (String)getProperty( Acm.CM_NAME, false );
     }
 
     public String getSysmlName() {
-        return (String)getProperty( Acm.ACM_NAME );
+        return (String)getProperty( Acm.ACM_NAME, false );
     }
 
     public String getSysmlId() {
-        String id = (String)getProperty( Acm.ACM_ID );
+        String id = (String)getProperty( Acm.ACM_ID, false );
         if ( id == null ) {
             id = getName();
         }
@@ -817,19 +817,39 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      * @return
      */
     public Object getProperty( String acmType ) {
+        return getProperty( acmType, true );
+    }
+    public Object getProperty( String acmType, boolean setWorkspaceIfNull ) {
+        Object result = null;
         if ( useFoundationalApi ) {
-            return services.getNodeService()
-                           .getProperty( nodeRef, createQName( acmType ) );
+            QName typeQName = createQName( acmType );
+            result = services.getNodeService().getProperty( nodeRef, typeQName );
         } else {
-            return getProperties().get( acmType );
+            result = getProperties().get( acmType );
         }
+        if ( result instanceof NodeRef ) {
+            result = NodeUtil.getNodeRefAtTime( (NodeRef)result, getWorkspace(setWorkspaceIfNull), null );
+        } else if ( result instanceof Collection ) {
+            Collection<?> resultColl = (Collection< ? >)result;
+            ArrayList<Object> arr = new ArrayList<Object>();
+            for ( Object o : resultColl ) {
+                if ( o instanceof NodeRef ) {
+                    NodeRef ref = NodeUtil.getNodeRefAtTime( (NodeRef)o, getWorkspace(setWorkspaceIfNull), null );
+                    arr.add( ref );
+                } else {
+                    arr.add( o );
+                }
+            }
+            result = arr;
+        }
+        return result;
     }
 
     
     public Date getLastModified(Date dateTime) {
-        Date lastModifiedDate = (Date)getProperty( Acm.ACM_LAST_MODIFIED );
+        Date lastModifiedDate = (Date)getProperty( Acm.ACM_LAST_MODIFIED, false );
 
-        Object value = getProperty( Acm.ACM_VALUE );
+        Object value = getProperty( Acm.ACM_VALUE, false );
         ArrayList<NodeRef> dependentNodes = new ArrayList<NodeRef>();
         if ( value instanceof Collection ) {
             Collection< ? > c = (Collection< ? >)value;
@@ -973,21 +993,21 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         String qname = "";
 
         if (isName) {
-            qname = "/" + this.getProperty("sysml:name") + qname;
+            qname = "/" + this.getProperty("sysml:name", false) + qname;
         } else {
-            qname = "/" + this.getProperty("sysml:id") + qname;
+            qname = "/" + this.getProperty("sysml:id", false) + qname;
         }
         
-        NodeRef ownerRef = (NodeRef) this.getProperty( "ems:owner" );
+        NodeRef ownerRef = (NodeRef) this.getProperty( "ems:owner", false );
         // Need to look up based on owners...
         while ( ownerRef != null ) {
             EmsScriptNode owner = new EmsScriptNode(ownerRef, services, response);
             String nameProp = null;
             if (isName) {
-                nameProp = (String) owner.getProperty( "sysml:name" );
+                nameProp = (String) owner.getProperty( "sysml:name", false );
             } else {
                 // looking for id, so need to replace _pkg from reified nodes
-                nameProp = (String) owner.getProperty("sysml:id");
+                nameProp = (String) owner.getProperty("sysml:id", false);
             }
             // ignore things in tree until a sysmlId is found
             if (nameProp == null) {
@@ -995,7 +1015,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             }
             qname = "/" + nameProp + qname;
             
-            ownerRef = (NodeRef) owner.getProperty( "ems:owner" );
+            ownerRef = (NodeRef) owner.getProperty( "ems:owner", false );
         }
 
         return qname;
@@ -1009,7 +1029,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     public JSONArray getChildrenViewsJSONArray() {
         JSONArray childrenViews = new JSONArray();
         try {
-            Object property = this.getProperty( Acm.ACM_CHILDREN_VIEWS );
+            Object property = this.getProperty( Acm.ACM_CHILDREN_VIEWS, true );
             if ( property != null ) {
                 childrenViews = new JSONArray( property.toString() );
             }
@@ -1064,7 +1084,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     public String nodeRefToSysmlId( NodeRef ref ) throws JSONException {
         EmsScriptNode node = new EmsScriptNode( ref, services );
-        Object sysmlId = node.getProperty( Acm.ACM_ID );
+        Object sysmlId = node.getProperty( Acm.ACM_ID, true );
         if ( sysmlId != null ) {
             return "" + sysmlId;
         } else {
@@ -1102,23 +1122,23 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     
     protected void addElementJSON(JSONObject elementJson, Date dateTime) throws JSONException {
         EmsScriptNode node = getNodeAtAtime( dateTime );
-        elementJson.put( Acm.JSON_ID, node.getProperty( Acm.ACM_ID ) );
-        elementJson.put( Acm.JSON_NAME, node.getProperty( Acm.ACM_NAME ) );
-        elementJson.put( Acm.JSON_DOCUMENTATION, node.getProperty( Acm.ACM_DOCUMENTATION) );
+        elementJson.put( Acm.JSON_ID, node.getProperty( Acm.ACM_ID, true ) );
+        elementJson.put( Acm.JSON_NAME, node.getProperty( Acm.ACM_NAME, false ) );
+        elementJson.put( Acm.JSON_DOCUMENTATION, node.getProperty( Acm.ACM_DOCUMENTATION, false) );
         elementJson.put( "qualifiedName", node.getSysmlQName() );
         String qid = (String) node.getSysmlQId();
         elementJson.put( "qualifiedId", qid.replace( "_pkg", "" ) );
         elementJson.put( "editable", node.hasPermission( PermissionService.WRITE ) );
-        NodeRef ownerRef = (NodeRef) node.getProperty( "ems:owner" );
+        NodeRef ownerRef = (NodeRef) node.getProperty( "ems:owner", false );
         EmsScriptNode owner;
         if (ownerRef != null) {
             owner = new EmsScriptNode(ownerRef, services, response);
         } else {
             owner = node.getParent();
         }
-        elementJson.put( "owner", owner.getProperty("sysml:id") );
-        elementJson.put(  "creator", node.getProperty("cm:modifier") );
-        elementJson.put(  "modified", getLastModified((Date)node.getProperty("cm:modified")));
+        elementJson.put( "owner", owner.getProperty("sysml:id", true) );
+        elementJson.put( "creator", node.getProperty("cm:modifier", false) );
+        elementJson.put( "modified", getLastModified((Date)node.getProperty("cm:modified", false)));
     }
     
     private void addSpecializationJSON(JSONObject json, Date dateTime) throws JSONException {
@@ -1133,8 +1153,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 String methodName = "add" + aspectQname.getLocalName() + "JSON";
                 Method method = null;
                 try {
-                    // make sure that the method signature here matches all the add methods
-                    method = this.getClass().getDeclaredMethod( methodName, JSONObject.class, EmsScriptNode.class, Date.class );
+                    method = this.getClass().getDeclaredMethod( methodName, JSONObject.class, Date.class );
                 } catch ( NoSuchMethodException | SecurityException e ) {
                     // do nothing, method isn't implemented yet
 //                    System.out.println("Method not yet implemented: " + methodName);
@@ -1533,7 +1552,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         if ( checkPermissions( PermissionService.WRITE, response, status ) ) {
             @SuppressWarnings( "unchecked" )
             ArrayList< Serializable > oldValues =
-                    (ArrayList< Serializable >)getProperty( acmProperty );
+                    (ArrayList< Serializable >)getProperty( acmProperty, true );
             if ( !EmsScriptNode.checkIfListsEquivalent( values, oldValues ) ) {
                 setProperty( acmProperty, values );
                 changed = true;
@@ -1968,7 +1987,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     public boolean checkPermissions( String permissions, StringBuffer response,
                                      Status status ) {
         if ( !hasPermission( permissions ) && response != null ) {
-            Object property = getProperty( Acm.CM_NAME );
+            Object property = getProperty( Acm.CM_NAME, true );
             if ( property != null ) {
                 String msg =
                         "Warning! No " + permissions + " priveleges to "
@@ -2091,7 +2110,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     public WorkspaceNode getWorkspace( boolean setIfNull ) {
         if ( workspace == null && setIfNull ) {
             if ( hasAspect( "ems:HasWorkspace" ) ) {
-                NodeRef ref = (NodeRef)getProperty( "ems:workspace" );
+                NodeRef ref = (NodeRef)getProperty( "ems:workspace", setIfNull );
                 WorkspaceNode ws = new WorkspaceNode( ref, getServices() );
                 setWorkspace( ws, null );
             }
@@ -2262,13 +2281,13 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     // HERE!!  REVIEW -- Is this right?
     public Object getPropertyValue( String propertyName ) {
         //Debug.error("ERROR!  EmsScriptNode.getPropertyValue() doesn't work!");
-        Object o = getProperty( propertyName );
+        Object o = getProperty( propertyName, true );
         Object value = o; // default if case is not handled below
         
         if ( o instanceof NodeRef ) {
             EmsScriptNode property = new EmsScriptNode((NodeRef)o, getServices());
             if ( property.hasAspect( "Property" ) ) {
-                value = property.getProperty("value");
+                value = property.getProperty("value", true);
             }
         }
         return value;
@@ -2319,7 +2338,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
  
     public ArrayList< NodeRef > getPropertyNodeRefs( String acmProperty ) {
-        Object o = getProperty(acmProperty);
+        Object o = getProperty(acmProperty, true);
         ArrayList< NodeRef > refs = null;
         if ( ! ( o instanceof Collection ) ) {
             if ( o instanceof NodeRef ) {
@@ -2454,8 +2473,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             
             // NOTE -- This code assumes that the source and target are from the
             // appropriate workspace!
-            NodeRef source = (NodeRef)getProperty( Acm.ACM_SOURCE );
-            NodeRef target = (NodeRef)getProperty( Acm.ACM_TARGET );
+            NodeRef source = (NodeRef)getProperty( Acm.ACM_SOURCE, true );
+            NodeRef target = (NodeRef)getProperty( Acm.ACM_TARGET, true );
             
            if ( source != null ) {
                EmsScriptNode sNode = new EmsScriptNode( source, services );
@@ -2502,7 +2521,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
     
     private String getSysmlIdOfProperty(String propertyName, Date dateTime) {
-        NodeRef elementRef = (NodeRef) this.getProperty(propertyName);
+        NodeRef elementRef = (NodeRef) this.getProperty(propertyName, true);
         return getSysmlIdFromNodeRef( elementRef );
     }
     
@@ -2510,7 +2529,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         if (nodeRef != null) {
             EmsScriptNode node = new EmsScriptNode(nodeRef, services, response);
             if (node != null && node.exists()) {
-                return (String) node.getProperty("sysml:id");
+                return (String) node.getProperty("sysml:id", true);
             }
         }
         return null;
@@ -2581,25 +2600,25 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 //        json.put( "displayedElements", getView().getDisplayedElements() );
 //        json.put( "allowedElements", getView().getDisplayedElements() );
 //        json.put( "childrenViews", getView().getChildViews() );
-        json.put( "contains", new JSONArray((String)node.getProperty( "view2:contains" )) );
-        json.put( "displayedElements", new JSONArray((String)node.getProperty( "view2:displayedElements" )) );
-        json.put( "allowedElements", new JSONArray((String)node.getProperty( "view2:allowedElements" )) );
-        json.put( "childrenViews", new JSONArray((String)node.getProperty( "view2:childrenViews" )) );
+        json.put( "contains", new JSONArray((String)node.getProperty( "view2:contains", true )) );
+        json.put( "displayedElements", new JSONArray((String)node.getProperty( "view2:displayedElements", false )) );
+        json.put( "allowedElements", new JSONArray((String)node.getProperty( "view2:allowedElements", false )) );
+        json.put( "childrenViews", new JSONArray((String)node.getProperty( "view2:childrenViews", false )) );
         
         // TODO: Snapshots?
     }
 
     protected void addProductJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        json.put( "view2view", new JSONArray((String)node.getProperty( "view2:view2view" )) );
-        json.put( "noSections", new JSONArray((String)node.getProperty( "view2:noSections")) );
+        json.put( "view2view", new JSONArray((String)node.getProperty( "view2:view2view", true )) );
+        json.put( "noSections", new JSONArray((String)node.getProperty( "view2:noSections", false)) );
         addViewJSON(json, node, dateTime);
     }
         
     protected void addPropertyJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        json.put( "isDerived", node.getProperty("sysml:isDerived") );
-        json.put( "isSlot", node.getProperty("sysml:isSlot") );
-        json.put( "value", addInternalJSON((ArrayList<NodeRef>)node.getProperty("sysml:value"), dateTime));
-        json.put( "propertyType", addInternalJSON((ArrayList<NodeRef>)node.getProperty("sysml:propertyType"), dateTime));
+        json.put( "isDerived", node.getProperty("sysml:isDerived", true) );
+        json.put( "isSlot", node.getProperty("sysml:isSlot", false) );
+        json.put( "value", addInternalJSON((ArrayList<NodeRef>)node.getProperty("sysml:value", false), dateTime));
+        json.put( "propertyType", addInternalJSON((ArrayList<NodeRef>)node.getProperty("sysml:propertyType", false), dateTime));
     }
 
     protected void addDirectedRelationshipJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
@@ -2671,7 +2690,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     protected void addExpressionJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
         addValueSpecificationJSON( json, node, dateTime );
         
-        ArrayList<NodeRef> nodeRefs = (ArrayList<NodeRef>) node.getProperty( "sysml:operand" );
+        ArrayList<NodeRef> nodeRefs = (ArrayList<NodeRef>) node.getProperty( "sysml:operand", true );
         JSONArray array = new JSONArray();
         for (NodeRef nodeRef: nodeRefs) {
             NodeRef versionedRef = nodeRef;
@@ -2707,12 +2726,12 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     protected void addLiteralBooleanJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
         addValueSpecificationJSON( json, node, dateTime );
-        json.put( "boolean", node.getProperty("sysml:boolean") );
+        json.put( "boolean", node.getProperty("sysml:boolean", true) );
     }
     
     protected void addLiteralIntegerJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
         addValueSpecificationJSON( json, node, dateTime );
-        json.put( "integer", node.getProperty("sysml:integer") );
+        json.put( "integer", node.getProperty("sysml:integer", true) );
     }
     
     protected void addLiteralNullJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
@@ -2721,22 +2740,22 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
     protected void addLiteralRealJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
         addValueSpecificationJSON( json, node, dateTime );
-        json.put( "double", node.getProperty("sysml:double") );
+        json.put( "double", node.getProperty("sysml:double", true) );
     }
     
     protected void addLiteralStringJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
         addValueSpecificationJSON( json, node, dateTime );
-        json.put( "string", node.getProperty("sysml:string") );
+        json.put( "string", node.getProperty("sysml:string", true) );
     }
 
     protected void addLiteralUnlimitedNaturalJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
         addValueSpecificationJSON( json, node, dateTime );
-        json.put( "naturalValue", node.getProperty("sysml:naturalValue") );
+        json.put( "naturalValue", node.getProperty("sysml:naturalValue", true) );
     }
 
     protected void addOpaqueExpressionJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
         addValueSpecificationJSON( json, node, dateTime );
-        json.put( "expressionBody", node.getProperty("sysml:expressionBody") );
+        json.put( "expressionBody", node.getProperty("sysml:expressionBody", true) );
     }    
 
     protected void addStringExpressionJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
@@ -2763,7 +2782,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
     
     protected void addOperationJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        ArrayList<NodeRef> nodeRefs = (ArrayList<NodeRef>) node.getProperty( "sysml:operationParameter" );
+        ArrayList<NodeRef> nodeRefs = (ArrayList<NodeRef>) node.getProperty( "sysml:operationParameter", true );
         JSONArray ids = addNodeRefIdsJSON( nodeRefs, dateTime );
         if (ids.length() > 0) { 
             json.put( "parameters", ids );
@@ -2776,7 +2795,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }    
 
     protected void addInstanceSpecificationJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        json.put( "specification", node.getProperty( "sysml:instanceSpecificationSpecification") );
+        json.put( "specification", node.getProperty( "sysml:instanceSpecificationSpecification", true) );
     }
 
     protected void addConstraintJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
@@ -2787,8 +2806,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
     
     protected void addParameterJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        json.put( "direction", node.getProperty("sysml:parameterDirection") );
-        json.put( "parameterType", node.getProperty( "sysml:parameterType" ));
+        json.put( "direction", node.getProperty("sysml:parameterDirection", true) );
+        json.put( "parameterType", node.getProperty( "sysml:parameterType", true ));
         
         String id = node.getSysmlIdOfProperty( "sysml:parameterDefaultValue", dateTime );
         if (id != null) {
@@ -2797,7 +2816,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
 
     protected void addConnectorJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        ArrayList<NodeRef> nodeRefs = (ArrayList<NodeRef>) node.getProperty( "sysml:roles" );
+        ArrayList<NodeRef> nodeRefs = (ArrayList<NodeRef>) node.getProperty( "sysml:roles", true );
         JSONArray ids = addNodeRefIdsJSON( nodeRefs, dateTime );
         json.put( "connectorRoles", ids );
     }

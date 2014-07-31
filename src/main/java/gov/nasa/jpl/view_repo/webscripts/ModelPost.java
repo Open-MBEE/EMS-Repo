@@ -970,6 +970,20 @@ public class ModelPost extends AbstractJavaWebScript {
             									oldVals.iterator() : null;
             ArrayList<String> nodeNames = new ArrayList<String>();
 
+            // Check for workspace disagreement in arguments.
+            if ( node.getWorkspace() != workspace ) {
+                if ( workspace == null ) {
+                    workspace = node.getWorkspace();
+                } else {
+                    log( LogLevel.WARNING,
+                         "Property owner's workspace ("
+                                 + node.getWorkspaceName()
+                                 + ") and specified workspace for property ("
+                                 + workspace.getName()
+                                 + ") are different!" );
+                }
+            }            
+
             // Compare the existing values to the new ones
             // in the JSON element.  Assume that they maintain the
             // same ordering.  If there are more values in the
@@ -985,6 +999,15 @@ public class ModelPost extends AbstractJavaWebScript {
             		
           			nodeNames.add(oldValNode.getName());
         			
+                    if ( workspace != null
+                         && !workspace.equals( oldValNode.getWorkspace() ) ) {
+                        EmsScriptNode newNode =
+                                workspace.replicateWithParentFolders( oldValNode );
+                        //EmsScriptNode newNode = oldValNode.clone( node );
+                        //newNode.setWorkspace( workspace, oldValNode.getNodeRef() );
+                        oldValNode = newNode;
+          			}
+          			
         			// Ingest the JSON for the value
         			// to set properties for the node:
         			oldValNode.ingestJSON((JSONObject)newVal);
@@ -1080,12 +1103,12 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // TODO Need to permission check on new node creation
         // find node if exists, otherwise create
-        EmsScriptNode node = findScriptNodeById( id, workspace, null );
+        EmsScriptNode nodeToUpdate = findScriptNodeById( id, workspace, null );
         String existingNodeType = null;
-        if ( node != null ) {
-            node.setResponse( getResponse() );
-            node.setStatus( getResponseStatus() );
-            existingNodeType = node.getTypeName();
+        if ( nodeToUpdate != null ) {
+            nodeToUpdate.setResponse( getResponse() );
+            nodeToUpdate.setStatus( getResponseStatus() );
+            existingNodeType = nodeToUpdate.getTypeName();
         }
         EmsScriptNode reifiedNode = null;
 
@@ -1148,15 +1171,15 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // Move the node to the specified workspace if the node is not a
         // workspace itself.
-        if ( workspace != null && workspace.exists() && node != null
-             && node.exists() && !node.isWorkspace() && !workspace.equals( node.getWorkspace() ) ) {
-            parent = workspace.replicateFolderWithChain( parent );
-            EmsScriptNode oldNode = node;
-            node = node.clone(parent);
-            node.setWorkspace( workspace, oldNode.getNodeRef() );
+        if ( workspace != null && workspace.exists() && nodeToUpdate != null
+             && nodeToUpdate.exists() && !nodeToUpdate.isWorkspace() && !workspace.equals( nodeToUpdate.getWorkspace() ) ) {
+            parent = workspace.replicateWithParentFolders( parent );
+            EmsScriptNode oldNode = nodeToUpdate;
+            nodeToUpdate = nodeToUpdate.clone(parent);
+            nodeToUpdate.setWorkspace( workspace, oldNode.getNodeRef() );
         }
 
-        if ( node == null || !node.exists() ) {// && newElements.contains( id ) ) {
+        if ( nodeToUpdate == null || !nodeToUpdate.exists() ) {// && newElements.contains( id ) ) {
             if ( type == null || type.trim().isEmpty() ) {
                 if (Debug.isOn()) System.out.println( "PREFIX: type not found for " + jsonType );
                 return null;
@@ -1164,15 +1187,15 @@ public class ModelPost extends AbstractJavaWebScript {
                 log( LogLevel.INFO, "\tcreating node" );
                 try {
 //                    if ( parent != null && parent.exists() ) {
-                        node = parent.createSysmlNode( id, acmSysmlType );
-                        if ( node == null || !node.exists() ) {
+                        nodeToUpdate = parent.createSysmlNode( id, acmSysmlType );
+                        if ( nodeToUpdate == null || !nodeToUpdate.exists() ) {
                             throw new Exception( "createNode() failed." );
                         }
-                        node.setProperty( Acm.CM_NAME, id );
-                        node.setProperty( Acm.ACM_ID, id );
+                        nodeToUpdate.setProperty( Acm.CM_NAME, id );
+                        nodeToUpdate.setProperty( Acm.ACM_ID, id );
                         modStatus.setState( ModStatus.State.ADDED  );
                         if ( workspace != null && workspace.exists() ) {
-                            node.setWorkspace( workspace, null );
+                            nodeToUpdate.setWorkspace( workspace, null );
                         }
 //                    } else {
 //                        Debug.error( true, true,
@@ -1194,15 +1217,15 @@ public class ModelPost extends AbstractJavaWebScript {
             // TODO -- Need to be able to handle changed type unless everything
             // is an element and only aspects are used for subclassing.
             try {
-                if (node != null && node.exists() ) {
-                    if ( Debug.isOn() ) Debug.outln("moving node <<<" + node + ">>>");
+                if (nodeToUpdate != null && nodeToUpdate.exists() ) {
+                    if ( Debug.isOn() ) Debug.outln("moving node <<<" + nodeToUpdate + ">>>");
                     if ( Debug.isOn() ) Debug.outln("to parent <<<" + parent + ">>>");
-                        if ( node.move(parent) ) {
+                        if ( nodeToUpdate.move(parent) ) {
                             modStatus.setState( ModStatus.State.MOVED  );
                         }
                     if ( !type.equals( acmSysmlType )
                             && NodeUtil.isAspect( acmSysmlType ) ) {
-                        if (node.createOrUpdateAspect( acmSysmlType )) {
+                        if (nodeToUpdate.createOrUpdateAspect( acmSysmlType )) {
                             modStatus.setState( ModStatus.State.UPDATED  );
                         }
                     }
@@ -1212,15 +1235,15 @@ public class ModelPost extends AbstractJavaWebScript {
                 e.printStackTrace();
             }
         }
-        boolean nodeExists = node != null && node.exists(); 
+        boolean nodeExists = nodeToUpdate != null && nodeToUpdate.exists(); 
         if (id != null && nodeExists ) {
-            foundElements.put(id, node); // cache the found value
+            foundElements.put(id, nodeToUpdate); // cache the found value
         }
         
         // Note: Moved this before ingesting the json b/c we need the reifiedNode
         if (nodeExists && elementHierarchyJson.has(id)) {
             log(LogLevel.INFO, "\tcreating reified package");
-            reifiedNode = getOrCreateReifiedNode(node, id, workspace, true); // TODO -- Is last argument correct?
+            reifiedNode = getOrCreateReifiedNode(nodeToUpdate, id, workspace, true); // TODO -- Is last argument correct?
             
             JSONArray array = elementHierarchyJson.getJSONArray(id);
             if ( array != null ) {
@@ -1231,15 +1254,15 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         // update metadata
-        if (ingest && nodeExists && checkPermissions(node, PermissionService.WRITE)) {
+        if (ingest && nodeExists && checkPermissions(nodeToUpdate, PermissionService.WRITE)) {
             log(LogLevel.INFO, "\tinserting metadata");
             
             // Special processing for Expression or Property:
             //	Note: this will modify elementJson
-            processExpressionOrProperty(acmSysmlType, nestedNode, elementJson, specializeJson, node, 
+            processExpressionOrProperty(acmSysmlType, nestedNode, elementJson, specializeJson, nodeToUpdate, 
 										ingest, reifiedNode, parent, id, workspace);
               
-            if ( node.ingestJSON(elementJson) ) {
+            if ( nodeToUpdate.ingestJSON(elementJson) ) {
                 modStatus.setState( ModStatus.State.UPDATED );
             }
         } // ends if (ingest && nodeExists && checkPermissions(node, PermissionService.WRITE))
@@ -1270,7 +1293,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         end = System.currentTimeMillis(); log(LogLevel.INFO, "\tTotal: " + (end-start) + " ms");
-        return nestedNode ? node : reifiedNode;
+        return nestedNode ? nodeToUpdate : reifiedNode;
     }
     
     protected EmsScriptNode getOrCreateReifiedNode( EmsScriptNode node,
@@ -1296,7 +1319,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         
         if ( workspace != null && workspace.exists() ) {
-            parent = workspace.replicateFolderWithChain( parent );
+            parent = workspace.replicateWithParentFolders( parent );
         }
 
         if (checkPermissions(parent, PermissionService.WRITE)) {

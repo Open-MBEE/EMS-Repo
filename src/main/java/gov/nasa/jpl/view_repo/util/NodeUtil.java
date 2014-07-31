@@ -133,7 +133,7 @@ public class NodeUtil {
         }
         if ( Debug.isOn() ) {
             Debug.outln( "luceneSearch(" + queryPattern + "): returned "
-                         + resultSetToList( results ) );
+                         + results.length() + " nodes." );//resultSetToList( results ) );
         }
         return results;
     }
@@ -204,7 +204,7 @@ public class NodeUtil {
                         Debug.outln( "findNodeRefsByType(" + specifier + ", " + prefix +
                                      ", " + workspace + ", " + dateTime + ", justFirst=" +
                                      justFirst + ", exactMatch=" + exactMatch + "): candidate "
-                                     + esn );
+                                     + esn.getWorkspaceName( false ) + "::" + esn.getName() );
                     }
 
                     // Get the version for the date/time if specified.
@@ -277,11 +277,16 @@ public class NodeUtil {
         } finally {
             if (results != null) {
                 if ( Debug.isOn() ) {
+                    Set< EmsScriptNode > set = EmsScriptNode.toEmsScriptNodeSet( nodeRefs, services,
+                                                      null, null );
+                    ArrayList<String> nodeNames = new ArrayList<String>();
+                    for ( EmsScriptNode n : set ) {
+                        nodeNames.add(n.getName());
+                    }
                     Debug.outln( "findNodeRefsByType(" + specifier + ", " + prefix +
                                  ", " + workspace + ", " + dateTime + ", justFirst=" +
                                  justFirst + ", exactMatch=" + exactMatch + "): returned "
-                                 + EmsScriptNode.toEmsScriptNodeSet( nodeRefs, services,
-                                                                     null, null ) );
+                                 + nodeNames );
                 }
 
                 results.close();
@@ -1044,8 +1049,20 @@ public class NodeUtil {
         return elements;
     }
 
+    public static boolean exists( EmsScriptNode node ) {
+        if ( node == null ) return false;
+        return node.exists();
+    }
+    
+    public static boolean exists( NodeRef ref ) {
+        if ( ref == null ) return false;
+        EmsScriptNode node = new EmsScriptNode( ref, getServices() );
+        return node.exists();
+    }
+    
     public static EmsScriptNode getUserHomeFolder( String userName ) {
         NodeRef homeFolderNode = null;
+        EmsScriptNode homeFolderScriptNode = null;
         if ( userName.equals( "admin" ) ) {
             homeFolderNode =
                     findNodeRefByType( userName, SearchType.CM_NAME, null,
@@ -1057,8 +1074,20 @@ public class NodeUtil {
             homeFolderNode =
                     (NodeRef)nodeService.getProperty( personNode,
                                                       ContentModel.PROP_HOMEFOLDER );
+        }
+        if ( homeFolderNode == null || !exists(homeFolderNode) ) {
+            NodeRef ref = findNodeRefById( "User Homes", null, null, getServices() );
+            EmsScriptNode homes = new EmsScriptNode( ref, getServices() );
+            if ( homes != null && homes.exists() ) {
+                homeFolderScriptNode = homes.createFolder( userName );
+            } else {
+                Debug.error("Error! No user homes folder!");
             }
-        return new EmsScriptNode( homeFolderNode, getServices() );
+        }
+        if ( !exists( homeFolderScriptNode ) && exists( homeFolderNode ) ) {
+            homeFolderScriptNode = new EmsScriptNode( homeFolderNode, getServices() );
+        }
+        return homeFolderScriptNode;
     }
 
     // REVIEW -- should this be in AbstractJavaWebScript?
