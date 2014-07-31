@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
 
+import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
@@ -126,20 +127,16 @@ public class WorkspaceDiff {
     }
     
     private void addJSONArray(JSONObject jsonObject, String key, Date dateTime) throws JSONException {
-        Set<EmsScriptNode> set = null;
-        if (key.equals( "elements" )) {
-            set = elements;
-        } else if (key.equals( "addedElements" )) {
-            set = addedElements;
-        } else if (key.equals( "deletedElements" )) {
-            set = deletedElements;
-        } else if (key.equals( "movedElements" )) {
-            set = movedElements;
-        } else if (key.equals( "updatedElements" )) {
-            set = updatedElements;
-        }
-        if (set != null && set.size() > 0) {
-            jsonObject.put( key, convertSetToJSONArray( set, dateTime ) );
+        try {
+            Field field = this.getClass().getDeclaredField( key );
+            field.setAccessible( true );
+            @SuppressWarnings( "unchecked" )
+            Set< EmsScriptNode > set = (Set<EmsScriptNode>) field.get( this );
+            if (set != null && set.size() > 0) {
+                jsonObject.put( key, convertSetToJSONArray( set, dateTime ) );
+            }
+        } catch ( Exception e ) {
+            e.printStackTrace();
         }
     }
     

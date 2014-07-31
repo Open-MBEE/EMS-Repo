@@ -995,7 +995,9 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         if (isName) {
             qname = "/" + this.getProperty("sysml:name", false) + qname;
         } else {
-            qname = "/" + this.getProperty("sysml:id", false) + qname;
+            qname = getDisplayPath() + "/" + getProperty("sysml:id", false);
+            qname = qname.substring( qname.indexOf( "Models/" ) + 7 );
+            qname = qname.replace( "_pkg", "" );
         }
         
         NodeRef ownerRef = (NodeRef) this.getProperty( "ems:owner", false );
@@ -1005,11 +1007,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             String nameProp = null;
             if (isName) {
                 nameProp = (String) owner.getProperty( "sysml:name", false );
-            } else {
-                // looking for id, so need to replace _pkg from reified nodes
-                nameProp = (String) owner.getProperty("sysml:id", false);
             }
-            // ignore things in tree until a sysmlId is found
             if (nameProp == null) {
                 break;
             }
@@ -1126,8 +1124,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         elementJson.put( Acm.JSON_NAME, node.getProperty( Acm.ACM_NAME, false ) );
         elementJson.put( Acm.JSON_DOCUMENTATION, node.getProperty( Acm.ACM_DOCUMENTATION, false) );
         elementJson.put( "qualifiedName", node.getSysmlQName() );
-        String qid = (String) node.getSysmlQId();
-        elementJson.put( "qualifiedId", qid.replace( "_pkg", "" ) );
+        elementJson.put( "qualifiedId", node.getSysmlQId() );
         elementJson.put( "editable", node.hasPermission( PermissionService.WRITE ) );
         NodeRef ownerRef = (NodeRef) node.getProperty( "ems:owner", false );
         EmsScriptNode owner;
@@ -1136,9 +1133,21 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         } else {
             owner = node.getParent();
         }
-        elementJson.put( "owner", owner.getProperty("sysml:id", true) );
+        String ownerId = null;
+        if (owner != null) {
+            ownerId = (String) owner.getProperty( "sysml:id", false );
+            if (ownerId != null) {
+                ownerId = ownerId.replace("_pkg", "");
+            }
+        }
+        if (ownerId == null) {
+            ownerId = "null";
+        }
+        elementJson.put( "owner", ownerId );
         elementJson.put( "creator", node.getProperty("cm:modifier", false) );
-        elementJson.put( "modified", getLastModified((Date)node.getProperty("cm:modified", false)));
+        elementJson.put( "modified",
+                         getLastModified( (Date)node.getProperty( "cm:modified",
+                                                                  false ) ) );
     }
     
     private void addSpecializationJSON(JSONObject json, Date dateTime) throws JSONException {
@@ -1150,24 +1159,25 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
         json.put( "type", typeName );
         for (QName aspectQname: this.aspects) {
-                String methodName = "add" + aspectQname.getLocalName() + "JSON";
-                Method method = null;
+            String methodName = "add" + aspectQname.getLocalName() + "JSON";
+            Method method = null;
+            try {
+                // make sure that the method signature here matches all the add methods
+                method = this.getClass().getDeclaredMethod( methodName, JSONObject.class, EmsScriptNode.class, Date.class );
+            } catch ( NoSuchMethodException | SecurityException e ) {
+                // do nothing, method isn't implemented yet
+//              System.out.println("Method not yet implemented: " + methodName);
+            }
+            
+            if (method != null) {
+                EmsScriptNode node = getNodeAtAtime( dateTime );
                 try {
-                    method = this.getClass().getDeclaredMethod( methodName, JSONObject.class, Date.class );
-                } catch ( NoSuchMethodException | SecurityException e ) {
-                    // do nothing, method isn't implemented yet
-//                    System.out.println("Method not yet implemented: " + methodName);
-                }
-                
-                if (method != null) {
-                    EmsScriptNode node = getNodeAtAtime( dateTime );
-                    try {
-                        method.invoke(this, json, node, dateTime);
-                    } catch ( IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
-                        // do nothing, internal server error
-                    }
+                    method.invoke(this, json, node, dateTime);
+                } catch ( IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
+                    // do nothing, internal server error
                 }
             }
+        }
     }
     
     /**

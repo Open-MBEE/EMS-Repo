@@ -149,6 +149,7 @@
         <aspect name="ems:Added"/>
         <aspect name="ems:Deleted"/>
         <aspect name="ems:Moved"/>
+        <aspect name="ems:Updated"/>
 
         <!-- The merge source is a node that overwrote this one when merged from 
         a child workspace. -->
