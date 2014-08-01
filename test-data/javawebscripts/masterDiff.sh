@@ -39,11 +39,11 @@ if [ $server -eq 1 ]; then
 
 	#run the diff script
 	echo 'RUNNING OLD API DIFF SCRIPT'
-	./diff2.sh
+	#./diff2.sh
 	#passTest=$?
 
 	echo 'RUNNING WORKSPACES DIFF SCRIPT'
-        #./diffWorkspaces.sh
+        ./diffWorkspaces.sh
         #passTest=$?
 
 
