@@ -186,6 +186,8 @@ public class ModelPost extends AbstractJavaWebScript {
     public Set< EmsScriptNode >
             createOrUpdateModel( Object content, Status status,
                                  EmsScriptNode projectNode ) throws Exception {
+    	Debug.turnOn();
+    	
         Date now = new Date();
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
@@ -259,6 +261,7 @@ public class ModelPost extends AbstractJavaWebScript {
     protected Set<EmsScriptNode> updateNodeReferences(boolean singleElement,
                                                       JSONObject postJson,
                                                       EmsScriptNode projectNode ) throws Exception {
+    	Debug.turnOn();
         TreeSet<EmsScriptNode> elements =
                 new TreeSet<EmsScriptNode>();
 
@@ -704,6 +707,7 @@ public class ModelPost extends AbstractJavaWebScript {
     protected Set<EmsScriptNode> updateOrCreateElement(JSONObject elementJson,
                                          EmsScriptNode parent,
                                          boolean ingest) throws Exception {
+    	Debug.turnOn();
         TreeSet<EmsScriptNode> elements =
                 new TreeSet<EmsScriptNode>();
 
@@ -957,6 +961,8 @@ public class ModelPost extends AbstractJavaWebScript {
                                                   JSONArray children,
                                                   boolean ingest, 
                                                   boolean nestedNode) throws Exception {
+    	Debug.turnOn();
+    	
         if (!elementJson.has(Acm.JSON_ID)) {
             elementJson.put( Acm.JSON_ID, createId( services ) );
             //return null;
@@ -1495,6 +1501,9 @@ public class ModelPost extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
+    	
+    	Debug.turnOn();
+    	
         printHeader( req );
 
         Map<String, Object> model = new HashMap<String, Object>();

@@ -1,66 +1,22 @@
 {
   "configurations": [{
-    "id": "48141ef2-d20a-45e6-b316-a7c0a07df095",
+    "id": "5a6d6acf-9881-4048-9942-d45cc960633d",
     "timestamp": "2014-06-09T09:03:45.834-0700",
     "description": "updating description",
     "name": "product test",
     "snapshots": [],
-    "modified": "2014-07-09T09:34:26.307-0700"
+    "modified": "2014-07-30T13:39:14.675-0700"
   }],
   "products": [
     {
       "author": "admin",
-      "lastModified": "2014-07-17T11:34:34.439-0700",
-      "name": "401",
-      "qualifiedName": "/////CY Test/4000/401",
-      "documentation": "4else",
-      "sysmlid": "401",
-      "owner": "4000",
-      "read": "2014-07-17T13:42:35.431-0700",
-      "specialization": {
-        "childrenViews": ["404"],
-        "displayedElements": [
-          "401",
-          "402",
-          "403"
-        ],
-        "view2view": [{
-          "childrenViews": [
-            "401",
-            "402"
-          ],
-          "sysmlid": "401"
-        }],
-        "isDerived": false,
-        "allowedElements": [
-          "401",
-          "402",
-          "403"
-        ],
-        "value": [{
-          "string": "dlam_string",
-          "type": "LiteralString"
-        }],
-        "contains": [{
-          "sourceType": "reference",
-          "source": "401",
-          "sourceProperty": "documentation",
-          "type": "Paragraph"
-        }],
-        "noSections": ["402"],
-        "type": "Product"
-      },
-      "editable": true
-    },
-    {
-      "author": "admin",
-      "lastModified": "2014-07-17T11:34:34.297-0700",
+      "lastModified": "2014-07-30T13:39:01.075-0700",
       "name": "301",
-      "qualifiedName": "/////CY Test/300/301",
+      "qualifiedName": "/////CY Test//301",
       "documentation": "else",
       "sysmlid": "301",
       "owner": "300",
-      "read": "2014-07-17T13:42:35.465-0700",
+      "read": "2014-07-30T14:29:05.931-0700",
       "specialization": {
         "childrenViews": ["304"],
         "displayedElements": [
@@ -92,6 +48,50 @@
           "type": "Paragraph"
         }],
         "noSections": ["302"],
+        "type": "Product"
+      },
+      "editable": true
+    },
+    {
+      "author": "admin",
+      "lastModified": "2014-07-30T13:39:15.369-0700",
+      "name": "401",
+      "qualifiedName": "/////CY Test//401",
+      "documentation": "4else",
+      "sysmlid": "401",
+      "owner": "4000",
+      "read": "2014-07-30T14:29:06.011-0700",
+      "specialization": {
+        "childrenViews": ["404"],
+        "displayedElements": [
+          "401",
+          "402",
+          "403"
+        ],
+        "view2view": [{
+          "childrenViews": [
+            "401",
+            "402"
+          ],
+          "sysmlid": "401"
+        }],
+        "isDerived": false,
+        "allowedElements": [
+          "401",
+          "402",
+          "403"
+        ],
+        "value": [{
+          "string": "dlam_string",
+          "type": "LiteralString"
+        }],
+        "contains": [{
+          "sourceType": "reference",
+          "source": "401",
+          "sourceProperty": "documentation",
+          "type": "Paragraph"
+        }],
+        "noSections": ["402"],
         "type": "Product"
       },
       "editable": true
