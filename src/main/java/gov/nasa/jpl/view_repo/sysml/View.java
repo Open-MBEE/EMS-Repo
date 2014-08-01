@@ -450,7 +450,7 @@ public class View extends List implements sysml.View< EmsScriptNode >, Comparato
     public JSONArray getContainsJson() {
         JSONArray viewablesJson = new JSONArray();
 
-        if ( isEmpty() ) generateViewables();
+        //if ( isEmpty() ) generateViewables();
 
         for ( Viewable< EmsScriptNode > viewable : this ) {
             if ( viewable != null ) {

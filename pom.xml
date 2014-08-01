@@ -178,6 +178,11 @@
 			<artifactId>chemistry-opencmis-commons-impl</artifactId>
 			<version>0.8.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.xmlgraphics</groupId>
+			<artifactId>batik-transcoder</artifactId>
+			<version>1.7</version>
+		</dependency>
     </dependencies>
 
 	
@@ -193,7 +198,7 @@
         <repository>
               <id>artifactory</id>
               <name>releases</name>
-              <url>http://128.149.16.144:8082/artifactory/libs-release-local</url>
+              <url>http://128.149.19.207:8082/artifactory/libs-release-local</url>
         </repository>
         <repository>
             <id>alfresco-public</id>

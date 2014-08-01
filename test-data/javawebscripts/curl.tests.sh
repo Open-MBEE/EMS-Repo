@@ -81,7 +81,8 @@ echo ""
 echo SNAPSHOTS
 
 # post snapshot
-echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:text/html" --data @JsonData/snapshot.html http://localhost:8080/alfresco/service/ui/views/301/snapshot
+#echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:text/html" --data @JsonData/snapshot.html http://localhost:8080/alfresco/service/ui/views/301/snapshot
+echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:application/json" --data @JsonData/snapshots.json http://localhost:8080/alfresco/service/workspaces/master/sites/europa/configurations/_17_0_5_1_407019f_1402422683509_36078_16169/snapshots
 
 # get snapshots - this currently doesn't work
 #echo  curl -w "%{http_code}" -u admin:admin -X GET http://localhost:8080/alfresco/service/snapshots/301

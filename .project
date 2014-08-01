@@ -3,6 +3,7 @@
 	<name>view-repo</name>
 	<comment></comment>
 	<projects>
+		<project>docbook</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
