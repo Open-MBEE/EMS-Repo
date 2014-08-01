@@ -178,14 +178,14 @@
 		{
 		  "properties":
 		  {
-		      "sysmlids":
+		      "elements":
 		      {
-		          "type": "array",
-		          "description": "List of SysML IDs that are in conflict between the two workspaces",
-		          "items":
-		          {
-		              "type": "string"
-	              }
+	            "type": "array",
+	            "description": "Array of elements in conflict. Only keys of conflicted properties are shown (with values from WS2).",
+	            "items": {
+	               "type": "object",
+	               "$ref": "file:///../workspaces.json#/definitions/Element"
+                }
 		      }
 		  }
 	   }
