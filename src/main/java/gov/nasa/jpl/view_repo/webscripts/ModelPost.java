@@ -208,7 +208,7 @@ public class ModelPost extends AbstractJavaWebScript {
         
         // create commit history
         // TODO add in commit message
-        CommitUtil.commitChangeSet(changeSet, "", runWithoutTransactions, services);
+//        CommitUtil.commitChangeSet(changeSet, "", runWithoutTransactions, services);
         
         now = new Date();
         end = System.currentTimeMillis();

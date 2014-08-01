@@ -24,8 +24,15 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
 
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
     		<a class="navbar-brand" href="/share/page/site/${siteName}/dashboard">${siteTitle}</a>
     	</div>
+      <div class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
       	<#if siteName == 'europa'>
         	<li class="active"><a href="#">In-Work Document List</a></li>
@@ -58,6 +65,7 @@ var pageData = { home: ${res},  baseUrl: "${url.context}/service" };
       <li><a href="/share/page/site/ems-training/dashboard">Support</a></li>
         <li><a href="#" class="submit-logout">logout</a></li>
       </ul>
+      </div>
     </nav>
     
     

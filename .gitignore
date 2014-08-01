@@ -3,3 +3,4 @@
 /alf_data
 *.log
 *.log.*
+/target

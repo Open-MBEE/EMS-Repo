@@ -64,11 +64,14 @@ public class WebScriptUtil {
             for (ResultSetRow row: resultSet) {
                 EmsScriptNode node = new EmsScriptNode(row.getNodeRef(), services, response);
                 // filter by project
-                if (node.getQnamePath().startsWith(qnamePath)) {
-                    set.add(node);
+                if (node != null && node.exists()) {
+                    if (node.getQnamePath().startsWith(qnamePath)) {
+                        set.add(node);
+                    }
                 }
             }
         } catch (Exception e) {
+            // catch result set exception - if its invalid
             e.printStackTrace();  
         } finally {
             if (resultSet != null) {

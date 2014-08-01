@@ -24,39 +24,47 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
 
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
     	<div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
     		<a class="navbar-brand" href="/share/page/site/${siteName}/dashboard">${siteTitle}</a>
     	</div>
-    	<ul class="nav navbar-nav">
-    	<li class="active"><a href="#">${title}</a></li>
-        <li class="dropdown" id="firstDropdown">
-        	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Goto <b class="caret"></b></a>
-        	<ul class="dropdown-menu">
-        		<li><a href="${url.context}/service/ve/configurations/${siteName}">DocWeb</a></li>
-        	<#if siteName == 'europa'>
-        		<li><a href="${url.context}/service/ve/index/${siteName}">Document List</a></li>
-        		<li><a href="${url.context}/service/ve/documents/${siteName}">In-Work Document List</a></li>
-        	<#else>
-        		<li><a href="${url.context}/service/ve/documents/${siteName}">Document List</a></li>
-        	</#if>	
-        		<li><a href="/share/page/site/${siteName}/dashboard">Dashboard</a></li>
-   			</ul>
-   		</li>
-   		<li class="dropdown">
-   			<a href="#" class="dropdown-toggle" data-toggle="dropdown">Other Sites <b class="caret"></b></a>
-   			<ul class="dropdown-menu" id="otherSites">
-   			
-   			</ul>
-   		</li>
-   	  </ul>
+      <div class="navbar-collapse collapse">
+      	<ul class="nav navbar-nav">
+      	<li class="active"><a href="#">${title}</a></li>
+          <li class="dropdown" id="firstDropdown">
+          	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Goto <b class="caret"></b></a>
+          	<ul class="dropdown-menu">
+          		<li><a href="${url.context}/service/ve/configurations/${siteName}">DocWeb</a></li>
+          	<#if siteName == 'europa'>
+          		<li><a href="${url.context}/service/ve/index/${siteName}">Document List</a></li>
+          		<li><a href="${url.context}/service/ve/documents/${siteName}">In-Work Document List</a></li>
+          	<#else>
+          		<li><a href="${url.context}/service/ve/documents/${siteName}">Document List</a></li>
+          	</#if>	
+          		<li><a href="/share/page/site/${siteName}/dashboard">Dashboard</a></li>
+     			</ul>
+     		</li>
+     		<li class="dropdown">
+     			<a href="#" class="dropdown-toggle" data-toggle="dropdown">Other Sites <b class="caret"></b></a>
+     			<ul class="dropdown-menu" id="otherSites">
+     			
+     			</ul>
+     		</li>
+     	  </ul>
 
-      <div class="pull-right">
-        <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
+        <div class="pull-right">
+          <img class="europa-icon" src="${url.context}/scripts/vieweditor/images/europa-icon.png" />
+        </div>
+
+        <ul class="nav navbar-nav pull-right">
+        	<li><a href="/share/page/site/ems-training/dashboard">Support</a></li>
+          <li><a href="#" class="submit-logout">logout</a></li>
+        </ul>
       </div>
-
-      <ul class="nav navbar-nav pull-right">
-      	<li><a href="/share/page/site/ems-training/dashboard">Support</a></li>
-        <li><a href="#" class="submit-logout">logout</a></li>
-      </ul>
     </nav>
    
 
@@ -142,7 +150,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
       <div id="export" class="inspector" style="height:100%;">
         <h3>Export</h3>
         <ul class="list-unstyled">
-          <li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>         
+          <!--<li><button type="button" class="btn btn-default" proxy-click="print">Print PDF</button></li>-->         
           <li><button type="button" class="btn btn-default" proxy-click="printPreview">Print Preview</button></li>
           {{^viewTree.snapshot}}
           <li><button type="button" class="btn btn-default" proxy-click="snapshot:{{(viewTree.id)}}">Mark Model Version </button></li>   
@@ -402,7 +410,7 @@ var pageData = { viewHierarchy: ${res},  baseUrl: "${url.context}/service" };
                 <button type="button" class="btn btn-primary saveSection" proxy-click="saveSection:{{ id }}">Save changes</button>
               </div>
             </div>
-            <div id="section{{ id }}" class="section page editing" data-section-id="{{ id }}" contenteditable="false" proxy-dblclick="sectionDoubleClick">
+            <div id="section{{ id }}" class="section page editing scrollable_section" data-section-id="{{ id }}" contenteditable="false" proxy-dblclick="sectionDoubleClick">
               {{{ content }}}
             </div>
             {{/editing}}
@@ -717,6 +725,9 @@ window.pageExitManager = function()
         window.onbeforeunload = null;
       }
       app.updateSaveAllButton(numOpenEditors);
+    },
+    anyEditorsOpen : function () {
+      return numOpenEditors > 0;
     }
   }
 }();
@@ -994,6 +1005,9 @@ app.on('cancelEditing', function(e) {
   $sectionHeader.html($sectionHeader.data('original-content'));
   $sectionHeader.attr('contenteditable', false);
 
+  if(!window.pageExitManager.anyEditorsOpen()) {
+    app.set('currentInspector', 'document-info');
+  }
   //section.find(".reference.editable").attr('contenteditable', false);
 
   //section.find("p").removeClass("pwrapper");
@@ -1147,6 +1161,9 @@ app.on('saveSection', function(e, sectionId) {
       //$(this).replaceWith(text);
   }); 
 
+  if(!window.pageExitManager.anyEditorsOpen()) {
+    app.set('currentInspector', 'document-info');
+  }
   //app.fire('saveSectionComplete', e, sectionId);
   //If data is saved before references are converted to dom elements, 
   //change realData saveSection to saveSectionComplete and fire event above
@@ -1182,8 +1199,7 @@ app.on('elementDetails', function(evt) {
 })
 
 // export.js
-
-app.data.printPreviewTemplate = "\n<html>\n\t<head>\n\t\t<style>img {max-width: 100%;}</style>\n\t\t<title>{{ documentTitle }}</title>\n\t\t<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>\n\t\t<style type=\"text/css\">.print-only{ display: block; } \n\n\n\t\t  .no-section {\n\t\t    display: none;\n\t\t  }\n\n\t\t  .page-sections.no-section {\n\t\t    display: block;\n\t\t  }\n\n\t\t  .blank.reference {\n\t\t\t  display: none;\n\t\t\t}\n\n\t\t\t@page {\n\t\t\t  margin: 1cm;\n\t\t\t}\n\n\t\t\tbody {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t.page-sections, #the-document h1, #the-document h2, #the-document h3, #the-document h4, #the-document h5 {\n\t\t\t  font-family: 'PT Serif', Georgia, serif;\n\t\t\t}\n\t\t\t.navbar-brand, .page .inspector, .inspectors {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t#the-document {counter-reset: level1;}\n\t\t\t#toc:before, #toc:after {counter-reset: level1; content: \"\";}\n\t\t\t#toc h3:before{content: \"\"}\n\t\t\t \n\t\t\t#the-document h2, #toc > ul > li {counter-reset: level2;}\n\t\t\t#the-document h3, #toc > ul >  ul > li {counter-reset: level3;}\n\t\t\t#the-document h4, #toc > ul > ul > ul > li {counter-reset: level4;}\n\t\t\t#the-document h5, #toc > ul > ul > ul > ul > li {counter-reset: level5;}\n\t\t\t#the-document h6, #toc > ul > ul > ul > ul > ul > li {}\n\n\t\t\t#the-document h2:before,\n\t\t\t#toc > ul > li a:before {\n\t\t\t    content: counter(level1) \" \";\n\t\t\t    counter-increment: level1;\n\t\t\t}\n\t\t\t#the-document h3:before,\n\t\t\t#toc > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \" \";\n\t\t\t    counter-increment: level2;\n\t\t\t}\n\t\t\t#the-document h4:before,\n\t\t\t#toc > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \" \";\n\t\t\t    counter-increment: level3;\n\t\t\t}\n\t\t\t#the-document h5:before,\n\t\t\t#toc > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \" \";\n\t\t\t    counter-increment: level4;\n\t\t\t}\n\t\t\t#the-document h6:before,\n\t\t\t#toc > ul > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \".\" counter(level5) \" \";\n\t\t\t    counter-increment: level5;\n\t\t\t}\n\t\t</style>\n\t</head>\n\t<body>\n\t\t<div id=\"the-document\">\n\t\t\t{{ content }}\n\t\t</div>\n\t</body>\n</html>";
+app.data.printPreviewTemplate = "\n<html>\n\t<head>\n\t\t<style>img {max-width: 100%;}</style>\n\t\t<title>{{ documentTitle }}</title>\n\t\t<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro|PT+Serif:400,700' rel='stylesheet' type='text/css'>\n\t\t<style type=\"text/css\">\ntable, td, th, tr { border: 1px solid black; border-collapse: collapse;margin-top:10px;margin-bottom:10px}\n .print-only{ display: block; } \n\n\n\t\t  .no-section {\n\t\t    display: none;\n\t\t  }\n\n\t\t  .page-sections.no-section {\n\t\t    display: block;\n\t\t  }\n\n\t\t  .blank.reference {\n\t\t\t  display: none;\n\t\t\t}\n\n\t\t\t@page {\n\t\t\t  margin: 1cm;\n\t\t\t}\n\n\t\t\tbody {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t.page-sections, #the-document h1, #the-document h2, #the-document h3, #the-document h4, #the-document h5 {\n\t\t\t  font-family: 'PT Serif', Georgia, serif;\n\t\t\t}\n\t\t\t.navbar-brand, .page .inspector, .inspectors {\n\t\t\t  font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;\n\t\t\t}\n\n\t\t\t#the-document {counter-reset: level1;}\n\t\t\t#toc:before, #toc:after {counter-reset: level1; content: \"\";}\n\t\t\t#toc h3:before{content: \"\"}\n\t\t\t \n\t\t\t#the-document h2, #toc > ul > li {counter-reset: level2;}\n\t\t\t#the-document h3, #toc > ul >  ul > li {counter-reset: level3;}\n\t\t\t#the-document h4, #toc > ul > ul > ul > li {counter-reset: level4;}\n\t\t\t#the-document h5, #toc > ul > ul > ul > ul > li {counter-reset: level5;}\n\t\t\t#the-document h6, #toc > ul > ul > ul > ul > ul > li {}\n\n\t\t\t#the-document h2:before,\n\t\t\t#toc > ul > li a:before {\n\t\t\t    content: counter(level1) \" \";\n\t\t\t    counter-increment: level1;\n\t\t\t}\n\t\t\t#the-document h3:before,\n\t\t\t#toc > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \" \";\n\t\t\t    counter-increment: level2;\n\t\t\t}\n\t\t\t#the-document h4:before,\n\t\t\t#toc > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \" \";\n\t\t\t    counter-increment: level3;\n\t\t\t}\n\t\t\t#the-document h5:before,\n\t\t\t#toc > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \" \";\n\t\t\t    counter-increment: level4;\n\t\t\t}\n\t\t\t#the-document h6:before,\n\t\t\t#toc > ul > ul > ul > ul > ul > li a:before {\n\t\t\t    content: counter(level1) \".\" counter(level2) \".\" counter(level3) \".\" counter(level4) \".\" counter(level5) \" \";\n\t\t\t    counter-increment: level5;\n\t\t\t}\n\t\t</style>\n\t</head>\n\t<body>\n\t\t<div id=\"the-document\">\n\t\t\t{{ content }}\n\t\t</div>\n\t</body>\n</html>";
 
 
 

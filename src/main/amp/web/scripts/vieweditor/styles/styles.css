@@ -404,7 +404,7 @@ h1 {
 #top-alert {
   position: fixed;
   width: 100%;
-  z-index: 100;
+  z-index: 1000;
   margin-top: -10px;
   box-shadow: 0 0 5px rgba(0,0,0, .2);
 }
@@ -586,6 +586,15 @@ background-color: #ffffff;
 
 .table-striped>thead>tr:first-child>th {
 background-color: #ffffff;
+}
+
+.navbar-inverse .navbar-nav .open .dropdown-menu>li>a {
+ color: #222; 
+}
+
+.scrollable_section.section.page.editing {
+	max-height: 500px;
+	overflow-y: scroll;
 }
 
 .dropdown-submenu{position:relative;}
