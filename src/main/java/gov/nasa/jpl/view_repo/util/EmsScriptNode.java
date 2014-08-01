@@ -185,6 +185,23 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                                   services, response, status );
     }
 
+    public Set<EmsScriptNode> getChildNodes() {
+        Set<EmsScriptNode> set = new LinkedHashSet<EmsScriptNode>();
+        List< ChildAssociationRef > refs =
+                services.getNodeService().getChildAssocs( nodeRef );
+        if ( refs != null ) {
+            // check all associations to see if there's a matching association
+            for ( ChildAssociationRef ref : refs ) {
+                if ( ref.getParentRef().equals( nodeRef ) ) {
+                    NodeRef child = ref.getChildRef();
+                    EmsScriptNode node = new EmsScriptNode( child, getServices() );
+                    set.add( node );
+                }
+            }
+        }
+        return set;
+    }
+    
 //    @Override
 //    public Scriptable getChildren() {
 //        Scriptable myChildren = super.getChildren();
