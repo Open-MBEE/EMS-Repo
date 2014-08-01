@@ -52,7 +52,7 @@ if [ $server -eq 1 ]; then
                 ./diffWorkspace.sh
                 #passTest=$?
 
-        else [ $diffChoose -eq 3 ];then
+        else 
                 echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
                 ./diff2.sh
                 ./diffWorkspace.sh
