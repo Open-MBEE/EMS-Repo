@@ -292,10 +292,10 @@ public class ModelPost extends AbstractJavaWebScript {
 
         if (addedElementsMap.size() > 0 || updatedElementsMap.size() > 0 || movedElementsMap.size() > 0) {
             WorkspaceDiff wsDiff = new WorkspaceDiff();
-            wsDiff.setElements( WorkspaceDiff.convertMapValuesToSet( originalElementMap ) );
-            wsDiff.setAddedElements( WorkspaceDiff.convertMapValuesToSet( addedElementsMap ) );
-            wsDiff.setMovedElements( WorkspaceDiff.convertMapValuesToSet( movedElementsMap ) );
-            wsDiff.setUpdatedElements( WorkspaceDiff.convertMapValuesToSet( updatedElementsMap ) );
+            wsDiff.setElements( originalElementMap );
+            wsDiff.setAddedElements( addedElementsMap  );
+            wsDiff.setMovedElements( movedElementsMap  );
+            wsDiff.setUpdatedElements( updatedElementsMap );
             
             Date t1 = new Date(start);
             Date t2 = new Date(end);

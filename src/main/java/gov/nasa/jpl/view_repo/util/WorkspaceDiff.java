@@ -4,11 +4,9 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 
 import java.lang.reflect.Field;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,23 +14,23 @@ import org.json.JSONObject;
 
 public class WorkspaceDiff {
     private EmsScriptNode ws1;
-    private Set<EmsScriptNode> elements;
+    private Map<String, EmsScriptNode> elements;
 
     private EmsScriptNode ws2;
     private Map<String, EmsScriptNode> addedElements;
     private Map<String, EmsScriptNode> conflictedElements;
     private Map<String, EmsScriptNode> deletedElements;
     private Map<String, EmsScriptNode> movedElements;
-    private Map< String, Map< EmsScriptNode, Set< String > > > updatedElements;
+    private Map< String, EmsScriptNode > updatedElements;
 
     public WorkspaceDiff() {
-        elements = new TreeSet<EmsScriptNode>();
+        elements = new TreeMap<String, EmsScriptNode>();
         
         addedElements = new TreeMap<String, EmsScriptNode>();
         conflictedElements = new TreeMap<String, EmsScriptNode>();
         deletedElements = new TreeMap<String, EmsScriptNode>();
         movedElements = new TreeMap<String, EmsScriptNode>();
-        updatedElements = new TreeMap< String, Map< EmsScriptNode, Set< String > > >();
+        updatedElements = new TreeMap< String, EmsScriptNode >();
         
         ws1 = null;
         ws2 = null;
@@ -56,7 +54,7 @@ public class WorkspaceDiff {
         return deletedElements;
     }
 
-    public Set< EmsScriptNode > getElements() {
+    public Map< String, EmsScriptNode > getElements() {
         return elements;
     }
 
@@ -64,7 +62,7 @@ public class WorkspaceDiff {
         return movedElements;
     }
 
-    public Map< String, Map< EmsScriptNode, Set< String >>> getUpdatedElements() {
+    public Map< String, EmsScriptNode > getUpdatedElements() {
         return updatedElements;
     }
 
@@ -88,7 +86,7 @@ public class WorkspaceDiff {
         this.deletedElements = deletedElements;
     }
 
-    public void setElements( Set< EmsScriptNode > elements ) {
+    public void setElements(Map< String, EmsScriptNode > elements ) {
         this.elements = elements;
     }
 
@@ -96,7 +94,7 @@ public class WorkspaceDiff {
         this.movedElements = movedElements;
     }
     
-    public void setUpdatedElements( Map< String, Map< EmsScriptNode, Set< String >>> updatedElements ) {
+    public void setUpdatedElements( Map< String, EmsScriptNode> updatedElements ) {
         this.updatedElements = updatedElements;
     }
     
@@ -143,9 +141,9 @@ public class WorkspaceDiff {
             Field field = this.getClass().getDeclaredField( key );
             field.setAccessible( true );
             @SuppressWarnings( "unchecked" )
-            Set< EmsScriptNode > set = (Set<EmsScriptNode>) field.get( this );
-            if (set != null && set.size() > 0) {
-                jsonObject.put( key, convertSetToJSONArray( set, dateTime ) );
+            Map< String, EmsScriptNode > map = (Map<String, EmsScriptNode>) field.get( this );
+            if (map != null && map.size() > 0) {
+                jsonObject.put( key, convertMapToJSONArray( map, dateTime ) );
                 emptyArray = false;
             } else {
                 jsonObject.put( key, new JSONArray() );
@@ -157,9 +155,9 @@ public class WorkspaceDiff {
         return !emptyArray;
     }
     
-    private JSONArray convertSetToJSONArray(Set<EmsScriptNode> set, Date dateTime) throws JSONException {
+    private JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> set, Date dateTime) throws JSONException {
         JSONArray array = new JSONArray();
-        for (EmsScriptNode node: set) {
+        for (EmsScriptNode node: set.values()) {
             array.put( node.toJSONObject( dateTime ) );
         }
         return array;
@@ -179,12 +177,12 @@ public class WorkspaceDiff {
         
     }
     
-    public static Set<EmsScriptNode> convertMapValuesToSet(Map<String, EmsScriptNode> map) {
-        Set<EmsScriptNode> set = new LinkedHashSet<EmsScriptNode>();
-        for (EmsScriptNode node: map.values()) {
-            set.add( node );
-        }
-        return set;
-    }
+//    public static Set<EmsScriptNode> convertMapValuesToSet(Map<String, EmsScriptNode> map) {
+//        Set<EmsScriptNode> set = new LinkedHashSet<EmsScriptNode>();
+//        for (EmsScriptNode node: map.values()) {
+//            set.add( node );
+//        }
+//        return set;
+//    }
 
 }
