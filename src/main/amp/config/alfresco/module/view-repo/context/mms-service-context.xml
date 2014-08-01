@@ -20,7 +20,7 @@
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
     </bean>
-
+    	
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.elements.post"
         class="gov.nasa.jpl.view_repo.webscripts.ModelPost" parent="webscript"
         singleton="false">
@@ -29,6 +29,7 @@
         <property name="jmsConnection" ref="jmsConnection" />
         <property name="restConnection" ref="restConnection" /> 
     </bean>
+    
 
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.products.snapshots.post"
         class="gov.nasa.jpl.view_repo.webscripts.SnapshotPost" parent="webscript"
@@ -39,6 +40,70 @@
 
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.products.get"
         class="gov.nasa.jpl.view_repo.webscripts.MmsProductsGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+        <!-- adding new bean -->
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.products.product.post"
+        class="gov.nasa.jpl.view_repo.webscripts.ProductPost" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+        <!-- adding new bean -->
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.products.post"
+        class="gov.nasa.jpl.view_repo.webscripts.ProductPost" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+           <!-- adding new bean -->
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.projects.project.post"
+        class="gov.nasa.jpl.view_repo.webscripts.ProjectPost" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+            <!-- adding new bean -->
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.views.post"
+        class="gov.nasa.jpl.view_repo.webscripts.ViewPost" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <!-- adding new bean -->
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.views.view.get"
+        class="gov.nasa.jpl.view_repo.webscripts.ViewGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+      <!-- adding new bean -->
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.views.elements.get"
+        class="gov.nasa.jpl.view_repo.webscripts.ViewGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <!-- adding new bean -->
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.products.product.get"
+        class="gov.nasa.jpl.view_repo.webscripts.ProductGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <!-- adding new bean -->
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.get"
+        class="gov.nasa.jpl.view_repo.webscripts.ModelGet" parent="webscript"
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
@@ -108,5 +173,5 @@
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
     </bean>
-       
+    
 </beans>

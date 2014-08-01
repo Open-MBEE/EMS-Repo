@@ -69,6 +69,14 @@
 	            <type>jar</type>
 	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/mbee_util.jar</systemPath>
 	        </dependency>
+	        <dependency>
+	            <groupId>kparser</groupId>
+	            <artifactId>kparser</artifactId>
+	            <version>0.0.2</version>
+	            <scope>system</scope>
+	            <type>jar</type>
+	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kparser.jar</systemPath>
+	        </dependency>
             </dependencies>
         </profile>
         <profile>
@@ -88,6 +96,11 @@
                     <groupId>gov.nasa.jpl.mbee.sysml</groupId>
                     <artifactId>sysml</artifactId>
                     <version>0.0.8</version>
+                </dependency>
+                <dependency>
+                    <groupId>kparser</groupId>
+                    <artifactId>kparser</artifactId>
+                    <version>0.0.2</version>
                 </dependency>
             </dependencies>
         </profile>

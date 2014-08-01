@@ -35,30 +35,51 @@ done
 
 if [ $server -eq 1 ]; then
 	echo 'SERVER CONNECTED'
-	sleep 10s
+	sleep 60s
+	
+	diffChoose=2
 
-	#run the diff script
-	echo 'RUNNING DIFF SCRIPT'
-	./diff2.sh
-	passTest=$?
+	if [ $diffChoose -eq 1 ];then
+		#run the diff script
+		echo 'RUNNING OLD API DIFF SCRIPT'
+		echo 'OMITTING WORKSPACES DIFF SCRIPT'
+		./diff2.sh
+		#passTest=$?
 
+        elif [ $diffChoose -eq 2 ];then
+	        echo 'RUNNING WORKSPACES DIFF SCRIPT'
+	        echo 'OMITTING OLD API DIFF SCRIPT'
+                ./diffWorkspace.sh
+                #passTest=$?
+
+        else 
+                echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
+                ./diff2.sh
+                ./diffWorkspace.sh
+                #passTest=$?
+        fi
+        
+        
         #connect to soapUI -- WORK STILL NEEDED
         echo 'RUNNING SOAP UI TESTS'
         #ssh $soapServer 'cd /classPath/; ./soapScript;'
         #classPath=??
-        #TestSuite="??"
+        TestSuite="WorkspacesTesting"
         #TestCase="??"
         #./testrunner.sh -f ./soapTestData -s $TestSuite -c $TestCase $classpath
         cd ./soapStuff
-        ./Resources/app/bin/testrunner.sh ./maxRegression-soapui-project.xml
+	for i in $(ls . | grep "soapui-project.xml"); do
+	         echo RUNNING TEST $i
+                ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i
+        done
 
         #shutdown the tomcat server process
         pkill -fn 'integration-test'
         echo 'KILLING SERVER'
 
-	echo 'PASSTEST?'
-        echo "$passTest"
-	exit $passTest
+	#echo 'PASSTEST?'
+        #echo "$passTest"
+	#exit $passTest
 fi
 
 if [ $server -eq 2 ]; then
