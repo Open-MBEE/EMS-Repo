@@ -43,7 +43,7 @@ if [ $server -eq 1 ]; then
 	#passTest=$?
 
 	echo 'RUNNING WORKSPACES DIFF SCRIPT'
-        ./diffWorkspaces.sh
+        ./diffWorkspace.sh
         #passTest=$?
 
 
