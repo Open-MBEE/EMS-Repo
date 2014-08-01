@@ -4,34 +4,35 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 
 import java.lang.reflect.Field;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mozilla.javascript.Scriptable;
 
 public class WorkspaceDiff {
     private EmsScriptNode ws1;
     private Set<EmsScriptNode> elements;
 
     private EmsScriptNode ws2;
-    private Set<EmsScriptNode> addedElements;
-    private Set<EmsScriptNode> conflictedElements;
-    private Set<EmsScriptNode> deletedElements;
-    private Set<EmsScriptNode> movedElements;
-    private Set<EmsScriptNode> updatedElements;
+    private Map<String, EmsScriptNode> addedElements;
+    private Map<String, EmsScriptNode> conflictedElements;
+    private Map<String, EmsScriptNode> deletedElements;
+    private Map<String, EmsScriptNode> movedElements;
+    private Map< String, Map< EmsScriptNode, Set< String > > > updatedElements;
 
     public WorkspaceDiff() {
-        elements = new HashSet<EmsScriptNode>();
+        elements = new TreeSet<EmsScriptNode>();
         
-        addedElements = new HashSet<EmsScriptNode>();
-        conflictedElements = new HashSet<EmsScriptNode>();
-        deletedElements = new HashSet<EmsScriptNode>();
-        movedElements = new HashSet<EmsScriptNode>();
-        updatedElements = new HashSet<EmsScriptNode>();
+        addedElements = new TreeMap<String, EmsScriptNode>();
+        conflictedElements = new TreeMap<String, EmsScriptNode>();
+        deletedElements = new TreeMap<String, EmsScriptNode>();
+        movedElements = new TreeMap<String, EmsScriptNode>();
+        updatedElements = new TreeMap< String, Map< EmsScriptNode, Set< String > > >();
         
         ws1 = null;
         ws2 = null;
@@ -43,15 +44,15 @@ public class WorkspaceDiff {
         this.ws2 = ws2;
     }
 
-    public Set< EmsScriptNode > getAddedElements() {
+    public Map< String, EmsScriptNode > getAddedElements() {
         return addedElements;
     }
 
-    public Set<EmsScriptNode> getConflictedElements() {
+    public Map<String, EmsScriptNode> getConflictedElements() {
         return conflictedElements;
     }
 
-    public Set< EmsScriptNode > getDeletedElements() {
+    public Map< String, EmsScriptNode > getDeletedElements() {
         return deletedElements;
     }
 
@@ -59,11 +60,11 @@ public class WorkspaceDiff {
         return elements;
     }
 
-    public Set< EmsScriptNode > getMovedElements() {
+    public Map< String, EmsScriptNode > getMovedElements() {
         return movedElements;
     }
 
-    public Set< EmsScriptNode > getUpdatedElements() {
+    public Map< String, Map< EmsScriptNode, Set< String >>> getUpdatedElements() {
         return updatedElements;
     }
 
@@ -75,15 +76,15 @@ public class WorkspaceDiff {
         return ws2;
     }
 
-    public void setAddedElements( Set< EmsScriptNode > addedElements ) {
+    public void setAddedElements( Map< String, EmsScriptNode > addedElements ) {
         this.addedElements = addedElements;
     }
 
-    public void setConflictedElements( Set<EmsScriptNode> conflictedElements ) {
+    public void setConflictedElements( Map<String, EmsScriptNode> conflictedElements ) {
         this.conflictedElements = conflictedElements;
     }
 
-    public void setDeletedElements( Set< EmsScriptNode > deletedElements ) {
+    public void setDeletedElements( Map< String, EmsScriptNode > deletedElements ) {
         this.deletedElements = deletedElements;
     }
 
@@ -91,11 +92,11 @@ public class WorkspaceDiff {
         this.elements = elements;
     }
 
-    public void setMovedElements( Set< EmsScriptNode > movedElements ) {
+    public void setMovedElements( Map< String, EmsScriptNode > movedElements ) {
         this.movedElements = movedElements;
     }
     
-    public void setUpdatedElements( Set< EmsScriptNode > updatedElements ) {
+    public void setUpdatedElements( Map< String, Map< EmsScriptNode, Set< String >>> updatedElements ) {
         this.updatedElements = updatedElements;
     }
     
@@ -173,14 +174,13 @@ public class WorkspaceDiff {
     }
     
     private void captureDeltas(EmsScriptNode node) {
+        // delta 
+        Set< EmsScriptNode > children = node.getChildNodes();
         
-        Scriptable json = node.getChildren();
-        
-        json.getIds();
     }
     
     public static Set<EmsScriptNode> convertMapValuesToSet(Map<String, EmsScriptNode> map) {
-        Set<EmsScriptNode> set = new HashSet<EmsScriptNode>();
+        Set<EmsScriptNode> set = new LinkedHashSet<EmsScriptNode>();
         for (EmsScriptNode node: map.values()) {
             set.add( node );
         }
