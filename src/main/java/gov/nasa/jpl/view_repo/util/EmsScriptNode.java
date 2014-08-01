@@ -1062,7 +1062,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      * @return JSONObject serialization of node
      */
     public JSONObject toJSONObject(Date dateTime) throws JSONException {
-        return toJSONObject( Acm.JSON_TYPE_FILTER.ALL, dateTime );
+        return toJSONObject( null, dateTime );
     }
 
     /**
@@ -1074,10 +1074,10 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      *            JSONObject
      * @return JSONObject serialization of node
      */
-    public JSONObject toJSONObject( Acm.JSON_TYPE_FILTER renderType,
+    public JSONObject toJSONObject( Set<String> filter,
                                     Date dateTime )
             throws JSONException {
-        return toJSONObject( renderType, true, true, false, dateTime );
+        return toJSONObject( filter, false, dateTime );
     }
 
     public String nodeRefToSysmlId( NodeRef ref ) throws JSONException {
@@ -1118,14 +1118,28 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         return this;
     }
     
-    protected void addElementJSON(JSONObject elementJson, Date dateTime) throws JSONException {
+    private void putInJson(JSONObject jsonObject, String key, Object value, Set<String> filter) throws JSONException {
+        if (filter == null || filter.size() == 0) {
+            jsonObject.put( key, value );
+        } else if (filter.contains( key )) {
+            jsonObject.put( key,  value );
+        }
+    }
+    
+    protected void addElementJSON(JSONObject elementJson, Set<String> filter, Date dateTime) throws JSONException {
         EmsScriptNode node = getNodeAtAtime( dateTime );
+        // mandatory elements put in directly
         elementJson.put( Acm.JSON_ID, node.getProperty( Acm.ACM_ID, true ) );
-        elementJson.put( Acm.JSON_NAME, node.getProperty( Acm.ACM_NAME, false ) );
-        elementJson.put( Acm.JSON_DOCUMENTATION, node.getProperty( Acm.ACM_DOCUMENTATION, false) );
-        elementJson.put( "qualifiedName", node.getSysmlQName() );
-        elementJson.put( "qualifiedId", node.getSysmlQId() );
-        elementJson.put( "editable", node.hasPermission( PermissionService.WRITE ) );
+        elementJson.put( "creator", node.getProperty("cm:modifier", false) );
+        elementJson.put( "modified",
+                         getLastModified( (Date)node.getProperty( "cm:modified",
+                                                                  false ) ) );
+        
+        putInJson(elementJson, Acm.JSON_NAME, node.getProperty( Acm.ACM_NAME, false ), filter );
+        putInJson( elementJson, Acm.JSON_DOCUMENTATION, node.getProperty( Acm.ACM_DOCUMENTATION, false), filter );
+        putInJson( elementJson, "qualifiedName", node.getSysmlQName(), filter );
+        putInJson( elementJson, "qualifiedId", node.getSysmlQId(), filter );
+        putInJson( elementJson, "editable", node.hasPermission( PermissionService.WRITE ), filter );
         NodeRef ownerRef = (NodeRef) node.getProperty( "ems:owner", false );
         EmsScriptNode owner;
         if (ownerRef != null) {
@@ -1143,14 +1157,10 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         if (ownerId == null) {
             ownerId = "null";
         }
-        elementJson.put( "owner", ownerId );
-        elementJson.put( "creator", node.getProperty("cm:modifier", false) );
-        elementJson.put( "modified",
-                         getLastModified( (Date)node.getProperty( "cm:modified",
-                                                                  false ) ) );
+        putInJson( elementJson, "owner", ownerId, filter );
     }
     
-    private void addSpecializationJSON(JSONObject json, Date dateTime) throws JSONException {
+    private void addSpecializationJSON(JSONObject json, Set<String> filter, Date dateTime) throws JSONException {
         String typeName = getTypeName();
         if (typeName == null) {
             // TODO: error logging
@@ -1163,7 +1173,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             Method method = null;
             try {
                 // make sure that the method signature here matches all the add methods
-                method = this.getClass().getDeclaredMethod( methodName, JSONObject.class, EmsScriptNode.class, Date.class );
+                method = this.getClass().getDeclaredMethod( methodName, JSONObject.class, EmsScriptNode.class, Set.class, Date.class);
             } catch ( NoSuchMethodException | SecurityException e ) {
                 // do nothing, method isn't implemented yet
 //              System.out.println("Method not yet implemented: " + methodName);
@@ -1183,13 +1193,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     /**
      * Convert node into our custom JSONObject
      * 
-     * @param renderType
-     *            Type of JSONObject to render, this filters what keys are in
-     *            JSONObject
-     * @param showQualifiedName
-     *            If true, displays qualifiedName key
-     * @param showEditable
-     *            If true, displays editable key
+     * @param filter
+     *            Set of keys that should be displayed (plus the mandatory fields)
      * @param isExprOrProp
      *              If true, does not add specialization key, as it is nested call to
      *              process the Expression operand or Property value
@@ -1199,9 +1204,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      *            not checked.
      * @return JSONObject serialization of node
      */
-    public JSONObject toJSONObject( Acm.JSON_TYPE_FILTER renderType,
-                                    boolean showQualifiedName,
-                                    boolean showEditable, 
+    public JSONObject toJSONObject( Set<String> filter,
                                     boolean isExprOrProp,
                                     Date dateTime ) throws JSONException {
         JSONObject element = new JSONObject();
@@ -1213,10 +1216,10 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
         if ( readTime == null ) readTime = System.currentTimeMillis();
         if (isExprOrProp) {
-            addSpecializationJSON(element, dateTime);
+            addSpecializationJSON(element, filter, dateTime);
         } else {
-            addElementJSON(element, dateTime);
-            addSpecializationJSON( specializationJSON, dateTime );
+            addElementJSON(element, filter, dateTime);
+            addSpecializationJSON( specializationJSON, filter, dateTime );
             if (specializationJSON.length() > 0) {
                 element.put(Acm.JSON_SPECIALIZATION, specializationJSON );
             }
@@ -2570,7 +2573,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             if (versionedRef != null) {
                 EmsScriptNode node = new EmsScriptNode(versionedRef, services, response);
                 if (node != null && node.exists()) {
-                    jsonArray.put( node.toJSONObject( null, true, true, true, null ) );
+                    jsonArray.put( node.toJSONObject( null, true, null ) );
                 }
             } else {
                 // TODO error handling
@@ -2596,109 +2599,109 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      * unused private methods don't occur.
      * 
      **************************************************************************************/
-    protected void addPackageJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
+    protected void addPackageJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
         // do nothing - package currently doesn't have any additional metadata
     }
     
-    protected void addViewpointJSON(JSONObject json, Date dateTime) throws JSONException {
+    protected void addViewpointJSON(JSONObject json, Set<String> filter, Date dateTime) throws JSONException {
         json.put( "method", this.getSysmlIdOfProperty( "sysml:method", dateTime ) );
     }    
     
-    protected void addViewJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
+    protected void addViewJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
         // TODO: figure out why this isn't working
 //        json.put( "contains", getView().getContainsJson() );
 //        json.put( "displayedElements", getView().getDisplayedElements() );
 //        json.put( "allowedElements", getView().getDisplayedElements() );
 //        json.put( "childrenViews", getView().getChildViews() );
-        json.put( "contains", new JSONArray((String)node.getProperty( "view2:contains", true )) );
-        json.put( "displayedElements", new JSONArray((String)node.getProperty( "view2:displayedElements", false )) );
-        json.put( "allowedElements", new JSONArray((String)node.getProperty( "view2:allowedElements", false )) );
-        json.put( "childrenViews", new JSONArray((String)node.getProperty( "view2:childrenViews", false )) );
+        putInJson( json, "contains", new JSONArray((String)node.getProperty( "view2:contains", true )), filter );
+        putInJson( json, "displayedElements", new JSONArray((String)node.getProperty( "view2:displayedElements", false )), filter );
+        putInJson( json, "allowedElements", new JSONArray((String)node.getProperty( "view2:allowedElements", false )), filter );
+        putInJson( json, "childrenViews", new JSONArray((String)node.getProperty( "view2:childrenViews", false )), filter );
         
         // TODO: Snapshots?
     }
 
-    protected void addProductJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        json.put( "view2view", new JSONArray((String)node.getProperty( "view2:view2view", true )) );
-        json.put( "noSections", new JSONArray((String)node.getProperty( "view2:noSections", false)) );
-        addViewJSON(json, node, dateTime);
+    protected void addProductJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        putInJson( json, "view2view", new JSONArray((String)node.getProperty( "view2:view2view", true )), filter );
+        putInJson( json, "noSections", new JSONArray((String)node.getProperty( "view2:noSections", false)), filter );
+        addViewJSON(json, node, filter, dateTime);
     }
         
-    protected void addPropertyJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        json.put( "isDerived", node.getProperty("sysml:isDerived", true) );
-        json.put( "isSlot", node.getProperty("sysml:isSlot", false) );
-        json.put( "value", addInternalJSON((ArrayList<NodeRef>)node.getProperty("sysml:value", false), dateTime));
-        json.put( "propertyType", addInternalJSON((ArrayList<NodeRef>)node.getProperty("sysml:propertyType", false), dateTime));
+    protected void addPropertyJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        putInJson( json, "isDerived", node.getProperty("sysml:isDerived", true), filter );
+        putInJson( json, "isSlot", node.getProperty("sysml:isSlot", false), filter );
+        putInJson( json, "value", addInternalJSON((ArrayList<NodeRef>)node.getProperty("sysml:value", false), dateTime), filter);
+        putInJson( json, "propertyType", addInternalJSON((ArrayList<NodeRef>)node.getProperty("sysml:propertyType", false), dateTime), filter);
     }
 
-    protected void addDirectedRelationshipJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
+    protected void addDirectedRelationshipJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
         String id;
         
         id = getSysmlIdOfProperty( "sysml:source", dateTime );
         if (id != null) {
-            json.put( "source", id );
+            putInJson( json, "source", id, filter );
         }
         
         id = getSysmlIdOfProperty( "sysml:target", dateTime );
         if (id != null) {
-            json.put( "target", id );
+            putInJson( json, "target", id, filter );
         }
     }
     
-    protected void addDependencyJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addDirectedRelationshipJSON(json, node, dateTime);
+    protected void addDependencyJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addDirectedRelationshipJSON(json, node, filter, dateTime);
     }
 
-    protected void addExposeJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addDirectedRelationshipJSON(json, node, dateTime);
+    protected void addExposeJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addDirectedRelationshipJSON(json, node, filter, dateTime);
     }
 
-    protected void addConformJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addDirectedRelationshipJSON(json, node, dateTime);
+    protected void addConformJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addDirectedRelationshipJSON(json, node, filter, dateTime);
     }
 
-    protected void addGeneralizationJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addDirectedRelationshipJSON(json, node, dateTime);
+    protected void addGeneralizationJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addDirectedRelationshipJSON(json, node, filter, dateTime);
     }
     
-    protected void addValueSpecificationJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
+    protected void addValueSpecificationJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
         String valueExpressionId = node.getSysmlIdOfProperty( "sysml:valueExpression", dateTime );
         if (valueExpressionId != null) {
-            json.put( "expression", valueExpressionId );
+            putInJson( json, "expression", valueExpressionId, filter );
         }
     }
     
-    protected void addDurationJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addValueSpecificationJSON( json, node, dateTime );
+    protected void addDurationJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addValueSpecificationJSON( json, node, filter, dateTime );
     }
     
-    protected void addDurationIntervalJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addValueSpecificationJSON( json, node, dateTime );
+    protected void addDurationIntervalJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addValueSpecificationJSON( json, node, filter, dateTime );
         
         String id;
         
         id = getSysmlIdOfProperty( "sysml:durationMax", dateTime );
         if (id != null) {
-            json.put( "max", id );
+            putInJson( json, "max", id, filter );
         }
         
         id = getSysmlIdOfProperty( "sysml:durationMin", dateTime );
         if (id != null) {
-            json.put( "min", id );
+            putInJson( json, "min", id, filter );
         }
     }
 
-    protected void addElementValueJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addValueSpecificationJSON( json, node, dateTime );
+    protected void addElementValueJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addValueSpecificationJSON( json, node, filter, dateTime );
         
         String elementId = node.getSysmlIdOfProperty( "sysml:elementValueOfElement", dateTime );
         if (elementId != null) {
-            json.put( "element", elementId );
+            putInJson( json, "element", elementId, filter );
         }
     }
 
-    protected void addExpressionJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addValueSpecificationJSON( json, node, dateTime );
+    protected void addExpressionJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addValueSpecificationJSON( json, node, filter, dateTime );
         
         ArrayList<NodeRef> nodeRefs = (ArrayList<NodeRef>) node.getProperty( "sysml:operand", true );
         JSONArray array = new JSONArray();
@@ -2711,123 +2714,123 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                 EmsScriptNode versionedNode = new EmsScriptNode(versionedRef, services, response);
                 JSONObject jsonObject = new JSONObject();
                 // operands can reference anything, so call recursively as necessary
-                versionedNode.addSpecializationJSON( jsonObject, dateTime );
+                versionedNode.addSpecializationJSON( jsonObject, filter, dateTime );
                 array.put( jsonObject );
             } else {
                 // TODO: Error handling
             }
             
         }
-        json.put( "operand", array );
+        putInJson( json, "operand", array, filter );
     }
 
-    protected void addInstanceValueJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addValueSpecificationJSON( json, node, dateTime );
+    protected void addInstanceValueJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addValueSpecificationJSON( json, node, filter, dateTime );
         
         String id = node.getSysmlIdOfProperty( "sysml:instance", dateTime );
         if (id != null) {
-            json.put( "instance", id );
+            putInJson( json, "instance", id, filter );
         }
     }
 
-    protected void addIntervalJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addValueSpecificationJSON( json, node, dateTime );
+    protected void addIntervalJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addValueSpecificationJSON( json, node, filter, dateTime );
     }
 
-    protected void addLiteralBooleanJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addValueSpecificationJSON( json, node, dateTime );
-        json.put( "boolean", node.getProperty("sysml:boolean", true) );
+    protected void addLiteralBooleanJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addValueSpecificationJSON( json, node, filter, dateTime );
+        putInJson( json, "boolean", node.getProperty("sysml:boolean", true), filter );
     }
     
-    protected void addLiteralIntegerJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addValueSpecificationJSON( json, node, dateTime );
-        json.put( "integer", node.getProperty("sysml:integer", true) );
+    protected void addLiteralIntegerJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addValueSpecificationJSON( json, node, filter, dateTime );
+        putInJson( json, "integer", node.getProperty("sysml:integer", true), filter );
     }
     
-    protected void addLiteralNullJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addValueSpecificationJSON( json, node, dateTime );
+    protected void addLiteralNullJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addValueSpecificationJSON( json, node, filter, dateTime );
     }
 
-    protected void addLiteralRealJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addValueSpecificationJSON( json, node, dateTime );
-        json.put( "double", node.getProperty("sysml:double", true) );
+    protected void addLiteralRealJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addValueSpecificationJSON( json, node, filter, dateTime );
+        putInJson( json, "double", node.getProperty("sysml:double", true), filter );
     }
     
-    protected void addLiteralStringJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addValueSpecificationJSON( json, node, dateTime );
-        json.put( "string", node.getProperty("sysml:string", true) );
+    protected void addLiteralStringJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addValueSpecificationJSON( json, node, filter, dateTime );
+        putInJson( json, "string", node.getProperty("sysml:string", true), filter );
     }
 
-    protected void addLiteralUnlimitedNaturalJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addValueSpecificationJSON( json, node, dateTime );
-        json.put( "naturalValue", node.getProperty("sysml:naturalValue", true) );
+    protected void addLiteralUnlimitedNaturalJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addValueSpecificationJSON( json, node, filter, dateTime );
+        putInJson( json, "naturalValue", node.getProperty("sysml:naturalValue", true), filter );
     }
 
-    protected void addOpaqueExpressionJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addValueSpecificationJSON( json, node, dateTime );
-        json.put( "expressionBody", node.getProperty("sysml:expressionBody", true) );
+    protected void addOpaqueExpressionJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addValueSpecificationJSON( json, node, filter, dateTime );
+        putInJson( json, "expressionBody", node.getProperty("sysml:expressionBody", true), filter );
     }    
 
-    protected void addStringExpressionJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addValueSpecificationJSON( json, node, dateTime );
+    protected void addStringExpressionJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addValueSpecificationJSON( json, node, filter, dateTime );
     }
     
-    protected void addTimeExpressionJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addValueSpecificationJSON( json, node, dateTime );
+    protected void addTimeExpressionJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addValueSpecificationJSON( json, node, filter, dateTime );
     }
     
-    protected void addTimeIntervalJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        addValueSpecificationJSON( json, node, dateTime );
+    protected void addTimeIntervalJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        addValueSpecificationJSON( json, node, filter, dateTime );
         String id;
         
         id = getSysmlIdOfProperty( "sysml:timeIntervalMax", dateTime );
         if (id != null) {
-            json.put("max", id);
+            putInJson( json, "max", id, filter);
         }
 
         id = getSysmlIdOfProperty( "sysml:timeIntervalMin", dateTime );
         if (id != null) {
-            json.put("min", id);
+            putInJson( json, "min", id, filter);
         }
     }
     
-    protected void addOperationJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
+    protected void addOperationJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
         ArrayList<NodeRef> nodeRefs = (ArrayList<NodeRef>) node.getProperty( "sysml:operationParameter", true );
         JSONArray ids = addNodeRefIdsJSON( nodeRefs, dateTime );
         if (ids.length() > 0) { 
-            json.put( "parameters", ids );
+            putInJson( json, "parameters", ids, filter );
         }
         
         String id = getSysmlIdOfProperty( "sysml:operationExpression", dateTime );
         if (id != null) {
-            json.put( "expression", id );
+            putInJson( json, "expression", id, filter );
         }
     }    
 
-    protected void addInstanceSpecificationJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        json.put( "specification", node.getProperty( "sysml:instanceSpecificationSpecification", true) );
+    protected void addInstanceSpecificationJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        putInJson( json, "specification", node.getProperty( "sysml:instanceSpecificationSpecification", true), filter );
     }
 
-    protected void addConstraintJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
+    protected void addConstraintJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
         String specId = getSysmlIdOfProperty( "sysml:constraintSpecification", dateTime ); 
         if (specId != null) {
-            json.put( "specification", specId );
+            putInJson( json, "specification", specId, filter );
         }
     }
     
-    protected void addParameterJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
-        json.put( "direction", node.getProperty("sysml:parameterDirection", true) );
-        json.put( "parameterType", node.getProperty( "sysml:parameterType", true ));
+    protected void addParameterJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
+        putInJson( json, "direction", node.getProperty("sysml:parameterDirection", true), filter );
+        putInJson( json, "parameterType", node.getProperty( "sysml:parameterType", true ), filter);
         
         String id = node.getSysmlIdOfProperty( "sysml:parameterDefaultValue", dateTime );
         if (id != null) {
-            json.put( "defaultValue", id );
+            putInJson( json, "defaultValue", id, filter );
         }
     }
 
-    protected void addConnectorJSON(JSONObject json, EmsScriptNode node, Date dateTime) throws JSONException {
+    protected void addConnectorJSON(JSONObject json, EmsScriptNode node, Set<String> filter, Date dateTime) throws JSONException {
         ArrayList<NodeRef> nodeRefs = (ArrayList<NodeRef>) node.getProperty( "sysml:roles", true );
         JSONArray ids = addNodeRefIdsJSON( nodeRefs, dateTime );
-        json.put( "connectorRoles", ids );
+        putInJson( json, "connectorRoles", ids, filter );
     }
 }

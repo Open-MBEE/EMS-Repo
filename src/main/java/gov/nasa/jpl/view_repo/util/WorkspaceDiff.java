@@ -19,6 +19,7 @@ public class WorkspaceDiff {
 
     private EmsScriptNode ws2;
     private Set<EmsScriptNode> addedElements;
+    private Set<EmsScriptNode> conflictedElements;
     private Set<EmsScriptNode> deletedElements;
     private Set<EmsScriptNode> movedElements;
     private Set<EmsScriptNode> updatedElements;
@@ -27,8 +28,9 @@ public class WorkspaceDiff {
         elements = new HashSet<EmsScriptNode>();
         
         addedElements = new HashSet<EmsScriptNode>();
-        movedElements = new HashSet<EmsScriptNode>();
+        conflictedElements = new HashSet<EmsScriptNode>();
         deletedElements = new HashSet<EmsScriptNode>();
+        movedElements = new HashSet<EmsScriptNode>();
         updatedElements = new HashSet<EmsScriptNode>();
         
         ws1 = null;
@@ -43,6 +45,10 @@ public class WorkspaceDiff {
 
     public Set< EmsScriptNode > getAddedElements() {
         return addedElements;
+    }
+
+    public Set<EmsScriptNode> getConflictedElements() {
+        return conflictedElements;
     }
 
     public Set< EmsScriptNode > getDeletedElements() {
@@ -71,6 +77,10 @@ public class WorkspaceDiff {
 
     public void setAddedElements( Set< EmsScriptNode > addedElements ) {
         this.addedElements = addedElements;
+    }
+
+    public void setConflictedElements( Set<EmsScriptNode> conflictedElements ) {
+        this.conflictedElements = conflictedElements;
     }
 
     public void setDeletedElements( Set< EmsScriptNode > deletedElements ) {
@@ -126,7 +136,8 @@ public class WorkspaceDiff {
         jsonObject.put( "timestamp", TimeUtils.toTimestamp( dateTime ) );
     }
     
-    private void addJSONArray(JSONObject jsonObject, String key, Date dateTime) throws JSONException {
+    private boolean addJSONArray(JSONObject jsonObject, String key, Date dateTime) throws JSONException {
+        boolean emptyArray = true;
         try {
             Field field = this.getClass().getDeclaredField( key );
             field.setAccessible( true );
@@ -134,10 +145,15 @@ public class WorkspaceDiff {
             Set< EmsScriptNode > set = (Set<EmsScriptNode>) field.get( this );
             if (set != null && set.size() > 0) {
                 jsonObject.put( key, convertSetToJSONArray( set, dateTime ) );
+                emptyArray = false;
+            } else {
+                jsonObject.put( key, new JSONArray() );
             }
         } catch ( Exception e ) {
             e.printStackTrace();
         }
+        
+        return !emptyArray;
     }
     
     private JSONArray convertSetToJSONArray(Set<EmsScriptNode> set, Date dateTime) throws JSONException {
@@ -170,4 +186,5 @@ public class WorkspaceDiff {
         }
         return set;
     }
+
 }
