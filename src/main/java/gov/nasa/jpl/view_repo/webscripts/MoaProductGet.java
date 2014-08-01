@@ -185,7 +185,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		}
 
 		if (checkPermissions(product, PermissionService.READ)){
-		    JSONObject object = product.toJSONObject(Acm.JSON_TYPE_FILTER.PRODUCT, dateTime);
+		    JSONObject object = product.toJSONObject(dateTime);
 		    productsJson = new JSONObject(object, JSONObject.getNames(object));
 
 		    if (object.has(Acm.JSON_VIEW_2_VIEW)) {
@@ -282,7 +282,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	    for (String viewId: viewIds) {
 	        EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime);
 	        if (view != null && checkPermissions(view, PermissionService.READ)) {
-        	        JSONObject viewJson = view.toJSONObject(Acm.JSON_TYPE_FILTER.VIEW, dateTime);
+        	        JSONObject viewJson = view.toJSONObject(dateTime);
         	        
         	        // add any related comments as part of the view
         	        JSONArray commentsJson = new JSONArray();
@@ -291,7 +291,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
                                                          workspace, dateTime );// new ArrayList<EmsScriptNode>();
         	        Collections.sort(commentList, new EmsScriptNode.EmsScriptNodeComparator());
         	        for (EmsScriptNode comment: commentList) {
-        	            commentsJson.put(comment.toJSONObject(Acm.JSON_TYPE_FILTER.COMMENT, dateTime));
+        	            commentsJson.put(comment.toJSONObject(dateTime));
         	        }
         	        viewJson.put("comments", commentsJson);
         	        
@@ -317,7 +317,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	    for (String elementId: elementIds) {
 	        EmsScriptNode element = findScriptNodeById(elementId, workspace, dateTime);
 	        if (element != null && checkPermissions(element, PermissionService.READ)) {
-	            JSONObject elementJson = element.toJSONObject(Acm.JSON_TYPE_FILTER.ELEMENT, dateTime);
+	            JSONObject elementJson = element.toJSONObject(dateTime);
 	            elementsJson.put(elementJson);
 	        }
 	    }

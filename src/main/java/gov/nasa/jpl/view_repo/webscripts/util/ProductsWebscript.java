@@ -163,16 +163,16 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                             v.getDisplayedElements();
                     elems = NodeUtil.getVersionAtTime( elems, dateTime );
                     for ( EmsScriptNode n : elems ) {
-                        productsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT, dateTime ) );
+                        productsJson.put( n.toJSONObject( dateTime ) );
                     }
                 } else if ( gettingContainedViews ) {
                     Collection< EmsScriptNode > elems =
                             v.getContainedViews( recurse, workspace, dateTime, null );
                     for ( EmsScriptNode n : elems ) {
-                        productsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW, dateTime ) );
+                        productsJson.put( n.toJSONObject( dateTime ) );
                     }
                 } else {
-                    productsJson.put( product.toJSONObject( JSON_TYPE_FILTER.PRODUCT, dateTime ) );
+                    productsJson.put( product.toJSONObject( dateTime ) );
                 }
             } catch ( JSONException e ) {
                 log( LogLevel.ERROR, "Could not create products JSON array",

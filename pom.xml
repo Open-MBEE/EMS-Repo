@@ -278,7 +278,7 @@
 						<fallback>default</fallback>
 						<resources>
 							<resource>
-								<directory>src/main/amp/config</directory>
+								<directory>src/main/amp/config/alfresco/templates/webscripts</directory>
 							</resource>
 						</resources>
 					</classpath>
@@ -289,7 +289,7 @@
 						<resources>
 							<resource>
 								<target>/</target>
-								<directory>src/main/amp/web</directory>
+								<directory>src/main/amp/web/WEB-INF/lib</directory>
 							</resource>
 						</resources>
 					</web>

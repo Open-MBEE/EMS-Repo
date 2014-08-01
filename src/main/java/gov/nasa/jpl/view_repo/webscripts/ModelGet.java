@@ -372,7 +372,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			EmsScriptNode node = elementsFound.get(id);
 
 			if (checkPermissions(node, PermissionService.READ)){ 
-                elements.put(node.toJSONObject(Acm.JSON_TYPE_FILTER.ELEMENT, dateTime));
+                elements.put(node.toJSONObject(dateTime));
 			} // TODO -- REVIEW -- Warning if no permissions?
 		}
 	}

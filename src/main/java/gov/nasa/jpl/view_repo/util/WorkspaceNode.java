@@ -56,7 +56,13 @@ public class WorkspaceNode extends EmsScriptNode {
     
     @Override
     public WorkspaceNode getWorkspace() {
-        return this; // This allow
+        log( "Warning! calling getWorkspace on a workspace! " + getName() );
+        return this;
+    }
+    
+    @Override
+    public WorkspaceNode getWorkspace(boolean setIfNull) {
+        return this;
     }
     
     @Override
@@ -155,11 +161,14 @@ public class WorkspaceNode extends EmsScriptNode {
      * @return true iff the node is in this workspace
      */
     public boolean contains( EmsScriptNode node ) {
-        WorkspaceNode nodeWs = node.getWorkspace();
+        return contains( node, true );
+    }
+    private boolean contains( EmsScriptNode node, boolean setWorkspaceIfNull ) {
+        WorkspaceNode nodeWs = node.getWorkspace(setWorkspaceIfNull);
         if ( this.equals( nodeWs ) ) return true;
         WorkspaceNode parentWs = getParentWorkspace();
         if ( parentWs == null ) return ( nodeWs == null );
-        return parentWs.contains( node );
+        return parentWs.contains( node, false );
     }
     
     /**
@@ -174,6 +183,9 @@ public class WorkspaceNode extends EmsScriptNode {
         if ( node == null ) return null;
         EmsScriptNode newFolder = node;
 
+        String thisName = exists() ? getName() : null;
+        String nodeName = node != null && node.exists() ? node.getName() : null;
+        
         // make sure the folder's parent is replicated
         EmsScriptNode parent = node.getParent();
 
@@ -182,18 +194,26 @@ public class WorkspaceNode extends EmsScriptNode {
 //            if ( Debug.isOn() ) Debug.outln( "returning newFolder for workspace top: " + newFolder );
 //            return newFolder;
         }
+        String parentName = parent != null && parent.exists() ? parent.getName() : null;
+
         if ( parent != null && parent.exists() && !this.equals( parent.getWorkspace() ) ) {
-            parent = replicateWithParentFolders( parent );
+            parent = findScriptNodeByName( parentName, this, null );
+            if ( parent == null || !parent.exists() || !this.equals( parent.getWorkspace() ) ) {
+                parent = replicateWithParentFolders( parent );
+            }
             //if ( Debug.isOn() ) Debug.outln( "moving newFolder " + newFolder + " to parent " + parent );
             //newFolder.move( parent );
         } else if ( parent == null || !parent.exists() ) {
             Debug.error("Error! Bad parent when replicating folder chain! " + parent );
         }
 
-        // If the folder is not already in this workspace, clone it.
-        if ( node.getWorkspace() == null || !node.getWorkspace().equals( this ) ) {
-            newFolder = node.clone(parent);
-            newFolder.setWorkspace( this, node.getNodeRef() );
+        // If the node is not already in this workspace, clone it.
+        if ( node.getWorkspace() == null || !node.getWorkspace().exists() || !node.getWorkspace().equals( this ) ) {
+            node = findScriptNodeByName( nodeName, this, null );
+            if ( node == null || !node.exists() || !this.equals( node.getWorkspace() ) ) {
+                newFolder = node.clone(parent);
+                newFolder.setWorkspace( this, node.getNodeRef() );
+            }
         }
         
         if ( Debug.isOn() ) Debug.outln( "returning newFolder: " + newFolder );

@@ -161,6 +161,7 @@ public class NodeUtil {
         ResultSet results = null;
         String queryPattern = prefix + name + "\"";
         results = luceneSearch( queryPattern, services );
+        //if ( (results == null || results.length() == 0 ) && pref)
         return results;
     }
 
@@ -195,6 +196,7 @@ public class NodeUtil {
         try {
             results = findNodeRefsByType( specifier, prefix, services );
             if (results != null) {
+                NodeRef lowest = null;
                 for (ResultSetRow row: results) {
                     NodeRef nr = row.getNodeRef();
                     if ( nr == null ) continue;
@@ -257,11 +259,21 @@ public class NodeUtil {
                             }
                             if ( match ) {
                                 nodeRef = nr;
-                                nodeRefs.add( nodeRef );
+                                if ( exists(workspace) && (!exists(lowest) || isWorkspaceSource(lowest, nodeRef) ) ) {
+                                    lowest = nodeRef;
+                                    nodeRefs.add( 0, nodeRef );
+                                } else {
+                                    nodeRefs.add( nodeRef );
+                                }
                                 if ( Debug.isOn() ) {
                                     Debug.outln( "findNodeRefsByType(): matched!" );
                                  }
-                                if ( justFirst ) break;
+                                if ( justFirst && 
+                                     ( !exists( workspace ) ||
+                                       ( exists( lowest ) && 
+                                               workspace.equals( getWorkspace( nodeRef ) ) ) ) ) {
+                                    break;
+                                }
                             } else {
                                 if ( Debug.isOn() ) {
                                    Debug.outln( "findNodeRefsByType(): not an exact match" );
@@ -303,6 +315,28 @@ public class NodeUtil {
         return nodeRefs;     
     }
     
+    public static WorkspaceNode getWorkspace( NodeRef nodeRef ) {
+        EmsScriptNode node = new EmsScriptNode( nodeRef, getServices() );
+        return node.getWorkspace( true );
+    }
+
+    public static boolean isWorkspaceSource( EmsScriptNode source, EmsScriptNode changed ) {
+        if (!exists(source) || !exists(changed)) return false;
+        //if ( changed.equals( source ) ) return true;
+        if ( !changed.hasAspect( "ems:HasWorkspace" ) ) return false;
+        EmsScriptNode directSource = changed.getWorkspaceSource();
+        if ( !exists(directSource) ) return false;
+        if ( source.equals( directSource ) ) return true;
+        return isWorkspaceSource( source, directSource );
+    }
+    
+    public static boolean isWorkspaceSource( NodeRef source, NodeRef changed ) {
+        if ( source == null || changed == null ) return false;
+        EmsScriptNode sourceNode = new EmsScriptNode( source, getServices() );
+        EmsScriptNode changedNode = new EmsScriptNode( changed, getServices() );
+        return isWorkspaceSource( sourceNode, changedNode );
+    }
+
     /**
      * Find a NodeReference by name (returns first match, assuming things are
      * unique)

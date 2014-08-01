@@ -34,7 +34,6 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.util.Acm.JSON_TYPE_FILTER;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.Collection;
@@ -194,7 +193,7 @@ public class ViewGet extends AbstractJavaWebScript {
                                                     generate, recurse, null );
                     elems = NodeUtil.getVersionAtTime( elems, dateTime );
                     for ( EmsScriptNode n : elems ) {
-                        viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT, dateTime ) );
+                        viewsJson.put( n.toJSONObject( dateTime ) );
                     }
                 } else if ( gettingContainedViews ) {
                     if (Debug.isOn()) System.out.println("+ + + + + gettingContainedViews");
@@ -202,11 +201,11 @@ public class ViewGet extends AbstractJavaWebScript {
                             v.getContainedViews( recurse, workspace, dateTime,
                                                  null );
                     for ( EmsScriptNode n : elems ) {
-                        viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW, dateTime ) );
+                        viewsJson.put( n.toJSONObject( dateTime ) );
                     }
                 } else {
                     if (Debug.isOn()) System.out.println("+ + + + + just the view");
-                    viewsJson.put( view.toJSONObject( JSON_TYPE_FILTER.VIEW, dateTime ) );
+                    viewsJson.put( view.toJSONObject(  dateTime ) );
                 }
             } catch ( JSONException e ) {
                 log( LogLevel.ERROR, "Could not create views JSON array",
