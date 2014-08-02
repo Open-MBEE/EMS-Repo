@@ -1190,20 +1190,21 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
 
         json.put( "type", typeName );
         for (QName aspectQname: this.aspects) {
-            String methodName = "add" + aspectQname.getLocalName() + "JSON";
+            String cappedAspectName = Utils.capitalize( aspectQname.getLocalName() );
+            String methodName = "add" + cappedAspectName + "JSON";
             Method method = null;
             try {
                 // make sure that the method signature here matches all the add methods
                 method = this.getClass().getDeclaredMethod( methodName, JSONObject.class, EmsScriptNode.class, Set.class, Date.class);
             } catch ( NoSuchMethodException | SecurityException e ) {
                 // do nothing, method isn't implemented yet
-//              System.out.println("Method not yet implemented: " + methodName);
+                System.out.println("Method not yet implemented: " + methodName);
             }
             
             if (method != null) {
                 EmsScriptNode node = getNodeAtAtime( dateTime );
                 try {
-                    method.invoke(this, json, node, dateTime);
+                    method.invoke(this, json, node, filter, dateTime);
                 } catch ( IllegalAccessException | IllegalArgumentException | InvocationTargetException e ) {
                     // do nothing, internal server error
                 }
