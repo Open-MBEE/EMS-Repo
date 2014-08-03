@@ -7,7 +7,6 @@ import gov.nasa.jpl.mbee.util.Debug;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletResponse;
@@ -60,11 +59,11 @@ public class WorkspaceNode extends EmsScriptNode {
         return this;
     }
     
-    @Override
-    public WorkspaceNode getWorkspace(boolean setIfNull) {
-        return this;
-    }
-    
+//    @Override
+//    public WorkspaceNode getWorkspace(boolean setIfNull) {
+//        return this;
+//    }
+//    
     @Override
     public WorkspaceNode getParentWorkspace() {
         NodeRef ref = (NodeRef)getProperty("sysml:parent");
@@ -160,15 +159,12 @@ public class WorkspaceNode extends EmsScriptNode {
      * @param node
      * @return true iff the node is in this workspace
      */
-    public boolean contains( EmsScriptNode node ) {
-        return contains( node, true );
-    }
-    private boolean contains( EmsScriptNode node, boolean setWorkspaceIfNull ) {
-        WorkspaceNode nodeWs = node.getWorkspace(setWorkspaceIfNull);
+    public boolean contains( EmsScriptNode node  ) {
+        WorkspaceNode nodeWs = node.getWorkspace();//setWorkspaceIfNull);
         if ( this.equals( nodeWs ) ) return true;
         WorkspaceNode parentWs = getParentWorkspace();
         if ( parentWs == null ) return ( nodeWs == null );
-        return parentWs.contains( node, false );
+        return parentWs.contains( node );
     }
     
     /**

@@ -203,10 +203,15 @@ public class NodeUtil {
                     EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
 
                     if ( Debug.isOn() ) {
-                        Debug.outln( "findNodeRefsByType(" + specifier + ", " + prefix +
-                                     ", " + workspace + ", " + dateTime + ", justFirst=" +
-                                     justFirst + ", exactMatch=" + exactMatch + "): candidate "
-                                     + esn.getWorkspaceName( false ) + "::" + esn.getName() );
+                        Debug.turnOff();
+                        System.out.println( "findNodeRefsByType(" + specifier
+                                            + ", " + prefix + ", " + workspace
+                                            + ", " + dateTime + ", justFirst="
+                                            + justFirst + ", exactMatch="
+                                            + exactMatch + "): candidate "
+                                            + esn.getWorkspaceName()// false )
+                                            + "::" + esn.getName() );
+                        Debug.turnOn();
                     }
 
                     // Get the version for the date/time if specified.
@@ -225,8 +230,10 @@ public class NodeUtil {
                         esn = new EmsScriptNode( nr, getServices() );
                         if ( !esn.exists() ) {
                             if ( Debug.isOn() ) {
-                                Debug.outln( "findNodeRefsByType(): element does not exist "
+                                Debug.turnOff();
+                                System.out.println( "findNodeRefsByType(): element does not exist "
                                              + esn );
+                                Debug.turnOn();
                             }
 
                             continue;
@@ -235,8 +242,10 @@ public class NodeUtil {
                         // Make sure it's in the right workspace.
                         if ( workspace != null && !workspace.contains( esn ) ) {
                             if ( Debug.isOn() ) {
-                                Debug.outln( "findNodeRefsByType(): wrong workspace "
+                                Debug.turnOff();
+                                System.out.println( "findNodeRefsByType(): wrong workspace "
                                              + workspace );
+                                Debug.turnOn();
                             }
 
                             continue;
@@ -289,16 +298,20 @@ public class NodeUtil {
         } finally {
             if (results != null) {
                 if ( Debug.isOn() ) {
-                    Set< EmsScriptNode > set = EmsScriptNode.toEmsScriptNodeSet( nodeRefs, services,
-                                                      null, null );
-                    ArrayList<String> nodeNames = new ArrayList<String>();
-                    for ( EmsScriptNode n : set ) {
-                        nodeNames.add(n.getName());
+                    List< EmsScriptNode > set =
+                            EmsScriptNode.toEmsScriptNodeList( nodeRefs,
+                                                               services, null,
+                                                               null );
+                    if ( Debug.isOn() ) {
+                        Debug.turnOff();
+                        System.out.println( "findNodeRefsByType(" + specifier
+                                            + ", " + prefix + ", " + workspace
+                                            + ", " + dateTime + ", justFirst="
+                                            + justFirst + ", exactMatch="
+                                            + exactMatch + "): returning "
+                                            + set );
+                        Debug.turnOn();
                     }
-                    Debug.outln( "findNodeRefsByType(" + specifier + ", " + prefix +
-                                 ", " + workspace + ", " + dateTime + ", justFirst=" +
-                                 justFirst + ", exactMatch=" + exactMatch + "): returned "
-                                 + nodeNames );
                 }
 
                 results.close();
@@ -317,7 +330,7 @@ public class NodeUtil {
     
     public static WorkspaceNode getWorkspace( NodeRef nodeRef ) {
         EmsScriptNode node = new EmsScriptNode( nodeRef, getServices() );
-        return node.getWorkspace( true );
+        return node.getWorkspace();
     }
 
     public static boolean isWorkspaceSource( EmsScriptNode source, EmsScriptNode changed ) {
