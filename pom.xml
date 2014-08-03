@@ -240,7 +240,7 @@
         <repository>
               <id>artifactory</id>
               <name>releases</name>
-              <url>http://128.149.16.144:8082/artifactory/libs-release-local</url>
+              <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
         </repository>
         <repository>
             <id>alfresco-public</id>
