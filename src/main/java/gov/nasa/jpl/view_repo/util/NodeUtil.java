@@ -209,7 +209,7 @@ public class NodeUtil {
                                             + ", " + dateTime + ", justFirst="
                                             + justFirst + ", exactMatch="
                                             + exactMatch + "): candidate "
-                                            + esn.getWorkspaceName()// false )
+                                            + esn.getWorkspaceName()
                                             + "::" + esn.getName() );
                         Debug.turnOn();
                     }

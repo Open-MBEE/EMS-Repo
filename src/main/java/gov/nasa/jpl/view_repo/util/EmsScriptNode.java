@@ -2156,20 +2156,6 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
 
     
-//    /**
-//     * @return the workspace
-//     */
-//    public WorkspaceNode getWorkspace( boolean setIfNull ) {
-//        if ( workspace == null && setIfNull ) {
-//            if ( hasAspect( "ems:HasWorkspace" ) ) {
-//                NodeRef ref = (NodeRef)getProperty( "ems:workspace", false );
-//                WorkspaceNode ws = new WorkspaceNode( ref, getServices() );
-//                setWorkspace( ws, null );
-//            }
-//        }
-//        return workspace;
-//    }
-
     public WorkspaceNode getWorkspace() {
         if ( workspace == null ) {
             if ( hasAspect( "ems:HasWorkspace" ) ) {
@@ -2179,22 +2165,12 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             }
         }
         return workspace;
-//        return getWorkspace( true );
     }
 
     
-//    /**
-//     * @return the sysml id (cm name) of the workspace
-//     */
-//    public String getWorkspaceName( boolean setIfNull ) {
-//        String workspaceName = null;
-//        EmsScriptNode ws = getWorkspace( setIfNull );
-//        if ( ws != null ) {
-//            workspaceName = ws.getName();
-//        }
-//        return workspaceName;
-//    }
-
+   /**
+    * @return the sysml id (cm name) of the workspace
+    */
     public String getWorkspaceName() {
         String workspaceName = null;
         EmsScriptNode ws = getWorkspace();
@@ -2202,8 +2178,8 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
             workspaceName = ws.getName();
         }
         return workspaceName;
-//        return getWorkspaceName( true );
     }
+
     /**
      * @param workspace the workspace to set
      */

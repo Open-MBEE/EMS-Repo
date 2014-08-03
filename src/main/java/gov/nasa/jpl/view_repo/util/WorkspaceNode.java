@@ -59,11 +59,6 @@ public class WorkspaceNode extends EmsScriptNode {
         return this;
     }
     
-//    @Override
-//    public WorkspaceNode getWorkspace(boolean setIfNull) {
-//        return this;
-//    }
-//    
     @Override
     public WorkspaceNode getParentWorkspace() {
         NodeRef ref = (NodeRef)getProperty("sysml:parent");
@@ -160,7 +155,7 @@ public class WorkspaceNode extends EmsScriptNode {
      * @return true iff the node is in this workspace
      */
     public boolean contains( EmsScriptNode node  ) {
-        WorkspaceNode nodeWs = node.getWorkspace();//setWorkspaceIfNull);
+        WorkspaceNode nodeWs = node.getWorkspace();
         if ( this.equals( nodeWs ) ) return true;
         WorkspaceNode parentWs = getParentWorkspace();
         if ( parentWs == null ) return ( nodeWs == null );
