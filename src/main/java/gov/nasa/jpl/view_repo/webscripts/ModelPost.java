@@ -63,6 +63,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
@@ -221,6 +222,8 @@ public class ModelPost extends AbstractJavaWebScript {
         
         TreeSet<EmsScriptNode> elements =
                 new TreeSet<EmsScriptNode>();
+        TreeMap<String, EmsScriptNode> nodeMap = 
+                new TreeMap< String, EmsScriptNode >();
         
         // create the element map and hierarchies
         if (buildElementMap(postJson.getJSONArray(ELEMENTS), projectNode, workspace)) {
@@ -254,8 +257,13 @@ public class ModelPost extends AbstractJavaWebScript {
                     // necessary and place element with owner; don't update
                     // properties on this first pass.
                     if (owner != null && owner.exists()) {
-                        elements.addAll( updateOrCreateElement( elementMap.get( rootElement ),
-                                                                owner, workspace, false ) );
+                        Set< EmsScriptNode > updatedElements =
+                                updateOrCreateElement( elementMap.get( rootElement ),
+                                                       owner, workspace, false );
+                        for ( EmsScriptNode node : updatedElements ) {
+                            nodeMap.put(node.getName(), node);
+                        }
+                        elements.addAll( updatedElements );
                     }
                 }
             } // end for (String rootElement: rootElements) {
@@ -265,8 +273,12 @@ public class ModelPost extends AbstractJavaWebScript {
         updateOrCreateAllRelationships(relationshipsJson, workspace);
                 
         // make another pass through the elements and update their properties
-        elements.addAll( updateNodeReferences( singleElement, postJson,
-                                               projectNode, workspace ) );
+        Set< EmsScriptNode > updatedElements = updateNodeReferences( singleElement, postJson,
+                                               projectNode, workspace );
+        for ( EmsScriptNode node : updatedElements ) {
+            nodeMap.put(node.getName(), node);
+        }
+        elements.addAll( updatedElements );
 
         now = new Date();
         end = System.currentTimeMillis();
@@ -277,6 +289,7 @@ public class ModelPost extends AbstractJavaWebScript {
             log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
         }
         
+        elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
         return elements;
     }
     
@@ -770,8 +783,9 @@ public class ModelPost extends AbstractJavaWebScript {
                                                           WorkspaceNode workspace,
                                                           boolean ingest )
                                                                   throws Exception {
-        TreeSet<EmsScriptNode> elements =
-                new TreeSet<EmsScriptNode>();
+        TreeSet<EmsScriptNode> elements = new TreeSet<EmsScriptNode>();
+        TreeMap<String, EmsScriptNode> nodeMap = 
+                new TreeMap< String, EmsScriptNode >();
 
         EmsScriptNode element = null;
 
@@ -782,6 +796,7 @@ public class ModelPost extends AbstractJavaWebScript {
         element = findScriptNodeById( jsonId, workspace, null );
         if ( element != null ) {
             elements.add( element );
+            nodeMap.put( element.getName(), element );
             // only add to original element map if it exists on first pass
             if (!ingest) {
                 if (!originalElementMap.containsKey( jsonId )) {
@@ -831,7 +846,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
            return elements;
        }
-
+       
         JSONArray children = new JSONArray();
         
         EmsScriptNode reifiedNode = null;
@@ -875,9 +890,13 @@ public class ModelPost extends AbstractJavaWebScript {
         if (reifiedNode != null && reifiedNode.exists()) {
             //elements.add( reifiedNode ); 
             for (int ii = 0; ii < children.length(); ii++) {
-                elements.addAll( 
-                updateOrCreateElement(elementMap.get(children.getString(ii)),
-                                                       reifiedNode, workspace, ingest) );
+                Set< EmsScriptNode > childElements =
+                        updateOrCreateElement(elementMap.get(children.getString(ii)),
+                                                       reifiedNode, workspace, ingest);
+                // Elements in new workspace replace originals.
+                for ( EmsScriptNode node : childElements ) {
+                    nodeMap.put( node.getName(), node );
+                }
             }
         }
 
@@ -911,7 +930,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     // do nothing
             }
         }
-        
+        elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
         return elements;
     }
     
