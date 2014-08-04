@@ -96,7 +96,7 @@
                     <groupId>gov.nasa.jpl.mbee.sysml</groupId>
                     <artifactId>sysml</artifactId>
                     <version>0.0.9</version>
-                </dependency>
+               </dependency>
                 <dependency>
                     <groupId>kparser</groupId>
                     <artifactId>kparser</artifactId>
@@ -291,7 +291,7 @@
 						<fallback>default</fallback>
 						<resources>
 							<resource>
-								<directory>src/main/amp/config/alfresco/templates/webscripts</directory>
+								<directory>src/main/amp/config</directory>
 							</resource>
 						</resources>
 					</classpath>
@@ -302,7 +302,7 @@
 						<resources>
 							<resource>
 								<target>/</target>
-								<directory>src/main/amp/web/WEB-INF/lib</directory>
+								<directory>src/main/amp/web</directory>
 							</resource>
 						</resources>
 					</web>
