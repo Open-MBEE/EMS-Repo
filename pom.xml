@@ -85,17 +85,17 @@
                 <dependency>
 			        <groupId>gov.nasa.jpl.mbee.util</groupId>
 			        <artifactId>mbee_util</artifactId>
-			        <version>0.0.5</version>
+			        <version>0.0.6</version>
 			    </dependency>
 			    <dependency>
 			        <groupId>gov.nasa.jpl.mbee.bae</groupId>
 			        <artifactId>bae</artifactId>
-			        <version>0.0.9</version>
+			        <version>0.0.10</version>
 			    </dependency>
                 <dependency>
                     <groupId>gov.nasa.jpl.mbee.sysml</groupId>
                     <artifactId>sysml</artifactId>
-                    <version>0.0.8</version>
+                    <version>0.0.9</version>
                 </dependency>
                 <dependency>
                     <groupId>kparser</groupId>
@@ -226,7 +226,7 @@
         <repository>
               <id>artifactory</id>
               <name>releases</name>
-              <url>http://128.149.16.144:8082/artifactory/libs-release-local</url>
+              <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
         </repository>
         <repository>
             <id>alfresco-public</id>
