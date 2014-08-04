@@ -111,13 +111,18 @@ public class WorkspaceDiff {
         JSONObject ws1Json = new JSONObject();
         JSONObject ws2Json = new JSONObject();
         
-        addJSONArray(ws1Json, "elements", time1);
+        //addJSONArray(ws1Json, "elements", time1);
+        addJSONArray(ws1Json, "elements", elements, time1);
         addWorkspaceMetadata( ws1Json, ws1, time1 );
         
-        addJSONArray(ws2Json, "addedElements", time2);
-        addJSONArray(ws2Json, "movedElements", time2);
-        addJSONArray(ws2Json, "deletedElements", time2);
-        addJSONArray(ws2Json, "updatedElements", time2);
+        addJSONArray(ws2Json, "addedElements", addedElements, time2);
+        addJSONArray(ws2Json, "movedElements", movedElements, time2);
+        addJSONArray(ws2Json, "deletedElements", deletedElements, time2);
+        addJSONArray(ws2Json, "updatedElements", updatedElements, time2);
+        //addJSONArray(ws2Json, "addedElements", time2);
+        //addJSONArray(ws2Json, "movedElements", time2);
+        //addJSONArray(ws2Json, "deletedElements", time2);
+        //addJSONArray(ws2Json, "updatedElements", time2);
         addWorkspaceMetadata( ws2Json, ws2, time2);
         
         deltaJson.put( "workspace1", ws1Json );
@@ -142,19 +147,23 @@ public class WorkspaceDiff {
             field.setAccessible( true );
             @SuppressWarnings( "unchecked" )
             Map< String, EmsScriptNode > map = (Map<String, EmsScriptNode>) field.get( this );
-            if (map != null && map.size() > 0) {
-                jsonObject.put( key, convertMapToJSONArray( map, dateTime ) );
-                emptyArray = false;
-            } else {
-                jsonObject.put( key, new JSONArray() );
-            }
+            emptyArray = !addJSONArray( jsonObject, key, map, dateTime );
         } catch ( Exception e ) {
             e.printStackTrace();
         }
-        
         return !emptyArray;
     }
-    
+    private boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, Date dateTime) throws JSONException {
+        boolean emptyArray = true;
+        if (map != null && map.size() > 0) {
+            jsonObject.put( key, convertMapToJSONArray( map, dateTime ) );
+            emptyArray = false;
+        } else {
+            jsonObject.put( key, new JSONArray() );
+        }
+        return !emptyArray;
+    }    
+
     private JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> set, Date dateTime) throws JSONException {
         JSONArray array = new JSONArray();
         for (EmsScriptNode node: set.values()) {

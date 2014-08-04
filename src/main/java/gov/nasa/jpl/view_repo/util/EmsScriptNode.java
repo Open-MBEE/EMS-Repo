@@ -32,6 +32,7 @@ package gov.nasa.jpl.view_repo.util;
 import gov.nasa.jpl.mbee.util.ClassUtils;
 import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
@@ -54,6 +55,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -2252,19 +2254,13 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         if ( isSiteOrSites ) {
             properties.remove( createQName( "st:sitePreset" ) );
         }
-//            DictionaryService ds = getServices().getDictionaryService();
-//            TypeDefinition siteTypeDef = ds.getType( QName.createQName( "st:site" ) );
-//            Map< QName, PropertyDefinition > propss = siteTypeDef.getProperties();
-//            
-//            for ( Map.Entry<QName, PropertyDefinition> e : propss.entrySet() ) {
-//                PropertyDefinition propDef = e.getValue();
-//                if ( propDef.)
-//            }
-//            Set<QName> props = new HashSet<QName>(propss.keySet());
-//            
-//        }
         nodeService.setProperties( node.getNodeRef(), properties );
         return node;
+    }
+    
+    public Map<String, Pair< Object, Object > > diff( EmsScriptNode source ) {
+        NodeDiff nodeDiff = new NodeDiff( source.getNodeRef(), getNodeRef() );
+        return nodeDiff.getPropertyChanges();
     }
 
     public void appendToPropertyNodeRefs( String acmProperty, NodeRef ref ) {
