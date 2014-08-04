@@ -190,6 +190,7 @@
 			<overrides />
 			<mandatory-aspects />
 		</aspect>
+		
 		<aspect name="view2:timestamped">
 		  <properties>
 		      <property name="view2:timestamp">

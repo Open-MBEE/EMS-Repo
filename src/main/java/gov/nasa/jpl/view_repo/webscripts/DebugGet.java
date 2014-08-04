@@ -53,7 +53,9 @@ public class DebugGet extends DeclarativeWebScript {
 	    Map<String, Object> model = new HashMap<String, Object>();
 	    
 	    String turnOn = req.getParameter( "on" );
-	    if (turnOn == null ) {
+	    String turnOff = req.getParameter( "off" );
+
+	    if (turnOn == null || turnOn.trim().equalsIgnoreCase("false") || turnOff.trim().equalsIgnoreCase("true")) {
 	        Debug.turnOff();
 	        model.put( "res", "debug off" );
 	    } else {

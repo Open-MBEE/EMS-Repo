@@ -37,9 +37,9 @@
          <tr><td></td><td>org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:243)</td></tr>
          <tr><td></td><td>org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:210)</td></tr>
          <tr><td></td><td>org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:222)</td></tr>
-         <tr><td></td><td>org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:123)</td></tr>
+         <tr><td></td><td>org.apache.catalina.core.StandardContextValve.__invoke(StandardContextValve.java:123)</td></tr>
          <tr><td></td><td>org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:472)</td></tr>
-         <tr><td></td><td>org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:171)</td></tr>
+         <tr><td></td><td>org.apache.catalina.core.StandardHostValve.__invoke(StandardHostValve.java:171)</td></tr>
          <tr><td></td><td>org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:99)</td></tr>
          <tr><td></td><td>org.apache.catalina.valves.AccessLogValve.invoke(AccessLogValve.java:936)</td></tr>
          <tr><td></td><td>org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:118)</td></tr>
