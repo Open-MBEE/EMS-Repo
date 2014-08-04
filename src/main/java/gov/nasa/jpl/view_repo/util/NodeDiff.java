@@ -1,8 +1,10 @@
 package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.Pair;
+import gov.nasa.jpl.mbee.util.Utils;
 
 import java.io.Serializable;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -23,9 +25,11 @@ import org.alfresco.service.namespace.QName;
 public class NodeDiff {
     protected static boolean computeDiffOnConstruction = false;
     protected boolean lazy = true;
+    protected boolean ignoreRemovedProperties = false;
+    
     public NodeRef node1, node2;
-//    public Set<String> removedAspects = null;
-//    public Set<String> addedAspects = null;
+    public Set<String> removedAspects = null;
+    public Set<String> addedAspects = null;
     public Map<String, Object> removedProperties = null;
     public Map<String, Object> addedProperties = null;
     public Map<String, Pair< Object, Object > > updatedProperties = null;
@@ -33,14 +37,26 @@ public class NodeDiff {
     private ServiceRegistry services = null;
 
     public NodeDiff( NodeRef node1, NodeRef node2 ) {
-        this( node1, node2, null );
+        this( node1, node2, null, null );
     }
 
-    public NodeDiff( NodeRef node1, NodeRef node2, Boolean lazy ) {
+    public NodeDiff( NodeRef node1, NodeRef node2,
+                     Boolean lazy, Boolean ignoreRemovedProperties ) {
         if ( lazy != null ) this.lazy = lazy;
+        if ( ignoreRemovedProperties != null ) {
+            this.ignoreRemovedProperties = ignoreRemovedProperties;
+        }
         this.node1 = node1;
         this.node2 = node2;
         if ( computeDiffOnConstruction ) diffProperties();
+    }
+
+    public boolean areDifferent() {
+        return !areSame();
+    }
+
+    public boolean areSame() {
+        return getPropertyChanges().isEmpty();
     }
 
     /**
@@ -55,9 +71,12 @@ public class NodeDiff {
         propertyChanges = new TreeMap< String, Pair<Object,Object> >();
         if ( !lazy ) {
             addedProperties = new TreeMap< String, Object >();
-            removedProperties = new TreeMap< String, Object >();
+//            if ( !ignoreRemovedProperties ) {
+                removedProperties = new TreeMap< String, Object >();
+//            }
             updatedProperties = new TreeMap< String, Pair<Object,Object> >();
         }
+        if ( !NodeUtil.exists( node1 ) || !NodeUtil.exists( node2 ) ) return;
         for ( QName qName : keys ) {
             Serializable val1 = properties1.get( qName );
             Serializable val2 = properties2.get( qName );
@@ -68,7 +87,9 @@ public class NodeDiff {
                 if ( val1 == null ) {
                     addedProperties.put( propName, val2 );
                 } else if ( val2 == null ) {
-                    removedProperties.put( propName, val1 );
+                    if ( !ignoreRemovedProperties ) {
+                        removedProperties.put( propName, val1 );
+                    }
                 } else {
                     updatedProperties.put( propName, new Pair< Object, Object >( val1, val2 ) );
                 }
@@ -91,33 +112,43 @@ public class NodeDiff {
         return node2;
     }
     
-//  private void diffAspects() {
-//  // TODO Auto-generated method stub
-//}
+    protected void diffAspects() {
+        // TODO -- create generic diff, union, intersect, subtract utility functions
+        Set<QName> aspects1 = NodeUtil.getAspects( node1 );
+        Set<QName> aspects2 = NodeUtil.getAspects( node2 );
+        Pair<Set<QName>, Set<QName> > p = Utils.diff(aspects1, aspects2);
+        addedAspects =
+                new LinkedHashSet< String >( NodeUtil.qNamesToStrings( p.first ) );
+        removedAspects =
+                new LinkedHashSet< String >( NodeUtil.qNamesToStrings( p.second ) );
+    }
 
-//    public Set< String > getRemovedAspects() {
-//        if ( removedAspects == null ) {
-//            diffAspects();
-//        }
-//        return removedAspects;
-//    }
-//
-//    public Set< String > getAddedAspects() {
-//        if ( addedAspects == null ) {
-//            diffAspects();
-//        }
-//        return addedAspects;
-//    }
+    public Set< String > getRemovedAspects() {
+        if ( removedAspects == null ) {
+            diffAspects();
+        }
+        return removedAspects;
+    }
+
+    public Set< String > getAddedAspects() {
+        if ( addedAspects == null ) {
+            diffAspects();
+        }
+        return addedAspects;
+    }
     
     public Map< String, Object > getRemovedProperties() {
         if ( removedProperties == null ) {
             removedProperties = new TreeMap< String, Object >();
-            for ( Map.Entry< String, Pair< Object, Object > > e : getPropertyChanges().entrySet() ) {
-                if ( e.getValue().second == null ) {
-                    removedProperties.put( e.getKey(), e.getValue().first );
+            if ( !ignoreRemovedProperties ) {
+                for ( Map.Entry< String, Pair< Object, Object > > e : getPropertyChanges().entrySet() ) {
+                    if ( e.getValue().second == null ) {
+                        removedProperties.put( e.getKey(),
+                                               e.getValue().first );
+                    }
                 }
             }
-//            diffProperties();
+            // diffProperties();
         }
         return removedProperties;
     }
@@ -141,8 +172,10 @@ public class NodeDiff {
             for ( String k : getAddedProperties().keySet() ) {
                 updatedProperties.remove( k );
             }
-            for ( String k : getRemovedProperties().keySet() ) {
-                updatedProperties.remove( k );
+            if ( !ignoreRemovedProperties ) {
+                for ( String k : getRemovedProperties().keySet() ) {
+                    updatedProperties.remove( k );
+                }
             }
 //            diffProperties();
         }

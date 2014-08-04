@@ -1149,5 +1149,18 @@ public class NodeUtil {
         Debug.error( true, "Could not create a unique id!" );
         return null;
     }
+
+    public static Set< QName > getAspects( NodeRef ref ) {
+        EmsScriptNode node = new EmsScriptNode( ref, getServices() );
+        return node.getAspectsSet();
+    }
+    
+    public static List<String> qNamesToStrings( Collection<QName> qNames ) {
+        List<String> names = new ArrayList< String >();
+        for ( QName qn : qNames ) {
+            names.add( qn.toPrefixString() );
+        }
+        return names;
+    }
     
 }

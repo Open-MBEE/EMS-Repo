@@ -54,6 +54,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -69,6 +70,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.dictionary.ClassDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
@@ -76,6 +78,7 @@ import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentData;
 import org.alfresco.service.cmr.repository.ContentWriter;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -98,6 +101,20 @@ import org.springframework.extensions.webscripts.Status;
 public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNode>, Comparable< EmsScriptNode > {
     private static final long serialVersionUID = 9132455162871185541L;
 
+    /**
+     * A set of content model property names that serve as workspace metadata
+     * and whose changes are not recorded in a workspace.
+     */
+    public static TreeSet<String> workspaceMetaProperties = new TreeSet<String>() {
+        private static final long serialVersionUID = -327817873667229953L;
+        {
+            add("ems:workspace");
+            add("ems:source");
+            add("ems:lastTimeSyncParent");
+            add("ems:mergeSource");
+        }
+    };
+    
     // provide logging capability of what is done
     private StringBuffer response = null;
 
@@ -826,19 +843,6 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
                                   response );
     }
 
-    protected static TreeSet<String> workspaceMetaProperties = new TreeSet<String>() {
-
-        private static final long serialVersionUID = -327817873667229953L;
-
-        {
-            add("ems:workspace");
-            add("ems:source");
-            add("ems:lastTimeSyncParent");
-            add("ems:mergeSource");
-        }
-        
-    };
-    
     /**
      * Get the property of the specified type
      * 
@@ -2259,8 +2263,95 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     }
     
     public Map<String, Pair< Object, Object > > diff( EmsScriptNode source ) {
+        if ( !NodeUtil.exists( source ) ) return null;
         NodeDiff nodeDiff = new NodeDiff( source.getNodeRef(), getNodeRef() );
         return nodeDiff.getPropertyChanges();
+    }
+    
+    public NodeDiff getNodeDiff( EmsScriptNode source ) {
+        return getNodeDiff( source, null, null );
+    }
+
+    public NodeDiff getNodeDiff( EmsScriptNode source, Boolean lazy,
+                                 Boolean ignoreRemovedProperties ) {
+        if ( !NodeUtil.exists( source ) ) return null;
+        NodeDiff nodeDiff =
+                new NodeDiff( source.getNodeRef(), getNodeRef(), lazy,
+                              ignoreRemovedProperties );;
+        return nodeDiff;
+    }
+    
+    /**
+     * Merge the input node into this one. This adds and updates most aspects,
+     * properties, and property values of the input node to this one. It does
+     * not remove aspects or properties not found for the input node. This
+     * ignores workspace metadata (e.g., does not change workspaces or add the
+     * HasWorkspace aspect).
+     * 
+     * @param node
+     *            the node whose properties are being merged
+     * @return true if and only if any changes are made
+     */
+    public boolean merge( EmsScriptNode node ) {
+        boolean changed = false;
+        NodeDiff diff = getNodeDiff( node, true, true );
+        return merge( diff );
+    }
+    
+    /**
+     * Merge the differences in the input NodeDiff into this node even though
+     * this node may not be one of the nodes use to create the NodeDiff. Added
+     * properties are treated as updates if the properties already exist in this
+     * node. This ignores workspace metadata (e.g., does not change workspaces
+     * or add the HasWorkspace aspect).
+     * 
+     * @param diff
+     *            the NodeDiff to apply to this node
+     * @return true if and only if any changes are made
+     */
+    public boolean merge( NodeDiff diff ) {
+        boolean changed = false;
+        for ( Entry< String, Object > e : diff.getRemovedProperties().entrySet() ) {
+            if ( workspaceMetaProperties.contains( e.getKey() ) ) continue;
+            Object myVal = getProperty( e.getKey() );
+            if ( myVal != null ) {
+                if ( removeProperty( e.getKey() ) ) changed = true;
+            }
+        }
+        for ( Entry< String, Pair< Object, Object > > e : diff.getPropertyChanges()
+                                                              .entrySet() ) {
+            if ( workspaceMetaProperties.contains( e.getKey() ) ) continue;
+            Object newVal = e.getValue().second;
+            if ( newVal == null ) continue;
+            Object myVal = getProperty( e.getKey() );
+            if ( newVal.equals( myVal ) ) continue;
+            if ( newVal instanceof Serializable ) {
+                Serializable sVal = (Serializable)newVal;
+                if ( createOrUpdateProperty( e.getKey(), sVal  ) ) changed = true;
+            } else {
+                Debug.error("Merging bad property value! " + e.getValue() );
+            }
+        }
+        return changed;
+    }
+    
+
+    /**
+     * Remove the property with the given name.
+     * 
+     * @param acmProperty
+     *            the name of the property in short format (e.g. sysml:value)
+     * @return true if and only if the property was successfully removed
+     */
+    public boolean removeProperty( String acmProperty ) {
+        NodeService ns = getServices().getNodeService();
+        try {
+            ns.removeProperty( getNodeRef(), createQName( acmProperty ) );
+            return true;
+        } catch (InvalidNodeRefException e ) {
+            // ignore
+        }
+        return false;
     }
 
     public void appendToPropertyNodeRefs( String acmProperty, NodeRef ref ) {
