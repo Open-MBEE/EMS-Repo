@@ -21,6 +21,7 @@ import org.junit.Assert;
  * change to the first.
  *
  * TODO -- this does not diff content
+ * TODO -- a map from node ID to added and removed aspects
  */
 public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
 
