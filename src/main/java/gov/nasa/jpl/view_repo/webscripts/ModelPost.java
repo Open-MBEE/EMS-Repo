@@ -82,7 +82,6 @@ import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
-import Temp.kExpressionParser.*;
 
 
 /**
@@ -1763,9 +1762,6 @@ public class ModelPost extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
-    	
-    	Debug.turnOn();
-    	
         printHeader( req );
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -1809,40 +1805,12 @@ public class ModelPost extends AbstractJavaWebScript {
                     response.append("JSON uploaded, model load being processed in background.\n");
                     response.append("You will be notified via email when the model load has finished.\n");
                 }
-                else {
-                   
-                  List<JSONObject> foo = new ArrayList<JSONObject>();
-                    JSONObject pJson = (JSONObject)req.parseContent();
-                    JSONObject exprJson = kExpressionParser.parseExpression(expressionString);
-                    foo.add( pJson );
-                    foo.add( exprJson );
- 
-                    JSONArray elementsJson = new JSONArray();
- 
-                    for ( JSONObject postJson : foo ) {
-                        EmsScriptNode projectNode = getProjectNodeFromRequest( req, true );
-                        Set< EmsScriptNode > elements =
-                            instance.createOrUpdateModel( postJson, status,
-                                                          projectNode, workspace );
-                        // REVIEW -- TODO -- shouldn't this be called from instance?
-                        addRelationshipsToProperties( elements );
-                        if ( !Utils.isNullOrEmpty( elements ) ) {
-                           
-                            // Fix constraints if desired:
-                            if (fix) {
-                              instance.fix(elements);
-                            }
-                           
-                            // Create JSON object of the elements to return:
-                            for ( EmsScriptNode element : elements ) {
-                                elementsJson.put( element.toJSONObject(null) );
-                            }
-                        }
-                    }
-                    top.put( "elements", elementsJson );
-                    model.put( "res", top.toString( 4 ) );
- 
-                }
+                else {                
+                    JSONObject postJson = (JSONObject)req.parseContent();
+                    EmsScriptNode projectNode = getProjectNodeFromRequest( req, true );
+                    Set< EmsScriptNode > elements = 
+                        instance.createOrUpdateModel( postJson, status,
+                                                      projectNode, workspace );
                     // REVIEW -- TODO -- shouldn't this be called from instance?
                     addRelationshipsToProperties( elements );
                     if ( !Utils.isNullOrEmpty( elements ) ) {
@@ -1860,6 +1828,7 @@ public class ModelPost extends AbstractJavaWebScript {
                         top.put( "elements", elementsJson );
                         model.put( "res", top.toString( 4 ) );
                     }
+                }
                 // REVIEW -- TODO -- shouldn't this be called from instance?
                 appendResponseStatusInfo(instance);
             } catch (JSONException e) {
