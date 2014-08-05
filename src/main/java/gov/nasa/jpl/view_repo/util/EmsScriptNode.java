@@ -32,6 +32,7 @@ package gov.nasa.jpl.view_repo.util;
 import gov.nasa.jpl.mbee.util.ClassUtils;
 import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.Diff;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
@@ -51,6 +52,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -2264,7 +2266,7 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
     
     public Map<String, Pair< Object, Object > > diff( EmsScriptNode source ) {
         if ( !NodeUtil.exists( source ) ) return null;
-        NodeDiff nodeDiff = new NodeDiff( source.getNodeRef(), getNodeRef() );
+        Diff nodeDiff = new NodeDiff( source.getNodeRef(), getNodeRef() );
         return nodeDiff.getPropertyChanges();
     }
     
@@ -2311,14 +2313,14 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
      */
     public boolean merge( NodeDiff diff ) {
         boolean changed = false;
-        for ( Entry< String, Object > e : diff.getRemovedProperties().entrySet() ) {
+        for ( Entry< String, Object > e : diff.getRemovedProperties().get(diff.node1).entrySet() ) {
             if ( workspaceMetaProperties.contains( e.getKey() ) ) continue;
             Object myVal = getProperty( e.getKey() );
             if ( myVal != null ) {
                 if ( removeProperty( e.getKey() ) ) changed = true;
             }
         }
-        for ( Entry< String, Pair< Object, Object > > e : diff.getPropertyChanges()
+        for ( Entry< String, Pair< Object, Object > > e : diff.getPropertyChanges().get( diff.node1 )
                                                               .entrySet() ) {
             if ( workspaceMetaProperties.contains( e.getKey() ) ) continue;
             Object newVal = e.getValue().second;
@@ -2335,7 +2337,26 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         return changed;
     }
     
-
+    public static Map<String, NodeDiff> diff( Set<EmsScriptNode> set1,
+                                              Set<EmsScriptNode> set2 ) {
+        Map<String, NodeDiff> diffs = new LinkedHashMap< String, NodeDiff >();
+        
+//        Pair< Set< EmsScriptNode >, Set< EmsScriptNode > > setDiff =
+//                Utils.diff( set1, set2 );
+        Set<String> ids = new TreeSet<String>();
+        for ( EmsScriptNode node : set1 ) {
+            ids.add(node.getName());
+        }
+        for ( EmsScriptNode node : set2 ) {
+            ids.add(node.getName());
+        }
+        for ( String id : ids ) {
+            
+        }
+        return diffs;
+        
+    }
+    
     /**
      * Remove the property with the given name.
      * 
