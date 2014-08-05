@@ -4,6 +4,7 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -21,8 +22,10 @@ import org.alfresco.service.namespace.QName;
  * the short format, such as cm:name. The values are the raw Serializable values
  * returned by getProperties(). The second node is treated as the result of a
  * change to the first.
+ * 
+ * TODO -- this does not diff content
  */
-public class NodeDiff {
+public class NodeDiff implements Diff<NodeRef, Object, String> {
     protected static boolean computeDiffOnConstruction = false;
     protected boolean lazy = true;
     protected boolean ignoreRemovedProperties = false;
@@ -51,10 +54,18 @@ public class NodeDiff {
         if ( computeDiffOnConstruction ) diffProperties();
     }
 
+    /* (non-Javadoc)
+     * @see gov.nasa.jpl.view_repo.util.Diff#areDifferent()
+     */
+    @Override
     public boolean areDifferent() {
         return !areSame();
     }
 
+    /* (non-Javadoc)
+     * @see gov.nasa.jpl.view_repo.util.Diff#areSame()
+     */
+    @Override
     public boolean areSame() {
         return getPropertyChanges().isEmpty();
     }
@@ -105,11 +116,19 @@ public class NodeDiff {
         return services;
     }
 
-    public NodeRef getNode1() {
-        return node1;
+    /* (non-Javadoc)
+     * @see gov.nasa.jpl.view_repo.util.Diff#getNode1()
+     */
+    @Override
+    public Set<NodeRef> get1() {
+        return Utils.newSet(node1);
     }
-    public NodeRef getNode2() {
-        return node2;
+    /* (non-Javadoc)
+     * @see gov.nasa.jpl.view_repo.util.Diff#getNode2()
+     */
+    @Override
+    public Set<NodeRef> get2() {
+        return Utils.newSet(node2);
     }
     
     protected void diffAspects() {
@@ -137,11 +156,15 @@ public class NodeDiff {
         return addedAspects;
     }
     
-    public Map< String, Object > getRemovedProperties() {
+    /* (non-Javadoc)
+     * @see gov.nasa.jpl.view_repo.util.Diff#getRemovedProperties()
+     */
+    @Override
+    public Map< NodeRef, Map< String, Object > > getRemovedProperties() {
         if ( removedProperties == null ) {
             removedProperties = new TreeMap< String, Object >();
             if ( !ignoreRemovedProperties ) {
-                for ( Map.Entry< String, Pair< Object, Object > > e : getPropertyChanges().entrySet() ) {
+                for ( Map.Entry< String, Pair< Object, Object > > e : getPropertyChanges().get(node1).entrySet() ) {
                     if ( e.getValue().second == null ) {
                         removedProperties.put( e.getKey(),
                                                e.getValue().first );
@@ -150,42 +173,82 @@ public class NodeDiff {
             }
             // diffProperties();
         }
-        return removedProperties;
+        Map< NodeRef, Map< String, Object > > removedMap =
+                new HashMap< NodeRef, Map< String, Object > >();
+        removedMap.put( node1, removedProperties );
+        return removedMap;
     }
 
-    public Map< String, Object > getAddedProperties() {
+    /* (non-Javadoc)
+     * @see gov.nasa.jpl.view_repo.util.Diff#getAddedProperties()
+     */
+    @Override
+    public Map< NodeRef, Map< String, Object > > getAddedProperties() {
         if ( addedProperties == null ) {
             addedProperties = new TreeMap< String, Object >();
-            for ( Map.Entry< String, Pair< Object, Object > > e : getPropertyChanges().entrySet() ) {
+            for ( Map.Entry< String, Pair< Object, Object > > e : getPropertyChanges().get(node1).entrySet() ) {
                 if ( e.getValue().first == null ) {
                     addedProperties.put( e.getKey(), e.getValue().second );
                 }
             }
 //            diffProperties();
         }
-        return addedProperties;
+        Map< NodeRef, Map< String, Object > > addedMap =
+                new HashMap< NodeRef, Map< String, Object > >();
+        addedMap.put( node1, addedProperties );
+        return addedMap;
     }
 
-    public Map< String, Pair< Object, Object >> getUpdatedProperties() {
+    /* (non-Javadoc)
+     * @see gov.nasa.jpl.view_repo.util.Diff#getUpdatedProperties()
+     */
+    @Override
+    public Map< NodeRef, Map< String, Pair< Object, Object >>> getUpdatedProperties() {
         if ( updatedProperties == null ) {
-            updatedProperties = new TreeMap< String, Pair<Object,Object> >( getPropertyChanges() );
-            for ( String k : getAddedProperties().keySet() ) {
+            updatedProperties = new TreeMap< String, Pair<Object, Object> >( getPropertyChanges().get( node1 ) );
+            for ( String k : getAddedProperties().get(node1).keySet() ) {
                 updatedProperties.remove( k );
             }
             if ( !ignoreRemovedProperties ) {
-                for ( String k : getRemovedProperties().keySet() ) {
+                for ( String k : getRemovedProperties().get(node1).keySet() ) {
                     updatedProperties.remove( k );
                 }
             }
 //            diffProperties();
         }
-        return updatedProperties;
+        Map< NodeRef, Map< String, Pair< Object, Object > > > updatedMap = new HashMap< NodeRef, Map<String,Pair<Object,Object>> >();
+        updatedMap.put( node1, updatedProperties );
+        return updatedMap;
     }
 
-    public Map< String, Pair< Object, Object >> getPropertyChanges() {
+    /* (non-Javadoc)
+     * @see gov.nasa.jpl.view_repo.util.Diff#getPropertyChanges()
+     */
+    @Override
+    public Map< NodeRef, Map< String, Pair< Object, Object >>> getPropertyChanges() {
         if ( propertyChanges == null ) {
             diffProperties();
         }
-        return propertyChanges;
+        Map< NodeRef, Map< String, Pair< Object, Object > > > propertyMap = new HashMap< NodeRef, Map<String,Pair<Object,Object>> >();
+        propertyMap.put( node1, propertyChanges );
+        return propertyMap;
+    }
+
+    @Override
+    public Object get( NodeRef t, String id ) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Set< NodeRef > getRemoved() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Set< NodeRef > getAdded() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
