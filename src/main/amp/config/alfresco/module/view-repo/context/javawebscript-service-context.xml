@@ -80,14 +80,14 @@
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.element.delete"
-		class="gov.nasa.jpl.view_repo.webscripts.ModelDelete" parent="webscript"
+		class="gov.nasa.jpl.view_repo.webscripts.ModelPurge" parent="webscript"
 		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 	</bean>
 
 	<bean id="webscript.gov.nasa.jpl.javawebscripts.ve.delete"
-		class="gov.nasa.jpl.view_repo.webscripts.ViewEditorDelete" parent="webscript"
+		class="gov.nasa.jpl.view_repo.webscripts.ViewEditorPurge" parent="webscript"
 		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
