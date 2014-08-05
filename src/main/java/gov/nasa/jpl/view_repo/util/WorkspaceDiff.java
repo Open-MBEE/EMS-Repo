@@ -2,12 +2,13 @@ package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
 
-import java.lang.reflect.Field;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.alfresco.service.cmr.version.Version;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,6 +16,7 @@ import org.json.JSONObject;
 public class WorkspaceDiff {
     private EmsScriptNode ws1;
     private Map<String, EmsScriptNode> elements;
+    private Map<String, Version> elementsVersions;
 
     private EmsScriptNode ws2;
     private Map<String, EmsScriptNode> addedElements;
@@ -25,6 +27,7 @@ public class WorkspaceDiff {
 
     public WorkspaceDiff() {
         elements = new TreeMap<String, EmsScriptNode>();
+        elementsVersions = new TreeMap<String, Version>();
         
         addedElements = new TreeMap<String, EmsScriptNode>();
         conflictedElements = new TreeMap<String, EmsScriptNode>();
@@ -56,6 +59,10 @@ public class WorkspaceDiff {
 
     public Map< String, EmsScriptNode > getElements() {
         return elements;
+    }
+    
+    public Map< String, Version > getElementsVersions() {
+        return elementsVersions;
     }
 
     public Map< String, EmsScriptNode > getMovedElements() {
@@ -90,6 +97,10 @@ public class WorkspaceDiff {
         this.elements = elements;
     }
 
+    public void setElementsVersions( Map< String, Version > elementsVersions ) {
+        this.elementsVersions = elementsVersions;
+    }
+
     public void setMovedElements( Map< String, EmsScriptNode > movedElements ) {
         this.movedElements = movedElements;
     }
@@ -105,24 +116,23 @@ public class WorkspaceDiff {
     public void setWs2( EmsScriptNode ws2 ) {
         this.ws2 = ws2;
     }
-      
+    
     public JSONObject toJSONObject(Date time1, Date time2) throws JSONException {
+            return toJSONObject( time1, time2, false );
+    }    
+    
+    public JSONObject toJSONObject(Date time1, Date time2, boolean showAll) throws JSONException {
         JSONObject deltaJson = new JSONObject();
         JSONObject ws1Json = new JSONObject();
         JSONObject ws2Json = new JSONObject();
         
-        //addJSONArray(ws1Json, "elements", time1);
-        addJSONArray(ws1Json, "elements", elements, time1);
+        addJSONArray(ws1Json, "elements", elements, elementsVersions, time1, showAll);
         addWorkspaceMetadata( ws1Json, ws1, time1 );
         
-        addJSONArray(ws2Json, "addedElements", addedElements, time2);
-        addJSONArray(ws2Json, "movedElements", movedElements, time2);
-        addJSONArray(ws2Json, "deletedElements", deletedElements, time2);
-        addJSONArray(ws2Json, "updatedElements", updatedElements, time2);
-        //addJSONArray(ws2Json, "addedElements", time2);
-        //addJSONArray(ws2Json, "movedElements", time2);
-        //addJSONArray(ws2Json, "deletedElements", time2);
-        //addJSONArray(ws2Json, "updatedElements", time2);
+        addJSONArray(ws2Json, "addedElements", addedElements, time2, showAll);
+        addJSONArray(ws2Json, "movedElements", movedElements, time2, showAll);
+        addJSONArray(ws2Json, "deletedElements", deletedElements, time2, showAll);
+        addJSONArray(ws2Json, "updatedElements", updatedElements, time2, showAll);
         addWorkspaceMetadata( ws2Json, ws2, time2);
         
         deltaJson.put( "workspace1", ws1Json );
@@ -137,38 +147,53 @@ public class WorkspaceDiff {
         } else {
             jsonObject.put("name", ws.getName());
         }
-        jsonObject.put( "timestamp", TimeUtils.toTimestamp( dateTime ) );
-    }
-    
-    private boolean addJSONArray(JSONObject jsonObject, String key, Date dateTime) throws JSONException {
-        boolean emptyArray = true;
-        try {
-            Field field = this.getClass().getDeclaredField( key );
-            field.setAccessible( true );
-            @SuppressWarnings( "unchecked" )
-            Map< String, EmsScriptNode > map = (Map<String, EmsScriptNode>) field.get( this );
-            emptyArray = !addJSONArray( jsonObject, key, map, dateTime );
-        } catch ( Exception e ) {
-            e.printStackTrace();
+        if (dateTime != null) {
+            jsonObject.put( "timestamp", TimeUtils.toTimestamp( dateTime ) );
         }
-        return !emptyArray;
     }
-    private boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, Date dateTime) throws JSONException {
+
+    private boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, Date dateTime, boolean showAll) throws JSONException {
+            return addJSONArray(jsonObject, key, map, null, dateTime, showAll);
+    }    
+
+    private boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, Map< String, Version> versions, Date dateTime, boolean showAll) throws JSONException {
         boolean emptyArray = true;
         if (map != null && map.size() > 0) {
-            jsonObject.put( key, convertMapToJSONArray( map, dateTime ) );
+            jsonObject.put( key, convertMapToJSONArray( map, versions, dateTime, showAll ) );
             emptyArray = false;
         } else {
+            // add in the empty array
             jsonObject.put( key, new JSONArray() );
         }
         return !emptyArray;
     }    
 
-    private JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> set, Date dateTime) throws JSONException {
+    private JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> set, Map<String, Version> versions, Date dateTime, boolean showAll) throws JSONException {
+        Set<String> filter = null;
+        if (!showAll) {
+            filter = new HashSet<String>();
+            filter.add("id");
+        }
+        
         JSONArray array = new JSONArray();
         for (EmsScriptNode node: set.values()) {
-            array.put( node.toJSONObject( dateTime ) );
+            if ( versions == null || versions.size() <= 0 ) {
+                array.put( node.toJSONObject( filter, dateTime ) );
+            } else {
+                JSONObject jsonObject = node.toJSONObject( filter, dateTime );
+                Version version = versions.get( node.getName() );
+                if ( version != null) {
+                    // TODO: perhaps add service and response in method call rather than using the nodes?
+                    EmsScriptNode changedNode = new EmsScriptNode(version.getVersionedNodeRef(), node.getServices(), node.getResponse());
+                    
+                    // for reverting need to keep track of noderef and versionLabel
+                    jsonObject.put( "id", changedNode.getId() );
+                    jsonObject.put( "version", version.getVersionLabel() );
+                    array.put( jsonObject );
+                }
+            }
         }
+        
         return array;
     }
     
@@ -181,17 +206,10 @@ public class WorkspaceDiff {
     }
     
     private void captureDeltas(EmsScriptNode node) {
-        // delta 
-        Set< EmsScriptNode > children = node.getChildNodes();
-        
+//        Set< EmsScriptNode > children = node.getChildNodes();
     }
     
-//    public static Set<EmsScriptNode> convertMapValuesToSet(Map<String, EmsScriptNode> map) {
-//        Set<EmsScriptNode> set = new LinkedHashSet<EmsScriptNode>();
-//        for (EmsScriptNode node: map.values()) {
-//            set.add( node );
-//        }
-//        return set;
-//    }
-
+    public boolean ingestJSON(JSONObject json) {
+        return true;
+    }
 }

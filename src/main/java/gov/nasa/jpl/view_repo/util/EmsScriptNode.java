@@ -85,6 +85,8 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.version.Version;
+import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
@@ -2997,4 +2999,20 @@ public class EmsScriptNode extends ScriptNode implements Comparator<EmsScriptNod
         JSONArray ids = addNodeRefIdsJSON( nodeRefs, dateTime );
         putInJson( json, "connectorRoles", ids, filter );
     }
+    
+    /**************************
+     * Miscellaneous functions
+     **************************/
+    public Version getHeadVersion() {
+        Version headVersion = null;
+        if (getIsVersioned())
+        {
+            VersionHistory history = this.services.getVersionService().getVersionHistory(this.nodeRef);
+            if (history != null)
+            {
+                headVersion = history.getHeadVersion();
+            }
+        }
+        return headVersion;
+    }    
 }
