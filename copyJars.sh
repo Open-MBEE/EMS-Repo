@@ -7,5 +7,7 @@ cd ../sysml
 ant
 cd ../bae
 ant
+cd ../K
+ant
 popd
 
