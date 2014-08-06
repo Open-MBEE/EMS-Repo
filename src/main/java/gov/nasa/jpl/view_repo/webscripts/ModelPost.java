@@ -920,23 +920,34 @@ public class ModelPost extends AbstractJavaWebScript {
                 case ADDED:
                     if (!ingest) {
                         addedElements.put( jsonId, element );
+                        element.createOrUpdateAspect( "ems:Added" ); 
                     }
                     break;
                 case UPDATED:
                     if (ingest && !addedElements.containsKey( jsonId )) {
-                        modifiedElements.put( jsonId, element );
+                        if (element.hasAspect( "ems:Added" )) {
+                            modifiedElements.put( jsonId, element );
+                            element.createOrUpdateAspect( "ems:Updated" );
+                        }
                     }
                     break;
                 case MOVED:
                     if (!ingest && !addedElements.containsKey( jsonId )) {
-                        movedElements.put( jsonId, element );
+                        if (element.hasAspect( "ems:Added" )) {
+                            movedElements.put( jsonId, element );
+                            element.createOrUpdateAspect( "ems:Moved" );
+                        }
                     }
                     break;
                 case UPDATED_AND_MOVED:
                     if (ingest && !addedElements.containsKey( jsonId )) {
-                        modifiedElements.put( jsonId, element );
-                    } else {
-                        movedElements.put( jsonId, element );
+                        if (element.hasAspect( "ems:Added" )) {
+                            modifiedElements.put( jsonId, element );
+                            element.createOrUpdateAspect( "ems:Updated" );
+    
+                            movedElements.put( jsonId, element );
+                            element.createOrUpdateAspect( "ems:Moved" );
+                        }
                     }
                     break;
                 default:

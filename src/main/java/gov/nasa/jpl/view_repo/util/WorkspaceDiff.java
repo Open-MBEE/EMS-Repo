@@ -15,6 +15,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * Class for keeping track of differences between two workspaces. WS1 always has the original
+ * elements, while WS2 always has just the deltas.
+ * @author cinyoung
+ *
+ */
 public class WorkspaceDiff {
     private WorkspaceNode ws1;
     private Map<String, EmsScriptNode> elements;
@@ -120,11 +126,25 @@ public class WorkspaceDiff {
     public void setWs2( WorkspaceNode ws2 ) {
         this.ws2 = ws2;
     }
-
+    /**
+     * Dumps the JSON delta based.
+     * @param   time1   Timestamp to dump ws1
+     * @param   time2   Timestamp to dump ws2
+     * @return  JSONObject of the delta
+     * @throws JSONException
+     */
     public JSONObject toJSONObject(Date time1, Date time2) throws JSONException {
             return toJSONObject( time1, time2, false );
     }
 
+    /**
+     * Dumps the JSON delta based.
+     * @param   time1   Timestamp to dump ws1
+     * @param   time2   Timestamp to dump ws2
+     * @param   showAll If true, shows all keys in JSONObject, if false, only shows ids
+     * @return  JSONObject of the delta
+     * @throws JSONException
+     */
     public JSONObject toJSONObject(Date time1, Date time2, boolean showAll) throws JSONException {
         JSONObject deltaJson = new JSONObject();
         JSONObject ws1Json = new JSONObject();
@@ -145,6 +165,13 @@ public class WorkspaceDiff {
         return deltaJson;
     }
 
+    /**
+     * Add the workspace metadata onto the provided JSONObject
+     * @param jsonObject
+     * @param ws
+     * @param dateTime
+     * @throws JSONException
+     */
     private void addWorkspaceMetadata(JSONObject jsonObject, EmsScriptNode ws, Date dateTime) throws JSONException {
         if (ws == null) {
             jsonObject.put( "name", "master" );
