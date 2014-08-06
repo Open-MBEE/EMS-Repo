@@ -923,23 +923,34 @@ public class ModelPost extends AbstractJavaWebScript {
                 case ADDED:
                     if (!ingest) {
                         addedElements.put( jsonId, element );
+                        element.createOrUpdateAspect( "ems:Added" ); 
                     }
                     break;
                 case UPDATED:
                     if (ingest && !addedElements.containsKey( jsonId )) {
-                        modifiedElements.put( jsonId, element );
+                        if (element.hasAspect( "ems:Added" )) {
+                            modifiedElements.put( jsonId, element );
+                            element.createOrUpdateAspect( "ems:Updated" );
+                        }
                     }
                     break;
                 case MOVED:
                     if (!ingest && !addedElements.containsKey( jsonId )) {
-                        movedElements.put( jsonId, element );
+                        if (element.hasAspect( "ems:Added" )) {
+                            movedElements.put( jsonId, element );
+                            element.createOrUpdateAspect( "ems:Moved" );
+                        }
                     }
                     break;
                 case UPDATED_AND_MOVED:
                     if (ingest && !addedElements.containsKey( jsonId )) {
-                        modifiedElements.put( jsonId, element );
-                    } else {
-                        movedElements.put( jsonId, element );
+                        if (element.hasAspect( "ems:Added" )) {
+                            modifiedElements.put( jsonId, element );
+                            element.createOrUpdateAspect( "ems:Updated" );
+    
+                            movedElements.put( jsonId, element );
+                            element.createOrUpdateAspect( "ems:Moved" );
+                        }
                     }
                     break;
                 default:
@@ -1765,9 +1776,6 @@ public class ModelPost extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
-    	
-    	Debug.turnOn();
-    	
         printHeader( req );
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -1812,10 +1820,10 @@ public class ModelPost extends AbstractJavaWebScript {
                     response.append("You will be notified via email when the model load has finished.\n");
                 }
                 else {
-                   ArrayList<JSONObject> foo = new ArrayList<JSONObject>();
+                   
+                  ArrayList<JSONObject> foo = new ArrayList<JSONObject>();
                     JSONObject pJson = (JSONObject)req.parseContent();
-                    JSONObject exprJson = new JSONObject();
-                    exprJson.put("KExpressionParser:", KExpParser.parseExpression(expressionString));
+                    JSONObject exprJson =new JSONObject(KExpParser.parseExpression(expressionString));
                     foo.add( pJson );
                     foo.add( exprJson );
  
@@ -1842,26 +1850,7 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                     }
                     top.put( "elements", elementsJson );
-                    model.put( "res", top.toString( 4 ) );
- 
-                }
-                    // REVIEW -- TODO -- shouldn't this be called from instance?
-                    addRelationshipsToProperties( elements );
-                    if ( !Utils.isNullOrEmpty( elements ) ) {
-                        
-                        // Fix constraints if desired:
-                        if (fix) {
-                        	instance.fix(elements);
-                        }
-                        
-                        // Create JSON object of the elements to return:
-                        JSONArray elementsJson = new JSONArray();
-                        for ( EmsScriptNode element : elements ) {
-                            elementsJson.put( element.toJSONObject(null) );
-                        }
-                        top.put( "elements", elementsJson );
-                        model.put( "res", top.toString( 4 ) );
-                    }
+                    model.put( "res", top.toString( 4 ) );                }
                 // REVIEW -- TODO -- shouldn't this be called from instance?
                 appendResponseStatusInfo(instance);
             } catch (JSONException e) {
