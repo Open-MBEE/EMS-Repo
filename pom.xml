@@ -69,6 +69,14 @@
 	            <type>jar</type>
 	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/mbee_util.jar</systemPath>
 	        </dependency>
+	        <dependency>
+	            <groupId>kparser</groupId>
+	            <artifactId>kparser</artifactId>
+	            <version>0.0.2</version>
+	            <scope>system</scope>
+	            <type>jar</type>
+	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kparser.jar</systemPath>
+	        </dependency>
             </dependencies>
         </profile>
         <profile>
@@ -77,17 +85,22 @@
                 <dependency>
 			        <groupId>gov.nasa.jpl.mbee.util</groupId>
 			        <artifactId>mbee_util</artifactId>
-			        <version>0.0.5</version>
+			        <version>0.0.7</version>
 			    </dependency>
 			    <dependency>
 			        <groupId>gov.nasa.jpl.mbee.bae</groupId>
 			        <artifactId>bae</artifactId>
-			        <version>0.0.7</version>
+			        <version>0.0.11</version>
 			    </dependency>
                 <dependency>
                     <groupId>gov.nasa.jpl.mbee.sysml</groupId>
                     <artifactId>sysml</artifactId>
-                    <version>0.0.8</version>
+                    <version>0.0.10</version>
+                </dependency>
+                <dependency>
+                    <groupId>kparser</groupId>
+                    <artifactId>kparser</artifactId>
+                    <version>0.0.2</version>
                 </dependency>
             </dependencies>
         </profile>
@@ -213,7 +226,7 @@
         <repository>
               <id>artifactory</id>
               <name>releases</name>
-              <url>http://128.149.16.144:8082/artifactory/libs-release-local</url>
+              <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
         </repository>
         <repository>
             <id>alfresco-public</id>

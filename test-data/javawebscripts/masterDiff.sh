@@ -36,17 +36,30 @@ done
 if [ $server -eq 1 ]; then
 	echo 'SERVER CONNECTED'
 	sleep 60s
+	
+	diffChoose=2
 
-	#run the diff script
-	echo 'RUNNING OLD API DIFF SCRIPT'
-	./diff2.sh
-	#passTest=$?
+	if [ $diffChoose -eq 1 ];then
+		#run the diff script
+		echo 'RUNNING OLD API DIFF SCRIPT'
+		echo 'OMITTING WORKSPACES DIFF SCRIPT'
+		./diff2.sh
+		#passTest=$?
 
-	echo 'RUNNING WORKSPACES DIFF SCRIPT'
-        #./diffWorkspaces.sh
-        #passTest=$?
+        elif [ $diffChoose -eq 2 ];then
+	        echo 'RUNNING WORKSPACES DIFF SCRIPT'
+	        echo 'OMITTING OLD API DIFF SCRIPT'
+                ./diffWorkspace.sh
+                #passTest=$?
 
-
+        else 
+                echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
+                ./diff2.sh
+                ./diffWorkspace.sh
+                #passTest=$?
+        fi
+        
+        
         #connect to soapUI -- WORK STILL NEEDED
         echo 'RUNNING SOAP UI TESTS'
         #ssh $soapServer 'cd /classPath/; ./soapScript;'
