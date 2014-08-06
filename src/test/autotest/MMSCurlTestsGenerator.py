@@ -5,6 +5,7 @@ from pprint import pprint
 import collections
 import commands
 import re
+import string
 
 ''' 
 IDENTIFIERS/IDs:
@@ -69,7 +70,7 @@ Test Procedure for each URL:
 '''
 
 # Variable Dec:
-CLASS2URL = 'class2Url.html'
+CLASS2URL = 'class2url.html'
 CLASS2URL_PATH = '../../../bin/'
 OUTPUT_BASHFILENAME = 'GeneratedCurlTests.sh'
 
@@ -93,14 +94,14 @@ def main ():
 			urlList.append([url,descXml,bean])
 
 	sortURLsToRequests()
-
+	
 	createHeaderAndFlags()
-	createGetRequests()
-	createPostRequests()
-	createDeleteRequests()
+	createAllGetRequests()
+	createAllPostRequests()
+	createAllDeleteRequests()
 
 # Create Post Requests
-def createPostRequests():
+def createAllPostRequests():
 	out.write('\n\n######################################## POST REQUESTS ########################################\n')
 	out.write('echo')
 	out.write('\necho POST REQUESTS:\n')
@@ -108,14 +109,15 @@ def createPostRequests():
 		# create comment describing request
 		s = '\n# Post '+ getElementedActedOn(url) + '\n'
 		newUrl = replaceIDs(url)
+		url2 = replaceParams (newUrl)
 		# create curl command
-		s += 'echo curl $CURL_FLAGS $CURL_POST_FLAGS $BASE_URL @JsonData/[TBD :D ] \"'+newUrl+'\"\n'
+		s += 'echo curl $CURL_FLAGS $CURL_POST_FLAGS $SERVICE_URL @JsonData/[TBD :D ] \"'+url2+'\"\n'
 		out.write(s)
 	out.write('echo')
 
 
 # Create Get Requests
-def createGetRequests():
+def createAllGetRequests():
 	out.write('\n\n######################################## GET REQUESTS ########################################\n')
 	out.write('echo')
 	out.write('\necho GET REQUESTS:\n')
@@ -123,14 +125,16 @@ def createGetRequests():
 		# create comment describing request
 		s = '\n# get '+ getElementedActedOn(url) + '\n'
 		newUrl = replaceIDs(url)
+		url2 = replaceParams (newUrl)
+		#generateAllCurlCombinations (newUrl)
 		# create curl command
-		s += 'echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL\"'+newUrl+'\"\n'
+		s += 'echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL\"'+url2+'\"\n'
 		out.write(s)
 	out.write('echo')
 
 
 # Create Delete Requests
-def createDeleteRequests():
+def createAllDeleteRequests():
 	out.write('\n\n######################################## DELETE REQUESTS ########################################\n')
 	out.write('echo')
 	out.write('\necho DELETE REQUESTS:\n')
@@ -138,26 +142,28 @@ def createDeleteRequests():
 		# create comment describing request
 		s = '\n# get '+ getElementedActedOn(url) + '\n'
 		newUrl = replaceIDs(url)
+		url2 = replaceParams (newUrl)
 		# create curl command
-		s += 'echo curl $CURL_FLAGS $CURL_DELETE_FLAGS $BASE_URL\"'+newUrl+'\"\n'
+		s += 'echo curl $CURL_FLAGS $CURL_DELETE_FLAGS $SERVICE_URL\"'+url2+'\"\n'
 		out.write(s)
 	out.write('echo')
 
+# replace all parameters with values and provide all possible combinations
+#def generateAllCurlCombinations (url):
 
 # replace the parameters/queries with values in paramValues
 def replaceParams(url):
 	try:
 		regex = '(\{(.*?)\})'
+		print url
 		matchList = re.findall(regex,url)
 		for item in matchList:
 			idWithBrkts = item[0]
 			idName = item[1]
 			if '?' in idName:
-				idName = idName.replace('?','')
-				if paramValues.get(idName) is not None:
-					url = re.sub(idWithBrkts,paramValues.get(idName), url)
-				else:
-					url = re.sub(idWithBrkts,ALL_OTHER_ID+idName, url)
+				idWoutQMarks = idName.replace('?','')
+				url = url.replace(idWithBrkts,','.join(paramValues.get(idWoutQMarks)))
+				print '\t'+url
 		return url + '\\'
 	except:
 		return None
@@ -178,7 +184,7 @@ def replaceIDs (url):
 			if '?' not in idName:
 				if defaultIDs.get(idName) is not None:
 					url = re.sub(idWithBrkts,defaultIDs.get(idName), url)
-				else:
+				elif idName is not None:
 					url = re.sub(idWithBrkts,ALL_OTHER_ID+idName, url)
 		return url + '\\'
 	except:
