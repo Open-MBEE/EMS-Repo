@@ -82,7 +82,9 @@ import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
-import Temp.kExpressionParser.*;
+
+import kexpparser.KExpParser;
+import kexpparser.KExpParser$;
 
 
 /**
@@ -1810,10 +1812,10 @@ public class ModelPost extends AbstractJavaWebScript {
                     response.append("You will be notified via email when the model load has finished.\n");
                 }
                 else {
-                   
-                  List<JSONObject> foo = new ArrayList<JSONObject>();
+                   ArrayList<JSONObject> foo = new ArrayList<JSONObject>();
                     JSONObject pJson = (JSONObject)req.parseContent();
-                    JSONObject exprJson = kExpressionParser.parseExpression(expressionString);
+                    JSONObject exprJson = new JSONObject();
+                    exprJson.put("KExpressionParser:", KExpParser.parseExpression(expressionString));
                     foo.add( pJson );
                     foo.add( exprJson );
  
