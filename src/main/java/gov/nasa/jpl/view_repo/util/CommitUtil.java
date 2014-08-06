@@ -1,6 +1,5 @@
 package gov.nasa.jpl.view_repo.util;
 
-import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 
@@ -10,26 +9,16 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.transaction.UserTransaction;
 
-import org.alfresco.model.ContentModel;
-import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.version.Version;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 public class CommitUtil {
-    private static final String VERSION_KEY = "version";
-	private static final String ID_KEY = "nodeid";
-	private static final String COMMIT_KEY = "commits";
-
 	public CommitUtil() {
 	}
 
@@ -183,7 +172,7 @@ public class CommitUtil {
 			ServiceRegistry services) {
 		boolean status = true;
 
-		String content = (String) commit.getProperty( "ems:commit" );
+//		String content = (String) commit.getProperty( "ems:commit" );
 		// TODO: need to revert to original elements
 		// TODO: revert moves.... this may not be easy
 		// TODO: revert adds (e.g., make them deleted)
