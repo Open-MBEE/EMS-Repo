@@ -50,7 +50,8 @@ if [ $server -eq 1 ]; then
                 echo 'RUNNING WORKSPACES DIFF SCRIPT'
                 echo 'OMITTING OLD API DIFF SCRIPT'
 		gitBranch=`git branch | grep '*'`
-		echo "$gitBranch"
+		#echo "$gitBranch"
+		echo $WORKSPACE
                 if [ "$gitBranch" == "* workspaces" ];then
                     echo 'WORKING FROM  WORKSPACES BRANCH'
                     ./diffWorkspaceDW.sh
