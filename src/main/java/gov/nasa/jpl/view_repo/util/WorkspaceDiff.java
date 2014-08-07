@@ -1,13 +1,17 @@
 package gov.nasa.jpl.view_repo.util;
 
-import gov.nasa.jpl.mbee.util.AbstractDiff;
+import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.version.Version;
@@ -22,6 +26,7 @@ import org.json.JSONObject;
  *
  */
 public class WorkspaceDiff {
+    // TODO -- what about timestamps!!!
     private WorkspaceNode ws1;
     private Map<String, EmsScriptNode> elements;
     private Map<String, Version> elementsVersions;
@@ -53,6 +58,74 @@ public class WorkspaceDiff {
         this();
         this.ws1 = ws1;
         this.ws2 = ws2;
+        diff();
+    }
+
+    protected void populateMembers() {
+        if ( nodeDiff == null ) return;
+
+        // Added
+        Set< NodeRef > refs = nodeDiff.getAdded();
+        addedElements.clear();
+        for ( NodeRef ref : refs ) {
+            EmsScriptNode node = new EmsScriptNode( ref, NodeUtil.getServices() );
+            addedElements.put( node.getName(), node );
+        }
+
+        // Removed
+        refs = nodeDiff.getRemoved();
+        deletedElements.clear();
+        for ( NodeRef ref : refs ) {
+            EmsScriptNode node = new EmsScriptNode( ref, NodeUtil.getServices() );
+            deletedElements.put( node.getName(), node );
+        }
+
+        // Updated
+        refs = nodeDiff.getUpdated();
+        updatedElements.clear();
+        for ( NodeRef ref : refs ) {
+            EmsScriptNode node = new EmsScriptNode( ref, NodeUtil.getServices() );
+            updatedElements.put( node.getName(), node );
+        }
+
+        // Moved
+        movedElements.clear();
+        for ( Entry< String, EmsScriptNode > e : updatedElements.entrySet() ) {
+            Map< String, Pair< Object, Object >> changes =
+                    nodeDiff.getPropertyChanges().get( e.getKey() );
+            if ( changes != null ) {
+                Pair< Object, Object > ownerChange = changes.get( "ems:owner" );
+                if ( ownerChange != null && ownerChange.first != null
+                     && ownerChange.first != null
+                     && !ownerChange.first.equals( ownerChange.second ) ) {
+                    movedElements.put( e.getKey(), e.getValue() );
+                }
+            }
+        }
+
+        // Conflicted
+        conflictedElements.clear();
+        Set<NodeRef> intersection = new LinkedHashSet< NodeRef >( nodeDiff.get1());
+        boolean intersects = Utils.intersect( intersection, nodeDiff.get1() );
+        if ( intersects ) {
+            for ( NodeRef ref : intersection ) {
+                EmsScriptNode node = new EmsScriptNode( ref, NodeUtil.getServices() );
+                conflictedElements.put( node.getName(), node );
+            }
+        }
+
+        // Elements
+        Set<String> ids = new TreeSet< String >(nodeDiff.getMap1().keySet());
+        ids.addAll( nodeDiff.getMap2().keySet() );
+        for ( String id : ids ) {
+            // TODO -- what about timestamps!!!
+            NodeRef ref = NodeUtil.findNodeRefById( id, getWs1(), null, null );
+            EmsScriptNode node = new EmsScriptNode( ref, NodeUtil.getServices() );
+            elements.put( id, node );
+        }
+
+        // TODO -- ElementVersions?????
+
     }
 
     public Map< String, EmsScriptNode > getAddedElements() {
@@ -121,10 +194,12 @@ public class WorkspaceDiff {
 
     public void setWs1( WorkspaceNode ws1 ) {
         this.ws1 = ws1;
+        if ( ws1 != null && ws2 != null ) diff();
     }
 
     public void setWs2( WorkspaceNode ws2 ) {
         this.ws2 = ws2;
+        if ( ws1 != null && ws2 != null ) diff();
     }
     /**
      * Dumps the JSON delta based.
@@ -241,15 +316,6 @@ public class WorkspaceDiff {
         Set<NodeRef> s2 = node.getChangedNodeRefsWithRespectTo( ws1 );
         nodeDiff = new NodeDiff( s1, s2 );
         populateMembers();
-    }
-
-    protected void populateMembers() {
-        if ( nodeDiff == null ) return;
-
-        Set< NodeRef > foo = nodeDiff.getAdded();
-
-        // TODO Auto-generated method stub
-
     }
 
     public boolean ingestJSON(JSONObject json) {
