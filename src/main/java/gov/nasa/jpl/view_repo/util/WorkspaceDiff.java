@@ -1,11 +1,13 @@
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,6 +15,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.version.Version;
 import org.json.JSONArray;
@@ -26,12 +29,28 @@ import org.json.JSONObject;
  *
  */
 public class WorkspaceDiff {
-    // TODO -- what about timestamps!!!
+
+    /**
+     * A conflict between two workspaces may be defined as
+     * <ol>
+     * <li>non-equal changes to the same element or
+     * <li>non-equal changes to the same property of the same element.
+     * </ol>
+     * The second definition is more strict than the first and implies the
+     * first. If conflictMustBeChangeToSameProperty is true, the second
+     * definition is used, else the first.
+     */
+    public boolean conflictMustBeChangeToSameProperty;
+
     private WorkspaceNode ws1;
+    private WorkspaceNode ws2;
+
+    private Date timestamp1;
+    private Date timestamp2;
+
     private Map<String, EmsScriptNode> elements;
     private Map<String, Version> elementsVersions;
 
-    private WorkspaceNode ws2;
     private Map<String, EmsScriptNode> addedElements;
     private Map<String, EmsScriptNode> conflictedElements;
     private Map<String, EmsScriptNode> deletedElements;
@@ -40,7 +59,7 @@ public class WorkspaceDiff {
 
     NodeDiff nodeDiff = null;
 
-    public WorkspaceDiff() {
+    private WorkspaceDiff() {
         elements = new TreeMap<String, EmsScriptNode>();
         elementsVersions = new TreeMap<String, Version>();
 
@@ -54,45 +73,94 @@ public class WorkspaceDiff {
         ws2 = null;
     }
 
-    public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2) {
+    public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2 ) {
         this();
         this.ws1 = ws1;
         this.ws2 = ws2;
+        this.timestamp1 = timestamp1;
+        this.timestamp2 = timestamp2;
         diff();
     }
 
-    protected void populateMembers() {
-        if ( nodeDiff == null ) return;
-
-        // Added
-        Set< NodeRef > refs = nodeDiff.getAdded();
-        addedElements.clear();
-        for ( NodeRef ref : refs ) {
-            EmsScriptNode node = new EmsScriptNode( ref, NodeUtil.getServices() );
-            addedElements.put( node.getName(), node );
+    /**
+     * A simple utility to add elements to the added, deleted, and updated sets
+     * based on differences in their existence.
+     *
+     * @param node1
+     * @param node2
+     */
+    protected void addToDiff( EmsScriptNode node1, EmsScriptNode node2 ) {
+        boolean exists1 = NodeUtil.exists( node1 );
+        boolean exists2 = NodeUtil.exists( node2 );
+        String name;
+        if ( !exists2 ) {
+            if ( exists1 ) {
+                // node1 exists but not node2
+                name = node1.getName();
+                deletedElements.put( name, node1 );
+            } else {
+                // neither exist so no difference!
+            }
+        } else {
+            name = node2.getName();
+            if ( exists1 ) {
+                // both node1 and node2 exist
+                name = node1.getName();
+                updatedElements.put( name, node2 );
+            } else {
+                // node2 exists but not node1
+                addedElements.put( name, node2 );
+            }
         }
+    }
+
+
+    protected void addDiffs( Set<NodeRef> refs ) {
+        for ( NodeRef ref : refs ) {
+            EmsScriptNode nodeFromRef = new EmsScriptNode( ref, getServices() );
+            String name = nodeFromRef.getName();
+            NodeRef ref1 = NodeUtil.findNodeRefById( name, getWs1(),
+                                                     getTimestamp1(), getServices() );
+            EmsScriptNode node1 = new EmsScriptNode( ref1, getServices() );
+            NodeRef ref2 = NodeUtil.findNodeRefById( name, getWs2(),
+                                                     getTimestamp2(), getServices() );
+            EmsScriptNode node2 = new EmsScriptNode( ref2, getServices() );
+            addToDiff( node1, node2 );
+        }
+    }
+
+    /**
+     * Populate the WorkspaceDiff members based on the already constructed nodeDiff.
+     */
+    protected void populateMembers() {
+        addedElements.clear();
+        deletedElements.clear();
+        updatedElements.clear();
+        movedElements.clear();
+        conflictedElements.clear();
+        elements.clear();
+        elementsVersions.clear(); // ??? REVIEW
+
+        if ( nodeDiff == null ) {
+            Debug.error("Trying WorkspaceDiff.populateMembers() when nodeDiff == null!");
+            return;
+        }
+
+        Set< NodeRef > refs = nodeDiff.getAdded();
+        addDiffs( refs );
 
         // Removed
         refs = nodeDiff.getRemoved();
-        deletedElements.clear();
-        for ( NodeRef ref : refs ) {
-            EmsScriptNode node = new EmsScriptNode( ref, NodeUtil.getServices() );
-            deletedElements.put( node.getName(), node );
-        }
+        addDiffs( refs );
 
         // Updated
         refs = nodeDiff.getUpdated();
-        updatedElements.clear();
-        for ( NodeRef ref : refs ) {
-            EmsScriptNode node = new EmsScriptNode( ref, NodeUtil.getServices() );
-            updatedElements.put( node.getName(), node );
-        }
+        addDiffs( refs );
 
         // Moved
-        movedElements.clear();
         for ( Entry< String, EmsScriptNode > e : updatedElements.entrySet() ) {
             Map< String, Pair< Object, Object >> changes =
-                    nodeDiff.getPropertyChanges().get( e.getKey() );
+                    nodeDiff.getPropertyChanges( e.getKey() );
             if ( changes != null ) {
                 Pair< Object, Object > ownerChange = changes.get( "ems:owner" );
                 if ( ownerChange != null && ownerChange.first != null
@@ -104,28 +172,131 @@ public class WorkspaceDiff {
         }
 
         // Conflicted
-        conflictedElements.clear();
-        Set<NodeRef> intersection = new LinkedHashSet< NodeRef >( nodeDiff.get1());
-        boolean intersects = Utils.intersect( intersection, nodeDiff.get1() );
-        if ( intersects ) {
-            for ( NodeRef ref : intersection ) {
-                EmsScriptNode node = new EmsScriptNode( ref, NodeUtil.getServices() );
-                conflictedElements.put( node.getName(), node );
-            }
-        }
+        computeConflicted();
 
         // Elements
-        Set<String> ids = new TreeSet< String >(nodeDiff.getMap1().keySet());
+        Set< String > ids = new TreeSet< String >( nodeDiff.getMap1().keySet() );
         ids.addAll( nodeDiff.getMap2().keySet() );
         for ( String id : ids ) {
-            // TODO -- what about timestamps!!!
-            NodeRef ref = NodeUtil.findNodeRefById( id, getWs1(), null, null );
-            EmsScriptNode node = new EmsScriptNode( ref, NodeUtil.getServices() );
-            elements.put( id, node );
+            NodeRef ref = NodeUtil.findNodeRefById( id, getWs1(), getTimestamp1(), null );
+            if ( ref != null ) {
+                EmsScriptNode node = new EmsScriptNode( ref, getServices() );
+                if ( node.exists() ) elements.put( id, node );
+            }
         }
 
         // TODO -- ElementVersions?????
 
+    }
+
+    /**
+     * The intersection of the two workspace change sets are the potential
+     * conflicts. The changes could still be the same in both workspaces, so we
+     * need to check the existence of the nodes in the workspaces, and if both
+     * exist, then the property changes must differ. If
+     * conflictMustBeChangeToSameProperty == true, then properties changes must
+     * be compared to the property values in the common parent to see whether
+     * they are actually changed in each workspace.
+     */
+    protected void computeConflicted() {
+        // Get intersection.
+        Set< NodeRef > nodes = nodeDiff.get1();
+        Set<String> intersection = NodeUtil.getNames( nodes );
+        Set<String> names2 = NodeUtil.getNames( nodeDiff.get2() );
+        boolean intersects = Utils.intersect( intersection, names2 );
+        if ( intersects ) {
+            for ( String name : intersection ) {
+                // REVIEW -- TODO -- Should differences in aspects be recognized?
+//                Set< String > aspects = nodeDiff.getAddedAspects( name );
+//                Utils.minus( aspects, WorkspaceNode.workspaceMetaAspects );
+
+                // Check to see if the existence of the nodes changed, in which
+                // case, it is a definite conflict.
+                NodeRef ref1 = NodeUtil.findNodeRefById( name, getWs1(),
+                                                         getTimestamp1(),
+                                                         getServices() );
+                NodeRef ref2 = NodeUtil.findNodeRefById( name, getWs2(),
+                                                         getTimestamp2(),
+                                                         getServices() );
+                boolean isConflict =
+                        ( NodeUtil.exists( ref1 ) != NodeUtil.exists( ref2 ) );
+
+                if ( !isConflict && conflictMustBeChangeToSameProperty ) {
+                    isConflict = samePropertyChanged( ref1, ref2 );
+                }
+
+                if ( isConflict ) {
+                    // This assumes that a pair of properties in changes are actually different.
+                    EmsScriptNode node = new EmsScriptNode( nodeDiff.get2( name ),
+                                                            getServices() );
+                    conflictedElements.put( name, node );
+                }
+            }
+        }
+    }
+
+    /**
+     * Check to see if there is a property that was changed in both workspaces
+     * for the given nodes. Need to check against the common parent.
+     *
+     * @param ref1
+     *            a node in workspace 1
+     * @param ref2
+     *            a corresponding node in workspace 2
+     * @return true iff there is a property for which these nodes were both
+     *         changed in the respective workspaces to different values.
+     */
+    protected boolean samePropertyChanged( NodeRef ref1, NodeRef ref2 ) {
+        String elementName = NodeUtil.getName( ref1 );
+        Map< String, Pair< Object, Object > > changes =
+                new LinkedHashMap< String, Pair<Object,Object> >( nodeDiff.getPropertyChanges( elementName ) );
+        Utils.removeAll( changes, WorkspaceNode.workspaceMetaProperties );
+        if ( Utils.isNullOrEmpty( changes ) ) return false;
+        WorkspaceNode parentWs =
+                WorkspaceNode.getCommonParent( getWs1(), getWs2() );
+        NodeRef pRef1 = NodeUtil.findNodeRefById( elementName, parentWs,
+                                                 getTimestamp1(),
+                                                 getServices() );
+        NodeDiff nodeDiff1 = new NodeDiff( pRef1, ref1 );
+
+        Map< String, Pair< Object, Object >> changes1 =
+                nodeDiff1.getPropertyChanges( elementName );
+        if ( Utils.isNullOrEmpty( changes1 ) ) return false;
+
+        NodeRef pRef2 =
+                NodeUtil.findNodeRefById( elementName, parentWs,
+                                          getTimestamp2(),
+                                          getServices() );
+        NodeDiff nodeDiff2 = new NodeDiff( pRef2, ref2 );
+        Map< String, Pair< Object, Object >> changes2 =
+                nodeDiff2.getPropertyChanges( elementName );
+        if ( Utils.isNullOrEmpty( changes2 ) ) return false;
+        Set< String > propIds1 =
+                new LinkedHashSet< String >( changes1.keySet() );
+        Set< String > propIds2 = changes2.keySet();
+        if ( !Utils.intersect( propIds1, propIds2 ) ) return false;
+        for ( String propName : propIds1 ) {
+            Pair< Object, Object > propVals =
+                    changes.get( propName );
+            if ( propVals.first == propVals.second
+                 || ( propVals.first != null
+                      && propVals.first.equals( propVals.second ) ) ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private ServiceRegistry getServices() {
+        return NodeUtil.getServices();
+    }
+
+    private Date getTimestamp1() {
+        return timestamp1;
+    }
+
+    private Date getTimestamp2() {
+        return timestamp2;
     }
 
     public Map< String, EmsScriptNode > getAddedElements() {
@@ -199,6 +370,16 @@ public class WorkspaceDiff {
 
     public void setWs2( WorkspaceNode ws2 ) {
         this.ws2 = ws2;
+        if ( ws1 != null && ws2 != null ) diff();
+    }
+
+    public void setTimestamp1( Date timestamp1 ) {
+        this.timestamp1 = timestamp1;
+        if ( ws1 != null && ws2 != null ) diff();
+    }
+
+    public void setTimestamp2( Date timestamp2 ) {
+        this.timestamp2 = timestamp2;
         if ( ws1 != null && ws2 != null ) diff();
     }
     /**

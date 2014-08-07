@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -1162,6 +1163,18 @@ public class NodeUtil {
             names.add( qn.toPrefixString() );
         }
         return names;
+    }
+
+    public static Set< String > getNames( Collection< NodeRef > refs ) {
+        List< EmsScriptNode > nodes = EmsScriptNode.toEmsScriptNodeList( refs );
+        TreeSet< String > names =
+                new TreeSet< String >( EmsScriptNode.getNames( nodes ) );
+        return names;
+    }
+
+    public static String getName( NodeRef ref ) {
+        EmsScriptNode node = new EmsScriptNode( ref, getServices() );
+        return node.getName();
     }
 
 }

@@ -124,6 +124,26 @@ public class EmsScriptNode extends ScriptNode implements
                     add( "ems:mergeSource" );
                 }
             };
+    public static TreeSet< String > workspaceMetaAspects =
+            new TreeSet< String >() {
+                /**
+                 *
+                 */
+                private static final long serialVersionUID = 1L;
+
+                {
+                    add( "ems:HasWorkspace" );
+                    add( "ems:Trashed" );
+                    add( "ems:Added" );
+                    add( "ems:Deleted" );
+                    add( "ems:Moved" );
+                    add( "ems:Updated" );
+                    add( "ems:MergeSource" );
+                    add( "ems:Committable" );
+                    add( "st:site" );
+                    add( "st:sites" );
+                }
+            };
 
     // provide logging capability of what is done
     private StringBuffer response = null;
@@ -2210,6 +2230,10 @@ public class EmsScriptNode extends ScriptNode implements
         return true;
     }
 
+    public boolean isDeleted() {
+        return !exists();
+    }
+
 
     public boolean isFolder() {
         try {
@@ -2424,7 +2448,8 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean merge( NodeDiff diff ) {
         boolean changed = false;
 
-        for ( String aspect : diff.getRemovedAspects() ) {
+
+        for ( String aspect : diff.getRemovedAspects(getName()) ) {
             NodeService ns = getServices().getNodeService();
             if ( hasAspect( aspect ) ) {
                 try {
@@ -2436,7 +2461,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
 
-        for ( String aspect : diff.getAddedAspects() ) {
+        for ( String aspect : diff.getAddedAspects(getName()) ) {
             NodeService ns = getServices().getNodeService();
             if ( !hasAspect( aspect ) ) {
                 try {
