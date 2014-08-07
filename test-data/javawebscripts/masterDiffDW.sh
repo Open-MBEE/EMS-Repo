@@ -83,10 +83,11 @@ if [ $server -eq 1 ]; then
 
 	echo 'PASSTEST?'
         echo "$passTest"
-	#exit $passTest
+	exit $passTest
 fi
 
 if [ $server -eq 2 ]; then
 	echo 'SERVER TIME-OUT'
+	exit 1
 fi
 
