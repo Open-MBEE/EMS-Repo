@@ -8,7 +8,7 @@ pkill -fn 'integration-test'
 echo 'KILLING SERVER IF ONE IS RUNNING'
 sleep 3s
 
-#cd ./../..
+cd ./../..
 ./runserver.sh > serverLog.txt &
 echo 'STARTING UP SERVER'
 sleep 60s
@@ -47,10 +47,14 @@ if [ $server -eq 1 ]; then
 		passTest=$?
 
         elif [ $diffChoose -eq 2 ];then
-	        echo 'RUNNING WORKSPACES DIFF SCRIPT'
-	        echo 'OMITTING OLD API DIFF SCRIPT'
-                ./diffWorkspaceDW.sh
-                passTest=$?
+                echo 'RUNNING WORKSPACES DIFF SCRIPT'
+                echo 'OMITTING OLD API DIFF SCRIPT'
+                branch=`git branch | grep '*'`
+                if [ "$branch" == "* workspaces" ];then
+                    echo 'WORKING FROM  WORKSPACES BRANCH'
+                    ./diffWorkspaceDW.sh
+                    passTest=$?
+                fi
 
         else 
                 echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
@@ -68,10 +72,10 @@ if [ $server -eq 1 ]; then
         #TestCase="??"
         #./testrunner.sh -f ./soapTestData -s $TestSuite -c $TestCase $classpath
         cd ./soapStuff
-	for i in $(ls . | grep "soapui-project.xml"); do
-	         echo RUNNING TEST $i
-                ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i
-        done
+	#for i in $(ls . | grep "soapui-project.xml"); do
+	#         echo RUNNING TEST $i
+        #        ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i
+        #done
 
         #shutdown the tomcat server process
         pkill -fn 'integration-test'
