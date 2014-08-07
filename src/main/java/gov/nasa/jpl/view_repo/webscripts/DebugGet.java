@@ -30,6 +30,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,14 +53,17 @@ public class DebugGet extends DeclarativeWebScript {
 			Status status, Cache cache) {
 	    Map<String, Object> model = new HashMap<String, Object>();
 	    
-	    String turnOn = req.getParameter( "on" );
-	    if (turnOn == null ) {
-	        Debug.turnOff();
-	        model.put( "res", "debug off" );
+	    String turnOnStr = req.getParameter( "on" );
+	    boolean turnOn = turnOnStr != null; 
+	    turnOnStr = turnOn ? "on" : "off";
+	    if ( turnOn == Debug.isOn() ) {
+	        System.out.println((new Date()) + ": debug is already " + turnOnStr );
 	    } else {
-	        Debug.turnOn();
-	        model.put( "res", "debug on" );
+	        if ( turnOn ) Debug.turnOn();
+	        else Debug.turnOff();
+            System.out.println((new Date()) + ": debug turned " + turnOnStr );
 	    }
+        model.put( "res", "debug " + turnOnStr );
 	    
 		return model;
 	}
