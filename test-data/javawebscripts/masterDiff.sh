@@ -77,12 +77,13 @@ if [ $server -eq 1 ]; then
         pkill -fn 'integration-test'
         echo 'KILLING SERVER'
 
-	#echo 'PASSTEST?'
-        #echo "$passTest"
-	#exit $passTest
+	echo 'PASSTEST?'
+        echo "$passTest"
+	exit $passTest
 fi
 
 if [ $server -eq 2 ]; then
 	echo 'SERVER TIME-OUT'
+	exit 1
 fi
 
