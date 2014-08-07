@@ -46,12 +46,14 @@ import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
 import gov.nasa.jpl.view_repo.connections.JmsConnection;
 import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -123,10 +125,11 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     private JSONObject elementHierarchyJson;
 
-    private Map<String, EmsScriptNode> addedElementsMap = new HashMap<String, EmsScriptNode>();
-    private Map<String, EmsScriptNode> movedElementsMap = new HashMap<String, EmsScriptNode>();
-    private Map<String, EmsScriptNode> updatedElementsMap = new HashMap<String, EmsScriptNode>();
-    private Map<String, EmsScriptNode> originalElementMap = new HashMap<String, EmsScriptNode>();
+    private Map<String, EmsScriptNode> addedElements = new HashMap<String, EmsScriptNode>();
+    private Map<String, EmsScriptNode> movedElements = new HashMap<String, EmsScriptNode>();
+    private Map<String, EmsScriptNode> modifiedElements = new HashMap<String, EmsScriptNode>();
+    private Map<String, EmsScriptNode> originalElements = new HashMap<String, EmsScriptNode>();
+    private Map<String, Version> originalElementsVersions = new HashMap<String, Version>();
     
     private EmsSystemModel systemModel;
     
@@ -282,9 +285,21 @@ public class ModelPost extends AbstractJavaWebScript {
         total = end - start;
         log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
         
+        // Send deltas to all listeners
         if ( !sendDeltas(workspace, start, end) ) {
             log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
         }
+        
+        // Commit history
+        String siteName = null;
+        if (projectNode != null) {
+            EmsScriptNode siteNode = projectNode.getSiteNode();
+            siteName = siteNode.getName();
+        }
+        CommitUtil commitUtil = new CommitUtil();
+        commitUtil.commit( originalElements, originalElementsVersions, addedElements,
+                           null, movedElements, modifiedElements, workspace, siteName,
+                           "", false, services, response );
         
         elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
         return elements;
@@ -300,12 +315,12 @@ public class ModelPost extends AbstractJavaWebScript {
         boolean jmsStatus = false;
         boolean restStatus = false;
 
-        if (addedElementsMap.size() > 0 || updatedElementsMap.size() > 0 || movedElementsMap.size() > 0) {
+        if (addedElements.size() > 0 || modifiedElements.size() > 0 || movedElements.size() > 0) {
             WorkspaceDiff wsDiff = new WorkspaceDiff();
-            wsDiff.setElements( originalElementMap );
-            wsDiff.setAddedElements( addedElementsMap  );
-            wsDiff.setMovedElements( movedElementsMap  );
-            wsDiff.setUpdatedElements( updatedElementsMap );
+            wsDiff.setElements( originalElements );
+            wsDiff.setAddedElements( addedElements  );
+            wsDiff.setMovedElements( movedElements  );
+            wsDiff.setUpdatedElements( modifiedElements );
             
             Date t1 = new Date(start);
             Date t2 = new Date(end);
@@ -796,8 +811,9 @@ public class ModelPost extends AbstractJavaWebScript {
             nodeMap.put( element.getName(), element );
             // only add to original element map if it exists on first pass
             if (!ingest) {
-                if (!originalElementMap.containsKey( jsonId )) {
-                    originalElementMap.put( jsonId, element );
+                if (!originalElements.containsKey( jsonId )) {
+                    originalElements.put( jsonId, element );
+                    originalElementsVersions.put( jsonId, element.getHeadVersion());
                 }
             }
         }
@@ -903,24 +919,35 @@ public class ModelPost extends AbstractJavaWebScript {
             switch (modStatus.getState()) {
                 case ADDED:
                     if (!ingest) {
-                        addedElementsMap.put( jsonId, element );
+                        addedElements.put( jsonId, element );
+                        element.createOrUpdateAspect( "ems:Added" ); 
                     }
                     break;
                 case UPDATED:
-                    if (ingest && !addedElementsMap.containsKey( jsonId )) {
-                        updatedElementsMap.put( jsonId, element );
+                    if (ingest && !addedElements.containsKey( jsonId )) {
+                        if (element.hasAspect( "ems:Added" )) {
+                            modifiedElements.put( jsonId, element );
+                            element.createOrUpdateAspect( "ems:Updated" );
+                        }
                     }
                     break;
                 case MOVED:
-                    if (!ingest && !addedElementsMap.containsKey( jsonId )) {
-                        movedElementsMap.put( jsonId, element );
+                    if (!ingest && !addedElements.containsKey( jsonId )) {
+                        if (element.hasAspect( "ems:Added" )) {
+                            movedElements.put( jsonId, element );
+                            element.createOrUpdateAspect( "ems:Moved" );
+                        }
                     }
                     break;
                 case UPDATED_AND_MOVED:
-                    if (ingest && !addedElementsMap.containsKey( jsonId )) {
-                        updatedElementsMap.put( jsonId, element );
-                    } else {
-                        movedElementsMap.put( jsonId, element );
+                    if (ingest && !addedElements.containsKey( jsonId )) {
+                        if (element.hasAspect( "ems:Added" )) {
+                            modifiedElements.put( jsonId, element );
+                            element.createOrUpdateAspect( "ems:Updated" );
+    
+                            movedElements.put( jsonId, element );
+                            element.createOrUpdateAspect( "ems:Moved" );
+                        }
                     }
                     break;
                 default:
@@ -1773,10 +1800,15 @@ public class ModelPost extends AbstractJavaWebScript {
 
         ModelPost instance = new ModelPost(repository, services);
 
+        String expressionString = req.getParameter( "expression" );
+        
         JSONObject top = new JSONObject();
         if (wsFound && validateRequest(req, status)) {
             try {
                 if (runInBackground) {
+                    if ( expressionString != null || expressionString.length() == 0 ) {
+                        // ERRROR
+                    }
                     instance.saveAndStartAction(req, workspace, status);
                     // REVIEW -- TODO -- shouldn't response be called from
                     // instance? Maybe move the bulk of this method to a new
@@ -1784,8 +1816,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     response.append("JSON uploaded, model load being processed in background.\n");
                     response.append("You will be notified via email when the model load has finished.\n");
                 }
-                else {
-                	
+                else {                
                     JSONObject postJson = (JSONObject)req.parseContent();
                     EmsScriptNode projectNode = getProjectNodeFromRequest( req, true );
                     Set< EmsScriptNode > elements = 

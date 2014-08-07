@@ -213,5 +213,38 @@
               </property>
           </properties>
         </aspect>
+        
+        <aspect name="ems:Committable">
+            <properties>
+                
+                <property name="ems:commitParents">
+                    <!-- multiple parents only for MERGE -->
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>true</multiple>
+                    <index enabled="false"/>
+                </property>
+                <property name="ems:commitChildren">
+                    <!-- multiple children only for BRANCH -->
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>true</multiple>
+                    <index enabled="false"/>
+                </property>
+                <property name="ems:commitType">
+                    <!-- can be COMMIT, MERGE, BRANCH -->
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+                <property name="ems:commit">
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
+        </aspect>
      </aspects>
 </model>

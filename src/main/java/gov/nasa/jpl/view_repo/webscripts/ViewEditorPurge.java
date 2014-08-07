@@ -29,9 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,34 +37,33 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 
-import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
- * Descriptor in /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/model.get.desc.xml
+ * Web service to purge a project recursively with each hard delete within its own
+ * transaction.
+ * 
  * @author cinyoung
  *
  */
-public class ModelDelete extends AbstractJavaWebScript {
-    public ModelDelete() {
-        super();
-    }
+public class ViewEditorPurge extends AbstractJavaWebScript {
+ 	public ViewEditorPurge() {
+ 	    super();
+ 	}
     
-    public ModelDelete(Repository repositoryHelper, ServiceRegistry registry) {
+    public ViewEditorPurge(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
 
 
-    // injected via spring configuration
-    protected boolean isViewRequest = false;
-    
-	private EmsScriptNode modelRootNode = null;
-	private String modelId;
+    private EmsScriptNode siteNode = null;
+	private String siteName;
 	
 	@Override
 	protected void clearCaches() {
@@ -76,17 +73,13 @@ public class ModelDelete extends AbstractJavaWebScript {
 	
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		modelId = req.getServiceMatch().getTemplateVars().get("id");
-		if (!checkRequestVariable(modelId, "id")) {
-			log(LogLevel.ERROR, "Element id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
-			return false;
-		}
+		siteName = req.getServiceMatch().getTemplateVars().get("id");
 		
-		WorkspaceNode workspace = getWorkspace( req );
-		
-		modelRootNode = findScriptNodeById(modelId, workspace, null);
-		if (modelRootNode == null) {
-			log(LogLevel.ERROR, "Element not found with id: " + modelId + ".\n", HttpServletResponse.SC_NOT_FOUND);
+		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+		if (siteInfo != null) {
+		    siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+		} else {
+			log(LogLevel.ERROR, "Site not found: " + siteName + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
 		}
 		
@@ -96,70 +89,56 @@ public class ModelDelete extends AbstractJavaWebScript {
 	
 	/**
 	 * Entry point
-	 * 
-	 * Make deletion synchronized to simplify checks for conflicting deletes
+	 * Leave synchronized as deletes can interfere with one another
 	 */
 	@Override
 	protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
         printHeader( req );
-        
+
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
 
 		boolean recurse = true;
 		if (validateRequest(req, status)) {
-	        WorkspaceNode workspace = getWorkspace( req );
+			EmsScriptNode veNode = null;
+
+	        if (req.getParameter("project") != null) {
+	        		String projectid = req.getParameter("project");
+	        		if (projectid.startsWith("ViewEditor") || projectid.startsWith("Models")) {
+		        		veNode = siteNode.childByNamePath("/" + projectid);
+		        		log(LogLevel.INFO, "Attempting to delete dir " + projectid);
+	        		}
+	        }
 	        
-		    if (services.getDictionaryService().isSubClass(modelRootNode.getQNameType(), ContentModel.TYPE_FOLDER)) {
-		        handleElementHierarchy(modelRootNode, workspace, recurse);
-		    } else {
-		        delete(modelRootNode, workspace);
-		        EmsScriptNode pkgNode = findScriptNodeById(modelId + "_pkg", workspace, null);
-		        handleElementHierarchy(pkgNode, workspace, recurse);
-		    }
+	        if (veNode != null) {
+	        		handleElementHierarchy(veNode, recurse);
+	        } else {
+	        		log(LogLevel.INFO, "could not find node to delete");
+	        }
 		}
 		
 		model.put("res", "okay");
 				
 		status.setCode(responseStatus.getCode());
 
-		printFooter();
-        
-		return model;
+        printFooter();
+
+        return model;
 	}
 
 
 	/**
 	 * Deletes a node in a transaction
 	 * @param node
-	 * @param workspace 
 	 */
-	private void delete(EmsScriptNode node, WorkspaceNode workspace) {
-	    if ( node == null || !node.exists() ) {
-	        log(LogLevel.ERROR, "Trying to delete a non-existent node! " + node);
-	        return;
-	    }
-	    
-	    // don't delete a _pkg node since it will be automatically deleted by its refied component
-	    String id = (String) node.getProperty(Acm.ACM_ID);
-	    if (id.endsWith("_pkg")) {
-	        return;
-	    }
-	    
-        // Add the element to the specified workspace to be deleted from there.
-        if ( workspace != null && workspace.exists() && node != null
-             && node.exists() && !node.isWorkspace() ) {
-	        EmsScriptNode newNodeToDelete = workspace.replicateWithParentFolders( node );
-	        node = newNodeToDelete;
-	    }
-	    
+	private void delete(EmsScriptNode node) {
         UserTransaction trx;
         trx = services.getTransactionService().getNonPropagatingUserTransaction();
         try {
             trx.begin();
-            String key = (String)node.getProperty(Acm.ACM_ID);
+            String key = (String)node.getProperty("cm:name");
             log(LogLevel.INFO, "delete: beginning transaction {" + node.getNodeRef());
             services.getNodeService().deleteNode(node.getNodeRef());
             log(LogLevel.INFO, "} delete ending transaction: " + key);
@@ -178,18 +157,19 @@ public class ModelDelete extends AbstractJavaWebScript {
 	/**
 	 * Build up the element hierarchy from the specified root
 	 * @param root		Root node to get children for
-	 * @param workspace 
 	 * @throws JSONException
 	 */
-    protected void handleElementHierarchy( EmsScriptNode root,
-                                           WorkspaceNode workspace,
-                                           boolean recurse ) {
+	protected void handleElementHierarchy(EmsScriptNode root, boolean recurse) {
 		if (recurse) {
 			for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
+			    try {
 				EmsScriptNode child = new EmsScriptNode(assoc.getChildRef(), services, response);
-				handleElementHierarchy(child, workspace, recurse);
+				handleElementHierarchy(child, recurse);
+			    } catch (Exception e) {
+			        // do nothing
+			    }
 			}
 		}
-		delete(root, workspace);
+		delete(root);
 	}	
 }

@@ -1,180 +1,199 @@
 package gov.nasa.jpl.view_repo.util;
 
-import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import javax.transaction.UserTransaction;
 
-import org.alfresco.model.ContentModel;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.version.Version;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 public class CommitUtil {
-	private static final String VERSION_KEY = "version";
-	private static final String ID_KEY = "nodeid";
-	private static final String COMMIT_KEY = "commits";
-
-	private CommitUtil() {
-		// prevent instantiation
+	public CommitUtil() {
 	}
 
-	public static List<EmsScriptNode> getChangeSets(EmsScriptNode context,
-	                                                WorkspaceNode workspace,
-	                                                ServiceRegistry services,
-	                                                StringBuffer response ) {
-		List<EmsScriptNode> changeSets = new ArrayList<EmsScriptNode>();
-		if (context != null) {
-            changeSets.addAll(WebScriptUtil.getAllNodesInPath(
-					context.getQnamePath(), "TYPE", "cm:content",
-					workspace,
-					null, services, response));
-			Collections.sort(changeSets,
-					new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator());
-		}
+    private EmsScriptNode getOrCreateCommitPkg(WorkspaceNode workspace, String siteName, ServiceRegistry services, StringBuffer response, boolean create) {
+        EmsScriptNode context = null;
+        
+        if (workspace == null) {
+            SiteInfo siteInfo = services.getSiteService().getSite( siteName );
+            context = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+        } else {
+            context = workspace;
+        }
 
-		return changeSets;
+        EmsScriptNode commitPkg = context.childByNamePath( "commits" );
+        
+        if (commitPkg == null && create) {
+            commitPkg = context.createFolder( "commits" );
+        }
+        
+        return commitPkg;
+    }
+	
+	private EmsScriptNode getCommitPkg(WorkspaceNode workspace, String siteName, ServiceRegistry services, StringBuffer response) {
+	    return getOrCreateCommitPkg( workspace, siteName, services, response, false );
+	}
+	
+	
+	public ArrayList<EmsScriptNode> getCommits(WorkspaceNode workspace,
+	                                           String siteName,
+	                                             ServiceRegistry services,
+	                                             StringBuffer response) {
+	    ArrayList<EmsScriptNode> commits = new ArrayList<EmsScriptNode>();
+	    EmsScriptNode commitPkg = getCommitPkg(workspace, siteName, services, response);
+	    
+	    if (commitPkg != null) {
+            commits.addAll(WebScriptUtil.getAllNodesInPath(commitPkg.getQnamePath(),
+                                                           "TYPE",
+                                                           "cm:content",
+                                                           workspace,
+                                                           null,
+                                                           services,
+                                                           response));
+            
+            Collections.sort( commits, new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator() );
+	    }
+	    
+	    return commits;
 	}
 
-	public static JSONObject getJsonChangeSets(EmsScriptNode context,
-	                                           WorkspaceNode workspace,
-	                                           ServiceRegistry services,
-	                                           StringBuffer response)
-			throws JSONException {
-		EmsScriptNode commitPkg = context.childByNamePath("Commits");
-		List<EmsScriptNode> changeSets = getChangeSets(commitPkg, workspace,
-		                                               services, response);
-		
-		JSONObject jsonChangeSets = new JSONObject();
-		JSONArray array = new JSONArray();
-		for (EmsScriptNode changeSet : changeSets) {
-			JSONObject json = new JSONObject();
-			json.put("nodeid", changeSet.getId());
-			json.put("modifier", changeSet.getProperty("cm:creator"));
-			json.put("timestamp", changeSet.getProperty("cm:modified"));
-			json.put("message", changeSet.getProperty("cm:description"));
-			array.put(json);
-		}
-		jsonChangeSets.put("changeSets", array);
-
-		return jsonChangeSets;
+	public EmsScriptNode getLastCommit(WorkspaceNode ws, String siteName, ServiceRegistry services, StringBuffer response) {
+	    ArrayList<EmsScriptNode> commits = getCommits(ws, siteName, services, response);
+	    
+	    if (commits.size() > 0) {
+	        return commits.get( 0 );
+	    }
+	    
+	    return null;
 	}
 
-	// TODO: need to convert this to use workspaces
-	public static void commitChangeSet(Set<Version> changeSet, String message,
-			boolean runWithoutTransactions, ServiceRegistry services) {
-		if (runWithoutTransactions) {
-			try {
-				commitTransactionableChangeSet(changeSet, message, services);
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} else {
-			UserTransaction trx;
-			trx = services.getTransactionService()
-					.getNonPropagatingUserTransaction();
-			try {
-				trx.begin();
-				commitTransactionableChangeSet(changeSet, message, services);
-				trx.commit();
-			} catch (Throwable e) {
-				try {
-					// log(LogLevel.ERROR,
-					// "commitChangeSet: DB transaction failed: " +
-					// e.getMessage(),
-					// HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-					e.printStackTrace();
-					trx.rollback();
-				} catch (Throwable ee) {
-					// log(LogLevel.ERROR, "commitChangeSet: rollback failed: "
-					// + ee.getMessage());
-					ee.printStackTrace();
-				}
-			}
-		}
+	
+	public void commit(Map<String, EmsScriptNode> elements,
+	                   Map<String, Version> elementsVersions,
+	                   Map<String, EmsScriptNode> addedElements,
+	                   Map<String, EmsScriptNode> deletedElements,
+	                   Map<String, EmsScriptNode> movedElements,
+	                   Map<String, EmsScriptNode> updatedElements,
+	                   WorkspaceNode workspace,
+	                   String siteName,
+	                   String message,
+	                   boolean runWithoutTransactions,
+	                   ServiceRegistry services,
+	                   StringBuffer response
+	                   ) {
+	    WorkspaceDiff wsDiff = new WorkspaceDiff();
+
+	    wsDiff.setElements( elements );
+        wsDiff.setElementsVersions( elementsVersions );
+	    
+	    wsDiff.setAddedElements( addedElements );
+	    wsDiff.setDeletedElements( deletedElements );
+	    wsDiff.setMovedElements( movedElements );
+	    wsDiff.setUpdatedElements( updatedElements );
+	    
+	    if (runWithoutTransactions) {
+            try {
+                commitTransactionable(wsDiff, workspace, siteName, message, services, response);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+	    } else {
+            UserTransaction trx;
+            trx = services.getTransactionService()
+                    .getNonPropagatingUserTransaction();
+            try {
+                trx.begin();
+                commitTransactionable(wsDiff, workspace, siteName, message, services, response);
+                trx.commit();
+            } catch (Throwable e) {
+                try {
+                    e.printStackTrace();
+                    trx.rollback();
+                } catch (Throwable ee) {
+                    ee.printStackTrace();
+                }
+            }
+	    }
 	}
+	
+	
+	private void commitTransactionable( WorkspaceDiff wsDiff,
+	                                    WorkspaceNode workspace,
+	                                    String siteName,
+	                                    String message,
+                                        ServiceRegistry services,
+                                        StringBuffer response) throws JSONException {
+	    EmsScriptNode commitPkg = getOrCreateCommitPkg( workspace, siteName, services, response, true );
+	    
+	    if (commitPkg == null) {
+	        // TODO: means commitPkg couldn't be created
+	    } else {
+	        // get the most recent commit before creating a new one
+            EmsScriptNode lastCommitNode = getLastCommit( workspace, siteName, services, response );
+            
+	        Date now = new Date();
+	        EmsScriptNode commitNode = commitPkg.createNode("commit_" + now.getTime(), "cm:content");
+	        commitNode.createOrUpdateAspect( "cm:titled");
+	        commitNode.createOrUpdateProperty("cm:description", message);
+	        
+	        commitNode.createOrUpdateAspect( "ems:Committable" );
+	        commitNode.createOrUpdateProperty( "ems:commitType", "COMMIT" );
+	        commitNode.createOrUpdateProperty( "ems:commit", wsDiff.toJSONObject( null, null, false ).toString() );
+	        
+	        if (lastCommitNode != null) {
+	            ArrayList< Serializable > values = new ArrayList<Serializable>();
+	            
+	            values.add( lastCommitNode.getNodeRef() );
+	            commitNode.setProperty( "ems:commitParent", values );
+	            
+	            values = new ArrayList<Serializable>();
+	            values.add( commitNode.getNodeRef() );
+	            lastCommitNode.setProperty( "ems:commitChildren", values );
+	        }
+	    }
+    }
+
+	
 
 	/**
-	 * Make a commit change set that can be reverted
-	 * 
-	 * @throws JSONException
 	 */
-	public static void commitTransactionableChangeSet(Set<Version> changeSet,
-			String message, ServiceRegistry services) throws JSONException {
-		JSONObject changeJson = new JSONObject();
-		JSONArray changeArray = new JSONArray();
-		EmsScriptNode commitPkg = null;
-		for (Version version : changeSet) {
-			EmsScriptNode changedNode = new EmsScriptNode(
-					version.getVersionedNodeRef(), services);
-			// create the commit directory as necessary
-			EmsScriptNode siteNode = changedNode.getSiteNode();
-			commitPkg = siteNode.childByNamePath("Commits");
-			if (commitPkg == null) {
-				commitPkg = siteNode.createFolder("Commits", "cm:folder");
-			}
-
-			JSONObject json = new JSONObject();
-			json.put(ID_KEY, changedNode.getId());
-			json.put(VERSION_KEY, version.getVersionLabel());
-			changeArray.put(json);
-		}
-
-		changeJson.put(COMMIT_KEY, changeArray);
-		// create the node with information
-		Date now = new Date();
-		EmsScriptNode commitNode = commitPkg.createNode("commit_"
-				+ now.getTime(), "cm:content");
-		// so we can add the commit message
-		commitNode.addAspect("cm:titled");
-		commitNode.setProperty("cm:description", message);
-
-		ActionUtil.saveStringToFile(commitNode, "application/json", services, changeJson.toString());
-	}
-
-	/**
-	 * @param changeSet
-	 * @param services
-	 * @return
-	 * @throws JSONException
-	 */
-	public static boolean revertCommit(EmsScriptNode changeSet,
+	public boolean revertCommit(EmsScriptNode commit,
 			ServiceRegistry services) {
 		boolean status = true;
 
-        ContentReader reader = services.getContentService().getReader(changeSet.getNodeRef(), ContentModel.PROP_CONTENT);
-        String content = reader.getContentString();
-
-		try {
-			JSONObject changeJson = new JSONObject(content);
-	
-			JSONArray changeArray = changeJson.getJSONArray(COMMIT_KEY);
-			for (int ii = 0; ii < changeArray.length(); ii++) {
-				JSONObject json = changeArray.getJSONObject(ii);
-				EmsScriptNode node = getScriptNodeByNodeRefId(json.getString(ID_KEY), services);
-				if (node != null) {
-					String versionKey = json.getString(VERSION_KEY);
-					node.revert("reverting to version " + versionKey
-							+ " as part of commit " + changeSet.getName(), false,
-							versionKey);
-				}
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-			status = false;
-		}
+//		String content = (String) commit.getProperty( "ems:commit" );
+		// TODO: need to revert to original elements
+		// TODO: revert moves.... this may not be easy
+		// TODO: revert adds (e.g., make them deleted)
+//		try {
+//			JSONObject changeJson = new JSONObject(content);
+//	
+//			JSONArray changeArray = changeJson.getJSONArray(COMMIT_KEY);
+//			for (int ii = 0; ii < changeArray.length(); ii++) {
+//				JSONObject json = changeArray.getJSONObject(ii);
+//				EmsScriptNode node = getScriptNodeByNodeRefId(json.getString(ID_KEY), services);
+//				if (node != null) {
+//					String versionKey = json.getString(VERSION_KEY);
+//					node.revert("reverting to version " + versionKey
+//							+ " as part of commit " + commit.getName(), false,
+//							versionKey);
+//				}
+//			}
+//		} catch (JSONException e) {
+//			e.printStackTrace();
+//			status = false;
+//		}
 
 		return status;
 	}
@@ -195,5 +214,5 @@ public class CommitUtil {
 			}
 		}		
 		return null;
-	}
+	}		
 }

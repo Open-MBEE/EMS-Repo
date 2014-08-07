@@ -1,19 +1,17 @@
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.mbee.util.AbstractDiff;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
 
-import java.io.Serializable;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
+import org.junit.Assert;
 
 /**
  * NodeDiff provides access to differences between two nodes in alfresco, at
@@ -21,81 +19,56 @@ import org.alfresco.service.namespace.QName;
  * the short format, such as cm:name. The values are the raw Serializable values
  * returned by getProperties(). The second node is treated as the result of a
  * change to the first.
+ *
+ * TODO -- this does not diff content
+ * TODO -- a map from node ID to added and removed aspects
  */
-public class NodeDiff {
-    protected static boolean computeDiffOnConstruction = false;
-    protected boolean lazy = true;
-    protected boolean ignoreRemovedProperties = false;
-    
+public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
+
+    public NodeDiff( Map< String, NodeRef > m1, Map< String, NodeRef > m2,
+                     Boolean ignoreRemovedProperties ) {
+        super( m1, m2, ignoreRemovedProperties );
+        // TODO Auto-generated constructor stub
+    }
+
+    public NodeDiff( Map< String, NodeRef > map1, Map< String, NodeRef > map2 ) {
+        super( map1, map2 );
+        if ( map1 != null && map1.size() == 1 && map2 != null && map2.size() == 1 ) {
+            node1 = getMap1().values().iterator().next();
+            node2 = getMap2().values().iterator().next();
+        }
+        // TODO Auto-generated constructor stub
+    }
+
+    public NodeDiff( Set< NodeRef > s1, Set< NodeRef > s2,
+                     Boolean ignoreRemovedProperties ) {
+        super( s1, s2, ignoreRemovedProperties );
+        // TODO Auto-generated constructor stub
+    }
+
+    public NodeDiff( Set< NodeRef > s1, Set< NodeRef > s2 ) {
+        super( s1, s2 );
+        // TODO Auto-generated constructor stub
+    }
+
     public NodeRef node1, node2;
-    public Set<String> removedAspects = null;
-    public Set<String> addedAspects = null;
-    public Map<String, Object> removedProperties = null;
-    public Map<String, Object> addedProperties = null;
-    public Map<String, Pair< Object, Object > > updatedProperties = null;
-    public Map<String, Pair< Object, Object > > propertyChanges = null;
-    private ServiceRegistry services = null;
+    protected Set<String> removedAspects = null;
+    protected Set<String> addedAspects = null;
+    public ServiceRegistry services = null;
 
     public NodeDiff( NodeRef node1, NodeRef node2 ) {
-        this( node1, node2, null, null );
+        this( node1, node2, null );
     }
 
     public NodeDiff( NodeRef node1, NodeRef node2,
-                     Boolean lazy, Boolean ignoreRemovedProperties ) {
-        if ( lazy != null ) this.lazy = lazy;
+                     Boolean ignoreRemovedProperties ) {
+        super( Utils.newSet( node1 ), Utils.newSet( node2 ), ignoreRemovedProperties );
         if ( ignoreRemovedProperties != null ) {
             this.ignoreRemovedProperties = ignoreRemovedProperties;
         }
         this.node1 = node1;
         this.node2 = node2;
         if ( computeDiffOnConstruction ) diffProperties();
-    }
-
-    public boolean areDifferent() {
-        return !areSame();
-    }
-
-    public boolean areSame() {
-        return getPropertyChanges().isEmpty();
-    }
-
-    /**
-     * Compute property changes and save them in propertyChanges.
-     */
-    protected void diffProperties() {
-        NodeService nodeService = getServices().getNodeService();
-        Map< QName, Serializable > properties1 = nodeService.getProperties( node1 );
-        Map< QName, Serializable > properties2 = nodeService.getProperties( node2 );
-        Set< QName > keys = new TreeSet< QName >( properties1.keySet() );
-        keys.addAll( properties2.keySet() );
-        propertyChanges = new TreeMap< String, Pair<Object,Object> >();
-        if ( !lazy ) {
-            addedProperties = new TreeMap< String, Object >();
-//            if ( !ignoreRemovedProperties ) {
-                removedProperties = new TreeMap< String, Object >();
-//            }
-            updatedProperties = new TreeMap< String, Pair<Object,Object> >();
-        }
-        if ( !NodeUtil.exists( node1 ) || !NodeUtil.exists( node2 ) ) return;
-        for ( QName qName : keys ) {
-            Serializable val1 = properties1.get( qName );
-            Serializable val2 = properties2.get( qName );
-            
-            if ( val1 == null && val2 == null ) continue;
-            String propName = qName.toPrefixString();
-            if ( !lazy ) {
-                if ( val1 == null ) {
-                    addedProperties.put( propName, val2 );
-                } else if ( val2 == null ) {
-                    if ( !ignoreRemovedProperties ) {
-                        removedProperties.put( propName, val1 );
-                    }
-                } else {
-                    updatedProperties.put( propName, new Pair< Object, Object >( val1, val2 ) );
-                }
-            }
-            propertyChanges.put( propName, new Pair< Object, Object >( val1, val2 ) );
-        }
     }
 
     private ServiceRegistry getServices() {
@@ -105,13 +78,6 @@ public class NodeDiff {
         return services;
     }
 
-    public NodeRef getNode1() {
-        return node1;
-    }
-    public NodeRef getNode2() {
-        return node2;
-    }
-    
     protected void diffAspects() {
         // TODO -- create generic diff, union, intersect, subtract utility functions
         Set<QName> aspects1 = NodeUtil.getAspects( node1 );
@@ -136,56 +102,35 @@ public class NodeDiff {
         }
         return addedAspects;
     }
-    
-    public Map< String, Object > getRemovedProperties() {
-        if ( removedProperties == null ) {
-            removedProperties = new TreeMap< String, Object >();
-            if ( !ignoreRemovedProperties ) {
-                for ( Map.Entry< String, Pair< Object, Object > > e : getPropertyChanges().entrySet() ) {
-                    if ( e.getValue().second == null ) {
-                        removedProperties.put( e.getKey(),
-                                               e.getValue().first );
-                    }
-                }
-            }
-            // diffProperties();
-        }
-        return removedProperties;
+
+    @Override
+    public String getId( NodeRef t ) {
+        EmsScriptNode node = new EmsScriptNode( t, getServices() );
+        return node.getName();
     }
 
-    public Map< String, Object > getAddedProperties() {
-        if ( addedProperties == null ) {
-            addedProperties = new TreeMap< String, Object >();
-            for ( Map.Entry< String, Pair< Object, Object > > e : getPropertyChanges().entrySet() ) {
-                if ( e.getValue().first == null ) {
-                    addedProperties.put( e.getKey(), e.getValue().second );
-                }
-            }
-//            diffProperties();
-        }
-        return addedProperties;
+    @Override
+    public String getPropertyId( Object property ) {
+        Assert.assertFalse( true );
+        return null;
     }
 
-    public Map< String, Pair< Object, Object >> getUpdatedProperties() {
-        if ( updatedProperties == null ) {
-            updatedProperties = new TreeMap< String, Pair<Object,Object> >( getPropertyChanges() );
-            for ( String k : getAddedProperties().keySet() ) {
-                updatedProperties.remove( k );
-            }
-            if ( !ignoreRemovedProperties ) {
-                for ( String k : getRemovedProperties().keySet() ) {
-                    updatedProperties.remove( k );
-                }
-            }
-//            diffProperties();
-        }
-        return updatedProperties;
+    @Override
+    public Set< Object > getProperties( NodeRef t ) {
+        return new LinkedHashSet< Object >( getPropertyMap( t ).values() );
     }
 
-    public Map< String, Pair< Object, Object >> getPropertyChanges() {
-        if ( propertyChanges == null ) {
-            diffProperties();
-        }
-        return propertyChanges;
+    @Override
+    public Object getProperty( NodeRef ref, String id ) {
+        EmsScriptNode node = new EmsScriptNode( ref, getServices() );
+        return node.getProperty( id );
     }
+
+    @Override
+    public Map<String, Object> getPropertyMap( NodeRef ref ) {
+        EmsScriptNode node = new EmsScriptNode( ref, getServices() );
+        Map< String, Object > props = node.getProperties();
+        return props;
+    }
+
 }

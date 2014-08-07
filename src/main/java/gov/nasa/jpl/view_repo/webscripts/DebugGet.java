@@ -51,21 +51,27 @@ public class DebugGet extends DeclarativeWebScript {
 	
 	protected Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
-	    Map<String, Object> model = new HashMap<String, Object>();
-	    
-	    String turnOnStr = req.getParameter( "on" );
-	    boolean turnOn = turnOnStr != null; 
-	    turnOnStr = turnOn ? "on" : "off";
-	    if ( turnOn == Debug.isOn() ) {
-	        System.out.println((new Date()) + ": debug is already " + turnOnStr );
-	    } else {
-	        if ( turnOn ) Debug.turnOn();
-	        else Debug.turnOff();
-            System.out.println((new Date()) + ": debug turned " + turnOnStr );
-	    }
+        Map< String, Object > model = new HashMap< String, Object >();
+
+        String turnOnStr = req.getParameter( "on" );
+        String turnOffStr = req.getParameter( "off" );
+
+        boolean turnOn = !( turnOnStr == null ||
+                            turnOnStr.trim().equalsIgnoreCase( "false" ) ||
+                            ( turnOffStr != null &&
+                              turnOffStr.trim().equalsIgnoreCase( "true" ) ) );
+        turnOnStr = turnOn ? "on" : "off";
+        if ( turnOn == Debug.isOn() ) {
+            System.out.println( ( new Date() ) + ": debug is already "
+                                + turnOnStr );
+        } else {
+            if ( turnOn ) Debug.turnOn();
+            else Debug.turnOff();
+            System.out.println( ( new Date() ) + ": debug turned " + turnOnStr );
+        }
         model.put( "res", "debug " + turnOnStr );
-	    
-		return model;
+
+        return model;
 	}
 
 }

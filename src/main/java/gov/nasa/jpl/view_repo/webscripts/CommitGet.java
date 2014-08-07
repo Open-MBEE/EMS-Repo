@@ -83,9 +83,9 @@ public class CommitGet extends AbstractJavaWebScript {
         String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
         EmsScriptNode siteNode = getSiteNode( siteName, workspace, dateTime );
         //EmsScriptNode siteNode = new EmsScriptNode(services.getSiteService().getSite(siteName).getNodeRef(), services, response);
-        JSONObject changeSets = null;
+        JSONObject changeSets = new JSONObject();
         try {
-			changeSets = CommitUtil.getJsonChangeSets(siteNode, workspace, services, response);
+//			changeSets = CommitUtil.getJsonChangeSets(siteNode, workspace, services, response);
 
 			model.put("res", changeSets.toString(2));
             model.put("title", siteName);

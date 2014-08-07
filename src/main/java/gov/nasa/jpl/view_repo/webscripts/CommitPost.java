@@ -79,18 +79,18 @@ public class CommitPost extends AbstractJavaWebScript {
         String nodeId = req.getServiceMatch().getTemplateVars().get(COMMIT_ID);
         
         EmsScriptNode changeSet = CommitUtil.getScriptNodeByNodeRefId(nodeId, services);
-        if (changeSet != null) {
-        		if (CommitUtil.revertCommit(changeSet, services)) {
-        			responseStatus.setCode(HttpServletResponse.SC_OK);
-        			response.append("Okay");
-        		} else {
-        			responseStatus.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        			response.append("Could not revert");
-        		}
-        } else {
-        		responseStatus.setCode(HttpServletResponse.SC_NOT_FOUND);
-        		response.append("Could not find change set to revert");
-        }
+//        if (changeSet != null) {
+//        		if (CommitUtil.revertCommit(changeSet, services)) {
+//        			responseStatus.setCode(HttpServletResponse.SC_OK);
+//        			response.append("Okay");
+//        		} else {
+//        			responseStatus.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+//        			response.append("Could not revert");
+//        		}
+//        } else {
+//        		responseStatus.setCode(HttpServletResponse.SC_NOT_FOUND);
+//        		response.append("Could not find change set to revert");
+//        }
 
 		status.setCode(responseStatus.getCode());
 		model.put("res", response.toString());
