@@ -2196,6 +2196,21 @@ public class EmsScriptNode extends ScriptNode implements
         }
     }
 
+    /**
+     * Override exists for EmsScriptNodes
+     *
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean exists() {
+        if ( !super.exists() ) return false;
+        if ( hasAspect( "ems:Deleted" ) ) {
+            return false;
+        }
+        return true;
+    }
+
+
     public boolean isFolder() {
         try {
             services.getNodeService().getType( this.getNodeRef() );
@@ -3346,5 +3361,14 @@ public class EmsScriptNode extends ScriptNode implements
             refs.add( ref );
         }
         return refs;
+    }
+
+    public static List< EmsScriptNode >
+            toEmsScriptNodeList( Collection< NodeRef > refs ) {
+        ArrayList<EmsScriptNode> nodes = new ArrayList< EmsScriptNode >();
+        for ( NodeRef ref : refs ) {
+            nodes.add( new EmsScriptNode( ref, NodeUtil.getServices() ) );
+        }
+        return nodes;
     }
 }
