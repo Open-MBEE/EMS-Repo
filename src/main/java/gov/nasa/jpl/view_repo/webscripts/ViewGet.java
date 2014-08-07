@@ -168,7 +168,6 @@ public class ViewGet extends AbstractJavaWebScript {
         return model;
     }
 
-
     private void handleView( String viewId, JSONArray viewsJson,
                              boolean generate, boolean recurse,
                              WorkspaceNode workspace, Date dateTime )
