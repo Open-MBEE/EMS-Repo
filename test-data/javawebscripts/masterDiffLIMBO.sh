@@ -49,8 +49,12 @@ if [ $server -eq 1 ]; then
         elif [ $diffChoose -eq 2 ];then
 	        echo 'RUNNING WORKSPACES DIFF SCRIPT'
 	        echo 'OMITTING OLD API DIFF SCRIPT'
-                ./diffWorkspaceLIMBO.sh
-                passTest=$?
+		echo $GIT_BRANCH
+		if [[ "$GIT_BRANCH" == *workspaces ]];then
+		    echo 'WORKING FROM WORKSPACES BRANCH'
+                    ./diffWorkspaceLIMBO.sh
+                    passTest=$?
+		fi
 
         else 
                 echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
@@ -64,14 +68,14 @@ if [ $server -eq 1 ]; then
         echo 'RUNNING SOAP UI TESTS'
         #ssh $soapServer 'cd /classPath/; ./soapScript;'
         #classPath=??
-        TestSuite="WorkspacesTesting"
+        #TestSuite="WorkspacesTesting"
         #TestCase="??"
         #./testrunner.sh -f ./soapTestData -s $TestSuite -c $TestCase $classpath
-        cd ./soapStuff
-	for i in $(ls . | grep "soapui-project.xml"); do
-	         echo RUNNING TEST $i
-                ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i
-        done
+        #cd ./soapStuff
+	#for i in $(ls . | grep "soapui-project.xml"); do
+	#         echo RUNNING TEST $i
+        #        ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i
+        #done
 
         #shutdown the tomcat server process
         pkill -fn 'integration-test'
@@ -79,10 +83,11 @@ if [ $server -eq 1 ]; then
 
 	echo 'PASSTEST?'
         echo "$passTest"
-	#exit $passTest
+	exit $passTest
 fi
 
 if [ $server -eq 2 ]; then
 	echo 'SERVER TIME-OUT'
+	exit 1
 fi
 

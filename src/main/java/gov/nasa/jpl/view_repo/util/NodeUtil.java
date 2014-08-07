@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -48,7 +49,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
 
 public class NodeUtil {
-    
+
     public enum SearchType {
         DOCUMENTATION( "@sysml\\:documentation:\"" ),
         NAME( "@sysml\\:name:\"" ),
@@ -56,8 +57,9 @@ public class NodeUtil {
         ID( "@sysml\\:id:\"" ),
         STRING( "@sysml\\:string:\"" ),
         BODY( "@sysml\\:body:\"" ),
-        CHECKSUM( "@view\\:cs\"" );
-        
+        CHECKSUM( "@view\\:cs\"" ),
+        WORKSPACE("@ems\\:workspace\"" );
+
         public String prefix;
 
         SearchType( String prefix ) {
@@ -66,7 +68,7 @@ public class NodeUtil {
     };
 
     public static ServiceRegistry services = null;
-    
+
     // needed for Lucene search
     public static StoreRef SEARCH_STORE = null;
             //new StoreRef( StoreRef.PROTOCOL_WORKSPACE, "SpacesStore" );
@@ -78,7 +80,7 @@ public class NodeUtil {
         }
         return SEARCH_STORE;
     }
-    
+
     public static ApplicationContext getApplicationContext() {
         String[] contextPath =
                 new String[] { "classpath:alfresco/application-context.xml" };
@@ -86,7 +88,7 @@ public class NodeUtil {
                 ApplicationContextHelper.getApplicationContext( contextPath );
         return applicationContext;
     }
-    
+
     public static ServiceRegistry getServices() {
         return getServiceRegistry();
     }
@@ -107,7 +109,7 @@ public class NodeUtil {
                             + resultSet.length() + " matches." );
         return resultSetToList( resultSet );
     }
-    
+
     public static ResultSet luceneSearch(String queryPattern ) {
         return luceneSearch( queryPattern, (SearchService)null );
     }
@@ -126,7 +128,7 @@ public class NodeUtil {
             }
         }
         ResultSet results = null;
-        if ( searchService != null ) { 
+        if ( searchService != null ) {
             results = searchService.query( getStoreRef(),
                                            SearchService.LANGUAGE_LUCENE,
                                            queryPattern );
@@ -137,7 +139,7 @@ public class NodeUtil {
         }
         return results;
     }
-    
+
     public static List<EmsScriptNode> resultSetToList( ResultSet results ) {
         ArrayList<EmsScriptNode> nodes = new ArrayList<EmsScriptNode>();
        for ( ResultSetRow row : results ) {
@@ -150,7 +152,7 @@ public class NodeUtil {
     }
     public static String resultSetToString( ResultSet results ) {
         return "" + resultSetToList( results );
-    }    
+    }
 
     protected static ResultSet findNodeRefsByType(String name, SearchType type,
                                                   ServiceRegistry services) {
@@ -172,7 +174,7 @@ public class NodeUtil {
         return findNodeRefByType( name, type.prefix, workspace, dateTime,
                                   exactMatch, services );
     }
-    
+
     public static NodeRef findNodeRefByType( String specifier, String prefix,
                                              WorkspaceNode workspace,
                                              Date dateTime, boolean exactMatch,
@@ -226,7 +228,7 @@ public class NodeUtil {
                         }
                         continue;
                     }
-                    
+
                         esn = new EmsScriptNode( nr, getServices() );
                         if ( !esn.exists() ) {
                             if ( Debug.isOn() ) {
@@ -250,7 +252,7 @@ public class NodeUtil {
 
                             continue;
                         }
-                        
+
                         // Make sure we didn't just get a near match.
                         try {
                             if ( !esn.checkPermissions( PermissionService.READ ) ) {
@@ -277,9 +279,9 @@ public class NodeUtil {
                                 if ( Debug.isOn() ) {
                                     Debug.outln( "findNodeRefsByType(): matched!" );
                                  }
-                                if ( justFirst && 
+                                if ( justFirst &&
                                      ( !exists( workspace ) ||
-                                       ( exists( lowest ) && 
+                                       ( exists( lowest ) &&
                                                workspace.equals( getWorkspace( nodeRef ) ) ) ) ) {
                                     break;
                                 }
@@ -319,15 +321,15 @@ public class NodeUtil {
         }
 //        // If we found a NodeRef but still have null (maybe because a version
 //        // didn't exist at the time), try again for the latest.
-//        if ( nodeRefs.isEmpty()//nodeRef == null 
+//        if ( nodeRefs.isEmpty()//nodeRef == null
 //                && dateTime != null && gotResults) {
 //            nodeRefs = findNodeRefsByType( specifier, prefix, null, justFirst,
 //                                           exactMatch, services );
 //            //nodeRef = findNodeRefByType( specifier, prefix, null, services );
 //        }
-        return nodeRefs;     
+        return nodeRefs;
     }
-    
+
     public static WorkspaceNode getWorkspace( NodeRef nodeRef ) {
         EmsScriptNode node = new EmsScriptNode( nodeRef, getServices() );
         return node.getWorkspace();
@@ -342,7 +344,7 @@ public class NodeUtil {
         if ( source.equals( directSource ) ) return true;
         return isWorkspaceSource( source, directSource );
     }
-    
+
     public static boolean isWorkspaceSource( NodeRef source, NodeRef changed ) {
         if ( source == null || changed == null ) return false;
         EmsScriptNode sourceNode = new EmsScriptNode( source, getServices() );
@@ -353,10 +355,10 @@ public class NodeUtil {
     /**
      * Find a NodeReference by name (returns first match, assuming things are
      * unique)
-     * 
+     *
      * @param id
      *            Node name to search for
-     * @param workspace 
+     * @param workspace
      * @param dateTime
      *            the time specifying which version of the NodeRef to find; null
      *            defaults to the latest version
@@ -375,8 +377,8 @@ public class NodeUtil {
         }
         return r;
     }
-    
-    
+
+
     /**
      * Perform Lucene search for the specified pattern and ACM type
      * TODO: Scope Lucene search by adding either parent or path context
@@ -396,7 +398,7 @@ public class NodeUtil {
         }
         return elementsFound;
     }
-    
+
     /**
      * Perform Lucene search for the specified pattern and ACM type
      * TODO: Scope Lucene search by adding either parent or path context
@@ -410,7 +412,7 @@ public class NodeUtil {
                                Status status ) {
         Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
 
-        
+
         //ResultSet resultSet = null;
         ArrayList<NodeRef> resultSet = null;
         //try {
@@ -455,12 +457,12 @@ public class NodeUtil {
 
         return searchResults;
     }
-    
+
     /**
      * This method behaves the same as if calling
      * {@link #isType(String, ServiceRegistry)} while passing null as the
      * ServiceRegistry.
-     * 
+     *
      * @param typeName
      * @return true if and only if a type is defined in the content model with a
      *         matching name.
@@ -472,7 +474,7 @@ public class NodeUtil {
     /**
      * Determine whether the input type name is a type in the content model (as
      * opposed to an aspect, for example).
-     * 
+     *
      * @param typeName
      * @param services
      * @return true if and only if a type is defined in the content model with a
@@ -484,7 +486,7 @@ public class NodeUtil {
             typeName = Acm.getJSON2ACM().get( typeName );
         }
 //        String[] split = typeName.split( ":" );
-//        
+//
 //        String nameSpace = null;
 //        String localName = null;
 //        if ( split.length == 2 ) {
@@ -529,12 +531,12 @@ public class NodeUtil {
 //        if (Debug.isOn()) System.out.println("isType(" + typeName + ") = false");
         return false;
     }
-    
+
     /**
      * This method behaves the same as if calling
      * {@link #isAspect(String, ServiceRegistry)} while passing null as the
      * ServiceRegistry.
-     * 
+     *
      * @param aspectName
      * @return true if and only if an aspect is defined in the content model
      *         with a matching name.
@@ -546,7 +548,7 @@ public class NodeUtil {
     /**
      * Determine whether the input aspect name is an aspect in the content model
      * (as opposed to a type, for example).
-     * 
+     *
      * @param aspectName
      * @param services
      * @return true if and only if an aspect is defined in the content model
@@ -556,7 +558,7 @@ public class NodeUtil {
         AspectDefinition aspect = getAspect( aspectName, services );
         return aspect != null;
     }
-    
+
     public static AspectDefinition getAspect( String aspectName, ServiceRegistry services ) {
         if ( Acm.getJSON2ACM().keySet().contains( aspectName ) ) {
             aspectName = Acm.getACM2JSON().get( aspectName );
@@ -572,7 +574,7 @@ public class NodeUtil {
               return t;
             }
         }
-        
+
         Collection< QName > aspects = dServ.getAllAspects();
         if (Debug.isOn()) System.out.println("all aspects: " + aspects);
 
@@ -589,7 +591,7 @@ public class NodeUtil {
         return null;
 
     }
-    
+
     public static Collection< PropertyDefinition >
             getAspectProperties( String aspectName, ServiceRegistry services ) {
         AspectDefinition aspect = getAspect( aspectName, services );
@@ -613,31 +615,31 @@ public class NodeUtil {
     {
         return longQName.toPrefixString(getServices().getNamespaceService());
     }
-    
+
     /**
      * Helper to create a QName from either a fully qualified or short-name
      * QName string
      * <P>
      * Copied from {@link ScriptNode#createQName(QName)}.
-     * 
+     *
      * @param s
      *            Fully qualified or short-name QName string
-     * 
+     *
      * @return QName
      */
     public static QName createQName(String s) {
         return createQName( s, null );
     }
-    
+
     /**
      * Helper to create a QName from either a fully qualified or short-name
      * QName string
      * <P>
      * Copied from {@link ScriptNode#createQName(QName)}.
-     * 
+     *
      * @param s
      *            Fully qualified or short-name QName string
-     * 
+     *
      * @param services
      *            ServiceRegistry for getting the service to resolve the name
      *            space
@@ -662,19 +664,19 @@ public class NodeUtil {
         return qname;
     }
 
-    
+
 //    public static QName makeContentModelQName( String cmName ) {
 //        return makeContentModelQName( cmName, null );
 //    }
 //    public static QName makeContentModelQName( String cmName, ServiceRegistry services ) {
 //        if ( services == null ) services = getServices();
-//        
+//
 //        if ( cmName == null ) return null;
 //        if ( Acm.getJSON2ACM().keySet().contains( cmName ) ) {
 //            cmName = Acm.getACM2JSON().get( cmName );
 //        }
 //        String[] split = cmName.split( ":" );
-//        
+//
 //        String nameSpace = null;
 //        String localName = null;
 //        if ( split.length == 2 ) {
@@ -704,12 +706,12 @@ public class NodeUtil {
 //        }
 //        return qName;
 //    }
-    
+
     /**
      * This method behaves the same as if calling
      * {@link #getContentModelTypeName(String, ServiceRegistry)} while passing
      * null as the ServiceRegistry.
-     * 
+     *
      * @param typeOrAspectName
      * @return the input type name if it matches a type; otherwise,
      *         return the Element type, assuming that all nodes are Elements
@@ -722,7 +724,7 @@ public class NodeUtil {
      * Get the type defined in the Alfresco content model. Return the input type
      * name if it matches a type; otherwise, return the Element type, assuming
      * that all nodes are Elements.
-     * 
+     *
      * @param typeOrAspectName
      * @return
      */
@@ -733,13 +735,13 @@ public class NodeUtil {
             typeOrAspectName = Acm.getJSON2ACM().get( typeOrAspectName );
         }
         String type = typeOrAspectName;
-        boolean notType = !NodeUtil.isType( type, services ); 
+        boolean notType = !NodeUtil.isType( type, services );
         if ( notType ) {
             type = Acm.ACM_ELEMENT;
         }
         return type;
     }
-    
+
     /**
      * Get site of specified short name
      * @param siteName
@@ -762,7 +764,7 @@ public class NodeUtil {
                 return siteNode;
             }
         }
-        
+
         // Get the site from SiteService.
         SiteInfo siteInfo = services.getSiteService().getSite(siteName);
         if (siteInfo != null) {
@@ -796,14 +798,14 @@ public class NodeUtil {
         }
         return companyHome;
     }
-    
+
     public static Set< NodeRef > getRootNodes(ServiceRegistry services ) {
         return services.getNodeService().getAllRootNodes( getStoreRef() );
     }
 
     /**
      * Find an existing NodeRef with the input Alfresco id.
-     * 
+     *
      * @param id
      *            an id similar to
      *            workspace://SpacesStore/e297594b-8c24-427a-9342-35ea702b06ff
@@ -823,7 +825,7 @@ public class NodeUtil {
     }
 
     public static class VersionLowerBoundComparator implements Comparator< Object > {
-        
+
         @Override
         public int compare( Object o1, Object o2 ) {
             Date d1 = null;
@@ -850,10 +852,10 @@ public class NodeUtil {
             return -GenericComparator.instance().compare( d1, d2 );
         }
     }
-    
+
     public static VersionLowerBoundComparator versionLowerBoundComparator =
             new VersionLowerBoundComparator();
-    
+
     public static NodeRef getNodeRefAtTime( NodeRef nodeRef, WorkspaceNode workspace,
                                             Date timestamp ) {
         EmsScriptNode node = new EmsScriptNode( nodeRef, getServices() );
@@ -881,11 +883,11 @@ public class NodeUtil {
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         return getNodeRefAtTime( ref, dateTime );
     }
-    
+
     /**
      * Get the version of the NodeRef that was the most current at the specified
      * date/time.
-     * 
+     *
      * @param ref
      *            some version of the NodeRef
      * @param dateTime
@@ -912,7 +914,7 @@ public class NodeUtil {
                 if (Debug.isOn())  Debug.outln( "no history! created " + createdTime );
         		return ref;
         }
-        
+
         Collection< Version > versions = history.getAllVersions();
         Vector<Version> vv = new Vector<Version>( versions );
         if (Debug.isOn())  Debug.outln("versions = " + vv );
@@ -985,10 +987,10 @@ public class NodeUtil {
         return fnr;
     }
 
-    
+
     /**
      * Find or create a folder
-     * 
+     *
      * @param source
      *            node within which folder will have been created; may be null
      * @param path
@@ -1004,7 +1006,7 @@ public class NodeUtil {
             Pattern p = Pattern.compile( "(Sites)?/?(\\w*)" );
             Matcher m = p.matcher( path );
             if ( m.matches() ) {
-                String siteName = m.group( 1 ); 
+                String siteName = m.group( 1 );
                 source = getSiteNode( siteName, null, null, services, response );
                 if ( source != null ) {
                     result = mkdir( source, path, services, response, status );
@@ -1054,7 +1056,7 @@ public class NodeUtil {
         }
         return folder;
     }
-    
+
     /**
      * Append onto the response for logging purposes
      * @param msg   Message to be appened to response
@@ -1100,13 +1102,13 @@ public class NodeUtil {
         if ( node == null ) return false;
         return node.exists();
     }
-    
+
     public static boolean exists( NodeRef ref ) {
         if ( ref == null ) return false;
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
         return node.exists();
     }
-    
+
     public static EmsScriptNode getUserHomeFolder( String userName ) {
         NodeRef homeFolderNode = null;
         EmsScriptNode homeFolderScriptNode = null;
@@ -1154,7 +1156,7 @@ public class NodeUtil {
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
         return node.getAspectsSet();
     }
-    
+
     public static List<String> qNamesToStrings( Collection<QName> qNames ) {
         List<String> names = new ArrayList< String >();
         for ( QName qn : qNames ) {
@@ -1162,5 +1164,17 @@ public class NodeUtil {
         }
         return names;
     }
-    
+
+    public static Set< String > getNames( Collection< NodeRef > refs ) {
+        List< EmsScriptNode > nodes = EmsScriptNode.toEmsScriptNodeList( refs );
+        TreeSet< String > names =
+                new TreeSet< String >( EmsScriptNode.getNames( nodes ) );
+        return names;
+    }
+
+    public static String getName( NodeRef ref ) {
+        EmsScriptNode node = new EmsScriptNode( ref, getServices() );
+        return node.getName();
+    }
+
 }

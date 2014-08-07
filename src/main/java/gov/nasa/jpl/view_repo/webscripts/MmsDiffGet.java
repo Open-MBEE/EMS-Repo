@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,14 +22,14 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     protected Map< String, Object > executeImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
         Map<String, Object> results = new HashMap<String, Object>();
-        
-        EmsScriptNode ws1, ws2;
-        
-        ws1 = findScriptNodeById( "300", null, null );
-        ws2 = findScriptNodeById( "400", null, null );
-        
+
+        WorkspaceNode ws1, ws2;
+
+        ws1 = getWorkspaceFromId( "ws1", services, response, status, false, null );
+        ws2 = getWorkspaceFromId( "ws2", services, response, status, false, null );
+
         WorkspaceDiff diff = new WorkspaceDiff(ws1, ws2);
-        
+
         return results;
     }
 }

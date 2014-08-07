@@ -124,6 +124,26 @@ public class EmsScriptNode extends ScriptNode implements
                     add( "ems:mergeSource" );
                 }
             };
+    public static TreeSet< String > workspaceMetaAspects =
+            new TreeSet< String >() {
+                /**
+                 *
+                 */
+                private static final long serialVersionUID = 1L;
+
+                {
+                    add( "ems:HasWorkspace" );
+                    add( "ems:Trashed" );
+                    add( "ems:Added" );
+                    add( "ems:Deleted" );
+                    add( "ems:Moved" );
+                    add( "ems:Updated" );
+                    add( "ems:MergeSource" );
+                    add( "ems:Committable" );
+                    add( "st:site" );
+                    add( "st:sites" );
+                }
+            };
 
     // provide logging capability of what is done
     private StringBuffer response = null;
@@ -2196,6 +2216,25 @@ public class EmsScriptNode extends ScriptNode implements
         }
     }
 
+    /**
+     * Override exists for EmsScriptNodes
+     *
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean exists() {
+        if ( !super.exists() ) return false;
+        if ( hasAspect( "ems:Deleted" ) ) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isDeleted() {
+        return !exists();
+    }
+
+
     public boolean isFolder() {
         try {
             services.getNodeService().getType( this.getNodeRef() );
@@ -2409,7 +2448,8 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean merge( NodeDiff diff ) {
         boolean changed = false;
 
-        for ( String aspect : diff.getRemovedAspects() ) {
+
+        for ( String aspect : diff.getRemovedAspects(getName()) ) {
             NodeService ns = getServices().getNodeService();
             if ( hasAspect( aspect ) ) {
                 try {
@@ -2421,7 +2461,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
 
-        for ( String aspect : diff.getAddedAspects() ) {
+        for ( String aspect : diff.getAddedAspects(getName()) ) {
             NodeService ns = getServices().getNodeService();
             if ( !hasAspect( aspect ) ) {
                 try {
@@ -3325,5 +3365,35 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
         return headVersion;
+    }
+
+    public static List< String > getNames( List< EmsScriptNode > nodes ) {
+        List< String > names = new ArrayList< String >();
+        for ( EmsScriptNode node : nodes ) {
+            String name = node.getName();
+            if ( !Utils.isNullOrEmpty( name ) ) {
+                names.add( name );
+            }
+        }
+        return names;
+    }
+
+    public static Collection< ? extends NodeRef >
+            getNodeRefs( List< EmsScriptNode > nodes ) {
+        List< NodeRef > refs = new ArrayList< NodeRef >();
+        for ( EmsScriptNode node : nodes ) {
+            NodeRef ref = node.getNodeRef();
+            refs.add( ref );
+        }
+        return refs;
+    }
+
+    public static List< EmsScriptNode >
+            toEmsScriptNodeList( Collection< NodeRef > refs ) {
+        ArrayList<EmsScriptNode> nodes = new ArrayList< EmsScriptNode >();
+        for ( NodeRef ref : refs ) {
+            nodes.add( new EmsScriptNode( ref, NodeUtil.getServices() ) );
+        }
+        return nodes;
     }
 }
