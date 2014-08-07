@@ -70,9 +70,17 @@
 	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/mbee_util.jar</systemPath>
 	        </dependency>
 	        <dependency>
-	            <groupId>KExpParser</groupId>
-	            <artifactId>KExpParser</artifactId>
+	            <groupId>kexpparser</groupId>
+	            <artifactId>kexpparser</artifactId>
 	            <version>0.0.7</version>
+	            <scope>system</scope>
+	            <type>jar</type>
+	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
+	        </dependency>
+	        <dependency>
+	            <groupId>emsscala</groupId>
+	            <artifactId>emsscala</artifactId>
+	            <version>0.0.1</version>
 	            <scope>system</scope>
 	            <type>jar</type>
 	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
@@ -98,9 +106,14 @@
                     <version>0.0.10</version>
                </dependency>
                 <dependency>
-                    <groupId>KExpParser</groupId>
-                    <artifactId>KExpParser</artifactId>
+                    <groupId>kexpparser</groupId>
+                    <artifactId>kexpparser</artifactId>
                     <version>0.0.7</version>
+                </dependency>
+                <dependency>
+                    <groupId>emsscala</groupId>
+                    <artifactId>emsscala</artifactId>
+                    <version>0.0.1</version>
                 </dependency>
             </dependencies>
         </profile>

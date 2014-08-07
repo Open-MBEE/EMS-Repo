@@ -15,6 +15,6 @@
 	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/kparser.jar"/>
 	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/mbee_util.jar"/>
 	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/sysml.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/kparser"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/kexpparser"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
