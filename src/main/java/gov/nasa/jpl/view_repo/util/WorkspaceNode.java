@@ -1,24 +1,29 @@
 /**
- * 
+ *
  */
 package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.search.ResultSet;
 import org.springframework.extensions.webscripts.Status;
 
 /**
  * WorkspaceNode is an EmsScriptNode and a folder containing changes to a parent
  * workspace.
- * 
+ *
  */
 public class WorkspaceNode extends EmsScriptNode {
 
@@ -52,13 +57,13 @@ public class WorkspaceNode extends EmsScriptNode {
     public WorkspaceNode( NodeRef nodeRef, ServiceRegistry services ) {
         super( nodeRef, services );
     }
-    
+
     @Override
     public WorkspaceNode getWorkspace() {
         log( "Warning! calling getWorkspace on a workspace! " + getName() );
         return this;
     }
-    
+
     @Override
     public WorkspaceNode getParentWorkspace() {
         NodeRef ref = (NodeRef)getProperty("sysml:parent");
@@ -66,7 +71,7 @@ public class WorkspaceNode extends EmsScriptNode {
         WorkspaceNode parentWs = new WorkspaceNode( ref, getServices() );
         return parentWs;
     }
-    
+
     @Override
     public void setWorkspace( WorkspaceNode workspace, NodeRef source ) {
         String msg = "Cannot set the workspace of a workspace!";
@@ -83,7 +88,7 @@ public class WorkspaceNode extends EmsScriptNode {
     /**
      * Create a workspace folder within the specified folder or (if the folder
      * is null) within the specified user's home folder.
-     * 
+     *
      * @param sysmlId
      *            the name/identifier of the workspace
      * @param userName
@@ -123,7 +128,7 @@ public class WorkspaceNode extends EmsScriptNode {
         WorkspaceNode ws = new WorkspaceNode( folder.createFolder( sysmlId ).getNodeRef(),
                                               services, response, status );
         ws.addAspect( "ems:Workspace" );
-        
+
         ws.setProperty( "ems:parent", folder );
         if ( folder.isWorkspace() ) {
             if ( Debug.isOn() ) Debug.outln( "folder is a workspace: " + folder );
@@ -145,12 +150,12 @@ public class WorkspaceNode extends EmsScriptNode {
 //                                        getServices(), getResponse(),
 //                                        getStatus() );
 //    }
-    
+
     /**
      * Determine whether the given node is correct for this workspace, meaning
      * that it is either modified in this workspace or is contained by the
      * parent workspace and unmodified in this workspace.
-     * 
+     *
      * @param node
      * @return true iff the node is in this workspace
      */
@@ -161,11 +166,11 @@ public class WorkspaceNode extends EmsScriptNode {
         if ( parentWs == null ) return ( nodeWs == null );
         return parentWs.contains( node );
     }
-    
+
     /**
      * Replicate this node and its parent/grandparent folders into this
      * workspace if not already present.
-     * 
+     *
      * @param node
      * @return
      */
@@ -176,7 +181,7 @@ public class WorkspaceNode extends EmsScriptNode {
 
         String thisName = exists() ? getName() : null;
         String nodeName = node != null && node.exists() ? node.getName() : null;
-        
+
         // make sure the folder's parent is replicated
         EmsScriptNode parent = node.getParent();
 
@@ -206,11 +211,82 @@ public class WorkspaceNode extends EmsScriptNode {
                 newFolder.setWorkspace( this, node.getNodeRef() );
             }
         }
-        
+
         if ( Debug.isOn() ) Debug.outln( "returning newFolder: " + newFolder );
         return newFolder;
     }
-    
+
+    public WorkspaceNode getCommonParent(WorkspaceNode other) {
+        return getCommonParent( this, other );
+    }
+
+    public static WorkspaceNode getCommonParent( WorkspaceNode ws1,
+                                                 WorkspaceNode ws2 ) {
+        Set<WorkspaceNode> parents = new TreeSet<WorkspaceNode>();
+        while ( ( ws1 != null || ws2 != null )
+                && ( ws1 == null && !ws1.equals( ws2 ) )
+                && ( ws1 == null || !parents.contains( ws1 ) )
+                && ( ws2 == null || !parents.contains( ws2 ) ) ) {
+            if ( ws1 != null ) {
+                parents.add( ws1 );
+                ws1 = ws1.getParentWorkspace();
+            }
+            if ( ws2 != null ) {
+                parents.add( ws2 );
+                ws2 = ws2.getParentWorkspace();
+            }
+        }
+        if ( ws1 != null && ( ws1.equals( ws2 ) || parents.contains( ws1 ) ) ) {
+            return ws1;
+        }
+        if ( ws2 != null && parents.contains( ws2 ) ) {
+            return ws2;
+        }
+        return null;
+    }
+
+    public Set< NodeRef > getChangedNodeRefs() {
+        Set< NodeRef > changedElementIds = new TreeSet< NodeRef >();
+        ResultSet refs = NodeUtil.findNodeRefsByType( getName(), SearchType.WORKSPACE, getServices() );
+        List< EmsScriptNode > nodes = NodeUtil.resultSetToList( refs );
+        changedElementIds.addAll( EmsScriptNode.getNodeRefs( nodes ) );
+        return changedElementIds;
+    }
+
+    public Set< String > getChangedElementIds() {
+        Set< String > changedElementIds = new TreeSet< String >();
+        ResultSet refs = NodeUtil.findNodeRefsByType( getName(), SearchType.WORKSPACE, getServices() );
+        List< EmsScriptNode > nodes = NodeUtil.resultSetToList( refs );
+        changedElementIds.addAll( EmsScriptNode.getNames( nodes ) );
+        return changedElementIds;
+    }
+
+    public Set< NodeRef > getChangedNodeRefsWithRespectTo( WorkspaceNode other ) {
+        Set< NodeRef > changedNodeRefs = new TreeSet< NodeRef >();//getChangedNodeRefs());
+        if ( NodeUtil.exists( other ) ) {
+            WorkspaceNode targetParent = getCommonParent( other );
+            WorkspaceNode parent = this;
+            while ( parent != null && !parent.equals( targetParent ) ) {
+                changedNodeRefs.addAll( parent.getChangedNodeRefs() );
+                parent = parent.getParentWorkspace();
+            }
+        }
+        return changedNodeRefs;
+    }
+
+    public Set< String > getChangedElementIdsWithRespectTo( WorkspaceNode other ) {
+        Set< String > changedElementIds = new TreeSet< String >();//getChangedElementIds());
+        if ( NodeUtil.exists( other ) ) {
+            WorkspaceNode targetParent = getCommonParent( other );
+            WorkspaceNode parent = this;
+            while ( parent != null && !parent.equals( targetParent ) ) {
+                changedElementIds.addAll( parent.getChangedElementIds() );
+                parent = parent.getParentWorkspace();
+            }
+        }
+        return changedElementIds;
+    }
+
     // When creating a node, create it in the workspace with the owner (and
     // parent chain up to company home) replicated in the workspace.
 
@@ -219,10 +295,10 @@ public class WorkspaceNode extends EmsScriptNode {
 
     // When copying a node, check and see if the other end of each relationship
     // is in the new workspace, and copy the relationship if it is.
-    
+
     /**
      * Find the differences between this workspace and another.
-     * 
+     *
      * @param other
      *            the workspace to compare
      * @return a map of elements in this workspace to changed elements in the
@@ -231,23 +307,23 @@ public class WorkspaceNode extends EmsScriptNode {
     public Map<EmsScriptNode, EmsScriptNode> diff( WorkspaceNode other ) {
         TreeMap<EmsScriptNode, EmsScriptNode> map = new TreeMap<EmsScriptNode, EmsScriptNode>();
         // TODO
-        
+
         // find deepest common parent
-        
+
         // Collect the sysmlids of elements changed in this and the other
         // workspace as well as those of their parents up to (but not including
         // the deepest common parent). These should also include deleted
         // elements.
-        
+
         // For each sysmlid, get the corresponding element from each of the two
         // workspaces. Map the one from this workspace to that from the other
         // workspace.
-        
-        // NOTE: This doesn't specify the changes and conflicts explicitly.  
-        
+
+        // NOTE: This doesn't specify the changes and conflicts explicitly.
+
         //Set<EmsScriptNode> myElements = getLocalChanges();
-        
+
         return map;
     }
-    
+
 }

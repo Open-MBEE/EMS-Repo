@@ -2196,6 +2196,21 @@ public class EmsScriptNode extends ScriptNode implements
         }
     }
 
+    /**
+     * Override exists for EmsScriptNodes
+     *
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean exists() {
+        if ( !super.exists() ) return false;
+        if ( hasAspect( "ems:Deleted" ) ) {
+            return false;
+        }
+        return true;
+    }
+
+
     public boolean isFolder() {
         try {
             services.getNodeService().getType( this.getNodeRef() );
@@ -3325,5 +3340,35 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
         return headVersion;
+    }
+
+    public static List< String > getNames( List< EmsScriptNode > nodes ) {
+        List< String > names = new ArrayList< String >();
+        for ( EmsScriptNode node : nodes ) {
+            String name = node.getName();
+            if ( !Utils.isNullOrEmpty( name ) ) {
+                names.add( name );
+            }
+        }
+        return names;
+    }
+
+    public static Collection< ? extends NodeRef >
+            getNodeRefs( List< EmsScriptNode > nodes ) {
+        List< NodeRef > refs = new ArrayList< NodeRef >();
+        for ( EmsScriptNode node : nodes ) {
+            NodeRef ref = node.getNodeRef();
+            refs.add( ref );
+        }
+        return refs;
+    }
+
+    public static List< EmsScriptNode >
+            toEmsScriptNodeList( Collection< NodeRef > refs ) {
+        ArrayList<EmsScriptNode> nodes = new ArrayList< EmsScriptNode >();
+        for ( NodeRef ref : refs ) {
+            nodes.add( new EmsScriptNode( ref, NodeUtil.getServices() ) );
+        }
+        return nodes;
     }
 }
