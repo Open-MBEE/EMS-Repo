@@ -8,7 +8,7 @@ pkill -fn 'integration-test'
 echo 'KILLING SERVER IF ONE IS RUNNING'
 sleep 3s
 
-#cd ./../..
+cd ./../..
 ./runserver.sh > serverLog.txt &
 echo 'STARTING UP SERVER'
 sleep 60s
@@ -49,7 +49,8 @@ if [ $server -eq 1 ]; then
         elif [ $diffChoose -eq 2 ];then
                 echo 'RUNNING WORKSPACES DIFF SCRIPT'
                 echo 'OMITTING OLD API DIFF SCRIPT'
-                branch=`git branch | grep '*'`
+		branch=`git branch | grep '*'`
+		echo $branch
                 if [ "$branch" == "* workspaces" ];then
                     echo 'WORKING FROM  WORKSPACES BRANCH'
                     ./diffWorkspaceDW.sh
