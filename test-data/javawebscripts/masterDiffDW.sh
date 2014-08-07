@@ -52,7 +52,7 @@ if [ $server -eq 1 ]; then
 		#gitBranch=`git branch | grep '*'`
 		#echo "$gitBranch"
 		echo $WORKSPACE
-                if [[ "$WORKSPACE" =~ *workspaces]];then
+		if [[ "$WORKSPACE" == *workspaces]];then
                     echo 'WORKING FROM  WORKSPACES BRANCH'
                     ./diffWorkspaceDW.sh
                     passTest=$?
