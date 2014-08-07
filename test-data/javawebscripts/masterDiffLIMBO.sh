@@ -49,8 +49,12 @@ if [ $server -eq 1 ]; then
         elif [ $diffChoose -eq 2 ];then
 	        echo 'RUNNING WORKSPACES DIFF SCRIPT'
 	        echo 'OMITTING OLD API DIFF SCRIPT'
-                ./diffWorkspaceLIMBO.sh
-                passTest=$?
+		echo $GIT_BRANCH
+		if [[ "$GIT_BRANCH" == *workspaces ]];then
+		    echo 'WORKING FROM WORKSPACES BRANCH'
+                    ./diffWorkspaceLIMBO.sh
+                    passTest=$?
+		fi
 
         else 
                 echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
