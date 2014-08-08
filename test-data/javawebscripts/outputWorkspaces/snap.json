@@ -20,9 +20,9 @@
          <table>
             <tr><td><b>404 Description:</b></td><td> Requested resource is not available.</td></tr>
             <tr><td>&nbsp;</td></tr>
-            <tr><td><b>Message:</b></td><td>07010003 Script url /ui/views/301/snapshot does not map to a Web Script.</td></tr>
+            <tr><td><b>Message:</b></td><td>07070001 Script url /ui/views/301/snapshot does not map to a Web Script.</td></tr>
             <tr><td></td><td>&nbsp;</td></tr>
-   <tr><td><b>Exception:</b></td><td>org.springframework.extensions.webscripts.WebScriptException - 07010003 Script url /ui/views/301/snapshot does not map to a Web Script.</td></tr>
+   <tr><td><b>Exception:</b></td><td>org.springframework.extensions.webscripts.WebScriptException - 07070001 Script url /ui/views/301/snapshot does not map to a Web Script.</td></tr>
    <tr><td></td><td>&nbsp;</td></tr>
          <tr><td></td><td>org.springframework.extensions.webscripts.AbstractRuntime.executeScript(AbstractRuntime.java:173)</td></tr>
          <tr><td></td><td>org.springframework.extensions.webscripts.servlet.WebScriptServlet.service(WebScriptServlet.java:132)</td></tr>
@@ -49,10 +49,10 @@
          <tr><td></td><td>org.apache.tomcat.util.net.JIoEndpoint$SocketProcessor.run(JIoEndpoint.java:310)</td></tr>
          <tr><td></td><td>java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)</td></tr>
          <tr><td></td><td>java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)</td></tr>
-         <tr><td></td><td>java.lang.Thread.run(Thread.java:744)</td></tr>
+         <tr><td></td><td>java.lang.Thread.run(Thread.java:745)</td></tr>
    <tr><td></td><td>&nbsp;</td></tr>
             <tr><td><b>Server</b>:</td><td>Community v4.2.0 (r56674-b4848) schema 6,033</td></tr>
-            <tr><td><b>Time</b>:</td><td>Aug 1, 2014 4:46:16 PM</td></tr>
+            <tr><td><b>Time</b>:</td><td>Aug 7, 2014 2:07:26 PM</td></tr>
             <tr><td></td><td>&nbsp;</td></tr>
          </table>
       </div>

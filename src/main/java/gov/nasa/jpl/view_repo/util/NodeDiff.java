@@ -5,8 +5,11 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
 
 import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -52,8 +55,8 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
     }
 
     public NodeRef node1, node2;
-    protected Set<String> removedAspects = null;
-    protected Set<String> addedAspects = null;
+    protected Map<String, Set< String > > removedAspects = null;
+    protected Map< String, Set< String > > addedAspects = null;
     public ServiceRegistry services = null;
 
     public NodeDiff( NodeRef node1, NodeRef node2 ) {
@@ -79,28 +82,57 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
     }
 
     protected void diffAspects() {
-        // TODO -- create generic diff, union, intersect, subtract utility functions
-        Set<QName> aspects1 = NodeUtil.getAspects( node1 );
-        Set<QName> aspects2 = NodeUtil.getAspects( node2 );
-        Pair<Set<QName>, Set<QName> > p = Utils.diff(aspects1, aspects2);
-        addedAspects =
-                new LinkedHashSet< String >( NodeUtil.qNamesToStrings( p.first ) );
-        removedAspects =
-                new LinkedHashSet< String >( NodeUtil.qNamesToStrings( p.second ) );
+        addedAspects = new LinkedHashMap<String, Set< String > >();
+        removedAspects = new LinkedHashMap<String, Set< String > >();
+        Set< String > intersection =
+                new LinkedHashSet< String >( getMap1().keySet() );
+        Utils.intersect( intersection, getMap2().keySet() );
+        for ( String id : intersection ) {
+            NodeRef n1 = get1(id);
+            NodeRef n2 = get2(id);
+            if ( !NodeUtil.exists( n1 ) ) continue;
+            if ( !NodeUtil.exists( n2 ) ) continue;
+            Set<QName> aspects1 = NodeUtil.getAspects( n1 );
+            Set<QName> aspects2 = NodeUtil.getAspects( n2 );
+            Pair<Set<QName>, Set<QName> > p = Utils.diff(aspects1, aspects2);
+            if ( p != null ) {
+                List< String > aspects = null;
+                if ( p.first != null ) {
+                    aspects = NodeUtil.qNamesToStrings( p.first );
+                    addedAspects.put( id, new TreeSet< String >( aspects ) );
+                }
+                if ( p.second != null ) {
+                    aspects = NodeUtil.qNamesToStrings( p.second );
+                    removedAspects.put( id, new TreeSet< String >( aspects ) );
+                }
+            }
+        }
     }
 
-    public Set< String > getRemovedAspects() {
+    public Map< String, Set< String > > getRemovedAspects() {
         if ( removedAspects == null ) {
             diffAspects();
         }
         return removedAspects;
     }
 
-    public Set< String > getAddedAspects() {
+    public Set< String > getRemovedAspects( String name ) {
+        Set< String > result = getRemovedAspects().get( name );
+        if ( result == null ) return Utils.newSet();
+        return result;
+    }
+
+    public Map< String, Set< String > > getAddedAspects() {
         if ( addedAspects == null ) {
             diffAspects();
         }
         return addedAspects;
+    }
+
+    public Set< String > getAddedAspects( String name ) {
+        Set< String > result = getAddedAspects().get( name );
+        if ( result == null ) return Utils.newSet();
+        return result;
     }
 
     @Override

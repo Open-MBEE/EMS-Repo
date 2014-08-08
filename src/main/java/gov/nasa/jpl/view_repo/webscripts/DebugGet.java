@@ -30,6 +30,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,20 +51,27 @@ public class DebugGet extends DeclarativeWebScript {
 	
 	protected Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
-	    Map<String, Object> model = new HashMap<String, Object>();
-	    
-	    String turnOn = req.getParameter( "on" );
-	    String turnOff = req.getParameter( "off" );
+        Map< String, Object > model = new HashMap< String, Object >();
 
-	    if (turnOn == null || turnOn.trim().equalsIgnoreCase("false") || turnOff.trim().equalsIgnoreCase("true")) {
-	        Debug.turnOff();
-	        model.put( "res", "debug off" );
-	    } else {
-	        Debug.turnOn();
-	        model.put( "res", "debug on" );
-	    }
-	    
-		return model;
+        String turnOnStr = req.getParameter( "on" );
+        String turnOffStr = req.getParameter( "off" );
+
+        boolean turnOn = !( turnOnStr == null ||
+                            turnOnStr.trim().equalsIgnoreCase( "false" ) ||
+                            ( turnOffStr != null &&
+                              turnOffStr.trim().equalsIgnoreCase( "true" ) ) );
+        turnOnStr = turnOn ? "on" : "off";
+        if ( turnOn == Debug.isOn() ) {
+            System.out.println( ( new Date() ) + ": debug is already "
+                                + turnOnStr );
+        } else {
+            if ( turnOn ) Debug.turnOn();
+            else Debug.turnOff();
+            System.out.println( ( new Date() ) + ": debug turned " + turnOnStr );
+        }
+        model.put( "res", "debug " + turnOnStr );
+
+        return model;
 	}
 
 }
