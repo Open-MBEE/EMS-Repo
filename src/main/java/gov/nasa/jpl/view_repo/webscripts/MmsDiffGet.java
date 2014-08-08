@@ -28,7 +28,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         ws1 = getWorkspaceFromId( "ws1", services, response, status, false, null );
         ws2 = getWorkspaceFromId( "ws2", services, response, status, false, null );
 
-        WorkspaceDiff diff = new WorkspaceDiff(ws1, ws2);
+        WorkspaceDiff diff = new WorkspaceDiff(ws1, ws2, null, null);
 
         return results;
     }
