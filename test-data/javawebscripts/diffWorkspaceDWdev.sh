@@ -60,7 +60,7 @@ echo 'testGET2'
 # get elements
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/300?recurse=true\""
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/300?recurse=true" | grep -v '"read":'| grep -v '"lastModified"' > outputWorkspaces/get2.json 
-java -cp .:../../src/main/amp/web/WEB-INF/lib/mbee_util.jar:../../target/view-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes gov.nasa.jpl.view_repo.util.JsonDiff baselineWorkspaces/post2.json outputWorkspaces/post2.json  | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"author"' | grep -v '"sysmlid":' | grep -v '"modified":' | grep -v '"qualifiedId"'
+java -cp .:../../src/main/amp/web/WEB-INF/lib/mbee_util.jar:../../target/view-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes gov.nasa.jpl.view_repo.util.JsonDiff baselineWorkspaces/get2.json outputWorkspaces/get2.json  | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"author"' | grep -v '"sysmlid":' | grep -v '"modified":' | grep -v '"qualifiedId"'
 echo
 echo
 
