@@ -65,8 +65,6 @@ echo
 echo
 
 echo 'testGET3'
-# get views
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"views/301\""
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"views/301" | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > outputWorkspaces/get3.json
 DIFF=$(diff baselineWorkspaces/get3.json outputWorkspaces/get3.json | grep -v '"author"' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+")
 if [ "$DIFF" != "" ];then
