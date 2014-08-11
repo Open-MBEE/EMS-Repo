@@ -493,8 +493,8 @@ public class WorkspaceDiff {
     }
 
     protected void captureDeltas(WorkspaceNode node) {
-        Set<NodeRef> s1 = ws1.getChangedNodeRefsWithRespectTo( node );
-        Set<NodeRef> s2 = node.getChangedNodeRefsWithRespectTo( ws1 );
+        Set<NodeRef> s1 = ws1.getChangedNodeRefsWithRespectTo( node, timestamp1 );
+        Set<NodeRef> s2 = node.getChangedNodeRefsWithRespectTo( ws1, timestamp2 );
         nodeDiff = new NodeDiff( s1, s2 );
         populateMembers();
     }
