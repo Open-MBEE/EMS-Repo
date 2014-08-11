@@ -8,7 +8,7 @@ pkill -fn 'integration-test'
 echo 'KILLING SERVER IF ONE IS RUNNING'
 sleep 3s
 
-#cd ./../..
+cd ./../..
 ./runserver.sh > serverLog.txt &
 echo 'STARTING UP SERVER'
 sleep 60s
@@ -44,19 +44,19 @@ if [ $server -eq 1 ]; then
 		echo 'RUNNING OLD API DIFF SCRIPT'
 		echo 'OMITTING WORKSPACES DIFF SCRIPT'
 		./diff2.sh
-		#passTest=$?
+		passTest=$?
 
         elif [ $diffChoose -eq 2 ];then
 	        echo 'RUNNING WORKSPACES DIFF SCRIPT'
 	        echo 'OMITTING OLD API DIFF SCRIPT'
                 ./diffWorkspace.sh
-                #passTest=$?
+                passTest=$?
 
         else 
                 echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
                 ./diff2.sh
                 ./diffWorkspace.sh
-                #passTest=$?
+                passTest=$?
         fi
         
         
@@ -79,11 +79,10 @@ if [ $server -eq 1 ]; then
 
 	echo 'PASSTEST?'
         echo "$passTest"
-	exit $passTest
+	#exit $passTest
 fi
 
 if [ $server -eq 2 ]; then
 	echo 'SERVER TIME-OUT'
-	exit 1
 fi
 

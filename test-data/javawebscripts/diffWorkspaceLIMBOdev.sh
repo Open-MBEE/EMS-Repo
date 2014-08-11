@@ -29,19 +29,6 @@ export CURL_GET_FLAGS="-X GET"
 
 ###################################    POST CURL COMMANDS   ############################################
 
-echo
-echo 'testPost1'
-# create project and site
-echo curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/europa/projects/123456?createSite=true" 
-curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/europa/projects/123456?createSite=true" > outputWorkspaces/post1.json
-DIFF=$(diff baselineWorkspaces/post1.json outputWorkspaces/post1.json)
-if [ "$DIFF" != "" ];then
-	passTest=1
-	echo "$DIFF"
-fi
-echo
-echo
-
 echo 'testPost 2'
 #post elements to project
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elementsNew.json $BASE_URL"elements" 
@@ -67,18 +54,6 @@ echo
 
 ####################################     	GET CURL COMMANDS                ###########################################
 
-
-echo 'testGET8'
-# get product list
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"ve/documents/europa?format=json\""
-curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"ve/documents/europa?format=json" | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > outputWorkspaces/get8.json
-DIFF=$(diff baselineWorkspaces/get8.json outputWorkspaces/get8.json | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+")
-if [ "$DIFF" != "" ];then
-        passTest=1
-        echo "$DIFF"
-fi
-echo
-echo
 
 echo 'testGET9'
 # get search

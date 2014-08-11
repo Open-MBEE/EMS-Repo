@@ -1,171 +1,175 @@
 {"elements": [
     {
-        "qualifiedId": "no_project/MMS_1407450207694_7d3b5631-be50-4a7a-bb22-fa63c35285fe",
-        "name": "400",
-        "qualifiedName": "/400",
-        "sysmlid": "MMS_1407450207694_7d3b5631-be50-4a7a-bb22-fa63c35285fe",
-        "documentation": "4something",
+        "author": "admin",
+        "qualifiedName": "//////",
+        "sysmlid": "MMS_1406917275802_da03fc57-6a3d-403c-9059-a8ffdaf0c1c6",
         "owner": "no_project",
         "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 15:23:40 PDT 2014"
+        "editable": true
     },
     {
-        "qualifiedId": "no_project/300/MMS_1407450207652_bbfb55ea-50d5-475c-840b-d5399da26778",
-        "name": "301",
-        "qualifiedName": "/300/301",
-        "sysmlid": "MMS_1407450207652_bbfb55ea-50d5-475c-840b-d5399da26778",
-        "documentation": "else",
-        "owner": "300",
-        "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 15:23:40 PDT 2014"
-    },
-    {
-        "qualifiedId": "no_project/cdelp/MMS_1407450207730_012d949b-a878-4ca9-b7e7-973963e61ace",
-        "name": "dlam",
-        "qualifiedName": "/dlam",
-        "sysmlid": "MMS_1407450207730_012d949b-a878-4ca9-b7e7-973963e61ace",
-        "documentation": "to make compatible with value specs",
-        "owner": "cdelp",
-        "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 15:23:36 PDT 2014"
-    },
-    {
-        "qualifiedId": "no_project/303/MMS_1407450207672_c1a8863c-e61c-432d-afaa-0fe2a01bdea2",
-        "name": "304",
-        "qualifiedName": "/304",
-        "sysmlid": "MMS_1407450207672_c1a8863c-e61c-432d-afaa-0fe2a01bdea2",
-        "documentation": "about",
-        "owner": "303",
-        "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 15:23:41 PDT 2014"
-    },
-    {
-        "qualifiedId": "no_project/401/MMS_1407450207702_6cf61d8b-6a58-48d0-9324-0a41b2cf632c",
+        "author": "admin",
         "name": "402",
-        "qualifiedName": "/402",
-        "sysmlid": "MMS_1407450207702_6cf61d8b-6a58-48d0-9324-0a41b2cf632c",
+        "qualifiedName": "//////401/402",
         "documentation": "4to",
+        "sysmlid": "MMS_1406917275776_bec7463a-caa0-4f39-994f-98992d987b46",
         "owner": "401",
-        "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 15:23:37 PDT 2014"
+        "specialization": {
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true
     },
     {
-        "qualifiedId": "no_project/MMS_1407450207723_2bf5239e-a7aa-40f5-a436-6e42d8151bb3",
-        "name": "600",
-        "qualifiedName": "/600",
-        "sysmlid": "MMS_1407450207723_2bf5239e-a7aa-40f5-a436-6e42d8151bb3",
-        "documentation": "element values",
-        "owner": "no_project",
-        "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 15:23:38 PDT 2014"
-    },
-    {
-        "qualifiedId": "no_project/301/MMS_1407450207658_6d68ea9e-6a07-4d5d-8893-547c8e79fc82",
-        "name": "302",
-        "qualifiedName": "/302",
-        "sysmlid": "MMS_1407450207658_6d68ea9e-6a07-4d5d-8893-547c8e79fc82",
-        "documentation": "to",
-        "owner": "301",
-        "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 15:23:39 PDT 2014"
-    },
-    {
-        "qualifiedId": "no_project/999/MMS_1407450207690_389098ef-75dd-492d-8ffe-a62ac3441562",
+        "author": "admin",
         "name": "305",
-        "qualifiedName": "/305",
-        "sysmlid": "MMS_1407450207690_389098ef-75dd-492d-8ffe-a62ac3441562",
+        "qualifiedName": "//////999/305",
         "documentation": "no owner",
+        "sysmlid": "MMS_1406917275759_dfc6e1a4-5848-466c-8590-d033390efbe7",
         "owner": "999",
-        "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 15:23:38 PDT 2014"
+        "specialization": {
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true
     },
     {
-        "qualifiedId": "no_project/402/MMS_1407450207706_04597443-40f4-4236-8bcc-fe95e1728c7d",
+        "author": "admin",
+        "name": "301",
+        "qualifiedName": "//////300/301",
+        "documentation": "else",
+        "sysmlid": "MMS_1406917275739_6eea4d23-35a3-45a6-9cd8-3184819bfcc7",
+        "owner": "300",
+        "specialization": {
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
         "name": "403",
-        "qualifiedName": "/403",
-        "sysmlid": "MMS_1407450207706_04597443-40f4-4236-8bcc-fe95e1728c7d",
+        "qualifiedName": "//////402/403",
         "documentation": "4talk",
+        "sysmlid": "MMS_1406917275782_6c7cefca-d61f-4b6f-854d-7ef11de9cd0e",
         "owner": "402",
-        "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 15:23:37 PDT 2014"
+        "specialization": {
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true
     },
     {
-        "qualifiedId": "no_project/4000/MMS_1407450207698_31ab4aec-e1da-49a6-9410-b72ae6a10be1",
-        "name": "401",
-        "qualifiedName": "/401",
-        "sysmlid": "MMS_1407450207698_31ab4aec-e1da-49a6-9410-b72ae6a10be1",
-        "documentation": "4else",
-        "owner": "4000",
-        "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 15:23:38 PDT 2014"
+        "author": "admin",
+        "name": "304",
+        "qualifiedName": "//////303/304",
+        "documentation": "about",
+        "sysmlid": "MMS_1406917275754_0c229fa6-d66d-4bd2-a120-2a055eafecf0",
+        "owner": "303",
+        "specialization": {
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true
     },
     {
-        "qualifiedId": "no_project/300/MMS_1407450207718_9cc91d1c-b28a-4e35-985a-9fbe9462124c",
-        "name": "500",
-        "qualifiedName": "/300/500",
-        "sysmlid": "MMS_1407450207718_9cc91d1c-b28a-4e35-985a-9fbe9462124c",
-        "documentation": "directed_relationship",
+        "author": "admin",
+        "name": "dlam",
+        "qualifiedName": "//////cdelp/dlam",
+        "documentation": "to make compatible with value specs",
+        "sysmlid": "MMS_1406917275808_848d5bd5-477d-48ff-a240-ca5443e93d53",
+        "owner": "cdelp",
+        "specialization": {
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "400",
+        "qualifiedName": "//////400",
+        "documentation": "4something",
+        "sysmlid": "MMS_1406917275763_abf4fa39-e24d-4179-b5e7-160a87b20d9c",
+        "owner": "no_project",
+        "specialization": {
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "404",
+        "qualifiedName": "//////403/404",
+        "documentation": "4about",
+        "sysmlid": "MMS_1406917275789_7bd83816-d4df-4c04-ab9e-4968c038f911",
+        "owner": "403",
+        "specialization": {
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "302",
+        "qualifiedName": "//////301/302",
+        "documentation": "to",
+        "sysmlid": "MMS_1406917275743_00fce5c6-167f-41e2-b6a2-f00d27884674",
+        "owner": "301",
+        "specialization": {
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "qualifiedName": "//////300/",
+        "sysmlid": "MMS_1406917275796_ec9c003b-8d82-4300-a098-ced4eef4ac8c",
         "owner": "300",
         "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 15:23:39 PDT 2014"
+        "editable": true
     },
     {
-        "qualifiedId": "no_project/302/MMS_1407450207666_050d86fc-2955-4f7a-81c8-44940484e525",
+        "author": "admin",
+        "name": "401",
+        "qualifiedName": "//////4000/401",
+        "documentation": "4else",
+        "sysmlid": "MMS_1406917275769_e846e04f-3407-4630-9553-b97f2a55476c",
+        "owner": "4000",
+        "specialization": {
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
         "name": "303",
-        "qualifiedName": "/303",
-        "sysmlid": "MMS_1407450207666_050d86fc-2955-4f7a-81c8-44940484e525",
+        "qualifiedName": "//////302/303",
         "documentation": "talk",
+        "sysmlid": "MMS_1406917275749_b767039e-3765-40cd-8b61-8c87f778ee54",
         "owner": "302",
-        "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 15:23:36 PDT 2014"
+        "specialization": {
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true
     },
     {
-        "qualifiedId": "no_project/MMS_1407450207645_445e48b8-1ca8-4d1e-a987-119aaed8a3b4",
+        "author": "admin",
         "name": "300",
-        "qualifiedName": "/300",
-        "sysmlid": "MMS_1407450207645_445e48b8-1ca8-4d1e-a987-119aaed8a3b4",
+        "qualifiedName": "//////300",
         "documentation": "something",
+        "sysmlid": "MMS_1406917275733_57181aae-42ce-40b9-ba92-6eeb277b4ed8",
         "owner": "no_project",
-        "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 15:23:37 PDT 2014"
-    },
-    {
-        "qualifiedId": "no_project/403/MMS_1407450207710_2579245c-5a37-4477-a452-aa72af24e951",
-        "name": "404",
-        "qualifiedName": "/404",
-        "sysmlid": "MMS_1407450207710_2579245c-5a37-4477-a452-aa72af24e951",
-        "documentation": "4about",
-        "owner": "403",
-        "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 15:23:40 PDT 2014"
+        "specialization": {
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true
     }
 ]}
 400
