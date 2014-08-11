@@ -63,19 +63,6 @@ echo
 
 ####################################    	POST CHANGE CURL COMMANDS        ###########################################
 
-echo 'testPOSTCHANGE1'
-# post changes to directed relationships only (without owners)
-echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/directedrelationships.json $BASE_URL"sites/europa/projects/123456\""
-curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/directedrelationships.json $BASE_URL"sites/europa/projects/123456" | grep -v '"read":' | grep -v '"lastModified"' | grep -v '"sysmlid"' > outputWorkspaces/postChange1.json
-DIFF=$(diff baselineWorkspaces/postChange1.json outputWorkspaces/postChange1.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' |grep -v '"author"')
-if [ "$DIFF" != "" ];then
-        passTest=1
-        echo "$DIFF"
-fi
-echo
-echo
-
-
 
 
 ####################################   		CONFIGURATIONS CURL COMMANDS     ###########################################
