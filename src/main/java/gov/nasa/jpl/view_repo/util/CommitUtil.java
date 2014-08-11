@@ -24,7 +24,7 @@ public class CommitUtil {
 
     private EmsScriptNode getOrCreateCommitPkg(WorkspaceNode workspace, String siteName, ServiceRegistry services, StringBuffer response, boolean create) {
         EmsScriptNode context = null;
-        
+
         if (workspace == null) {
             SiteInfo siteInfo = services.getSiteService().getSite( siteName );
             context = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
@@ -33,26 +33,26 @@ public class CommitUtil {
         }
 
         EmsScriptNode commitPkg = context.childByNamePath( "commits" );
-        
+
         if (commitPkg == null && create) {
             commitPkg = context.createFolder( "commits" );
         }
-        
+
         return commitPkg;
     }
-	
+
 	private EmsScriptNode getCommitPkg(WorkspaceNode workspace, String siteName, ServiceRegistry services, StringBuffer response) {
 	    return getOrCreateCommitPkg( workspace, siteName, services, response, false );
 	}
-	
-	
+
+
 	public ArrayList<EmsScriptNode> getCommits(WorkspaceNode workspace,
 	                                           String siteName,
 	                                             ServiceRegistry services,
 	                                             StringBuffer response) {
 	    ArrayList<EmsScriptNode> commits = new ArrayList<EmsScriptNode>();
 	    EmsScriptNode commitPkg = getCommitPkg(workspace, siteName, services, response);
-	    
+
 	    if (commitPkg != null) {
             commits.addAll(WebScriptUtil.getAllNodesInPath(commitPkg.getQnamePath(),
                                                            "TYPE",
@@ -61,24 +61,24 @@ public class CommitUtil {
                                                            null,
                                                            services,
                                                            response));
-            
+
             Collections.sort( commits, new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator() );
 	    }
-	    
+
 	    return commits;
 	}
 
 	public EmsScriptNode getLastCommit(WorkspaceNode ws, String siteName, ServiceRegistry services, StringBuffer response) {
 	    ArrayList<EmsScriptNode> commits = getCommits(ws, siteName, services, response);
-	    
+
 	    if (commits.size() > 0) {
 	        return commits.get( 0 );
 	    }
-	    
+
 	    return null;
 	}
 
-	
+
 	public void commit(Map<String, EmsScriptNode> elements,
 	                   Map<String, Version> elementsVersions,
 	                   Map<String, EmsScriptNode> addedElements,
@@ -92,16 +92,16 @@ public class CommitUtil {
 	                   ServiceRegistry services,
 	                   StringBuffer response
 	                   ) {
-	    WorkspaceDiff wsDiff = new WorkspaceDiff();
+	    WorkspaceDiff wsDiff = new WorkspaceDiff( workspace, workspace, null, null );
 
 	    wsDiff.setElements( elements );
         wsDiff.setElementsVersions( elementsVersions );
-	    
+
 	    wsDiff.setAddedElements( addedElements );
 	    wsDiff.setDeletedElements( deletedElements );
 	    wsDiff.setMovedElements( movedElements );
 	    wsDiff.setUpdatedElements( updatedElements );
-	    
+
 	    if (runWithoutTransactions) {
             try {
                 commitTransactionable(wsDiff, workspace, siteName, message, services, response);
@@ -126,8 +126,8 @@ public class CommitUtil {
             }
 	    }
 	}
-	
-	
+
+
 	private void commitTransactionable( WorkspaceDiff wsDiff,
 	                                    WorkspaceNode workspace,
 	                                    String siteName,
@@ -135,28 +135,28 @@ public class CommitUtil {
                                         ServiceRegistry services,
                                         StringBuffer response) throws JSONException {
 	    EmsScriptNode commitPkg = getOrCreateCommitPkg( workspace, siteName, services, response, true );
-	    
+
 	    if (commitPkg == null) {
 	        // TODO: means commitPkg couldn't be created
 	    } else {
 	        // get the most recent commit before creating a new one
             EmsScriptNode lastCommitNode = getLastCommit( workspace, siteName, services, response );
-            
+
 	        Date now = new Date();
 	        EmsScriptNode commitNode = commitPkg.createNode("commit_" + now.getTime(), "cm:content");
 	        commitNode.createOrUpdateAspect( "cm:titled");
 	        commitNode.createOrUpdateProperty("cm:description", message);
-	        
+
 	        commitNode.createOrUpdateAspect( "ems:Committable" );
 	        commitNode.createOrUpdateProperty( "ems:commitType", "COMMIT" );
 	        commitNode.createOrUpdateProperty( "ems:commit", wsDiff.toJSONObject( null, null, false ).toString() );
-	        
+
 	        if (lastCommitNode != null) {
 	            ArrayList< Serializable > values = new ArrayList<Serializable>();
-	            
+
 	            values.add( lastCommitNode.getNodeRef() );
 	            commitNode.setProperty( "ems:commitParent", values );
-	            
+
 	            values = new ArrayList<Serializable>();
 	            values.add( commitNode.getNodeRef() );
 	            lastCommitNode.setProperty( "ems:commitChildren", values );
@@ -164,7 +164,7 @@ public class CommitUtil {
 	    }
     }
 
-	
+
 
 	/**
 	 */
@@ -178,7 +178,7 @@ public class CommitUtil {
 		// TODO: revert adds (e.g., make them deleted)
 //		try {
 //			JSONObject changeJson = new JSONObject(content);
-//	
+//
 //			JSONArray changeArray = changeJson.getJSONArray(COMMIT_KEY);
 //			for (int ii = 0; ii < changeArray.length(); ii++) {
 //				JSONObject json = changeArray.getJSONObject(ii);
@@ -197,7 +197,7 @@ public class CommitUtil {
 
 		return status;
 	}
-	
+
 	public static EmsScriptNode getScriptNodeByNodeRefId(String nodeId, ServiceRegistry services) {
 		String store = EmsScriptNode.getStoreRef().toString();
 		if (!nodeId.startsWith(store)) {
@@ -212,7 +212,7 @@ public class CommitUtil {
 			} else {
 				// too many found - couldn't disambiguate
 			}
-		}		
+		}
 		return null;
-	}		
+	}
 }

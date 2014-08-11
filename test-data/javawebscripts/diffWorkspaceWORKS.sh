@@ -30,8 +30,20 @@ export CURL_GET_FLAGS="-X GET"
 
 ### ADDED CURL COMMANDS
 
+echo 'testGET1'
+# get project - should just return 200
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/123456\""
+curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/123456"
+echo
+echo
+
+
 
 exit $passTest
+
+
+
+
 
 
 

@@ -56,13 +56,6 @@ echo
 
 ####################################     	GET CURL COMMANDS                ###########################################
 
-echo 'testGET1'
-# get project - should just return 200
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/123456\""
-curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/123456"
-echo
-echo
-
 echo 'testGET2'
 # get elements
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/300?recurse=true\""

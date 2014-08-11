@@ -6,6 +6,7 @@ package gov.nasa.jpl.view_repo.util;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -245,85 +246,57 @@ public class WorkspaceNode extends EmsScriptNode {
         return null;
     }
 
-    public Set< NodeRef > getChangedNodeRefs() {
+    public Set< NodeRef > getChangedNodeRefs( Date dateTime ) {
         Set< NodeRef > changedElementIds = new TreeSet< NodeRef >();
-        ResultSet refs = NodeUtil.findNodeRefsByType( getName(), SearchType.WORKSPACE, getServices() );
-        List< EmsScriptNode > nodes = NodeUtil.resultSetToList( refs );
-        changedElementIds.addAll( EmsScriptNode.getNodeRefs( nodes ) );
+        //ResultSet refs = NodeUtil.findNodeRefsByType( getName(), SearchType.WORKSPACE, getServices() );
+        //List< EmsScriptNode > nodes = NodeUtil.resultSetToList( refs );
+        //NodeUtil.resultSetToList( refs );
+        ArrayList< NodeRef > refs =
+                NodeUtil.findNodeRefsByType( getName(),
+                                             SearchType.WORKSPACE.prefix, null,
+                                             dateTime, false, true,
+                                             getServices() );
+        //List< EmsScriptNode > nodes = toEmsScriptNodeList( refs );
+
+        //changedElementIds.addAll( EmsScriptNode.getNodeRefs( nodes ) );
+        changedElementIds.addAll( refs );
         return changedElementIds;
     }
 
-    public Set< String > getChangedElementIds() {
+    public Set< String > getChangedElementIds( Date dateTime ) {
         Set< String > changedElementIds = new TreeSet< String >();
-        ResultSet refs = NodeUtil.findNodeRefsByType( getName(), SearchType.WORKSPACE, getServices() );
-        List< EmsScriptNode > nodes = NodeUtil.resultSetToList( refs );
+//        ResultSet refs = NodeUtil.findNodeRefsByType( getName(), SearchType.WORKSPACE, getServices() );
+//        List< EmsScriptNode > nodes = NodeUtil.resultSetToList( refs );
+        Set< NodeRef > refs = getChangedNodeRefs( dateTime );
+        List< EmsScriptNode > nodes = toEmsScriptNodeList( refs );
         changedElementIds.addAll( EmsScriptNode.getNames( nodes ) );
         return changedElementIds;
     }
 
-    public Set< NodeRef > getChangedNodeRefsWithRespectTo( WorkspaceNode other ) {
+    public Set< NodeRef > getChangedNodeRefsWithRespectTo( WorkspaceNode other, Date dateTime ) {
         Set< NodeRef > changedNodeRefs = new TreeSet< NodeRef >();//getChangedNodeRefs());
         if ( NodeUtil.exists( other ) ) {
             WorkspaceNode targetParent = getCommonParent( other );
             WorkspaceNode parent = this;
             while ( parent != null && !parent.equals( targetParent ) ) {
-                changedNodeRefs.addAll( parent.getChangedNodeRefs() );
+                changedNodeRefs.addAll( parent.getChangedNodeRefs( dateTime ) );
                 parent = parent.getParentWorkspace();
             }
         }
         return changedNodeRefs;
     }
 
-    public Set< String > getChangedElementIdsWithRespectTo( WorkspaceNode other ) {
+    public Set< String > getChangedElementIdsWithRespectTo( WorkspaceNode other, Date dateTime ) {
         Set< String > changedElementIds = new TreeSet< String >();//getChangedElementIds());
         if ( NodeUtil.exists( other ) ) {
             WorkspaceNode targetParent = getCommonParent( other );
             WorkspaceNode parent = this;
             while ( parent != null && !parent.equals( targetParent ) ) {
-                changedElementIds.addAll( parent.getChangedElementIds() );
+                changedElementIds.addAll( parent.getChangedElementIds( dateTime ) );
                 parent = parent.getParentWorkspace();
             }
         }
         return changedElementIds;
-    }
-
-    // When creating a node, create it in the workspace with the owner (and
-    // parent chain up to company home) replicated in the workspace.
-
-    // When updating a node, if it is not in the specified workspace, copy it
-    // with the same name into a folder chain replicated in the workspace.
-
-    // When copying a node, check and see if the other end of each relationship
-    // is in the new workspace, and copy the relationship if it is.
-
-    /**
-     * Find the differences between this workspace and another.
-     *
-     * @param other
-     *            the workspace to compare
-     * @return a map of elements in this workspace to changed elements in the
-     *         other workspace
-     */
-    public Map<EmsScriptNode, EmsScriptNode> diff( WorkspaceNode other ) {
-        TreeMap<EmsScriptNode, EmsScriptNode> map = new TreeMap<EmsScriptNode, EmsScriptNode>();
-        // TODO
-
-        // find deepest common parent
-
-        // Collect the sysmlids of elements changed in this and the other
-        // workspace as well as those of their parents up to (but not including
-        // the deepest common parent). These should also include deleted
-        // elements.
-
-        // For each sysmlid, get the corresponding element from each of the two
-        // workspaces. Map the one from this workspace to that from the other
-        // workspace.
-
-        // NOTE: This doesn't specify the changes and conflicts explicitly.
-
-        //Set<EmsScriptNode> myElements = getLocalChanges();
-
-        return map;
     }
 
 }

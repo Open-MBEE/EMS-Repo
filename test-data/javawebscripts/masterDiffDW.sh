@@ -60,7 +60,7 @@ if [ $server -eq 1 ]; then
 
         else 
                 echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
-                ./diff2.sh
+                #./diff2.sh
                 ./diffWorkspaceDW.sh
                 passTest=$?
         fi
