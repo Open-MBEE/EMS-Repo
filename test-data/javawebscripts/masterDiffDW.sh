@@ -53,9 +53,14 @@ if [ $server -eq 1 ]; then
 		#echo "$gitBranch"
 		echo $GIT_BRANCH
 		if [[ "$GIT_BRANCH" == *workspaces ]];then
-                    echo 'WORKING FROM  WORKSPACES BRANCH'
+                    echo 'DIFFING  WORKSPACES BRANCH'
                     ./diffWorkspaceDW.sh
                     passTest=$?
+                fi
+                if [[ "$GIT_BRANCH" == *develop ]];then
+                    echo 'DIFFING DEVELOP BRANCH'
+                    ./diffWorkspaceDWdev.sh
+		    passTest=$?
                 fi
 
         else 

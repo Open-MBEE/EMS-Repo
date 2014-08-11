@@ -55,6 +55,11 @@ if [ $server -eq 1 ]; then
                     ./diffWorkspaceLIMBO.sh
                     passTest=$?
 		fi
+		if [[ "$GIT_BRANCH" == *develop ]];then
+		    echo 'DIFFING DEVELOP BRANCH'
+ 		    ./diffWorkspaceLIMBOdev.sh
+		    passTest=$?
+		fi
 
         else 
                 echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'

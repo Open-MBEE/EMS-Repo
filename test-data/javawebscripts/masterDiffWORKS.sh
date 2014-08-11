@@ -51,11 +51,15 @@ if [ $server -eq 1 ]; then
                 echo 'OMITTING OLD API DIFF SCRIPT'
                 echo $GIT_BRANCH
                 if [[ "$GIT_BRANCH" == *workspaces ]];then
-                    echo 'WORKING FROM  WORKSPACES BRANCH'
+                    echo 'DIFFING  WORKSPACES BRANCH'
                     ./diffWorkspaceWORKS.sh
                     passTest=$?
                 fi
-
+                if [[ "$GIT_BRANCH" == *develop ]];then
+		    echo 'DIFFING DEVELOP BRANCH'
+		    ./diffWorkspaceWORKSdev.sh
+		    passTEST=$?
+		fi
         else 
                 echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
                 ./diff2.sh
