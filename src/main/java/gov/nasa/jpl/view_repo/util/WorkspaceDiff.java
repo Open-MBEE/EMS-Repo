@@ -399,7 +399,7 @@ public class WorkspaceDiff {
      * @throws JSONException
      */
     public JSONObject toJSONObject(Date time1, Date time2) throws JSONException {
-            return toJSONObject( time1, time2, false );
+            return toJSONObject( time1, time2, true );
     }
 
     /**
