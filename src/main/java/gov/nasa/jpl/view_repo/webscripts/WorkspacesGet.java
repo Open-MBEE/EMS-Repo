@@ -34,6 +34,7 @@ import org.alfresco.service.ServiceRegistry;
 
 public class WorkspacesGet extends AbstractJavaWebScript{
 	
+	
     protected boolean gettingContainedWorkspaces = false;
 	
     public WorkspacesGet() {
@@ -49,6 +50,7 @@ public class WorkspacesGet extends AbstractJavaWebScript{
 	 */
 	@Override
 	protected Map<String, Object> executeImpl (WebScriptRequest req, Status status, Cache cache) {
+		
 		printHeader( req );
 
         clearCaches();
@@ -85,20 +87,30 @@ public class WorkspacesGet extends AbstractJavaWebScript{
     
 	protected JSONObject handleWorkspace (EmsScriptNode homeFolder) throws JSONException{
 		
-		JSONObject json = null;
-		JSONArray jArray = null;
-		
-        ResultSet refs = NodeUtil.findNodeRefsByType( "*", SearchType.WORKSPACE, services );
-        List< EmsScriptNode > nodes = NodeUtil.resultSetToList( refs );
+		JSONObject json = new JSONObject ();
+		JSONArray jArray = new JSONArray ();
+        Collection <EmsScriptNode> nodes = NodeUtil.luceneSearchElements("ASPECT:\"ems:workspace\"" );
 		
         for (EmsScriptNode workspaceNode: nodes){
-        	JSONObject interiorJson = null;
+        	
+        	JSONObject interiorJson = new JSONObject();
+        	
         	if (checkPermissions(workspaceNode, PermissionService.READ)){
-	        	interiorJson.put(Acm.JSON_TYPE, workspaceNode.getProperty(Acm.ACM_TYPE));
-	        	interiorJson.put(Acm.JSON_ID, workspaceNode.getSysmlId());
-	        	interiorJson.put(Acm.JSON_NAME, workspaceNode.getProperty(Acm.CM_TITLE));
-	        	interiorJson.put(Acm.JSON_SOURCE, "ems:source"/*((WorkspaceNode) workspaceNode).getParentWorkspace().getSysmlId()*/);
-	        	interiorJson.put("timestamp", workspaceNode.getProperty("ems:lastTimeSyncParent"));
+        		
+//        		Map <String, Object> wkspProperties = new HashMap <String, Object> ();
+//        		wkspProperties = workspaceNode.getProperties();
+//        		for (String key: wkspProperties.keySet()) {
+//        			interiorJson.put(key, wkspProperties.get(key));
+//        		}
+        			
+	        	//interiorJson.put(Acm.JSON_ID,workspaceNode.getProperty("ems:id"));
+	        	//interiorJson.put(Acm.JSON_NAME, workspaceNode.getProperty(Acm.CM_TITLE));
+	        	//interiorJson.put("sysml:parent", getStringIfNull(((WorkspaceNode) workspaceNode).getParentWorkspace().getSysmlId()));
+	        	interiorJson.put("lastTimeSyncParent", getStringIfNull(workspaceNode.getProperty("ems:lastTimeSyncParent")));
+	        	interiorJson.put("ems:parent", getStringIfNull(workspaceNode.getProperty("ems:parent")));
+	        	interiorJson.put(Acm.JSON_TYPE, getStringIfNull(workspaceNode.getProperty(Acm.ACM_TYPE)));
+        		interiorJson.put(Acm.JSON_ID, getStringIfNull(workspaceNode.getProperty(Acm.JSON_ID)));
+        		interiorJson.put(Acm.JSON_NAME, getStringIfNull(workspaceNode.getProperty(Acm.CM_NAME)));
         	}
         	else {
         		log(LogLevel.WARNING,"No permission to read: "+ workspaceNode.getSysmlId(),HttpServletResponse.SC_NOT_FOUND);
@@ -110,19 +122,23 @@ public class WorkspacesGet extends AbstractJavaWebScript{
         json.put("workspaces", jArray);
         return json;
 	}
+	
+	protected Object getStringIfNull (Object obj){
+		
+		if (obj == null)
+			return "null";
+		else 
+			return obj;
+		
+	}
     
     /**
      * Validate the request and check some permissions
      */
     @Override
 	protected boolean validateRequest (WebScriptRequest req, Status status){
-		
-    	String workspaceID = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
-    	
+
 		if (checkRequestContent(req)==false){
-			return false;
-		}
-		else if (checkRequestVariable(workspaceID, WORKSPACE_ID) == false){
 			return false;
 		}
 		

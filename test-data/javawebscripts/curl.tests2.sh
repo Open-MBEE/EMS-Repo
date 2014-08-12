@@ -25,7 +25,7 @@ echo GET
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/303\""
 
 # get list of workspaces - should just return 200
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $WORKSPACE_URL
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $WORKSPACE_URL"\""
 
 
 

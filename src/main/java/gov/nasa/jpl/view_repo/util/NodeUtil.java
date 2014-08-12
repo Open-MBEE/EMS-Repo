@@ -158,6 +158,7 @@ public class NodeUtil {
                                                   ServiceRegistry services) {
         return findNodeRefsByType( name, type.prefix, services );
     }
+   
     public static ResultSet findNodeRefsByType(String name, String prefix,
                                                   ServiceRegistry services) {
         ResultSet results = null;
