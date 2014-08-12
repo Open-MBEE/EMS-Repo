@@ -9,16 +9,13 @@ import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.search.ResultSet;
 import org.springframework.extensions.webscripts.Status;
 
 /**
@@ -247,12 +244,12 @@ public class WorkspaceNode extends EmsScriptNode {
     }
 
     public Set< NodeRef > getChangedNodeRefs( Date dateTime ) {
-        Set< NodeRef > changedElementIds = new TreeSet< NodeRef >();
+        Set< NodeRef > changedElementIds = new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);
         //ResultSet refs = NodeUtil.findNodeRefsByType( getName(), SearchType.WORKSPACE, getServices() );
         //List< EmsScriptNode > nodes = NodeUtil.resultSetToList( refs );
         //NodeUtil.resultSetToList( refs );
         ArrayList< NodeRef > refs =
-                NodeUtil.findNodeRefsByType( getName(),
+                NodeUtil.findNodeRefsByType( getNodeRef().toString(),
                                              SearchType.WORKSPACE.prefix, null,
                                              dateTime, false, true,
                                              getServices() );
@@ -274,7 +271,7 @@ public class WorkspaceNode extends EmsScriptNode {
     }
 
     public Set< NodeRef > getChangedNodeRefsWithRespectTo( WorkspaceNode other, Date dateTime ) {
-        Set< NodeRef > changedNodeRefs = new TreeSet< NodeRef >();//getChangedNodeRefs());
+        Set< NodeRef > changedNodeRefs = new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);//getChangedNodeRefs());
         if ( NodeUtil.exists( other ) ) {
             WorkspaceNode targetParent = getCommonParent( other );
             WorkspaceNode parent = this;

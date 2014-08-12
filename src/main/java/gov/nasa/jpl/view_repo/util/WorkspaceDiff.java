@@ -73,10 +73,19 @@ public class WorkspaceDiff {
         ws2 = null;
     }
 
-    public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2 ) {
+    /**
+     * Constructor only for creating 
+     * @param ws1
+     * @param ws2
+     */
+    public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2) {
         this();
         this.ws1 = ws1;
         this.ws2 = ws2;
+    }
+    
+    public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2 ) {
+        this(ws1, ws2);
         this.timestamp1 = timestamp1;
         this.timestamp2 = timestamp2;
         diff();
@@ -121,10 +130,10 @@ public class WorkspaceDiff {
             String name = nodeFromRef.getName();
             NodeRef ref1 = NodeUtil.findNodeRefById( name, getWs1(),
                                                      getTimestamp1(), getServices() );
-            EmsScriptNode node1 = new EmsScriptNode( ref1, getServices() );
+            EmsScriptNode node1 = ref1 == null ? null : new EmsScriptNode( ref1, getServices() );
             NodeRef ref2 = NodeUtil.findNodeRefById( name, getWs2(),
                                                      getTimestamp2(), getServices() );
-            EmsScriptNode node2 = new EmsScriptNode( ref2, getServices() );
+            EmsScriptNode node2 = ref2 == null ? null : new EmsScriptNode( ref2, getServices() );
             addToDiff( node1, node2 );
         }
     }
@@ -390,7 +399,7 @@ public class WorkspaceDiff {
      * @throws JSONException
      */
     public JSONObject toJSONObject(Date time1, Date time2) throws JSONException {
-            return toJSONObject( time1, time2, false );
+            return toJSONObject( time1, time2, true );
     }
 
     /**
@@ -493,8 +502,9 @@ public class WorkspaceDiff {
     }
 
     protected void captureDeltas(WorkspaceNode node) {
-        Set<NodeRef> s1 = ws1.getChangedNodeRefsWithRespectTo( node, timestamp1 );
-        Set<NodeRef> s2 = node.getChangedNodeRefsWithRespectTo( ws1, timestamp2 );
+        Set< NodeRef > newSet = Utils.newSet();
+        Set<NodeRef> s1 = ( ws1 == null ? newSet : ws1.getChangedNodeRefsWithRespectTo( node, timestamp1 ) );
+        Set<NodeRef> s2 = ( node == null ? newSet : node.getChangedNodeRefsWithRespectTo( ws1, timestamp2 ) );
         nodeDiff = new NodeDiff( s1, s2 );
         populateMembers();
     }

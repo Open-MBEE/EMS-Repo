@@ -316,7 +316,7 @@ public class ModelPost extends AbstractJavaWebScript {
         boolean restStatus = false;
 
         if (addedElements.size() > 0 || modifiedElements.size() > 0 || movedElements.size() > 0) {
-            WorkspaceDiff wsDiff = new WorkspaceDiff( workspace, workspace, null, null);
+            WorkspaceDiff wsDiff = new WorkspaceDiff( workspace, workspace);
             wsDiff.setElements( originalElements );
             wsDiff.setAddedElements( addedElements  );
             wsDiff.setMovedElements( movedElements  );
