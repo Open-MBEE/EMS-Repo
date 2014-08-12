@@ -88,6 +88,7 @@ public class WorkspaceDiff {
         this(ws1, ws2);
         this.timestamp1 = timestamp1;
         this.timestamp2 = timestamp2;
+        diff();
     }
 
     /**
