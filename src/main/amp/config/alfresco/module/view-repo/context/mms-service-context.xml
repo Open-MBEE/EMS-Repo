@@ -190,5 +190,12 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
 
-    
+    <!--  adding new bean -->
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.post"
+    	class="gov.nasa.jpl.view_repo.webscripts.WorkspacesPost" parent="webscript"
+    	singleton="false">
+    	<property name="repositoryHelper" ref="repositoryHelper" />
+    	<property name="services" ref="ServiceRegistry" />
+    </bean>
+
 </beans>
