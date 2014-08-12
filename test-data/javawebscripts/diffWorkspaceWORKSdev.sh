@@ -55,7 +55,12 @@ echo
 echo 'testGET1'
 # get project - should just return 200
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/123456\""
-curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/123456"
+curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/123456" > outputWorkspaces/get1.json
+DIFF=$(diff baselineWorkspaces/get1.json outputWorkspaces/get1.json)
+if [ "$DIFF" != "" ];then
+	passTest=1
+	echo "$DIFF"
+fi
 echo
 echo
 

@@ -8,7 +8,7 @@ pkill -fn 'integration-test'
 echo 'KILLING SERVER IF ONE IS RUNNING'
 sleep 3s
 
-#cd ./../..
+cd ./../..
 ./runserver.sh > serverLog.txt &
 echo 'STARTING UP SERVER'
 sleep 60s
@@ -46,7 +46,7 @@ if [ $server -eq 1 ]; then
 	echo 'SERVER CONNECTED'
 	sleep 60s
 	
-	diffChoose=2
+	diffChoose=3
 
 	if [ $diffChoose -eq 1 ];then
 		#run the diff script
@@ -71,8 +71,8 @@ if [ $server -eq 1 ]; then
 		fi
         else 
                 echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
-                ./diff2.sh
-                ./diffWorkspaceWORKS.sh
+#                ./diff2.sh
+                ./diffWorkspaceWORKSdev.sh
                 passTest=$?
         fi
         
