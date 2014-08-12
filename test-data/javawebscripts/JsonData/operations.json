@@ -1,0 +1,324 @@
+{ "elements": [
+    {
+      "sysmlid" : "operations",
+      "specialization" : {
+         "type" : "Package"
+      }
+    },
+    {
+        "sysmlid" : "Conditional",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+    {
+        "sysmlid" : "Sum",
+        "owner" : "operations",
+        "specialization" : {
+	    "element" : "Plus",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Add",
+        "owner" : "operations",
+        "specialization" : {
+	    "element" : "Plus",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Plus",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "Plus",
+	    "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Sub",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "Minus",
+	    "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Minus",
+        "owner" : "operations",
+        "specialization" : {
+	    "element" : "Minus",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Times",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "Times",
+	    "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Divide",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "Divide",
+	    "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Negative",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "Negative",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "EQ",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "EQ",
+	    "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Equals",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "EQ",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "NEQ",
+        "owner" : "operations",
+        "specialization" : {
+	    "element" : "NotEQ",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "NotEquals",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "NotEQ",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "LT",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "LT",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Less",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "LT",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "LTE",
+        "owner" : "operations",
+        "specialization" : {
+	    "element" : "LTE",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "LessEquals",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "LTE",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "GT",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "GT",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Greater",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "GT",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "GTE",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "GTE",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "GreaterEquals",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "GTE",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "DoesThereExist",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+    {
+        "sysmlid" : "ThereExists",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+    {
+        "sysmlid" : "ForAll",
+        "owner" : "operations",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    },
+    {
+        "sysmlid" : "And",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "And",
+	    "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Or",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "Or",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Xor",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "Not",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Not",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "Not",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Modulo",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "Modulo",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "NotEQ",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "NotEQ",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "IsIn",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "IsIn",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "NotIn",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "NotIn",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Subset",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "Subset",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Psubset",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "Psubset",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Union",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "Union",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "Inter",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "Inter",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "map",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "map",
+            "type" : "ElementValue"
+        }
+    }, 
+    {
+        "sysmlid" : "Tuples",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "Tuples",
+            "type" : "ElementValue"
+        }
+    },  
+    {
+        "sysmlid" : "Concat",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "Concat",
+            "type" : "ElementValue"
+        }
+    },
+    {
+        "sysmlid" : "IsIn",
+        "owner" : "operations",
+        "specialization" : {
+            "element" : "IsIn",
+            "type" : "ElementValue"
+        }
+    }    
+]}

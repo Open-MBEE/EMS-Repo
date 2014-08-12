@@ -110,11 +110,11 @@
                     <artifactId>kexpparser</artifactId>
                     <version>0.0.7</version>
                 </dependency>
-                <dependency>
+               <!--  <dependency>
                     <groupId>emsscala</groupId>
                     <artifactId>emsscala</artifactId>
                     <version>0.0.1</version>
-                </dependency>
+                </dependency> -->
             </dependencies>
         </profile>
     </profiles>

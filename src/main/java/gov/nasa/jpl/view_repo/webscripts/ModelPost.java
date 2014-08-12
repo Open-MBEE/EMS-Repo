@@ -83,7 +83,6 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-import kexpparser.KExpParser;
 import kexpparser.KExpParser$;
 
 
@@ -1806,11 +1805,13 @@ public class ModelPost extends AbstractJavaWebScript {
         String expressionString = req.getParameter( "expression" );
         
         JSONObject top = new JSONObject();
+        ArrayList<JSONObject> foo = new ArrayList<JSONObject>();
         if (wsFound && validateRequest(req, status)) {
             try {
                 if (runInBackground) {
-                    if ( expressionString != null || expressionString.length() == 0 ) {
-                        // ERRROR
+                    if ( expressionString == null || expressionString.length() == 0 ) 
+                    {
+                        
                     }
                     instance.saveAndStartAction(req, workspace, status);
                     // REVIEW -- TODO -- shouldn't response be called from
@@ -1819,17 +1820,16 @@ public class ModelPost extends AbstractJavaWebScript {
                     response.append("JSON uploaded, model load being processed in background.\n");
                     response.append("You will be notified via email when the model load has finished.\n");
                 }
-                else {
-                   
-                  ArrayList<JSONObject> foo = new ArrayList<JSONObject>();
+                else if (expressionString != null && expressionString.length() > 0)
+                {
                     JSONObject pJson = (JSONObject)req.parseContent();
                     JSONObject exprJson =new JSONObject(KExpParser.parseExpression(expressionString));
+                    System.out.println("*********************************************************************************************");
+                    System.out.println(exprJson);
                     foo.add( pJson );
                     foo.add( exprJson );
- 
                     JSONArray elementsJson = new JSONArray();
- 
-                    for ( JSONObject postJson : foo ) {
+                    for (JSONObject postJson : foo){
                         EmsScriptNode projectNode = getProjectNodeFromRequest( req, true );
                         Set< EmsScriptNode > elements =
                             instance.createOrUpdateModel( postJson, status,
@@ -1851,6 +1851,30 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
                     top.put( "elements", elementsJson );
                     model.put( "res", top.toString( 4 ) );                }
+                else {
+                    JSONObject postJson = (JSONObject)req.parseContent();;
+                    JSONArray elementsJson = new JSONArray();
+                        EmsScriptNode projectNode = getProjectNodeFromRequest( req, true );
+                        Set< EmsScriptNode > elements =
+                            instance.createOrUpdateModel( postJson, status,
+                                                          projectNode, workspace );
+                        // REVIEW -- TODO -- shouldn't this be called from instance?
+                        addRelationshipsToProperties( elements );
+                        if ( !Utils.isNullOrEmpty( elements ) ) {
+                           
+                            // Fix constraints if desired:
+                            if (fix) {
+                              instance.fix(elements);
+                            }
+                           
+                            // Create JSON object of the elements to return:
+                            for ( EmsScriptNode element : elements ) {
+                                elementsJson.put( element.toJSONObject(null) );
+                            }
+                        }
+                    top.put( "elements", elementsJson );
+                    model.put( "res", top.toString( 4 ) ); 
+                }
                 // REVIEW -- TODO -- shouldn't this be called from instance?
                 appendResponseStatusInfo(instance);
             } catch (JSONException e) {

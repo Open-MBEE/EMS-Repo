@@ -1267,7 +1267,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
         json.put( "type", typeName );
-        for ( QName aspectQname : this.aspects ) {
+        for ( QName aspectQname : this.getAspectsSet() ) {
             String cappedAspectName =
                     Utils.capitalize( aspectQname.getLocalName() );
             String methodName = "add" + cappedAspectName + "JSON";
@@ -1281,18 +1281,23 @@ public class EmsScriptNode extends ScriptNode implements
                                                            EmsScriptNode.class,
                                                            Set.class,
                                                            Date.class );
+                System.out.println(method);
             } catch ( NoSuchMethodException | SecurityException e ) {
-                // do nothing, method isn't implemented yet
-                // System.out.println("Method not yet implemented: " +
-                // methodName);
+            	if  ( methodName.equals("addElementValueJSON") ) {
+            	    e.printStackTrace();
+            	}
             }
 
             if ( method != null ) {
                 EmsScriptNode node = getNodeAtAtime( dateTime );
                 try {
                     method.invoke( this, json, node, filter, dateTime );
+                    System.out.println("*******************************************************");
+                    System.out.println(json);
+                    System.out.println(method);
                 } catch ( IllegalAccessException | IllegalArgumentException
                           | InvocationTargetException e ) {
+                	e.printStackTrace();
                     // do nothing, internal server error
                 }
             }
