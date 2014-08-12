@@ -111,6 +111,8 @@ public class WorkspacesGet extends AbstractJavaWebScript{
 	        	interiorJson.put(Acm.JSON_TYPE, getStringIfNull(workspaceNode.getProperty(Acm.ACM_TYPE)));
         		interiorJson.put(Acm.JSON_ID, getStringIfNull(workspaceNode.getProperty(Acm.JSON_ID)));
         		interiorJson.put(Acm.JSON_NAME, getStringIfNull(workspaceNode.getProperty(Acm.CM_NAME)));
+        		interiorJson.put("mergesource", getStringIfNull(workspaceNode.getProperty("ems:Mergesource")));
+        		interiorJson.put("ems:Workspace", getStringIfNull(workspaceNode.getProperty("ems:Workspace")));
         	}
         	else {
         		log(LogLevel.WARNING,"No permission to read: "+ workspaceNode.getSysmlId(),HttpServletResponse.SC_NOT_FOUND);
