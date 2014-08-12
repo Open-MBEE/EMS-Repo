@@ -73,13 +73,21 @@ public class WorkspaceDiff {
         ws2 = null;
     }
 
-    public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2 ) {
+    /**
+     * Constructor only for creating 
+     * @param ws1
+     * @param ws2
+     */
+    public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2) {
         this();
         this.ws1 = ws1;
         this.ws2 = ws2;
+    }
+    
+    public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2 ) {
+        this(ws1, ws2);
         this.timestamp1 = timestamp1;
         this.timestamp2 = timestamp2;
-        diff();
     }
 
     /**
