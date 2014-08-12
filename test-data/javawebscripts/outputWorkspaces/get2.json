@@ -1,112 +1,139 @@
 {"elements": [
     {
-        "qualifiedId": "no_project/300/MMS_1407445681350_7662b9e9-1b12-4940-b5f8-8dc898748722",
-        "qualifiedName": "/300/null",
-        "sysmlid": "MMS_1407445681350_7662b9e9-1b12-4940-b5f8-8dc898748722",
+        "author": "admin",
+        "qualifiedName": "//////300/",
+        "sysmlid": "MMS_1407800197698_bec81791-c06e-4cde-a82f-cc879ab401de",
+        "owner": "300",
+        "specialization": {"type": "Element"},
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "qualifiedName": "//////300/",
+        "sysmlid": "MMS_1407802542068_e454b1a7-0627-4fd3-941d-2757d359b20a",
+        "owner": "300",
+        "specialization": {"type": "Element"},
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "301",
+        "qualifiedName": "//////300/301",
+        "documentation": "else",
+        "sysmlid": "MMS_1407798178732_339c4e5d-d1a3-4bbf-b34b-18295c3852db",
+        "owner": "300",
+        "specialization": {
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "300",
+        "qualifiedName": "//////300",
+        "documentation": "something",
+        "sysmlid": "300",
+        "owner": "no_project",
+        "specialization": {
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "contains": [],
+            "type": "Product"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "301",
+        "qualifiedName": "//////300/301",
+        "documentation": "else",
+        "sysmlid": "301",
+        "owner": "300",
+        "specialization": {
+            "childrenViews": ["304"],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "isDerived": false,
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "301",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "View"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "qualifiedName": "//////300/",
+        "sysmlid": "MMS_1407798178811_4ef5bddd-2259-4e6c-9091-02aa4b5aeb83",
+        "owner": "300",
+        "specialization": {"type": "Element"},
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "New test",
+        "qualifiedName": "//////300/New test",
+        "documentation": "change testing commnets",
+        "sysmlid": "_comment_300",
+        "owner": "300",
+        "specialization": {"type": "Comment"},
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "name": "301",
+        "qualifiedName": "//////300/301",
+        "documentation": "else",
+        "sysmlid": "MMS_1407802542013_becc2d7e-efd1-4366-93c8-bb9c55aca484",
+        "owner": "300",
+        "specialization": {
+            "isDerived": false,
+            "type": "Property"
+        },
+        "editable": true
+    },
+    {
+        "author": "admin",
+        "qualifiedName": "//////300/",
+        "sysmlid": "MMS_1407798224885_af17304c-b090-4c62-b4de-bce26324cf51",
         "owner": "300",
         "specialization": {
             "string": "dlam_string",
             "type": "LiteralString"
         },
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 14:08:01 PDT 2014"
+        "editable": true
     },
     {
-        "qualifiedId": "no_project/300/MMS_1407445620729_c1a7472d-4af8-498d-8fd9-65f125c94cf2",
-        "name": "500",
-        "qualifiedName": "/500",
-        "sysmlid": "MMS_1407445620729_c1a7472d-4af8-498d-8fd9-65f125c94cf2",
-        "documentation": "directed_relationship",
-        "owner": "300",
-        "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 14:07:13 PDT 2014"
-    },
-    {
-        "qualifiedId": "no_project/300",
-        "name": "300",
-        "qualifiedName": "/300",
-        "sysmlid": "300",
-        "documentation": "something",
-        "owner": "no_project",
-        "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Product"
-        },
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 15:23:34 PDT 2014"
-    },
-    {
-        "qualifiedId": "no_project/300/MMS_1407450207718_9cc91d1c-b28a-4e35-985a-9fbe9462124c",
-        "name": "500",
-        "qualifiedName": "/300/500",
-        "sysmlid": "MMS_1407450207718_9cc91d1c-b28a-4e35-985a-9fbe9462124c",
-        "documentation": "directed_relationship",
-        "owner": "300",
-        "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 15:23:39 PDT 2014"
-    },
-    {
-        "qualifiedId": "no_project/300/MMS_1407445620661_214d17e4-e9d1-408e-ac9d-3b29f8108fc9",
+        "author": "admin",
         "name": "301",
-        "qualifiedName": "/301",
-        "sysmlid": "MMS_1407445620661_214d17e4-e9d1-408e-ac9d-3b29f8108fc9",
+        "qualifiedName": "//////300/301",
         "documentation": "else",
+        "sysmlid": "MMS_1407800197654_0057a14e-550d-41b7-a222-183fe021899e",
         "owner": "300",
         "specialization": {
             "isDerived": false,
-            "isSlot": false,
             "type": "Property"
         },
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 14:07:14 PDT 2014"
-    },
-    {
-        "qualifiedId": "no_project/300/MMS_1407450207652_bbfb55ea-50d5-475c-840b-d5399da26778",
-        "name": "301",
-        "qualifiedName": "/300/301",
-        "sysmlid": "MMS_1407450207652_bbfb55ea-50d5-475c-840b-d5399da26778",
-        "documentation": "else",
-        "owner": "300",
-        "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "type": "Property"
-        },
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 15:23:40 PDT 2014"
-    },
-    {
-        "qualifiedId": "no_project/300/_comment_300",
-        "name": "New test",
-        "qualifiedName": "/New test",
-        "sysmlid": "_comment_300",
-        "documentation": "change testing commnets",
-        "owner": "300",
-        "specialization": {"type": "Comment"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "Thu Aug 07 14:07:20 PDT 2014"
+        "editable": true
     }
 ]}
 200

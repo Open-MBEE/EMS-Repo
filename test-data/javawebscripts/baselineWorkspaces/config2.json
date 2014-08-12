@@ -1,21 +1,7 @@
-{"configurations": [
-  {
-    "id": "deb299f3-2e12-4dbb-bb68-ac9e834abc2d",
-    "timestamp": "2014-08-09T09:03:45.834-0700",
-    "description": "updating description",
-    "name": "ThiTests_1",
-  },
-  {
-    "id": "51b6ea3b-7d09-48b5-98c2-336b19f3e5e0",
-    "timestamp": "2014-08-09T09:03:45.834-0700",
-    "description": "updating description",
-    "name": "ThiTest",
-  },
-  {
-    "id": "180eb0db-c647-4055-bd40-46cd4859e1f5",
-    "timestamp": "2014-06-09T09:04:45.834-0700",
-    "description": "updating description",
-    "name": "product test 2",
-  }
-]}
+{"configurations": [{
+  "id": "64c3539d-27d0-43d3-a486-0b460bd307ce",
+  "timestamp": "2014-06-09T09:04:45.834-0700",
+  "description": "updating description",
+  "name": "product test 2",
+}]}
 200
