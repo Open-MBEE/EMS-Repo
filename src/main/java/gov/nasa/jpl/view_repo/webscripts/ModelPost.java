@@ -285,10 +285,10 @@ public class ModelPost extends AbstractJavaWebScript {
         total = end - start;
         log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
 
-//        // Send deltas to all listeners
-//        if ( !sendDeltas(workspace, start, end) ) {
-//            log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
-//        }
+        // Send deltas to all listeners
+        if ( !sendDeltas(workspace, start, end) ) {
+            log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
+        }
 
         // Commit history
         String siteName = null;
@@ -316,7 +316,7 @@ public class ModelPost extends AbstractJavaWebScript {
         boolean restStatus = false;
 
         if (addedElements.size() > 0 || modifiedElements.size() > 0 || movedElements.size() > 0) {
-            WorkspaceDiff wsDiff = new WorkspaceDiff( workspace, workspace, null, null);
+            WorkspaceDiff wsDiff = new WorkspaceDiff( workspace, workspace);
             wsDiff.setElements( originalElements );
             wsDiff.setAddedElements( addedElements  );
             wsDiff.setMovedElements( movedElements  );
