@@ -41,6 +41,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONException;
@@ -70,6 +71,9 @@ public class ProjectGet extends AbstractJavaWebScript {
      */
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+    	
+    	String userName = AuthenticationUtil.getRunAsUser();
+    	
         printHeader( req );
 
         clearCaches();
@@ -80,12 +84,14 @@ public class ProjectGet extends AbstractJavaWebScript {
         try {
             if (validateRequest(req, status)) {
                 
+            	
+            	
                 String siteName = getSiteName( req );
                 String projectId = getProjectId( req );
 
                 // get timestamp if specified
                 String timestamp = req.getParameter("timestamp");
-                Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+                Date dateTime = TimeUtils.dateFromTimestamp(timestamp);
                 
                 WorkspaceNode workspace = getWorkspace( req );
                 

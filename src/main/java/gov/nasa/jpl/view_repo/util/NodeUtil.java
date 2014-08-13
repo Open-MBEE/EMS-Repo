@@ -5,7 +5,6 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,9 +22,7 @@ import java.util.regex.Pattern;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.jscript.ScriptNode;
-import org.alfresco.repo.jscript.ScriptNode.NodeValueConverter;
 import org.alfresco.repo.jscript.ScriptVersion;
-import org.alfresco.repo.jscript.ValueConverter;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
@@ -44,7 +41,6 @@ import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ApplicationContextHelper;
-import org.mozilla.javascript.Scriptable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
 
@@ -58,14 +54,16 @@ public class NodeUtil {
         STRING( "@sysml\\:string:\"" ),
         BODY( "@sysml\\:body:\"" ),
         CHECKSUM( "@view\\:cs\"" ),
-        WORKSPACE("@ems\\:workspace\"" );
+        WORKSPACE("@ems\\:workspace:\"" );
 
         public String prefix;
 
         SearchType( String prefix ) {
             this.prefix = prefix;
         }
-    };
+    }
+
+    public static final Comparator< ? super NodeRef > nodeRefComparator = GenericComparator.instance();
 
     public static ServiceRegistry services = null;
 
@@ -154,11 +152,12 @@ public class NodeUtil {
         return "" + resultSetToList( results );
     }
 
-    protected static ResultSet findNodeRefsByType(String name, SearchType type,
+    public static ResultSet findNodeRefsByType(String name, SearchType type,
                                                   ServiceRegistry services) {
         return findNodeRefsByType( name, type.prefix, services );
     }
-    protected static ResultSet findNodeRefsByType(String name, String prefix,
+   
+    public static ResultSet findNodeRefsByType(String name, String prefix,
                                                   ServiceRegistry services) {
         ResultSet results = null;
         String queryPattern = prefix + name + "\"";
@@ -195,6 +194,7 @@ public class NodeUtil {
         ResultSet results = null;
         ArrayList<NodeRef> nodeRefs = new ArrayList<NodeRef>();
         NodeRef nodeRef = null;
+        if ( services == null ) services = getServices();
         try {
             results = findNodeRefsByType( specifier, prefix, services );
             if (results != null) {

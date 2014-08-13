@@ -131,13 +131,21 @@
                     <type>d:noderef</type>
                     <mandatory>false</mandatory>
                     <multiple>false</multiple>
-                    <index enabled="false"/>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
                 </property>
                 <property name="ems:source"> <!-- The node from the parent workspace from which this one was cloned -->
                     <type>d:noderef</type>
                     <mandatory>false</mandatory>
                     <multiple>false</multiple>
-                    <index enabled="false"/>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
                 </property>
             </properties>
         </aspect>

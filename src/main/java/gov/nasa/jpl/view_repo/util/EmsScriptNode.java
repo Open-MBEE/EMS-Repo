@@ -203,7 +203,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         String msg = "Error! Node has HasWorkspace aspect but no source node!";
         log( msg );
-        Debug.error( msg );
+//        Debug.error( msg );
         return null;
     }
 
