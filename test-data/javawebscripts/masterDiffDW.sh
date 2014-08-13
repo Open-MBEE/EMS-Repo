@@ -86,7 +86,7 @@ if [ $server -eq 1 ]; then
         #classPath=??
         TestSuite="WorkspacesTesting"
         #TestCase="??"
-        ./testrunner.sh -f ./soapTestData -s $TestSuite -c $TestCase $classpath
+        #./testrunner.sh -f ./soapTestData -s $TestSuite -c $TestCase $classpath
         cd ./soapStuff
 	for i in $(ls . | grep "soapui-project.xml"); do
 	         echo RUNNING TEST $i
