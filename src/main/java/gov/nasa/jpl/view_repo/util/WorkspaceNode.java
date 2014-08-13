@@ -4,9 +4,8 @@
 package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.Debug;
-
+import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
-
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -142,7 +141,7 @@ public class WorkspaceNode extends EmsScriptNode {
         if ( Debug.isOn() ) Debug.outln( "created workspace " + ws + " in folder " + folder );
         return ws;
     }
-    
+
     public static WorkspaceNode createWorskpaceFromSource( String sysmlId,
     									String userName,
     									String sourceId,
