@@ -80,7 +80,7 @@ public class JmsConnection implements AbstractConnection {
         }
         catch (Exception e) {
             logger.error( "Caught, but doing nothing: " + e);
-            e.printStackTrace();
+//            e.printStackTrace();
             status = false;
         }
         

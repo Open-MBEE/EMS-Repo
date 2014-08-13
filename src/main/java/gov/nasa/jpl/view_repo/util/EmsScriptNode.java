@@ -2224,7 +2224,7 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public boolean isDeleted() {
-        return !exists();
+        return hasAspect( "ems:Deleted" );
     }
 
 
@@ -3388,5 +3388,13 @@ public class EmsScriptNode extends ScriptNode implements
             nodes.add( new EmsScriptNode( ref, NodeUtil.getServices() ) );
         }
         return nodes;
+    }
+
+    @Override
+    public boolean removeAspect(String type) {
+        if (hasAspect(type)) {
+            return super.removeAspect( type );
+        }
+        return true;
     }
 }

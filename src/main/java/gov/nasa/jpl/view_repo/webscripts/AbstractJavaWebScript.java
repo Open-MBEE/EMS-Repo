@@ -31,8 +31,11 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.connections.JmsConnection;
+import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -52,6 +55,8 @@ import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.mozilla.javascript.Scriptable;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
@@ -92,6 +97,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     protected StringBuffer response = new StringBuffer();
     protected Status responseStatus = new Status();
 
+    private JmsConnection jmsConnection = null;
+    private RestPostConnection restConnection = null;
+    
+    protected WorkspaceDiff wsDiff;
+
     protected void initMemberVariables(String siteName) {
 		companyhome = new ScriptNode(repository.getCompanyHome(), services);
 	}
@@ -115,6 +125,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     public AbstractJavaWebScript(Repository repositoryHelper, ServiceRegistry registry) {
         this.setRepositoryHelper(repositoryHelper);
         this.setServices(registry);
+
+        // FIX: Need to figure out why spring dependency injection doesn't work
+        jmsConnection = new JmsConnection();
+        restConnection = new RestPostConnection();
     }
 
     public AbstractJavaWebScript() {
@@ -610,4 +624,40 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return gotSuffix;
     }
 
+    
+    /**
+     * Send off the deltas to various endpoints
+     * @param deltas    JSONObject of the deltas to be published
+     * @return          true if publish completed
+     * @throws JSONException
+     */
+    protected boolean sendDeltas(JSONObject deltaJson) throws JSONException {
+        boolean jmsStatus = false;
+        boolean restStatus = false;
+
+        if (jmsConnection != null) {
+            jmsStatus = jmsConnection.publish( deltaJson, "master" );
+        }
+        if (restConnection != null) {
+            restStatus = restConnection.publish( deltaJson, "MMS" );
+        }
+
+        return jmsStatus && restStatus ? true : false;
+    }
+
+    public void setWsDiff(WorkspaceNode workspace) {
+        wsDiff = new WorkspaceDiff(workspace, workspace);
+    }
+    
+    public WorkspaceDiff getWsDiff() {
+        return wsDiff;
+    }
+    
+    public void setJmsConnection(JmsConnection jmsConnection) {
+        this.jmsConnection = jmsConnection;
+    }
+
+    public void setRestConnection(RestPostConnection restConnection) {
+        this.restConnection = restConnection;
+    }    
 }

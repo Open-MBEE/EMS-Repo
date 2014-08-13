@@ -897,9 +897,8 @@ public class NodeUtil {
     public static NodeRef getNodeRefAtTime( NodeRef ref,
                                             Date dateTime ) {
         if (Debug.isOn())  Debug.outln("getNodeRefAtTime( " + ref + ", " + dateTime + " )" );
-
-        if ( dateTime == null ) {
-            return ref;//getServices().getVersionService().getCurrentVersion( ref );
+        if (ref == null || dateTime == null ) {
+            return ref;
         }
         VersionHistory history = getServices().getVersionService().getVersionHistory( ref );
         if (history == null) {

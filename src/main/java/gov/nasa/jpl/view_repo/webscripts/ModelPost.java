@@ -105,9 +105,6 @@ public class ModelPost extends AbstractJavaWebScript {
 
     public ModelPost(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
-        // FIX: Need to figure out why spring dependency injection doesn't work
-        jmsConnection = new JmsConnection();
-        restConnection = new RestPostConnection();
      }
 
 
@@ -124,12 +121,6 @@ public class ModelPost extends AbstractJavaWebScript {
      * },
      */
     private JSONObject elementHierarchyJson;
-
-    private Map<String, EmsScriptNode> addedElements = new HashMap<String, EmsScriptNode>();
-    private Map<String, EmsScriptNode> movedElements = new HashMap<String, EmsScriptNode>();
-    private Map<String, EmsScriptNode> modifiedElements = new HashMap<String, EmsScriptNode>();
-    private Map<String, EmsScriptNode> originalElements = new HashMap<String, EmsScriptNode>();
-    private Map<String, Version> originalElementsVersions = new HashMap<String, Version>();
 
     private EmsSystemModel systemModel;
 
@@ -159,17 +150,6 @@ public class ModelPost extends AbstractJavaWebScript {
     protected Set<String> newElements;
 
     protected SiteInfo siteInfo;
-
-    private JmsConnection jmsConnection = null;
-    private RestPostConnection restConnection = null;
-
-    public void setJmsConnection(JmsConnection jmsConnection) {
-        this.jmsConnection = jmsConnection;
-    }
-
-    public void setRestConnection(RestPostConnection restConnection) {
-        this.restConnection = restConnection;
-    }
 
     private EmsSystemModel getSystemModel() {
         if ( systemModel == null ) {
@@ -286,7 +266,8 @@ public class ModelPost extends AbstractJavaWebScript {
         log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
 
         // Send deltas to all listeners
-        if ( !sendDeltas(workspace, start, end) ) {
+        JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
+        if ( !sendDeltas(deltaJson) ) {
             log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
         }
 
@@ -297,43 +278,11 @@ public class ModelPost extends AbstractJavaWebScript {
             siteName = siteNode.getName();
         }
         CommitUtil commitUtil = new CommitUtil();
-        commitUtil.commit( originalElements, originalElementsVersions, addedElements,
-                           null, movedElements, modifiedElements, workspace, siteName,
+        commitUtil.commit( wsDiff, workspace, siteName,
                            "", false, services, response );
 
         elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
         return elements;
-    }
-
-    /**
-     * Send off the deltas to various endpoints
-     * @param deltas    JSONObject of the deltas to be published
-     * @return          true if publish completed
-     * @throws JSONException
-     */
-    private boolean sendDeltas(WorkspaceNode workspace, long start, long end) throws JSONException {
-        boolean jmsStatus = false;
-        boolean restStatus = false;
-
-        if (addedElements.size() > 0 || modifiedElements.size() > 0 || movedElements.size() > 0) {
-            WorkspaceDiff wsDiff = new WorkspaceDiff( workspace, workspace);
-            wsDiff.setElements( originalElements );
-            wsDiff.setAddedElements( addedElements  );
-            wsDiff.setMovedElements( movedElements  );
-            wsDiff.setUpdatedElements( modifiedElements );
-
-            Date t1 = new Date(start);
-            Date t2 = new Date(end);
-            JSONObject deltaJson = wsDiff.toJSONObject( t1, t2 );
-            if (jmsConnection != null) {
-                jmsStatus = jmsConnection.publish( deltaJson, "master" );
-            }
-            if (restConnection != null) {
-                restStatus = restConnection.publish( deltaJson, "MMS" );
-            }
-        }
-
-        return jmsStatus && restStatus ? true : false;
     }
 
 
@@ -811,9 +760,9 @@ public class ModelPost extends AbstractJavaWebScript {
             nodeMap.put( element.getName(), element );
             // only add to original element map if it exists on first pass
             if (!ingest) {
-                if (!originalElements.containsKey( jsonId )) {
-                    originalElements.put( jsonId, element );
-                    originalElementsVersions.put( jsonId, element.getHeadVersion());
+                if (!wsDiff.getElements().containsKey( jsonId )) {
+                    wsDiff.getElements().put( jsonId, element );
+                    wsDiff.getElementsVersions().put( jsonId, element.getHeadVersion());
                 }
             }
         }
@@ -914,38 +863,60 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         element = findScriptNodeById( jsonId, workspace, null );
-        if (element != null && element.exists()) {
+        if (element != null && (element.exists() || element.isDeleted())) {
             // can't add the node JSON yet since properties haven't been tied in yet
             switch (modStatus.getState()) {
                 case ADDED:
                     if (!ingest) {
-                        addedElements.put( jsonId, element );
+                        wsDiff.getAddedElements().put( jsonId, element );
                         element.createOrUpdateAspect( "ems:Added" );
                     }
                     break;
                 case UPDATED:
-                    if (ingest && !addedElements.containsKey( jsonId )) {
-                        if (element.hasAspect( "ems:Added" )) {
-                            modifiedElements.put( jsonId, element );
+                    if (ingest && !wsDiff.getAddedElements().containsKey( jsonId )) {
+                        element.removeAspect( "ems:Moved" );
+                        
+                        if (element.hasAspect( "ems:Deleted" )) {
+                            wsDiff.getAddedElements().put( jsonId,  element );
+                            element.removeAspect( "ems:Deleted" );
+                            element.removeAspect( "ems:Updated" );
+                            element.createOrUpdateAspect( "ems:Added" );
+                        } else {
+                            element.removeAspect( "ems:Added" );
+                            wsDiff.getUpdatedElements().put( jsonId, element );
                             element.createOrUpdateAspect( "ems:Updated" );
                         }
                     }
                     break;
                 case MOVED:
-                    if (!ingest && !addedElements.containsKey( jsonId )) {
-                        if (element.hasAspect( "ems:Added" )) {
-                            movedElements.put( jsonId, element );
+                    if (!ingest && !wsDiff.getAddedElements().containsKey( jsonId )) {
+                        element.removeAspect( "ems:Updated" );
+                        if (element.hasAspect( "ems:Deleted" )) {
+                            wsDiff.getAddedElements().put( jsonId,  element );
+                            element.removeAspect( "ems:Deleted" );
+                            element.removeAspect( "ems:Moved" );
+                            element.createOrUpdateAspect( "ems:Added" );
+                        } else {
+                            element.removeAspect( "ems:Added" );
+                            wsDiff.getMovedElements().put( jsonId, element );
                             element.createOrUpdateAspect( "ems:Moved" );
                         }
                     }
                     break;
                 case UPDATED_AND_MOVED:
-                    if (ingest && !addedElements.containsKey( jsonId )) {
-                        if (element.hasAspect( "ems:Added" )) {
-                            modifiedElements.put( jsonId, element );
+                    if (ingest && !wsDiff.getAddedElements().containsKey( jsonId )) {
+                        if (element.hasAspect( "ems:Deleted" )) {
+                            wsDiff.getAddedElements().put( jsonId,  element );
+                            element.removeAspect( "ems:Deleted" );
+                            element.removeAspect( "ems:Moved" );
+                            element.removeAspect( "ems:Updated" );
+                            element.createOrUpdateAspect( "ems:Added" );
+                        } else {
+                            element.removeAspect( "ems:Added" );
+                            wsDiff.getUpdatedElements().put( jsonId, element );
                             element.createOrUpdateAspect( "ems:Updated" );
-
-                            movedElements.put( jsonId, element );
+    
+                            wsDiff.getMovedElements().put( jsonId, element );
                             element.createOrUpdateAspect( "ems:Moved" );
                         }
                     }
@@ -1804,6 +1775,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         JSONObject top = new JSONObject();
         if (wsFound && validateRequest(req, status)) {
+            instance.setWsDiff( workspace );
             try {
                 if (runInBackground) {
                     if ( expressionString != null || expressionString.length() == 0 ) {
