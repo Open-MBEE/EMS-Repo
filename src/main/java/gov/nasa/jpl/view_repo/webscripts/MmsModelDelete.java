@@ -183,6 +183,9 @@ public class MmsModelDelete extends AbstractJavaWebScript {
     protected void handleElementHierarchy( EmsScriptNode root,
                                            WorkspaceNode workspace,
                                            boolean recurse ) {
+        if (root == null) {
+            return;
+        }                                       
         if (recurse) {
             for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
                 EmsScriptNode child = new EmsScriptNode(assoc.getChildRef(), services, response);
