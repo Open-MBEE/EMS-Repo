@@ -4,7 +4,7 @@
 	<description>
 	post workspaces
 	</description>
-	<url>/workspaces/{workspaceId}</url>
+	<url>/workspaces/{workspaceId}?sourceWorkspace={sourceWorkspace}</url>
 	<format default="json">any</format>
 	<authentication>user</authentication>
 	<transaction allow="readwrite">required</transaction>

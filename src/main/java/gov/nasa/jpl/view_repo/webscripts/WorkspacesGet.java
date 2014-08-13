@@ -33,24 +33,24 @@ import org.alfresco.service.ServiceRegistry;
 
 
 public class WorkspacesGet extends AbstractJavaWebScript{
-	
-	
+
+
     protected boolean gettingContainedWorkspaces = false;
-	
+
     public WorkspacesGet() {
         super();
     }
-    
+
     public WorkspacesGet(Repository repositoryHelper, ServiceRegistry registry) {
-        super(repositoryHelper, registry);	
+        super(repositoryHelper, registry);
     }
-    
+
 	/**
 	 * Entry point
 	 */
 	@Override
 	protected Map<String, Object> executeImpl (WebScriptRequest req, Status status, Cache cache) {
-		
+
 		printHeader( req );
 
         clearCaches();
@@ -60,10 +60,10 @@ public class WorkspacesGet extends AbstractJavaWebScript{
 
         try {
             if (validateRequest(req, status)) {
-                
+
                 String userName = AuthenticationUtil.getRunAsUser();
                 EmsScriptNode homeFolder = NodeUtil.getUserHomeFolder(userName);
-                
+
                 json = handleWorkspace (homeFolder);
             }
         } catch (JSONException e) {
@@ -76,7 +76,11 @@ public class WorkspacesGet extends AbstractJavaWebScript{
         if (json == null) {
             model.put("res", response.toString());
         } else {
-            model.put("res", json.toString());
+            try {
+                model.put("res", json.toString(4));
+            } catch ( JSONException e ) {
+                e.printStackTrace();
+            }
         }
         status.setCode(responseStatus.getCode());
 
@@ -84,25 +88,25 @@ public class WorkspacesGet extends AbstractJavaWebScript{
 
         return model;
 	}
-    
+
 	protected JSONObject handleWorkspace (EmsScriptNode homeFolder) throws JSONException{
-		
+
 		JSONObject json = new JSONObject ();
 		JSONArray jArray = new JSONArray ();
         Collection <EmsScriptNode> nodes = NodeUtil.luceneSearchElements("ASPECT:\"ems:workspace\"" );
-		
+
         for (EmsScriptNode workspaceNode: nodes){
-        	
+
         	JSONObject interiorJson = new JSONObject();
-        	
+
         	if (checkPermissions(workspaceNode, PermissionService.READ)){
-        		
+
 //        		Map <String, Object> wkspProperties = new HashMap <String, Object> ();
 //        		wkspProperties = workspaceNode.getProperties();
 //        		for (String key: wkspProperties.keySet()) {
 //        			interiorJson.put(key, wkspProperties.get(key));
 //        		}
-        			
+
 	        	//interiorJson.put(Acm.JSON_ID,workspaceNode.getProperty("ems:id"));
 	        	//interiorJson.put(Acm.JSON_NAME, workspaceNode.getProperty(Acm.CM_TITLE));
 	        	//interiorJson.put("sysml:parent", getStringIfNull(((WorkspaceNode) workspaceNode).getParentWorkspace().getSysmlId()));
@@ -117,23 +121,23 @@ public class WorkspacesGet extends AbstractJavaWebScript{
         	else {
         		log(LogLevel.WARNING,"No permission to read: "+ workspaceNode.getSysmlId(),HttpServletResponse.SC_NOT_FOUND);
         	}
-        	
+
         	jArray.put(interiorJson);
         }
-		
+
         json.put("workspaces", jArray);
         return json;
 	}
-	
+
 	protected Object getStringIfNull (Object obj){
-		
+
 		if (obj == null)
 			return "null";
-		else 
+		else
 			return obj;
-		
+
 	}
-    
+
     /**
      * Validate the request and check some permissions
      */
@@ -143,11 +147,11 @@ public class WorkspacesGet extends AbstractJavaWebScript{
 		if (checkRequestContent(req)==false){
 			return false;
 		}
-		
+
 		return true;
-	
+
 	}
-	
-	
-	
+
+
+
 }
