@@ -18,6 +18,7 @@ cd ./test-data/javawebscripts
 server=0
 serverCount=0
 dotCount=0
+test=0
 echo 'POLLING SERVER'
 while [ $server -eq 0 ]; do
         > tempMasterDiff
