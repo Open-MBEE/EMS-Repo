@@ -16,8 +16,8 @@
      "owner":"300", 
      "specialization": {"type":"Property",
                         "isDerived":false, 
-                        "value":[{"type":"LiteralString",
-                                  "string":"dlam_string"}]}
+                        "value":[{"type":"LiteralInteger",
+                                  "integer":"1"}]}
     },
 
     {"documentation" : "to", 

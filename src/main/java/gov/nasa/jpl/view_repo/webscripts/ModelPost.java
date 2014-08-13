@@ -1779,9 +1779,6 @@ public class ModelPost extends AbstractJavaWebScript {
             instance.setWsDiff( workspace );
             try {
                 if (runInBackground) {
-                    if ( expressionString != null || expressionString.length() == 0 ) {
-                        // ERRROR
-                    }
                     instance.saveAndStartAction(req, workspace, status);
                     // REVIEW -- TODO -- shouldn't response be called from
                     // instance? Maybe move the bulk of this method to a new
