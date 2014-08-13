@@ -213,7 +213,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 */
 	protected EmsScriptNode findScriptNodeById(String id,
 	                                           WorkspaceNode workspace,
-	                                           Date dateTime) {
+	                                           Date dateTime, boolean findDeleted) {
 		EmsScriptNode result = null;
 
 		// be smart about search if possible
@@ -232,7 +232,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			}
 		}
 		if ( result == null ) {
-			NodeRef nodeRef = NodeUtil.findNodeRefById(id, workspace, dateTime, services);
+			NodeRef nodeRef = NodeUtil.findNodeRefById(id, workspace, dateTime, services, findDeleted);
 			if (nodeRef != null) {
 				result = new EmsScriptNode(nodeRef, services, response);
 				foundElements.put(id, result); // add to cache
@@ -335,7 +335,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             } else {
                 EmsScriptNode sitesFolder = null;
                 // check and see if the Sites folder already exists
-                NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, workspace, null, true, services );
+                NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, workspace, null, true, services, false );
                 if ( sitesNodeRef != null ) {
                     sitesFolder = new EmsScriptNode( sitesNodeRef, services );
                 } else {
@@ -421,7 +421,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             WorkspaceNode workspace = null;
 
             NodeRef ref = NodeUtil.findNodeRefById( nameOrId, null,
-                                                    null, services );
+                                                    null, services, false );
             if ( ref != null ) {
                 workspace = new WorkspaceNode( ref, services, response,
                                                responseStatus );

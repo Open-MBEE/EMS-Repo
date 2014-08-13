@@ -85,7 +85,7 @@ public class ModelPurge extends AbstractJavaWebScript {
 		
 		WorkspaceNode workspace = getWorkspace( req );
 		
-		modelRootNode = findScriptNodeById(modelId, workspace, null);
+		modelRootNode = findScriptNodeById(modelId, workspace, null, false);
 		if (modelRootNode == null) {
 			log(LogLevel.ERROR, "Element not found with id: " + modelId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
@@ -117,7 +117,7 @@ public class ModelPurge extends AbstractJavaWebScript {
 		        handleElementHierarchy(modelRootNode, workspace, recurse);
 		    } else {
 		        delete(modelRootNode, workspace);
-		        EmsScriptNode pkgNode = findScriptNodeById(modelId + "_pkg", workspace, null);
+		        EmsScriptNode pkgNode = findScriptNodeById(modelId + "_pkg", workspace, null, false);
 		        handleElementHierarchy(pkgNode, workspace, recurse);
 		    }
 		}

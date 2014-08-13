@@ -290,12 +290,26 @@ public class EmsScriptNode extends ScriptNode implements
      *            Short name (e.g., sysml:View) of the aspect to look for
      * @return true if node updated with aspect
      */
-    public boolean createOrUpdateAspect( String aspectName ) {
-        if ( Acm.getJSON2ACM().keySet().contains( aspectName ) ) {
-            aspectName = Acm.getJSON2ACM().get( aspectName );
+    public boolean createOrUpdateAspect( String type ) {
+        if ( Acm.getJSON2ACM().keySet().contains( type ) ) {
+            type = Acm.getJSON2ACM().get( type );
         }
-        if ( !hasAspect( aspectName ) ) {
-            return addAspect( aspectName );
+        
+        // FIXME: reconsider whether all aspects are mutually exclusive 
+        if (Acm.VALUESPEC_ASPECTS.contains( type )) {
+            if ( hasAspect(type) ) {
+                return false;
+            }
+            
+            // if refactoring, need to remove any prior valuespecs since they're
+            // mutually exclusive
+            for (String valuespec: Acm.VALUESPEC_ASPECTS) {
+                removeAspect(valuespec);
+            }
+        }
+        
+        if ( !hasAspect( type ) ) {
+            return addAspect( type );
         }
         return false;
     }
@@ -535,7 +549,7 @@ public class EmsScriptNode extends ScriptNode implements
                                              SearchType.CHECKSUM.prefix, // null,
                                                                          // null,
                                              workspace, dateTime, false, false,
-                                             services );
+                                             services, false );
         // ResultSet existingArtifacts =
         // NodeUtil.findNodeRefsByType( "" + cs, SearchType.CHECKSUM,
         // services );
@@ -1635,7 +1649,7 @@ public class EmsScriptNode extends ScriptNode implements
         ArrayList< NodeRef > refs =
                 NodeUtil.findNodeRefsByType( valueId, "@cm\\:name:\"",
                                              workspace, dateTime, true, true,
-                                             services );
+                                             services, false );
         List< EmsScriptNode > nodeList =
                 toEmsScriptNodeList( refs, services, response, status );
 
@@ -2072,7 +2086,7 @@ public class EmsScriptNode extends ScriptNode implements
             filename = filename.replace( "src=/editor/images/docgen/", "" );
             NodeRef nodeRef =
                     findNodeRefByType( filename, "@cm\\:name:\"",
-                                       getWorkspace(), null );
+                                       getWorkspace(), null, false );
             if ( nodeRef != null ) {
                 // this should grab whatever is the latest versions purl - so
                 // fine for snapshots
@@ -2115,9 +2129,9 @@ public class EmsScriptNode extends ScriptNode implements
 
     protected NodeRef
             findNodeRefByType( String name, String type,
-                               WorkspaceNode workspace, Date dateTime ) {
+                               WorkspaceNode workspace, Date dateTime, boolean findDeleted ) {
         return NodeUtil.findNodeRefByType( name, type, workspace, dateTime,
-                                           true, services );
+                                           true, services, findDeleted );
     }
 
     // protected static ResultSet findNodeRefsByType( String name, String type,
@@ -3003,14 +3017,10 @@ public class EmsScriptNode extends ScriptNode implements
                    "value",
                    addInternalJSON( node.getProperty( "sysml:value" ), dateTime ),
                    filter );
-        Object propertyType = node.getProperty( "sysml:propertyType" );
+        NodeRef propertyType = (NodeRef) node.getProperty( "sysml:propertyType" );
         if ( propertyType != null ) {
-            Object propTypeJson = addInternalJSON( propertyType, dateTime );
-            if ( propTypeJson instanceof JSONArray ) {
-                putInJson( json, "propertyType", propTypeJson, filter );
-            } else {
-                putInJson( json, "propertyType", propTypeJson, filter );
-            }
+            EmsScriptNode propertyTypeNode = new EmsScriptNode(propertyType, services, response);
+            putInJson( json, "propertyType", propertyTypeNode.getSysmlId(), filter);
         }
     }
 

@@ -82,7 +82,7 @@ public class ViewGet extends AbstractJavaWebScript {
     
         WorkspaceNode workspace = getWorkspace( req );
 
-        EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime);
+        EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime, false);
         if (view == null) {
             log(LogLevel.ERROR, "View not found with id: " + viewId + " at " + dateTime + ".\n", HttpServletResponse.SC_NOT_FOUND);
             return false;
@@ -172,7 +172,7 @@ public class ViewGet extends AbstractJavaWebScript {
                              boolean generate, boolean recurse,
                              WorkspaceNode workspace, Date dateTime )
                                      throws JSONException {
-        EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime);
+        EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime, false);
 
         if (view == null) {
             log( LogLevel.ERROR, "View not found with ID: " + viewId,

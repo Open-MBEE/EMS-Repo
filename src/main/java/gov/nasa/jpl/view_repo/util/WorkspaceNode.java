@@ -288,11 +288,13 @@ public class WorkspaceNode extends EmsScriptNode {
         //ResultSet refs = NodeUtil.findNodeRefsByType( getName(), SearchType.WORKSPACE, getServices() );
         //List< EmsScriptNode > nodes = NodeUtil.resultSetToList( refs );
         //NodeUtil.resultSetToList( refs );
+        // don't need to findDeleted since its doing a comparison with another workspace - so
+        // absence is equivalent to finding deleted
         ArrayList< NodeRef > refs =
                 NodeUtil.findNodeRefsByType( getNodeRef().toString(),
                                              SearchType.WORKSPACE.prefix, null,
                                              dateTime, false, true,
-                                             getServices() );
+                                             getServices(), false ); 
         //List< EmsScriptNode > nodes = toEmsScriptNodeList( refs );
 
         //changedElementIds.addAll( EmsScriptNode.getNodeRefs( nodes ) );

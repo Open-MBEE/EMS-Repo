@@ -81,7 +81,7 @@ public class ProductGet extends AbstractJavaWebScript {
         
         WorkspaceNode workspace = getWorkspace( req );
 
-		EmsScriptNode product = findScriptNodeById(productId, workspace, dateTime);
+		EmsScriptNode product = findScriptNodeById(productId, workspace, dateTime, false);
 		if (product == null) {
 			log(LogLevel.ERROR, "Product not found with id: " + productId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;

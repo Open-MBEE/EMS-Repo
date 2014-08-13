@@ -94,11 +94,11 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         
         String elementId = req.getServiceMatch().getTemplateVars().get("elementId");
 
-        EmsScriptNode root = findScriptNodeById(elementId, workspace, null);
+        EmsScriptNode root = findScriptNodeById(elementId, workspace, null, false);
 
         if (root != null && root.exists()) {
             delete(root, workspace);
-            EmsScriptNode pkgNode = findScriptNodeById(elementId + "_pkg", workspace, null);
+            EmsScriptNode pkgNode = findScriptNodeById(elementId + "_pkg", workspace, null, false);
             handleElementHierarchy( pkgNode, workspace, true );
         } else {
             log( LogLevel.ERROR, "Could not find node " + elementId + " in workspace " + wsId,
@@ -183,6 +183,10 @@ public class MmsModelDelete extends AbstractJavaWebScript {
     protected void handleElementHierarchy( EmsScriptNode root,
                                            WorkspaceNode workspace,
                                            boolean recurse ) {
+        if (root == null) {
+            return;
+        }
+        
         if (recurse) {
             for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
                 EmsScriptNode child = new EmsScriptNode(assoc.getChildRef(), services, response);

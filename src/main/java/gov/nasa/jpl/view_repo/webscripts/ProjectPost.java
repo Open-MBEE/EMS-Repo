@@ -115,7 +115,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 	}
 
 	public int updateOrCreateProject(JSONObject jsonObject, WorkspaceNode workspace, String projectId, boolean fix) throws JSONException {
-	      EmsScriptNode projectNode = findScriptNodeById(projectId, workspace, null);
+	      EmsScriptNode projectNode = findScriptNodeById(projectId, workspace, null, true);
 	      
 	      if (projectNode == null) {
 	          log(LogLevel.ERROR, "Could not find project\n", HttpServletResponse.SC_NOT_FOUND);
@@ -189,7 +189,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		}
 		
 		// create project if doesn't exist or update if fix is specified 
-		EmsScriptNode projectNode = findScriptNodeById(projectId, workspace, null);
+		EmsScriptNode projectNode = findScriptNodeById(projectId, workspace, null, true);
 		String projectName = null;
 		if (jsonObject.has(Acm.JSON_NAME)) {
 		    projectName = jsonObject.getString(Acm.JSON_NAME);
