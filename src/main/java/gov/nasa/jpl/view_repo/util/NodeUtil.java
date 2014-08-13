@@ -152,11 +152,12 @@ public class NodeUtil {
         return "" + resultSetToList( results );
     }
 
-    protected static ResultSet findNodeRefsByType(String name, SearchType type,
+    public static ResultSet findNodeRefsByType(String name, SearchType type,
                                                   ServiceRegistry services) {
         return findNodeRefsByType( name, type.prefix, services );
     }
-    protected static ResultSet findNodeRefsByType(String name, String prefix,
+   
+    public static ResultSet findNodeRefsByType(String name, String prefix,
                                                   ServiceRegistry services) {
         ResultSet results = null;
         String queryPattern = prefix + name + "\"";

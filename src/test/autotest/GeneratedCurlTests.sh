@@ -20,9 +20,6 @@ export SERVICE_URL="http://localhost:8080/alfresco/service/"
 echo
 echo GET REQUESTS:
 
-# get {path}?cs={cs?}&amp;extension={extension?}
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"/artifacts/Test_path?cs=Random_CS_ID&amp;extension=Random_Extension_ID\\"
-
 # get checklogin
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"/checklogin\\"
 

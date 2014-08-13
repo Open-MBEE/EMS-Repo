@@ -4,7 +4,9 @@
 package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.Debug;
-import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
+
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
+
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -139,6 +141,45 @@ public class WorkspaceNode extends EmsScriptNode {
         ws.setProperty( "ems:lastTimeSyncParent", new Date() );
         if ( Debug.isOn() ) Debug.outln( "created workspace " + ws + " in folder " + folder );
         return ws;
+    }
+    
+    public static WorkspaceNode createWorskpaceFromSource( String sysmlId,
+    									String userName,
+    									String sourceId,
+    									EmsScriptNode folder,
+    									ServiceRegistry services,
+    									StringBuffer response,
+    									Status status ) {
+    	if ( sysmlId == null ) {
+    		sysmlId = NodeUtil.createId( services );
+    	}
+    	if ( folder == null || !folder.exists() ) {
+    		//String userName = ws.getOwner();
+    		if ( userName != null && userName.length() > 0 ) {
+    			folder = NodeUtil.getUserHomeFolder( userName );
+    			if ( Debug.isOn() ) Debug.outln( "user home folder: " + folder );
+    		}
+    	}
+    	if ( folder == null || !folder.exists() ) {
+    		Debug.error( true, false, "\n%%% Error! no folder, " + folder
+    				+ ", within which to create workspace, "
+    				+ sysmlId );
+    	}
+
+    	WorkspaceNode ws = new WorkspaceNode( folder.createFolder( sysmlId ).getNodeRef(),
+    			services, response, status );
+    	ws.addAspect( "ems:Workspace" );
+    	ws.addAspect( "ems:MergeSource" );
+    	ws.setProperty( "ems:parent", folder );
+    	WorkspaceNode parentWorkspace = AbstractJavaWebScript.getWorkspaceFromId(sourceId, services, response, status, false, userName);
+    	if ( Debug.isOn() ) Debug.outln( "parent workspace: " + parentWorkspace );
+    	if(parentWorkspace != null) {
+    		parentWorkspace.appendToPropertyNodeRefs( "ems:children", ws.getNodeRef() );
+    		ws.setProperty( "ems:mergeSource", parentWorkspace.getNodeRef());
+    	}
+    	ws.setProperty( "ems:lastTimeSyncParent", new Date() );
+    	if ( Debug.isOn() ) Debug.outln( "created workspace " + ws + " in folder " + folder );
+    	return ws;
     }
 
     // A workspace is not created inside the folder of another workspace, so
