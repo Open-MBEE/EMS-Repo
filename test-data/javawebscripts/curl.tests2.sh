@@ -12,7 +12,6 @@ export CURL_USER=" -u admin:admin"
 export CURL_FLAGS=$CURL_STATUS$CURL_USER
 export SERVICE_URL="\"http://localhost:8080/alfresco/service/"
 export BASE_URL="\"http://localhost:8080/alfresco/service/workspaces/master/"
-export WORKSPACE_URL="\"http://localhost:8080/alfresco/service/workspaces/"
 
 echo POSTS
 
@@ -23,9 +22,5 @@ echo GET
 
 # get project - should just return 200
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/303\""
-
-# get list of workspaces - should just return 200
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $WORKSPACE_URL"\""
-
 
 
