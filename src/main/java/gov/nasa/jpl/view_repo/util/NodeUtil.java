@@ -193,6 +193,7 @@ public class NodeUtil {
         ResultSet results = null;
         ArrayList<NodeRef> nodeRefs = new ArrayList<NodeRef>();
         NodeRef nodeRef = null;
+        if ( services == null ) services = getServices();
         try {
             results = findNodeRefsByType( specifier, prefix, services );
             if (results != null) {

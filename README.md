@@ -113,6 +113,10 @@ Eclipse/Maven
 Make sure to install both the JRebel plug-in for Eclipse and download the Jrebel .jar and store it somewhere like "/Applications/jrebel".  
 The path to the jrebel.jar will be used by mvn via the MAVEN_OPTS environment variable.
 
+To make sure the rebel.xml file is generated properly, do 
+
+    mvn jrebel:generate
+    
 To build the amp file, do 
 
     mvn package
