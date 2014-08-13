@@ -5,7 +5,7 @@
 mkdir -p output
 
 passTest=0
-
+testVal=0
 export CURL_STATUS='-w \n%{http_code}\n'
 export CURL_POST_FLAGS_NO_DATA="-X POST"
 export CURL_POST_FLAGS='-X POST -H Content-Type:application/json --data'
