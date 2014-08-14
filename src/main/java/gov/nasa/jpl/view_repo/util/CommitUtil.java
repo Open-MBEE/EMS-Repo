@@ -41,7 +41,7 @@ public class CommitUtil {
         return commitPkg;
     }
 
-	private EmsScriptNode getCommitPkg(WorkspaceNode workspace, String siteName, ServiceRegistry services, StringBuffer response) {
+	public EmsScriptNode getCommitPkg(WorkspaceNode workspace, String siteName, ServiceRegistry services, StringBuffer response) {
 	    return getOrCreateCommitPkg( workspace, siteName, services, response, false );
 	}
 

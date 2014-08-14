@@ -53,7 +53,7 @@ public class NodeUtil {
         ID( "@sysml\\:id:\"" ),
         STRING( "@sysml\\:string:\"" ),
         BODY( "@sysml\\:body:\"" ),
-        CHECKSUM( "@view\\:cs\"" ),
+        CHECKSUM( "@view\\:cs:\"" ),
         WORKSPACE("@ems\\:workspace:\"" );
 
         public String prefix;
@@ -156,7 +156,7 @@ public class NodeUtil {
                                                   ServiceRegistry services) {
         return findNodeRefsByType( name, type.prefix, services );
     }
-   
+
     public static ResultSet findNodeRefsByType(String name, String prefix,
                                                   ServiceRegistry services) {
         ResultSet results = null;

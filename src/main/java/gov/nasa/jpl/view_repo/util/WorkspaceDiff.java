@@ -5,10 +5,12 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -16,8 +18,11 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.dictionary.DictionaryService;
+import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.version.Version;
+import org.alfresco.service.namespace.QName;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,7 +79,7 @@ public class WorkspaceDiff {
     }
 
     /**
-     * Constructor only for creating 
+     * Constructor only for creating
      * @param ws1
      * @param ws2
      */
@@ -83,7 +88,7 @@ public class WorkspaceDiff {
         this.ws1 = ws1;
         this.ws2 = ws2;
     }
-    
+
     public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2 ) {
         this(ws1, ws2);
         this.timestamp1 = timestamp1;
@@ -464,15 +469,71 @@ public class WorkspaceDiff {
         return !emptyArray;
     }
 
+    public static String toJsonName( Object name ) {
+        QName qn = null;
+        String possiblePrefixString = "" + name;
+        if ( name instanceof QName ) {
+            qn = (QName)name;
+        } else {
+            qn = NodeUtil.createQName( possiblePrefixString );
+        }
+        if ( qn != null ) {
+            possiblePrefixString = qn.getPrefixString();
+        }
+        if ( Acm.getACM2JSON().containsKey( possiblePrefixString ) ) {
+            return Acm.getACM2JSON().get( possiblePrefixString );
+        } else {
+            if ( possiblePrefixString.startsWith( "sysml:" ) ) {
+                possiblePrefixString = possiblePrefixString.substring( 6 );
+            } else if ( possiblePrefixString.startsWith( "ems:" ) ) {
+                possiblePrefixString = possiblePrefixString.substring( 4 );
+            } else possiblePrefixString = null;
+        }
+        return possiblePrefixString;
+    }
+
+    protected static Set<String> filter = null;
+    protected static Set<String> getFilter() {
+        if ( filter == null ) {
+            filter = new LinkedHashSet<String>();
+            filter.add("id");
+            filter.add("read");
+            filter.add("creator");
+            for ( QName qn : getIgnoredPropIdQNames() ) {
+                String jsonName = toJsonName( qn );
+                if ( jsonName != null ) {
+                    filter.add( jsonName );
+                }
+            }
+        }
+        return filter;
+    }
+
+
     private JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> set, Map<String, Version> versions, Date dateTime, boolean showAll) throws JSONException {
         Set<String> filter = null;
         if (!showAll) {
-            filter = new HashSet<String>();
-            filter.add("id");
+            filter = getFilter();
+//            filter = new HashSet<String>();
+//            filter.add("id");
         }
 
         JSONArray array = new JSONArray();
         for (EmsScriptNode node: set.values()) {
+            Map< String, Pair< Object, Object > > propChanges =
+                    nodeDiff.getPropertyChanges( node.getName() );
+            if ( !showAll && propChanges != null && !propChanges.isEmpty() ) {
+                filter = new LinkedHashSet< String >(filter);
+                for ( Entry< String, Pair< Object, Object > > e : propChanges.entrySet() ) {
+                    Pair< Object, Object > p = e.getValue();
+                    if ( p != null && p.first != null && p.second != null ) {
+                        String jsonName = toJsonName( e.getKey() );
+                        if ( jsonName != null ) {
+                            filter.add( jsonName );
+                        }
+                    }
+                }
+            }
             if ( versions == null || versions.size() <= 0 ) {
                 array.put( node.toJSONObject( filter, dateTime ) );
             } else {
@@ -501,15 +562,172 @@ public class WorkspaceDiff {
         return status;
     }
 
+    protected static Set<String> ignoredPropIds = getIgnoredPropIds();
+    protected static Set<QName> ignoredPropIdQnames = getIgnoredPropIdQNames();
+    public static Set<String> getIgnoredPropIds() {
+        if ( ignoredPropIds == null ) {
+            DictionaryService ds = NodeUtil.getServices().getDictionaryService();
+            //ds.getAllAspects();
+            Collection< QName > properties = ds.getAllProperties( null );
+            ignoredPropIds = Utils.newSet();
+            for ( QName propName : properties ) {
+                //PropertyDefinition propDef = ds.getProperty( propName );
+                if ( propName == null ) continue;
+                if ( propName.getPrefixString().startsWith( "sys:" ) ) {
+                    ignoredPropIds.add( propName.toString() );
+                }
+                if ( propName.getPrefixString().startsWith( "ems:" ) ) {
+                    ignoredPropIds.add( propName.toString() );
+                }
+            }
+            List<String> prefixes = Utils.newList(
+//                                                  "cm:name",
+//                                                  "cm:content",
+//                                                  "cm:modelName",
+//                                                  "cm:modelDescription",
+//                                                  "cm:modelAuthor",
+//                                                  "cm:modelPublishedDate",
+//                                                  "cm:modelVersion",
+//                                                  "cm:modelActive",
+//                                                  "cm:destination",
+//                                                  "cm:userName",
+//                                                  "cm:homeFolder",
+//                                                   "cm:firstName",
+//                                                  "cm:lastName",
+//                                                  "cm:middleName",
+//                                                  "cm:email",
+//                                                  "cm:organizationId",
+//                                                  "cm:homeFolderProvider",
+//                                                  "cm:defaultHomeFolderPath",
+//                                                  "cm:presenceProvider",
+//                                                  "cm:presenceUsername",
+//                                                  "cm:organization",
+//                                                  "cm:jobtitle",
+//                                                  "cm:location",
+//                                                  "cm:persondescription",
+//                                                  "cm:telephone",
+//                                                  "cm:mobile",
+//                                                  "cm:companyaddress1",
+//                                                  "cm:companyaddress2",
+//                                                  "cm:companyaddress3",
+//                                                  "cm:companypostcode",
+//                                                  "cm:companytelephone",
+//                                                  "cm:companyfax",
+//                                                  "cm:companyemail",
+//                                                  "cm:skype",
+//                                                  "cm:instantmsg",
+//                                                  "cm:userStatus",
+//                                                  "cm:userStatusTime",
+//                                                  "cm:googleusername",
+//                                                  "cm:emailFeedDisabled",
+//                                                  "cm:subscriptionsPrivate",
+//                                                  "cm:emailFeedId",
+//                                                  "cm:sizeCurrent",
+//                                                  "cm:sizeQuota",
+//                                                  "cm:authorityName",
+//                                                  "cm:authorityDisplayName",
+//                                                  "cm:ratingScore",
+//                                                  "cm:ratingScheme",
+//                                                  "cm:ratedAt",
+//                                                  "cm:failureCount",
+//                                                  "cm:failedThumbnailTime",
+//                                                  "cm:thumbnailName",
+//                                                  "cm:contentPropertyName",
+//                                                  "cm:title",
+//                                                  "cm:description",
+                                                  "cm:created",
+                                                  "cm:creator",
+                                                  "cm:modified",
+                                                  "cm:modifier",
+                                                  "cm:accessed",
+//                                                  "cm:template",
+//                                                  "cm:webscript",
+//                                                  "cm:summaryWebscript",
+//                                                  "cm:removeAfter",
+//                                                  "cm:owner",
+//                                                  "cm:author",
+//                                                  "cm:publisher",
+//                                                  "cm:contributor",
+//                                                  "cm:type",
+//                                                  "cm:identifier",
+//                                                  "cm:dcsource",
+//                                                  "cm:coverage",
+//                                                  "cm:rights",
+//                                                  "cm:subject",
+//                                                  "cm:from",
+//                                                  "cm:to",
+//                                                  "cm:summary",
+//                                                  "cm:hits",
+//                                                  "cm:counter",
+//                                                  "cm:workingCopyOwner",
+//                                                  "cm:workingCopyMode",
+//                                                  "cm:workingCopyLabel",
+                                                  "cm:versionLabel",
+                                                  "cm:versionType",
+                                                  "cm:initialVersion",
+                                                  "cm:autoVersion",
+                                                  "cm:autoVersionOnUpdateProps",
+                                                  "cm:lockOwner",
+                                                  "cm:lockType",
+                                                  "cm:lockLifetime",
+                                                  "cm:expiryDate",
+                                                  "cm:lockIsDeep"
+//                                                  "cm:categories",
+//                                                  "cm:taggable",
+//                                                  "cm:tagScopeCache",
+//                                                  "cm:tagScopeSummary",
+//                                                  "cm:likesRatingSchemeCount",
+//                                                  "cm:likesRatingSchemeTotal",
+//                                                  "cm:fiveStarRatingSchemeCount",
+//                                                  "cm:fiveStarRatingSchemeTotal",
+//                                                  "cm:originator",
+//                                                  "cm:addressee",
+//                                                  "cm:addressees",
+//                                                  "cm:subjectline",
+//                                                  "cm:sentdate",
+//                                                  "cm:noderef",
+//                                                  "cm:storeName",
+//                                                      "cm:preferenceValues",
+//                                                  "cm:published",
+//                                                  "cm:updated",
+//                                                  "cm:latitude",
+//                                                  "cm:longitude",
+//                                                   "cm:lastThumbnailModification",
+//                                                  "cm:isIndexed",
+//                                                  "cm:isContentIndexed",
+//                                                  "cm:locale",
+//                                                  "cm:automaticUpdate"
+                                                  );
+            for ( String p : prefixes ) {
+                QName qn = NodeUtil.createQName( p );
+                ignoredPropIds.add( qn.toString() );
+            }
+//            ignoredPropIds.addAll( prefixes );
+        }
+        return ignoredPropIds;
+    }
+    public static Set<QName> getIgnoredPropIdQNames() {
+        ignoredPropIdQnames = new LinkedHashSet<QName>();
+        if ( ignoredPropIdQnames == null ) {
+            for ( String n : getIgnoredPropIds() ) {
+                QName qn = NodeUtil.createQName( n );
+                ignoredPropIdQnames.add( qn );
+            }
+        }
+        return ignoredPropIdQnames;
+    }
+
     protected void captureDeltas(WorkspaceNode node) {
         Set< NodeRef > newSet = Utils.newSet();
         Set<NodeRef> s1 = ( ws1 == null ? newSet : ws1.getChangedNodeRefsWithRespectTo( node, timestamp1 ) );
         Set<NodeRef> s2 = ( node == null ? newSet : node.getChangedNodeRefsWithRespectTo( ws1, timestamp2 ) );
         nodeDiff = new NodeDiff( s1, s2 );
+        nodeDiff.addPropertyIdsToIgnore( getIgnoredPropIds() ); //Utils.newList( "read", "creator", "modified" ) );
         populateMembers();
     }
 
     public boolean ingestJSON(JSONObject json) {
+        // TODO??
         return true;
     }
 }

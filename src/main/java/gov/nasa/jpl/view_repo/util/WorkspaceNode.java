@@ -284,26 +284,26 @@ public class WorkspaceNode extends EmsScriptNode {
     }
 
     public Set< NodeRef > getChangedNodeRefs( Date dateTime ) {
-        Set< NodeRef > changedElementIds = new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);
-        //ResultSet refs = NodeUtil.findNodeRefsByType( getName(), SearchType.WORKSPACE, getServices() );
-        //List< EmsScriptNode > nodes = NodeUtil.resultSetToList( refs );
-        //NodeUtil.resultSetToList( refs );
+        Set< NodeRef > changedNodeRefs = new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);
         ArrayList< NodeRef > refs =
                 NodeUtil.findNodeRefsByType( getNodeRef().toString(),
                                              SearchType.WORKSPACE.prefix, null,
                                              dateTime, false, true,
                                              getServices() );
-        //List< EmsScriptNode > nodes = toEmsScriptNodeList( refs );
+        changedNodeRefs.addAll( refs );
 
-        //changedElementIds.addAll( EmsScriptNode.getNodeRefs( nodes ) );
-        changedElementIds.addAll( refs );
-        return changedElementIds;
+        // remove commits
+        CommitUtil c = new CommitUtil();
+        ArrayList< EmsScriptNode > commits = c.getCommits( this, null, getServices(), getResponse() );
+        commits.add( c.getCommitPkg( this, null, getServices(), getResponse() ) );
+        System.out.println("removing commits: " + commits );
+        changedNodeRefs.removeAll( commits );
+
+        return changedNodeRefs;
     }
 
     public Set< String > getChangedElementIds( Date dateTime ) {
         Set< String > changedElementIds = new TreeSet< String >();
-//        ResultSet refs = NodeUtil.findNodeRefsByType( getName(), SearchType.WORKSPACE, getServices() );
-//        List< EmsScriptNode > nodes = NodeUtil.resultSetToList( refs );
         Set< NodeRef > refs = getChangedNodeRefs( dateTime );
         List< EmsScriptNode > nodes = toEmsScriptNodeList( refs );
         changedElementIds.addAll( EmsScriptNode.getNames( nodes ) );
