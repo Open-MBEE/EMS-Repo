@@ -85,17 +85,17 @@
                 <dependency>
 			        <groupId>gov.nasa.jpl.mbee.util</groupId>
 			        <artifactId>mbee_util</artifactId>
-			        <version>0.0.10</version>
+			        <version>0.0.11</version>
 			    </dependency>
                 <dependency>
                     <groupId>gov.nasa.jpl.mbee.sysml</groupId>
                     <artifactId>sysml</artifactId>
-                    <version>0.0.13</version>
+                    <version>0.0.14</version>
                </dependency>
                 <dependency>
                     <groupId>gov.nasa.jpl.mbee.bae</groupId>
                     <artifactId>bae</artifactId>
-                    <version>0.0.14</version>
+                    <version>0.0.15</version>
                 </dependency>
                 <dependency>
                     <groupId>kparser</groupId>
