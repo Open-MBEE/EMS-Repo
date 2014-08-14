@@ -294,20 +294,20 @@ public class EmsScriptNode extends ScriptNode implements
         if ( Acm.getJSON2ACM().keySet().contains( type ) ) {
             type = Acm.getJSON2ACM().get( type );
         }
-        
-        // FIXME: reconsider whether all aspects are mutually exclusive 
+
+        // FIXME: reconsider whether all aspects are mutually exclusive
         if (Acm.VALUESPEC_ASPECTS.contains( type )) {
             if ( hasAspect(type) ) {
                 return false;
             }
-            
+
             // if refactoring, need to remove any prior valuespecs since they're
             // mutually exclusive
             for (String valuespec: Acm.VALUESPEC_ASPECTS) {
                 removeAspect(valuespec);
             }
         }
-        
+
         if ( !hasAspect( type ) ) {
             return addAspect( type );
         }
@@ -1098,9 +1098,13 @@ public class EmsScriptNode extends ScriptNode implements
             qname = "/" + this.getProperty( "sysml:name" ) + qname;
         } else {
             qname = getDisplayPath() + "/" + getProperty( "sysml:id" );
-            int pos = qname.indexOf( "Models/" ) + 7;
-            if ( qname.length() >= pos ) {
-                qname = qname.substring( pos );
+
+            int pos = qname.indexOf( "Models/" );
+            if ( pos >= 0 ) {
+                pos += 7; // to skip past "Models/"
+                if ( qname.length() >= pos ) {
+                    qname = qname.substring( pos );
+                }
             }
             qname = qname.replace( "_pkg", "" );
         }
@@ -3406,5 +3410,17 @@ public class EmsScriptNode extends ScriptNode implements
             return super.removeAspect( type );
         }
         return true;
+    }
+
+    public static boolean isModelElement( NodeRef ref ) {
+        EmsScriptNode node = new EmsScriptNode( ref, NodeUtil.getServices() );
+        return node.isModelElement();
+    }
+
+    public boolean isModelElement() {
+        if ( getTypeShort().equals( "sysml:Element" ) ) {
+            return true;
+        }
+        return false;
     }
 }
