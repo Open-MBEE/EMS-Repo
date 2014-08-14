@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1176,6 +1177,16 @@ public class NodeUtil {
     public static String getName( NodeRef ref ) {
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
         return node.getName();
+    }
+
+    public static Set<NodeRef> getModelElements( Set<NodeRef> s1 ) {
+        Set<NodeRef> newSet1 = new LinkedHashSet< NodeRef >();
+        for ( NodeRef ref : s1 ) {
+            if ( EmsScriptNode.isModelElement( ref ) ) {
+                newSet1.add( ref );
+            }
+        }
+        return newSet1;
     }
 
 }

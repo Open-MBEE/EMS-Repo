@@ -33,18 +33,18 @@ public class MmsModelDelete extends AbstractJavaWebScript {
     public MmsModelDelete() {
         super();
     }
-    
+
     public MmsModelDelete(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
-    
+
     @Override
     protected Map< String, Object > executeImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
         Map<String, Object> model = new HashMap<String, Object>();
-        
+
         MmsModelDelete instance = new MmsModelDelete(repository, services);
-       
+
         JSONObject result = null;
         try {
             result = instance.handleRequest( req );
@@ -62,16 +62,16 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         if (result == null) {
             model.put( "res", "");
         }
-        
+
         // REVIEW -- TODO -- shouldn't responseStatus be called from instance?
         status.setCode(responseStatus.getCode());
 
         return model;
     }
-    
+
     protected JSONObject handleRequest(WebScriptRequest req) throws JSONException {
         JSONObject result = null;
-        
+
         Long start = System.currentTimeMillis();
         String user = AuthenticationUtil.getRunAsUser();
         String wsId = null;
@@ -91,7 +91,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             return result;
         }
         setWsDiff(workspace);
-        
+
         String elementId = req.getServiceMatch().getTemplateVars().get("elementId");
 
         EmsScriptNode root = findScriptNodeById(elementId, workspace, null, false);
@@ -106,19 +106,19 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             return result;
         }
         String siteName = root.getSiteName();
-        
+
         long end = System.currentTimeMillis();
-        
+
         boolean showAll = false;
         result = wsDiff.toJSONObject( new Date(start), new Date(end), showAll );
-        
+
         // apply aspects after JSON has been created (otherwise it won't be output)
         for (EmsScriptNode deletedNode: wsDiff.getDeletedElements().values()) {
             if (deletedNode.exists()) {
                 deletedNode.createOrUpdateAspect( "ems:Deleted" );
             }
         }
-        
+
         // Send deltas to all listeners
         if ( !sendDeltas(result) ) {
             log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
@@ -126,39 +126,39 @@ public class MmsModelDelete extends AbstractJavaWebScript {
 
         CommitUtil commitUtil = new CommitUtil();
         commitUtil.commit( wsDiff, workspace, siteName, "", false, services, response );
-        
+
         return result;
     }
-    
+
     /**
      * Deletes a node by adding the ems:Deleted aspect
      * @param node
-     * @param workspace 
+     * @param workspace
      */
     private void delete(EmsScriptNode node, WorkspaceNode workspace) {
         if ( node == null || !node.exists() ) {
             log(LogLevel.ERROR, "Trying to delete a non-existent node! " + node);
             return;
         }
-        
+
         // Add the element to the specified workspace to be deleted from there.
         if ( workspace != null && workspace.exists() && node != null
              && node.exists() && !node.isWorkspace() ) {
             EmsScriptNode newNodeToDelete = workspace.replicateWithParentFolders( node );
             node = newNodeToDelete;
         }
-        
+
         if ( node != null && node.exists() ) {
             addToWsDiff( node );
 //            node.createOrUpdateAspect( "ems:Deleted" ) ;
-            
+
             deleteRelationships(node, "sysml:relationshipsAsSource", "sysml:relAsSource");
             deleteRelationships(node, "sysml:relationshipsAsTarget", "sysml:relAsTarget");
         }
     }
 
     /**
-     * Deletes the relationships that are attached to this node   
+     * Deletes the relationships that are attached to this node
      * @param node          Node to delete relationships for
      * @param aspectName    String of the aspect name to look for
      * @param propertyName  String of the property to remove
@@ -173,11 +173,11 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             }
         }
     }
-    
+
     /**
      * Build up the element hierarchy from the specified root
      * @param root      Root node to get children for
-     * @param workspace 
+     * @param workspace
      * @throws JSONException
      */
     protected void handleElementHierarchy( EmsScriptNode root,
@@ -186,7 +186,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         if (root == null) {
             return;
         }
-        
+
         if (recurse) {
             for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
                 EmsScriptNode child = new EmsScriptNode(assoc.getChildRef(), services, response);

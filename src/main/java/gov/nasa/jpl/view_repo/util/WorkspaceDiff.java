@@ -47,6 +47,8 @@ public class WorkspaceDiff {
      */
     public boolean conflictMustBeChangeToSameProperty;
 
+    public boolean onlyModelElements = true;
+
     private WorkspaceNode ws1;
     private WorkspaceNode ws2;
 
@@ -500,15 +502,14 @@ public class WorkspaceDiff {
     protected static Set<String> getFilter() {
         if ( filter == null ) {
             filter = new LinkedHashSet<String>();
+            filter.add("sysmlid");
             filter.add("id");
-            filter.add("read");
-            filter.add("creator");
-            for ( QName qn : getIgnoredPropIdQNames() ) {
-                String jsonName = toJsonName( qn );
-                if ( jsonName != null ) {
-                    filter.add( jsonName );
-                }
-            }
+//            for ( QName qn : getIgnoredPropIdQNames() ) {
+//                String jsonName = toJsonName( qn );
+//                if ( jsonName != null ) {
+//                    filter.remove( jsonName );
+//                }
+//            }
         }
         return filter;
     }
@@ -530,7 +531,7 @@ public class WorkspaceDiff {
                 filter = new LinkedHashSet< String >(filter);
                 for ( Entry< String, Pair< Object, Object > > e : propChanges.entrySet() ) {
                     Pair< Object, Object > p = e.getValue();
-                    if ( p != null && p.first != null && p.second != null ) {
+                    if ( p != null && ( p.first != null || p.second != null ) ) {
                         String jsonName = toJsonName( e.getKey() );
                         if ( jsonName != null ) {
                             filter.add( jsonName );
@@ -543,7 +544,7 @@ public class WorkspaceDiff {
             } else {
                 JSONObject jsonObject = node.toJSONObject( filter, dateTime );
                 Version version = versions.get( node.getName() );
-                if ( version != null) {
+                if ( version != null ) {
                     // TODO: perhaps add service and response in method call rather than using the nodes?
                     EmsScriptNode changedNode = new EmsScriptNode(version.getVersionedNodeRef(), node.getServices(), node.getResponse());
 
@@ -596,7 +597,7 @@ public class WorkspaceDiff {
 //                                                  "cm:destination",
 //                                                  "cm:userName",
 //                                                  "cm:homeFolder",
-//                                                   "cm:firstName",
+//                                                  "cm:firstName",
 //                                                  "cm:lastName",
 //                                                  "cm:middleName",
 //                                                  "cm:email",
@@ -675,7 +676,7 @@ public class WorkspaceDiff {
                                                   "cm:lockType",
                                                   "cm:lockLifetime",
                                                   "cm:expiryDate",
-                                                  "cm:lockIsDeep"
+                                                  "cm:lockIsDeep",
 //                                                  "cm:categories",
 //                                                  "cm:taggable",
 //                                                  "cm:tagScopeCache",
@@ -691,14 +692,14 @@ public class WorkspaceDiff {
 //                                                  "cm:sentdate",
 //                                                  "cm:noderef",
 //                                                  "cm:storeName",
-//                                                      "cm:preferenceValues",
+//                                                  "cm:preferenceValues",
 //                                                  "cm:published",
 //                                                  "cm:updated",
 //                                                  "cm:latitude",
 //                                                  "cm:longitude",
-//                                                   "cm:lastThumbnailModification",
-//                                                  "cm:isIndexed",
-//                                                  "cm:isContentIndexed",
+                                                  "cm:lastThumbnailModification",
+                                                  "cm:isIndexed",
+                                                  "cm:isContentIndexed"
 //                                                  "cm:locale",
 //                                                  "cm:automaticUpdate"
                                                   );
@@ -711,8 +712,8 @@ public class WorkspaceDiff {
         return ignoredPropIds;
     }
     public static Set<QName> getIgnoredPropIdQNames() {
-        ignoredPropIdQnames = new LinkedHashSet<QName>();
         if ( ignoredPropIdQnames == null ) {
+            ignoredPropIdQnames = new LinkedHashSet<QName>();
             for ( String n : getIgnoredPropIds() ) {
                 QName qn = NodeUtil.createQName( n );
                 ignoredPropIdQnames.add( qn );
@@ -725,6 +726,10 @@ public class WorkspaceDiff {
         Set< NodeRef > newSet = Utils.newSet();
         Set<NodeRef> s1 = ( ws1 == null ? newSet : ws1.getChangedNodeRefsWithRespectTo( node, timestamp1 ) );
         Set<NodeRef> s2 = ( node == null ? newSet : node.getChangedNodeRefsWithRespectTo( ws1, timestamp2 ) );
+        if ( onlyModelElements ) {
+            s1 = NodeUtil.getModelElements(s1);
+            s2 = NodeUtil.getModelElements(s2);
+        }
         nodeDiff = new NodeDiff( s1, s2 );
         nodeDiff.addPropertyIdsToIgnore( getIgnoredPropIds() ); //Utils.newList( "read", "creator", "modified" ) );
         populateMembers();

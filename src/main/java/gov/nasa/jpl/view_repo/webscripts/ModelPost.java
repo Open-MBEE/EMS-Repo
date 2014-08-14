@@ -49,6 +49,7 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.ArrayList;
@@ -263,6 +264,7 @@ public class ModelPost extends AbstractJavaWebScript {
         log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
 
         // Send deltas to all listeners
+        wsDiff = new WorkspaceDiff( workspace, workspace, new Date(start), new Date(end) );
         JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
         if ( !sendDeltas(deltaJson) ) {
             log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
@@ -872,7 +874,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 case UPDATED:
                     if (ingest && !wsDiff.getAddedElements().containsKey( jsonId )) {
                         element.removeAspect( "ems:Moved" );
-                        
+
                         if (element.hasAspect( "ems:Deleted" )) {
                             wsDiff.getAddedElements().put( jsonId,  element );
                             element.removeAspect( "ems:Deleted" );
@@ -912,7 +914,7 @@ public class ModelPost extends AbstractJavaWebScript {
                             element.removeAspect( "ems:Added" );
                             wsDiff.getUpdatedElements().put( jsonId, element );
                             element.createOrUpdateAspect( "ems:Updated" );
-    
+
                             wsDiff.getMovedElements().put( jsonId, element );
                             element.createOrUpdateAspect( "ems:Moved" );
                         }
@@ -962,7 +964,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // the elementJson to just contain the sysmlid for the nodes,
         // instead of the nodes themselves.  Also, need to create
         // or modify nodes the properties map to.
-        
+
         boolean changed = false;
 
         // If it is a nested node then it doesnt have a specialize property
@@ -1046,7 +1048,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     EmsScriptNode newValNode = updateOrCreateTransactionableElement((JSONObject)newVal,nestedParent,
             																		null, workspace, ingest, true, modStatus );
             		nodeNames.add(newValNode.getName());
-            		
+
             		changed = true;
             	}
             }

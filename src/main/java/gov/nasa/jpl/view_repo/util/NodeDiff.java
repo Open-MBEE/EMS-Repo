@@ -149,7 +149,9 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
 
     @Override
     public Set< Object > getProperties( NodeRef t ) {
-        return new LinkedHashSet< Object >( getPropertyMap( t ).values() );
+        Map< String, Object > map = getPropertyMap( t );
+        LinkedHashSet< Object > set = new LinkedHashSet< Object >( map.values() );
+        return set;
     }
 
     @Override
@@ -162,6 +164,8 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
     public Map<String, Object> getPropertyMap( NodeRef ref ) {
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
         Map< String, Object > props = node.getProperties();
+        // TODO --REVIEW -- HERE!  Do we need to add anything here for specializations? Expressions?
+        Utils.removeAll( props, getPropertyIdsToIgnore() );
         return props;
     }
 
