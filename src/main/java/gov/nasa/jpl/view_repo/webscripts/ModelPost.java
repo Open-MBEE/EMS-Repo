@@ -941,7 +941,7 @@ public class ModelPost extends AbstractJavaWebScript {
      * @param id
      * @throws Exception
      */
-    private void processExpressionOrProperty(String type, boolean nestedNode, JSONObject elementJson,
+    private boolean processExpressionOrProperty(String type, boolean nestedNode, JSONObject elementJson,
     										 JSONObject specializeJson, EmsScriptNode node,
     										 boolean ingest, EmsScriptNode reifiedNode,
     										 EmsScriptNode parent, String id,
@@ -962,6 +962,8 @@ public class ModelPost extends AbstractJavaWebScript {
         // the elementJson to just contain the sysmlid for the nodes,
         // instead of the nodes themselves.  Also, need to create
         // or modify nodes the properties map to.
+        
+        boolean changed = false;
 
         // If it is a nested node then it doesnt have a specialize property
         JSONObject jsonToCheck = nestedNode ? elementJson : specializeJson;
@@ -1021,7 +1023,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         			// Ingest the JSON for the value
         			// to set properties for the node:
-        			oldValNode.ingestJSON((JSONObject)newVal);
+        			changed = oldValNode.ingestJSON((JSONObject)newVal);
 
             	}
             	// Old value doesnt exists, so create a new node:
@@ -1044,6 +1046,8 @@ public class ModelPost extends AbstractJavaWebScript {
                     EmsScriptNode newValNode = updateOrCreateTransactionableElement((JSONObject)newVal,nestedParent,
             																		null, workspace, ingest, true, modStatus );
             		nodeNames.add(newValNode.getName());
+            		
+            		changed = true;
             	}
             }
 
@@ -1054,6 +1058,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         } // ends if Property and elementJson has a value or Expression and elementJson has a operand
 
+        return changed;
     }
 
     /**
@@ -1274,8 +1279,10 @@ public class ModelPost extends AbstractJavaWebScript {
 
             // Special processing for Expression or Property:
             //	Note: this will modify elementJson
-            processExpressionOrProperty(acmSysmlType, nestedNode, elementJson, specializeJson, nodeToUpdate,
-										ingest, reifiedNode, parent, id, workspace);
+            if ( processExpressionOrProperty(acmSysmlType, nestedNode, elementJson, specializeJson, nodeToUpdate,
+										ingest, reifiedNode, parent, id, workspace) ) {
+                modStatus.setState( ModStatus.State.UPDATED );
+            }
 
             if ( nodeToUpdate.ingestJSON(elementJson) ) {
                 modStatus.setState( ModStatus.State.UPDATED );
