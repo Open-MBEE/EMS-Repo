@@ -65,10 +65,18 @@ public class WorkspaceNode extends EmsScriptNode {
 
     @Override
     public WorkspaceNode getParentWorkspace() {
-        NodeRef ref = (NodeRef)getProperty("sysml:parent");
+        NodeRef ref = (NodeRef)getProperty("ems:parent");
         if ( ref == null ) return null;
         WorkspaceNode parentWs = new WorkspaceNode( ref, getServices() );
         return parentWs;
+    }
+    // delete later
+    @Override
+    public WorkspaceNode getSourceWorkspace() {
+        NodeRef ref = (NodeRef)getProperty("ems:source");
+        if ( ref == null ) return null;
+        WorkspaceNode sourceWs = new WorkspaceNode( ref, getServices() );
+        return sourceWs;
     }
 
     @Override
@@ -168,13 +176,14 @@ public class WorkspaceNode extends EmsScriptNode {
     	WorkspaceNode ws = new WorkspaceNode( folder.createFolder( sysmlId ).getNodeRef(),
     			services, response, status );
     	ws.addAspect( "ems:Workspace" );
-    	ws.addAspect( "ems:MergeSource" );
-    	ws.setProperty( "ems:parent", folder );
+    	ws.addAspect( "ems:HasWorkspace" );
+    	ws.setProperty("ems:workspace", ws.getNodeRef() );
     	WorkspaceNode parentWorkspace = AbstractJavaWebScript.getWorkspaceFromId(sourceId, services, response, status, false, userName);
+    	ws.setProperty( "ems:source", parentWorkspace.getNodeRef() );
     	if ( Debug.isOn() ) Debug.outln( "parent workspace: " + parentWorkspace );
     	if(parentWorkspace != null) {
     		parentWorkspace.appendToPropertyNodeRefs( "ems:children", ws.getNodeRef() );
-    		ws.setProperty( "ems:mergeSource", parentWorkspace.getNodeRef());
+
     	}
     	ws.setProperty( "ems:lastTimeSyncParent", new Date() );
     	if ( Debug.isOn() ) Debug.outln( "created workspace " + ws + " in folder " + folder );
