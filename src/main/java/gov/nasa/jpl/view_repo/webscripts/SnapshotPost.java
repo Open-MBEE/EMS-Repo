@@ -82,7 +82,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
         WorkspaceNode workspace = getWorkspace( req );
         
-        EmsScriptNode topview = findScriptNodeById(viewId, workspace, null);
+        EmsScriptNode topview = findScriptNodeById(viewId, workspace, null, true);
         EmsScriptNode snapshotFolderNode = getSnapshotFolderNode(topview);
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -137,7 +137,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                          WorkspaceNode workspace ) {
         String snapshotName = viewId + "_" + System.currentTimeMillis();
         String contextPath = "alfresco/service/";
-        EmsScriptNode viewNode = findScriptNodeById(viewId, workspace, null);
+        EmsScriptNode viewNode = findScriptNodeById(viewId, workspace, null, true);
         EmsScriptNode snapshotFolder = getSnapshotFolderNode(viewNode);
         return createSnapshot(view, viewId, snapshotName, contextPath, snapshotFolder);
     }

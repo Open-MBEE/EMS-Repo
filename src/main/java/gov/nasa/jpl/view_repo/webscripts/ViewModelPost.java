@@ -84,7 +84,7 @@ public class ViewModelPost extends ModelPost {
         try {
             WorkspaceNode workspace = getWorkspace( req );
             trx.begin();
-            EmsScriptNode view = findScriptNodeById(viewid, workspace, null);
+            EmsScriptNode view = findScriptNodeById(viewid, workspace, null, true);
             view.createOrUpdateProperty("cm:modifier", AuthenticationUtil.getFullyAuthenticatedUser());
             trx.commit();
         } catch (Throwable e) {
@@ -152,7 +152,7 @@ public class ViewModelPost extends ModelPost {
             }
             String id = elementJson.getString(Acm.JSON_ID);
             
-            EmsScriptNode elementNode = findScriptNodeById(id, workspace, null);
+            EmsScriptNode elementNode = findScriptNodeById(id, workspace, null, true);
             if (elementNode != null) {
                 updateOrCreateElement(elementJson, elementNode.getParent(), workspace, false);
             } else {
@@ -166,7 +166,7 @@ public class ViewModelPost extends ModelPost {
                     if (annotatedJson.length() <= 0) {
                         parentFound = false;
                     } else {
-                        EmsScriptNode commentParent = findScriptNodeById(annotatedJson.getString(0), workspace, null);
+                        EmsScriptNode commentParent = findScriptNodeById(annotatedJson.getString(0), workspace, null, true);
                             if (commentParent == null) {
                                 parentFound = false;
                             } else {
@@ -196,7 +196,7 @@ public class ViewModelPost extends ModelPost {
             JSONObject elementJson = array.getJSONObject(ii);
             
             String id = elementJson.getString(Acm.JSON_ID);
-            EmsScriptNode elementNode = findScriptNodeById(id, workspace, null);
+            EmsScriptNode elementNode = findScriptNodeById(id, workspace, null, true);
             if (elementNode != null) {
                 updateOrCreateElement(elementJson, elementNode.getParent(), workspace, true);
             } else {
@@ -210,7 +210,7 @@ public class ViewModelPost extends ModelPost {
                     if (annotatedJson.length() <= 0) {
                         parentFound = false;
                     } else {
-                        EmsScriptNode commentParent = findScriptNodeById(annotatedJson.getString(0), workspace, null);
+                        EmsScriptNode commentParent = findScriptNodeById(annotatedJson.getString(0), workspace, null, true);
                             if (commentParent == null) {
                                 parentFound = false;
                             } else {

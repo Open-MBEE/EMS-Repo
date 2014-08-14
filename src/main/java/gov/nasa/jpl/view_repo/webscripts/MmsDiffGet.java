@@ -29,6 +29,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         workspaceId1 = req.getParameter( "workspace1" );
         workspaceId2 = req.getParameter( "workspace2" );
         System.out.println("fooooo");
+        System.out.println("fooobarrrr");
         ws1 = getWorkspaceFromId( workspaceId1, getServices(), response, status, false, null );
         ws2 = getWorkspaceFromId( workspaceId2, getServices(), response, status, false, null );
         boolean wsFound1 = ( ws1 != null || ( workspaceId1 != null && workspaceId1.equalsIgnoreCase( "master" ) ) );

@@ -285,12 +285,18 @@ public class WorkspaceNode extends EmsScriptNode {
 
     public Set< NodeRef > getChangedNodeRefs( Date dateTime ) {
         Set< NodeRef > changedNodeRefs = new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);
+        //ResultSet refs = NodeUtil.findNodeRefsByType( getName(), SearchType.WORKSPACE, getServices() );
+        //List< EmsScriptNode > nodes = NodeUtil.resultSetToList( refs );
+        //NodeUtil.resultSetToList( refs );
+        // don't need to findDeleted since its doing a comparison with another workspace - so
+        // absence is equivalent to finding deleted
         ArrayList< NodeRef > refs =
                 NodeUtil.findNodeRefsByType( getNodeRef().toString(),
                                              SearchType.WORKSPACE.prefix, null,
                                              dateTime, false, true,
-                                             getServices() );
+                                             getServices(), false );
         changedNodeRefs.addAll( refs );
+        //List< EmsScriptNode > nodes = toEmsScriptNodeList( refs );
 
         // remove commits
         CommitUtil c = new CommitUtil();

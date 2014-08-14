@@ -381,7 +381,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     public Collection< EmsScriptNode >
             getElementWithIdentifier( Object context, String specifier ) {
         // TODO -- need to take into account the context!
-        NodeRef element = NodeUtil.findNodeRefById( specifier, null, null, services );
+        NodeRef element = NodeUtil.findNodeRefById( specifier, null, null, services, false );
         EmsScriptNode emsSN = new EmsScriptNode( element, services );
         return Utils.newList( emsSN );
     }

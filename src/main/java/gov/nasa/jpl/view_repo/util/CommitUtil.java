@@ -22,6 +22,15 @@ public class CommitUtil {
 	public CommitUtil() {
 	}
 
+	/**
+	 * Gets the commit package in the specified workspace (creates if possible)
+	 * @param workspace
+	 * @param siteName
+	 * @param services
+	 * @param response
+	 * @param create
+	 * @return
+	 */
     private EmsScriptNode getOrCreateCommitPkg(WorkspaceNode workspace, String siteName, ServiceRegistry services, StringBuffer response, boolean create) {
         EmsScriptNode context = null;
 
@@ -41,11 +50,27 @@ public class CommitUtil {
         return commitPkg;
     }
 
+    /**
+     * Gets the commit package for the specified workspace
+     * @param workspace
+     * @param siteName
+     * @param services
+     * @param response
+     * @return
+     */
 	public EmsScriptNode getCommitPkg(WorkspaceNode workspace, String siteName, ServiceRegistry services, StringBuffer response) {
 	    return getOrCreateCommitPkg( workspace, siteName, services, response, false );
 	}
 
 
+	/**
+	 * Given a workspace gets an ordered list of the commit history
+	 * @param workspace
+	 * @param siteName
+	 * @param services
+	 * @param response
+	 * @return
+	 */
 	public ArrayList<EmsScriptNode> getCommits(WorkspaceNode workspace,
 	                                           String siteName,
 	                                             ServiceRegistry services,
@@ -68,6 +93,14 @@ public class CommitUtil {
 	    return commits;
 	}
 
+	/**
+	 * Get the most recent commit in a workspace
+	 * @param ws
+	 * @param siteName
+	 * @param services
+	 * @param response
+	 * @return
+	 */
 	public EmsScriptNode getLastCommit(WorkspaceNode ws, String siteName, ServiceRegistry services, StringBuffer response) {
 	    ArrayList<EmsScriptNode> commits = getCommits(ws, siteName, services, response);
 
@@ -78,37 +111,20 @@ public class CommitUtil {
 	    return null;
 	}
 
-
-	public void commit(Map<String, EmsScriptNode> elements,
-	                   Map<String, Version> elementsVersions,
-	                   Map<String, EmsScriptNode> addedElements,
-	                   Map<String, EmsScriptNode> deletedElements,
-	                   Map<String, EmsScriptNode> movedElements,
-	                   Map<String, EmsScriptNode> updatedElements,
-	                   WorkspaceNode workspace,
-	                   String siteName,
-	                   String message,
-	                   boolean runWithoutTransactions,
-	                   ServiceRegistry services,
-	                   StringBuffer response
-	                   ) {
-	    WorkspaceDiff wsDiff = new WorkspaceDiff( workspace, workspace, null, null );
-
-	    wsDiff.setElements( elements );
-        wsDiff.setElementsVersions( elementsVersions );
-
-	    wsDiff.setAddedElements( addedElements );
-	    wsDiff.setDeletedElements( deletedElements );
-	    wsDiff.setMovedElements( movedElements );
-	    wsDiff.setUpdatedElements( updatedElements );
-
-	    if (runWithoutTransactions) {
+	public void commit(WorkspaceDiff wsDiff,
+                       WorkspaceNode workspace,
+                       String siteName,
+                       String message,
+                       boolean runWithoutTransactions,
+                       ServiceRegistry services,
+                       StringBuffer response) {
+        if (runWithoutTransactions) {
             try {
                 commitTransactionable(wsDiff, workspace, siteName, message, services, response);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-	    } else {
+        } else {
             UserTransaction trx;
             trx = services.getTransactionService()
                     .getNonPropagatingUserTransaction();
@@ -124,7 +140,7 @@ public class CommitUtil {
                     ee.printStackTrace();
                 }
             }
-	    }
+        }
 	}
 
 

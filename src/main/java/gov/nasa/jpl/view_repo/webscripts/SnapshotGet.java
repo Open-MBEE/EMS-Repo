@@ -88,7 +88,7 @@ public class SnapshotGet extends AbstractJavaWebScript {
         String id = req.getServiceMatch().getTemplateVars().get("id");
         Map<String, Object> model = new HashMap<String, Object>();
 
-        EmsScriptNode snapshot = findScriptNodeById(id, workspace, dateTime);
+        EmsScriptNode snapshot = findScriptNodeById(id, workspace, dateTime, false);
         if (snapshot != null) {
             String snapshotString = getSnapshotString(snapshot);
             Date date = (Date)snapshot.getLastModified( dateTime );

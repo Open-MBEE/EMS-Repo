@@ -133,7 +133,7 @@ public class ProjectGet extends AbstractJavaWebScript {
         JSONObject json = null;
         
         if (siteName == null) {
-            projectNode = findScriptNodeById(projectId, workspace, dateTime);
+            projectNode = findScriptNodeById(projectId, workspace, dateTime, false);
         } else {
             EmsScriptNode siteNode = getSiteNode( siteName, workspace, dateTime );
             projectNode = siteNode.childByNamePath("/Models/" + projectId);
