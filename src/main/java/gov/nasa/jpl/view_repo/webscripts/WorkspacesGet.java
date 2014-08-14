@@ -96,7 +96,7 @@ public class WorkspacesGet extends AbstractJavaWebScript{
         Collection <EmsScriptNode> nodes = NodeUtil.luceneSearchElements("ASPECT:\"ems:workspace\"" );
 
         for (EmsScriptNode workspaceNode: nodes){
-
+        	//WorkspaceNode workspaceNode = new WorkspaceNode(emsNode.getNodeRef(), emsNode.getServices(), emsNode.getResponse(), emsNode.getStatus());
         	JSONObject interiorJson = new JSONObject();
 
         	if (checkPermissions(workspaceNode, PermissionService.READ)){
@@ -106,16 +106,19 @@ public class WorkspacesGet extends AbstractJavaWebScript{
 //        		for (String key: wkspProperties.keySet()) {
 //        			interiorJson.put(key, wkspProperties.get(key));
 //        		}
-
+        		
 	        	//interiorJson.put(Acm.JSON_ID,workspaceNode.getProperty("ems:id"));
 	        	//interiorJson.put(Acm.JSON_NAME, workspaceNode.getProperty(Acm.CM_TITLE));
 	        	//interiorJson.put("sysml:parent", getStringIfNull(((WorkspaceNode) workspaceNode).getParentWorkspace().getSysmlId()));
 	        	interiorJson.put("lastTimeSyncParent", getStringIfNull(workspaceNode.getProperty("ems:lastTimeSyncParent")));
-	        	interiorJson.put("ems:parent", getStringIfNull(workspaceNode.getProperty("ems:parent")));
+	        	if(workspaceNode.getSourceWorkspace() != null)
+	        		interiorJson.put("ems:source", getStringIfNull(workspaceNode.getSourceWorkspace().getProperty(Acm.CM_NAME)));
+	        	else
+	        		interiorJson.put("ems:source:", "master"); // workspace is null only if master.
 	        	interiorJson.put(Acm.JSON_TYPE, getStringIfNull(workspaceNode.getProperty(Acm.ACM_TYPE)));
-        		interiorJson.put(Acm.JSON_ID, getStringIfNull(workspaceNode.getProperty(Acm.JSON_ID)));
+//        		interiorJson.put(Acm.JSON_ID, getStringIfNull(workspaceNode.getProperty(Acm.JSON_ID)));
         		interiorJson.put(Acm.JSON_NAME, getStringIfNull(workspaceNode.getProperty(Acm.CM_NAME)));
-        		interiorJson.put("mergesource", getStringIfNull(workspaceNode.getProperty("ems:Mergesource")));
+//        		interiorJson.put("mergesource", getStringIfNull(workspaceNode.getProperty("ems:Mergesource")));
         		interiorJson.put("ems:Workspace", getStringIfNull(workspaceNode.getProperty("ems:Workspace")));
         	}
         	else {

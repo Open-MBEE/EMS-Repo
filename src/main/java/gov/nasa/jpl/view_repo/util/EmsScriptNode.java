@@ -2359,7 +2359,16 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public WorkspaceNode getParentWorkspace() {
         WorkspaceNode ws = getWorkspace();
+       // if( ws == null)
+       // 	return null;
         return ws.getParentWorkspace();
+    }
+    // delete later
+    public WorkspaceNode getSourceWorkspace() {
+        WorkspaceNode ws = getWorkspace();
+       if( ws == null)
+        	return null;
+        return ws.getSourceWorkspace();
     }
 
     public EmsScriptNode( NodeRef nodeRef, ServiceRegistry services ) {

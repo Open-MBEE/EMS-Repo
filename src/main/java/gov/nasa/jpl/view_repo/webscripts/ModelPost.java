@@ -948,7 +948,6 @@ public class ModelPost extends AbstractJavaWebScript {
     										 boolean ingest, EmsScriptNode reifiedNode,
     										 EmsScriptNode parent, String id,
     										 WorkspaceNode workspace) throws Exception {
-
         // TODO REVIEW
         //		Wanted to do a lot of processing in buildTransactionElementMap(), so that we make the
         //		node a owner and in the elementHierachyJson, so that the children will be processed
@@ -960,7 +959,7 @@ public class ModelPost extends AbstractJavaWebScript {
         //		This may be easier if the operand and values objects have their own sysmlid in them, so we dont
         //		need to create one ourselves.  Brad didnt want this, but perhaps we should?
 
-    	// If it is a value or operand property then need to convert
+        // If it is a value or operand property then need to convert
         // the elementJson to just contain the sysmlid for the nodes,
         // instead of the nodes themselves.  Also, need to create
         // or modify nodes the properties map to.
@@ -973,12 +972,11 @@ public class ModelPost extends AbstractJavaWebScript {
         // If it is a Property or Expression and json has the properties of interest:
         if ( (type.equals(Acm.ACM_PROPERTY) && jsonToCheck != null && jsonToCheck.has(Acm.JSON_VALUE)) ||
         	 (type.equals(Acm.ACM_EXPRESSION) && jsonToCheck != null && jsonToCheck.has(Acm.JSON_OPERAND)) ) {
-
-        	boolean isProperty = type.equals(Acm.ACM_PROPERTY);
-        	String jsonKey = isProperty ? Acm.JSON_VALUE : Acm.JSON_OPERAND;
-        	Collection<EmsScriptNode> oldVals = isProperty ?
-        											Utils.asList(getSystemModel().getValue(node, null), EmsScriptNode.class) :
-        											getSystemModel().getProperty(node, Acm.ACM_OPERAND);
+            	boolean isProperty = type.equals(Acm.ACM_PROPERTY);
+            	String jsonKey = isProperty ? Acm.JSON_VALUE : Acm.JSON_OPERAND;
+            	Collection<EmsScriptNode> oldVals = isProperty ?
+            											Utils.asList(getSystemModel().getValue(node, null), EmsScriptNode.class) :
+            											getSystemModel().getProperty(node, Acm.ACM_OPERAND);
 
             JSONArray newVals = jsonToCheck.getJSONArray(jsonKey);
             Iterator<EmsScriptNode> iter = !Utils.isNullOrEmpty(oldVals) ?
@@ -1004,60 +1002,65 @@ public class ModelPost extends AbstractJavaWebScript {
             // same ordering.  If there are more values in the
             // JSON element, then make new nodes for them.
             for (int i = 0; i < newVals.length(); ++i) {
+            	    Object newVal = newVals.optJSONObject(i);
 
-        	    Object newVal = newVals.optJSONObject(i);
+                	// Get the sysmlid of the old value if it exists:
+                	if (iter != null && iter.hasNext()) {
+                		EmsScriptNode oldValNode = iter.next();
 
-            	// Get the sysmlid of the old value if it exists:
-            	if (iter != null && iter.hasNext()) {
+              			nodeNames.add(oldValNode.getName());
 
-            		EmsScriptNode oldValNode = iter.next();
+                        if ( workspace != null
+                             && !workspace.equals( oldValNode.getWorkspace() ) ) {
+                            EmsScriptNode newNode =
+                                    workspace.replicateWithParentFolders( oldValNode );
+                            //EmsScriptNode newNode = oldValNode.clone( node );
+                            //newNode.setWorkspace( workspace, oldValNode.getNodeRef() );
+                            oldValNode = newNode;
+              			}
 
-          			nodeNames.add(oldValNode.getName());
+                        JSONObject newValJson = (JSONObject) newVal;
+                        // types are mutually exclusive so put in right aspect
+                        if (newValJson.has( "type" )) {
+                            if (oldValNode.createOrUpdateAspect(newValJson.getString( "type" ))) {
+                                changed = true;
+                            }
+                        }
 
-                    if ( workspace != null
-                         && !workspace.equals( oldValNode.getWorkspace() ) ) {
-                        EmsScriptNode newNode =
-                                workspace.replicateWithParentFolders( oldValNode );
-                        //EmsScriptNode newNode = oldValNode.clone( node );
-                        //newNode.setWorkspace( workspace, oldValNode.getNodeRef() );
-                        oldValNode = newNode;
-          			}
+                        // Ingest the JSON for the value to update properties
+                        if ( oldValNode.ingestJSON( newValJson ) ) {
+                            changed = true;
+                        }
+                	}
+                	// Old value doesnt exists, so create a new node:
+                	else {
 
-        			// Ingest the JSON for the value
-        			// to set properties for the node:
-        			changed = oldValNode.ingestJSON((JSONObject)newVal);
+                		//	The refiedNode will be null if the node is not in the elementHierachy, which
+                		//	will be the case if no other elements have it as a owner, so in that case
+                		//	we make a reifiedNode for it here.  If all of that fails, then use the parent
+                		EmsScriptNode nestedParent = null;
+                		if (reifiedNode == null) {
+                			 EmsScriptNode reifiedPkg = getOrCreateReifiedNode(node, id, workspace, true);
+                			 nestedParent = reifiedPkg == null ? parent : reifiedPkg;
+                		}
+                		else {
+                			nestedParent = reifiedNode;
+                		}
 
-            	}
-            	// Old value doesnt exists, so create a new node:
-            	else {
+                		// TODO: Need to get the MODIFICATION STATUS out of here?!!
+                		ModStatus modStatus = new ModStatus();
+                        EmsScriptNode newValNode = updateOrCreateTransactionableElement((JSONObject)newVal,nestedParent,
+                																		null, workspace, ingest, true, modStatus );
+                		nodeNames.add(newValNode.getName());
 
-            		//	The refiedNode will be null if the node is not in the elementHierachy, which
-            		//	will be the case if no other elements have it as a owner, so in that case
-            		//	we make a reifiedNode for it here.  If all of that fails, then use the parent
-            		EmsScriptNode nestedParent = null;
-            		if (reifiedNode == null) {
-            			 EmsScriptNode reifiedPkg = getOrCreateReifiedNode(node, id, workspace, true);
-            			 nestedParent = reifiedPkg == null ? parent : reifiedPkg;
-            		}
-            		else {
-            			nestedParent = reifiedNode;
-            		}
-
-            		// TODO: Need to get the MODIFICATION STATUS out of here?!!
-            		ModStatus modStatus = new ModStatus();
-                    EmsScriptNode newValNode = updateOrCreateTransactionableElement((JSONObject)newVal,nestedParent,
-            																		null, workspace, ingest, true, modStatus );
-            		nodeNames.add(newValNode.getName());
-
-            		changed = true;
-            	}
+                		changed = true;
+                	}
             }
 
             // Replace the property in the JSON with the sysmlids
             // before ingesting:
-        	JSONArray jsonArry = new JSONArray(nodeNames);
-        	jsonToCheck.put(jsonKey, jsonArry);
-
+            	JSONArray jsonArry = new JSONArray(nodeNames);
+            	jsonToCheck.put(jsonKey, jsonArry);
         } // ends if Property and elementJson has a value or Expression and elementJson has a operand
 
         return changed;
