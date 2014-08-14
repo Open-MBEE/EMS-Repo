@@ -114,7 +114,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
 		}	
 		else {
 			EmsScriptNode folder = null;
-			WorkspaceNode ws = WorkspaceNode.createWorskpaceFromSource(newWorkID, user, sourceWorkId, folder, services, response, status);
+			WorkspaceNode ws = WorkspaceNode.createWorskpaceFromSource(newWorkID, user, sourceWorkId, folder, getServices(), getResponse(), status);
 		}
 		return HttpServletResponse.SC_OK;
 	}
