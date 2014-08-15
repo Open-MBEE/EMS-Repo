@@ -142,6 +142,11 @@ public class EmsScriptNode extends ScriptNode implements
     protected WorkspaceNode workspace = null;
     protected WorkspaceNode parentWorkspace = null;
 
+    /**
+     * When writing out JSON, evaluate Expressions and include the results.
+     */
+    private boolean evaluatingExpressions;
+
     // TODO add nodeService and other member variables when no longer
     // subclassing ScriptNode
     // extend Serializable after removing ScriptNode extension
@@ -3091,11 +3096,9 @@ public class EmsScriptNode extends ScriptNode implements
         }
     }
 
-    protected
-            void
-            addExpressionJSON( JSONObject json, EmsScriptNode node,
-                               Set< String > filter, Date dateTime )
-                                                                    throws JSONException {
+    protected void addExpressionJSON( JSONObject json, EmsScriptNode node,
+                                      Set< String > filter, Date dateTime )
+                                                          throws JSONException {
         addValueSpecificationJSON( json, node, filter, dateTime );
 
         ArrayList< NodeRef > nodeRefs =
@@ -3122,6 +3125,20 @@ public class EmsScriptNode extends ScriptNode implements
 
         }
         putInJson( json, "operand", array, filter );
+        putInJson( json, "display", getExpressionDisplayString(), filter );
+        if ( evaluatingExpressions ) {
+            putInJson( json, "evaluation", getExpressionEvaluation(), filter );
+        }
+    }
+
+    public Object getExpressionEvaluation() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String getExpressionDisplayString() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     protected

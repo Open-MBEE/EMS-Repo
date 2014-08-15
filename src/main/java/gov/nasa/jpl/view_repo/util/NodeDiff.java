@@ -68,7 +68,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         }
         this.node1 = node1;
         this.node2 = node2;
-        if ( computeDiffOnConstruction ) diffProperties();
+        //if ( computeDiffOnConstruction ) diffProperties();
     }
 
     private ServiceRegistry getServices() {
