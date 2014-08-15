@@ -82,7 +82,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class SnapshotPost extends AbstractJavaWebScript {
 	protected String snapshotName;
-	private boolean isSnapshotNode;
+	private boolean isSnapshotNode = false;	//determines whether we're working with a view/product or a snapshot node reference; true for snapshot node reference
 	
     public SnapshotPost() {
         super();
@@ -97,33 +97,50 @@ public class SnapshotPost extends AbstractJavaWebScript {
         // TODO Auto-generated method stub
         return false;
     }
+    
+    private String getSnapshotId(WebScriptRequest req){
+    	String snapshotId = null;
+    	String[] snapshotIds = {"snapshotId"};
+        for (String key: snapshotIds) {
+        	snapshotId = req.getServiceMatch().getTemplateVars().get(key);
+            if (snapshotId != null) {
+                break;
+            }
+        }
+		return snapshotId;
+    }
+    
+    private String getViewId(WebScriptRequest req){
+    	 String viewId = null;
+         String[] viewKeys = {"viewid", "productId"};
+         for (String key: viewKeys) {
+             viewId = req.getServiceMatch().getTemplateVars().get(key);
+             if (viewId != null) {
+                 break;
+             }
+         }
+         return viewId;
+    }
 
     @Override
     protected synchronized Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
         clearCaches();
 
-        String viewId = null;
-        String[] viewKeys = {"viewid", "productId"};
-        for (String key: viewKeys) {
-            viewId = req.getServiceMatch().getTemplateVars().get(key);
-            if (viewId != null) {
-                break;
-            }
-        }
+        String snapshotId = getSnapshotId(req);
+        String viewId = getViewId(req);
 
-        EmsScriptNode topview = findScriptNodeById(viewId, null);
+        EmsScriptNode topview = null;
         EmsScriptNode snapshotFolderNode = null;
         EmsScriptNode snapshotNode = null;
         Map<String, Object> model = new HashMap<String, Object>();
         DateTime now = new DateTime();
         DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
         
-        init(topview);
-        
-        if(this.isSnapshotNode){
-        	System.out.println("Got a Snapshot node...");
-        	snapshotNode = topview;
+        if(snapshotId != null && !snapshotId.isEmpty()){
+          	System.out.println("Got a Snapshot node...");
+          	this.isSnapshotNode = true;
+        	snapshotNode = findScriptNodeById(snapshotId, null);
         	this.snapshotName = (String)snapshotNode.getProperty(Acm.ACM_ID);
         	ChildAssociationRef childAssociationRef = this.services.getNodeService().getPrimaryParent(snapshotNode.getNodeRef());
         	snapshotFolderNode = new EmsScriptNode(childAssociationRef.getParentRef(), this.services);
@@ -138,7 +155,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
     		}
         }
         else{
-	        snapshotFolderNode = getSnapshotFolderNode(topview);
+        	topview = findScriptNodeById(viewId, null);
+        	snapshotFolderNode = getSnapshotFolderNode(topview);
 	        this.snapshotName = viewId + "_" + now.getMillis();
 	        if (checkPermissions(snapshotFolderNode, PermissionService.WRITE)) {
 	            snapshotNode = createSnapshot(topview, viewId, snapshotName, req.getContextPath(), snapshotFolderNode);
@@ -188,9 +206,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return model;
     }
 
-    private void init(EmsScriptNode product){
+/*    private void init(EmsScriptNode product){
     	this.isSnapshotNodeRef(product);
-    }
+    }*/
     
     private EmsScriptNode getHtmlZipNode(EmsScriptNode snapshotNode){
     	NodeRef node = (NodeRef)snapshotNode.getProperty("view2:htmlZipNode");
@@ -323,10 +341,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
 //    }
 //    
 */	
-	private boolean isSnapshotNodeRef(EmsScriptNode view){
+/*	private boolean isSnapshotNodeRef(EmsScriptNode view){
 		this.isSnapshotNode = (view.getType().equals("{http://jpl.nasa.gov/model/view/2.0}Snapshot"));
 		return this.isSnapshotNode;
-	}
+	}*/
 	
     public EmsScriptNode createSnapshot(EmsScriptNode view, String viewId, String snapshotName, String contextPath, EmsScriptNode snapshotFolder) {
     	EmsScriptNode snapshotNode = null;

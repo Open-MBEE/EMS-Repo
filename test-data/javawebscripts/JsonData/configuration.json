@@ -1,6 +1,2 @@
-{
-"name":"product test",
-"description":"updating description",
-"timestamp":"2014-06-09T09:03:45.834-0700",
-"products": ["401"]
-}
+{"configurations":[{"name":"DocWeb 1002", "description":"test 1002"}]}
+
