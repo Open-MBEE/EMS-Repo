@@ -66,6 +66,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.util.TempFileProvider;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
@@ -124,7 +125,30 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     @Override
     protected synchronized Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+    	Map<String, Object> model = new HashMap<String, Object>();
+
         printHeader( req );
+
+        clearCaches();
+
+		SnapshotPost instance = new SnapshotPost(repository, services);
+
+		JSONObject result = instance.saveAndStartAction(req, status);
+		appendResponseStatusInfo(instance);
+
+		status.setCode(responseStatus.getCode());
+		if (result == null) {
+		    model.put("res", response.toString());
+		} else {
+		    model.put("res", result);
+		}
+
+        printFooter();
+
+		return model;
+		
+    	/*
+    	printHeader( req );
         clearCaches();
 
         String snapshotId = getSnapshotId(req);
@@ -202,8 +226,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         if (status.getCode() != HttpServletResponse.SC_OK) {
             model.put("res", response.toString());
         }
+        
         printFooter();
         return model;
+        */
     }
 
 /*    private void init(EmsScriptNode product){
@@ -235,6 +261,84 @@ public class SnapshotPost extends AbstractJavaWebScript {
         EmsScriptNode snapshotFolder = getSnapshotFolderNode(viewNode);
         return createSnapshot(view, viewId, snapshotName, contextPath, snapshotFolder);
     }
+    
+    public EmsScriptNode generateHTML(EmsScriptNode snapshotNode){
+    	this.snapshotName = (String)snapshotNode.getProperty(Acm.ACM_ID);
+    	ChildAssociationRef childAssociationRef = this.services.getNodeService().getPrimaryParent(snapshotNode.getNodeRef());
+    	EmsScriptNode snapshotFolderNode = new EmsScriptNode(childAssociationRef.getParentRef(), this.services);
+    	DocBookWrapper docBookWrapper = new DocBookWrapper(this.snapshotName, snapshotNode);
+    	
+    	if(!hasHtmlZip(snapshotNode)){
+    		System.out.println("Generating HTML zip...");
+    		docBookWrapper.saveHtmlZipToRepo(snapshotFolderNode);
+		}
+    	return snapshotNode;
+    }
+    
+    public EmsScriptNode generatePDF(EmsScriptNode snapshotNode){
+    	this.snapshotName = (String)snapshotNode.getProperty(Acm.ACM_ID);
+    	ChildAssociationRef childAssociationRef = this.services.getNodeService().getPrimaryParent(snapshotNode.getNodeRef());
+    	EmsScriptNode snapshotFolderNode = new EmsScriptNode(childAssociationRef.getParentRef(), this.services);
+    	DocBookWrapper docBookWrapper = new DocBookWrapper(this.snapshotName, snapshotNode);
+    	if(!hasPdf(snapshotNode)){
+    		System.out.println("Generating PDF...");
+    		docBookWrapper.savePdfToRepo(snapshotFolderNode);
+    	}
+    	return snapshotNode;
+    }
+    
+    private String getSiteName(WebScriptRequest req){
+    	 String[] siteKeys = {SITE_NAME, "siteId"};
+ 	    
+ 		String siteName = null;
+ 		for (String key: siteKeys) {
+ 		    siteName = req.getServiceMatch().getTemplateVars().get(key);
+ 		    if (siteName != null) {
+ 		        break;
+ 		    }
+ 		}
+ 		return siteName;
+    }
+    
+    private JSONObject saveAndStartAction(WebScriptRequest req, Status status) {
+	    JSONObject jsonObject = null;
+	  /*  String siteName = getSiteName(req);
+		if (siteName == null) {
+			log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
+			return null;
+		}
+
+		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+		if (siteInfo == null) {
+			log(LogLevel.ERROR, "Could not find site: " + siteName, HttpServletResponse.SC_NOT_FOUND);
+			return null;
+		}
+		EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+
+		JSONObject reqPostJson = (JSONObject) req.parseContent();
+		JSONObject postJson;
+		try {
+		    if (reqPostJson.has( "snapshots" )) {
+		        JSONArray configsJson = reqPostJson.getJSONArray( "snapshots" );
+		        postJson = configsJson.getJSONObject( 0 );
+		    } else {
+		        postJson = reqPostJson;
+		    }
+		    
+			if (!postJson.has( "formats" )) {
+				log(LogLevel.ERROR, "Missing snapshot formats!", HttpServletResponse.SC_BAD_REQUEST);
+			} else {
+				J
+				jsonObject = handleCreate(postJson, siteNode, status);
+			}
+		} catch (JSONException e) {
+			log(LogLevel.ERROR, "Could not parse JSON", HttpServletResponse.SC_BAD_REQUEST);
+			e.printStackTrace();
+			return null;
+		}*/
+		
+		return jsonObject;
+	}
     
     /**
 	 * Utility function to find all the NodeRefs for the specified name

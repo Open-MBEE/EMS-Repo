@@ -127,5 +127,10 @@
 	    <property name="services" ref="ServiceRegistry"/>
 	    <property name="repository" ref="repositoryHelper"/>
     </bean>	
+    
+    <bean id="snapshotArtifactsGeneration" class="gov.nasa.jpl.view_repo.actions.SnapshotArtifactsGenerationActionExecuter" parent="action-executer">
+	    <property name="services" ref="ServiceRegistry"/>
+	    <property name="repository" ref="repositoryHelper"/>
+    </bean>	
 
 </beans>
