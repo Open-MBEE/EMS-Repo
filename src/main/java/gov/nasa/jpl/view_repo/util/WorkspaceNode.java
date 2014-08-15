@@ -327,13 +327,11 @@ public class WorkspaceNode extends EmsScriptNode {
 
     public Set< NodeRef > getChangedNodeRefsWithRespectTo( WorkspaceNode other, Date dateTime ) {
         Set< NodeRef > changedNodeRefs = new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);//getChangedNodeRefs());
-        if ( NodeUtil.exists( other ) ) {
-            WorkspaceNode targetParent = getCommonParent( other );
-            WorkspaceNode parent = this;
-            while ( parent != null && !parent.equals( targetParent ) ) {
-                changedNodeRefs.addAll( parent.getChangedNodeRefs( dateTime ) );
-                parent = parent.getParentWorkspace();
-            }
+        WorkspaceNode targetParent = getCommonParent( other );
+        WorkspaceNode parent = this;
+        while ( parent != null && !parent.equals( targetParent ) ) {
+            changedNodeRefs.addAll( parent.getChangedNodeRefs( dateTime ) );
+            parent = parent.getParentWorkspace();
         }
         return changedNodeRefs;
     }
