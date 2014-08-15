@@ -99,7 +99,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
     private JmsConnection jmsConnection = null;
     private RestPostConnection restConnection = null;
-    
+
     protected WorkspaceDiff wsDiff;
 
     protected void initMemberVariables(String siteName) {
@@ -332,6 +332,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             if ( workspace == null || !workspace.exists() ) {
                 SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, SiteVisibility.PUBLIC );
                 siteNode = new EmsScriptNode( foo.getNodeRef(), services );
+                siteNode.createOrUpdateAspect( "cm:taggable" );
             } else {
                 EmsScriptNode sitesFolder = null;
                 // check and see if the Sites folder already exists
@@ -624,7 +625,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return gotSuffix;
     }
 
-    
+
     /**
      * Send off the deltas to various endpoints
      * @param deltas    JSONObject of the deltas to be published
@@ -648,16 +649,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     public void setWsDiff(WorkspaceNode workspace) {
         wsDiff = new WorkspaceDiff(workspace, workspace);
     }
-    
+
     public WorkspaceDiff getWsDiff() {
         return wsDiff;
     }
-    
+
     public void setJmsConnection(JmsConnection jmsConnection) {
         this.jmsConnection = jmsConnection;
     }
 
     public void setRestConnection(RestPostConnection restConnection) {
         this.restConnection = restConnection;
-    }    
+    }
 }
