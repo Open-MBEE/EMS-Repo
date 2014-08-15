@@ -2,12 +2,8 @@
     "type": "Expression",
     "operand": [
         {
-            "element": "Plus",
+            "element": "Not",
             "type": "ElementValue"
-        },
-        {
-            "integer": 1,
-            "type": "LiteralInteger"
         },
         {
             "integer": 1,

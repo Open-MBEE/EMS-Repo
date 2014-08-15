@@ -77,14 +77,7 @@
 	            <type>jar</type>
 	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
 	        </dependency>
-	        <dependency>
-	            <groupId>emsscala</groupId>
-	            <artifactId>emsscala</artifactId>
-	            <version>0.0.1</version>
-	            <scope>system</scope>
-	            <type>jar</type>
-	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
-	        </dependency>
+	        
             </dependencies>
         </profile>
         <profile>
@@ -110,11 +103,7 @@
                     <artifactId>kexpparser</artifactId>
                     <version>0.0.7</version>
                 </dependency>
-               <!--  <dependency>
-                    <groupId>emsscala</groupId>
-                    <artifactId>emsscala</artifactId>
-                    <version>0.0.1</version>
-                </dependency> -->
+              
             </dependencies>
         </profile>
     </profiles>
