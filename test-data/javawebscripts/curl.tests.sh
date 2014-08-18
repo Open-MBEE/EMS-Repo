@@ -107,3 +107,12 @@ echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/configuration.json $BASE_URL"co
 
 # get configurations
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"configurations/europa\""
+
+echo ""
+echo WORKSPACES
+echo curl $CURL_FLAGS -X POST $SERVICE_URL"workspaces/wsA?sourceWorkspace=master\""
+
+echo curl $CURL_FLAGS -X POST $SERVICE_URL"workspaces/wsB?sourceWorkspace=wsA\""
+
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"workspaces\""
+

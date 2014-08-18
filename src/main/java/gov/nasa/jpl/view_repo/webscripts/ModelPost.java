@@ -264,21 +264,22 @@ public class ModelPost extends AbstractJavaWebScript {
         log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
 
         // Send deltas to all listeners
-        wsDiff = new WorkspaceDiff( workspace, workspace, new Date(start), new Date(end) );
-        JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
-        if ( !sendDeltas(deltaJson) ) {
-            log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
+        if (wsDiff.isDiff()) {
+            JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
+            if ( !sendDeltas(deltaJson) ) {
+                log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
+            }
+    
+            // Commit history
+            String siteName = null;
+            if (projectNode != null) {
+                EmsScriptNode siteNode = projectNode.getSiteNode();
+                siteName = siteNode.getName();
+            }
+            CommitUtil commitUtil = new CommitUtil();
+            commitUtil.commit( wsDiff, workspace, siteName,
+                               "", false, services, response );
         }
-
-        // Commit history
-        String siteName = null;
-        if (projectNode != null) {
-            EmsScriptNode siteNode = projectNode.getSiteNode();
-            siteName = siteNode.getName();
-        }
-        CommitUtil commitUtil = new CommitUtil();
-        commitUtil.commit( wsDiff, workspace, siteName,
-                           "", false, services, response );
 
         elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
         return elements;

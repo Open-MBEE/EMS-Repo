@@ -179,11 +179,10 @@ public class WorkspaceNode extends EmsScriptNode {
     	ws.addAspect( "ems:HasWorkspace" );
     	ws.setProperty("ems:workspace", ws.getNodeRef() );
     	WorkspaceNode parentWorkspace = AbstractJavaWebScript.getWorkspaceFromId(sourceId, services, response, status, false, userName);
-    	ws.setProperty( "ems:source", parentWorkspace.getNodeRef() );
-    	if ( Debug.isOn() ) Debug.outln( "parent workspace: " + parentWorkspace );
     	if(parentWorkspace != null) {
+        if ( Debug.isOn() ) Debug.outln( "parent workspace: " + parentWorkspace );
     		parentWorkspace.appendToPropertyNodeRefs( "ems:children", ws.getNodeRef() );
-
+        ws.setProperty( "ems:source", parentWorkspace.getNodeRef() );
     	}
     	ws.setProperty( "ems:lastTimeSyncParent", new Date() );
     	if ( Debug.isOn() ) Debug.outln( "created workspace " + ws + " in folder " + folder );

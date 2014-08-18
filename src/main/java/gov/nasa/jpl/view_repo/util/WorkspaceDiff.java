@@ -7,7 +7,6 @@ import gov.nasa.jpl.mbee.util.Utils;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -19,7 +18,6 @@ import java.util.TreeSet;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
-import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.namespace.QName;
@@ -525,16 +523,19 @@ public class WorkspaceDiff {
 
         JSONArray array = new JSONArray();
         for (EmsScriptNode node: set.values()) {
-            Map< String, Pair< Object, Object > > propChanges =
-                    nodeDiff.getPropertyChanges( node.getName() );
-            if ( !showAll && propChanges != null && !propChanges.isEmpty() ) {
-                filter = new LinkedHashSet< String >(filter);
-                for ( Entry< String, Pair< Object, Object > > e : propChanges.entrySet() ) {
-                    Pair< Object, Object > p = e.getValue();
-                    if ( p != null && ( p.first != null || p.second != null ) ) {
-                        String jsonName = toJsonName( e.getKey() );
-                        if ( jsonName != null ) {
-                            filter.add( jsonName );
+            // allow the possibility that nodeDiff isn't being used to make the diff call
+            if ( nodeDiff != null ) {
+                Map< String, Pair< Object, Object > > propChanges =
+                        nodeDiff.getPropertyChanges( node.getName() );
+                if ( !showAll && propChanges != null && !propChanges.isEmpty() ) {
+                    filter = new LinkedHashSet< String >(filter);
+                    for ( Entry< String, Pair< Object, Object > > e : propChanges.entrySet() ) {
+                        Pair< Object, Object > p = e.getValue();
+                        if ( p != null && ( p.first != null || p.second != null ) ) {
+                            String jsonName = toJsonName( e.getKey() );
+                            if ( jsonName != null ) {
+                                filter.add( jsonName );
+                            }
                         }
                     }
                 }
@@ -738,5 +739,12 @@ public class WorkspaceDiff {
     public boolean ingestJSON(JSONObject json) {
         // TODO??
         return true;
+    }
+    
+    public boolean isDiff() {
+        if (addedElements.size() > 0 || deletedElements.size() > 0 || movedElements.size() > 0 || updatedElements.size() > 0) {
+            return true;
+        }
+        return false;
     }
 }

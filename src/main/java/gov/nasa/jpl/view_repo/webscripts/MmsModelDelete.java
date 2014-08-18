@@ -119,13 +119,15 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             }
         }
 
-        // Send deltas to all listeners
-        if ( !sendDeltas(result) ) {
-            log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
+        if (wsDiff.isDiff()) {
+            // Send deltas to all listeners
+            if ( !sendDeltas(result) ) {
+                log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
+            }
+    
+            CommitUtil commitUtil = new CommitUtil();
+            commitUtil.commit( wsDiff, workspace, siteName, "", false, services, response );
         }
-
-        CommitUtil commitUtil = new CommitUtil();
-        commitUtil.commit( wsDiff, workspace, siteName, "", false, services, response );
 
         return result;
     }

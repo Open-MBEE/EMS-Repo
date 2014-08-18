@@ -30,6 +30,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.ModelPost;
@@ -38,6 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.UserTransaction;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -103,18 +105,43 @@ public class WorkspacesPost extends AbstractJavaWebScript{
 		return model;
 	}
 	
-	public int createWorkSpace(String sourceWorkId, String newWorkID, JSONObject jsonObject, String user, Status status){
-		if(newWorkID == "master"){
-			log(LogLevel.WARNING, "Workspace already exists. \n", HttpServletResponse.SC_BAD_REQUEST);
+	public int createWorkSpace(String sourceWorkId, String newWorkID, JSONObject jsonObject, String user, Status status) {
+		if(newWorkID.equals( "master" )){
+			log(LogLevel.WARNING, "Workspace already exists.", HttpServletResponse.SC_BAD_REQUEST);
 			return HttpServletResponse.SC_BAD_REQUEST;
 		}
-		else if(AbstractJavaWebScript.getWorkspaceFromId(newWorkID, services, response, status, false, user) != null){
-			log(LogLevel.WARNING, "Workspace already exists. \n", HttpServletResponse.SC_BAD_REQUEST);
+		else if(AbstractJavaWebScript.getWorkspaceFromId(newWorkID, services, response, status, false, user) != null) {
+			log(LogLevel.WARNING, "Workspace already exists.", HttpServletResponse.SC_BAD_REQUEST);
 			return HttpServletResponse.SC_BAD_REQUEST;
-		}	
-		else {
-			EmsScriptNode folder = null;
-			WorkspaceNode ws = WorkspaceNode.createWorskpaceFromSource(newWorkID, user, sourceWorkId, folder, getServices(), getResponse(), status);
+		} else {
+	        WorkspaceNode srcWs = AbstractJavaWebScript.getWorkspaceFromId( sourceWorkId, services, response, status, false, user );
+	        if (!sourceWorkId.equals( "master" ) && srcWs == null) {
+	            log(LogLevel.WARNING, "Source workspace not found.", HttpServletResponse.SC_NOT_FOUND);
+	            return HttpServletResponse.SC_NOT_FOUND;
+	        } else {
+        			EmsScriptNode folder = null;
+        			WorkspaceNode dstWs = null;
+                UserTransaction trx;
+                trx = services.getTransactionService().getNonPropagatingUserTransaction();
+                try {
+                    trx.begin();
+                    dstWs = WorkspaceNode.createWorskpaceFromSource(newWorkID, user, sourceWorkId, folder, getServices(), getResponse(), status);
+                    trx.commit();
+                } catch (Throwable e) {
+                    try {
+                        e.printStackTrace();
+                        trx.rollback();
+                    } catch (Throwable ee) {
+                        ee.printStackTrace();
+                    }
+                }
+        			
+                if (dstWs != null) {
+            			// keep history of the branch
+            			CommitUtil commitUtil = new CommitUtil();
+            			commitUtil.branch( srcWs, dstWs, null, "", false, services, response );
+                }
+	        }
 		}
 		return HttpServletResponse.SC_OK;
 	}
