@@ -8,7 +8,7 @@ pkill -fn 'integration-test'
 echo 'KILLING SERVER IF ONE IS RUNNING'
 sleep 3s
 
-#cd ./../..
+cd ./../..
 ./runserver.sh > serverLog.txt &
 echo 'STARTING UP SERVER'
 sleep 60s
@@ -17,15 +17,25 @@ sleep 60s
 cd ./test-data/javawebscripts
 server=0
 serverCount=0
+dotCount=0
 echo 'POLLING SERVER'
 while [ $server -eq 0 ]; do
 	> tempMasterDiff
 	netstat -ln | grep '8080' > tempMasterDiff
 	count=`sed -n '$=' tempMasterDiff`
-	if [ $count -gt 0 ]; then
-		server=1
+	numberRegEx='^[0-9]+$'
+	if [[ $count =~ $numberRegEx ]];then
+		if [ $count -gt 0 ]; then
+			server=1
+		fi
+	else
+		dotCount=$(($dotCount+1))
+		if [ $dotCount -gt 20 ];then 
+		     echo '...'
+		     dotCount=0
+		fi
 	fi
-	
+
 	#time-out condition
 	serverCount=$(($serverCount+1))
 	if [ $serverCount -gt 50000 ];then
@@ -44,19 +54,19 @@ if [ $server -eq 1 ]; then
 		echo 'RUNNING OLD API DIFF SCRIPT'
 		echo 'OMITTING WORKSPACES DIFF SCRIPT'
 		./diff2.sh
-		#passTest=$?
+		passTest=$?
 
         elif [ $diffChoose -eq 2 ];then
 	        echo 'RUNNING WORKSPACES DIFF SCRIPT'
 	        echo 'OMITTING OLD API DIFF SCRIPT'
                 ./diffWorkspace.sh
-                #passTest=$?
+                passTest=$?
 
         else 
                 echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
                 ./diff2.sh
                 ./diffWorkspace.sh
-                #passTest=$?
+                passTest=$?
         fi
         
         
@@ -77,8 +87,8 @@ if [ $server -eq 1 ]; then
         pkill -fn 'integration-test'
         echo 'KILLING SERVER'
 
-	#echo 'PASSTEST?'
-        #echo "$passTest"
+	echo 'PASSTEST?'
+        echo "$passTest"
 	#exit $passTest
 fi
 

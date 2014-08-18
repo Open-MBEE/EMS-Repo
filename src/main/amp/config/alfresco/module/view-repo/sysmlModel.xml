@@ -311,7 +311,7 @@
                 <property name="sysml:propertyType">
                     <type>d:noderef</type>
                     <mandatory>false</mandatory>
-                    <multiple>true</multiple>
+                    <multiple>false</multiple>
                     <index enabled="true">
                         <atomic>false</atomic>
                         <stored>false</stored>

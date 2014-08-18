@@ -1,12 +1,11 @@
 {"elements": [
     {
-        "sysmlid": "_17_0_2_3_e610336_1394148443742_79128_29536",
+        "id": "_17_0_2_3_e610336_1394148443742_79128_29536",
         "name": "ContextViewpoint",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "specialization": {"method": "get_two_names",
-                            "type": "Viewpoint"
-                           }
+        "method": "get_two_names",
+        "type": "Viewpoint"
     },
     {
         "sysmlid": "_17_0_2_3_e610336_1394148233838_91795_29332",
@@ -44,12 +43,11 @@
         "name": "get_two_names_op",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "specialization": {"expression": "get_two_names_expression",
-                           "type": "Operation"
-                           }
+        "operationExpression": "get_two_names_expression",
+        "type": "Operation" 
     },
     {
-        "sysmlid": "get_two_names_expression",
+        "id": "get_two_names_expression",
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
@@ -81,67 +79,52 @@
         "name": "get_names_op",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "specialization": {"parameters":["s1_param",
-                                         "s2_param"],
-                            "expression": "vp_expression_2",
-                            "type": "Operation" 
-                           } 
+        "operationParameter":["s1_param",
+                              "s2_param"],
+        "operationExpression": "vp_expression_2",
+        "type": "Operation" 
     },
     {
-        "sysmlid": "s1_param",
+        "id": "s1_param",
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "specialization" : {
-                            "type": "Parameter"
-                            }    
+        "type": "Parameter" 
     },
     {
-        "sysmlid": "s2_param",
+        "id": "s2_param",
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "specialization" : {
-                            "type": "Parameter"
-                            }    
+        "type": "Parameter" 
     },
     {
-        "sysmlid": "vp_expression_2",
+        "id": "vp_expression_2",
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "specialization": {"operand": [{"element":"op_list",
-                                        "type":"ElementValue"},
-                                        {"element":"op_name_arg_1",
-                                        "type":"ElementValue"},
-                                        {"element":"op_name_arg_2",
-                                        "type":"ElementValue"}],
-                            "type": "Expression"
-                           }
+        "operand": ["op_list",
+                    "op_name_arg_1",
+                    "op_name_arg_2"],
+        "type": "Expression" 
     },    
     {
-        "sysmlid": "op_name_arg_1",
+        "id": "op_name_arg_1",
         "name": "Name",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "specialization": {"operand": [{"element":"op_name_arg",
-                                        "type":"ElementValue"},
-                                       {"element":"s1_param",
-                                        "type":"ElementValue"}],
-                           "type": "Expression"
-                          }
+        "operand":["op_name_arg",
+                   "s1_param"],
+        "type": "Expression"
     },
     {
-        "sysmlid": "op_name_arg_2",
+        "id": "op_name_arg_2",
         "name": "Name",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "specialization": {"operand": [{"element":"op_name_arg",
-                                        "type":"ElementValue"},
-                                       {"element":"s2_param",
-                                        "type":"ElementValue"}],
-                           "type": "Expression"
-                          }
+        "operand":["op_name_arg",
+                   "s2_param"],
+        "type": "Expression"
     }
 
 ]}
