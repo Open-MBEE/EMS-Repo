@@ -21,7 +21,8 @@
         "specialization": { "type": "ElementValue",
 				        	"elementValueOfElement": "op_ev_31835",
 				        	"valueExpression": "expr_32165"
-				    	  	},
+				    	  	}
+	},
     {
         "documentation": "",
         "sysmlid": "op_ev_31835",
