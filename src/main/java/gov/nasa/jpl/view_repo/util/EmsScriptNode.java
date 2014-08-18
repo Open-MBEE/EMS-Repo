@@ -72,6 +72,7 @@ import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
@@ -901,6 +902,31 @@ public class EmsScriptNode extends ScriptNode implements
         return new EmsScriptNode( myParent.getNodeRef(), services, response );
     }
 
+    public EmsScriptNode getUnreifiedParent( Date dateTime ) {
+        EmsScriptNode parent = getParent();
+        if ( parent != null ) {
+            parent = parent.getUnreified( dateTime );
+        }
+        return parent;
+    }
+
+    public EmsScriptNode getUnreified( Date dateTime ) {
+        if ( !isReified() ) return this;
+        String sysmlId = getSysmlId();
+        sysmlId = sysmlId.replaceAll( "^(.*)_pkg$", "$1" );
+        EmsScriptNode unreified =
+                findScriptNodeByName( sysmlId, getWorkspace(), dateTime );
+        return unreified;
+    }
+
+    public boolean isReified() {
+        String sysmlId = getSysmlId();
+        if ( isFolder() && sysmlId != null && sysmlId.endsWith( "_pkg" ) ) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Get the property of the specified type
      *
@@ -921,9 +947,8 @@ public class EmsScriptNode extends ScriptNode implements
         // workspace meta-property
         if ( !workspaceMetaProperties.contains( acmType ) ) {
             if ( result instanceof NodeRef ) {
-                result =
-                        NodeUtil.getNodeRefAtTime( (NodeRef)result,
-                                                   getWorkspace(), null );
+                result = NodeUtil.getNodeRefAtTime( (NodeRef)result,
+                                                    getWorkspace(), null );
             } else if ( result instanceof Collection ) {
                 Collection< ? > resultColl = (Collection< ? >)result;
                 ArrayList< Object > arr = new ArrayList< Object >();
@@ -1040,17 +1065,15 @@ public class EmsScriptNode extends ScriptNode implements
                                                        createQName( acmType ),
                                                        value );
             } catch ( Exception e ) {
-                if ( Debug.isOn() ) System.out.println( "Got exception in "
-                                                        + "setProperty(acmType="
-                                                        + acmType
-                                                        + ", value="
-                                                        + value
-                                                        + ") for EmsScriptNode "
-                                                        + this
-                                                        + " calling setProperty(nodeRef="
-                                                        + nodeRef + ", "
-                                                        + acmType + ", "
-                                                        + value + ")" );
+                if ( Debug.isOn() ) {
+                    System.out.println( "Got exception in "
+                                        + "setProperty(acmType=" + acmType
+                                        + ", value=" + value
+                                        + ") for EmsScriptNode " + this
+                                        + " calling setProperty(nodeRef="
+                                        + nodeRef + ", " + acmType + ", "
+                                        + value + ")" );
+                }
                 e.printStackTrace();
             }
         } else {
@@ -2832,6 +2855,47 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
     }
+
+    public Set<QName> getAllAspectsAndInherited() {
+        Set<QName> aspects = new LinkedHashSet< QName >();
+        aspects.addAll( getAspectsSet() );
+        ArrayList<QName> queue = new ArrayList< QName >( aspects );
+        DictionaryService ds = getServices().getDictionaryService();
+        while ( !queue.isEmpty() ) {
+            QName a = queue.get(0);
+            queue.remove( 0 );
+            AspectDefinition aspect = ds.getAspect( a );
+            QName p = aspect.getParentName();
+            if ( p != null && !aspects.contains( p ) ) {
+                aspects.add( p );
+                queue.add( p );
+            }
+        }
+        return aspects;
+    }
+
+
+
+    public boolean hasOrInheritsAspect( String aspectName ) {
+        if ( hasAspect( aspectName ) ) return true;
+        QName qName = NodeUtil.createQName( aspectName );
+        return getAllAspectsAndInherited().contains( qName );
+//        QName qn = NodeUtil.createQName( aspectName );
+//        if ( getAspectsSet().contains( qn ) ) return true;
+//
+//        DictionaryService ds = getServices().getDictionaryService();
+//        AspectDefinition aspect = ds.getAspect( qn );
+//
+//        //aspect.
+//
+//        NodeService ns = NodeUtil.getServices().getNodeService();
+//        ns.ge
+//        if ( ns.hasAspect( getNodeRef(), NodeUtil.createQName( aspectName ) ) ) {
+//
+//        }
+//        return false;
+    }
+
 
     public boolean isWorkspace() {
         return hasAspect( "ems:Workspace" );

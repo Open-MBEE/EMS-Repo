@@ -32,9 +32,12 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.ModelPost;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,6 +48,7 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -86,11 +90,14 @@ public class WorkspacesPost extends AbstractJavaWebScript{
 		Map<String, Object> model = new HashMap<String, Object>();
 		int statusCode = HttpServletResponse.SC_OK;
 		String user = AuthenticationUtil.getRunAsUser();
+		JSONObject json = null;
 		try{
 			if(validateRequest(req, status)){
 				String sourceWorkspaceParam = req.getParameter("sourceWorkspace");
 				String newName = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
 				statusCode = createWorkSpace(sourceWorkspaceParam, newName, (JSONObject)req.parseContent(), user, status);
+				WorkspaceNode ws = AbstractJavaWebScript.getWorkspaceFromId(newName, getServices(), getResponse(), status, false, user);
+				json = printObject(ws);
 			} else {
 				statusCode = responseStatus.getCode();
 			}
@@ -98,11 +105,44 @@ public class WorkspacesPost extends AbstractJavaWebScript{
 			log(LogLevel.ERROR, "Internal stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			e.printStackTrace();
 		}
-		
+		if(json == null)
+			model.put("res", response.toString());
+		else
+			try {
+				model.put("res", json.toString(4));
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		status.setCode(statusCode);
-		model.put("res", response.toString());
 		printFooter();
 		return model;
+	}
+	protected JSONObject printObject(WorkspaceNode ws) throws JSONException{
+		JSONObject json = new JSONObject();
+		JSONArray jsonArray = new JSONArray();
+		JSONObject interiorJson = new JSONObject();
+		if(checkPermissions(ws, PermissionService.READ)){
+			interiorJson.put("lastTimeSyncParent", getStringIfNull(ws.getProperty("ems:lastTimeSyncParent")));
+        	if(ws.getSourceWorkspace() != null)
+        		interiorJson.put("ems:source", getStringIfNull(ws.getSourceWorkspace().getProperty(Acm.CM_NAME)));
+        	else
+        		interiorJson.put("ems:source:", "master"); // workspace is null only if master.
+        	interiorJson.put(Acm.JSON_TYPE, getStringIfNull(ws.getProperty(Acm.ACM_TYPE)));
+    		interiorJson.put(Acm.JSON_NAME, getStringIfNull(ws.getProperty(Acm.CM_NAME)));
+    	}
+    	else {
+    		log(LogLevel.WARNING,"No permission to read: "+ ws.getSysmlId(),HttpServletResponse.SC_NOT_FOUND);
+		}
+		jsonArray.put(interiorJson);
+		json.put("workspace", jsonArray);
+		return json;
+	}
+	
+	protected Object getStringIfNull(Object object){
+		if(object == null)
+			return null;
+		return object;
 	}
 	
 	public int createWorkSpace(String sourceWorkId, String newWorkID, JSONObject jsonObject, String user, Status status) {
@@ -145,5 +185,4 @@ public class WorkspacesPost extends AbstractJavaWebScript{
 		}
 		return HttpServletResponse.SC_OK;
 	}
-	
 }

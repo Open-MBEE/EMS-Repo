@@ -8,11 +8,13 @@ import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
 import org.junit.Assert;
 
@@ -72,6 +74,23 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         this.node1 = node1;
         this.node2 = node2;
         if ( computeDiffOnConstruction ) diff();
+    }
+
+    /* (non-Javadoc)
+     * @see gov.nasa.jpl.mbee.util.AbstractDiff#diff()
+     */
+    @Override
+    public void diff() {
+        super.diff();
+        fixValueSpecifications();
+    }
+
+    /* (non-Javadoc)
+     * @see gov.nasa.jpl.mbee.util.AbstractDiff#diffProperties(java.lang.Object)
+     */
+    @Override
+    protected List< Set< String >> diffProperties( String tid ) {
+        return super.diffProperties( tid );
     }
 
     private ServiceRegistry getServices() {
@@ -167,6 +186,234 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         // TODO --REVIEW -- HERE!  Do we need to add anything here for specializations? Expressions?
         Utils.removeAll( props, getPropertyIdsToIgnore() );
         return props;
+    }
+
+//    /**
+//     * Remove ValueSpecification elements in diff and include the differences as
+//     * value property updates in the owning Property.
+//     *
+//     * If a ValueSpecification (which has many subclasses/subaspects) has
+//     * changed, and it is owned by a Property, then the value property of the
+//     * owning Property has changed. In the JSON output, we should show the
+//     * changed value in the owning element (in its specialization) instead of as
+//     * a separate element.
+//     *
+//     * To do this, this WorkspaceDiff is altered by
+//     * <ul>
+//     * <li>removing Property-owned ValueSpecifications from the added, removed,
+//     * and updatedElements maps,
+//     * <li>adding the owning Property elements to these element maps if not
+//     * already there, and
+//     * <li>adding the value properties to the nodeDiff.propertyChanges as well
+//     * as the added, removed, and updatedProperties maps of the nodeDiff.
+//     * </ul>
+//     *
+//     * One tricky part is that an Expression may be owned by another Expression
+//     * that is owned by a Property.
+//     *
+//     * Another tricky part is that an owning Property may be added or deleted,
+//     * in which case the ValueSpecification may need to be handled differently.
+//     * @param workspaceDiff TODO
+//     */
+//    protected void fixValueSpecifications(WorkspaceDiff workspaceDiff ) {
+//
+//        // Identify the Properties that own changed ValueSpecifications and add
+//        // them to the updatedElements map.
+//
+//        Set< EmsScriptNode > valueSpecs = new LinkedHashSet<EmsScriptNode>();
+//        //Map< String, EmsScriptNode > refs = getAddedElements();
+//        for ( Entry< String, EmsScriptNode > e : workspaceDiff.getAddedElements().entrySet() ) {
+//            EmsScriptNode node = e.getValue();
+//            if ( isPropertyOwnedValueSpecification( node ) ) {
+//                valueSpecs.add( node );
+//            }
+//        }
+//        for ( Entry< String, EmsScriptNode > e : workspaceDiff.getUpdatedElements().entrySet() ) {
+//            EmsScriptNode node = e.getValue();
+//            if ( isPropertyOwnedValueSpecification( node ) ) {
+//                valueSpecs.add( node );
+//            }
+//        }
+//        // what about getDeletedElements()?
+//        // TODO
+//
+//
+//        // Remove the owned ValueSpecifications from the element maps.
+//
+//        for ( EmsScriptNode node : valueSpecs ) {
+//            workspaceDiff.getAddedElements().remove( node.getName() );
+//            workspaceDiff.getUpdatedElements().remove( node.getName() );
+//            workspaceDiff.getDeletedElements().remove( node.getName() ); // Is this right?????!!!
+//        }
+//
+//        // Add the owning Properties' values to the nodeDiff property change maps.
+//
+//        //for ( )
+//        // TODO
+//
+//    }
+
+    /**
+     * Remove ValueSpecification elements in diff and include the differences as
+     * value property updates in the owning Property.
+     * <p>
+     * If a ValueSpecification (which has many subclasses/subaspects) has
+     * changed, and it is owned by a Property, then the value property of the
+     * owning Property has changed. In the JSON output, we should show the
+     * changed value in the owning element (in its specialization) instead of as
+     * a separate element.
+     * <p>
+     * To do this, this WorkspaceDiff is altered by
+     * <ul>
+     * <li>removing Property-owned ValueSpecifications from the added, removed,
+     * and updatedElements maps,
+     * <li>adding the owning Property elements to these element maps if not
+     * already there, and
+     * <li>adding the value properties to the nodeDiff.propertyChanges as well
+     * as the added, removed, and updatedProperties maps of the nodeDiff.
+     * </ul>
+     * <p>
+     * One tricky part is that an Expression may be owned by another Expression
+     * that is owned by a Property.
+     * <p>
+     * Another tricky part is that an owning Property may be added or deleted,
+     * in which case the ValueSpecification may need to be handled differently.
+     *
+     * @param workspaceDiff
+     *            TODO
+     */
+    protected void fixValueSpecifications() {
+
+        // Identify the Properties that own changed ValueSpecifications and add
+        // them to the updatedElements map.
+
+        System.out.println("added = " + getAdded() );
+        System.out.println("removed = " + getRemoved() );
+        System.out.println("updated = " + getUpdated() );
+
+        System.out.println("added properties= " + getAddedProperties() );
+        System.out.println("removed properties= " + getRemovedProperties() );
+        System.out.println("updated properties= " + getUpdatedProperties() );
+        System.out.println("property changes = " + getPropertyChanges() );
+
+        Set< EmsScriptNode > valueSpecs = new LinkedHashSet<EmsScriptNode>();
+        Set< EmsScriptNode > owningProperties = new LinkedHashSet<EmsScriptNode>();
+        //Map< String, EmsScriptNode > refs = getAddedElements();
+        for ( NodeRef e : getAdded() ) {
+            EmsScriptNode node = new EmsScriptNode( e, getServices() );
+            if ( isPropertyOwnedValueSpecification( node ) ) {
+                EmsScriptNode owningProp = getOwningProperty( node );
+                // TODO -- REVIEW -- Does the if statement below need to be uncommented?
+//                if ( !getRemoved().contains( owningProp ) ) {
+                    owningProperties.add( owningProp );
+                    valueSpecs.add( node );
+//                }
+            }
+        }
+        for ( NodeRef e : getUpdated() ) {
+            EmsScriptNode node = new EmsScriptNode( e, getServices() );
+            if ( isPropertyOwnedValueSpecification( node ) ) {
+                valueSpecs.add( node );
+                owningProperties.add( getOwningProperty( node ) );
+            }
+        }
+        for ( NodeRef e : getRemoved() ) {
+            EmsScriptNode node = new EmsScriptNode( e, getServices() );
+            if ( isPropertyOwnedValueSpecification( node ) ) {
+                valueSpecs.add( node );
+                owningProperties.add( getOwningProperty( node ) );
+            }
+        }
+
+        System.out.println("valueSpecs = " + valueSpecs );
+        System.out.println("owningProperties = " + owningProperties );
+
+        // adding the owning Property elements to these element maps if not already there
+        for ( EmsScriptNode node : owningProperties ) {
+            if ( !getAdded().contains( node.getNodeRef() ) ) {
+                if ( !getRemoved().contains( node.getNodeRef() ) ) {
+                    if ( !getUpdated().contains( node.getNodeRef() ) ) {
+                        getUpdated().add( node.getNodeRef() );
+                    }
+                }
+            }
+        }
+
+        // Add the owning Properties' values to the nodeDiff property change maps.
+        for ( EmsScriptNode valueNode : valueSpecs ) {
+            EmsScriptNode owningPropNode = getOwningProperty( valueNode );
+            Map< String, Pair< Object, Object > > propChanges = getPropertyChanges( owningPropNode.getName() );
+//            if ( propChanges == null ) {
+//                propChanges = new LinkedHashMap< String, Pair<Object,Object> >();
+//                getPropertyChanges().put( owningPropNode.getName(), propChanges );
+//            }
+            String valueName = NodeUtil.createQName( "sysml:value", getServices() ).toString();
+            Pair< Object, Object > valueChange = propChanges.get( valueName );
+            if ( valueChange == null ) {
+                valueChange = new Pair< Object, Object >( null, null );
+                propChanges.put( valueName, valueChange );
+            }
+            if ( getRemoved().contains( valueNode.getNodeRef() ) ) {
+                valueChange.first = valueNode;
+                getRemovedProperties( owningPropNode.getName() ).put( valueName, valueNode );
+            } else {
+                valueChange.second = valueNode;
+                if ( getAdded().contains( valueNode.getNodeRef() ) ) {
+                    getAddedProperties( valueNode.getName() ).put( valueName, valueNode );
+                } else {
+                    getUpdatedProperties( valueNode.getName() ).put( valueName, valueChange );
+                }
+            }
+        }
+
+        // Remove the owned ValueSpecifications from everything.
+        for ( EmsScriptNode node : valueSpecs ) {
+            getAdded().remove( node.getNodeRef() );
+            getUpdated().remove( node.getNodeRef() );
+            getRemoved().remove( node.getNodeRef() ); // Is this right?????!!!
+
+            getPropertyChanges().remove( node.getName() );
+            getAddedProperties().remove( node.getName() );
+            getRemovedProperties().remove( node.getName() );
+            getUpdatedProperties().remove( node.getName() );
+
+            get1().remove( node.getNodeRef() );
+            getMap1().remove( node.getName() );
+            get2().remove( node.getNodeRef() );
+            getMap2().remove( node.getName() );
+        }
+
+        System.out.println("added = " + getAdded() );
+        System.out.println("removed = " + getRemoved() );
+        System.out.println("updated = " + getUpdated() );
+
+        System.out.println("added properties= " + getAddedProperties() );
+        System.out.println("removed properties= " + getRemovedProperties() );
+        System.out.println("updated properties= " + getUpdatedProperties() );
+        System.out.println("property changes = " + getPropertyChanges() );
+
+    }
+
+
+    protected static EmsScriptNode getOwningProperty( EmsScriptNode node ) {
+        System.out.println("getOwningProperty(" + node + ")");
+        EmsScriptNode parent = node;
+        while ( parent != null && !parent.hasOrInheritsAspect( "sysml:Property" ) ) {
+            System.out.println("parent = " + parent );
+            parent = parent.getUnreifiedParent( null );  // TODO -- REVIEW -- need timestamp??!!
+        }
+        System.out.println("returning " + parent );
+        return parent;
+    }
+
+    protected static boolean isPropertyOwnedValueSpecification( EmsScriptNode node ) {
+//        NodeService ns = NodeUtil.getServices().getNodeService();
+//        if ( ns.hasAspect( node.getNodeRef(), NodeUtil.createQName( "sysml:ValueSpecification" ) ) ) {
+        if ( node.hasOrInheritsAspect( "sysml:ValueSpecification" ) ) {
+            EmsScriptNode parent = getOwningProperty( node );
+            return parent != null && parent.hasOrInheritsAspect( "sysml:Property" );
+        }
+        return false;
     }
 
 }
