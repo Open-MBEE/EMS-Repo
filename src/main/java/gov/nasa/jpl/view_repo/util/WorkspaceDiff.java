@@ -199,7 +199,15 @@ public class WorkspaceDiff {
             NodeRef ref = NodeUtil.findNodeRefById( id, getWs1(), getTimestamp1(), null, false );
             if ( ref != null ) {
                 EmsScriptNode node = new EmsScriptNode( ref, getServices() );
-                if ( node.exists() ) elements.put( id, node );
+                if ( node.exists() ) {
+                    EmsScriptNode parent = node;
+                    String parentId = id;
+                    while ( parent != null && parent.isModelElement() ) {
+                        elements.put( parentId, parent );
+                        parent = parent.getOwningParent( null );
+                        parentId = parent.getName();
+                    }
+                }
             }
         }
 
