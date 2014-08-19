@@ -29,15 +29,10 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.webscripts.ModelPost;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -120,33 +115,17 @@ public class WorkspacesPost extends AbstractJavaWebScript{
     }
     protected JSONObject printObject(WorkspaceNode ws) throws JSONException{
         JSONObject json = new JSONObject();
-        if (ws == null) {
-            return json;
-        }
-
         JSONArray jsonArray = new JSONArray();
-        JSONObject interiorJson = new JSONObject();
-        if(checkPermissions(ws, PermissionService.READ)){
-            interiorJson.put("lastTimeSyncParent", getStringIfNull(ws.getProperty("ems:lastTimeSyncParent")));
-            if(ws.getSourceWorkspace() != null)
-                interiorJson.put("ems:source", getStringIfNull(ws.getSourceWorkspace().getProperty(Acm.CM_NAME)));
-            else
-                interiorJson.put("ems:source:", "master"); // workspace is null only if master.
-            interiorJson.put(Acm.JSON_TYPE, getStringIfNull(ws.getProperty(Acm.ACM_TYPE)));
-            interiorJson.put(Acm.JSON_NAME, getStringIfNull(ws.getProperty(Acm.CM_NAME)));
+        if (ws != null) {
+            if(checkPermissions(ws, PermissionService.READ)) {
+                jsonArray.put(ws.toJSONObject( null ));
+            }
+            else {
+                log(LogLevel.WARNING,"No permission to read: "+ ws.getSysmlId(),HttpServletResponse.SC_NOT_FOUND);
+            }
         }
-        else {
-            log(LogLevel.WARNING,"No permission to read: "+ ws.getSysmlId(),HttpServletResponse.SC_NOT_FOUND);
-        }
-        jsonArray.put(interiorJson);
-        json.put("workspace", jsonArray);
+        json.put("workspaces", jsonArray);
         return json;
-    }
-    
-    protected Object getStringIfNull(Object object){
-        if(object == null)
-            return null;
-        return object;
     }
     
     public int createWorkSpace(String sourceWorkId, String newWorkID, JSONObject jsonObject, String user, Status status) {
