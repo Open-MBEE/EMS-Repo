@@ -120,6 +120,10 @@ public class WorkspacesPost extends AbstractJavaWebScript{
     }
     protected JSONObject printObject(WorkspaceNode ws) throws JSONException{
         JSONObject json = new JSONObject();
+        if (ws == null) {
+            return json;
+        }
+
         JSONArray jsonArray = new JSONArray();
         JSONObject interiorJson = new JSONObject();
         if(checkPermissions(ws, PermissionService.READ)){
