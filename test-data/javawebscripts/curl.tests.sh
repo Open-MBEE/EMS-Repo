@@ -74,11 +74,11 @@ echo DELETE
 # post new element
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elementsNewTest.json $SERVICE_URL"workspaces/master/elements\""
 # get elements
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"workspaces/masters/elements/871\""
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"workspaces/master/elements/771\""
 # delete elements
-echo curl $CURL_FLAGS -X DELETE $SERVICE_URL"workspaces/masters/elements/871\""
+echo curl $CURL_FLAGS -X DELETE $SERVICE_URL"workspaces/master/elements/771\""
 # get elements (should get 404)
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"workspaces/masters/elements/871\""
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"workspaces/master/elements/771\""
 
 
 echo ""

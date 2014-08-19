@@ -17,6 +17,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -90,7 +91,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                                              : HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
             return result;
         }
-        setWsDiff(workspace);
+        setWsDiff(workspace);   // need to initialize the workspace diff
 
         String elementId = req.getServiceMatch().getTemplateVars().get("elementId");
 
@@ -138,24 +139,25 @@ public class MmsModelDelete extends AbstractJavaWebScript {
      * @param workspace
      */
     private void delete(EmsScriptNode node, WorkspaceNode workspace) {
-        if ( node == null || !node.exists() ) {
-            log(LogLevel.ERROR, "Trying to delete a non-existent node! " + node);
-            return;
-        }
-
-        // Add the element to the specified workspace to be deleted from there.
-        if ( workspace != null && workspace.exists() && node != null
-             && node.exists() && !node.isWorkspace() ) {
-            EmsScriptNode newNodeToDelete = workspace.replicateWithParentFolders( node );
-            node = newNodeToDelete;
-        }
-
-        if ( node != null && node.exists() ) {
-            addToWsDiff( node );
-//            node.createOrUpdateAspect( "ems:Deleted" ) ;
-
-            deleteRelationships(node, "sysml:relationshipsAsSource", "sysml:relAsSource");
-            deleteRelationships(node, "sysml:relationshipsAsTarget", "sysml:relAsTarget");
+        if (checkPermissions(node, PermissionService.WRITE)) {
+            if ( node == null || !node.exists() ) {
+                log(LogLevel.ERROR, "Trying to delete a non-existent node! " + node);
+                return;
+            }
+    
+            // Add the element to the specified workspace to be deleted from there.
+            if ( workspace != null && workspace.exists() && node != null
+                 && node.exists() && !node.isWorkspace() ) {
+                EmsScriptNode newNodeToDelete = workspace.replicateWithParentFolders( node );
+                node = newNodeToDelete;
+            }
+    
+            if ( node != null && node.exists() ) {
+                addToWsDiff( node );
+    
+                deleteRelationships(node, "sysml:relationshipsAsSource", "sysml:relAsSource");
+                deleteRelationships(node, "sysml:relationshipsAsTarget", "sysml:relAsTarget");
+            }
         }
     }
 
@@ -171,7 +173,6 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             for (NodeRef relRef: relRefs) {
                 EmsScriptNode relNode = new EmsScriptNode(relRef, services, response);
                 addToWsDiff( relNode );
-//                relNode.createOrUpdateAspect( "ems:Deleted" );
             }
         }
     }
