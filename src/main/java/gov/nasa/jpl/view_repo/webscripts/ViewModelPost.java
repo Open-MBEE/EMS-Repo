@@ -1,29 +1,29 @@
 /*******************************************************************************
- * Copyright (c) <2013>, California Institute of Technology ("Caltech").  
+ * Copyright (c) <2013>, California Institute of Technology ("Caltech").
  * U.S. Government sponsorship acknowledged.
- * 
+ *
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification, are 
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
- * 
- *  - Redistributions of source code must retain the above copyright notice, this list of 
+ *
+ *  - Redistributions of source code must retain the above copyright notice, this list of
  *    conditions and the following disclaimer.
- *  - Redistributions in binary form must reproduce the above copyright notice, this list 
- *    of conditions and the following disclaimer in the documentation and/or other materials 
+ *  - Redistributions in binary form must reproduce the above copyright notice, this list
+ *    of conditions and the following disclaimer in the documentation and/or other materials
  *    provided with the distribution.
- *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory, 
- *    nor the names of its contributors may be used to endorse or promote products derived 
+ *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory,
+ *    nor the names of its contributors may be used to endorse or promote products derived
  *    from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
- * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER  
- * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
@@ -54,15 +54,15 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * Services /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/view/element.post.desc.xml
- * 
+ *
  * @author cinyoung
  *
  */
 public class ViewModelPost extends ModelPost {
     public ViewModelPost() {
-        super(); 
+        super();
     }
-    
+
     public ViewModelPost(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
@@ -102,11 +102,11 @@ public class ViewModelPost extends ModelPost {
                 ee.printStackTrace();
             }
         }
-        
+
         ViewModelPost instance = new ViewModelPost(repository, services);
-        
+
         try {
-//            Set< EmsScriptNode > elements = 
+//            Set< EmsScriptNode > elements =
                     instance.createOrUpdateModel(req, status);
             appendResponseStatusInfo(instance);
         } catch (JSONException e) {
@@ -126,7 +126,7 @@ public class ViewModelPost extends ModelPost {
 //        }
 //        top.put( "elements", elementsJson );
 //        model.put( "res", top.toString( 4 ) );
-        
+
         status.setCode(responseStatus.getCode());
         model.put("res", response.toString());
 
@@ -134,31 +134,31 @@ public class ViewModelPost extends ModelPost {
 
         return model;
     }
-    
+
     protected void createOrUpdateModel(WebScriptRequest req, Status status) throws Exception {
         clearCaches();
 
         JSONObject postJson = (JSONObject) req.parseContent();
         JSONArray array = postJson.getJSONArray("elements");
-        
+
         WorkspaceNode workspace = getWorkspace( req );
 
         for (int ii = 0; ii < array.length(); ii++) {
             JSONObject elementJson = array.getJSONObject(ii);
-            
+
             // If element does not have a ID, then create one for it using the alfresco id (cm:id):
             if (!elementJson.has(Acm.JSON_ID)) {
                 elementJson.put( Acm.JSON_ID, NodeUtil.createId( services ) );
             }
             String id = elementJson.getString(Acm.JSON_ID);
-            
+
             EmsScriptNode elementNode = findScriptNodeById(id, workspace, null, true);
             if (elementNode != null) {
                 updateOrCreateElement(elementJson, elementNode.getParent(), workspace, false);
             } else {
                 // new element, we need a proper parent
                 boolean parentFound = true;
-                
+
                 // for now only support new comments
                 if (elementJson.has(Acm.JSON_ANNOTATED_ELEMENTS)) {
                     JSONArray annotatedJson = elementJson.getJSONArray(Acm.JSON_ANNOTATED_ELEMENTS);
@@ -172,7 +172,7 @@ public class ViewModelPost extends ModelPost {
                             } else {
                                 if (checkPermissions(commentParent, PermissionService.WRITE)) {
                                     newElements.add(id);
-                                    updateOrCreateElement(elementJson, commentParent.getParent(), workspace, false);
+                                    updateOrCreateElement(elementJson, commentParent.getOwningParent(null), workspace, false);
                                 }
                             }
                     }
@@ -183,9 +183,9 @@ public class ViewModelPost extends ModelPost {
                 }
             }
         }
-        
+
         updateOrCreateAllRelationships(relationshipsJson, workspace);
-        
+
         updateNodeReferencesForView( array, workspace );
     }
 
@@ -194,7 +194,7 @@ public class ViewModelPost extends ModelPost {
                                                         throws Exception {
         for (int ii = 0; ii < array.length(); ii++) {
             JSONObject elementJson = array.getJSONObject(ii);
-            
+
             String id = elementJson.getString(Acm.JSON_ID);
             EmsScriptNode elementNode = findScriptNodeById(id, workspace, null, true);
             if (elementNode != null) {
@@ -202,7 +202,7 @@ public class ViewModelPost extends ModelPost {
             } else {
                 // new element, we need a proper parent
                 boolean parentFound = true;
-                
+
                 // for now only support new comments
                 if (elementJson.has(Acm.JSON_ANNOTATED_ELEMENTS)) {
                     JSONArray annotatedJson = elementJson.getJSONArray(Acm.JSON_ANNOTATED_ELEMENTS);

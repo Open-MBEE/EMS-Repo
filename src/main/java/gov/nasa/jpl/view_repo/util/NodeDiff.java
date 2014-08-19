@@ -4,17 +4,16 @@ import gov.nasa.jpl.mbee.util.AbstractDiff;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
 
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.QName;
 import org.junit.Assert;
 
@@ -30,14 +29,31 @@ import org.junit.Assert;
  */
 public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
 
+    public static class NodeNameComparator implements Comparator<NodeRef> {
+        public static final NodeNameComparator instance = new NodeNameComparator();
+        @Override
+        public int compare( NodeRef ref1, NodeRef ref2 ) {
+            if ( ref1 == ref2 ) return 0;
+            if ( ref1 == null ) return -1;
+            if ( ref2 == null ) return 1;
+            String n1 = NodeUtil.getName( ref1 );
+            String n2 = NodeUtil.getName( ref2 );
+            if ( n1 == n2 ) return 0;
+            if ( n1 == null ) return -1;
+            if ( n2 == null ) return 1;
+            return n1.compareTo( n2 );
+        }
+    }
+
     public NodeDiff( Map< String, NodeRef > m1, Map< String, NodeRef > m2,
                      Boolean ignoreRemovedProperties ) {
-        super( m1, m2, ignoreRemovedProperties );
+        //super( m1, m2, ignoreRemovedProperties );
+        super( m1, m2, NodeNameComparator.instance, ignoreRemovedProperties );
         // TODO Auto-generated constructor stub
     }
 
     public NodeDiff( Map< String, NodeRef > map1, Map< String, NodeRef > map2 ) {
-        super( map1, map2 );
+        super( map1, map2, NodeNameComparator.instance );
         if ( map1 != null && map1.size() == 1 && map2 != null && map2.size() == 1 ) {
             node1 = getMap1().values().iterator().next();
             node2 = getMap2().values().iterator().next();
@@ -47,12 +63,12 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
 
     public NodeDiff( Set< NodeRef > s1, Set< NodeRef > s2,
                      Boolean ignoreRemovedProperties ) {
-        super( s1, s2, ignoreRemovedProperties );
+        super( s1, s2, NodeNameComparator.instance, ignoreRemovedProperties );
         // TODO Auto-generated constructor stub
     }
 
     public NodeDiff( Set< NodeRef > s1, Set< NodeRef > s2 ) {
-        super( s1, s2 );
+        super( s1, s2, NodeNameComparator.instance );
         // TODO Auto-generated constructor stub
     }
 
@@ -65,9 +81,16 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         this( node1, node2, null );
     }
 
+    public static Set<NodeRef> newSet( NodeRef node1 ) {
+        Set< NodeRef > s = new TreeSet< NodeRef >( NodeNameComparator.instance );
+        s.add(node1);
+        return s;
+    }
+
     public NodeDiff( NodeRef node1, NodeRef node2,
                      Boolean ignoreRemovedProperties ) {
-        super( Utils.newSet( node1 ), Utils.newSet( node2 ), ignoreRemovedProperties );
+        super( newSet( node1 ), newSet( node2 ),
+               NodeNameComparator.instance, ignoreRemovedProperties );
         if ( ignoreRemovedProperties != null ) {
             this.ignoreRemovedProperties = ignoreRemovedProperties;
         }
@@ -137,7 +160,10 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
 
     public Set< String > getRemovedAspects( String name ) {
         Set< String > result = getRemovedAspects().get( name );
-        if ( result == null ) return Utils.newSet();
+        if ( result == null ) {
+            result = Utils.newSet();
+            getAddedAspects().put( name, result );
+        }
         return result;
     }
 
@@ -150,7 +176,10 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
 
     public Set< String > getAddedAspects( String name ) {
         Set< String > result = getAddedAspects().get( name );
-        if ( result == null ) return Utils.newSet();
+        if ( result == null ) {
+            result = Utils.newSet();
+            getAddedAspects().put( name, result );
+        }
         return result;
     }
 
@@ -395,10 +424,17 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
     }
 
 
+    protected static boolean isProperty( EmsScriptNode node ) {
+        if ( node == null ) return false;
+        if ( node.hasOrInheritsAspect( "sysml:Property" ) ) return true;
+        if ( node.getProperty(Acm.ACM_VALUE ) != null ) return true;
+        return false;
+    }
+
     protected static EmsScriptNode getOwningProperty( EmsScriptNode node ) {
         System.out.println("getOwningProperty(" + node + ")");
         EmsScriptNode parent = node;
-        while ( parent != null && !parent.hasOrInheritsAspect( "sysml:Property" ) ) {
+        while ( parent != null && !isProperty( parent ) ) {
             System.out.println("parent = " + parent );
             parent = parent.getUnreifiedParent( null );  // TODO -- REVIEW -- need timestamp??!!
         }
@@ -411,7 +447,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
 //        if ( ns.hasAspect( node.getNodeRef(), NodeUtil.createQName( "sysml:ValueSpecification" ) ) ) {
         if ( node.hasOrInheritsAspect( "sysml:ValueSpecification" ) ) {
             EmsScriptNode parent = getOwningProperty( node );
-            return parent != null && parent.hasOrInheritsAspect( "sysml:Property" );
+            return parent != null && isProperty( parent );
         }
         return false;
     }
