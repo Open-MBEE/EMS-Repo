@@ -118,22 +118,23 @@ public class WorkspacesPost extends AbstractJavaWebScript{
 		printFooter();
 		return model;
 	}
+	
 	protected JSONObject printObject(WorkspaceNode ws) throws JSONException{
 		JSONObject json = new JSONObject();
 		JSONArray jsonArray = new JSONArray();
 		JSONObject interiorJson = new JSONObject();
-		if(checkPermissions(ws, PermissionService.READ)){
-			interiorJson.put("lastTimeSyncParent", getStringIfNull(ws.getProperty("ems:lastTimeSyncParent")));
-        	if(ws.getSourceWorkspace() != null)
+
+		// no need to check permissions (since it hasn't been committed yet)
+		interiorJson.put("lastTimeSyncParent", getStringIfNull(ws.getProperty("ems:lastTimeSyncParent")));
+        	if(ws.getSourceWorkspace() != null) {
         		interiorJson.put("ems:source", getStringIfNull(ws.getSourceWorkspace().getProperty(Acm.CM_NAME)));
-        	else
+        	}
+        	else {
         		interiorJson.put("ems:source:", "master"); // workspace is null only if master.
+        	}
         	interiorJson.put(Acm.JSON_TYPE, getStringIfNull(ws.getProperty(Acm.ACM_TYPE)));
     		interiorJson.put(Acm.JSON_NAME, getStringIfNull(ws.getProperty(Acm.CM_NAME)));
-    	}
-    	else {
-    		log(LogLevel.WARNING,"No permission to read: "+ ws.getSysmlId(),HttpServletResponse.SC_NOT_FOUND);
-		}
+    		
 		jsonArray.put(interiorJson);
 		json.put("workspace", jsonArray);
 		return json;
