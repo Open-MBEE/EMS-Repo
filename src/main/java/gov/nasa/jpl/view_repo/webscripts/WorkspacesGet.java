@@ -95,46 +95,18 @@ public class WorkspacesGet extends AbstractJavaWebScript{
 		JSONArray jArray = new JSONArray ();
         Collection <EmsScriptNode> nodes = NodeUtil.luceneSearchElements("ASPECT:\"ems:workspace\"" );
 
-        for (EmsScriptNode workspaceNode: nodes){
-        	JSONObject interiorJson = new JSONObject();
-
-        	if (checkPermissions(workspaceNode, PermissionService.READ)){
-
-//        		Map <String, Object> wkspProperties = new HashMap <String, Object> ();
-//        		wkspProperties = workspaceNode.getProperties();
-//        		for (String key: wkspProperties.keySet()) {
-//        			interiorJson.put(key, wkspProperties.get(key));
-//        		}
-        	
-	        	interiorJson.put("lastTimeSyncParent", getStringIfNull(workspaceNode.getProperty("ems:lastTimeSyncParent")));
-	        	if(workspaceNode.getSourceWorkspace() != null)
-	        		interiorJson.put("ems:source", getStringIfNull(workspaceNode.getSourceWorkspace().getProperty(Acm.CM_NAME)));
-	        	else
-	        		interiorJson.put("ems:source:", "master"); // workspace is null only if master.
-	        	interiorJson.put(Acm.JSON_TYPE, getStringIfNull(workspaceNode.getProperty(Acm.ACM_TYPE)));
-        		interiorJson.put(Acm.JSON_NAME, getStringIfNull(workspaceNode.getProperty(Acm.CM_NAME)));
-        	}
-        	else {
-        		log(LogLevel.WARNING,"No permission to read: "+ workspaceNode.getSysmlId(),HttpServletResponse.SC_NOT_FOUND);
-        	}
-
-        	jArray.put(interiorJson);
+        for (EmsScriptNode workspaceNode: nodes) {
+            	if (checkPermissions(workspaceNode, PermissionService.READ)){
+            	    WorkspaceNode wsNode = new WorkspaceNode(workspaceNode.getNodeRef(), services, response);
+            	    jArray.put(wsNode.toJSONObject( null ));
+            }
         }
 
         json.put("workspaces", jArray);
         return json;
 	}
 
-	protected Object getStringIfNull (Object obj){
-
-		if (obj == null)
-			return "null";
-		else
-			return obj;
-
-	}
-
-    /**
+	/**
      * Validate the request and check some permissions
      */
     @Override

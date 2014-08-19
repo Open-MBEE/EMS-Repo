@@ -4,6 +4,7 @@
 package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
@@ -17,7 +18,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
+
 
 /**
  * WorkspaceNode is an EmsScriptNode and a folder containing changes to a parent
@@ -180,11 +184,11 @@ public class WorkspaceNode extends EmsScriptNode {
     	ws.setProperty("ems:workspace", ws.getNodeRef() );
     	WorkspaceNode parentWorkspace = AbstractJavaWebScript.getWorkspaceFromId(sourceId, services, response, status, false, userName);
     	ws.createOrUpdateProperty( "ems:lastTimeSyncParent", new Date() );
-    	if(parentWorkspace != null)
-    		ws.setProperty( "ems:source", parentWorkspace.getNodeRef() );
     	if ( Debug.isOn() ) Debug.outln( "parent workspace: " + parentWorkspace );
     	if(parentWorkspace != null) {
+        if ( Debug.isOn() ) Debug.outln( "parent workspace: " + parentWorkspace );
     		parentWorkspace.appendToPropertyNodeRefs( "ems:children", ws.getNodeRef() );
+        ws.setProperty( "ems:source", parentWorkspace.getNodeRef() );
     	}
     	if ( Debug.isOn() ) Debug.outln( "created workspace " + ws + " in folder " + folder );
     	return ws;
@@ -349,4 +353,33 @@ public class WorkspaceNode extends EmsScriptNode {
         return changedElementIds;
     }
 
+    @Override
+    public JSONObject toJSONObject( Date dateTime ) throws JSONException {
+        JSONObject json = new JSONObject();
+        
+        json.put( "creator", getProperty( "cm:modifier" ) );
+        json.put( "created", TimeUtils.toTimestamp( (Date)getProperty("cm:modified") ));
+        json.put( "id", getProperty( "cm:id" ) );
+        json.put( "name",  getProperty( "cm:name" ) );
+        if(getSourceWorkspace() != null) {
+            json.put("parent", getStringIfNull(getSourceWorkspace().getProperty(Acm.CM_NAME)));
+        }
+        else
+        {
+            json.put("parent", "master"); // workspace is null only if master.
+        }
+        json.put("branched", TimeUtils.toTimestamp( (Date)getProperty("ems:lastTimeSyncParent") ));
+        
+        return json;
+    }
+
+    protected Object getStringIfNull (Object obj){
+
+        if (obj == null)
+            return "null";
+        else
+            return obj;
+
+    }
+    
 }
