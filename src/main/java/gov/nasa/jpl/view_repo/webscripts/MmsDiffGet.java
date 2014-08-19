@@ -75,7 +75,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         workspaceDiff = new WorkspaceDiff(ws1, ws2, dateTime1, dateTime1);
 
         try {
-            JSONObject top = workspaceDiff.toJSONObject( dateTime1, dateTime2, true );
+            JSONObject top = workspaceDiff.toJSONObject( dateTime1, dateTime2, false );
             results.put("res", top.toString(4));
         } catch (JSONException e) {
             e.printStackTrace();

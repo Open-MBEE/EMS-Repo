@@ -488,14 +488,15 @@ public class WorkspaceDiff {
         if ( qn != null ) {
             possiblePrefixString = qn.getPrefixString();
         }
-        if ( Acm.getACM2JSON().containsKey( possiblePrefixString ) ) {
+        if ( !Acm.getJSON2ACM().containsKey( possiblePrefixString ) &&
+             Acm.getACM2JSON().containsKey( possiblePrefixString ) ) {
             return Acm.getACM2JSON().get( possiblePrefixString );
         } else {
             if ( possiblePrefixString.startsWith( "sysml:" ) ) {
                 possiblePrefixString = possiblePrefixString.substring( 6 );
             } else if ( possiblePrefixString.startsWith( "ems:" ) ) {
                 possiblePrefixString = possiblePrefixString.substring( 4 );
-            } else possiblePrefixString = null;
+            }// else possiblePrefixString = null;
         }
         return possiblePrefixString;
     }
@@ -744,7 +745,7 @@ public class WorkspaceDiff {
         // TODO??
         return true;
     }
-    
+
     public boolean isDiff() {
         if (addedElements.size() > 0 || deletedElements.size() > 0 || movedElements.size() > 0 || updatedElements.size() > 0) {
             return true;
