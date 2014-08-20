@@ -92,24 +92,13 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                                                  dateTime, services,
                                                  response );
         for ( EmsScriptNode product : productSet ) {
-            JSONObject productJson = new JSONObject();
-            String productId = (String)product.getProperty( Acm.ACM_ID );
-
-            productJson.put( Acm.JSON_ID, productId );
-            productJson.put( Acm.JSON_NAME,
-                             product.getProperty( Acm.ACM_NAME ) );
-            productJson.put( "snapshots",
-                             getProductSnapshots( productId,
-                                                  req.getContextPath(),
-                                                  dateTime ) );
-
-            productsJson.put( productJson );
+            productsJson.put( product.toJSONObject( null ) );
         }
         
         return productsJson;
     }
 
-    private JSONArray
+    public JSONArray
             getProductSnapshots( String productId, String contextPath,
                                  Date dateTime ) throws JSONException {
         EmsScriptNode product = findScriptNodeById( productId, dateTime );
@@ -164,12 +153,13 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                 if ( gettingDisplayedElements ) {
                     Collection< EmsScriptNode > elems =
                             v.getDisplayedElements();
+                    elems = NodeUtil.getVersionAtTime( elems, dateTime );
                     for ( EmsScriptNode n : elems ) {
                         productsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT, dateTime ) );
                     }
                 } else if ( gettingContainedViews ) {
                     Collection< EmsScriptNode > elems =
-                            v.getContainedViews( recurse, null );
+                            v.getContainedViews( recurse, dateTime, null );
                     for ( EmsScriptNode n : elems ) {
                         productsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW, dateTime ) );
                     }

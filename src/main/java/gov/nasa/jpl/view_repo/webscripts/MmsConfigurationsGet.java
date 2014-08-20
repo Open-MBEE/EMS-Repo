@@ -16,6 +16,21 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class MmsConfigurationsGet extends AbstractJavaWebScript {
+    public enum Type {
+        SINGLE,
+        MULTIPLE
+    }
+    
+    private Type type;
+    
+    public void setType(Type type) {
+        this.type = type;
+    }
+    
+    public Type getType() {
+        return type;
+    }
+    
     public MmsConfigurationsGet() {
         super();
     }
@@ -33,6 +48,8 @@ public class MmsConfigurationsGet extends AbstractJavaWebScript {
     
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        clearCaches();
+
         Map<String, Object> model = new HashMap<String, Object>();
         
         MmsConfigurationsGet instance = new MmsConfigurationsGet(repository, services);
@@ -41,7 +58,17 @@ public class MmsConfigurationsGet extends AbstractJavaWebScript {
 
         try {
             ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, instance.response);
-            jsonObject.put("configurations", configWs.handleConfigurations(req, true));
+            switch(type) {
+                case SINGLE:
+                    jsonObject.put("configurations", configWs.handleConfiguration(req, true));
+                    break;
+                case MULTIPLE:
+                    jsonObject.put("configurations", configWs.handleConfigurations(req, true));
+                    break;
+                default:
+                    // assume multiple
+                    jsonObject.put("configurations", configWs.handleConfigurations(req, true));
+            }
             model.put("res", jsonObject.toString(2));
         } catch (Exception e) {
             model.put("res", response.toString());

@@ -30,6 +30,8 @@
 package gov.nasa.jpl.view_repo.util;
 
 
+import gov.nasa.jpl.mbee.util.Debug;
+
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -273,6 +275,15 @@ public class Acm {
     public static final String ACM_METHOD = SYSML + JSON_METHOD;
     public static final String ACM_CONNECTOR = SYSML + JSON_CONNECTOR;
     public static final String ACM_CONNECTOR_ROLE = SYSML + JSON_CONNECTOR_ROLE;
+
+    // relationship property aspect names
+    public static final String ACM_RELATIONSHIPS_AS_SOURCE = "sysml:relationshipsAsSource";
+    public static final String ACM_RELATIONSHIPS_AS_TARGET = "sysml:relationshipsAsTarget";
+    public static final String ACM_UNDIRECTED_RELATIONSHIPS = "sysml:undirectedRelationships";
+    // properties for above aspects
+    public static final String ACM_REL_AS_SOURCE = "sysml:relAsSource";
+    public static final String ACM_REL_AS_TARGET = "sysml:relAsTarget";
+    public static final String ACM_UNDIRECTED_REL = "sysml:undirectedRel";
     
     // Additions with api.raml file:
     public static final String ACM_SPECIALIZATION = SYSML + JSON_SPECIALIZATION;
@@ -342,7 +353,7 @@ public class Acm {
                         }
                     } catch (Throwable t) {
                         if ( t instanceof NoSuchFieldException ) {
-                            System.out.println( t.getLocalizedMessage() );
+                            if (Debug.isOn()) System.out.println( t.getLocalizedMessage() );
                         } else {
                             t.printStackTrace();
                         }
@@ -526,7 +537,9 @@ public class Acm {
      * Properties of an Element, ie not found via specialization
      */
     public static final Set<String> ELEMENT_PROPS_JSON = new HashSet<String>() {
-    	// quickfix to add a compiler generated UID is failing
+        private static final long serialVersionUID = 2925847909688618372L;
+
+        // quickfix to add a compiler generated UID is failing
 		{
             addAll(COMMON_JSON);	// id, author, last modified
             add(JSON_NAME);
@@ -571,39 +584,61 @@ public class Acm {
     };
 
     public static final String[] ACM_ASPECTS = {
+        // relationship aspects such as ACM_RELATIONSHIPS_AS_SOURCE are left
+        // out intentionally since they are not intended to be sysml types
+        // like those above.
+
+        // The type written to element json is the first of these found for
+        // an element, so subclasses should precede parents, and more
+        // likely matches should precede less likely ones.
         Acm.ACM_PRODUCT,
         Acm.ACM_VIEW,
+        Acm.ACM_PROPERTY,
+        Acm.ACM_PACKAGE,
+        Acm.ACM_ELEMENT_VALUE,
+        Acm.ACM_LITERAL_STRING, 
+        Acm.ACM_LITERAL_INTEGER,
+        Acm.ACM_LITERAL_REAL,
+        Acm.ACM_LITERAL_BOOLEAN,
+        Acm.ACM_LITERAL_UNLIMITED_NATURAL,
+        Acm.ACM_LITERAL_NULL,
+        Acm.ACM_VIEWPOINT,
         Acm.ACM_COMMENT,
         Acm.ACM_CONSTRAINT,
         Acm.ACM_CONFORM,
-        Acm.ACM_DEPENDENCY,
-        Acm.ACM_DIRECTED_RELATIONSHIP,
         Acm.ACM_EXPOSE,
         Acm.ACM_GENERALIZATION,
-        Acm.ACM_PACKAGE,
-        Acm.ACM_PROPERTY,
-        Acm.ACM_VIEWPOINT,
-        Acm.ACM_VALUE_SPECIFICATION,
-        Acm.ACM_VALUE_EXPRESSION,
         Acm.ACM_DURATION,
         Acm.ACM_DURATION_INTERVAL,
-        Acm.ACM_ELEMENT_VALUE,
         Acm.ACM_EXPRESSION,
         Acm.ACM_INSTANCE_VALUE,
         Acm.ACM_INTERVAL,
-        Acm.ACM_LITERAL_BOOLEAN,
-        Acm.ACM_LITERAL_INTEGER,
-        Acm.ACM_LITERAL_NULL,
-        Acm.ACM_LITERAL_REAL,
-        Acm.ACM_LITERAL_STRING, 
-        Acm.ACM_LITERAL_UNLIMITED_NATURAL,
+        Acm.ACM_OPAQUE_EXPRESSION,
         Acm.ACM_STRING_EXPRESSION, 
         Acm.ACM_TIME_EXPRESSION,
         Acm.ACM_TIME_INTERVAL,
-        Acm.ACM_OPERATION_EXPRESSION,
+        Acm.ACM_OPERATION,
         Acm.ACM_INSTANCE_SPECIFICATION,
-        Acm.ACM_CONSTRAINT,
         Acm.ACM_PARAMETER,
-        Acm.ACM_CONNECTOR                                                
+        Acm.ACM_CONNECTOR,
+        Acm.ACM_DEPENDENCY,
+        Acm.ACM_DIRECTED_RELATIONSHIP,
+        Acm.ACM_VALUE_SPECIFICATION
     };
+    
+    public static final String[] ACM_RELATIONSHIP_PROPERTY_ASPECTS = {
+        ACM_RELATIONSHIPS_AS_SOURCE,
+        ACM_RELATIONSHIPS_AS_TARGET,
+        ACM_UNDIRECTED_RELATIONSHIPS
+    };
+
+    public static HashMap<String,String> PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS = new HashMap<String,String>(){
+		private static final long serialVersionUID = -5161523326512878741L;
+		{
+        put( ACM_RELATIONSHIPS_AS_SOURCE, ACM_REL_AS_SOURCE );
+        put( ACM_RELATIONSHIPS_AS_TARGET, ACM_REL_AS_TARGET );
+        put( ACM_UNDIRECTED_RELATIONSHIPS, ACM_UNDIRECTED_REL );
+    	};
+    };
+
 }

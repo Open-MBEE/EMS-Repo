@@ -8,7 +8,38 @@
         "type": "Viewpoint"
     },
     {
-        "id": "get_two_names",
+        "sysmlid": "_17_0_2_3_e610336_1394148233838_91795_29332",
+        "name": "Context",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "specialization": {
+                            "type": "View"
+                          }
+    },
+    {
+        "sysmlid": "_17_0_2_3_e610336_1394148461465_93174_29599",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_3_e610336_1394148233838_91795_29332",
+        "specialization" : {
+            "type": "Conform",
+            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
+            "target": "_17_0_2_3_e610336_1394148443742_79128_29536"
+        }
+    },
+    {
+        "sysmlid": "_17_0_2_3_e610336_1394148759911_783211_29758",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_3_e610336_1394148233838_91795_29332",
+        "specialization" : {
+            "type": "Expose",
+            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
+            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478"
+        }
+    },
+    {
+        "sysmlid": "get_two_names",
         "name": "get_two_names_op",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
@@ -20,13 +51,31 @@
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "operand": ["get_names",
-                    "_17_0_2_4_f3a0363_1394141845089_115460_28389",
-                    "_17_0_2_4_f3a0363_1394140377374_900991_27624"],
-        "type": "Expression" 
+        "specialization": {"operand": [{"element":"get_names",
+                                        "type":"ElementValue"},
+                                       {"element":"_17_0_2_4_f3a0363_1394141845089_115460_28389",
+                                        "type":"ElementValue"},
+                                       {"element":"_17_0_2_4_f3a0363_1394141831980_671275_28387",
+                                        "type":"ElementValue"}],
+                            "type": "Expression" 
+                           }
     },
     {
-        "id": "get_names",
+        "sysmlid": "_17_0_2_4_f3a0363_1394141845089_115460_28389",
+        "name": "ionosphere",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394140377374_900991_27624",
+        "specialization": {"type": "Property"}
+    },
+    {
+        "sysmlid": "_17_0_2_4_f3a0363_1394141831980_671275_28387",
+        "name": "radiation",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394140377374_900991_27624",
+        "specialization": {"type": "Property"}
+    },
+    {
+        "sysmlid": "get_names",
         "name": "get_names_op",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",

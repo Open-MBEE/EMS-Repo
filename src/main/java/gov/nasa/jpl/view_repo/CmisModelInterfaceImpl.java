@@ -8,7 +8,6 @@ package gov.nasa.jpl.view_repo;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -229,11 +228,11 @@ public class CmisModelInterfaceImpl
 					"org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
 
 			repositories = getFactory(createNew).getRepositories(parameter);
-			Debug.outln(repositories.size() + " Repositories");
+			if (Debug.isOn()) Debug.outln(repositories.size() + " Repositories");
 			for (Repository r : repositories) {
-				Debug.outln("  Id: " + r.getId());
-				Debug.outln("  Name: " + r.getName());
-				Debug.outln("  Description: " + r.getDescription());
+				if (Debug.isOn()) Debug.outln("  Id: " + r.getId());
+				if (Debug.isOn()) Debug.outln("  Name: " + r.getName());
+				if (Debug.isOn()) Debug.outln("  Description: " + r.getDescription());
 			}
 			session = repositories.get(0).createSession();
 
@@ -260,24 +259,24 @@ public class CmisModelInterfaceImpl
 		// false);
 		ItemIterable<QueryResult> resultsI = getSession().query(query, false);
 		List<QueryResult> results = new ArrayList<QueryResult>();
-		// Debug.outln("Results");
+		// if (Debug.isOn()) Debug.outln("Results");
 		// int ct = 0;
 		for (QueryResult result : resultsI) {
 			results.add(result);
-			// Debug.outln("Result Properties " + ct++ + ": " +
+			// if (Debug.isOn()) Debug.outln("Result Properties " + ct++ + ": " +
 			// result.result.getProperties());
 			// for (PropertyData<?> data: result.getProperties()) {
-			// Debug.outln("  Query name:" + data.getQueryName());
-			// Debug.outln("      Values:" + data.getValues());
+			// if (Debug.isOn()) Debug.outln("  Query name:" + data.getQueryName());
+			// if (Debug.isOn()) Debug.outln("      Values:" + data.getValues());
 			// }
 		}
-		Debug.outln("cmisQuery(" + query + ") returning " + results);
+		if (Debug.isOn()) Debug.outln("cmisQuery(" + query + ") returning " + results);
 		return results;
 	}
 
 	// public static Collection<NodeRef> cmisNodeQuery( String query ) {
 	// Collection<NodeRef> results = queryResultsToNodes( cmisQuery( query ) );
-	// Debug.outln("cmisNodeQuery(" + query + ") returning " + results );
+	// if (Debug.isOn()) Debug.outln("cmisNodeQuery(" + query + ") returning " + results );
 	// return results;
 	// }
 	// public List<NodeRef> cmisTest(String query) {

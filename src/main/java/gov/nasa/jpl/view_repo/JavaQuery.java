@@ -173,17 +173,17 @@ public class JavaQuery extends AbstractModuleComponent {
         for ( StoreRef store : stores ) {
             if ( store != null
                  && store.getIdentifier().trim().equals( storeName.trim() ) ) {
-                Debug.outln( "getStoreRefByName(" + storeName
+                if (Debug.isOn()) Debug.outln( "getStoreRefByName(" + storeName
                              + ") found store = "
                              + MoreToString.Helper.toString( store ) );
                 return store;
             } else {
-//                Debug.outln( "getStoreRefByName(" + storeName
+//                if (Debug.isOn()) Debug.outln( "getStoreRefByName(" + storeName
 //                             + ") does not match store id = "
 //                             + store.getIdentifier() );
             }
         }
-        Debug.outln( "getStoreRefByName(" + storeName + ") failed; stores = "
+        if (Debug.isOn()) Debug.outln( "getStoreRefByName(" + storeName + ") failed; stores = "
                      + MoreToString.Helper.toString( stores ) );
         return null;
     }
@@ -195,10 +195,10 @@ public class JavaQuery extends AbstractModuleComponent {
         namespacePrefixResolver2 = new DynamicNamespacePrefixResolver(null);
         namespacePrefixResolver1.registerNamespace( NamespaceService.ALFRESCO_PREFIX, NamespaceService.ALFRESCO_URI);
         namespacePrefixResolver2.registerNamespace(NamespaceService.CONTENT_MODEL_PREFIX, NamespaceService.CONTENT_MODEL_1_0_URI);
-        Debug.outln( "namespace prefix resolver for NamespaceService.ALFRESCO_PREFIX, NamespaceService.ALFRESCO_URI has prefixes "
+        if (Debug.isOn()) Debug.outln( "namespace prefix resolver for NamespaceService.ALFRESCO_PREFIX, NamespaceService.ALFRESCO_URI has prefixes "
                             + namespacePrefixResolver1.getPrefixes()
                             + " and URIs " + namespacePrefixResolver1.getURIs() );
-        Debug.outln( "namespace prefix resolver for NamespaceService.CONTENT_MODEL_PREFIX, NamespaceService.CONTENT_MODEL_1_0_URI has prefixes "
+        if (Debug.isOn()) Debug.outln( "namespace prefix resolver for NamespaceService.CONTENT_MODEL_PREFIX, NamespaceService.CONTENT_MODEL_1_0_URI has prefixes "
                             + namespacePrefixResolver2.getPrefixes()
                             + " and URIs " + namespacePrefixResolver2.getURIs() );
     }
@@ -215,10 +215,10 @@ public class JavaQuery extends AbstractModuleComponent {
         try {
             answer = searchService.selectNodes(rootNodeRef, string, null, namespacePrefixResolver1, false);
         } catch (Throwable e) {
-            Debug.outln("JavaQuery.getNode(" + string + "): failed to selectNodes; " + e.getLocalizedMessage());
+            if (Debug.isOn()) Debug.outln("JavaQuery.getNode(" + string + "): failed to selectNodes; " + e.getLocalizedMessage());
             while ( e.getCause() != null && e.getCause() != e ) {
                 e = e.getCause();
-                Debug.outln( e.getLocalizedMessage() );
+                if (Debug.isOn()) Debug.outln( e.getLocalizedMessage() );
             }
 //            e.printStackTrace();
         }
@@ -230,10 +230,10 @@ public class JavaQuery extends AbstractModuleComponent {
             try {
                 answer = searchService.selectNodes(rootNodeRef, string, null, namespacePrefixResolver2, false);
             } catch (Throwable e) {
-                Debug.outln("JavaQuery.getNode(" + string + "): failed to selectNodes; " + e.getLocalizedMessage());
+                if (Debug.isOn()) Debug.outln("JavaQuery.getNode(" + string + "): failed to selectNodes; " + e.getLocalizedMessage());
                 while ( e.getCause() != null && e.getCause() != e ) {
                     e = e.getCause();
-                    Debug.outln( e.getLocalizedMessage() );
+                    if (Debug.isOn()) Debug.outln( e.getLocalizedMessage() );
                 }
 //                e.printStackTrace();
             }
@@ -263,43 +263,43 @@ public class JavaQuery extends AbstractModuleComponent {
      */
     private static boolean isNodeRef( String refString ) {
         boolean result = NodeRef.isNodeRef( refString );
-        Debug.outln( refString + " is " + ( result ? "" : "not " )
+        if (Debug.isOn()) Debug.outln( refString + " is " + ( result ? "" : "not " )
                             + "a NodeRef" );
         return result;
     }
 
     public static Collection<NodeRef> queryResultsToNodes( final List<QueryResult> results ) {
         LinkedHashSet<NodeRef> nodes = new LinkedHashSet<NodeRef>();
-        Debug.outln( "queryResultsToNodes(" + results + ")" );
+        if (Debug.isOn()) Debug.outln( "queryResultsToNodes(" + results + ")" );
         for (QueryResult result: results) {
-            Debug.outln("Properties = " + result.getProperties());
+            if (Debug.isOn()) Debug.outln("Properties = " + result.getProperties());
             for (PropertyData<?> data: result.getProperties()) {
-                Debug.outln("  Query name:" + data.getQueryName());
-                Debug.outln("      Values:" + data.getValues());
+                if (Debug.isOn()) Debug.outln("  Query name:" + data.getQueryName());
+                if (Debug.isOn()) Debug.outln("      Values:" + data.getValues());
             }
             for(PropertyData<?> data: result.getProperties()) {
-                Debug.outln(data.getQueryName());
-                Debug.outln(data.getValues().toString());
-                Debug.outln("queryResultsToNodes(" + results + ") adding " + data.getValues() );
+                if (Debug.isOn()) Debug.outln(data.getQueryName());
+                if (Debug.isOn()) Debug.outln(data.getValues().toString());
+                if (Debug.isOn()) Debug.outln("queryResultsToNodes(" + results + ") adding " + data.getValues() );
                 for ( Object v : data.getValues() ) {
                     String vs = MoreToString.Helper.toString( v ); 
-                    Debug.outln("queryResultsToNodes(" + results + ") += " + vs );
+                    if (Debug.isOn()) Debug.outln("queryResultsToNodes(" + results + ") += " + vs );
                     if ( v instanceof NodeRef ) {
                         nodes.add( (NodeRef)v );
-                        Debug.outln("queryResultsToNodes(" + results + "): nodes.add(v) " + nodes );
+                        if (Debug.isOn()) Debug.outln("queryResultsToNodes(" + results + "): nodes.add(v) " + nodes );
                     } else {
                         if ( v != null && isNodeRef( vs ) ) {
                             List< NodeRef > refs = NodeRef.getNodeRefs( vs );
                             if ( refs != null ) nodes.addAll( refs );
-                            Debug.outln("queryResultsToNodes(" + results + "): nodes.addAll(" + refs + ") " + nodes );
+                            if (Debug.isOn()) Debug.outln("queryResultsToNodes(" + results + "): nodes.addAll(" + refs + ") " + nodes );
                         } else {
-                            Debug.outln("queryResultsToNodes(" + results + "): " + vs + " is not a NodeRef!" );
+                            if (Debug.isOn()) Debug.outln("queryResultsToNodes(" + results + "): " + vs + " is not a NodeRef!" );
                         }
                     }
                 }
             }
         }
-        Debug.outln( "queryResultsToNodes(" + results + ") returning " + nodes );
+        if (Debug.isOn()) Debug.outln( "queryResultsToNodes(" + results + ") returning " + nodes );
         return nodes;
     }
 
@@ -312,14 +312,14 @@ public class JavaQuery extends AbstractModuleComponent {
     }
     public static List<Map<?,?>> queryResultsToTable(List<QueryResult> results) {
         ArrayList<Map< ?, ? >> list = new ArrayList<Map<?,?>>();
-        //Debug.outln("Results");
+        //if (Debug.isOn()) Debug.outln("Results");
         for (QueryResult result : results) {
             LinkedHashMap<String, List<?>> map = new LinkedHashMap<String, List<?>>();
-            //Debug.outln("Properties: " + result.getProperties());
+            //if (Debug.isOn()) Debug.outln("Properties: " + result.getProperties());
             for (PropertyData<?> data: result.getProperties()) {
                 map.put( data.getQueryName(), data.getValues() );
-                //Debug.outln("  Query name:" + data.getQueryName());
-                //Debug.outln("      Values:" + data.getValues());
+                //if (Debug.isOn()) Debug.outln("  Query name:" + data.getQueryName());
+                //if (Debug.isOn()) Debug.outln("      Values:" + data.getValues());
             }
             list.add( map );
         }
@@ -349,24 +349,24 @@ public class JavaQuery extends AbstractModuleComponent {
         // Create a session
         SessionFactory factory = SessionFactoryImpl.newInstance();
         List<Repository> repositories = factory.getRepositories(parameter);
-        Debug.outln(repositories.size() + " Repositories");
+        if (Debug.isOn()) Debug.outln(repositories.size() + " Repositories");
         for(Repository r: repositories) {
-            Debug.outln("  Id: " + r.getId());
-            Debug.outln("  Name: " + r.getName());
-            Debug.outln("  Description: " + r.getDescription());
+            if (Debug.isOn()) Debug.outln("  Id: " + r.getId());
+            if (Debug.isOn()) Debug.outln("  Name: " + r.getName());
+            if (Debug.isOn()) Debug.outln("  Description: " + r.getDescription());
         }
-        Debug.outln("");
+        if (Debug.isOn()) Debug.outln("");
         Session session = repositories.get(0).createSession();
 //        Session session = localConnectionManager.getConnection().getSession();
         
         // Folder browsing example:
         Folder folder = session.getRootFolder();
-        if ( folder.getChildren().iterator().hasNext() ) Debug.outln("Sessions");
+        if ( folder.getChildren().iterator().hasNext() ) if (Debug.isOn()) Debug.outln("Sessions");
         for(CmisObject obj: folder.getChildren()) {
-            Debug.outln("  Name: " + obj.getName());
-            Debug.outln("  Id: " + obj.getId());
-            Debug.outln("  Type: " + getType(obj.getType()));
-            Debug.outln("");
+            if (Debug.isOn()) Debug.outln("  Name: " + obj.getName());
+            if (Debug.isOn()) Debug.outln("  Id: " + obj.getId());
+            if (Debug.isOn()) Debug.outln("  Type: " + getType(obj.getType()));
+            if (Debug.isOn()) Debug.outln("");
         }
         
         // Query example:
@@ -376,13 +376,13 @@ public class JavaQuery extends AbstractModuleComponent {
         for (QueryResult result : resultsI) {
             results.add( result );
         }
-        Debug.outln("cmisQuery(" + query + ") returning " + results );
+        if (Debug.isOn()) Debug.outln("cmisQuery(" + query + ") returning " + results );
         return results;
     }
 
     public static Collection<NodeRef> cmisNodeQuery( String query ) {
         Collection<NodeRef> results = queryResultsToNodes( cmisQuery( query ) );
-        Debug.outln("cmisNodeQuery(" + query + ") returning " + results  );
+        if (Debug.isOn()) Debug.outln("cmisNodeQuery(" + query + ") returning " + results  );
         return results;
     }
     public List<NodeRef> cmisTest(String query) {
@@ -390,13 +390,13 @@ public class JavaQuery extends AbstractModuleComponent {
     }
     public List<NodeRef> xpathTest(String query) {
         List< NodeRef > nodes = getNodes(query);
-        Debug.outln( "testXPath: get(" + query + ") got node: "
+        if (Debug.isOn()) Debug.outln( "testXPath: get(" + query + ") got node: "
                             + nodes );
         if ( Utils.isNullOrEmpty( nodes ) ) return nodes;
-        Debug.outln("SUCCEEDED!!!\n");
+        if (Debug.isOn()) Debug.outln("SUCCEEDED!!!\n");
 //        String nodeName =
 //                (String)nodeService.getProperty( node, ContentModel.PROP_NAME );
-//        Debug.outln( "testXPath() got nodeName " + nodeName );
+//        if (Debug.isOn()) Debug.outln( "testXPath() got nodeName " + nodeName );
         return nodes;
     }    
     public List<NodeRef> luceneTest(String query) {
@@ -421,12 +421,12 @@ public class JavaQuery extends AbstractModuleComponent {
                 nodeList.add( currentNodeRef );
             }
         } catch ( Throwable e ) {
-            Debug.outln( "JavaQuery.query(" + query + ", " + language
+            if (Debug.isOn()) Debug.outln( "JavaQuery.query(" + query + ", " + language
                                 + "): failed to selectNodes; "
                                 + e.getLocalizedMessage() );
             while ( e.getCause() != null && e.getCause() != e ) {
                 e = e.getCause();
-                Debug.outln( e.getLocalizedMessage() );
+                if (Debug.isOn()) Debug.outln( e.getLocalizedMessage() );
             }
         } finally {
             if ( results != null ) {
@@ -588,7 +588,7 @@ public class JavaQuery extends AbstractModuleComponent {
 
     @Override
     protected void executeInternal() throws Throwable {
-        Debug.outln( "JavaQuery has been executed (although it does nothing by itself)" );
+        if (Debug.isOn()) Debug.outln( "JavaQuery has been executed (although it does nothing by itself)" );
         //JavaQueryTest.log.debug( "Test debug logging. Congratulation your AMP is working" );
         //JavaQueryTest.log.info( "This is only for information purposed. Better remove me from the log in Production" );
     }
@@ -601,7 +601,7 @@ public class JavaQuery extends AbstractModuleComponent {
     }
 
     public static Object get(String xpath, QName property) {
-        Debug.outln( "get(" + xpath + ", " + property + ")" );
+        if (Debug.isOn()) Debug.outln( "get(" + xpath + ", " + property + ")" );
         List<NodeRef> nodes = get( xpath );
         assertNotNull( nodes );
         NodeRef node = nodes.get( 0 );

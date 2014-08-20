@@ -69,6 +69,14 @@
 	            <type>jar</type>
 	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/mbee_util.jar</systemPath>
 	        </dependency>
+	        <dependency>
+	            <groupId>kparser</groupId>
+	            <artifactId>kparser</artifactId>
+	            <version>0.0.2</version>
+	            <scope>system</scope>
+	            <type>jar</type>
+	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kparser.jar</systemPath>
+	        </dependency>
             </dependencies>
         </profile>
         <profile>
@@ -77,16 +85,21 @@
                 <dependency>
 			        <groupId>gov.nasa.jpl.mbee.util</groupId>
 			        <artifactId>mbee_util</artifactId>
-			        <version>0.0.3</version>
-			    </dependency>
-			    <dependency>
-			        <groupId>gov.nasa.jpl.mbee.bae</groupId>
-			        <artifactId>bae</artifactId>
-			        <version>0.0.3</version>
+			        <version>0.0.12</version>
 			    </dependency>
                 <dependency>
                     <groupId>gov.nasa.jpl.mbee.sysml</groupId>
                     <artifactId>sysml</artifactId>
+                    <version>0.0.15</version>
+                </dependency>
+		    <dependency>
+		        <groupId>gov.nasa.jpl.mbee.bae</groupId>
+		        <artifactId>bae</artifactId>
+		        <version>0.0.17</version>
+		    </dependency>
+                <dependency>
+                    <groupId>kparser</groupId>
+                    <artifactId>kparser</artifactId>
                     <version>0.0.2</version>
                 </dependency>
             </dependencies>
@@ -183,6 +196,23 @@
 			<artifactId>batik-transcoder</artifactId>
 			<version>1.7</version>
 		</dependency>
+		
+		<!-- dependency for max regression test (groovy script) -->
+<!-- 		<dependency> -->
+<!--             <groupId>org.apache.httpcomponents</groupId> -->
+<!--             <artifactId>httpclient</artifactId> -->
+<!--             <version>4.2.5</version> -->
+<!--         </dependency> -->
+<!--         <dependency> -->
+<!--             <groupId>com.jayway.restassured</groupId> -->
+<!--             <artifactId>rest-assured</artifactId> -->
+<!--             <version>1.8.1</version> -->
+<!--         </dependency> -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.codehaus.groovy</groupId> -->
+<!-- 			<artifactId>groovy-all</artifactId> -->
+<!-- 			<version>2.2.1</version> -->
+<!-- 		</dependency> -->
     </dependencies>
 
 	
@@ -198,7 +228,7 @@
         <repository>
               <id>artifactory</id>
               <name>releases</name>
-              <url>http://128.149.19.207:8082/artifactory/libs-release-local</url>
+              <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
         </repository>
         <repository>
             <id>alfresco-public</id>
@@ -211,6 +241,12 @@
                 <enabled>true</enabled>
                 <updatePolicy>daily</updatePolicy>
             </snapshots>
+        </repository>
+        
+        <!-- soap ui plugin -->
+        <repository>
+            <id>smartbear-sweden-plugin-repository</id>
+            <url>http://www.soapui.org/repository/maven2/</url>
         </repository>
     </repositories>
 
@@ -316,6 +352,155 @@
                     </execution>
 			</executions>
 			</plugin>
+			
+			<!-- soap UI plugin -->
+<!-- 			<plugin> -->
+<!-- 			    <groupId>com.smartbear.soapui</groupId> -->
+<!-- 			    <artifactId>soapui-maven-plugin</artifactId> -->
+<!-- 			    <version>4.6.1</version> -->
+<!-- 			    <dependencies> -->
+<!--                     <dependency> -->
+<!--                         <groupId>mysql</groupId> -->
+<!--                         <artifactId>mysql-connector-java</artifactId> -->
+<!--                         <version>5.1.6</version> -->
+<!--                     </dependency> -->
+<!--                 </dependencies> -->
+<!-- 			    <executions> -->
+<!-- 			        <execution> -->
+<!-- 			            <phase>integration-test</phase> -->
+<!-- 			            <goals> -->
+<!-- 			                <goal>test</goal> -->
+<!-- 		                </goals> -->
+<!-- 		                <configuration> -->
+<!-- 					         <projectFile>simple-test-soapui-project.xml</projectFile> -->
+<!-- 					         <testSuite>TestSuite1</testSuite> -->
+<!-- 			            </configuration> -->
+<!-- 	                </execution> -->
+<!-- 			    </executions> -->
+<!-- 			</plugin> -->
+			
+			
+	   <!-- Max's plugin for regression testing -->
+<!-- 				<plugin> -->
+<!-- 					<groupId>org.codehaus.mojo</groupId> -->
+<!-- 					<artifactId>exec-maven-plugin</artifactId> -->
+<!-- 					<version>1.2.1</version> -->
+<!-- 						<executions> -->
+<!-- 							<execution> -->
+<!-- 								<id>diff-test</id> -->
+<!-- 								<phase>integration-test</phase> -->
+<!-- 								<goals> -->
+<!-- 									<goal>exec</goal> -->
+<!-- 								</goals> -->
+<!-- 								<configuration> -->
+<!-- 									<executable>./diff2.sh</executable> -->
+<!-- 									<workingDirectory>${basedir}/test-data/javawebscripts</workingDirectory> -->
+<!-- 								</configuration> -->
+<!-- 							</execution> -->
+<!-- 						</executions> -->
+<!-- 				</plugin> -->
+				
+<!-- 				<plugin> -->
+<!-- 					<groupId>org.codehaus.mojo</groupId> -->
+<!-- 					<artifactId>exec-maven-plugin</artifactId> -->
+<!-- 					<version>1.2.1</version> -->
+<!-- 						<executions> -->
+<!-- 							<execution> -->
+<!-- 								<id>wait-script</id> -->
+<!-- 								<phase>integration-test</phase> -->
+<!-- 								<goals> -->
+<!-- 									<goal>exec</goal> -->
+<!-- 								</goals> -->
+<!-- 								<configuration> -->
+<!-- 									<executable>./wait.java</executable> -->
+<!-- 									<workingDirectory>${basedir}/src/test/java/gov/nasa/jpl</workingDirectory> -->
+<!-- 								</configuration> -->
+<!-- 							</execution> -->
+<!-- 						</executions> -->
+<!-- 				</plugin> -->
+				
+				
+				
+<!-- 				<plugin> -->
+<!-- 					<groupId>org.codehaus.mojo</groupId> -->
+<!-- 					<artifactId>exec-maven-plugin</artifactId> -->
+<!-- 					<version>1.2.1</version> -->
+<!-- 						<executions> -->
+<!-- 							<execution> -->
+<!-- 								<id>wait-script</id> -->
+<!-- 								<phase>integration-test</phase> -->
+<!-- 								<goals> -->
+<!-- 									<goal>java</goal> -->
+<!-- 								</goals> -->
+<!-- 								<configuration> -->
+<!--  									<mainClass>gov.nasa.jpl.wait</mainClass>  -->
+<!-- 								</configuration> -->
+<!-- 							</execution> -->
+<!-- 						</executions> -->
+<!-- 				</plugin> -->
+				
+								<!--  Max Regression test #2 -->
+<!-- 				<plugin> -->
+<!-- 					<groupId>org.codehaus.gmaven</groupId> -->
+<!-- 					<artifactId>gmaven-plugin</artifactId> -->
+<!-- 					<version>1.5</version> -->
+<!-- 					<configuration> -->
+<!-- 						<providerSelection>1.8</providerSelection> -->
+<!-- 						<sourceEncoding>UTF-8</sourceEncoding> -->
+<!-- 					</configuration> -->
+<!-- 					<dependencies> -->
+<!-- 						<dependency> -->
+<!-- 							<groupId>org.codehaus.gmaven.runtime</groupId> -->
+<!-- 							<artifactId>gmaven-runtime-1.8</artifactId> -->
+<!-- 							<version>1.5</version> -->
+<!-- 							<exclusions> -->
+<!-- 								<exclusion> -->
+<!-- 									<groupId>org.codehaus.groovy</groupId> -->
+<!-- 									<artifactId>groovy-all</artifactId> -->
+<!-- 								</exclusion> -->
+<!-- 							</exclusions> -->
+<!-- 						</dependency> -->
+<!-- 						<dependency> -->
+<!-- 							<groupId>org.codehaus.groovy</groupId> -->
+<!-- 							<artifactId>groovy-all</artifactId> -->
+<!-- 							<version>2.2.1</version> -->
+<!-- 						</dependency> -->
+<!-- 					</dependencies> -->
+<!-- 					<executions> -->
+<!-- 						<execution> -->
+<!-- 							<id>wait script</id> -->
+<!-- 							<phase>pre-integration-test</phase> -->
+<!-- 							<goals> -->
+<!-- 								<goal>execute</goal> -->
+<!-- 								<goal>generateStubs</goal> -->
+<!-- 								<goal>compile</goal> -->
+<!-- 								<goal>generateTestStubs</goal> -->
+<!-- 								<goal>testCompile</goal> -->
+<!-- 							</goals> -->
+<!-- 							<configuration> -->
+<!-- 								<source> <![CDATA[ -->
+<!-- 								import static com.jayway.restassured.RestAssured.*;  -->
+<!-- 									println("wait for server to start")  -->
+<!-- 									 for(int i = 0; i < 30; i++) {  -->
+<!-- 									     try{  -->
+<!-- 									         def response = with().get("http://localhost:8080/alfresco")  -->
+<!-- 									        def status = response.getStatusLine() -->
+<!-- 									        println(status)  -->
+<!-- 									         } catch(Exception e){  -->
+<!-- 									             Thread.sleep(1000)  -->
+<!-- 									             continue  -->
+<!-- 									         }finally{  -->
+<!-- 									             print(".")  -->
+<!-- 									         }  -->
+<!-- 									        if( !(status ==~ /.*OK.*/) )  -->
+<!-- 									          Thread.sleep(1000) -->
+<!--  											} -->
+<!--  										]]>  -->
+<!-- 									</source> -->
+<!-- 									</configuration> -->
+<!-- 						</execution> -->
+<!-- 					</executions> -->
+<!-- 				</plugin> -->
 		</plugins>
 		<pluginManagement>
 			<plugins>

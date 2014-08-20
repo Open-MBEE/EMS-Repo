@@ -1,8 +1,8 @@
 {
 "artifacts": [
-    {
-    "url":"${link}",
-    "id":"${id}"
-    }
+        {
+            "url":"${link}",
+            "id":"${id}"
+        }
     ]
 }   

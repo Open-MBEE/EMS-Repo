@@ -113,19 +113,8 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	 */
 	private JSONObject saveAndStartAction(WebScriptRequest req, Status status) {
 	    JSONObject jsonObject = null;
-	    String[] siteKeys = {SITE_NAME, "siteId"};
-	    
-		String siteName = null;
-		for (String key: siteKeys) {
-		    siteName = req.getServiceMatch().getTemplateVars().get(key);
-		    if (siteName != null) {
-		        break;
-		    }
-		}
-		if (siteName == null) {
-			log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
-			return null;
-		}
+
+	    String siteName = getSiteName( req );
 
 		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
 		if (siteInfo == null) {
@@ -197,6 +186,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 			return null;
 		}
 	}
+
 	
 	private JSONObject handleUpdate(JSONObject postJson, EmsScriptNode siteNode, Status status) throws JSONException {
 		String[] idKeys = {"nodeid", "id"};
@@ -213,7 +203,6 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		    log(LogLevel.WARNING, "JSON malformed does not include Alfresco id for configuration", HttpServletResponse.SC_BAD_REQUEST);
 		    return null;
 		}
-				
 		
 		NodeRef configNodeRef = NodeUtil.getNodeRefFromNodeId( nodeId );
 		if (configNodeRef != null) {
@@ -227,17 +216,20 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		}
 	}
 	
+	
 	/**
 	 * Kick off the actual action in the background
 	 * @param jobNode
 	 * @param siteName
 	 * @param productList
 	 */
-	private void startAction(EmsScriptNode jobNode, String siteName, HashSet<String> productList) {
-		ActionService actionService = services.getActionService();
-		Action configurationAction = actionService.createAction(ConfigurationGenerationActionExecuter.NAME);
-		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_SITE_NAME, siteName);
-		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_PRODUCT_LIST, productList);
-		services.getActionService().executeAction(configurationAction, jobNode.getNodeRef(), true, true);
+	public void startAction(EmsScriptNode jobNode, String siteName, HashSet<String> productList) {
+	    if (productList.size() > 0) {
+        		ActionService actionService = services.getActionService();
+        		Action configurationAction = actionService.createAction(ConfigurationGenerationActionExecuter.NAME);
+        		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_SITE_NAME, siteName);
+        		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_PRODUCT_LIST, productList);
+        		services.getActionService().executeAction(configurationAction, jobNode.getNodeRef(), true, true);
+	    }
 	}
 }

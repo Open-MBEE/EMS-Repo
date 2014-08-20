@@ -121,12 +121,11 @@ To run in embedded jetty container and H2 db, (with jrebel and remote debugging!
 	export MAVEN_OPTS='-Xms256m -Xmx1G -XX:PermSize=300m -Xdebug -Xrunjdwp:transport=dt_socket,address=10000,server=y,suspend=n -javaagent:/Applications/jrebel/jrebel.jar'
 	
     mvn integration-test -Pamp-to-war -Dmaven.test.skip=false
-    
-NOTE: It's possible that Eclipse can get in the way of the maven execution. So, when running maven, temporarily turn off the Eclipse->Project->Build Automatically". Once the Jetty server is up and running, turn it back on so you can make changes hot swap your code updates.
-If you get an error about avmRemote or something like that, you may need to update your /etc/hosts to with something like COMPUTER_NAME 127.0.0.1
-    
-NOTE: If you have issues with the hostname of your machine, then modify the /etc/hosts file mapping your hostname to what localhost is mapped to, ie "127.0.0.1 LMC-039919"
 
+**IMPORTANT:** Check that /etc/hosts has the appropriate IP address for your machine, e.g., the line that starts with 128.149.16.... should match your instance's IP address
+    
+**NOTE:** It's possible that Eclipse can get in the way of the maven execution. So, when running maven, temporarily turn off the Eclipse->Project->Build Automatically". Once the Jetty server is up and running, turn it back on so you can make changes hot swap your code updates.
+    
 To clean all data and artifacts.  After doing this make sure to update the Maven project (right click on project folder->Maven->Update Project) and re-create/copy the sysml, util, bae .jar files.
 
     mvn clean -Ppurge
@@ -224,3 +223,101 @@ To evaluate a Java expression from a webpage, go to
 To evaluate a Java expression, in this example, Math.Min(1,2), from the command line
 
     curl -w "%{http_code}\n" -u admin:admin -X POST -H "Content-Type:text/plain" "http://localhost:8080/alfresco/service/java_query?verbose=false" --data 'Math.min(1,2)'
+
+
+#Debugging Overview
+
+**IMPORTANT:** Push code changes to your own branch. Merge them with workspaces branch at Cin-Young's and Brad's consent.
+
+##Eclipse Environment
+
+###Set-Up:
+   	Add view-repo debug configuration in eclipse:
+		Run > Debug Configurations > Remote Java Application > view-repo > change port to alfresco port (usually 8080) > Apply
+		Click on bug icon (select view-repo under drop-down menu by clicking on the arrow key)
+	
+	To customize editor:
+		Window > Preferences
+		For line numbers: > General > Text Editors > click "Show line numbers"
+		For java-specific customizations: > Java > Editor
+	
+	To add breakpoints: Double click on left margin (left of line numbers) 
+	
+	To skip breakpoints: Run > Skip All Breakpoints  OR  click on icon in quick-access toolbar with line across it
+	
+	To add redo shortcut: Window > Preferences > General > Keys > Search "redo" > Change binding to Ctrl+Y or your choice
+	
+	Note: For easier debugging, copy-paste stacktrace on console window to access lines referenced in error message
+
+###Eclipse Shortcuts:
+
+Note: Following shortcuts are mainly for Linux.
+	
+|       **ShortCut**      |       **Description**    |
+|-------------------------|--------------------------|
+| Ctrl+Shift+R            | Resource/File finder     |
+| Ctrl+L                  | Go to line               |
+| F3                      | Go to Definition         |
+| F4                      | Type Hierarchy           |
+| Ctrl+Alt+H              | Call Hierachy            |
+
+
+##Code Summary
+
+### Main Files
+
+	[../alfresco-view-repo/src/main/amp/config/alfresco/module/view-repo/context] :
+		- mms-service-context.xml : bean scripts used for linking Java or Javascript classes with CRUD requests for various URLs on alfresco
+			* Changes made to mms-service-context.xml can be viewed in class2url.html
+			* Make sure to run class2UrlMapping.py in the same directory to update class2url.html
+	
+	[../alfresco-view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/view/] :
+		- contains descriptor files for various URLs and bean scripts
+			
+	[../alfresco-view-repo/src/main/java/gov/nasa/jpl/view_repo/webscripts/] :
+		- contains Java classes (webscripts) used by the webservice when CRUD requests are made 
+	
+	[../alfresco-view-repo/src/main/amp/config/alfresco/module/view-repo/] 	:
+		- sysmlModel.xml - dictionary/specifications for all SysML types and aspects, and their respective properties; defines content model
+		- emsModel.xml - also defines the content model
+	
+	[../alfresco-view-repo/src/main/java/gov/nasa/jpl/view_repo/util/] :
+		- EmsScriptNode.java : class for model elements 
+			* ingestJson() - for reading from Json object and updating node
+			* toJsonObject () - for writing to Json objects from node
+		- Acm.java : acm = "alfersco content model"; is a static class that has json property names and the alfresco content model types that correspond to them (like DictionaryService)
+	
+### Supporting Items:
+	
+	DictionaryService (interface, provided by Alfresco) 
+		- tells you what is in the content model (which defines how we store things in Alfresco database)
+		- provides information on content meta-data like types and aspects (which are equivalent to MagicDraw stereotypes) 
+	
+	http://localhost:8080/mms/raml.index
+		- raml API (DESIGN), shows intended CRUD requests for web server/alfresco
+		
+	http://localhost:8080/alfresco/service/debug?on 
+		- check if debugging is on.
+	
+	Debug.isOn() - check if debugging is on
+	Debug.turnOn() or Debug.turnOff() - turn debugging on or off 
+	
+	executeImpl - gets called first when you invoke webserver with a HTTP request (crud request - e.g. during test cases)
+	
+### Alfresco-View-Share In Parallel With View-Repo:
+
+	clone alfresco-view-share repository
+	change JVM environment address variable to something else (ex: change 10000 to 10001)
+		echo $MAVEN_OPTS
+		copy output and change the address to some other number
+		export MAVEN_OPTS="PASTE OUTPUT HERE WITH NEW ADDRESS VARIABLE"     (Note: Include quotation marks)
+	change directory to alfresco-view-share
+	mvn package                                   (only needed the first time around)
+	mvn integration-test -Pamp-to-war             (needed every time view-share is to be displayed)
+	open localhost:8081/alfresco/share/
+	sign in as admin:admin
+	
+	run curl commands/test cases against view-repo database
+	refresh view-share page
+	the final, integrated content model is displayed in view-share in your dashboard (under sites) and in Repository
+	

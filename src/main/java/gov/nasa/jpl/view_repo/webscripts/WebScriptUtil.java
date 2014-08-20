@@ -29,8 +29,6 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.TimeUtils;
-import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
@@ -43,11 +41,6 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
-import org.alfresco.service.cmr.search.SearchService;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
  * static class for webscript utilities
@@ -69,8 +62,6 @@ public class WebScriptUtil {
         
         ResultSet resultSet = null;
         try {
-            // TODO -- REVIEW -- Will lucene return deleted nodes that may have
-            // existed at the specified date/time?
             resultSet = NodeUtil.luceneSearch( pattern, services ); 
             for (ResultSetRow row: resultSet) {
                 NodeRef nr = row.getNodeRef();
@@ -80,12 +71,17 @@ public class WebScriptUtil {
                     if ( nr == null ) continue;
                 }
                 EmsScriptNode node = new EmsScriptNode(nr, services, response);
-                // filter by project
-                if (node.getQnamePath().startsWith(qnamePath)) {
-                    set.add(node);
+                try {
+                    // filter by project
+                    if (node.getQnamePath().startsWith(qnamePath)) {
+                        set.add(node);
+                    }
+                } catch (Exception ee) {
+                    // do nothing, exception is most likely that the nodeRef doesn't exist
                 }
             }
         } catch (Exception e) {
+            // do nothing, exception is most likely bad lucene query
             e.printStackTrace();  
         } finally {
             if (resultSet != null) {

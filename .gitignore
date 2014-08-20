@@ -1,6 +1,8 @@
 /target
 /alf_data_dev
 /alf_data
+/alf_data_testData
+/alf_data*/
 *.log
 *.log.*
 *~
@@ -9,7 +11,4 @@ debug*.txt
 debug*.out
 .classpath
 /src/main/amp/web/scripts/raml/
-/target
-/target
-/target
-/target
+

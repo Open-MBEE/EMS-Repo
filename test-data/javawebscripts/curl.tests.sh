@@ -16,15 +16,22 @@ export CURL_SECURITY=" -k -3"
 #else
 #	export CURL_USER=" -u cinyoung"
 #	export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
+#	export SERVICE_URL="\"http://ems.jpl.nasa.gov/alfresco/service/"
+#	export BASE_URL="\"http://ems.jpl.nasa.gov/alfresco/service/javawebscripts/"
+#	export BASE_URL="\"https://ems.jpl.nasa.gov/alfresco/service/javawebscripts/"
+#	export CURL_USER=" -u shatkhin"
+#	export CURL_FLAGS=$CURL_STATUS$CURL_USER$CURL_SECURITY
 #	export SERVICE_URL="\"http://europaems-dev-staging-a:8443/alfresco/service/"
 #	export BASE_URL="\"http://europaems-dev-staging-a:8443/alfresco/service/javawebscripts/"
-#	export BASE_URL="\"https://europaems-dev-staging-a:8443/alfresco/service/javawebscripts/"
+#	export BASE_URL="\"https://europaems-dev-staging-a/alfresco/service/javawebscripts/"
 #fi
 
 # TODO: CURL commands aren't executed from bash using environment variables
 echo POSTS
 # create project and site
-echo curl $CURL_FLAGS $CURL_POST_FLAGS \'{\"name\":\"CY Test\"}\' $BASE_URL"sites/europa/projects/123456?fix=true&createSite=true\""
+echo curl $CURL_FLAGS $CURL_POST_FLAGS \'{\"name\":\"TEST\"}\' $BASE_URL"sites/europa/projects/123456?fix=true&createSite=true\""
+echo curl $CURL_FLAGS $CURL_POST_FLAGS \'{\"name\":\"Holding Bin Project\"}\' $BASE_URL"sites/no_site/projects/holding_bin_project?fix=true\""
+
 
 # post elements to project
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elementsNew.json $BASE_URL"sites/europa/projects/123456/elements\""
@@ -37,6 +44,9 @@ echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/comments.json $BASE_URL"sites/e
 
 # post products
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/products.json $BASE_URL"products\""
+
+# post elements to project
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elements.json.change $BASE_URL"sites/europa/projects/123456/elements\""
 
 echo ""
 echo GET
@@ -68,6 +78,9 @@ echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"ve/documents/europa?format=js
 # get search
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"element/search?keyword=some*\""
 
+# get commits list
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"javawebscripts/sites/europa/commits\""
+
 echo ""
 echo POST changes
 
@@ -81,8 +94,14 @@ echo ""
 echo SNAPSHOTS
 
 # post snapshot
-#echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:text/html" --data @JsonData/snapshot.html http://localhost:8080/alfresco/service/ui/views/301/snapshot
-echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:application/json" --data @JsonData/snapshots.json http://localhost:8080/alfresco/service/workspaces/master/sites/europa/configurations/_17_0_5_1_407019f_1402422683509_36078_16169/snapshots
+echo curl $CURL_FLAGS $CURL_POST_FLAGS_NO_DATA $SERVICE_URL"workspaces/master/sites/europa/products/_17_0_5_1_407019f_1402422683509_36078_16169/snapshots\""
+#echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:text/html" --data @JsonData/snapshot.html http://localhost:8080/alfresco/service/ui/views/_17_0_5_1_407019f_1402422683509_36078_16169/snapshot
+echo curl $CURL_FLAGS $CURL_POST_FLAGS_NO_DATA $SERVICE_URL"workspaces/master/sites/undefined/products/_17_0_5_1_407019f_1402422683509_36078_16169/snapshots\""
+#echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:application/json" --data @JsonData/snapshots.json http://localhost:8080/alfresco/service/workspaces/master/sites/europa/configurations/_17_0_5_1_407019f_1402422683509_36078_16169/snapshots
+echo curl $CURL_FLAGS $CURL_POST_FLAGS_NO_DATA $SERVICE_URL"workspaces/master/sites/europa/products/_17_0_5_1_407019f_1402422683509_36078_16169\""
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/configuration.json $SERVICE_URL"workspaces/master/sites/europa/configurations\""
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/configuration.products.json $SERVICE_URL"workspaces/master/sites/europa/configurations/[CONFIGURATION_ID]/products\""
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"workspaces/master/sites/europa/configurations/[CONFIGURATION_ID]/snapshots\""
 
 # get snapshots - this currently doesn't work
 #echo  curl -w "%{http_code}" -u admin:admin -X GET http://localhost:8080/alfresco/service/snapshots/301

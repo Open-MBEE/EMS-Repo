@@ -4,6 +4,8 @@
 	<comment></comment>
 	<projects>
 		<project>docbook</project>
+		<project>sysml</project>
+		<project>util</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
