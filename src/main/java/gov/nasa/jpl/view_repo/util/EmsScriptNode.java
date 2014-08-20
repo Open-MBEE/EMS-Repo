@@ -1310,7 +1310,7 @@ public class EmsScriptNode extends ScriptNode implements
         elementJson.put( Acm.JSON_ID, node.getProperty( Acm.ACM_ID ) );
         elementJson.put( "creator", node.getProperty( "cm:modifier" ) );
         elementJson.put( "modified",
-                         getLastModified( (Date)node.getProperty( "cm:modified" ) ) );
+                         TimeUtils.toTimestamp( getLastModified( (Date)node.getProperty( "cm:modified" ) ) ) );
 
         putInJson( elementJson, Acm.JSON_NAME,
                    node.getProperty( Acm.ACM_NAME ), filter );
