@@ -139,7 +139,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
 	
 	protected Object getStringIfNull(Object object){
 		if(object == null)
-			return null;
+			return "null";
 		return object;
 	}
 	

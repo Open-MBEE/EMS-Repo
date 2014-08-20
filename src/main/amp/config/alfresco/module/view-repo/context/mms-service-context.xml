@@ -207,4 +207,11 @@
     	<property name="services" ref="ServiceRegistry" />
     </bean>
 
+	<!--  adding new bean -->
+	<bean id="webscript.gov.nasa.jpl.mms.workspaces.workspace.get"
+		class="gov.nasa.jpl.view_repo.webscripts.WorkspaceGet" parent="webscript"
+		singleton="false">
+		<property name="repositoryHelper" ref="repositoryHelper" />
+		<property name="services" ref="ServiceRegistry" />
+	</bean>
 </beans>
