@@ -902,8 +902,36 @@ public class EmsScriptNode extends ScriptNode implements
         return new EmsScriptNode( myParent.getNodeRef(), services, response );
     }
 
+
+    /**
+     * Return the version of the parent at a specific time. This uses the
+     * ems:owner property instead of getParent() when it returns non-null; else,
+     * it call getParent(). For workspaces, the parent should always be in the
+     * same workspace, so there is no need to specify (or use) the workspace.
+     *
+     * @param dateTime
+     * @return the parent/owning node
+     */
+    public EmsScriptNode getOwningParent( Date dateTime ) {
+        EmsScriptNode node = null;
+        NodeRef ref = (NodeRef)getProperty( "ems:owner" );
+        if ( ref == null ) {
+            node = getParent();
+        } else {
+            node = new EmsScriptNode( ref, getServices() );
+        }
+        if ( node == null ) return null;
+        if ( dateTime != null ) {
+            NodeRef vref = NodeUtil.getNodeRefAtTime( getNodeRef(), dateTime );
+            if ( vref != null ) {
+                node = new EmsScriptNode( vref, getServices() );
+            }
+        }
+        return node;
+    }
+
     public EmsScriptNode getUnreifiedParent( Date dateTime ) {
-        EmsScriptNode parent = getParent();
+        EmsScriptNode parent = getOwningParent( dateTime );
         if ( parent != null ) {
             parent = parent.getUnreified( dateTime );
         }
@@ -1297,7 +1325,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( ownerRef != null ) {
             owner = new EmsScriptNode( ownerRef, services, response );
         } else {
-            owner = node.getParent();
+            owner = node.getOwningParent(dateTime);
         }
         String ownerId = null;
         if ( owner != null ) {
