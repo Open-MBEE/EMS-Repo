@@ -331,10 +331,10 @@ resourceTypes:
   get:
     is: [diffable]
     queryParameters:      
-      sourceTimestamp:
+      workspace1Timestamp:
         description: The source workspace timestamp to use in comparison (if not specified, gets latest)
         type: date
-      targetTimestamp:
+      workspace2Timestamp:
         description: The target workspace timestamp to use in comparison (if not specified, gets latest)
         type: date
 /merge:
