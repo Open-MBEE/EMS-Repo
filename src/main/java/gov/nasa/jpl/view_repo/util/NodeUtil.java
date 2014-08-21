@@ -273,7 +273,7 @@ public class NodeUtil {
                             }
                             if ( match ) {
                                 nodeRef = nr;
-                                if ( exists(workspace) && (!exists(lowest) || workspace.equals( esn.getWorkspace() ) || isWorkspaceSource(lowest, nodeRef) ) ) {
+                                if ( exists(workspace) && (!exists(lowest) || isWorkspaceSource(lowest, nodeRef) ) ) {
                                     lowest = nodeRef;
                                     nodeRefs.add( 0, nodeRef );
                                 } else {
@@ -339,11 +339,12 @@ public class NodeUtil {
     }
 
     public static boolean isWorkspaceSource( EmsScriptNode source, EmsScriptNode changed ) {
-        if (!exists(source) || !exists(changed)) return false;
+        // TODO: removed exists so we can include ems:Deleted nodes in results, may need to revisit
+//        if (!exists(source) || !exists(changed)) return false;
         //if ( changed.equals( source ) ) return true;
         if ( !changed.hasAspect( "ems:HasWorkspace" ) ) return false;
         EmsScriptNode directSource = changed.getWorkspaceSource();
-        if ( !exists(directSource) ) return false;
+//        if ( !exists(directSource) ) return false;
         if ( source.equals( directSource ) ) return true;
         return isWorkspaceSource( source, directSource );
     }
