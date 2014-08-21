@@ -183,7 +183,7 @@ public class NodeUtil {
                 findNodeRefsByType( specifier, prefix, workspace, dateTime, true,
                                     exactMatch, services, findDeleted );
         if ( Utils.isNullOrEmpty( refs ) ) return null;
-        NodeRef ref = refs.get( refs.size()-1 );
+        NodeRef ref = refs.get( 0 );
         return ref;
     }
 
@@ -273,7 +273,7 @@ public class NodeUtil {
                             }
                             if ( match ) {
                                 nodeRef = nr;
-                                if ( exists(workspace) && (!exists(lowest) || isWorkspaceSource(lowest, nodeRef) ) ) {
+                                if ( exists(workspace) && (!exists(lowest) || workspace.equals( esn.getWorkspace() ) || isWorkspaceSource(lowest, nodeRef) ) ) {
                                     lowest = nodeRef;
                                     nodeRefs.add( 0, nodeRef );
                                 } else {
