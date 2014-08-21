@@ -1112,6 +1112,10 @@ public class NodeUtil {
     }
 
     public static EmsScriptNode getUserHomeFolder( String userName ) {
+        return getUserHomeFolder(userName, false);
+    }
+    
+    public static EmsScriptNode getUserHomeFolder( String userName, boolean createIfNotFound) {
         NodeRef homeFolderNode = null;
         EmsScriptNode homeFolderScriptNode = null;
         if ( userName.equals( "admin" ) ) {
@@ -1129,7 +1133,7 @@ public class NodeUtil {
         if ( homeFolderNode == null || !exists(homeFolderNode) ) {
             NodeRef ref = findNodeRefById( "User Homes", null, null, getServices(), false );
             EmsScriptNode homes = new EmsScriptNode( ref, getServices() );
-            if ( homes != null && homes.exists() ) {
+            if ( createIfNotFound && homes != null && homes.exists() ) {
                 homeFolderScriptNode = homes.createFolder( userName );
             } else {
                 Debug.error("Error! No user homes folder!");

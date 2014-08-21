@@ -126,7 +126,7 @@ public class WorkspaceNode extends EmsScriptNode {
         if ( folder == null || !folder.exists() ) {
             //String userName = ws.getOwner();
             if ( userName != null && userName.length() > 0 ) {
-                folder = NodeUtil.getUserHomeFolder( userName );
+                folder = NodeUtil.getUserHomeFolder( userName, true );
                 if ( Debug.isOn() ) Debug.outln( "user home folder: " + folder );
             }
         }
@@ -167,7 +167,7 @@ public class WorkspaceNode extends EmsScriptNode {
     	if ( folder == null || !folder.exists() ) {
     		//String userName = ws.getOwner();
     		if ( userName != null && userName.length() > 0 ) {
-    			folder = NodeUtil.getUserHomeFolder( userName );
+    			folder = NodeUtil.getUserHomeFolder( userName, true );
     			if ( Debug.isOn() ) Debug.outln( "user home folder: " + folder );
     		}
     	}
