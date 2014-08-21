@@ -133,10 +133,10 @@ public class WorkspaceDiff {
         for ( NodeRef ref : refs ) {
             EmsScriptNode nodeFromRef = new EmsScriptNode( ref, getServices() );
             String name = nodeFromRef.getName();
-            NodeRef ref1 = NodeUtil.findNodeRefById( name, getWs1(),
+            NodeRef ref1 = NodeUtil.findNodeRefById( name, false, getWs1(),
                                                      getTimestamp1(), getServices(), false );
             EmsScriptNode node1 = ref1 == null ? null : new EmsScriptNode( ref1, getServices() );
-            NodeRef ref2 = NodeUtil.findNodeRefById( name, getWs2(),
+            NodeRef ref2 = NodeUtil.findNodeRefById( name, false, getWs2(),
                                                      getTimestamp2(), getServices(), false );
             EmsScriptNode node2 = ref2 == null ? null : new EmsScriptNode( ref2, getServices() );
             addToDiff( node1, node2 );
@@ -196,7 +196,7 @@ public class WorkspaceDiff {
         Set< String > ids = new TreeSet< String >( nodeDiff.getMap1().keySet() );
         ids.addAll( nodeDiff.getMap2().keySet() );
         for ( String id : ids ) {
-            NodeRef ref = NodeUtil.findNodeRefById( id, getWs1(), getTimestamp1(), null, false );
+            NodeRef ref = NodeUtil.findNodeRefById( id, false, getWs1(), getTimestamp1(), null, false );
             if ( ref != null ) {
                 EmsScriptNode node = new EmsScriptNode( ref, getServices() );
                 if ( node.exists() ) {
@@ -238,11 +238,11 @@ public class WorkspaceDiff {
 
                 // Check to see if the existence of the nodes changed, in which
                 // case, it is a definite conflict.
-                NodeRef ref1 = NodeUtil.findNodeRefById( name, getWs1(),
+                NodeRef ref1 = NodeUtil.findNodeRefById( name, false, getWs1(),
                                                          getTimestamp1(),
                                                          getServices(),
                                                          false);
-                NodeRef ref2 = NodeUtil.findNodeRefById( name, getWs2(),
+                NodeRef ref2 = NodeUtil.findNodeRefById( name, false, getWs2(),
                                                          getTimestamp2(),
                                                          getServices(),
                                                          false);
@@ -282,7 +282,7 @@ public class WorkspaceDiff {
         if ( Utils.isNullOrEmpty( changes ) ) return false;
         WorkspaceNode parentWs =
                 WorkspaceNode.getCommonParent( getWs1(), getWs2() );
-        NodeRef pRef1 = NodeUtil.findNodeRefById( elementName, parentWs,
+        NodeRef pRef1 = NodeUtil.findNodeRefById( elementName, false, parentWs,
                                                  getTimestamp1(),
                                                  getServices(),
                                                  false );
@@ -293,7 +293,7 @@ public class WorkspaceDiff {
         if ( Utils.isNullOrEmpty( changes1 ) ) return false;
 
         NodeRef pRef2 =
-                NodeUtil.findNodeRefById( elementName, parentWs,
+                NodeUtil.findNodeRefById( elementName, false, parentWs,
                                           getTimestamp2(),
                                           getServices(),
                                           false );
@@ -436,7 +436,7 @@ public class WorkspaceDiff {
         JSONObject ws1Json = new JSONObject();
         JSONObject ws2Json = new JSONObject();
 
-        addJSONArray(ws1Json, "elements", elements, elementsVersions, time1, showAll);
+        addJSONArray(ws1Json, "elements", elements, elementsVersions, time1, true);
         addWorkspaceMetadata( ws1Json, ws1, time1 );
 
         addJSONArray(ws2Json, "addedElements", addedElements, time2, showAll);

@@ -244,7 +244,7 @@ public class WorkspaceNode extends EmsScriptNode {
         String parentName = parent != null && parent.exists() ? parent.getName() : null;
 
         if ( parent != null && parent.exists() && !this.equals( parent.getWorkspace() ) ) {
-            parent = findScriptNodeByName( parentName, this, null );
+            parent = findScriptNodeByName( parentName, false, this, null );
             if ( parent == null || !parent.exists() || !this.equals( parent.getWorkspace() ) ) {
                 parent = replicateWithParentFolders( parent );
             }
@@ -256,7 +256,7 @@ public class WorkspaceNode extends EmsScriptNode {
 
         // If the node is not already in this workspace, clone it.
         if ( node.getWorkspace() == null || !node.getWorkspace().exists() || !node.getWorkspace().equals( this ) ) {
-            node = findScriptNodeByName( nodeName, this, null );
+            node = findScriptNodeByName( nodeName, false, this, null );
             if ( node == null || !node.exists() || !this.equals( node.getWorkspace() ) ) {
                 newFolder = node.clone(parent);
                 newFolder.setWorkspace( this, node.getNodeRef() );
@@ -305,8 +305,8 @@ public class WorkspaceNode extends EmsScriptNode {
         // absence is equivalent to finding deleted
         ArrayList< NodeRef > refs =
                 NodeUtil.findNodeRefsByType( getNodeRef().toString(),
-                                             SearchType.WORKSPACE.prefix, null,
-                                             dateTime, false, true,
+                                             SearchType.WORKSPACE.prefix,
+                                             true, null, dateTime, false, true,
                                              getServices(), false );
         changedNodeRefs.addAll( refs );
         //List< EmsScriptNode > nodes = toEmsScriptNodeList( refs );
@@ -356,7 +356,7 @@ public class WorkspaceNode extends EmsScriptNode {
     @Override
     public JSONObject toJSONObject( Date dateTime ) throws JSONException {
         JSONObject json = new JSONObject();
-        
+
         json.put( "creator", getProperty( "cm:modifier" ) );
         json.put( "created", TimeUtils.toTimestamp( (Date)getProperty("cm:modified") ));
         json.put( "id", getProperty( "cm:id" ) );
@@ -369,7 +369,7 @@ public class WorkspaceNode extends EmsScriptNode {
             json.put("parent", "master"); // workspace is null only if master.
         }
         json.put("branched", TimeUtils.toTimestamp( (Date)getProperty("ems:lastTimeSyncParent") ));
-        
+
         return json;
     }
 
@@ -381,5 +381,5 @@ public class WorkspaceNode extends EmsScriptNode {
             return obj;
 
     }
-    
+
 }
