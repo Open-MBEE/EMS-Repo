@@ -99,7 +99,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
     private JmsConnection jmsConnection = null;
     private RestPostConnection restConnection = null;
-    
+
     protected WorkspaceDiff wsDiff;
 
     protected void initMemberVariables(String siteName) {
@@ -175,7 +175,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         if (siteName == null) {
             log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
         } else {
-            siteNode = NodeUtil.getSiteNode( siteName, workspace, dateTime,
+            siteNode = NodeUtil.getSiteNode( siteName, false, workspace, dateTime,
                                              services, response );
         }
 
@@ -213,7 +213,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 */
 	protected EmsScriptNode findScriptNodeById(String id,
 	                                           WorkspaceNode workspace,
-	                                           Date dateTime) {
+	                                           Date dateTime, boolean findDeleted) {
 		EmsScriptNode result = null;
 
 		// be smart about search if possible
@@ -232,7 +232,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			}
 		}
 		if ( result == null ) {
-			NodeRef nodeRef = NodeUtil.findNodeRefById(id, workspace, dateTime, services);
+			NodeRef nodeRef = NodeUtil.findNodeRefById(id, false, workspace, dateTime, services, findDeleted);
 			if (nodeRef != null) {
 				result = new EmsScriptNode(nodeRef, services, response);
 				foundElements.put(id, result); // add to cache
@@ -280,7 +280,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @return             true if user has specified permissions to node, false otherwise
 	 */
 	protected boolean checkPermissions(EmsScriptNode node, String permissions) {
-	    return node.checkPermissions( permissions, response, responseStatus );
+	    if (node != null) {
+	        return node.checkPermissions( permissions, response, responseStatus );
+	    } else {
+	        return false;
+	    }
 	}
 
 	/**
@@ -332,10 +336,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             if ( workspace == null || !workspace.exists() ) {
                 SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, SiteVisibility.PUBLIC );
                 siteNode = new EmsScriptNode( foo.getNodeRef(), services );
+                siteNode.createOrUpdateAspect( "cm:taggable" );
             } else {
                 EmsScriptNode sitesFolder = null;
                 // check and see if the Sites folder already exists
-                NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, workspace, null, true, services );
+                NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, false, workspace, null, true, services, false );
                 if ( sitesNodeRef != null ) {
                     sitesFolder = new EmsScriptNode( sitesNodeRef, services );
                 } else {
@@ -420,8 +425,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             }
             WorkspaceNode workspace = null;
 
-            NodeRef ref = NodeUtil.findNodeRefById( nameOrId, null,
-                                                    null, services );
+            NodeRef ref = NodeUtil.findNodeRefById( nameOrId, true, null,
+                                                    null, services, false );
             if ( ref != null ) {
                 workspace = new WorkspaceNode( ref, services, response,
                                                responseStatus );
@@ -488,11 +493,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 */
 	protected Map<String, EmsScriptNode> searchForElements(String type,
 	                                                       String pattern,
+	                                                       boolean ignoreWorkspace,
 	                                                       WorkspaceNode workspace,
 	                                                       Date dateTime) {
 		Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
 
-        searchResults.putAll( NodeUtil.searchForElements( type, pattern, workspace,
+        searchResults.putAll( NodeUtil.searchForElements( type, pattern, ignoreWorkspace,
+                                                          workspace,
                                                           dateTime, services,
                                                           response,
                                                           responseStatus ) );
@@ -624,7 +631,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return gotSuffix;
     }
 
-    
+
     /**
      * Send off the deltas to various endpoints
      * @param deltas    JSONObject of the deltas to be published
@@ -639,7 +646,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             jmsStatus = jmsConnection.publish( deltaJson, "master" );
         }
         if (restConnection != null) {
-            restStatus = restConnection.publish( deltaJson, "MMS" );
+            try {
+                restStatus = restConnection.publish( deltaJson, "MMS" );
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
         }
 
         return jmsStatus && restStatus ? true : false;
@@ -648,16 +660,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     public void setWsDiff(WorkspaceNode workspace) {
         wsDiff = new WorkspaceDiff(workspace, workspace);
     }
-    
+
     public WorkspaceDiff getWsDiff() {
         return wsDiff;
     }
-    
+
     public void setJmsConnection(JmsConnection jmsConnection) {
         this.jmsConnection = jmsConnection;
     }
 
     public void setRestConnection(RestPostConnection restConnection) {
         this.restConnection = restConnection;
-    }    
+    }
 }

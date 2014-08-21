@@ -114,9 +114,12 @@ public class ModelGet extends AbstractJavaWebScript {
                 wsFound = true;
             }
         }
-        if ( wsFound ) modelRootNode = findScriptNodeById(modelId, workspace, dateTime);
+        // need to find deleted elements in workspace, so can return not found rather than
+        // the node from parent workspace
+        boolean findDeleted = true;
+        if ( wsFound ) modelRootNode = findScriptNodeById(modelId, workspace, dateTime, findDeleted);
         
-		if (modelRootNode == null) {
+		if (modelRootNode == null || modelRootNode.hasAspect( "ems:Deleted" )) {
             log( LogLevel.ERROR,
                  "Element with id, " + modelId
                  + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
@@ -204,7 +207,7 @@ public class ModelGet extends AbstractJavaWebScript {
             WorkspaceNode workspace = getWorkspace( req );
             
             if (Debug.isOn()) System.out.println("modelId = " + modelId );
-            EmsScriptNode modelRootNode = findScriptNodeById(modelId, workspace, dateTime);
+            EmsScriptNode modelRootNode = findScriptNodeById(modelId, workspace, dateTime, false);
             if (Debug.isOn()) System.out.println("modelRootNode = " + modelRootNode );
             
             if ( modelRootNode == null ) {
@@ -247,7 +250,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			JSONArray childElementJson = new JSONArray(allowedElements.toString());
 			for (int ii = 0; ii < childElementJson.length(); ii++) {
 				String id = childElementJson.getString(ii);
-				EmsScriptNode childElement = findScriptNodeById(id, workspace, dateTime);
+				EmsScriptNode childElement = findScriptNodeById(id, workspace, dateTime, false);
 				
     				// TODO Need to report that allowedElements can't be found
     				if (childElement != null && childElement.exists()) {
@@ -269,7 +272,7 @@ public class ModelGet extends AbstractJavaWebScript {
 					for (int ii = 0; ii < childViewJson.length(); ii++) {
 						String id = childViewJson.getString(ii);
                         EmsScriptNode childView =
-                                findScriptNodeById( id, workspace, dateTime );
+                                findScriptNodeById( id, workspace, dateTime, false );
 						if (childView != null && childView.exists()) {
 					        if (checkPermissions(childView, PermissionService.READ)) {
 					            handleViewHierarchy( childView, recurse,
@@ -322,7 +325,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		    if (!rootName.contains("_pkg")) {
                 EmsScriptNode reifiedNode =
                         findScriptNodeById( rootName + "_pkg", workspace,
-                                            dateTime );
+                                            dateTime, false );
 		        if (reifiedNode != null) {
                     handleElementHierarchy( reifiedNode, recurse, workspace,
                                             dateTime );

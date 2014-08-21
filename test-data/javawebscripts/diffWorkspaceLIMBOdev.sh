@@ -4,7 +4,7 @@
 
 mkdir -p outputWorkspaces
 
-passTest=0
+failedTest=0
 
 export CURL_STATUS='-w \n%{http_code}\n'
 export CURL_POST_FLAGS_NO_DATA="-X POST"
@@ -36,7 +36,7 @@ echo
 curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/viewsNew.json $BASE_URL"views" | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > outputWorkspaces/post3.json
 DIFF=$(diff baselineWorkspaces/post3.json outputWorkspaces/post3.json)
 if [ "$DIFF" != "" ];then
-        passTest=1
+        failedTest=1
         echo "$DIFF"
 fi
 echo
@@ -48,7 +48,7 @@ echo
 curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/productsNew.json $BASE_URL"sites/europa/products" | grep -v '"read":'| grep -v '"lastModified"'| grep -v '"sysmlid"' > outputWorkspaces/post5.json
 DIFF=$(diff baselineWorkspaces/post5.json outputWorkspaces/post5.json)
 if [ "$DIFF" != "" ];then
-        passTest=1
+        failedTest=1
         echo "$DIFF"
 fi
 echo
@@ -68,7 +68,7 @@ echo 'testGET3'
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"views/301" | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > outputWorkspaces/get3.json
 DIFF=$(diff baselineWorkspaces/get3.json outputWorkspaces/get3.json | grep -v '"author"' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+")
 if [ "$DIFF" != "" ];then
-        passTest=1
+        failedTest=1
         echo "$DIFF"
 fi 
 echo 
@@ -80,7 +80,7 @@ echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"views/301/elements\""
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"views/301/elements" | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > outputWorkspaces/get4.json
 DIFF=$(diff baselineWorkspaces/get4.json outputWorkspaces/get4.json | grep -v '"author"' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+")
 if [ "$DIFF" != "" ];then
-        passTest=1
+        failedTest=1
         echo "$DIFF"
 fi 
 echo
@@ -92,7 +92,7 @@ echo 'testGET5'
 #curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/303/comments"  | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > outputWorkspaces/get5.json
 #DIFF=$(diff baselineWorkspaces/get5.json outputWorkspaces/get5.json)
 #if [ "$DIFF" != "" ];then
-#        passTest=1
+#        failedTest=1
 #        echo "$DIFF"
 #fi
 echo "COMMENTS TEST OMITTED FOR NOW" 
@@ -104,7 +104,7 @@ echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/products/301\""
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/products/301"  | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > outputWorkspaces/get6.json
 DIFF=$(diff baselineWorkspaces/get6.json outputWorkspaces/get6.json | grep -v '"author"' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+")
 if [ "$DIFF" != "" ];then
-        passTest=1
+        failedTest=1
         echo "$DIFF"
 fi 
 echo
@@ -116,7 +116,7 @@ echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"ve/products/3301?format=json\
 curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"ve/products/3301?format=json" | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > outputWorkspaces/get7.json
 DIFF=$(diff baselineWorkspaces/get7.json outputWorkspaces/get7.json | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+")
 if [ "$DIFF" != "" ];then
-        passTest=1
+        failedTest=1
         echo "$DIFF"
 fi
 echo
@@ -132,7 +132,7 @@ echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/400\""
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"elements/400" | grep -v '"read":' | grep -v '"lastModified"' > outputWorkspaces/postChange2.json
 DIFF=$(diff baselineWorkspaces/postChange2.json outputWorkspaces/postChange2.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"author"')
 if [ "$DIFF" != "" ];then
-        passTest=1
+        failedTest=1
         echo "$DIFF"
 fi
 echo
@@ -151,7 +151,7 @@ grep -vE '"id":*' outputWorkspaces/snap.json | grep -vE '"url": "/alfresco/servi
 grep -vE '"id":*' baselineWorkspaces/snap.json | grep -vE '"url": "/alfresco/service/snapshots/*' | grep -vE '"created":' > baselineWorkspaces/tempSnap1.json
 DIFF=$(diff baselineWorkspaces/tempSnap1.json baselineWorkspaces/tempSnap2.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v '"creator"' | grep -vi 'time' | grep -v 'WebScriptException' | grep -v 'snapshot does not map to a')
 if [ "$DIFF" != "" ];then
-        passTest=1
+        failedTest=1
         echo "$DIFF"
 fi
 echo
@@ -167,4 +167,4 @@ echo
 
 
 
-exit $passTest
+exit $failedTest

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-passTest=0
+failTest=0
 soapServer="128.149.16.xxx:8080"
 
 #start up the server
@@ -55,7 +55,7 @@ if [ $server -eq 1 ]; then
 		echo 'RUNNING OLD API DIFF SCRIPT'
 		echo 'OMITTING WORKSPACES DIFF SCRIPT'
 		./diff2.sh
-		passTest=$?
+		failTest=$?
 
         elif [ $diffChoose -eq 2 ];then
                 echo 'RUNNING WORKSPACES DIFF SCRIPT'
@@ -64,7 +64,7 @@ if [ $server -eq 1 ]; then
                 if [[ "$GIT_BRANCH" == *workspaces ]];then
                     echo 'DIFFING  WORKSPACES BRANCH'
                     ./diffWorkspaceWORKS.sh
-                    passTest=$?
+                    failTest=$?
                 fi
                 if [[ "$GIT_BRANCH" == *develop ]];then
 		    echo 'DIFFING DEVELOP BRANCH'
@@ -75,7 +75,7 @@ if [ $server -eq 1 ]; then
                 echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
                 ./diff2.sh
                 ./diffWorkspaceWORKSdev.sh
-                passTest=$?
+                failTest=$?
         fi
         
         
@@ -83,22 +83,27 @@ if [ $server -eq 1 ]; then
         echo 'RUNNING SOAP UI TESTS'
         #ssh $soapServer 'cd /classPath/; ./soapScript;'
         #classPath=??
-        #TestSuite="WorkspacesTesting"
+        TestSuite="WorkspacesTesting"
         #TestCase="??"
         #./testrunner.sh -f ./soapTestData -s $TestSuite -c $TestCase $classpath
-        #cd ./soapStuff
-	#for i in $(ls . | grep "soapui-project.xml"); do
-	#         echo RUNNING TEST $i
-        #        ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i
-        #done
+        cd ./soapStuff
+	for i in $(ls . | grep "soapui-project.xml"); do
+	         echo RUNNING TEST $i
+                ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i > soapSuite$i.out
+        done
+
+	DIFF=`grep -i failed soapSuite*.out`
+	if [ "$DIFF" != "" ]; then
+	    failTest=1
+        fi
 
         #shutdown the tomcat server process
         pkill -fn 'integration-test'
         echo 'KILLING SERVER'
 
 	echo 'PASSTEST?'
-        echo "$passTest"
-	exit $passTest
+        echo "$failTest"
+	exit $failTest
 fi
 
 if [ $server -eq 2 ]; then

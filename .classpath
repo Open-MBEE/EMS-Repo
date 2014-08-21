@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry combineaccessrules="false" kind="src" path="/bae"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/sysml"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/util"/>
 	<classpathentry kind="src" output="target/classes" path="src/main/java">
 		<attributes>
 			<attribute name="optional" value="true"/>
@@ -39,8 +36,7 @@
 	<classpathentry kind="lib" path="lib/alfresco-web-framework-commons-4.2.e.jar"/>
 	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/AE.jar"/>
 	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/kparser.jar"/>
-	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/mbee_util.jar"/>
+	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/mbee_util.jar" sourcepath="/util/src"/>
 	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/sysml.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/kexpparser"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
