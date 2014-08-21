@@ -57,6 +57,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 
 public class WorkspacesPost extends AbstractJavaWebScript{
+
     public WorkspacesPost() {
         super();
     }
@@ -169,3 +170,4 @@ public class WorkspacesPost extends AbstractJavaWebScript{
         return HttpServletResponse.SC_OK;
     }
 }
+

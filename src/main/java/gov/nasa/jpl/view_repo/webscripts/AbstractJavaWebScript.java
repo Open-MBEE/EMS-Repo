@@ -646,7 +646,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             jmsStatus = jmsConnection.publish( deltaJson, "master" );
         }
         if (restConnection != null) {
-            restStatus = restConnection.publish( deltaJson, "MMS" );
+            try {
+                restStatus = restConnection.publish( deltaJson, "MMS" );
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
         }
 
         return jmsStatus && restStatus ? true : false;

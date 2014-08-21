@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.UserTransaction;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -47,6 +48,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         MmsModelDelete instance = new MmsModelDelete(repository, services);
 
         JSONObject result = null;
+        
         try {
             result = instance.handleRequest( req );
             if (result != null) {
@@ -96,27 +98,54 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         String elementId = req.getServiceMatch().getTemplateVars().get("elementId");
 
         EmsScriptNode root = findScriptNodeById(elementId, workspace, null, false);
+        String siteName = null;
+        
+        UserTransaction trx;
+        trx = services.getTransactionService().getNonPropagatingUserTransaction();
+        try {
+            trx.begin();
 
-        if (root != null && root.exists()) {
-            delete(root, workspace);
-            EmsScriptNode pkgNode = findScriptNodeById(elementId + "_pkg", workspace, null, false);
-            handleElementHierarchy( pkgNode, workspace, true );
-        } else {
-            log( LogLevel.ERROR, "Could not find node " + elementId + " in workspace " + wsId,
-                 HttpServletResponse.SC_NOT_FOUND);
-            return result;
-        }
-        String siteName = root.getSiteName();
+            if (root != null && root.exists()) {
+                delete(root, workspace);
+                EmsScriptNode pkgNode = findScriptNodeById(elementId + "_pkg", workspace, null, false);
+                handleElementHierarchy( pkgNode, workspace, true );
+            } else {
+                log( LogLevel.ERROR, "Could not find node " + elementId + " in workspace " + wsId,
+                     HttpServletResponse.SC_NOT_FOUND);
+                return result;
+            }
+            siteName = root.getSiteName();
 
-        long end = System.currentTimeMillis();
+            long end = System.currentTimeMillis();
 
-        boolean showAll = false;
-        result = wsDiff.toJSONObject( new Date(start), new Date(end), showAll );
+            boolean showAll = false;
+            result = wsDiff.toJSONObject( new Date(start), new Date(end), showAll );
 
-        // apply aspects after JSON has been created (otherwise it won't be output)
-        for (EmsScriptNode deletedNode: wsDiff.getDeletedElements().values()) {
-            if (deletedNode.exists()) {
-                deletedNode.createOrUpdateAspect( "ems:Deleted" );
+            // apply aspects after JSON has been created (otherwise it won't be output)
+            for (EmsScriptNode deletedNode: wsDiff.getDeletedElements().values()) {
+                if (deletedNode.exists()) {
+                    deletedNode.removeAspect( "ems:Added" );
+                    deletedNode.removeAspect( "ems:Udated" );
+                    deletedNode.removeAspect( "ems:Moved" );
+                    deletedNode.createOrUpdateAspect( "ems:Deleted" );
+                }
+            }
+            
+            trx.commit();
+        } catch (Throwable e) {
+            try {
+                if (e instanceof JSONException) {
+                        log(LogLevel.ERROR, "MmsModelDelete.handleRequest: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+                } else {
+                        log(LogLevel.ERROR, "MmsModelDelete.handleRequest: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                }
+                trx.rollback();
+                log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                e.printStackTrace();
+            } catch (Throwable ee) {
+                log(LogLevel.ERROR, "\tMmsModelDelete.handleRequest: rollback failed: " + ee.getMessage());
+                ee.printStackTrace();
+                e.printStackTrace();
             }
         }
 
@@ -139,7 +168,9 @@ public class MmsModelDelete extends AbstractJavaWebScript {
      * @param workspace
      */
     private void delete(EmsScriptNode node, WorkspaceNode workspace) {
-        if (checkPermissions(node, PermissionService.WRITE)) {
+        if (!checkPermissions(node, PermissionService.WRITE)) {
+            log(LogLevel.ERROR, "no permissions", HttpServletResponse.SC_FORBIDDEN);
+        } else {
             if ( node == null || !node.exists() ) {
                 log(LogLevel.ERROR, "Trying to delete a non-existent node! " + node);
                 return;
@@ -148,8 +179,19 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             // Add the element to the specified workspace to be deleted from there.
             if ( workspace != null && workspace.exists() && node != null
                  && node.exists() && !node.isWorkspace() ) {
-                EmsScriptNode newNodeToDelete = workspace.replicateWithParentFolders( node );
-                node = newNodeToDelete;
+                EmsScriptNode newNodeToDelete = null;
+                if ( !workspace.equals( node.getWorkspace() ) ) { 
+                    try {
+                        newNodeToDelete = workspace.replicateWithParentFolders( node );
+                        node = newNodeToDelete;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (newNodeToDelete != null) {
+                            node = newNodeToDelete;
+                        }
+                    }
+                }
             }
     
             if ( node != null && node.exists() ) {

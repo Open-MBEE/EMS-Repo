@@ -399,11 +399,12 @@ public class NodeUtil {
     }
 
     public static boolean isWorkspaceSource( EmsScriptNode source, EmsScriptNode changed ) {
-        if (!exists(source) || !exists(changed)) return false;
+        // TODO: removed exists so we can include ems:Deleted nodes in results, may need to revisit
+//        if (!exists(source) || !exists(changed)) return false;
         //if ( changed.equals( source ) ) return true;
         if ( !changed.hasAspect( "ems:HasWorkspace" ) ) return false;
         EmsScriptNode directSource = changed.getWorkspaceSource();
-        if ( !exists(directSource) ) return false;
+//        if ( !exists(directSource) ) return false;
         if ( source.equals( directSource ) ) return true;
         return isWorkspaceSource( source, directSource );
     }
@@ -1189,6 +1190,10 @@ public class NodeUtil {
     }
 
     public static EmsScriptNode getUserHomeFolder( String userName ) {
+        return getUserHomeFolder(userName, false);
+    }
+    
+    public static EmsScriptNode getUserHomeFolder( String userName, boolean createIfNotFound) {
         NodeRef homeFolderNode = null;
         EmsScriptNode homeFolderScriptNode = null;
         if ( userName.equals( "admin" ) ) {
@@ -1206,7 +1211,7 @@ public class NodeUtil {
         if ( homeFolderNode == null || !exists(homeFolderNode) ) {
             NodeRef ref = findNodeRefById( "User Homes", true, null, null, getServices(), false );
             EmsScriptNode homes = new EmsScriptNode( ref, getServices() );
-            if ( homes != null && homes.exists() ) {
+            if ( createIfNotFound && homes != null && homes.exists() ) {
                 homeFolderScriptNode = homes.createFolder( userName );
             } else {
                 Debug.error("Error! No user homes folder!");

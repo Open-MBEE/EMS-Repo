@@ -87,10 +87,10 @@ traits:
   - diffable:
       description: Aspect for resources that can be diffed or merged
       queryParameters:
-        sourceWs:
+        workspace1:
           description: The source workspaces to compare against
           type: string
-        targetWs:
+        workspace2:
           description: The target workspaces to compare
           type: string
 resourceTypes:
@@ -185,14 +185,19 @@ resourceTypes:
             description: Could not delete <<resourcePathName>> due to internal server error
 /workspaces:
   description: All resources are "namespaced" by the workspace (aka branch).
-  type: collection
+  type: readCollection
   /{workspaceId}:
-    type: readCollection
+    type: collection
     uriParameters:
       workspaceId:
         description: Workspace ID under consideration. "master" is always defined and is the
-                     "trunk" workspace to whih all other workspaces should be merged.
+                     "trunk" workspace to which all other workspaces should be merged.
                      "master" is what is contained at the Alfresco sites level.
+    post:
+      queryParameters:
+        sourceWorkspace:
+          description: The source workspace to branch from 
+          type: string
     /elements:
       type: collection
       /{elementId}:
@@ -326,10 +331,10 @@ resourceTypes:
   get:
     is: [diffable]
     queryParameters:      
-      sourceTimestamp:
+      workspace1Timestamp:
         description: The source workspace timestamp to use in comparison (if not specified, gets latest)
         type: date
-      targetTimestamp:
+      workspace2Timestamp:
         description: The target workspace timestamp to use in comparison (if not specified, gets latest)
         type: date
 /merge:
