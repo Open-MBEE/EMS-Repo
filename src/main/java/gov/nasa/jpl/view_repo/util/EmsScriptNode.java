@@ -1210,16 +1210,17 @@ public class EmsScriptNode extends ScriptNode implements
         // e.printStackTrace();
         // }
         // return null;
-        if ( !exists() ) {
+        if ( !exists() && !isDeleted() ) {
             return "NON-EXISTENT-NODE";
         }
+        String deleted = isDeleted() ? "DELETED: " : "";
         String name = getName();
         String sysmlName = getSysmlName();
         String qualifiedName = getSysmlQName();
         String type = getTypeName();
         String workspaceName = getWorkspaceName();
         String result =
-                "{type=" + type + ", id=" + name + ", name=" + sysmlName
+                deleted + "{type=" + type + ", id=" + name + ", name=" + sysmlName
                         + ", qualified name=" + qualifiedName + ", workspace="
                         + workspaceName + "}";
         if ( wasOn ) Debug.turnOn();
