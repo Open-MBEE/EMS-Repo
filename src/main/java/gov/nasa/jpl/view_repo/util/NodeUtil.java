@@ -183,7 +183,7 @@ public class NodeUtil {
                 findNodeRefsByType( specifier, prefix, workspace, dateTime, true,
                                     exactMatch, services, findDeleted );
         if ( Utils.isNullOrEmpty( refs ) ) return null;
-        NodeRef ref = refs.get( 0 );
+        NodeRef ref = refs.get( refs.size()-1 );
         return ref;
     }
 
