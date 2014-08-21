@@ -172,11 +172,11 @@ public class EmsScriptNode extends ScriptNode implements
         setResponse( response );
     }
 
-    public EmsScriptNode childByNamePath( String path, WorkspaceNode workspace ) {
+    public EmsScriptNode childByNamePath( String path, boolean ignoreWorkspace, WorkspaceNode workspace ) {
         // Make sure this node is in the target workspace.
         EmsScriptNode node = this;
-        if ( workspace != null && !workspace.equals( getWorkspace() ) ) {
-            node = findScriptNodeByName( getName(), workspace, null );
+        if ( !ignoreWorkspace && workspace != null && !workspace.equals( getWorkspace() ) ) {
+            node = findScriptNodeByName( getName(), ignoreWorkspace, workspace, null );
         }
         // See if the path/child is in this workspace.
         EmsScriptNode child = node.childByNamePath( path );
@@ -547,8 +547,7 @@ public class EmsScriptNode extends ScriptNode implements
         // see if image already exists by looking up by checksum
         ArrayList< NodeRef > refs =
                 NodeUtil.findNodeRefsByType( "" + cs,
-                                             SearchType.CHECKSUM.prefix, // null,
-                                                                         // null,
+                                             SearchType.CHECKSUM.prefix, false,
                                              workspace, dateTime, false, false,
                                              services, false );
         // ResultSet existingArtifacts =
@@ -566,7 +565,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
         EmsScriptNode targetSiteNode =
-                NodeUtil.getSiteNode( targetSiteName, workspace, dateTime,
+                NodeUtil.getSiteNode( targetSiteName, false, workspace, dateTime,
                                       services, response );
 
         if ( matchingNode != null ) return matchingNode;
@@ -943,7 +942,7 @@ public class EmsScriptNode extends ScriptNode implements
         String sysmlId = getSysmlId();
         sysmlId = sysmlId.replaceAll( "^(.*)_pkg$", "$1" );
         EmsScriptNode unreified =
-                findScriptNodeByName( sysmlId, getWorkspace(), dateTime );
+                findScriptNodeByName( sysmlId, false, getWorkspace(), dateTime );
         return unreified;
     }
 
@@ -1691,18 +1690,21 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     private EmsScriptNode convertIdToEmsScriptNode( String valueId,
+                                                    boolean ignoreWorkspace,
                                                     WorkspaceNode workspace,
                                                     Date dateTime ) {
-        return convertIdToEmsScriptNode( valueId, workspace, dateTime,
+        return convertIdToEmsScriptNode( valueId, ignoreWorkspace,
+                                         workspace, dateTime,
                                          services, response, status );
     }
 
     public static EmsScriptNode
-            convertIdToEmsScriptNode( String valueId, WorkspaceNode workspace,
+            convertIdToEmsScriptNode( String valueId, boolean ignoreWorkspace,
+                                      WorkspaceNode workspace,
                                       Date dateTime, ServiceRegistry services,
                                       StringBuffer response, Status status ) {
         ArrayList< NodeRef > refs =
-                NodeUtil.findNodeRefsByType( valueId, "@cm\\:name:\"",
+                NodeUtil.findNodeRefsByType( valueId, "@cm\\:name:\"", ignoreWorkspace,
                                              workspace, dateTime, true, true,
                                              services, false );
         List< EmsScriptNode > nodeList =
@@ -1779,9 +1781,11 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public EmsScriptNode findScriptNodeByName( String id,
+                                               boolean ignoreWorkspace,
                                                WorkspaceNode workspace,
                                                Date dateTime ) {
-        return convertIdToEmsScriptNode( id, workspace, dateTime, services,
+        return convertIdToEmsScriptNode( id, ignoreWorkspace, workspace,
+                                         dateTime, services,
                                          response, status );
     }
 
@@ -1802,12 +1806,11 @@ public class EmsScriptNode extends ScriptNode implements
      * @return the list of properties
      * @throws JSONException
      */
-    public
-            ArrayList< Serializable >
+    public ArrayList< Serializable >
             getPropertyValuesFromJson( PropertyDefinition propDef,
                                        JSONArray jsonArray,
                                        WorkspaceNode workspace, Date dateTime )
-                                                                               throws JSONException {
+                                               throws JSONException {
         // ArrayList<Serializable> properties = new ArrayList<Serializable>();
 
         if ( propDef == null ) {
@@ -1844,11 +1847,10 @@ public class EmsScriptNode extends ScriptNode implements
         return getPropertyValuesFromJson( type, jsonArray, workspace, dateTime );
     }
 
-    public
-            ArrayList< Serializable >
-            getPropertyValuesFromJson( PropertyType type, JSONArray jsonArray,
-                                       WorkspaceNode workspace, Date dateTime )
-                                                                               throws JSONException {
+    public ArrayList< Serializable >
+        getPropertyValuesFromJson( PropertyType type, JSONArray jsonArray,
+                                   WorkspaceNode workspace, Date dateTime )
+                                           throws JSONException {
         if ( Debug.isOn() ) System.out.println( "getPropertyValuesFromJson("
                                                 + type + ", " + jsonArray
                                                 + ", " + dateTime + ")" );
@@ -1881,7 +1883,7 @@ public class EmsScriptNode extends ScriptNode implements
                 case NODE_REF:
                     String sysmlId = jsonArray.getString( i );
                     EmsScriptNode node =
-                            convertIdToEmsScriptNode( sysmlId, workspace,
+                            convertIdToEmsScriptNode( sysmlId, false, workspace,
                                                       dateTime );
                     if ( node != null ) {
                         property = node.getNodeRef();
@@ -1972,7 +1974,8 @@ public class EmsScriptNode extends ScriptNode implements
                     sysmlId = "" + jsonObject.get( jsonKey );
                 }
                 EmsScriptNode node =
-                        convertIdToEmsScriptNode( sysmlId, workspace, dateTime );
+                        convertIdToEmsScriptNode( sysmlId, false, workspace,
+                                                  dateTime );
                 if ( node != null ) {
                     property = node.getNodeRef();
                 } else if ( !Utils.isNullOrEmpty( sysmlId ) ) {
@@ -2185,7 +2188,7 @@ public class EmsScriptNode extends ScriptNode implements
     protected NodeRef
             findNodeRefByType( String name, String type,
                                WorkspaceNode workspace, Date dateTime, boolean findDeleted ) {
-        return NodeUtil.findNodeRefByType( name, type, workspace, dateTime,
+        return NodeUtil.findNodeRefByType( name, type, false, workspace, dateTime,
                                            true, services, findDeleted );
     }
 

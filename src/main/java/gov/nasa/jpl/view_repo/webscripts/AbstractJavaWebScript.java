@@ -175,7 +175,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         if (siteName == null) {
             log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
         } else {
-            siteNode = NodeUtil.getSiteNode( siteName, workspace, dateTime,
+            siteNode = NodeUtil.getSiteNode( siteName, false, workspace, dateTime,
                                              services, response );
         }
 
@@ -232,7 +232,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			}
 		}
 		if ( result == null ) {
-			NodeRef nodeRef = NodeUtil.findNodeRefById(id, workspace, dateTime, services, findDeleted);
+			NodeRef nodeRef = NodeUtil.findNodeRefById(id, false, workspace, dateTime, services, findDeleted);
 			if (nodeRef != null) {
 				result = new EmsScriptNode(nodeRef, services, response);
 				foundElements.put(id, result); // add to cache
@@ -340,7 +340,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             } else {
                 EmsScriptNode sitesFolder = null;
                 // check and see if the Sites folder already exists
-                NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, workspace, null, true, services, false );
+                NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, false, workspace, null, true, services, false );
                 if ( sitesNodeRef != null ) {
                     sitesFolder = new EmsScriptNode( sitesNodeRef, services );
                 } else {
@@ -425,7 +425,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             }
             WorkspaceNode workspace = null;
 
-            NodeRef ref = NodeUtil.findNodeRefById( nameOrId, null,
+            NodeRef ref = NodeUtil.findNodeRefById( nameOrId, true, null,
                                                     null, services, false );
             if ( ref != null ) {
                 workspace = new WorkspaceNode( ref, services, response,
@@ -493,11 +493,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 */
 	protected Map<String, EmsScriptNode> searchForElements(String type,
 	                                                       String pattern,
+	                                                       boolean ignoreWorkspace,
 	                                                       WorkspaceNode workspace,
 	                                                       Date dateTime) {
 		Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
 
-        searchResults.putAll( NodeUtil.searchForElements( type, pattern, workspace,
+        searchResults.putAll( NodeUtil.searchForElements( type, pattern, ignoreWorkspace,
+                                                          workspace,
                                                           dateTime, services,
                                                           response,
                                                           responseStatus ) );

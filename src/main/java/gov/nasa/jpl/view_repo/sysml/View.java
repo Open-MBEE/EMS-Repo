@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package gov.nasa.jpl.view_repo.sysml;
 
@@ -31,16 +31,16 @@ import sysml.view.Viewable;
  * A View embeds {@link Viewable}s and itself is a {@link Viewable}. View
  * inherits from List so that it may contain Viewables in addition to having
  * View children.
- * 
+ *
  */
 public class View extends List implements sysml.view.View< EmsScriptNode >, Comparator<View>, Comparable<View> {
 
     private static final long serialVersionUID = -7618965504816221446L;
-    
+
     protected EmsScriptNode viewNode = null;
-    
+
     protected EmsSystemModel model = null;
-    
+
     /**
      * This is a cache of the displayed elements to keep from having to
      * recompute them as is done for allowed elements.
@@ -50,19 +50,19 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     protected boolean generate = false;
 
     protected boolean recurse = false;
-    
+
 
 
     /**
-     * @see List#List() 
+     * @see List#List()
      */
     public View() {
         super();
     }
 
     /**
-     * Create a View object from the view element node. 
-     * @see List#List() 
+     * Create a View object from the view element node.
+     * @see List#List()
      */
     public View( EmsScriptNode viewNode ) {
         this();
@@ -143,7 +143,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 
     /**
      * Override equals for EmsScriptNodes
-     * 
+     *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -151,15 +151,15 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         if ( this == obj ) return true;
         if ( obj == null ) return false;
         if ( obj instanceof View ) {
-            if ( ((View)obj).getElement().equals( getElement() ) ) return true; 
+            if ( ((View)obj).getElement().equals( getElement() ) ) return true;
         }
         return false;
     }
 
-    
+
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see sysml.View#getChildViews()
      */
     @Override
@@ -181,7 +181,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         Object o = viewNode.getProperty( Acm.ACM_CHILDREN_VIEWS );
         Collection< EmsScriptNode > childViews =
                 getElementsForJson( o, workspace, dateTime );
-      
+
 //        JSONArray jarr = null;
 //        if ( o instanceof String ) {
 //            String s = (String)o;
@@ -221,12 +221,12 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 
         return childViews;
     }
-    
+
     /**
      * Helper method to get the source property for the passed node
      */
     private EmsScriptNode getSource(EmsScriptNode node) {
-    	
+
     	Collection<EmsScriptNode> sources = getModel().getSource( node );
 
     	if (!Utils.isNullOrEmpty(sources)) {
@@ -236,7 +236,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     		return null;
     	}
     }
-    
+
     /**
      * Get the viewpoint to which this view conforms.
      */
@@ -244,12 +244,12 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         if ( viewNode == null ) return null;
         EmsScriptNode viewpoint = null;
 
-        Set< EmsScriptNode > conformElements = 
+        Set< EmsScriptNode > conformElements =
                 this.getElement().getRelationshipsOfType( Acm.JSON_CONFORM );
         if ( Utils.isNullOrEmpty( conformElements ) ) {
             return null;
         }
-        
+
         // Get all elements of Conform type:
         //Collection<EmsScriptNode> conformElements = getModel().getType(null, Acm.JSON_CONFORM);
         if (Debug.isOn()) System.out.println( "Got "
@@ -257,28 +257,28 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
                                                         : conformElements.size() )
                             + " elements of type " + Acm.JSON_CONFORM );
         for ( EmsScriptNode node : conformElements ) {
-            
+
             // If the sysml:source of the Compose element is the View:
 //            EmsScriptNode source = getSource(node);
-//            if ( source != null && source.equals( viewNode ) ) { 
-                
+//            if ( source != null && source.equals( viewNode ) ) {
+
                 // Get the target of the Conform relationship (the Viewpoint):
                 Collection<EmsScriptNode> viewpointNodes = getModel().getTarget(node);
-                
+
                 if (!Utils.isNullOrEmpty(viewpointNodes)) {
                     viewpoint = viewpointNodes.iterator().next();
                 }
                 break;
 //            }
         }
-        
+
         return viewpoint;
     }
-    
+
     public Collection< EmsScriptNode > getExposedElements() {
         if ( viewNode == null ) return null;
 
-        Set< EmsScriptNode > exposeElements = 
+        Set< EmsScriptNode > exposeElements =
                 this.getElement().getRelationshipsOfType( Acm.JSON_EXPOSE );
         if ( Utils.isNullOrEmpty( exposeElements ) ) {
             return null;
@@ -291,46 +291,46 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 
         if (Debug.isOn()) Debug.outln( "Expose relationships of " + viewNode + ": "
                      + exposeElements );
-        
+
         // Check if any of the nodes in the passed collection of Expose or Conform
         // elements have the View as a sysml:source:
         for ( EmsScriptNode node : exposeElements ) {
-            
+
 //            // If the sysml:source of the Expose element is the View, then
 //            // add it to our expose list (there can be multiple exposes for
 //            // a view):
 //            EmsScriptNode source = getSource(node);
-//            if (source != null && source.equals( viewNode ) ) { 
+//            if (source != null && source.equals( viewNode ) ) {
 
                 // Get the target(s) of the Expose relationship:
 
                 Collection<EmsScriptNode> nodes = getModel().getTarget(node);
-                
+
                 if (!Utils.isNullOrEmpty(nodes)) {
                     exposed.addAll(nodes);
                 }
 //            }
         }
-        
+
         return exposed;
     }
-    
-    
+
+
     public EmsScriptNode getViewpointOperation() {
         EmsScriptNode viewpoint = getViewpoint();
         if ( viewpoint == null ) return null;
         //if ( viewpoint == null || !viewpoint.exists() ) return null;
-        
-        // Get the Method property from the ViewPoint element:        
+
+        // Get the Method property from the ViewPoint element:
         Collection< EmsScriptNode > viewpointMethods =
                 getModel().getProperty( viewpoint, "method" );
-        
+
         EmsScriptNode viewpointMethod = null;
-        
+
         if ( viewpointMethods.size() > 0 ) {
             viewpointMethod = viewpointMethods.iterator().next();
         }
-        
+
         //if ( viewpointMethod == null ) viewpointMethod = viewpoint;  // HACK -- TODO
 
         return viewpointMethod;
@@ -338,27 +338,27 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 
     public void generateViewables() {
         // Get the related elements that define the the view.
-        
+
         Collection<EmsScriptNode> exposed = getExposedElements();
         // TODO -- need to handle case where viewpoint operation does not exist
         //         and an external function (e.g., Java) is somehow specified.
-        EmsScriptNode viewpointOp = getViewpointOperation(); 
+        EmsScriptNode viewpointOp = getViewpointOperation();
         if ( viewpointOp == null ) {
             if (Debug.isOn()) System.out.println("*** View.toViewJson(): no viewpoint operation! View = " + toBoringString() );
             return;
         }
-        
+
         // Translate the viewpoint Operation/Expression element into an AE Expression:
         ArrayList<Object> paramValList = new ArrayList<Object>();
-        // This is a List of a collection of nodes, where the value of exposed 
+        // This is a List of a collection of nodes, where the value of exposed
         // parameter is a collection of nodes:
-        paramValList.add( exposed );  
+        paramValList.add( exposed );
         SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel > sysmlToAeExpr =
                 new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getModel() );
         Expression< Object > aeExpr = sysmlToAeExpr.operationToAeExpression(viewpointOp, paramValList);
 
         if ( aeExpr == null ) return;
-        
+
         // Evaluate the expression to get the Viewables and add them to this View.
 
         clear(); // make sure we clear out any old information
@@ -382,13 +382,13 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 //            addAll( viewables );
         }
     }
-    
-    /** 
+
+    /**
      * Create a JSON String for the View with the following format:
      * <P>
      * <code>
      *  {
-     *       "views": 
+     *       "views":
      *           [ {
      *              "id": elementId,
      *              "displayedElements": [elementId, ...],
@@ -396,31 +396,31 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
      *              "childrenViews": [viewId, ..],
      *              "contains": [
      *                  {
-     *                      "type": Paragraph", 
+     *                      "type": Paragraph",
      *                      "sourceType": "reference"|"text",
-     *                      
+     *
      *                      // if sourceType is reference
-     *                      "source": elementId, 
-     *                      "sourceProperty": "documentation"|"name"|"value", 
-     *                      
+     *                      "source": elementId,
+     *                      "sourceProperty": "documentation"|"name"|"value",
+     *
      *                      // if sourceType is text
      *                      "text": text
      *                  },
      *                  {
-     *                      "type": "Table", 
-     *                      "title": title, 
+     *                      "type": "Table",
+     *                      "title": title,
      *                      "body": [[{
      *                          "content": [ //this allows multiple things in a cell
      *                              {
-     *                                  "type": "Paragraph"|"List", 
+     *                                  "type": "Paragraph"|"List",
      *                                  (see above...)
      *                              }, ...
      *                          ],
      *                          // optional
-     *                          "colspan": colspan, 
+     *                          "colspan": colspan,
      *                          "rowspan": rowspan
-     *                      }, ...], ...], 
-     *                      "header": same as body, 
+     *                      }, ...], ...],
+     *                      "header": same as body,
      *                      // optional, probably translate to table class if user wants to customize css?
      *                      "style": style
      *                  },
@@ -433,10 +433,10 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
      *                          }, ...], ...
      *                      ],
      *                      "ordered": true/false
-     *                  }, ...  
+     *                  }, ...
      *              ],
      *          }
-     *      
+     *
      *      ]
      *  }
      * </code>
@@ -447,22 +447,22 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     public JSONObject toViewJson() {
         return toViewJson( getWorkspace(), generate, recurse );
     }
-    
+
     public WorkspaceNode getWorkspace() {
         if ( getElement() != null && getElement().exists() ) {
             return getElement().getWorkspace();
         }
         return null;
     }
-    
+
     public JSONObject toViewJson( WorkspaceNode workspace,
                                   boolean doGenerate, boolean doRecurse ) {
-    	
+
         if ( viewNode == null ) {
             if (Debug.isOn()) System.out.println("*** called View.toViewJson() without a view node! View = " + toBoringString() );
             return null;
         }
-        
+
         // Get the related elements that define the the view.
         if ( doGenerate ) {
             generateViewables();
@@ -508,7 +508,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         }
         return json;
     }
-    
+
     public JSONArray getContainsJson() {
         return getContainsJson( generate );
     }
@@ -537,7 +537,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         }
         return viewablesJson;
     }
-    
+
     public Collection<EmsScriptNode> getAllowedElements() {
         if ( displayedElements != null ) {
             return displayedElements;
@@ -557,34 +557,34 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
                                   boolean doGenerate, boolean doRecurse,
                                   Set< View > seen ) {
         if ( doRecurse ) {
-            if ( seen == null ) seen = new HashSet<View>(); 
+            if ( seen == null ) seen = new HashSet<View>();
             if ( seen.contains( this ) ) return Utils.getEmptySet();
             seen.add( this );
         }
-        
+
         LinkedHashSet<EmsScriptNode> set = new LinkedHashSet<EmsScriptNode>();
-        
+
         // Generate Viewables from Viewpoint method, but don't overwrite cached
         // values.
         if ( doGenerate && isEmpty() ) {
-            generateViewables(); 
+            generateViewables();
         } else if ( displayedElements != null ) {
             // Return cached value which won't change since it's from hardcoded JSON.
             return displayedElements;
         }
-        
+
         // get contained Viewables
         // REVIEW -- should this only be done when generate == true?
         Collection< EmsScriptNode > versionedElements = super.getDisplayedElements();
         versionedElements = NodeUtil.getVersionAtTime( versionedElements, dateTime );
         set.addAll( versionedElements );
 
-        // get elements specified in JSON in the displayed elements property 
+        // get elements specified in JSON in the displayed elements property
         Object dElems = getElement().getProperty( Acm.ACM_DISPLAYED_ELEMENTS );
         set.addAll( getElementsForJson( dElems, workspace, dateTime ) );
 
         if ( doRecurse ) {
-            
+
             // get recursively from child views
             for ( sysml.view.View< EmsScriptNode > v : getChildViews() ) {
                 EmsScriptNode n = NodeUtil.getVersionAtTime( v.getElement(), dateTime );
@@ -603,7 +603,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
                     set.addAll( vElems );
                 }
             }
-            
+
             // get recursively from viewToView property
             Collection< EmsScriptNode > v2vs =
                     getViewToViewPropertyViews( workspace, dateTime );
@@ -620,7 +620,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         displayedElements = set;
         return set;
     }
-    
+
     public Collection< EmsScriptNode >
             getElementsForJson( Object obj, WorkspaceNode workspace,
                                 Date dateTime ) {
@@ -649,6 +649,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         }
         EmsScriptNode node =
                     EmsScriptNode.convertIdToEmsScriptNode( idString,
+                                                            false,
                                                             workspace,
                                                             dateTime,
                                                             getElement().getServices(),
@@ -657,7 +658,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         if ( node != null ) nodes.add( node );
         return nodes;
     }
-    
+
     public Collection< EmsScriptNode >
             getElementsForJson( JSONArray jsonArray, WorkspaceNode workspace,
                                 Date dateTime ) {
@@ -694,7 +695,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         }
         return nodes;
     }
-    
+
     public Collection< EmsScriptNode >
             getViewToViewPropertyViews( WorkspaceNode workspace, Date dateTime ) {
         JSONArray jarr = getViewToViewPropertyJson();
@@ -743,7 +744,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         return views;
     }
 
-    
+
     private String toBoringString() {
         return "view node = "
                + this.viewNode
