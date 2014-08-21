@@ -244,7 +244,17 @@ public class WorkspaceNode extends EmsScriptNode {
         String parentName = parent != null && parent.exists() ? parent.getName() : null;
 
         if ( parent != null && parent.exists() && !this.equals( parent.getWorkspace() ) ) {
-            parent = findScriptNodeByName( parentName, false, this, null );
+            EmsScriptNode grandParent = parent.getOwningParent( null );
+            ArrayList< NodeRef > arr = NodeUtil.findNodeRefsByType( parentName, SearchType.CM_NAME.prefix, false, this, null, false, true, getServices(), false );
+            for ( NodeRef ref : arr ) {
+                EmsScriptNode p = new EmsScriptNode( ref, getServices() );
+                EmsScriptNode gp = p.getParent();
+                if ( grandParent == gp || ( grandParent != null && gp != null && grandParent.getName().equals( gp.getName() ) ) ) {
+                    parent = p;
+                    break;
+                }
+            }
+            //parent = findScriptNodeByName( parentName, false, this, null );
             if ( parent == null || !parent.exists() || !this.equals( parent.getWorkspace() ) ) {
                 parent = replicateWithParentFolders( parent );
             }
