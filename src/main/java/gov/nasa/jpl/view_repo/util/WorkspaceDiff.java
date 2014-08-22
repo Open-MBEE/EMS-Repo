@@ -134,10 +134,10 @@ public class WorkspaceDiff {
             EmsScriptNode nodeFromRef = new EmsScriptNode( ref, getServices() );
             String name = nodeFromRef.getName();
             NodeRef ref1 = NodeUtil.findNodeRefById( name, false, getWs1(),
-                                                     getTimestamp1(), getServices(), false );
+                                                     getTimestamp1(), getServices(), true );
             EmsScriptNode node1 = ref1 == null ? null : new EmsScriptNode( ref1, getServices() );
             NodeRef ref2 = NodeUtil.findNodeRefById( name, false, getWs2(),
-                                                     getTimestamp2(), getServices(), false );
+                                                     getTimestamp2(), getServices(), true );
             EmsScriptNode node2 = ref2 == null ? null : new EmsScriptNode( ref2, getServices() );
             addToDiff( node1, node2 );
         }
@@ -171,7 +171,6 @@ public class WorkspaceDiff {
         refs = nodeDiff.getUpdated();
         addDiffs( refs );
 
-
         // Fix nested elements (value specifications, Expressions, ???)
         //nodeDiff.fixValueSpecifications(this);
 
@@ -196,7 +195,7 @@ public class WorkspaceDiff {
         Set< String > ids = new TreeSet< String >( nodeDiff.getMap1().keySet() );
         ids.addAll( nodeDiff.getMap2().keySet() );
         for ( String id : ids ) {
-            NodeRef ref = NodeUtil.findNodeRefById( id, false, getWs1(), getTimestamp1(), null, false );
+            NodeRef ref = NodeUtil.findNodeRefById( id, false, getWs1(), getTimestamp1(), null, true );
             if ( ref != null ) {
                 EmsScriptNode node = new EmsScriptNode( ref, getServices() );
                 if ( node.exists() ) {

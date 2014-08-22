@@ -317,7 +317,7 @@ public class WorkspaceNode extends EmsScriptNode {
                 NodeUtil.findNodeRefsByType( getNodeRef().toString(),
                                              SearchType.WORKSPACE.prefix,
                                              true, null, dateTime, false, true,
-                                             getServices(), false );
+                                             getServices(), true );
         changedNodeRefs.addAll( refs );
         //List< EmsScriptNode > nodes = toEmsScriptNodeList( refs );
 
