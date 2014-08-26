@@ -49,7 +49,6 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
-import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.ArrayList;
@@ -269,7 +268,7 @@ public class ModelPost extends AbstractJavaWebScript {
             if ( !sendDeltas(deltaJson) ) {
                 log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
             }
-    
+
             // Commit history
             String siteName = null;
             if (projectNode != null) {

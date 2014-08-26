@@ -54,7 +54,7 @@ public class WorkspacesGet extends AbstractJavaWebScript{
                 String userName = AuthenticationUtil.getRunAsUser();
                 EmsScriptNode homeFolder = NodeUtil.getUserHomeFolder(userName);
 
-                json = handleWorkspace (homeFolder);
+                json = handleWorkspace (homeFolder, status, userName);
             }
         } catch (JSONException e) {
             log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -79,12 +79,22 @@ public class WorkspacesGet extends AbstractJavaWebScript{
         return model;
 	}
 
-	protected JSONObject handleWorkspace (EmsScriptNode homeFolder) throws JSONException{
+	protected JSONObject handleWorkspace (EmsScriptNode homeFolder, Status status, String user) throws JSONException{
 
 		JSONObject json = new JSONObject ();
 		JSONArray jArray = new JSONArray ();
         Collection <EmsScriptNode> nodes = NodeUtil.luceneSearchElements("ASPECT:\"ems:workspace\"" );
-
+        //This is for the master workspace (not located in the user home folder).
+        WorkspaceNode master = AbstractJavaWebScript.getWorkspaceFromId("master", services, response, status, false, user);
+        if(master == null){
+        	JSONObject interiorJson = new JSONObject();
+        	interiorJson.put("creator", "null");
+        	interiorJson.put("created",  "null");
+			interiorJson.put("name", "master");
+			interiorJson.put("parent", "null");
+			interiorJson.put("branched", "null");
+			jArray.put(interiorJson);
+		}
         for (EmsScriptNode workspaceNode: nodes) {
             	if (checkPermissions(workspaceNode, PermissionService.READ)){
             	    WorkspaceNode wsNode = new WorkspaceNode(workspaceNode.getNodeRef(), services, response);

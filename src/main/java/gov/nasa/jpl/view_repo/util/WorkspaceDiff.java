@@ -438,7 +438,7 @@ public class WorkspaceDiff {
         addJSONArray(ws1Json, "elements", elements, elementsVersions, time1, true);
         addWorkspaceMetadata( ws1Json, ws1, time1 );
 
-        addJSONArray(ws2Json, "addedElements", addedElements, time2, showAll);
+        addJSONArray(ws2Json, "addedElements", addedElements, time2, true);
         addJSONArray(ws2Json, "movedElements", movedElements, time2, showAll);
         addJSONArray(ws2Json, "deletedElements", deletedElements, time2, showAll);
         addJSONArray(ws2Json, "updatedElements", updatedElements, time2, showAll);
@@ -743,6 +743,19 @@ public class WorkspaceDiff {
             s1 = NodeUtil.getModelElements(s1);
             s2 = NodeUtil.getModelElements(s2);
         }
+
+        // need to make sure both sets have each others' nodes
+        for ( NodeRef n : s1 ) {
+            String cmName = NodeUtil.getName( n );
+            NodeRef ref = NodeUtil.findNodeRefById( cmName, false, node, timestamp2, getServices(), false );
+            if ( ref != null ) s2.add( ref );
+        }
+        for ( NodeRef n : s2 ) {
+            String cmName = NodeUtil.getName( n );
+            NodeRef ref = NodeUtil.findNodeRefById( cmName, false, ws1, timestamp1, getServices(), false );
+            if ( ref != null ) s1.add( ref );
+        }
+
         nodeDiff = new NodeDiff( s1, s2 );
         nodeDiff.addPropertyIdsToIgnore( getIgnoredPropIds() ); //Utils.newList( "read", "creator", "modified" ) );
         populateMembers();

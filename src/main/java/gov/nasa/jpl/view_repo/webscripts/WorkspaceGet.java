@@ -40,7 +40,7 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 				String userName = AuthenticationUtil.getRunAsUser();
 				String wsID = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
 				WorkspaceNode workspace = AbstractJavaWebScript.getWorkspaceFromId(wsID, getServices(), getResponse(), status, false, userName);
-				object = getWorkspace(workspace);
+				object = getWorkspace(workspace, wsID);
 			}
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "JSON object could not be created \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -70,22 +70,23 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		return object;
 	}
 	
-	protected JSONObject getWorkspace(WorkspaceNode ws) throws JSONException {
+	protected JSONObject getWorkspace(WorkspaceNode ws, String wsID) throws JSONException {
 		JSONObject json = new JSONObject();
 		JSONArray jsonArray = new JSONArray();
 		JSONObject interiorJson = new JSONObject();
-		if(checkPermissions(ws, PermissionService.READ)){
-			interiorJson.put("lastTimeSyncParent", getStringIfNull(ws.getProperty("ems:lastTimeSyncParent")));
-			if(ws.getSourceWorkspace() != null)
-				interiorJson.put("ems:source", getStringIfNull(ws.getSourceWorkspace().getProperty(Acm.CM_NAME)));
-			else
-				interiorJson.put("ems:source", "master");
-			interiorJson.put(Acm.JSON_TYPE, getStringIfNull(ws.getProperty(Acm.ACM_TYPE)));
-			interiorJson.put(Acm.JSON_NAME, getStringIfNull(ws.getProperty(Acm.CM_NAME)));
+		if(ws == null && wsID.equals("master")){
+			interiorJson.put("creator", "null");
+			interiorJson.put("created",  "null");
+			interiorJson.put("name", wsID);
+			interiorJson.put("parent", "null");
+			interiorJson.put("branched", "null");
+			jsonArray.put(interiorJson);
+		}
+		else if(checkPermissions(ws, PermissionService.READ)){
+			jsonArray.put(ws.toJSONObject(null));
 		}
 		else
 			log(LogLevel.WARNING, "No permission to read: " + ws.getSysmlId(), HttpServletResponse.SC_NOT_FOUND);
-		jsonArray.put(interiorJson);
 		json.put("workspace" , jsonArray);
 		return json;
 	}
