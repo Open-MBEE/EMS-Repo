@@ -32,6 +32,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.ae.event.Call;
 import gov.nasa.jpl.ae.event.ConstraintExpression;
 import gov.nasa.jpl.ae.event.Expression;
+import gov.nasa.jpl.ae.event.Parameter;
 import gov.nasa.jpl.ae.event.ParameterListenerImpl;
 import gov.nasa.jpl.ae.solver.Constraint;
 import gov.nasa.jpl.ae.solver.ConstraintLoopSolver;
@@ -49,6 +50,7 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -56,6 +58,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -1588,6 +1591,20 @@ public class ModelPost extends AbstractJavaWebScript {
                                 }
                                 else {
                                     log( LogLevel.INFO, "Satisfied all of the constraints!" );
+                                    
+                                    // Update the values of the nodes after solving the constraints:
+                                    EmsScriptNode node;
+                                    Parameter<Object> param;
+                                    Set<Entry<EmsScriptNode, Parameter<Object>>> entrySet = sysmlToAe.getExprParamMap().entrySet();
+                                    for (Entry<EmsScriptNode, Parameter<Object>> entry : entrySet) {
+                                    	
+                                    	node = entry.getKey();
+                                    	param = entry.getValue();
+                                    	systemModel.setValue(node, (Serializable)param.getValue());
+                                    }
+                                    
+                                    log( LogLevel.INFO, "Updated all node values to satisfy the constraints!" );
+
                                 }
                                 
                             } // End if constraints list is non-empty
