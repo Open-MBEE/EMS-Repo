@@ -39,10 +39,6 @@ public class RestPostConnection implements AbstractConnection {
         if (response.getStatus() != 200) {
             status = false;
         }
-        if (logger.isDebugEnabled()) {
-            logger.debug("\n#### Response From Server ####\n");
-            logger.debug(response.getEntity( String.class ));
-        }
         
         return status;
     }
