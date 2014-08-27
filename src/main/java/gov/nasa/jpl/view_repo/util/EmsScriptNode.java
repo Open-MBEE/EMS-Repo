@@ -107,6 +107,8 @@ public class EmsScriptNode extends ScriptNode implements
                                              Comparable< EmsScriptNode > {
     private static final long serialVersionUID = 9132455162871185541L;
 
+    public static final boolean expressionStuff = true;
+
     /**
      * A set of content model property names that serve as workspace metadata
      * and whose changes are not recorded in a workspace.
@@ -3070,36 +3072,29 @@ public class EmsScriptNode extends ScriptNode implements
                   this.getSysmlIdOfProperty( "sysml:method", dateTime ) );
     }
 
-    protected
-            void
-            addViewJSON( JSONObject json, EmsScriptNode node,
-                         Set< String > filter, Date dateTime )
-                                                              throws JSONException {
-        // TODO: figure out why this isn't working
-        // json.put( "contains", getView().getContainsJson() );
-        // json.put( "displayedElements", getView().getDisplayedElements() );
-        // json.put( "allowedElements", getView().getDisplayedElements() );
-        // json.put( "childrenViews", getView().getChildViews() );
-        putInJson( json,
-                   "contains",
-                   new JSONArray( (String)node.getProperty( "view2:contains" ) ),
-                   filter );
-        putInJson( json,
-                   "displayedElements",
-                   new JSONArray(
-                                  (String)node.getProperty( "view2:displayedElements" ) ),
-                   filter );
-        putInJson( json,
-                   "allowedElements",
-                   new JSONArray(
-                                  (String)node.getProperty( "view2:allowedElements" ) ),
-                   filter );
-        putInJson( json,
-                   "childrenViews",
-                   new JSONArray(
-                                  (String)node.getProperty( "view2:childrenViews" ) ),
-                   filter );
-
+    protected void addViewJSON( JSONObject json, EmsScriptNode node,
+                                Set< String > filter, Date dateTime )
+                                        throws JSONException {
+        if ( expressionStuff ) {
+            // TODO: figure out why this isn't working
+            json.put( "contains", getView().getContainsJson(true) );
+            json.put( "displayedElements", getView().getDisplayedElements() );
+            json.put( "allowedElements", getView().getDisplayedElements() );
+            json.put( "childrenViews", getView().getChildViews() );
+        } else {
+            putInJson( json, "contains",
+                       new JSONArray( (String)node.getProperty( "view2:contains" ) ),
+                       filter );
+            putInJson( json, "displayedElements",
+                       new JSONArray( (String)node.getProperty( "view2:displayedElements" ) ),
+                       filter );
+            putInJson( json, "allowedElements",
+                       new JSONArray( (String)node.getProperty( "view2:allowedElements" ) ),
+                       filter );
+            putInJson( json, "childrenViews",
+                       new JSONArray( (String)node.getProperty( "view2:childrenViews" ) ),
+                       filter );
+        }
         // TODO: Snapshots?
     }
 
@@ -3235,9 +3230,13 @@ public class EmsScriptNode extends ScriptNode implements
                                                                       throws JSONException {
         addValueSpecificationJSON( json, node, filter, dateTime );
 
+//        String elementId =
+//                node.getSysmlIdOfProperty( "sysml:element", dateTime );
+//        if ( elementId == null ) {
         String elementId =
                 node.getSysmlIdOfProperty( "sysml:elementValueOfElement",
                                            dateTime );
+        //        }
         if ( elementId != null ) {
             putInJson( json, "element", elementId, filter );
         }

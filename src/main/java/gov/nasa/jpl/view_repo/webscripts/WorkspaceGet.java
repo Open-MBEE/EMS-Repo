@@ -20,21 +20,22 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class WorkspaceGet extends AbstractJavaWebScript{
-	
+
 	public WorkspaceGet(){
 		super();
 	}
-	
+
 	public WorkspaceGet(Repository repositoryHelper, ServiceRegistry service){
 		super(repositoryHelper, service);
 	}
-	
-	protected Map<String, Object> executeImpl (WebScriptRequest req, Status status, Cache cache) {
+
+	@Override
+    protected Map<String, Object> executeImpl (WebScriptRequest req, Status status, Cache cache) {
 		printHeader(req);
 		clearCaches();
 		Map<String, Object> model = new HashMap<String, Object>();
 		JSONObject object = null;
-		
+
 		try{
 			if(validateRequest(req, status)){
 				String userName = AuthenticationUtil.getRunAsUser();
@@ -49,7 +50,7 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 			log(LogLevel.ERROR, "Internal error stack trace \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			e.printStackTrace();
 		}
-		
+
 		if(object == null){
 			model.put("res", response.toString());
 		} else {
@@ -62,14 +63,14 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		status.setCode(responseStatus.getCode());
 		printFooter();
 		return model;
-		
+
 	}
 	protected Object getStringIfNull(Object object){
 		if(object == null)
 			return "null";
 		return object;
 	}
-	
+
 	protected JSONObject getWorkspace(WorkspaceNode ws, String wsID) throws JSONException {
 		JSONObject json = new JSONObject();
 		JSONArray jsonArray = new JSONArray();
@@ -86,18 +87,18 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 			jsonArray.put(ws.toJSONObject(null));
 		}
 		else
-			log(LogLevel.WARNING, "No permission to read: " + ws.getSysmlId(), HttpServletResponse.SC_NOT_FOUND);
+			log(LogLevel.WARNING, "No permission to read: " + (ws == null ? null : ws.getSysmlId()), HttpServletResponse.SC_NOT_FOUND);
 		json.put("workspace" , jsonArray);
 		return json;
 	}
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		// TODO Auto-generated method stub
-		if(checkRequestContent(req) == false) 
+		if(checkRequestContent(req) == false)
 			return false;
-		
+
 		String wsId = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
-		
+
 		if(checkRequestVariable(wsId, WORKSPACE_ID) == false)
 			return false;
 		return true;

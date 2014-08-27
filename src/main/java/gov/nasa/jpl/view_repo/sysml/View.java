@@ -47,7 +47,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
      */
     protected Collection<EmsScriptNode> displayedElements = null;
 
-    protected boolean generate = false;
+    protected boolean generate = true;
 
     protected boolean recurse = false;
 
@@ -336,7 +336,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         return viewpointMethod;
     }
 
-    public void generateViewables() {
+    public boolean generateViewables() {
         // Get the related elements that define the the view.
 
         Collection<EmsScriptNode> exposed = getExposedElements();
@@ -345,7 +345,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         EmsScriptNode viewpointOp = getViewpointOperation();
         if ( viewpointOp == null ) {
             if (Debug.isOn()) System.out.println("*** View.toViewJson(): no viewpoint operation! View = " + toBoringString() );
-            return;
+            return false;
         }
 
         // Translate the viewpoint Operation/Expression element into an AE Expression:
@@ -357,7 +357,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
                 new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getModel() );
         Expression< Object > aeExpr = sysmlToAeExpr.operationToAeExpression(viewpointOp, paramValList);
 
-        if ( aeExpr == null ) return;
+        if ( aeExpr == null ) return false;
 
         // Evaluate the expression to get the Viewables and add them to this View.
 
@@ -381,6 +381,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 //                    (java.util.List< Viewable<EmsScriptNode> >)Utils.asList( c );
 //            addAll( viewables );
         }
+        return !isEmpty();
     }
 
     /**
