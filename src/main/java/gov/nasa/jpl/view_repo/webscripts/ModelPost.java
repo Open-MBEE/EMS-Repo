@@ -268,7 +268,11 @@ public class ModelPost extends AbstractJavaWebScript {
         // Send deltas to all listeners
         if (wsDiff.isDiff()) {
             JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
-            if ( !sendDeltas(deltaJson) ) {
+            String wsId = "master";
+            if (workspace != null) {
+                wsId = workspace.getSysmlId();
+            }
+            if ( !sendDeltas(deltaJson, wsId, null) ) {
                 log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
             }
 
