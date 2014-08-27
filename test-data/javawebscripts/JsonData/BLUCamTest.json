@@ -1,81 +1,102 @@
 {"elements": [
     {
-        "id": "_17_0_2_3_e610336_1394148443742_79128_29536",
+        "sysmlid": "_17_0_2_3_e610336_1394148443742_79128_29536",
         "name": "ContextViewpoint",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "method": "get_two_names",
-        "type": "Viewpoint"
+        "specialization": {"method": "get_two_names",
+                            "type": "Viewpoint"
+                           }
     },
     {
-        "id": "get_two_names",
+        "sysmlid": "get_two_names",
         "name": "get_two_names_op",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "operationExpression": "get_two_names_expression",
-        "type": "Operation" 
+        "specialization": {"expression": "get_two_names_expression",
+                           "type": "Operation"
+                           }
     },
     {
-        "id": "get_two_names_expression",
+        "sysmlid": "get_two_names_expression",
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "operand": ["get_names",
-                    "_17_0_2_4_f3a0363_1394141845089_115460_28389",
-                    "_17_0_2_4_f3a0363_1394140377374_900991_27624"],
-        "type": "Expression" 
+        "specialization": {"operand": [{"element":"get_names",
+                                        "type":"ElementValue"},
+                                       {"element":"_17_0_2_4_f3a0363_1394141845089_115460_28389",
+                                        "type":"ElementValue"},
+                                       {"element":"_17_0_2_4_f3a0363_1394141831980_671275_28387",
+                                        "type":"ElementValue"}],
+                            "type": "Expression" 
+                           }
     },
     {
-        "id": "get_names",
+        "sysmlid": "get_names",
         "name": "get_names_op",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "operationParameter":["s1_param",
-                              "s2_param"],
-        "operationExpression": "vp_expression_2",
-        "type": "Operation" 
+        "specialization": {"parameters":["s1_param",
+                                         "s2_param"],
+                            "expression": "vp_expression_2",
+                            "type": "Operation" 
+                           } 
     },
     {
-        "id": "s1_param",
+        "sysmlid": "s1_param",
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "type": "Parameter" 
+        "specialization" : {
+                            "type": "Parameter"
+                            }    
     },
     {
-        "id": "s2_param",
+        "sysmlid": "s2_param",
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "type": "Parameter" 
+        "specialization" : {
+                            "type": "Parameter"
+                            }    
     },
     {
-        "id": "vp_expression_2",
+        "sysmlid": "vp_expression_2",
         "name": "",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "operand": ["op_list",
-                    "op_name_arg_1",
-                    "op_name_arg_2"],
-        "type": "Expression" 
+        "specialization": {"operand": [{"element":"op_list",
+                                        "type":"ElementValue"},
+                                        {"element":"op_name_arg_1",
+                                        "type":"ElementValue"},
+                                        {"element":"op_name_arg_2",
+                                        "type":"ElementValue"}],
+                            "type": "Expression"
+                           }
     },    
     {
-        "id": "op_name_arg_1",
+        "sysmlid": "op_name_arg_1",
         "name": "Name",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "operand":["op_name_arg",
-                   "s1_param"],
-        "type": "Expression"
+        "specialization": {"operand": [{"element":"op_name_arg",
+                                        "type":"ElementValue"},
+                                       {"element":"s1_param",
+                                        "type":"ElementValue"}],
+                           "type": "Expression"
+                          }
     },
     {
-        "id": "op_name_arg_2",
+        "sysmlid": "op_name_arg_2",
         "name": "Name",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "operand":["op_name_arg",
-                   "s2_param"],
-        "type": "Expression"
+        "specialization": {"operand": [{"element":"op_name_arg",
+                                        "type":"ElementValue"},
+                                       {"element":"s2_param",
+                                        "type":"ElementValue"}],
+                           "type": "Expression"
+                          }
     }
 
 ]}
