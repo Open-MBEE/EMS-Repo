@@ -442,6 +442,7 @@ public class WorkspaceDiff {
         addJSONArray(ws2Json, "movedElements", movedElements, time2, showAll);
         addJSONArray(ws2Json, "deletedElements", deletedElements, time2, showAll);
         addJSONArray(ws2Json, "updatedElements", updatedElements, time2, showAll);
+        addJSONArray(ws2Json, "conflictedElements", conflictedElements, time2, showAll);
         addWorkspaceMetadata( ws2Json, ws2, time2);
 
         deltaJson.put( "workspace1", ws1Json );
@@ -737,8 +738,8 @@ public class WorkspaceDiff {
 
     protected void captureDeltas(WorkspaceNode node) {
         Set< NodeRef > newSet = Utils.newSet();
-        Set<NodeRef> s1 = ( ws1 == null ? newSet : ws1.getChangedNodeRefsWithRespectTo( node, timestamp1 ) );
-        Set<NodeRef> s2 = ( node == null ? newSet : node.getChangedNodeRefsWithRespectTo( ws1, timestamp2 ) );
+        Set<NodeRef> s1 = ( ws1 == null ? newSet : ws1.getChangedNodeRefsWithRespectTo( node, timestamp1, timestamp2 ) );
+        Set<NodeRef> s2 = ( node == null ? newSet : node.getChangedNodeRefsWithRespectTo( ws1, timestamp2, timestamp1 ) );
         if ( onlyModelElements ) {
             s1 = NodeUtil.getModelElements(s1);
             s2 = NodeUtil.getModelElements(s2);

@@ -16,6 +16,7 @@ import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.model.ContentModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONException;
@@ -322,9 +323,10 @@ public class WorkspaceNode extends EmsScriptNode {
         //List< EmsScriptNode > nodes = toEmsScriptNodeList( refs );
 
         // remove commits
-        CommitUtil c = new CommitUtil();
-        ArrayList< EmsScriptNode > commits = c.getCommits( this, null, getServices(), getResponse() );
-        commits.add( c.getCommitPkg( this, null, getServices(), getResponse() ) );
+        ArrayList< EmsScriptNode > commits =
+                CommitUtil.getCommits( this, null, getServices(), getResponse() );
+        commits.add( CommitUtil.getCommitPkg( this, null, getServices(),
+                                              getResponse() ) );
         System.out.println("removing commits: " + commits );
         changedNodeRefs.removeAll( commits );
 
@@ -339,13 +341,25 @@ public class WorkspaceNode extends EmsScriptNode {
         return changedElementIds;
     }
 
-    public Set< NodeRef > getChangedNodeRefsWithRespectTo( WorkspaceNode other, Date dateTime ) {
+    public Set< NodeRef > getChangedNodeRefsWithRespectTo( WorkspaceNode other, Date dateTime, Date otherTime ) {
         Set< NodeRef > changedNodeRefs = new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);//getChangedNodeRefs());
         WorkspaceNode targetParent = getCommonParent( other );
         WorkspaceNode parent = this;
+        WorkspaceNode lastParent = parent;
         while ( parent != null && !parent.equals( targetParent ) ) {
             changedNodeRefs.addAll( parent.getChangedNodeRefs( dateTime ) );
             parent = parent.getParentWorkspace();
+            if ( parent != null ) lastParent = parent;
+        }
+        if ( otherTime!= null && dateTime != null && dateTime.after( otherTime ) ) {
+            Date lastParentCreationDate = lastParent.getCreationDate();
+            if ( otherTime.before( lastParentCreationDate ) ) {
+                String specifier = "[" + TimeUtils.toTimestamp( dateTime );
+                NodeUtil.findNodeRefsByType( specifier, "@ems\\:blah:", false, lastParent, null, true, true, getServices(), true );
+                // TODO
+                // keep walking parent back to master and collect all commits
+                // between timepoints looking at creation date of parents.
+            }
         }
         return changedNodeRefs;
     }
