@@ -351,7 +351,7 @@ public class WorkspaceNode extends EmsScriptNode {
             parent = parent.getParentWorkspace();
             if ( parent != null ) lastParent = parent;
         }
-        if ( dateTime.after( otherTime ) ) {
+        if ( otherTime!= null && dateTime != null && dateTime.after( otherTime ) ) {
             Date lastParentCreationDate = lastParent.getCreationDate();
             if ( otherTime.before( lastParentCreationDate ) ) {
                 String specifier = "[" + TimeUtils.toTimestamp( dateTime );
