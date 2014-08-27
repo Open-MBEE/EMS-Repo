@@ -1302,6 +1302,11 @@ public class EmsScriptNode extends ScriptNode implements
         }
     }
 
+    public Date getCreationDate() {
+        Date date = (Date)getProperty( "cm:created" );
+        return date;
+    }
+
     protected void
             addElementJSON( JSONObject elementJson, Set< String > filter,
                             Date dateTime ) throws JSONException {

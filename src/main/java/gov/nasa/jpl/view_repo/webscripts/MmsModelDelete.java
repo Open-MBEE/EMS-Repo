@@ -48,7 +48,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         MmsModelDelete instance = new MmsModelDelete(repository, services);
 
         JSONObject result = null;
-        
+
         try {
             result = instance.handleRequest( req );
             if (result != null) {
@@ -99,7 +99,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
 
         EmsScriptNode root = findScriptNodeById(elementId, workspace, null, false);
         String siteName = null;
-        
+
         UserTransaction trx;
         trx = services.getTransactionService().getNonPropagatingUserTransaction();
         try {
@@ -130,7 +130,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                     deletedNode.createOrUpdateAspect( "ems:Deleted" );
                 }
             }
-            
+
             trx.commit();
         } catch (Throwable e) {
             try {
@@ -154,9 +154,8 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             if ( !sendDeltas(result) ) {
                 log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
             }
-    
-            CommitUtil commitUtil = new CommitUtil();
-            commitUtil.commit( wsDiff, workspace, siteName, "", false, services, response );
+
+            CommitUtil.commit( wsDiff, workspace, siteName, "", false, services, response );
         }
 
         return result;
@@ -175,12 +174,12 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 log(LogLevel.ERROR, "Trying to delete a non-existent node! " + node);
                 return;
             }
-    
+
             // Add the element to the specified workspace to be deleted from there.
             if ( workspace != null && workspace.exists() && node != null
                  && node.exists() && !node.isWorkspace() ) {
                 EmsScriptNode newNodeToDelete = null;
-                if ( !workspace.equals( node.getWorkspace() ) ) { 
+                if ( !workspace.equals( node.getWorkspace() ) ) {
                     try {
                         newNodeToDelete = workspace.replicateWithParentFolders( node );
                         node = newNodeToDelete;
@@ -193,10 +192,10 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                     }
                 }
             }
-    
+
             if ( node != null && node.exists() ) {
                 addToWsDiff( node );
-    
+
                 deleteRelationships(node, "sysml:relationshipsAsSource", "sysml:relAsSource");
                 deleteRelationships(node, "sysml:relationshipsAsTarget", "sysml:relAsTarget");
             }

@@ -275,8 +275,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 EmsScriptNode siteNode = projectNode.getSiteNode();
                 siteName = siteNode.getName();
             }
-            CommitUtil commitUtil = new CommitUtil();
-            commitUtil.commit( wsDiff, workspace, siteName,
+            CommitUtil.commit( wsDiff, workspace, siteName,
                                "", false, services, response );
         }
 

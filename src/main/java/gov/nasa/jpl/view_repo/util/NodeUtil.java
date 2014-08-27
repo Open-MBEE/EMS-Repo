@@ -205,6 +205,14 @@ public class NodeUtil {
 //                                   findDeleted );
 //    }
 
+//    public Set<NodeRef> findNodeRefsInDateRange( Date fromDate, Date toDate,
+////                      String parentScopeName,
+//                      boolean ignoreWorkspace,
+//                      WorkspaceNode workspace, Date dateTime,
+//                      boolean justFirst, boolean exactMatch,
+//                      ServiceRegistry services, boolean includeDeleted ) {
+//    }
+
     public static ArrayList< NodeRef >
             findNodeRefsByType( String specifier, String prefix,
 //                                String parentScopeName,
@@ -1184,15 +1192,20 @@ public class NodeUtil {
         return node.exists();
     }
 
-    public static EmsScriptNode getUserHomeFolder() {
+    public static String getUserName() {
         String userName = AuthenticationUtil.getRunAsUser();
+        return userName;
+    }
+
+    public static EmsScriptNode getUserHomeFolder() {
+        String userName = getUserName();
         return getUserHomeFolder( userName );
     }
 
     public static EmsScriptNode getUserHomeFolder( String userName ) {
         return getUserHomeFolder(userName, false);
     }
-    
+
     public static EmsScriptNode getUserHomeFolder( String userName, boolean createIfNotFound) {
         NodeRef homeFolderNode = null;
         EmsScriptNode homeFolderScriptNode = null;
