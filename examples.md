@@ -2,7 +2,7 @@
 
 1) create a project
 
-    projecpost 123456
+    projectpost 123456
     
 1) get a project
 
@@ -45,16 +45,22 @@
 
   b) load model into project
   
-    curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data @JsonData/BluCamNameListExpr.json "http://localhost:8080/alfresco/service/javawebscripts/sites/europa/projects/blu/elements" # change
+    curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data @JsonData/BluCamNameListExpr.json "http://localhost:8080/alfresco/service/javawebscripts/sites/europa/projects/blu/elements"
 
-    curl -w "\n%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/javawebscripts/views/_17_0_2_3_e610336_1394148311476_17302_29388/elements"
+  c) get the generated content in the view
+
+    curl -w "\n%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/javawebscripts/views/_17_0_2_3_e610336_1394148311476_17302_29388"
 
 
 4) View generation with user-defined operations 
 
-    curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data @JsonData/BLUCamTest.json "http://localhost:8080/alfresco/service/javawebscripts/sites/europa/projects/123456/elements"
+  a) load model into project
 
-    curl -w "\n%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/javawebscripts/views/_17_0_2_3_e610336_1394148233838_91795_29332/elements"
+    curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data @JsonData/BLUCamTest.json "http://localhost:8080/alfresco/service/javawebscripts/sites/europa/projects/blu/elements"
+
+  b) get the generated content in the view
+
+    curl -w "\n%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/javawebscripts/views/_17_0_2_3_e610336_1394148233838_91795_29332"
  
 5) Create workspace
 
