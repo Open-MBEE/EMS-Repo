@@ -128,29 +128,29 @@ resourceTypes:
                          resource)
           500:
             description: Could not append to <<resourcePathName>> due to internal server error   
-      put:
-        description: Create/update operation for <<resourcePathName>>
-        body:
-          schema: <<resourcePathName>>
-        responses:
-          200:
-            description: <<resourcePathName>> update successful
-            body:
-              schema: <<resourcePathName>>PutResponse
-          201:
-            description: <<resourcePathName>> create successful
-          202:
-            description: <<resourcePathName>> create/update started, but not yet completed
-          401:
-            description: User does not have create/update permissions to <<resourcePathName>>
-          404:
-            description: <<resourcePathName>> not found
-          409:
-            description: <<resourcePathName>> conflict detected (e.g., intervening update 
-                         occurred between when user accessed resource and when user updated
-                         resource)
-          500:
-            description: Could not append to <<resourcePathName>> due to internal server error
+#      put:
+#        description: Create/update operation for <<resourcePathName>>
+#        body:
+#          schema: <<resourcePathName>>
+#        responses:
+#          200:
+#            description: <<resourcePathName>> update successful
+#            body:
+#              schema: <<resourcePathName>>PutResponse
+#          201:
+#            description: <<resourcePathName>> create successful
+#          202:
+#            description: <<resourcePathName>> create/update started, but not yet completed
+#          401:
+#            description: User does not have create/update permissions to <<resourcePathName>>
+#          404:
+#            description: <<resourcePathName>> not found
+#          409:
+#            description: <<resourcePathName>> conflict detected (e.g., intervening update 
+#                         occurred between when user accessed resource and when user updated
+#                         resource)
+#          500:
+#            description: Could not append to <<resourcePathName>> due to internal server error
       delete:
         description: Delete operation for <<resourcePathName>>
         responses:
@@ -180,8 +180,8 @@ resourceTypes:
       /{elementId}:
         post:
           is: [constrainable]
-        put:
-          is: [constrainable]
+#        put:
+#          is: [constrainable]
         type: collection
         uriParameters:
           elementId:
@@ -321,8 +321,8 @@ resourceTypes:
           /{elementId}:
             post:
               is: [constrainable]
-            put:
-              is: [constrainable]
+#            put:
+#              is: [constrainable]
             type: collection
             uriParameters:
               elementId:
