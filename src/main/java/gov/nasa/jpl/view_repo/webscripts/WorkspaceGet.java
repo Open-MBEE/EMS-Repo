@@ -1,35 +1,23 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.util.Acm;
-import gov.nasa.jpl.mbee.util.TimeUtils;
-import gov.nasa.jpl.view_repo.sysml.View;
-import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.util.NodeUtil;
-import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
-import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
-import org.alfresco.service.ServiceRegistry;
 
 public class WorkspaceGet extends AbstractJavaWebScript{
 	
@@ -52,7 +40,7 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 				String userName = AuthenticationUtil.getRunAsUser();
 				String wsID = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
 				WorkspaceNode workspace = AbstractJavaWebScript.getWorkspaceFromId(wsID, getServices(), getResponse(), status, false, userName);
-				object = getWorkspace(workspace);
+				object = getWorkspace(workspace, wsID);
 			}
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "JSON object could not be created \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -82,22 +70,23 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		return object;
 	}
 	
-	protected JSONObject getWorkspace(WorkspaceNode ws) throws JSONException {
+	protected JSONObject getWorkspace(WorkspaceNode ws, String wsID) throws JSONException {
 		JSONObject json = new JSONObject();
 		JSONArray jsonArray = new JSONArray();
 		JSONObject interiorJson = new JSONObject();
-		if(checkPermissions(ws, PermissionService.READ)){
-			interiorJson.put("lastTimeSyncParent", getStringIfNull(ws.getProperty("ems:lastTimeSyncParent")));
-			if(ws.getSourceWorkspace() != null)
-				interiorJson.put("ems:source", getStringIfNull(ws.getSourceWorkspace().getProperty(Acm.CM_NAME)));
-			else
-				interiorJson.put("ems:source", "master");
-			interiorJson.put(Acm.JSON_TYPE, getStringIfNull(ws.getProperty(Acm.ACM_TYPE)));
-			interiorJson.put(Acm.JSON_NAME, getStringIfNull(ws.getProperty(Acm.CM_NAME)));
+		if(ws == null && wsID.equals("master")){
+			interiorJson.put("creator", "null");
+			interiorJson.put("created",  "null");
+			interiorJson.put("name", wsID);
+			interiorJson.put("parent", "null");
+			interiorJson.put("branched", "null");
+			jsonArray.put(interiorJson);
+		}
+		else if(checkPermissions(ws, PermissionService.READ)){
+			jsonArray.put(ws.toJSONObject(null));
 		}
 		else
 			log(LogLevel.WARNING, "No permission to read: " + ws.getSysmlId(), HttpServletResponse.SC_NOT_FOUND);
-		jsonArray.put(interiorJson);
 		json.put("workspace" , jsonArray);
 		return json;
 	}

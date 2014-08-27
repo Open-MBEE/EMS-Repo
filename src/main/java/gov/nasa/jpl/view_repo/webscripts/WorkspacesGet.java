@@ -1,26 +1,17 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.Debug;
-import gov.nasa.jpl.view_repo.util.Acm;
-import gov.nasa.jpl.mbee.util.TimeUtils;
-import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
-import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,7 +20,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
-import org.alfresco.service.ServiceRegistry;
 
 
 public class WorkspacesGet extends AbstractJavaWebScript{
@@ -64,7 +54,7 @@ public class WorkspacesGet extends AbstractJavaWebScript{
                 String userName = AuthenticationUtil.getRunAsUser();
                 EmsScriptNode homeFolder = NodeUtil.getUserHomeFolder(userName);
 
-                json = handleWorkspace (homeFolder);
+                json = handleWorkspace (homeFolder, status, userName);
             }
         } catch (JSONException e) {
             log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -89,12 +79,22 @@ public class WorkspacesGet extends AbstractJavaWebScript{
         return model;
 	}
 
-	protected JSONObject handleWorkspace (EmsScriptNode homeFolder) throws JSONException{
+	protected JSONObject handleWorkspace (EmsScriptNode homeFolder, Status status, String user) throws JSONException{
 
 		JSONObject json = new JSONObject ();
 		JSONArray jArray = new JSONArray ();
         Collection <EmsScriptNode> nodes = NodeUtil.luceneSearchElements("ASPECT:\"ems:workspace\"" );
-
+        //This is for the master workspace (not located in the user home folder).
+        WorkspaceNode master = AbstractJavaWebScript.getWorkspaceFromId("master", services, response, status, false, user);
+        if(master == null){
+        	JSONObject interiorJson = new JSONObject();
+        	interiorJson.put("creator", "null");
+        	interiorJson.put("created",  "null");
+			interiorJson.put("name", "master");
+			interiorJson.put("parent", "null");
+			interiorJson.put("branched", "null");
+			jArray.put(interiorJson);
+		}
         for (EmsScriptNode workspaceNode: nodes) {
             	if (checkPermissions(workspaceNode, PermissionService.READ)){
             	    WorkspaceNode wsNode = new WorkspaceNode(workspaceNode.getNodeRef(), services, response);
