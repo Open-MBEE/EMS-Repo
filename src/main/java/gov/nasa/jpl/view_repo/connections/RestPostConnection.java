@@ -11,7 +11,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 
-public class RestPostConnection implements AbstractConnection {
+public class RestPostConnection extends AbstractConnection {
     static Logger logger = Logger.getLogger(RestPostConnection.class);
 
     private long sequenceId = 1;
