@@ -36,6 +36,9 @@
 
     viewget 301
 
+1) creating a product
+
+    viewpost viewsNew.json
 
 2) view generation
 
@@ -79,3 +82,8 @@
 11) Fixing constraint violations
 
     curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data @JsonData/expressionElementsNew.json "http://localhost:8080/alfresco/service/javawebscripts/sites/europa/projects/123456/elements?fix=true"
+
+12) snapshots
+
+13) configuration sets
+
