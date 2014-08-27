@@ -9,6 +9,15 @@
                            }
     },
     {
+        "sysmlid": "_17_0_2_3_e610336_1394148233838_91795_29332",
+        "name": "Context",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+         "specialization" : {
+                                "type": "View"
+                            }
+    },
+    {
         "sysmlid": "get_two_names",
         "name": "get_two_names_op",
         "documentation": "",
@@ -30,6 +39,20 @@
                                         "type":"ElementValue"}],
                             "type": "Expression" 
                            }
+    },
+    {
+        "sysmlid": "_17_0_2_4_f3a0363_1394141845089_115460_28389",
+        "name": "ionosphere",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394140377374_900991_27624",
+        "specialization": {"type": "Property"}
+    },
+    {
+        "sysmlid": "_17_0_2_4_f3a0363_1394141831980_671275_28387",
+        "name": "radiation",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394140377374_900991_27624",
+        "specialization": {"type": "Property"}
     },
     {
         "sysmlid": "get_names",
