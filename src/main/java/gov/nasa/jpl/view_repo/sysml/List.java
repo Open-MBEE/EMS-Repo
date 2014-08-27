@@ -44,7 +44,11 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
         super( c );
     }
     
-//    // FIXME java reflection is not smart enough to handle this correctly
+    // FIXME java reflection is not smart enough to handle this correctly, 
+    //		 as it doesnt work with an array of Names in a Object array, even
+    //		 if typecasting that array to an Object, or wrapping it in another
+    //		 Object array.  Believe the Object array must be a V array for this 
+    //		 to work.
 //    public <V extends Viewable<EmsScriptNode>> List(V... c) {
 //    	this( Utils.newList(c));
 //    }
