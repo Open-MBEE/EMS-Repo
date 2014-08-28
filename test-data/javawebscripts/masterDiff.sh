@@ -80,13 +80,13 @@ if [ $server -eq 1 ]; then
     cd ./soapStuff
     
 	for i in $(ls . | grep "soapui-project.xml"); do
-	         echo RUNNING TEST $i
-                ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i
-        done
+         echo RUNNING TEST $i
+            ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i
+    done
 
-        #shutdown the tomcat server process
-        pkill -fn 'integration-test'
-        echo 'KILLING SERVER'
+    #shutdown the tomcat server process
+    pkill -fn 'integration-test'
+    echo 'KILLING SERVER'
 
 	echo 'PASSTEST?'
         echo "$passTest"

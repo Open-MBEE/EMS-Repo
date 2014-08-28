@@ -56,7 +56,6 @@ if [ $server -eq 1 ]; then
 		echo 'OMITTING WORKSPACES DIFF SCRIPT'
 		./diff2.sh
 		failTest=$?
-
     elif [ $diffChoose -eq 2 ];then
             echo 'RUNNING WORKSPACES DIFF SCRIPT'
             echo 'OMITTING OLD API DIFF SCRIPT'
@@ -65,17 +64,16 @@ if [ $server -eq 1 ]; then
                 echo 'DIFFING  WORKSPACES BRANCH'
                 ./diffWorkspaceWORKS.sh
                 failTest=$?
-            fi
-            if [[ "$GIT_BRANCH" == *develop ]];then
-	    echo 'DIFFING DEVELOP BRANCH'
-	    ./diffWorkspaceWORKSdev.sh
-	    passTEST=$?
-	fi
-    else 
-            echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
-            ./diff2.sh
-            ./diffWorkspaceWORKSdev.sh
-            failTest=$?
+            elif [[ "$GIT_BRANCH" == *develop ]];then
+			    echo 'DIFFING DEVELOP BRANCH'
+			    ./diffWorkspaceWORKSdev.sh
+			    failTest=$?
+   			else 
+	            echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
+	            ./diff2.sh
+	            ./diffWorkspaceWORKSdev.sh
+	            failTest=$?
+	        fi
     fi
     
     
@@ -96,11 +94,11 @@ if [ $server -eq 1 ]; then
 	DIFF=`grep -i failed soapSuite*.out`
 	if [ "$DIFF" != "" ]; then
 	    failTest=1
-        fi
+    fi
 
-        #shutdown the tomcat server process
-        pkill -fn 'integration-test'
-        echo 'KILLING SERVER'
+    #shutdown the tomcat server process
+    pkill -fn 'integration-test'
+    echo 'KILLING SERVER'
 
 	echo 'PASSTEST?'
         echo "$failTest"
