@@ -81,6 +81,7 @@ The following commands can be tested from the alfresco-view-repo/test-data/javaw
 
     wspost ws1
     curl -w %{http_code}\n -X POST -u admin:admin http://localhost:8080/alfresco/service/workspaces/ws1?sourceWorkspace=master
+    
     wspost ws2 ws1
     curl -w %{http_code}\n -X POST -u admin:admin http://localhost:8080/alfresco/service/workspaces/ws2?sourceWorkspace=ws1
 
@@ -88,6 +89,7 @@ The following commands can be tested from the alfresco-view-repo/test-data/javaw
 
     wsget
     curl -w %{http_code}\n -X GET -u admin:admin http://localhost:8080/alfresco/service/workspaces
+
     wsget ws1
     curl -w %{http_code}\n -X GET -u admin:admin http://localhost:8080/alfresco/service/workspaces/ws1
 
@@ -121,23 +123,30 @@ The following commands can be tested from the alfresco-view-repo/test-data/javaw
     wsdiff ws1 ws1 2014-08-28T07:22:00.000-0800 2014-08-28T07:23:00.000-0800
     curl -w %{http_code}\n -X GET -u admin:admin http://localhost:8080/alfresco/service/diff?workspace1=master&workspace2=ws1?timestamp1=2014-08-28T07:22:00.000-0800?timestamp2=2014-08-28T07:23:00.000-0800
 
-17) Post expression
+17) Save/merge workspace
+
+    modelmerge ws1
+    curl -w %{http_code}\n -X POST -u admin:admin http://localhost:8080/alfresco/service/workspaces/ws1
+
+18) Post expression
 
     curl -w %{http_code}\n -X POST -u admin:admin -H Content-Type:application/json --data @JsonData/operations.json http://localhost:8080/alfresco/service/workspaces/master/elements?expression=1%2B1
 
-18) Get expression
+19) Get expression
 
     modelget <sysmlid of generated Expression> 
 
-19) Evaluating expressions
-
-    
-
-11) Fixing constraint violations
+20) Fixing constraint violations
 
     curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data @JsonData/expressionElementsNew.json "http://localhost:8080/alfresco/service/javawebscripts/sites/europa/projects/123456/elements?fix=true"
 
-12) snapshots
+21) snapshots
 
-13) configuration sets
+22) configuration sets
+
+NOT YET AVAILABLE
+
+23) Evaluating expressions
+
+    curl -w "\n%{http_code}\n" -u admin:admin -X GET "http://localhost:8080/alfresco/service/javawebscripts/elements/<sysmlid of expression>?evaluate=true"
 
