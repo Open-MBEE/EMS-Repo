@@ -76,7 +76,7 @@ if [ $server -eq 1 ]; then
 	        ./diffWorkspaceDW.sh
 	        passTest=$?
 	    fi
-    
+    fi
     
     #connect to soapUI -- WORK STILL NEEDED
     echo 'RUNNING SOAP UI TESTS'
