@@ -351,7 +351,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                 } else if (productObject instanceof JSONObject) {
                     productId = ((JSONObject)productObject).getString( "sysmlid" );
                 }
-                EmsScriptNode product = findScriptNodeById(productId, workspace, null);
+                EmsScriptNode product = findScriptNodeById(productId, workspace, null, false);
                 if (product != null) {
                     config.createOrUpdateAssociation( product, "ems:configuredProducts", true );
                     productSet.add( productId );

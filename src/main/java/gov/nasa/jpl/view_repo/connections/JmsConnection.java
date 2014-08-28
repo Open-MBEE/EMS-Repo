@@ -12,7 +12,7 @@ import org.json.JSONObject;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.log4j.Logger;
 
-public class JmsConnection implements AbstractConnection {
+public class JmsConnection extends AbstractConnection {
     static Logger logger = Logger.getLogger(JmsConnection.class);
     long sequenceId = 0;
     
@@ -70,6 +70,14 @@ public class JmsConnection implements AbstractConnection {
 
             // Create a message
             TextMessage message = session.createTextMessage(msg);
+            if (workspace != null) {
+                message.setStringProperty( "workspace", workspace );
+            } else {
+                message.setStringProperty( "workspace", "master" );
+            }
+            if (projectId != null) {
+                message.setStringProperty( "projectId", projectId );
+            }
 
             // Tell the producer to send the message
             producer.send(message);
@@ -86,5 +94,4 @@ public class JmsConnection implements AbstractConnection {
         
         return status;
     }
-    
 }

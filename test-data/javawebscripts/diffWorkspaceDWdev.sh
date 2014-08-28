@@ -4,7 +4,7 @@
 
 mkdir -p outputWorkspaces
 
-passTest=0
+failedTest=0
 
 export CURL_STATUS='-w \n%{http_code}\n'
 export CURL_POST_FLAGS_NO_DATA="-X POST"
@@ -37,7 +37,7 @@ echo
 curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/comments.json $BASE_URL"elements"  | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"'| grep -v '"author"' > outputWorkspaces/post4.json
 DIFF=$(diff -I 'author' baselineWorkspaces/post4.json outputWorkspaces/post4.json | grep -v '"author"')
 if [ "$DIFF" != "" ];then
-        passTest=1
+        failedTest=1
         echo "$DIFF"
 fi
 echo
@@ -53,7 +53,7 @@ echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"element/search?keyword=some*\""
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"element/search?keyword=some*" | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > outputWorkspaces/get9.json
 DIFF=$(diff baselineWorkspaces/get9.json outputWorkspaces/get9.json)
 if [ "$DIFF" != "" ];then
-        passTest=1
+        failedTest=1
         echo "$DIFF"
 fi
 echo
@@ -74,7 +74,7 @@ echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/configuration.json $BASE_URL"si
 curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/configuration.json $BASE_URL"sites/europa/configurations" | grep -v '"read":' | grep -v '"lastModified"' | grep -v '"sysmlid"' > outputWorkspaces/config1.json
 DIFF=$(diff baselineWorkspaces/config1.json outputWorkspaces/config1.json | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -ve '---' | grep -v 'time')
 if [ "$DIFF" != "" ];then
-        passTest=1
+        failedTest=1
         echo "$DIFF"
 fi
 echo
@@ -91,7 +91,7 @@ grep -vE '"id":*' outputWorkspaces/config2.json | grep -vE '"url": "/alfresco/se
 grep -vE '"read":' baselineWorkspaces/config2.json  | grep -v '"modified"' | grep -v '"sysmlid"' | grep -vE '"id":*'| grep -vE '"url": "/alfresco/service/snapshots/*' | grep -vE '"created":'  > baselineWorkspaces/tempConfig2_2.json
 DIFF=$(diff baselineWorkspaces/tempConfig2_2.json baselineWorkspaces/tempConfig2_1.json)
 if [ "$DIFF" != "" ];then
-        passTest=1
+        failedTest=1
         echo "$DIFF"
 fi
 echo
@@ -99,4 +99,4 @@ echo
 
 ####################################   		ADDED CURL COMMANDS     ##########################################
 
-exit $passTest
+exit $failedTest

@@ -1,26 +1,17 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.Debug;
-import gov.nasa.jpl.view_repo.util.Acm;
-import gov.nasa.jpl.mbee.util.TimeUtils;
-import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
-import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,7 +20,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
-import org.alfresco.service.ServiceRegistry;
 
 
 public class WorkspacesGet extends AbstractJavaWebScript{
@@ -64,7 +54,7 @@ public class WorkspacesGet extends AbstractJavaWebScript{
                 String userName = AuthenticationUtil.getRunAsUser();
                 EmsScriptNode homeFolder = NodeUtil.getUserHomeFolder(userName);
 
-                json = handleWorkspace (homeFolder);
+                json = handleWorkspace (homeFolder, status, userName);
             }
         } catch (JSONException e) {
             log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -89,56 +79,34 @@ public class WorkspacesGet extends AbstractJavaWebScript{
         return model;
 	}
 
-	protected JSONObject handleWorkspace (EmsScriptNode homeFolder) throws JSONException{
+	protected JSONObject handleWorkspace (EmsScriptNode homeFolder, Status status, String user) throws JSONException{
 
 		JSONObject json = new JSONObject ();
 		JSONArray jArray = new JSONArray ();
         Collection <EmsScriptNode> nodes = NodeUtil.luceneSearchElements("ASPECT:\"ems:workspace\"" );
-
-        for (EmsScriptNode workspaceNode: nodes){
-
+        //This is for the master workspace (not located in the user home folder).
+        WorkspaceNode master = AbstractJavaWebScript.getWorkspaceFromId("master", services, response, status, false, user);
+        if(master == null){
         	JSONObject interiorJson = new JSONObject();
-
-        	if (checkPermissions(workspaceNode, PermissionService.READ)){
-
-//        		Map <String, Object> wkspProperties = new HashMap <String, Object> ();
-//        		wkspProperties = workspaceNode.getProperties();
-//        		for (String key: wkspProperties.keySet()) {
-//        			interiorJson.put(key, wkspProperties.get(key));
-//        		}
-
-	        	//interiorJson.put(Acm.JSON_ID,workspaceNode.getProperty("ems:id"));
-	        	//interiorJson.put(Acm.JSON_NAME, workspaceNode.getProperty(Acm.CM_TITLE));
-	        	//interiorJson.put("sysml:parent", getStringIfNull(((WorkspaceNode) workspaceNode).getParentWorkspace().getSysmlId()));
-	        	interiorJson.put("lastTimeSyncParent", getStringIfNull(workspaceNode.getProperty("ems:lastTimeSyncParent")));
-	        	interiorJson.put("ems:parent", getStringIfNull(workspaceNode.getProperty("ems:parent")));
-	        	interiorJson.put(Acm.JSON_TYPE, getStringIfNull(workspaceNode.getProperty(Acm.ACM_TYPE)));
-        		interiorJson.put(Acm.JSON_ID, getStringIfNull(workspaceNode.getProperty(Acm.JSON_ID)));
-        		interiorJson.put(Acm.JSON_NAME, getStringIfNull(workspaceNode.getProperty(Acm.CM_NAME)));
-        		interiorJson.put("mergesource", getStringIfNull(workspaceNode.getProperty("ems:Mergesource")));
-        		interiorJson.put("ems:Workspace", getStringIfNull(workspaceNode.getProperty("ems:Workspace")));
-        	}
-        	else {
-        		log(LogLevel.WARNING,"No permission to read: "+ workspaceNode.getSysmlId(),HttpServletResponse.SC_NOT_FOUND);
-        	}
-
-        	jArray.put(interiorJson);
+        	interiorJson.put("creator", "null");
+        	interiorJson.put("created",  "null");
+			interiorJson.put("name", "master");
+			interiorJson.put("parent", "null");
+			interiorJson.put("branched", "null");
+			jArray.put(interiorJson);
+		}
+        for (EmsScriptNode workspaceNode: nodes) {
+            	if (checkPermissions(workspaceNode, PermissionService.READ)){
+            	    WorkspaceNode wsNode = new WorkspaceNode(workspaceNode.getNodeRef(), services, response);
+            	    jArray.put(wsNode.toJSONObject( null ));
+            }
         }
 
         json.put("workspaces", jArray);
         return json;
 	}
 
-	protected Object getStringIfNull (Object obj){
-
-		if (obj == null)
-			return "null";
-		else
-			return obj;
-
-	}
-
-    /**
+	/**
      * Validate the request and check some permissions
      */
     @Override

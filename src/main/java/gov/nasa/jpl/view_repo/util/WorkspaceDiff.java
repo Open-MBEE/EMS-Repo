@@ -5,10 +5,11 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 
+import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -16,8 +17,10 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.version.Version;
+import org.alfresco.service.namespace.QName;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,6 +44,8 @@ public class WorkspaceDiff {
      * definition is used, else the first.
      */
     public boolean conflictMustBeChangeToSameProperty;
+
+    public boolean onlyModelElements = true;
 
     private WorkspaceNode ws1;
     private WorkspaceNode ws2;
@@ -74,7 +79,7 @@ public class WorkspaceDiff {
     }
 
     /**
-     * Constructor only for creating 
+     * Constructor only for creating
      * @param ws1
      * @param ws2
      */
@@ -83,7 +88,7 @@ public class WorkspaceDiff {
         this.ws1 = ws1;
         this.ws2 = ws2;
     }
-    
+
     public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2 ) {
         this(ws1, ws2);
         this.timestamp1 = timestamp1;
@@ -128,11 +133,11 @@ public class WorkspaceDiff {
         for ( NodeRef ref : refs ) {
             EmsScriptNode nodeFromRef = new EmsScriptNode( ref, getServices() );
             String name = nodeFromRef.getName();
-            NodeRef ref1 = NodeUtil.findNodeRefById( name, getWs1(),
-                                                     getTimestamp1(), getServices() );
+            NodeRef ref1 = NodeUtil.findNodeRefById( name, false, getWs1(),
+                                                     getTimestamp1(), getServices(), true );
             EmsScriptNode node1 = ref1 == null ? null : new EmsScriptNode( ref1, getServices() );
-            NodeRef ref2 = NodeUtil.findNodeRefById( name, getWs2(),
-                                                     getTimestamp2(), getServices() );
+            NodeRef ref2 = NodeUtil.findNodeRefById( name, false, getWs2(),
+                                                     getTimestamp2(), getServices(), true );
             EmsScriptNode node2 = ref2 == null ? null : new EmsScriptNode( ref2, getServices() );
             addToDiff( node1, node2 );
         }
@@ -166,6 +171,9 @@ public class WorkspaceDiff {
         refs = nodeDiff.getUpdated();
         addDiffs( refs );
 
+        // Fix nested elements (value specifications, Expressions, ???)
+        //nodeDiff.fixValueSpecifications(this);
+
         // Moved
         for ( Entry< String, EmsScriptNode > e : updatedElements.entrySet() ) {
             Map< String, Pair< Object, Object >> changes =
@@ -187,10 +195,18 @@ public class WorkspaceDiff {
         Set< String > ids = new TreeSet< String >( nodeDiff.getMap1().keySet() );
         ids.addAll( nodeDiff.getMap2().keySet() );
         for ( String id : ids ) {
-            NodeRef ref = NodeUtil.findNodeRefById( id, getWs1(), getTimestamp1(), null );
+            NodeRef ref = NodeUtil.findNodeRefById( id, false, getWs1(), getTimestamp1(), null, true );
             if ( ref != null ) {
                 EmsScriptNode node = new EmsScriptNode( ref, getServices() );
-                if ( node.exists() ) elements.put( id, node );
+                if ( node.exists() ) {
+                    EmsScriptNode parent = node;
+                    String parentId = id;
+                    while ( parent != null && parent.isModelElement() ) {
+                        elements.put( parentId, parent );
+                        parent = parent.getOwningParent( null );
+                        parentId = parent.getName();
+                    }
+                }
             }
         }
 
@@ -221,12 +237,14 @@ public class WorkspaceDiff {
 
                 // Check to see if the existence of the nodes changed, in which
                 // case, it is a definite conflict.
-                NodeRef ref1 = NodeUtil.findNodeRefById( name, getWs1(),
+                NodeRef ref1 = NodeUtil.findNodeRefById( name, false, getWs1(),
                                                          getTimestamp1(),
-                                                         getServices() );
-                NodeRef ref2 = NodeUtil.findNodeRefById( name, getWs2(),
+                                                         getServices(),
+                                                         false);
+                NodeRef ref2 = NodeUtil.findNodeRefById( name, false, getWs2(),
                                                          getTimestamp2(),
-                                                         getServices() );
+                                                         getServices(),
+                                                         false);
                 boolean isConflict =
                         ( NodeUtil.exists( ref1 ) != NodeUtil.exists( ref2 ) );
 
@@ -263,9 +281,10 @@ public class WorkspaceDiff {
         if ( Utils.isNullOrEmpty( changes ) ) return false;
         WorkspaceNode parentWs =
                 WorkspaceNode.getCommonParent( getWs1(), getWs2() );
-        NodeRef pRef1 = NodeUtil.findNodeRefById( elementName, parentWs,
+        NodeRef pRef1 = NodeUtil.findNodeRefById( elementName, false, parentWs,
                                                  getTimestamp1(),
-                                                 getServices() );
+                                                 getServices(),
+                                                 false );
         NodeDiff nodeDiff1 = new NodeDiff( pRef1, ref1 );
 
         Map< String, Pair< Object, Object >> changes1 =
@@ -273,9 +292,10 @@ public class WorkspaceDiff {
         if ( Utils.isNullOrEmpty( changes1 ) ) return false;
 
         NodeRef pRef2 =
-                NodeUtil.findNodeRefById( elementName, parentWs,
+                NodeUtil.findNodeRefById( elementName, false, parentWs,
                                           getTimestamp2(),
-                                          getServices() );
+                                          getServices(),
+                                          false );
         NodeDiff nodeDiff2 = new NodeDiff( pRef2, ref2 );
         Map< String, Pair< Object, Object >> changes2 =
                 nodeDiff2.getPropertyChanges( elementName );
@@ -415,13 +435,14 @@ public class WorkspaceDiff {
         JSONObject ws1Json = new JSONObject();
         JSONObject ws2Json = new JSONObject();
 
-        addJSONArray(ws1Json, "elements", elements, elementsVersions, time1, showAll);
+        addJSONArray(ws1Json, "elements", elements, elementsVersions, time1, true);
         addWorkspaceMetadata( ws1Json, ws1, time1 );
 
-        addJSONArray(ws2Json, "addedElements", addedElements, time2, showAll);
+        addJSONArray(ws2Json, "addedElements", addedElements, time2, true);
         addJSONArray(ws2Json, "movedElements", movedElements, time2, showAll);
         addJSONArray(ws2Json, "deletedElements", deletedElements, time2, showAll);
         addJSONArray(ws2Json, "updatedElements", updatedElements, time2, showAll);
+        addJSONArray(ws2Json, "conflictedElements", conflictedElements, time2, showAll);
         addWorkspaceMetadata( ws2Json, ws2, time2);
 
         deltaJson.put( "workspace1", ws1Json );
@@ -464,21 +485,80 @@ public class WorkspaceDiff {
         return !emptyArray;
     }
 
+    public static String toJsonName( Object name ) {
+        QName qn = null;
+        String possiblePrefixString = "" + name;
+        if ( name instanceof QName ) {
+            qn = (QName)name;
+        } else {
+            qn = NodeUtil.createQName( possiblePrefixString );
+        }
+        if ( qn != null ) {
+            possiblePrefixString = qn.getPrefixString();
+        }
+        if ( !Acm.getJSON2ACM().containsKey( possiblePrefixString ) &&
+             Acm.getACM2JSON().containsKey( possiblePrefixString ) ) {
+            return Acm.getACM2JSON().get( possiblePrefixString );
+        } else {
+            if ( possiblePrefixString.startsWith( "sysml:" ) ) {
+                possiblePrefixString = possiblePrefixString.substring( 6 );
+            } else if ( possiblePrefixString.startsWith( "ems:" ) ) {
+                possiblePrefixString = possiblePrefixString.substring( 4 );
+            }// else possiblePrefixString = null;
+        }
+        return possiblePrefixString;
+    }
+
+    protected static Set<String> filter = null;
+    protected static Set<String> getFilter() {
+        if ( filter == null ) {
+            filter = new LinkedHashSet<String>();
+            filter.add("sysmlid");
+            filter.add("id");
+//            for ( QName qn : getIgnoredPropIdQNames() ) {
+//                String jsonName = toJsonName( qn );
+//                if ( jsonName != null ) {
+//                    filter.remove( jsonName );
+//                }
+//            }
+        }
+        return filter;
+    }
+
+
     private JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> set, Map<String, Version> versions, Date dateTime, boolean showAll) throws JSONException {
         Set<String> filter = null;
         if (!showAll) {
-            filter = new HashSet<String>();
-            filter.add("id");
+            filter = getFilter();
+//            filter = new HashSet<String>();
+//            filter.add("id");
         }
 
         JSONArray array = new JSONArray();
         for (EmsScriptNode node: set.values()) {
+            // allow the possibility that nodeDiff isn't being used to make the diff call
+            if ( nodeDiff != null ) {
+                Map< String, Pair< Object, Object > > propChanges =
+                        nodeDiff.getPropertyChanges( node.getName() );
+                if ( !showAll && propChanges != null && !propChanges.isEmpty() ) {
+                    filter = new LinkedHashSet< String >(filter);
+                    for ( Entry< String, Pair< Object, Object > > e : propChanges.entrySet() ) {
+                        Pair< Object, Object > p = e.getValue();
+                        if ( p != null && ( p.first != null || p.second != null ) ) {
+                            String jsonName = toJsonName( e.getKey() );
+                            if ( jsonName != null ) {
+                                filter.add( jsonName );
+                            }
+                        }
+                    }
+                }
+            }
             if ( versions == null || versions.size() <= 0 ) {
                 array.put( node.toJSONObject( filter, dateTime ) );
             } else {
                 JSONObject jsonObject = node.toJSONObject( filter, dateTime );
                 Version version = versions.get( node.getName() );
-                if ( version != null) {
+                if ( version != null ) {
                     // TODO: perhaps add service and response in method call rather than using the nodes?
                     EmsScriptNode changedNode = new EmsScriptNode(version.getVersionedNodeRef(), node.getServices(), node.getResponse());
 
@@ -501,15 +581,196 @@ public class WorkspaceDiff {
         return status;
     }
 
+    protected static Set<String> ignoredPropIds = getIgnoredPropIds();
+    protected static Set<QName> ignoredPropIdQnames = getIgnoredPropIdQNames();
+    public static Set<String> getIgnoredPropIds() {
+        if ( ignoredPropIds == null ) {
+            DictionaryService ds = NodeUtil.getServices().getDictionaryService();
+            //ds.getAllAspects();
+            Collection< QName > properties = ds.getAllProperties( null );
+            ignoredPropIds = Utils.newSet();
+            for ( QName propName : properties ) {
+                //PropertyDefinition propDef = ds.getProperty( propName );
+                if ( propName == null ) continue;
+                if ( propName.getPrefixString().startsWith( "sys:" ) ) {
+                    ignoredPropIds.add( propName.toString() );
+                }
+                if ( propName.getPrefixString().startsWith( "ems:" ) ) {
+                    ignoredPropIds.add( propName.toString() );
+                }
+            }
+            List<String> prefixes = Utils.newList(
+//                                                  "cm:name",
+//                                                  "cm:content",
+//                                                  "cm:modelName",
+//                                                  "cm:modelDescription",
+//                                                  "cm:modelAuthor",
+//                                                  "cm:modelPublishedDate",
+//                                                  "cm:modelVersion",
+//                                                  "cm:modelActive",
+//                                                  "cm:destination",
+//                                                  "cm:userName",
+//                                                  "cm:homeFolder",
+//                                                  "cm:firstName",
+//                                                  "cm:lastName",
+//                                                  "cm:middleName",
+//                                                  "cm:email",
+//                                                  "cm:organizationId",
+//                                                  "cm:homeFolderProvider",
+//                                                  "cm:defaultHomeFolderPath",
+//                                                  "cm:presenceProvider",
+//                                                  "cm:presenceUsername",
+//                                                  "cm:organization",
+//                                                  "cm:jobtitle",
+//                                                  "cm:location",
+//                                                  "cm:persondescription",
+//                                                  "cm:telephone",
+//                                                  "cm:mobile",
+//                                                  "cm:companyaddress1",
+//                                                  "cm:companyaddress2",
+//                                                  "cm:companyaddress3",
+//                                                  "cm:companypostcode",
+//                                                  "cm:companytelephone",
+//                                                  "cm:companyfax",
+//                                                  "cm:companyemail",
+//                                                  "cm:skype",
+//                                                  "cm:instantmsg",
+//                                                  "cm:userStatus",
+//                                                  "cm:userStatusTime",
+//                                                  "cm:googleusername",
+//                                                  "cm:emailFeedDisabled",
+//                                                  "cm:subscriptionsPrivate",
+//                                                  "cm:emailFeedId",
+//                                                  "cm:sizeCurrent",
+//                                                  "cm:sizeQuota",
+//                                                  "cm:authorityName",
+//                                                  "cm:authorityDisplayName",
+//                                                  "cm:ratingScore",
+//                                                  "cm:ratingScheme",
+//                                                  "cm:ratedAt",
+//                                                  "cm:failureCount",
+//                                                  "cm:failedThumbnailTime",
+//                                                  "cm:thumbnailName",
+//                                                  "cm:contentPropertyName",
+//                                                  "cm:title",
+//                                                  "cm:description",
+                                                  "cm:created",
+                                                  "cm:creator",
+                                                  "cm:modified",
+                                                  "cm:modifier",
+                                                  "cm:accessed",
+//                                                  "cm:template",
+//                                                  "cm:webscript",
+//                                                  "cm:summaryWebscript",
+//                                                  "cm:removeAfter",
+//                                                  "cm:owner",
+//                                                  "cm:author",
+//                                                  "cm:publisher",
+//                                                  "cm:contributor",
+//                                                  "cm:type",
+//                                                  "cm:identifier",
+//                                                  "cm:dcsource",
+//                                                  "cm:coverage",
+//                                                  "cm:rights",
+//                                                  "cm:subject",
+//                                                  "cm:from",
+//                                                  "cm:to",
+//                                                  "cm:summary",
+//                                                  "cm:hits",
+//                                                  "cm:counter",
+//                                                  "cm:workingCopyOwner",
+//                                                  "cm:workingCopyMode",
+//                                                  "cm:workingCopyLabel",
+                                                  "cm:versionLabel",
+                                                  "cm:versionType",
+                                                  "cm:initialVersion",
+                                                  "cm:autoVersion",
+                                                  "cm:autoVersionOnUpdateProps",
+                                                  "cm:lockOwner",
+                                                  "cm:lockType",
+                                                  "cm:lockLifetime",
+                                                  "cm:expiryDate",
+                                                  "cm:lockIsDeep",
+//                                                  "cm:categories",
+//                                                  "cm:taggable",
+//                                                  "cm:tagScopeCache",
+//                                                  "cm:tagScopeSummary",
+//                                                  "cm:likesRatingSchemeCount",
+//                                                  "cm:likesRatingSchemeTotal",
+//                                                  "cm:fiveStarRatingSchemeCount",
+//                                                  "cm:fiveStarRatingSchemeTotal",
+//                                                  "cm:originator",
+//                                                  "cm:addressee",
+//                                                  "cm:addressees",
+//                                                  "cm:subjectline",
+//                                                  "cm:sentdate",
+//                                                  "cm:noderef",
+//                                                  "cm:storeName",
+//                                                  "cm:preferenceValues",
+//                                                  "cm:published",
+//                                                  "cm:updated",
+//                                                  "cm:latitude",
+//                                                  "cm:longitude",
+                                                  "cm:lastThumbnailModification",
+                                                  "cm:isIndexed",
+                                                  "cm:isContentIndexed"
+//                                                  "cm:locale",
+//                                                  "cm:automaticUpdate"
+                                                  );
+            for ( String p : prefixes ) {
+                QName qn = NodeUtil.createQName( p );
+                ignoredPropIds.add( qn.toString() );
+            }
+//            ignoredPropIds.addAll( prefixes );
+        }
+        return ignoredPropIds;
+    }
+    public static Set<QName> getIgnoredPropIdQNames() {
+        if ( ignoredPropIdQnames == null ) {
+            ignoredPropIdQnames = new LinkedHashSet<QName>();
+            for ( String n : getIgnoredPropIds() ) {
+                QName qn = NodeUtil.createQName( n );
+                ignoredPropIdQnames.add( qn );
+            }
+        }
+        return ignoredPropIdQnames;
+    }
+
     protected void captureDeltas(WorkspaceNode node) {
         Set< NodeRef > newSet = Utils.newSet();
-        Set<NodeRef> s1 = ( ws1 == null ? newSet : ws1.getChangedNodeRefsWithRespectTo( node, timestamp1 ) );
-        Set<NodeRef> s2 = ( node == null ? newSet : node.getChangedNodeRefsWithRespectTo( ws1, timestamp2 ) );
+        Set<NodeRef> s1 = ( ws1 == null ? newSet : ws1.getChangedNodeRefsWithRespectTo( node, timestamp1, timestamp2 ) );
+        Set<NodeRef> s2 = ( node == null ? newSet : node.getChangedNodeRefsWithRespectTo( ws1, timestamp2, timestamp1 ) );
+        if ( onlyModelElements ) {
+            s1 = NodeUtil.getModelElements(s1);
+            s2 = NodeUtil.getModelElements(s2);
+        }
+
+        // need to make sure both sets have each others' nodes
+        for ( NodeRef n : s1 ) {
+            String cmName = NodeUtil.getName( n );
+            NodeRef ref = NodeUtil.findNodeRefById( cmName, false, node, timestamp2, getServices(), false );
+            if ( ref != null ) s2.add( ref );
+        }
+        for ( NodeRef n : s2 ) {
+            String cmName = NodeUtil.getName( n );
+            NodeRef ref = NodeUtil.findNodeRefById( cmName, false, ws1, timestamp1, getServices(), false );
+            if ( ref != null ) s1.add( ref );
+        }
+
         nodeDiff = new NodeDiff( s1, s2 );
+        nodeDiff.addPropertyIdsToIgnore( getIgnoredPropIds() ); //Utils.newList( "read", "creator", "modified" ) );
         populateMembers();
     }
 
     public boolean ingestJSON(JSONObject json) {
+        // TODO??
         return true;
+    }
+
+    public boolean isDiff() {
+        if (addedElements.size() > 0 || deletedElements.size() > 0 || movedElements.size() > 0 || updatedElements.size() > 0) {
+            return true;
+        }
+        return false;
     }
 }

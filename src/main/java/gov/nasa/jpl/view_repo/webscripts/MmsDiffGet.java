@@ -28,7 +28,6 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     protected boolean validateRequest( WebScriptRequest req, Status status ) {
         workspaceId1 = req.getParameter( "workspace1" );
         workspaceId2 = req.getParameter( "workspace2" );
-        System.out.println("fooooo");
         ws1 = getWorkspaceFromId( workspaceId1, getServices(), response, status, false, null );
         ws2 = getWorkspaceFromId( workspaceId2, getServices(), response, status, false, null );
         boolean wsFound1 = ( ws1 != null || ( workspaceId1 != null && workspaceId1.equalsIgnoreCase( "master" ) ) );
@@ -76,7 +75,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         workspaceDiff = new WorkspaceDiff(ws1, ws2, dateTime1, dateTime1);
 
         try {
-            JSONObject top = workspaceDiff.toJSONObject( dateTime1, dateTime2 );
+            JSONObject top = workspaceDiff.toJSONObject( dateTime1, dateTime2, false );
             results.put("res", top.toString(4));
         } catch (JSONException e) {
             e.printStackTrace();

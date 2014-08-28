@@ -4,7 +4,7 @@
 
 mkdir -p outputWorkspaces
 
-passTest=0
+failedTest=0
 
 export CURL_STATUS='-w \n%{http_code}\n'
 export CURL_POST_FLAGS_NO_DATA="-X POST"
@@ -41,7 +41,7 @@ echo
 
 
 
-exit $passTest
+exit $failedTest
 
 
 

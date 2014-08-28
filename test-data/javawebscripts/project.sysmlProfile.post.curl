@@ -1,2 +1,0 @@
-# post sysml profile project to europa site
-curl -X POST -u admin:admin -H "Content-Type:application/json" --data '{"name":"SysML Profile"}' "http://localhost:8080/view-repo/service/javawebscripts/sites/europa/projects/eee_1045467100313_135436_2"

@@ -4,6 +4,7 @@
 package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
@@ -15,9 +16,13 @@ import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.alfresco.model.ContentModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
+
 
 /**
  * WorkspaceNode is an EmsScriptNode and a folder containing changes to a parent
@@ -65,10 +70,18 @@ public class WorkspaceNode extends EmsScriptNode {
 
     @Override
     public WorkspaceNode getParentWorkspace() {
-        NodeRef ref = (NodeRef)getProperty("sysml:parent");
+        NodeRef ref = (NodeRef)getProperty("ems:parent");
         if ( ref == null ) return null;
         WorkspaceNode parentWs = new WorkspaceNode( ref, getServices() );
         return parentWs;
+    }
+    // delete later
+    @Override
+    public WorkspaceNode getSourceWorkspace() {
+        NodeRef ref = (NodeRef)getProperty("ems:source");
+        if ( ref == null ) return null;
+        WorkspaceNode sourceWs = new WorkspaceNode( ref, getServices() );
+        return sourceWs;
     }
 
     @Override
@@ -114,7 +127,7 @@ public class WorkspaceNode extends EmsScriptNode {
         if ( folder == null || !folder.exists() ) {
             //String userName = ws.getOwner();
             if ( userName != null && userName.length() > 0 ) {
-                folder = NodeUtil.getUserHomeFolder( userName );
+                folder = NodeUtil.getUserHomeFolder( userName, true );
                 if ( Debug.isOn() ) Debug.outln( "user home folder: " + folder );
             }
         }
@@ -155,7 +168,7 @@ public class WorkspaceNode extends EmsScriptNode {
     	if ( folder == null || !folder.exists() ) {
     		//String userName = ws.getOwner();
     		if ( userName != null && userName.length() > 0 ) {
-    			folder = NodeUtil.getUserHomeFolder( userName );
+    			folder = NodeUtil.getUserHomeFolder( userName, true );
     			if ( Debug.isOn() ) Debug.outln( "user home folder: " + folder );
     		}
     	}
@@ -168,15 +181,16 @@ public class WorkspaceNode extends EmsScriptNode {
     	WorkspaceNode ws = new WorkspaceNode( folder.createFolder( sysmlId ).getNodeRef(),
     			services, response, status );
     	ws.addAspect( "ems:Workspace" );
-    	ws.addAspect( "ems:MergeSource" );
-    	ws.setProperty( "ems:parent", folder );
+    	ws.addAspect( "ems:HasWorkspace" );
+    	ws.setProperty("ems:workspace", ws.getNodeRef() );
     	WorkspaceNode parentWorkspace = AbstractJavaWebScript.getWorkspaceFromId(sourceId, services, response, status, false, userName);
+    	ws.createOrUpdateProperty( "ems:lastTimeSyncParent", new Date() );
     	if ( Debug.isOn() ) Debug.outln( "parent workspace: " + parentWorkspace );
     	if(parentWorkspace != null) {
+        if ( Debug.isOn() ) Debug.outln( "parent workspace: " + parentWorkspace );
     		parentWorkspace.appendToPropertyNodeRefs( "ems:children", ws.getNodeRef() );
-    		ws.setProperty( "ems:mergeSource", parentWorkspace.getNodeRef());
+        ws.setProperty( "ems:source", parentWorkspace.getNodeRef() );
     	}
-    	ws.setProperty( "ems:lastTimeSyncParent", new Date() );
     	if ( Debug.isOn() ) Debug.outln( "created workspace " + ws + " in folder " + folder );
     	return ws;
     }
@@ -231,7 +245,17 @@ public class WorkspaceNode extends EmsScriptNode {
         String parentName = parent != null && parent.exists() ? parent.getName() : null;
 
         if ( parent != null && parent.exists() && !this.equals( parent.getWorkspace() ) ) {
-            parent = findScriptNodeByName( parentName, this, null );
+            EmsScriptNode grandParent = parent.getOwningParent( null );
+            ArrayList< NodeRef > arr = NodeUtil.findNodeRefsByType( parentName, SearchType.CM_NAME.prefix, false, this, null, false, true, getServices(), false );
+            for ( NodeRef ref : arr ) {
+                EmsScriptNode p = new EmsScriptNode( ref, getServices() );
+                EmsScriptNode gp = p.getParent();
+                if ( grandParent == gp || ( grandParent != null && gp != null && grandParent.getName().equals( gp.getName() ) ) ) {
+                    parent = p;
+                    break;
+                }
+            }
+            //parent = findScriptNodeByName( parentName, false, this, null );
             if ( parent == null || !parent.exists() || !this.equals( parent.getWorkspace() ) ) {
                 parent = replicateWithParentFolders( parent );
             }
@@ -243,7 +267,7 @@ public class WorkspaceNode extends EmsScriptNode {
 
         // If the node is not already in this workspace, clone it.
         if ( node.getWorkspace() == null || !node.getWorkspace().exists() || !node.getWorkspace().equals( this ) ) {
-            node = findScriptNodeByName( nodeName, this, null );
+            node = findScriptNodeByName( nodeName, false, this, null );
             if ( node == null || !node.exists() || !this.equals( node.getWorkspace() ) ) {
                 newFolder = node.clone(parent);
                 newFolder.setWorkspace( this, node.getNodeRef() );
@@ -284,40 +308,57 @@ public class WorkspaceNode extends EmsScriptNode {
     }
 
     public Set< NodeRef > getChangedNodeRefs( Date dateTime ) {
-        Set< NodeRef > changedElementIds = new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);
+        Set< NodeRef > changedNodeRefs = new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);
         //ResultSet refs = NodeUtil.findNodeRefsByType( getName(), SearchType.WORKSPACE, getServices() );
         //List< EmsScriptNode > nodes = NodeUtil.resultSetToList( refs );
         //NodeUtil.resultSetToList( refs );
+        // don't need to findDeleted since its doing a comparison with another workspace - so
+        // absence is equivalent to finding deleted
         ArrayList< NodeRef > refs =
                 NodeUtil.findNodeRefsByType( getNodeRef().toString(),
-                                             SearchType.WORKSPACE.prefix, null,
-                                             dateTime, false, true,
-                                             getServices() );
+                                             SearchType.WORKSPACE.prefix,
+                                             true, null, dateTime, false, true,
+                                             getServices(), true );
+        changedNodeRefs.addAll( refs );
         //List< EmsScriptNode > nodes = toEmsScriptNodeList( refs );
 
-        //changedElementIds.addAll( EmsScriptNode.getNodeRefs( nodes ) );
-        changedElementIds.addAll( refs );
-        return changedElementIds;
+        // remove commits
+        ArrayList< EmsScriptNode > commits =
+                CommitUtil.getCommits( this, null, getServices(), getResponse() );
+        commits.add( CommitUtil.getCommitPkg( this, null, getServices(),
+                                              getResponse() ) );
+        System.out.println("removing commits: " + commits );
+        changedNodeRefs.removeAll( commits );
+
+        return changedNodeRefs;
     }
 
     public Set< String > getChangedElementIds( Date dateTime ) {
         Set< String > changedElementIds = new TreeSet< String >();
-//        ResultSet refs = NodeUtil.findNodeRefsByType( getName(), SearchType.WORKSPACE, getServices() );
-//        List< EmsScriptNode > nodes = NodeUtil.resultSetToList( refs );
         Set< NodeRef > refs = getChangedNodeRefs( dateTime );
         List< EmsScriptNode > nodes = toEmsScriptNodeList( refs );
         changedElementIds.addAll( EmsScriptNode.getNames( nodes ) );
         return changedElementIds;
     }
 
-    public Set< NodeRef > getChangedNodeRefsWithRespectTo( WorkspaceNode other, Date dateTime ) {
+    public Set< NodeRef > getChangedNodeRefsWithRespectTo( WorkspaceNode other, Date dateTime, Date otherTime ) {
         Set< NodeRef > changedNodeRefs = new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);//getChangedNodeRefs());
-        if ( NodeUtil.exists( other ) ) {
-            WorkspaceNode targetParent = getCommonParent( other );
-            WorkspaceNode parent = this;
-            while ( parent != null && !parent.equals( targetParent ) ) {
-                changedNodeRefs.addAll( parent.getChangedNodeRefs( dateTime ) );
-                parent = parent.getParentWorkspace();
+        WorkspaceNode targetParent = getCommonParent( other );
+        WorkspaceNode parent = this;
+        WorkspaceNode lastParent = parent;
+        while ( parent != null && !parent.equals( targetParent ) ) {
+            changedNodeRefs.addAll( parent.getChangedNodeRefs( dateTime ) );
+            parent = parent.getParentWorkspace();
+            if ( parent != null ) lastParent = parent;
+        }
+        if ( otherTime!= null && dateTime != null && dateTime.after( otherTime ) ) {
+            Date lastParentCreationDate = lastParent.getCreationDate();
+            if ( otherTime.before( lastParentCreationDate ) ) {
+                String specifier = "[" + TimeUtils.toTimestamp( dateTime );
+                NodeUtil.findNodeRefsByType( specifier, "@ems\\:blah:", false, lastParent, null, true, true, getServices(), true );
+                // TODO
+                // keep walking parent back to master and collect all commits
+                // between timepoints looking at creation date of parents.
             }
         }
         return changedNodeRefs;
@@ -334,6 +375,35 @@ public class WorkspaceNode extends EmsScriptNode {
             }
         }
         return changedElementIds;
+    }
+
+    @Override
+    public JSONObject toJSONObject( Date dateTime ) throws JSONException {
+        JSONObject json = new JSONObject();
+
+        json.put( "creator", getProperty( "cm:modifier" ) );
+        json.put( "created", TimeUtils.toTimestamp( (Date)getProperty("cm:modified") ));
+        json.put( "id", getProperty( "cm:id" ) );
+        json.put( "name",  getProperty( "cm:name" ) );
+        if(getSourceWorkspace() != null) {
+            json.put("parent", getStringIfNull(getSourceWorkspace().getProperty(Acm.CM_NAME)));
+        }
+        else
+        {
+            json.put("parent", "master"); // workspace is null only if master.
+        }
+        json.put("branched", TimeUtils.toTimestamp( (Date)getProperty("ems:lastTimeSyncParent") ));
+
+        return json;
+    }
+
+    protected Object getStringIfNull (Object obj){
+
+        if (obj == null)
+            return "null";
+        else
+            return obj;
+
     }
 
 }
