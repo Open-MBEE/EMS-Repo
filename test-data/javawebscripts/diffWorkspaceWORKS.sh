@@ -37,7 +37,6 @@ curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/europa/pr
 DIFF=$(diff baselineWorkspaces/post1.json outputWorkspaces/post1.json)
 if [ "$DIFF" != "" ];then
         failedTest=1
-        echo 'DIFF'
         echo "$DIFF"
 fi
 echo
@@ -46,7 +45,6 @@ echo
 echo 'testGET1'
 # get project - should just return 200
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/123456\""
-echo '------Response-------'
 curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/123456"
 echo
 echo
