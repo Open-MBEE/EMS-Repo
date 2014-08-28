@@ -188,6 +188,34 @@ public class ModelPost extends AbstractJavaWebScript {
     public Set< EmsScriptNode >
             createOrUpdateModel( Object content, Status status,
                                  EmsScriptNode projectNode, WorkspaceNode workspace ) throws Exception {
+    	JSONObject postJson = (JSONObject) content;
+    	
+    	JSONArray updatedArray = postJson.optJSONArray("updatedElements");
+		JSONArray movedArray = postJson.optJSONArray("movedElements");
+		JSONArray addedArray = postJson.optJSONArray("addedElements");
+		JSONArray elementsArray = postJson.optJSONArray("elements");
+		
+		Collection<JSONArray> collections = new ArrayList<JSONArray>();
+		if(updatedArray != null)
+			collections.add(updatedArray);
+		if(movedArray != null)
+			collections.add(movedArray);
+		if(addedArray != null)
+			collections.add(addedArray);
+		if(elementsArray != null)
+			collections.add(elementsArray);
+		TreeSet<EmsScriptNode> elements = new TreeSet< EmsScriptNode >();
+
+		for(JSONArray jsonArray : collections){
+			JSONObject object = new JSONObject();
+			object.put("elements", jsonArray);
+			elements.addAll(createOrUpdateModel2(object, status, projectNode, workspace));
+		}
+    	return elements;
+    }
+    public Set< EmsScriptNode >
+    		createOrUpdateModel2( Object content, Status status,
+    								EmsScriptNode projectNode, WorkspaceNode workspace ) throws Exception {
         Date now = new Date();
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
@@ -299,7 +327,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         for (String rootElement : rootElements) {
             log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
-            if (!rootElement.equals(projectNode.getProperty(Acm.CM_NAME))) {
+            if (projectNode == null || !rootElement.equals(projectNode.getProperty(Acm.CM_NAME))) {
                 EmsScriptNode owner = getOwner( rootElement, projectNode, workspace, false );
 
                 try {
@@ -1914,7 +1942,7 @@ public class ModelPost extends AbstractJavaWebScript {
         return true;
     }
 
-    private EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req, boolean createIfNonexistent) {
+    protected EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req, boolean createIfNonexistent) {
         EmsScriptNode projectNode = null;
 
         WorkspaceNode workspace = getWorkspace( req );

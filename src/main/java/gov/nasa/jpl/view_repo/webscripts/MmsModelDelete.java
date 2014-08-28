@@ -125,7 +125,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             for (EmsScriptNode deletedNode: wsDiff.getDeletedElements().values()) {
                 if (deletedNode.exists()) {
                     deletedNode.removeAspect( "ems:Added" );
-                    deletedNode.removeAspect( "ems:Udated" );
+                    deletedNode.removeAspect( "ems:Updated" );
                     deletedNode.removeAspect( "ems:Moved" );
                     deletedNode.createOrUpdateAspect( "ems:Deleted" );
                 }
@@ -167,7 +167,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
      * @param node
      * @param workspace
      */
-    private void delete(EmsScriptNode node, WorkspaceNode workspace) {
+    public void delete(EmsScriptNode node, WorkspaceNode workspace) {
         if (!checkPermissions(node, PermissionService.WRITE)) {
             log(LogLevel.ERROR, "no permissions", HttpServletResponse.SC_FORBIDDEN);
         } else {
