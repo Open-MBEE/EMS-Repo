@@ -72,7 +72,7 @@
 	        <dependency>
 	            <groupId>kexpparser</groupId>
 	            <artifactId>kexpparser</artifactId>
-	            <version>1.0</version>
+	            <version>0.0.8</version>
 	            <scope>system</scope>
 	            <type>jar</type>
 	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
