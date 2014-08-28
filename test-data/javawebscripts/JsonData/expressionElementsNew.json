@@ -1,5 +1,14 @@
 { "elements" : [
 
+   {
+        "documentation": "",
+        "sysmlid": "constraint_32165",
+        "name": "",
+        "owner": "e_32169",
+        "specialization": {"type": "Constraint",
+                          "specification":"expr_32165"
+                          }
+    },
     {
         "documentation": "",
         "sysmlid": "expr_32165",
@@ -8,27 +17,21 @@
         "specialization": {"type": "Expression",
         				   "symbol": "",
 					       "operand": [
-					            "op_32166",
-					            "arg_32167",
-					            "arg_32168"
-					        ]}
+					                   {"type":"ElementValue",
+					                    "element":"op_ev_31835"},
+					                   {"type":"ElementValue",
+					                    "element":"arg_ev_38307_1"},
+					                   {"type":"ElementValue",
+					                    "element":"arg_ev_33001"}
+					                   ]}
     },
-    {
-        "documentation": "",
-        "sysmlid": "op_32166",
-        "name": "",
-        "owner": "expr_32165",
-        "specialization": { "type": "ElementValue",
-				        	"elementValueOfElement": "op_ev_31835",
-				        	"valueExpression": "expr_32165"
-				    	  	},
     {
         "documentation": "",
         "sysmlid": "op_ev_31835",
         "name": "GreaterEquals",
         "owner": "e_31828",
         "specialization": { "type": "Operation",
-					        "operationParameter": [ 
+					        "parameters": [ 
 					            "op_param_31867",
 					            "op_param_31868",
 					            "op_param_31869"
@@ -63,43 +66,28 @@
     },
     {
         "documentation": "",
-        "sysmlid": "arg_32167",
-        "name": "",
-        "owner": "expr_32165",
-        "specialization": { "type": "ElementValue",
-					        "valueExpression": "expr_32165",
-					        "elementValueOfElement": "arg_ev_38307"
-					        }
-    },
-    {
-        "documentation": "",
         "sysmlid": "arg_ev_38307",
         "name": "duration",
         "owner": "e_38304",
         "specialization": { "type": "Property",
 					        "isDerived": false,
 					        "isSlot": false,
-					        "propertyType": "_11_5EAPbeta_be00301_1147431819399_50461_1671",
-					        "value": ["durVal"]
+					        "propertyType": ["_11_5EAPbeta_be00301_1147431819399_50461_1671"],
+					        "value": [{"type": "LiteralInteger",
+        					           "integer": 22}]
 					        }
     },
     {
         "documentation": "",
-        "sysmlid": "durVal",
-        "name": "",
-        "owner": "arg_ev_33001",
-        "specialization": { "type": "LiteralInteger",
-        					"integer": 22
-        					}
-    },
-    {
-        "documentation": "",
-        "sysmlid": "arg_32168",
-        "name": "",
-        "owner": "expr_32165",
-        "specialization": { "type": "ElementValue",
-					        "elementValueOfElement": "arg_ev_33001",
-					        "valueExpression": "expr_32165"
+        "sysmlid": "arg_ev_38307_1",
+        "name": "duration_1",
+        "owner": "e_38304",
+        "specialization": { "type": "Property",
+					        "isDerived": false,
+					        "isSlot": false,
+					        "propertyType": "_11_5EAPbeta_be00301_1147431819399_50461_1671",
+					        "value": [{"type": "LiteralInteger",
+        					           "integer": 10}]
 					        }
     },
     {
@@ -111,18 +99,9 @@
 					        "isDerived": false,
 					        "isSlot": false,
 					        "propertyType": "_11_5EAPbeta_be00301_1147431819399_50461_1671",
-					        "value": ["initVal"]
+					        "value": [{"type": "LiteralInteger",
+        					           "integer": 11}]
 					        }
-    },
-    {
-        "documentation": "",
-        "sysmlid": "initVal",
-        "name": "",
-        "owner": "arg_ev_33001",
-        "specialization": { "type": "LiteralInteger",
-        					"integer": 11
-        					}
     }
 
 ]}
-

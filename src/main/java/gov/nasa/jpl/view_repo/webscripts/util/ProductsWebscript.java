@@ -107,7 +107,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
             getProductSnapshots( String productId, String contextPath,
                                  WorkspaceNode workspace, Date dateTime ) throws JSONException {
         EmsScriptNode product = findScriptNodeById( productId, workspace,
-                                                    dateTime );
+                                                    dateTime, false );
 
         JSONArray snapshotsJson = new JSONArray();
         List< EmsScriptNode > snapshotsList =
@@ -148,7 +148,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                                     boolean gettingDisplayedElements,
                                     boolean gettingContainedViews ) {
         JSONArray productsJson = new JSONArray();
-        EmsScriptNode product = findScriptNodeById( productId, workspace, dateTime );
+        EmsScriptNode product = findScriptNodeById( productId, workspace, dateTime, false );
 
         if ( product == null ) {
             log( LogLevel.ERROR, "Product not found with ID: " + productId,

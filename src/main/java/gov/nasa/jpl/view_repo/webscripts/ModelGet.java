@@ -114,9 +114,12 @@ public class ModelGet extends AbstractJavaWebScript {
                 wsFound = true;
             }
         }
-        if ( wsFound ) modelRootNode = findScriptNodeById(modelId, workspace, dateTime);
+        // need to find deleted elements in workspace, so can return not found rather than
+        // the node from parent workspace
+        boolean findDeleted = true;
+        if ( wsFound ) modelRootNode = findScriptNodeById(modelId, workspace, dateTime, findDeleted);
         
-		if (modelRootNode == null) {
+		if (modelRootNode == null || modelRootNode.hasAspect( "ems:Deleted" )) {
             log( LogLevel.ERROR,
                  "Element with id, " + modelId
                  + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
@@ -204,7 +207,7 @@ public class ModelGet extends AbstractJavaWebScript {
             WorkspaceNode workspace = getWorkspace( req );
             
             if (Debug.isOn()) System.out.println("modelId = " + modelId );
-            EmsScriptNode modelRootNode = findScriptNodeById(modelId, workspace, dateTime);
+            EmsScriptNode modelRootNode = findScriptNodeById(modelId, workspace, dateTime, false);
             if (Debug.isOn()) System.out.println("modelRootNode = " + modelRootNode );
             
             if ( modelRootNode == null ) {
@@ -247,20 +250,20 @@ public class ModelGet extends AbstractJavaWebScript {
 			JSONArray childElementJson = new JSONArray(allowedElements.toString());
 			for (int ii = 0; ii < childElementJson.length(); ii++) {
 				String id = childElementJson.getString(ii);
-				EmsScriptNode childElement = findScriptNodeById(id, workspace, dateTime);
+				EmsScriptNode childElement = findScriptNodeById(id, workspace, dateTime, false);
 				
-				// TODO Need to report that allowedElements can't be found
-				if (childElement != null) {
+    				// TODO Need to report that allowedElements can't be found
+    				if (childElement != null && childElement.exists()) {
                     if ( checkPermissions( childElement, PermissionService.READ ) ) {
                         elementsFound.put( id, childElement );
                     } // TODO -- REVIEW -- Warning if no permissions?
-				} else {
+    				} else {
                     log( LogLevel.WARNING,
                          "Element " + id
                          + ( dateTime == null ? "" : " at " + dateTime )
                          + " not found",
                          HttpServletResponse.SC_NOT_FOUND );
-				}
+    				}
 			}
 			if (recurse) {
 				Object childrenViews = root.getProperty(Acm.ACM_CHILDREN_VIEWS);
@@ -269,12 +272,12 @@ public class ModelGet extends AbstractJavaWebScript {
 					for (int ii = 0; ii < childViewJson.length(); ii++) {
 						String id = childViewJson.getString(ii);
                         EmsScriptNode childView =
-                                findScriptNodeById( id, workspace, dateTime );
-						if (childView != null) {
-						    if (checkPermissions(childView, PermissionService.READ)) {
-                                handleViewHierarchy( childView, recurse,
-                                                     workspace, dateTime );
-						    } // TODO -- REVIEW -- Warning if no permissions?
+                                findScriptNodeById( id, workspace, dateTime, false );
+						if (childView != null && childView.exists()) {
+					        if (checkPermissions(childView, PermissionService.READ)) {
+					            handleViewHierarchy( childView, recurse,
+					                                 workspace, dateTime );
+					        } // TODO -- REVIEW -- Warning if no permissions?
 						} else {
 		                    log( LogLevel.WARNING,
 		                         "Element " + id
@@ -301,6 +304,11 @@ public class ModelGet extends AbstractJavaWebScript {
 	                                              throws JSONException {
 		JSONArray array = new JSONArray();
 		
+		// don't return any elements
+		if (!root.exists()) {
+		    return;
+		}
+		
 		// add root element to elementsFound if its not already there (if it's there, it's probably because the root is a reified pkg node)
 		String sysmlId = (String)root.getProperty(Acm.ACM_ID);
 		if (!elementsFound.containsKey(sysmlId)) {
@@ -317,7 +325,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		    if (!rootName.contains("_pkg")) {
                 EmsScriptNode reifiedNode =
                         findScriptNodeById( rootName + "_pkg", workspace,
-                                            dateTime );
+                                            dateTime, false );
 		        if (reifiedNode != null) {
                     handleElementHierarchy( reifiedNode, recurse, workspace,
                                             dateTime );
@@ -327,26 +335,28 @@ public class ModelGet extends AbstractJavaWebScript {
 			    NodeRef childRef = assoc.getChildRef();
 			    NodeRef vChildRef = NodeUtil.getNodeRefAtTime( childRef, workspace, dateTime );
                 if ( vChildRef == null ) {
+                    // this doesn't elicit a not found response
                     log( LogLevel.WARNING,
                          "Element " + childRef
-                         + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
-                         HttpServletResponse.SC_NOT_FOUND );
+                         + ( dateTime == null ? "" : " at " + dateTime ) + " not found");
 			        continue;
 			    }
                 childRef = vChildRef;
                 EmsScriptNode child =
                         new EmsScriptNode( childRef, services, response );
                 if ( checkPermissions( child, PermissionService.READ ) ) {
-                    if ( child.getTypeShort().equals( Acm.ACM_ELEMENT_FOLDER ) ) {
-                        handleElementHierarchy( child, recurse, workspace,
-                                                dateTime );
-                    } else {
-                        String value = (String)child.getProperty( Acm.ACM_ID );
-                        if ( value != null ) {
-                            array.put( value );
-                            elementsFound.put( value, child );
-                            // add empty hierarchies as well
-                            elementHierarchy.put( value, new JSONArray() );
+                    if (child.exists()) {
+                        if ( child.getTypeShort().equals( Acm.ACM_ELEMENT_FOLDER ) ) {
+                            handleElementHierarchy( child, recurse, workspace,
+                                                    dateTime );
+                        } else {
+                            String value = (String)child.getProperty( Acm.ACM_ID );
+                            if ( value != null ) {
+                                array.put( value );
+                                elementsFound.put( value, child );
+                                // add empty hierarchies as well
+                                elementHierarchy.put( value, new JSONArray() );
+                            }
                         }
                     }
                 }

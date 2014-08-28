@@ -1,29 +1,29 @@
 /*******************************************************************************
- * Copyright (c) <2013>, California Institute of Technology ("Caltech").  
+ * Copyright (c) <2013>, California Institute of Technology ("Caltech").
  * U.S. Government sponsorship acknowledged.
- * 
+ *
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification, are 
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
- * 
- *  - Redistributions of source code must retain the above copyright notice, this list of 
+ *
+ *  - Redistributions of source code must retain the above copyright notice, this list of
  *    conditions and the following disclaimer.
- *  - Redistributions in binary form must reproduce the above copyright notice, this list 
- *    of conditions and the following disclaimer in the documentation and/or other materials 
+ *  - Redistributions in binary form must reproduce the above copyright notice, this list
+ *    of conditions and the following disclaimer in the documentation and/or other materials
  *    provided with the distribution.
- *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory, 
- *    nor the names of its contributors may be used to endorse or promote products derived 
+ *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory,
+ *    nor the names of its contributors may be used to endorse or promote products derived
  *    from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
- * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER  
- * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 package gov.nasa.jpl.view_repo.webscripts;
@@ -31,8 +31,11 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.connections.JmsConnection;
+import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -52,6 +55,8 @@ import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.mozilla.javascript.Scriptable;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
@@ -61,9 +66,9 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * Base class for all EMS Java backed webscripts. Provides helper functions and
  * key variables necessary for execution. This provides most of the capabilities
  * that were in utils.js
- * 
+ *
  * @author cinyoung
- * 
+ *
  */
 public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     public enum LogLevel {
@@ -73,25 +78,30 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			this.value = value;
 		}
 	}
-	
+
     public static final int MAX_PRINT = 200;
 
     // injected members
 	protected ServiceRegistry services;		// get any of the Alfresco services
 	protected Repository repository;		// used for lucene search
 	protected LogLevel logLevel = LogLevel.WARNING;
-	
+
 	// internal members
 	protected ScriptNode companyhome;
 	protected Map<String, EmsScriptNode> foundElements = new HashMap<String, EmsScriptNode>();
 
 	// needed for Lucene search
 	protected static final StoreRef SEARCH_STORE = new StoreRef(StoreRef.PROTOCOL_WORKSPACE, "SpacesStore");
-	
+
     // response to HTTP request, made as class variable so all methods can update
     protected StringBuffer response = new StringBuffer();
     protected Status responseStatus = new Status();
-    
+
+    private JmsConnection jmsConnection = null;
+    private RestPostConnection restConnection = null;
+
+    protected WorkspaceDiff wsDiff;
+
     protected void initMemberVariables(String siteName) {
 		companyhome = new ScriptNode(repository.getCompanyHome(), services);
 	}
@@ -111,17 +121,21 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         this.setServices( services );
         this.response = response ;
     }
-	   
+
     public AbstractJavaWebScript(Repository repositoryHelper, ServiceRegistry registry) {
         this.setRepositoryHelper(repositoryHelper);
         this.setServices(registry);
+
+        // FIX: Need to figure out why spring dependency injection doesn't work
+        jmsConnection = new JmsConnection();
+        restConnection = new RestPostConnection();
     }
- 
+
     public AbstractJavaWebScript() {
         // default constructor for spring
         super();
     }
-    
+
 
     /**
 	 * Utility for clearing out caches
@@ -132,7 +146,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		response = new StringBuffer();
 		responseStatus.setCode(HttpServletResponse.SC_OK);
 	}
-	
+
 	/**
 	 * Parse the request and do validation checks on request
 	 * TODO: Investigate whether or not to deprecate and/or remove
@@ -141,11 +155,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @return			true if request valid and parsed, false otherwise
 	 */
 	abstract protected boolean validateRequest(WebScriptRequest req, Status status);
-	
-	
+
+
     /**
      * Get site by name, workspace, and time
-     * 
+     *
      * @param siteName
      *            short name of site
      * @param workspace
@@ -157,49 +171,49 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     protected EmsScriptNode getSiteNode(String siteName, WorkspaceNode workspace,
                                         Date dateTime) {
         EmsScriptNode siteNode = null;
-        
+
         if (siteName == null) {
             log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
         } else {
-            siteNode = NodeUtil.getSiteNode( siteName, workspace, dateTime,
+            siteNode = NodeUtil.getSiteNode( siteName, false, workspace, dateTime,
                                              services, response );
         }
-        
+
         return siteNode;
     }
- 
+
     protected EmsScriptNode getSiteNodeFromRequest(WebScriptRequest req) {
-        String siteName = null; 
+        String siteName = null;
         // get timestamp if specified
         String timestamp = req.getParameter("timestamp");
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-        
+
         WorkspaceNode workspace = getWorkspace( req );
-        
+
         String[] siteKeys = {"id", "siteId", "siteName"};
-        
+
         for (String siteKey: siteKeys) {
             siteName = req.getServiceMatch().getTemplateVars().get( siteKey );
             if (siteName != null) break;
         }
-        
+
         return getSiteNode( siteName, workspace, dateTime );
     }
-    
-	
+
+
 	/**
 	 * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
 	 * This does caching of found elements so they don't need to be looked up with a different API each time.
-	 * 
+	 *
 	 * TODO extend so search context can be specified
 	 * @param id	Node id to search for
-	 * @param workspace 
-     * @param dateTime 
+	 * @param workspace
+     * @param dateTime
 	 * @return		ScriptNode with name if found, null otherwise
 	 */
 	protected EmsScriptNode findScriptNodeById(String id,
 	                                           WorkspaceNode workspace,
-	                                           Date dateTime) {
+	                                           Date dateTime, boolean findDeleted) {
 		EmsScriptNode result = null;
 
 		// be smart about search if possible
@@ -208,7 +222,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                     foundElements.get( id ).getVersionAtTime( dateTime );
 			if ( resultAtTime != null && resultAtTime.exists() &&
 			     ( workspace == null || workspace.equals( resultAtTime.getWorkspace() ) ) ) {
-			    //if ( resultAtTime != null ) 
+			    //if ( resultAtTime != null )
                 if ( Debug.isOn() ) {
                     Debug.outln( "findScriptNodeById(" + id + ", " + workspace
                                  + ", " + dateTime
@@ -218,13 +232,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			}
 		}
 		if ( result == null ) {
-			NodeRef nodeRef = NodeUtil.findNodeRefById(id, workspace, dateTime, services);
+			NodeRef nodeRef = NodeUtil.findNodeRefById(id, false, workspace, dateTime, services, findDeleted);
 			if (nodeRef != null) {
 				result = new EmsScriptNode(nodeRef, services, response);
 				foundElements.put(id, result); // add to cache
 			}
 		}
-		
+
         if ( Debug.isOn() ) {
             Debug.outln( "findScriptNodeById(" + id + ", " + workspace
                          + ", " + dateTime
@@ -241,24 +255,24 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			}
 		}
 	}
-	
+
 	protected void log(LogLevel level, String msg) {
 	    if (level.value >= logLevel.value) {
 	        log("[" + level.name() + "]: " + msg);
 	    }
         if (Debug.isOn()) System.out.println(msg);
 	}
-	
+
 	protected void log(String msg, int code) {
 		response.append(msg);
 		responseStatus.setCode(code);
 		responseStatus.setMessage(msg);
 	}
-	
+
 	protected void log(String msg) {
 	    response.append(msg + "\n");
 	}
-	
+
 	/**
 	 * Checks whether user has permissions to the node and logs results and status as appropriate
 	 * @param node         EmsScriptNode to check permissions on
@@ -266,7 +280,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @return             true if user has specified permissions to node, false otherwise
 	 */
 	protected boolean checkPermissions(EmsScriptNode node, String permissions) {
-	    return node.checkPermissions( permissions, response, responseStatus );
+	    if (node != null) {
+	        return node.checkPermissions( permissions, response, responseStatus );
+	    } else {
+	        return false;
+	    }
 	}
 
 	/**
@@ -283,17 +301,17 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		return true;
 	}
 
-	
+
     protected static final String WORKSPACE_ID = "workspaceId";
 	protected static final String PROJECT_ID = "projectId";
     protected static final String SITE_NAME = "siteName";
     protected static final String SITE_NAME2 = "siteId";
-    
+
     public static final String NO_WORKSPACE_ID = "master"; // default is master if unspecified
     public static final String NO_PROJECT_ID = "no_project";
     public static final String NO_SITE_ID = "no_site";
 
-    
+
     public String getSiteName( WebScriptRequest req ) {
         return getSiteName( req, false );
     }
@@ -311,17 +329,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         }
         return siteName;
     }
-    
+
     public EmsScriptNode createSite( String siteName, WorkspaceNode workspace ) {
         EmsScriptNode siteNode = getSiteNode( siteName, workspace, null );
         if ( siteNode == null || !siteNode.exists() ) {
             if ( workspace == null || !workspace.exists() ) {
                 SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, SiteVisibility.PUBLIC );
                 siteNode = new EmsScriptNode( foo.getNodeRef(), services );
+                siteNode.createOrUpdateAspect( "cm:taggable" );
             } else {
                 EmsScriptNode sitesFolder = null;
                 // check and see if the Sites folder already exists
-                NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, workspace, null, true, services );
+                NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, false, workspace, null, true, services, false );
                 if ( sitesNodeRef != null ) {
                     sitesFolder = new EmsScriptNode( sitesNodeRef, services );
                 } else {
@@ -355,7 +374,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         }
         return siteNode;
     }
-    
+
     public String getProjectId( WebScriptRequest req ) {
         String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
         if ( projectId == null || projectId.length() <= 0 ) {
@@ -363,7 +382,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         }
         return projectId;
     }
-    
+
     public static String getWorkspaceId( WebScriptRequest req ) {
         String workspaceId = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
         if ( workspaceId == null || workspaceId.length() <= 0 ) {
@@ -371,11 +390,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         }
         return workspaceId;
     }
-    
+
     public WorkspaceNode getWorkspace( WebScriptRequest req ) {
         return getWorkspace( req, false, null );
     }
-    
+
     public WorkspaceNode getWorkspace( WebScriptRequest req,
                                        boolean createIfNotFound,
                                        String userName ) {
@@ -405,9 +424,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 return null;
             }
             WorkspaceNode workspace = null;
-            
-            NodeRef ref = NodeUtil.findNodeRefById( nameOrId, null,
-                                                    null, services );
+
+            NodeRef ref = NodeUtil.findNodeRefById( nameOrId, true, null,
+                                                    null, services, false );
             if ( ref != null ) {
                 workspace = new WorkspaceNode( ref, services, response,
                                                responseStatus );
@@ -441,7 +460,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         }
         return null;
     }
-    
+
+    public ServiceRegistry getServices() {
+        if ( services == null ) {
+            services = NodeUtil.getServices();
+        }
+        return services;
+    }
+
     protected boolean checkRequestContent(WebScriptRequest req) {
         if (req.getContent() == null) {
             log(LogLevel.ERROR, "No content provided.\n", HttpServletResponse.SC_NO_CONTENT);
@@ -449,7 +475,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         }
         return true;
     }
-    
+
 
 	protected boolean checkRequestVariable(Object value, String type) {
 		if (value == null) {
@@ -467,11 +493,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 */
 	protected Map<String, EmsScriptNode> searchForElements(String type,
 	                                                       String pattern,
+	                                                       boolean ignoreWorkspace,
 	                                                       WorkspaceNode workspace,
 	                                                       Date dateTime) {
 		Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
 
-        searchResults.putAll( NodeUtil.searchForElements( type, pattern, workspace,
+        searchResults.putAll( NodeUtil.searchForElements( type, pattern, ignoreWorkspace,
+                                                          workspace,
                                                           dateTime, services,
                                                           response,
                                                           responseStatus ) );
@@ -491,7 +519,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 //					}
 //				}
 //			} catch (Exception e) {
-//				log(LogLevel.ERROR, "Could not parse search: " + pattern + ".\n", HttpServletResponse.SC_BAD_REQUEST);  
+//				log(LogLevel.ERROR, "Could not parse search: " + pattern + ".\n", HttpServletResponse.SC_BAD_REQUEST);
 //			} finally {
 //				if (resultSet != null) {
 //					resultSet.close();
@@ -504,7 +532,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 	/**
      * Helper utility to check the value of a request parameter
-     * 
+     *
      * @param req
      *            WebScriptRequest with parameter to be checked
      * @param name
@@ -528,11 +556,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     public Status getResponseStatus() {
         return responseStatus;
     }
-    
+
     public void setLogLevel(LogLevel level) {
         logLevel = level;
     }
-    
+
     /**
      * Should create the new instances with the response in constructor, so
      * this can be removed every where
@@ -579,7 +607,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return id;
     }
 
-    
+
     protected static boolean urlEndsWith( String url, String suffix ) {
         if ( url == null ) return false;
         url = url.toLowerCase().trim();
@@ -603,4 +631,47 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return gotSuffix;
     }
 
+
+    /**
+     * Send off the deltas to various endpoints
+     * @param deltas    JSONObject of the deltas to be published
+     * @return          true if publish completed
+     * @throws JSONException
+     */
+    protected boolean sendDeltas(JSONObject deltaJson, String workspace, String projectId) throws JSONException {
+        boolean jmsStatus = false;
+        boolean restStatus = false;
+
+        if (jmsConnection != null) {
+            jmsConnection.setWorkspace( workspace );
+            jmsConnection.setProjectId( projectId );
+            jmsStatus = jmsConnection.publish( deltaJson, "master" );
+        }
+        if (restConnection != null) {
+            try {
+                restStatus = restConnection.publish( deltaJson, "MMS" );
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+
+        return jmsStatus && restStatus ? true : false;
+    }
+
+    public void setWsDiff(WorkspaceNode workspace) {
+        wsDiff = new WorkspaceDiff(workspace, workspace);
+    }
+
+    public WorkspaceDiff getWsDiff() {
+        return wsDiff;
+    }
+
+    public void setJmsConnection(JmsConnection jmsConnection) {
+        this.jmsConnection = jmsConnection;
+    }
+
+    public void setRestConnection(RestPostConnection restConnection) {
+        this.restConnection = restConnection;
+    }
 }

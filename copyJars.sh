@@ -9,7 +9,7 @@ cd ../bae
 ant
 cd ../K
 ant
-cd ../emsscala
-ant
+#cd ../emsscala
+#ant
 popd
 

@@ -93,7 +93,7 @@ def convertBeanId2DescFile(id):
 	filename = DESC_PATH
 	for ii in range(len(tokens)-1):
 		filename += tokens[ii] + '/'
-	filename = filename[:-1] + '.desc.xml'
+	filename = filename[:-1] + '.' + tokens[ii+1] + '.desc.xml'
 
 	return filename
 

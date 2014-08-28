@@ -70,6 +70,7 @@ public class ProjectGet extends AbstractJavaWebScript {
      */
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+//    	String userName = AuthenticationUtil.getRunAsUser();
         printHeader( req );
 
         clearCaches();
@@ -79,13 +80,12 @@ public class ProjectGet extends AbstractJavaWebScript {
 
         try {
             if (validateRequest(req, status)) {
-                
                 String siteName = getSiteName( req );
                 String projectId = getProjectId( req );
 
                 // get timestamp if specified
                 String timestamp = req.getParameter("timestamp");
-                Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+                Date dateTime = TimeUtils.dateFromTimestamp(timestamp);
                 
                 WorkspaceNode workspace = getWorkspace( req );
                 
@@ -123,17 +123,22 @@ public class ProjectGet extends AbstractJavaWebScript {
     private JSONObject handleProject( String projectId, String siteName,
                                       WorkspaceNode workspace, Date dateTime )
                                               throws JSONException {
-        EmsScriptNode projectNode;
+        EmsScriptNode projectNode = null;
         JSONObject json = null;
         
         if (siteName == null) {
-            projectNode = findScriptNodeById(projectId, workspace, dateTime);
+            projectNode = findScriptNodeById(projectId, workspace, dateTime, false);
         } else {
             EmsScriptNode siteNode = getSiteNode( siteName, workspace, dateTime );
-            projectNode = siteNode.childByNamePath("/Models/" + projectId);
-            if (projectNode == null) {
-            		// for backwards compatibility
-            		projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
+            if (siteNode == null) {
+                log(LogLevel.ERROR, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
+                return null;
+            } else {
+                projectNode = siteNode.childByNamePath("/Models/" + projectId);
+                if (projectNode == null) {
+                		// for backwards compatibility
+                		projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
+                }
             }
         }
         if (projectNode == null) {
