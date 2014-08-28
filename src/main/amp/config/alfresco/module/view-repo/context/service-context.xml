@@ -110,8 +110,9 @@
    		<property name="discussionService" ref="DiscussionService" />
    		<property name="siteService" ref="SiteService" />
   	</bean>
-
+  	
 	<bean id="extendPermissionModel" parent="permissionModelBootstrap">
    		<property name="model" value="alfresco/extension/permissionDefinitionsExtension.xml" /> 
 	</bean>
+
 </beans>
