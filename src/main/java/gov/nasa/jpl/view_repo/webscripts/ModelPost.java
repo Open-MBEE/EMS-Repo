@@ -194,6 +194,8 @@ public class ModelPost extends AbstractJavaWebScript {
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
 
+        setWsDiff( workspace );
+
         clearCaches();
 
         JSONObject postJson = (JSONObject) content;
@@ -1808,7 +1810,6 @@ public class ModelPost extends AbstractJavaWebScript {
 
         JSONObject top = new JSONObject();
         if (wsFound && validateRequest(req, status)) {
-            instance.setWsDiff( workspace );
             try {
                 if (runInBackground) {
                     instance.saveAndStartAction(req, workspace, status);
@@ -1825,12 +1826,12 @@ public class ModelPost extends AbstractJavaWebScript {
                         instance.createOrUpdateModel( postJson, status,
                                                       projectNode, workspace );
                     // REVIEW -- TODO -- shouldn't this be called from instance?
-                    addRelationshipsToProperties( elements );
+                    instance.addRelationshipsToProperties( elements );
                     if ( !Utils.isNullOrEmpty( elements ) ) {
 
                         // Fix constraints if desired:
                         if (fix) {
-                        	instance.fix(elements);
+                            instance.fix(elements);
                         }
 
                         // Create JSON object of the elements to return:

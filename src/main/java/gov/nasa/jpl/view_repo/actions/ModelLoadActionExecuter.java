@@ -36,11 +36,15 @@ import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 import gov.nasa.jpl.view_repo.webscripts.ModelPost;
         
 
+
         import java.util.List;
         
 
+import java.util.Set;
+
         import javax.servlet.http.HttpServletResponse;
         
+
 
         import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
@@ -125,7 +129,9 @@ import org.springframework.extensions.webscripts.Status;
                     modelService.setRunWithoutTransactions(false);
                     Status status = new Status();
                     try {
-                        modelService.createOrUpdateModel(content, status, projectNode, workspace);
+                        Set<EmsScriptNode> elements = 
+                                modelService.createOrUpdateModel(content, status, projectNode, workspace);
+                        modelService.addRelationshipsToProperties( elements );
                     } catch (Exception e) {
                         status.setCode(HttpServletResponse.SC_BAD_REQUEST);
                         response.append("ERROR: could not parse request\n");
