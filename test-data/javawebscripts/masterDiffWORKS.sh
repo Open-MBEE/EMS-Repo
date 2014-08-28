@@ -86,12 +86,12 @@ if [ $server -eq 1 ]; then
     TestSuite="WorkspacesTesting"
     #TestCase="??"
     #./testrunner.sh -f ./soapTestData -s $TestSuite -c $TestCase $classpath
-    cd ./soapStuff
+    #cd ./soapStuff
     
-	for i in $(ls . | grep "soapui-project.xml"); do
-	         echo RUNNING TEST $i
-                ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i > soapSuite$i.out
-        done
+	#for i in $(ls . | grep "soapui-project.xml"); do
+	#         echo RUNNING TEST $i
+    #            ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i > soapSuite$i.out
+    #    done
 
 	DIFF=`grep -i failed soapSuite*.out`
 	if [ "$DIFF" != "" ]; then
