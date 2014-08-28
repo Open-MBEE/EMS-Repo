@@ -35,7 +35,7 @@
 	<classpathentry kind="lib" path="lib/alfresco-web-client-4.2.e.jar"/>
 	<classpathentry kind="lib" path="lib/alfresco-web-framework-commons-4.2.e.jar"/>
 	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/AE.jar"/>
-	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/kparser.jar"/>
+	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/kexpparser.jar"/>
 	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/mbee_util.jar" sourcepath="/util/src"/>
 	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/sysml.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/kexpparser"/>
