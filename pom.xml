@@ -96,19 +96,19 @@
                 <dependency>
                     <groupId>kexpparser</groupId>
                     <artifactId>kexpparser</artifactId>
-                    <version>0.0.7</version>
+                    <version>0.0.8</version>
                </dependency>
                 <dependency>
                     <groupId>gov.nasa.jpl.mbee.bae</groupId>
                     <artifactId>bae</artifactId>
                     <version>0.0.20</version>
                 </dependency>
-                <dependency>
+<!--                 <dependency>
                     <groupId>kparser</groupId>
                     <artifactId>kparser</artifactId>
                     <version>0.0.2</version>
                 </dependency>
-              
+ -->              
             </dependencies>
         </profile>
     </profiles>
