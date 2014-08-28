@@ -120,34 +120,6 @@ public class DocBookWrapper {
 			System.out.println("Failed to create docbook child node!");
 			ex.printStackTrace();
 		}
-		
-		//boolean isAspectCreated = this.snapshotNode.createOrUpdateAspect("view2:docbook");
-		//if(!isAspectCreated) System.out.println("Aspect not created!");
-		
-		/*
-		String nodeName = "docbook";
-		Map<QName, Serializable> props = new HashMap<QName, Serializable>(1);
-		props.put(ContentModel.PROP_NAME, nodeName);
-		
-		ServiceRegistry services = this.snapshotNode.getServices();
-		NodeRef node = services.getNodeService().createNode(this.snapshotNode.getNodeRef(), ContentModel.ASSOC_CONTAINS, QName.createQName(NamespaceService.CONTENT_MODEL_1_0_URI, nodeName), ContentModel.TYPE_CONTENT, props).getChildRef();
-		//ActionUtil.saveStringToFile(new EmsScriptNode(node, services), "application/docbook+xml", services, this.getContent());
-		
-		ContentWriter writer = services.getContentService().getWriter(node, ContentModel.PROP_CONTENT, true);
-		writer.setMimetype("application/docbook+xml");
-		writer.setEncoding("UTF-8");
-		writer.putContent(this.getContent());
-		*/
-		/*
-		EmsScriptNode docbookNode = this.snapshotNode.createNode("docbook", "sysml:Element");
-    	ActionUtil.saveStringToFile(docbookNode, "application/docbook+xml", services, docBookWrapper.getContent());
-    	
-    	QName docbookAspectName = QName.createQName("sysmlModel", "view2.docbook");
-    	QName docbookIdProp = QName.createQName("sysmlModel", "view2:docbookId");
-    	Map<QName,Serializable> docbookValues = new HashMap<QName, Serializable>();
-    	docbookValues.put(docbookIdProp, docbookNode.getId());
-    	snapshotNode.getServices().getNodeService().addAspect(snapshotNode.getNodeRef(), docbookAspectName, docbookValues);
-    	*/
 	}
 	
 	public void saveHtmlZipToRepo(EmsScriptNode snapshotFolder){
@@ -170,7 +142,6 @@ public class DocBookWrapper {
 		try{
 			String pdfPath = transformToPDF();
 			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_PDF", "cm:content");
-			//ActionUtil.saveStringToFile(node, MimetypeMap.MIMETYPE_PDF, services, this.getContent());
 			this.saveFileToRepo(node, MimetypeMap.MIMETYPE_PDF, pdfPath);
 			if(this.snapshotNode.createOrUpdateAspect("view2:pdf")){
 				this.snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef());
@@ -242,19 +213,6 @@ public class DocBookWrapper {
 		return this.docGenCssFileName.toString();
 	}
 	
-/*	public EmsScriptNode getView(){
-		return this.view;
-	}*/
-	
-/*	public String getViewId(){
-		return this.viewId;
-	}*/
-	
-	public void createDocumentLibrary(){
-
-		
-	}
-
 	private boolean createDocBookDir(){
 		boolean bSuccess = true;
 		if(!Files.exists(this.dbDirName)){
@@ -319,11 +277,8 @@ public class DocBookWrapper {
 	    		return;
 	    	}
     	}
-    	//System.out.println("getting content service...");
     	ContentService contentService = this.getSnapshotNode().getServices().getContentService();
     	if(contentService == null) System.out.println("conent service is null!");
-    	//System.out.println("getting nodeRef...");
-		//System.out.println("getting prop_content...");
 		ContentReader reader = contentService.getReader(node, ContentModel.PROP_CONTENT);
 		if(reader==null) System.out.println("reader is null!");
 		File srcFile = new File(savePath.toString());
