@@ -1,0 +1,46 @@
+th, td {
+    padding: 5px;
+}
+
+body {
+    background-color: #EEEEEE;
+    color: black;
+    font-family: sans-serif;
+}
+
+table {
+    border-spacing: 0px;
+    font-size: 0.9em;
+}
+
+.caption, caption {
+	font-weight: bold;
+}
+
+h3.title, h4.title, h5.title, h6.title {
+	font-size: 1.1em;
+}
+
+.ruleError{
+	color: #FF0000;
+}
+
+.underline {
+	text-decoration: underline;
+}
+
+.debb9e {
+	background-color: #debb9e;
+}
+
+.ccccff {
+	background-color: #ccccff;
+}
+
+.ff3333 {
+	background-color: #ff3333;
+}
+
+.ff33ff {
+	background-color: #ff33ff;
+}

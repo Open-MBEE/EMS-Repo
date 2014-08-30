@@ -94,7 +94,14 @@ echo ""
 echo SNAPSHOTS
 
 # post snapshot
-echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:text/html" --data @JsonData/snapshot.html http://localhost:8080/alfresco/service/ui/views/301/snapshot
+echo curl $CURL_FLAGS $CURL_POST_FLAGS_NO_DATA $SERVICE_URL"workspaces/master/sites/europa/products/_17_0_5_1_407019f_1402422683509_36078_16169/snapshots\""
+#echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:text/html" --data @JsonData/snapshot.html http://localhost:8080/alfresco/service/ui/views/_17_0_5_1_407019f_1402422683509_36078_16169/snapshot
+echo curl $CURL_FLAGS $CURL_POST_FLAGS_NO_DATA $SERVICE_URL"workspaces/master/sites/undefined/products/_17_0_5_1_407019f_1402422683509_36078_16169/snapshots\""
+#echo  curl -w "%{http_code}" -u admin:admin -X POST -H "Content-Type:application/json" --data @JsonData/snapshots.json http://localhost:8080/alfresco/service/workspaces/master/sites/europa/configurations/_17_0_5_1_407019f_1402422683509_36078_16169/snapshots
+echo curl $CURL_FLAGS $CURL_POST_FLAGS_NO_DATA $SERVICE_URL"workspaces/master/sites/europa/products/_17_0_5_1_407019f_1402422683509_36078_16169\""
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/configuration.json $SERVICE_URL"workspaces/master/sites/europa/configurations\""
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/configuration.products.json $SERVICE_URL"workspaces/master/sites/europa/configurations/[CONFIGURATION_ID]/products\""
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"workspaces/master/sites/europa/configurations/[CONFIGURATION_ID]/snapshots\""
 
 # get snapshots - this currently doesn't work
 #echo  curl -w "%{http_code}" -u admin:admin -X GET http://localhost:8080/alfresco/service/snapshots/301

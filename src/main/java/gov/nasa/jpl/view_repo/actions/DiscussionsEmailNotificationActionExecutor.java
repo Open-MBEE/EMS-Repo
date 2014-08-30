@@ -136,14 +136,14 @@ public class DiscussionsEmailNotificationActionExecutor  extends ActionExecuterA
 	}
 
     private boolean isEmailExisted(List<String> emailList, String email){
-		return emailList.contains(email);
+		return emailList.contains(email.trim().toLowerCase());
 	}
 	
 	private void addEmailToList(PostInfo post, List<String> emailList){
 		String poster = post.getCreator();
 		String posterEmail = getEmail(poster);
 		if(!isEmailExisted(emailList, posterEmail)) {
-			emailList.add(posterEmail);
+			emailList.add(posterEmail.trim().toLowerCase());
 		}
 	}
 	
@@ -190,7 +190,8 @@ public class DiscussionsEmailNotificationActionExecutor  extends ActionExecuterA
     			services.getActionService().executeAction(mailAction, null);
     		}
     		catch(Exception ex){
-    			System.out.println("ERROR: Failed to send discussion notification email to " + email + ex.getMessage() + ex.getStackTrace());
+    			System.out.println("ERROR: Failed to send discussion notification email to " + email);
+    			ex.printStackTrace();
     		}
     	}
 	}

@@ -249,7 +249,40 @@
 		      </property>
 		  </properties>
 		</aspect>
-
+		
+		<aspect name="view2:docbook">
+			<properties>
+				<property name="view2:docbookNode">
+					<type>d:noderef</type> 
+					<mandatory>true</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false"></index>
+				</property>
+			</properties>
+		</aspect>
+		
+		<aspect name="view2:pdf">
+			<properties>
+				<property name="view2:pdfNode">
+					<type>d:noderef</type> 
+					<mandatory>false</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false"></index>
+				</property>
+			</properties>
+		</aspect>
+		
+		<aspect name="view2:htmlZip">
+			<properties>
+				<property name="view2:htmlZipNode">
+					<type>d:noderef</type> 
+					<mandatory>true</mandatory>
+					<multiple>false</multiple>
+					<index enabled="false"></index>
+				</property>
+			</properties>
+		</aspect>
+		
 		<aspect name="sysml:Comment">
 			<properties>
 				<property name="sysml:body">
