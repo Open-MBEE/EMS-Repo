@@ -564,54 +564,27 @@ public class NodeUtil {
      */
     public static boolean isType( String typeName, ServiceRegistry services ) {
         if ( typeName == null ) return false;
-        if ( Acm.getJSON2ACM().keySet().contains( typeName ) ) {
-            typeName = Acm.getJSON2ACM().get( typeName );
+        // quick and dirty - using DictionaryService results in WARNINGS
+        typeName = typeName.replace( "sysml:", "" );
+        if (typeName.equals( "Element" ) ||
+                typeName.equals( "Project" )) {
+            return true;
         }
-//        String[] split = typeName.split( ":" );
-//
-//        String nameSpace = null;
-//        String localName = null;
-//        if ( split.length == 2 ) {
-//            nameSpace = split[0];
-//            localName = split[1];
-//        } else if ( split.length == 1 ) {
-//            localName = split[0];
-//        } else {
-//            Debug.error(true, false, "Bad type name " + typeName );
-//            return false;
+        return false;
+//        if ( Acm.getJSON2ACM().keySet().contains( typeName ) ) {
+//            typeName = Acm.getJSON2ACM().get( typeName );
 //        }
-//        if ( localName == null ) {
-//            Debug.error(true, false, "Bad type name " + typeName );
-//            return false;
-//        }
-        if ( services == null ) services = getServices();
-        DictionaryService dServ = services.getDictionaryService();
-//        Collection< QName > types = dServ.getAllTypes();
-//        //{http://www.alfresco.org/model/transfer/1.0}
-        QName qName = createQName( typeName, services );
-        if ( qName != null ) {
-            // TODO: this prints out a warning, maybe better way to check?
-            TypeDefinition t = dServ.getType( qName );
-            if ( t != null ) {
-//              if (Debug.isOn()) System.out.println("\n\n*** getType(" + typeName + ") worked!!!\n" );
-              return true;
-            }
-        }
-//        //        if (Debug.isOn()) System.out.println("all types: " + types);
-////        TypeDefinition t = dServ.getType( QName.createQName( typeName ) );
-////        if (Debug.isOn()) System.out.println("getType(" + typeName + ") = " + t );
-//        for ( QName type : types ) {
-////            if (Debug.isOn()) System.out.println( "getLocalName() = " + type.getLocalName() );
-////            if (Debug.isOn()) System.out.println( "getPrefixString() = " + type.getPrefixString() );
-////            if (Debug.isOn()) System.out.println( "toPrefixString() = " + type.toPrefixString() );
-////            if (Debug.isOn()) System.out.println( "toString() = " + type.toString() );
-//            if ( typeName.equals( type.getPrefixString() ) ) {
-//                if (Debug.isOn()) System.out.println("isType(" + typeName + ") = true");
-//                return true;
+//        if ( services == null ) services = getServices();
+//        DictionaryService dServ = services.getDictionaryService();
+//        QName qName = createQName( typeName, services );
+//        if ( qName != null ) {
+//            // TODO: this prints out a warning, maybe better way to check?
+//            TypeDefinition t = dServ.getType( qName );
+//            if ( t != null ) {
+//              return true;
 //            }
 //        }
-//        if (Debug.isOn()) System.out.println("isType(" + typeName + ") = false");
-        return false;
+//        return false;
     }
 
     /**
