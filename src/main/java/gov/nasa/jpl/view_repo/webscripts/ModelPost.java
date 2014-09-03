@@ -41,6 +41,7 @@ import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
 import gov.nasa.jpl.ae.util.ClassData;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
@@ -107,6 +108,14 @@ public class ModelPost extends AbstractJavaWebScript {
         super(repositoryHelper, registry);
      }
 
+
+    // Set the flag to time events that occur during a model post using the timers
+    // below
+    private static boolean timeEvents = false;
+    private Timer timerCommit = null;
+    private Timer timerIngest = null;
+    private Timer timerUpdateModel = null;
+    private Timer timerToJson = null;
 
     // when run in background as an action, this needs to be false
     private boolean runWithoutTransactions = false;
@@ -207,6 +216,8 @@ public class ModelPost extends AbstractJavaWebScript {
         TreeMap<String, EmsScriptNode> nodeMap =
                 new TreeMap< String, EmsScriptNode >();
 
+        timerUpdateModel= Timer.startTimer(timerUpdateModel, timeEvents);
+        
         // create the element map and hierarchies
         if (buildElementMap(postJson.getJSONArray(ELEMENTS), projectNode, workspace)) {
             // start building up elements from the root elements
@@ -221,7 +232,9 @@ public class ModelPost extends AbstractJavaWebScript {
                     try {
                         trx.begin();
                         owner = getOwner(rootElement, projectNode, workspace, true);
+                        timerCommit = Timer.startTimer(timerCommit, timeEvents);
                         trx.commit();
+                        Timer.stopTimer(timerCommit, "!!!!! createOrUpdateModel(): commit time", timeEvents);
                     } catch (Throwable e) {
                         try {
                             trx.rollback();
@@ -250,6 +263,8 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
             } // end for (String rootElement: rootElements) {
         } // end if (buildElementMap(postJson.getJSONArray(ELEMENTS))) {
+        
+        Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): main loop time", timeEvents);
 
         // handle the relationships
         updateOrCreateAllRelationships(relationshipsJson, workspace);
@@ -266,6 +281,8 @@ public class ModelPost extends AbstractJavaWebScript {
         end = System.currentTimeMillis();
         total = end - start;
         log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
+
+        timerUpdateModel = Timer.startTimer(timerUpdateModel, timeEvents);
 
         // Send deltas to all listeners
         if (wsDiff.isDiff()) {
@@ -287,6 +304,8 @@ public class ModelPost extends AbstractJavaWebScript {
             CommitUtil.commit( wsDiff, workspace, siteName,
                                "", false, services, response );
         }
+
+        Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): Deltas time", timeEvents);
 
         elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
         return elements;
@@ -421,7 +440,9 @@ public class ModelPost extends AbstractJavaWebScript {
                 log(LogLevel.INFO, "updateOrCreateRelationships: beginning transaction {");
                 updateOrCreateTransactionableRelationships(jsonObject, key, workspace);
                 log(LogLevel.INFO, "} updateOrCreateRelationships committing: " + key);
+                timerCommit = Timer.startTimer(timerCommit, timeEvents);
                 trx.commit();
+                Timer.stopTimer(timerCommit, "!!!!! updateOrCreateRelationships(): commit time", timeEvents);
             } catch (Throwable e) {
                 try {
                     if (e instanceof JSONException) {
@@ -602,7 +623,9 @@ public class ModelPost extends AbstractJavaWebScript {
                 log(LogLevel.INFO, "buildElementMap begin transaction {");
                 isValid = buildTransactionableElementMap(jsonArray, projectNode, workspace);
                 log(LogLevel.INFO, "} buildElementMap committing");
+                timerCommit = Timer.startTimer(timerCommit, timeEvents);
                 trx.commit();
+                Timer.stopTimer(timerCommit, "!!!!! buildElementMap(): commit time", timeEvents);
             } catch (Throwable e) {
                 try {
                     log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
@@ -837,7 +860,9 @@ public class ModelPost extends AbstractJavaWebScript {
                                                               workspace,
                                                               ingest, false, modStatus );
                 log(LogLevel.INFO, "} updateOrCreateElement end transaction");
+                timerCommit = Timer.startTimer(timerCommit, timeEvents);
                 trx.commit();
+                Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): commit time", timeEvents);
             } catch (Throwable e) {
                 try {
                     if (e instanceof JSONException) {
@@ -1036,9 +1061,12 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
 
                         // Ingest the JSON for the value to update properties
+                        timerIngest = Timer.startTimer(timerIngest, timeEvents);
                         if ( oldValNode.ingestJSON( newValJson ) ) {
                             changed = true;
                         }
+                        Timer.stopTimer(timerIngest, "!!!!! processExpressionOrProperty(): ingestJSON time", timeEvents);
+
                 	}
                 	// Old value doesnt exists, so create a new node:
                 	else {
@@ -1230,6 +1258,7 @@ public class ModelPost extends AbstractJavaWebScript {
                         if ( workspace != null && workspace.exists() ) {
                             nodeToUpdate.setWorkspace( workspace, null );
                         }
+
 //                    } else {
 //                        Debug.error( true, true,
 //                                     "Error! Attempt to create node, " + id
@@ -1297,7 +1326,13 @@ public class ModelPost extends AbstractJavaWebScript {
                 modStatus.setState( ModStatus.State.UPDATED );
             }
 
+            if (timerIngest == null)
+            	timerIngest = new Timer();
+            
+            timerIngest.start();
             if ( nodeToUpdate.ingestJSON(elementJson) ) {
+                timerIngest.stop();
+                System.out.println("!!!!! updateOrCreateTransactionableElement(): ingestJSON"+timerIngest);
                 modStatus.setState( ModStatus.State.UPDATED );
             }
         } // ends if (ingest && nodeExists && checkPermissions(node, PermissionService.WRITE))
@@ -1328,6 +1363,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         end = System.currentTimeMillis(); log(LogLevel.INFO, "\tTotal: " + (end-start) + " ms");
+        
         return nestedNode ? nodeToUpdate : reifiedNode;
     }
 
@@ -1836,11 +1872,14 @@ public class ModelPost extends AbstractJavaWebScript {
 
                         // Create JSON object of the elements to return:
                         JSONArray elementsJson = new JSONArray();
+                        timerToJson = Timer.startTimer(timerToJson, timeEvents);
                         for ( EmsScriptNode element : elements ) {
                             elementsJson.put( element.toJSONObject(null) );
                         }
+                        Timer.stopTimer(timerToJson, "!!!!! executeImpl(): toJSON time", timeEvents);
                         top.put( "elements", elementsJson );
                         model.put( "res", top.toString( 4 ) );
+
                     }
                 }
                 // REVIEW -- TODO -- shouldn't this be called from instance?
@@ -2021,4 +2060,5 @@ public class ModelPost extends AbstractJavaWebScript {
         elementMap = new HashMap<String, JSONObject>();
         newElements = new HashSet<String>();
     }
+   
 }

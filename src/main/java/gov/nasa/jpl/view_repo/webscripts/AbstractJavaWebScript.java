@@ -30,6 +30,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.connections.JmsConnection;
 import gov.nasa.jpl.view_repo.connections.RestPostConnection;
@@ -79,6 +80,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		}
 	}
 
+    private static boolean timeEvents = false;
+    private static Timer timer = null;
+    
     public static final int MAX_PRINT = 200;
 
     // injected members
@@ -216,6 +220,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	                                           Date dateTime, boolean findDeleted) {
 		EmsScriptNode result = null;
 
+	    timer = Timer.startTimer(timer, timeEvents);
+        
 		// be smart about search if possible
 		if (foundElements.containsKey(id)) {
             EmsScriptNode resultAtTime =
@@ -230,6 +236,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 }
 			    result = resultAtTime;
 			}
+			
+	        if (timeEvents) System.out.println("====== findScriptNodeById(): cache time "+timer);
+
 		}
 		if ( result == null ) {
 			NodeRef nodeRef = NodeUtil.findNodeRefById(id, false, workspace, dateTime, services, findDeleted);
@@ -237,6 +246,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 				result = new EmsScriptNode(nodeRef, services, response);
 				foundElements.put(id, result); // add to cache
 			}
+			
+			if (timeEvents) System.out.println("====== findScriptNodeById(): findNodeRefById time "+timer);
 		}
 
         if ( Debug.isOn() ) {
@@ -244,6 +255,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                          + ", " + dateTime
                          + "): returning " + result );
         }
+        
+	    Timer.stopTimer(timer, "====== findScriptNodeById(): end time", timeEvents);
+
 		return result;
 	}
 
