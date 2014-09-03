@@ -1,0 +1,13 @@
+{"elements": [{"specialization": {
+    "type": "Expression",
+    "operand": [
+        {
+            "element": "Not",
+            "type": "ElementValue"
+        },
+        {
+            "integer": 1,
+            "type": "LiteralInteger"
+        }
+    ]
+}}]}
