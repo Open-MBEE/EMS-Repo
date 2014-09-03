@@ -77,6 +77,12 @@
         <property name="services" ref="ServiceRegistry" />
 	</bean>
 	
+   <bean id="webscript.gov.nasa.jpl.javawebscripts.nodeUnlock.post"
+        class="gov.nasa.jpl.view_repo.webscripts.NodeUnlock"
+        parent="webscript">
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+	
 	<!--  utility bean for checking user site permissions: also expose a webscript base object -->
 	<bean id="UserUtil" class="gov.nasa.jpl.view_repo.util.UserUtil" parent="baseJavaScriptExtension">
 		<property name="siteService" ref="SiteService"/>
@@ -95,8 +101,8 @@
     <bean id="configurationGeneration" class="gov.nasa.jpl.view_repo.actions.ConfigurationGenerationActionExecuter" parent="action-executer">
 	    <property name="services" ref="ServiceRegistry"/>
 	    <property name="repository" ref="repositoryHelper"/>
-    </bean>	
-
+    </bean>
+    
 	<bean id="discussionsEmailNotification" class="gov.nasa.jpl.view_repo.actions.DiscussionsEmailNotificationActionExecutor" parent="action-executer">
    		<property name="publicAction"><value>true</value></property>
    		<property name="nodeService" ref="NodeService" />
