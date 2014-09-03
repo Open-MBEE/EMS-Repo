@@ -1332,13 +1332,9 @@ public class ModelPost extends AbstractJavaWebScript {
                 modStatus.setState( ModStatus.State.UPDATED );
             }
 
-            if (timerIngest == null)
-            	timerIngest = new Timer();
-            
-            timerIngest.start();
+            timerIngest = Timer.startTimer(timerIngest, timeEvents);
             if ( nodeToUpdate.ingestJSON(elementJson) ) {
-                timerIngest.stop();
-                System.out.println("!!!!! updateOrCreateTransactionableElement(): ingestJSON"+timerIngest);
+                Timer.stopTimer(timerIngest, "!!!!! updateOrCreateTransactionableElement(): ingestJSON", timeEvents);
                 modStatus.setState( ModStatus.State.UPDATED );
             }
         } // ends if (ingest && nodeExists && checkPermissions(node, PermissionService.WRITE))
