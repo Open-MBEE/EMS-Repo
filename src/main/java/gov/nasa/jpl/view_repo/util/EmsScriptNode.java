@@ -112,7 +112,7 @@ public class EmsScriptNode extends ScriptNode implements
     private static final long serialVersionUID = 9132455162871185541L;
 
     public static final boolean expressionStuff = true;
-
+    
     /**
      * A set of content model property names that serve as workspace metadata
      * and whose changes are not recorded in a workspace.
