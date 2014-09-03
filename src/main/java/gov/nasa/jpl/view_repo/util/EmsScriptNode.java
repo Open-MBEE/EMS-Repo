@@ -162,6 +162,11 @@ public class EmsScriptNode extends ScriptNode implements
     protected WorkspaceNode workspace = null;
     protected WorkspaceNode parentWorkspace = null;
 
+    /**
+     * When writing out JSON, evaluate Expressions and include the results.
+     */
+    private boolean evaluatingExpressions;
+
     // TODO add nodeService and other member variables when no longer
     // subclassing ScriptNode
     // extend Serializable after removing ScriptNode extension
@@ -1390,7 +1395,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
         json.put( "type", typeName );
-        for ( QName aspectQname : this.aspects ) {
+        for ( QName aspectQname : this.getAspectsSet() ) {
             String cappedAspectName =
                     Utils.capitalize( aspectQname.getLocalName() );
             String methodName = "add" + cappedAspectName + "JSON";
@@ -1404,18 +1409,23 @@ public class EmsScriptNode extends ScriptNode implements
                                                            EmsScriptNode.class,
                                                            Set.class,
                                                            Date.class );
+                System.out.println(method);
             } catch ( NoSuchMethodException | SecurityException e ) {
-                // do nothing, method isn't implemented yet
-                // System.out.println("Method not yet implemented: " +
-                // methodName);
+            	if  ( methodName.equals("addElementValueJSON") ) {
+            	    e.printStackTrace();
+            	}
             }
 
             if ( method != null ) {
                 EmsScriptNode node = getNodeAtAtime( dateTime );
                 try {
                     method.invoke( this, json, node, filter, dateTime );
+                    System.out.println("*******************************************************");
+                    System.out.println(json);
+                    System.out.println(method);
                 } catch ( IllegalAccessException | IllegalArgumentException
                           | InvocationTargetException e ) {
+                	e.printStackTrace();
                     // do nothing, internal server error
                 }
             }
@@ -3276,11 +3286,9 @@ public class EmsScriptNode extends ScriptNode implements
         }
     }
 
-    protected
-            void
-            addExpressionJSON( JSONObject json, EmsScriptNode node,
-                               Set< String > filter, Date dateTime )
-                                                                    throws JSONException {
+    protected void addExpressionJSON( JSONObject json, EmsScriptNode node,
+                                      Set< String > filter, Date dateTime )
+                                                          throws JSONException {
         addValueSpecificationJSON( json, node, filter, dateTime );
 
         ArrayList< NodeRef > nodeRefs =
@@ -3307,6 +3315,20 @@ public class EmsScriptNode extends ScriptNode implements
 
         }
         putInJson( json, "operand", array, filter );
+        putInJson( json, "display", getExpressionDisplayString(), filter );
+        if ( evaluatingExpressions ) {
+            putInJson( json, "evaluation", getExpressionEvaluation(), filter );
+        }
+    }
+
+    public Object getExpressionEvaluation() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public String getExpressionDisplayString() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     protected

@@ -70,13 +70,14 @@
 	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/mbee_util.jar</systemPath>
 	        </dependency>
 	        <dependency>
-	            <groupId>kparser</groupId>
-	            <artifactId>kparser</artifactId>
-	            <version>0.0.2</version>
+	            <groupId>kexpparser</groupId>
+	            <artifactId>kexpparser</artifactId>
+	            <version>0.0.8</version>
 	            <scope>system</scope>
 	            <type>jar</type>
-	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kparser.jar</systemPath>
+	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
 	        </dependency>
+	        
             </dependencies>
         </profile>
         <profile>
@@ -93,15 +94,21 @@
                     <version>0.0.16</version>
                </dependency>
                 <dependency>
+                    <groupId>kexpparser</groupId>
+                    <artifactId>kexpparser</artifactId>
+                    <version>0.0.8</version>
+               </dependency>
+                <dependency>
                     <groupId>gov.nasa.jpl.mbee.bae</groupId>
                     <artifactId>bae</artifactId>
                     <version>0.0.20</version>
                 </dependency>
-                <dependency>
+<!--                 <dependency>
                     <groupId>kparser</groupId>
                     <artifactId>kparser</artifactId>
                     <version>0.0.2</version>
                 </dependency>
+ -->              
             </dependencies>
         </profile>
     </profiles>

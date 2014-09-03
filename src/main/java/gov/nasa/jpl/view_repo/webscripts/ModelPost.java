@@ -83,6 +83,8 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+import kexpparser.KExpParser;
+
 
 /**
  * Descriptor file:
@@ -1818,6 +1820,7 @@ public class ModelPost extends AbstractJavaWebScript {
         String expressionString = req.getParameter( "expression" );
 
         JSONObject top = new JSONObject();
+        ArrayList<JSONObject> foo = new ArrayList<JSONObject>();
         if (wsFound && validateRequest(req, status)) {
             try {
                 if (runInBackground) {

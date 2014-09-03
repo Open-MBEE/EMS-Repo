@@ -140,6 +140,15 @@
                                   {"type":"ElementValue",
                                   "element":"302"}]}
      },
+    {"documentation" : "something",
+     "sysmlid":"x",
+     "name":"300",
+     "owner":"null",
+     "specialization": {"type":"Property",
+                        "isDerived":false,
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
     
     {"documentation" : "to make compatible with value specs (this is just a Element)", 
      "sysmlid":"dlam", 
