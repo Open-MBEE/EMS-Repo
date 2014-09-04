@@ -3,7 +3,7 @@
   <description>
   Post elements to the project
   </description>
-  <url>/javawebscripts/sites/{siteName}/projects/{projectId}/elements?background={background?}?fix={fix?}</url>
+  <url>/javawebscripts/sites/{siteName}/projects/{projectId}/elements?background={background?}&amp;fix={fix?}&amp;expression={expression?}&amp;evaluate={evaluate?}</url>
   <format default="json">any</format> 
   <authentication>user</authentication>
   <transaction>none</transaction>

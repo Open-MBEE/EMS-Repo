@@ -11,7 +11,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 
-public class RestPostConnection implements AbstractConnection {
+public class RestPostConnection extends AbstractConnection {
     static Logger logger = Logger.getLogger(RestPostConnection.class);
 
     private long sequenceId = 1;
@@ -38,10 +38,6 @@ public class RestPostConnection implements AbstractConnection {
         ClientResponse response = getResourceBuilder(webResource, dst).post( ClientResponse.class, msg);
         if (response.getStatus() != 200) {
             status = false;
-        }
-        if (logger.isDebugEnabled()) {
-            logger.debug("\n#### Response From Server ####\n");
-            logger.debug(response.getEntity( String.class ));
         }
         
         return status;

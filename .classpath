@@ -34,9 +34,8 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/alfresco-web-client-4.2.e.jar"/>
 	<classpathentry kind="lib" path="lib/alfresco-web-framework-commons-4.2.e.jar"/>
-	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/AE.jar"/>
-	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/kparser.jar"/>
-	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/mbee_util.jar" sourcepath="/util/src"/>
-	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/sysml.jar"/>
+	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/emsscala.jar"/>
+	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/kexpparser.jar"/>
+	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/scala-library.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

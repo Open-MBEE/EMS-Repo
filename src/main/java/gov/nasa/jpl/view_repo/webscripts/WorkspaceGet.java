@@ -1,52 +1,41 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.view_repo.util.Acm;
-import gov.nasa.jpl.mbee.util.TimeUtils;
-import gov.nasa.jpl.view_repo.sysml.View;
-import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.util.NodeUtil;
-import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
-import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
-import org.alfresco.service.ServiceRegistry;
 
 public class WorkspaceGet extends AbstractJavaWebScript{
-	
+
 	public WorkspaceGet(){
 		super();
 	}
-	
+
 	public WorkspaceGet(Repository repositoryHelper, ServiceRegistry service){
 		super(repositoryHelper, service);
 	}
-	
-	protected Map<String, Object> executeImpl (WebScriptRequest req, Status status, Cache cache) {
+
+	@Override
+    protected Map<String, Object> executeImpl (WebScriptRequest req, Status status, Cache cache) {
 		printHeader(req);
 		clearCaches();
 		Map<String, Object> model = new HashMap<String, Object>();
 		JSONObject object = null;
-		
+
 		try{
 			if(validateRequest(req, status)){
 				String userName = AuthenticationUtil.getRunAsUser();
@@ -61,7 +50,7 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 			log(LogLevel.ERROR, "Internal error stack trace \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			e.printStackTrace();
 		}
-		
+
 		if(object == null){
 			model.put("res", response.toString());
 		} else {
@@ -74,14 +63,14 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		status.setCode(responseStatus.getCode());
 		printFooter();
 		return model;
-		
+
 	}
 	protected Object getStringIfNull(Object object){
 		if(object == null)
 			return "null";
 		return object;
 	}
-	
+
 	protected JSONObject getWorkspace(WorkspaceNode ws, String wsID) throws JSONException {
 		JSONObject json = new JSONObject();
 		JSONArray jsonArray = new JSONArray();
@@ -98,18 +87,18 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 			jsonArray.put(ws.toJSONObject(null));
 		}
 		else
-			log(LogLevel.WARNING, "No permission to read: " + ws.getSysmlId(), HttpServletResponse.SC_NOT_FOUND);
+			log(LogLevel.WARNING, "No permission to read: " + (ws == null ? null : ws.getSysmlId()), HttpServletResponse.SC_NOT_FOUND);
 		json.put("workspace" , jsonArray);
 		return json;
 	}
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		// TODO Auto-generated method stub
-		if(checkRequestContent(req) == false) 
+		if(checkRequestContent(req) == false)
 			return false;
-		
+
 		String wsId = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
-		
+
 		if(checkRequestVariable(wsId, WORKSPACE_ID) == false)
 			return false;
 		return true;

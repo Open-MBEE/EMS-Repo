@@ -3,8 +3,11 @@ package gov.nasa.jpl.view_repo.util;
 import gov.nasa.jpl.mbee.util.CompareUtils.GenericComparator;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,6 +67,13 @@ public class NodeUtil {
             this.prefix = prefix;
         }
     }
+    
+    // Set the flag to time events that occur during a model post using the timers
+    // below
+    private static boolean timeEvents = false;
+    private static Timer timerIsType = null;
+    private static Timer timerByType = null;
+    private static Timer timerLucene = null;
 
     public static final Comparator< ? super NodeRef > nodeRefComparator = GenericComparator.instance();
 
@@ -122,6 +132,9 @@ public class NodeUtil {
     }
     public static ResultSet luceneSearch(String queryPattern,
                                          SearchService searchService ) {
+    	
+        timerLucene = Timer.startTimer(timerLucene, timeEvents);
+    	
         if ( searchService == null ) {
             if ( getServiceRegistry() != null ) {
                 searchService = getServiceRegistry().getSearchService();
@@ -137,6 +150,9 @@ public class NodeUtil {
             Debug.outln( "luceneSearch(" + queryPattern + "): returned "
                          + results.length() + " nodes." );//resultSetToList( results ) );
         }
+        
+     	Timer.stopTimer(timerLucene, "***** luceneSearch(): time", timeEvents);
+
         return results;
     }
 
@@ -205,6 +221,14 @@ public class NodeUtil {
 //                                   findDeleted );
 //    }
 
+//    public Set<NodeRef> findNodeRefsInDateRange( Date fromDate, Date toDate,
+////                      String parentScopeName,
+//                      boolean ignoreWorkspace,
+//                      WorkspaceNode workspace, Date dateTime,
+//                      boolean justFirst, boolean exactMatch,
+//                      ServiceRegistry services, boolean includeDeleted ) {
+//    }
+
     public static ArrayList< NodeRef >
             findNodeRefsByType( String specifier, String prefix,
 //                                String parentScopeName,
@@ -212,6 +236,9 @@ public class NodeUtil {
                                 WorkspaceNode workspace, Date dateTime,
                                 boolean justFirst, boolean exactMatch,
                                 ServiceRegistry services, boolean includeDeleted ) {
+    	
+        timerByType = Timer.startTimer(timerByType, timeEvents);
+        
         ResultSet results = null;
         ArrayList<NodeRef> nodeRefs = new ArrayList<NodeRef>();
         NodeRef nodeRef = null;
@@ -361,6 +388,9 @@ public class NodeUtil {
 //                                           exactMatch, services );
 //            //nodeRef = findNodeRefByType( specifier, prefix, null, services );
 //        }
+        
+        Timer.stopTimer(timerByType, "***** findNodeRefsByType(): time ", timeEvents);
+
         return nodeRefs;
     }
 
@@ -556,54 +586,29 @@ public class NodeUtil {
      */
     public static boolean isType( String typeName, ServiceRegistry services ) {
         if ( typeName == null ) return false;
-        if ( Acm.getJSON2ACM().keySet().contains( typeName ) ) {
-            typeName = Acm.getJSON2ACM().get( typeName );
+        // quick and dirty - using DictionaryService results in WARNINGS
+        typeName = typeName.replace( "sysml:", "" );
+        if (typeName.equals( "Element" ) ||
+                typeName.equals( "Project" )) {
+            return true;
         }
-//        String[] split = typeName.split( ":" );
-//
-//        String nameSpace = null;
-//        String localName = null;
-//        if ( split.length == 2 ) {
-//            nameSpace = split[0];
-//            localName = split[1];
-//        } else if ( split.length == 1 ) {
-//            localName = split[0];
-//        } else {
-//            Debug.error(true, false, "Bad type name " + typeName );
-//            return false;
+        return false;
+//        if ( Acm.getJSON2ACM().keySet().contains( typeName ) ) {
+//            typeName = Acm.getJSON2ACM().get( typeName );
 //        }
-//        if ( localName == null ) {
-//            Debug.error(true, false, "Bad type name " + typeName );
-//            return false;
-//        }
-        if ( services == null ) services = getServices();
-        DictionaryService dServ = services.getDictionaryService();
-//        Collection< QName > types = dServ.getAllTypes();
-//        //{http://www.alfresco.org/model/transfer/1.0}
-        QName qName = createQName( typeName, services );
-        if ( qName != null ) {
-            // TODO: this prints out a warning, maybe better way to check?
-            TypeDefinition t = dServ.getType( qName );
-            if ( t != null ) {
-//              if (Debug.isOn()) System.out.println("\n\n*** getType(" + typeName + ") worked!!!\n" );
-              return true;
-            }
-        }
-//        //        if (Debug.isOn()) System.out.println("all types: " + types);
-////        TypeDefinition t = dServ.getType( QName.createQName( typeName ) );
-////        if (Debug.isOn()) System.out.println("getType(" + typeName + ") = " + t );
-//        for ( QName type : types ) {
-////            if (Debug.isOn()) System.out.println( "getLocalName() = " + type.getLocalName() );
-////            if (Debug.isOn()) System.out.println( "getPrefixString() = " + type.getPrefixString() );
-////            if (Debug.isOn()) System.out.println( "toPrefixString() = " + type.toPrefixString() );
-////            if (Debug.isOn()) System.out.println( "toString() = " + type.toString() );
-//            if ( typeName.equals( type.getPrefixString() ) ) {
-//                if (Debug.isOn()) System.out.println("isType(" + typeName + ") = true");
-//                return true;
+//        if ( services == null ) services = getServices();
+//        DictionaryService dServ = services.getDictionaryService();
+//        QName qName = createQName( typeName, services );
+//        if ( qName != null ) {
+//            // TODO: this prints out a warning, maybe better way to check?
+//            TypeDefinition t = dServ.getType( qName );
+//            if ( t != null ) {
+//              return true;
 //            }
 //        }
 //        if (Debug.isOn()) System.out.println("isType(" + typeName + ") = false");
-        return false;
+        
+
     }
 
     /**
@@ -1184,15 +1189,20 @@ public class NodeUtil {
         return node.exists();
     }
 
-    public static EmsScriptNode getUserHomeFolder() {
+    public static String getUserName() {
         String userName = AuthenticationUtil.getRunAsUser();
+        return userName;
+    }
+
+    public static EmsScriptNode getUserHomeFolder() {
+        String userName = getUserName();
         return getUserHomeFolder( userName );
     }
 
     public static EmsScriptNode getUserHomeFolder( String userName ) {
         return getUserHomeFolder(userName, false);
     }
-    
+
     public static EmsScriptNode getUserHomeFolder( String userName, boolean createIfNotFound) {
         NodeRef homeFolderNode = null;
         EmsScriptNode homeFolderScriptNode = null;
@@ -1269,6 +1279,5 @@ public class NodeUtil {
             }
         }
         return newSet1;
-    }
-
+    }    
 }

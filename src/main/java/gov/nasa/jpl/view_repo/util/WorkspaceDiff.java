@@ -134,10 +134,10 @@ public class WorkspaceDiff {
             EmsScriptNode nodeFromRef = new EmsScriptNode( ref, getServices() );
             String name = nodeFromRef.getName();
             NodeRef ref1 = NodeUtil.findNodeRefById( name, false, getWs1(),
-                                                     getTimestamp1(), getServices(), false );
+                                                     getTimestamp1(), getServices(), true );
             EmsScriptNode node1 = ref1 == null ? null : new EmsScriptNode( ref1, getServices() );
             NodeRef ref2 = NodeUtil.findNodeRefById( name, false, getWs2(),
-                                                     getTimestamp2(), getServices(), false );
+                                                     getTimestamp2(), getServices(), true );
             EmsScriptNode node2 = ref2 == null ? null : new EmsScriptNode( ref2, getServices() );
             addToDiff( node1, node2 );
         }
@@ -171,7 +171,6 @@ public class WorkspaceDiff {
         refs = nodeDiff.getUpdated();
         addDiffs( refs );
 
-
         // Fix nested elements (value specifications, Expressions, ???)
         //nodeDiff.fixValueSpecifications(this);
 
@@ -196,7 +195,7 @@ public class WorkspaceDiff {
         Set< String > ids = new TreeSet< String >( nodeDiff.getMap1().keySet() );
         ids.addAll( nodeDiff.getMap2().keySet() );
         for ( String id : ids ) {
-            NodeRef ref = NodeUtil.findNodeRefById( id, false, getWs1(), getTimestamp1(), null, false );
+            NodeRef ref = NodeUtil.findNodeRefById( id, false, getWs1(), getTimestamp1(), null, true );
             if ( ref != null ) {
                 EmsScriptNode node = new EmsScriptNode( ref, getServices() );
                 if ( node.exists() ) {
@@ -439,10 +438,11 @@ public class WorkspaceDiff {
         addJSONArray(ws1Json, "elements", elements, elementsVersions, time1, true);
         addWorkspaceMetadata( ws1Json, ws1, time1 );
 
-        addJSONArray(ws2Json, "addedElements", addedElements, time2, showAll);
+        addJSONArray(ws2Json, "addedElements", addedElements, time2, true);
         addJSONArray(ws2Json, "movedElements", movedElements, time2, showAll);
         addJSONArray(ws2Json, "deletedElements", deletedElements, time2, showAll);
         addJSONArray(ws2Json, "updatedElements", updatedElements, time2, showAll);
+        addJSONArray(ws2Json, "conflictedElements", conflictedElements, time2, showAll);
         addWorkspaceMetadata( ws2Json, ws2, time2);
 
         deltaJson.put( "workspace1", ws1Json );
@@ -738,12 +738,25 @@ public class WorkspaceDiff {
 
     protected void captureDeltas(WorkspaceNode node) {
         Set< NodeRef > newSet = Utils.newSet();
-        Set<NodeRef> s1 = ( ws1 == null ? newSet : ws1.getChangedNodeRefsWithRespectTo( node, timestamp1 ) );
-        Set<NodeRef> s2 = ( node == null ? newSet : node.getChangedNodeRefsWithRespectTo( ws1, timestamp2 ) );
+        Set<NodeRef> s1 = ( ws1 == null ? newSet : ws1.getChangedNodeRefsWithRespectTo( node, timestamp1, timestamp2 ) );
+        Set<NodeRef> s2 = ( node == null ? newSet : node.getChangedNodeRefsWithRespectTo( ws1, timestamp2, timestamp1 ) );
         if ( onlyModelElements ) {
             s1 = NodeUtil.getModelElements(s1);
             s2 = NodeUtil.getModelElements(s2);
         }
+
+        // need to make sure both sets have each others' nodes
+        for ( NodeRef n : s1 ) {
+            String cmName = NodeUtil.getName( n );
+            NodeRef ref = NodeUtil.findNodeRefById( cmName, false, node, timestamp2, getServices(), false );
+            if ( ref != null ) s2.add( ref );
+        }
+        for ( NodeRef n : s2 ) {
+            String cmName = NodeUtil.getName( n );
+            NodeRef ref = NodeUtil.findNodeRefById( cmName, false, ws1, timestamp1, getServices(), false );
+            if ( ref != null ) s1.add( ref );
+        }
+
         nodeDiff = new NodeDiff( s1, s2 );
         nodeDiff.addPropertyIdsToIgnore( getIgnoredPropIds() ); //Utils.newList( "read", "creator", "modified" ) );
         populateMembers();

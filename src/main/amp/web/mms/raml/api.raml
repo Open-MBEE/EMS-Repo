@@ -93,6 +93,13 @@ traits:
         workspace2:
           description: The target workspaces to compare
           type: string
+        timestamp1:
+          description: The source workspace timestamp to use in comparison (if not specified, gets latest)
+          type: date
+        timestamp2:
+          description: The target workspace timestamp to use in comparison (if not specified, gets latest)
+          type: date
+          
 resourceTypes:
   - readCollection:
       securedBy: [basic]
@@ -330,13 +337,6 @@ resourceTypes:
   type: collection
   get:
     is: [diffable]
-    queryParameters:      
-      workspace1Timestamp:
-        description: The source workspace timestamp to use in comparison (if not specified, gets latest)
-        type: date
-      workspace2Timestamp:
-        description: The target workspace timestamp to use in comparison (if not specified, gets latest)
-        type: date
 /merge:
   post:
     is: [diffable]

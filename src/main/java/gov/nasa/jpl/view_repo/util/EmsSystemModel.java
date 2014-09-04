@@ -4,6 +4,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.List;
+
 
 
 import org.alfresco.service.ServiceRegistry;
@@ -1254,6 +1256,52 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         return null;
     }
 
+    /**
+     * Set the value for the passed node to the passed value
+     * 
+     * @param node
+     * @param value
+     */
+    public < T extends Serializable > void setValue(EmsScriptNode node, T value) {
+    	
+    	if (node == null || value == null) {
+            Debug.error("setValue(): passed node or value is null!");
+    	}
+    	else {
+	    	String type = getTypeString(node, null);
+
+	    	if (type == null) {
+	            Debug.error("setValue(): type for the passed node is null!");
+	    	}
+	    	else {
+		        if (type.equals(Acm.JSON_LITERAL_INTEGER)) {
+
+		        	node.createOrUpdateProperty(Acm.ACM_INTEGER, value);
+		        }
+		        else if (type.equals(Acm.JSON_LITERAL_REAL)) {
+
+		        	node.createOrUpdateProperty(Acm.ACM_DOUBLE, value);
+		        }
+		        else if (type.equals(Acm.JSON_LITERAL_BOOLEAN)) {
+
+		        	node.createOrUpdateProperty(Acm.ACM_BOOLEAN, value);
+		        }
+		        else if (type.equals(Acm.JSON_LITERAL_UNLIMITED_NATURAL)) {
+
+		        	node.createOrUpdateProperty(Acm.ACM_NATURAL_VALUE, value);
+		        }
+		        else if (type.equals(Acm.JSON_LITERAL_STRING)) {
+
+		        	node.createOrUpdateProperty(Acm.ACM_STRING, value);
+		        }
+		        else {
+		            Debug.error("setValue(): unrecognized type: "+type);
+		        }
+	    	}
+    	}
+
+    }
+    
     @Override
     public Object set( Object object, Object specifier, Object value ) {
         // TODO Auto-generated method stub
