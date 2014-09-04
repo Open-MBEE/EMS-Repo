@@ -1386,6 +1386,78 @@ public class EmsScriptNode extends ScriptNode implements
         putInJson( elementJson, "owner", ownerId, filter );
     }
 
+    public enum SpecEnum  {
+      Conform,
+      Connector,
+      Constraint,
+      Dependency,
+      DirectedRelationship,
+      DurationInterval,
+      Duration,
+      ElementValue,
+      Expose,
+      Expression,
+      Generalization,
+      InstanceSpecification,
+      InstanceValue,
+      Interval,
+      LiteralBoolean,
+      LiteralInteger,
+      LiteralNull,
+      LiteralReal,
+      LiteralString,
+      LiteralUnlimitedNatural,
+      OpaqueExpression,
+      Operation,
+      Package,
+      Parameter,
+      Product,
+      Property,
+      StringExpression,
+      TimeExpression,
+      TimeInterval,
+      ValueSpecification,
+      View
+    };
+    
+    public static Map<String, SpecEnum> aspect2Key = new HashMap<String, SpecEnum>() {
+        private static final long serialVersionUID = -2080928480362524333L;
+
+        {
+            put("Conform", SpecEnum.Conform);
+            put("Connector", SpecEnum.Connector);
+            put("Constraint", SpecEnum.Constraint);
+            put("Dependency", SpecEnum.Dependency);
+            put("DirectedRelationship", SpecEnum.DirectedRelationship);
+            put("DurationInterval", SpecEnum.DurationInterval);
+            put("Duration", SpecEnum.Duration);
+            put("ElementValue", SpecEnum.ElementValue);
+            put("Expose", SpecEnum.Expose);
+            put("Expression", SpecEnum.Expression);
+            put("Generalization", SpecEnum.Generalization);
+            put("InstanceSpecification", SpecEnum.InstanceSpecification);
+            put("InstanceValue", SpecEnum.InstanceValue);
+            put("Interval", SpecEnum.Interval);
+            put("LiteralBoolean", SpecEnum.LiteralBoolean);
+            put("LiteralInteger", SpecEnum.LiteralInteger);
+            put("LiteralNull", SpecEnum.LiteralNull);
+            put("LiteralReal", SpecEnum.LiteralReal);
+            put("LiteralString", SpecEnum.LiteralString);
+            put("LiteralUnlimitedNatural", SpecEnum.LiteralUnlimitedNatural);
+            put("OpaqueExpression", SpecEnum.OpaqueExpression);
+            put("Operation", SpecEnum.Operation);
+            put("Package", SpecEnum.Package);
+            put("Parameter", SpecEnum.Parameter);
+            put("Product", SpecEnum.Product);
+            put("Property", SpecEnum.Property);
+            put("StringExpression", SpecEnum.StringExpression);
+            put("TimeExpression", SpecEnum.TimeExpression);
+            put("TimeInterval", SpecEnum.TimeInterval);
+            put("ValueSpecification", SpecEnum.ValueSpecification);
+            put("View", SpecEnum.View);
+        }
+    };
+    
     private void addSpecializationJSON( JSONObject json, Set< String > filter,
                                         Date dateTime ) throws JSONException {
         String typeName = getTypeName();
@@ -1396,35 +1468,112 @@ public class EmsScriptNode extends ScriptNode implements
 
         json.put( "type", typeName );
         for ( QName aspectQname : this.getAspectsSet() ) {
+            // reflection is too slow?
             String cappedAspectName =
                     Utils.capitalize( aspectQname.getLocalName() );
-            String methodName = "add" + cappedAspectName + "JSON";
-            Method method = null;
-            try {
-                // make sure that the method signature here matches all the add
-                // methods
-                method =
-                        this.getClass().getDeclaredMethod( methodName,
-                                                           JSONObject.class,
-                                                           EmsScriptNode.class,
-                                                           Set.class,
-                                                           Date.class );
-            } catch ( NoSuchMethodException | SecurityException e ) {
-            	if  ( methodName.equals("addElementValueJSON") ) {
-            	    e.printStackTrace();
-            	}
-            }
-
-            if ( method != null ) {
-                EmsScriptNode node = getNodeAtAtime( dateTime );
-                try {
-                    method.invoke( this, json, node, filter, dateTime );
-                } catch ( IllegalAccessException | IllegalArgumentException
-                          | InvocationTargetException e ) {
-                	e.printStackTrace();
-                    // do nothing, internal server error
-                }
-            }
+            EmsScriptNode node = getNodeAtAtime( dateTime );
+            SpecEnum aspect = aspect2Key.get( cappedAspectName );
+            if (aspect == null) {
+                
+            } else {
+                switch (aspect) {
+                    case Conform:
+                        addConformJSON( json, node, filter, dateTime );
+                        break;
+                    case Connector:
+                        addConnectorJSON( json, node, filter, dateTime );
+                        break;
+                    case Constraint:
+                        addConstraintJSON( json, node, filter, dateTime );
+                        break;
+                    case Dependency:
+                        addDependencyJSON( json, node, filter, dateTime );
+                        break;
+                    case DirectedRelationship:
+                        addDirectedRelationshipJSON( json, node, filter, dateTime );
+                        break;
+                    case Duration:
+                        addDurationJSON( json, node, filter, dateTime );
+                        break;
+                    case DurationInterval:
+                        addDurationIntervalJSON( json, node, filter, dateTime );
+                        break;
+                    case ElementValue:
+                        addElementValueJSON( json, node, filter, dateTime );
+                        break;
+                    case Expose:
+                        addExposeJSON( json, node, filter, dateTime );
+                        break;
+                    case Expression:
+                        addExpressionJSON( json, node, filter, dateTime );
+                        break;
+                    case Generalization:
+                        addGeneralizationJSON( json, node, filter, dateTime );
+                        break;
+                    case InstanceSpecification:
+                        addInstanceSpecificationJSON( json, node, filter, dateTime );
+                        break;
+                    case InstanceValue:
+                        addInstanceValueJSON( json, node, filter, dateTime );
+                        break;
+                    case Interval:
+                        addIntervalJSON( json, node, filter, dateTime );
+                        break;
+                    case LiteralBoolean:
+                        addLiteralBooleanJSON( json, node, filter, dateTime );
+                        break;
+                    case LiteralInteger:
+                        addLiteralIntegerJSON( json, node, filter, dateTime );
+                        break;
+                    case LiteralNull:
+                        addLiteralNullJSON( json, node, filter, dateTime );
+                        break;
+                    case LiteralReal:
+                        addLiteralRealJSON( json, node, filter, dateTime );
+                        break;
+                    case LiteralString:
+                        addLiteralStringJSON( json, node, filter, dateTime );
+                        break;
+                    case LiteralUnlimitedNatural:
+                        addLiteralUnlimitedNaturalJSON( json, node, filter, dateTime );
+                        break;
+                    case OpaqueExpression:
+                        addOpaqueExpressionJSON( json, node, filter, dateTime );
+                        break;
+                    case Operation:
+                        addOperationJSON( json, node, filter, dateTime );
+                        break;
+                    case Package:
+                        addPackageJSON( json, node, filter, dateTime );
+                        break;
+                    case Parameter:
+                        addParameterJSON( json, node, filter, dateTime );
+                        break;
+                    case Product:
+                        addProductJSON( json, node, filter, dateTime );
+                        break;
+                    case Property:
+                        addPropertyJSON( json, node, filter, dateTime );
+                        break;
+                    case StringExpression:
+                        addStringExpressionJSON( json, node, filter, dateTime );
+                        break;
+                    case TimeExpression:
+                        addStringExpressionJSON( json, node, filter, dateTime );
+                        break;
+                    case TimeInterval:
+                        addTimeIntervalJSON( json, node, filter, dateTime );
+                        break;
+                    case ValueSpecification:
+                        addValueSpecificationJSON( json, node, filter, dateTime );
+                        break;
+                    case View:
+                        addViewJSON( json, node, filter, dateTime );
+                        break;
+                    default:
+                            
+                } // end switch
+            } // end if aspect == null
         }
     }
 
@@ -2462,14 +2611,14 @@ public class EmsScriptNode extends ScriptNode implements
     public WorkspaceNode getParentWorkspace() {
         WorkspaceNode ws = getWorkspace();
        // if( ws == null)
-       // 	return null;
+       //   return null;
         return ws.getParentWorkspace();
     }
     // delete later
     public WorkspaceNode getSourceWorkspace() {
         WorkspaceNode ws = getWorkspace();
        if( ws == null)
-        	return null;
+            return null;
         return ws.getSourceWorkspace();
     }
 
@@ -3289,6 +3438,10 @@ public class EmsScriptNode extends ScriptNode implements
 
         ArrayList< NodeRef > nodeRefs =
                 (ArrayList< NodeRef >)node.getProperty( "sysml:operand" );
+        if (nodeRefs == null) {
+            return;
+        }
+        
         JSONArray array = new JSONArray();
         for ( NodeRef nodeRef : nodeRefs ) {
             NodeRef versionedRef = nodeRef;
