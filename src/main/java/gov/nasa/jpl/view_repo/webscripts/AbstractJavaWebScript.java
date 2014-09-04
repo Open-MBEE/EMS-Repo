@@ -258,7 +258,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                          + "): returning " + result );
         }
         
-//	    Timer.stopTimer(timer, "====== findScriptNodeById(): end time", timeEvents);
+	    Timer.stopTimer(timer, "====== findScriptNodeById(): end time", timeEvents);
 
 		return result;
 	}
