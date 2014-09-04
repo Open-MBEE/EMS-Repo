@@ -120,7 +120,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         } else {
             ModelPost modelService = new ModelPost(repository, services);
             modelService.setLogLevel(LogLevel.DEBUG);
-            modelService.setRunWithoutTransactions(false);
+            modelService.setRunWithoutTransactions(true);
             Status status = new Status();
             try {
                 Set<EmsScriptNode> elements = 
@@ -144,11 +144,20 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         // set the status
         jsonNode.setProperty("ems:job_status", jobStatus);
 
-        String contextUrl = "https://" + ActionUtil.getHostName() + ".jpl.nasa.gov/alfresco";
+        String contextUrl = "https://" + ActionUtil.getHostName() + "alfresco";
         	
         // Send off the notification email
+        // FIXME: hack to send email off later... until appropriate scale is set. 
+        try {
+            if (logger.isDebugEnabled()) logger.debug("sleeping before sending out for " + content.length()/5000);
+            Thread.sleep( content.length()/5000 );
+        } catch ( InterruptedException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
         String subject =
-                "[EuropaEMS] Workspace " + workspaceId + " Project "
+                "Workspace " + workspaceId + " Project "
                         + projectName + " Load " + jobStatus;
         String msg = "Log URL: " + contextUrl + logNode.getUrl();
         ActionUtil.sendEmailToModifier(jsonNode, msg, subject, services, response);
