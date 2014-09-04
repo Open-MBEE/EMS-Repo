@@ -1409,7 +1409,6 @@ public class EmsScriptNode extends ScriptNode implements
                                                            EmsScriptNode.class,
                                                            Set.class,
                                                            Date.class );
-                System.out.println(method);
             } catch ( NoSuchMethodException | SecurityException e ) {
             	if  ( methodName.equals("addElementValueJSON") ) {
             	    e.printStackTrace();
@@ -1420,9 +1419,6 @@ public class EmsScriptNode extends ScriptNode implements
                 EmsScriptNode node = getNodeAtAtime( dateTime );
                 try {
                     method.invoke( this, json, node, filter, dateTime );
-                    System.out.println("*******************************************************");
-                    System.out.println(json);
-                    System.out.println(method);
                 } catch ( IllegalAccessException | IllegalArgumentException
                           | InvocationTargetException e ) {
                 	e.printStackTrace();

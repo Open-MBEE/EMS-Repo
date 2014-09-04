@@ -30,6 +30,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.connections.JmsConnection;
 import gov.nasa.jpl.view_repo.connections.RestPostConnection;
@@ -55,6 +56,7 @@ import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mozilla.javascript.Scriptable;
@@ -71,6 +73,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
+    private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
     public enum LogLevel {
 		DEBUG(0), INFO(1), WARNING(2), ERROR(3);
 		private int value;
@@ -79,6 +82,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		}
 	}
 
+    private static boolean timeEvents = false;
+    private static Timer timer = null;
+    
     public static final int MAX_PRINT = 200;
 
     // injected members
@@ -216,6 +222,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	                                           Date dateTime, boolean findDeleted) {
 		EmsScriptNode result = null;
 
+	    timer = Timer.startTimer(timer, timeEvents);
+        
 		// be smart about search if possible
 		if (foundElements.containsKey(id)) {
             EmsScriptNode resultAtTime =
@@ -230,6 +238,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 }
 			    result = resultAtTime;
 			}
+			
+	        if (timeEvents) System.out.println("====== findScriptNodeById(): cache time "+timer);
+
 		}
 		if ( result == null ) {
 			NodeRef nodeRef = NodeUtil.findNodeRefById(id, false, workspace, dateTime, services, findDeleted);
@@ -237,6 +248,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 				result = new EmsScriptNode(nodeRef, services, response);
 				foundElements.put(id, result); // add to cache
 			}
+			
+			if (timeEvents) System.out.println("====== findScriptNodeById(): findNodeRefById time "+timer);
 		}
 
         if ( Debug.isOn() ) {
@@ -244,6 +257,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                          + ", " + dateTime
                          + "): returning " + result );
         }
+        
+//	    Timer.stopTimer(timer, "====== findScriptNodeById(): end time", timeEvents);
+
 		return result;
 	}
 
@@ -251,7 +267,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		if (level.value >= logLevel.value || level.value == LogLevel.ERROR.value) {
 			log("[" + level.name() + "]: " + msg + "\n", code);
 			if (level.value >= LogLevel.WARNING.value) {
-				if (Debug.isOn()) System.out.println("[" + level.name() + "]: " + msg + "\n");
+				if (logger.isDebugEnabled()) logger.debug("[" + level.name() + "]: " + msg + "\n");
 			}
 		}
 	}
@@ -260,7 +276,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	    if (level.value >= logLevel.value) {
 	        log("[" + level.name() + "]: " + msg);
 	    }
-        if (Debug.isOn()) System.out.println(msg);
+        if (logger.isDebugEnabled()) logger.debug(msg);
 	}
 
 	protected void log(String msg, int code) {

@@ -3,8 +3,11 @@ package gov.nasa.jpl.view_repo.util;
 import gov.nasa.jpl.mbee.util.CompareUtils.GenericComparator;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,6 +67,13 @@ public class NodeUtil {
             this.prefix = prefix;
         }
     }
+    
+    // Set the flag to time events that occur during a model post using the timers
+    // below
+    private static boolean timeEvents = false;
+    private static Timer timerIsType = null;
+    private static Timer timerByType = null;
+    private static Timer timerLucene = null;
 
     public static final Comparator< ? super NodeRef > nodeRefComparator = GenericComparator.instance();
 
@@ -122,6 +132,9 @@ public class NodeUtil {
     }
     public static ResultSet luceneSearch(String queryPattern,
                                          SearchService searchService ) {
+    	
+        timerLucene = Timer.startTimer(timerLucene, timeEvents);
+    	
         if ( searchService == null ) {
             if ( getServiceRegistry() != null ) {
                 searchService = getServiceRegistry().getSearchService();
@@ -137,6 +150,9 @@ public class NodeUtil {
             Debug.outln( "luceneSearch(" + queryPattern + "): returned "
                          + results.length() + " nodes." );//resultSetToList( results ) );
         }
+        
+     	Timer.stopTimer(timerLucene, "***** luceneSearch(): time", timeEvents);
+
         return results;
     }
 
@@ -220,6 +236,9 @@ public class NodeUtil {
                                 WorkspaceNode workspace, Date dateTime,
                                 boolean justFirst, boolean exactMatch,
                                 ServiceRegistry services, boolean includeDeleted ) {
+    	
+        timerByType = Timer.startTimer(timerByType, timeEvents);
+        
         ResultSet results = null;
         ArrayList<NodeRef> nodeRefs = new ArrayList<NodeRef>();
         NodeRef nodeRef = null;
@@ -369,6 +388,9 @@ public class NodeUtil {
 //                                           exactMatch, services );
 //            //nodeRef = findNodeRefByType( specifier, prefix, null, services );
 //        }
+        
+        Timer.stopTimer(timerByType, "***** findNodeRefsByType(): time ", timeEvents);
+
         return nodeRefs;
     }
 
@@ -584,7 +606,9 @@ public class NodeUtil {
 //              return true;
 //            }
 //        }
-//        return false;
+//        if (Debug.isOn()) System.out.println("isType(" + typeName + ") = false");
+        
+
     }
 
     /**
@@ -1255,6 +1279,5 @@ public class NodeUtil {
             }
         }
         return newSet1;
-    }
-
+    }    
 }
