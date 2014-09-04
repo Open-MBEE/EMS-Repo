@@ -215,7 +215,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	                                           WorkspaceNode workspace,
 	                                           Date dateTime, boolean findDeleted) {
 	    return NodeUtil.findScriptNodeById( id, workspace, dateTime, findDeleted,
-	                                        foundElements, services, response );
+	                                        services, response );
 	}
 
     protected void log(LogLevel level, String msg, int code) {
@@ -311,7 +311,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             } else {
                 EmsScriptNode sitesFolder = null;
                 // check and see if the Sites folder already exists
-                NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, false, workspace, null, true, services, false );
+                boolean useSimpleCache = workspace == null;
+                NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, useSimpleCache, false, workspace, null, true, services, false );
                 if ( sitesNodeRef != null ) {
                     sitesFolder = new EmsScriptNode( sitesNodeRef, services );
                 } else {

@@ -246,7 +246,7 @@ public class WorkspaceNode extends EmsScriptNode {
 
         if ( parent != null && parent.exists() && !this.equals( parent.getWorkspace() ) ) {
             EmsScriptNode grandParent = parent.getOwningParent( null );
-            ArrayList< NodeRef > arr = NodeUtil.findNodeRefsByType( parentName, SearchType.CM_NAME.prefix, false, this, null, false, true, getServices(), false );
+            ArrayList< NodeRef > arr = NodeUtil.findNodeRefsByType( parentName, SearchType.CM_NAME.prefix, false, false, this, null, false, true, getServices(), false );
             for ( NodeRef ref : arr ) {
                 EmsScriptNode p = new EmsScriptNode( ref, getServices() );
                 EmsScriptNode gp = p.getParent();
@@ -316,7 +316,7 @@ public class WorkspaceNode extends EmsScriptNode {
         // absence is equivalent to finding deleted
         ArrayList< NodeRef > refs =
                 NodeUtil.findNodeRefsByType( getNodeRef().toString(),
-                                             SearchType.WORKSPACE.prefix,
+                                             SearchType.WORKSPACE.prefix, false,
                                              true, null, dateTime, false, true,
                                              getServices(), true );
         changedNodeRefs.addAll( refs );
@@ -355,7 +355,8 @@ public class WorkspaceNode extends EmsScriptNode {
             Date lastParentCreationDate = lastParent.getCreationDate();
             if ( otherTime.before( lastParentCreationDate ) ) {
                 String specifier = "[" + TimeUtils.toTimestamp( dateTime );
-                NodeUtil.findNodeRefsByType( specifier, "@ems\\:blah:", false, lastParent, null, true, true, getServices(), true );
+                Debug.error("CODE NOT DONE FOR THIS!!!");
+                NodeUtil.findNodeRefsByType( specifier, "@ems\\:blah:", false, false, lastParent, null, true, true, getServices(), true );
                 // TODO
                 // keep walking parent back to master and collect all commits
                 // between timepoints looking at creation date of parents.

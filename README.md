@@ -227,6 +227,7 @@ Sometimes, eclipse will lock the GUI with a popup saying that the user operation
 If this is annoying because the rebuild takes a long time, you can create a ram disk to store the target directory and create a soft link to it.
 This should speed up the rebuild significantly.
 
+     sudo mkdir /mnt/ramdisk
      sudo mount -t tmpfs -o size=1024m tmpfs /mnt/ramdisk
      cd ~/git/alfresco-view-repo
      mv target /mnt/ramdisk

@@ -49,11 +49,12 @@ public class NodeUtil {
 
     public static boolean doCaching = false;
     
-//    /**
-//     * A cache of alfresco nodes stored as a map from cm:name to node
-//     */
-//    public static HashMap< String, EmsScriptNode > foundElements =
-//            new HashMap< String, EmsScriptNode >();
+    /**
+     * A cache of alfresco nodes stored as a map from cm:name to node for the master branch only.
+     */
+    public static HashMap< String, NodeRef > simpleCache =
+            new HashMap< String, NodeRef >();
+
     /**
      * A cache of alfresco nodes stored as a map from sysml:id to a set of nodes
      */
@@ -199,16 +200,18 @@ public class NodeUtil {
     }
 
     public static NodeRef findNodeRefByType( String name, SearchType type,
+                                             boolean useSimpleCache,
                                              boolean ignoreWorkspace,
                                              WorkspaceNode workspace,
                                              Date dateTime, boolean exactMatch,
                                              ServiceRegistry services, boolean findDeleted ) {
-        return findNodeRefByType( name, type.prefix, ignoreWorkspace, workspace, dateTime,
+        return findNodeRefByType( name, type.prefix, useSimpleCache, ignoreWorkspace, workspace, dateTime,
                                   exactMatch, services, findDeleted );
     }
 
     public static NodeRef findNodeRefByType( String specifier, String prefix,
                                              //String parentScopeName,
+                                             boolean useSimpleCache,
                                              boolean ignoreWorkspace,
                                              WorkspaceNode workspace,
                                              Date dateTime, boolean exactMatch,
@@ -216,6 +219,7 @@ public class NodeUtil {
         ArrayList< NodeRef > refs =
                 findNodeRefsByType( specifier, prefix,
                                     //parentScopeName,
+                                    useSimpleCache,
                                     ignoreWorkspace,
                                     workspace, dateTime, true,
                                     exactMatch, services, findDeleted );
@@ -234,6 +238,7 @@ public class NodeUtil {
 
     public static ArrayList< NodeRef >
             findNodeRefsByType( String specifier, String prefix,
+                                boolean useSimpleCache,
                                 boolean ignoreWorkspace,
                                 WorkspaceNode workspace, Date dateTime,
                                 boolean justFirst, boolean exactMatch,
@@ -244,28 +249,42 @@ public class NodeUtil {
         if ( services == null ) services = getServices();
         
         // look in cache first
+        //boolean simpleCacheLookup = false;
         if ( doCaching ) {
-            results = getCachedElements( specifier, prefix, ignoreWorkspace, workspace, dateTime, justFirst,
-                                         exactMatch, includeDeleted );
+//            simpleCacheLookup =
+//                    !ignoreWorkspace
+//                            && workspace == null
+//                            && dateTime == null
+//                            && !includeDeleted
+//                            && ( prefix.equals( SearchType.CM_NAME.prefix ) || prefix.equals( SearchType.ID.prefix ) );
+            if ( useSimpleCache ) {
+                NodeRef ref = simpleCache.get( specifier );
+                if ( exists(ref ) ) {
+                    results = Utils.newList( ref );
+                }
+            } else  {
+                results = getCachedElements( specifier, prefix, ignoreWorkspace, workspace, dateTime, justFirst,
+                                             exactMatch, includeDeleted );
+            }
         }
 
         boolean wasCached = false;
         boolean caching = false;
         try {
             if ( !Utils.isNullOrEmpty( results ) ) {
-                wasCached = true;
+                wasCached = true; // doCaching must be true here
             } else {
                 results = findNodeRefsByType( specifier, prefix, services );
-                if ( !Utils.isNullOrEmpty( results ) ) {
+                if ( doCaching && !Utils.isNullOrEmpty( results ) ) {
                     caching = true;
                 }
             }
-            if (results != null) {
-                NodeRef lowest = null;
-                //int minParentDistance = Integer.MAX_VALUE;
+            if ( results != null ) {
                 if ( wasCached && dateTime == null ) {
                     nodeRefs = results;
                 } else for (NodeRef nr: results) {
+                    NodeRef lowest = null;
+                    //int minParentDistance = Integer.MAX_VALUE;
                     if ( nr == null ) continue;
                     EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
 
@@ -359,9 +378,14 @@ public class NodeUtil {
 //                    }
                 }
             }
-            if ( caching ) {
-                putInCache( specifier, prefix, ignoreWorkspace, workspace, dateTime, justFirst,
-                            exactMatch, includeDeleted, nodeRefs );
+            if ( doCaching && caching && !Utils.isNullOrEmpty( nodeRefs ) ) {
+                if ( useSimpleCache ) {
+                    NodeRef r = nodeRefs.get( 0 ); 
+                    simpleCache.put( specifier, r );
+                } else {
+                    putInCache( specifier, prefix, ignoreWorkspace, workspace, dateTime, justFirst,
+                                exactMatch, includeDeleted, nodeRefs );
+                }
             }
         } finally {
             if (results != null) {
@@ -488,7 +512,9 @@ public class NodeUtil {
                                           boolean ignoreWorkspace,
                                           WorkspaceNode workspace,
                                           Date dateTime, ServiceRegistry services, boolean findDeleted) {
+        boolean useSimpleCache = !ignoreWorkspace && !findDeleted && workspace == null && dateTime == null;
         NodeRef r = findNodeRefByType(id, SearchType.ID.prefix, //parentScopeName,
+                                      useSimpleCache,
                                       ignoreWorkspace,
                                       workspace, dateTime, true, services, findDeleted); // TODO: temporarily search by ID
         EmsScriptNode esn = null;
@@ -498,6 +524,7 @@ public class NodeUtil {
         if ( r == null || (!esn.exists() && !esn.isDeleted()) ) {
             r = findNodeRefByType( id, "@cm\\:name:\"",
                                    //parentScopeName,
+                                   useSimpleCache,
                                    ignoreWorkspace,
                                    workspace, dateTime,
                                    true, services, findDeleted );
@@ -546,7 +573,7 @@ public class NodeUtil {
         ArrayList<NodeRef> resultSet = null;
         //try {
 
-        resultSet = findNodeRefsByType( pattern, type, ignoreWorkspace, workspace,
+        resultSet = findNodeRefsByType( pattern, type, false, ignoreWorkspace, workspace,
                                         dateTime, false, false, getServices(),
                                         false );
             //resultSet = findNodeRefsByType(pattern, type, getServices());
@@ -859,8 +886,10 @@ public class NodeUtil {
         if ( Utils.isNullOrEmpty( siteName ) ) return null;
 
         // Try to find the site in the workspace first.
+        boolean useSimpleCache = !ignoreWorkspace && workspace == null && dateTime == null;
         ArrayList< NodeRef > refs =
                 findNodeRefsByType( siteName, SearchType.CM_NAME.prefix,
+                                    useSimpleCache,
                                     ignoreWorkspace, workspace, dateTime, true,
                                     true, getServices(), false );
         for ( NodeRef ref : refs ) {
@@ -1232,7 +1261,7 @@ public class NodeUtil {
         EmsScriptNode homeFolderScriptNode = null;
         if ( userName.equals( "admin" ) ) {
             homeFolderNode =
-                    findNodeRefByType( userName, SearchType.CM_NAME, true, null,
+                    findNodeRefByType( userName, SearchType.CM_NAME, true, true, null,
                                        null, true, getServices(), false );
         } else {
             PersonService personService = getServices().getPersonService();
@@ -1306,18 +1335,20 @@ public class NodeUtil {
     }
 
     public static EmsScriptNode findScriptNodeById( String id,
-                                                       WorkspaceNode workspace,
-                                                       Date dateTime,
-                                                       boolean findDeleted,
-                                                       Map< String, EmsScriptNode > foundElements,
-                                                       ServiceRegistry services,
-                                                       StringBuffer response ) {
+                                                    WorkspaceNode workspace,
+                                                    Date dateTime,
+                                                    boolean findDeleted,
+                                                    //Map< String, EmsScriptNode > simpleCache,
+                                                    ServiceRegistry services,
+                                                    StringBuffer response ) {
     	EmsScriptNode result = null;
     
     	// be smart about search if possible
-    	if (foundElements.containsKey(id)) {
+        NodeRef ref = simpleCache.get( id );
+    	if (ref != null) {
+    	    EmsScriptNode esn = new EmsScriptNode( ref, services );
             EmsScriptNode resultAtTime =
-                    foundElements.get( id ).getVersionAtTime( dateTime );
+                    esn.getVersionAtTime( dateTime );
     		if ( resultAtTime != null && resultAtTime.exists() &&
     		     ( workspace == null || workspace.equals( resultAtTime.getWorkspace() ) ) ) {
     		    //if ( resultAtTime != null )
@@ -1333,7 +1364,7 @@ public class NodeUtil {
     		NodeRef nodeRef = findNodeRefById(id, false, workspace, dateTime, services, findDeleted);
     		if (nodeRef != null) {
     			result = new EmsScriptNode(nodeRef, services, response);
-    			foundElements.put(id, result); // add to cache
+//    			simpleCache.put(id, nodeRef); // add to cache
     		}
     	}
     

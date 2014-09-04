@@ -554,7 +554,7 @@ public class EmsScriptNode extends ScriptNode implements
         // see if image already exists by looking up by checksum
         ArrayList< NodeRef > refs =
                 NodeUtil.findNodeRefsByType( "" + cs,
-                                             SearchType.CHECKSUM.prefix, false,
+                                             SearchType.CHECKSUM.prefix, false, false,
                                              workspace, dateTime, false, false,
                                              services, false );
         // ResultSet existingArtifacts =
@@ -1745,8 +1745,9 @@ public class EmsScriptNode extends ScriptNode implements
                                       WorkspaceNode workspace,
                                       Date dateTime, ServiceRegistry services,
                                       StringBuffer response, Status status ) {
+        boolean useSimpleCache = !ignoreWorkspace && workspace == null && dateTime == null;
         ArrayList< NodeRef > refs =
-                NodeUtil.findNodeRefsByType( valueId, "@cm\\:name:\"", ignoreWorkspace,
+                NodeUtil.findNodeRefsByType( valueId, "@cm\\:name:\"", useSimpleCache, ignoreWorkspace,
                                              workspace, dateTime, true, true,
                                              services, false );
         List< EmsScriptNode > nodeList =
@@ -2184,8 +2185,9 @@ public class EmsScriptNode extends ScriptNode implements
             filename = filename.replace( "_latest", "" );
             filename = filename.replace( "\\", "" );
             filename = filename.replace( "src=/editor/images/docgen/", "" );
+            boolean useSimpleCache = getWorkspace() == null;
             NodeRef nodeRef =
-                    findNodeRefByType( filename, "@cm\\:name:\"",
+                    findNodeRefByType( filename, "@cm\\:name:\"", useSimpleCache,
                                        getWorkspace(), null, false );
             if ( nodeRef != null ) {
                 // this should grab whatever is the latest versions purl - so
@@ -2228,9 +2230,9 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     protected NodeRef
-            findNodeRefByType( String name, String type,
+            findNodeRefByType( String name, String type, boolean useSimpleCache,
                                WorkspaceNode workspace, Date dateTime, boolean findDeleted ) {
-        return NodeUtil.findNodeRefByType( name, type, false, workspace, dateTime,
+        return NodeUtil.findNodeRefByType( name, type, useSimpleCache, false, workspace, dateTime,
                                            true, services, findDeleted );
     }
 
