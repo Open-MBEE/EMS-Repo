@@ -202,6 +202,8 @@ public class ModelPost extends AbstractJavaWebScript {
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
 
+        System.out.println("****** NodeUtil.doCaching = " + NodeUtil.doCaching );
+        
         setWsDiff( workspace );
 
         clearCaches();
@@ -281,6 +283,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         timerUpdateModel = Timer.startTimer(timerUpdateModel, timeEvents);
 
+        /*
         // Send deltas to all listeners
         if (wsDiff.isDiff()) {
             JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
@@ -301,6 +304,7 @@ public class ModelPost extends AbstractJavaWebScript {
             CommitUtil.commit( deltaJson, workspace, siteName,
                                "", false, services, response );
         }
+        */
 
         Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): Deltas time", timeEvents);
 
@@ -1826,6 +1830,9 @@ public class ModelPost extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
+        NodeUtil.doCaching = true;
+        Timer timer = new Timer();
+
         printHeader( req );
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -1918,6 +1925,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
         printFooter();
 
+        System.out.println( "ModelPost: " + timer );
+        
         return model;
     }
 

@@ -82,9 +82,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		}
 	}
 
-    private static boolean timeEvents = false;
-    private static Timer timer = null;
-    
     public static final int MAX_PRINT = 200;
 
     // injected members
@@ -220,50 +217,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	protected EmsScriptNode findScriptNodeById(String id,
 	                                           WorkspaceNode workspace,
 	                                           Date dateTime, boolean findDeleted) {
-		EmsScriptNode result = null;
+	    return NodeUtil.findScriptNodeById( id, workspace, dateTime, findDeleted,
 
-	    timer = Timer.startTimer(timer, timeEvents);
-        
-		// be smart about search if possible
-		if (foundElements.containsKey(id)) {
-            EmsScriptNode resultAtTime =
-                    foundElements.get( id ).getVersionAtTime( dateTime );
-			if ( resultAtTime != null && resultAtTime.exists() &&
-			     ( workspace == null || workspace.equals( resultAtTime.getWorkspace() ) ) ) {
-			    //if ( resultAtTime != null )
-                if ( Debug.isOn() ) {
-                    Debug.outln( "findScriptNodeById(" + id + ", " + workspace
-                                 + ", " + dateTime
-                                 + "): found in foundElements: " + resultAtTime );
-                }
-			    result = resultAtTime;
-			}
-			
-	        if (timeEvents) System.out.println("====== findScriptNodeById(): cache time "+timer);
-
-		}
-		if ( result == null ) {
-			NodeRef nodeRef = NodeUtil.findNodeRefById(id, false, workspace, dateTime, services, findDeleted);
-			if (nodeRef != null) {
-				result = new EmsScriptNode(nodeRef, services, response);
-				foundElements.put(id, result); // add to cache
-			}
-			
-			if (timeEvents) System.out.println("====== findScriptNodeById(): findNodeRefById time "+timer);
-		}
-
-        if ( Debug.isOn() ) {
-            Debug.outln( "findScriptNodeById(" + id + ", " + workspace
-                         + ", " + dateTime
-                         + "): returning " + result );
-        }
-        
-	    Timer.stopTimer(timer, "====== findScriptNodeById(): end time", timeEvents);
-
-		return result;
+	                                        services, response );
 	}
 
-	protected void log(LogLevel level, String msg, int code) {
+    protected void log(LogLevel level, String msg, int code) {
 		if (level.value >= logLevel.value || level.value == LogLevel.ERROR.value) {
 			log("[" + level.name() + "]: " + msg + "\n", code);
 			if (level.value >= LogLevel.WARNING.value) {
@@ -356,7 +315,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             } else {
                 EmsScriptNode sitesFolder = null;
                 // check and see if the Sites folder already exists
-                NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, false, workspace, null, true, services, false );
+                boolean useSimpleCache = workspace == null;
+                NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, useSimpleCache, false, workspace, null, true, services, false );
                 if ( sitesNodeRef != null ) {
                     sitesFolder = new EmsScriptNode( sitesNodeRef, services );
                 } else {

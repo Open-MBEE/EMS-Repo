@@ -28,6 +28,7 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo.actions;
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
@@ -86,6 +87,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
     
     @Override
     protected void executeImpl(Action action, NodeRef nodeRef) {
+        Timer timer = new Timer();
         String projectId = (String) action.getParameterValue(PARAM_PROJECT_ID);
         String projectName = (String) action.getParameterValue(PARAM_PROJECT_NAME);
         EmsScriptNode projectNode = (EmsScriptNode) action.getParameterValue(PARAM_PROJECT_NODE);
@@ -154,6 +156,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         ActionUtil.sendEmailToModifier(jsonNode, msg, subject, services, response);
 
         if (logger.isDebugEnabled()) logger.debug("Email notification sent for " + workspaceId + " - "+ projectName + " [id: " + projectId + "]");
+        System.out.println( "ModelLoadActionExecuter: " + timer );
     }
 
     protected void clearCache() {
