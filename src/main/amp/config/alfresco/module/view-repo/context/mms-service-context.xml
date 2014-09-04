@@ -216,7 +216,7 @@
 	</bean>
 	
 	<!--  adding new bean -->
-	<bean id="webscript.gov.nasa.jpl.mms.workspaces.workspaces.merge"
+	<bean id="webscript.gov.nasa.jpl.mms.merge.post"
 		class="gov.nasa.jpl.view_repo.webscripts.WorkspacesMerge" parent="webscript"
 		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
