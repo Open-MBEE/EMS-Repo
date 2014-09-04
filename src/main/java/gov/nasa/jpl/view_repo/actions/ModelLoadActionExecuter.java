@@ -122,7 +122,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         } else {
             ModelPost modelService = new ModelPost(repository, services);
             modelService.setLogLevel(LogLevel.DEBUG);
-            modelService.setRunWithoutTransactions(true);
+            modelService.setRunWithoutTransactions(false);
             Status status = new Status();
             try {
                 Set<EmsScriptNode> elements = 

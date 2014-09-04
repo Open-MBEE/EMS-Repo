@@ -30,6 +30,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.connections.JmsConnection;
 import gov.nasa.jpl.view_repo.connections.RestPostConnection;
@@ -55,6 +56,7 @@ import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mozilla.javascript.Scriptable;
@@ -71,6 +73,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
+    private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
     public enum LogLevel {
 		DEBUG(0), INFO(1), WARNING(2), ERROR(3);
 		private int value;
@@ -215,6 +218,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	                                           WorkspaceNode workspace,
 	                                           Date dateTime, boolean findDeleted) {
 	    return NodeUtil.findScriptNodeById( id, workspace, dateTime, findDeleted,
+
 	                                        services, response );
 	}
 
@@ -222,7 +226,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		if (level.value >= logLevel.value || level.value == LogLevel.ERROR.value) {
 			log("[" + level.name() + "]: " + msg + "\n", code);
 			if (level.value >= LogLevel.WARNING.value) {
-				if (Debug.isOn()) System.out.println("[" + level.name() + "]: " + msg + "\n");
+				if (logger.isDebugEnabled()) logger.debug("[" + level.name() + "]: " + msg + "\n");
 			}
 		}
 	}
@@ -231,7 +235,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	    if (level.value >= logLevel.value) {
 	        log("[" + level.name() + "]: " + msg);
 	    }
-        if (Debug.isOn()) System.out.println(msg);
+        if (logger.isDebugEnabled()) logger.debug(msg);
 	}
 
 	protected void log(String msg, int code) {

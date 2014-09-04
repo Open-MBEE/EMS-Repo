@@ -3,8 +3,11 @@ package gov.nasa.jpl.view_repo.util;
 import gov.nasa.jpl.mbee.util.CompareUtils.GenericComparator;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -82,6 +85,15 @@ public class NodeUtil {
             this.prefix = prefix;
         }
     }
+    
+    // Set the flag to time events that occur during a model post using the timers
+    // below
+    private static boolean timeEvents = false;
+    private static Timer timer = null;
+
+    private static Timer timerIsType = null;
+    private static Timer timerByType = null;
+    private static Timer timerLucene = null;
 
     public static final Comparator< ? super NodeRef > nodeRefComparator = GenericComparator.instance();
 
@@ -140,6 +152,9 @@ public class NodeUtil {
     }
     public static ResultSet luceneSearch(String queryPattern,
                                          SearchService searchService ) {
+    	
+        timerLucene = Timer.startTimer(timerLucene, timeEvents);
+    	
         if ( searchService == null ) {
             if ( getServiceRegistry() != null ) {
                 searchService = getServiceRegistry().getSearchService();
@@ -155,6 +170,9 @@ public class NodeUtil {
             Debug.outln( "luceneSearch(" + queryPattern + "): returned "
                          + results.length() + " nodes." );//resultSetToList( results ) );
         }
+        
+     	Timer.stopTimer(timerLucene, "***** luceneSearch(): time", timeEvents);
+
         return results;
     }
 
@@ -244,6 +262,9 @@ public class NodeUtil {
                                 boolean justFirst, boolean exactMatch,
                                 ServiceRegistry services, boolean includeDeleted ) {
         ArrayList<NodeRef> results = null;
+    	
+        timerByType = Timer.startTimer(timerByType, timeEvents);
+        
         ArrayList<NodeRef> nodeRefs = new ArrayList<NodeRef>();
         NodeRef nodeRef = null;
         if ( services == null ) services = getServices();
@@ -401,6 +422,16 @@ public class NodeUtil {
 
             }
         }
+//        // If we found a NodeRef but still have null (maybe because a version
+//        // didn't exist at the time), try again for the latest.
+//        if ( nodeRefs.isEmpty()//nodeRef == null
+//                && dateTime != null && gotResults) {
+//            nodeRefs = findNodeRefsByType( specifier, prefix, null, justFirst,
+//                                           exactMatch, services );
+//            //nodeRef = findNodeRefByType( specifier, prefix, null, services );
+//        }
+        
+        Timer.stopTimer(timerByType, "***** findNodeRefsByType(): time ", timeEvents);
 
         return nodeRefs;
     }
@@ -659,7 +690,9 @@ public class NodeUtil {
 //              return true;
 //            }
 //        }
-//        return false;
+//        if (Debug.isOn()) System.out.println("isType(" + typeName + ") = false");
+        
+
     }
 
     /**
@@ -1343,6 +1376,8 @@ public class NodeUtil {
                                                     StringBuffer response ) {
     	EmsScriptNode result = null;
     
+        timer = Timer.startTimer(timer, timeEvents);
+        
     	// be smart about search if possible
         NodeRef ref = simpleCache.get( id );
     	if (ref != null) {
@@ -1359,6 +1394,8 @@ public class NodeUtil {
                 }
     		    result = resultAtTime;
     		}
+            
+            if (timeEvents) System.out.println("====== findScriptNodeById(): cache time "+timer);
     	}
     	if ( result == null ) {
     		NodeRef nodeRef = findNodeRefById(id, false, workspace, dateTime, services, findDeleted);
@@ -1366,6 +1403,9 @@ public class NodeUtil {
     			result = new EmsScriptNode(nodeRef, services, response);
 //    			simpleCache.put(id, nodeRef); // add to cache
     		}
+
+    		if (timeEvents) System.out.println("====== findScriptNodeById(): findNodeRefById time "+timer);
+    		
     	}
     
         if ( Debug.isOn() ) {
@@ -1373,6 +1413,9 @@ public class NodeUtil {
                          + ", " + dateTime
                          + "): returning " + result );
         }
+
+        Timer.stopTimer(timer, "====== findScriptNodeById(): end time", timeEvents);
+
     	return result;
     }
 
