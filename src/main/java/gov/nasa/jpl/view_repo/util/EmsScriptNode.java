@@ -3273,18 +3273,23 @@ public class EmsScriptNode extends ScriptNode implements
             json.put( "allowedElements", getView().getDisplayedElements() );
             json.put( "childrenViews", getView().getChildViews() );
         } else {
-            putInJson( json, "contains",
-                       new JSONArray( (String)node.getProperty( "view2:contains" ) ),
-                       filter );
-            putInJson( json, "displayedElements",
-                       new JSONArray( (String)node.getProperty( "view2:displayedElements" ) ),
-                       filter );
-            putInJson( json, "allowedElements",
-                       new JSONArray( (String)node.getProperty( "view2:allowedElements" ) ),
-                       filter );
-            putInJson( json, "childrenViews",
-                       new JSONArray( (String)node.getProperty( "view2:childrenViews" ) ),
-                       filter );
+            String property;
+            property = (String) node.getProperty("view2:contains");
+            if (property != null) {
+                putInJson( json, "contains", new JSONArray( property ), filter );
+            }
+            property = (String) node.getProperty("view2:displayedElements");
+            if (property != null) {
+                putInJson( json, "displayedElements", new JSONArray( property ), filter );
+            }
+            property = (String) node.getProperty("view2:allowedElements");
+            if (property != null) {
+                putInJson( json, "allowedElements", new JSONArray( property ), filter );
+            }
+            property = (String) node.getProperty("view2:childrenViews");
+            if (property != null) {
+                putInJson( json, "childrenViews", new JSONArray( property ), filter );
+            }
         }
         // TODO: Snapshots?
     }
