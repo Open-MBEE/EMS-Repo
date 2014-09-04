@@ -41,6 +41,7 @@ import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
 import gov.nasa.jpl.ae.util.ClassData;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
@@ -194,6 +195,8 @@ public class ModelPost extends AbstractJavaWebScript {
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
 
+        System.out.println("****** NodeUtil.doCaching = " + NodeUtil.doCaching );
+        
         setWsDiff( workspace );
 
         clearCaches();
@@ -216,24 +219,24 @@ public class ModelPost extends AbstractJavaWebScript {
 
                     EmsScriptNode owner = null;
 
-//                    UserTransaction trx;
-//                    trx = services.getTransactionService().getNonPropagatingUserTransaction();
-//                    try {
-//                        trx.begin();
+                    UserTransaction trx;
+                    trx = services.getTransactionService().getNonPropagatingUserTransaction();
+                    try {
+                        trx.begin();
                         owner = getOwner(rootElement, projectNode, workspace, true);
-//                        trx.commit();
-//                    } catch (Throwable e) {
-//                        try {
-//                            trx.rollback();
-//                            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
-//                            log(LogLevel.ERROR, "\t####### when calling getOwner(" + rootElement + ", " + projectNode + ", true)");
-//                            e.printStackTrace();
-//                        } catch (Throwable ee) {
-//                            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
-//                            log(LogLevel.ERROR, "\tafter calling getOwner(" + rootElement + ", " + projectNode + ", true)");
-//                            ee.printStackTrace();
-//                        }
-//                    }
+                        trx.commit();
+                    } catch (Throwable e) {
+                        try {
+                            trx.rollback();
+                            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                            log(LogLevel.ERROR, "\t####### when calling getOwner(" + rootElement + ", " + projectNode + ", true)");
+                            e.printStackTrace();
+                        } catch (Throwable ee) {
+                            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                            log(LogLevel.ERROR, "\tafter calling getOwner(" + rootElement + ", " + projectNode + ", true)");
+                            ee.printStackTrace();
+                        }
+                    }
 
                     // Create element, owner, and reified package folder as
                     // necessary and place element with owner; don't update
@@ -1788,6 +1791,9 @@ public class ModelPost extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
+        NodeUtil.doCaching = false;
+        Timer timer = new Timer();
+
         printHeader( req );
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -1877,6 +1883,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
         printFooter();
 
+        System.out.println( "ModelPost: " + timer );
+        
         return model;
     }
 
