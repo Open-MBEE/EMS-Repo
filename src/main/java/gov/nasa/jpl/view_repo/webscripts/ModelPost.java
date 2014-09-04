@@ -197,7 +197,7 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     public Set< EmsScriptNode >
             createOrUpdateModel( Object content, Status status,
-                                 EmsScriptNode projectNode, WorkspaceNode workspace ) throws Exception {
+                                 EmsScriptNode projectNode, WorkspaceNode targetWS, WorkspaceNode sourceWS ) throws Exception {
     	JSONObject postJson = (JSONObject) content;
     	
     	JSONArray updatedArray = postJson.optJSONArray("updatedElements");
@@ -219,18 +219,20 @@ public class ModelPost extends AbstractJavaWebScript {
 		for(JSONArray jsonArray : collections){
 			JSONObject object = new JSONObject();
 			object.put("elements", jsonArray);
-			elements.addAll(createOrUpdateModel2(object, status, projectNode, workspace));
+			elements.addAll(createOrUpdateModel2(object, status, projectNode, targetWS, sourceWS));
 		}
     	return elements;
     }
     public Set< EmsScriptNode >
     		createOrUpdateModel2( Object content, Status status,
-    								EmsScriptNode projectNode, WorkspaceNode workspace ) throws Exception {
+    								EmsScriptNode projectNode, WorkspaceNode targetWS, WorkspaceNode sourceWS ) throws Exception {
         Date now = new Date();
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
-
-        setWsDiff( workspace );
+        if(sourceWS == null)
+            setWsDiff( targetWS );
+        else
+            setWsDiff(targetWS, sourceWS, null, null);
 
         clearCaches();
 
@@ -246,7 +248,7 @@ public class ModelPost extends AbstractJavaWebScript {
         timerUpdateModel= Timer.startTimer(timerUpdateModel, timeEvents);
         
         // create the element map and hierarchies
-        if (buildElementMap(postJson.getJSONArray(ELEMENTS), projectNode, workspace)) {
+        if (buildElementMap(postJson.getJSONArray(ELEMENTS), projectNode, targetWS)) {
             // start building up elements from the root elements
             for (String rootElement : rootElements) {
                 log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
@@ -258,7 +260,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     trx = services.getTransactionService().getNonPropagatingUserTransaction();
                     try {
                         trx.begin();
-                        owner = getOwner(rootElement, projectNode, workspace, true);
+                        owner = getOwner(rootElement, projectNode, targetWS, true);
                         trx.commit();
                     } catch (Throwable e) {
                         try {
@@ -279,7 +281,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     if (owner != null && owner.exists()) {
                         Set< EmsScriptNode > updatedElements =
                                 updateOrCreateElement( elementMap.get( rootElement ),
-                                                       owner, workspace, false );
+                                                       owner, targetWS, false );
                         for ( EmsScriptNode node : updatedElements ) {
                             nodeMap.put(node.getName(), node);
                         }
@@ -292,11 +294,11 @@ public class ModelPost extends AbstractJavaWebScript {
         Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): main loop time", timeEvents);
 
         // handle the relationships
-        updateOrCreateAllRelationships(relationshipsJson, workspace);
+        updateOrCreateAllRelationships(relationshipsJson, targetWS);
 
         // make another pass through the elements and update their properties
         Set< EmsScriptNode > updatedElements = updateNodeReferences( singleElement, postJson,
-                                               projectNode, workspace );
+                                               projectNode, targetWS );
         for ( EmsScriptNode node : updatedElements ) {
             nodeMap.put(node.getName(), node);
         }
@@ -313,8 +315,8 @@ public class ModelPost extends AbstractJavaWebScript {
         if (wsDiff.isDiff()) {
             JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
             String wsId = "master";
-            if (workspace != null) {
-                wsId = workspace.getSysmlId();
+            if (targetWS != null) {
+                wsId = targetWS.getSysmlId();
             }
             if ( !sendDeltas(deltaJson, wsId, null) ) {
                 log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
@@ -326,7 +328,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 EmsScriptNode siteNode = projectNode.getSiteNode();
                 siteName = siteNode.getName();
             }
-            CommitUtil.commit( deltaJson, workspace, siteName,
+            CommitUtil.commit( deltaJson, targetWS, siteName,
                                "", false, services, response );
         }
 
@@ -1909,7 +1911,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     EmsScriptNode projectNode = getProjectNodeFromRequest( req, true );
                     Set< EmsScriptNode > elements =
                         instance.createOrUpdateModel( postJson, status,
-                                                      projectNode, workspace );
+                                                      projectNode, workspace, null );
                     // REVIEW -- TODO -- shouldn't this be called from instance?
                     instance.addRelationshipsToProperties( elements );
                     if ( !Utils.isNullOrEmpty( elements ) ) {
