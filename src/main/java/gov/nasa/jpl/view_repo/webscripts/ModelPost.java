@@ -203,6 +203,8 @@ public class ModelPost extends AbstractJavaWebScript {
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
 
+        System.out.println("****** NodeUtil.doCaching = " + NodeUtil.doCaching );
+        
         setWsDiff( workspace );
 
         clearCaches();
@@ -227,24 +229,24 @@ public class ModelPost extends AbstractJavaWebScript {
 
                     EmsScriptNode owner = null;
 
-//                    UserTransaction trx;
-//                    trx = services.getTransactionService().getNonPropagatingUserTransaction();
-//                    try {
-//                        trx.begin();
+                    UserTransaction trx;
+                    trx = services.getTransactionService().getNonPropagatingUserTransaction();
+                    try {
+                        trx.begin();
                         owner = getOwner(rootElement, projectNode, workspace, true);
-//                        trx.commit();
-//                    } catch (Throwable e) {
-//                        try {
-//                            trx.rollback();
-//                            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
-//                            log(LogLevel.ERROR, "\t####### when calling getOwner(" + rootElement + ", " + projectNode + ", true)");
-//                            e.printStackTrace();
-//                        } catch (Throwable ee) {
-//                            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
-//                            log(LogLevel.ERROR, "\tafter calling getOwner(" + rootElement + ", " + projectNode + ", true)");
-//                            ee.printStackTrace();
-//                        }
-//                    }
+                        trx.commit();
+                    } catch (Throwable e) {
+                        try {
+                            trx.rollback();
+                            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                            log(LogLevel.ERROR, "\t####### when calling getOwner(" + rootElement + ", " + projectNode + ", true)");
+                            e.printStackTrace();
+                        } catch (Throwable ee) {
+                            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                            log(LogLevel.ERROR, "\tafter calling getOwner(" + rootElement + ", " + projectNode + ", true)");
+                            ee.printStackTrace();
+                        }
+                    }
 
                     // Create element, owner, and reified package folder as
                     // necessary and place element with owner; don't update
@@ -282,6 +284,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         timerUpdateModel = Timer.startTimer(timerUpdateModel, timeEvents);
 
+        /*
         // Send deltas to all listeners
         if (wsDiff.isDiff()) {
             JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
@@ -299,9 +302,10 @@ public class ModelPost extends AbstractJavaWebScript {
                 EmsScriptNode siteNode = projectNode.getSiteNode();
                 siteName = siteNode.getName();
             }
-            CommitUtil.commit( wsDiff, workspace, siteName,
+            CommitUtil.commit( deltaJson, workspace, siteName,
                                "", false, services, response );
         }
+        */
 
         Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): Deltas time", timeEvents);
 
@@ -762,14 +766,6 @@ public class ModelPost extends AbstractJavaWebScript {
         return true;
     }
 
-    protected Set< EmsScriptNode > updateOrCreateElement( JSONObject elementJson,
-                                                          EmsScriptNode parent,
-                                                          WorkspaceNode workspace,
-                                                          boolean ingest)
-                                                                  throws Exception {
-        return updateOrCreateElement( elementJson, parent, workspace, ingest, runWithoutTransactions );
-    }
-        
     /**
      * Update or create element with specified metadata
      * @param workspace
@@ -784,8 +780,7 @@ public class ModelPost extends AbstractJavaWebScript {
     protected Set< EmsScriptNode > updateOrCreateElement( JSONObject elementJson,
                                                           EmsScriptNode parent,
                                                           WorkspaceNode workspace,
-                                                          boolean ingest,
-                                                          boolean transactionsOff)
+                                                          boolean ingest)
                                                                   throws Exception {
         TreeSet<EmsScriptNode> elements = new TreeSet<EmsScriptNode>();
         TreeMap<String, EmsScriptNode> nodeMap =
@@ -857,7 +852,7 @@ public class ModelPost extends AbstractJavaWebScript {
         EmsScriptNode reifiedNode = null;
         ModStatus modStatus = new ModStatus();
 
-        if (transactionsOff) {
+        if (runWithoutTransactions) {
             reifiedNode =
                     updateOrCreateTransactionableElement( elementJson, parent,
                                                           children, workspace, ingest, false, modStatus );
@@ -899,7 +894,7 @@ public class ModelPost extends AbstractJavaWebScript {
             for (int ii = 0; ii < children.length(); ii++) {
                 Set< EmsScriptNode > childElements =
                         updateOrCreateElement(elementMap.get(children.getString(ii)),
-                                                       reifiedNode, workspace, ingest, true);
+                                                       reifiedNode, workspace, ingest);
                 // Elements in new workspace replace originals.
                 for ( EmsScriptNode node : childElements ) {
                     nodeMap.put( node.getName(), node );
@@ -908,6 +903,36 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         element = findScriptNodeById( jsonId, workspace, null, true );
+        if (runWithoutTransactions) {
+            updateTransactionableWsState(element, jsonId, modStatus, ingest);
+        } else {
+            UserTransaction trx;
+            trx = services.getTransactionService().getNonPropagatingUserTransaction();
+            try {
+                trx.begin();
+                timerCommit = Timer.startTimer(timerCommit, timeEvents);
+                updateTransactionableWsState( element, jsonId, modStatus, ingest );
+                trx.commit();
+                Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): ws metadata time", timeEvents);
+            } catch (Throwable e) {
+                try {
+                    log(LogLevel.ERROR, "updateOrCreateElement: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    e.printStackTrace();
+                    trx.rollback();
+                } catch (Throwable ee) {
+                    log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
+                    ee.printStackTrace();
+                    e.printStackTrace();
+                }
+            }
+        }
+        
+        elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
+        return elements;
+    }
+
+    
+    private void updateTransactionableWsState(EmsScriptNode element, String jsonId, ModStatus modStatus, boolean ingest) {
         if (element != null && (element.exists() || element.isDeleted())) {
             // can't add the node JSON yet since properties haven't been tied in yet
             switch (modStatus.getState()) {
@@ -970,10 +995,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     // do nothing
             }
         }
-        elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
-        return elements;
     }
-
     /**
      * Special processing for Expression and Property elements.  Modifies the passed elementJson
      * or specializeJson.
@@ -1098,8 +1120,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
                 		// TODO: Need to get the MODIFICATION STATUS out of here?!!
                 		ModStatus modStatus = new ModStatus();
-                        EmsScriptNode newValNode = updateOrCreateTransactionableElement((JSONObject)newVal,nestedParent,
-                																		null, workspace, ingest, true, modStatus );
+                    EmsScriptNode newValNode = updateOrCreateTransactionableElement((JSONObject)newVal,nestedParent,
+            																		null, workspace, ingest, true, modStatus );
                 		nodeNames.add(newValNode.getName());
 
                 		changed = true;
@@ -1271,7 +1293,6 @@ public class ModelPost extends AbstractJavaWebScript {
                         if ( workspace != null && workspace.exists() ) {
                             nodeToUpdate.setWorkspace( workspace, null );
                         }
-
 //                    } else {
 //                        Debug.error( true, true,
 //                                     "Error! Attempt to create node, " + id
@@ -1449,14 +1470,6 @@ public class ModelPost extends AbstractJavaWebScript {
                     node = findScriptNodeById(id, workspace, null, false);
                 }
 
-                if (node != null) {
-                    // lets keep track of reification
-                    node.createOrUpdateAspect( "ems:Reified" );
-                    node.createOrUpdateProperty( "ems:reifiedPkg", reifiedNode.getNodeRef() );
-
-                    reifiedNode.createOrUpdateAspect( "ems:Reified" );
-                    reifiedNode.createOrUpdateProperty( "ems:reifiedNode", node.getNodeRef() );
-                }
             }
         }
 
@@ -1830,6 +1843,9 @@ public class ModelPost extends AbstractJavaWebScript {
 
     protected Map<String, Object> executeImplImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
+        NodeUtil.doCaching = true;
+        Timer timer = new Timer();
+
         printHeader( req );
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -1893,7 +1909,6 @@ public class ModelPost extends AbstractJavaWebScript {
                         Timer.stopTimer(timerToJson, "!!!!! executeImpl(): toJSON time", timeEvents);
                         top.put( "elements", elementsJson );
                         model.put( "res", top.toString( 4 ) );
-
                     }
                 }
                 // REVIEW -- TODO -- shouldn't this be called from instance?
@@ -1921,6 +1936,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
         printFooter();
 
+        System.out.println( "ModelPost: " + timer );
+        
         return model;
     }
 
@@ -2075,6 +2092,5 @@ public class ModelPost extends AbstractJavaWebScript {
         rootElements = new HashSet<String>();
         elementMap = new HashMap<String, JSONObject>();
         newElements = new HashSet<String>();
-    }
-   
+    }   
 }

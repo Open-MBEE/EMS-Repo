@@ -17,6 +17,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class CommitUtil {
 
@@ -201,13 +202,14 @@ public class CommitUtil {
     }
 
     public static List<EmsScriptNode> getPreviousCommits( EmsScriptNode commit ) {
+        @SuppressWarnings( "unchecked" )
         ArrayList< NodeRef > parentNodes =
                 (ArrayList< NodeRef >)commit.getProperties().get( "{http://jpl.nasa.gov/model/ems/1.0}commitParents" );
         List<EmsScriptNode> parentRefs = commit.toEmsScriptNodeList( parentNodes );
         return parentRefs;
     }
 
-    public static void commit(WorkspaceDiff wsDiff,
+    public static void commit(JSONObject wsDiff,
                        WorkspaceNode workspace,
                        String siteName,
                        String msg,
@@ -240,14 +242,14 @@ public class CommitUtil {
 	}
 
 
-	private static void commitTransactionable( WorkspaceDiff wsDiff,
+	private static void commitTransactionable( JSONObject wsDiff,
 	                                           WorkspaceNode workspace,
 	                                           String siteName,
 	                                           String msg,
 	                                           ServiceRegistry services,
 	                                           StringBuffer response) throws JSONException {
 	    createCommitNode( workspace, workspace, "COMMIT", msg,
-	                      wsDiff.toJSONObject( null, null, false ).toString(), siteName,
+	                      wsDiff.toString(), siteName,
 	                      services, response );
     }
 
@@ -353,6 +355,7 @@ public class CommitUtil {
 	    } else {
 	        // FIXME: not sure why getting property is providing [null] array
 //            ArrayList< NodeRef > parentRefs = currCommit.getPropertyNodeRefs( "ems:commitParents" );
+            @SuppressWarnings( "unchecked" )
             ArrayList< NodeRef > parentRefs =
                     (ArrayList< NodeRef >)currCommit.getProperties().get( "{http://jpl.nasa.gov/model/ems/1.0}commitParents" );
             if ( parentRefs == null ) {
@@ -362,6 +365,7 @@ public class CommitUtil {
             currCommit.setProperty( "ems:commitParents", parentRefs );
 
 //            ArrayList< NodeRef > childRefs = prevCommit.getPropertyNodeRefs( "ems:commitChildren" );
+            @SuppressWarnings( "unchecked" )
             ArrayList< NodeRef > childRefs =
                     (ArrayList< NodeRef >)prevCommit.getProperties().get( "{http://jpl.nasa.gov/model/ems/1.0}commitChildren" );
             if ( childRefs == null ) {
