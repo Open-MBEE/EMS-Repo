@@ -44,10 +44,11 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 		printHeader(req);
 		clearCaches();
 		Map<String, Object> model = new HashMap<String, Object>();
+		JSONObject result = new JSONObject();
 		try{
 			if(validateRequest(req, status)){
-				String timeSource = req.getParameter("timestampSource");
-				Date time = TimeUtils.dateFromTimestamp(timeSource);
+				//String timeSource = req.getParameter("timestampSource");
+				//Date time = TimeUtils.dateFromTimestamp(timeSource);
 				
 				String targetId = req.getParameter("target");
 				WorkspaceNode targetWS = AbstractJavaWebScript.getWorkspaceFromId(targetId, getServices(), getResponse(), status, false, null);
@@ -55,7 +56,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				String sourceId = req.getParameter("source");
 				WorkspaceNode sourceWS = AbstractJavaWebScript.getWorkspaceFromId(sourceId,  getServices(), getResponse(), status, false, null);
 				
-				WorkspaceDiff workspaceDiff = new WorkspaceDiff(sourceWS, targetWS, time, time);
+				wsDiff = new WorkspaceDiff(sourceWS, targetWS, null /*time*/, null /*time*/);
 		/*		// Gotta merge here
 				Map<String, EmsScriptNode> elements = workspaceDiff.getElements();
 				Map<String, EmsScriptNode> addedElements = workspaceDiff.getAddedElements();
@@ -85,15 +86,17 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				
 				*/
 				//For the nodes here, we delete them from the source
-				Map<String, EmsScriptNode> deletedElements = workspaceDiff.getDeletedElements();
+				Map<String, EmsScriptNode> deletedElements = wsDiff.getDeletedElements();
 				Collection <EmsScriptNode> deletedCollection = deletedElements.values();
 				
 				
 				// Prints out the differences after merging.
-				JSONObject top = workspaceDiff.toJSONObject(null, time, false);
+				JSONObject top = wsDiff.toJSONObject(null, null /*time*/, false);
 				
 				// Retrieving the arrays for all the added elements
 				ModelPost instance = new ModelPost(repository, services);
+				
+				// Error here, projectNode isn't 123456, but rather no_project.
 				EmsScriptNode projectNode = instance.getProjectNodeFromRequest(req, true);
 				 Set< EmsScriptNode > elements =
 	                        instance.createOrUpdateModel( top.getJSONObject("workspace2"), status,
@@ -110,12 +113,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 	                       //top.put( "elements", elementsJson );
 	                        //model.put( "res", top.toString( 4 ) );
 	                    }
-	            JSONObject result = handleDelete(deletedCollection, targetWS, targetId, time, workspaceDiff); 
-	            if (result != null) {
-	                model.put( "res", result.toString(2) );
-	            } else {
-	            	model.put("res",  "");
-	            }
+	            result = handleDelete(deletedCollection, targetWS, targetId, null /*time*/, wsDiff); 
 			}
 		 } catch (JSONException e) {
 	           log(LogLevel.ERROR, "Could not create JSON\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -124,8 +122,18 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 	           log(LogLevel.ERROR, "Internal server error\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	           e.printStackTrace();
 	        }
-	    status.setCode(responseStatus.getCode());
-	    return model;
+		if (result == null) {
+             model.put( "res", response.toString() );
+         } else {
+             try {
+                 model.put("res",  result.toString(2));
+             } catch (JSONException e) {
+                 // TODO Auto-generated catch block
+                 e.printStackTrace();
+             }
+         }
+		status.setCode(responseStatus.getCode());
+		return model;
 	}
 	
 	// Essentially the same executeImpl code from MmsModelDelete
