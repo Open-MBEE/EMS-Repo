@@ -284,7 +284,6 @@ public class ModelPost extends AbstractJavaWebScript {
 
         timerUpdateModel = Timer.startTimer(timerUpdateModel, timeEvents);
 
-        /*
         // Send deltas to all listeners
         if (wsDiff.isDiff()) {
             JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
@@ -305,7 +304,6 @@ public class ModelPost extends AbstractJavaWebScript {
             CommitUtil.commit( deltaJson, workspace, siteName,
                                "", false, services, response );
         }
-        */
 
         Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): Deltas time", timeEvents);
 
