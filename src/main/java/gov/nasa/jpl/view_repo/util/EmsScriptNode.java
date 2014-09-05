@@ -2495,7 +2495,10 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public boolean isDeleted() {
-        return hasAspect( "ems:Deleted" );
+        if (exists()) {
+            return hasAspect( "ems:Deleted" );
+        }
+        return true;
     }
 
 
