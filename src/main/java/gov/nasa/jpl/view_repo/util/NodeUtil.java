@@ -90,8 +90,6 @@ public class NodeUtil {
     // below
     private static boolean timeEvents = false;
     private static Timer timer = null;
-
-    private static Timer timerIsType = null;
     private static Timer timerByType = null;
     private static Timer timerLucene = null;
 

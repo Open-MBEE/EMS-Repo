@@ -53,7 +53,7 @@
     {"documentation" : "no owner", 
      "sysmlid":"X2X_305", 
      "name":"X2X_305", 
-     "owner":"999", 
+     "owner":"X2X_999", 
      "specialization": {"type":"Property",
                         "isDerived":false, 
                         "value":[{"type":"LiteralString",
@@ -153,7 +153,7 @@
     {"documentation" : "to make compatible with value specs (this is just a Element)", 
      "sysmlid":"X2X_dlam", 
      "name":"X2X_dlam", 
-     "owner":"cdelp"
+     "owner":"X2X_cdelp"
     }
 
 ]}

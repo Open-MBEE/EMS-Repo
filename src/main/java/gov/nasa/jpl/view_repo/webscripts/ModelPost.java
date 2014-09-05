@@ -76,6 +76,7 @@ import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.version.Version;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -283,7 +284,6 @@ public class ModelPost extends AbstractJavaWebScript {
 
         timerUpdateModel = Timer.startTimer(timerUpdateModel, timeEvents);
 
-        /*
         // Send deltas to all listeners
         if (wsDiff.isDiff()) {
             JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
@@ -304,7 +304,6 @@ public class ModelPost extends AbstractJavaWebScript {
             CommitUtil.commit( deltaJson, workspace, siteName,
                                "", false, services, response );
         }
-        */
 
         Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): Deltas time", timeEvents);
 
@@ -367,11 +366,17 @@ public class ModelPost extends AbstractJavaWebScript {
         if (Utils.isNullOrEmpty( ownerName ) ) {
             EmsScriptNode elementNode = findScriptNodeById(elementId, workspace, null, false);
             if (elementNode == null || !elementNode.exists()) {
-                owner = projectNode;
+            	// Place elements with no owner in a holding_bin_<site>_<project> package:
+                //owner = projectNode; 
+            	String projectNodeId = ((projectNode == null || projectNode.getSysmlId() == null) ? NO_PROJECT_ID : projectNode.getSysmlId());
+            	String siteName = ((siteInfo == null || siteInfo.getShortName() == null) ? NO_SITE_ID : getSiteInfo().getShortName() );
+            	ownerName = "holding_bin_"+siteName+"_"+projectNodeId;  
             } else {
                 owner = elementNode.getParent();
             }
-        } else {
+        } 
+        
+        if (!Utils.isNullOrEmpty(ownerName)) {
        		boolean foundOwnerElement = true;
             owner = findScriptNodeById(ownerName, workspace, null, false);
             if (owner == null || !owner.exists()) {
@@ -379,7 +384,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 log( LogLevel.WARNING, "Could not find owner with name: "
                                        + ownerName + " putting " + elementId
                                        + " into project: " + projectNode);
-                owner = projectNode;
+                owner = projectNode;  
                 foundOwnerElement = false;
             }
             // really want to add pkg as owner
@@ -1823,12 +1828,18 @@ public class ModelPost extends AbstractJavaWebScript {
         } // End if constraints list is non-empty
 
     }
-
+    
     /**
      * Entry point
      */
     @Override
-    protected Map<String, Object> executeImpl(WebScriptRequest req,
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+    	
+        ModelPost instance = new ModelPost(repository, services);
+        return instance.executeImplImpl(req,  status, cache);
+    }
+
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
         NodeUtil.doCaching = true;
         Timer timer = new Timer();
@@ -1858,8 +1869,6 @@ public class ModelPost extends AbstractJavaWebScript {
                                              : HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
         }
 
-        ModelPost instance = new ModelPost(repository, services);
-
         String expressionString = req.getParameter( "expression" );
 
         JSONObject top = new JSONObject();
@@ -1867,7 +1876,7 @@ public class ModelPost extends AbstractJavaWebScript {
         if (wsFound && validateRequest(req, status)) {
             try {
                 if (runInBackground) {
-                    instance.saveAndStartAction(req, workspace, status);
+                    saveAndStartAction(req, workspace, status);
                     // REVIEW -- TODO -- shouldn't response be called from
                     // instance? Maybe move the bulk of this method to a new
                     // method and call from instance.
@@ -1878,15 +1887,15 @@ public class ModelPost extends AbstractJavaWebScript {
                     JSONObject postJson = (JSONObject)req.parseContent();
                     EmsScriptNode projectNode = getProjectNodeFromRequest( req, true );
                     Set< EmsScriptNode > elements =
-                        instance.createOrUpdateModel( postJson, status,
+                        createOrUpdateModel( postJson, status,
                                                       projectNode, workspace );
                     // REVIEW -- TODO -- shouldn't this be called from instance?
-                    instance.addRelationshipsToProperties( elements );
+                    addRelationshipsToProperties( elements );
                     if ( !Utils.isNullOrEmpty( elements ) ) {
 
                         // Fix constraints if desired:
                         if (fix) {
-                            instance.fix(elements);
+                            fix(elements);
                         }
 
                         // Create JSON object of the elements to return:
@@ -1901,7 +1910,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
                 }
                 // REVIEW -- TODO -- shouldn't this be called from instance?
-                appendResponseStatusInfo(instance);
+                appendResponseStatusInfo(this);
             } catch (JSONException e) {
                 log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
                 e.printStackTrace();
@@ -2003,7 +2012,8 @@ public class ModelPost extends AbstractJavaWebScript {
         //String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
         String projectId = getProjectId(req);
         EmsScriptNode siteNode = createSite( siteName, workspace );
-
+        setSiteInfo(req); // Setting the site info in case we just created the site for the first time
+        
         projectNode = siteNode.childByNamePath("/Models/" + projectId);
         if (projectNode == null) {
                 // for backwards compatibility
@@ -2059,6 +2069,7 @@ public class ModelPost extends AbstractJavaWebScript {
         String siteName = getSiteName( req );
         siteInfo = services.getSiteService().getSite(siteName);
     }
+    
     public SiteInfo getSiteInfo() {
         return getSiteInfo( null );
     }
