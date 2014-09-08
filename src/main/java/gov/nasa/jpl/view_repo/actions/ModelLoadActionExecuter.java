@@ -146,7 +146,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         // set the status
         jsonNode.setProperty("ems:job_status", jobStatus);
 
-        String contextUrl = "https://" + ActionUtil.getHostName() + "alfresco";
+        String contextUrl = "https://" + ActionUtil.getHostName() + "alfresco/";
         	
         // Send off the notification email
         String subject =
