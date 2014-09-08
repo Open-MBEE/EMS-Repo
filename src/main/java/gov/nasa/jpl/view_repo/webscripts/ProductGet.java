@@ -113,12 +113,16 @@ public class ProductGet extends AbstractJavaWebScript {
 			
 			// default recurse=true but recurse only applies to displayed elements and contained views
             boolean recurse = checkArgEquals(req, "recurse", "false") ? false : true;
+            
+            // default simple=false
+            boolean simple = checkArgEquals(req, "simple", "true") ? true : false;
 
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
             WorkspaceNode workspace = getWorkspace( req );
             ProductsWebscript productsWs = new ProductsWebscript(repository, services, response);
+            productsWs.simpleJson = simple;
 			productsJson = productsWs.handleProduct(productId, recurse, workspace, dateTime, gettingDisplayedElements, gettingContainedViews);
 		}
 

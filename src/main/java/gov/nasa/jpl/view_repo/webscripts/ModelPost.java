@@ -76,7 +76,6 @@ import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
-import org.alfresco.service.cmr.site.SiteService;
 import org.alfresco.service.cmr.version.Version;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -160,6 +159,9 @@ public class ModelPost extends AbstractJavaWebScript {
 
     protected SiteInfo siteInfo;
 
+    protected boolean prettyPrint = true;
+    
+    
     private EmsSystemModel getSystemModel() {
         if ( systemModel == null ) {
             systemModel = new EmsSystemModel(this.services);
@@ -1852,6 +1854,10 @@ public class ModelPost extends AbstractJavaWebScript {
         boolean runInBackground = checkArgEquals(req, "background", "true");
         boolean fix = checkArgEquals(req, "fix", "true");
 
+        // see if prettyPrint default is overridden and change
+        prettyPrint = checkArgEquals(req, "pretty", "" + !prettyPrint) ? !prettyPrint : prettyPrint;
+
+
         String user = AuthenticationUtil.getRunAsUser();
         String wsId = null;
         WorkspaceNode workspace = getWorkspace( req, true, user );
@@ -1906,7 +1912,8 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                         Timer.stopTimer(timerToJson, "!!!!! executeImpl(): toJSON time", timeEvents);
                         top.put( "elements", elementsJson );
-                        model.put( "res", top.toString( 4 ) );
+                        if ( prettyPrint ) model.put( "res", top.toString( 4 ) );
+                        else model.put( "res", top.toString() );
                     }
                 }
                 // REVIEW -- TODO -- shouldn't this be called from instance?
