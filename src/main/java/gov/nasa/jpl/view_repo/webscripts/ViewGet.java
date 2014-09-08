@@ -60,6 +60,8 @@ public class ViewGet extends AbstractJavaWebScript {
     // injected via spring configuration
     protected boolean isViewRequest = false;
 
+    protected boolean prettyPrint = true;
+
     public ViewGet() {
         super();
     }
@@ -79,9 +81,12 @@ public class ViewGet extends AbstractJavaWebScript {
         // get timestamp if specified
         String timestamp = req.getParameter("timestamp");
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-    
+        
         WorkspaceNode workspace = getWorkspace( req );
 
+        // see if prettyPrint default is overridden and change
+        prettyPrint = checkArgEquals(req, "pretty", "" + !prettyPrint) ? !prettyPrint : prettyPrint;
+    
         EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime, false);
         if (view == null) {
             log(LogLevel.ERROR, "View not found with id: " + viewId + " at " + dateTime + ".\n", HttpServletResponse.SC_NOT_FOUND);
@@ -113,6 +118,10 @@ public class ViewGet extends AbstractJavaWebScript {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        ViewGet instance = new ViewGet();
+        return instance.executeImplImpl( req, status, cache );
+    }
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
         clearCaches();
@@ -150,7 +159,8 @@ public class ViewGet extends AbstractJavaWebScript {
             try {
                 JSONObject json = new JSONObject();
                 json.put(gettingDisplayedElements ? "elements" : "views", viewsJson);
-                model.put("res", json.toString(4));
+                if ( prettyPrint ) model.put("res", json.toString(4));
+                else model.put("res", json.toString()); 
             } catch (JSONException e) {
                 e.printStackTrace();
                 log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
