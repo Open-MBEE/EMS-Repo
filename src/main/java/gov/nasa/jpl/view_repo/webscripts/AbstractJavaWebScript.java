@@ -648,7 +648,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         if (jmsConnection != null) {
             jmsConnection.setWorkspace( workspace );
             jmsConnection.setProjectId( projectId );
-            jmsStatus = jmsConnection.publish( deltaJson, "master" );
+            jmsStatus = jmsConnection.publish( deltaJson, workspace );
         }
         if (restConnection != null) {
             try {

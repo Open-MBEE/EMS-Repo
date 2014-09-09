@@ -1470,6 +1470,12 @@ public class ModelPost extends AbstractJavaWebScript {
                     node = findScriptNodeById(id, workspace, null, false);
                 }
 
+                // lets keep track of reification
+                node.createOrUpdateAspect( "ems:Reified" );
+                node.createOrUpdateProperty( "ems:reifiedPkg", reifiedNode.getNodeRef() );
+                
+                reifiedNode.createOrUpdateAspect( "ems:Reified" );
+                reifiedNode.createOrUpdateProperty( "ems:reifiedNode", node.getNodeRef() );
             }
         }
 
