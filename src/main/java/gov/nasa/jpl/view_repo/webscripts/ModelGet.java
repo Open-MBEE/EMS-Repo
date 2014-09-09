@@ -146,6 +146,7 @@ public class ModelGet extends AbstractJavaWebScript {
     protected Map<String, Object> executeImpl(WebScriptRequest req,
             Status status, Cache cache) {
         ModelGet instance = new ModelGet(repository, services);
+        instance.setServices( getServices() );
         return instance.executeImplImpl( req, status, cache );
     }
 	protected Map<String, Object> executeImplImpl(WebScriptRequest req,

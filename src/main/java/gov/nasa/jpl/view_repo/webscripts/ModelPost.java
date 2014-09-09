@@ -1844,6 +1844,7 @@ public class ModelPost extends AbstractJavaWebScript {
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
     	
         ModelPost instance = new ModelPost(repository, services);
+        instance.setServices( getServices() );
         return instance.executeImplImpl(req,  status, cache);
     }
 

@@ -119,6 +119,7 @@ public class ViewGet extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         ViewGet instance = new ViewGet();
+        instance.setServices( getServices() );
         return instance.executeImplImpl( req, status, cache );
     }
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
