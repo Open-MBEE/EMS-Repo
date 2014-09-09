@@ -14,21 +14,14 @@ echo 'STARTING UP SERVER'
 sleep 60s
 
 #poll to see if the server is up
-cd ./test-data/javawebscripts
 server=0
 serverCount=0
 dotCount=0
 test=0
 echo 'POLLING SERVER'
 while [ $server -eq 0 ]; do
-        > tempMasterDiff
-        netstat -ln | grep '8080' > tempMasterDiff
-        count=`sed -n '$=' tempMasterDiff`
-        numberRegEx='^[0-9]+$'
-        if [[ $count =~ $numberRegEx ]];then
-                if [ $count -gt 0 ]; then
-                        server=1
-                fi
+        if grep -q "Starting ProtocolHandler" runserver.log;then
+                server=1
         else
                 dotCount=$(($dotCount+1))
                 if [ $dotCount -gt 20 ];then
@@ -44,6 +37,7 @@ while [ $server -eq 0 ]; do
         fi
 done
 
+cd ./test-data/javawebscripts
 if [ $server -eq 1 ]; then
 	echo 'SERVER CONNECTED'
 	sleep 60s
