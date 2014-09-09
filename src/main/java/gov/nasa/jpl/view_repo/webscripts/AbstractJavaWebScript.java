@@ -524,6 +524,31 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         }
         return req.getParameter(name).equals(value);
     }
+    
+    /**
+     * Helper utility to get the value of a Boolean request parameter
+     * 
+     * @param req
+     *            WebScriptRequest with parameter to be checked
+     * @param name
+     *            String of the request parameter name to check
+     * @param defaultValue
+     *            default value if there is no parameter with the given name
+     * @return true if the parameter is assigned no value, if it is assigned
+     *         "true" (ignoring case), or if it's default is true and it is not
+     *         assigned "false" (ingoring case).
+     */
+    public static boolean getBooleanArg(WebScriptRequest req, String name,
+                                        boolean defaultValue) {
+        if (req.getParameter(name) == null) {
+            return defaultValue;
+        }
+        String paramVal = req.getParameter(name).toLowerCase();
+        if ( paramVal.equals( "true" ) ) return true;
+        if ( paramVal.equals( "false" ) ) return false;
+        return defaultValue;
+    }
+    
 
     public StringBuffer getResponse() {
         return response;

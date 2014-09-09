@@ -39,6 +39,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ProductsWebscript extends AbstractJavaWebScript {
 
+    public boolean simpleJson = false;
+
     public ProductsWebscript( Repository repository, ServiceRegistry services,
                               StringBuffer response ) {
         super( repository, services, response );
@@ -163,13 +165,21 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                             v.getDisplayedElements();
                     elems = NodeUtil.getVersionAtTime( elems, dateTime );
                     for ( EmsScriptNode n : elems ) {
-                        productsJson.put( n.toJSONObject( dateTime ) );
+                        if ( simpleJson ) {
+                            productsJson.put( n.toSimpleJSONObject( dateTime ) );
+                        } else {
+                            productsJson.put( n.toJSONObject( dateTime ) );
+                        }
                     }
                 } else if ( gettingContainedViews ) {
                     Collection< EmsScriptNode > elems =
                             v.getContainedViews( recurse, workspace, dateTime, null );
                     for ( EmsScriptNode n : elems ) {
-                        productsJson.put( n.toJSONObject( dateTime ) );
+                        if ( simpleJson ) {
+                            productsJson.put( n.toSimpleJSONObject( dateTime ) );
+                        } else {
+                            productsJson.put( n.toJSONObject( dateTime ) );
+                        }
                     }
                 } else {
                     productsJson.put( product.toJSONObject( dateTime ) );

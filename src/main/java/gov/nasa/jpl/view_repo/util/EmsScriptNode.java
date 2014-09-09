@@ -926,6 +926,14 @@ public class EmsScriptNode extends ScriptNode implements
     public String getSysmlName() {
         return (String)getProperty( Acm.ACM_NAME );
     }
+    public String getSysmlName(Date dateTime) {
+        EmsScriptNode esn = this;
+        if ( dateTime != null ) {
+            NodeRef ref = NodeUtil.getNodeRefAtTime( getNodeRef(), dateTime );
+            esn = new EmsScriptNode( ref, getServices() );
+        }
+        return esn.getSysmlName();
+    }
 
     public String getSysmlId() {
         String id = (String)getProperty( Acm.ACM_ID );
@@ -1293,10 +1301,7 @@ public class EmsScriptNode extends ScriptNode implements
      *            JSONObject
      * @return JSONObject serialization of node
      */
-    public
-            JSONObject
-            toJSONObject( Set< String > filter, Date dateTime )
-                                                               throws JSONException {
+    public JSONObject toJSONObject( Set< String > filter, Date dateTime ) throws JSONException {
         return toJSONObject( filter, false, dateTime );
     }
 
@@ -1466,6 +1471,10 @@ public class EmsScriptNode extends ScriptNode implements
     
     private void addSpecializationJSON( JSONObject json, Set< String > filter,
                                         Date dateTime ) throws JSONException {
+        addSpecializationJSON( json, filter, dateTime, false );
+    }
+    private void addSpecializationJSON( JSONObject json, Set< String > filter,
+                                        Date dateTime, boolean justTheType ) throws JSONException {
         String typeName = getTypeName();
         if ( typeName == null ) {
             // TODO: error logging
@@ -1473,6 +1482,9 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
         json.put( "type", typeName );
+        
+        if ( justTheType ) return;
+        
         for ( QName aspectQname : this.getAspectsSet() ) {
             // reflection is too slow?
             String cappedAspectName =
@@ -1631,6 +1643,22 @@ public class EmsScriptNode extends ScriptNode implements
         return element;
     }
 
+    public JSONObject toSimpleJSONObject( Date dateTime ) throws JSONException {
+        JSONObject element = new JSONObject();
+        element.put( "sysmlid", getName() );
+        if ( dateTime == null ) {
+            element.put( "name", getSysmlName() );
+        } else {
+            element.put( "name", getSysmlName( dateTime ) );            
+        }
+        JSONObject specializationJSON = new JSONObject();
+        addSpecializationJSON( specializationJSON, null, dateTime, true );
+        if ( specializationJSON.length() > 0 ) {
+            element.put( Acm.JSON_SPECIALIZATION, specializationJSON );
+        }
+        return element;
+    }
+    
     public boolean isView() {
         boolean isView =
                 hasAspect( Acm.ACM_VIEW ) || hasAspect( Acm.ACM_PRODUCT );

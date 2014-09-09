@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -75,6 +76,8 @@ public class ModelGet extends AbstractJavaWebScript {
 	protected JSONArray elements = new JSONArray();
 	protected Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
 
+    protected boolean prettyPrint = true;
+	
     @Override
 	protected void clearCaches() {
 		super.clearCaches();
@@ -136,32 +139,38 @@ public class ModelGet extends AbstractJavaWebScript {
 	}
 
 	
-	/**
-	 * Entry point
-	 */
-	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req,
+    /**
+     * Entry point
+     */
+    @Override
+    protected Map<String, Object> executeImpl(WebScriptRequest req,
+            Status status, Cache cache) {
+        ModelGet instance = new ModelGet(repository, services);
+        return instance.executeImplImpl( req, status, cache );
+    }
+	protected Map<String, Object> executeImplImpl(WebScriptRequest req,
 			Status status, Cache cache) {
+	    Timer timer = new Timer();
 	    printHeader( req );
 
 		clearCaches();
         
 		Map<String, Object> model = new HashMap<String, Object>();
-		ModelGet instance = new ModelGet(repository, services);
 		// make sure to pass down view request flag to instance
-		instance.setIsViewRequest(isViewRequest);
+		setIsViewRequest(isViewRequest);
 
 		JSONArray elementsJson = new JSONArray();
 		if (validateRequest(req, status)) {
-		    elementsJson = instance.handleRequest(req);
-		    appendResponseStatusInfo(instance);
+		    elementsJson = handleRequest(req);
+		    appendResponseStatusInfo(this);
 		}
 		
 		JSONObject top = new JSONObject();
 		try {
 		    if (elementsJson.length() > 0) {
 		        top.put("elements", elementsJson);
-	            model.put("res", top.toString(4));
+		        if ( prettyPrint ) model.put("res", top.toString(4));
+		        else model.put("res", top.toString());
 		    } else {
 		        log(LogLevel.WARNING, "No elements found",
 		            HttpServletResponse.SC_NOT_FOUND);
@@ -170,10 +179,12 @@ public class ModelGet extends AbstractJavaWebScript {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-				
+
 		status.setCode(responseStatus.getCode());
 		
-        printFooter();        
+        printFooter();
+        
+        System.out.println( "ModelGet: " + timer );
 
 		return model;
 	}
@@ -199,17 +210,19 @@ public class ModelGet extends AbstractJavaWebScript {
                 return new JSONArray();
             }
             
-
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
             
             WorkspaceNode workspace = getWorkspace( req );
-            
+
+            // see if prettyPrint default is overridden and change
+            prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
+
             if (Debug.isOn()) System.out.println("modelId = " + modelId );
             EmsScriptNode modelRootNode = findScriptNodeById(modelId, workspace, dateTime, false);
             if (Debug.isOn()) System.out.println("modelRootNode = " + modelRootNode );
-            
+
             if ( modelRootNode == null ) {
                     log( LogLevel.ERROR,
                          "Element " + modelId
