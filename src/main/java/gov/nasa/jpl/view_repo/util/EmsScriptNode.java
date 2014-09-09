@@ -1465,6 +1465,10 @@ public class EmsScriptNode extends ScriptNode implements
     
     private void addSpecializationJSON( JSONObject json, Set< String > filter,
                                         Date dateTime ) throws JSONException {
+        addSpecializationJSON( json, filter, dateTime, false );
+    }
+    private void addSpecializationJSON( JSONObject json, Set< String > filter,
+                                        Date dateTime, boolean justTheType ) throws JSONException {
         String typeName = getTypeName();
         if ( typeName == null ) {
             // TODO: error logging
@@ -1472,6 +1476,9 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
         json.put( "type", typeName );
+        
+        if ( justTheType ) return;
+        
         for ( QName aspectQname : this.getAspectsSet() ) {
             // reflection is too slow?
             String cappedAspectName =
@@ -1637,6 +1644,11 @@ public class EmsScriptNode extends ScriptNode implements
             element.put( "name", getSysmlName() );
         } else {
             element.put( "name", getSysmlName( dateTime ) );            
+        }
+        JSONObject specializationJSON = new JSONObject();
+        addSpecializationJSON( specializationJSON, null, dateTime, true );
+        if ( specializationJSON.length() > 0 ) {
+            element.put( Acm.JSON_SPECIALIZATION, specializationJSON );
         }
         return element;
     }
