@@ -962,7 +962,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         if ( node == null ) return null;
         if ( dateTime != null ) {
-            NodeRef vref = NodeUtil.getNodeRefAtTime( getNodeRef(), dateTime );
+            NodeRef vref = NodeUtil.getNodeRefAtTime( node.getNodeRef(), dateTime );
             if ( vref != null ) {
                 node = new EmsScriptNode( vref, getServices() );
             }
@@ -1184,11 +1184,15 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public String getSysmlQPath( boolean isName ) {
         String qname = "";
-
+        boolean noDisplayPath = true;
         if ( isName ) {
-            qname = "/" + this.getProperty( "sysml:name" ) + qname;
+            qname = "/" + this.getProperty( "sysml:name" );
         } else {
-            qname = getDisplayPath() + "/" + getProperty( "sysml:id" );
+            String displayPath = getDisplayPath();
+            if (displayPath.length() > 0) {
+                noDisplayPath = false; // versioned nodes don't have, so need to look up path if that's the case
+            }
+            qname = displayPath + "/" + getProperty( "sysml:id" );
 
             int pos = qname.indexOf( "Models/" );
             if ( pos >= 0 ) {
@@ -1208,6 +1212,8 @@ public class EmsScriptNode extends ScriptNode implements
             String nameProp = null;
             if ( isName ) {
                 nameProp = (String)owner.getProperty( "sysml:name" );
+            } else if (noDisplayPath) {
+                nameProp = (String)owner.getProperty( "sysml:id" );
             }
             if ( nameProp == null ) {
                 break;
@@ -1366,13 +1372,13 @@ public class EmsScriptNode extends ScriptNode implements
         putInJson( elementJson, "qualifiedId", node.getSysmlQId(), filter );
         putInJson( elementJson, "editable",
                    node.hasPermission( PermissionService.WRITE ), filter );
-        NodeRef ownerRef = (NodeRef)node.getProperty( "ems:owner" );
-        EmsScriptNode owner;
-        if ( ownerRef != null ) {
-            owner = new EmsScriptNode( ownerRef, services, response );
-        } else {
-            owner = node.getOwningParent(dateTime);
-        }
+//        NodeRef ownerRef = (NodeRef)node.getProperty( "ems:owner" );
+//        EmsScriptNode owner;
+//        if ( ownerRef != null ) {
+//            owner = new EmsScriptNode( ownerRef, services, response );
+//        } else {
+        EmsScriptNode owner = node.getOwningParent(dateTime);
+//        }
         String ownerId = null;
         if ( owner != null ) {
             ownerId = (String)owner.getProperty( "sysml:id" );
