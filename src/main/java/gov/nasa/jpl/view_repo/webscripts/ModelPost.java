@@ -1851,12 +1851,11 @@ public class ModelPost extends AbstractJavaWebScript {
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
 
-        boolean runInBackground = checkArgEquals(req, "background", "true");
-        boolean fix = checkArgEquals(req, "fix", "true");
+        boolean runInBackground = getBooleanArg(req, "background", false);
+        boolean fix = getBooleanArg(req, "fix", false);
 
         // see if prettyPrint default is overridden and change
-        prettyPrint = checkArgEquals(req, "pretty", "" + !prettyPrint) ? !prettyPrint : prettyPrint;
-
+        prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
 
         String user = AuthenticationUtil.getRunAsUser();
         String wsId = null;

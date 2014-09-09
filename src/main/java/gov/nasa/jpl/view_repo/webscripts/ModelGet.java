@@ -217,7 +217,7 @@ public class ModelGet extends AbstractJavaWebScript {
             WorkspaceNode workspace = getWorkspace( req );
 
             // see if prettyPrint default is overridden and change
-            prettyPrint = checkArgEquals(req, "pretty", "" + !prettyPrint) ? !prettyPrint : prettyPrint;
+            prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
 
             if (Debug.isOn()) System.out.println("modelId = " + modelId );
             EmsScriptNode modelRootNode = findScriptNodeById(modelId, workspace, dateTime, false);

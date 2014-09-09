@@ -85,7 +85,7 @@ public class ViewGet extends AbstractJavaWebScript {
         WorkspaceNode workspace = getWorkspace( req );
 
         // see if prettyPrint default is overridden and change
-        prettyPrint = checkArgEquals(req, "pretty", "" + !prettyPrint) ? !prettyPrint : prettyPrint;
+        prettyPrint = getBooleanArg( req, "pretty", prettyPrint );
     
         EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime, false);
         if (view == null) {
@@ -128,9 +128,9 @@ public class ViewGet extends AbstractJavaWebScript {
 
         Map<String, Object> model = new HashMap<String, Object>();
         // default recurse=false but recurse only applies to displayed elements and contained views
-        boolean recurse = checkArgEquals(req, "recurse", "true") ? true : false;
+        boolean recurse = getBooleanArg(req, "recurse", false);
         // default generate=true
-        boolean generate = checkArgEquals(req, "generate", "false") ? false : true;
+        boolean generate = getBooleanArg( req, "generate", true );
 
         JSONArray viewsJson = new JSONArray();
         if (validateRequest(req, status)) {
