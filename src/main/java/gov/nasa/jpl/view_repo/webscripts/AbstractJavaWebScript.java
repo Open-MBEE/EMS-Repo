@@ -536,14 +536,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      *            default value if there is no parameter with the given name
      * @return true if the parameter is assigned no value, if it is assigned
      *         "true" (ignoring case), or if it's default is true and it is not
-     *         assigned "false" (ingoring case).
+     *         assigned "false" (ignoring case).
      */
     public static boolean getBooleanArg(WebScriptRequest req, String name,
                                         boolean defaultValue) {
-        if (req.getParameter(name) == null) {
+        if ( !Utils.toSet( req.getParameterNames() ).contains( name ) ) {
             return defaultValue;
         }
-        String paramVal = req.getParameter(name).toLowerCase();
+        String paramVal = req.getParameter(name);
+        if ( Utils.isNullOrEmpty( paramVal ) ) return true;
+        paramVal = paramVal.toLowerCase();
         if ( paramVal.equals( "true" ) ) return true;
         if ( paramVal.equals( "false" ) ) return false;
         return defaultValue;

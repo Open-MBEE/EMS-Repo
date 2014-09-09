@@ -113,10 +113,11 @@ public class ProductGet extends AbstractJavaWebScript {
 			if (Debug.isOn()) System.out.println("productId = " + productId);
 			
 			// default recurse=true but recurse only applies to displayed elements and contained views
-            boolean recurse = checkArgEquals(req, "recurse", "false") ? false : true;
+            boolean recurse = getBooleanArg( req, "recurse", true );
             
             // default simple=false
             boolean simple = getBooleanArg( req, "simple", false );
+            System.out.println("simple=" + simple);
 
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
@@ -126,7 +127,7 @@ public class ProductGet extends AbstractJavaWebScript {
 
             // see if prettyPrint default is overridden and change
             prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
-
+            System.out.println("prettyPrint=" + prettyPrint);
             
             ProductsWebscript productsWs = new ProductsWebscript(repository, services, response);
             productsWs.simpleJson = simple;

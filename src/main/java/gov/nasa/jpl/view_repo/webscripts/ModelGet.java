@@ -232,7 +232,7 @@ public class ModelGet extends AbstractJavaWebScript {
             }
             
             // recurse default is false
-            boolean recurse = checkArgEquals(req, "recurse", "true") ? true : false;
+            boolean recurse = getBooleanArg(req, "recurse", false);
             
             if (isViewRequest) {
                 handleViewHierarchy(modelRootNode, recurse, workspace, dateTime);
