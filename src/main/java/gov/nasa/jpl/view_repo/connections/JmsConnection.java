@@ -87,8 +87,7 @@ public class JmsConnection extends AbstractConnection {
             connection.close();
         }
         catch (Exception e) {
-            logger.error( "Caught, but doing nothing: " + e);
-//            e.printStackTrace();
+            logger.error( "JMS exception caught, probably means JMS broker not up");
             status = false;
         }
         
