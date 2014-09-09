@@ -153,7 +153,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         if (!hostname.contains( "jpl.nasa.gov" )) {
             hostname += ".jpl.nasa.gov";
         }
-        String contextUrl = "https://" + hostname + "/alfresco/";
+        String contextUrl = "https://" + hostname + "/alfresco";
         	
         // Send off the notification email
         String subject =
