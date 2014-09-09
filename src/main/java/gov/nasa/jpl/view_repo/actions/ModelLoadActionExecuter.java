@@ -146,17 +146,24 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         // set the status
         jsonNode.setProperty("ems:job_status", jobStatus);
 
-        String contextUrl = "https://" + ActionUtil.getHostName() + "alfresco/";
+        String hostname = ActionUtil.getHostName();
+        if (hostname.endsWith("/" )) {
+            hostname = hostname.substring( 0, hostname.lastIndexOf( "/" ) );
+        } 
+        if (!hostname.contains( "jpl.nasa.gov" )) {
+            hostname += ".jpl.nasa.gov";
+        }
+        String contextUrl = "https://" + hostname + "/alfresco/";
         	
         // Send off the notification email
         String subject =
                 "Workspace " + workspaceId + " Project "
-                        + projectName + " Load " + jobStatus;
+                        + projectName + " load completed";
         String msg = "Log URL: " + contextUrl + logNode.getUrl();
         ActionUtil.sendEmailToModifier(jsonNode, msg, subject, services, response);
 
-        if (logger.isDebugEnabled()) logger.debug("Email notification sent for " + workspaceId + " - "+ projectName + " [id: " + projectId + "]");
-        System.out.println( "ModelLoadActionExecuter: " + timer );
+        if (logger.isDebugEnabled()) logger.debug("Email notification sent for " + workspaceId + " - "+ projectName + " [id: " + projectId + "]:\n" + msg);
+        if (logger.isDebugEnabled()) logger.debug( "ModelLoadActionExecuter: " + timer );
     }
 
     protected void clearCache() {
