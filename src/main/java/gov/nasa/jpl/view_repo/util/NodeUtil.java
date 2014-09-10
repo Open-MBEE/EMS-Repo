@@ -1070,12 +1070,12 @@ public class NodeUtil {
         		// Versioning doesn't make versions until the first save...
         		EmsScriptNode node = new EmsScriptNode(ref, services);
         		Date createdTime = (Date)node.getProperty("cm:created");
-                if ( dateTime != null && dateTime.compareTo( createdTime ) < 0 ) {
-                    if (Debug.isOn())  Debug.outln( "no history! dateTime " + dateTime
-                                        + " before created " + createdTime );
+        		if ( dateTime != null && createdTime != null && dateTime.compareTo( createdTime ) < 0 ) {
+                if (Debug.isOn())  Debug.outln( "no history! dateTime " + dateTime
+                                    + " before created " + createdTime );
         			return null;
         		}
-                if (Debug.isOn())  Debug.outln( "no history! created " + createdTime );
+            if (Debug.isOn() && createdTime != null)  Debug.outln( "no history! created " + createdTime );
         		return ref;
         }
 
