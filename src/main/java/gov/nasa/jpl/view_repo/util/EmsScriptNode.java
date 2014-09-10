@@ -2876,18 +2876,24 @@ public class EmsScriptNode extends ScriptNode implements
             // keep track of owners and children
             EmsScriptNode oldParentReifiedNode = oldParentPkg.getReifiedNode();
 
-            oldParentReifiedNode.removeFromPropertyNodeRefs( "ems:ownedChildren",
+            if ( oldParentReifiedNode != null ) {
+                oldParentReifiedNode.removeFromPropertyNodeRefs( "ems:ownedChildren",
                                                              this.getNodeRef() );
+            }
 
             EmsScriptNode newParent =
                     new EmsScriptNode( destination.getNodeRef(), services,
                                        response );
-            EmsScriptNode newReifiedNode = newParent.getReifiedNode();
-            newReifiedNode.appendToPropertyNodeRefs( "ems:ownedChildren",
-                                                     this.getNodeRef() );
+            if (newParent != null) {
+                EmsScriptNode newReifiedNode = newParent.getReifiedNode();
+                if (newReifiedNode != null) {
+                    newReifiedNode.appendToPropertyNodeRefs( "ems:ownedChildren",
+                                                             this.getNodeRef() );
 
-            this.createOrUpdateProperty( "ems:owner",
-                                         newReifiedNode.getNodeRef() );
+                    this.createOrUpdateProperty( "ems:owner",
+                                                 newReifiedNode.getNodeRef() );
+                }
+            }
 
             // make sure to move package as well
             EmsScriptNode reifiedPkg = getReifiedPkg();

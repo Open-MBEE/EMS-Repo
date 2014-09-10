@@ -79,7 +79,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 
 		try {
 			if (validateRequest(req, status)) {
-			    String siteName = getSiteName( req, true );
+			    String siteName = getSiteName( req );
 		        String projectId = getProjectId( req );
 		        boolean delete = getBooleanArg( req, "delete", false );
 		        boolean fix = getBooleanArg(req, "fix", false);
