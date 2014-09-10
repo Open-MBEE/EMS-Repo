@@ -22,19 +22,19 @@ echo existingWarFile=$existingWarFile
 echo mmtJar=$mmtJar
 
 # process arguments
-if ["$#" -eq 0]; then
+if [ "$#" -eq 0 ]; then
   echo "$0 : Error! Need at least one argument!"
   echo $usage
   exit 1
 fi;
 ampFile=$1
-if ["$#" -eq 2]; then
+if [ "$#" -eq 2 ]; then
   warFile=$2
 else
   warfile=$existingWarFile
 fi;
 
-if ["$#" -eq 3]; then
+if [ "$#" -eq 3 ]; then
   mmsappDir=$3
 else
   mmsappDir=/home/cinyoung/mmsapp
