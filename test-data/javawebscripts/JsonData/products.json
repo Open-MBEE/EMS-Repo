@@ -9,16 +9,6 @@
 		"noSections": [
 		"302" 
 		]
-		},
-		{
-		"sysmlid": "401",
-		"view2view": [
-			{"sysmlid": "401", 
-			"childrenViews": ["401","402"]
-		}],
-		"noSections": [
-		"402"
-		]
 		}
 	]
 }
