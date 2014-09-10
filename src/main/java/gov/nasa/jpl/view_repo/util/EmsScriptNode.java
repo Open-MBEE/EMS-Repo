@@ -3312,19 +3312,19 @@ public class EmsScriptNode extends ScriptNode implements
         } else {
             String property;
             property = (String) node.getProperty("view2:contains");
-            if (property != null) {
+            if (property != null && property.length() > 0) {
                 putInJson( json, "contains", new JSONArray( property ), filter );
             }
             property = (String) node.getProperty("view2:displayedElements");
-            if (property != null) {
+            if (property != null && property.length() > 0) {
                 putInJson( json, "displayedElements", new JSONArray( property ), filter );
             }
             property = (String) node.getProperty("view2:allowedElements");
-            if (property != null) {
+            if (property != null && property.length() > 0) {
                 putInJson( json, "allowedElements", new JSONArray( property ), filter );
             }
             property = (String) node.getProperty("view2:childrenViews");
-            if (property != null) {
+            if (property != null && property.length() > 0) {
                 putInJson( json, "childrenViews", new JSONArray( property ), filter );
             }
         }
