@@ -186,7 +186,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     productsJson.put( product.toJSONObject( dateTime ) );
                 }
             } catch ( JSONException e ) {
-                log( LogLevel.ERROR, "Could not create products JSON array",
+                log( LogLevel.ERROR, "Could not create JSON for product",
                      HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
                 e.printStackTrace();
             }
