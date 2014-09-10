@@ -174,6 +174,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                 } else if ( gettingContainedViews ) {
                     Collection< EmsScriptNode > elems =
                             v.getContainedViews( recurse, workspace, dateTime, null );
+                    elems.add( product );
                     for ( EmsScriptNode n : elems ) {
                         if ( simpleJson ) {
                             productsJson.put( n.toSimpleJSONObject( dateTime ) );

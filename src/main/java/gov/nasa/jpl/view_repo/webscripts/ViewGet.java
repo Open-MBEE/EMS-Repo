@@ -210,6 +210,7 @@ public class ViewGet extends AbstractJavaWebScript {
                     Collection< EmsScriptNode > elems =
                             v.getContainedViews( recurse, workspace, dateTime,
                                                  null );
+                    elems.add( view );
                     for ( EmsScriptNode n : elems ) {
                         viewsJson.put( n.toJSONObject( dateTime ) );
                     }
