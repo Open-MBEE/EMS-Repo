@@ -15,6 +15,15 @@
         <version>1.1.1</version>
     </parent>
 
+  <distributionManagement>
+      <!-- use mvn -U deploy -DgeneratePom=true -Dpackaging=jar  -->
+      <repository>
+          <id>artifactory</id>
+          <name>releases</name>
+          <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
+      </repository>
+  </distributionManagement>
+
     <!-- 
        | SDK properties have sensible defaults in the SDK parent,
        | but you can override the properties below to use another version. 
