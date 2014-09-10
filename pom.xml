@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>gov.nasa.jpl</groupId>
     <artifactId>view-repo</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${env.BUILD_NUMBER}</version>
     <name>view-repo AMP project</name>
     <packaging>amp</packaging>
     <description>Manages the lifecycle of the view-repo AMP (Alfresco Module Package)</description>
@@ -77,8 +77,10 @@
 	            <type>jar</type>
 	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
 	        </dependency>
-	        
             </dependencies>
+            <properties>
+                <env.BUILD_NUMBER>1</env.BUILD_NUMBER>
+            </properties>
         </profile>
         <profile>
             <id>mbee-dev</id>
@@ -100,6 +102,43 @@
 	                <scope>system</scope>
 	                <type>jar</type>
 	                <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
+               </dependency>
+                <dependency>
+                    <groupId>gov.nasa.jpl.mbee.bae</groupId>
+                    <artifactId>bae</artifactId>
+                    <version>0.0.24</version>
+                </dependency>
+<!--                 <dependency>
+                    <groupId>kparser</groupId>
+                    <artifactId>kparser</artifactId>
+                    <version>0.0.2</version>
+                </dependency>
+ -->              
+            </dependencies>
+            <properties>
+                <env.BUILD_NUMBER>1</env.BUILD_NUMBER>
+            </properties>
+        </profile>
+        <profile>
+            <id>jenkins</id>
+            <dependencies>
+                <dependency>
+                    <groupId>gov.nasa.jpl.mbee.util</groupId>
+                    <artifactId>mbee_util</artifactId>
+                    <version>0.0.16</version>
+                </dependency>
+                <dependency>
+                    <groupId>gov.nasa.jpl.mbee.sysml</groupId>
+                    <artifactId>sysml</artifactId>
+                    <version>0.0.20</version>
+               </dependency>
+                <dependency>
+                    <groupId>kexpparser</groupId>
+                    <artifactId>kexpparser</artifactId>
+                    <version>0.0.8</version>
+                    <scope>system</scope>
+                    <type>jar</type>
+                    <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
                </dependency>
                 <dependency>
                     <groupId>gov.nasa.jpl.mbee.bae</groupId>
