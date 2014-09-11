@@ -3,7 +3,7 @@
     {"documentation" : "something", 
      "sysmlid":"300", 
      "name":"300", 
-     "owner":"123456", 
+     "owner":"null", 
      "specialization": {"type":"Property",
                         "isDerived":false, 
                         "value":[{"type":"LiteralString",
@@ -53,10 +53,107 @@
     {"documentation" : "no owner", 
      "sysmlid":"305", 
      "name":"305", 
-     "owner":"304", 
+     "owner":"999", 
      "specialization": {"type":"Property",
                         "isDerived":false, 
                         "value":[{"type":"LiteralString",
                                   "string":"dlam_string"}]}
+    },
+    
+    {"documentation" : "4something", 
+     "sysmlid":"4000", 
+     "name":"400", 
+     "owner":"null", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+    
+    {"documentation" : "4else", 
+     "sysmlid":"401", 
+     "name":"401", 
+     "owner":"4000", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+    
+    {"documentation" : "4to", 
+     "sysmlid":"402", 
+     "name":"402", 
+     "owner":"401", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+    
+    {"documentation" : "4talk", 
+     "sysmlid":"403", 
+     "name":"403", 
+     "owner":"402", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+    
+    {"documentation" : "4about", 
+     "sysmlid":"404", 
+     "name":"404", 
+     "owner":"403", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+    
+    {"documentation" : "directed_relationship", 
+     "sysmlid":"500",
+     "owner":"300",
+     "name":"500",
+     "specialization": {"type":"DirectedRelationship",
+                        "source":"302",
+                        "target":"303"}
+     },
+    
+    {"documentation" : "element values", 
+     "sysmlid":"600",
+     "owner":"null",
+     "name":"600", 
+     "specialization": {"type":"Property",
+                        "value":[{"type":"ElementValue",
+                                  "element":"300"},
+                                 {"type":"ElementValue",
+                                  "element":"302"}]}
+     },
+     
+    {"documentation" : "", 
+     "sysmlid":"6666",
+     "owner":"null",
+     "name":"6666_name", 
+     "specialization": {"type":"Expression",
+                        "operand":[{"type":"ElementValue",
+                                  "element":"300"},
+                                  {"type":"ElementValue",
+                                  "element":"302"}]}
+     },
+    {"documentation" : "something",
+     "sysmlid":"x",
+     "name":"300",
+     "owner":"null",
+     "specialization": {"type":"Property",
+                        "isDerived":false,
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+    
+    {"documentation" : "to make compatible with value specs (this is just a Element)", 
+     "sysmlid":"dlam", 
+     "name":"dlam", 
+     "owner":"cdelp"
     }
+
 ]}
