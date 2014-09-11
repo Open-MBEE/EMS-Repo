@@ -122,8 +122,7 @@ public class JsonDiff {
             o2 = new JSONObject( jstr2 );
         } catch ( Throwable e ) {
             //System.err.println("Error! " + e.getLocalizedMessage() );
-            System.err.println("Error! " + e.getStackTrace() );
-            System.err.println(usage);
+            e.printStackTrace();
             return;
         }
         try {
