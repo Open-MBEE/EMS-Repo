@@ -30,6 +30,10 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.TempFileProvider;
 import org.alfresco.util.exec.RuntimeExec;
 import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import com.sun.activation.registries.MimeTypeFile;
 
@@ -44,61 +48,222 @@ import gov.nasa.jpl.view_repo.util.NodeUtil;
 public class DocBookWrapper {
 	public static final String DOC_BOOK_DIR_NAME = "docbook";
 	
-	//private EmsScriptNode view;
-	//private String viewId;
-	private DBSerializeVisitor dbSerializeVisitor;
-	private String jobId;
-	private String snapshotName;
-	private EmsScriptNode snapshotNode;
-	private Path jobDirName;
+	private DBBook dbBook;
+	private Path docGenCssFileName;
 	private Path dbDirName;
-	private Path imageDirName;
 	private Path dbFileName;
+	private DBSerializeVisitor dbSerializeVisitor;
+	private String content;
 	private Path fobFileName;
 	private Path fobXslFileName;
-	private Path xalanDirName;
 	private Path htmlXslFileName;
-	private Path docGenCssFileName;
-	private DBBook dbBook;
-	private String content;
+	private Path imageDirName;
+	private Path jobDirName;
+	private String snapshotName;
+	private EmsScriptNode snapshotNode;
+	private Path xalanDirName;
 	
-	//public DocBookWrapper(EmsScriptNode view, String viewId, String snapshotName, EmsScriptNode snapshotNode){
 	public DocBookWrapper(String snapshotName, EmsScriptNode snapshotNode){
-		//this.view = view;
-		//this.viewId = viewId;
 		this.snapshotName = snapshotName;
 		this.snapshotNode = snapshotNode;
 		this.dbSerializeVisitor = new DBSerializeVisitor(true, null);
 		setPaths();
 	}
-	
-	private void setPaths(){
-		String tmpDirName	= TempFileProvider.getTempDir().getAbsolutePath();
-    	this.jobDirName = Paths.get(tmpDirName, this.snapshotName);
-		this.dbDirName = Paths.get(jobDirName.toString(), "docbook");
-		this.imageDirName = Paths.get(dbDirName.toString(), "images");
-		this.dbFileName = Paths.get(this.dbDirName.toString(), this.snapshotName + ".db");
+
+	private boolean createDocBookDir(){
+		boolean bSuccess = true;
+		if(!Files.exists(this.dbDirName)){
+    		if(!new File(this.dbDirName.toString()).mkdirs()) {
+    			bSuccess = false;
+    			System.out.println("Failed to create DocBook Directory: " + this.dbDirName);
+    		}
+    	}
+		return bSuccess;
+	}
+
+	/**
+	 * Helper to execute the command using RuntimeExec
+	 * 
+	 * @param srcFile	File to transform
+	 * @return 			Absolute path of the generated file
+	 */
+	private String doPDFTransformation(File srcFile) {
+		RuntimeExec re = new RuntimeExec();
+		List<String> command = new ArrayList<String>();
 		
-		String docgenDirName = "/opt/local/alfresco/tomcat/webapps/alfresco/docgen/";
-		if(!Files.exists(Paths.get(docgenDirName))){
-			docgenDirName = "target/view-repo-war/docgen/";
-			if(!Files.exists(Paths.get(docgenDirName))) 
-				System.out.println("Failed to find docgen/fop!");
-			else{
-				docgenDirName = Paths.get(docgenDirName).toAbsolutePath().toString();
+		System.out.println("srcFile: " + srcFile.getAbsolutePath());
+		String source = srcFile.getAbsolutePath();
+		
+		String target = source.substring(0, source.indexOf(".")) + ".pdf";
+		command.add(this.getFobFileName());
+		command.add("-xml");
+		command.add(source);
+		command.add("-xsl");
+		command.add(this.getFobXslFileName());
+		command.add("-pdf");
+		command.add(target);
+
+		System.out.println("DO_TRANSFORM source: " + source);
+		System.out.println("DO_TRANSFORM target: " + target);
+		System.out.println("DO_TRANSFROM cmd: " + command);
+		
+		re.setCommand(list2Array(command));
+		ExecutionResult result = re.execute();
+
+		if (!result.getSuccess()) {
+			System.out.println("FOP transformation command unsuccessful\n");
+			//logger.error("FOP transformation command unsuccessful\n");
+			System.out.println("Exit value: " + result.getExitValue());
+		}
+
+		return target;
+	}
+
+    /**
+	 * Utility function to find all the NodeRefs for the specified name
+	 * @param name
+	 * @return
+	 */
+	private ResultSet findNodeRef(String name) {
+	    String pattern = "@cm\\:name:\"" + name + "\"";
+		ResultSet query = NodeUtil.luceneSearch( pattern);
+		return query;
+	}
+	
+	private String formatContent(String rawContent){
+		Document document = Jsoup.parseBodyFragment(rawContent);
+		Elements lits = document.getElementsByTag("literallayout");
+		for(Element lit : lits){
+			Elements cirRefs = lit.getElementsByTag("CircularReference");
+			for(Element cirRef : cirRefs){
+				//cirRef.before("</literallayout><font color='red'>Circular Reference!</font><literallayout>");
+				//cirRef.remove();
 			}
 		}
-		this.fobFileName = Paths.get(docgenDirName, "fop-1.0", "fop");
-		this.fobXslFileName = Paths.get(docgenDirName, "xsl/fo/mgss.xsl");
-		this.xalanDirName = Paths.get(docgenDirName, "xalan-j_2_7_1");
-		this.htmlXslFileName = Paths.get(docgenDirName, "xsl/html", "chunk_custom.xsl");
-		this.docGenCssFileName = Paths.get(docgenDirName, "xsl", "docgen.css");
+		return document.body().html();
 	}
 	
-	public void setDBBook(DBBook dbBook){
-		this.dbBook = dbBook;
+	public String getContent(){
+		//this.dbBook.accept(this.dbSerializeVisitor);
+		if(this.content == null || this.content.isEmpty()){
+			this.dbSerializeVisitor.visit(dbBook);
+			String rawContent = this.dbSerializeVisitor.getOut(); 
+			//this.content = formatContent(rawContent);
+			this.content = rawContent;
+		}
+		return this.content;
+	}
+
+	public String getDBFileName(){
+		return this.dbFileName.toString();
+	}
+
+	public String getDBDirImage(){
+		return this.imageDirName.toString();
 	}
 	
+	public String getDBDirName(){
+		return this.dbDirName.toString();
+	}
+
+	public String getDocGenCssFileName(){
+		return this.docGenCssFileName.toString();
+	}
+	
+	public String getFobFileName(){
+		return this.fobFileName.toString();
+	}
+	
+	public String getFobXslFileName(){
+		return this.fobXslFileName.toString();
+	}
+	
+	public String getHtmlXslFileName(){
+		return this.htmlXslFileName.toString();
+	}
+
+	public String getJobDirName(){
+		return this.jobDirName.toString();
+	}
+	
+	public EmsScriptNode getSnapshotNode(){
+		return this.snapshotNode;
+	}
+	
+	public String getXalanDirName(){
+		return this.xalanDirName.toString();
+	}
+	
+	/**
+	 * Helper method to convert a list to an array of specified type
+	 * @param list
+	 * @return
+	 */
+	private String[] list2Array(List<String> list) {
+		return Arrays.copyOf(list.toArray(), list.toArray().length, String[].class);
+	}
+
+	private void retrieveDocBook(){
+		if(this.snapshotNode.hasAspect("view2:docbook")){
+    		//System.out.println("has docbook aspect!");
+    		//System.out.println("getting docbook node...");
+    		NodeRef dbNodeRef = (NodeRef)this.snapshotNode.getProperty("view2:docbookNode");
+    		if(dbNodeRef==null) System.out.println("dbNodeRef is null!");
+    		try{
+    			retrieveStringPropContent(dbNodeRef, this.dbFileName);
+    			System.out.println("retrieved docbook!");
+    		}
+    		catch(Exception ex){
+    			System.out.println("Failed to retrieve DocBook!");
+    			ex.printStackTrace();
+    		}
+    	}
+    }
+    
+	private void retrieveImages(File srcFile, ContentService contentService){
+		DocBookContentTransformer dbTransf = new DocBookContentTransformer();
+		System.out.println("getting images...");
+		// TODO: check image time information with temp file and replace if image has been updated more recently
+		for (String img: dbTransf.findImages(srcFile)) 
+		{
+			String imgFilename = this.getDBDirImage() + File.separator + img;
+			File imgFile = new File(imgFilename);
+			if (!imgFile.exists()) 
+			{
+				System.out.println("finding image: " + imgFilename);
+				ResultSet rs = findNodeRef(img);
+				ContentReader imgReader;
+				for (NodeRef nr: rs.getNodeRefs()) {
+					System.out.println("retrieving image file...");
+					imgReader = contentService.getReader(nr, ContentModel.PROP_CONTENT);
+					System.out.println("saving image file...");
+					if(!Files.exists(this.imageDirName)){ 
+						if(!new File(this.imageDirName.toString()).mkdirs()){
+							System.out.println("Failed to create directory for " + this.imageDirName);
+						}
+					}
+					imgReader.getContent(imgFile);		
+					break;
+				}
+			}
+		}	
+	}
+	
+    private void retrieveStringPropContent(NodeRef node, Path savePath) throws IOException{
+    	if(!Files.exists(savePath.getParent())){
+	    	if(!new File(savePath.getParent().toString()).mkdirs()){
+	    		System.out.println("Could not create path: " + savePath.getParent());
+	    		return;
+	    	}
+    	}
+    	ContentService contentService = this.getSnapshotNode().getServices().getContentService();
+    	if(contentService == null) System.out.println("conent service is null!");
+		ContentReader reader = contentService.getReader(node, ContentModel.PROP_CONTENT);
+		if(reader==null) System.out.println("reader is null!");
+		File srcFile = new File(savePath.toString());
+		reader.getContent(srcFile);
+    }
+
 	public void save() throws IOException{
 		String docBookXml = this.getContent();
     	File f = new File(this.dbFileName.toString());
@@ -122,6 +287,34 @@ public class DocBookWrapper {
 		}
 	}
 	
+	public boolean saveFileToRepo(EmsScriptNode scriptNode, String mimeType, String filePath){
+		boolean bSuccess = false;
+		if(filePath == null || filePath.isEmpty()){
+			System.out.println("File path parameter is missing!");
+			return false;
+		}
+		if(!Files.exists(Paths.get(filePath))){
+			System.out.println(filePath + " does not exist!");
+			return false;
+		}
+		
+		NodeRef nodeRef = scriptNode.getNodeRef();
+		ContentService contentService = scriptNode.getServices().getContentService();
+		
+		ContentWriter writer = contentService.getWriter(nodeRef, ContentModel.PROP_CONTENT, true);
+		writer.setLocale(Locale.US);
+		File file = new File(filePath);
+		writer.setMimetype(mimeType);
+		try{
+			writer.putContent(file);
+			bSuccess = true;
+		}
+		catch(Exception ex){
+			System.out.println("Failed to save '" + filePath + "' to repository!");
+		}
+		return bSuccess;
+	}
+
 	public void saveHtmlZipToRepo(EmsScriptNode snapshotFolder){
 		try{
 			this.transformToHTML();
@@ -153,164 +346,31 @@ public class DocBookWrapper {
 		}
 	}
 	
-    /**
-	 * Utility function to find all the NodeRefs for the specified name
-	 * @param name
-	 * @return
-	 */
-	private ResultSet findNodeRef(String name) {
-	    String pattern = "@cm\\:name:\"" + name + "\"";
-		ResultSet query = NodeUtil.luceneSearch( pattern);
-		return query;
+	public void setDBBook(DBBook dbBook){
+		this.dbBook = dbBook;
 	}
 	
-	public String getContent(){
-		//this.dbBook.accept(this.dbSerializeVisitor);
-		if(this.content == null || this.content.isEmpty()){
-			this.dbSerializeVisitor.visit(dbBook);
-			this.content = this.dbSerializeVisitor.getOut();
-		}
-		return this.content;
-	}
-	
-	public String getJobDirName(){
-		return this.jobDirName.toString();
-	}
-	
-	public String getDBDirName(){
-		return this.dbDirName.toString();
-	}
-	
-	public String getDBDirImage(){
-		return this.imageDirName.toString();
-	}
-	
-	public String getDBFileName(){
-		return this.dbFileName.toString();
-	}
-	
-	public String getFobFileName(){
-		return this.fobFileName.toString();
-	}
-	
-	public String getFobXslFileName(){
-		return this.fobXslFileName.toString();
-	}
-	
-	public String getHtmlXslFileName(){
-		return this.htmlXslFileName.toString();
-	}
-	
-	public EmsScriptNode getSnapshotNode(){
-		return this.snapshotNode;
-	}
-	
-	public String getXalanDirName(){
-		return this.xalanDirName.toString();
-	}
-	
-	public String getDocGenCssFileName(){
-		return this.docGenCssFileName.toString();
-	}
-	
-	private boolean createDocBookDir(){
-		boolean bSuccess = true;
-		if(!Files.exists(this.dbDirName)){
-    		if(!new File(this.dbDirName.toString()).mkdirs()) {
-    			bSuccess = false;
-    			System.out.println("Failed to create DocBook Directory: " + this.dbDirName);
-    		}
-    	}
-		return bSuccess;
-	}
-	
-	private void retrieveImages(File srcFile, ContentService contentService){
-		DocBookContentTransformer dbTransf = new DocBookContentTransformer();
-		System.out.println("getting images...");
-		// TODO: check image time information with temp file and replace if image has been updated more recently
-		for (String img: dbTransf.findImages(srcFile)) 
-		{
-			String imgFilename = this.getDBDirImage() + File.separator + img;
-			File imgFile = new File(imgFilename);
-			if (!imgFile.exists()) 
-			{
-				System.out.println("finding image: " + imgFilename);
-				ResultSet rs = findNodeRef(img);
-				ContentReader imgReader;
-				for (NodeRef nr: rs.getNodeRefs()) {
-					System.out.println("retrieving image file...");
-					imgReader = contentService.getReader(nr, ContentModel.PROP_CONTENT);
-					System.out.println("saving image file...");
-					if(!Files.exists(this.imageDirName)){ 
-						if(!new File(this.imageDirName.toString()).mkdirs()){
-							System.out.println("Failed to create directory for " + this.imageDirName);
-						}
-					}
-					imgReader.getContent(imgFile);		
-					break;
-				}
+	private void setPaths(){
+		String tmpDirName	= TempFileProvider.getTempDir().getAbsolutePath();
+    	this.jobDirName = Paths.get(tmpDirName, this.snapshotName);
+		this.dbDirName = Paths.get(jobDirName.toString(), "docbook");
+		this.imageDirName = Paths.get(dbDirName.toString(), "images");
+		this.dbFileName = Paths.get(this.dbDirName.toString(), this.snapshotName + ".db");
+		
+		String docgenDirName = "/opt/local/alfresco/tomcat/webapps/alfresco/docgen/";
+		if(!Files.exists(Paths.get(docgenDirName))){
+			docgenDirName = "target/view-repo-war/docgen/";
+			if(!Files.exists(Paths.get(docgenDirName))) 
+				System.out.println("Failed to find docgen/fop!");
+			else{
+				docgenDirName = Paths.get(docgenDirName).toAbsolutePath().toString();
 			}
-		}	
-	}
-	
-	private void retrieveDocBook(){
-		if(this.snapshotNode.hasAspect("view2:docbook")){
-    		//System.out.println("has docbook aspect!");
-    		//System.out.println("getting docbook node...");
-    		NodeRef dbNodeRef = (NodeRef)this.snapshotNode.getProperty("view2:docbookNode");
-    		if(dbNodeRef==null) System.out.println("dbNodeRef is null!");
-    		try{
-    			retrieveStringPropContent(dbNodeRef, this.dbFileName);
-    			System.out.println("retrieved docbook!");
-    		}
-    		catch(Exception ex){
-    			System.out.println("Failed to retrieve DocBook!");
-    			ex.printStackTrace();
-    		}
-    	}
-    }
-    
-    private void retrieveStringPropContent(NodeRef node, Path savePath) throws IOException{
-    	if(!Files.exists(savePath.getParent())){
-	    	if(!new File(savePath.getParent().toString()).mkdirs()){
-	    		System.out.println("Could not create path: " + savePath.getParent());
-	    		return;
-	    	}
-    	}
-    	ContentService contentService = this.getSnapshotNode().getServices().getContentService();
-    	if(contentService == null) System.out.println("conent service is null!");
-		ContentReader reader = contentService.getReader(node, ContentModel.PROP_CONTENT);
-		if(reader==null) System.out.println("reader is null!");
-		File srcFile = new File(savePath.toString());
-		reader.getContent(srcFile);
-    }
-    
-	public boolean saveFileToRepo(EmsScriptNode scriptNode, String mimeType, String filePath){
-		boolean bSuccess = false;
-		if(filePath == null || filePath.isEmpty()){
-			System.out.println("File path parameter is missing!");
-			return false;
 		}
-		if(!Files.exists(Paths.get(filePath))){
-			System.out.println(filePath + " does not exist!");
-			return false;
-		}
-		
-		NodeRef nodeRef = scriptNode.getNodeRef();
-		ContentService contentService = scriptNode.getServices().getContentService();
-		
-		ContentWriter writer = contentService.getWriter(nodeRef, ContentModel.PROP_CONTENT, true);
-		writer.setLocale(Locale.US);
-		File file = new File(filePath);
-		writer.setMimetype(mimeType);
-		try{
-			writer.putContent(file);
-			bSuccess = true;
-		}
-		catch(Exception ex){
-			System.out.println("Failed to save '" + filePath + "' to repository!");
-		}
-		return bSuccess;
+		this.fobFileName = Paths.get(docgenDirName, "fop-1.0", "fop");
+		this.fobXslFileName = Paths.get(docgenDirName, "xsl/fo/mgss.xsl");
+		this.xalanDirName = Paths.get(docgenDirName, "xalan-j_2_7_1");
+		this.htmlXslFileName = Paths.get(docgenDirName, "xsl/html", "chunk_custom.xsl");
+		this.docGenCssFileName = Paths.get(docgenDirName, "xsl", "docgen.css");
 	}
 	
 	private void transformToHTML() throws Exception{
@@ -370,44 +430,6 @@ public class DocBookWrapper {
 		}
 	}
 	
-	/**
-	 * Helper to execute the command using RuntimeExec
-	 * 
-	 * @param srcFile	File to transform
-	 * @return 			Absolute path of the generated file
-	 */
-	private String doPDFTransformation(File srcFile) {
-		RuntimeExec re = new RuntimeExec();
-		List<String> command = new ArrayList<String>();
-		
-		System.out.println("srcFile: " + srcFile.getAbsolutePath());
-		String source = srcFile.getAbsolutePath();
-		
-		String target = source.substring(0, source.indexOf(".")) + ".pdf";
-		command.add(this.getFobFileName());
-		command.add("-xml");
-		command.add(source);
-		command.add("-xsl");
-		command.add(this.getFobXslFileName());
-		command.add("-pdf");
-		command.add(target);
-
-		System.out.println("DO_TRANSFORM source: " + source);
-		System.out.println("DO_TRANSFORM target: " + target);
-		System.out.println("DO_TRANSFROM cmd: " + command);
-		
-		re.setCommand(list2Array(command));
-		ExecutionResult result = re.execute();
-
-		if (!result.getSuccess()) {
-			System.out.println("FOP transformation command unsuccessful\n");
-			//logger.error("FOP transformation command unsuccessful\n");
-			System.out.println("Exit value: " + result.getExitValue());
-		}
-
-		return target;
-	}
-
 	private String transformToPDF(){
     	if(!createDocBookDir()){
     		System.out.println("Failed to create DocBook directory!");
@@ -438,9 +460,10 @@ public class DocBookWrapper {
 		//command.add("\"*.css\"");
 		command.add("docbook");
 		
-		command.add("-x");
-		command.add("*.db");
-		command.add("*.pdf");
+		// not including docbook and pdf files
+		//command.add("-x");
+		//command.add("*.db");
+		//command.add("*.pdf");
 
 		processBuilder.command(command);
 		System.out.println("zip command: " + processBuilder.command());
@@ -452,14 +475,5 @@ public class DocBookWrapper {
 		}
 		
 		return Paths.get(this.getJobDirName(), zipFile).toString();
-	}
-	
-	/**
-	 * Helper method to convert a list to an array of specified type
-	 * @param list
-	 * @return
-	 */
-	private String[] list2Array(List<String> list) {
-		return Arrays.copyOf(list.toArray(), list.toArray().length, String[].class);
 	}
 }
