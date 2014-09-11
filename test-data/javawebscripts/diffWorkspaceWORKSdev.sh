@@ -44,10 +44,11 @@ echo
 echo
 
 echo 'testPost 2'
+pwd
 #post elements to project
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elementsNew.json $BASE_URL"elements" 
 curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elements.json $BASE_URL"elements" | grep -v '"read":'| grep -v '"lastModified"' > outputWorkspaces/post2.json
-DIFF=$((java -cp .:../../src/main/amp/web/WEB-INF/lib/mbee_util.jar:../../target/view-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes gov.nasa.jpl.view_repo.util.JsonDiff baselineWorkspaces/post2.json outputWorkspaces/post2.json  | grep -v '"sysmlid"' | grep -v '"author"'| grep -v '}' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -v '"modified":' | grep -v '"qualifiedId”') 2>&1)
+DIFF=$((java -cp .:../../../../.m2/repository/gov/nasa/jpl/mbee/util/mbee_util/0.0.16/mbee_util-0.0.16.jar:../../target/view-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes gov.nasa.jpl.view_repo.util.JsonDiff baselineWorkspaces/post2.json outputWorkspaces/post2.json  | grep -v '"sysmlid"' | grep -v '"author"'| grep -v '}' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -v '"modified":' | grep -v '"qualifiedId”') 2>&1)
 if [ "$DIFF" != "" ];then
         failedTest=1
         echo "$DIFF"
@@ -72,7 +73,7 @@ echo 'testGET8'
 # get product list
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"ve/documents/europa?format=json\""
 curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"ve/documents/europa?format=json" | grep -v '"read":'| grep -v '"lastModified"' | grep -v '"sysmlid"' > outputWorkspaces/get8.json
-DIFF=$((java -cp .:../../src/main/amp/web/WEB-INF/lib/mbee_util.jar:../../target/view-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes gov.nasa.jpl.view_repo.util.JsonDiff baselineWorkspaces/get8.json outputWorkspaces/get8.json  | grep -v '"sysmlid"' | grep -v '"author"'| grep -v '}' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -v '"modified":' | grep -v '"qualifiedId”') 2>&1)
+DIFF=$((java -cp .:../../../../.m2/repository/gov/nasa/jpl/mbee/util/mbee_util/0.0.16/mbee_util-0.0.16.jar:../../target/view-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes gov.nasa.jpl.view_repo.util.JsonDiff baselineWorkspaces/get8.json outputWorkspaces/get8.json  | grep -v '"sysmlid"' | grep -v '"author"'| grep -v '}' | grep -ve '---' | egrep -v "[0-9]+[c|a|d][0-9]+" | grep -v '"modified":' | grep -v '"qualifiedId”') 2>&1)
 if [ "$DIFF" != "" ];then
         failedTest=1
         echo "$DIFF"
