@@ -226,7 +226,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     		}
     		else{
     			String s = (String)node.getProperty(Acm.SYSML + srcProp);
-    			s = handleTransclusion(src, s,null, 0);
+    			s = handleTransclusion(src, srcProp, s,null, 0);
     			s = HtmlSanitize(s);
     			if(s != null && !s.isEmpty()) p.setText("<literallayout>" + s + "</literallayout>");
     		}
@@ -234,7 +234,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	else{
     		if(srcProp != null && !srcProp.isEmpty()){
     			String s = (String)obj.opt(Acm.SYSML + srcProp);
-    			s = handleTransclusion(src, s,null, 0);
+    			s = handleTransclusion(src, srcProp, s,null, 0);
     			s = HtmlSanitize(s);
     			if(s != null && !s.isEmpty()) p.setText("<literallayout>" + s + "</literallayout>");
     		}
@@ -292,10 +292,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
     		DBBook docBook = createDocBook(view);
     		docBook.setRemoveBlankPages(true);
     		Collection<EmsScriptNode> v2v = view.getView().getViewToViewPropertyViews(new Date());
-    		String prodId = view.getId();
+    		//String prodId = view.getId();
     		for(EmsScriptNode node:v2v){
-    			String nodeId = node.getId();
-    			if(nodeId.compareTo(prodId) == 0) continue;
+    			//String nodeId = node.getId();
+    			JSONObject jsnObj = node.toJSONObject(null);
+    			JSONObject spec = (JSONObject)jsnObj.get("specialization");
+    			if(((String)spec.opt("type")).compareTo("Product") == 0) continue;
+    			//if(nodeId.compareTo(prodId) == 0) continue;
 				DocumentElement section = (DocumentElement)emsScriptNodeToDBSection(node, true);
 				docBook.addElement(section);
     		}
@@ -765,8 +768,16 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		}
 		return null;
 	}
-    
-    private String handleTransclusion(String id, String inputString, List<List<String>> cirRefList, int index){
+    /**
+     * 
+     * @param id
+     * @param transclusionType
+     * @param inputString
+     * @param cirRefList
+     * @param index
+     * @return
+     */
+    private String handleTransclusion(String id, String transclusionType, String inputString, List<List<String>> cirRefList, int index){
 		if(cirRefList == null ){ 
 			cirRefList = new ArrayList<List<String>>();
 		}
@@ -776,7 +787,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			cirRefList.add(list);
 		}
 		list = cirRefList.get(index); 
-		list.add(id);
+		list.add(id + transclusionType);
 		index++;
 		String result = parseTransclusionName(cirRefList, index, inputString);
 		result = parseTransclusionDoc(cirRefList, index, result);
@@ -784,6 +795,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		return result;
 	}
 
+    /**
+     * 
+     * @param snapshotNode
+     * @return
+     */
     public static boolean hasHtmlZip(EmsScriptNode snapshotNode){
     	return snapshotNode.hasAspect("view2:htmlZip");
     }
@@ -798,9 +814,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
    
 //	private String parseTransclusion(List<String> cirRefList, String inputString){
 
-    private boolean isCircularReference(String id, List<List<String>> cirRefList, int index){
+    private boolean isCircularReference(String id, String transclusionType, List<List<String>> cirRefList, int index){
     	for(int i = index-1; i >= 0; i--){
-    		if(cirRefList.get(i).contains(id)) return true;
+    		if(cirRefList.get(i).contains(id + transclusionType)) return true;
     	}
     	return false;
     }
@@ -810,7 +826,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		Elements elements = document.getElementsByTag("mms-transclude-doc");
 		for(Element element:elements){
 			String id = element.attr("data-mms-eid");
-			if(isCircularReference(id, cirRefList, index)){
+			if(isCircularReference(id, "documentation", cirRefList, index)){
 				System.out.println("Circular reference!");
 				element.before("[Circular reference!]");
 				element.remove();
@@ -830,7 +846,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 						String doc = getTranscludedContent(jsObj, "documentation");
 						String transcluded = doc;
 						while(true){
-							transcluded = handleTransclusion(id, transcluded, cirRefList, index);
+							transcluded = handleTransclusion(id, "doc", transcluded, cirRefList, index);
 							if(transcluded.compareToIgnoreCase(doc) == 0) break;
 							doc = transcluded;
 						}
@@ -852,7 +868,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		Elements elements = document.getElementsByTag("mms-transclude-name");
 		for(Element element:elements){
 			String id = element.attr("data-mms-eid");
-			if(isCircularReference(id, cirRefList, index)){
+			if(isCircularReference(id, "name", cirRefList, index)){
 				System.out.println("Circular reference!");
 				element.before("[Circular reference!]");
 				element.remove();
@@ -872,7 +888,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 						String name = getTranscludedContent(jsObj, "name");
 						String transcluded = name;
 						while(true){
-							transcluded = handleTransclusion(id, transcluded, cirRefList, index);
+							transcluded = handleTransclusion(id, "name", transcluded, cirRefList, index);
 							if(transcluded.compareToIgnoreCase(name) == 0) break;
 							name = transcluded;
 						}
@@ -893,7 +909,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		Elements elements = document.getElementsByTag("mms-transclude-val");
 		for(Element element:elements){
 			String id = element.attr("data-mms-eid");
-			if(isCircularReference(id, cirRefList, index)){
+			if(isCircularReference(id, "value", cirRefList, index)){
 				System.out.println("Circular reference!");
 				element.before("[Circular reference!]");
 				element.remove();

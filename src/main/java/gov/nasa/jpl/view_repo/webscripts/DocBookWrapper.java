@@ -357,9 +357,11 @@ public class DocBookWrapper {
 		this.imageDirName = Paths.get(dbDirName.toString(), "images");
 		this.dbFileName = Paths.get(this.dbDirName.toString(), this.snapshotName + ".db");
 		
-		String docgenDirName = "/opt/local/alfresco/tomcat/webapps/alfresco/docgen/";
+		//String docgenDirName = "/opt/local/alfresco/tomcat/webapps/alfresco/docgen/";
+		String docgenDirName = "/opt/local/docbookgen/";
 		if(!Files.exists(Paths.get(docgenDirName))){
-			docgenDirName = "target/view-repo-war/docgen/";
+			String userHome = System.getProperty("user.home");
+			docgenDirName = Paths.get(userHome, "git/docbookgen").toString();
 			if(!Files.exists(Paths.get(docgenDirName))) 
 				System.out.println("Failed to find docgen/fop!");
 			else{
