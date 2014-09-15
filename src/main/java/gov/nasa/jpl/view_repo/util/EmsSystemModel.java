@@ -1291,7 +1291,6 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 		        	node.createOrUpdateProperty(Acm.ACM_NATURAL_VALUE, value);
 		        }
 		        else if (type.equals(Acm.JSON_LITERAL_STRING)) {
-
 		        	node.createOrUpdateProperty(Acm.ACM_STRING, value);
 		        }
 		        else {

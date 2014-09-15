@@ -60,7 +60,7 @@ session.setAttribute(AuthenticationHelper.SESSION_USERNAME, authCookieValue);
 
 %>
 
-<body style="background-image: url(<%=request.getContextPath()%>/scripts/vieweditor/images/europa-bg.png); background-repeat: no-repeat; background-attachment: fixed; background-color:#000000;">
+<body class="customBackground">
 
 <r:page titleId="title_login">
 
