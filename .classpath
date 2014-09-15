@@ -37,5 +37,6 @@
 	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/emsscala.jar"/>
 	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/kexpparser.jar"/>
 	<classpathentry kind="lib" path="src/main/amp/web/WEB-INF/lib/scala-library.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/docbook"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

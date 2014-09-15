@@ -61,7 +61,6 @@ if [ $server -eq 1 ]; then
         echo 'OMITTING OLD API DIFF SCRIPT'
             ./diffWorkspace.sh
             passTest=$?
-
     else 
             echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
             ./diff2.sh

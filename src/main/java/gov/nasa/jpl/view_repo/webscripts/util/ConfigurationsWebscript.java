@@ -2,18 +2,22 @@ package gov.nasa.jpl.view_repo.webscripts.util;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
+import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -258,6 +262,27 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         snapshotJson.put( "created",  EmsScriptNode.getIsoTime( (Date)snapshot.getProperty( "cm:created" )));
         snapshotJson.put( "creator", snapshot.getProperty( "cm:modifier" ) );
 
+        LinkedList<HashMap> list = new LinkedList<HashMap>();
+        if(SnapshotPost.hasPdf(snapshot) || SnapshotPost.hasHtmlZip(snapshot)){
+        	String contextUrl = "https://" + ActionUtil.getHostName() + ".jpl.nasa.gov/alfresco";
+        	HashMap<String, String> transformMap;
+            if(SnapshotPost.hasPdf(snapshot)){
+            	EmsScriptNode pdfNode = SnapshotPost.getPdfNode(snapshot);
+            	transformMap = new HashMap<String,String>();
+            	transformMap.put("type", "pdf");
+            	transformMap.put("url", contextUrl + pdfNode.getUrl());
+            	list.add(transformMap);
+            }
+            if(SnapshotPost.hasHtmlZip(snapshot)){
+            	EmsScriptNode htmlZipNode = SnapshotPost.getHtmlZipNode(snapshot);
+            	transformMap = new HashMap<String,String>();
+            	transformMap.put("type", "html");
+            	transformMap.put("url", contextUrl + htmlZipNode.getUrl());
+            	list.add(transformMap);
+            }
+        }
+        snapshotJson.put("formats", list);
+        
         JSONArray configsJson = new JSONArray();
         List< EmsScriptNode > configs =
                 snapshot.getSourceAssocsNodesByType( "ems:configuredSnapshots",

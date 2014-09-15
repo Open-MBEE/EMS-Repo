@@ -1,6 +1,8 @@
 /target
 /alf_data_dev
 /alf_data
+/alf_data_testData
+/alf_data*/
 *.log
 *.log.*
 *~
