@@ -63,6 +63,15 @@ chown tomcat:tomcat $existingWarFile
 echo rm -rf $alfrescoWebappDir
 rm -rf $alfrescoWebappDir
 
+
+mkdir $alfrescoWebappDir
+cd $alfrescoWebappDir
+jar xvf $existingWarFile
+
+cp -pRf ../amps/mmsapp .
+cd ..
+chown tomcat:tomcat -R  $alfrescoWebappDir
+
 # owner must be tomcat
 echo "amp installed!"
 echo "restart:\n\t\tsudo /etc/init.d/tomcat restart"
@@ -70,7 +79,3 @@ echo "after alfresco dir is recreated, copy mmsapp:\n\t\tcp -pRf $mmsappDir $alf
 echo "then, make sure the mmsapp's owner is tomcat:\n\t\tchown -Rh tomcat:tomcat ${alfrescoWebappDir}/$mmsappDir"
 
 exit 0
-
-~                                                                                                  
-~                                                                                                  
-~                     
