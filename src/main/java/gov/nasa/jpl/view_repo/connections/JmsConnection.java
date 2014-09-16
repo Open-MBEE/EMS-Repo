@@ -39,7 +39,8 @@ public class JmsConnection extends AbstractConnection {
         boolean result = false;
         try {
             json.put( "sequence", sequenceId++ );
-            result = publishTopic(json.toString( 2 ), topic);
+            // FIXME: topic is always the same since we're using metadata now
+            result = publishTopic(json.toString( 2 ), "master");
         } catch ( JSONException e ) {
             e.printStackTrace();
         }

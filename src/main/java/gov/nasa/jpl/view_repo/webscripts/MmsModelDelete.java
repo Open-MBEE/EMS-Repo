@@ -80,7 +80,9 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         String wsId = null;
         WorkspaceNode workspace = getWorkspace( req, true, user );
         boolean wsFound = workspace != null;
-        if ( !wsFound ) {
+        if ( wsFound ) {
+            wsId = workspace.getSysmlId();
+        } else {
             wsId = getWorkspaceId( req );
             if ( wsId != null && wsId.equalsIgnoreCase( "master" ) ) {
                 wsFound = true;
