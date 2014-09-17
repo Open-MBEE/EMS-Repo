@@ -2532,7 +2532,8 @@ public class EmsScriptNode extends ScriptNode implements
         if (exists()) {
             return hasAspect( "ems:Deleted" );
         }
-        return true;
+        // may seem counterintuitive, but if it doesn't exist, it isn't deleted
+        return false;
     }
 
 
