@@ -195,6 +195,7 @@ public class ModelPost extends AbstractJavaWebScript {
      * @throws JSONException
      *             Parse error
      */
+
     public Set< EmsScriptNode >
             createOrUpdateModel( Object content, Status status,
                                  EmsScriptNode projectNode, WorkspaceNode targetWS, WorkspaceNode sourceWS ) throws Exception {
@@ -206,13 +207,22 @@ public class ModelPost extends AbstractJavaWebScript {
 		JSONArray elementsArray = postJson.optJSONArray("elements");
 		
 		Collection<JSONArray> collections = new ArrayList<JSONArray>();
-		if(updatedArray != null)
-			collections.add(updatedArray);
-		if(movedArray != null)
-			collections.add(movedArray);
-		if(addedArray != null)
-			collections.add(addedArray);
-		if(elementsArray != null)
+		if(updatedArray != null){
+		    if(!(updatedArray.length() == 0 ))
+		        collections.add(updatedArray);
+		}
+		
+		if(movedArray != null){
+		    if(!(movedArray.length() == 0))
+		        collections.add(movedArray);
+		}
+		
+		if(addedArray != null){
+		    if(!(addedArray.length() == 0))
+		        collections.add(addedArray);
+		}
+		
+		if(!(elementsArray == null))
 			collections.add(elementsArray);
 		TreeSet<EmsScriptNode> elements = new TreeSet< EmsScriptNode >();
 
@@ -1184,7 +1194,9 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         if (Debug.isOn()) System.out.println( "%% %% %% readTime = " + readTime );
         if ( readTime == null ) return false;
-        Date lastModified = element.getLastModified( null );
+        Date lastModified = new Date();
+        if(element != null)
+            lastModified = element.getLastModified( null );
         if (Debug.isOn()) System.out.println( "%% %% %% lastModified = " + lastModified );
         //DateTimeFormatter parser = ISODateTimeFormat.dateParser(); // format is different than what is printed
 

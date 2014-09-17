@@ -3,6 +3,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.ArrayList;
@@ -106,7 +107,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             trx.begin();
 
             if (root != null && root.exists()) {
-                delete(root, workspace);
+                delete(root, workspace, null);
                 EmsScriptNode pkgNode = findScriptNodeById(elementId + "_pkg", workspace, null, false);
                 handleElementHierarchy( pkgNode, workspace, true );
             } else {
@@ -166,7 +167,9 @@ public class MmsModelDelete extends AbstractJavaWebScript {
      * @param node
      * @param workspace
      */
-    public void delete(EmsScriptNode node, WorkspaceNode workspace) {
+    public void delete(EmsScriptNode node, WorkspaceNode workspace, WorkspaceDiff workspaceDiff) {
+        if(workspaceDiff != null && wsDiff == null)
+            wsDiff = workspaceDiff;
         if (!checkPermissions(node, PermissionService.WRITE)) {
             log(LogLevel.ERROR, "no permissions", HttpServletResponse.SC_FORBIDDEN);
         } else {
@@ -237,7 +240,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 handleElementHierarchy(child, workspace, recurse);
             }
         }
-        delete(root, workspace);
+        delete(root, workspace, null);
     }
 
     /**
@@ -247,9 +250,12 @@ public class MmsModelDelete extends AbstractJavaWebScript {
     private void addToWsDiff( EmsScriptNode node ) {
         String sysmlId = node.getSysmlId();
         if (!sysmlId.endsWith( "_pkg" )) {
-            wsDiff.getElementsVersions().put( sysmlId, node.getHeadVersion() );
-            wsDiff.getElements().put( sysmlId, node );
-            wsDiff.getDeletedElements().put( sysmlId, node );
+            if(wsDiff.getElementsVersions() != null)
+                wsDiff.getElementsVersions().put( sysmlId, node.getHeadVersion() );
+            if(wsDiff.getElements() != null)
+                wsDiff.getElements().put( sysmlId, node );
+            if(wsDiff.getDeletedElements() != null)
+                wsDiff.getDeletedElements().put( sysmlId, node );
         }
     }
 }

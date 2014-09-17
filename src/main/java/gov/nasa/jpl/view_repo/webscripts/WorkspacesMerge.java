@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,7 +58,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				String sourceId = req.getParameter("source");
 				WorkspaceNode sourceWS = AbstractJavaWebScript.getWorkspaceFromId(sourceId,  getServices(), getResponse(), status, false, null);
 				
-				wsDiff = new WorkspaceDiff(sourceWS, targetWS, null /*time*/, null /*time*/);
+				wsDiff = new WorkspaceDiff(targetWS, sourceWS, null /*time*/, null /*time*/);
 		/*		// Gotta merge here
 				Map<String, EmsScriptNode> elements = workspaceDiff.getElements();
 				Map<String, EmsScriptNode> addedElements = workspaceDiff.getAddedElements();
@@ -92,6 +94,22 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				
 				// Prints out the differences after merging.
 				JSONObject top = wsDiff.toJSONObject(null, null /*time*/, false);
+		        Iterator< ? > iter = top.keys();
+		        while ( iter.hasNext() ) {
+		            String key = "" + iter.next();
+				    JSONObject object = top.optJSONObject(key);
+				    Iterator< ? > iter2 = object.keys();
+				    while(iter2.hasNext() ) {
+				        String key2 = "" + iter2.next();
+				        JSONArray jArray = object.optJSONArray( key2 );
+				        if(jArray != null) {
+				            for(int i = 0; i < jArray.length(); i++) {
+				                JSONObject obj = jArray.getJSONObject(i);
+				                if(obj.has("read")) obj.remove( "read" );
+				            }
+				        }
+				    }
+				}
 				
 				// Retrieving the arrays for all the added elements
 				ModelPost instance = new ModelPost(repository, services);
@@ -142,10 +160,14 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 		JSONObject result = null;
 		MmsModelDelete deleteInstance = new MmsModelDelete(repository, services);
 		long start = System.currentTimeMillis();
-		for( EmsScriptNode node : collection){
+		Collection <EmsScriptNode> tempCollection = new ArrayList();
+		for( EmsScriptNode node : collection)
+		    tempCollection.add(node);
+		for( EmsScriptNode node : tempCollection){
 			if(node != null && node.exists()){
-				deleteInstance.delete(node, workspace);
+				deleteInstance.delete(node, workspace, workspaceDiff);
 				EmsScriptNode pkgnode = findScriptNodeById(node.getSysmlId() + "_pkg", workspace, time, false);
+				// After this step, my collection has an increased element
 				deleteInstance.handleElementHierarchy(pkgnode, workspace, true);
 			} else {
 				log( LogLevel.ERROR, "Could not find node " + node.getSysmlId() + "in workspace" + wsId,
