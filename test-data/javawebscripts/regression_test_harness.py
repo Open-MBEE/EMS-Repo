@@ -3,8 +3,10 @@
 #    -Fix run server if we use it
 #    -Get SOAP UI tests working
 #
-#    -Find correct mbee_util jar file for JsonDiff
-#    -Test 14/15 returning 500, 10 not returning a json output
+#    -Ability to run tests in a specified order
+#    -Check that return status is correct (usually 200), but diff would catch this, talk to CY.
+#    -Test 14 returning 500 (ask CY what a configuration is, it works the first time, but not the second)
+#     12 output correct? Why the elements owned by 6666?
 #
 
 import os
@@ -14,6 +16,7 @@ import time
 import subprocess
 import sys
 import optparse
+import glob
 
 CURL_STATUS = '-w "\\n%{http_code}\\n"'
 CURL_POST_FLAGS_NO_DATA = "-X POST"
@@ -28,16 +31,17 @@ SERVICE_URL = "http://%s/alfresco/service/"%HOST
 BASE_URL_WS = SERVICE_URL+"workspaces/"
 BASE_URL_JW = SERVICE_URL+"javawebscripts/"
 
-soap_server = "128.149.16.xxx:8080"
 failed_tests = 0
 passed_tests = 0
 result_dir = ""
 baseline_dir = ""
-display_width = 80
+display_width = 100
 test_dir_path = "test-data/javawebscripts"
 test_nums = []
 create_baselines = False
 common_filters = ['"read"','"lastModified"','"modified"']
+cmd_git_branch = None
+
 
 def create_command_line_options():
 
@@ -48,23 +52,27 @@ def create_command_line_options():
     An optparse.OptionParser object for parsing the command line arguments fed to this application'''
     
     usageText = '''
-    python regression_test_harness.py [-t <TESTNUMS> -b]
+    python regression_test_harness.py [-t <TESTNUMS> -b -g <GITBRANCH>]
     
-    To run all tests
+    To run all tests for the branch:
     
     python regression_test_harness.py -t 1,2,5-9,11
 
-    To run test numbers 1,2,5-9,11
+    To run test numbers 1,2,5-9,11 (overrides tests for that branch):
     
     python regression_test_harness.py -t 1,2,5-9,11
     
-    To create baselines of all tests.  After doing this you will need to copy them from testBaselineDir 
-    into the desired folder for that branch, ie workspacesBaselineDir, if you like the results.  
-    This is b/c when running this outside of jenkins, the script will output to testBaselineDir.
-    If you dont like this, then simply define the env variable GIT_BRANCH to be the name of the branch
-    before running the script.
+    To create baselines of all tests for the branch:
     
     python regression_test_harness.py -b
+     
+    After generating the baselines you will need to copy them from testBaselineDir 
+    into the desired folder for that branch, ie workspacesBaselineDir, if you like the results.  
+    This is b/c when running this outside of jenkins, the script will output to testBaselineDir.
+    If you dont like this, then change the branch name used using the -g command line arg.
+    
+    When all tests are ran, it is all the tests for the particular branch, which is specified in
+    the tests table.
     '''
                 
     versionText = 'Version 1 (9_16_2014)'
@@ -75,23 +83,35 @@ def create_command_line_options():
                       help='''Specifiy the tests to run or create baselines for.  Otherwise does all tests. ie "1,2,5-9,11"  (Optional)''')
     parser.add_option("-b","--createBaselines",action="store_true",dest="create_baselines",
                       help='''Supply this option if you want to create the baseline files for the tests (Optional)''')
+    parser.add_option("-g","--gitBranch",action="callback",type="string",metavar="GITBRANCH",callback=parse_git_branch,
+                      help='''Specify the GIT_BRANCH to use, otherwise uses the value of $GIT_BRANCH, and if that env variable is not defined uses 'test'. (Optional)''')
+        
     return parser
 
 def parse_command_line():
     '''Parse the command line options given to this application'''
 
-    global test_nums, create_baselines
+    global test_nums, create_baselines, cmd_git_branch
     
     parser = create_command_line_options()
     
     parser.test_nums = None
+    parser.cmd_git_branch = None
     
     (_options,_args) = parser.parse_args()
     
     test_nums = parser.test_nums
     create_baselines = _options.create_baselines
+    cmd_git_branch = parser.cmd_git_branch
  
-        
+def parse_git_branch(option, opt, value, parser):
+    '''
+    Parses the GIT_BRANCH command line arg
+    '''
+    
+    if value is not None:
+        parser.cmd_git_branch = value.strip()
+
 def parse_test_nums(option, opt, value, parser):
     '''
     Parses out the section numbers ran from the passed string and creates
@@ -162,14 +182,19 @@ def print_error(msg):
     global failed_tests
     failed_tests += 1
     print "\nFAIL: "+str(msg)
+    
+def mbee_util_jar_path():
+    path = "../../../../.m2/repository/gov/nasa/jpl/mbee/util/mbee_util/"
+    pathList = glob.glob(path+"*SNAPSHOT/*SNAPSHOT.jar")
+    if pathList:
+        return pathList[0]
+    else:
+        return path+"0.0.16/mbee_util-0.0.16.jar"
 
 def run_curl_test(test_num, test_desc, curl_cmd, use_json_diff=False, filters=None):
     '''
     Runs the curl test and diffs against the baseline if create_baselines is false, otherwise
-    runs the curl command and creates the baseline .json file.  Assumption is this script
-    is ran from the alfresco-view-repo folder.  It will create result and baseline folders
-    if needed, and bases the name on the GIT_BRANCH env variable which is populated
-    by Jenkins.  If ran manually, it will use "test" as the branch name.
+    runs the curl command and creates the baseline .json file. 
     
     test_num: The unique test number for this test
     test_desc: The test description
@@ -232,11 +257,10 @@ def run_curl_test(test_num, test_desc, curl_cmd, use_json_diff=False, filters=No
         else:
             # Perform diff:
             if use_json_diff:
-                # TODO: search for mbee_util .jar
-                cp = ".:../../../../.m2/repository/gov/nasa/jpl/mbee/util/mbee_util/0.0.16/mbee_util-0.0.16.jar:../../target/view-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes"
+                cp = ".:%s:../../target/view-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes"%mbee_util_jar_path()
                 diff_cmd = "java -cp %s gov.nasa.jpl.view_repo.util.JsonDiff"%cp
             else:
-                 diff_cmd = "diff"
+                diff_cmd = "diff"
                  
             (status_diff,output_diff) = commands.getstatusoutput("%s %s %s"%(diff_cmd,baseline_json,result_json))
                  
@@ -338,6 +362,7 @@ tests =[\
 # Curl Cmd, 
 # Use JsonDiff, 
 # Output Filters (ie lines in the .json output with these strings will be filtered out)
+# Branch Names that will run this test by default
 # ]
 
 # POSTS: ==========================
@@ -347,7 +372,8 @@ tests =[\
 create_curl_cmd(type="POST",data='\'{"name":"JW_TEST"}\'',base_url=BASE_URL_JW,
                 branch="sites/europa/projects/123456",project_post=True),
 False, 
-None
+None,
+["test","workspaces","develop"]
 ],
  
 [
@@ -356,7 +382,8 @@ None
 create_curl_cmd(type="POST",data="elementsNew.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="master/"),
 True, 
-common_filters
+common_filters,
+["test","workspaces","develop"]
 ],
         
 [
@@ -365,7 +392,8 @@ common_filters
 create_curl_cmd(type="POST",data="views.json",base_url=BASE_URL_JW,
                 post_type="views",branch=""),
 False, 
-None
+None,
+["test","workspaces","develop"]
 ],
         
 [
@@ -374,7 +402,8 @@ None
 create_curl_cmd(type="POST",data="products.json",base_url=BASE_URL_JW,
                 post_type="products",branch=""),
 False, 
-None
+None,
+["test","workspaces","develop"]
 ],
   
 # GETS: ==========================    
@@ -384,7 +413,8 @@ None
 create_curl_cmd(type="GET",data="sites/europa/projects/123456",base_url=BASE_URL_JW,
                 branch=""),
 False, 
-None
+None,
+["test","workspaces","develop"]
 ],
         
 [
@@ -393,7 +423,8 @@ None
 create_curl_cmd(type="GET",data="elements/123456?recurse=true",base_url=BASE_URL_JW,
                 branch=""),
 True, 
-common_filters
+common_filters,
+["test","workspaces","develop"]
 ],
         
 [
@@ -402,7 +433,8 @@ common_filters
 create_curl_cmd(type="GET",data="views/301",base_url=BASE_URL_JW,
                 branch=""),
 True, 
-common_filters
+common_filters,
+["test","workspaces","develop"]
 ],
         
 [
@@ -411,7 +443,8 @@ common_filters
 create_curl_cmd(type="GET",data="views/301/elements",base_url=BASE_URL_JW,
                 branch=""),
 True, 
-common_filters
+common_filters,
+["test","workspaces","develop"]
 ],
      
 [
@@ -420,56 +453,52 @@ common_filters
 create_curl_cmd(type="GET",data="products/301",base_url=BASE_URL_JW,
                 branch=""),
 True, 
-common_filters
+common_filters,
+["test","workspaces","develop"]
 ],
-           
+                   
 [
 10, 
-"Get moaproduct",
-create_curl_cmd(type="GET",data="ve/products/301?format=json",base_url=SERVICE_URL,
-                branch=""),
-True, 
-common_filters
-],
-        
-[
-11, 
 "Get product list",
 create_curl_cmd(type="GET",data="ve/documents/europa?format=json",base_url=SERVICE_URL,
                 branch=""),
 True, 
-common_filters
+common_filters,
+["test","workspaces","develop"]
 ],
         
 [
-12, 
+11, 
 "Get search",
 create_curl_cmd(type="GET",data="",base_url=BASE_URL_JW,
                 branch="element/search?keyword=some*"),
 True, 
-common_filters
+common_filters,
+["test","workspaces","develop"]
 ],
 
 # DELETES: ==========================    
       
 [
-13, 
+12, 
 "Delete element 6666",
 create_curl_cmd(type="DELETE",data="elements/6666",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
-common_filters
+common_filters+['"timestamp"','"sysmlid"','"id"','"qualifiedId"'],
+["test","workspaces","develop"]
 ],
         
 # POST CHANGES: ==========================    
 
 [
-14, 
+13, 
 "Post changes to directed relationships only (without owners)",
 create_curl_cmd(type="POST",data="directedrelationships.json",base_url=BASE_URL_JW,
                 branch="sites/europa/projects/123456/",post_type="elements"),
 True, 
-common_filters
+common_filters,
+["test","workspaces","develop"]
 ],
         
 # SNAPSHOTS: ==========================    
@@ -479,21 +508,23 @@ common_filters
 # CONFIGURATIONS: ==========================    
 
 [
-15, 
+14, 
 "Post configuration",
 create_curl_cmd(type="POST",data="configuration.json",base_url=BASE_URL_JW,
                 branch="configurations/europa",post_type=""),
 True, 
-['"read"','"lastModified"']
+common_filters+['"timestamp"','"id"'],
+["test","workspaces","develop"]
 ],
         
 [
-16, 
+15, 
 "Get configurations",
 create_curl_cmd(type="GET",data="configurations/europa",base_url=BASE_URL_JW,
                 branch=""),
 True, 
-['"read"','"lastModified"']
+common_filters+['"timestamp"','"id"'],
+["test","workspaces","develop"]
 ],
         
 # WORKSPACES: ==========================    
@@ -522,14 +553,19 @@ if __name__ == '__main__':
     
     os.chdir(test_dir_path)
 
-    # Make the directories if needed:
-    git_branch = os.getenv("GIT_BRANCH", "test")
-    if "/" in git_branch:
-        dir_name = git_branch.split("/")[1]
+    # Determine the branch to use based on the command line arg if supplied, otherwise
+    # use the environment variable:
+    if cmd_git_branch:
+        git_branch = cmd_git_branch
     else:
-        dir_name = git_branch
-    result_dir = "%sResultDir"%dir_name
-    baseline_dir = "%sBaselineDir"%dir_name
+        git_branch = os.getenv("GIT_BRANCH", "test")
+    
+    # Make the directories if needed:
+    if "/" in git_branch:
+        git_branch = git_branch.split("/")[1]
+
+    result_dir = "%sResultDir"%git_branch
+    baseline_dir = "%sBaselineDir"%git_branch
     
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
@@ -543,16 +579,25 @@ if __name__ == '__main__':
     for test in tests:
         test_num = test[0]
         
-        # If the test number is in the list of ones to run, or
-        # no list of test numbers to run, then run the test:
-        if not test_nums or test_num in test_nums:
+        # If the test number is in the list of ones to run:
+        if test_nums:
+            if test_num in test_nums:
                 run_curl_test(test_num=test_num,
                               test_desc=test[1],
                               curl_cmd=test[2],
                               use_json_diff=test[3],
                               filters=test[4])
-    
-    # TODO: uncomment when done running manually
+                
+        # Otherwise if the test should be run for the current branch:
+        else:
+            if git_branch in test[5]:
+                run_curl_test(test_num=test_num,
+                              test_desc=test[1],
+                              curl_cmd=test[2],
+                              use_json_diff=test[3],
+                              filters=test[4])
+                
+    # uncomment once startup_server() works
 #     print "KILLING SERVER"
 #     kill_server()
     

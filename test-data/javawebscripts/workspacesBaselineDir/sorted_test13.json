@@ -1,87 +1,15 @@
-{
-    "sequence": 0,
-    "workspace1": {
-        "elements": [
-            {
-                "creator": "admin",
-                "documentation": "",
-                "editable": true,
-                "id": "6ad2f688-76a3-48b2-878d-353a2cad4657",
-                "name": "6666_name",
-                "owner": "null",
-                "qualifiedId": "/6666",
-                "qualifiedName": "/6666_name",
-                "specialization": {
-                    "operand": [
-                        {
-                            "element": "300",
-                            "type": "ElementValue"
-                        },
-                        {
-                            "element": "302",
-                            "type": "ElementValue"
-                        }
-                    ],
-                    "type": "Expression"
-                },
-                "sysmlid": "6666",
-                "version": "1.1"
-            },
-            {
-                "creator": "admin",
-                "editable": true,
-                "id": "6461af43-28cf-46ad-b796-c00fc6e23218",
-                "owner": "6666",
-                "qualifiedId": "/6666/MMS_1410918280823_9c8e8bc7-1e9f-4c6c-8c17-8acf4630af4d",
-                "qualifiedName": "/6666_name/null",
-                "specialization": {
-                    "element": "302",
-                    "type": "ElementValue"
-                },
-                "sysmlid": "MMS_1410918280823_9c8e8bc7-1e9f-4c6c-8c17-8acf4630af4d",
-                "version": "1.0"
-            },
-            {
-                "creator": "admin",
-                "editable": true,
-                "id": "8ec5a752-388b-4f07-b681-7b5949a9e1fa",
-                "owner": "6666",
-                "qualifiedId": "/6666/MMS_1410918280757_30f8b846-9013-43a3-9249-ff547d033594",
-                "qualifiedName": "/6666_name/null",
-                "specialization": {
-                    "element": "300",
-                    "type": "ElementValue"
-                },
-                "sysmlid": "MMS_1410918280757_30f8b846-9013-43a3-9249-ff547d033594",
-                "version": "1.0"
-            }
-        ],
-        "name": "master",
-        "timestamp": "2014-09-16T18:44:47.774-0700"
+{"elements": [{
+    "creator": "admin",
+    "documentation": "directed_relationship2",
+    "editable": true,
+    "name": "500",
+    "owner": "300",
+    "qualifiedId": "no_project/holding_bin_no_site_no_project/300/500",
+    "qualifiedName": "/300/500",
+    "specialization": {
+        "source": "303",
+        "target": "304",
+        "type": "DirectedRelationship"
     },
-    "workspace2": {
-        "addedElements": [],
-        "conflictedElements": [],
-        "deletedElements": [
-            {
-                "creator": "admin",
-                "specialization": {"type": "ElementValue"},
-                "sysmlid": "MMS_1410918280757_30f8b846-9013-43a3-9249-ff547d033594"
-            },
-            {
-                "creator": "admin",
-                "specialization": {"type": "ElementValue"},
-                "sysmlid": "MMS_1410918280823_9c8e8bc7-1e9f-4c6c-8c17-8acf4630af4d"
-            },
-            {
-                "creator": "admin",
-                "specialization": {"type": "Expression"},
-                "sysmlid": "6666"
-            }
-        ],
-        "movedElements": [],
-        "name": "master",
-        "timestamp": "2014-09-16T18:44:47.787-0700",
-        "updatedElements": []
-    }
-}
+    "sysmlid": "500"
+}]}
