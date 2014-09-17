@@ -1,0 +1,48 @@
+{"products": [{
+    "qualifiedId": "no_project/holding_bin_no_site_no_project/300/301",
+    "name": "301",
+    "qualifiedName": "/300/301",
+    "sysmlid": "301",
+    "documentation": "else",
+    "owner": "300",
+    "read": "2014-09-16T18:44:47.081-0700",
+    "specialization": {
+        "displayedElements": [
+            "301",
+            "302",
+            "303"
+        ],
+        "childrenViews": ["304"],
+        "view2view": [{
+            "childrenViews": [
+                "301",
+                "302"
+            ],
+            "sysmlid": "301"
+        }],
+        "isDerived": false,
+        "isSlot": false,
+        "allowedElements": [
+            "301",
+            "302",
+            "303"
+        ],
+        "value": [{
+            "string": "dlam_string",
+            "type": "LiteralString"
+        }],
+        "contains": [{
+            "sourceType": "reference",
+            "source": "301",
+            "sourceProperty": "documentation",
+            "type": "Paragraph"
+        }],
+        "noSections": ["302"],
+        "type": "Product"
+    },
+    "editable": true,
+    "creator": "admin",
+    "modified": "2014-09-16T18:44:45.912-0700"
+}]}
+
+200
