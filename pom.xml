@@ -2,6 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    
     <groupId>gov.nasa.jpl</groupId>
     <artifactId>view-repo</artifactId>
     <version>${env.BUILD_NUMBER}</version>
@@ -22,6 +23,11 @@
           <name>releases</name>
           <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
       </repository>
+      <snapshotRepository>
+          <id>artifactory</id>
+          <name>snapshots</name>
+          <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-snapshot-local</url>
+      </snapshotRepository>
   </distributionManagement>
 
     <!-- 
@@ -47,6 +53,7 @@
         <!-- This controls which properties will be picked in src/test/properties for embedded run -->
         <env>local</env>
         <maven.test.skip>false</maven.test.skip>
+        <mbee.version>2.1.0-SNAPSHOT</mbee.version>
     </properties>
 
     <!-- profiles for specific dependencies for developers or users -->
@@ -97,17 +104,17 @@
                 <dependency>
 			        <groupId>gov.nasa.jpl.mbee.util</groupId>
 			        <artifactId>mbee_util</artifactId>
-			        <version>0.0.16</version>
+			        <version>${mbee.version}</version>
 			    </dependency>
                 <dependency>
                     <groupId>gov.nasa.jpl.mbee.sysml</groupId>
                     <artifactId>sysml</artifactId>
-                    <version>0.0.20</version>
+                    <version>${mbee.version}</version>
                </dependency>
                 <dependency>
                     <groupId>gov.nasa.jpl.mbee.bae</groupId>
                     <artifactId>bae</artifactId>
-                    <version>0.0.24</version>
+                    <version>${mbee.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>kexpparser</groupId>
@@ -133,12 +140,12 @@
                 <dependency>
                     <groupId>gov.nasa.jpl.mbee.util</groupId>
                     <artifactId>mbee_util</artifactId>
-                    <version>0.0.16</version>
+                    <version>${mbee.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>gov.nasa.jpl.mbee.sysml</groupId>
                     <artifactId>sysml</artifactId>
-                    <version>0.0.20</version>
+                    <version>${mbee.version}</version>
                </dependency>
                 <dependency>
                     <groupId>kexpparser</groupId>
@@ -151,7 +158,7 @@
                 <dependency>
                     <groupId>gov.nasa.jpl.mbee.bae</groupId>
                     <artifactId>bae</artifactId>
-                    <version>0.0.24</version>
+                    <version>${mbee.version}</version>
                 </dependency>
                 <dependency>
                    <groupId>gov.nasa.jpl.mbee.docbook</groupId>
@@ -288,7 +295,12 @@
         -->
     <repositories>
         <repository>
-              <id>artifactory</id>
+              <id>artifactory-snapshots</id>
+              <name>snapshots</name>
+              <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-snapshot-local</url>
+        </repository>
+        <repository>
+              <id>artifactory-releases</id>
               <name>releases</name>
               <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
         </repository>
