@@ -4,7 +4,8 @@
 #    -Get SOAP UI tests working
 #
 #    -Find correct mbee_util jar file for JsonDiff
-#    -Curl cmd helper
+#    -Test 14/15 returning 500, 10 not returning a json output
+#
 
 import os
 import commands
@@ -19,6 +20,7 @@ CURL_POST_FLAGS_NO_DATA = "-X POST"
 CURL_POST_FLAGS = '-X POST -H "Content-Type:application/json" --data'
 CURL_PUT_FLAGS = "-X PUT"
 CURL_GET_FLAGS = "-X GET"
+CURL_DELETE_FLAGS = "-X DELETE"
 CURL_USER = " -u admin:admin"
 CURL_FLAGS = CURL_STATUS+CURL_USER
 HOST = "localhost:8080" 
@@ -31,11 +33,11 @@ failed_tests = 0
 passed_tests = 0
 result_dir = ""
 baseline_dir = ""
-display_width = 40
+display_width = 80
 test_dir_path = "test-data/javawebscripts"
 test_nums = []
 create_baselines = False
-
+common_filters = ['"read"','"lastModified"','"modified"']
 
 def create_command_line_options():
 
@@ -56,7 +58,11 @@ def create_command_line_options():
     
     python regression_test_harness.py -t 1,2,5-9,11
     
-    To create baselines of all tests
+    To create baselines of all tests.  After doing this you will need to copy them from testBaselineDir 
+    into the desired folder for that branch, ie workspacesBaselineDir, if you like the results.  
+    This is b/c when running this outside of jenkins, the script will output to testBaselineDir.
+    If you dont like this, then simply define the env variable GIT_BRANCH to be the name of the branch
+    before running the script.
     
     python regression_test_harness.py -b
     '''
@@ -251,10 +257,10 @@ def create_curl_cmd(type, data=None, base_url=BASE_URL_WS, post_type="elements",
     
     type: POST, GET, DELETE
     data: Data to post in JsonData ie elementsNew.json, or the key/value pair when making a project ie "'{"name":"JW_TEST"}'",
-          or the data to get ie views/301
+          or the data to get ie views/301 or data to delete ie workspaces/master/elements/771
     base_url:  What base url to use, ie %s
     post_type: "elements", "views", "products"
-    branch: The workspace branch, ie "master/", or the project/site to post to ie "sites/europa/projects/123456"
+    branch: The workspace branch, ie "master/", or the project/site to use to ie "sites/europa/projects/123456/"
     project_post: Set to True if creating a project
     '''%BASE_URL_WS
     
@@ -270,7 +276,10 @@ def create_curl_cmd(type, data=None, base_url=BASE_URL_WS, post_type="elements",
             
     elif type == "GET":
         cmd = 'curl %s %s "%s%s%s"'%(CURL_FLAGS, CURL_GET_FLAGS, base_url, branch, data)
-         
+        
+    elif type == "DELETE":
+        cmd = 'curl %s %s "%s%s%s"'%(CURL_FLAGS, CURL_DELETE_FLAGS, base_url, branch, data)
+
     return cmd
 
 def kill_server():
@@ -347,7 +356,7 @@ None
 create_curl_cmd(type="POST",data="elementsNew.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="master/"),
 True, 
-['"read"','"lastModified"']
+common_filters
 ],
         
 [
@@ -384,7 +393,7 @@ None
 create_curl_cmd(type="GET",data="elements/123456?recurse=true",base_url=BASE_URL_JW,
                 branch=""),
 True, 
-['"read"','"lastModified"']
+common_filters
 ],
         
 [
@@ -393,7 +402,7 @@ True,
 create_curl_cmd(type="GET",data="views/301",base_url=BASE_URL_JW,
                 branch=""),
 True, 
-['"read"','"lastModified"']
+common_filters
 ],
         
 [
@@ -402,7 +411,7 @@ True,
 create_curl_cmd(type="GET",data="views/301/elements",base_url=BASE_URL_JW,
                 branch=""),
 True, 
-['"read"','"lastModified"']
+common_filters
 ],
      
 [
@@ -411,7 +420,7 @@ True,
 create_curl_cmd(type="GET",data="products/301",base_url=BASE_URL_JW,
                 branch=""),
 True, 
-['"read"','"lastModified"']
+common_filters
 ],
            
 [
@@ -420,7 +429,7 @@ True,
 create_curl_cmd(type="GET",data="ve/products/301?format=json",base_url=SERVICE_URL,
                 branch=""),
 True, 
-['"read"','"lastModified"']
+common_filters
 ],
         
 [
@@ -429,7 +438,7 @@ True,
 create_curl_cmd(type="GET",data="ve/documents/europa?format=json",base_url=SERVICE_URL,
                 branch=""),
 True, 
-['"read"','"lastModified"']
+common_filters
 ],
         
 [
@@ -438,16 +447,58 @@ True,
 create_curl_cmd(type="GET",data="",base_url=BASE_URL_JW,
                 branch="element/search?keyword=some*"),
 True, 
-['"read"','"lastModified"']
+common_filters
 ],
 
 # DELETES: ==========================    
       
+[
+13, 
+"Delete element 6666",
+create_curl_cmd(type="DELETE",data="elements/6666",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters
+],
+        
 # POST CHANGES: ==========================    
 
+[
+14, 
+"Post changes to directed relationships only (without owners)",
+create_curl_cmd(type="POST",data="directedrelationships.json",base_url=BASE_URL_JW,
+                branch="sites/europa/projects/123456/",post_type="elements"),
+True, 
+common_filters
+],
+        
 # SNAPSHOTS: ==========================    
 
+# TODO
+
+# CONFIGURATIONS: ==========================    
+
+[
+15, 
+"Post configuration",
+create_curl_cmd(type="POST",data="configuration.json",base_url=BASE_URL_JW,
+                branch="configurations/europa",post_type=""),
+True, 
+['"read"','"lastModified"']
+],
+        
+[
+16, 
+"Get configurations",
+create_curl_cmd(type="GET",data="configurations/europa",base_url=BASE_URL_JW,
+                branch=""),
+True, 
+['"read"','"lastModified"']
+],
+        
 # WORKSPACES: ==========================    
+
+# TODO
 
 
 ]    
@@ -461,7 +512,8 @@ if __name__ == '__main__':
     # Parse the command line arguments:
     parse_command_line()
     
-    #startup_server()  # this is not working yet, so assumption for now is that this will be called by the bash script which will start up the server
+    #startup_server()  # this is not working yet, so assumption for now is that this will be called 
+                       # by the bash script which will start up the server
     
     # Change directories to where we are used to sending curl cmds:
     if not os.path.exists(test_dir_path):

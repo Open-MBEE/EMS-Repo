@@ -37,7 +37,7 @@ while [ $server -eq 0 ]; do
         fi
 done
 
-cd ./test-data/javawebscripts
+#cd ./test-data/javawebscripts
 if [ $server -eq 1 ]; then
 	echo 'SERVER CONNECTED'
 	sleep 60s
@@ -51,21 +51,23 @@ if [ $server -eq 1 ]; then
 		./diff2.sh
 		failTest=$?
     elif [ $diffChoose -eq 2 ];then
-            echo 'RUNNING WORKSPACES DIFF SCRIPT'
-            echo 'OMITTING OLD API DIFF SCRIPT'
+            #echo 'RUNNING WORKSPACES DIFF SCRIPT'
+            #echo 'OMITTING OLD API DIFF SCRIPT'
             echo $GIT_BRANCH
             if [[ "$GIT_BRANCH" == *workspaces ]];then
-                echo 'DIFFING  WORKSPACES BRANCH'
-	        ./diffWorkspaceWORKSdev.sh
+                #echo 'DIFFING  WORKSPACES BRANCH'
+	        #./diffWorkspaceWORKSdev.sh
+                python test-data/javawebscripts/regression_test_harness.py
                 failTest=$?
             elif [[ "$GIT_BRANCH" == *develop ]];then
 			    echo 'DIFFING DEVELOP BRANCH'
 			    ./diffWorkspaceWORKSdev.sh
 			    failTest=$?
    			else 
-	            echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
-	            ./diff2.sh
-	            ./diffWorkspaceWORKSdev.sh
+	            #echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
+	            #./diff2.sh
+	            #./diffWorkspaceWORKSdev.sh
+		    python test-data/javawebscripts/regression_test_harness.py
 	            failTest=$?
 	        fi
     fi
@@ -94,7 +96,7 @@ if [ $server -eq 1 ]; then
     pkill -fn 'integration-test'
     echo 'KILLING SERVER'
 
-	echo 'PASSTEST?'
+	echo ‘NUMBER OF FAILED TESTS:’
         echo "$failTest"
 	exit $failTest
 fi
