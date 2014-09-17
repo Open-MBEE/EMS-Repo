@@ -70,7 +70,7 @@ if [ $server -eq 1 ]; then
         pkill -fn 'integration-test'
         echo 'KILLING SERVER'
 
-        echo ‘NUMBER OF TOTAL FAILED TESTS:’
+        echo 'NUMBER OF TOTAL FAILED TESTS:'
         echo "$failTest"
         exit $failTest
 fi

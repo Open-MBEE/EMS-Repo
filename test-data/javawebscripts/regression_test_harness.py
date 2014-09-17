@@ -4,10 +4,11 @@
 #    -Get SOAP UI tests working
 #
 #    -Ability to run tests in a specified order
-#    -Check that return status is correct (usually 200), but diff would catch this, talk to CY.
-#    -Test 14 returning 500 (ask CY what a configuration is, it works the first time, but not the second)
-#     12 output correct? Why the elements owned by 6666?
 #
+# BUGS:
+#    -Test 14 returning 500 if doing more than once.  This is bug w/ the lock file.
+#     Test 16 returns 404 after doing it more than once, and created time changes.  This is also a bug
+#     Test 11 return nothing if done right after posting the elements.  Doesnt work untill some delay.
 
 import os
 import commands
@@ -28,7 +29,8 @@ CURL_USER = " -u admin:admin"
 CURL_FLAGS = CURL_STATUS+CURL_USER
 HOST = "localhost:8080" 
 SERVICE_URL = "http://%s/alfresco/service/"%HOST
-BASE_URL_WS = SERVICE_URL+"workspaces/"
+BASE_URL_WS_NOBS = SERVICE_URL+"workspaces"
+BASE_URL_WS = BASE_URL_WS_NOBS+"/"
 BASE_URL_JW = SERVICE_URL+"javawebscripts/"
 
 failed_tests = 0
@@ -191,7 +193,8 @@ def mbee_util_jar_path():
     else:
         return path+"0.0.16/mbee_util-0.0.16.jar"
 
-def run_curl_test(test_num, test_desc, curl_cmd, use_json_diff=False, filters=None):
+def run_curl_test(test_num, test_desc, curl_cmd, use_json_diff=False, filters=None,
+                  delay=None):
     '''
     Runs the curl test and diffs against the baseline if create_baselines is false, otherwise
     runs the curl command and creates the baseline .json file. 
@@ -201,8 +204,9 @@ def run_curl_test(test_num, test_desc, curl_cmd, use_json_diff=False, filters=No
     curl_cmd: The curl command to send
     use_json_diff: Set to True to use a JsonDiff when comparing to the baseline
     filters: A list of strings that should be removed from the post output, ie ['"modified"']
+    delay: Delay time in seconds before running the test
     '''
-    
+
     result_json = "%s/test%d.json"%(result_dir,test_num)
     result_orig_json = "%s/test%d_orig.json"%(result_dir,test_num)
     baseline_json = "%s/test%d.json"%(baseline_dir,test_num)
@@ -217,6 +221,10 @@ def run_curl_test(test_num, test_desc, curl_cmd, use_json_diff=False, filters=No
         print "TEST NUMBER "+str(test_num)
         orig_json = result_orig_json
         filtered_json = result_json
+        
+    if delay:
+        print "Delaying %s seconds before running the test"%delay
+        time.sleep(delay)
         
     print "TEST DESCRIPTION: "+test_desc
     print "Executing curl cmd: \n"+str(curl_cmd)
@@ -274,7 +282,7 @@ def run_curl_test(test_num, test_desc, curl_cmd, use_json_diff=False, filters=No
         
     thick_divider()
     
-def create_curl_cmd(type, data=None, base_url=BASE_URL_WS, post_type="elements", branch="master/", 
+def create_curl_cmd(type, data="", base_url=BASE_URL_WS, post_type="elements", branch="master/", 
                     project_post=False):
     '''
     Helper method to create curl commands.  Returns the curl cmd (string).
@@ -286,6 +294,7 @@ def create_curl_cmd(type, data=None, base_url=BASE_URL_WS, post_type="elements",
     post_type: "elements", "views", "products"
     branch: The workspace branch, ie "master/", or the project/site to use to ie "sites/europa/projects/123456/"
     project_post: Set to True if creating a project
+    post_no_data: Set to True if posting with no data
     '''%BASE_URL_WS
     
     cmd = ""
@@ -296,7 +305,7 @@ def create_curl_cmd(type, data=None, base_url=BASE_URL_WS, post_type="elements",
         elif data:
             cmd = 'curl %s %s @JsonData/%s "%s%s%s"'%(CURL_FLAGS, CURL_POST_FLAGS, data, base_url, branch, post_type)
         else:
-            cmd = 'curl %s %s "%s%s%s"'%(CURL_FLAGS, CURL_POST_FLAGS, base_url, branch, post_type)
+            cmd = 'curl %s %s "%s%s%s"'%(CURL_FLAGS, CURL_POST_FLAGS_NO_DATA, base_url, branch, post_type)
             
     elif type == "GET":
         cmd = 'curl %s %s "%s%s%s"'%(CURL_FLAGS, CURL_GET_FLAGS, base_url, branch, data)
@@ -363,6 +372,7 @@ tests =[\
 # Use JsonDiff, 
 # Output Filters (ie lines in the .json output with these strings will be filtered out)
 # Branch Names that will run this test by default
+# Delay before running the test (Optional)
 # ]
 
 # POSTS: ==========================
@@ -474,7 +484,8 @@ create_curl_cmd(type="GET",data="",base_url=BASE_URL_JW,
                 branch="element/search?keyword=some*"),
 True, 
 common_filters,
-["test","workspaces","develop"]
+["test","workspaces","develop"],
+120.0
 ],
 
 # DELETES: ==========================    
@@ -485,7 +496,7 @@ common_filters,
 create_curl_cmd(type="DELETE",data="elements/6666",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
-common_filters+['"timestamp"','"sysmlid"','"id"','"qualifiedId"'],
+common_filters+['"timestamp"','"sysmlid"','"id"','"qualifiedId"','"version"'],
 ["test","workspaces","develop"]
 ],
         
@@ -501,10 +512,6 @@ common_filters,
 ["test","workspaces","develop"]
 ],
         
-# SNAPSHOTS: ==========================    
-
-# TODO
-
 # CONFIGURATIONS: ==========================    
 
 [
@@ -529,8 +536,38 @@ common_filters+['"timestamp"','"id"'],
         
 # WORKSPACES: ==========================    
 
-# TODO
+[
+16, 
+"Create workspace test 1",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                post_type="",branch="wsA?sourceWorkspace=master"),
+True, 
+common_filters+['"branched"','"created"'],
+["test","workspaces","develop"]
+],
+        
+[
+17, 
+"Create workspace test 2",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                post_type="",branch="wsB?sourceWorkspace=wsA"),
+True, 
+common_filters+['"branched"','"created"'],
+["test","workspaces","develop"]
+],
+        
+[
+18, 
+"Get workspaces",
+create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,branch=""),
+True, 
+common_filters+['"branched"','"created"'],
+["test","workspaces","develop"]
+],
+        
+# SNAPSHOTS: ==========================    
 
+# TODO
 
 ]    
 
@@ -586,7 +623,8 @@ if __name__ == '__main__':
                               test_desc=test[1],
                               curl_cmd=test[2],
                               use_json_diff=test[3],
-                              filters=test[4])
+                              filters=test[4],
+                              delay=test[6] if (len(test) > 6) else None)
                 
         # Otherwise if the test should be run for the current branch:
         else:
@@ -595,7 +633,8 @@ if __name__ == '__main__':
                               test_desc=test[1],
                               curl_cmd=test[2],
                               use_json_diff=test[3],
-                              filters=test[4])
+                              filters=test[4],
+                              delay=test[6] if (len(test) > 6) else None)
                 
     # uncomment once startup_server() works
 #     print "KILLING SERVER"

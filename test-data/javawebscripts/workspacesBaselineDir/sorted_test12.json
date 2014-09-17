@@ -21,8 +21,7 @@
                         }
                     ],
                     "type": "Expression"
-                },
-                "version": "1.1"
+                }
             },
             {
                 "creator": "admin",
@@ -32,8 +31,7 @@
                 "specialization": {
                     "element": "300",
                     "type": "ElementValue"
-                },
-                "version": "1.0"
+                }
             },
             {
                 "creator": "admin",
@@ -43,8 +41,7 @@
                 "specialization": {
                     "element": "302",
                     "type": "ElementValue"
-                },
-                "version": "1.0"
+                }
             }
         ],
         "name": "master"

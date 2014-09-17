@@ -6,7 +6,7 @@
         "sysmlid": "301",
         "documentation": "else",
         "owner": "300",
-        "read": "2014-09-17T10:27:49.916-0700",
+        "read": "2014-09-17T13:06:45.069-0700",
         "specialization": {
             "displayedElements": [
                 "301",
@@ -43,7 +43,7 @@
         },
         "editable": true,
         "creator": "admin",
-        "modified": "2014-09-17T10:27:48.979-0700"
+        "modified": "2014-09-17T13:06:44.249-0700"
     },
     {
         "qualifiedId": "no_project/holding_bin_no_site_no_project/300/301/302",
@@ -52,7 +52,7 @@
         "sysmlid": "302",
         "documentation": "to",
         "owner": "301",
-        "read": "2014-09-17T10:27:49.927-0700",
+        "read": "2014-09-17T13:06:45.083-0700",
         "specialization": {
             "isDerived": false,
             "isSlot": false,
@@ -64,7 +64,7 @@
         },
         "editable": true,
         "creator": "admin",
-        "modified": "2014-09-17T10:27:48.047-0700"
+        "modified": "2014-09-17T13:06:43.149-0700"
     },
     {
         "qualifiedId": "no_project/holding_bin_no_site_no_project/300/301/302/303",
@@ -73,7 +73,7 @@
         "sysmlid": "303",
         "documentation": "talk",
         "owner": "302",
-        "read": "2014-09-17T10:27:49.936-0700",
+        "read": "2014-09-17T13:06:45.093-0700",
         "specialization": {
             "isDerived": false,
             "isSlot": false,
@@ -85,7 +85,7 @@
         },
         "editable": true,
         "creator": "admin",
-        "modified": "2014-09-17T10:27:48.107-0700"
+        "modified": "2014-09-17T13:06:43.205-0700"
     }
 ]}
 200
