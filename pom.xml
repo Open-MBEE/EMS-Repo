@@ -5,7 +5,7 @@
     
     <groupId>gov.nasa.jpl</groupId>
     <artifactId>view-repo</artifactId>
-    <version>${env.BUILD_NUMBER}-RELEASE</version>
+    <version>${env.BUILD_NUMBER}</version>
     <name>view-repo AMP project</name>
     <packaging>amp</packaging>
     <description>Manages the lifecycle of the view-repo AMP (Alfresco Module Package)</description>
@@ -95,7 +95,7 @@
 	        </dependency>
             </dependencies>
             <properties>
-                <env.BUILD_NUMBER>1</env.BUILD_NUMBER>
+                <env.BUILD_NUMBER>1.0</env.BUILD_NUMBER>
             </properties>
         </profile>
         <profile>
@@ -131,7 +131,7 @@
                 </dependency>
             </dependencies>
             <properties>
-                <env.BUILD_NUMBER>1</env.BUILD_NUMBER>
+                <env.BUILD_NUMBER>1.0</env.BUILD_NUMBER>
             </properties>
         </profile>
         <profile>
