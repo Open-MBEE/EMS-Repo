@@ -3,10 +3,11 @@
 usage="usage: sudo $0 repoAmpFile [repoWarFile] [shareAmpFile] [shareWarFile] [mmsappDir] "
 
 # variable initialization
-installWarCommand=./installWar.sh
-startAlfrescoCmd=./stopAlfresco.sh
-stopAlfrescoCmd=./stopAlfresco.sh
-deloyMmsappCmd=./deployMmsapp.sh
+d=$(dirname $0)
+installWarCommand=$d/installWar.sh
+startAlfrescoCmd=$d/stopAlfresco.sh
+stopAlfrescoCmd=$d/stopAlfresco.sh
+deloyMmsappCmd=$d/deployMmsapp.sh
 
 tomcatDir=/opt/local/apache-tomcat
 if [ ! -f $tomcatDir ]; then
@@ -106,12 +107,12 @@ $stopAlfrescoCmd
 
 # install war files
 if [ -f "$ampFile" ]; then
-  echo $installWarCommand $ampFile $warFile $existingWarFile $alfrescoWebappDir
-  $installWarCommand $ampFile $warFile $existingWarFile $alfrescoWebappDir
+  echo $installWarCommand $mmtjar $ampFile $warFile $existingWarFile $alfrescoWebappDir
+  $installWarCommand $mmtjar $ampFile $warFile $existingWarFile $alfrescoWebappDir
 fi
 if [ -f "$shareAmpFile" ]; then
-  echo $installWarCommand $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
-  $installWarCommand $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
+  echo $installWarCommand $mmtjar $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
+  $installWarCommand $mmtjar $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
 fi
 
 # deploy mmsapp

@@ -1,18 +1,19 @@
 #!/bin/bash
 
-usage="usage: sudo $0 ampFile warFile existingWarFile explodedWebappDir"
+usage="usage: sudo $0 mmtjar ampFile warFile existingWarFile explodedWebappDir"
 
-if [ ( ! "$#" -eq 3 ) &&  ( ! "$#" -eq 4 ) ]; then
+if [ ( ! "$#" -eq 4 ) &&  ( ! "$#" -eq 5 ) ]; then
 #if [ ! "$#" -eq 3 ]; then
   echo "$0 : Error! Need at three arguments! number of passed args = $#"
   echo $usage
   exit 1
 fi
 
-ampFile=$1
-warFile=$2
-existingWarFile=$3
-explodedWebappDir=$4
+mmtjar=$1
+ampFile=$2
+warFile=$3
+existingWarFile=$4
+explodedWebappDir=$5
 
 owner=`ls -ld $existingWarFile | cut -d' ' -f 3`
 
@@ -33,7 +34,11 @@ fi
 
 # install amp to war
 echo java -jar $mmtJar install $ampFile $existingWarFile -force
-java -jar $mmtJar install $ampFile $existingWarFile -force
+temp=`mktemp`
+java -jar $mmtJar install $ampFile $existingWarFile -force | tee $temp | head -n 5
+echo . . .
+tail -n 5 $temp
+/bin/rm -rf $temp
 
 # change owner to tomcat if specified
 #if [ "tomcat" == "$owner" ]; then

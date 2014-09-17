@@ -1,10 +1,14 @@
 #!/bin/bash
 # stop alfresco server
+
+d=$(dirname $0)
+killCommand=$d/killAlfresco.sh
+
 if [ -e /etc/init.d/alfresco ]; then
   echo "/etc/init.d/alfresco stop &"
   /etc/init.d/alfresco stop &
+  echo sleep 5
   sleep 5
-  killCommand=${0/stop/kill}
   echo $killCommand
   $killCommand
 else
