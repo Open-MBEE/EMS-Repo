@@ -1,8 +1,8 @@
 {"workspaces": [{
 
-    "name": "wsA",
+    "name": "wsB",
 
-    "parent": "master",
+    "parent": "wsA",
 
     "creator": "admin"
 

@@ -1,3 +1,8 @@
 { "elements" : [
-	{"id":"500","source":"303","target":"304"}
+	{"documentation" : "directed_relationship2", 
+     "sysmlid":"500",
+     "specialization": {"type":"DirectedRelationship",
+                        "source":"303",
+                        "target":"304"}
+     },
 ]}

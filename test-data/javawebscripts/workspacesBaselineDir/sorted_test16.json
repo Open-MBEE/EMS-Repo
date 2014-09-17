@@ -1,11 +1,7 @@
-{
-    "configurations": [{
-        "description": "test",
-        "id": "1430e76a-5df4-4b0e-9eae-39d89700b3e1",
-        "modified": "2014-09-16T18:44:49.756-0700",
-        "name": "DocWeb 1000",
-        "snapshots": [],
-        "timestamp": "2014-09-16T18:44:49.746-0700"
-    }],
-    "products": []
-}
+{"workspaces": [{
+    "branched": "2014-09-17T11:56:44.966-0700",
+    "created": "2014-09-17T11:56:44.959-0700",
+    "creator": "admin",
+    "name": "wsA",
+    "parent": "master"
+}]}

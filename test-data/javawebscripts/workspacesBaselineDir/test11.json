@@ -1,18 +1,84 @@
-{
+{"elements": [
 
-    "documents": {},
+    {
 
-    "volume2volumes": {},
+        "qualifiedId": "no_project/holding_bin_no_site_no_project/300",
 
-    "name": "europa",
+        "name": "300",
 
-    "volumes": {},
+        "qualifiedName": "/300",
 
-    "volume2documents": {},
+        "sysmlid": "300",
 
-    "projectVolumes": []
+        "documentation": "something",
 
-}
+        "owner": "holding_bin_no_site_no_project",
+
+        "specialization": {
+
+            "isDerived": false,
+
+            "isSlot": false,
+
+            "value": [{
+
+                "string": "dlam_string",
+
+                "type": "LiteralString"
+
+            }],
+
+            "type": "Property"
+
+        },
+
+        "editable": true,
+
+        "creator": "admin",
+
+    },
+
+    {
+
+        "qualifiedId": "no_project/holding_bin_no_site_no_project/x",
+
+        "name": "300",
+
+        "qualifiedName": "/300",
+
+        "sysmlid": "x",
+
+        "documentation": "something",
+
+        "owner": "holding_bin_no_site_no_project",
+
+        "specialization": {
+
+            "isDerived": false,
+
+            "isSlot": false,
+
+            "value": [{
+
+                "string": "dlam_string",
+
+                "type": "LiteralString"
+
+            }],
+
+            "type": "Property"
+
+        },
+
+        "editable": true,
+
+        "creator": "admin",
+
+    }
+
+]}
+
+
 
 200
 

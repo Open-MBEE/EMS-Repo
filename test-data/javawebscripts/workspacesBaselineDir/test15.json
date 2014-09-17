@@ -1,18 +1,20 @@
 {
 
-  "id": "1430e76a-5df4-4b0e-9eae-39d89700b3e1",
+  "configurations": [{
 
-  "timestamp": "2014-09-16T18:44:49.746-0700",
+    "description": "test",
 
-  "description": "test",
+    "name": "DocWeb 1000",
 
-  "name": "DocWeb 1000",
+    "snapshots": [],
 
-  "snapshots": [],
+  }],
 
-  "modified": "2014-09-16T18:44:49.756-0700"
+  "products": []
 
 }
+
+
 
 200
 

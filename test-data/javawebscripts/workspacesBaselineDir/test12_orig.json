@@ -1,46 +1,100 @@
-{"elements": [
-    {
-        "qualifiedId": "no_project/holding_bin_no_site_no_project/300",
-        "name": "300",
-        "qualifiedName": "/300",
-        "sysmlid": "300",
-        "documentation": "something",
-        "owner": "holding_bin_no_site_no_project",
-        "read": "2014-09-16T18:44:47.589-0700",
+{
+  "sequence": 0,
+  "workspace1": {
+    "timestamp": "2014-09-17T13:08:46.268-0700",
+    "name": "master",
+    "elements": [
+      {
+        "qualifiedId": "/6666",
+        "qualifiedName": "/6666_name",
+        "sysmlid": "6666",
+        "editable": true,
+        "version": "1.1",
+        "modified": "2014-09-17T13:06:40.015-0700",
+        "creator": "admin",
+        "id": "14f7f335-0754-4c99-bb8b-c1d23d26440d",
+        "name": "6666_name",
+        "owner": "null",
+        "documentation": "",
+        "read": "2014-09-17T13:08:46.277-0700",
         "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
+          "type": "Expression",
+          "operand": [
+            {
+              "element": "300",
+              "type": "ElementValue"
+            },
+            {
+              "element": "302",
+              "type": "ElementValue"
+            }
+          ]
+        }
+      },
+      {
+        "id": "ab758c7f-2034-4f77-a05c-883256a2f6dd",
+        "qualifiedId": "/6666/MMS_1410984400022_2042e95d-479f-4816-b989-a6b458624717",
+        "qualifiedName": "/6666_name/null",
+        "sysmlid": "MMS_1410984400022_2042e95d-479f-4816-b989-a6b458624717",
+        "owner": "6666",
+        "read": "2014-09-17T13:08:46.327-0700",
+        "specialization": {
+          "element": "300",
+          "type": "ElementValue"
         },
         "editable": true,
+        "version": "1.0",
         "creator": "admin",
-        "modified": "2014-09-16T18:44:39.211-0700"
-    },
-    {
-        "qualifiedId": "no_project/holding_bin_no_site_no_project/x",
-        "name": "300",
-        "qualifiedName": "/300",
-        "sysmlid": "x",
-        "documentation": "something",
-        "owner": "holding_bin_no_site_no_project",
-        "read": "2014-09-16T18:44:47.600-0700",
+        "modified": "2014-09-17T13:06:40.036-0700"
+      },
+      {
+        "id": "a6ab05d9-5bb6-4957-aa49-8cff399585eb",
+        "qualifiedId": "/6666/MMS_1410984400085_52ae3273-630b-4d95-b5cc-1c65fd09a75f",
+        "qualifiedName": "/6666_name/null",
+        "sysmlid": "MMS_1410984400085_52ae3273-630b-4d95-b5cc-1c65fd09a75f",
+        "owner": "6666",
+        "read": "2014-09-17T13:08:46.347-0700",
         "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }],
-            "type": "Property"
+          "element": "302",
+          "type": "ElementValue"
         },
         "editable": true,
+        "version": "1.0",
         "creator": "admin",
-        "modified": "2014-09-16T18:44:41.998-0700"
-    }
-]}
-
+        "modified": "2014-09-17T13:06:40.091-0700"
+      }
+    ]
+  },
+  "workspace2": {
+    "timestamp": "2014-09-17T13:08:46.277-0700",
+    "deletedElements": [
+      {
+        "sysmlid": "6666",
+        "read": "2014-09-17T13:08:46.361-0700",
+        "specialization": {"type": "Expression"},
+        "creator": "admin",
+        "modified": "2014-09-17T13:06:40.015-0700"
+      },
+      {
+        "sysmlid": "MMS_1410984400022_2042e95d-479f-4816-b989-a6b458624717",
+        "read": "2014-09-17T13:08:46.422-0700",
+        "specialization": {"type": "ElementValue"},
+        "creator": "admin",
+        "modified": "2014-09-17T13:06:40.036-0700"
+      },
+      {
+        "sysmlid": "MMS_1410984400085_52ae3273-630b-4d95-b5cc-1c65fd09a75f",
+        "read": "2014-09-17T13:08:46.442-0700",
+        "specialization": {"type": "ElementValue"},
+        "creator": "admin",
+        "modified": "2014-09-17T13:06:40.091-0700"
+      }
+    ],
+    "addedElements": [],
+    "conflictedElements": [],
+    "updatedElements": [],
+    "name": "master",
+    "movedElements": []
+  }
+}
 200
