@@ -1,6 +1,11 @@
 #!/bin/bash
 
-usage="usage: sudo $0 repoAmpFile [repoWarFile] [shareAmpFile] [shareWarFile] [mmsappDir] "
+usage() {
+  echo "usage: sudo $(basename $0) repoAmpFile|shareAmpFile [shareAmpFile|repoAmpFile] [repoWarFile] [shareWarFile] [mmsappDir] [mmsappZip]"
+  echo
+  echo "The order of arguments is not important. The $(basename $0) script may be called from anywhere, but the scripts on which it depends (installWar.sh, startAlfresco.sh, stopAlfresco.h, and deployMmsapp.sh) must be in the same directory as $(basename $0)."
+  echo
+}
 
 # variable initialization
 d=$(dirname $0)
@@ -26,17 +31,19 @@ fi
 mmsappDeployDir=${alfrescoWebappDir}/mmsapp
 tmpDir=/tmp/mmsappZip
 
-echo tomcatDir=$tomcatDir
-echo webappDir=$webappDir
-echo alfrescoWebappDir=$alfrescoWebappDir
-echo existingWarFile=$existingWarFile
-echo existingShareWarFile=$existingShareWarFile
-echo mmtJar=$mmtJar
+echo
+echo initialized directories and files:
+echo "  tomcatDir =" $tomcatDir
+echo "  webappDir =" $webappDir
+echo "  alfrescoWebappDir =" $alfrescoWebappDir
+echo "  existingWarFile =" $existingWarFile
+echo "  existingShareWarFile =" $existingShareWarFile
+echo "  mmtJar =" $mmtJar
 
 # process arguments
 if [ "$#" -eq 0 ]; then
   echo "$0 : Error! Need at least one argument!"
-  echo $usage
+  usage
   exit 1
 fi;
 
@@ -50,57 +57,52 @@ mmsappZip=""
 # Look at substrings in the input to determine which input file is which
 for var in "$@"
 do
-  if [[ $var == *share* ]]; then
-    echo $var " is share"
-    if [[ $var == *amp ]]; then
-      echo $var " is amp"
-      shareAmpFile=$var
-    else
-      if [[ $var == *war ]]; then
-        echo $var " is war"
-        shareWarFile=$var
-      fi
-    fi
+  if [[ $var == *zip ]]; then
+    mmsappZip=$var
   else
-    if [[ $var == *repo* ]]; then
-      echo $var " is repo"
+    if [[ $var == *share* ]]; then
       if [[ $var == *amp ]]; then
-        echo $var " is amp"
-        ampFile=$var
+        shareAmpFile=$var
       else
         if [[ $var == *war ]]; then
-          echo $var " is war"
-          warFile=$var
+          shareWarFile=$var
+        else
+          if [[ -d "$var" ]]; then
+            mmsappDir=$var
+          else
+            echo "Unknown argument! " $var 
+          fi
         fi
       fi
     else
-      if [[ $var == *mms* ]]; then
-        echo $var " is mmsapp"
-        if [[ $var == *zip ]]; then
-          echo $var " is zip"
-          mmsappZip=$var
+#      if [[ ( $var == *repo* ) || ( $var == alfresco* ) ]]; then
+        if [[ $var == *amp ]]; then
+          ampFile=$var
         else
-	  mmsappDir=$var
+          if [[ $var == *war ]]; then
+            warFile=$var
+#          fi
+#        fi
+          else
+            if [[ -d "$var" ]]; then
+              mmsappDir=$var
+            else
+              echo "Unknown argument! " + $var 
+            fi
+          fi
         fi
-      else
-        if [[ $var == *zip ]]; then
-          echo $var " is zip"
-          mmsappZip=$var
-	fi
-      fi
     fi
   fi
 done
 
+echo
 echo "arguments processed with the following assignments:"
-echo "  ampFile=" $ampFile
-echo "  shareAmpFile=" $shareAmpFile
-echo "  warFile=" $warFile
-echo "  shareWarFile=" $shareWarFile
-echo "  mmsappDir=" $mmsappDir
-echo "  mmsappZip=" $mmsappZip
-
-exit 0
+echo "  ampFile =" $ampFile
+echo "  shareAmpFile =" $shareAmpFile
+echo "  warFile =" $warFile
+echo "  shareWarFile =" $shareWarFile
+echo "  mmsappDir =" $mmsappDir
+echo "  mmsappZip =" $mmsappZip
 
 # stop alfresco server
 $stopAlfrescoCmd
