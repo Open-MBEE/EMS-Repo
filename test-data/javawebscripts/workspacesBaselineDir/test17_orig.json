@@ -1,0 +1,8 @@
+{"workspaces": [{
+    "created": "2014-09-17T13:08:48.588-0700",
+    "name": "wsB",
+    "parent": "wsA",
+    "branched": "2014-09-17T13:08:48.602-0700",
+    "creator": "admin"
+}]}
+200
