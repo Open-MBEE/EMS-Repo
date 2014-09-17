@@ -1,0 +1,100 @@
+{
+  "sequence": 0,
+  "workspace1": {
+    "timestamp": "2014-09-16T18:44:47.774-0700",
+    "name": "master",
+    "elements": [
+      {
+        "qualifiedId": "/6666",
+        "qualifiedName": "/6666_name",
+        "sysmlid": "6666",
+        "editable": true,
+        "version": "1.1",
+        "modified": "2014-09-16T18:44:40.745-0700",
+        "creator": "admin",
+        "id": "6ad2f688-76a3-48b2-878d-353a2cad4657",
+        "name": "6666_name",
+        "owner": "null",
+        "documentation": "",
+        "read": "2014-09-16T18:44:47.787-0700",
+        "specialization": {
+          "type": "Expression",
+          "operand": [
+            {
+              "element": "300",
+              "type": "ElementValue"
+            },
+            {
+              "element": "302",
+              "type": "ElementValue"
+            }
+          ]
+        }
+      },
+      {
+        "id": "8ec5a752-388b-4f07-b681-7b5949a9e1fa",
+        "qualifiedId": "/6666/MMS_1410918280757_30f8b846-9013-43a3-9249-ff547d033594",
+        "qualifiedName": "/6666_name/null",
+        "sysmlid": "MMS_1410918280757_30f8b846-9013-43a3-9249-ff547d033594",
+        "owner": "6666",
+        "read": "2014-09-16T18:44:47.842-0700",
+        "specialization": {
+          "element": "300",
+          "type": "ElementValue"
+        },
+        "editable": true,
+        "version": "1.0",
+        "creator": "admin",
+        "modified": "2014-09-16T18:44:40.774-0700"
+      },
+      {
+        "id": "6461af43-28cf-46ad-b796-c00fc6e23218",
+        "qualifiedId": "/6666/MMS_1410918280823_9c8e8bc7-1e9f-4c6c-8c17-8acf4630af4d",
+        "qualifiedName": "/6666_name/null",
+        "sysmlid": "MMS_1410918280823_9c8e8bc7-1e9f-4c6c-8c17-8acf4630af4d",
+        "owner": "6666",
+        "read": "2014-09-16T18:44:47.867-0700",
+        "specialization": {
+          "element": "302",
+          "type": "ElementValue"
+        },
+        "editable": true,
+        "version": "1.0",
+        "creator": "admin",
+        "modified": "2014-09-16T18:44:40.829-0700"
+      }
+    ]
+  },
+  "workspace2": {
+    "timestamp": "2014-09-16T18:44:47.787-0700",
+    "deletedElements": [
+      {
+        "sysmlid": "6666",
+        "read": "2014-09-16T18:44:47.895-0700",
+        "specialization": {"type": "Expression"},
+        "creator": "admin",
+        "modified": "2014-09-16T18:44:40.745-0700"
+      },
+      {
+        "sysmlid": "MMS_1410918280757_30f8b846-9013-43a3-9249-ff547d033594",
+        "read": "2014-09-16T18:44:47.976-0700",
+        "specialization": {"type": "ElementValue"},
+        "creator": "admin",
+        "modified": "2014-09-16T18:44:40.774-0700"
+      },
+      {
+        "sysmlid": "MMS_1410918280823_9c8e8bc7-1e9f-4c6c-8c17-8acf4630af4d",
+        "read": "2014-09-16T18:44:47.998-0700",
+        "specialization": {"type": "ElementValue"},
+        "creator": "admin",
+        "modified": "2014-09-16T18:44:40.829-0700"
+      }
+    ],
+    "addedElements": [],
+    "conflictedElements": [],
+    "updatedElements": [],
+    "name": "master",
+    "movedElements": []
+  }
+}
+200
