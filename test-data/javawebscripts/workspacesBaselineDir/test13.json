@@ -1,0 +1,32 @@
+{"elements": [{
+
+    "qualifiedId": "no_project/holding_bin_no_site_no_project/300/500",
+
+    "name": "500",
+
+    "qualifiedName": "/300/500",
+
+    "sysmlid": "500",
+
+    "documentation": "directed_relationship2",
+
+    "owner": "300",
+
+    "specialization": {
+
+        "source": "303",
+
+        "target": "304",
+
+        "type": "DirectedRelationship"
+
+    },
+
+    "editable": true,
+
+    "creator": "admin",
+
+}]}
+
+200
+

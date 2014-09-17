@@ -1,76 +1,128 @@
 #!/bin/bash
 
-usage="usage: sudo $0 ampFile [warFile [mmsappDir]] "
+usage() {
+  echo "usage: sudo $(basename $0) repoAmpFile|shareAmpFile [shareAmpFile|repoAmpFile] [repoWarFile] [shareWarFile] [mmsappDir] [mmsappZip]"
+  echo
+  echo "The order of arguments is not important. The $(basename $0) script may be called from anywhere, but the scripts on which it depends (installWar.sh, startAlfresco.sh, stopAlfresco.h, and deployMmsapp.sh) must be in the same directory as $(basename $0)."
+  echo
+}
 
 # variable initialization
-#tomcatDir=/opt/local/apache-tomcat
-tomcatDir=/opt/local/alfresco-4.2.e/tomcat
+d=$(dirname $0)
+installWarCommand=$d/installWar.sh
+startAlfrescoCmd=$d/stopAlfresco.sh
+stopAlfrescoCmd=$d/stopAlfresco.sh
+deloyMmsappCmd=$d/deployMmsapp.sh
+
+tomcatDir=/opt/local/apache-tomcat
+if [ ! -f $tomcatDir ]; then
+  tomcatDir=/opt/local/alfresco-4.2e/tomcat
+fi
 webappDir=${tomcatDir}/webapps
 alfrescoWebappDir=${webappDir}/alfresco
+shareWebappDir=${webappDir}/share
 existingWarFile=${alfrescoWebappDir}.war
-#mmtJar=${tomcatDir}/bin/alfresco-mmt.jar
-mmtJar=${tomcatDir}/../bin/alfresco-mmt.jar
+existingShareWarFile=${webappDir}/share.war
+mmtJar=${tomcatDir}/bin/alfresco-mmt.jar
+if [ ! -f $mmtJar ]; then
+  mmtJar=${tomcatDir}/../bin/alfresco-mmt.jar
+fi
 
-echo 0=$0
-echo 1=$1
-echo 2=$2
-echo 3=$3
-echo tomcatDir=$tomcatDir
-echo webappDir=$webappDir
-echo alfrescoWebappDir=$alfrescoWebappDir
-echo existingWarFile=$existingWarFile
-echo mmtJar=$mmtJar
+mmsappDeployDir=${alfrescoWebappDir}/mmsapp
+tmpDir=/tmp/mmsappZip
+
+echo
+echo initialized directories and files:
+echo "  tomcatDir =" $tomcatDir
+echo "  webappDir =" $webappDir
+echo "  alfrescoWebappDir =" $alfrescoWebappDir
+echo "  existingWarFile =" $existingWarFile
+echo "  existingShareWarFile =" $existingShareWarFile
+echo "  mmtJar =" $mmtJar
 
 # process arguments
 if [ "$#" -eq 0 ]; then
   echo "$0 : Error! Need at least one argument!"
-  echo $usage
+  usage
   exit 1
 fi;
+
 ampFile=$1
-if [ "$#" -eq 2 ]; then
-  warFile=$2
-else
-  warfile=$existingWarFile
-fi;
+shareAmpFile=""
+warfile=$existingWarFile
+shareWarFile=$existingShareWarFile
+mmsappDir=""
+mmsappZip=""
 
-if [ "$#" -eq 3 ]; then
-  mmsappDir=$3
-else
-  mmsappDir=/home/cinyoung/mmsapp
-fi;
+# Look at substrings in the input to determine which input file is which
+for var in "$@"
+do
+  if [[ $var == *zip ]]; then
+    mmsappZip=$var
+  else
+    if [[ $var == *share* ]]; then
+      if [[ $var == *amp ]]; then
+        shareAmpFile=$var
+      else
+        if [[ $var == *war ]]; then
+          shareWarFile=$var
+        else
+          if [[ -d "$var" ]]; then
+            mmsappDir=$var
+          else
+            echo "Unknown argument! " $var 
+          fi
+        fi
+      fi
+    else
+#      if [[ ( $var == *repo* ) || ( $var == alfresco* ) ]]; then
+        if [[ $var == *amp ]]; then
+          ampFile=$var
+        else
+          if [[ $var == *war ]]; then
+            warFile=$var
+#          fi
+#        fi
+          else
+            if [[ -d "$var" ]]; then
+              mmsappDir=$var
+            else
+              echo "Unknown argument! " + $var 
+            fi
+          fi
+        fi
+    fi
+  fi
+done
 
-echo ampFile=$ampFile
-echo warFile=$warFile
-echo mmsappDir=$mmsappDir
+echo
+echo "arguments processed with the following assignments:"
+echo "  ampFile =" $ampFile
+echo "  shareAmpFile =" $shareAmpFile
+echo "  warFile =" $warFile
+echo "  shareWarFile =" $shareWarFile
+echo "  mmsappDir =" $mmsappDir
+echo "  mmsappZip =" $mmsappZip
 
-# backup war file
-echo cp $existingWarFile ${existingWarFile}.`date '+%Y%m%d'`
-cp $existingWarFile ${existingWarFile}.`date '+%Y%m%d'`
-# use specified warFile
-echo cp -f $warFile $existingWarFile
-cp -f $warFile $existingWarFile
+# stop alfresco server
+$stopAlfrescoCmd
 
-# install amp to war
-echo java -jar $mmtJar install $ampFile $existingWarFile -force
-java -jar $mmtJar install $ampFile $existingWarFile -force
+# install war files
+if [ -f "$ampFile" ]; then
+  echo $installWarCommand $mmtjar $ampFile $warFile $existingWarFile $alfrescoWebappDir
+  $installWarCommand $mmtjar $ampFile $warFile $existingWarFile $alfrescoWebappDir
+fi
+if [ -f "$shareAmpFile" ]; then
+  echo $installWarCommand $mmtjar $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
+  $installWarCommand $mmtjar $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
+fi
 
-# owner must be tomcat
-#echo chown tomcat:tomcat $warFile
-#chown tomcat:tomcat $warFile
+# deploy mmsapp
+if [ -f "$ampFile" ]; then
+  $deployMmsappCmd $mmsappDeployDir $mmsappDir $backupDir $mmsappZip
+fi
 
-# blast alfresco directory
-echo rm -rf $alfrescoWebappDir
-rm -rf $alfrescoWebappDir
-
-# owner must be tomcat
-echo "amp installed!"
-echo "restart:\n\t\tsudo /etc/init.d/tomcat restart"
-echo "after alfresco dir is recreated, copy mmsapp:\n\t\tcp -pRf $mmsappDir $alfrescoWebAppDir"
-echo "then, make sure the mmsapp's owner is tomcat:\n\t\tchown -Rh tomcat:tomcat ${alfrescoWebappDir}/$mmsappDir"
+#start server
+$startAlrfescoCmd
 
 exit 0
-
-~                                                                                                  
-~                                                                                                  
-~                     
