@@ -2692,10 +2692,16 @@ public class EmsScriptNode extends ScriptNode implements
         }
         EmsScriptNode node = parent.createNode( getName(), type );
 
+        if ( node == null ) {
+            Debug.error( "Could not create node in parent " + parent.getName() );
+            return null;
+        }
+
         // add missing aspects
         NodeService nodeService = getServices().getNodeService();
         Set< QName > myAspects = nodeService.getAspects( getNodeRef() );
         for ( QName qName : myAspects ) {
+            if ( qName == null ) continue;
             node.createOrUpdateAspect( qName.toString() );
         }
 
