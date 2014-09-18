@@ -1,6 +1,28 @@
 {
 
-    "creator": "admin"
+    "workspace1": {
+
+        "name": "wsA",
+
+        "elements": []
+
+    },
+
+    "workspace2": {
+
+        "deletedElements": [],
+
+        "addedElements": [],
+
+        "conflictedElements": [],
+
+        "updatedElements": [],
+
+        "name": "wsB",
+
+        "movedElements": []
+
+    }
 
 }
 

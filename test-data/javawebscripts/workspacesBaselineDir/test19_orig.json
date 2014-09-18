@@ -1,7 +1,15 @@
 {
-    "id": "301_1410988311514",
-    "created": "2014-09-17T14:11:51.514-07:00",
-    "url": "/alfresco/service/snapshots/301_1410988311514",
-    "creator": "admin"
+    "workspace1": {
+        "name": "wsA",
+        "elements": []
+    },
+    "workspace2": {
+        "deletedElements": [],
+        "addedElements": [],
+        "conflictedElements": [],
+        "updatedElements": [],
+        "name": "wsB",
+        "movedElements": []
+    }
 }
 200

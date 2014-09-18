@@ -57,8 +57,8 @@ def create_command_line_options():
     
     To run all tests for the branch:
     
-    python regression_test_harness.py -t 1,2,11,5-9
-
+    python regression_test_harness.py 
+    
     To run test numbers 1,2,11,5-9 (overrides tests for that branch):
     
     python regression_test_harness.py -t 1,2,5-9,11
@@ -77,8 +77,9 @@ def create_command_line_options():
     Alternatively, change the branch name used using the -g command line arg when creating the baselines,
     to output to the correct baseline folder.
     
-    When all tests are ran, it is all the tests for the particular branch, which is specified in
-    the tests table.
+    When all tests are ran, it runs all the tests mapped to the current branch, which is specified in
+    the tests table.  The current branch is determined via the GIT_BRANCH environment variable, or the
+    -g command line argument.
     
     The -t option can take test numbers in any order, and it will run them in the order specified.
     Similarly for -n option.
@@ -95,7 +96,7 @@ def create_command_line_options():
     parser.add_option("-b","--createBaselines",action="store_true",dest="create_baselines",
                       help='''Supply this option if you want to create the baseline files for the tests (Optional)''')
     parser.add_option("-g","--gitBranch",action="callback",type="string",metavar="GITBRANCH",callback=parse_git_branch,
-                      help='''Specify the GIT_BRANCH to use, otherwise uses the value of $GIT_BRANCH, and if that env variable is not defined uses 'test'. (Optional)''')
+                      help='''Specify the branch to use, otherwise uses the value of $GIT_BRANCH, and if that env variable is not defined uses 'test'. (Optional)''')
         
     return parser
 
@@ -358,7 +359,9 @@ def startup_server():
     print "STARTING UP SERVER"
     #subprocess.call("./runserver_regression.sh")
     # Is this inheriting the correct environment variables?
-    p = subprocess.Popen("./runserver_regression.sh") # still not working, eventually hangs and server doesn't come up
+    #p = subprocess.Popen("./runserver_regression.sh", shell=True) # still not working, eventually hangs and server doesn't come up
+    commands.getstatusoutput("./runserver_regression.sh")
+    #time.sleep(30)
     
     print "POLLING SERVER"
     server_log = open("runserver.log","r")
@@ -617,10 +620,21 @@ common_filters+['"branched"','"created"'],
 ["test","workspaces","develop"]
 ],
         
+[
+19, 
+"CompareWorkspaces",
+"Compare workspaces",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff?workspace1=wsA&workspace2=wsB"),
+True, 
+common_filters,
+["test","workspaces","develop"]
+],
+        
 # SNAPSHOTS: ==========================    
 
 [
-19,
+20,
 "PostSnapshot",
 "Post snapshot test",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -642,8 +656,9 @@ if __name__ == '__main__':
     # Parse the command line arguments:
     parse_command_line()
     
-    #startup_server()  # this is not working yet, so assumption for now is that this will be called 
-                       # by the bash script which will start up the server
+    # this is not working yet, so assumption for now is that this will be called 
+    # by the bash script which will start up the server
+    #startup_server() 
     
     # Change directories to where we are used to sending curl cmds:
     if not os.path.exists(test_dir_path):
