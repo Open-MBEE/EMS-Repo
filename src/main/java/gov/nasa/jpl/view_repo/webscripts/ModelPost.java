@@ -198,16 +198,58 @@ public class ModelPost extends AbstractJavaWebScript {
      * @throws JSONException
      *             Parse error
      */
+
     public Set< EmsScriptNode >
             createOrUpdateModel( Object content, Status status,
-                                 EmsScriptNode projectNode, WorkspaceNode workspace ) throws Exception {
+                                 EmsScriptNode projectNode, WorkspaceNode targetWS, WorkspaceNode sourceWS ) throws Exception {
+    	JSONObject postJson = (JSONObject) content;
+    	
+    	JSONArray updatedArray = postJson.optJSONArray("updatedElements");
+		JSONArray movedArray = postJson.optJSONArray("movedElements");
+		JSONArray addedArray = postJson.optJSONArray("addedElements");
+		JSONArray elementsArray = postJson.optJSONArray("elements");
+		
+		Collection<JSONArray> collections = new ArrayList<JSONArray>();
+		if(updatedArray != null){
+		    if(!(updatedArray.length() == 0 ))
+		        collections.add(updatedArray);
+		}
+		
+		if(movedArray != null){
+		    if(!(movedArray.length() == 0))
+		        collections.add(movedArray);
+		}
+		
+		if(addedArray != null){
+		    if(!(addedArray.length() == 0))
+		        collections.add(addedArray);
+		}
+		
+		if(!(elementsArray == null))
+			collections.add(elementsArray);
+		TreeSet<EmsScriptNode> elements = new TreeSet< EmsScriptNode >();
+
+		for(JSONArray jsonArray : collections){
+			JSONObject object = new JSONObject();
+			object.put("elements", jsonArray);
+			elements.addAll(createOrUpdateModel2(object, status, projectNode, targetWS, sourceWS));
+		}
+    	return elements;
+    }
+    public Set< EmsScriptNode >
+    		createOrUpdateModel2( Object content, Status status,
+    								EmsScriptNode projectNode, WorkspaceNode targetWS, WorkspaceNode sourceWS ) throws Exception {
         Date now = new Date();
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
 
         System.out.println("****** NodeUtil.doCaching = " + NodeUtil.doCaching );
         
-        setWsDiff( workspace );
+        if(sourceWS == null)
+            setWsDiff( targetWS );
+        else
+            setWsDiff(targetWS, sourceWS, null, null);
+
 
         clearCaches();
 
@@ -223,7 +265,7 @@ public class ModelPost extends AbstractJavaWebScript {
         timerUpdateModel= Timer.startTimer(timerUpdateModel, timeEvents);
         
         // create the element map and hierarchies
-        if (buildElementMap(postJson.getJSONArray(ELEMENTS), projectNode, workspace)) {
+        if (buildElementMap(postJson.getJSONArray(ELEMENTS), projectNode, targetWS)) {
             // start building up elements from the root elements
             for (String rootElement : rootElements) {
                 log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
@@ -231,11 +273,12 @@ public class ModelPost extends AbstractJavaWebScript {
 
                     EmsScriptNode owner = null;
 
+
                     UserTransaction trx;
                     trx = services.getTransactionService().getNonPropagatingUserTransaction();
                     try {
                         trx.begin();
-                        owner = getOwner(rootElement, projectNode, workspace, true);
+                        owner = getOwner(rootElement, projectNode, targetWS, true);
                         trx.commit();
                     } catch (Throwable e) {
                         try {
@@ -250,13 +293,15 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                     }
 
+
+
                     // Create element, owner, and reified package folder as
                     // necessary and place element with owner; don't update
                     // properties on this first pass.
                     if (owner != null && owner.exists()) {
                         Set< EmsScriptNode > updatedElements =
                                 updateOrCreateElement( elementMap.get( rootElement ),
-                                                       owner, workspace, false );
+                                                       owner, targetWS, false );
                         for ( EmsScriptNode node : updatedElements ) {
                             nodeMap.put(node.getName(), node);
                         }
@@ -269,11 +314,11 @@ public class ModelPost extends AbstractJavaWebScript {
         Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): main loop time", timeEvents);
 
         // handle the relationships
-        updateOrCreateAllRelationships(relationshipsJson, workspace);
+        updateOrCreateAllRelationships(relationshipsJson, targetWS);
 
         // make another pass through the elements and update their properties
         Set< EmsScriptNode > updatedElements = updateNodeReferences( singleElement, postJson,
-                                               projectNode, workspace );
+                                               projectNode, targetWS );
         for ( EmsScriptNode node : updatedElements ) {
             nodeMap.put(node.getName(), node);
         }
@@ -290,8 +335,8 @@ public class ModelPost extends AbstractJavaWebScript {
         if (wsDiff.isDiff()) {
             JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
             String wsId = "master";
-            if (workspace != null) {
-                wsId = workspace.getSysmlId();
+            if (targetWS != null) {
+                wsId = targetWS.getSysmlId();
             }
             if ( !sendDeltas(deltaJson, wsId, null) ) {
                 log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
@@ -303,7 +348,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 EmsScriptNode siteNode = projectNode.getSiteNode();
                 siteName = siteNode.getName();
             }
-            CommitUtil.commit( deltaJson, workspace, siteName,
+            CommitUtil.commit( deltaJson, targetWS, siteName,
                                "", false, services, response );
         }
 
@@ -327,7 +372,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         for (String rootElement : rootElements) {
             log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
-            if (!rootElement.equals(projectNode.getProperty(Acm.CM_NAME))) {
+            if (projectNode == null || !rootElement.equals(projectNode.getProperty(Acm.CM_NAME))) {
                 EmsScriptNode owner = getOwner( rootElement, projectNode, workspace, false );
 
                 try {
@@ -1155,7 +1200,9 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         if (Debug.isOn()) System.out.println( "%% %% %% readTime = " + readTime );
         if ( readTime == null ) return false;
-        Date lastModified = element.getLastModified( null );
+        Date lastModified = new Date();
+        if(element != null)
+            lastModified = element.getLastModified( null );
         if (Debug.isOn()) System.out.println( "%% %% %% lastModified = " + lastModified );
         //DateTimeFormatter parser = ISODateTimeFormat.dateParser(); // format is different than what is printed
 
@@ -1902,7 +1949,8 @@ public class ModelPost extends AbstractJavaWebScript {
                     EmsScriptNode projectNode = getProjectNodeFromRequest( req, true );
                     Set< EmsScriptNode > elements =
                         createOrUpdateModel( postJson, status,
-                                                      projectNode, workspace );
+                                                      projectNode, workspace, null );
+
                     // REVIEW -- TODO -- shouldn't this be called from instance?
                     addRelationshipsToProperties( elements );
                     if ( !Utils.isNullOrEmpty( elements ) ) {
@@ -2017,7 +2065,7 @@ public class ModelPost extends AbstractJavaWebScript {
         return true;
     }
 
-    private EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req, boolean createIfNonexistent) {
+    protected EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req, boolean createIfNonexistent) {
         EmsScriptNode projectNode = null;
 
         WorkspaceNode workspace = getWorkspace( req );
