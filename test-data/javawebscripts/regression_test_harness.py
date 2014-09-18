@@ -669,7 +669,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_JW,
                 branch="sites/europa/projects/123456/",
                 post_type="elements?fix=true"),
 True, 
-common_filters,
+common_filters+['"specification"'],
 ["test","workspaces","develop"]
 ],
                 
