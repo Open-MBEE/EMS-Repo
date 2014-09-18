@@ -60,7 +60,7 @@ public class RestPostConnection extends AbstractConnection {
         headers.put( "MessageID", sequenceId++ );
         headers.put( "MessageSource", dst );
         headers.put( "MessageRecipient", "TMS" );
-        headers.put( "MessageType", "JSON" );
+        headers.put( "MessageType", "DELTA" );
         
         builder = header(builder, headers);
         

@@ -1,0 +1,24 @@
+{"workspaces": [
+    {
+        "created": "null",
+        "name": "master",
+        "parent": "null",
+        "branched": "null",
+        "creator": "null"
+    },
+    {
+        "created": "2014-09-17T13:08:48.604-0700",
+        "name": "wsA",
+        "parent": "master",
+        "branched": "2014-09-17T13:08:48.349-0700",
+        "creator": "admin"
+    },
+    {
+        "created": "2014-09-17T13:08:48.588-0700",
+        "name": "wsB",
+        "parent": "wsA",
+        "branched": "2014-09-17T13:08:48.602-0700",
+        "creator": "admin"
+    }
+]}
+200

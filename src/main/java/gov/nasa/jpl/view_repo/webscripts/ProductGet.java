@@ -59,6 +59,7 @@ public class ProductGet extends AbstractJavaWebScript {
     // injected via spring configuration
     protected boolean isViewRequest = false;
 
+    protected boolean prettyPrint = true;
 
     public ProductGet() {
 	    super();
@@ -112,13 +113,24 @@ public class ProductGet extends AbstractJavaWebScript {
 			if (Debug.isOn()) System.out.println("productId = " + productId);
 			
 			// default recurse=true but recurse only applies to displayed elements and contained views
-            boolean recurse = checkArgEquals(req, "recurse", "false") ? false : true;
+            boolean recurse = getBooleanArg( req, "recurse", true );
+            
+            // default simple=false
+            boolean simple = getBooleanArg( req, "simple", false );
+            System.out.println("simple=" + simple);
 
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+
             WorkspaceNode workspace = getWorkspace( req );
+
+            // see if prettyPrint default is overridden and change
+            prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
+            System.out.println("prettyPrint=" + prettyPrint);
+            
             ProductsWebscript productsWs = new ProductsWebscript(repository, services, response);
+            productsWs.simpleJson = simple;
 			productsJson = productsWs.handleProduct(productId, recurse, workspace, dateTime, gettingDisplayedElements, gettingContainedViews);
 		}
 
@@ -129,7 +141,8 @@ public class ProductGet extends AbstractJavaWebScript {
                                                   : ( gettingContainedViews
                                                       ? "views" : "products" ),
                          productsJson );
-				model.put("res", json.toString(4));
+                if ( prettyPrint ) model.put("res", json.toString(4));
+                else model.put("res", json.toString());
 			} catch (JSONException e) {
 				log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				model.put("res", response.toString());

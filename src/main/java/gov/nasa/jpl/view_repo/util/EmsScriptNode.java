@@ -559,7 +559,7 @@ public class EmsScriptNode extends ScriptNode implements
         // see if image already exists by looking up by checksum
         ArrayList< NodeRef > refs =
                 NodeUtil.findNodeRefsByType( "" + cs,
-                                             SearchType.CHECKSUM.prefix, false,
+                                             SearchType.CHECKSUM.prefix, false, false,
                                              workspace, dateTime, false, false,
                                              services, false );
         // ResultSet existingArtifacts =
@@ -926,6 +926,14 @@ public class EmsScriptNode extends ScriptNode implements
     public String getSysmlName() {
         return (String)getProperty( Acm.ACM_NAME );
     }
+    public String getSysmlName(Date dateTime) {
+        EmsScriptNode esn = this;
+        if ( dateTime != null ) {
+            NodeRef ref = NodeUtil.getNodeRefAtTime( getNodeRef(), dateTime );
+            esn = new EmsScriptNode( ref, getServices() );
+        }
+        return esn.getSysmlName();
+    }
 
     public String getSysmlId() {
         String id = (String)getProperty( Acm.ACM_ID );
@@ -962,7 +970,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         if ( node == null ) return null;
         if ( dateTime != null ) {
-            NodeRef vref = NodeUtil.getNodeRefAtTime( getNodeRef(), dateTime );
+            NodeRef vref = NodeUtil.getNodeRefAtTime( node.getNodeRef(), dateTime );
             if ( vref != null ) {
                 node = new EmsScriptNode( vref, getServices() );
             }
@@ -1184,11 +1192,15 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public String getSysmlQPath( boolean isName ) {
         String qname = "";
-
+        boolean noDisplayPath = true;
         if ( isName ) {
-            qname = "/" + this.getProperty( "sysml:name" ) + qname;
+            qname = "/" + this.getProperty( "sysml:name" );
         } else {
-            qname = getDisplayPath() + "/" + getProperty( "sysml:id" );
+            String displayPath = getDisplayPath();
+            if (displayPath.length() > 0) {
+                noDisplayPath = false; // versioned nodes don't have, so need to look up path if that's the case
+            }
+            qname = displayPath + "/" + getProperty( "sysml:id" );
 
             int pos = qname.indexOf( "Models/" );
             if ( pos >= 0 ) {
@@ -1208,6 +1220,8 @@ public class EmsScriptNode extends ScriptNode implements
             String nameProp = null;
             if ( isName ) {
                 nameProp = (String)owner.getProperty( "sysml:name" );
+            } else if (noDisplayPath) {
+                nameProp = (String)owner.getProperty( "sysml:id" );
             }
             if ( nameProp == null ) {
                 break;
@@ -1287,10 +1301,7 @@ public class EmsScriptNode extends ScriptNode implements
      *            JSONObject
      * @return JSONObject serialization of node
      */
-    public
-            JSONObject
-            toJSONObject( Set< String > filter, Date dateTime )
-                                                               throws JSONException {
+    public JSONObject toJSONObject( Set< String > filter, Date dateTime ) throws JSONException {
         return toJSONObject( filter, false, dateTime );
     }
 
@@ -1366,13 +1377,13 @@ public class EmsScriptNode extends ScriptNode implements
         putInJson( elementJson, "qualifiedId", node.getSysmlQId(), filter );
         putInJson( elementJson, "editable",
                    node.hasPermission( PermissionService.WRITE ), filter );
-        NodeRef ownerRef = (NodeRef)node.getProperty( "ems:owner" );
-        EmsScriptNode owner;
-        if ( ownerRef != null ) {
-            owner = new EmsScriptNode( ownerRef, services, response );
-        } else {
-            owner = node.getOwningParent(dateTime);
-        }
+//        NodeRef ownerRef = (NodeRef)node.getProperty( "ems:owner" );
+//        EmsScriptNode owner;
+//        if ( ownerRef != null ) {
+//            owner = new EmsScriptNode( ownerRef, services, response );
+//        } else {
+        EmsScriptNode owner = node.getOwningParent(dateTime);
+//        }
         String ownerId = null;
         if ( owner != null ) {
             ownerId = (String)owner.getProperty( "sysml:id" );
@@ -1460,6 +1471,10 @@ public class EmsScriptNode extends ScriptNode implements
     
     private void addSpecializationJSON( JSONObject json, Set< String > filter,
                                         Date dateTime ) throws JSONException {
+        addSpecializationJSON( json, filter, dateTime, false );
+    }
+    private void addSpecializationJSON( JSONObject json, Set< String > filter,
+                                        Date dateTime, boolean justTheType ) throws JSONException {
         String typeName = getTypeName();
         if ( typeName == null ) {
             // TODO: error logging
@@ -1467,6 +1482,9 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
         json.put( "type", typeName );
+        
+        if ( justTheType ) return;
+        
         for ( QName aspectQname : this.getAspectsSet() ) {
             // reflection is too slow?
             String cappedAspectName =
@@ -1625,6 +1643,22 @@ public class EmsScriptNode extends ScriptNode implements
         return element;
     }
 
+    public JSONObject toSimpleJSONObject( Date dateTime ) throws JSONException {
+        JSONObject element = new JSONObject();
+        element.put( "sysmlid", getName() );
+        if ( dateTime == null ) {
+            element.put( "name", getSysmlName() );
+        } else {
+            element.put( "name", getSysmlName( dateTime ) );            
+        }
+        JSONObject specializationJSON = new JSONObject();
+        addSpecializationJSON( specializationJSON, null, dateTime, true );
+        if ( specializationJSON.length() > 0 ) {
+            element.put( Acm.JSON_SPECIALIZATION, specializationJSON );
+        }
+        return element;
+    }
+    
     public boolean isView() {
         boolean isView =
                 hasAspect( Acm.ACM_VIEW ) || hasAspect( Acm.ACM_PRODUCT );
@@ -1900,8 +1934,9 @@ public class EmsScriptNode extends ScriptNode implements
                                       WorkspaceNode workspace,
                                       Date dateTime, ServiceRegistry services,
                                       StringBuffer response, Status status ) {
+        boolean useSimpleCache = !ignoreWorkspace && workspace == null && dateTime == null;
         ArrayList< NodeRef > refs =
-                NodeUtil.findNodeRefsByType( valueId, "@cm\\:name:\"", ignoreWorkspace,
+                NodeUtil.findNodeRefsByType( valueId, "@cm\\:name:\"", useSimpleCache, ignoreWorkspace,
                                              workspace, dateTime, true, true,
                                              services, false );
         List< EmsScriptNode > nodeList =
@@ -2339,8 +2374,9 @@ public class EmsScriptNode extends ScriptNode implements
             filename = filename.replace( "_latest", "" );
             filename = filename.replace( "\\", "" );
             filename = filename.replace( "src=/editor/images/docgen/", "" );
+            boolean useSimpleCache = getWorkspace() == null;
             NodeRef nodeRef =
-                    findNodeRefByType( filename, "@cm\\:name:\"",
+                    findNodeRefByType( filename, "@cm\\:name:\"", useSimpleCache,
                                        getWorkspace(), null, false );
             if ( nodeRef != null ) {
                 // this should grab whatever is the latest versions purl - so
@@ -2383,9 +2419,9 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     protected NodeRef
-            findNodeRefByType( String name, String type,
+            findNodeRefByType( String name, String type, boolean useSimpleCache,
                                WorkspaceNode workspace, Date dateTime, boolean findDeleted ) {
-        return NodeUtil.findNodeRefByType( name, type, false, workspace, dateTime,
+        return NodeUtil.findNodeRefByType( name, type, useSimpleCache, false, workspace, dateTime,
                                            true, services, findDeleted );
     }
 
@@ -2493,7 +2529,11 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public boolean isDeleted() {
-        return hasAspect( "ems:Deleted" );
+        if (exists()) {
+            return hasAspect( "ems:Deleted" );
+        }
+        // may seem counterintuitive, but if it doesn't exist, it isn't deleted
+        return false;
     }
 
 
@@ -2837,18 +2877,24 @@ public class EmsScriptNode extends ScriptNode implements
             // keep track of owners and children
             EmsScriptNode oldParentReifiedNode = oldParentPkg.getReifiedNode();
 
-            oldParentReifiedNode.removeFromPropertyNodeRefs( "ems:ownedChildren",
+            if ( oldParentReifiedNode != null ) {
+                oldParentReifiedNode.removeFromPropertyNodeRefs( "ems:ownedChildren",
                                                              this.getNodeRef() );
+            }
 
             EmsScriptNode newParent =
                     new EmsScriptNode( destination.getNodeRef(), services,
                                        response );
-            EmsScriptNode newReifiedNode = newParent.getReifiedNode();
-            newReifiedNode.appendToPropertyNodeRefs( "ems:ownedChildren",
-                                                     this.getNodeRef() );
+            if (newParent != null) {
+                EmsScriptNode newReifiedNode = newParent.getReifiedNode();
+                if (newReifiedNode != null) {
+                    newReifiedNode.appendToPropertyNodeRefs( "ems:ownedChildren",
+                                                             this.getNodeRef() );
 
-            this.createOrUpdateProperty( "ems:owner",
-                                         newReifiedNode.getNodeRef() );
+                    this.createOrUpdateProperty( "ems:owner",
+                                                 newReifiedNode.getNodeRef() );
+                }
+            }
 
             // make sure to move package as well
             EmsScriptNode reifiedPkg = getReifiedPkg();
@@ -3271,18 +3317,23 @@ public class EmsScriptNode extends ScriptNode implements
             json.put( "allowedElements", getView().getDisplayedElements() );
             json.put( "childrenViews", getView().getChildViews() );
         } else {
-            putInJson( json, "contains",
-                       new JSONArray( (String)node.getProperty( "view2:contains" ) ),
-                       filter );
-            putInJson( json, "displayedElements",
-                       new JSONArray( (String)node.getProperty( "view2:displayedElements" ) ),
-                       filter );
-            putInJson( json, "allowedElements",
-                       new JSONArray( (String)node.getProperty( "view2:allowedElements" ) ),
-                       filter );
-            putInJson( json, "childrenViews",
-                       new JSONArray( (String)node.getProperty( "view2:childrenViews" ) ),
-                       filter );
+            String property;
+            property = (String) node.getProperty("view2:contains");
+            if (property != null && property.length() > 0) {
+                putInJson( json, "contains", new JSONArray( property ), filter );
+            }
+            property = (String) node.getProperty("view2:displayedElements");
+            if (property != null && property.length() > 0) {
+                putInJson( json, "displayedElements", new JSONArray( property ), filter );
+            }
+            property = (String) node.getProperty("view2:allowedElements");
+            if (property != null && property.length() > 0) {
+                putInJson( json, "allowedElements", new JSONArray( property ), filter );
+            }
+            property = (String) node.getProperty("view2:childrenViews");
+            if (property != null && property.length() > 0) {
+                putInJson( json, "childrenViews", new JSONArray( property ), filter );
+            }
         }
         // TODO: Snapshots?
     }

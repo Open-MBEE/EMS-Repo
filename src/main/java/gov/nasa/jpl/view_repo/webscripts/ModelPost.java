@@ -159,6 +159,9 @@ public class ModelPost extends AbstractJavaWebScript {
 
     protected SiteInfo siteInfo;
 
+    protected boolean prettyPrint = true;
+    
+    
     private EmsSystemModel getSystemModel() {
         if ( systemModel == null ) {
             systemModel = new EmsSystemModel(this.services);
@@ -239,10 +242,14 @@ public class ModelPost extends AbstractJavaWebScript {
         Date now = new Date();
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
+
+        System.out.println("****** NodeUtil.doCaching = " + NodeUtil.doCaching );
+        
         if(sourceWS == null)
             setWsDiff( targetWS );
         else
             setWsDiff(targetWS, sourceWS, null, null);
+
 
         clearCaches();
 
@@ -266,24 +273,26 @@ public class ModelPost extends AbstractJavaWebScript {
 
                     EmsScriptNode owner = null;
 
-//                    UserTransaction trx;
-//                    trx = services.getTransactionService().getNonPropagatingUserTransaction();
-//                    try {
-//                        trx.begin();
+
+                    UserTransaction trx;
+                    trx = services.getTransactionService().getNonPropagatingUserTransaction();
+                    try {
+                        trx.begin();
                         owner = getOwner(rootElement, projectNode, targetWS, true);
-//                        trx.commit();
-//                    } catch (Throwable e) {
-//                        try {
-//                            trx.rollback();
-//                            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
-//                            log(LogLevel.ERROR, "\t####### when calling getOwner(" + rootElement + ", " + projectNode + ", true)");
-//                            e.printStackTrace();
-//                        } catch (Throwable ee) {
-//                            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
-//                            log(LogLevel.ERROR, "\tafter calling getOwner(" + rootElement + ", " + projectNode + ", true)");
-//                            ee.printStackTrace();
-//                        }
-//                    }
+                        trx.commit();
+                    } catch (Throwable e) {
+                        try {
+                            trx.rollback();
+                            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                            log(LogLevel.ERROR, "\t####### when calling getOwner(" + rootElement + ", " + projectNode + ", true)");
+                            e.printStackTrace();
+                        } catch (Throwable ee) {
+                            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                            log(LogLevel.ERROR, "\tafter calling getOwner(" + rootElement + ", " + projectNode + ", true)");
+                            ee.printStackTrace();
+                        }
+                    }
+
 
 
                     // Create element, owner, and reified package folder as
@@ -404,11 +413,17 @@ public class ModelPost extends AbstractJavaWebScript {
         if (Utils.isNullOrEmpty( ownerName ) ) {
             EmsScriptNode elementNode = findScriptNodeById(elementId, workspace, null, false);
             if (elementNode == null || !elementNode.exists()) {
-                owner = projectNode;
+            	// Place elements with no owner in a holding_bin_<site>_<project> package:
+                //owner = projectNode; 
+            	String projectNodeId = ((projectNode == null || projectNode.getSysmlId() == null) ? NO_PROJECT_ID : projectNode.getSysmlId());
+            	String siteName = ((siteInfo == null || siteInfo.getShortName() == null) ? NO_SITE_ID : getSiteInfo().getShortName() );
+            	ownerName = "holding_bin_"+siteName+"_"+projectNodeId;  
             } else {
                 owner = elementNode.getParent();
             }
-        } else {
+        } 
+        
+        if (!Utils.isNullOrEmpty(ownerName)) {
        		boolean foundOwnerElement = true;
             owner = findScriptNodeById(ownerName, workspace, null, false);
             if (owner == null || !owner.exists()) {
@@ -416,7 +431,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 log( LogLevel.WARNING, "Could not find owner with name: "
                                        + ownerName + " putting " + elementId
                                        + " into project: " + projectNode);
-                owner = projectNode;
+                owner = projectNode;  
                 foundOwnerElement = false;
             }
             // really want to add pkg as owner
@@ -796,14 +811,6 @@ public class ModelPost extends AbstractJavaWebScript {
         return true;
     }
 
-    protected Set< EmsScriptNode > updateOrCreateElement( JSONObject elementJson,
-                                                          EmsScriptNode parent,
-                                                          WorkspaceNode workspace,
-                                                          boolean ingest)
-                                                                  throws Exception {
-        return updateOrCreateElement( elementJson, parent, workspace, ingest, runWithoutTransactions );
-    }
-        
     /**
      * Update or create element with specified metadata
      * @param workspace
@@ -818,8 +825,7 @@ public class ModelPost extends AbstractJavaWebScript {
     protected Set< EmsScriptNode > updateOrCreateElement( JSONObject elementJson,
                                                           EmsScriptNode parent,
                                                           WorkspaceNode workspace,
-                                                          boolean ingest,
-                                                          boolean transactionsOff)
+                                                          boolean ingest)
                                                                   throws Exception {
         TreeSet<EmsScriptNode> elements = new TreeSet<EmsScriptNode>();
         TreeMap<String, EmsScriptNode> nodeMap =
@@ -891,7 +897,7 @@ public class ModelPost extends AbstractJavaWebScript {
         EmsScriptNode reifiedNode = null;
         ModStatus modStatus = new ModStatus();
 
-        if (transactionsOff) {
+        if (runWithoutTransactions) {
             reifiedNode =
                     updateOrCreateTransactionableElement( elementJson, parent,
                                                           children, workspace, ingest, false, modStatus );
@@ -933,7 +939,7 @@ public class ModelPost extends AbstractJavaWebScript {
             for (int ii = 0; ii < children.length(); ii++) {
                 Set< EmsScriptNode > childElements =
                         updateOrCreateElement(elementMap.get(children.getString(ii)),
-                                                       reifiedNode, workspace, ingest, true);
+                                                       reifiedNode, workspace, ingest);
                 // Elements in new workspace replace originals.
                 for ( EmsScriptNode node : childElements ) {
                     nodeMap.put( node.getName(), node );
@@ -942,7 +948,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         element = findScriptNodeById( jsonId, workspace, null, true );
-        if (transactionsOff) {
+        if (runWithoutTransactions) {
             updateTransactionableWsState(element, jsonId, modStatus, ingest);
         } else {
             UserTransaction trx;
@@ -1511,6 +1517,14 @@ public class ModelPost extends AbstractJavaWebScript {
                     node = findScriptNodeById(id, workspace, null, false);
                 }
 
+                if (node != null) {
+                    // lets keep track of reification
+                    node.createOrUpdateAspect( "ems:Reified" );
+                    node.createOrUpdateProperty( "ems:reifiedPkg", reifiedNode.getNodeRef() );
+                    
+                    reifiedNode.createOrUpdateAspect( "ems:Reified" );
+                    reifiedNode.createOrUpdateProperty( "ems:reifiedNode", node.getNodeRef() );
+                }
             }
         }
 
@@ -1871,20 +1885,33 @@ public class ModelPost extends AbstractJavaWebScript {
         } // End if constraints list is non-empty
 
     }
-
+    
     /**
      * Entry point
      */
     @Override
-    protected Map<String, Object> executeImpl(WebScriptRequest req,
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+    	
+        ModelPost instance = new ModelPost(repository, services);
+        instance.setServices( getServices() );
+        return instance.executeImplImpl(req,  status, cache);
+    }
+
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
+        NodeUtil.doCaching = true;
+        Timer timer = new Timer();
+
         printHeader( req );
 
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
 
-        boolean runInBackground = checkArgEquals(req, "background", "true");
-        boolean fix = checkArgEquals(req, "fix", "true");
+        boolean runInBackground = getBooleanArg(req, "background", false);
+        boolean fix = getBooleanArg(req, "fix", false);
+
+        // see if prettyPrint default is overridden and change
+        prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
 
         String user = AuthenticationUtil.getRunAsUser();
         String wsId = null;
@@ -1903,8 +1930,6 @@ public class ModelPost extends AbstractJavaWebScript {
                                              : HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
         }
 
-        ModelPost instance = new ModelPost(repository, services);
-
         String expressionString = req.getParameter( "expression" );
 
         JSONObject top = new JSONObject();
@@ -1912,7 +1937,7 @@ public class ModelPost extends AbstractJavaWebScript {
         if (wsFound && validateRequest(req, status)) {
             try {
                 if (runInBackground) {
-                    instance.saveAndStartAction(req, workspace, status);
+                    saveAndStartAction(req, workspace, status);
                     // REVIEW -- TODO -- shouldn't response be called from
                     // instance? Maybe move the bulk of this method to a new
                     // method and call from instance.
@@ -1923,15 +1948,16 @@ public class ModelPost extends AbstractJavaWebScript {
                     JSONObject postJson = (JSONObject)req.parseContent();
                     EmsScriptNode projectNode = getProjectNodeFromRequest( req, true );
                     Set< EmsScriptNode > elements =
-                        instance.createOrUpdateModel( postJson, status,
+                        createOrUpdateModel( postJson, status,
                                                       projectNode, workspace, null );
+
                     // REVIEW -- TODO -- shouldn't this be called from instance?
-                    instance.addRelationshipsToProperties( elements );
+                    addRelationshipsToProperties( elements );
                     if ( !Utils.isNullOrEmpty( elements ) ) {
 
                         // Fix constraints if desired:
                         if (fix) {
-                            instance.fix(elements);
+                            fix(elements);
                         }
 
                         // Create JSON object of the elements to return:
@@ -1942,11 +1968,12 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                         Timer.stopTimer(timerToJson, "!!!!! executeImpl(): toJSON time", timeEvents);
                         top.put( "elements", elementsJson );
-                        model.put( "res", top.toString( 4 ) );
+                        if ( prettyPrint ) model.put( "res", top.toString( 4 ) );
+                        else model.put( "res", top.toString() );
                     }
                 }
                 // REVIEW -- TODO -- shouldn't this be called from instance?
-                appendResponseStatusInfo(instance);
+                appendResponseStatusInfo(this);
             } catch (JSONException e) {
                 log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
                 e.printStackTrace();
@@ -1970,6 +1997,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
         printFooter();
 
+        System.out.println( "ModelPost: " + timer );
+        
         return model;
     }
 
@@ -2046,7 +2075,8 @@ public class ModelPost extends AbstractJavaWebScript {
         //String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
         String projectId = getProjectId(req);
         EmsScriptNode siteNode = createSite( siteName, workspace );
-
+        setSiteInfo(req); // Setting the site info in case we just created the site for the first time
+        
         projectNode = siteNode.childByNamePath("/Models/" + projectId);
         if (projectNode == null) {
                 // for backwards compatibility
@@ -2102,6 +2132,7 @@ public class ModelPost extends AbstractJavaWebScript {
         String siteName = getSiteName( req );
         siteInfo = services.getSiteService().getSite(siteName);
     }
+    
     public SiteInfo getSiteInfo() {
         return getSiteInfo( null );
     }

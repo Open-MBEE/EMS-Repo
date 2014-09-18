@@ -39,7 +39,8 @@ public class JmsConnection extends AbstractConnection {
         boolean result = false;
         try {
             json.put( "sequence", sequenceId++ );
-            result = publishTopic(json.toString( 2 ), topic);
+            // FIXME: topic is always the same since we're using metadata now
+            result = publishTopic(json.toString( 2 ), "master");
         } catch ( JSONException e ) {
             e.printStackTrace();
         }
@@ -66,7 +67,7 @@ public class JmsConnection extends AbstractConnection {
 
             // Create a MessageProducer from the Session to the Topic or Queue
             MessageProducer producer = session.createProducer(destination);
-            producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+            producer.setDeliveryMode(DeliveryMode.PERSISTENT);
 
             // Create a message
             TextMessage message = session.createTextMessage(msg);
@@ -87,8 +88,7 @@ public class JmsConnection extends AbstractConnection {
             connection.close();
         }
         catch (Exception e) {
-            logger.error( "Caught, but doing nothing: " + e);
-//            e.printStackTrace();
+            logger.error( "JMS exception caught, probably means JMS broker not up");
             status = false;
         }
         

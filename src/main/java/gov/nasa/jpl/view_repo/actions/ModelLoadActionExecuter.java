@@ -28,6 +28,7 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo.actions;
 
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
@@ -86,6 +87,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
     
     @Override
     protected void executeImpl(Action action, NodeRef nodeRef) {
+        Timer timer = new Timer();
         String projectId = (String) action.getParameterValue(PARAM_PROJECT_ID);
         String projectName = (String) action.getParameterValue(PARAM_PROJECT_NAME);
         EmsScriptNode projectNode = (EmsScriptNode) action.getParameterValue(PARAM_PROJECT_NODE);
@@ -120,7 +122,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         } else {
             ModelPost modelService = new ModelPost(repository, services);
             modelService.setLogLevel(LogLevel.DEBUG);
-            modelService.setRunWithoutTransactions(true);
+            modelService.setRunWithoutTransactions(false);
             Status status = new Status();
             try {
                 Set<EmsScriptNode> elements = 
@@ -144,25 +146,24 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         // set the status
         jsonNode.setProperty("ems:job_status", jobStatus);
 
-        String contextUrl = "https://" + ActionUtil.getHostName() + "alfresco";
+        String hostname = ActionUtil.getHostName();
+        if (hostname.endsWith("/" )) {
+            hostname = hostname.substring( 0, hostname.lastIndexOf( "/" ) );
+        } 
+        if (!hostname.contains( "jpl.nasa.gov" )) {
+            hostname += ".jpl.nasa.gov";
+        }
+        String contextUrl = "https://" + hostname + "/alfresco";
         	
         // Send off the notification email
-        // FIXME: hack to send email off later... until appropriate scale is set. 
-        try {
-            if (logger.isDebugEnabled()) logger.debug("sleeping before sending out for " + content.length()/5000);
-            Thread.sleep( content.length()/5000 );
-        } catch ( InterruptedException e ) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
         String subject =
                 "Workspace " + workspaceId + " Project "
-                        + projectName + " Load " + jobStatus;
+                        + projectName + " load completed";
         String msg = "Log URL: " + contextUrl + logNode.getUrl();
         ActionUtil.sendEmailToModifier(jsonNode, msg, subject, services, response);
 
-        if (logger.isDebugEnabled()) logger.debug("Email notification sent for " + workspaceId + " - "+ projectName + " [id: " + projectId + "]");
+        if (logger.isDebugEnabled()) logger.debug("Email notification sent for " + workspaceId + " - "+ projectName + " [id: " + projectId + "]:\n" + msg);
+        if (logger.isDebugEnabled()) logger.debug( "ModelLoadActionExecuter: " + timer );
     }
 
     protected void clearCache() {

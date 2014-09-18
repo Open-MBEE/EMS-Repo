@@ -1,24 +1,24 @@
 { "products":
-	[
-		{
-		"sysmlid": "301",
-		"view2view": [
-			{"sysmlid": "301", 
-			"childrenViews": ["301","302"]
-		}],
-		"noSections": [
-		"302" 
-		]
-		},
-		{
-		"sysmlid": "401",
-		"view2view": [
-			{"sysmlid": "401", 
-			"childrenViews": ["401","402"]
-		}],
-		"noSections": [
-		"402"
-		]
-		}
-	]
+    [
+        {
+        "sysmlid": "301",
+        "view2view": [
+            {"sysmlid": "301", 
+            "childrenViews": ["301","302"]
+        }],
+        "noSections": [
+        "302" 
+        ]
+        },
+        {
+        "sysmlid": "401",
+        "view2view": [
+            {"sysmlid": "401", 
+            "childrenViews": ["401","402"]
+        }],
+        "noSections": [
+        "402"
+        ]
+        }
+    ]
 }

@@ -82,15 +82,13 @@ public class DiscussionsEmailNotificationActionExecutor  extends ActionExecuterA
         // TODO Auto-generated method stub
     }
     
-    
     private TopicInfo getPrimaryTopic(NodeRef nodeRef){
         org.alfresco.util.Pair<TopicInfo,PostInfo> pair = discussionService.getForNodeRef(nodeRef);
         return (TopicInfo)pair.getFirst();
     }
     
-    
     private NodeRef getUserProfile(String userName){
-    	return personService.getPerson(userName);
+    	return personService.getPerson(userName, false);
     }
 
     private void setSiteInfo(NodeRef nodeRef){
@@ -104,35 +102,50 @@ public class DiscussionsEmailNotificationActionExecutor  extends ActionExecuterA
     }
 
     private void addSiteMgrToEmailAddresses(NodeRef nodeRef, List<String> emailAddresses){
-    	Map<String, String> managers = getSiteManagers(nodeRef);
-    	Iterator itr = managers.entrySet().iterator();
-    	while(itr.hasNext()){
-    		Map.Entry pairs = (Map.Entry)itr.next();
-    		String email = getEmail(pairs.getKey().toString());
-    		emailAddresses.add(email);
+    	try{
+	    	Map<String, String> managers = getSiteManagers(nodeRef);
+	    	if(managers==null) System.out.println("did not find any site manager!");
+	    	Iterator itr = managers.entrySet().iterator();
+	    	while(itr.hasNext()){
+	    		Map.Entry pairs = (Map.Entry)itr.next();
+	    		if(pairs == null || pairs.getKey()==null){ 
+	    			System.out.println("site manager map entry is null.");
+	    			continue;
+	    		}
+	    		String email = getEmail(pairs.getKey().toString());
+	    		if(email!=null && !email.isEmpty()) emailAddresses.add(email);
+	    		else System.out.println("did not find email address for " + pairs.getKey().toString());
+	    	}
+    	}
+    	catch(Exception ex){
+    		System.out.println("Failed to add site manager(s) to email list!");
+    		ex.printStackTrace();
     	}
     }
     
-	
     private String getEmail(String userName) {
-		NodeRef person = getUserProfile(userName);
-		return (String)nodeService.getProperty(person, ContentModel.PROP_EMAIL);
+    	try{
+			NodeRef person = getUserProfile(userName);
+			if(person == null) return "";
+			return (String)nodeService.getProperty(person, ContentModel.PROP_EMAIL);
+    	}
+    	catch(Exception ex){
+    		System.out.println("Failed to get email address for " + userName);
+    	}
+    	return "";
 	}
 
-	
     private boolean isEmailExisted(List<String> emailList, String email){
-		return emailList.contains(email);
+		return emailList.contains(email.trim().toLowerCase());
 	}
-	
 	
 	private void addEmailToList(PostInfo post, List<String> emailList){
 		String poster = post.getCreator();
 		String posterEmail = getEmail(poster);
 		if(!isEmailExisted(emailList, posterEmail)) {
-			emailList.add(posterEmail);
+			emailList.add(posterEmail.trim().toLowerCase());
 		}
 	}
-	
 	
 	private void gatherEmailAddresses(PostWithReplies postWithReplies, List<String> emailList){
 		for(PostWithReplies post:postWithReplies.getReplies()){
@@ -141,7 +154,6 @@ public class DiscussionsEmailNotificationActionExecutor  extends ActionExecuterA
 			gatherEmailAddresses(discussionService.listPostReplies(p, 1), emailList);
 		}
 	}
-	
 	
 	private NodeRef getEmailTemplate(){
 		String templatePATH = "PATH:\"/app:company_home/app:dictionary/app:email_templates/app:notify_email_templates/cm:discussion-email.html.ftl\"";
@@ -164,6 +176,7 @@ public class DiscussionsEmailNotificationActionExecutor  extends ActionExecuterA
         mailAction.setParameterValue(MailActionExecuter.PARAM_TEMPLATE, template);
     	for (int i = 0; i < emailAddresses.size(); i++) {
     		String email = emailAddresses.get(i);
+    		if(email == null || email.isEmpty()) continue;
     		mailAction.setParameterValue(MailActionExecuter.PARAM_TO, email);
     		Map<String, Serializable> templateArgs = new HashMap<String, Serializable>();
     		templateArgs.put("posterName", post.getCreator());
@@ -177,7 +190,8 @@ public class DiscussionsEmailNotificationActionExecutor  extends ActionExecuterA
     			services.getActionService().executeAction(mailAction, null);
     		}
     		catch(Exception ex){
-    			System.out.println("ERROR: Failed to send discussion notification email to " + email + ex.getMessage() + ex.getStackTrace());
+    			System.out.println("ERROR: Failed to send discussion notification email to " + email);
+    			ex.printStackTrace();
     		}
     	}
 	}

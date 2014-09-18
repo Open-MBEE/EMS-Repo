@@ -1,0 +1,159 @@
+{ "elements" : [
+
+    {"documentation" : "something", 
+     "sysmlid":"X4X_300", 
+     "name":"X4X_300", 
+     "owner":"null", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+
+    {"documentation" : "else", 
+     "sysmlid":"X4X_301", 
+     "name":"X4X_301", 
+     "owner":"X4X_300", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+
+    {"documentation" : "to", 
+     "sysmlid":"X4X_302", 
+     "name":"X4X_302", 
+     "owner":"X4X_301", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+
+    {"documentation" : "talk", 
+     "sysmlid":"X4X_303", 
+     "name":"X4X_303", 
+     "owner":"X4X_302", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+
+    {"documentation" : "about", 
+     "sysmlid":"X4X_304", 
+     "name":"X4X_304", 
+     "owner":"X4X_303", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+    
+    {"documentation" : "no owner", 
+     "sysmlid":"X4X_305", 
+     "name":"X4X_305", 
+     "owner":"X4X_999", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+    
+    {"documentation" : "4something", 
+     "sysmlid":"X4X_4000", 
+     "name":"X4X_400", 
+     "owner":"null", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+    
+    {"documentation" : "4else", 
+     "sysmlid":"X4X_401", 
+     "name":"X4X_401", 
+     "owner":"X4X_4000", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+    
+    {"documentation" : "4to", 
+     "sysmlid":"X4X_402", 
+     "name":"X4X_402", 
+     "owner":"X4X_401", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+    
+    {"documentation" : "4talk", 
+     "sysmlid":"X4X_403", 
+     "name":"X4X_403", 
+     "owner":"X4X_402", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+    
+    {"documentation" : "4about", 
+     "sysmlid":"X4X_404", 
+     "name":"X4X_404", 
+     "owner":"X4X_403", 
+     "specialization": {"type":"Property",
+                        "isDerived":false, 
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+    
+    {"documentation" : "directed_relationship", 
+     "sysmlid":"X4X_500",
+     "owner":"X4X_300",
+     "name":"X4X_500",
+     "specialization": {"type":"DirectedRelationship",
+                        "source":"X4X_302",
+                        "target":"X4X_303"}
+     },
+    
+    {"documentation" : "element values", 
+     "sysmlid":"X4X_600",
+     "owner":"null",
+     "name":"X4X_600", 
+     "specialization": {"type":"Property",
+                        "value":[{"type":"ElementValue",
+                                  "element":"X4X_300"},
+                                 {"type":"ElementValue",
+                                  "element":"X4X_302"}]}
+     },
+     
+    {"documentation" : "", 
+     "sysmlid":"X4X_6666",
+     "owner":"null",
+     "name":"X4X_6666_name", 
+     "specialization": {"type":"Expression",
+                        "operand":[{"type":"ElementValue",
+                                  "element":"X4X_300"},
+                                  {"type":"ElementValue",
+                                  "element":"X4X_302"}]}
+     },
+    {"documentation" : "something",
+     "sysmlid":"X4X_x",
+     "name":"X4X_300",
+     "owner":"null",
+     "specialization": {"type":"Property",
+                        "isDerived":false,
+                        "value":[{"type":"LiteralString",
+                                  "string":"dlam_string"}]}
+    },
+    
+    {"documentation" : "to make compatible with value specs (this is just a Element)", 
+     "sysmlid":"X4X_dlam", 
+     "name":"X4X_dlam", 
+     "owner":"X4X_cdelp"
+    }
+
+]}

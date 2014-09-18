@@ -79,11 +79,11 @@ public class ProjectPost extends AbstractJavaWebScript {
 
 		try {
 			if (validateRequest(req, status)) {
-			    String siteName = getSiteName( req, true );
+			    String siteName = getSiteName( req );
 		        String projectId = getProjectId( req );
-		        boolean delete = checkArgEquals(req, "delete", "true") ? true : false;
-		        boolean fix = checkArgEquals(req, "fix", "true") ? true : false;
-		        boolean createSite = checkArgEquals(req, "createSite", "true") ? true : false;
+		        boolean delete = getBooleanArg( req, "delete", false );
+		        boolean fix = getBooleanArg(req, "fix", false);
+		        boolean createSite = getBooleanArg(req, "createSite", false);
 
                 WorkspaceNode workspace = getWorkspace( req );
                 if ( siteName != null && !siteName.equals( NO_SITE_ID ) ) {

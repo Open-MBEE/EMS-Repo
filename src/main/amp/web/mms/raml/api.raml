@@ -20,25 +20,25 @@ securitySchemes:
 
 schemas:
   # these all return elements - search may need to be paged
-  - elements: !include elements.json
-  - views:    !include elements.json
-  - products: !include elements.json
+  - elements: !include elements.json-schema
+  - views:    !include elements.json-schema
+  - products: !include elements.json-schema
 
-  - comments:       !include elements.json    
-  - configurations: !include configurations.json
-  - projects:       !include projects.json
-  - snapshots:      !include snapshots.json
-  - versions:       !include versions.json
+  - comments:       !include elements.json-schema    
+  - configurations: !include configurations.json-schema
+  - projects:       !include projects.json-schema
+  - snapshots:      !include snapshots.json-schema
+  - versions:       !include versions.json-schema
     
-  - sites:       !include sites.json
-  - workspaces:  !include workspaces.json
+  - sites:       !include sites.json-schema
+  - workspaces:  !include workspaces.json-schema
     
-  - diff:        !include diff.json
-  - client:      !include client.json
+  - diff:        !include diff.json-schema
+  - client:      !include client.json-schema
   
   # include post/ put and delete responses
-  #- elementsResponse: !include postResponse.json
-  #- viewsResponse: !include postResponse.json
+  #- elementsResponse: !include postResponse.json-schema
+  #- viewsResponse: !include postResponse.json-schema
 traits:
   - backgroundable:
       description: Aspect for resources that can be created/updated in the asynchronously in
@@ -149,31 +149,29 @@ resourceTypes:
                          resource)
           500:
             description: Could not append to <<resourcePathName>> due to internal server error   
-      put:
-        description: Create/update operation for <<resourcePathName>>
-        body:
-          application/json:
-            schema: <<resourcePathName>>
-        responses:
-          200:
-            description: <<resourcePathName>> update successful
-            body:
-              application/json:
-                schema: <<resourcePathName>>PutResponse
-          201:
-            description: <<resourcePathName>> create successful
-          202:
-            description: <<resourcePathName>> create/update started, but not yet completed
-          401:
-            description: User does not have create/update permissions to <<resourcePathName>>
-          404:
-            description: <<resourcePathName>> not found
-          409:
-            description: <<resourcePathName>> conflict detected (e.g., intervening update 
-                         occurred between when user accessed resource and when user updated
-                         resource)
-          500:
-            description: Could not append to <<resourcePathName>> due to internal server error
+#      put:
+#        description: Create/update operation for <<resourcePathName>>
+#        body:
+#          schema: <<resourcePathName>>
+#        responses:
+#          200:
+#            description: <<resourcePathName>> update successful
+#            body:
+#              schema: <<resourcePathName>>PutResponse
+#          201:
+#            description: <<resourcePathName>> create successful
+#          202:
+#            description: <<resourcePathName>> create/update started, but not yet completed
+#          401:
+#            description: User does not have create/update permissions to <<resourcePathName>>
+#          404:
+#            description: <<resourcePathName>> not found
+#          409:
+#            description: <<resourcePathName>> conflict detected (e.g., intervening update 
+#                         occurred between when user accessed resource and when user updated
+#                         resource)
+#          500:
+#            description: Could not append to <<resourcePathName>> due to internal server error
       delete:
         description: Delete operation for <<resourcePathName>>
         responses:
@@ -210,8 +208,8 @@ resourceTypes:
       /{elementId}:
         post:
           is: [constrainable]
-        put:
-          is: [constrainable]
+#        put:
+#          is: [constrainable]
         type: collection
         uriParameters:
           elementId:
@@ -297,8 +295,8 @@ resourceTypes:
           /{elementId}:
             post:
               is: [constrainable]
-            put:
-              is: [constrainable]
+#            put:
+#              is: [constrainable]
             type: collection
             uriParameters:
               elementId:
