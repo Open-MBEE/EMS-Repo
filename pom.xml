@@ -93,6 +93,11 @@
 	            <type>jar</type>
 	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
 	        </dependency>
+	        <dependency>
+                    <groupId>gov.nasa.jpl.mbee.docbook</groupId>
+                    <artifactId>docbook</artifactId>
+                    <version>0.0.1</version>
+            </dependency>
             </dependencies>
             <properties>
                 <env.BUILD_NUMBER>1.0</env.BUILD_NUMBER>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<webscript>
+	<shortname>workspaces merge</shortname>
+	<description>
+	post merge
+	</description>
+	<url>/merge?target={target}&amp;source={source}</url>
+	<format default="json">any</format>
+	<authentication>user</authentication>
+	<transaction allow="readwrite">required</transaction>
+	<family>MMS REST API</family>
+</webscript>

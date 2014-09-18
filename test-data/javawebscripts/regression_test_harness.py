@@ -2,6 +2,7 @@
 # TODO:
 #    -Fix run server if we use it
 #    -Get SOAP UI tests working
+#    -Add ability to run test functions instead of just curl string commands
 #
 # BUGS (filed defects for these on JIRA):
 #    -Test 14 returning 500 if doing more than once.  This is bug w/ the lock file.
@@ -59,9 +60,9 @@ def create_command_line_options():
     
     python regression_test_harness.py 
     
-    To run test numbers 1,2,11,5-9 (overrides tests for that branch):
+    To run test numbers 1,2,11,5-9:
     
-    python regression_test_harness.py -t 1,2,5-9,11
+    python regression_test_harness.py -t 1,2,11,5-9
     
     To create baselines of all tests for the branch:
     
@@ -73,7 +74,7 @@ def create_command_line_options():
      
     After generating the baselines you will need to copy them from testBaselineDir 
     into the desired folder for that branch, ie workspacesBaselineDir, if you like the results.  
-    This is b/c when running this script outside of jenkins, the script will output to testBaselineDir.
+    This is because when running this script outside of jenkins, the script will output to testBaselineDir.
     Alternatively, change the branch name used using the -g command line arg when creating the baselines,
     to output to the correct baseline folder.
     
@@ -314,6 +315,17 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
         
     thick_divider()
     
+def run_test(test):
+    '''
+    Runs the curl test specified the passed test list
+    '''
+    
+    run_curl_test(test_num=test[0],test_name=test[1],
+                  test_desc=test[2],curl_cmd=test[3],
+                  use_json_diff=test[4],filters=test[5],
+                  delay=test[7] if (len(test) > 7) else None)
+    
+    
 def create_curl_cmd(type, data="", base_url=BASE_URL_WS, post_type="elements", branch="master/", 
                     project_post=False):
     '''
@@ -397,6 +409,7 @@ def startup_server():
 # TABLE OF ALL POSSIBLE TESTS TO RUN
 #     MUST HAVE A UNIQUE TEST NUMBER AND UNIQUE TEST NAME
 #
+##########################################################################################    
 tests =[\
         
 # [       
@@ -533,7 +546,7 @@ create_curl_cmd(type="GET",data="",base_url=BASE_URL_JW,
 True, 
 common_filters,
 ["test","workspaces","develop"],
-120.0
+120
 ],
 
 # DELETES: ==========================    
@@ -644,6 +657,21 @@ True,
 common_filters+['"created"','"id"','"url"'],
 ["test","workspaces","develop"]
 ],
+        
+# EXPRESSIONS: ==========================    
+
+[
+21,
+"SolveConstraint",
+"Post expressions with a constraint and solves for the constraint.",
+create_curl_cmd(type="POST",base_url=BASE_URL_JW,
+                data="expressionElementsNew.json",
+                branch="sites/europa/projects/123456/",
+                post_type="elements?fix=true"),
+True, 
+common_filters+['"specification"'],
+["test","workspaces","develop"]
+],
                 
 ]    
 
@@ -651,6 +679,7 @@ common_filters+['"created"','"id"','"url"'],
 #
 # MAIN METHOD 
 #
+##########################################################################################    
 if __name__ == '__main__':
     
     # Parse the command line arguments:
@@ -696,10 +725,7 @@ if __name__ == '__main__':
             # If it is a valid test number then run the test:
             for test in tests:
                 if test_num == test[0]:
-                     run_curl_test(test_num=test[0],test_name=test[1],
-                                  test_desc=test[2],curl_cmd=test[3],
-                                  use_json_diff=test[4],filters=test[5],
-                                  delay=test[7] if (len(test) > 7) else None)
+                    run_test(test)
                      
     # If there were test names specified:
     elif test_names:
@@ -707,20 +733,14 @@ if __name__ == '__main__':
                 # If it is a valid test number then run the test:
                 for test in tests:
                     if test_name == test[1]:
-                         run_curl_test(test_num=test[0],test_name=test[1],
-                                      test_desc=test[2],curl_cmd=test[3],
-                                      use_json_diff=test[4],filters=test[5],
-                                      delay=test[7] if (len(test) > 7) else None)
-                         
+                        run_test(test)
+
     # Otherwise, run all the tests for the branch:
     else:
         for test in tests:            
             if git_branch in test[6]:
-                    run_curl_test(test_num=test[0],test_name=test[1],
-                                  test_desc=test[2],curl_cmd=test[3],
-                                  use_json_diff=test[4],filters=test[5],
-                                  delay=test[7] if (len(test) > 7) else None)
-                
+                run_test(test)
+
     # uncomment once startup_server() works
 #     print "KILLING SERVER"
 #     kill_server()
