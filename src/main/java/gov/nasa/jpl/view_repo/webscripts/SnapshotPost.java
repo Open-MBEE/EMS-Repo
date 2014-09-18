@@ -824,7 +824,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         try {
             jobNode =
                     ActionUtil.getOrCreateJob( siteNode, jobName,
-                                               "ems:ConfigurationSet", status,
+                                               "cm:content", status,
                                                response );
             if ( jobNode == null ) {
                 log( LogLevel.ERROR, "Couldn't create snapshot job: "
