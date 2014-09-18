@@ -218,7 +218,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	                                           WorkspaceNode workspace,
 	                                           Date dateTime, boolean findDeleted) {
 	    return NodeUtil.findScriptNodeById( id, workspace, dateTime, findDeleted,
-
 	                                        services, response );
 	}
 

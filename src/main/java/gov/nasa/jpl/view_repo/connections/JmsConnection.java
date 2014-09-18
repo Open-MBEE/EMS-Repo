@@ -67,7 +67,7 @@ public class JmsConnection extends AbstractConnection {
 
             // Create a MessageProducer from the Session to the Topic or Queue
             MessageProducer producer = session.createProducer(destination);
-            producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+            producer.setDeliveryMode(DeliveryMode.PERSISTENT);
 
             // Create a message
             TextMessage message = session.createTextMessage(msg);
