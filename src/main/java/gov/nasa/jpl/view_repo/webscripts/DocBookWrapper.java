@@ -93,8 +93,7 @@ public class DocBookWrapper {
 		
 		System.out.println("srcFile: " + srcFile.getAbsolutePath());
 		String source = srcFile.getAbsolutePath();
-		
-		String target = source.substring(0, source.indexOf(".")) + ".pdf";
+		String target = source.subSequence(0, source.lastIndexOf(".")) + ".pdf";
 		command.add(this.getFobFileName());
 		command.add("-xml");
 		command.add(source);
@@ -355,7 +354,7 @@ public class DocBookWrapper {
     	this.jobDirName = Paths.get(tmpDirName, this.snapshotName);
 		this.dbDirName = Paths.get(jobDirName.toString(), "docbook");
 		this.imageDirName = Paths.get(dbDirName.toString(), "images");
-		this.dbFileName = Paths.get(this.dbDirName.toString(), this.snapshotName + ".db");
+		this.dbFileName = Paths.get(this.dbDirName.toString(), this.snapshotName + ".xml");
 		
 		//String docgenDirName = "/opt/local/alfresco/tomcat/webapps/alfresco/docgen/";
 		String docgenDirName = "/opt/local/docbookgen/";
