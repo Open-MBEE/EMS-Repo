@@ -812,14 +812,15 @@ public class EmsScriptNode extends ScriptNode implements
      */
     @Override
     public EmsScriptNode createNode( String name, String type ) {
-        NodeRef nr = findNodeRefByType( name, SearchType.CM_NAME.prefix, true,
-                                        workspace, null, false );
-        EmsScriptNode n = new EmsScriptNode( nr, getServices() ); 
-        if ( !n.checkPermissions( PermissionService.ADD_CHILDREN, getResponse(),
-                                 getStatus() ) ) {
-            log( "No permissions to add children to " + n.getName() );
-            return null;
-        }
+//        NodeRef nr = findNodeRefByType( name, SearchType.CM_NAME.prefix, true,
+//                                        workspace, null, false );
+//        
+//        EmsScriptNode n = new EmsScriptNode( nr, getServices() ); 
+//        if ( !n.checkPermissions( PermissionService.ADD_CHILDREN, getResponse(),
+//                                 getStatus() ) ) {
+//            log( "No permissions to add children to " + n.getName() );
+//            return null;
+//        }
 
         EmsScriptNode result = null;
         // Date start = new Date(), end;
@@ -852,16 +853,13 @@ public class EmsScriptNode extends ScriptNode implements
                             new EmsScriptNode( assoc.getChildRef(), services,
                                                response );
                 } catch ( Exception e ) {
-                    if ( Debug.isOn() ) System.out.println( "Got exception in "
-                                                            + "createNode(name="
-                                                            + name
-                                                            + ", type="
-                                                            + type
-                                                            + ") for EmsScriptNode("
-                                                            + this
-                                                            + ") calling createNode(nodeRef="
-                                                            + nodeRef
-                                                            + ", . . .)" );
+                    if ( Debug.isOn() ) 
+                        System.out.println( "Got exception in "
+                                            + "createNode(name="
+                                            + name + ", type=" + type
+                                            + ") for EmsScriptNode(" + this
+                                            + ") calling createNode(nodeRef="
+                                            + nodeRef + ", . . .)" );
                     e.printStackTrace();
                 }
 
