@@ -256,6 +256,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             } else {
                 String s = (String)node.getProperty( Acm.SYSML + srcProp );
                 s = handleTransclusion( src, srcProp, s, null, 0 );
+                //s = handleEmbeddedImage(src, srcProp, s, null, 0);
                 s = HtmlSanitize( s );
                 if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
                                                             + s
@@ -265,6 +266,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             if ( srcProp != null && !srcProp.isEmpty() ) {
                 String s = (String)obj.opt( Acm.SYSML + srcProp );
                 s = handleTransclusion( src, srcProp, s, null, 0 );
+                //s = handleEmbeddedImage(src, srcProp, s, null, 0);
                 s = HtmlSanitize( s );
                 if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
                                                             + s
@@ -801,6 +803,18 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return viewId;
     }
 
+    //private String handleEmbeddedImage( String id, String inputString)
+    //{
+    	//Document document = Jsoup.parseBodyFragment(inputString);
+    	//Elements images = document.getElementsByTag("img");
+    	//for(Element image : images){
+    		//String href = image.attr("href");
+    		//if(href.toLowerCase().startsWith("http")){
+    			
+    		//}
+    	//}
+    //}
+    
     private
             JSONObject
             handleGenerateArtifacts( JSONObject postJson,
@@ -824,7 +838,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         try {
             jobNode =
                     ActionUtil.getOrCreateJob( siteNode, jobName,
-                                               "ems:ConfigurationSet", status,
+                                               "cm:content", status,
                                                response );
             if ( jobNode == null ) {
                 log( LogLevel.ERROR, "Couldn't create snapshot job: "
