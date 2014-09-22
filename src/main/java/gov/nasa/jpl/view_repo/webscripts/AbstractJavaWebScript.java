@@ -218,7 +218,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	                                           WorkspaceNode workspace,
 	                                           Date dateTime, boolean findDeleted) {
 	    return NodeUtil.findScriptNodeById( id, workspace, dateTime, findDeleted,
-
 	                                        services, response );
 	}
 
@@ -665,7 +664,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     public void setWsDiff(WorkspaceNode workspace) {
         wsDiff = new WorkspaceDiff(workspace, workspace);
     }
-
+    public void setWsDiff(WorkspaceNode workspace1, WorkspaceNode workspace2, Date time1, Date time2) {
+        wsDiff = new WorkspaceDiff(workspace1, workspace2, time1, time2);
+    }
+    
     public WorkspaceDiff getWsDiff() {
         return wsDiff;
     }

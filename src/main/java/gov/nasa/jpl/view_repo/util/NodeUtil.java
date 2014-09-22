@@ -30,6 +30,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
+import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
@@ -337,7 +338,7 @@ public class NodeUtil {
                             continue;
                         }
                     }
-
+                    try {
                     // Make sure it's in the right workspace.
                     if ( !ignoreWorkspace && 
                          ( ( workspace != null &&
@@ -352,6 +353,12 @@ public class NodeUtil {
                             Debug.turnOn();
                         }
                         continue;
+                    }
+                    } catch( InvalidNodeRefException e ) {
+                        if ( Debug.isOn() ) e.printStackTrace();
+                        continue;
+                    } catch( Throwable e ) {
+                        e.printStackTrace();
                     }
 
                     // Make sure we didn't just get a near match.

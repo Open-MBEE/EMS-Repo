@@ -43,7 +43,7 @@ if [ $server -eq 1 ]; then
 	
         # Run regression tests
         # The script will run the desired tests based on the GIT_BRANCH environment variable.
-        # Those tests ran can be overwritten by specifying the desired tests using the -t option.
+        # Those tests ran can be overwritten by specifying the desired tests using the -t or -n option.
         python test-data/javawebscripts/regression_test_harness.py
   	failTest=$?
 

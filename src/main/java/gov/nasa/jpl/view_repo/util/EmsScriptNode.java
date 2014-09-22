@@ -812,6 +812,15 @@ public class EmsScriptNode extends ScriptNode implements
      */
     @Override
     public EmsScriptNode createNode( String name, String type ) {
+        NodeRef nr = findNodeRefByType( name, SearchType.CM_NAME.prefix, true,
+                                        workspace, null, false );
+        EmsScriptNode n = new EmsScriptNode( nr, getServices() ); 
+        if ( !n.checkPermissions( PermissionService.ADD_CHILDREN, getResponse(),
+                                 getStatus() ) ) {
+            log( "No permissions to add children to " + n.getName() );
+            return null;
+        }
+
         EmsScriptNode result = null;
         // Date start = new Date(), end;
 
@@ -2376,7 +2385,7 @@ public class EmsScriptNode extends ScriptNode implements
             filename = filename.replace( "src=/editor/images/docgen/", "" );
             boolean useSimpleCache = getWorkspace() == null;
             NodeRef nodeRef =
-                    findNodeRefByType( filename, "@cm\\:name:\"", useSimpleCache,
+                    findNodeRefByType( filename, SearchType.CM_NAME.prefix, useSimpleCache,
                                        getWorkspace(), null, false );
             if ( nodeRef != null ) {
                 // this should grab whatever is the latest versions purl - so
@@ -2532,7 +2541,8 @@ public class EmsScriptNode extends ScriptNode implements
         if (exists()) {
             return hasAspect( "ems:Deleted" );
         }
-        return true;
+        // may seem counterintuitive, but if it doesn't exist, it isn't deleted
+        return false;
     }
 
 
@@ -2691,10 +2701,16 @@ public class EmsScriptNode extends ScriptNode implements
         }
         EmsScriptNode node = parent.createNode( getName(), type );
 
+        if ( node == null ) {
+            Debug.error( "Could not create node in parent " + parent.getName() );
+            return null;
+        }
+
         // add missing aspects
         NodeService nodeService = getServices().getNodeService();
         Set< QName > myAspects = nodeService.getAspects( getNodeRef() );
         for ( QName qName : myAspects ) {
+            if ( qName == null ) continue;
             node.createOrUpdateAspect( qName.toString() );
         }
 

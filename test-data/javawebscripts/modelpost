@@ -1,5 +1,4 @@
 #!/bin/bash
-
 if [ "$#" -eq 1 ]; then
   echo curl -w "%{http_code}\n" -X POST -u admin:admin -H "Content-Type:application/json" --data @$1 "http://localhost:8080/alfresco/service/workspaces/master/elements"
   curl -w "%{http_code}\n" -X POST -u admin:admin -H "Content-Type:application/json" --data @$1 "http://localhost:8080/alfresco/service/workspaces/master/elements"
@@ -7,3 +6,4 @@ else
   echo curl -w "%{http_code}\n" -X POST -u admin:admin -H "Content-Type:application/json" --data @$2 "http://localhost:8080/alfresco/service/workspaces/$1/elements"
   curl -w "%{http_code}\n" -X POST -u admin:admin -H "Content-Type:application/json" --data @$2 "http://localhost:8080/alfresco/service/workspaces/$1/elements"
 fi;
+
