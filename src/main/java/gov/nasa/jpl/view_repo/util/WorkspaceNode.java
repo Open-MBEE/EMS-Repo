@@ -327,8 +327,12 @@ public class WorkspaceNode extends EmsScriptNode {
                 CommitUtil.getCommits( this, null, getServices(), getResponse() );
         commits.add( CommitUtil.getCommitPkg( this, null, getServices(),
                                               getResponse() ) );
-        System.out.println("removing commits: " + commits );
-        changedNodeRefs.removeAll( commits );
+        //System.out.println("removing commits: " + commits );
+        NodeRef commitRef;
+        for (EmsScriptNode commitNode : commits) {
+        	commitRef = commitNode.getNodeRef();
+        	if (commitRef != null) changedNodeRefs.remove(commitRef);
+        }
 
         return changedNodeRefs;
     }
