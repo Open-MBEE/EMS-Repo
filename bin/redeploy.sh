@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#change test to 1 to just see commands without running them
+#change test to 0 to run normally
+export test=1
+
 usage() {
   echo "usage: sudo $(basename $0) repoAmpFile|shareAmpFile [shareAmpFile|repoAmpFile] [repoWarFile] [shareWarFile] [mmsappDir] [mmsappZip]"
   echo
@@ -16,7 +20,7 @@ deloyMmsappCmd=$d/deployMmsapp.sh
 
 tomcatDir=/opt/local/apache-tomcat
 if [ ! -f $tomcatDir ]; then
-  tomcatDir=/opt/local/alfresco-4.2e/tomcat
+  tomcatDir=/opt/local/alfresco-4.2.e/tomcat
 fi
 webappDir=${tomcatDir}/webapps
 alfrescoWebappDir=${webappDir}/alfresco
@@ -105,7 +109,10 @@ echo "  mmsappDir =" $mmsappDir
 echo "  mmsappZip =" $mmsappZip
 
 # stop alfresco server
-$stopAlfrescoCmd
+echo $stopAlfrescoCmd
+if [[ "$test" -eq "0" ]]; then
+  $stopAlfrescoCmd
+fi
 
 # install war files
 if [ -f "$ampFile" ]; then
@@ -114,7 +121,7 @@ if [ -f "$ampFile" ]; then
 fi
 if [ -f "$shareAmpFile" ]; then
   echo $installWarCommand $mmtjar $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
-  $installWarCommand $mmtjar $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
+    $installWarCommand $mmtjar $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
 fi
 
 # deploy mmsapp

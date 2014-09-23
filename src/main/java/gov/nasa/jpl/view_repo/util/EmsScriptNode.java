@@ -643,67 +643,72 @@ public class EmsScriptNode extends ScriptNode implements
     public String extractAndReplaceImageData( String value ) {
         if ( value == null ) return null;
         String v = value;
-        Document doc = Jsoup.parse( v );
-        Elements imgs = doc.select( "img.src" );
-        for (Element img: imgs) {
-            String src = img.attr("src");
-            int index = src.indexOf( "base64," );
-            if (src.startsWith( "data" ) && index > 0) {
-                String mediatype = src.substring( "data:".length(), index );
-                if (mediatype.startsWith( "image/" )) {
-                    String extension = mediatype.replace( "image/", "" );
-                    index += "base64,".length();
-                    String content = src.substring( index );
-                    String name = "img_" + System.currentTimeMillis();
-                    EmsScriptNode artNode =
-                            findOrCreateArtifact( name, extension, content,
-                                                  getSiteName(), "images",
-                                                  getWorkspace(), null );
-                    if ( artNode == null || !artNode.exists() ) {
-                        log( "Failed to pull out image data for value! "
-                             + value );
-                        break;
-                    }
-
-                    String url = artNode.getUrl();
-                    String link = url.replace( "/d/d/", "/alfresco/service/api/node/content/" );
-                    img.attr( src, link );
-                }
-            }
-            v = doc.select( "body" ).html();
-        }
-//        while ( true ) {
-//            Pattern p =
-//                    Pattern.compile( "(.*)<img\\s*src\\s*=\\s*[\"']data:image/(\\w*);base64,([^\"']*)[\"'][^>]*>(.*)" );
-//            Matcher m = p.matcher( v );
-//            if ( !m.matches() ) {
-//                break;
-//            } else {
-//                if ( m.groupCount() != 4 ) {
-//                    log( "Expected 4 match groups, got " + m.groupCount()
-//                         + "! " + m );
-//                    break;
-//                }
-//                String extension = m.group( 2 );
-//                String content = m.group( 3 );
-//                String name = "img_" + System.currentTimeMillis();
-//                EmsScriptNode artNode =
-//                        findOrCreateArtifact( name, extension, content,
-//                                              getSiteName(), "images",
-//                                              getWorkspace(), null );
-//                if ( artNode == null || !artNode.exists() ) {
-//                    log( "Failed to pull out image data for value! " + value );
-//                    break;
-//                }
+//        Document doc = Jsoup.parse( v );
+//        Elements imgs = doc.select( "img.src" );
+//        System.out.println("imgs = " + imgs);
+//        for (Element img: imgs) {
+//            String src = img.attr("src");
+//            int index = src.indexOf( "base64," );
+//            System.out.println("indexOf \"base64,\"" + index);
+//            System.out.println("src = " + src.substring( 0, Math.min( src.length()-1, 100 ) ) + " . . .");
+//            if (src.startsWith( "data" ) && index > 0) {
+//                String mediatype = src.substring( "data:".length(), index );
+//                System.out.println("mediatype = " + mediatype);
+//                if (mediatype.startsWith( "image/" )) {
+//                    String extension = mediatype.replace( "image/", "" );
+//                    index += "base64,".length();
+//                    String content = src.substring( index );
+//                    String name = "img_" + System.currentTimeMillis();
+//                    EmsScriptNode artNode =
+//                            findOrCreateArtifact( name, extension, content,
+//                                                  getSiteName(), "images",
+//                                                  getWorkspace(), null );
+//                    if ( artNode == null || !artNode.exists() ) {
+//                        log( "Failed to pull out image data for value! "
+//                             + value );
+//                        break;
+//                    }
 //
-//                String url = artNode.getUrl();
-//                String link = "<img src=\"" + url + "\"/>";
-//                link =
-//                        link.replace( "/d/d/",
-//                                      "/alfresco/service/api/node/content/" );
-//                v = m.group( 1 ) + link + m.group( 4 );
+//                    String url = artNode.getUrl();
+//                    String link = url.replace( "/d/d/", "/alfresco/service/api/node/content/" );
+//                    img.attr( src, link );
+//                }
 //            }
+//            v = doc.select( "body" ).html();
 //        }
+        if ( Debug.isOn()) Debug.outln("extractAndReplaceImageData(" + v.substring( 0, Math.min( v.length(), 100 ) ) + (v.length()>100 ? " . . ." :"") + ")");
+        while ( true ) {
+            Pattern p = Pattern.compile( "(.*)<img[^>]*\\ssrc\\s*=\\s*[\"']data:image/(\\w*);\\s*base64\\s*,([^\"']*)[\"'][^>]*>(.*)",
+                                         Pattern.DOTALL );
+            Matcher m = p.matcher( v );
+            if ( !m.matches() ) {
+                break;
+            } else {
+                if ( m.groupCount() != 4 ) {
+                    log( "Expected 4 match groups, got " + m.groupCount()
+                         + "! " + m );
+                    break;
+                }
+                String extension = m.group( 2 );
+                String content = m.group( 3 );
+                String name = "img_" + System.currentTimeMillis();
+                EmsScriptNode artNode =
+                        findOrCreateArtifact( name, extension, content,
+                                              getSiteName(), "images",
+                                              getWorkspace(), null );
+                if ( artNode == null || !artNode.exists() ) {
+                    log( "Failed to pull out image data for value! " + value );
+                    break;
+                }
+
+                String url = artNode.getUrl();
+                String link = "<img src=\"" + url + "\"/>";
+                link =
+                        link.replace( "/d/d/",
+                                      "/alfresco/service/api/node/content/" );
+                v = m.group( 1 ) + link + m.group( 4 );
+            }
+        }
         return v;
     }
 

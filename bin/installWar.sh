@@ -2,7 +2,7 @@
 
 usage="usage: sudo $0 mmtjar ampFile warFile existingWarFile explodedWebappDir"
 
-if [ ( ! "$#" -eq 4 ) &&  ( ! "$#" -eq 5 ) ]; then
+if [[ ( ! "$#" -eq 4 ) &&  ( ! "$#" -eq 5 ) ]]; then
 #if [ ! "$#" -eq 3 ]; then
   echo "$0 : Error! Need at three arguments! number of passed args = $#"
   echo $usage
@@ -26,24 +26,32 @@ echo "  explodedWebappDir=" $explodedWebappDir
 # backup war file
 if [ ! $existingWarFile -ef $warFile ]; then
   echo cp $existingWarFile ${existingWarFile}.`date '+%Y%m%d-%H%M%S'`
-  cp $existingWarFile ${existingWarFile}.`date '+%Y%m%d-%H%M%S'`
+  if [[ "$test" -eq "0" ]]; then
+    cp $existingWarFile ${existingWarFile}.`date '+%Y%m%d-%H%M%S'`
+  fi
   # use specified warFile
   echo cp -f $warFile $existingWarFile
-  cp -f $warFile $existingWarFile
+  if [[ "$test" -eq "0" ]]; then
+    cp -f $warFile $existingWarFile
+  fi
 fi
 
 # install amp to war
 echo java -jar $mmtJar install $ampFile $existingWarFile -force
 temp=`mktemp`
-java -jar $mmtJar install $ampFile $existingWarFile -force | tee $temp | head -n 5
-echo . . .
-tail -n 5 $temp
-/bin/rm -rf $temp
+if [[ "$test" -eq "0" ]]; then
+  java -jar $mmtJar install $ampFile $existingWarFile -force | tee $temp | head -n 5
+  echo . . .
+  tail -n 5 $temp
+  /bin/rm -rf $temp
+fi
 
 # change owner to tomcat if specified
 #if [ "tomcat" == "$owner" ]; then
   echo chown ${owner}:${owner} $existingWarFile
-  chown ${owner}:${owner} $existingWarFile
+  if [[ "$test" -eq "0" ]]; then
+    chown ${owner}:${owner} $existingWarFile
+  fi
   #chown tomcat:tomcat $existingWarFile
 #fi
 
@@ -52,22 +60,30 @@ if [ ! "$explodedWebappDir" -eq "" ]; then
   # blast alfresco directory
   if [ -d $explodedWebappDir ]; then
     echo rm -rf $explodedWebappDir
-    rm -rf $explodedWebappDir
+    if [[ "$test" -eq "0" ]]; then
+      rm -rf $explodedWebappDir
+    fi
   fi
 
   # explode war
   echo mkdir $explodedWebappDir
-  mkdir $explodedWebappDir
+  if [[ "$test" -eq "0" ]]; then
+    mkdir $explodedWebappDir
+  fi
 
   echo pushd $explodedWebappDir
   pushd $explodedWebappDir
 
   echo jar xvf $existingWarFile
-  jar xvf $existingWarFile
+  if [[ "$test" -eq "0" ]]; then
+    jar xvf $existingWarFile
+  fi
 
   # change owner
   echo chown -Rh ${owner}:${owner} $explodedWebappDir
-  chown -Rh ${owner}:${owner} $explodedWebappDir
+  if [[ "$test" -eq "0" ]]; then
+    chown -Rh ${owner}:${owner} $explodedWebappDir
+  fi
 
   # get back to where we were
   echo popd
@@ -76,6 +92,3 @@ if [ ! "$explodedWebappDir" -eq "" ]; then
 fi
 
 exit 0
-
-
-
