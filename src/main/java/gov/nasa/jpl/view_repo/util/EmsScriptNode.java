@@ -676,22 +676,19 @@ public class EmsScriptNode extends ScriptNode implements
 //            }
 //            v = doc.select( "body" ).html();
 //        }
-//        System.out.println("extractAndReplaceImageData(" + v.substring( 0, Math.min( v.length(), 100 ) ) + (v.length()>100 ? " . . ." :"") + ")");
+        if ( Debug.isOn()) Debug.outln("extractAndReplaceImageData(" + v.substring( 0, Math.min( v.length(), 100 ) ) + (v.length()>100 ? " . . ." :"") + ")");
         while ( true ) {
             Pattern p = Pattern.compile( "(.*)<img[^>]*\\ssrc\\s*=\\s*[\"']data:image/(\\w*);\\s*base64\\s*,([^\"']*)[\"'][^>]*>(.*)",
                                          Pattern.DOTALL );
             Matcher m = p.matcher( v );
             if ( !m.matches() ) {
-                System.out.println("no match!");
                 break;
             } else {
-                System.out.println("matched!");
                 if ( m.groupCount() != 4 ) {
                     log( "Expected 4 match groups, got " + m.groupCount()
                          + "! " + m );
                     break;
                 }
-//                System.out.println("m = " + m);
                 String extension = m.group( 2 );
                 String content = m.group( 3 );
                 String name = "img_" + System.currentTimeMillis();
