@@ -144,6 +144,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
              model.put( "res", response.toString() );
          } else {
              try {
+                 result.put("message", response.toString());
                  model.put("res",  result.toString(2));
              } catch (JSONException e) {
                  // TODO Auto-generated catch block
