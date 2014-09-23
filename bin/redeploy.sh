@@ -1,22 +1,45 @@
 #!/bin/bash
 
-#change test to 1 to just see commands without running them
-#change test to 0 to run normally
-export test=1
-
 usage() {
+  echo
   echo "usage: sudo $(basename $0) repoAmpFile|shareAmpFile [shareAmpFile|repoAmpFile] [repoWarFile] [shareWarFile] [mmsappDir] [mmsappZip]"
   echo
   echo "The order of arguments is not important. The $(basename $0) script may be called from anywhere, but the scripts on which it depends (installWar.sh, startAlfresco.sh, stopAlfresco.h, and deployMmsapp.sh) must be in the same directory as $(basename $0)."
   echo
+  echo
 }
+
+# Change test_mms to 1 to just see commands without running them.
+# Change test_mms to 0 to run normally.
+# An existing test_mms environment variable overrides setting the value here.
+if [ -z "$test_mms" ]; then
+  #export test_mms=1 # just test
+  export test_mms=0 # normal
+fi
+
+echo
+if [[ "$test_mms" -eq "0" ]]; then
+  echo "running $0 normally"
+else
+  echo "running $0 in test mode; will not affect server"
+fi
+echo
+
+#This below doesn't work.
+#checkLastCommand() {
+#  if [ "$?" -ne "0" ]; then
+#    echo "$0: ERROR! command failed! \"!!\""
+#    exit 1
+#  fi
+#}
+
 
 # variable initialization
 d=$(dirname $0)
 installWarCommand=$d/installWar.sh
 startAlfrescoCmd=$d/stopAlfresco.sh
 stopAlfrescoCmd=$d/stopAlfresco.sh
-deloyMmsappCmd=$d/deployMmsapp.sh
+deployMmsappCmd=$d/deployMmsapp.sh
 
 tomcatDir=/opt/local/apache-tomcat
 if [ ! -f $tomcatDir ]; then
@@ -100,7 +123,7 @@ do
 done
 
 echo
-echo "arguments processed with the following assignments:"
+echo "arguments for $0 processed with the following assignments:"
 echo "  ampFile =" $ampFile
 echo "  shareAmpFile =" $shareAmpFile
 echo "  warFile =" $warFile
@@ -109,27 +132,62 @@ echo "  mmsappDir =" $mmsappDir
 echo "  mmsappZip =" $mmsappZip
 
 # stop alfresco server
+echo
 echo $stopAlfrescoCmd
-if [[ "$test" -eq "0" ]]; then
+#if [[ "$test_mms" -eq "0" ]]; then
   $stopAlfrescoCmd
-fi
+  if [ "$?" -ne "0" ]; then
+    echo "$0: ERROR! command failed! \"!!\""
+    exit 1
+  fi
+#fi
 
 # install war files
-if [ -f "$ampFile" ]; then
-  echo $installWarCommand $mmtjar $ampFile $warFile $existingWarFile $alfrescoWebappDir
-  $installWarCommand $mmtjar $ampFile $warFile $existingWarFile $alfrescoWebappDir
+if [[ ( -f "$mmtJar" ) &&  ( -f "$ampFile" ) &&  ( -f "$warFile" ) &&  ( -f "$existingWarFile" ) &&  ( -d $(dirname $alfrescoWebappDir) ) ]]; then
+  echo
+  echo $installWarCommand $mmtJar $ampFile $warFile $existingWarFile $alfrescoWebappDir
+  $installWarCommand $mmtJar $ampFile $warFile $existingWarFile $alfrescoWebappDir
+  if [ "$?" -ne "0" ]; then
+    echo "$0: ERROR! command failed! \"!!\""
+    exit 1
+  fi
+else
+  echo "ERROR! Not all inputs to $installWarCommand exist for view-repo!"
+  exit 1
 fi
-if [ -f "$shareAmpFile" ]; then
-  echo $installWarCommand $mmtjar $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
-    $installWarCommand $mmtjar $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
+
+if [[ ( -f "$mmtJar" ) &&  ( -f "$shareAmpFile" ) &&  ( -f "$shareWarFile" ) &&  ( -f "$existingShareWarFile" ) &&  ( -d $(dirname $shareWebappDir) ) ]]; then
+  echo
+  echo $installWarCommand $mmtJar $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
+    $installWarCommand $mmtJar $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
+  if [ "$?" -ne "0" ]; then
+    echo "$0: ERROR! command failed! \"!!\""
+    exit 1
+  fi
+else
+  echo "ERROR! Not all inputs to $installWarCommand exist for share!"
+  exit 1
 fi
 
 # deploy mmsapp
-if [ -f "$ampFile" ]; then
-  $deployMmsappCmd $mmsappDeployDir $mmsappDir $backupDir $mmsappZip
+echo
+if [[ ( -f "$mmsappZip" ) || ( -d "$mmsappDir" ) ]]; then
+  if [[ -d $(dirname $mmsappDeployDir) ]]; then
+    echo $deployMmsappCmd $mmsappDeployDir "$mmsappDir" "$backupDir" "$mmsappZip"
+    $deployMmsappCmd $mmsappDeployDir $mmsappDir $backupDir $mmsappZip
+    if [ "$?" -ne "0" ]; then
+      echo "$0: ERROR! command failed! \"!!\""
+      exit 1
+    fi
+  else
+    echo "ERROR! Directory $(dirname $mmsappDeployDir) does not exist! Cannot run $deployMmsappCmd."
+    exit 1
+  fi
 fi
 
 #start server
+echo
+echo $startAlrfescoCmd
 $startAlrfescoCmd
 
 exit 0
