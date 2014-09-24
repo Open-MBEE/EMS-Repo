@@ -265,6 +265,7 @@ public class DocBookWrapper {
 
 	public void save() throws IOException{
 		String docBookXml = this.getContent();
+		new File(this.dbDirName.toString()).mkdirs();
     	File f = new File(this.dbFileName.toString());
     	FileWriter fw = new FileWriter(f);
     	fw.write(docBookXml);

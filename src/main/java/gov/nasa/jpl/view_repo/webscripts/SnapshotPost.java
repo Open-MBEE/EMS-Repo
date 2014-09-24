@@ -256,7 +256,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             } else {
                 String s = (String)node.getProperty( Acm.SYSML + srcProp );
                 s = handleTransclusion( src, srcProp, s, null, 0 );
-                //s = handleEmbeddedImage(src, srcProp, s, null, 0);
+                s = handleEmbeddedImage(src, s);
                 s = HtmlSanitize( s );
                 if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
                                                             + s
@@ -266,7 +266,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             if ( srcProp != null && !srcProp.isEmpty() ) {
                 String s = (String)obj.opt( Acm.SYSML + srcProp );
                 s = handleTransclusion( src, srcProp, s, null, 0 );
-                //s = handleEmbeddedImage(src, srcProp, s, null, 0);
+                s = handleEmbeddedImage(src, s);
                 s = HtmlSanitize( s );
                 if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
                                                             + s
@@ -803,18 +803,20 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return viewId;
     }
 
-    //private String handleEmbeddedImage( String id, String inputString)
-    //{
-    	//Document document = Jsoup.parseBodyFragment(inputString);
-    	//Elements images = document.getElementsByTag("img");
-    	//for(Element image : images){
-    		//String href = image.attr("href");
-    		//if(href.toLowerCase().startsWith("http")){
-    			
-    		//}
-    	//}
-    //}
-    
+    private String handleEmbeddedImage( String id, String inputString)
+    {
+    	Document document = Jsoup.parseBodyFragment(inputString);
+    	Elements images = document.getElementsByTag("img");
+    	for(Element image : images){
+    		String src = image.attr("src");
+    		if(src.toLowerCase().startsWith("http")){
+    			System.out.println("Embedded image src: " + src);
+    			//http://localhost:8081/share/proxy/alfresco/api/node/content/workspace/SpacesStore/74cd8a96-8a21-47e5-9b3b-a1b3e296787d/graph.JPG
+    		}
+    	}
+    	return inputString;
+    }
+
     private
             JSONObject
             handleGenerateArtifacts( JSONObject postJson,
@@ -903,7 +905,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     private String HtmlSanitize( String s ) {
-        return s.replaceAll( "(?i)<p>([^<]*)</p>", "$1" );
+    	Document document = Jsoup.parseBodyFragment(s);
+    	return document.text();
+        //return s.replaceAll( "(?i)<p>([^<]*)</p>", "$1" );
     }
 
     // private String parseTransclusion(List<String> cirRefList, String
