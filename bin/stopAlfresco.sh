@@ -1,5 +1,6 @@
 #!/bin/bash
 # stop alfresco server
+echo "##### stop alfresco server"
 
 #change test_mms to 1 to just see commands without running them
 #change test_mms to 0 to run normally
@@ -8,7 +9,7 @@ if [ -z "$test_mms" ]; then
   export test_mms=0 # normal
 fi
 
-d=$(dirname $0)
+d=$(dirname "$0")
 killCommand=$d/killAlfresco.sh
 
 if [ -e /etc/init.d/alfresco ]; then

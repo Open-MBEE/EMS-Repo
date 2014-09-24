@@ -41,6 +41,7 @@ echo "  owner =" $owner
 # backup war file
 if [ ! $existingWarFile -ef $warFile ]; then
   echo
+  echo "##### backup war file"
   echo cp $existingWarFile ${existingWarFile}.`date '+%Y%m%d-%H%M%S'`
   if [[ "$test_mms" -eq "0" ]]; then
     cp $existingWarFile ${existingWarFile}.`date '+%Y%m%d-%H%M%S'`
@@ -50,6 +51,7 @@ if [ ! $existingWarFile -ef $warFile ]; then
     fi
   fi
   # use specified warFile
+  echo "##### use specified warFile"
   echo cp -f $warFile $existingWarFile
   if [[ "$test_mms" -eq "0" ]]; then
     cp -f $warFile $existingWarFile
@@ -58,6 +60,7 @@ fi
 
 # install amp to war
 echo
+echo "##### install amp to war"
 echo java -jar $mmtJar install $ampFile $existingWarFile -force
 temp=`mktemp`
 if [[ "$test_mms" -eq "0" ]]; then
@@ -67,15 +70,16 @@ if [[ "$test_mms" -eq "0" ]]; then
   /bin/rm -rf $temp
 fi
 
-# change owner to tomcat if specified
-#if [ "tomcat" == "$owner" ]; then
+# change owner if specified
+if [ -n "$owner" ]; then
   echo
+  echo "##### change owner of war file"
   echo chown ${owner}:${owner} $existingWarFile
   if [[ "$test_mms" -eq "0" ]]; then
     chown ${owner}:${owner} $existingWarFile
   fi
   #chown tomcat:tomcat $existingWarFile
-#fi
+fi
 
 if [[ ( -z "$explodedWebappDir" ) || ( ! -d $explodeParentDir  ) ]]; then
   echo
@@ -84,6 +88,7 @@ if [[ ( -z "$explodedWebappDir" ) || ( ! -d $explodeParentDir  ) ]]; then
 else
   echo
   # blast alfresco directory
+  echo "##### blast alfresco directory"
   if [ -d $explodedWebappDir ]; then
     echo rm -rf $explodedWebappDir
     if [[ "$test_mms" -eq "0" ]]; then
@@ -92,6 +97,7 @@ else
   fi
 
   # explode war
+  echo "##### explode war in target directory"
   echo mkdir $explodedWebappDir
   if [[ "$test_mms" -eq "0" ]]; then
     mkdir $explodedWebappDir
@@ -102,13 +108,14 @@ else
   pushd $explodedWebappDir
 
   echo
-  echo jar xvf $existingWarFile
+  echo jar xf $existingWarFile
   if [[ "$test_mms" -eq "0" ]]; then
-    jar xvf $existingWarFile
+    jar xf $existingWarFile
   fi
 
   # change owner
   echo
+  echo "##### change owner of deployed web app"
   echo chown -Rh ${owner}:${owner} $explodedWebappDir
   if [[ "$test_mms" -eq "0" ]]; then
     chown -Rh ${owner}:${owner} $explodedWebappDir
@@ -116,6 +123,7 @@ else
 
   # get back to where we were
   echo
+  echo "##### get back to the directory where we were"
   echo popd
   popd
 

@@ -51,15 +51,17 @@ deployParentDir=$(dirname $mmsappDeployDir)
 # Use the owner of the webapp directory as the owner of the deployed webapp
 owner=`ls -ld $deployParentDir | cut -d' ' -f 3`
 
-echo "arguments for $0 processed with the following assignments and inferred values:"
-echo "mmsappDeployDir =" $mmsappDeployDir
-echo "mmsappDir =" $mmsappDir
-echo "mmsappZip =" $mmsappZip
-echo "backupDir =" $backupDir
-echo "owner = " $owner
+echo "##### arguments for $0 processed with the following assignments and inferred values:"
+echo "  mmsappDeployDir =" $mmsappDeployDir
+echo "  mmsappDir =" $mmsappDir
+echo "  mmsappZip =" $mmsappZip
+echo "  backupDir =" $backupDir
+echo "  owner = " $owner
 
 # unzip zip file if provided
 if [ -f "$mmsappZip" ]; then
+  echo
+  echo "##### unzip zip file"
   echo mkdir $tmpDir
   mkdir $tmpDir
   echo pushd $tmpDir
@@ -76,6 +78,8 @@ fi
 
 # backup existing mmsapp dir
 if [ -e "$mmsappDeployDir" ]; then
+  echo
+  echo "##### backup existing mmsapp dir"
   echo "tar -zcf ${backupDir}/mmsapp.`date '+%Y%m%d-%H%M%S'`.tgz $mmsappDeployDir"
   #echo "/bin/mv $mmsappDeployDir ${backupDir}/mmsapp.`date '+%Y%m%d-%H%M%S'`"
   if [[ "$test_mms" -eq "0" ]]; then
@@ -96,6 +100,8 @@ fi
 
 # copy the mmsapp directory to the deployed location
 if [ -d $mmsappDir ]; then
+  echo
+  echo "##### copy the mmsapp directory to the deployed location"
   echo cp -pRf $mmsappDir $mmsappDeployDir
   if [[ "$test_mms" -eq "0" ]]; then
     cp -pRf $mmsappDir $mmsappDeployDir
@@ -108,6 +114,8 @@ fi
 
 # delete the temporary unzip directory if it exists
 if [ -e "$tmpDir" ]; then
+  echo
+  echo "##### delete the temporary unzip directory if it exists"
   echo /bin/rm -rf $tmpDir
   #if [[ "$test_mms" -eq "0" ]]; then
     /bin/rm -rf $tmpDir
@@ -119,6 +127,8 @@ fi
 
 # change permissions for the deployed mmsapp
 if [[ -d "$mmsappDeployDir" || "$test_mms" -ne "0" ]]; then
+  echo
+  echo "##### change permissions for the deployed mmsapp"
   echo chown -Rh ${owner}:${owner} $mmsappDeployDir
   if [[ "$test_mms" -eq "0" ]]; then
     chown -Rh ${owner}:${owner} $mmsappDeployDir
@@ -128,6 +138,7 @@ if [[ -d "$mmsappDeployDir" || "$test_mms" -ne "0" ]]; then
     fi
   fi
 else
+  echo
   echo "$0: ERROR! Could not find directory \"${mmsappDeployDir}\"to deploy mmsapp"
   exit 1
 fi

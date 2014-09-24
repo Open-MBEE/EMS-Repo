@@ -26,6 +26,7 @@ fi
 echo
 
 #This below doesn't work.
+# BUT it probably would if using !-2 instead of !!
 #checkLastCommand() {
 #  if [ "$?" -ne "0" ]; then
 #    echo "$0: ERROR! command failed! \"!!\""
@@ -35,9 +36,9 @@ echo
 
 
 # variable initialization
-d=$(dirname $0)
+d=$(dirname "$0")
 installWarCommand=$d/installWar.sh
-startAlfrescoCmd=$d/stopAlfresco.sh
+startAlfrescoCmd=$d/startAlfresco.sh
 stopAlfrescoCmd=$d/stopAlfresco.sh
 deployMmsappCmd=$d/deployMmsapp.sh
 
@@ -74,7 +75,7 @@ if [ "$#" -eq 0 ]; then
   exit 1
 fi;
 
-ampFile=$1
+ampFile=""
 shareAmpFile=""
 warfile=$existingWarFile
 shareWarFile=$existingShareWarFile
@@ -123,7 +124,7 @@ do
 done
 
 echo
-echo "arguments for $0 processed with the following assignments:"
+echo "### arguments for $0 processed with the following assignments:"
 echo "  ampFile =" $ampFile
 echo "  shareAmpFile =" $shareAmpFile
 echo "  warFile =" $warFile
@@ -132,18 +133,25 @@ echo "  mmsappDir =" $mmsappDir
 echo "  mmsappZip =" $mmsappZip
 
 # stop alfresco server
-echo
-echo $stopAlfrescoCmd
-#if [[ "$test_mms" -eq "0" ]]; then
-  $stopAlfrescoCmd
-  if [ "$?" -ne "0" ]; then
-    echo "$0: ERROR! command failed! \"!!\""
-    exit 1
-  fi
-#fi
+if [[ -n "$ampFile" || -n "$shareAmpFile" ]]; then
+  echo
+  echo "### stop alfresco server"
+  echo $stopAlfrescoCmd
+  #if [[ "$test_mms" -eq "0" ]]; then
+    $stopAlfrescoCmd
+    if [ "$?" -ne "0" ]; then
+      echo "$0: ERROR! command failed! \"!!\""
+      exit 1
+    fi
+  #fi
+else
+  echo "Not stopping alfresco server since no amps are being installed."
+fi
 
-# install war files
+# install view-repo war files
 if [[ -n "$ampFile" ]]; then
+  echo
+  echo "### install view-repo amp and war files"
   if [[ ( -f "$mmtJar" ) &&  ( -f "$ampFile" ) &&  ( -f "$warFile" ) &&  ( -f "$existingWarFile" ) &&  ( -d $(dirname $alfrescoWebappDir) ) ]]; then
     echo
     echo $installWarCommand $mmtJar $ampFile $warFile $existingWarFile $alfrescoWebappDir
@@ -156,9 +164,14 @@ if [[ -n "$ampFile" ]]; then
     echo "ERROR! Not all inputs to $installWarCommand exist for view-repo!"
     exit 1
   fi
+else
+  echo
+  echo "### skipping installation of view-repo amp/war files"
 fi
 
 if [[ -n "$shareAmpFile" ]]; then
+  echo
+  echo "### install view-share amp and war files"
   if [[ ( -f "$mmtJar" ) &&  ( -f "$shareAmpFile" ) &&  ( -f "$shareWarFile" ) &&  ( -f "$existingShareWarFile" ) &&  ( -d $(dirname $shareWebappDir) ) ]]; then
     echo
     echo $installWarCommand $mmtJar $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
@@ -187,11 +200,22 @@ if [[ ( -f "$mmsappZip" ) || ( -d "$mmsappDir" ) ]]; then
     echo "ERROR! Directory $(dirname $mmsappDeployDir) does not exist! Cannot run $deployMmsappCmd."
     exit 1
   fi
+else
+  echo
+  echo "### skipping installation of view-share amp/war files"
 fi
 
 #start server
+if [[ -n "$ampFile" || -n "$shareAmpFile" ]]; then
+  echo
+  echo "### start alfresco server"
+  echo $startAlfrescoCmd
+  $startAlfrescoCmd
+else
+  echo "Not restarting alfresco server since no amps were being installed."
+fi
+
 echo
-echo $startAlrfescoCmd
-$startAlrfescoCmd
+echo "Success!"
 
 exit 0
