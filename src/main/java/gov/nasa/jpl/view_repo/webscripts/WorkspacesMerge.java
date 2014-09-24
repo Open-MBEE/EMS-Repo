@@ -1,30 +1,20 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
-import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.util.Acm;
-import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
-
 import org.alfresco.repo.model.Repository;
-import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -144,6 +134,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
              model.put( "res", response.toString() );
          } else {
              try {
+                 result.put("message", response.toString());
                  model.put("res",  result.toString(2));
              } catch (JSONException e) {
                  // TODO Auto-generated catch block

@@ -12,6 +12,8 @@ if [ "$pid" == "" ]; then
 fi
 
 echo "kill $pid"
-kill $pid
+if [[ "$test" -eq "0" ]]; then
+  kill $pid
+fi
 
 exit 0

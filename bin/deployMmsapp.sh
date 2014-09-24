@@ -16,6 +16,7 @@ fi
 if [ -f "$mmsappZip" ) ]; then
   mkdir $tmpDir
   pushd $tmpDir
+  echo unzip $mmsappZip
   unzip $mmsappZip
   unzippedDir=`/bin/ls -1`
   #unzippedDir=`readlink -e $unzippedDir`
@@ -26,24 +27,34 @@ fi
 # backup existing mmsapp dir
 if [ -e "$mmsappDeployDir" ]; then
   echo "/bin/mv $mmsappDeployDir ${backupDir}/mmsapp.`date '+%Y%m%d-%H%M%S'`"
-  /bin/mv $mmsappDeployDir ${backupDir}/mmsapp.`date '+%Y%m%d-%H%M%S'`
-  #/bin/rm -rf $mmsappDeployDir
+  if [[ "$test" -eq "1" ]]; then
+    /bin/mv $mmsappDeployDir ${backupDir}/mmsapp.`date '+%Y%m%d-%H%M%S'`
+    #/bin/rm -rf $mmsappDeployDir
+  fi
 fi
 
 # copy the mmsapp directory to the deployed location
 if [ -d $mmsappDir ]; then
   echo cp -pRf $mmsappDir $mmsappDeployDir
-  cp -pRf $mmsappDir $mmsappDeployDir
+  if [[ "$test" -eq "1" ]]; then
+    cp -pRf $mmsappDir $mmsappDeployDir
+  fi
 fi
 
 # delete the temporary unzip directory if it exists
 if [ -e "$tmpDir" ]; then
   echo /bin/rm -rf $tmpDir
-  /bin/rm -rf $tmpDir
+  if [[ "$test" -eq "1" ]]; then
+    /bin/rm -rf $tmpDir
+  fi
 fi
 
 # change permissions for the deployed mmsapp
 if [ -d "$mmsappDeployDir" ]; then
   echo chown -Rh ${owner}:${owner} $mmsappDeployDir
-  chown -Rh ${owner}:${owner} $mmsappDeployDir
+  if [[ "$test" -eq "1" ]]; then
+    chown -Rh ${owner}:${owner} $mmsappDeployDir
+  fi
 fi
+
+exit 0

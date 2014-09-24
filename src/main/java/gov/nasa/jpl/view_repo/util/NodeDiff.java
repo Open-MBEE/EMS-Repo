@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.AbstractDiff;
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.Utils;
 
@@ -316,14 +317,14 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         // Identify the Properties that own changed ValueSpecifications and add
         // them to the updatedElements map.
 
-        System.out.println("added = " + getAdded() );
-        System.out.println("removed = " + getRemoved() );
-        System.out.println("updated = " + getUpdated() );
+        if (Debug.isOn()) Debug.outln("added = " + getAdded() );
+        if (Debug.isOn()) Debug.outln("removed = " + getRemoved() );
+        if (Debug.isOn()) Debug.outln("updated = " + getUpdated() );
 
-        System.out.println("added properties= " + getAddedProperties() );
-        System.out.println("removed properties= " + getRemovedProperties() );
-        System.out.println("updated properties= " + getUpdatedProperties() );
-        System.out.println("property changes = " + getPropertyChanges() );
+        if (Debug.isOn()) Debug.outln("added properties= " + getAddedProperties() );
+        if (Debug.isOn()) Debug.outln("removed properties= " + getRemovedProperties() );
+        if (Debug.isOn()) Debug.outln("updated properties= " + getUpdatedProperties() );
+        if (Debug.isOn()) Debug.outln("property changes = " + getPropertyChanges() );
 
         Set< EmsScriptNode > valueSpecs = new LinkedHashSet<EmsScriptNode>();
         Set< EmsScriptNode > owningProperties = new LinkedHashSet<EmsScriptNode>();
@@ -354,8 +355,8 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
             }
         }
 
-        System.out.println("valueSpecs = " + valueSpecs );
-        System.out.println("owningProperties = " + owningProperties );
+        if (Debug.isOn()) Debug.outln("valueSpecs = " + valueSpecs );
+        if (Debug.isOn()) Debug.outln("owningProperties = " + owningProperties );
 
         // adding the owning Property elements to these element maps if not already there
         for ( EmsScriptNode node : owningProperties ) {
@@ -412,14 +413,14 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
             getMap2().remove( node.getName() );
         }
 
-        System.out.println("added = " + getAdded() );
-        System.out.println("removed = " + getRemoved() );
-        System.out.println("updated = " + getUpdated() );
+        if (Debug.isOn()) Debug.outln("added = " + getAdded() );
+        if (Debug.isOn()) Debug.outln("removed = " + getRemoved() );
+        if (Debug.isOn()) Debug.outln("updated = " + getUpdated() );
 
-        System.out.println("added properties= " + getAddedProperties() );
-        System.out.println("removed properties= " + getRemovedProperties() );
-        System.out.println("updated properties= " + getUpdatedProperties() );
-        System.out.println("property changes = " + getPropertyChanges() );
+        if (Debug.isOn()) Debug.outln("added properties= " + getAddedProperties() );
+        if (Debug.isOn()) Debug.outln("removed properties= " + getRemovedProperties() );
+        if (Debug.isOn()) Debug.outln("updated properties= " + getUpdatedProperties() );
+        if (Debug.isOn()) Debug.outln("property changes = " + getPropertyChanges() );
 
     }
 
@@ -432,13 +433,13 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
     }
 
     protected static EmsScriptNode getOwningProperty( EmsScriptNode node ) {
-        System.out.println("getOwningProperty(" + node + ")");
+        if (Debug.isOn()) Debug.outln("getOwningProperty(" + node + ")");
         EmsScriptNode parent = node;
         while ( parent != null && !isProperty( parent ) ) {
-            System.out.println("parent = " + parent );
+            if (Debug.isOn()) Debug.outln("parent = " + parent );
             parent = parent.getUnreifiedParent( null );  // TODO -- REVIEW -- need timestamp??!!
         }
-        System.out.println("returning " + parent );
+        if (Debug.isOn()) Debug.outln("returning " + parent );
         return parent;
     }
 
