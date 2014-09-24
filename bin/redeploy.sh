@@ -143,30 +143,34 @@ echo $stopAlfrescoCmd
 #fi
 
 # install war files
-if [[ ( -f "$mmtJar" ) &&  ( -f "$ampFile" ) &&  ( -f "$warFile" ) &&  ( -f "$existingWarFile" ) &&  ( -d $(dirname $alfrescoWebappDir) ) ]]; then
-  echo
-  echo $installWarCommand $mmtJar $ampFile $warFile $existingWarFile $alfrescoWebappDir
-  $installWarCommand $mmtJar $ampFile $warFile $existingWarFile $alfrescoWebappDir
-  if [ "$?" -ne "0" ]; then
-    echo "$0: ERROR! command failed! \"!!\""
+if [[ -n "$ampFile" ]]; then
+  if [[ ( -f "$mmtJar" ) &&  ( -f "$ampFile" ) &&  ( -f "$warFile" ) &&  ( -f "$existingWarFile" ) &&  ( -d $(dirname $alfrescoWebappDir) ) ]]; then
+    echo
+    echo $installWarCommand $mmtJar $ampFile $warFile $existingWarFile $alfrescoWebappDir
+    $installWarCommand $mmtJar $ampFile $warFile $existingWarFile $alfrescoWebappDir
+    if [ "$?" -ne "0" ]; then
+      echo "$0: ERROR! command failed! \"!!\""
+      exit 1
+    fi
+  else
+    echo "ERROR! Not all inputs to $installWarCommand exist for view-repo!"
     exit 1
   fi
-else
-  echo "ERROR! Not all inputs to $installWarCommand exist for view-repo!"
-  exit 1
 fi
 
-if [[ ( -f "$mmtJar" ) &&  ( -f "$shareAmpFile" ) &&  ( -f "$shareWarFile" ) &&  ( -f "$existingShareWarFile" ) &&  ( -d $(dirname $shareWebappDir) ) ]]; then
-  echo
-  echo $installWarCommand $mmtJar $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
-    $installWarCommand $mmtJar $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
-  if [ "$?" -ne "0" ]; then
-    echo "$0: ERROR! command failed! \"!!\""
+if [[ -n "$shareAmpFile" ]]; then
+  if [[ ( -f "$mmtJar" ) &&  ( -f "$shareAmpFile" ) &&  ( -f "$shareWarFile" ) &&  ( -f "$existingShareWarFile" ) &&  ( -d $(dirname $shareWebappDir) ) ]]; then
+    echo
+    echo $installWarCommand $mmtJar $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
+      $installWarCommand $mmtJar $shareAmpFile $shareWarFile $existingShareWarFile $shareWebappDir
+    if [ "$?" -ne "0" ]; then
+      echo "$0: ERROR! command failed! \"!!\""
+      exit 1
+    fi
+  else
+    echo "ERROR! Not all inputs to $installWarCommand exist for share!"
     exit 1
   fi
-else
-  echo "ERROR! Not all inputs to $installWarCommand exist for share!"
-  exit 1
 fi
 
 # deploy mmsapp

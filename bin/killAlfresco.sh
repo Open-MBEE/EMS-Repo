@@ -12,16 +12,18 @@ pid=`ps auxwww | grep java | grep -v grep | grep -v artifactory | grep alfresco 
 if [ "$pid" == "" ]; then
   pid=`ps -elf | grep java | grep -v grep | grep -v artifactory | grep alfresco | cut -d' ' -f 4`
 fi
+
 if [ "$pid" == "" ]; then
   pidFile=`find /opt/local/ -name "*atalina.pid"`
-  if [ -f $pidFile ]; then
-    pid=$(cat $pidFile)
+  echo "pidFile = $pidFle"
+  if [ -f "$pidFile" ]; then
+    pid=`cat $pidFile`
   fi
 fi
 
 if [ "$pid" == "" ]; then
   echo "Could not find alfresco server to kill!"
-  exit 1
+  exit 0
 fi
 
 echo "kill $pid"
