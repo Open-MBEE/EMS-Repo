@@ -128,7 +128,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         this.setRepositoryHelper(repositoryHelper);
         this.setServices(registry);
 
-        // FIX: Need to figure out why spring dependency injection doesn't work
+        // FIXME: needs to be injected via spring
         jmsConnection = new JmsConnection();
         restConnection = new RestPostConnection();
     }

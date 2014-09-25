@@ -14,7 +14,7 @@ fi
 
 echo "path: $path"
 
-echo "determining latest version for view-share"
+echo "\ndetermining latest version for view-share"
 export share_latest=`curl -s http://europambee-build:8082/artifactory/libs-release-local/gov/nasa/jpl/view-share/maven-metadata.xml | grep latest | sed 's/<latest>//g' | sed 's/<\/latest>//g' | sed 's/ //g'`
 echo "downloading view-share-$share_latest.amp..."
 
@@ -28,7 +28,7 @@ else
   echo "completed download"
 fi
 
-echo "determining latest version for view-repo"
+echo "\ndetermining latest version for view-repo"
 export repo_latest=`curl -s http://europambee-build:8082/artifactory/libs-release-local/gov/nasa/jpl/view-repo/maven-metadata.xml | grep latest | sed 's/<latest>//g' | sed 's/<\/latest>//g' | sed 's/ //g'`
 echo "downloading view-repo-$repo_latest.amp..."
 
@@ -41,3 +41,25 @@ else
   fi
   echo "completed download"
 fi
+
+echo "\ndetermining latest snapshot for evm"
+evm_snapshot=`curl -sL "http://europambee-build:8082/artifactory/libs-snapshot-local/gov/nasa/jpl/evm" | grep SNAPSHOT | sort | head -1 | cut -d'"' -f2`
+echo "determining the latest snapshot version: $evm_snapshot"
+evm_version=`curl -sL "http://europambee-build:8082/artifactory/libs-snapshot-local/gov/nasa/jpl/evm/$evm_snapshot" | grep "zip\"" | tail -1 | cut -d'"' -f2`
+echo "downloading snapshot: $evm_version"
+curl -sL "http://europambee-build:8082/artifactory/libs-snapshot-local/gov/nasa/jpl/evm/$evm_snapshot$evm_version" > $path/$evm_version
+if [ -n $owner ]; then
+  chown $owner $path/$evm_version
+fi
+echo "completed download"
+
+echo "determining latest snapshot for europa-evm"
+evm_snapshot=`curl -sL "http://europambee-build:8082/artifactory/libs-snapshot-local/gov/nasa/jpl/evm" | grep "europa-SNAPSHOT" | sort | head -1 | cut -d'"' -f2`
+echo "determining the latest snapshot version: $evm_snapshot"
+evm_version=`curl -sL "http://europambee-build:8082/artifactory/libs-snapshot-local/gov/nasa/jpl/evm/$evm_snapshot" | grep "zip\"" | tail -1 | cut -d'"' -f2`
+echo "downloading snapshot: $evm_version"
+curl -sL "http://europambee-build:8082/artifactory/libs-snapshot-local/gov/nasa/jpl/evm/$evm_snapshot$evm_version" > $path/$evm_version
+if [ -n $owner ]; then
+  chown $owner $path/$evm_version
+fi
+echo "completed download"
