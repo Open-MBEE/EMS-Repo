@@ -16,7 +16,8 @@ public class JmsConnection extends AbstractConnection {
     static Logger logger = Logger.getLogger(JmsConnection.class);
     long sequenceId = 0;
     
-    private String uri = "tcp://localhost:61616";
+    // static so Spring can configure URI for everything
+    private static String uri = "tcp://localhost:61616";
     private ActiveMQConnectionFactory connectionFactory = null;
     
     public JmsConnection() {
@@ -26,7 +27,7 @@ public class JmsConnection extends AbstractConnection {
         if (logger.isDebugEnabled()) {
             logger.debug("uri set to: " + uri);
         }
-        this.uri = uri;
+        JmsConnection.uri = uri;
     }
     
     protected void init() {

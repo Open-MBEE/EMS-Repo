@@ -41,3 +41,14 @@ else
   fi
   echo "completed download"
 fi
+
+echo "determinig latest snapshot for evm"
+evm_snapshot=`curl -sL "http://europambee-build:8082/artifactory/libs-snapshot-local/gov/nasa/jpl/evm" | grep SNAPSHOT | sort | head -1 | cut -d'"' -f2`
+echo "determining the latest snapshot version: $evm_snapshot"
+evm_version=`curl -sL "http://europambee-build:8082/artifactory/libs-snapshot-local/gov/nasa/jpl/evm/$evm_snapshot" | grep "zip\"" | tail -1 | cut -d'"' -f2`
+echo "downloading snapshot: $evm_version"
+curl -sL "http://europambee-build:8082/artifactory/libs-snapshot-local/gov/nasa/jpl/evm/$evm_snapshot$evm_version" > $path/$evm_version
+if [ -n $owner ]; then
+  chown $owner $path/$evm_version
+fi
+echo "completed download"
