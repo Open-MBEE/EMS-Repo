@@ -345,7 +345,16 @@ public class WorkspaceNode extends EmsScriptNode {
         return changedElementIds;
     }
 
-    public Set< NodeRef > getChangedNodeRefsWithRespectTo( WorkspaceNode other, Date dateTime, Date otherTime ) {
+    /**
+     * Get the NodeRefs of this workspace that have changed 
+     * @param other
+     * @param dateTime
+     * @param otherTime
+     * @return
+     */
+    public Set< NodeRef > getChangedNodeRefsWithRespectTo( WorkspaceNode other,
+                                                           Date dateTime,
+                                                           Date otherTime ) {
         Set< NodeRef > changedNodeRefs = new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);//getChangedNodeRefs());
         WorkspaceNode targetParent = getCommonParent( other );
         WorkspaceNode parent = this;
@@ -355,8 +364,9 @@ public class WorkspaceNode extends EmsScriptNode {
             parent = parent.getParentWorkspace();
             if ( parent != null ) lastParent = parent;
         }
-        if ( otherTime!= null && dateTime != null && dateTime.after( otherTime ) ) {
+        if ( otherTime != null && dateTime != null && dateTime.after( otherTime ) ) {
             Date lastParentCreationDate = lastParent.getCreationDate();
+            //while ( otherTime )
             if ( otherTime.before( lastParentCreationDate ) ) {
                 String specifier = "[" + TimeUtils.toTimestamp( dateTime );
                 Debug.error("CODE NOT DONE FOR THIS!!!");
@@ -364,7 +374,12 @@ public class WorkspaceNode extends EmsScriptNode {
                 // TODO
                 // keep walking parent back to master and collect all commits
                 // between timepoints looking at creation date of parents.
+
+                parent = parent.getParentWorkspace();
+                if ( parent != null ) lastParent = parent;
+
             }
+            
         }
         return changedNodeRefs;
     }
