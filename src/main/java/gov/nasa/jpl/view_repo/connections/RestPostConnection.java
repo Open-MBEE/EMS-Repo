@@ -16,7 +16,8 @@ public class RestPostConnection extends AbstractConnection {
 
     private long sequenceId = 1;
     
-    private String uri = "https://orasoa-dev07.jpl.nasa.gov:8121/PublishMessageRestful"; // TODO: Springify
+    // static so Spring can configure URI for everything
+    private static String uri = "https://orasoa-dev07.jpl.nasa.gov:8121/PublishMessageRestful"; // TODO: Springify
     
     public RestPostConnection() {
         
@@ -26,14 +27,17 @@ public class RestPostConnection extends AbstractConnection {
         if (logger.isDebugEnabled()) {
             logger.debug("uri set to: " + uri);
         }
-        this.uri = uri;
+        RestPostConnection.uri = uri;
     }
     
     public boolean publish(JSONObject jsonObject, String dst) {
         boolean status = true;
         Client client = Client.create();
         String msg = jsonObject.toString( );
-        
+    
+        if (logger.isDebugEnabled()) {
+            logger.debug("sending to: " + uri);
+        }
         WebResource webResource = client.resource(uri);
         ClientResponse response = getResourceBuilder(webResource, dst).post( ClientResponse.class, msg);
         if (response.getStatus() != 200) {
