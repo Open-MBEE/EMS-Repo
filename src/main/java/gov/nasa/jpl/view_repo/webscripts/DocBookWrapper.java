@@ -4,29 +4,22 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.search.ResultSet;
-import org.alfresco.service.namespace.NamespaceService;
-import org.alfresco.service.namespace.QName;
 import org.alfresco.util.TempFileProvider;
 import org.alfresco.util.exec.RuntimeExec;
 import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
@@ -35,13 +28,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.sun.activation.registries.MimeTypeFile;
 
 import gov.nasa.jpl.docbook.model.DBBook;
 import gov.nasa.jpl.docbook.model.DBSerializeVisitor;
 import gov.nasa.jpl.view_repo.DocBookContentTransformer;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
-import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
@@ -265,6 +256,7 @@ public class DocBookWrapper {
 
 	public void save() throws IOException{
 		String docBookXml = this.getContent();
+		new File(this.dbDirName.toString()).mkdirs();
     	File f = new File(this.dbFileName.toString());
     	FileWriter fw = new FileWriter(f);
     	fw.write(docBookXml);
@@ -362,7 +354,7 @@ public class DocBookWrapper {
 			String userHome = System.getProperty("user.home");
 			docgenDirName = Paths.get(userHome, "git/docbookgen").toString();
 			if(!Files.exists(Paths.get(docgenDirName))) 
-				System.out.println("Failed to find docgen/fop!");
+				System.out.println("Failed to find docbookgen/fop directory!");
 			else{
 				docgenDirName = Paths.get(docgenDirName).toAbsolutePath().toString();
 			}
@@ -403,7 +395,10 @@ public class DocBookWrapper {
 		command.add("1");
 		command.add("-param");
 		command.add("chunk.tocs.and.lots.has.title");
-		command.add("1");		
+		command.add("1");
+		command.add("-param");
+		command.add("html.stylesheet");
+		command.add("docgen.css");
 
 		//System.out.println("DO_TRANSFORM source: " + source);
 		//System.out.println("DO_TRANSFORM target: " + target);
