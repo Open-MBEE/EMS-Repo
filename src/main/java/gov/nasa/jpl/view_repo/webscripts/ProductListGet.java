@@ -30,6 +30,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -128,6 +129,7 @@ public class ProductListGet extends AbstractJavaWebScript {
                 JSONObject jsonObject =
                         instance.handleProductList( siteNode, workspace, dateTime );
                 appendResponseStatusInfo(instance);
+                if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
                 model.put("res", jsonObject.toString(4));
                 model.put("title", siteNode.getProperty(Acm.CM_TITLE));
                 model.put("siteName", siteNode.getProperty(Acm.CM_NAME));

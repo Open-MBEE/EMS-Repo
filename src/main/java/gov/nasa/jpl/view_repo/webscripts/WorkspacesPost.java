@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -105,6 +106,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
             model.put("res", response.toString());
         else
             try {
+            	if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
                 model.put("res", json.toString(4));
             } catch (JSONException e) {
                 // TODO Auto-generated catch block

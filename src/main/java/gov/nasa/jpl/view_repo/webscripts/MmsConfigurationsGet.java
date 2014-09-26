@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 
 import java.util.HashMap;
@@ -69,6 +70,8 @@ public class MmsConfigurationsGet extends AbstractJavaWebScript {
                     // assume multiple
                     jsonObject.put("configurations", configWs.handleConfigurations(req, true));
             }
+            appendResponseStatusInfo( instance );
+            if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
             model.put("res", jsonObject.toString(2));
         } catch (Exception e) {
             model.put("res", response.toString());
@@ -80,7 +83,6 @@ public class MmsConfigurationsGet extends AbstractJavaWebScript {
             e.printStackTrace();
         } 
     
-        appendResponseStatusInfo( instance );
         status.setCode(responseStatus.getCode());
     
         return model;

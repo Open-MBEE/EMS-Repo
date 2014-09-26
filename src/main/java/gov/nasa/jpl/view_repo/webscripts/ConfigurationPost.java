@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ConfigurationGenerationActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
@@ -97,6 +98,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		    model.put("res", response.toString());
 		} else {
 		    try {
+		    	if (!Utils.isNullOrEmpty(response.toString())) result.put("message", response.toString());
                 model.put("res", result.toString(2));
             } catch ( JSONException e ) {
                 e.printStackTrace();

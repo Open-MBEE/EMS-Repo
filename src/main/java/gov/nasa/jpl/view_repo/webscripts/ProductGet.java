@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.util.ProductsWebscript;
@@ -141,6 +142,7 @@ public class ProductGet extends AbstractJavaWebScript {
                                                   : ( gettingContainedViews
                                                       ? "views" : "products" ),
                          productsJson );
+                if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
                 if ( prettyPrint ) model.put("res", json.toString(4));
                 else model.put("res", json.toString());
 			} catch (JSONException e) {

@@ -32,6 +32,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -164,13 +165,13 @@ public class ModelGet extends AbstractJavaWebScript {
 		JSONArray elementsJson = new JSONArray();
 		if (validateRequest(req, status)) {
 		    elementsJson = handleRequest(req);
-		    appendResponseStatusInfo(this);
 		}
 		
 		JSONObject top = new JSONObject();
 		try {
 		    if (elementsJson.length() > 0) {
 		        top.put("elements", elementsJson);
+		        if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
 		        if ( prettyPrint ) model.put("res", top.toString(4));
 		        else model.put("res", top.toString());
 		    } else {

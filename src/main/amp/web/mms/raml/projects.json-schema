@@ -11,6 +11,10 @@
                     {"$ref": "#/definitions/Project"}
                 ]
             }
+        },
+        "message": {
+                    "type": "string",
+                    "description": "The response message for this transaction if it is non-empty."
         }
     },
 

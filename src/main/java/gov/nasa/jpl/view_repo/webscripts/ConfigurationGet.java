@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 import gov.nasa.jpl.view_repo.webscripts.util.ProductsWebscript;
 
@@ -80,6 +81,7 @@ public class ConfigurationGet extends AbstractJavaWebScript {
         		jsonObject.put("configurations", configWs.handleConfigurations(req));
         		ProductsWebscript productWs = new ProductsWebscript(repository, services, response);
         		jsonObject.put("products", productWs.handleProducts(req));
+        		if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
         		model.put("res", jsonObject.toString(2));
         		String siteName = getSiteName(req);
         		model.put("title", siteName);
