@@ -1059,6 +1059,7 @@ public class EmsScriptNode extends ScriptNode implements
     public Date getLastModified( Date dateTime ) {
         Date lastModifiedDate = (Date)getProperty( Acm.ACM_LAST_MODIFIED );
 
+        // TODO FIXME should look at other properties besides VALUE:
         Object value = getProperty( Acm.ACM_VALUE );
         ArrayList< NodeRef > dependentNodes = new ArrayList< NodeRef >();
         if ( value instanceof Collection ) {
@@ -1378,8 +1379,10 @@ public class EmsScriptNode extends ScriptNode implements
         // mandatory elements put in directly
         elementJson.put( Acm.JSON_ID, node.getProperty( Acm.ACM_ID ) );
         elementJson.put( "creator", node.getProperty( "cm:modifier" ) );
+//        elementJson.put( "modified",
+//                         TimeUtils.toTimestamp( getLastModified( (Date)node.getProperty( "cm:modified" ) ) ) );
         elementJson.put( "modified",
-                         TimeUtils.toTimestamp( getLastModified( (Date)node.getProperty( "cm:modified" ) ) ) );
+                TimeUtils.toTimestamp( getLastModified( dateTime) ) );
 
         putInJson( elementJson, Acm.JSON_NAME,
                    node.getProperty( Acm.ACM_NAME ), filter );

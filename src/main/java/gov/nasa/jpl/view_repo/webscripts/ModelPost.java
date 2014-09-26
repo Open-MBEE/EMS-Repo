@@ -1097,7 +1097,7 @@ public class ModelPost extends AbstractJavaWebScript {
             ArrayList<String> nodeNames = new ArrayList<String>();
 
             // Check for workspace disagreement in arguments.
-            if ( node.getWorkspace() != workspace ) {
+            if (!node.getWorkspace().equals(workspace)) {
                 if ( workspace == null ) {
                     workspace = node.getWorkspace();
                 } else {
@@ -1191,7 +1191,7 @@ public class ModelPost extends AbstractJavaWebScript {
     public boolean inConflict( EmsScriptNode element, JSONObject elementJson ) {
         // TODO -- could check for which properties changed since the "read"
         // date to allow concurrent edits to different properties of the same
-        // element.
+        // element.    	
         String readTime = null;
         try {
             readTime = elementJson.getString( Acm.JSON_READ );//"read" );
@@ -1221,6 +1221,8 @@ public class ModelPost extends AbstractJavaWebScript {
                      + ", readDate = " + readDate + ", elementJson="
                      + elementJson );
         String lastModString = TimeUtils.toTimestamp( lastModified );
+        
+        
         return readTime.compareTo( lastModString ) >= 0;
     }
 
@@ -1899,7 +1901,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
     protected Map<String, Object> executeImplImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
-        NodeUtil.doCaching = true;
+        NodeUtil.doCaching = true;  // TODO toggle to false
         Timer timer = new Timer();
 
         printHeader( req );
@@ -1938,9 +1940,6 @@ public class ModelPost extends AbstractJavaWebScript {
             try {
                 if (runInBackground) {
                     saveAndStartAction(req, workspace, status);
-                    // REVIEW -- TODO -- shouldn't response be called from
-                    // instance? Maybe move the bulk of this method to a new
-                    // method and call from instance.
                     response.append("JSON uploaded, model load being processed in background.\n");
                     response.append("You will be notified via email when the model load has finished.\n");
                 }
@@ -1951,7 +1950,6 @@ public class ModelPost extends AbstractJavaWebScript {
                         createOrUpdateModel( postJson, status,
                                                       projectNode, workspace, null );
 
-                    // REVIEW -- TODO -- shouldn't this be called from instance?
                     addRelationshipsToProperties( elements );
                     if ( !Utils.isNullOrEmpty( elements ) ) {
 
@@ -1968,31 +1966,25 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                         Timer.stopTimer(timerToJson, "!!!!! executeImpl(): toJSON time", timeEvents);
                         top.put( "elements", elementsJson );
+                        top.put("message", response.toString());
                         if ( prettyPrint ) model.put( "res", top.toString( 4 ) );
                         else model.put( "res", top.toString() );
                     }
                 }
-                // REVIEW -- TODO -- shouldn't this be called from instance?
-                appendResponseStatusInfo(this);
             } catch (JSONException e) {
                 log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
                 e.printStackTrace();
-                // REVIEW -- TODO -- shouldn't response be called from
-                // instance? Maybe move the bulk of this method to a new
-                // method and call from instance.
                 model.put("res", response.toString());
             } catch (Exception e) {
                 log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 e.printStackTrace();
-                // REVIEW -- TODO -- shouldn't response be called from instance?
                 model.put("res", response.toString());
             }
         }
-        // REVIEW -- TODO -- shouldn't response be called from instance?
         if ( !model.containsKey( "res" ) ) {
             model.put( "res", response.toString() );
         }
-        // REVIEW -- TODO -- shouldn't responseStatus be called from instance?
+        
         status.setCode(responseStatus.getCode());
 
         printFooter();
