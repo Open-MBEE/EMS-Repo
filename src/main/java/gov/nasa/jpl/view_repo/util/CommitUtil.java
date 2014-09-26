@@ -116,6 +116,37 @@ public class CommitUtil {
 	}
 
     /**
+     * Given a workspace gets an ordered list of the commit history in a time
+     * range.
+     * 
+     * @param fromDateTime
+     * @param toDateTime
+     * @param workspace
+     * @param services
+     * @param response
+     * @param justFirst
+     * @return
+     */
+    public static ArrayList<EmsScriptNode> getCommitsAllSitesInDateTimeRange(Date fromDateTime,
+                                                                             Date toDateTime,
+                                                                             WorkspaceNode workspace,
+                                                                             ServiceRegistry services,
+                                                                             StringBuffer response,
+                                                                             boolean justFirst) {
+        ArrayList< EmsScriptNode > commits = new ArrayList< EmsScriptNode >();
+        String userName = NodeUtil.getUserName();
+        List< SiteInfo > sites = services.getSiteService().listSites( userName );
+        for ( SiteInfo si : sites ) {
+            String aSiteName = si.getShortName();
+            ArrayList< EmsScriptNode > siteCommits =
+                    getCommitsInDateTimeRange( fromDateTime, toDateTime, workspace, aSiteName, services, response, justFirst );
+            commits.addAll( siteCommits );
+            if ( justFirst && commits.size() > 0 ) break;
+        }
+        return commits;
+    }
+
+    /**
      * Given a workspace gets an ordered list of the commit history
      * @param workspace
      * @param services
@@ -302,7 +333,7 @@ public class CommitUtil {
 		}
 		return null;
 	}
-
+	
 	public static void branch(WorkspaceNode srcWs, WorkspaceNode dstWs,
 	                          String siteName, String msg,
 	                          boolean runWithoutTransactions,

@@ -4,6 +4,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
 import java.util.Collection;
 import java.util.Date;
@@ -411,6 +412,68 @@ public class WorkspaceDiff {
         this.timestamp2 = timestamp2;
         if ( ws1 != null && ws2 != null ) diff();
     }
+
+    public static Set< EmsScriptNode > getAllChangedElementsInDiffJson( JSONArray diffJson,
+                                                                        WorkspaceNode ws,
+                                                                        ServiceRegistry services )
+                                                                                throws JSONException {
+        Set< EmsScriptNode > nodes = new LinkedHashSet< EmsScriptNode >();
+        for ( int i = 0; i < diffJson.length(); ++i ) {
+            JSONObject element = diffJson.getJSONObject( i );
+            if ( element.has( "sysmlid" ) ) {
+                String sysmlid = element.getString( "sysmlid" );
+                NodeRef ref = NodeUtil.findNodeRefById( sysmlid, false, ws, null,
+                                                        services, true );
+                if ( ref == null ) ref = 
+                        NodeUtil.findNodeRefById( sysmlid, true, null, null,
+                                                  services, true );
+                if ( ref != null ) {
+                    EmsScriptNode node = new EmsScriptNode( ref, services );
+                    nodes.add( node );
+                }
+            }
+        }
+        return nodes;
+    }
+
+    public static Set< EmsScriptNode > getAllChangedElementsInDiffJson( JSONObject diffJson,
+                                                                        ServiceRegistry services )
+                                                                                throws JSONException {
+        LinkedHashSet< EmsScriptNode > nodes = new LinkedHashSet< EmsScriptNode >();
+        JSONObject jsonObj = diffJson;
+        JSONArray jsonArr = null;
+        
+        WorkspaceNode ws = null;
+        
+        if ( diffJson.has( "workspace2" ) ) {
+            jsonObj = jsonObj.getJSONObject( "workspace2" );
+            if ( jsonObj.has( "name" ) ) {
+                String name = jsonObj.getString( "name" );
+                ws = AbstractJavaWebScript.getWorkspaceFromId( name, services,
+                                                               null, null,
+                                                               false, null );
+            }
+        }
+        Set< EmsScriptNode > elements = null;
+        if ( diffJson.has( "addedElements" ) ) {
+            jsonArr = jsonObj.getJSONArray( "addedElements" );
+            elements = getAllChangedElementsInDiffJson( jsonArr, ws, services );
+            if ( elements != null ) nodes.addAll( elements );
+        }
+        if ( diffJson.has( "deletedElements" ) ) {
+            jsonArr = jsonObj.getJSONArray( "deletedElements" );
+            elements = getAllChangedElementsInDiffJson( jsonArr, ws, services );
+            if ( elements != null ) nodes.addAll( elements );
+        }
+        if ( diffJson.has( "updatedElements" ) ) {
+            jsonArr = jsonObj.getJSONArray( "updatedElements" );
+            elements = getAllChangedElementsInDiffJson( jsonArr, ws, services );
+            if ( elements != null ) nodes.addAll( elements );
+        }
+        return nodes;
+    }
+
+
     /**
      * Dumps the JSON delta based.
      * @param   time1   Timestamp to dump ws1
@@ -763,6 +826,7 @@ public class WorkspaceDiff {
     }
 
     public boolean ingestJSON(JSONObject json) {
+        Debug.error("ingestJson() not implemented!");
         // TODO??
         return true;
     }
@@ -773,4 +837,5 @@ public class WorkspaceDiff {
         }
         return false;
     }
+    
 }

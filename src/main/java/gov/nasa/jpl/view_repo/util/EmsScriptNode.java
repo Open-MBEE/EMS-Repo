@@ -45,8 +45,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -93,10 +91,6 @@ import org.alfresco.service.namespace.RegexQNamePattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.mozilla.javascript.Scriptable;
 import org.springframework.extensions.webscripts.Status;
 
@@ -676,14 +670,21 @@ public class EmsScriptNode extends ScriptNode implements
 //            }
 //            v = doc.select( "body" ).html();
 //        }
+        //Debug.turnOn();
         if ( Debug.isOn()) Debug.outln("extractAndReplaceImageData(" + v.substring( 0, Math.min( v.length(), 100 ) ) + (v.length()>100 ? " . . ." :"") + ")");
         while ( true ) {
             Pattern p = Pattern.compile( "(.*)<img[^>]*\\ssrc\\s*=\\s*[\"']data:image/(\\w*);\\s*base64\\s*,([^\"']*)[\"'][^>]*>(.*)",
                                          Pattern.DOTALL );
             Matcher m = p.matcher( v );
             if ( !m.matches() ) {
+                if ( Debug.isOn() ) {
+                    Debug.outln( "no match found for v=" +v.substring( 0, Math.min( v.length(), 100 ) ) + (v.length()>100 ? " . . ." :"") + ")");
+                }
                 break;
             } else {
+                if ( Debug.isOn() ) {
+                    Debug.outln( "match found for v=" +v.substring( 0, Math.min( v.length(), 100 ) ) + (v.length()>100 ? " . . ." :"") + ")");
+                }
                 if ( m.groupCount() != 4 ) {
                     log( "Expected 4 match groups, got " + m.groupCount()
                          + "! " + m );
@@ -709,6 +710,7 @@ public class EmsScriptNode extends ScriptNode implements
                 v = m.group( 1 ) + link + m.group( 4 );
             }
         }
+        //Debug.turnOff();
         return v;
     }
 

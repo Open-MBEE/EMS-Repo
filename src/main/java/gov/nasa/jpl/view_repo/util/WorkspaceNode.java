@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.model.ContentModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
@@ -309,30 +310,23 @@ public class WorkspaceNode extends EmsScriptNode {
 
     public Set< NodeRef > getChangedNodeRefs( Date dateTime ) {
         Set< NodeRef > changedNodeRefs = new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);
-        //ResultSet refs = NodeUtil.findNodeRefsByType( getName(), SearchType.WORKSPACE, getServices() );
-        //List< EmsScriptNode > nodes = NodeUtil.resultSetToList( refs );
-        //NodeUtil.resultSetToList( refs );
-        // don't need to findDeleted since its doing a comparison with another workspace - so
-        // absence is equivalent to finding deleted
+        if ( dateTime != null && dateTime.before( getCreationDate() ) ) {
+            return changedNodeRefs;
+        }
         ArrayList< NodeRef > refs =
                 NodeUtil.findNodeRefsByType( getNodeRef().toString(),
                                              SearchType.WORKSPACE.prefix, false,
                                              true, null, dateTime, false, true,
                                              getServices(), true );
         changedNodeRefs.addAll( refs );
-        //List< EmsScriptNode > nodes = toEmsScriptNodeList( refs );
 
         // remove commits
         ArrayList< EmsScriptNode > commits =
                 CommitUtil.getCommits( this, null, getServices(), getResponse() );
         commits.add( CommitUtil.getCommitPkg( this, null, getServices(),
                                               getResponse() ) );
-        //System.out.println("removing commits: " + commits );
-        NodeRef commitRef;
-        for (EmsScriptNode commitNode : commits) {
-        	commitRef = commitNode.getNodeRef();
-        	if (commitRef != null) changedNodeRefs.remove(commitRef);
-        }
+        List<NodeRef> commitRefs = NodeUtil.getNodeRefs( commits );
+        changedNodeRefs.removeAll(commitRefs);
 
         return changedNodeRefs;
     }
@@ -346,7 +340,10 @@ public class WorkspaceNode extends EmsScriptNode {
     }
 
     /**
-     * Get the NodeRefs of this workspace that have changed 
+     * Get the NodeRefs of this workspace that have changed with respect to
+     * another workspace. This method need not check the actual changes to see
+     * if they are different and may be a superset of those actually changed.
+     * 
      * @param other
      * @param dateTime
      * @param otherTime
@@ -355,31 +352,62 @@ public class WorkspaceNode extends EmsScriptNode {
     public Set< NodeRef > getChangedNodeRefsWithRespectTo( WorkspaceNode other,
                                                            Date dateTime,
                                                            Date otherTime ) {
-        Set< NodeRef > changedNodeRefs = new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);//getChangedNodeRefs());
+        Set< NodeRef > changedNodeRefs = 
+                new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);//getChangedNodeRefs());
         WorkspaceNode targetParent = getCommonParent( other );
         WorkspaceNode parent = this;
         WorkspaceNode lastParent = parent;
+        
+        // Get nodes in the workspace that have changed with respect to the
+        // common parent. To avoid computation, these do not take time into
+        // account except to rule out workspaces with changes only after
+        // dateTime.
         while ( parent != null && !parent.equals( targetParent ) ) {
             changedNodeRefs.addAll( parent.getChangedNodeRefs( dateTime ) );
             parent = parent.getParentWorkspace();
             if ( parent != null ) lastParent = parent;
         }
+        
+        // Now gather nodes in the common parent chain after otherTime and
+        // before dateTime. We need to get these from the transaction history
+        // (or potentially the version history) to only include those that
+        // changed within a timeframe. Otherwise, we would have to include the
+        // entire workspace, which could be master, and that would be too big.
         if ( otherTime != null && dateTime != null && dateTime.after( otherTime ) ) {
-            Date lastParentCreationDate = lastParent.getCreationDate();
-            //while ( otherTime )
-            if ( otherTime.before( lastParentCreationDate ) ) {
-                String specifier = "[" + TimeUtils.toTimestamp( dateTime );
-                Debug.error("CODE NOT DONE FOR THIS!!!");
-                NodeUtil.findNodeRefsByType( specifier, "@ems\\:blah:", false, false, lastParent, null, true, true, getServices(), true );
-                // TODO
-                // keep walking parent back to master and collect all commits
-                // between timepoints looking at creation date of parents.
-
-                parent = parent.getParentWorkspace();
-                if ( parent != null ) lastParent = parent;
-
+            ArrayList< EmsScriptNode > commits =
+                    CommitUtil.getCommitsAllSitesInDateTimeRange( otherTime,
+                                                                  dateTime,
+                                                                  lastParent,
+                                                                  getServices(),
+                                                                  getResponse(),
+                                                                  false );
+            for ( EmsScriptNode commit : commits ) {
+                String type = (String)commit.getProperty( "ems:commitType" );
+                if ( "COMMIT".equals( type ) ) {
+                    String diffStr = (String)commit.getProperty( "ems:commit" );
+                    try {
+                        JSONObject diff = new JSONObject( diffStr );
+                        
+                        Set< EmsScriptNode > elements =
+                                WorkspaceDiff.getAllChangedElementsInDiffJson( diff,
+                                                                               getServices() );
+                        if ( elements != null )
+                            changedNodeRefs.addAll( NodeUtil.getNodeRefs( elements ) );
+                    } catch ( JSONException e ) {
+                        String msg = "ERROR! Could not parse json from CommitUtil: \"" + diffStr + "\"";
+                        if ( getResponse() != null ) {
+                            getResponse().append( msg + "\n" );
+                            if ( getStatus() != null ) {
+                                getStatus().setCode( HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                                                     msg );
+                            }
+                        }
+                        Debug.error( false, msg );
+                        e.printStackTrace();
+                        return null;
+                    }
+                }
             }
-            
         }
         return changedNodeRefs;
     }

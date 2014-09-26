@@ -1370,6 +1370,15 @@ public class NodeUtil {
         return newSet1;
     }
 
+    public static List< NodeRef > getNodeRefs( Collection< EmsScriptNode > nodes ) {
+        List< NodeRef > refs = new ArrayList< NodeRef >();
+        for ( EmsScriptNode node : nodes ) {
+            NodeRef ref = node.getNodeRef();
+            if ( ref != null ) refs.add( ref );
+        }
+        return refs;
+    }
+    
     public static EmsScriptNode findScriptNodeById( String id,
                                                     WorkspaceNode workspace,
                                                     Date dateTime,

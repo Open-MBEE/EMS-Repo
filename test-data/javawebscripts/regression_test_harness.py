@@ -173,7 +173,7 @@ def parse_test_nums(option, opt, value, parser):
                     
         # value is just a range ie 1-3:
         elif value.find('-') != -1:
-            keyList += parse_range(keyStr)
+            keyList += parse_range(value)
 
         #value was just a single key:
         else:
@@ -632,9 +632,20 @@ True,
 common_filters+['"branched"','"created"'],
 ["test","workspaces","develop"]
 ],
-        
+
 [
-19, 
+19,
+"PostToWorkspace",
+"Post element to workspace",
+create_curl_cmd(type="POST",data="x.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="wsB/"),
+True, 
+common_filters,
+["test","workspaces","develop"]
+],
+
+[
+20,
 "CompareWorkspaces",
 "Compare workspaces",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
@@ -643,11 +654,11 @@ True,
 common_filters,
 ["test","workspaces","develop"]
 ],
-        
+
 # SNAPSHOTS: ==========================    
 
 [
-20,
+21,
 "PostSnapshot",
 "Post snapshot test",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -657,11 +668,11 @@ True,
 common_filters+['"created"','"id"','"url"'],
 ["test","workspaces","develop"]
 ],
-        
+
 # EXPRESSIONS: ==========================    
 
 [
-21,
+22,
 "SolveConstraint",
 "Post expressions with a constraint and solves for the constraint.",
 create_curl_cmd(type="POST",base_url=BASE_URL_JW,
