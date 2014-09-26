@@ -155,6 +155,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 if ( snapshotNode != null ) {
                     try {
                         JSONObject snapshoturl = new JSONObject();
+                        snapshoturl.put("message", response.toString());
                         snapshoturl.put( "id", snapshotName );
                         snapshoturl.put( "creator",
                                          AuthenticationUtil.getFullyAuthenticatedUser() );
