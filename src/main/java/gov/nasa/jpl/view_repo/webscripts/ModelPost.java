@@ -1098,7 +1098,8 @@ public class ModelPost extends AbstractJavaWebScript {
             ArrayList<String> nodeNames = new ArrayList<String>();
 
             // Check for workspace disagreement in arguments.
-            if (!node.getWorkspace().equals(workspace)) {
+            WorkspaceNode nodeWorkspace = node.getWorkspace();
+            if (nodeWorkspace != null && !nodeWorkspace.equals(workspace)) {
                 if ( workspace == null ) {
                     workspace = node.getWorkspace();
                 } else {
