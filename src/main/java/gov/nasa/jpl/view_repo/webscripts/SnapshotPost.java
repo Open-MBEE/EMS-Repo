@@ -90,6 +90,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class SnapshotPost extends AbstractJavaWebScript {
+	private boolean postMessage = false; // Remove once we want this in the output
 	protected String snapshotName;
 	private boolean isSnapshotNode = false;	//determines whether we're working with a view/product or a snapshot node reference; true for snapshot node reference
 	
@@ -155,6 +156,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 if ( snapshotNode != null ) {
                     try {
                         JSONObject snapshoturl = new JSONObject();
+                        if (postMessage) snapshoturl.put("message", response.toString());
                         snapshoturl.put( "id", snapshotName );
                         snapshoturl.put( "creator",
                                          AuthenticationUtil.getFullyAuthenticatedUser() );
@@ -256,7 +258,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             } else {
                 String s = (String)node.getProperty( Acm.SYSML + srcProp );
                 s = handleTransclusion( src, srcProp, s, null, 0 );
-                //s = handleEmbeddedImage(src, srcProp, s, null, 0);
+                s = handleEmbeddedImage(src, s);
                 s = HtmlSanitize( s );
                 if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
                                                             + s
@@ -266,7 +268,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             if ( srcProp != null && !srcProp.isEmpty() ) {
                 String s = (String)obj.opt( Acm.SYSML + srcProp );
                 s = handleTransclusion( src, srcProp, s, null, 0 );
-                //s = handleEmbeddedImage(src, srcProp, s, null, 0);
+                s = handleEmbeddedImage(src, s);
                 s = HtmlSanitize( s );
                 if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
                                                             + s
@@ -803,18 +805,20 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return viewId;
     }
 
-    //private String handleEmbeddedImage( String id, String inputString)
-    //{
-    	//Document document = Jsoup.parseBodyFragment(inputString);
-    	//Elements images = document.getElementsByTag("img");
-    	//for(Element image : images){
-    		//String href = image.attr("href");
-    		//if(href.toLowerCase().startsWith("http")){
-    			
-    		//}
-    	//}
-    //}
-    
+    private String handleEmbeddedImage( String id, String inputString)
+    {
+    	Document document = Jsoup.parseBodyFragment(inputString);
+    	Elements images = document.getElementsByTag("img");
+    	for(Element image : images){
+    		String src = image.attr("src");
+    		if(src.toLowerCase().startsWith("http")){
+    			System.out.println("Embedded image src: " + src);
+    			//http://localhost:8081/share/proxy/alfresco/api/node/content/workspace/SpacesStore/74cd8a96-8a21-47e5-9b3b-a1b3e296787d/graph.JPG
+    		}
+    	}
+    	return inputString;
+    }
+
     private
             JSONObject
             handleGenerateArtifacts( JSONObject postJson,
@@ -903,7 +907,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     private String HtmlSanitize( String s ) {
-        return s.replaceAll( "(?i)<p>([^<]*)</p>", "$1" );
+    	Document document = Jsoup.parseBodyFragment(s);
+    	String retString = Jsoup.parse(document.text()).text();
+    	return retString;
     }
 
     // private String parseTransclusion(List<String> cirRefList, String
@@ -1043,23 +1049,33 @@ public class SnapshotPost extends AbstractJavaWebScript {
             throws JSONException {
         JSONObject snapshoturl = snapshotNode.toJSONObject( null );
         if ( hasPdf( snapshotNode ) || hasHtmlZip( snapshotNode ) ) {
-            HashMap< String, String > transformMap;
-            LinkedList< HashMap > list = new LinkedList< HashMap >();
+        	JSONArray formats = new JSONArray();
+            //HashMap< String, String > transformMap;
+            //LinkedList< HashMap > list = new LinkedList< HashMap >();
             if ( hasPdf( snapshotNode ) ) {
                 EmsScriptNode pdfNode = getPdfNode( snapshotNode );
-                transformMap = new HashMap< String, String >();
-                transformMap.put( "type", "pdf" );
-                transformMap.put( "url", pdfNode.getUrl() );
-                list.add( transformMap );
+                JSONObject pdfJson = new JSONObject();
+                pdfJson.put("type", "pdf");
+                pdfJson.put("url", pdfNode.getUrl());
+                formats.put(pdfJson);
+                //transformMap = new HashMap< String, String >();
+                //transformMap.put( "type", "pdf" );
+                //transformMap.put( "url", pdfNode.getUrl() );
+                //list.add( transformMap );
             }
             if ( hasHtmlZip( snapshotNode ) ) {
                 EmsScriptNode htmlZipNode = getHtmlZipNode( snapshotNode );
-                transformMap = new HashMap< String, String >();
-                transformMap.put( "type", "html" );
-                transformMap.put( "url", htmlZipNode.getUrl() );
-                list.add( transformMap );
+                JSONObject htmlJson = new JSONObject();
+                htmlJson.put("type","html");
+                htmlJson.put("url", htmlZipNode.getUrl());
+                formats.put(htmlJson);
+                //transformMap = new HashMap< String, String >();
+                //transformMap.put( "type", "html" );
+                //transformMap.put( "url", htmlZipNode.getUrl() );
+                //list.add( transformMap );
             }
-            snapshoturl.put( "formats", list );
+            
+            snapshoturl.put( "formats", formats );
         }
         return snapshoturl;
     }

@@ -102,6 +102,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        			snapshot = snapshotService.generatePDF(snapshotId);
 	        		}
 	        		catch(JSONException ex){
+	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	        			System.out.println("Failed to generate PDF for snapshot Id: " + snapshotId);
 	        		}
 	        	}
@@ -110,6 +111,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        			snapshot = snapshotService.generateHTML(snapshotId);
 	        		}
 	        		catch(JSONException ex){
+	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	        			System.out.println("Failed to generate HTML zip for snapshot Id: " + snapshotId);
 	        		}
 	        	}
@@ -120,16 +122,11 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        	} else {
 	            	response.append("[INFO]: Successfully generated artifact for snapshot: " + snapshotId);
 	        	}
-	        	if (snapshot != null) {
-	            	//snapshots.add(snapshot);
-	        	}
 	        	response.append(snapshot.toString());
 	        }
-	        //String contextUrl = "https://" + ActionUtil.getHostName() + ".jpl.nasa.gov/alfresco";
 	        // Send off notification email
 	        String subject = "[EuropaEMS] Snapshot Generation " + jobStatus;
 	        String msg = buildEmailMessage(snapshot);
-	        // TODO: NOTE!!! The following needs to be commented out for local testing....
 	        ActionUtil.sendEmailToModifier(jobNode, msg, subject, services, response);
 	        
 	        System.out.println("Completed snapshot artifact(s) generation.");
@@ -137,6 +134,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         catch(Exception ex){
         	System.out.println("Failed to complete snapshot artifact(s) generation!");
         	ex.printStackTrace();
+        	ActionUtil.sendEmailToModifier(jobNode, "An unexpected error occurred and your snapshot artifact generation failed.", "[EuropaEMS] Snapshot Generation Failed", services, response);
         }
     }
 
@@ -153,8 +151,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
                 hostname += ".jpl.nasa.gov";
             }
             String contextUrl = "https://" + hostname + "/alfresco";
-    		//String contextUrl = "https://" + ActionUtil.getHostName() + ".jpl.nasa.gov/alfresco";
-	    	JSONArray formats = snapshot.getJSONArray("formats");
+	    	JSONArray formats = (JSONArray)snapshot.getJSONArray("formats");
 	    	for(int i=0; i < formats.length(); i++){
 				JSONObject format = formats.getJSONObject(i);
 				String formatType = format.getString("type");
