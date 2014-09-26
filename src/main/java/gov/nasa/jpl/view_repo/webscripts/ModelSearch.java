@@ -30,6 +30,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
@@ -85,6 +86,7 @@ public class ModelSearch extends ModelGet {
 
 	        JSONObject top = new JSONObject();
 			top.put("elements", elementsJson);
+			if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
 			model.put("res", top.toString(4));
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "Could not create the JSON response", HttpServletResponse.SC_BAD_REQUEST);

@@ -7,10 +7,7 @@
         "owner": "e_32169",
         "qualifiedId": "123456/e_32169/constraint_32165",
         "qualifiedName": "/",
-        "specialization": {
-            "specification": "workspace://SpacesStore/fbdf906a-8394-4cc9-ba20-963bbda5000b",
-            "type": "Constraint"
-        },
+        "specialization": {"type": "Constraint"},
         "sysmlid": "constraint_32165"
     },
     {

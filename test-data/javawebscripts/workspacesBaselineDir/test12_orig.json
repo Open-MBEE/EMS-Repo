@@ -1,7 +1,8 @@
 {
+  "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n",
   "sequence": 0,
   "workspace1": {
-    "timestamp": "2014-09-17T13:08:46.268-0700",
+    "timestamp": "2014-09-26T13:45:35.371-0700",
     "name": "master",
     "elements": [
       {
@@ -10,13 +11,13 @@
         "sysmlid": "6666",
         "editable": true,
         "version": "1.1",
-        "modified": "2014-09-17T13:06:40.015-0700",
+        "modified": "2014-09-26T13:43:30.130-0700",
         "creator": "admin",
-        "id": "14f7f335-0754-4c99-bb8b-c1d23d26440d",
+        "id": "6f997dd1-3cd0-4318-8e32-3747396f5ddf",
         "name": "6666_name",
         "owner": "null",
         "documentation": "",
-        "read": "2014-09-17T13:08:46.277-0700",
+        "read": "2014-09-26T13:45:35.381-0700",
         "specialization": {
           "type": "Expression",
           "operand": [
@@ -32,12 +33,12 @@
         }
       },
       {
-        "id": "ab758c7f-2034-4f77-a05c-883256a2f6dd",
-        "qualifiedId": "/6666/MMS_1410984400022_2042e95d-479f-4816-b989-a6b458624717",
+        "id": "a09fef44-7452-4508-846f-eb289aa5120a",
+        "qualifiedId": "/6666/MMS_1411764210136_2c0c2630-e35a-4a36-8e42-9899615d4060",
         "qualifiedName": "/6666_name/null",
-        "sysmlid": "MMS_1410984400022_2042e95d-479f-4816-b989-a6b458624717",
+        "sysmlid": "MMS_1411764210136_2c0c2630-e35a-4a36-8e42-9899615d4060",
         "owner": "6666",
-        "read": "2014-09-17T13:08:46.327-0700",
+        "read": "2014-09-26T13:45:35.426-0700",
         "specialization": {
           "element": "300",
           "type": "ElementValue"
@@ -45,15 +46,15 @@
         "editable": true,
         "version": "1.0",
         "creator": "admin",
-        "modified": "2014-09-17T13:06:40.036-0700"
+        "modified": "2014-09-26T13:43:30.149-0700"
       },
       {
-        "id": "a6ab05d9-5bb6-4957-aa49-8cff399585eb",
-        "qualifiedId": "/6666/MMS_1410984400085_52ae3273-630b-4d95-b5cc-1c65fd09a75f",
+        "id": "7d1775c6-6178-4639-b4ee-c664a51c8a46",
+        "qualifiedId": "/6666/MMS_1411764210183_ba127ad9-9b82-4dcb-9a92-e034c40238e7",
         "qualifiedName": "/6666_name/null",
-        "sysmlid": "MMS_1410984400085_52ae3273-630b-4d95-b5cc-1c65fd09a75f",
+        "sysmlid": "MMS_1411764210183_ba127ad9-9b82-4dcb-9a92-e034c40238e7",
         "owner": "6666",
-        "read": "2014-09-17T13:08:46.347-0700",
+        "read": "2014-09-26T13:45:35.440-0700",
         "specialization": {
           "element": "302",
           "type": "ElementValue"
@@ -61,33 +62,33 @@
         "editable": true,
         "version": "1.0",
         "creator": "admin",
-        "modified": "2014-09-17T13:06:40.091-0700"
+        "modified": "2014-09-26T13:43:30.187-0700"
       }
     ]
   },
   "workspace2": {
-    "timestamp": "2014-09-17T13:08:46.277-0700",
+    "timestamp": "2014-09-26T13:45:35.381-0700",
     "deletedElements": [
       {
         "sysmlid": "6666",
-        "read": "2014-09-17T13:08:46.361-0700",
+        "read": "2014-09-26T13:45:35.453-0700",
         "specialization": {"type": "Expression"},
         "creator": "admin",
-        "modified": "2014-09-17T13:06:40.015-0700"
+        "modified": "2014-09-26T13:43:30.130-0700"
       },
       {
-        "sysmlid": "MMS_1410984400022_2042e95d-479f-4816-b989-a6b458624717",
-        "read": "2014-09-17T13:08:46.422-0700",
+        "sysmlid": "MMS_1411764210136_2c0c2630-e35a-4a36-8e42-9899615d4060",
+        "read": "2014-09-26T13:45:35.494-0700",
         "specialization": {"type": "ElementValue"},
         "creator": "admin",
-        "modified": "2014-09-17T13:06:40.036-0700"
+        "modified": "2014-09-26T13:43:30.149-0700"
       },
       {
-        "sysmlid": "MMS_1410984400085_52ae3273-630b-4d95-b5cc-1c65fd09a75f",
-        "read": "2014-09-17T13:08:46.442-0700",
+        "sysmlid": "MMS_1411764210183_ba127ad9-9b82-4dcb-9a92-e034c40238e7",
+        "read": "2014-09-26T13:45:35.507-0700",
         "specialization": {"type": "ElementValue"},
         "creator": "admin",
-        "modified": "2014-09-17T13:06:40.091-0700"
+        "modified": "2014-09-26T13:43:30.187-0700"
       }
     ],
     "addedElements": [],

@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.util;
 
+import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
@@ -140,6 +141,7 @@ public class CommitUtil {
             String aSiteName = si.getShortName();
             ArrayList< EmsScriptNode > siteCommits =
                     getCommitsInDateTimeRange( fromDateTime, toDateTime, workspace, aSiteName, services, response, justFirst );
+            Debug.outln( "commits in " + aSiteName + " = " + siteCommits );
             commits.addAll( siteCommits );
             if ( justFirst && commits.size() > 0 ) break;
         }

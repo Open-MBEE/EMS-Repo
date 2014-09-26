@@ -30,6 +30,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -90,6 +91,7 @@ public class ProjectGet extends AbstractJavaWebScript {
                 WorkspaceNode workspace = getWorkspace( req );
                 
                 json = handleProject(projectId, siteName, workspace, dateTime);
+                if (json != null && !Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
             }
         } catch (JSONException e) {
             log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

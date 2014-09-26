@@ -352,6 +352,7 @@ public class WorkspaceNode extends EmsScriptNode {
     public Set< NodeRef > getChangedNodeRefsWithRespectTo( WorkspaceNode other,
                                                            Date dateTime,
                                                            Date otherTime ) {
+        Debug.turnOn();
         Set< NodeRef > changedNodeRefs = 
                 new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);//getChangedNodeRefs());
         WorkspaceNode targetParent = getCommonParent( other );
@@ -363,7 +364,9 @@ public class WorkspaceNode extends EmsScriptNode {
         // account except to rule out workspaces with changes only after
         // dateTime.
         while ( parent != null && !parent.equals( targetParent ) ) {
-            changedNodeRefs.addAll( parent.getChangedNodeRefs( dateTime ) );
+            Set< NodeRef > changes = parent.getChangedNodeRefs( dateTime );
+            Debug.outln( "nodes in " + parent.getName() + " = " + changes );
+            changedNodeRefs.addAll( changes );
             parent = parent.getParentWorkspace();
             if ( parent != null ) lastParent = parent;
         }
@@ -404,11 +407,13 @@ public class WorkspaceNode extends EmsScriptNode {
                         }
                         Debug.error( false, msg );
                         e.printStackTrace();
-                        return null;
+                        changedNodeRefs = null;
+                        break;
                     }
                 }
             }
         }
+        Debug.turnOff();
         return changedNodeRefs;
     }
 

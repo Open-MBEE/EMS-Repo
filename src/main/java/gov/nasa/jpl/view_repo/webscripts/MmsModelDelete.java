@@ -53,6 +53,8 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         try {
             result = instance.handleRequest( req );
             if (result != null) {
+                appendResponseStatusInfo( instance );
+                if (!Utils.isNullOrEmpty(response.toString())) result.put("message", response.toString()); 
                 model.put( "res", result.toString(2) );
             }
         } catch (JSONException e) {
@@ -62,7 +64,6 @@ public class MmsModelDelete extends AbstractJavaWebScript {
            log(LogLevel.ERROR, "Internal server error\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
            e.printStackTrace();
         }
-        appendResponseStatusInfo( instance );
         if (result == null) {
             model.put( "res", "");
         }

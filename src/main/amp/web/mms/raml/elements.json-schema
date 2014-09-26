@@ -9,6 +9,10 @@
                 "type": "object",
                 "$ref": "#/definitions/Element"
             }
+        },
+        "message": {
+                    "type": "string",
+                    "description": "The response message for this transaction if it is non-empty."
         }
     },
 

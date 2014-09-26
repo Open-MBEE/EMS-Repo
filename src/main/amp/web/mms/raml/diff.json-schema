@@ -16,6 +16,10 @@
         "sequence": {
             "type": "integer",
             "description": "Sequence ID so OSB knows what order messages should appear in"
+        },
+        "message": {
+                    "type": "string",
+                    "description": "The response message for this transaction if it is non-empty."
         }
     }
 }

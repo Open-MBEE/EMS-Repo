@@ -1,6 +1,4 @@
 {"workspaces": [{
-    "branched": "2014-09-17T11:56:44.966-0700",
-    "created": "2014-09-17T11:56:44.959-0700",
     "creator": "admin",
     "name": "wsA",
     "parent": "master"

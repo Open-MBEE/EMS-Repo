@@ -1,12 +1,12 @@
 { "products":  [
 
-	{"sysmlid": "3301",
+	{"sysmlid": "301",
 	 "specialization": {"noSections": ["302"],
                             "view2view": [{"id": "3301", 
 			                   "childrenViews": ["302"]}]}
         },
 
-	{"sysmlid": "4401",
+	{"sysmlid": "401",
 	 "specialization": {"noSections": ["402"],
                             "view2view": [{"id": "4401", 
 			                   "childrenViews": ["402"]}]}

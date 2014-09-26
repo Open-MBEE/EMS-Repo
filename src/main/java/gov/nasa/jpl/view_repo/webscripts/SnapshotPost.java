@@ -30,6 +30,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.docbook.model.*;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.SnapshotArtifactsGenerationActionExecuter;
 import gov.nasa.jpl.view_repo.util.Acm;
@@ -90,7 +91,6 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class SnapshotPost extends AbstractJavaWebScript {
-	private boolean postMessage = false; // Remove once we want this in the output
 	protected String snapshotName;
 	private boolean isSnapshotNode = false;	//determines whether we're working with a view/product or a snapshot node reference; true for snapshot node reference
 	
@@ -156,7 +156,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 if ( snapshotNode != null ) {
                     try {
                         JSONObject snapshoturl = new JSONObject();
-                        if (postMessage) snapshoturl.put("message", response.toString());
+                        if (!Utils.isNullOrEmpty(response.toString())) snapshoturl.put("message", response.toString());
                         snapshoturl.put( "id", snapshotName );
                         snapshoturl.put( "creator",
                                          AuthenticationUtil.getFullyAuthenticatedUser() );

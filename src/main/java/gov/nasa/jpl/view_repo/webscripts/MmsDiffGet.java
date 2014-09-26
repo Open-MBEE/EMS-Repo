@@ -1,8 +1,10 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -76,6 +78,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 
         try {
             JSONObject top = workspaceDiff.toJSONObject( dateTime1, dateTime2, false );
+            if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
             results.put("res", top.toString(4));
         } catch (JSONException e) {
             e.printStackTrace();
