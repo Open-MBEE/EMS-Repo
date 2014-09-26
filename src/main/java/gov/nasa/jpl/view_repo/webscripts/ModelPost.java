@@ -98,6 +98,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ModelPost extends AbstractJavaWebScript {
+	private boolean postMessage = false; // Remove once we want this in the output
 
     public ModelPost() {
         super();
@@ -1966,7 +1967,7 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                         Timer.stopTimer(timerToJson, "!!!!! executeImpl(): toJSON time", timeEvents);
                         top.put( "elements", elementsJson );
-                        top.put("message", response.toString());
+                        if (postMessage) top.put("message", response.toString());
                         if ( prettyPrint ) model.put( "res", top.toString( 4 ) );
                         else model.put( "res", top.toString() );
                     }
