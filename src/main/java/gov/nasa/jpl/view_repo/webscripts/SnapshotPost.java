@@ -90,6 +90,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class SnapshotPost extends AbstractJavaWebScript {
+	private boolean postMessage = false; // Remove once we want this in the output
 	protected String snapshotName;
 	private boolean isSnapshotNode = false;	//determines whether we're working with a view/product or a snapshot node reference; true for snapshot node reference
 	
@@ -155,7 +156,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 if ( snapshotNode != null ) {
                     try {
                         JSONObject snapshoturl = new JSONObject();
-                        snapshoturl.put("message", response.toString());
+                        if (postMessage) snapshoturl.put("message", response.toString());
                         snapshoturl.put( "id", snapshotName );
                         snapshoturl.put( "creator",
                                          AuthenticationUtil.getFullyAuthenticatedUser() );
