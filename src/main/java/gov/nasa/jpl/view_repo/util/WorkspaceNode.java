@@ -381,11 +381,7 @@ public class WorkspaceNode extends EmsScriptNode {
                                                                   ServiceRegistry services,
                                                                   StringBuffer response,
                                                                   Status status ) {
-        //Debug.turnOff();
-        //Debug.turnOn();
-        //Debug.outln( getName() + ".getChangedNodeRefsWithRespectTo(" + other.getName() + ", " + dateTime + ", " + otherTime +  ")" );
-        System.out.println( getName(thisWs) + ".getChangedNodeRefsWithRespectTo(" + getName(otherWs) + ", " + dateTime + ", " + otherTime +  ")" );
-        //Debug.turnOff();
+        //System.out.println( getName(thisWs) + ".getChangedNodeRefsWithRespectTo(" + getName(otherWs) + ", " + dateTime + ", " + otherTime +  ")" );
 
         Set< NodeRef > changedNodeRefs = 
                 new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);//getChangedNodeRefs());
@@ -400,10 +396,7 @@ public class WorkspaceNode extends EmsScriptNode {
         while ( parent != null && !parent.equals( targetParent ) ) {
             Set< NodeRef > changes = parent.getChangedNodeRefs( dateTime );
             
-            //Debug.turnOn();
-            //Debug.outln( "nodes in " + parent.getName() + " = " + changes );
-            System.out.println( "nodes in " + getName(parent) + " = " + changes );
-            //Debug.turnOff();
+            //System.out.println( "nodes in " + getName(parent) + " = " + changes );
             
             changedNodeRefs.addAll( changes );
             parent = parent.getParentWorkspace();
@@ -464,7 +457,6 @@ public class WorkspaceNode extends EmsScriptNode {
                 }
             }
         }
-        //Debug.turnOff();
         return changedNodeRefs;
     }
 

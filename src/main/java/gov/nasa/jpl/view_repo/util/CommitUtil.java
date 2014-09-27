@@ -151,10 +151,7 @@ public class CommitUtil {
             ArrayList< EmsScriptNode > siteCommits =
                     getCommitsInDateTimeRange( fromDateTime, toDateTime, workspace, siteName, services, response, justFirst );
 
-            //Debug.turnOn();
-            //Debug.outln( "commits in " + aSiteName + " = " + siteCommits );
-            System.out.println( "commits in " + siteName + " = " + siteCommits );
-            //Debug.turnOff();
+            //System.out.println( "commits in " + siteName + " = " + siteCommits );
 
             commits.addAll( siteCommits );
             if ( justFirst && commits.size() > 0 ) break;
@@ -227,7 +224,7 @@ public class CommitUtil {
         while ( true ) { // run until workspace is equal to null and once while it is null (for the master branch)
             EmsScriptNode commit = getLastCommit( workspace, siteName, services, response );
             while ( commit != null ) {
-                Date created = commit.getCreationDate();//workspace == null ? new Date(0) : workspace.getCreationDate();
+                Date created = commit.getCreationDate();
                 if ( created.before( fromDateTime ) ) break;
                 if ( !created.after( toDateTime ) ) {
                     commits.add( commit );

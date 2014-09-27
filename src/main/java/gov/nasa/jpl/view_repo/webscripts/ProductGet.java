@@ -118,7 +118,7 @@ public class ProductGet extends AbstractJavaWebScript {
             
             // default simple=false
             boolean simple = getBooleanArg( req, "simple", false );
-            System.out.println("simple=" + simple);
+            //System.out.println("simple=" + simple);
 
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
@@ -128,7 +128,7 @@ public class ProductGet extends AbstractJavaWebScript {
 
             // see if prettyPrint default is overridden and change
             prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
-            System.out.println("prettyPrint=" + prettyPrint);
+            //System.out.println("prettyPrint=" + prettyPrint);
             
             ProductsWebscript productsWs = new ProductsWebscript(repository, services, response);
             productsWs.simpleJson = simple;
