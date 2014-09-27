@@ -1,302 +1,308 @@
-{"elements": [
+{
 
-    {
+    "elements": [
 
-        "creator": "admin",
+        {
 
-        "documentation": "",
+            "creator": "admin",
 
-        "editable": true,
+            "documentation": "",
 
-        "name": "",
+            "editable": true,
 
-        "owner": "e_32169",
+            "name": "GreaterEquals",
 
-        "qualifiedId": "123456/e_32169/expr_32165",
+            "owner": "e_31828",
 
-        "qualifiedName": "/",
+            "qualifiedId": "123456/e_31828/op_ev_31835",
 
-        "specialization": {
+            "qualifiedName": "/GreaterEquals",
 
-            "operand": [
+            "specialization": {
 
-                {
+                "parameters": [
 
-                    "element": "op_ev_31835",
+                    "op_param_31867",
 
-                    "type": "ElementValue"
+                    "op_param_31868",
 
-                },
+                    "op_param_31869"
 
-                {
+                ],
 
-                    "element": "arg_ev_38307_1",
+                "type": "Operation"
 
-                    "type": "ElementValue"
+            },
 
-                },
-
-                {
-
-                    "element": "arg_ev_33001",
-
-                    "type": "ElementValue"
-
-                }
-
-            ],
-
-            "type": "Expression"
+            "sysmlid": "op_ev_31835"
 
         },
 
-        "sysmlid": "expr_32165"
+        {
 
-    },
+            "creator": "admin",
 
-    {
+            "documentation": "",
 
-        "creator": "admin",
+            "editable": true,
 
-        "documentation": "",
+            "name": "initialDuration",
 
-        "editable": true,
+            "owner": "e_38263",
 
-        "name": "initialDuration",
+            "qualifiedId": "123456/e_38263/arg_ev_33001",
 
-        "owner": "e_38263",
+            "qualifiedName": "/initialDuration",
 
-        "qualifiedId": "123456/e_38263/arg_ev_33001",
+            "specialization": {
 
-        "qualifiedName": "/initialDuration",
+                "isDerived": false,
 
-        "specialization": {
+                "isSlot": false,
 
-            "isDerived": false,
+                "type": "Property",
 
-            "isSlot": false,
+                "value": [{
 
-            "type": "Property",
+                    "integer": -997514701,
 
-            "value": [{
+                    "type": "LiteralInteger"
 
-                "integer": -1782754611,
+                }]
 
-                "type": "LiteralInteger"
+            },
 
-            }]
-
-        },
-
-        "sysmlid": "arg_ev_33001"
-
-    },
-
-    {
-
-        "creator": "admin",
-
-        "documentation": "",
-
-        "editable": true,
-
-        "name": "y",
-
-        "owner": "op_ev_31835",
-
-        "qualifiedId": "123456/e_31828/op_ev_31835/op_param_31869",
-
-        "qualifiedName": "/GreaterEquals/y",
-
-        "specialization": {"type": "Element"},
-
-        "sysmlid": "op_param_31869"
-
-    },
-
-    {
-
-        "creator": "admin",
-
-        "documentation": "",
-
-        "editable": true,
-
-        "name": "duration_1",
-
-        "owner": "e_38304",
-
-        "qualifiedId": "123456/e_38304/arg_ev_38307_1",
-
-        "qualifiedName": "/duration_1",
-
-        "specialization": {
-
-            "isDerived": false,
-
-            "isSlot": false,
-
-            "type": "Property",
-
-            "value": [{
-
-                "integer": 10,
-
-                "type": "LiteralInteger"
-
-            }]
+            "sysmlid": "arg_ev_33001"
 
         },
 
-        "sysmlid": "arg_ev_38307_1"
+        {
 
-    },
+            "creator": "admin",
 
-    {
+            "documentation": "",
 
-        "creator": "admin",
+            "editable": true,
 
-        "documentation": "",
+            "name": "y",
 
-        "editable": true,
+            "owner": "op_ev_31835",
 
-        "name": "result",
+            "qualifiedId": "123456/e_31828/op_ev_31835/op_param_31869",
 
-        "owner": "op_ev_31835",
+            "qualifiedName": "/GreaterEquals/y",
 
-        "qualifiedId": "123456/e_31828/op_ev_31835/op_param_31867",
+            "specialization": {"type": "Element"},
 
-        "qualifiedName": "/GreaterEquals/result",
-
-        "specialization": {"type": "Element"},
-
-        "sysmlid": "op_param_31867"
-
-    },
-
-    {
-
-        "creator": "admin",
-
-        "documentation": "",
-
-        "editable": true,
-
-        "name": "x",
-
-        "owner": "op_ev_31835",
-
-        "qualifiedId": "123456/e_31828/op_ev_31835/op_param_31868",
-
-        "qualifiedName": "/GreaterEquals/x",
-
-        "specialization": {"type": "Element"},
-
-        "sysmlid": "op_param_31868"
-
-    },
-
-    {
-
-        "creator": "admin",
-
-        "documentation": "",
-
-        "editable": true,
-
-        "name": "duration",
-
-        "owner": "e_38304",
-
-        "qualifiedId": "123456/e_38304/arg_ev_38307",
-
-        "qualifiedName": "/duration",
-
-        "specialization": {
-
-            "isDerived": false,
-
-            "isSlot": false,
-
-            "type": "Property",
-
-            "value": [{
-
-                "integer": 22,
-
-                "type": "LiteralInteger"
-
-            }]
+            "sysmlid": "op_param_31869"
 
         },
 
-        "sysmlid": "arg_ev_38307"
+        {
 
-    },
+            "creator": "admin",
 
-    {
+            "documentation": "",
 
-        "creator": "admin",
+            "editable": true,
 
-        "documentation": "",
+            "name": "x",
 
-        "editable": true,
+            "owner": "op_ev_31835",
 
-        "name": "GreaterEquals",
+            "qualifiedId": "123456/e_31828/op_ev_31835/op_param_31868",
 
-        "owner": "e_31828",
+            "qualifiedName": "/GreaterEquals/x",
 
-        "qualifiedId": "123456/e_31828/op_ev_31835",
+            "specialization": {"type": "Element"},
 
-        "qualifiedName": "/GreaterEquals",
-
-        "specialization": {
-
-            "parameters": [
-
-                "op_param_31867",
-
-                "op_param_31868",
-
-                "op_param_31869"
-
-            ],
-
-            "type": "Operation"
+            "sysmlid": "op_param_31868"
 
         },
 
-        "sysmlid": "op_ev_31835"
+        {
 
-    },
+            "creator": "admin",
 
-    {
+            "documentation": "",
 
-        "creator": "admin",
+            "editable": true,
 
-        "documentation": "",
+            "name": "",
 
-        "editable": true,
+            "owner": "e_32169",
 
-        "name": "",
+            "qualifiedId": "123456/e_32169/constraint_32165",
 
-        "owner": "e_32169",
+            "qualifiedName": "/",
 
-        "qualifiedId": "123456/e_32169/constraint_32165",
+            "specialization": {
 
-        "qualifiedName": "/",
+                "type": "Constraint"
 
-        "specialization": {
+            },
 
-            "type": "Constraint"
+            "sysmlid": "constraint_32165"
 
         },
 
-        "sysmlid": "constraint_32165"
+        {
 
-    }
+            "creator": "admin",
 
-]}
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "duration_1",
+
+            "owner": "e_38304",
+
+            "qualifiedId": "123456/e_38304/arg_ev_38307_1",
+
+            "qualifiedName": "/duration_1",
+
+            "specialization": {
+
+                "isDerived": false,
+
+                "isSlot": false,
+
+                "type": "Property",
+
+                "value": [{
+
+                    "integer": 10,
+
+                    "type": "LiteralInteger"
+
+                }]
+
+            },
+
+            "sysmlid": "arg_ev_38307_1"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "",
+
+            "owner": "e_32169",
+
+            "qualifiedId": "123456/e_32169/expr_32165",
+
+            "qualifiedName": "/",
+
+            "specialization": {
+
+                "operand": [
+
+                    {
+
+                        "element": "op_ev_31835",
+
+                        "type": "ElementValue"
+
+                    },
+
+                    {
+
+                        "element": "arg_ev_38307_1",
+
+                        "type": "ElementValue"
+
+                    },
+
+                    {
+
+                        "element": "arg_ev_33001",
+
+                        "type": "ElementValue"
+
+                    }
+
+                ],
+
+                "type": "Expression"
+
+            },
+
+            "sysmlid": "expr_32165"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "result",
+
+            "owner": "op_ev_31835",
+
+            "qualifiedId": "123456/e_31828/op_ev_31835/op_param_31867",
+
+            "qualifiedName": "/GreaterEquals/result",
+
+            "specialization": {"type": "Element"},
+
+            "sysmlid": "op_param_31867"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "duration",
+
+            "owner": "e_38304",
+
+            "qualifiedId": "123456/e_38304/arg_ev_38307",
+
+            "qualifiedName": "/duration",
+
+            "specialization": {
+
+                "isDerived": false,
+
+                "isSlot": false,
+
+                "type": "Property",
+
+                "value": [{
+
+                    "integer": 22,
+
+                    "type": "LiteralInteger"
+
+                }]
+
+            },
+
+            "sysmlid": "arg_ev_38307"
+
+        }
+
+    ],
+
+    "message": "[WARNING]: Could not find owner with name: e_32169 putting constraint_32165 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[ERROR]: \t trying to create reified node e_32169_pkg in parent, 123456 = {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}.\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307_1 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[ERROR]: \t trying to create reified node e_38304_pkg in parent, 123456 = {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}.\n[WARNING]: Could not find owner with name: e_32169 putting expr_32165 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_31828 putting op_ev_31835 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[ERROR]: \t trying to create reified node e_31828_pkg in parent, 123456 = {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}.\n[ERROR]: \t trying to create reified node op_ev_31835_pkg in parent, e_31828_pkg = {type=null, id=e_31828_pkg, name=e_31828, qualified name=/e_31828, workspace=null}.\n[WARNING]: Could not find owner with name: e_38263 putting arg_ev_33001 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[ERROR]: \t trying to create reified node e_38263_pkg in parent, 123456 = {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}.\n[WARNING]: Could not find owner with name: e_32169 putting constraint_32165 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307_1 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[ERROR]: \t trying to create reified node arg_ev_38307_1_pkg in parent, e_38304_pkg = {type=null, id=e_38304_pkg, name=e_38304, qualified name=/e_38304, workspace=null}.\n[WARNING]: Could not find owner with name: e_32169 putting expr_32165 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[ERROR]: \t trying to create reified node expr_32165_pkg in parent, e_32169_pkg = {type=null, id=e_32169_pkg, name=e_32169, qualified name=/e_32169, workspace=null}.\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[ERROR]: \t trying to create reified node arg_ev_38307_pkg in parent, e_38304_pkg = {type=null, id=e_38304_pkg, name=e_38304, qualified name=/e_38304, workspace=null}.\n[WARNING]: Could not find owner with name: e_31828 putting op_ev_31835 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38263 putting arg_ev_33001 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[ERROR]: \t trying to create reified node arg_ev_33001_pkg in parent, e_38263_pkg = {type=null, id=e_38263_pkg, name=e_38263, qualified name=/e_38263, workspace=null}.\n[WARNING]: createOrUpdateModel deltas not posted properly\n"
+
+}
 
 200
 
