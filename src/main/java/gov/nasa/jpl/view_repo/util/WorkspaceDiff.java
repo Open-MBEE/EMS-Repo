@@ -455,17 +455,17 @@ public class WorkspaceDiff {
             }
         }
         Set< EmsScriptNode > elements = null;
-        if ( diffJson.has( "addedElements" ) ) {
+        if ( jsonObj.has( "addedElements" ) ) {
             jsonArr = jsonObj.getJSONArray( "addedElements" );
             elements = getAllChangedElementsInDiffJson( jsonArr, ws, services );
             if ( elements != null ) nodes.addAll( elements );
         }
-        if ( diffJson.has( "deletedElements" ) ) {
+        if ( jsonObj.has( "deletedElements" ) ) {
             jsonArr = jsonObj.getJSONArray( "deletedElements" );
             elements = getAllChangedElementsInDiffJson( jsonArr, ws, services );
             if ( elements != null ) nodes.addAll( elements );
         }
-        if ( diffJson.has( "updatedElements" ) ) {
+        if ( jsonObj.has( "updatedElements" ) ) {
             jsonArr = jsonObj.getJSONArray( "updatedElements" );
             elements = getAllChangedElementsInDiffJson( jsonArr, ws, services );
             if ( elements != null ) nodes.addAll( elements );
@@ -801,8 +801,18 @@ public class WorkspaceDiff {
 
     protected void captureDeltas(WorkspaceNode node) {
         Set< NodeRef > newSet = Utils.newSet();
-        Set<NodeRef> s1 = ( ws1 == null ? newSet : ws1.getChangedNodeRefsWithRespectTo( node, timestamp1, timestamp2 ) );
-        Set<NodeRef> s2 = ( node == null ? newSet : node.getChangedNodeRefsWithRespectTo( ws1, timestamp2, timestamp1 ) );
+        Set< NodeRef > s1 =
+                WorkspaceNode.getChangedNodeRefsWithRespectTo( ws1, node,
+                                                               timestamp1,
+                                                               timestamp2,
+                                                               getServices(),
+                                                               null, null );
+        Set< NodeRef > s2 =
+                WorkspaceNode.getChangedNodeRefsWithRespectTo( node, ws1,
+                                                               timestamp2,
+                                                               timestamp1,
+                                                               getServices(),
+                                                               null, null );
         if ( onlyModelElements ) {
             s1 = NodeUtil.getModelElements(s1);
             s2 = NodeUtil.getModelElements(s2);
@@ -811,17 +821,21 @@ public class WorkspaceDiff {
         // need to make sure both sets have each others' nodes
         for ( NodeRef n : s1 ) {
             String cmName = NodeUtil.getName( n );
-            NodeRef ref = NodeUtil.findNodeRefById( cmName, false, node, timestamp2, getServices(), false );
+            NodeRef ref =
+                    NodeUtil.findNodeRefById( cmName, false, node, timestamp2,
+                                              getServices(), false );
             if ( ref != null ) s2.add( ref );
         }
         for ( NodeRef n : s2 ) {
             String cmName = NodeUtil.getName( n );
-            NodeRef ref = NodeUtil.findNodeRefById( cmName, false, ws1, timestamp1, getServices(), false );
+            NodeRef ref =
+                    NodeUtil.findNodeRefById( cmName, false, ws1, timestamp1,
+                                              getServices(), false );
             if ( ref != null ) s1.add( ref );
         }
 
         nodeDiff = new NodeDiff( s1, s2 );
-        nodeDiff.addPropertyIdsToIgnore( getIgnoredPropIds() ); //Utils.newList( "read", "creator", "modified" ) );
+        nodeDiff.addPropertyIdsToIgnore( getIgnoredPropIds() );
         populateMembers();
     }
 

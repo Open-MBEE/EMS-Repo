@@ -527,7 +527,7 @@ public class EmsScriptNode extends ScriptNode implements
 
         ArrayList< EmsScriptNode > emsNodeList =
                 new ArrayList< EmsScriptNode >();
-        for ( NodeRef ref : resultSet ) {
+        if ( resultSet != null ) for ( NodeRef ref : resultSet ) {
             // NodeRef ref = row.getNodeRef();
             if ( ref == null ) continue;
             EmsScriptNode node =

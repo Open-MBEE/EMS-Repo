@@ -278,6 +278,12 @@ public class WorkspaceNode extends EmsScriptNode {
         if ( Debug.isOn() ) Debug.outln( "returning newFolder: " + newFolder );
         return newFolder;
     }
+    
+    
+    public static String getName( WorkspaceNode ws ) {
+        if ( ws == null ) return "master";
+        return ws.getName();
+    }
 
     public WorkspaceNode getCommonParent(WorkspaceNode other) {
         return getCommonParent( this, other );
@@ -287,7 +293,7 @@ public class WorkspaceNode extends EmsScriptNode {
                                                  WorkspaceNode ws2 ) {
         Set<WorkspaceNode> parents = new TreeSet<WorkspaceNode>();
         while ( ( ws1 != null || ws2 != null )
-                && ( ws1 == null && !ws1.equals( ws2 ) )
+                && ( ws1 == null ? !ws2.equals( ws1 ) : !ws1.equals( ws2 ) )
                 && ( ws1 == null || !parents.contains( ws1 ) )
                 && ( ws2 == null || !parents.contains( ws2 ) ) ) {
             if ( ws1 != null ) {
@@ -339,24 +345,52 @@ public class WorkspaceNode extends EmsScriptNode {
         return changedElementIds;
     }
 
+    
+//    /**
+//     * Get the NodeRefs of this workspace that have changed with respect to
+//     * another workspace. This method need not check the actual changes to see
+//     * if they are different and may be a superset of those actually changed.
+//     * 
+//     * @param other
+//     * @param dateTime
+//     * @param otherTime
+//     * @return
+//     */
+//    public Set< NodeRef > getChangedNodeRefsWithRespectTo( WorkspaceNode other,
+//                                                           Date dateTime,
+//                                                           Date otherTime ) {
+//        return getChangedNodeRefsWithRespectTo( this, other, dateTime, otherTime );
+//    }
+    
+    
     /**
      * Get the NodeRefs of this workspace that have changed with respect to
      * another workspace. This method need not check the actual changes to see
      * if they are different and may be a superset of those actually changed.
      * 
-     * @param other
+     * @param thisWs
+     * @param otherWs
      * @param dateTime
      * @param otherTime
      * @return
      */
-    public Set< NodeRef > getChangedNodeRefsWithRespectTo( WorkspaceNode other,
-                                                           Date dateTime,
-                                                           Date otherTime ) {
-        Debug.turnOn();
+    public static Set< NodeRef > getChangedNodeRefsWithRespectTo( WorkspaceNode thisWs,
+                                                                  WorkspaceNode otherWs,
+                                                                  Date dateTime,
+                                                                  Date otherTime,
+                                                                  ServiceRegistry services,
+                                                                  StringBuffer response,
+                                                                  Status status ) {
+        //Debug.turnOff();
+        //Debug.turnOn();
+        //Debug.outln( getName() + ".getChangedNodeRefsWithRespectTo(" + other.getName() + ", " + dateTime + ", " + otherTime +  ")" );
+        System.out.println( getName(thisWs) + ".getChangedNodeRefsWithRespectTo(" + getName(otherWs) + ", " + dateTime + ", " + otherTime +  ")" );
+        //Debug.turnOff();
+
         Set< NodeRef > changedNodeRefs = 
                 new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);//getChangedNodeRefs());
-        WorkspaceNode targetParent = getCommonParent( other );
-        WorkspaceNode parent = this;
+        WorkspaceNode targetParent = getCommonParent( thisWs, otherWs );
+        WorkspaceNode parent = thisWs;
         WorkspaceNode lastParent = parent;
         
         // Get nodes in the workspace that have changed with respect to the
@@ -365,7 +399,12 @@ public class WorkspaceNode extends EmsScriptNode {
         // dateTime.
         while ( parent != null && !parent.equals( targetParent ) ) {
             Set< NodeRef > changes = parent.getChangedNodeRefs( dateTime );
-            Debug.outln( "nodes in " + parent.getName() + " = " + changes );
+            
+            //Debug.turnOn();
+            //Debug.outln( "nodes in " + parent.getName() + " = " + changes );
+            System.out.println( "nodes in " + getName(parent) + " = " + changes );
+            //Debug.turnOff();
+            
             changedNodeRefs.addAll( changes );
             parent = parent.getParentWorkspace();
             if ( parent != null ) lastParent = parent;
@@ -381,9 +420,21 @@ public class WorkspaceNode extends EmsScriptNode {
                     CommitUtil.getCommitsAllSitesInDateTimeRange( otherTime,
                                                                   dateTime,
                                                                   lastParent,
-                                                                  getServices(),
-                                                                  getResponse(),
+                                                                  services,
+                                                                  response,
                                                                   false );
+            // TODO -- REVIEW -- The created time of the commit is after the
+            // modified times of the items in the diff (right?). Thus, it is
+            // unclear whether any commits after the later time point can be
+            // ruled out since the nodes in the diff may have been modified long
+            // before the commit was created. For instance if a transaction
+            // includes posting 100 elements serially, then the commit time
+            // could be many seconds after the first element was modified. One
+            // solution would be to give the commit both a start and end time
+            // bounding the times that changes we made in the transaction. We
+            // should not assume that transactions are all atomic (one at a
+            // time); thus, the time interval of one commit may overlap with
+            // others'.
             for ( EmsScriptNode commit : commits ) {
                 String type = (String)commit.getProperty( "ems:commitType" );
                 if ( "COMMIT".equals( type ) ) {
@@ -393,16 +444,16 @@ public class WorkspaceNode extends EmsScriptNode {
                         
                         Set< EmsScriptNode > elements =
                                 WorkspaceDiff.getAllChangedElementsInDiffJson( diff,
-                                                                               getServices() );
+                                                                               services );
                         if ( elements != null )
                             changedNodeRefs.addAll( NodeUtil.getNodeRefs( elements ) );
                     } catch ( JSONException e ) {
                         String msg = "ERROR! Could not parse json from CommitUtil: \"" + diffStr + "\"";
-                        if ( getResponse() != null ) {
-                            getResponse().append( msg + "\n" );
-                            if ( getStatus() != null ) {
-                                getStatus().setCode( HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                                                     msg );
+                        if ( response != null ) {
+                            response.append( msg + "\n" );
+                            if ( status != null ) {
+                                status.setCode( HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                                                msg );
                             }
                         }
                         Debug.error( false, msg );
@@ -413,7 +464,7 @@ public class WorkspaceNode extends EmsScriptNode {
                 }
             }
         }
-        Debug.turnOff();
+        //Debug.turnOff();
         return changedNodeRefs;
     }
 

@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 
@@ -9,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.transaction.UserTransaction;
 
@@ -137,11 +140,22 @@ public class CommitUtil {
         ArrayList< EmsScriptNode > commits = new ArrayList< EmsScriptNode >();
         String userName = NodeUtil.getUserName();
         List< SiteInfo > sites = services.getSiteService().listSites( userName );
+        Set<String> siteNames = new TreeSet<String>();
         for ( SiteInfo si : sites ) {
             String aSiteName = si.getShortName();
+            siteNames.add( aSiteName );
+        }
+        siteNames.add(AbstractJavaWebScript.NO_SITE_ID);
+        System.out.println( siteNames.size() + " sites" );
+        for ( String siteName : siteNames ) {
             ArrayList< EmsScriptNode > siteCommits =
-                    getCommitsInDateTimeRange( fromDateTime, toDateTime, workspace, aSiteName, services, response, justFirst );
-            Debug.outln( "commits in " + aSiteName + " = " + siteCommits );
+                    getCommitsInDateTimeRange( fromDateTime, toDateTime, workspace, siteName, services, response, justFirst );
+
+            //Debug.turnOn();
+            //Debug.outln( "commits in " + aSiteName + " = " + siteCommits );
+            System.out.println( "commits in " + siteName + " = " + siteCommits );
+            //Debug.turnOff();
+
             commits.addAll( siteCommits );
             if ( justFirst && commits.size() > 0 ) break;
         }
@@ -213,7 +227,7 @@ public class CommitUtil {
         while ( true ) { // run until workspace is equal to null and once while it is null (for the master branch)
             EmsScriptNode commit = getLastCommit( workspace, siteName, services, response );
             while ( commit != null ) {
-                Date created = workspace.getCreationDate();
+                Date created = commit.getCreationDate();//workspace == null ? new Date(0) : workspace.getCreationDate();
                 if ( created.before( fromDateTime ) ) break;
                 if ( !created.after( toDateTime ) ) {
                     commits.add( commit );
