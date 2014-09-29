@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 import gov.nasa.jpl.mbee.util.CompareUtils;
-import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.FileUtils;
 
 import org.json.JSONArray;
@@ -72,7 +71,7 @@ public class JsonDiff {
                 String s = null;
                 try {
                   while ((s = reader.readLine()) != null) {
-                       System.out.println(s);
+                      System.out.println(s);
                   }
                   reader.close();
                 } catch ( IOException e ) {
@@ -122,8 +121,8 @@ public class JsonDiff {
             o1 = new JSONObject( jstr1 );
             o2 = new JSONObject( jstr2 );
         } catch ( Throwable e ) {
-            System.err.println("Error! " + e.getLocalizedMessage() );
-            System.err.println(usage);
+            //System.err.println("Error! " + e.getLocalizedMessage() );
+            e.printStackTrace();
             return;
         }
         try {

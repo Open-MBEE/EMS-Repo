@@ -31,7 +31,9 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.util.ProductsWebscript;
 
 import java.util.Date;
@@ -58,6 +60,7 @@ public class ProductGet extends AbstractJavaWebScript {
     // injected via spring configuration
     protected boolean isViewRequest = false;
 
+    protected boolean prettyPrint = true;
 
     public ProductGet() {
 	    super();
@@ -77,8 +80,10 @@ public class ProductGet extends AbstractJavaWebScript {
 		// get timestamp if specified
         String timestamp = req.getParameter("timestamp");
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-	
-		EmsScriptNode product = findScriptNodeById(productId, dateTime);
+        
+        WorkspaceNode workspace = getWorkspace( req );
+
+		EmsScriptNode product = findScriptNodeById(productId, workspace, dateTime, false);
 		if (product == null) {
 			log(LogLevel.ERROR, "Product not found with id: " + productId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
@@ -109,14 +114,25 @@ public class ProductGet extends AbstractJavaWebScript {
 			if (Debug.isOn()) System.out.println("productId = " + productId);
 			
 			// default recurse=true but recurse only applies to displayed elements and contained views
-            boolean recurse = checkArgEquals(req, "recurse", "false") ? false : true;
+            boolean recurse = getBooleanArg( req, "recurse", true );
+            
+            // default simple=false
+            boolean simple = getBooleanArg( req, "simple", false );
+            //System.out.println("simple=" + simple);
 
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-        
+
+            WorkspaceNode workspace = getWorkspace( req );
+
+            // see if prettyPrint default is overridden and change
+            prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
+            //System.out.println("prettyPrint=" + prettyPrint);
+            
             ProductsWebscript productsWs = new ProductsWebscript(repository, services, response);
-			productsJson = productsWs.handleProduct(productId, recurse, dateTime, gettingDisplayedElements, gettingContainedViews);
+            productsWs.simpleJson = simple;
+			productsJson = productsWs.handleProduct(productId, recurse, workspace, dateTime, gettingDisplayedElements, gettingContainedViews);
 		}
 
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK && productsJson != null) {
@@ -126,7 +142,9 @@ public class ProductGet extends AbstractJavaWebScript {
                                                   : ( gettingContainedViews
                                                       ? "views" : "products" ),
                          productsJson );
-				model.put("res", json.toString(4));
+                if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
+                if ( prettyPrint ) model.put("res", json.toString(4));
+                else model.put("res", json.toString());
 			} catch (JSONException e) {
 				log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				model.put("res", response.toString());

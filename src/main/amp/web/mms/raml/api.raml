@@ -1,7 +1,7 @@
 #%RAML 0.8
 ---
-# NOTE: to import into SOAPUI, need to remove {server} reference from baseUri
-# and change all the schema references to '|'
+# NOTE: to import into SOAPUI, change all the schema references to '|' since it
+#       can't find them and to remove the examples since it can't parse them
 title: mms
 version: v1.0
 mediaType: application/json
@@ -20,22 +20,25 @@ securitySchemes:
 
 schemas:
   # these all return elements - search may need to be paged
-  - elements: !include elements.json
-  - views:    !include elements.json
-  - products: !include elements.json
+  - elements: !include elements.json-schema
+  - views:    !include elements.json-schema
+  - products: !include elements.json-schema
 
-  - comments:       !include elements.json    
-  - configurations: !include configurations.json
-  - projects:       !include projects.json
-  - snapshots:      !include snapshots.json
-  - versions:       !include versions.json
+  - comments:       !include elements.json-schema    
+  - configurations: !include configurations.json-schema
+  - projects:       !include projects.json-schema
+  - snapshots:      !include snapshots.json-schema
+  - versions:       !include versions.json-schema
     
-  - sites:        !include sites.json
-  - workspaces:   !include workspaces.json
+  - sites:       !include sites.json-schema
+  - workspaces:  !include workspaces.json-schema
+    
+  - diff:        !include diff.json-schema
+  - client:      !include client.json-schema
   
   # include post/ put and delete responses
-  #- elementsResponse: !include postResponse.json
-  #- viewsResponse: !include postResponse.json
+  #- elementsResponse: !include postResponse.json-schema
+  #- viewsResponse: !include postResponse.json-schema
 traits:
   - backgroundable:
       description: Aspect for resources that can be created/updated in the asynchronously in
@@ -81,7 +84,22 @@ traits:
           description: Timestamp to find most recent version of <<resourcePathName>>,
                        specified in ISO8601 time format.
           type: date
-
+  - diffable:
+      description: Aspect for resources that can be diffed or merged
+      queryParameters:
+        workspace1:
+          description: The source workspaces to compare against
+          type: string
+        workspace2:
+          description: The target workspaces to compare
+          type: string
+        timestamp1:
+          description: The source workspace timestamp to use in comparison (if not specified, gets latest)
+          type: date
+        timestamp2:
+          description: The target workspace timestamp to use in comparison (if not specified, gets latest)
+          type: date
+          
 resourceTypes:
   - readCollection:
       securedBy: [basic]
@@ -94,7 +112,8 @@ resourceTypes:
               200:
                 description: <<resourcePathName>> read successful
                 body:
-                  schema: <<resourcePathName>>
+                  application/json:
+                    schema: <<resourcePathName>>
               400:
                 description: Malformed request by client
               401:
@@ -110,11 +129,13 @@ resourceTypes:
       post:
         description: Append operation for <<resourcePathName>>
         body:
-          schema: <<resourcePathName>>
+          application/json:
+            schema: <<resourcePathName>>
         responses:
           200:
             body:
-              schema: <<resourcePathName>>PostResponse
+              application/json:
+                schema: <<resourcePathName>>PostResponse
             description: <<resourcePathName>> append successful
           202:
             description: <<resourcePathName>> append started, but not yet completed
@@ -157,7 +178,8 @@ resourceTypes:
           200:
             description: <<resourcePathName>> delete successful
             body:
-              schema:  <<resourcePathName>>DeleteResponse
+              application/json:
+                schema:  <<resourcePathName>>DeleteResponse
           202:
             description: <<resourcePathName>> delete started, but not yet completed
           401:
@@ -166,15 +188,21 @@ resourceTypes:
             description: <<resourcePathName>> not found
           500:
             description: Could not delete <<resourcePathName>> due to internal server error
-
 /workspaces:
   description: All resources are "namespaced" by the workspace (aka branch).
+  type: readCollection
   /{workspaceId}:
+    type: collection
     uriParameters:
       workspaceId:
         description: Workspace ID under consideration. "master" is always defined and is the
-                     "trunk" workspace to whih all other workspaces should be merged.
+                     "trunk" workspace to which all other workspaces should be merged.
                      "master" is what is contained at the Alfresco sites level.
+    post:
+      queryParameters:
+        sourceWorkspace:
+          description: The source workspace to branch from 
+          type: string
     /elements:
       type: collection
       /{elementId}:
@@ -206,22 +234,6 @@ resourceTypes:
         description: Retrieve all sites for which user has read permissions
         responses:
           200:
-            body:
-              example: |
-                { "sites": 
-                  [
-                    {
-                      "name": "europa",
-                      "title": "Europa",
-                      "categories": [ "v1", "v2", "v3"]
-                    } ,
-                    {
-                      "name": "ems-support",
-                      "title": "EMS Support Site",
-                      "categories": []
-                    }
-                  ]
-                }
       /{siteId}:
         uriParameters:
           siteId:
@@ -245,24 +257,6 @@ resourceTypes:
             description: Retrieve all projects for which user has read permissions
             responses:
               200:
-                body:
-                  example: |
-                    # taken from project.post.desc.xml (not currently implemented)
-                    { 
-                      "projects": 
-                      [
-                        {
-                          "id": "PROJECT-123456",
-                          "name": "Europa",
-                          "projectVersion": "v1"
-                        },
-                        {
-                          "id": "PROJECT-2468",
-                          "name": "Europa FS",
-                          "projectVersion": "v35"
-                        }
-                      ]
-                    }
           /{projectId}:
             type: readCollection
             uriParameters:
@@ -274,26 +268,6 @@ resourceTypes:
             description: Retrieve all products for which user has read permissions
             responses:
               200:
-                body:
-                  example: |
-                    # taken from configuration.get.desc.xml
-                    {
-                      "products": [
-                        {
-                          "id": "_17_0_2_3_8af0285_1397502950809_504517_66083",
-                          "name": "Flight System",
-                          "snapshots": [
-                              {
-                              "created": "2014-04-21T17:00:16.645-07:00",
-                              "creator": "gdubos",
-                              "id": "_17_0_2_3_8af0285_1397502950809_504517_66083_1398124815059",
-                              "tag": "",
-                              "url": "/alfresco/service/snapshots/_17_0_2_3_8af0285_1397502950809_504517_66083_1398124815059"
-                            }
-                          ]
-                        }
-                      ]
-                    }
           /{productId}:
             type: collection
             uriParameters:
@@ -356,3 +330,21 @@ resourceTypes:
         type: collection
 /operations:
   description: Service for executing operations, e.g., like the OCL Execution capabilities in MDK. Details still TBD.
+/diff:
+  description: Service for diffing between two model versions between projects
+  type: collection
+  get:
+    is: [diffable]
+/merge:
+  post:
+    is: [diffable]
+/client:
+  post:
+    queryParameters:
+      unregister:
+        description: if specified, indicates deregistration, otherwise if not specified, always registration or update 
+        type: boolean
+    body:
+      application/json:
+        schema:
+          client

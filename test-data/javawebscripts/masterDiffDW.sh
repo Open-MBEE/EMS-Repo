@@ -17,6 +17,7 @@ sleep 60s
 cd ./test-data/javawebscripts
 server=0
 serverCount=0
+dotCount=0
 echo 'POLLING SERVER'
 while [ $server -eq 0 ]; do
         > tempMasterDiff
@@ -55,47 +56,45 @@ if [ $server -eq 1 ]; then
 		./diff2.sh
 		passTest=$?
 
-        elif [ $diffChoose -eq 2 ];then
-                echo 'RUNNING WORKSPACES DIFF SCRIPT'
-                echo 'OMITTING OLD API DIFF SCRIPT'
+    elif [ $diffChoose -eq 2 ];then
+        echo 'RUNNING WORKSPACES DIFF SCRIPT'
+        echo 'OMITTING OLD API DIFF SCRIPT'
 		#gitBranch=`git branch | grep '*'`
 		#echo "$gitBranch"
 		echo $GIT_BRANCH
 		if [[ "$GIT_BRANCH" == *workspaces ]];then
-                    echo 'DIFFING  WORKSPACES BRANCH'
-                    ./diffWorkspaceDW.sh
-                    passTest=$?
-                fi
-                if [[ "$GIT_BRANCH" == *develop ]];then
-                    echo 'DIFFING DEVELOP BRANCH'
-                    ./diffWorkspaceDWdev.sh
-		    passTest=$?
-                fi
-
-        else 
-                echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
-                #./diff2.sh
-                ./diffWorkspaceDW.sh
-                passTest=$?
-        fi
-        
-        
-        #connect to soapUI -- WORK STILL NEEDED
-        echo 'RUNNING SOAP UI TESTS'
-        #ssh $soapServer 'cd /classPath/; ./soapScript;'
-        #classPath=??
-        TestSuite="WorkspacesTesting"
-        #TestCase="??"
-        #./testrunner.sh -f ./soapTestData -s $TestSuite -c $TestCase $classpath
-        cd ./soapStuff
+	        echo 'DIFFING  WORKSPACES BRANCH'
+	        ./diffWorkspaceDW.sh
+	        passTest=$?
+	    elif [[ "$GIT_BRANCH" == *develop ]];then
+	        echo 'DIFFING DEVELOP BRANCH'
+	        ./diffWorkspaceDWdev.sh
+			passTest=$?
+	    else 
+	        echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
+	        #./diff2.sh
+	        ./diffWorkspaceDW.sh
+	        passTest=$?
+	    fi
+    fi
+    
+    #connect to soapUI -- WORK STILL NEEDED
+    echo 'RUNNING SOAP UI TESTS'
+    #ssh $soapServer 'cd /classPath/; ./soapScript;'
+    #classPath=??
+    TestSuite="WorkspacesTesting"
+    #TestCase="??"
+    #./testrunner.sh -f ./soapTestData -s $TestSuite -c $TestCase $classpath
+    cd ./soapStuff
+    
 	for i in $(ls . | grep "soapui-project.xml"); do
-	         echo RUNNING TEST $i
-                ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i
-        done
+         echo RUNNING TEST $i
+            ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i
+    done
 
-        #shutdown the tomcat server process
-        pkill -fn 'integration-test'
-        echo 'KILLING SERVER'
+    #shutdown the tomcat server process
+    pkill -fn 'integration-test'
+    echo 'KILLING SERVER'
 
 	echo 'PASSTEST?'
         echo "$passTest"

@@ -4,7 +4,7 @@
 
 mkdir -p outputWorkspaces
 
-passTest=0
+failedTest=0
 
 export CURL_STATUS='-w \n%{http_code}\n'
 export CURL_POST_FLAGS_NO_DATA="-X POST"
@@ -30,55 +30,26 @@ export CURL_GET_FLAGS="-X GET"
 
 ### ADDED CURL COMMANDS
 
-
+echo 'testPost1'
+# create project and site
+echo curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/europa/projects/123456?createSite=true" 
+curl $CURL_FLAGS $CURL_POST_FLAGS '{"name":"CY Test"}' $BASE_URL"sites/europa/projects/123456?createSite=true" > outputWorkspaces/post1.json
+DIFF=$(diff baselineWorkspaces/post1.json outputWorkspaces/post1.json)
+#if [ "$DIFF" != "" ];then
+#        failedTest=1
+#        echo "DIFF"
+#        echo "$DIFF"
+#fi
+echo
+echo
 
 echo 'testGET1'
 # get project - should just return 200
-echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/123456\""
-curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europa/projects/123456"
+#echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europaTest/projects/123456\""
+#curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"sites/europaTest/projects/123456"
 echo
 echo
 
 
 
-exit $passTest
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+exit $failedTest

@@ -75,7 +75,9 @@ def getUrlFromDesc(descFile):
 	try:
 		dom = parse(descFile)
 		urls = dom.getElementsByTagName('url')
-		return urls[0].toxml().replace('<url>','').replace('</url>','')
+		urlString = urls[0].toxml().replace('<url>','').replace('</url>','')
+		print urlString, descFile
+		return urlString
 	except:
 		return None
 

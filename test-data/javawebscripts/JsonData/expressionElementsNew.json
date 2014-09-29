@@ -72,7 +72,6 @@
         "specialization": { "type": "Property",
 					        "isDerived": false,
 					        "isSlot": false,
-					        "propertyType": ["_11_5EAPbeta_be00301_1147431819399_50461_1671"],
 					        "value": [{"type": "LiteralInteger",
         					           "integer": 22}]
 					        }
@@ -85,7 +84,6 @@
         "specialization": { "type": "Property",
 					        "isDerived": false,
 					        "isSlot": false,
-					        "propertyType": "_11_5EAPbeta_be00301_1147431819399_50461_1671",
 					        "value": [{"type": "LiteralInteger",
         					           "integer": 10}]
 					        }
@@ -98,7 +96,6 @@
         "specialization": { "type": "Property",
 					        "isDerived": false,
 					        "isSlot": false,
-					        "propertyType": "_11_5EAPbeta_be00301_1147431819399_50461_1671",
 					        "value": [{"type": "LiteralInteger",
         					           "integer": 11}]
 					        }

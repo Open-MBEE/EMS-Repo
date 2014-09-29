@@ -7,5 +7,9 @@ cd ../sysml
 ant
 cd ../bae
 ant
+cd ../K
+ant
+#cd ../emsscala
+#ant
 popd
 

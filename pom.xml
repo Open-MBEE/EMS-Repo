@@ -2,9 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    
     <groupId>gov.nasa.jpl</groupId>
     <artifactId>view-repo</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${env.BUILD_NUMBER}</version>
     <name>view-repo AMP project</name>
     <packaging>amp</packaging>
     <description>Manages the lifecycle of the view-repo AMP (Alfresco Module Package)</description>
@@ -14,6 +15,20 @@
         <artifactId>alfresco-sdk-parent</artifactId>
         <version>1.1.1</version>
     </parent>
+
+  <distributionManagement>
+      <!-- use mvn -U deploy -DgeneratePom=true -Dpackaging=jar  -->
+      <repository>
+          <id>artifactory</id>
+          <name>releases</name>
+          <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
+      </repository>
+      <snapshotRepository>
+          <id>artifactory</id>
+          <name>snapshots</name>
+          <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-snapshot-local</url>
+      </snapshotRepository>
+  </distributionManagement>
 
     <!-- 
        | SDK properties have sensible defaults in the SDK parent,
@@ -38,6 +53,7 @@
         <!-- This controls which properties will be picked in src/test/properties for embedded run -->
         <env>local</env>
         <maven.test.skip>false</maven.test.skip>
+        <mbee.version>2.1.0-SNAPSHOT</mbee.version>
     </properties>
 
     <!-- profiles for specific dependencies for developers or users -->
@@ -70,14 +86,22 @@
 	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/mbee_util.jar</systemPath>
 	        </dependency>
 	        <dependency>
-	            <groupId>kparser</groupId>
-	            <artifactId>kparser</artifactId>
-	            <version>0.0.2</version>
+	            <groupId>kexpparser</groupId>
+	            <artifactId>kexpparser</artifactId>
+	            <version>0.0.8</version>
 	            <scope>system</scope>
 	            <type>jar</type>
-	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kparser.jar</systemPath>
+	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
 	        </dependency>
+	        <dependency>
+                    <groupId>gov.nasa.jpl.mbee.docbook</groupId>
+                    <artifactId>docbook</artifactId>
+                    <version>0.0.1</version>
+            </dependency>
             </dependencies>
+            <properties>
+                <env.BUILD_NUMBER>1</env.BUILD_NUMBER>
+            </properties>
         </profile>
         <profile>
             <id>mbee-dev</id>
@@ -85,28 +109,67 @@
                 <dependency>
 			        <groupId>gov.nasa.jpl.mbee.util</groupId>
 			        <artifactId>mbee_util</artifactId>
-			        <version>0.0.15</version>
+			        <version>${mbee.version}</version>
 			    </dependency>
                 <dependency>
                     <groupId>gov.nasa.jpl.mbee.sysml</groupId>
                     <artifactId>sysml</artifactId>
-                    <version>0.0.18</version>
-                </dependency>
-		    <dependency>
-		        <groupId>gov.nasa.jpl.mbee.bae</groupId>
-		        <artifactId>bae</artifactId>
-		        <version>0.0.22</version>
-		    </dependency>
+                    <version>${mbee.version}</version>
+               </dependency>
                 <dependency>
-                    <groupId>kparser</groupId>
-                    <artifactId>kparser</artifactId>
-                    <version>0.0.2</version>
+                    <groupId>gov.nasa.jpl.mbee.bae</groupId>
+                    <artifactId>bae</artifactId>
+                    <version>${mbee.version}</version>
                 </dependency>
                 <dependency>
+                    <groupId>kexpparser</groupId>
+                    <artifactId>kexpparser</artifactId>
+                    <version>0.0.8</version>
+	                <scope>system</scope>
+	                <type>jar</type>
+	                <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
+               </dependency>
+                 <dependency>
                     <groupId>gov.nasa.jpl.mbee.docbook</groupId>
                     <artifactId>docbook</artifactId>
                     <version>0.0.1</version>
                 </dependency>
+            </dependencies>
+            <properties>
+                <env.BUILD_NUMBER>1</env.BUILD_NUMBER>
+            </properties>
+        </profile>
+        <profile>
+            <id>jenkins</id>
+            <dependencies>
+                <dependency>
+                    <groupId>gov.nasa.jpl.mbee.util</groupId>
+                    <artifactId>mbee_util</artifactId>
+                    <version>${mbee.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>gov.nasa.jpl.mbee.sysml</groupId>
+                    <artifactId>sysml</artifactId>
+                    <version>${mbee.version}</version>
+               </dependency>
+                <dependency>
+                    <groupId>kexpparser</groupId>
+                    <artifactId>kexpparser</artifactId>
+                    <version>0.0.8</version>
+                    <scope>system</scope>
+                    <type>jar</type>
+                    <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
+               </dependency>
+                <dependency>
+                    <groupId>gov.nasa.jpl.mbee.bae</groupId>
+                    <artifactId>bae</artifactId>
+                    <version>${mbee.version}</version>
+                </dependency>
+                <dependency>
+                   <groupId>gov.nasa.jpl.mbee.docbook</groupId>
+                   <artifactId>docbook</artifactId>
+                   <version>0.0.1</version>
+               </dependency>
             </dependencies>
         </profile>
     </profiles>
@@ -196,23 +259,34 @@
 			<artifactId>chemistry-opencmis-commons-impl</artifactId>
 			<version>0.8.0</version>
 		</dependency>
+		<!-- Temporary dependencies for connecting directly to JMS -->
+		<dependency>
+			<groupId>javax.jms</groupId>
+			<artifactId>javax.jms-api</artifactId>
+			<version>2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-core</artifactId>
+			<version>5.7.0</version>
+		</dependency>
+		<!-- REST client dependencies -->
+		<dependency>
+		    <groupId>com.sun.jersey</groupId>
+		    <artifactId>jersey-client</artifactId>
+		    <version>1.18.1</version>
+		</dependency>
+	    <dependency>
+	        <groupId>org.jsoup</groupId>
+	        <artifactId>jsoup</artifactId>
+	        <version>1.7.3</version>
+        </dependency>
+		<dependency>
+		    <groupId>org.jsoup</groupId>
+		    <artifactId>jsoup</artifactId>
+		    <version>1.7.3</version>
+		</dependency>
 		
-		<!-- dependency for max regression test (groovy script) -->
-<!-- 		<dependency> -->
-<!--             <groupId>org.apache.httpcomponents</groupId> -->
-<!--             <artifactId>httpclient</artifactId> -->
-<!--             <version>4.2.5</version> -->
-<!--         </dependency> -->
-<!--         <dependency> -->
-<!--             <groupId>com.jayway.restassured</groupId> -->
-<!--             <artifactId>rest-assured</artifactId> -->
-<!--             <version>1.8.1</version> -->
-<!--         </dependency> -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.codehaus.groovy</groupId> -->
-<!-- 			<artifactId>groovy-all</artifactId> -->
-<!-- 			<version>2.2.1</version> -->
-<!-- 		</dependency> -->
     </dependencies>
 
 	
@@ -226,7 +300,12 @@
         -->
     <repositories>
         <repository>
-              <id>artifactory</id>
+              <id>artifactory-snapshots</id>
+              <name>snapshots</name>
+              <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-snapshot-local</url>
+        </repository>
+        <repository>
+              <id>artifactory-releases</id>
               <name>releases</name>
               <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
         </repository>

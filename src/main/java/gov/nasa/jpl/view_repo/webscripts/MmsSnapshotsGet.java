@@ -1,7 +1,9 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 
 import java.util.Date;
@@ -48,6 +50,8 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("snapshots", instance.handleRequest(req));
+            appendResponseStatusInfo( instance );
+            if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
             model.put("res", jsonObject.toString(2));
         } catch (Exception e) {
             model.put("res", response.toString());
@@ -59,7 +63,6 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
             e.printStackTrace();
         } 
     
-        appendResponseStatusInfo( instance );
         status.setCode(responseStatus.getCode());
         return model;
     }
@@ -84,17 +87,20 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         
         String timestamp = req.getParameter("timestamp");
         
+        WorkspaceNode workspace = getWorkspace( req );
+
         EmsScriptNode config = configWs.getConfiguration( configurationId, timestamp );
         if (config == null) {
             return new JSONArray();
         }
         
-        return configWs.getSnapshots( config, TimeUtils.dateFromTimestamp(timestamp) );
+        return configWs.getSnapshots( config, workspace, TimeUtils.dateFromTimestamp(timestamp) );
     }
 
     private JSONArray handleProductSnapshot( WebScriptRequest req, String productId ) throws JSONException {
         Date timestamp = TimeUtils.dateFromTimestamp(req.getParameter("timestamp"));
-        EmsScriptNode product = findScriptNodeById( productId, timestamp);
+        WorkspaceNode workspace = getWorkspace( req );
+        EmsScriptNode product = findScriptNodeById( productId, workspace, timestamp, false);
         
         if (product == null) {
             log(LogLevel.WARNING, "Could not find product", HttpServletResponse.SC_NOT_FOUND);
@@ -104,9 +110,12 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, response);
         
         JSONArray snapshotsJson = new JSONArray();
-        List< EmsScriptNode > snapshots = product.getTargetAssocsNodesByType( "view2:snapshots", timestamp );
+        List< EmsScriptNode > snapshots =
+                product.getTargetAssocsNodesByType( "view2:snapshots",
+                                                    workspace, timestamp );
         for (EmsScriptNode snapshot: snapshots) {
-            snapshotsJson.put( configWs.getSnapshotJson( snapshot, product ) );
+            snapshotsJson.put( configWs.getSnapshotJson( snapshot, product,
+                                                         workspace ) );
         }
         
         return snapshotsJson;

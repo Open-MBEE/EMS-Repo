@@ -43,10 +43,10 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
             // REVIEW -- complain?
         }
     }
-    
-    
+
+
     /**
-     * @return the nodes for the Alfresco sites on this EMS server. 
+     * @return the nodes for the Alfresco sites on this EMS server.
      */
     public EmsScriptNode[] getSiteNodes() {
         Collection< EmsScriptNode > sitesNodes = getElementWithName( null, "Sites" );
@@ -60,28 +60,28 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
             }
         }
         if ( sitesNode == null ) sitesNode = sitesNodes.iterator().next();
-        
+
         //children = sitesNode.
                 return null;
-        
+
     }
-    
+
     /**
-     * @return the names of the Alfresco sites on this EMS server. 
+     * @return the names of the Alfresco sites on this EMS server.
      */
     public String[] getSites() {
         // TODO
         return null;
     }
-    
+
     /**
-     * @return the URL to the ViewEdtor for a given EMS site name or null if the site does not exist. 
+     * @return the URL to the ViewEdtor for a given EMS site name or null if the site does not exist.
      */
     String getViewEditorUrlForSite( String siteName ){
         // TODO
         return null;
     }
-    
+
     /**
      * @return the URL to this EMS server
      */
@@ -97,7 +97,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         return null;
     }
 
-    
+
     @Override
     public boolean isDirected( EmsScriptNode relationship ) {
         if ( relationship == null ) return false;
@@ -122,13 +122,13 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     @Override
     public Collection< EmsScriptNode > getSource( EmsScriptNode relationship ) {
-        
+
         return getProperty(relationship, Acm.ACM_SOURCE);
     }
 
     @Override
     public Collection< EmsScriptNode > getTarget( EmsScriptNode relationship ) {
-        
+
         return getProperty(relationship, Acm.ACM_TARGET);
     }
 
@@ -200,7 +200,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     @Override
     public EmsScriptNode createConstraint( Object context ) {
         if ( context instanceof EmsScriptNode ) {
-            
+
         }
         // TODO Auto-generated method stub
         return null;
@@ -281,7 +281,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     @Override
     public Collection< EmsScriptNode > getConstraint( Object context,
                                                       Object specifier ) {
-        
+
         // TODO Auto-generated method stub
         return null;
     }
@@ -383,7 +383,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     public Collection< EmsScriptNode >
             getElementWithIdentifier( Object context, String specifier ) {
         // TODO -- need to take into account the context!
-        NodeRef element = NodeUtil.findNodeRefById( specifier, null, services );
+        NodeRef element = NodeUtil.findNodeRefById( specifier, true, null, null, services, false );
         EmsScriptNode emsSN = new EmsScriptNode( element, services );
         return Utils.newList( emsSN );
     }
@@ -400,8 +400,8 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         Status status = new Status();
         // TODO -- need to take into account the context!
         Map< String, EmsScriptNode > elements =
-                NodeUtil.searchForElements( specifier, dateTime, services, response,
-                                            status );
+                NodeUtil.searchForElements( specifier, true, null, dateTime,
+                                            services, response, status );
         if ( elements != null ) return elements.values();
         return Collections.emptyList();
     }
@@ -465,68 +465,68 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
     @Override
     public Collection< String > getName( Object context ) {
-        
+
     	// Assuming that we can only have EmsScriptNode context:
     	if (context instanceof EmsScriptNode) {
-    		
+
     		EmsScriptNode node = (EmsScriptNode) context;
-    		
+
     		// Note: This returns the sysml:name not the cm:name, which is what we
     		//		 want
     		Object name = node.getProperty(Acm.ACM_NAME);
-    		
+
     		return Utils.asList(name, String.class);
     	}
-    	
+
     	else {
             // TODO -- error????  Are there any other contexts than an EmsScriptNode that would have a property?
             Debug.error("context is not an EmsScriptNode!");
             return null;
         }
-        
+
     }
 
     @Override
     public Collection< String > getIdentifier( Object context ) {
-     
+
         return null;
     }
-    
+
     /**
      * Attempts to convert propVal to a EmsScriptNode.  If conversion is possible, adds
      * to the passed List.
-     * 
+     *
      * @param propVal the property to try and convert
      * @param returnList the list of nodes to possibly add to
      */
     private void convertToScriptNode(Object propVal, List<EmsScriptNode> returnList) {
-    	    	
+
        	// The propVal can be a ArrayList<NodeRef>, ArrayList<Object>, NodeRef, or
     	// Object
-    	
+
     	if (propVal != null) {
-    	
+
 	 		if (propVal instanceof ArrayList) {
-				 			
+
 				// Loop through the arrayList and convert each NodeRef to a EmsScriptNode
 				ArrayList<?> propValArray = (ArrayList<?>)propVal;
 				for (Object propValNode : propValArray) {
-					
+
 					// If its a NodeRef then convert:
 					if (propValNode instanceof NodeRef) {
-						
+
 						returnList.add(new EmsScriptNode((NodeRef)propValNode, services));
 					}
-					
+
 					// TODO what do we do for other objects?  For now, nothing....
 				}
-	
+
 			} // ends if propVal is a ArrayList
-			
+
 			else if (propVal instanceof NodeRef) {
 				returnList.add(new EmsScriptNode((NodeRef)propVal, services));
 			}
-	 		
+
 			else if (propVal instanceof String) {
 				// Get the corresponding node with a name of the propVal:
 				Collection<EmsScriptNode> nodeList = getElementWithName(null, (String)propVal);
@@ -534,19 +534,19 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 					returnList.add(nodeList.iterator().next());
 				}
 			}
-			
+
 			else {
 				// TODO what do we do for other objects?  For now, nothing....
 			}
-		
+
     	}
- 
+
     }
 
     @Override
     public Collection< EmsScriptNode > getProperty( Object context,
                                                     Object specifier ) {
-    	
+
         ArrayList< EmsScriptNode > allProperties = new ArrayList< EmsScriptNode >();
 
         Object mySpecifier = specifier;
@@ -558,50 +558,50 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 
         // find the specified property inside the context
         if ( context instanceof EmsScriptNode ) {
-        	
+
             EmsScriptNode node = (EmsScriptNode)context;
 
             if ( mySpecifier == null ) {
                 // if no specifier, return all properties
                 Map< String, Object > props = node.getProperties();
                 if ( props != null ) {
-                
+
                 	// Loop through all of returned properties:
                 	Collection<Object> propValues = props.values();
                 	for (Object propVal : propValues) {
-                		
+
                 		// Attempt to convert to a EmsScriptNode and add to the list
                 		// to later return if conversion succeeded:
                 		convertToScriptNode(propVal, allProperties);
 
                 	} // ends for loop through properties
                 }
-                
+
             } // ends if specifies is null
-            
+
             else {
                 Object prop = node.getProperty( "" + mySpecifier );
-                
+
         		// Attempt to converted to a EmsScriptNode and add to the list
         		// to later return if conversion succeeded:
                 convertToScriptNode(prop, allProperties);
 
         	}
-            
+
             return allProperties;
         }
-        
+
         if ( context != null ) {
             // TODO -- error????  Are there any other contexts than an EmsScriptNode that would have a property?
             Debug.error("context is not an EmsScriptNode!");
             return null;
         }
-        
+
         // context is null; look for nodes of type Property that match the specifier
         if ( mySpecifier != null ) {
             return getElementWithName( context, "" + mySpecifier );
         }
-        
+
         // context and specifier are both be null
         // REVIEW -- error?
         // Debug.error("context and specifier cannot both be null!");
@@ -690,7 +690,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     @Override
     public Collection< EmsScriptNode > getRelationship( Object context,
                                                         Object specifier ) {
-    	
+
     	// TODO
         return null;
     }
@@ -788,7 +788,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
      * <li>getType(myWorkspace, "typeX") returns the types whose names or IDs
      * are "typeX" for myWorkspace.
      * </ul>
-     * 
+     *
      * @param context
      *            the element whose type is sought or a location as a package or
      *            workspace within which the type is to be found
@@ -802,14 +802,14 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     @Override
     public Collection< EmsScriptNode >
             getType( Object context, Object specifier ) {
-        
+
         // TODO -- the code below is relevant to getElementWithType(), not getType().
-        
+
     	// TODO ScriptNode getType returns a QName or String, why does he want a collection
     	// of EmsScriptNode?  I think we should change T to String.
-    	
+
     	// Ignoring context b/c it doesnt make sense
-    	
+
     	// Search for all elements with the specified type name:
     	if (specifier instanceof String) {
 //	        StringBuffer response = new StringBuffer();
@@ -821,9 +821,9 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
 ////                                        status );
 //
 //	        if ( elements != null && !elements.isEmpty()) return elements.values();
-	        
-//	        if ( elements == null ) elements = new LinkedHashMap<String, EmsScriptNode>(); 
-	        
+
+//	        if ( elements == null ) elements = new LinkedHashMap<String, EmsScriptNode>();
+
 	        Collection< EmsScriptNode > elementColl = null;
 	        try {
 	        		elementColl = NodeUtil.luceneSearchElements( "ASPECT:\"sysml:" + specifier + "\"" );
@@ -841,25 +841,25 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
             if ( elementColl != null && !elementColl.isEmpty()) {
             		return elementColl;
             }
-	        
+
     	}
-    	
+
         return Collections.emptyList();
     }
-    
+
     // TODO remove this once we fix getType()
     @Override
    public String getTypeString( Object context, Object specifier ) {
-    	
+
         // TODO finish this, just a partial implementation
-    
+
         if (context instanceof EmsScriptNode) {
         	EmsScriptNode node = (EmsScriptNode) context;
         	return node.getTypeName();
         }
-        
+
         return null;
-        
+
     }
 
     @Override
@@ -942,58 +942,59 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     @Override
     public Collection< Object > getValue( Object context,
     									  Object specifier ) {
-    	
+
         Object mySpecifier = specifier;
         // Convert specifier to add ACM type, ie prepend "sysml:":
         Map<String, String> convertMap = Acm.getJSON2ACM();
         if (specifier instanceof String && convertMap.containsKey(specifier)) {
         	 mySpecifier = convertMap.get(specifier);
         }
-        
+
     	// Assuming that we can only have EmsScriptNode context:
     	if (context instanceof EmsScriptNode) {
-    		
+
     		EmsScriptNode node = (EmsScriptNode) context;
-    		
+
 			// If it is a Property type, then the value is a NodeRef, which
 			// we convert to a EmsScriptNode:
-    			if (node.hasAspect(Acm.ACM_PROPERTY)) {
-				
+    		if (node.hasAspect(Acm.ACM_PROPERTY)) {
+
 		    	List<EmsScriptNode> returnList = new ArrayList<EmsScriptNode>();
-				Object valueNode = node.getProperty(Acm.ACM_VALUE);
-				convertToScriptNode(valueNode , returnList);
-				
+				Collection<NodeRef> valueNodes =
+				        (Collection< NodeRef >)node.getProperty(Acm.ACM_VALUE);
+				convertToScriptNode(valueNodes, returnList);
+
 	    		return Utils.asList(returnList, Object.class);
 			}
-			
+
 			// Otherwise, return the Object for the value
 			else {
-			
+
 	    		// If no specifier is supplied:
 				if (mySpecifier == null) {
 					// TODO what should we do here?
 	    		}
 				else {
-					
+
 					Object valueNode = node.getProperty("" + mySpecifier);
-					
+
 					if (valueNode != null) {
 						return Utils.newList(valueNode);
 					}
 				}
-    			
+
 			}
-    		
+
     	}
-    	
+
     	else {
             // TODO -- error????  Are there any other contexts than an EmsScriptNode that would have a property?
             Debug.error("context is not an EmsScriptNode!");
             return null;
         }
-    	
+
     	return null;
-    	
+
     }
 
     @Override
@@ -1268,29 +1269,28 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     	}
     	else {
 	    	String type = getTypeString(node, null);
-	    	
+
 	    	if (type == null) {
 	            Debug.error("setValue(): type for the passed node is null!");
 	    	}
 	    	else {
 		        if (type.equals(Acm.JSON_LITERAL_INTEGER)) {
-		            
+
 		        	node.createOrUpdateProperty(Acm.ACM_INTEGER, value);
 		        }
 		        else if (type.equals(Acm.JSON_LITERAL_REAL)) {
-		            
+
 		        	node.createOrUpdateProperty(Acm.ACM_DOUBLE, value);
 		        }
 		        else if (type.equals(Acm.JSON_LITERAL_BOOLEAN)) {
-		            
+
 		        	node.createOrUpdateProperty(Acm.ACM_BOOLEAN, value);
 		        }
 		        else if (type.equals(Acm.JSON_LITERAL_UNLIMITED_NATURAL)) {
-		            
+
 		        	node.createOrUpdateProperty(Acm.ACM_NATURAL_VALUE, value);
 		        }
 		        else if (type.equals(Acm.JSON_LITERAL_STRING)) {
-		            
 		        	node.createOrUpdateProperty(Acm.ACM_STRING, value);
 		        }
 		        else {
@@ -1336,7 +1336,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     public void addConstraint( EmsScriptNode constraint, String version,
                                String workspace ) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -1344,7 +1344,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
                                      Set< Object > valueDomainSet,
                                      String workspace ) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -1355,7 +1355,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
                                  Pair< Object, Object > valueDomainRange,
                                  String workspace ) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -1363,7 +1363,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
                              Set< Object > valueDomainSet,
                              String workspace ) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -1372,7 +1372,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
                          Pair< Object, Object > valueDomainRange,
                          String workspace ) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -1394,7 +1394,7 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
     @Override
     public void setOptimizationFunction( Method method, Object... arguments ) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -1413,20 +1413,20 @@ public class EmsSystemModel extends AbstractSystemModel< EmsScriptNode, EmsScrip
         // TODO Auto-generated method stub
         return false;
     }
-    
+
     // TODO dont like dependence on BAE for Call here....
     public Collection< Object >
     		map( Collection< Object > elements,
     			 Call call) throws InvocationTargetException {
-		 
+
     	return call.map( elements, 1 );
     }
-    
+
     public Collection< Object >
 			map( Collection< Object > elements,
 				 Call call,
 				 int indexOfObjectArgument) throws InvocationTargetException {
-		 
+
 		return call.map( elements, indexOfObjectArgument );
 	}
 

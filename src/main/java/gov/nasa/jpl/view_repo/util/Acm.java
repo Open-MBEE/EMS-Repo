@@ -635,10 +635,32 @@ public class Acm {
     public static HashMap<String,String> PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS = new HashMap<String,String>(){
 		private static final long serialVersionUID = -5161523326512878741L;
 		{
-        put( ACM_RELATIONSHIPS_AS_SOURCE, ACM_REL_AS_SOURCE );
-        put( ACM_RELATIONSHIPS_AS_TARGET, ACM_REL_AS_TARGET );
-        put( ACM_UNDIRECTED_RELATIONSHIPS, ACM_UNDIRECTED_REL );
-    	};
+            put( ACM_RELATIONSHIPS_AS_SOURCE, ACM_REL_AS_SOURCE );
+            put( ACM_RELATIONSHIPS_AS_TARGET, ACM_REL_AS_TARGET );
+            put( ACM_UNDIRECTED_RELATIONSHIPS, ACM_UNDIRECTED_REL );
+    	    };
     };
 
+    public static final Set<String> VALUESPEC_ASPECTS = new HashSet<String>() {
+        private static final long serialVersionUID = 494169408514256049L;
+        {
+            add("sysml:Duration");
+            add("sysml:DurationInterval");
+            add("sysml:ElementValue");
+            add("sysml:Expression");
+            add("sysml:InstanceValue");
+            add("sysml:Interval");
+            add("sysml:LiteralBoolean");
+            add("sysml:LiteralInteger");
+            add("sysml:LiteralNull");
+            add("sysml:LiteralReal");
+            add("sysml:LiteralString");
+            add("sysml:LietralUnliitedNatural");
+            add("sysml:OpaqueExpression");
+            add("sysml:StringExpression");
+            add("sysml:TimeExpression");
+            add("sysml:TimeInterval");
+            add("sysml:Operation");
+        }
+    };
 }

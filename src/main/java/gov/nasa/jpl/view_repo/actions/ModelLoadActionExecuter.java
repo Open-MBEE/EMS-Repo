@@ -28,12 +28,15 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo.actions;
 
-import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 import gov.nasa.jpl.view_repo.webscripts.ModelPost;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -46,10 +49,11 @@ import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
-
+        
 /**
  * Action for loading the project model in the background asynchronously
  * @author cinyoung
@@ -62,12 +66,16 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
     private Repository repository;
 
     private StringBuffer response;
+    private Status responseStatus;
 
     // Parameter values to be passed in when the action is created
     public static final String NAME = "modelLoad";
     public static final String PARAM_PROJECT_NAME = "projectName";
     public static final String PARAM_PROJECT_ID = "projectId";
     public static final String PARAM_PROJECT_NODE = "projectNode";
+    public static final String PARAM_WORKSPACE_ID = "workspaceId";
+    
+    static Logger logger = Logger.getLogger(ModelLoadActionExecuter.class);
 
     public void setRepository(Repository rep) {
         repository = rep;
@@ -79,12 +87,21 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
     
     @Override
     protected void executeImpl(Action action, NodeRef nodeRef) {
+        Timer timer = new Timer();
         String projectId = (String) action.getParameterValue(PARAM_PROJECT_ID);
         String projectName = (String) action.getParameterValue(PARAM_PROJECT_NAME);
         EmsScriptNode projectNode = (EmsScriptNode) action.getParameterValue(PARAM_PROJECT_NODE);
-        if (Debug.isOn()) System.out.println("ModelLoadActionExecuter started execution of " + projectName + " [id: " + projectId + "]");
+        String workspaceId = (String) action.getParameterValue(PARAM_WORKSPACE_ID);
+        if (logger.isDebugEnabled()) logger.debug( "started execution of " + projectName + " [id: " + projectId + "]");
         clearCache();
-
+        
+        WorkspaceNode workspace =
+                AbstractJavaWebScript.getWorkspaceFromId( workspaceId,
+                                                          services,
+                                                          response,
+                                                          responseStatus,
+                                                          false, null );
+        
         // Parse the stored file for loading
         EmsScriptNode jsonNode = new EmsScriptNode(nodeRef, services, response);
         ContentReader reader = services.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
@@ -101,16 +118,16 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         // Update the model
         String jobStatus = "Failed";
         if (content == null) {
-            response.append("ERRROR: Could not load JSON file for job\n");
+            response.append("ERROR: Could not load JSON file for job\n");
         } else {
             ModelPost modelService = new ModelPost(repository, services);
-            modelService.setRepositoryHelper(repository);
-            modelService.setServices(services);
             modelService.setLogLevel(LogLevel.DEBUG);
             modelService.setRunWithoutTransactions(false);
             Status status = new Status();
             try {
-                modelService.createOrUpdateModel(content, status, projectNode);
+                Set<EmsScriptNode> elements = 
+                        modelService.createOrUpdateModel(content, status, projectNode, workspace, null);
+                modelService.addRelationshipsToProperties( elements );
             } catch (Exception e) {
                 status.setCode(HttpServletResponse.SC_BAD_REQUEST);
                 response.append("ERROR: could not parse request\n");
@@ -120,6 +137,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
                 jobStatus = "Succeeded";
             }
             response.append(modelService.getResponse().toString());
+            if (logger.isDebugEnabled()) logger.debug( "completed model load with status [" + jobStatus + "]");
         }
 
         // Save off the log
@@ -128,14 +146,24 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         // set the status
         jsonNode.setProperty("ems:job_status", jobStatus);
 
-        String contextUrl = "https://" + ActionUtil.getHostName() + ".jpl.nasa.gov/alfresco";
+        String hostname = ActionUtil.getHostName();
+        if (hostname.endsWith("/" )) {
+            hostname = hostname.substring( 0, hostname.lastIndexOf( "/" ) );
+        } 
+        if (!hostname.contains( "jpl.nasa.gov" )) {
+            hostname += ".jpl.nasa.gov";
+        }
+        String contextUrl = "https://" + hostname + "/alfresco";
         	
         // Send off the notification email
-        String subject = "[EuropaEMS] Project " + projectName + " Load " + jobStatus;
+        String subject =
+                "Workspace " + workspaceId + " Project "
+                        + projectName + " load completed";
         String msg = "Log URL: " + contextUrl + logNode.getUrl();
         ActionUtil.sendEmailToModifier(jsonNode, msg, subject, services, response);
 
-        if (Debug.isOn()) System.out.println("ModelLoadActionExecuter completed execution of " + projectName + " [id: " + projectId + "]");
+        if (logger.isDebugEnabled()) logger.debug("Email notification sent for " + workspaceId + " - "+ projectName + " [id: " + projectId + "]:\n" + msg);
+        if (logger.isDebugEnabled()) logger.debug( "ModelLoadActionExecuter: " + timer );
     }
 
     protected void clearCache() {

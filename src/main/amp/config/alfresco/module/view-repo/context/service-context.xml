@@ -77,6 +77,12 @@
         <property name="services" ref="ServiceRegistry" />
 	</bean>
 	
+   <bean id="webscript.gov.nasa.jpl.javawebscripts.nodeUnlock.post"
+        class="gov.nasa.jpl.view_repo.webscripts.NodeUnlock"
+        parent="webscript">
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+	
 	<!--  utility bean for checking user site permissions: also expose a webscript base object -->
 	<bean id="UserUtil" class="gov.nasa.jpl.view_repo.util.UserUtil" parent="baseJavaScriptExtension">
 		<property name="siteService" ref="SiteService"/>
@@ -115,4 +121,11 @@
    		<property name="model" value="alfresco/extension/permissionDefinitionsExtension.xml" /> 
 	</bean>
 
+    <!-- Definitions for sending active sync messages -->
+    <bean id="jmsConnection" class="gov.nasa.jpl.view_repo.connections.JmsConnection">
+        <property name="uri" value="tcp://localhost:61616" />
+    </bean>
+    <bean id="restConnection" class="gov.nasa.jpl.view_repo.connections.RestPostConnection">
+        <property name="uri" value="https://orasoa-dev07.jpl.nasa.gov:8121/PublishMessageRestful" />
+    </bean>
 </beans>

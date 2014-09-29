@@ -1,7 +1,7 @@
 { "views":
 	[
 		{
-		"sysmlid": "301",
+		"sysmlid": "3301",
 		"specialization": {"displayedElements": ["301","302", "303"],
 				   "allowedElements": ["301","302", "303"],
 				   "childrenViews": ["304"],
@@ -12,7 +12,7 @@
 		},
 
 		{
-		"sysmlid": "401",
+		"sysmlid": "4401",
 		"specialization": {"displayedElements": ["401","402", "403"],
 				   "allowedElements": ["401","402", "403"],
 				   "childrenViews": ["404"],

@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.webscripts.util.ProductsWebscript;
 
 import java.util.HashMap;
@@ -44,6 +45,8 @@ public class MmsProductsGet extends AbstractJavaWebScript {
         try {
             ProductsWebscript productWs = new ProductsWebscript(repository, services, instance.response);
             jsonObject.put("products", productWs.handleProducts(req));
+            appendResponseStatusInfo( instance );
+            if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
             model.put("res", jsonObject.toString(2));
         } catch (Exception e) {
             model.put("res", response.toString());
@@ -55,7 +58,6 @@ public class MmsProductsGet extends AbstractJavaWebScript {
             e.printStackTrace();
         } 
     
-        appendResponseStatusInfo( instance );
         status.setCode(responseStatus.getCode());
     
         return model;

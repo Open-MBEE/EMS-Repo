@@ -74,7 +74,7 @@ public class JavaQueryPost extends AbstractJavaWebScript {
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		Map<String, Object> model = new HashMap<String, Object>();
-		boolean verbose = req.getParameter("verbose") == null || req.getParameter( "verbose" ).equals( "true" );
+		boolean verbose = getBooleanArg(req, "verbose", true);
 		
 //		NodeRef root = nodeLocatorService.getNode("companyhome", null, null);
 //		int count = nodeService.countChildAssocs(root, true);

@@ -17,6 +17,7 @@ sleep 60s
 cd ./test-data/javawebscripts
 server=0
 serverCount=0
+dotCount=0
 echo 'POLLING SERVER'
 while [ $server -eq 0 ]; do
         > tempMasterDiff
@@ -82,14 +83,14 @@ if [ $server -eq 1 ]; then
         echo 'RUNNING SOAP UI TESTS'
         #ssh $soapServer 'cd /classPath/; ./soapScript;'
         #classPath=??
-        TestSuite="WorkspacesTesting"
+        #TestSuite="WorkspacesTesting"
         #TestCase="??"
         #./testrunner.sh -f ./soapTestData -s $TestSuite -c $TestCase $classpath
-        cd ./soapStuff
-	for i in $(ls . | grep "soapui-project.xml"); do
-	         echo RUNNING TEST $i
-                ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i
-        done
+        #cd ./soapStuff
+	#for i in $(ls . | grep "soapui-project.xml"); do
+	#         echo RUNNING TEST $i
+        #        ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i
+        #done
 
         #shutdown the tomcat server process
         pkill -fn 'integration-test'

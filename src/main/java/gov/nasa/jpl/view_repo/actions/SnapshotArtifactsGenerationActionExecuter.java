@@ -65,13 +65,6 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
             dateTime = TimeUtils.dateFromTimestamp( timestamp );
         }
 
-        // Do not get an older version of the node based on the timestamp since
-        // new snapshots should be associated with a new configuration. The
-        // timestamp refers to the products, not the snapshots themselves.
-        //        if ( dateTime != null ) {
-//            NodeRef vRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
-//            if ( vRef != null ) nodeRef = vRef; 
-//        }
         EmsScriptNode jobNode = new EmsScriptNode(nodeRef, services, response);
         // clear out any existing associated snapshots
         String siteName = (String) action.getParameterValue(PARAM_SITE_NAME);
@@ -91,7 +84,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
             NodeRef vRef = NodeUtil.getNodeRefAtTime( siteRef, dateTime );
             if ( vRef != null ) siteRef = vRef;
         }
-        EmsScriptNode site = new EmsScriptNode(siteRef, services, response);
+        //EmsScriptNode site = new EmsScriptNode(siteRef, services, response);
         
         String jobStatus = "Succeeded";
         String snapshotId = (String)action.getParameterValue(PARAM_SNAPSHOT_ID);
@@ -109,6 +102,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        			snapshot = snapshotService.generatePDF(snapshotId);
 	        		}
 	        		catch(JSONException ex){
+	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	        			System.out.println("Failed to generate PDF for snapshot Id: " + snapshotId);
 	        		}
 	        	}
@@ -117,6 +111,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        			snapshot = snapshotService.generateHTML(snapshotId);
 	        		}
 	        		catch(JSONException ex){
+	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	        			System.out.println("Failed to generate HTML zip for snapshot Id: " + snapshotId);
 	        		}
 	        	}
@@ -127,16 +122,11 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        	} else {
 	            	response.append("[INFO]: Successfully generated artifact for snapshot: " + snapshotId);
 	        	}
-	        	if (snapshot != null) {
-	            	//snapshots.add(snapshot);
-	        	}
 	        	response.append(snapshot.toString());
 	        }
-	        String contextUrl = "https://" + ActionUtil.getHostName() + ".jpl.nasa.gov/alfresco";
 	        // Send off notification email
-	        String subject = "[EuropaEMS] Snapshot " + siteName + " Generation " + jobStatus;
+	        String subject = "[EuropaEMS] Snapshot Generation " + jobStatus;
 	        String msg = buildEmailMessage(snapshot);
-	        // TODO: NOTE!!! The following needs to be commented out for local testing....
 	        ActionUtil.sendEmailToModifier(jobNode, msg, subject, services, response);
 	        
 	        System.out.println("Completed snapshot artifact(s) generation.");
@@ -144,60 +134,24 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         catch(Exception ex){
         	System.out.println("Failed to complete snapshot artifact(s) generation!");
         	ex.printStackTrace();
+        	ActionUtil.sendEmailToModifier(jobNode, "An unexpected error occurred and your snapshot artifact generation failed.", "[EuropaEMS] Snapshot Generation Failed", services, response);
         }
-        /*
-        // create snapshots of all documents
-        // TODO: perhaps roll these in their own transactions
-        String jobStatus = "Succeeded";
-        Set<EmsScriptNode> snapshots = new HashSet<EmsScriptNode>();
-        for (EmsScriptNode product: productSet) {
-        		// only create the filtered list of documents
-        		if (productList.isEmpty() || productList.contains(product.getProperty(Acm.ACM_ID))) {
-	            SnapshotPost snapshotService = new SnapshotPost(repository, services);
-	            snapshotService.setRepositoryHelper(repository);
-	            snapshotService.setServices(services);
-	            snapshotService.setLogLevel(LogLevel.DEBUG);
-	            Status status = new Status();
-	            EmsScriptNode snapshot = snapshotService.createSnapshot(product, (String)product.getProperty(Acm.ACM_ID));
-	            if (status.getCode() != HttpServletResponse.SC_OK) {
-	                jobStatus = "Failed";
-	                response.append("[ERROR]: could not make snapshot for " + product.getProperty(Acm.ACM_NAME));
-	            } else {
-	                response.append("[INFO]: Successfully created snapshot: " + snapshot.getProperty(Acm.CM_NAME));
-	            }
-	            if (snapshot != null) {
-	                snapshots.add(snapshot);
-	            }
-	            response.append(snapshotService.getResponse().toString());
-        		}
-        }
-        // make relationships between configuration node and all the snapshots
-        for (EmsScriptNode snapshot: snapshots) {
-            jobNode.createOrUpdateAssociation(snapshot, "ems:configuredSnapshots", true);
-        }
-        
-        // save off the status of the job
-        jobNode.setProperty("ems:job_status", jobStatus);
-        
-        // Save off the log
-        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
+    }
 
-        String contextUrl = "https://" + ActionUtil.getHostName() + ".jpl.nasa.gov/alfresco";
-        
-        // Send off notification email
-        String subject = "[EuropaEMS] Configuration " + siteName + " Generation " + jobStatus;
-        String msg = "Log URL: " + contextUrl + logNode.getUrl();
-        // TODO: NOTE!!! The following needs to be commented out for local testing....
-        ActionUtil.sendEmailToModifier(jobNode, msg, subject, services, response);
-        
-        System.out.println("Completed configuration set");*/
+    @Override
+    protected void addParameterDefinitions(List<ParameterDefinition> paramList) {
+        // TODO Auto-generated method stub
     }
     
     private String buildEmailMessage(JSONObject snapshot) throws Exception{
     	StringBuffer buf = new StringBuffer();
     	try{
-    		String contextUrl = "https://" + ActionUtil.getHostName() + ".jpl.nasa.gov/alfresco";
-	    	JSONArray formats = snapshot.getJSONArray("formats");
+    		String hostname = ActionUtil.getHostName();
+            if (!hostname.endsWith( ".jpl.nasa.gov" )) {
+                hostname += ".jpl.nasa.gov";
+            }
+            String contextUrl = "https://" + hostname + "/alfresco";
+	    	JSONArray formats = (JSONArray)snapshot.getJSONArray("formats");
 	    	for(int i=0; i < formats.length(); i++){
 				JSONObject format = formats.getJSONObject(i);
 				String formatType = format.getString("type");
@@ -221,9 +175,4 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         response = new StringBuffer();
     }
 
-    @Override
-    protected void addParameterDefinitions(List<ParameterDefinition> paramList) {
-        // TODO Auto-generated method stub
-
-    }
 }

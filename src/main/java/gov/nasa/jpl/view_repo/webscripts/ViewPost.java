@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -72,8 +73,10 @@ public class ViewPost extends AbstractJavaWebScript {
 		
 		Map<String, Object> model = new HashMap<String, Object>();
 		
-		try {
-			updateViews((JSONObject)req.parseContent());
+        WorkspaceNode workspace = getWorkspace( req );
+
+        try {
+			updateViews((JSONObject)req.parseContent(), workspace);
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();
@@ -86,12 +89,12 @@ public class ViewPost extends AbstractJavaWebScript {
 		return model;
 	}
 	
-	private void updateViews(JSONObject jsonObject) throws JSONException {
+	private void updateViews(JSONObject jsonObject, WorkspaceNode workspace) throws JSONException {
 		if (jsonObject.has("views")) {
 			JSONArray viewsJson = jsonObject.getJSONArray("views");
 			
 			for (int ii = 0; ii < viewsJson.length(); ii++) {
-			    updateView(viewsJson, ii);
+			    updateView(viewsJson, ii, workspace);
 			}
 			
 //			jwsUtil.splitTransactions(new JwsFunctor() {
@@ -106,19 +109,20 @@ public class ViewPost extends AbstractJavaWebScript {
 	}
 	
 	
-	private void updateView(JSONArray viewsJson, int index) throws JSONException {
+	private void updateView(JSONArray viewsJson, int index,
+	                        WorkspaceNode workspace) throws JSONException {
 		JSONObject viewJson = viewsJson.getJSONObject(index);
-		updateView(viewJson);
+		updateView(viewJson, workspace);
 	}
 	
-	private void updateView(JSONObject viewJson) throws JSONException {
+	private void updateView(JSONObject viewJson, WorkspaceNode workspace) throws JSONException {
 		String id = viewJson.getString(Acm.JSON_ID);
 		if (id == null) {
 			log(LogLevel.ERROR, "view id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}
 		
-		EmsScriptNode view = findScriptNodeById(id, null);
+		EmsScriptNode view = findScriptNodeById(id, workspace, null, true);
 		if (view == null) {
 			log(LogLevel.ERROR, "could not find view with id: " + id, HttpServletResponse.SC_NOT_FOUND);
 			return;

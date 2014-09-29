@@ -1,0 +1,21 @@
+{
+    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n",
+    "elements": [{
+        "qualifiedId": "no_project/holding_bin_no_site_no_project/300/500",
+        "name": "500",
+        "qualifiedName": "/300/500",
+        "sysmlid": "500",
+        "documentation": "directed_relationship2",
+        "owner": "300",
+        "read": "2014-09-26T13:45:41.718-0700",
+        "specialization": {
+            "source": "303",
+            "target": "304",
+            "type": "DirectedRelationship"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2014-09-26T13:45:38.592-0700"
+    }]
+}
+200

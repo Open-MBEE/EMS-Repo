@@ -31,9 +31,10 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.Acm.JSON_TYPE_FILTER;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.Collection;
@@ -60,6 +61,8 @@ public class ViewGet extends AbstractJavaWebScript {
     // injected via spring configuration
     protected boolean isViewRequest = false;
 
+    protected boolean prettyPrint = true;
+
     public ViewGet() {
         super();
     }
@@ -79,8 +82,13 @@ public class ViewGet extends AbstractJavaWebScript {
         // get timestamp if specified
         String timestamp = req.getParameter("timestamp");
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        
+        WorkspaceNode workspace = getWorkspace( req );
+
+        // see if prettyPrint default is overridden and change
+        prettyPrint = getBooleanArg( req, "pretty", prettyPrint );
     
-        EmsScriptNode view = findScriptNodeById(viewId, dateTime);
+        EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime, false);
         if (view == null) {
             log(LogLevel.ERROR, "View not found with id: " + viewId + " at " + dateTime + ".\n", HttpServletResponse.SC_NOT_FOUND);
             return false;
@@ -111,15 +119,20 @@ public class ViewGet extends AbstractJavaWebScript {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        ViewGet instance = new ViewGet();
+        instance.setServices( getServices() );
+        return instance.executeImplImpl( req, status, cache );
+    }
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
         // default recurse=false but recurse only applies to displayed elements and contained views
-        boolean recurse = checkArgEquals(req, "recurse", "true") ? true : false;
+        boolean recurse = getBooleanArg(req, "recurse", false);
         // default generate=true
-        boolean generate = checkArgEquals(req, "generate", "false") ? false : true;
+        boolean generate = getBooleanArg( req, "generate", true );
 
         JSONArray viewsJson = new JSONArray();
         if (validateRequest(req, status)) {
@@ -134,8 +147,10 @@ public class ViewGet extends AbstractJavaWebScript {
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         
+            WorkspaceNode workspace = getWorkspace( req );
+
             try {
-                handleView(viewId, viewsJson, generate, recurse, dateTime);
+                handleView(viewId, viewsJson, generate, recurse, workspace, dateTime);
             } catch ( JSONException e ) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -146,7 +161,9 @@ public class ViewGet extends AbstractJavaWebScript {
             try {
                 JSONObject json = new JSONObject();
                 json.put(gettingDisplayedElements ? "elements" : "views", viewsJson);
-                model.put("res", json.toString(4));
+                if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
+                if ( prettyPrint ) model.put("res", json.toString(4));
+                else model.put("res", json.toString()); 
             } catch (JSONException e) {
                 e.printStackTrace();
                 log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -164,9 +181,11 @@ public class ViewGet extends AbstractJavaWebScript {
         return model;
     }
 
-
-    private void handleView(String viewId, JSONArray viewsJson, boolean generate, boolean recurse, Date dateTime) throws JSONException {
-        EmsScriptNode view = findScriptNodeById(viewId, dateTime);
+    private void handleView( String viewId, JSONArray viewsJson,
+                             boolean generate, boolean recurse,
+                             WorkspaceNode workspace, Date dateTime )
+                                     throws JSONException {
+        EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime, false);
 
         if (view == null) {
             log( LogLevel.ERROR, "View not found with ID: " + viewId,
@@ -181,20 +200,25 @@ public class ViewGet extends AbstractJavaWebScript {
                 if ( gettingDisplayedElements ) {
                     if (Debug.isOn()) System.out.println("+ + + + + gettingDisplayedElements");
                     // TODO -- need to use recurse flag!
-                    Collection< EmsScriptNode > elems = v.getDisplayedElements(dateTime, generate, recurse, null);
+                    Collection< EmsScriptNode > elems =
+                            v.getDisplayedElements( workspace, dateTime,
+                                                    generate, recurse, null );
                     elems = NodeUtil.getVersionAtTime( elems, dateTime );
                     for ( EmsScriptNode n : elems ) {
-                        viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.ELEMENT, dateTime ) );
+                        viewsJson.put( n.toJSONObject( dateTime ) );
                     }
                 } else if ( gettingContainedViews ) {
                     if (Debug.isOn()) System.out.println("+ + + + + gettingContainedViews");
-                    Collection< EmsScriptNode > elems = v.getContainedViews( recurse, dateTime, null );
+                    Collection< EmsScriptNode > elems =
+                            v.getContainedViews( recurse, workspace, dateTime,
+                                                 null );
+                    elems.add( view );
                     for ( EmsScriptNode n : elems ) {
-                        viewsJson.put( n.toJSONObject( JSON_TYPE_FILTER.VIEW, dateTime ) );
+                        viewsJson.put( n.toJSONObject( dateTime ) );
                     }
                 } else {
                     if (Debug.isOn()) System.out.println("+ + + + + just the view");
-                    viewsJson.put( view.toJSONObject( JSON_TYPE_FILTER.VIEW, dateTime ) );
+                    viewsJson.put( view.toJSONObject(  dateTime ) );
                 }
             } catch ( JSONException e ) {
                 log( LogLevel.ERROR, "Could not create views JSON array",

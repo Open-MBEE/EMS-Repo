@@ -32,6 +32,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -82,16 +83,18 @@ public class SnapshotGet extends AbstractJavaWebScript {
         String timestamp = req.getParameter("timestamp");
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
+        WorkspaceNode workspace = getWorkspace( req );
+        
         String id = req.getServiceMatch().getTemplateVars().get("id");
         Map<String, Object> model = new HashMap<String, Object>();
 
-        EmsScriptNode snapshot = findScriptNodeById(id, dateTime);
+        EmsScriptNode snapshot = findScriptNodeById(id, workspace, dateTime, false);
         if (snapshot != null) {
             String snapshotString = getSnapshotString(snapshot);
             Date date = (Date)snapshot.getLastModified( dateTime );
             model.put("res", snapshotString);
             model.put("title", "Snapshot (" + EmsScriptNode.getIsoTime(date) + ")");
-            model.put("tag", getConfigurationSet(snapshot, dateTime));
+            model.put("tag", getConfigurationSet(snapshot, workspace, dateTime));
             model.put("siteName", snapshot.getSiteName());
             model.put("siteTitle", snapshot.getSiteTitle());
         } else {
@@ -128,11 +131,13 @@ public class SnapshotGet extends AbstractJavaWebScript {
      * @param snapshotId
      * @return
      */
-    public static String getConfigurationSet(EmsScriptNode snapshot, Date dateTime) {
+    public static String getConfigurationSet( EmsScriptNode snapshot,
+                                              WorkspaceNode workspace,
+                                              Date dateTime ) {
 		if (snapshot != null) {
             List< EmsScriptNode > configurationSets =
                     snapshot.getSourceAssocsNodesByType( "ems:configuredSnapshots",
-                                                         dateTime );
+                                                         workspace, dateTime );
 			if (!configurationSets.isEmpty()) {
 				EmsScriptNode configurationSet = configurationSets.get(0);
 				String configurationSetName = (String) configurationSet.getProperty(Acm.CM_NAME);

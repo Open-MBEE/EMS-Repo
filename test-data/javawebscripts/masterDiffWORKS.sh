@@ -1,6 +1,6 @@
 #!/bin/bash
 
-passTest=0
+failTest=0
 soapServer="128.149.16.xxx:8080"
 
 #start up the server
@@ -8,25 +8,19 @@ pkill -fn 'integration-test'
 echo 'KILLING SERVER IF ONE IS RUNNING'
 sleep 3s
 
-#cd ./../..
 ./runserver.sh > serverLog.txt &
 echo 'STARTING UP SERVER'
 sleep 60s
 
 #poll to see if the server is up
-cd ./test-data/javawebscripts
 server=0
 serverCount=0
+dotCount=0
+test=0
 echo 'POLLING SERVER'
 while [ $server -eq 0 ]; do
-        > tempMasterDiff
-        netstat -ln | grep '8080' > tempMasterDiff
-        count=`sed -n '$=' tempMasterDiff`
-        numberRegEx='^[0-9]+$'
-        if [[ $count =~ $numberRegEx ]];then
-                if [ $count -gt 0 ]; then
-                        server=1
-                fi
+        if grep -q "Starting ProtocolHandler" runserver.log;then
+                server=1
         else
                 dotCount=$(($dotCount+1))
                 if [ $dotCount -gt 20 ];then
@@ -40,63 +34,45 @@ while [ $server -eq 0 ]; do
         if [ $serverCount -gt 50000 ];then
                 server=2
         fi
+
+	sleep 1s
 done
 
 if [ $server -eq 1 ]; then
 	echo 'SERVER CONNECTED'
-	sleep 60s
 	
-	diffChoose=2
+        # Run regression tests
+        # The script will run the desired tests based on the GIT_BRANCH environment variable.
+        # Those tests ran can be overwritten by specifying the desired tests using the -t or -n option.
+        python test-data/javawebscripts/regression_test_harness.py
+  	failTest=$?
 
-	if [ $diffChoose -eq 1 ];then
-		#run the diff script
-		echo 'RUNNING OLD API DIFF SCRIPT'
-		echo 'OMITTING WORKSPACES DIFF SCRIPT'
-		./diff2.sh
-		passTest=$?
-
-        elif [ $diffChoose -eq 2 ];then
-                echo 'RUNNING WORKSPACES DIFF SCRIPT'
-                echo 'OMITTING OLD API DIFF SCRIPT'
-                echo $GIT_BRANCH
-                if [[ "$GIT_BRANCH" == *workspaces ]];then
-                    echo 'DIFFING  WORKSPACES BRANCH'
-                    ./diffWorkspaceWORKS.sh
-                    passTest=$?
-                fi
-                if [[ "$GIT_BRANCH" == *develop ]];then
-		    echo 'DIFFING DEVELOP BRANCH'
-		    ./diffWorkspaceWORKSdev.sh
-		    passTEST=$?
-		fi
-        else 
-                echo 'RUNNING BOTH OLD API AND WORKSPACES DIFF SCRIPTS'
-                ./diff2.sh
-                ./diffWorkspaceWORKSdev.sh
-                passTest=$?
-        fi
-        
-        
         #connect to soapUI -- WORK STILL NEEDED
-        echo 'RUNNING SOAP UI TESTS'
+        #echo 'RUNNING SOAP UI TESTS'
         #ssh $soapServer 'cd /classPath/; ./soapScript;'
         #classPath=??
-        TestSuite="WorkspacesTesting"
+        #TestSuite="WorkspacesTesting"
         #TestCase="??"
         #./testrunner.sh -f ./soapTestData -s $TestSuite -c $TestCase $classpath
-        cd ./soapStuff
-	for i in $(ls . | grep "soapui-project.xml"); do
-	         echo RUNNING TEST $i
-                ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i
-        done
+        #cd ./soapStuff
+    
+        #for i in $(ls . | grep "soapui-project.xml"); do
+	#         echo RUNNING TEST $i
+        #            ./Resources/app/bin/testrunner.sh -s $TestSuite ./$i > soapSuite$i.out
+        #    done
+       
+        #DIFF=`grep -i failed soapSuite*.out`
+        #	if [ "$DIFF" != "" ]; then
+        #	    failTest=1
+        #fi
 
         #shutdown the tomcat server process
         pkill -fn 'integration-test'
         echo 'KILLING SERVER'
 
-	echo 'PASSTEST?'
-        echo "$passTest"
-	exit $passTest
+        echo 'NUMBER OF TOTAL FAILED TESTS:'
+        echo "$failTest"
+        exit $failTest
 fi
 
 if [ $server -eq 2 ]; then
