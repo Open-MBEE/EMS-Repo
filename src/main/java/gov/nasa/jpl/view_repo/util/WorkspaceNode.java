@@ -245,6 +245,9 @@ public class WorkspaceNode extends EmsScriptNode {
         }
         String parentName = parent != null && parent.exists() ? parent.getName() : null;
 
+        // Get the parent in this workspace. In case there are multiple nodes
+        // with the same cm:name, use the grandparent to disambiguate where it
+        // should be.
         if ( parent != null && parent.exists() && !this.equals( parent.getWorkspace() ) ) {
             EmsScriptNode grandParent = parent.getOwningParent( null );
             ArrayList< NodeRef > arr = NodeUtil.findNodeRefsByType( parentName, SearchType.CM_NAME.prefix, false, false, this, null, false, true, getServices(), false );
@@ -256,22 +259,21 @@ public class WorkspaceNode extends EmsScriptNode {
                     break;
                 }
             }
-            //parent = findScriptNodeByName( parentName, false, this, null );
-            if ( parent == null || !parent.exists() || !this.equals( parent.getWorkspace() ) ) {
+            if ( !this.equals( parent.getWorkspace() ) ) {
                 parent = replicateWithParentFolders( parent );
             }
-            //if ( Debug.isOn() ) Debug.outln( "moving newFolder " + newFolder + " to parent " + parent );
-            //newFolder.move( parent );
         } else if ( parent == null || !parent.exists() ) {
             Debug.error("Error! Bad parent when replicating folder chain! " + parent );
         }
 
         // If the node is not already in this workspace, clone it.
-        if ( node.getWorkspace() == null || !node.getWorkspace().exists() || !node.getWorkspace().equals( this ) ) {
+        if ( !this.equals( node.getWorkspace() ) ) {
             node = findScriptNodeByName( nodeName, false, this, null );
             if ( node == null || !node.exists() || !this.equals( node.getWorkspace() ) ) {
                 newFolder = node.clone(parent);
                 newFolder.setWorkspace( this, node.getNodeRef() );
+            } else {
+                newFolder = node;
             }
         }
 
