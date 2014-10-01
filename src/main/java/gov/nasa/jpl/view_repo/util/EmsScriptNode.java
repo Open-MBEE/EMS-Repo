@@ -105,7 +105,8 @@ public class EmsScriptNode extends ScriptNode implements
                                              Comparable< EmsScriptNode > {
     private static final long serialVersionUID = 9132455162871185541L;
 
-    public static final boolean expressionStuff = false;
+    public static boolean expressionStuff = false;
+    private static boolean forceExpressionStuff = false;
 
     /**
      * A set of content model property names that serve as workspace metadata
@@ -1822,8 +1823,8 @@ public class EmsScriptNode extends ScriptNode implements
                     String msg =
                             "Error! Element " + targetRef
                                     + " did not exist in workspace "
-                                    + workspace.getName() + " at " + dateTime
-                                    + ".\n";
+                                    + WorkspaceNode.getName(workspace) + " at "
+                                    + dateTime + ".\n";
                     if ( getResponse() == null || getStatus() == null ) {
                         Debug.error( msg );
                     } else {
@@ -3333,15 +3334,15 @@ public class EmsScriptNode extends ScriptNode implements
     protected void addViewJSON( JSONObject json, EmsScriptNode node,
                                 Set< String > filter, Date dateTime )
                                         throws JSONException {
-        if ( expressionStuff ) {
-            // TODO: figure out why this isn't working
+        String property;
+        property = (String) node.getProperty("view2:contains");
+        if ( forceExpressionStuff
+             || ( expressionStuff && ( property == null || property.length() <= 0 ) ) ) {
             json.put( "contains", getView().getContainsJson(true) );
             json.put( "displayedElements", getView().getDisplayedElements() );
             json.put( "allowedElements", getView().getDisplayedElements() );
             json.put( "childrenViews", getView().getChildViews() );
         } else {
-            String property;
-            property = (String) node.getProperty("view2:contains");
             if (property != null && property.length() > 0) {
                 putInJson( json, "contains", new JSONArray( property ), filter );
             }
