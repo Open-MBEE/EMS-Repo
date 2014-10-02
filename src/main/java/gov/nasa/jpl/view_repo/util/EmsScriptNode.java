@@ -3342,38 +3342,44 @@ public class EmsScriptNode extends ScriptNode implements
         } else {
             String property;
             property = (String) node.getProperty("view2:contains");
-            if (property != null && property.length() > 0) {
+            if (!Utils.isNullOrEmpty(property)) {
                 putInJson( json, "contains", new JSONArray( property ), filter );
             }
             property = (String) node.getProperty("view2:displayedElements");
-            if (property != null && property.length() > 0) {
+            if (!Utils.isNullOrEmpty(property)) {
                 putInJson( json, "displayedElements", new JSONArray( property ), filter );
             }
             property = (String) node.getProperty("view2:allowedElements");
-            if (property != null && property.length() > 0) {
+            if (!Utils.isNullOrEmpty(property)) {
                 putInJson( json, "allowedElements", new JSONArray( property ), filter );
             }
             property = (String) node.getProperty("view2:childrenViews");
-            if (property != null && property.length() > 0) {
+            if (!Utils.isNullOrEmpty(property)) {
                 putInJson( json, "childrenViews", new JSONArray( property ), filter );
             }
         }
         // TODO: Snapshots?
     }
 
-    protected
-            void
-            addProductJSON( JSONObject json, EmsScriptNode node,
-                            Set< String > filter, Date dateTime )
-                                                                 throws JSONException {
-        putInJson( json,
-                   "view2view",
-                   new JSONArray( (String)node.getProperty( "view2:view2view" ) ),
-                   filter );
-        putInJson( json,
-                   "noSections",
-                   new JSONArray( (String)node.getProperty( "view2:noSections" ) ),
-                   filter );
+    protected void addProductJSON( JSONObject json, EmsScriptNode node,
+                                   Set< String > filter, Date dateTime )
+                                           throws JSONException {
+        JSONArray jarr = new JSONArray();
+        String v2v = (String)node.getProperty( "view2:view2view" );
+        if ( !Utils.isNullOrEmpty( v2v ) ) {
+            jarr.put( v2v );
+            putInJson( json, "view2view",
+                       new JSONArray( (String)node.getProperty( "view2:view2view" ) ),
+                       filter );
+        }
+        jarr = new JSONArray();
+        String noSections = (String)node.getProperty( "view2:noSections" );
+        if ( !Utils.isNullOrEmpty( noSections ) ) {
+            jarr.put( noSections );
+            putInJson( json, "noSections",
+                       new JSONArray( (String)node.getProperty( "view2:noSections" ) ),
+                       filter );
+        }
         addViewJSON( json, node, filter, dateTime );
     }
 
