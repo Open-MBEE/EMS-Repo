@@ -984,6 +984,9 @@ public class NodeUtil {
      *         is printed if the id doesn't have the right syntax.
      */
     public static NodeRef findNodeRefByAlfrescoId(String id) {
+        if ( !id.contains( "://" ) ) {
+            id = "workspace://SpacesStore/" + id;
+        }
         if ( !NodeRef.isNodeRef( id ) ) {
             Debug.error("Bad NodeRef id: " + id );
             return null;

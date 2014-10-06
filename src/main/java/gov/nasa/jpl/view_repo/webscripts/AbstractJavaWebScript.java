@@ -399,8 +399,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             }
             WorkspaceNode workspace = null;
 
-            NodeRef ref = NodeUtil.findNodeRefById( nameOrId, true, null,
-                                                    null, services, false );
+            NodeRef ref = NodeUtil.findNodeRefByAlfrescoId( nameOrId );
+            if ( ref == null ) {
+                ref = NodeUtil.findNodeRefById( nameOrId, true, null, null,
+                                                services, false );
+            }
             if ( ref != null ) {
                 workspace = new WorkspaceNode( ref, services, response,
                                                responseStatus );

@@ -4,7 +4,10 @@
 package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.Pair;
+import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
@@ -16,10 +19,8 @@ import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.model.ContentModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
@@ -102,8 +103,8 @@ public class WorkspaceNode extends EmsScriptNode {
      * Create a workspace folder within the specified folder or (if the folder
      * is null) within the specified user's home folder.
      *
-     * @param sysmlId
-     *            the name/identifier of the workspace
+     * @param wsName
+     *            the name of the workspace
      * @param userName
      *            the name of the user that is creating the workspace
      * @param folder
@@ -115,15 +116,15 @@ public class WorkspaceNode extends EmsScriptNode {
      *         because both the containing folder and the user name were both
      *         unspecified (non-existent)
      */
-    public static WorkspaceNode createWorskpaceInFolder( String sysmlId,
+    public static WorkspaceNode createWorskpaceInFolder( String wsName,
                                                          //String wsName,
                                                          String userName,
                                                          EmsScriptNode folder,
                                                          ServiceRegistry services,
                                                          StringBuffer response,
                                                          Status status ) {
-        if ( sysmlId == null ) {
-            sysmlId = NodeUtil.createId( services );
+        if ( wsName == null ) {
+            wsName = NodeUtil.createId( services );
         }
         if ( folder == null || !folder.exists() ) {
             //String userName = ws.getOwner();
@@ -135,10 +136,10 @@ public class WorkspaceNode extends EmsScriptNode {
         if ( folder == null || !folder.exists() ) {
             Debug.error( true, false, "\n%%% Error! no folder, " + folder
                                       + ", within which to create workspace, "
-                                      + sysmlId );
+                                      + wsName );
         }
 
-        WorkspaceNode ws = new WorkspaceNode( folder.createFolder( sysmlId ).getNodeRef(),
+        WorkspaceNode ws = new WorkspaceNode( folder.createFolder( wsName ).getNodeRef(),
                                               services, response, status );
         ws.addAspect( "ems:Workspace" );
 
@@ -232,7 +233,7 @@ public class WorkspaceNode extends EmsScriptNode {
         if ( node == null ) return null;
         EmsScriptNode newFolder = node;
 
-        String thisName = exists() ? getName() : null;
+        //String thisName = exists() ? getName() : null;
         String nodeName = node != null && node.exists() ? node.getName() : null;
 
         // make sure the folder's parent is replicated
@@ -281,10 +282,43 @@ public class WorkspaceNode extends EmsScriptNode {
         return newFolder;
     }
     
-    
+
+    public static String getId( WorkspaceNode ws ) {
+        if ( ws == null ) return "master";
+        return ws.getNodeRef().getId();
+    }
+
     public static String getName( WorkspaceNode ws ) {
         if ( ws == null ) return "master";
         return ws.getName();
+    }
+    
+    public static String getQualifiedId( WorkspaceNode ws ) {
+        return getQualifiedName( ws, null );
+    }
+    public static String getQualifiedId( WorkspaceNode ws,
+                                         Seen<WorkspaceNode> seen ) {
+        if ( ws == null ) {
+            return getId( ws ); 
+        }
+        Pair< Boolean, Seen< WorkspaceNode > > p = Utils.seen( ws, true, seen );
+        if ( p.first ) return null;
+        seen = p.second;
+        return getQualifiedId( ws.getSourceWorkspace(), seen ) + ws.getId();
+    }
+
+    public static String getQualifiedName( WorkspaceNode ws ) {
+        return getQualifiedName( ws, null );
+    }
+    public static String getQualifiedName( WorkspaceNode ws,
+                                           Seen<WorkspaceNode> seen ) {
+        if ( ws == null ) {
+            return getName( ws ); 
+        }
+        Pair< Boolean, Seen< WorkspaceNode > > p = Utils.seen( ws, true, seen );
+        if ( p.first ) return null;
+        seen = p.second;
+        return getQualifiedName( ws.getSourceWorkspace(), seen ) + ws.getName();
     }
 
     public WorkspaceNode getCommonParent(WorkspaceNode other) {
@@ -480,28 +514,21 @@ public class WorkspaceNode extends EmsScriptNode {
         JSONObject json = new JSONObject();
 
         json.put( "creator", getProperty( "cm:modifier" ) );
-        json.put( "created", TimeUtils.toTimestamp( (Date)getProperty("cm:modified") ));
-        json.put( "id", getProperty( "cm:id" ) );
-        json.put( "name",  getProperty( "cm:name" ) );
-        if(getSourceWorkspace() != null) {
-            json.put("parent", getStringIfNull(getSourceWorkspace().getProperty(Acm.CM_NAME)));
-        }
-        else
-        {
-            json.put("parent", "master"); // workspace is null only if master.
-        }
-        json.put("branched", TimeUtils.toTimestamp( (Date)getProperty("ems:lastTimeSyncParent") ));
+        json.put( "qualifiedName", getQualifiedName( this ) );
+        json.put( "qualifiedId", getQualifiedId( this ) );
+        // REVIEW -- This assumes that the workspace does not changed after it
+        // is created, but wouldn't it's ems:lastTimeSyncParent property be
+        // expected to change?
+        json.put( "created", TimeUtils.toTimestamp( (Date)getProperty("cm:modified") ) );
+        json.put( "id", getId() );
+        json.put( "name",  getName() );
+        json.put( "parent", getId(getSourceWorkspace()));
+        // REVIEW -- Why is ems:lastTimeSyncParent called the "branched"
+        // date? Shouldn't the branched date always be the same as the created
+        // date?
+        json.put( "branched", TimeUtils.toTimestamp( (Date)getProperty("ems:lastTimeSyncParent") ) );
 
         return json;
-    }
-
-    protected Object getStringIfNull (Object obj){
-
-        if (obj == null)
-            return "null";
-        else
-            return obj;
-
     }
 
 }
