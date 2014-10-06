@@ -51,6 +51,8 @@ deployParentDir=$(dirname $mmsappDeployDir)
 # Use the owner of the webapp directory as the owner of the deployed webapp
 owner=`ls -ld $deployParentDir | cut -d' ' -f 3`
 
+mmsappZip=`readlink -e $mmsappZip`
+
 echo "##### arguments for $0 processed with the following assignments and inferred values:"
 echo "  mmsappDeployDir =" $mmsappDeployDir
 echo "  mmsappDir =" $mmsappDir
@@ -70,8 +72,10 @@ if [ -f "$mmsappZip" ]; then
   echo unzip -q $mmsappZip
   unzip -q $mmsappZip
   unzippedDir=`/bin/ls -1`
+  echo "unzippedDir=$unzippedDir"
   #unzippedDir=`readlink -e $unzippedDir`
   mmsappDir=`readlink -e $unzippedDir`
+  echo "mmsappDir=$mmsappDir"
   echo popd
   popd
 fi

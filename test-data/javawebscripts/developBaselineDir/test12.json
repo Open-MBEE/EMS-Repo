@@ -1,0 +1,144 @@
+{
+
+  "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n",
+
+  "sequence": 0,
+
+  "workspace1": {
+
+    "name": "master",
+
+    "elements": [
+
+      {
+
+        "qualifiedName": "/6666_name",
+
+        "editable": true,
+
+        "creator": "admin",
+
+        "name": "6666_name",
+
+        "owner": "null",
+
+        "documentation": "",
+
+        "specialization": {
+
+          "type": "Expression",
+
+          "operand": [
+
+            {
+
+              "element": "300",
+
+              "type": "ElementValue"
+
+            },
+
+            {
+
+              "element": "302",
+
+              "type": "ElementValue"
+
+            }
+
+          ]
+
+        }
+
+      },
+
+      {
+
+        "qualifiedName": "/6666_name/null",
+
+        "owner": "6666",
+
+        "specialization": {
+
+          "element": "300",
+
+          "type": "ElementValue"
+
+        },
+
+        "editable": true,
+
+        "creator": "admin",
+
+      },
+
+      {
+
+        "qualifiedName": "/6666_name/null",
+
+        "owner": "6666",
+
+        "specialization": {
+
+          "element": "302",
+
+          "type": "ElementValue"
+
+        },
+
+        "editable": true,
+
+        "creator": "admin",
+
+      }
+
+    ]
+
+  },
+
+  "workspace2": {
+
+    "deletedElements": [
+
+      {
+
+        "specialization": {"type": "Expression"},
+
+        "creator": "admin",
+
+      },
+
+      {
+
+        "specialization": {"type": "ElementValue"},
+
+        "creator": "admin",
+
+      },
+
+      {
+
+        "specialization": {"type": "ElementValue"},
+
+        "creator": "admin",
+
+      }
+
+    ],
+
+    "addedElements": [],
+
+    "conflictedElements": [],
+
+    "updatedElements": [],
+
+    "name": "master",
+
+    "movedElements": []
+
+  }
+
+}
+
+200
+

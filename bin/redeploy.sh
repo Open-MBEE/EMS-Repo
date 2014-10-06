@@ -43,7 +43,7 @@ stopAlfrescoCmd=$d/stopAlfresco.sh
 deployMmsappCmd=$d/deployMmsapp.sh
 
 tomcatDir=/opt/local/apache-tomcat
-if [ ! -f $tomcatDir ]; then
+if [ ! -d $tomcatDir ]; then
   tomcatDir=/opt/local/alfresco-4.2.e/tomcat
 fi
 webappDir=${tomcatDir}/webapps
@@ -77,7 +77,7 @@ fi;
 
 ampFile=""
 shareAmpFile=""
-warfile=$existingWarFile
+warFile=$existingWarFile
 shareWarFile=$existingShareWarFile
 mmsappDir=""
 mmsappZip=""
