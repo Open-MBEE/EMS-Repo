@@ -20,24 +20,29 @@ public class DocBookTable {
 	public int getStartCol(int row, int col, int rowspan, int colspan, boolean isHeader){
 		int startCol = 0;
 		boolean isSet = false;
-		for(int i = row; i < row + rowspan; i++){
-			for(int j = col; j < col+colspan; j++){
+		int rowEnd = row + rowspan;
+		int colEnd = col + colspan;
+		for(int i = row; i < rowEnd; i++){
+			for(int j = col; j < this.colCount; j++){
 				if(isHeader){
 					if(i < headerRowCount && j < colCount){
 						if(header[i][j] == 0 && !isSet){
 							startCol = j+1;
 							isSet = true;
+							header[i][j] = 1;
 						}
-						header[i][j] = 1;
+						if(j < colEnd) header[i][j] = 1;
 					}
 				}
 				else{
-					if(i < bodyRowCount && j < colCount)
+					if(i < bodyRowCount && j < colCount){
 						if(body[i][j] == 0 && !isSet){
 							startCol = j+1;
 							isSet = true;
+							body[i][j] = 1;
 						}
-						body[i][j] = 1;
+						if(j < colEnd) body[i][j] = 1;
+					}
 				}
 			}
 		}
