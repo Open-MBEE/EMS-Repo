@@ -56,6 +56,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.admin.SysAdminParams;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -70,6 +71,7 @@ import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.util.TempFileProvider;
+import org.alfresco.util.UrlUtil;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -92,8 +94,13 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class SnapshotPost extends AbstractJavaWebScript {
 	protected String snapshotName;
 	//TODO obsolete
-	private boolean isSnapshotNode = false;	//determines whether we're working with a view/product or a snapshot node reference; true for snapshot node reference
+	//private boolean isSnapshotNode = false;	//determines whether we're working with a view/product or a snapshot node reference; true for snapshot node reference
 	private JSONArray view2view;
+	//private SysAdminParams sysAdminParams;
+	
+	//public void setSysAdminParas(SysAdminParams sysAdminParams){
+	//	this.sysAdminParams = sysAdminParams;
+	//}
 	
     public SnapshotPost() {
         super();
@@ -116,8 +123,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         WorkspaceNode workspace = getWorkspace( req );
 
         Map< String, Object > model = new HashMap< String, Object >();
-        log( LogLevel.INFO,
-             "Starting snapshot creation or snapshot artifact generation..." );
+        log( LogLevel.INFO, "Starting snapshot creation or snapshot artifact generation..." );
         try {
             JSONObject reqPostJson = (JSONObject)req.parseContent();
             if ( reqPostJson != null ) {
@@ -182,6 +188,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 }
             }
         } catch ( Exception ex ) {
+        	status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             log( LogLevel.ERROR,
                  "Failed to create snapshot or snapshot artifact! "
                          + ex.getMessage() );
@@ -378,7 +385,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
         }
         return docBookMgr;
     }
-
     
     private DocBookTable createDocBookTable(JSONObject tblJson){
     	DocBookTable dbTable = new DocBookTable();
@@ -514,7 +520,15 @@ public class SnapshotPost extends AbstractJavaWebScript {
         this.snapshotName = viewId + "_" + System.currentTimeMillis();
         String contextPath = "alfresco/service/";
         EmsScriptNode viewNode = findScriptNodeById(viewId, workspace, null, true);
+        if(viewNode == null){
+        	System.out.println("Failed to find script node with Id: " + viewId);
+        	return null;
+        }
         EmsScriptNode snapshotFolder = getSnapshotFolderNode(viewNode);
+        if(snapshotFolder == null){
+        	System.out.println("Failed to get snapshot folder node!");
+        	return null;
+        }
         return createSnapshot(view, viewId, snapshotName, contextPath, snapshotFolder);
     }
     
@@ -522,38 +536,32 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                          String snapshotName,
                                          String contextPath,
                                          EmsScriptNode snapshotFolder ) {
-        EmsScriptNode snapshotNode = null;
-        if ( !this.isSnapshotNode ) {
-            snapshotNode =
-                    snapshotFolder.createNode( snapshotName, "view2:Snapshot" );
-            snapshotNode.createOrUpdateProperty( "cm:isIndexed", true );
-            snapshotNode.createOrUpdateProperty( "cm:isContentIndexed", false );
-            snapshotNode.createOrUpdateProperty( Acm.ACM_ID, snapshotName );
-
-            view.createOrUpdateAssociation( snapshotNode, "view2:snapshots" );
-        } else {
-            snapshotNode = view;
+        EmsScriptNode snapshotNode = snapshotFolder.createNode( snapshotName, "view2:Snapshot" );
+        if(snapshotNode == null){
+        	System.out.println("Failed to create view2:Snapshot!");
+        	return null;
         }
+        snapshotNode.createOrUpdateProperty( "cm:isIndexed", true );
+        snapshotNode.createOrUpdateProperty( "cm:isContentIndexed", false );
+        snapshotNode.createOrUpdateProperty( Acm.ACM_ID, snapshotName );
+
+        view.createOrUpdateAssociation( snapshotNode, "view2:snapshots" );
 
         JSONObject snapshotJson = new JSONObject();
         try {
-            if ( !this.isSnapshotNode ) {
-                snapshotJson.put( "snapshot", true );
-                ActionUtil.saveStringToFile( snapshotNode, "application/json",
-                                             services,
-                                             snapshotJson.toString( 4 ) );
-            }
-            DocBookWrapper docBookWrapper =
-                    createDocBook( view, viewId, snapshotName, contextPath,
-                                   snapshotNode );
+            snapshotJson.put( "snapshot", true );
+            ActionUtil.saveStringToFile( snapshotNode, "application/json", services, snapshotJson.toString( 4 ) );
+            DocBookWrapper docBookWrapper = createDocBook( view, viewId, snapshotName, contextPath, snapshotNode );
             if ( docBookWrapper == null ) {
                 log( LogLevel.ERROR, "Failed to generate DocBook!" );
+                snapshotNode = null;
             } else {
                 docBookWrapper.save();
-                String id = (String)snapshotNode.getProperty( Acm.ACM_ID );
                 docBookWrapper.saveDocBookToRepo( snapshotFolder );
             }
-        } catch ( Exception e1 ) {
+        } 
+        catch ( Exception e1 ) {
+        	snapshotNode = null;
             e1.printStackTrace();
         }
 
@@ -586,13 +594,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	return colspecs;
     }
     
-    private List< List< DocumentElement >>
-            createTableBody( JSONObject obj, DocBookTable dbTable ) throws JSONException {
+    private List< List< DocumentElement >> createTableBody( JSONObject obj, DocBookTable dbTable ) throws JSONException {
         return createTableRows( obj.getJSONArray( "body" ), dbTable, false );
     }
     
-    private List< List< DocumentElement >>
-            createTableHeader( JSONObject obj, DocBookTable dbTable ) throws JSONException {
+    private List< List< DocumentElement >> createTableHeader( JSONObject obj, DocBookTable dbTable ) throws JSONException {
         return createTableRows( obj.getJSONArray( "header" ), dbTable, true );
     }
     
@@ -697,18 +703,24 @@ public class SnapshotPost extends AbstractJavaWebScript {
     
     public JSONObject generateHTML( String snapshotId ) throws Exception {
         EmsScriptNode snapshotNode = findScriptNodeById( snapshotId, null, null, false ); // TODO -- REVIEW -- Pass in workspace????!!!!
+        if(snapshotNode == null) throw new Exception("Failed to find snapshot with Id: " + snapshotId);
         snapshotNode = generateHTML( snapshotNode );
+        if(snapshotNode == null) throw new Exception("Failed to generate HTML artifact!");
         return populateSnapshotProperties( snapshotNode );
     }
     
     public EmsScriptNode generateHTML( EmsScriptNode snapshotNode ) throws Exception {
         this.snapshotName = (String)snapshotNode.getProperty( Acm.ACM_ID );
+        if(this.snapshotName == null || this.snapshotName.isEmpty()) throw new Exception("Failed to retrieve snapshot Id!");
+        
         ChildAssociationRef childAssociationRef =
                 this.services.getNodeService()
                              .getPrimaryParent( snapshotNode.getNodeRef() );
-        EmsScriptNode snapshotFolderNode =
-                new EmsScriptNode( childAssociationRef.getParentRef(),
-                                   this.services );
+        if(childAssociationRef == null) throw new Exception("Failed to retrieve snapshot association reference!");
+        
+        EmsScriptNode snapshotFolderNode = new EmsScriptNode( childAssociationRef.getParentRef(), this.services );
+        if(snapshotFolderNode == null) throw new Exception("Failed to retrieve snapshot folder!");
+        
         DocBookWrapper docBookWrapper = new DocBookWrapper( this.snapshotName, snapshotNode );
 
         if ( !hasHtmlZip( snapshotNode ) ) {
@@ -720,18 +732,26 @@ public class SnapshotPost extends AbstractJavaWebScript {
     
     public JSONObject generatePDF(String snapshotId) throws Exception{
         EmsScriptNode snapshotNode = findScriptNodeById(snapshotId, null, null, false); // TODO -- REVIEW -- Pass in workspace????!!!!
-    	    snapshotNode = generatePDF(snapshotNode);
-    	    return populateSnapshotProperties(snapshotNode);
+        if(snapshotNode == null) throw new Exception("Failed to find snapshot with Id: " + snapshotId);
+    	snapshotNode = generatePDF(snapshotNode);
+    	if(snapshotNode == null) throw new Exception("Failed to generate PDF artifact!");
+    	return populateSnapshotProperties(snapshotNode);
     }
     
     public EmsScriptNode generatePDF( EmsScriptNode snapshotNode ) throws Exception {
         this.snapshotName = (String)snapshotNode.getProperty( Acm.ACM_ID );
+        if(this.snapshotName == null || this.snapshotName.isEmpty()) throw new Exception("Failed to retrieve snapshot Id!");
+        
         ChildAssociationRef childAssociationRef =
                 this.services.getNodeService()
                              .getPrimaryParent( snapshotNode.getNodeRef() );
+        if(childAssociationRef == null) throw new Exception("Failed to retrieve snapshot association reference!");
+        
         EmsScriptNode snapshotFolderNode =
                 new EmsScriptNode( childAssociationRef.getParentRef(),
                                    this.services );
+        if(snapshotFolderNode == null) throw new Exception("Failed to retrieve snapshot folder!");
+        
         DocBookWrapper docBookWrapper = new DocBookWrapper( this.snapshotName, snapshotNode );
         if ( !hasPdf( snapshotNode ) ) {
             log( LogLevel.INFO, "Generating PDF..." );
@@ -747,6 +767,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			try {
 				tmpJson = this.view2view.getJSONObject(j);
 				String tmpId = (String)tmpJson.opt("id");
+				if(tmpId == null || tmpId.isEmpty()) tmpId = tmpJson.optString(Acm.SYSMLID);
+				if(tmpId == null || tmpId.isEmpty()) continue;
 	        	if(tmpId.equals(nodeId)){
 	        		childNode = tmpJson;
 	        		break;
@@ -812,9 +834,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         if ( content != null && !content.isEmpty() ) return content;
         try {
             JSONObject spec = (JSONObject)jsonObj.get( "specialization" );
-            content = (String)spec.opt( transcludedType );
-            if ( content != null && !content.isEmpty() ) return content;
-
+            if(spec != null){ 
+	            content = (String)spec.opt( transcludedType );
+	            if ( content != null && !content.isEmpty() ) return content;
+            }
         } catch ( JSONException ex ) {
             System.out.println( "Failed to retrieve transcluded content!" );
         }
@@ -927,8 +950,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
     {
     	Document document = Jsoup.parseBodyFragment(inputString);
     	Elements images = document.getElementsByTag("img");
+    	//String shareUrl = UrlUtil.getShareUrl(sysAdminParams);
+    	//if(shareUrl != null) System.out.println("Share url: " + shareUrl);
     	for(Element image : images){
     		String src = image.attr("src");
+    		if(src == null) continue;
     		if(src.toLowerCase().startsWith("http")){
     			System.out.println("Embedded image src: " + src);
     			//http://localhost:8081/share/proxy/alfresco/api/node/content/workspace/SpacesStore/74cd8a96-8a21-47e5-9b3b-a1b3e296787d/graph.JPG
@@ -1090,12 +1116,18 @@ public class SnapshotPost extends AbstractJavaWebScript {
 					}
 					else{
 						String doc = getTranscludedContent(jsObj, "documentation");
-						String transcluded = doc;
-						while(true){
-							transcluded = handleTransclusion(id, "doc", transcluded,
-							                                 cirRefList, index);
-							if(transcluded.compareToIgnoreCase(doc) == 0) break;
-							doc = transcluded;
+						String transcluded = null;
+						if(doc == null || doc.isEmpty()){
+							transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
+						}
+						else{
+							transcluded = doc;
+							while(true){
+								transcluded = handleTransclusion(id, "doc", transcluded,
+								                                 cirRefList, index);
+								if(transcluded.compareToIgnoreCase(doc) == 0) break;
+								doc = transcluded;
+							}
 						}
 						element.before(transcluded);
 						element.remove();
@@ -1133,11 +1165,17 @@ public class SnapshotPost extends AbstractJavaWebScript {
 					}
 					else{
 						String name = getTranscludedContent(jsObj, "name");
-						String transcluded = name;
-						while(true){
-							transcluded = handleTransclusion(id, "name", transcluded, cirRefList, index);
-							if(transcluded.compareToIgnoreCase(name) == 0) break;
-							name = transcluded;
+						String transcluded = null;
+						if(name == null || name.isEmpty()){
+							transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
+						}
+						else{
+						transcluded = name;
+							while(true){
+								transcluded = handleTransclusion(id, "name", transcluded, cirRefList, index);
+								if(transcluded.compareToIgnoreCase(name) == 0) break;
+								name = transcluded;
+							}
 						}
 						element.before(transcluded);
 						element.remove();
@@ -1339,6 +1377,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         if(childrenViews == null) throw new Exception("Failed to retrieve 'childrenViews'.");
         for(int k=0; k< childrenViews.length(); k++){
         	String childId = childrenViews.getString(k);
+        	if(childId.equals(nodeId)) continue;
         	EmsScriptNode childNode = findScriptNodeById(childId, null, null, false);
         	traverseElements(section, childNode);
         }
