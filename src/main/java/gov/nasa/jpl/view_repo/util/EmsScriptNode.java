@@ -2620,8 +2620,10 @@ public class EmsScriptNode extends ScriptNode implements
         if ( workspace == null ) {
             if ( hasAspect( "ems:HasWorkspace" ) ) {
                 NodeRef ref = (NodeRef)getProperty( "ems:workspace" );
-                WorkspaceNode ws = new WorkspaceNode( ref, getServices() );
-                setWorkspace( ws, null );
+                if (ref != null) {
+                	WorkspaceNode ws = new WorkspaceNode( ref, getServices() );
+                    setWorkspace( ws, null );
+                }
             }
         }
         return workspace;

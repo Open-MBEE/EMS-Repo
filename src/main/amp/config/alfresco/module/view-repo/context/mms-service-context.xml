@@ -225,7 +225,7 @@
 	
 	<!-- adding new bean -->
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.products.views.get"
-        class="gov.nasa.jpl.view_repo.webscripts.ViewGet" parent="webscript"
+        class="gov.nasa.jpl.view_repo.webscripts.ProductGet" parent="webscript"
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />

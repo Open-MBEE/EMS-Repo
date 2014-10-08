@@ -189,8 +189,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		}
 
 		// create project if doesn't exist or update if fix is specified
-		// FIXME: this search is a issue if we have multiple sites in a workspace with the same projectId
-		//		  even worse, if the master workspace has the projectId and the current worskpace does not,
+		// FIXME: if the master workspace has the projectId and the current worskpace does not,
 		//		  it will return the master workspace projectNode.  This is especially bad for "no_project".
 		EmsScriptNode projectNode = findScriptNodeById(projectId, workspace, null, true);
 		String projectName = null;
@@ -201,7 +200,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		if (jsonObject.has(Acm.JSON_PROJECT_VERSION)) {
 		    projectVersion = jsonObject.getString(Acm.JSON_PROJECT_VERSION);
 		}
-		if (projectNode == null) {
+		if ( projectNode == null || (projectNode != null && !projectNode.getWorkspace().equals(workspace)) ) {
 			projectNode = modelContainerNode.createFolder(projectId, Acm.ACM_PROJECT);
 			projectNode.setProperty(Acm.CM_TITLE, projectName);
 			projectNode.setProperty(Acm.ACM_ID, projectId);
