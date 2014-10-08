@@ -29,9 +29,13 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,6 +55,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  * 
  */
+@Deprecated
 public class ModelCommentGet extends ModelGet {
     public ModelCommentGet() {
         super();
@@ -63,24 +68,35 @@ public class ModelCommentGet extends ModelGet {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+
+        printHeader( req );
+        
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
 
+        // get timestamp if specified
+        String timestamp = req.getParameter("timestamp");
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+
+        WorkspaceNode workspace = getWorkspace( req );
+        
         ModelCommentGet instance = new ModelCommentGet(repository, services);
         String elementId = req.getServiceMatch().getTemplateVars().get("id");
-        EmsScriptNode element = findScriptNodeByName(elementId);
+        EmsScriptNode element = findScriptNodeById(elementId, workspace, dateTime, false);
 
         if (element == null) {
             log(LogLevel.ERROR, "Could not find element", HttpServletResponse.SC_NOT_FOUND);
             model.put("res", response);
         } else {
-            JSONArray elementsJson = instance.getCommentElements(element);
+            JSONArray elementsJson =
+                    instance.getCommentElements( element, workspace, dateTime );
             appendResponseStatusInfo(instance);
             if (elementsJson != null) {
                 JSONObject top = new JSONObject();
                 try {
                     top.put("elements",  elementsJson);
+                    if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
                     model.put("res", top.toString(4));
                 } catch (JSONException e) {
                     log(LogLevel.ERROR, "Could not create the JSON response", HttpServletResponse.SC_BAD_REQUEST);
@@ -90,6 +106,9 @@ public class ModelCommentGet extends ModelGet {
         }
 
         status.setCode(responseStatus.getCode());
+        
+        printFooter();
+
         return model;
     }
     
@@ -98,18 +117,20 @@ public class ModelCommentGet extends ModelGet {
      * @param element
      * @return
      */
-    private JSONArray getCommentElements(EmsScriptNode element) {
+    private JSONArray getCommentElements( EmsScriptNode element,
+                                          WorkspaceNode workspace,
+                                          Date dateTime ) {
         try {
             JSONArray commentIds = element.getSourceAssocsIdsByType(Acm.ACM_ANNOTATED_ELEMENTS);
             for (int ii = 0; ii < commentIds.length(); ii++) {
                 String commentId = commentIds.getString(ii);
-                EmsScriptNode comment = findScriptNodeByName(commentId);
+                EmsScriptNode comment = findScriptNodeById(commentId, workspace, dateTime, false);
                 if (comment != null) {
                     elementsFound.put(commentId, comment);
                 }
             }
     
-            handleElements();
+            handleElements(dateTime);
         
             return elements;
         } catch (JSONException e) {

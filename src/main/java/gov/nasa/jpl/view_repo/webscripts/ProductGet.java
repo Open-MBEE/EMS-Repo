@@ -29,9 +29,14 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+import gov.nasa.jpl.view_repo.webscripts.util.ProductsWebscript;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,8 +52,17 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+// TODO -- this should be a subclass of ViewGet
 public class ProductGet extends AbstractJavaWebScript {
-	public ProductGet() {
+	protected boolean gettingDisplayedElements = false;
+    protected boolean gettingContainedViews = false;
+
+    // injected via spring configuration
+    protected boolean isViewRequest = false;
+
+    protected boolean prettyPrint = true;
+
+    public ProductGet() {
 	    super();
 	}
     
@@ -58,12 +72,18 @@ public class ProductGet extends AbstractJavaWebScript {
 	
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
-		String productId = req.getServiceMatch().getTemplateVars().get("id");
+		String productId = AbstractJavaWebScript.getIdFromRequest(req);
 		if (!checkRequestVariable(productId, "id")) {
 			return false;
 		}
-		
-		EmsScriptNode product = findScriptNodeByName(productId);
+
+		// get timestamp if specified
+        String timestamp = req.getParameter("timestamp");
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        
+        WorkspaceNode workspace = getWorkspace( req );
+
+		EmsScriptNode product = findScriptNodeById(productId, workspace, dateTime, false);
 		if (product == null) {
 			log(LogLevel.ERROR, "Product not found with id: " + productId + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
@@ -78,21 +98,53 @@ public class ProductGet extends AbstractJavaWebScript {
 	
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        printHeader( req );
+
 		clearCaches();
 		
 		Map<String, Object> model = new HashMap<String, Object>();
 
 		JSONArray productsJson = null;
 		if (validateRequest(req, status)) {
-			String productId = req.getServiceMatch().getTemplateVars().get("id");
-			productsJson = handleProduct(productId);
+			String productId = getIdFromRequest( req );
+			gettingDisplayedElements = isDisplayedElementRequest( req );
+			if ( !gettingDisplayedElements ) {
+			    gettingContainedViews  = isContainedViewRequest( req );
+			} 
+			if (Debug.isOn()) System.out.println("productId = " + productId);
+			
+			// default recurse=true but recurse only applies to displayed elements and contained views
+            boolean recurse = getBooleanArg( req, "recurse", true );
+            
+            // default simple=false
+            boolean simple = getBooleanArg( req, "simple", false );
+            //System.out.println("simple=" + simple);
+
+            // get timestamp if specified
+            String timestamp = req.getParameter("timestamp");
+            Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+
+            WorkspaceNode workspace = getWorkspace( req );
+
+            // see if prettyPrint default is overridden and change
+            prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
+            //System.out.println("prettyPrint=" + prettyPrint);
+            
+            ProductsWebscript productsWs = new ProductsWebscript(repository, services, response);
+            productsWs.simpleJson = simple;
+			productsJson = productsWs.handleProduct(productId, recurse, workspace, dateTime, gettingDisplayedElements, gettingContainedViews);
 		}
 
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK && productsJson != null) {
 			try {
-			    JSONObject top = new JSONObject();
-			    top.put("products", productsJson);
-				model.put("res", top.toString(4));
+			    JSONObject json = new JSONObject();
+                json.put( gettingDisplayedElements ? "elements"
+                                                  : ( gettingContainedViews
+                                                      ? "views" : "products" ),
+                         productsJson );
+                if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
+                if ( prettyPrint ) model.put("res", json.toString(4));
+                else model.put("res", json.toString());
 			} catch (JSONException e) {
 				log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				model.put("res", response.toString());
@@ -103,27 +155,19 @@ public class ProductGet extends AbstractJavaWebScript {
 		}
 
 		status.setCode(responseStatus.getCode());
+
+		printFooter();
+
 		return model;
 	}
 
 	
-	private JSONArray handleProduct(String productId) {
-	    JSONArray productsJson = new JSONArray();
-		EmsScriptNode product = findScriptNodeByName(productId);
-		if (product == null) {
-			log(LogLevel.ERROR, "Product not found with ID: " + productId, HttpServletResponse.SC_NOT_FOUND);
-		}
-
-		if (checkPermissions(product, PermissionService.READ)){ 
-		    try {
-                productsJson.put(product.toJSONObject(Acm.JSON_TYPE_FILTER.PRODUCT));
-            } catch (JSONException e) {
-                log(LogLevel.ERROR, "Could not create products JSON array", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                e.printStackTrace();
-            }
-		}
-		
-		return productsJson;
-	}
+    /**
+     * Need to differentiate between View or Element request - specified during Spring configuration
+     * @param flag
+     */
+    public void setIsViewRequest(boolean flag) {
+        isViewRequest = flag;
+    }
 
 }

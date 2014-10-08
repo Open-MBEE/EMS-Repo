@@ -1,0 +1,147 @@
+{"elements": [
+    {
+        "sysmlid": "_17_0_2_3_e610336_1394148443742_79128_29536",
+        "name": "ContextViewpoint",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "specialization": {"method": "get_two_names",
+                            "type": "Viewpoint"
+                           }
+    },
+    {
+        "sysmlid": "_17_0_2_3_e610336_1394148233838_91795_29332",
+        "name": "Context",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+         "specialization" : {
+                                "type": "View"
+                            }
+    },
+    {
+        "sysmlid": "_17_0_2_3_e610336_1394148461465_93174_29599",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_3_e610336_1394148233838_91795_29332",
+        "specialization" : {
+            "type": "Conform",
+            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
+            "target": "_17_0_2_3_e610336_1394148443742_79128_29536"
+        }
+    },
+    {
+        "id": "_17_0_2_3_e610336_1394149232050_812146_29911",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "specialization" : {
+            "type": "Expose",
+            "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
+            "target": "_17_0_2_4_f3a0363_1394140326296_809805_27600"
+        }
+    },
+    {
+        "sysmlid": "get_two_names",
+        "name": "get_two_names_op",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "specialization": {"expression": "get_two_names_expression",
+                           "type": "Operation"
+                           }
+    },
+    {
+        "sysmlid": "get_two_names_expression",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "specialization": {"operand": [{"element":"get_names",
+                                        "type":"ElementValue"},
+                                       {"element":"_17_0_2_4_f3a0363_1394141845089_115460_28389",
+                                        "type":"ElementValue"},
+                                       {"element":"_17_0_2_4_f3a0363_1394141831980_671275_28387",
+                                        "type":"ElementValue"}],
+                            "type": "Expression" 
+                           }
+    },
+    {
+        "sysmlid": "_17_0_2_4_f3a0363_1394141845089_115460_28389",
+        "name": "ionosphere",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394140377374_900991_27624",
+        "specialization": {"type": "Property"}
+    },
+    {
+        "sysmlid": "_17_0_2_4_f3a0363_1394141831980_671275_28387",
+        "name": "radiation",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394140377374_900991_27624",
+        "specialization": {"type": "Property"}
+    },
+    {
+        "sysmlid": "get_names",
+        "name": "get_names_op",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "specialization": {"parameters":["s1_param",
+                                         "s2_param"],
+                            "expression": "vp_expression_2",
+                            "type": "Operation" 
+                           } 
+    },
+    {
+        "sysmlid": "s1_param",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "specialization" : {
+                            "type": "Parameter"
+                            }    
+    },
+    {
+        "sysmlid": "s2_param",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "specialization" : {
+                            "type": "Parameter"
+                            }    
+    },
+    {
+        "sysmlid": "vp_expression_2",
+        "name": "",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "specialization": {"operand": [{"element":"op_list",
+                                        "type":"ElementValue"},
+                                        {"element":"op_name_arg_1",
+                                        "type":"ElementValue"},
+                                        {"element":"op_name_arg_2",
+                                        "type":"ElementValue"}],
+                            "type": "Expression"
+                           }
+    },    
+    {
+        "sysmlid": "op_name_arg_1",
+        "name": "Name",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "specialization": {"operand": [{"element":"op_name_arg",
+                                        "type":"ElementValue"},
+                                       {"element":"s1_param",
+                                        "type":"ElementValue"}],
+                           "type": "Expression"
+                          }
+    },
+    {
+        "sysmlid": "op_name_arg_2",
+        "name": "Name",
+        "documentation": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "specialization": {"operand": [{"element":"op_name_arg",
+                                        "type":"ElementValue"},
+                                       {"element":"s2_param",
+                                        "type":"ElementValue"}],
+                           "type": "Expression"
+                          }
+    }
+
+]}

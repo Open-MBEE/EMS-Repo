@@ -1,0 +1,12 @@
+{"workspaces": [{
+
+    "name": "wsA",
+
+    "parent": "master",
+
+    "creator": "admin"
+
+}]}
+
+200
+

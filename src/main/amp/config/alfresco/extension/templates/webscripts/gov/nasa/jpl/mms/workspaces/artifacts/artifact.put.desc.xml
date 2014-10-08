@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>put artifact with {artifactId}</shortname>
+    <description>
+    	put artifact with {artifactId}
+	</description>
+  	<url>/workspaces/{workspaceId}/artifacts/{artifactId}</url>
+  	<format default="json">any</format>
+  	<authentication>user</authentication>
+  	<transaction>none</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

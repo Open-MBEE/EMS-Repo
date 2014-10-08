@@ -29,9 +29,13 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -83,17 +87,27 @@ public class IndexGet extends AbstractJavaWebScript {
         clearCaches();
 
         IndexGet instance = new IndexGet(repository, services);
-        
+
+        // get timestamp if specified
+        String timestamp = req.getParameter("timestamp");
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+    
+       
         String siteName = req.getServiceMatch().getTemplateVars().get("id");
         SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+        
+        WorkspaceNode workspace = getWorkspace( req );
+        
         if (siteInfo == null) {
             log(LogLevel.ERROR, "Could not find site: " + siteName, HttpServletResponse.SC_NOT_FOUND);
         } else {
-            EmsScriptNode site = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+            //EmsScriptNode site = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+            EmsScriptNode site = getSiteNode( siteName, workspace, dateTime );
             JSONObject json;
             try {
-                json = instance.getIndexJson(site);
+                json = instance.getIndexJson(site, workspace, dateTime);
                 appendResponseStatusInfo(instance);
+                if (!Utils.isNullOrEmpty(response.toString())) json.put("message",response.toString());
                 model.put("res", json.toString());
                 model.put("title", siteName);
                 model.put("siteName", site.getProperty(Acm.CM_NAME));
@@ -111,21 +125,24 @@ public class IndexGet extends AbstractJavaWebScript {
             model.put("siteName", "");
             model.put("siteTitle", "ERROR site not found");
         }
-        
+
+        printFooter();
+
         return model;
     }
-    
+
     /**
      * Retrieve the index.json file if it exists and parse into JSONObject
      * @param site
+     * @param workspace 
      * @return
      * @throws JSONException
      */
-    private JSONObject getIndexJson(EmsScriptNode site) throws JSONException {
+    private JSONObject getIndexJson(EmsScriptNode site, WorkspaceNode workspace, Date dateTime) throws JSONException {
         EmsScriptNode index = site.childByNamePath("index.json");
         if (index == null) {
             ProductListGet productListService = new ProductListGet(repository, services);
-            return productListService.handleProductList(site); 
+            return productListService.handleProductList(site, workspace, dateTime); 
         } else {
             ContentReader reader = services.getContentService().getReader(index.getNodeRef(), ContentModel.PROP_CONTENT);
             return new JSONObject(reader.getContentString());

@@ -29,9 +29,13 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,6 +71,9 @@ public class ProjectGet extends AbstractJavaWebScript {
      */
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+//    	String userName = AuthenticationUtil.getRunAsUser();
+        printHeader( req );
+
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -74,9 +81,17 @@ public class ProjectGet extends AbstractJavaWebScript {
 
         try {
             if (validateRequest(req, status)) {
-                String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
-                String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
-                json = handleProject(projectId, siteName);
+                String siteName = getSiteName( req );
+                String projectId = getProjectId( req );
+
+                // get timestamp if specified
+                String timestamp = req.getParameter("timestamp");
+                Date dateTime = TimeUtils.dateFromTimestamp(timestamp);
+                
+                WorkspaceNode workspace = getWorkspace( req );
+                
+                json = handleProject(projectId, siteName, workspace, dateTime);
+                if (json != null && !Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
             }
         } catch (JSONException e) {
             log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -91,6 +106,9 @@ public class ProjectGet extends AbstractJavaWebScript {
             model.put("res", json.toString());
         }
         status.setCode(responseStatus.getCode());
+
+        printFooter();
+
         return model;
     }
 
@@ -104,18 +122,25 @@ public class ProjectGet extends AbstractJavaWebScript {
      * @return HttpStatusResponse code for success of the POST request
      * @throws JSONException 
      */
-    private JSONObject handleProject(String projectId, String siteName) throws JSONException {
-        EmsScriptNode projectNode;
+    private JSONObject handleProject( String projectId, String siteName,
+                                      WorkspaceNode workspace, Date dateTime )
+                                              throws JSONException {
+        EmsScriptNode projectNode = null;
         JSONObject json = null;
         
         if (siteName == null) {
-            projectNode = findScriptNodeByName(projectId);
+            projectNode = findScriptNodeById(projectId, workspace, dateTime, false);
         } else {
-            EmsScriptNode siteNode = new EmsScriptNode(services.getSiteService().getSite(siteName).getNodeRef(), services, response);
-            projectNode = siteNode.childByNamePath("/Models/" + projectId);
-            if (projectNode == null) {
-            		// for backwards compatibility
-            		projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
+            EmsScriptNode siteNode = getSiteNode( siteName, workspace, dateTime );
+            if (siteNode == null) {
+                log(LogLevel.ERROR, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
+                return null;
+            } else {
+                projectNode = siteNode.childByNamePath("/Models/" + projectId);
+                if (projectNode == null) {
+                		// for backwards compatibility
+                		projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
+                }
             }
         }
         if (projectNode == null) {

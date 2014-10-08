@@ -1,0 +1,25 @@
+{ "views":
+	[
+		{
+		"sysmlid": "3301",
+		"specialization": {"displayedElements": ["301","302", "303"],
+				   "allowedElements": ["301","302", "303"],
+				   "childrenViews": ["304"],
+				   "contains": [{"type": "Paragraph",
+						 "sourceType": "reference",
+						 "source": "301",
+						 "sourceProperty": "documentation"}]}
+		},
+
+		{
+		"sysmlid": "4401",
+		"specialization": {"displayedElements": ["401","402", "403"],
+				   "allowedElements": ["401","402", "403"],
+				   "childrenViews": ["404"],
+				   "contains": [{"type": "Paragraph",
+						 "sourceType": "reference",
+		 				 "source": "401",
+						 "sourceProperty": "documentation"}]}
+		}
+	]
+}

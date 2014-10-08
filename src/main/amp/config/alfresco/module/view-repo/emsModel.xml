@@ -66,9 +66,193 @@
             				<many>true</many>
             			</target>
             		</association>
+            		<association name="ems:configuredProducts">
+            		  <source>
+            		      <mandatory>false</mandatory>
+            		      <many>true</many>
+            		  </source>
+            		  <target>
+            		      <class>view2:Product</class>
+            		      <mandatory>false</mandatory>
+            		      <many>true</many>
+            		  </target>
+            		</association>
             </associations>
             <overrides/>
-            <mandatory-aspects/>
+            <mandatory-aspects>
+                <aspect>view2:timestamped</aspect>
+            </mandatory-aspects>
         </type>
      </types>
+     <aspects>
+        <aspect name="ems:HasChildren">
+            <properties>
+                <property name="ems:children">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>true</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+            </properties>
+        </aspect>
+         <aspect name="ems:TreeNode">
+            <parent>ems:HasChildren</parent>
+            <properties>
+                <property name="ems:parent">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+            </properties>
+        </aspect>
+        <aspect name="ems:Workspace">
+            <parent>ems:TreeNode</parent>
+            <properties>
+                <property name="ems:lastTimeSyncParent">
+                    <type>d:datetime</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
+        </aspect>
+        <aspect name="ems:HasWorkspace">
+            <properties>
+                <property name="ems:workspace">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>true</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+                <property name="ems:source"> <!-- The node from the parent workspace from which this one was cloned -->
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+            </properties>
+        </aspect>
+
+        <!-- Trashed is to implement a trash can in case we need something that 
+             we would lose if deleting from Alfresco -->
+        <aspect name="ems:Trashed"/>
+        
+        <aspect name="ems:Added"/>
+        <aspect name="ems:Deleted"/>
+        <aspect name="ems:Moved"/>
+        <aspect name="ems:Updated"/>
+
+        <!-- The merge source is a node that overwrote this one when merged from 
+        a child workspace. -->
+        <aspect name="ems:MergeSource">
+            <properties>
+                <property name="ems:mergeSource">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
+        </aspect>
+        
+        <aspect name="ems:Owned">
+          <properties>
+              <property name="ems:owner">
+                  <type>d:noderef</type>
+                  <mandatory>false</mandatory>
+                  <multiple>false</multiple>
+                  <index enabled="false">
+                      <atomic>false</atomic>
+                      <stored>false</stored>
+                      <tokenised>false</tokenised>
+                  </index>
+              </property>
+              <property name="ems:ownedChildren">
+                  <type>d:noderef</type>
+                  <mandatory>false</mandatory>
+                  <multiple>true</multiple>
+                  <index enabled="false">
+                      <atomic>false</atomic>
+                      <stored>false</stored>
+                      <tokenised>false</tokenised>
+                  </index>
+              </property>
+          </properties>
+        </aspect>
+        
+        <aspect name="ems:Reified">
+          <properties>
+              <property name="ems:reifiedNode">
+                  <type>d:noderef</type>
+                  <mandatory>false</mandatory>
+                  <multiple>false</multiple>
+                  <index enabled="false">
+                      <atomic>false</atomic>
+                      <stored>false</stored>
+                      <tokenised>false</tokenised>
+                  </index>
+              </property>
+              <property name="ems:reifiedPkg">
+                  <type>d:noderef</type>
+                  <mandatory>false</mandatory>
+                  <multiple>false</multiple>
+                  <index enabled="false">
+                      <atomic>false</atomic>
+                      <stored>false</stored>
+                      <tokenised>false</tokenised>
+                  </index>
+              </property>
+          </properties>
+        </aspect>
+        
+        <aspect name="ems:Committable">
+            <properties>
+                
+                <property name="ems:commitParents">
+                    <!-- multiple parents only for MERGE -->
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>true</multiple>
+                    <index enabled="false"/>
+                </property>
+                <property name="ems:commitChildren">
+                    <!-- multiple children only for BRANCH -->
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>true</multiple>
+                    <index enabled="false"/>
+                </property>
+                <property name="ems:commitType">
+                    <!-- can be COMMIT, MERGE, BRANCH -->
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+                <property name="ems:commit">
+                    <type>d:text</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+            </properties>
+        </aspect>
+     </aspects>
 </model>

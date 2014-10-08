@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>put comments</shortname>
+    <description>
+    	put comments
+	</description>
+  	<url>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}/comments</url>
+  	<format default="json">any</format>
+  	<authentication>user</authentication>
+  	<transaction>none</transaction>
+  	<family>MMS REST API</family>
+ </webscript>

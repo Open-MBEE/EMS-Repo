@@ -28,6 +28,9 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo;
 
+import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -46,7 +49,6 @@ import org.alfresco.service.cmr.repository.ContentService;
 import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.repository.TransformationOptions;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.SearchService;
@@ -143,7 +145,7 @@ public class DocBookContentTransformer extends AbstractContentTransformer2 {
 			}
 			String zipDir = "docbook" + File.separator + zipFile.getName().substring(0, zipFile.getName().indexOf("."));
 			srcFile = new File(tmpDirName + File.separator + zipDir + File.separator + "out.xml");
-			System.out.println("ZIP DIR: " + srcFile.getAbsolutePath());
+			if (Debug.isOn()) System.out.println("ZIP DIR: " + srcFile.getAbsolutePath());
 		} else {
 			// Create directories for DB and images
 			if ( !(new File(dbDirName).mkdirs()) ) {
@@ -242,9 +244,9 @@ public class DocBookContentTransformer extends AbstractContentTransformer2 {
 		command.add("-pdf");
 		command.add(target);
 
-		System.out.println("DO_TRANSFORM source: " + source);
-		System.out.println("DO_TRANSFORM target: " + target);
-		System.out.println("DO_TRANSFROM cmd: " + command);
+		if (Debug.isOn()) System.out.println("DO_TRANSFORM source: " + source);
+		if (Debug.isOn()) System.out.println("DO_TRANSFORM target: " + target);
+		if (Debug.isOn()) System.out.println("DO_TRANSFROM cmd: " + command);
 		
 		re.setCommand(list2Array(command));
 		ExecutionResult result = re.execute();
@@ -296,7 +298,8 @@ public class DocBookContentTransformer extends AbstractContentTransformer2 {
 	 * @return
 	 */
 	private ResultSet findNodeRef(String name) {
-		ResultSet query = searchService.query(StoreRef.STORE_REF_WORKSPACE_SPACESSTORE, SearchService.LANGUAGE_LUCENE, "@cm\\:name:\"" + name + "\"");
+	    String pattern = "@cm\\:name:\"" + name + "\"";
+		ResultSet query = NodeUtil.luceneSearch( pattern, searchService);
 		return query;
 	}
 }
