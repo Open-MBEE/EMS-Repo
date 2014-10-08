@@ -579,7 +579,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
 
     protected static String getIdFromRequest( WebScriptRequest req ) {
-        String[] ids = new String[] { "id", "modelid", "viewid", "workspaceId",
+        String[] ids = new String[] { "id", "modelid", "viewid", "viewId", "workspaceId",
                                       "workspaceid", "elementid", "elementId" };
         String id = null;
         for ( String idv : ids ) {
