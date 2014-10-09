@@ -934,6 +934,7 @@ public class EmsScriptNode extends ScriptNode implements
 
     @Override
     public String getName() {
+        super.getName();
         return (String)getProperty( Acm.CM_NAME );
     }
 

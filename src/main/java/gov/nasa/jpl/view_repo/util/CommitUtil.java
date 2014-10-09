@@ -1,6 +1,5 @@
 package gov.nasa.jpl.view_repo.util;
 
-import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
@@ -384,6 +383,45 @@ public class CommitUtil {
                                                        throws JSONException {
 	    createCommitNode(srcWs, dstWs, "BRANCH", msg, "{}", siteName, services, response);
 	}
+
+    // TODO -- REVIEW -- Just copied branch and search/replaced "branch" with "merge" 
+    public static void merge(WorkspaceNode srcWs, WorkspaceNode dstWs,
+                              String siteName, String msg,
+                              boolean runWithoutTransactions,
+                              ServiceRegistry services, StringBuffer response) {
+        if (runWithoutTransactions) {
+            try {
+                mergeTransactionable(srcWs, dstWs, siteName, msg, services, response);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+            UserTransaction trx;
+            trx = services.getTransactionService()
+                    .getNonPropagatingUserTransaction();
+            try {
+                trx.begin();
+                mergeTransactionable(srcWs, dstWs, siteName, msg, services, response);
+                trx.commit();
+            } catch (Throwable e) {
+                try {
+                    e.printStackTrace();
+                    trx.rollback();
+                } catch (Throwable ee) {
+                    ee.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private static void mergeTransactionable( WorkspaceNode srcWs,
+                                               WorkspaceNode dstWs,
+                                               String siteName, String msg,
+                                               ServiceRegistry services,
+                                               StringBuffer response )
+                                                       throws JSONException {
+        createCommitNode(srcWs, dstWs, "MERGE", msg, "{}", siteName, services, response);
+    }
 
 
 	/**

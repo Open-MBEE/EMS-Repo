@@ -40,7 +40,13 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 			if(validateRequest(req, status)){
 				String userName = AuthenticationUtil.getRunAsUser();
 				String wsID = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
-				WorkspaceNode workspace = AbstractJavaWebScript.getWorkspaceFromId(wsID, getServices(), getResponse(), status, false, userName);
+                WorkspaceNode workspace =
+                        WorkspaceNode.getWorkspaceFromId( wsID,
+                                                                  getServices(),
+                                                                  getResponse(),
+                                                                  status,
+                                                                  //false,
+                                                                  userName );
 				object = getWorkspace(workspace, wsID);
 			}
 		} catch (JSONException e) {

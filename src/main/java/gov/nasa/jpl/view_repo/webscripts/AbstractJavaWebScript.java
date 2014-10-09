@@ -52,7 +52,6 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessStatus;
-import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
 import org.apache.log4j.Logger;
@@ -366,76 +365,27 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
 
     public WorkspaceNode getWorkspace( WebScriptRequest req ) {
-        return getWorkspace( req, false, null );
+        return getWorkspace( req, //false,
+                             null );
     }
 
     public WorkspaceNode getWorkspace( WebScriptRequest req,
-                                       boolean createIfNotFound,
+//                                       boolean createIfNotFound,
                                        String userName ) {
-        return getWorkspace( req, services, response, responseStatus, createIfNotFound, userName );
+        return getWorkspace( req, services, response, responseStatus, //createIfNotFound,
+                             userName );
     }
 
     public static WorkspaceNode getWorkspace( WebScriptRequest req,
                                               ServiceRegistry services,
                                               StringBuffer response,
                                               Status responseStatus,
-                                              boolean createIfNotFound,
+                                              //boolean createIfNotFound,
                                               String userName ) {
         String nameOrId = getWorkspaceId( req );
-        return getWorkspaceFromId( nameOrId, services, response, responseStatus,
-                                   createIfNotFound, userName );
-    }
-
-    public static WorkspaceNode getWorkspaceFromId( String nameOrId,
-                                                    ServiceRegistry services,
-                                                    StringBuffer response,
-                                                    Status responseStatus,
-                                                    boolean createIfNotFound,
-                                                    String userName ) {
-        if ( !Utils.isNullOrEmpty( nameOrId ) ) {
-            // Use null to indicate master workspace
-            if ( nameOrId.toLowerCase().equals( "master" ) ) {
-                return null;
-            }
-            WorkspaceNode workspace = null;
-
-            NodeRef ref = NodeUtil.findNodeRefByAlfrescoId( nameOrId );
-            if ( ref == null ) {
-                ref = NodeUtil.findNodeRefById( nameOrId, true, null, null,
-                                                services, false );
-            }
-            if ( ref != null ) {
-                workspace = new WorkspaceNode( ref, services, response,
-                                               responseStatus );
-                if ( workspace.exists() && workspace.hasAspect( "ems:Workspace" ) ) {
-                    // TODO -- check read permissions
-                    if ( workspace.checkPermissions( PermissionService.READ ) ) {
-                        if ( Debug.isOn() ) Debug.outln( "workspace exists: " + workspace );
-                        return workspace;
-                    }
-                }
-            }
-            if ( !createIfNotFound ) {
-                if ( Debug.isOn() ) {
-                    Debug.outln( "workspace does not exist and is not to be created: "
-                                 + nameOrId );
-                }
-                return null;
-            }
-            workspace = WorkspaceNode.createWorskpaceInFolder( nameOrId, userName,
-                                                               null, services,
-                                                               response,
-                                                               responseStatus );
-            if ( Debug.isOn() ) {
-                Debug.outln( "created workspace in " + userName
-                             + " home folder: " + workspace );
-            }
-            return workspace;
-        }
-        if ( Debug.isOn() ) {
-            Debug.outln( "no workspace for bad id: " + nameOrId );
-        }
-        return null;
+        return WorkspaceNode.getWorkspaceFromId( nameOrId, services, response, responseStatus,
+                                   //createIfNotFound, 
+                                   userName );
     }
 
     public ServiceRegistry getServices() {

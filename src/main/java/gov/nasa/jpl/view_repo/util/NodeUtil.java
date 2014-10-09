@@ -76,7 +76,8 @@ public class NodeUtil {
         STRING( "@sysml\\:string:\"" ),
         BODY( "@sysml\\:body:\"" ),
         CHECKSUM( "@view\\:cs:\"" ),
-        WORKSPACE("@ems\\:workspace:\"" );
+        WORKSPACE("@ems\\:workspace:\"" ),
+        WORKSPACE_NAME("@ems\\:workspace_name:\"" );
 
         public String prefix;
 

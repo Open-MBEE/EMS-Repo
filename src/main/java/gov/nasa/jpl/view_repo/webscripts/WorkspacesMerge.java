@@ -1,9 +1,11 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -13,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
+
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.json.JSONArray;
@@ -43,10 +46,22 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				//Date time = TimeUtils.dateFromTimestamp(timeSource);
 				
 				String targetId = req.getParameter("target");
-				WorkspaceNode targetWS = AbstractJavaWebScript.getWorkspaceFromId(targetId, getServices(), getResponse(), status, false, null);
+                WorkspaceNode targetWS =
+                        WorkspaceNode.getWorkspaceFromId( targetId,
+                                                                  getServices(),
+                                                                  getResponse(),
+                                                                  status,
+                                                                  //false,
+                                                                  null );
 				
 				String sourceId = req.getParameter("source");
-				WorkspaceNode sourceWS = AbstractJavaWebScript.getWorkspaceFromId(sourceId,  getServices(), getResponse(), status, false, null);
+                WorkspaceNode sourceWS =
+                        WorkspaceNode.getWorkspaceFromId( sourceId,
+                                                                  getServices(),
+                                                                  getResponse(),
+                                                                  status,
+                                                                  //false,
+                                                                  null );
 				
 				wsDiff = new WorkspaceDiff(targetWS, sourceWS, null /*time*/, null /*time*/);
 		/*		// Gotta merge here
@@ -122,6 +137,19 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 	                        //model.put( "res", top.toString( 4 ) );
 	                    }
 	            result = handleDelete(deletedCollection, targetWS, targetId, null /*time*/, wsDiff); 
+	            
+                // FIXME!! We can't just leave the changes on the merged
+                // branch! If an element is changed in the parent, it could
+                // result in a conflict! But we can't mark them deleted since
+                // that would be making changes in the workspace. Can we
+                // purge???!!! Do we need another aspect, ems:Purged? Do we
+                // check to see if the last commit in the history is before the
+                // lastTimeSync?
+	            
+
+	            // keep history of the branch
+                CommitUtil.merge( sourceWS, targetWS, null, "", false,
+                                  services, response );
 			}
 		 } catch (JSONException e) {
 	           log(LogLevel.ERROR, "Could not create JSON\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -198,8 +226,12 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 		// TODO Auto-generated method stub
 		String targetId = req.getParameter( "target" );
         String sourceId = req.getParameter( "source" );
-        WorkspaceNode ws1 = getWorkspaceFromId( targetId, getServices(), response, status, false, null );
-        WorkspaceNode ws2 = getWorkspaceFromId( sourceId, getServices(), response, status, false, null );
+        WorkspaceNode ws1 =
+                WorkspaceNode.getWorkspaceFromId( targetId, getServices(), response, status, //false
+                                    null );
+        WorkspaceNode ws2 =
+                WorkspaceNode.getWorkspaceFromId( sourceId, getServices(), response, status, //false
+                                    null );
         boolean wsFound1 = ( ws1 != null || ( targetId != null && targetId.equalsIgnoreCase( "master" ) ) );
         boolean wsFound2 = ( ws2 != null || ( sourceId != null && sourceId.equalsIgnoreCase( "master" ) ) );
 
