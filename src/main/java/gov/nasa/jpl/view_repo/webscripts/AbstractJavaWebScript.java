@@ -579,8 +579,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
 
     protected static String getIdFromRequest( WebScriptRequest req ) {
-        String[] ids = new String[] { "id", "modelid", "viewid", "workspaceId",
-                                      "workspaceid", "elementid", "elementId" };
+        String[] ids = new String[] { "id", "modelid", "modelId", "productid", "productId", 
+        							  "viewid", "viewId", "workspaceid", "workspaceId",
+                                      "elementid", "elementId" };
         String id = null;
         for ( String idv : ids ) {
             id = req.getServiceMatch().getTemplateVars().get(idv);

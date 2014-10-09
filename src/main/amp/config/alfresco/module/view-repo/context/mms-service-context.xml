@@ -112,7 +112,7 @@
     
     <!-- adding new bean -->
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.get"
-        class="gov.nasa.jpl.view_repo.webscripts.ModelGet" parent="webscript"
+        class="gov.nasa.jpl.view_repo.webscripts.SiteGet" parent="webscript"
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
@@ -222,4 +222,22 @@
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
 	</bean>
+	
+	<!-- adding new bean -->
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.products.views.get"
+        class="gov.nasa.jpl.view_repo.webscripts.ProductGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <!-- adding new bean -->
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.elements.post"
+        class="gov.nasa.jpl.view_repo.webscripts.ModelPost" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+        <property name="jmsConnection" ref="jmsConnection" />
+        <property name="restConnection" ref="restConnection" /> 
+    </bean>
 </beans>
