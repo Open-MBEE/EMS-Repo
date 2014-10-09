@@ -622,19 +622,32 @@ public class WorkspaceNode extends EmsScriptNode {
         return changedElementIds;
     }
 
+    /**
+     * Add the workspace name and id metadata onto the provided JSONObject
+     * @param jsonObject
+     * @param ws
+     * @param dateTime
+     * @throws JSONException
+     */
+    public static void
+            addWorkspaceNamesAndIds( JSONObject json, WorkspaceNode ws,
+                                     Date dateTime ) throws JSONException {
+        json.put( "name",  getWorkspaceName(ws) );
+        json.put( "id", getId(ws) );
+        json.put( "qualifiedName", getQualifiedName( ws ) );
+        json.put( "qualifiedId", getQualifiedId( ws ) );
+    }
+    
     @Override
     public JSONObject toJSONObject( Date dateTime ) throws JSONException {
         JSONObject json = new JSONObject();
 
+        addWorkspaceNamesAndIds(json, this, dateTime );
         json.put( "creator", getProperty( "cm:modifier" ) );
-        json.put( "qualifiedName", getQualifiedName( this ) );
-        json.put( "qualifiedId", getQualifiedId( this ) );
         // REVIEW -- This assumes that the workspace does not changed after it
         // is created, but wouldn't it's ems:lastTimeSyncParent property be
         // expected to change?
         json.put( "created", TimeUtils.toTimestamp( (Date)getProperty("cm:modified") ) );
-        json.put( "id", getId() );
-        json.put( "name",  getWorkspaceName() );
         json.put( "parent", getId(getSourceWorkspace())); // this handles null as master
 
         // REVIEW -- Why is ems:lastTimeSyncParent called the "branched"

@@ -520,12 +520,8 @@ public class WorkspaceDiff {
      * @param dateTime
      * @throws JSONException
      */
-    private void addWorkspaceMetadata(JSONObject jsonObject, EmsScriptNode ws, Date dateTime) throws JSONException {
-        if (ws == null) {
-            jsonObject.put( "name", "master" );
-        } else {
-            jsonObject.put("name", ws.getName());
-        }
+    private void addWorkspaceMetadata(JSONObject jsonObject, WorkspaceNode ws, Date dateTime) throws JSONException {
+        WorkspaceNode.addWorkspaceNamesAndIds( jsonObject, ws, dateTime );
         if (dateTime != null) {
             jsonObject.put( "timestamp", TimeUtils.toTimestamp( dateTime ) );
         }

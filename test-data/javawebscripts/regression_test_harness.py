@@ -652,7 +652,7 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff?workspace1=wsA&workspace2=wsB"),
 True, 
 common_filters,
-["test","workspaces","develop"]
+["test","workspaces","develop",'"id"','"qualifiedId"']
 ],
 
 # SNAPSHOTS: ==========================    
