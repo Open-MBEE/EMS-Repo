@@ -94,6 +94,8 @@
 
     "name": "master",
 
+    "qualifiedName": "master",
+
   },
 
   "workspace2": {
@@ -133,6 +135,8 @@
     "movedElements": [],
 
     "name": "master",
+
+    "qualifiedName": "master",
 
     "updatedElements": []
 

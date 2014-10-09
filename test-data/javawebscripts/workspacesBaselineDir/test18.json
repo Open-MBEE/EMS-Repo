@@ -14,8 +14,6 @@
 
         "name": "wsA",
 
-        "qualifiedId": "master/2476e194-339b-4e0d-baa2-8b8ab4cc9e57",
-
         "qualifiedName": "master/wsA"
 
     },
@@ -25,8 +23,6 @@
         "creator": "admin",
 
         "name": "wsB",
-
-        "qualifiedId": "master/2476e194-339b-4e0d-baa2-8b8ab4cc9e57/d7939092-c87f-4a10-9e32-c5536238fb9c",
 
         "qualifiedName": "master/wsA/wsB"
 
