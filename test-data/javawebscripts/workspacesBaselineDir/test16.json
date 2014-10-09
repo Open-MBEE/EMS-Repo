@@ -1,10 +1,14 @@
 {"workspaces": [{
 
+    "creator": "admin",
+
     "name": "wsA",
 
     "parent": "master",
 
-    "creator": "admin"
+    "qualifiedId": "master/2476e194-339b-4e0d-baa2-8b8ab4cc9e57",
+
+    "qualifiedName": "master/wsA"
 
 }]}
 

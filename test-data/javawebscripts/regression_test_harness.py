@@ -306,7 +306,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
             (status_diff,output_diff) = commands.getstatusoutput("%s %s %s"%(diff_cmd,baseline_json,result_json))
                  
             if output_diff:
-                print_error("Diff returned bad status or diffs found, status: %s, output: '%s'"%(status_diff, output_diff))
+                print_error("Diff returned bad status or diffs found in the filtered .json files (%s,%s), status: %s, output: '%s'"%(test_num,baseline_json,result_json,status_diff, output_diff))
             else:
                 print_pass("Test number %s passed!  No differences in the filtered .json files (%s,%s)"%(test_num,baseline_json,result_json))
 
@@ -546,7 +546,7 @@ create_curl_cmd(type="GET",data="",base_url=BASE_URL_JW,
 True, 
 common_filters,
 ["test","workspaces","develop"],
-120
+40
 ],
 
 # DELETES: ==========================    
@@ -608,7 +608,7 @@ common_filters+['"timestamp"','"id"'],
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="",branch="wsA?sourceWorkspace=master"),
 True, 
-common_filters+['"branched"','"created"'],
+common_filters+['"branched"','"created"','"id"'],
 ["test","workspaces","develop"]
 ],
         
@@ -619,7 +619,7 @@ common_filters+['"branched"','"created"'],
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="",branch="wsB?sourceWorkspace=wsA"),
 True, 
-common_filters+['"branched"','"created"'],
+common_filters+['"branched"','"created"','"id"','"parent"'],
 ["test","workspaces","develop"]
 ],
         
@@ -629,7 +629,7 @@ common_filters+['"branched"','"created"'],
 "Get workspaces",
 create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,branch=""),
 True, 
-common_filters+['"branched"','"created"'],
+common_filters+['"branched"','"created"','"id"','"parent"'],
 ["test","workspaces","develop"]
 ],
 

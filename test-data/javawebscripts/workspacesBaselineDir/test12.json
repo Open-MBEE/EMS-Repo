@@ -6,27 +6,23 @@
 
   "workspace1": {
 
-    "name": "master",
-
     "elements": [
 
       {
 
-        "qualifiedName": "/6666_name",
+        "creator": "admin",
+
+        "documentation": "",
 
         "editable": true,
-
-        "creator": "admin",
 
         "name": "6666_name",
 
         "owner": "null",
 
-        "documentation": "",
+        "qualifiedName": "/6666_name",
 
         "specialization": {
-
-          "type": "Expression",
 
           "operand": [
 
@@ -46,17 +42,23 @@
 
             }
 
-          ]
+          ],
 
-        }
+          "type": "Expression"
+
+        },
 
       },
 
       {
 
-        "qualifiedName": "/6666_name/null",
+        "creator": "admin",
+
+        "editable": true,
 
         "owner": "6666",
+
+        "qualifiedName": "/6666_name/null",
 
         "specialization": {
 
@@ -66,17 +68,17 @@
 
         },
 
-        "editable": true,
-
-        "creator": "admin",
-
       },
 
       {
 
-        "qualifiedName": "/6666_name/null",
+        "creator": "admin",
+
+        "editable": true,
 
         "owner": "6666",
+
+        "qualifiedName": "/6666_name/null",
 
         "specialization": {
 
@@ -86,55 +88,53 @@
 
         },
 
-        "editable": true,
-
-        "creator": "admin",
-
       }
 
-    ]
+    ],
+
+    "name": "master",
 
   },
 
   "workspace2": {
 
+    "addedElements": [],
+
+    "conflictedElements": [],
+
     "deletedElements": [
 
       {
 
+        "creator": "admin",
+
         "specialization": {"type": "Expression"},
 
+      },
+
+      {
+
         "creator": "admin",
+
+        "specialization": {"type": "ElementValue"},
 
       },
 
       {
 
-        "specialization": {"type": "ElementValue"},
-
         "creator": "admin",
 
-      },
-
-      {
-
         "specialization": {"type": "ElementValue"},
-
-        "creator": "admin",
 
       }
 
     ],
 
-    "addedElements": [],
-
-    "conflictedElements": [],
-
-    "updatedElements": [],
+    "movedElements": [],
 
     "name": "master",
 
-    "movedElements": []
+    "updatedElements": []
 
   }
 

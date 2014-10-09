@@ -2,15 +2,15 @@
 
     "documents": {},
 
-    "volume2volumes": {},
-
     "name": "europa",
 
-    "volumes": {},
+    "projectVolumes": [],
 
     "volume2documents": {},
 
-    "projectVolumes": []
+    "volume2volumes": {},
+
+    "volumes": {}
 
 }
 
