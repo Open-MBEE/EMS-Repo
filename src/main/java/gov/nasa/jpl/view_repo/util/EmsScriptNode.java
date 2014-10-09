@@ -2546,7 +2546,7 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public boolean isDeleted() {
-        if (exists()) {
+        if (super.exists()) {
             return hasAspect( "ems:Deleted" );
         }
         // may seem counterintuitive, but if it doesn't exist, it isn't deleted

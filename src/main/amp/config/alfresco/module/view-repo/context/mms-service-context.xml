@@ -191,7 +191,6 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
     
-    <!-- adding new bean -->
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.get"
         class="gov.nasa.jpl.view_repo.webscripts.WorkspacesGet" parent="webscript"
         singleton="false">
@@ -199,7 +198,6 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
 
-    <!--  adding new bean -->
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.post"
     	class="gov.nasa.jpl.view_repo.webscripts.WorkspacesPost" parent="webscript"
     	singleton="false">
@@ -207,7 +205,6 @@
     	<property name="services" ref="ServiceRegistry" />
     </bean>
 
-	<!--  adding new bean -->
 	<bean id="webscript.gov.nasa.jpl.mms.workspaces.workspace.get"
 		class="gov.nasa.jpl.view_repo.webscripts.WorkspaceGet" parent="webscript"
 		singleton="false">
@@ -215,7 +212,6 @@
 		<property name="services" ref="ServiceRegistry" />
 	</bean>
 	
-	<!--  adding new bean -->
 	<bean id="webscript.gov.nasa.jpl.mms.merge.post"
 		class="gov.nasa.jpl.view_repo.webscripts.WorkspacesMerge" parent="webscript"
 		singleton="false">
@@ -223,7 +219,6 @@
 		<property name="services" ref="ServiceRegistry" />
 	</bean>
 	
-	<!-- adding new bean -->
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.products.views.get"
         class="gov.nasa.jpl.view_repo.webscripts.ProductGet" parent="webscript"
         singleton="false">
@@ -231,7 +226,6 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
     
-    <!-- adding new bean -->
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.elements.post"
         class="gov.nasa.jpl.view_repo.webscripts.ModelPost" parent="webscript"
         singleton="false">
@@ -239,5 +233,12 @@
         <property name="services" ref="ServiceRegistry" />
         <property name="jmsConnection" ref="jmsConnection" />
         <property name="restConnection" ref="restConnection" /> 
+    </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.search.get"
+        class="gov.nasa.jpl.view_repo.webscripts.ModelSearch" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
     </bean>
 </beans>

@@ -215,6 +215,7 @@ public class WorkspaceNode extends EmsScriptNode {
     public boolean contains( EmsScriptNode node  ) {
         WorkspaceNode nodeWs = node.getWorkspace();
         if ( this.equals( nodeWs ) ) return true;
+        
         WorkspaceNode parentWs = getParentWorkspace();
         if ( parentWs == null ) return ( nodeWs == null );
         return parentWs.contains( node );
