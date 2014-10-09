@@ -125,8 +125,10 @@ public class SiteGet extends AbstractJavaWebScript {
         	emsNode = new EmsScriptNode(siteInfo.getNodeRef(), services);
         	String name = emsNode.getName();
         	
+        	// Note: workspace is null if its the master, and in that case we consider it to contain
+        	//		 all sites.
         	if (!name.equals("no_site") && 
-        		workspace.contains(emsNode) ) {
+        		(workspace == null || (workspace != null && workspace.contains(emsNode))) ) {
         		
         		JSONObject siteJson = new JSONObject();
         		JSONArray catArray = new JSONArray();
