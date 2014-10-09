@@ -407,7 +407,7 @@ public class WorkspaceNode extends EmsScriptNode {
     }
     
     public static String getQualifiedId( WorkspaceNode ws ) {
-        return getQualifiedName( ws, null );
+        return getQualifiedId( ws, null );
     }
     public static String getQualifiedId( WorkspaceNode ws,
                                          Seen<WorkspaceNode> seen ) {
@@ -417,7 +417,7 @@ public class WorkspaceNode extends EmsScriptNode {
         Pair< Boolean, Seen< WorkspaceNode > > p = Utils.seen( ws, true, seen );
         if ( p.first ) return null;
         seen = p.second;
-        return getQualifiedId( ws.getSourceWorkspace(), seen ) + ws.getId();
+        return getQualifiedId( ws.getSourceWorkspace(), seen ) + "/" + ws.getId();
     }
 
     public static String getQualifiedName( WorkspaceNode ws ) {
@@ -431,7 +431,7 @@ public class WorkspaceNode extends EmsScriptNode {
         Pair< Boolean, Seen< WorkspaceNode > > p = Utils.seen( ws, true, seen );
         if ( p.first ) return null;
         seen = p.second;
-        return getQualifiedName( ws.getSourceWorkspace(), seen ) + ws.getName();
+        return getQualifiedName( ws.getSourceWorkspace(), seen ) + "/" + ws.getWorkspaceName();
     }
 
     public WorkspaceNode getCommonParent(WorkspaceNode other) {
@@ -634,8 +634,9 @@ public class WorkspaceNode extends EmsScriptNode {
         // expected to change?
         json.put( "created", TimeUtils.toTimestamp( (Date)getProperty("cm:modified") ) );
         json.put( "id", getId() );
-        json.put( "name",  getName() );
-        json.put( "parent", getId(getSourceWorkspace()));
+        json.put( "name",  getWorkspaceName() );
+        json.put( "parent", getId(getSourceWorkspace())); // this handles null as master
+
         // REVIEW -- Why is ems:lastTimeSyncParent called the "branched"
         // date? Shouldn't the branched date always be the same as the created
         // date?
