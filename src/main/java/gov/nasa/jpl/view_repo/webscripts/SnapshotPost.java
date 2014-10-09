@@ -747,6 +747,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			try {
 				tmpJson = this.view2view.getJSONObject(j);
 				String tmpId = (String)tmpJson.opt("id");
+				if(tmpId == null || tmpId.isEmpty()) tmpId = tmpJson.optString(Acm.SYSMLID);
+				if(tmpId == null || tmpId.isEmpty()) continue;
 	        	if(tmpId.equals(nodeId)){
 	        		childNode = tmpJson;
 	        		break;
@@ -1339,6 +1341,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         if(childrenViews == null) throw new Exception("Failed to retrieve 'childrenViews'.");
         for(int k=0; k< childrenViews.length(); k++){
         	String childId = childrenViews.getString(k);
+        	if(childId.equals(nodeId)) continue;
         	EmsScriptNode childNode = findScriptNodeById(childId, null, null, false);
         	traverseElements(section, childNode);
         }
