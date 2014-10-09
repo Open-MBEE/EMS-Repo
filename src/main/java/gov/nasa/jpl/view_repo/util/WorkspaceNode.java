@@ -247,11 +247,64 @@ public class WorkspaceNode extends EmsScriptNode {
     	return ws;
     }
 
-    public void delete() {
-        // TODO -- Add the delete aspect
-        // REVIEW -- Is that enough?!  What about the contents?  Don't we need to purge?
-        // NO! TODO -- need to update parent/child references, too.
+    public void delete( boolean deleteChildWorkspaces ) {
+        if ( !checkPermissions( PermissionService.WRITE, getResponse(), getStatus() ) ) {
+            log( "no write permissions to delete workpsace " + getName() );
+            return;
+        }
+
+        // Add the delete aspect to mark as "deleted"
         addAspect( "ems:Deleted" );
+
+        // FIXME -- REVIEW -- Is that enough?! What about the contents? Don't we
+        // need to purge? Or is a "deleted" workspaceNode enough?
+        
+        // Update parent/child workspace references
+        
+        // Remove this workspace from parent's children
+        WorkspaceNode source = getParentWorkspace();
+        if ( Debug.isOn() ) Debug.outln( "deleted workspace " + this + " from source " + getName(source) );
+        if ( source == null || !source.exists() ) {
+            // TODO -- do we keep the master's children anywhere?
+            if ( !source.exists() ) {
+                log( "no write permissions to remove reference to child workpsace, " + getName() + ", from parent, " + getName(source) );
+            }
+        } else {
+            if ( !source.checkPermissions( PermissionService.WRITE, getResponse(), getStatus() ) ) {
+                String msg = "Warning! No write permissions to delete workpsace " + getName() + ".\n";
+                getResponse().append( msg );
+                log( msg );
+//                if ( getStatus() != null ) {
+//                    getStatus().setCode( HttpServletResponse.SC_, msg );
+//                }
+            } else {
+                source.removeFromPropertyNodeRefs( "ems:children", getNodeRef() );
+            }
+        }
+        
+        // Not bothering to remove this workspace's ems:source or ems:children
+
+        // Delete children if requested
+        if ( deleteChildWorkspaces ) {
+            deleteChildWorkspaces( true );
+        }
+    }
+
+    public void deleteChildWorkspaces( boolean recursive ) {
+        // getting a copy in case it's the same list from which the children will remove themselves
+        ArrayList< NodeRef > children = new ArrayList<NodeRef>(getPropertyNodeRefs( "ems:children" ));
+        for ( NodeRef ref : children ) {
+            WorkspaceNode childWs = new WorkspaceNode( ref, getServices(),
+                                                       getResponse(),
+                                                       getStatus() );
+            if ( !NodeUtil.exists( childWs ) ) {
+                log( "trying to delete non-existent child workspace " + 
+                     ( childWs == null ? "" : "," + childWs.getName() + ", " ) +
+                     " from parent, " + getName() );
+            } else {
+                childWs.delete( recursive );
+            }
+        }
     }
     
     /**

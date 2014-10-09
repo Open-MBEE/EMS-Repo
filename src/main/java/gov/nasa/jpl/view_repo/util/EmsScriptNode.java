@@ -2871,16 +2871,16 @@ public class EmsScriptNode extends ScriptNode implements
         }
     }
 
-    private void removeFromPropertyNodeRefs( String acmProperty, NodeRef ref ) {
+    // TODO -- It would be nice to return a boolean here. Same goes to many of
+    // the callers of this method.
+    public void removeFromPropertyNodeRefs( String acmProperty, NodeRef ref ) {
         if ( checkPermissions( PermissionService.WRITE, response, status ) ) {
             ArrayList< NodeRef > relationships =
                     getPropertyNodeRefs( acmProperty );
-            if ( Utils.isNullOrEmpty( relationships ) ) {
-                relationships = Utils.newList( ref );
-            } else {
+            if ( !Utils.isNullOrEmpty( relationships ) ) {
                 relationships.remove( ref );
+                setProperty( acmProperty, relationships );
             }
-            setProperty( acmProperty, relationships );
         } else {
             log( "no write permissions to remove " + acmProperty + " from "
                  + id + "\n" );
