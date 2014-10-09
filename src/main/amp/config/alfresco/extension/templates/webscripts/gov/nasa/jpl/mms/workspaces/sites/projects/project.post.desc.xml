@@ -8,4 +8,27 @@
   	<authentication>user</authentication>
   	<transaction>none</transaction>
   	<family>MMS REST API</family>
+  	<args>
+	    <arg>
+	        <name>posted content</name>
+	        <description>The request body of the post as json:
+	        {
+	            "name": magicdraw-project-name,
+	            "projectVersion": magicdraw-project-version (if available)
+	        }
+	        </description>
+	    </arg>
+	    <arg>
+	        <name>delete</name>
+	        <description>Delete the specified project if true</description>
+	    </arg>
+	    <arg>
+	        <name>fix</name>
+	        <description>Force the fix (if true) if there are any discrepancies (e.g., project exists, but has different name).</description>
+	    </arg>
+	    <arg>
+            <name>createSite</name>
+            <description>If true, creates the site if it does not exists already.</description>
+        </arg>
+    </args>
  </webscript>

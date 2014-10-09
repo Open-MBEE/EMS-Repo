@@ -87,7 +87,7 @@ public class Acm {
     public static final String JSON_BODY = "body";
     public static final String JSON_EXPRESSION_BODY = "expressionBody";
     public static final String JSON_ANNOTATED_ELEMENTS = "annotatedElements";
-    public static String JSON_PROJECT_VERSION = VERSION; // Used to be "projectVersion"
+    public static String JSON_PROJECT_VERSION = "projectVersion"; 
 
     
 //    public static final String JSON_TIME_MAX = "timeMax";
@@ -203,7 +203,7 @@ public class Acm {
     public static final String ACM_BODY = SYSML + JSON_BODY;
     public static final String ACM_EXPRESSION_BODY = SYSML + JSON_EXPRESSION_BODY;
     public static final String ACM_ANNOTATED_ELEMENTS = SYSML + JSON_ANNOTATED_ELEMENTS;
-    public static String ACM_PROJECT_VERSION = SYSML + "projectVersion";
+    public static String ACM_PROJECT_VERSION = SYSML + JSON_PROJECT_VERSION;
     
 //    public static final String ACM_TIME_MAX = SYSML + JSON_TIME_MAX;
 //    public static final String ACM_TIME_MIN = SYSML + JSON_TIME_MIN;
