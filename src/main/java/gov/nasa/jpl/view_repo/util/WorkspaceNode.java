@@ -249,7 +249,8 @@ public class WorkspaceNode extends EmsScriptNode {
 
     public void delete() {
         // TODO -- Add the delete aspect
-        // REVIEW -- Is that enough?!  What about the contents?  Don't we need to purge, or is it enough that the workspace is merged?
+        // REVIEW -- Is that enough?!  What about the contents?  Don't we need to purge?
+        // NO! TODO -- need to update parent/child references, too.
         addAspect( "ems:Deleted" );
     }
     
