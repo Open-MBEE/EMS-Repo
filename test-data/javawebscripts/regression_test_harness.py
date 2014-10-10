@@ -298,7 +298,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
         else:
             # Perform diff:
             if use_json_diff:
-                cp = ".:%s:../../target/view-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes"%mbee_util_jar_path()
+                cp = ".:%s:../../target/mms-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes"%mbee_util_jar_path()
                 diff_cmd = "java -cp %s gov.nasa.jpl.view_repo.util.JsonDiff"%cp
             else:
                 diff_cmd = "diff"

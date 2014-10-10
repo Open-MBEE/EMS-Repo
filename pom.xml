@@ -363,7 +363,7 @@
 						</resources>
 					</classpath>
 					<war>
-						<path>target/view-repo-war</path>
+						<path>target/mms-repo-war</path>
 					</war>
 					<web>
 						<resources>
