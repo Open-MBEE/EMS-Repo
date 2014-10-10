@@ -76,7 +76,8 @@ public class NodeUtil {
         STRING( "@sysml\\:string:\"" ),
         BODY( "@sysml\\:body:\"" ),
         CHECKSUM( "@view\\:cs:\"" ),
-        WORKSPACE("@ems\\:workspace:\"" );
+        WORKSPACE("@ems\\:workspace:\"" ),
+        WORKSPACE_NAME("@ems\\:workspace_name:\"" );
 
         public String prefix;
 
@@ -339,21 +340,21 @@ public class NodeUtil {
                         }
                     }
                     try {
-                    // Make sure it's in the right workspace.
-                    if ( !ignoreWorkspace && 
-                         ( ( workspace != null &&
-                             !workspace.contains( esn ) ) ||
-                           ( workspace == null && 
-                             ( esn != null && esn.getWorkspace() != null ) )
-                         ) ) {
-                        if ( Debug.isOn() && !Debug.isOn()) {
-                            Debug.turnOff();
-                            System.out.println( "findNodeRefsByType(): wrong workspace "
-                                                + workspace );
-                            Debug.turnOn();
+                        // Make sure it's in the right workspace.
+                        if ( !ignoreWorkspace && 
+                             ( ( workspace != null &&
+                                 !workspace.contains( esn ) ) ||
+                               ( workspace == null && 
+                                 ( esn != null && esn.getWorkspace() != null ) )
+                             ) ) {
+                            if ( Debug.isOn() && !Debug.isOn()) {
+                                Debug.turnOff();
+                                System.out.println( "findNodeRefsByType(): wrong workspace "
+                                                    + workspace );
+                                Debug.turnOn();
+                            }
+                            continue;
                         }
-                        continue;
-                    }
                     } catch( InvalidNodeRefException e ) {
                         if ( Debug.isOn() ) e.printStackTrace();
                         continue;
@@ -610,15 +611,7 @@ public class NodeUtil {
         resultSet = findNodeRefsByType( pattern, type, false, ignoreWorkspace, workspace,
                                         dateTime, false, false, getServices(),
                                         false );
-            //resultSet = findNodeRefsByType(pattern, type, getServices());
-
-//            pattern = type + pattern + "\"";
-//            resultSet =
-//                    services.getSearchService().query( getStoreRef(),
-//                                                       SearchService.LANGUAGE_LUCENE,
-//                                                       pattern );
             for ( NodeRef nodeRef : resultSet ) {
-            //for ( ResultSetRow row : resultSet ) {
                 EmsScriptNode node =
                         new EmsScriptNode( nodeRef, services, response );
                 if ( node.checkPermissions( PermissionService.READ, response, status ) ) {
@@ -628,23 +621,6 @@ public class NodeUtil {
                     }
                 }
             }
-//        } catch (Exception e) {
-//            if ( response != null || status != null ) {
-//                String msg = "Error! Could not parse search: " + pattern + ".\n"
-//                             + e.getLocalizedMessage();
-//                if (Debug.isOn()) System.out.println(msg);
-//                e.printStackTrace( if (Debug.isOn()) System.out );
-//                if ( response != null ) response.append( msg );
-//                if ( status != null ) status.setCode( HttpServletResponse.SC_BAD_REQUEST,
-//                                                      msg );
-//            } else {
-//                e.printStackTrace();
-//            }
-//        } finally {
-//            if (resultSet != null) {
-//                resultSet.close();
-//            }
-//        }
 
         return searchResults;
     }
@@ -984,6 +960,9 @@ public class NodeUtil {
      *         is printed if the id doesn't have the right syntax.
      */
     public static NodeRef findNodeRefByAlfrescoId(String id) {
+        if ( !id.contains( "://" ) ) {
+            id = "workspace://SpacesStore/" + id;
+        }
         if ( !NodeRef.isNodeRef( id ) ) {
             Debug.error("Bad NodeRef id: " + id );
             return null;

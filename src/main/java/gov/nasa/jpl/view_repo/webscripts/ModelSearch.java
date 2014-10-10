@@ -31,16 +31,20 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,18 +62,21 @@ public class ModelSearch extends ModelGet {
 	    super();
 	}
 
+	
     public ModelSearch(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
 
+    
     protected final String[] searchTypes = {
 	        "@sysml\\:documentation:\"",
 	        "@sysml\\:name:\"",
 	        "@sysml\\:id:\"",
 	        "@sysml\\:string:\"",
 	        "@sysml\\:body:\""
-	        };
+    };
 
+    
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
@@ -101,6 +108,7 @@ public class ModelSearch extends ModelGet {
 		return model;
 	}
 
+	
 	private JSONArray executeSearchRequest(WebScriptRequest req) throws JSONException {
         String keyword = req.getParameter("keyword");
         if (keyword != null) {
@@ -108,11 +116,21 @@ public class ModelSearch extends ModelGet {
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
+            Map<String, EmsScriptNode> rawResults = new HashMap<String, EmsScriptNode>();
+            
             WorkspaceNode workspace = getWorkspace( req );
-
+            
             for (String searchType: searchTypes) {
-                elementsFound.putAll( searchForElements( searchType, keyword, false,
+                rawResults.putAll( searchForElements( searchType, keyword, false,
                                                          workspace, dateTime ) );
+            }
+            
+            // need to filter based on workspace
+            for (Entry< String, EmsScriptNode > element: rawResults.entrySet()) {
+                NodeRef nodeRef = NodeUtil.findNodeRefById( element.getKey(), false, workspace, dateTime, services, true );
+                if ( nodeRef.equals( element.getValue().getNodeRef() ) ) {
+                    elementsFound.put( element.getKey(), element.getValue() );
+                }
             }
 
             handleElements(dateTime);

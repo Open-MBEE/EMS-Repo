@@ -1,20 +1,20 @@
 {
 
-    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n",
-
     "elements": [{
 
-        "qualifiedId": "no_project/holding_bin_no_site_no_project/x",
-
-        "name": "300",
-
-        "qualifiedName": "/300",
-
-        "sysmlid": "x",
+        "creator": "admin",
 
         "documentation": "x is x",
 
+        "editable": true,
+
+        "name": "300",
+
         "owner": "holding_bin_no_site_no_project",
+
+        "qualifiedId": "no_project/holding_bin_no_site_no_project/x",
+
+        "qualifiedName": "/300",
 
         "specialization": {
 
@@ -22,23 +22,23 @@
 
             "isSlot": false,
 
+            "type": "Property",
+
             "value": [{
 
                 "string": "the x value",
 
                 "type": "LiteralString"
 
-            }],
-
-            "type": "Property"
+            }]
 
         },
 
-        "editable": true,
+        "sysmlid": "x"
 
-        "creator": "admin",
+    }],
 
-    }]
+    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
 
 }
 

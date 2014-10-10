@@ -934,6 +934,7 @@ public class EmsScriptNode extends ScriptNode implements
 
     @Override
     public String getName() {
+        super.getName();
         return (String)getProperty( Acm.CM_NAME );
     }
 
@@ -1822,8 +1823,8 @@ public class EmsScriptNode extends ScriptNode implements
                     String msg =
                             "Error! Element " + targetRef
                                     + " did not exist in workspace "
-                                    + workspace.getName() + " at " + dateTime
-                                    + ".\n";
+                                    + WorkspaceNode.getName(workspace) + " at "
+                                    + dateTime + ".\n";
                     if ( getResponse() == null || getStatus() == null ) {
                         Debug.error( msg );
                     } else {
@@ -2546,7 +2547,7 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public boolean isDeleted() {
-        if (exists()) {
+        if (super.exists()) {
             return hasAspect( "ems:Deleted" );
         }
         // may seem counterintuitive, but if it doesn't exist, it isn't deleted
@@ -2872,16 +2873,16 @@ public class EmsScriptNode extends ScriptNode implements
         }
     }
 
-    private void removeFromPropertyNodeRefs( String acmProperty, NodeRef ref ) {
+    // TODO -- It would be nice to return a boolean here. Same goes to many of
+    // the callers of this method.
+    public void removeFromPropertyNodeRefs( String acmProperty, NodeRef ref ) {
         if ( checkPermissions( PermissionService.WRITE, response, status ) ) {
             ArrayList< NodeRef > relationships =
                     getPropertyNodeRefs( acmProperty );
-            if ( Utils.isNullOrEmpty( relationships ) ) {
-                relationships = Utils.newList( ref );
-            } else {
+            if ( !Utils.isNullOrEmpty( relationships ) ) {
                 relationships.remove( ref );
+                setProperty( acmProperty, relationships );
             }
-            setProperty( acmProperty, relationships );
         } else {
             log( "no write permissions to remove " + acmProperty + " from "
                  + id + "\n" );
@@ -3335,47 +3336,52 @@ public class EmsScriptNode extends ScriptNode implements
     protected void addViewJSON( JSONObject json, EmsScriptNode node,
                                 Set< String > filter, Date dateTime )
                                         throws JSONException {
-        if ( expressionStuff ) {
-            // TODO: figure out why this isn't working
+        String property;
+        property = (String) node.getProperty("view2:contains");
+        if ( expressionStuff ) {//&& ( property == null || property.length() <= 0 ) ) {
             json.put( "contains", getView().getContainsJson(true) );
             json.put( "displayedElements", getView().getDisplayedElements() );
             json.put( "allowedElements", getView().getDisplayedElements() );
             json.put( "childrenViews", getView().getChildViews() );
         } else {
-            String property;
-            property = (String) node.getProperty("view2:contains");
-            if (property != null && property.length() > 0) {
+            if (!Utils.isNullOrEmpty(property)) {
                 putInJson( json, "contains", new JSONArray( property ), filter );
             }
             property = (String) node.getProperty("view2:displayedElements");
-            if (property != null && property.length() > 0) {
+            if (!Utils.isNullOrEmpty(property)) {
                 putInJson( json, "displayedElements", new JSONArray( property ), filter );
             }
             property = (String) node.getProperty("view2:allowedElements");
-            if (property != null && property.length() > 0) {
+            if (!Utils.isNullOrEmpty(property)) {
                 putInJson( json, "allowedElements", new JSONArray( property ), filter );
             }
             property = (String) node.getProperty("view2:childrenViews");
-            if (property != null && property.length() > 0) {
+            if (!Utils.isNullOrEmpty(property)) {
                 putInJson( json, "childrenViews", new JSONArray( property ), filter );
             }
         }
         // TODO: Snapshots?
     }
 
-    protected
-            void
-            addProductJSON( JSONObject json, EmsScriptNode node,
-                            Set< String > filter, Date dateTime )
-                                                                 throws JSONException {
-        putInJson( json,
-                   "view2view",
-                   new JSONArray( (String)node.getProperty( "view2:view2view" ) ),
-                   filter );
-        putInJson( json,
-                   "noSections",
-                   new JSONArray( (String)node.getProperty( "view2:noSections" ) ),
-                   filter );
+    protected void addProductJSON( JSONObject json, EmsScriptNode node,
+                                   Set< String > filter, Date dateTime )
+                                           throws JSONException {
+        JSONArray jarr = new JSONArray();
+        String v2v = (String)node.getProperty( "view2:view2view" );
+        if ( !Utils.isNullOrEmpty( v2v ) ) {
+            jarr.put( v2v );
+            putInJson( json, "view2view",
+                       new JSONArray( (String)node.getProperty( "view2:view2view" ) ),
+                       filter );
+        }
+        jarr = new JSONArray();
+        String noSections = (String)node.getProperty( "view2:noSections" );
+        if ( !Utils.isNullOrEmpty( noSections ) ) {
+            jarr.put( noSections );
+            putInJson( json, "noSections",
+                       new JSONArray( (String)node.getProperty( "view2:noSections" ) ),
+                       filter );
+        }
         addViewJSON( json, node, filter, dateTime );
     }
 

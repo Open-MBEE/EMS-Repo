@@ -1,7 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
@@ -41,7 +40,13 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 			if(validateRequest(req, status)){
 				String userName = AuthenticationUtil.getRunAsUser();
 				String wsID = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
-				WorkspaceNode workspace = AbstractJavaWebScript.getWorkspaceFromId(wsID, getServices(), getResponse(), status, false, userName);
+                WorkspaceNode workspace =
+                        WorkspaceNode.getWorkspaceFromId( wsID,
+                                                                  getServices(),
+                                                                  getResponse(),
+                                                                  status,
+                                                                  //false,
+                                                                  userName );
 				object = getWorkspace(workspace, wsID);
 			}
 		} catch (JSONException e) {

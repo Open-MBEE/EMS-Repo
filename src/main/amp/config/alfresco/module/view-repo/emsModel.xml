@@ -117,6 +117,18 @@
         <aspect name="ems:Workspace">
             <parent>ems:TreeNode</parent>
             <properties>
+			<!-- workspace_name is used instead of cm_name because we put all workspaces 
+				in the users' home folders, which require unique cm:names, and there can 
+				be two workspaces with the same name but different parent workspaces -->
+                <property name="ems:workspace_name">
+                    <type>d:text</type>
+                    <mandatory>true</mandatory>
+                    <index enabled="true">
+                        <atomic>true</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
                 <property name="ems:lastTimeSyncParent">
                     <type>d:datetime</type>
                     <mandatory>false</mandatory>

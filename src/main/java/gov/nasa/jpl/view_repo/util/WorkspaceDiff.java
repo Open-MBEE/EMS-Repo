@@ -4,7 +4,6 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
 import java.util.Collection;
 import java.util.Date;
@@ -449,9 +448,9 @@ public class WorkspaceDiff {
             jsonObj = jsonObj.getJSONObject( "workspace2" );
             if ( jsonObj.has( "name" ) ) {
                 String name = jsonObj.getString( "name" );
-                ws = AbstractJavaWebScript.getWorkspaceFromId( name, services,
-                                                               null, null,
-                                                               false, null );
+                ws = WorkspaceNode.getWorkspaceFromId( name, services,
+                                                               null, null, //false
+                                                               null );
             }
         }
         Set< EmsScriptNode > elements = null;
@@ -521,12 +520,8 @@ public class WorkspaceDiff {
      * @param dateTime
      * @throws JSONException
      */
-    private void addWorkspaceMetadata(JSONObject jsonObject, EmsScriptNode ws, Date dateTime) throws JSONException {
-        if (ws == null) {
-            jsonObject.put( "name", "master" );
-        } else {
-            jsonObject.put("name", ws.getName());
-        }
+    private void addWorkspaceMetadata(JSONObject jsonObject, WorkspaceNode ws, Date dateTime) throws JSONException {
+        WorkspaceNode.addWorkspaceNamesAndIds( jsonObject, ws, dateTime );
         if (dateTime != null) {
             jsonObject.put( "timestamp", TimeUtils.toTimestamp( dateTime ) );
         }

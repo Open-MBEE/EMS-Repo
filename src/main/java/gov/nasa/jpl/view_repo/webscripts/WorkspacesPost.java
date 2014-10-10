@@ -93,7 +93,8 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 String sourceWorkspaceParam = req.getParameter("sourceWorkspace");
                 String newName = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
                 statusCode = createWorkSpace(sourceWorkspaceParam, newName, (JSONObject)req.parseContent(), user, status);
-                WorkspaceNode ws = AbstractJavaWebScript.getWorkspaceFromId(newName, getServices(), getResponse(), status, false, user);
+                WorkspaceNode ws = WorkspaceNode.getWorkspaceFromId(newName, getServices(), getResponse(), status, //false,
+                                                                            user);
                 json = printObject(ws);
             } else {
                 statusCode = responseStatus.getCode();
@@ -136,11 +137,17 @@ public class WorkspacesPost extends AbstractJavaWebScript{
             log(LogLevel.WARNING, "Workspace already exists.", HttpServletResponse.SC_BAD_REQUEST);
             return HttpServletResponse.SC_BAD_REQUEST;
         }
-        else if(AbstractJavaWebScript.getWorkspaceFromId(newWorkID, services, response, status, false, user) != null) {
+        else if ( WorkspaceNode.getWorkspaceFromId( newWorkID, services,
+                                                            response, status, // false,
+                                                            user ) != null ) {
             log(LogLevel.WARNING, "Workspace already exists.", HttpServletResponse.SC_BAD_REQUEST);
             return HttpServletResponse.SC_BAD_REQUEST;
         } else {
-            WorkspaceNode srcWs = AbstractJavaWebScript.getWorkspaceFromId( sourceWorkId, services, response, status, false, user );
+            WorkspaceNode srcWs =
+                    WorkspaceNode.getWorkspaceFromId( sourceWorkId,
+                                                              services,
+                                                              response, status, // false,
+                                                              user );
             if (!sourceWorkId.equals( "master" ) && srcWs == null) {
                 log(LogLevel.WARNING, "Source workspace not found.", HttpServletResponse.SC_NOT_FOUND);
                 return HttpServletResponse.SC_NOT_FOUND;
@@ -151,7 +158,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 trx = services.getTransactionService().getNonPropagatingUserTransaction();
                 try {
                     trx.begin();
-                    dstWs = WorkspaceNode.createWorskpaceFromSource(newWorkID, user, sourceWorkId, folder, getServices(), getResponse(), status);
+                    dstWs = WorkspaceNode.createWorkspaceFromSource(newWorkID, user, sourceWorkId, folder, getServices(), getResponse(), status);
                     trx.commit();
                 } catch (Throwable e) {
                     try {

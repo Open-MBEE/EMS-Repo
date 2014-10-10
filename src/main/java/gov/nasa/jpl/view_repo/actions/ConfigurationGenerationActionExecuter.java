@@ -96,8 +96,8 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
             String timestamp = req.getParameter("timestamp");
             workspace = AbstractJavaWebScript.getWorkspace( req, services,
                                                             response,
-                                                            responseStatus,
-                                                            false, null );
+                                                            responseStatus, //false
+                                                            null );
             dateTime = TimeUtils.dateFromTimestamp( timestamp );
         }
 
@@ -144,25 +144,26 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         String jobStatus = "Succeeded";
         Set<EmsScriptNode> snapshots = new HashSet<EmsScriptNode>();
         for (EmsScriptNode product: productSet) {
-        		// only create the filtered list of documents
-        		if (productList.isEmpty() || productList.contains(product.getProperty(Acm.ACM_ID))) {
+    		// only create the filtered list of documents
+    		if (productList.isEmpty() || productList.contains(product.getProperty(Acm.ACM_ID))) {
 	            SnapshotPost snapshotService = new SnapshotPost(repository, services);
 	            snapshotService.setRepositoryHelper(repository);
 	            snapshotService.setServices(services);
 	            snapshotService.setLogLevel(LogLevel.DEBUG);
 	            Status status = new Status();
 	            EmsScriptNode snapshot = snapshotService.createSnapshot(product, (String)product.getProperty(Acm.ACM_ID), workspace);
-	            if (status.getCode() != HttpServletResponse.SC_OK) {
+	            if (snapshot == null || status.getCode() != HttpServletResponse.SC_OK) {
 	                jobStatus = "Failed";
 	                response.append("[ERROR]: could not make snapshot for " + product.getProperty(Acm.ACM_NAME));
-	            } else {
+	            } 
+	            else {
 	                response.append("[INFO]: Successfully created snapshot: " + snapshot.getProperty(Acm.CM_NAME));
 	            }
 	            if (snapshot != null) {
 	                snapshots.add(snapshot);
 	            }
 	            response.append(snapshotService.getResponse().toString());
-        		}
+    		}
         }
         // make relationships between configuration node and all the snapshots
         for (EmsScriptNode snapshot: snapshots) {

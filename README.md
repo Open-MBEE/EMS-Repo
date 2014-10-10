@@ -148,7 +148,7 @@ For JUnit tests in a single Java class, for example, in MyJavaJUnitTestClass.jav
 
     mvn -Dmaven.surefire.debug -Dmaven.test.skip=false -Dtest=MyJavaJUnitTestClass test
 
-To update the target/view-repo-war manually
+To update the target/mms-repo-war manually
 
 	mvn package -Pamp-to-war
 	
@@ -204,7 +204,7 @@ Get comments
 
 To open the javascript debugger: [http://localhost:8080/alfresco/service/api/javascript/debugger](http://localhost:8080/alfresco/service/api/javascript/debugger) (you may have to close and reopen to get it to step through on consecutive script calls)
 
-To refresh changes to scripts (they have to be updated in the "target/view-repo-war/WEB-INF/classes/alfresco/extension/..."): [http://localhost:8080/alfresco/service/index](http://localhost:8080/alfresco/service/index) hit refresh at the botton
+To refresh changes to scripts (they have to be updated in the "target/mms-repo-war/WEB-INF/classes/alfresco/extension/..."): [http://localhost:8080/alfresco/service/index](http://localhost:8080/alfresco/service/index) hit refresh at the botton
 
 Maven archetype from [Alfresco Maven SDK](https://artifacts.alfresco.com/nexus/content/repositories/alfresco-docs/alfresco-lifecycle-aggregator/latest/index.html)
 
@@ -235,7 +235,7 @@ This should speed up the rebuild significantly.
 
 THE FOLLOWING DOESN'T WORK: To attempt to turn off indexing (maybe because it slows down junit test runs), change VALIDATE to NONE for index.recovery.mode in
  
-    target/view-repo-war/WEB-INF/classes/alfresco/repository.properties
+    target/mms-repo-war/WEB-INF/classes/alfresco/repository.properties
 
 To evaluate a Java expression from a webpage, go to 
 

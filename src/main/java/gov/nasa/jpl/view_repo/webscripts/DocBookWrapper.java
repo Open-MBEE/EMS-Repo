@@ -311,30 +311,35 @@ public class DocBookWrapper {
 		try{
 			this.transformToHTML();
 			String zipPath = this.zipHtml();
+			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip HTML files and resources!");
+			
 			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_HTML_Zip", "cm:content");
-			this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, zipPath);
+			if(node == null) throw new Exception("Failed to create HTML repository node!");
+			
+			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, zipPath)) throw new Exception("Failed to save HTML artifact to repository!");
 			if(this.snapshotNode.createOrUpdateAspect("view2:htmlZip")){
-				this.snapshotNode.createOrUpdateProperty("view2:htmlZipNode", node.getNodeRef());
+				if(!this.snapshotNode.createOrUpdateProperty("view2:htmlZipNode", node.getNodeRef())) throw new Exception("Failed to create HTML aspect!");
 			}
 		}
 		catch(Exception ex){
 			throw new Exception("Failed to generate HTML zip!", ex);
-			//ex.printStackTrace();
 		}
 	}
 	
 	public void savePdfToRepo(EmsScriptNode snapshotFolder) throws Exception{
 		try{
 			String pdfPath = transformToPDF();
+			if(pdfPath == null || pdfPath.isEmpty()) throw new Exception("Failed to transform from DocBook to PDF!");
+			
 			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_PDF", "cm:content");
-			this.saveFileToRepo(node, MimetypeMap.MIMETYPE_PDF, pdfPath);
+			if(node == null) throw new Exception("Failed to create PDF repository node!");
+			
+			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_PDF, pdfPath)) throw new Exception("Failed to save PDF artifact to repository!");
 			if(this.snapshotNode.createOrUpdateAspect("view2:pdf")){
-				this.snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef());
+				if(!this.snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef())) throw new Exception("Failed to create PDF aspect!");
 			}
 		}
 		catch(Exception ex){
-			//System.out.println("Failed to generate PDF!\n" + ex.getMessage());
-			//ex.printStackTrace();
 			throw new Exception("Failed to genearate PDF!", ex);
 		}
 	}

@@ -31,7 +31,6 @@ package gov.nasa.jpl.view_repo.actions;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 import gov.nasa.jpl.view_repo.webscripts.ModelPost;
 
@@ -96,11 +95,9 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         clearCache();
         
         WorkspaceNode workspace =
-                AbstractJavaWebScript.getWorkspaceFromId( workspaceId,
-                                                          services,
-                                                          response,
-                                                          responseStatus,
-                                                          false, null );
+                WorkspaceNode.getWorkspaceFromId( workspaceId, services,
+                                                          response, responseStatus, //false
+                                                          null );
         
         // Parse the stored file for loading
         EmsScriptNode jsonNode = new EmsScriptNode(nodeRef, services, response);

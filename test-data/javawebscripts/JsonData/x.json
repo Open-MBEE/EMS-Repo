@@ -1,11 +1,6 @@
-{ "elements" : [
-
-{
- "sysmlid" : "x",
- "documentation" : "x is x",
- "specialization" : {
-   "type": "Property",
-   "value" : [{ "string" : "the x value",
-                "type" : "LiteralString"}]}
- }
-]}
+{"elements":[{"sysmlid":"_17_0_5_1_407019f_1411406899245_734736_18688",
+              "specialization":{"isSlot":false,"isDerived":false,
+                                "value":[{"integer":6,"type":"LiteralInteger"}],
+                                "type":"Property"}
+              }]
+}
