@@ -28,7 +28,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-
 import gov.nasa.jpl.docbook.model.DBBook;
 import gov.nasa.jpl.docbook.model.DBSerializeVisitor;
 import gov.nasa.jpl.view_repo.DocBookContentTransformer;
@@ -77,8 +76,9 @@ public class DocBookWrapper {
 	 * 
 	 * @param srcFile	File to transform
 	 * @return 			Absolute path of the generated file
+	 * @throws Exception 
 	 */
-	private String doPDFTransformation(File srcFile) {
+	private String doPDFTransformation(File srcFile) throws Exception {
 		RuntimeExec re = new RuntimeExec();
 		List<String> command = new ArrayList<String>();
 		
@@ -103,7 +103,8 @@ public class DocBookWrapper {
 		if (!result.getSuccess()) {
 			System.out.println("FOP transformation command unsuccessful\n");
 			//logger.error("FOP transformation command unsuccessful\n");
-			System.out.println("Exit value: " + result.getExitValue());
+			//System.out.println("Exit value: " + result.getExitValue());
+			throw new Exception("FOP transformation command failed! Exit value: " + result.getExitValue());
 		}
 
 		return target;
@@ -306,34 +307,40 @@ public class DocBookWrapper {
 		return bSuccess;
 	}
 
-	public void saveHtmlZipToRepo(EmsScriptNode snapshotFolder){
+	public void saveHtmlZipToRepo(EmsScriptNode snapshotFolder) throws Exception{
 		try{
 			this.transformToHTML();
 			String zipPath = this.zipHtml();
+			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip HTML files and resources!");
+			
 			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_HTML_Zip", "cm:content");
-			this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, zipPath);
+			if(node == null) throw new Exception("Failed to create HTML repository node!");
+			
+			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, zipPath)) throw new Exception("Failed to save HTML artifact to repository!");
 			if(this.snapshotNode.createOrUpdateAspect("view2:htmlZip")){
-				this.snapshotNode.createOrUpdateProperty("view2:htmlZipNode", node.getNodeRef());
+				if(!this.snapshotNode.createOrUpdateProperty("view2:htmlZipNode", node.getNodeRef())) throw new Exception("Failed to create HTML aspect!");
 			}
 		}
 		catch(Exception ex){
-			System.out.println("Failed to generate HTML zip!\n" + ex.getMessage());
-			ex.printStackTrace();
+			throw new Exception("Failed to generate HTML zip!", ex);
 		}
 	}
 	
-	public void savePdfToRepo(EmsScriptNode snapshotFolder){
+	public void savePdfToRepo(EmsScriptNode snapshotFolder) throws Exception{
 		try{
 			String pdfPath = transformToPDF();
+			if(pdfPath == null || pdfPath.isEmpty()) throw new Exception("Failed to transform from DocBook to PDF!");
+			
 			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_PDF", "cm:content");
-			this.saveFileToRepo(node, MimetypeMap.MIMETYPE_PDF, pdfPath);
+			if(node == null) throw new Exception("Failed to create PDF repository node!");
+			
+			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_PDF, pdfPath)) throw new Exception("Failed to save PDF artifact to repository!");
 			if(this.snapshotNode.createOrUpdateAspect("view2:pdf")){
-				this.snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef());
+				if(!this.snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef())) throw new Exception("Failed to create PDF aspect!");
 			}
 		}
 		catch(Exception ex){
-			System.out.println("Failed to generate PDF!\n" + ex.getMessage());
-			ex.printStackTrace();
+			throw new Exception("Failed to genearate PDF!", ex);
 		}
 	}
 	
@@ -410,6 +417,7 @@ public class DocBookWrapper {
 		if (!result.getSuccess()) {
 			System.out.println("Failed HTML transformation!\n");
 			//logger.error("FOP transformation command unsuccessful\n");
+			throw new Exception("Failed HTML transformation!");
 		}
 		else{
 			String title = "";
@@ -426,7 +434,7 @@ public class DocBookWrapper {
 		}
 	}
 	
-	private String transformToPDF(){
+	private String transformToPDF() throws Exception{
     	if(!createDocBookDir()){
     		System.out.println("Failed to create DocBook directory!");
     		return null;

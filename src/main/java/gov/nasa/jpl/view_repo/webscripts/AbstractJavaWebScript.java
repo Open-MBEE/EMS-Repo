@@ -313,31 +313,24 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 EmsScriptNode sitesFolder = null;
                 // check and see if the Sites folder already exists
                 boolean useSimpleCache = workspace == null;
-                NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, useSimpleCache, false, workspace, null, true, services, false );
+                NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, useSimpleCache, false, 
+                													workspace, null, true, services, false );
                 if ( sitesNodeRef != null ) {
                     sitesFolder = new EmsScriptNode( sitesNodeRef, services );
-                } else {
-                    // get Sites folder and replicate in workspace with new site folder
-                    EmsScriptNode root = NodeUtil.getCompanyHome( services );
-                    Scriptable folders = root.childFileFolders( false, true );
-                    List<Object> folderObjs = root.getValuesFromScriptable( folders );
-                    for ( Object folderObj : folderObjs ) {
-                        if ( folderObj instanceof NodeRef ) {
-                            EmsScriptNode folder = new EmsScriptNode( (NodeRef)folderObj, services );
-                            if ( folder.getName().equals( "Sites" ) ) {
-                                sitesFolder = folder;
-                                break;
-                            }
-                        } else {
-                            Debug.error( "Can't get child folders for creating site in workspace!" );
-                        }
+                    
+                    // If workspace of sitesNodeRef is this workspace then no need to replicate,
+                    // otherwise replicate from the master workspace:
+                    if ( !workspace.equals(sitesFolder.getWorkspace()) ) {
+                        sitesFolder = workspace.replicateWithParentFolders( sitesFolder );
                     }
-                    // now replicate sites folder
-                    if ( sitesFolder != null ) {
-                        EmsScriptNode newSitesFolder = workspace.replicateWithParentFolders( sitesFolder );
-                        sitesFolder = newSitesFolder;
-                    }
+                      
+                } 
+                // This case should never occur b/c the master workspace will always have a Sites folder:
+                else {
+                    Debug.error( "Can't find Sites folder in the workspace " + workspace);
                 }
+                
+                // Now, create the site folder:
                 if (sitesFolder == null ) {
                     Debug.error("Could not create site " + siteName + "!");
                 } else {
@@ -539,8 +532,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
 
     protected static String getIdFromRequest( WebScriptRequest req ) {
-        String[] ids = new String[] { "id", "modelid", "viewid", "workspaceId",
-                                      "workspaceid", "elementid", "elementId" };
+        String[] ids = new String[] { "id", "modelid", "modelId", "productid", "productId", 
+        							  "viewid", "viewId", "workspaceid", "workspaceId",
+                                      "elementid", "elementId" };
         String id = null;
         for ( String idv : ids ) {
             id = req.getServiceMatch().getTemplateVars().get(idv);

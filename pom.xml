@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
     
     <groupId>gov.nasa.jpl</groupId>
-    <artifactId>view-repo</artifactId>
-    <version>${env.BUILD_NUMBER}</version>
+    <artifactId>mms-repo</artifactId>
+    <version>2.1-SNAPSHOT</version>
     <name>view-repo AMP project</name>
     <packaging>amp</packaging>
     <description>Manages the lifecycle of the view-repo AMP (Alfresco Module Package)</description>
@@ -281,12 +281,6 @@
 	        <artifactId>jsoup</artifactId>
 	        <version>1.7.3</version>
         </dependency>
-		<dependency>
-		    <groupId>org.jsoup</groupId>
-		    <artifactId>jsoup</artifactId>
-		    <version>1.7.3</version>
-		</dependency>
-		
     </dependencies>
 
 	

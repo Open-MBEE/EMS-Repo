@@ -416,6 +416,8 @@ public class ModelPost extends AbstractJavaWebScript {
             	// Place elements with no owner in a holding_bin_<site>_<project> package:
                 //owner = projectNode; 
             	String projectNodeId = ((projectNode == null || projectNode.getSysmlId() == null) ? NO_PROJECT_ID : projectNode.getSysmlId());
+            	// siteInfo will be null if the site was created just for the workspace, but this should never happen.  In that case, can
+            	// try using getSiteName(req).
             	String siteName = ((siteInfo == null || siteInfo.getShortName() == null) ? NO_SITE_ID : getSiteInfo().getShortName() );
             	ownerName = "holding_bin_"+siteName+"_"+projectNodeId;  
             } else {

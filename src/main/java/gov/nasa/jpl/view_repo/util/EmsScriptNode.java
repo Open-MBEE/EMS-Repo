@@ -1823,8 +1823,8 @@ public class EmsScriptNode extends ScriptNode implements
                     String msg =
                             "Error! Element " + targetRef
                                     + " did not exist in workspace "
-                                    + workspace.getName() + " at " + dateTime
-                                    + ".\n";
+                                    + WorkspaceNode.getName(workspace) + " at "
+                                    + dateTime + ".\n";
                     if ( getResponse() == null || getStatus() == null ) {
                         Debug.error( msg );
                     } else {
@@ -2621,8 +2621,10 @@ public class EmsScriptNode extends ScriptNode implements
         if ( workspace == null ) {
             if ( hasAspect( "ems:HasWorkspace" ) ) {
                 NodeRef ref = (NodeRef)getProperty( "ems:workspace" );
-                WorkspaceNode ws = new WorkspaceNode( ref, getServices() );
-                setWorkspace( ws, null );
+                if (ref != null) {
+                	WorkspaceNode ws = new WorkspaceNode( ref, getServices() );
+                    setWorkspace( ws, null );
+                }
             }
         }
         return workspace;
@@ -3334,15 +3336,14 @@ public class EmsScriptNode extends ScriptNode implements
     protected void addViewJSON( JSONObject json, EmsScriptNode node,
                                 Set< String > filter, Date dateTime )
                                         throws JSONException {
-        if ( expressionStuff ) {
-            // TODO: figure out why this isn't working
+        String property;
+        property = (String) node.getProperty("view2:contains");
+        if ( expressionStuff ) {//&& ( property == null || property.length() <= 0 ) ) {
             json.put( "contains", getView().getContainsJson(true) );
             json.put( "displayedElements", getView().getDisplayedElements() );
             json.put( "allowedElements", getView().getDisplayedElements() );
             json.put( "childrenViews", getView().getChildViews() );
         } else {
-            String property;
-            property = (String) node.getProperty("view2:contains");
             if (!Utils.isNullOrEmpty(property)) {
                 putInJson( json, "contains", new JSONArray( property ), filter );
             }

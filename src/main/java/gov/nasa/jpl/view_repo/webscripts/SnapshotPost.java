@@ -30,9 +30,11 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.docbook.model.*;
+import gov.nasa.jpl.docbook.utils.HtmlToDocbook;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.SnapshotArtifactsGenerationActionExecuter;
+import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -47,16 +49,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.model.ContentModel;
+import org.alfresco.repo.admin.SysAdminParams;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -71,6 +71,7 @@ import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.util.TempFileProvider;
+import org.alfresco.util.UrlUtil;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -92,7 +93,14 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class SnapshotPost extends AbstractJavaWebScript {
 	protected String snapshotName;
-	private boolean isSnapshotNode = false;	//determines whether we're working with a view/product or a snapshot node reference; true for snapshot node reference
+	//TODO obsolete
+	//private boolean isSnapshotNode = false;	//determines whether we're working with a view/product or a snapshot node reference; true for snapshot node reference
+	private JSONArray view2view;
+	//private SysAdminParams sysAdminParams;
+	
+	//public void setSysAdminParas(SysAdminParams sysAdminParams){
+	//	this.sysAdminParams = sysAdminParams;
+	//}
 	
     public SnapshotPost() {
         super();
@@ -115,8 +123,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         WorkspaceNode workspace = getWorkspace( req );
 
         Map< String, Object > model = new HashMap< String, Object >();
-        log( LogLevel.INFO,
-             "Starting snapshot creation or snapshot artifact generation..." );
+        log( LogLevel.INFO, "Starting snapshot creation or snapshot artifact generation..." );
         try {
             JSONObject reqPostJson = (JSONObject)req.parseContent();
             if ( reqPostJson != null ) {
@@ -181,6 +188,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 }
             }
         } catch ( Exception ex ) {
+        	status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             log( LogLevel.ERROR,
                  "Failed to create snapshot or snapshot artifact! "
                          + ex.getMessage() );
@@ -215,7 +223,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                         (List< NodeRef >)node.getProperty( Acm.SYSML + srcProp );
                 StringBuffer sb = new StringBuffer();
                 int size = nodeRefs.size();
-                if ( size > 0 ) sb.append( "<literallayout>" );
+                //if ( size > 0 ) sb.append( "<literallayout>" );
                 for ( int i = 0; i < size; i++ ) {
                     NodeRef nodeRef = nodeRefs.get( i );
                     EmsScriptNode valueNode =
@@ -253,16 +261,17 @@ public class SnapshotPost extends AbstractJavaWebScript {
                         }
                     }
                 }
-                if ( size > 0 ) sb.append( "</literallayout>" );
+                //if ( size > 0 ) sb.append( "</literallayout>" );
                 p.setText( sb.toString() );
             } else {
                 String s = (String)node.getProperty( Acm.SYSML + srcProp );
                 s = handleTransclusion( src, srcProp, s, null, 0 );
                 s = handleEmbeddedImage(src, s);
                 s = HtmlSanitize( s );
-                if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
-                                                            + s
-                                                            + "</literallayout>" );
+                if(s != null && !s.isEmpty()) p.setText(s);
+                //if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
+                //                                            + s
+                //                                            + "</literallayout>" );
             }
         } else {
             if ( srcProp != null && !srcProp.isEmpty() ) {
@@ -270,9 +279,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 s = handleTransclusion( src, srcProp, s, null, 0 );
                 s = handleEmbeddedImage(src, s);
                 s = HtmlSanitize( s );
-                if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
-                                                            + s
-                                                            + "</literallayout>" );
+                if(s != null && !s.isEmpty()) p.setText(s);
+                //if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
+                  //                                          + s
+                    //                                        + "</literallayout>" );
             } else p.setText( HtmlSanitize( (String)obj.opt( "text" ) ) );
         }
         if ( p.getText() == null || p.getText().toString().isEmpty() ) return null;
@@ -293,12 +303,23 @@ public class SnapshotPost extends AbstractJavaWebScript {
             JSONObject obj = jsonContains.getJSONObject( i );
             DocumentElement e = createElement( obj );
             if ( e != null ) section.addElement( e );
+            
+            //traverseElements(section, node);
         }
 	}
 
     private DocumentElement createDBText( JSONObject obj ) throws JSONException {
         DBText text = new DBText();
-        text.setText( (String)obj.opt( "name" ) );
+        String value = null;
+        String sourceType = obj.optString("sourceType");
+        if(sourceType != null && !sourceType.isEmpty()){
+        	String source = obj.optString(sourceType);
+        	if(source != null && !source.isEmpty()) value = source;
+        }
+        else{
+        	value = obj.optString( "name" );
+        }
+        text.setText(HtmlSanitize(value));
         return text;
     }
 
@@ -315,37 +336,47 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return docBook;
     }
    
-    private DocBookWrapper createDocBook( EmsScriptNode view, String viewId,
+    private DocBookWrapper createDocBook( EmsScriptNode product, String productId,
                                           String snapshotName, String contextPath,
                                           EmsScriptNode snapshotFolder ) throws Exception {
         log( LogLevel.INFO, "\ncreating DocBook snapshot for view Id: "
-                            + viewId );
+                            + productId );
         log( LogLevel.INFO, "\ncreating DocBook snapshotname: " + snapshotName );
 
-        if ( view == null ) {
+        if ( product == null ) {
             log( LogLevel.WARNING, "null [view] input parameter reference." );
             return null;
         }
 
         DocBookWrapper docBookMgr = new DocBookWrapper( this.snapshotName, snapshotFolder );
         try {
-            DBBook docBook = createDocBook( view );
+            DBBook docBook = createDocBook( product );
             docBook.setRemoveBlankPages( true );
-            Collection< EmsScriptNode > v2v =
-                    view.getView().getViewToViewPropertyViews( null, new Date() ); // TODO -- REVIEW -- Do we need to pass a workspace in??????!!!
-            // String prodId = view.getId();
-            for ( EmsScriptNode node : v2v ) {
-                // String nodeId = node.getId();
-                JSONObject jsnObj = node.toJSONObject( null );
-                JSONObject spec = (JSONObject)jsnObj.get( "specialization" );
-                if ( ( (String)spec.opt( "type" ) ).compareTo( "Product" ) == 0 ) continue;
-                // if(nodeId.compareTo(prodId) == 0) continue;
-                DocumentElement section =
-                        (DocumentElement)emsScriptNodeToDBSection( node, true );
-                docBook.addElement( section );
+            
+            View productView = product.getView();
+            JSONArray contains = productView.getContainsJson();
+            if(contains == null || contains.length()==0){ throw new Exception("Failed to retrieve 'contains' JSONArray."); }
+            for(int i=0; i < contains.length(); i++){
+	            JSONObject contain = contains.getJSONObject(0);
+	            String sourceType = (String)contain.opt("sourceType");
+	            String source = (String)contain.opt("source");
+	            this.view2view = productView.getViewToViewPropertyJson();
+	            if(view2view == null || view2view.length()==0) throw new Exception ("Failed to retrieve 'view2view' JSONArray.");
+	            JSONObject v2vChildNode = getChildrenViews(source);
+	            if(v2vChildNode == null) throw new Exception("Failed to retrieve 'view2view' children view for: " + source);
+	            
+	            JSONArray childrenViews = v2vChildNode.getJSONArray("childrenViews");
+	            if(childrenViews == null) throw new Exception("Failed to retrieve 'childrenViews'.");
+	            for(int k=0; k< childrenViews.length(); k++){
+	            	String childId = childrenViews.getString(k);
+	            	EmsScriptNode childNode = findScriptNodeById(childId, null, null, false);
+	            	//creating chapters
+	            	DocumentElement section = (DocumentElement)emsScriptNodeToDBSection(childNode, true);
+	            	docBook.addElement(section);
+	            }
             }
-            docBookMgr.setDBBook( docBook );
-            docBookMgr.save();;
+            docBookMgr.setDBBook(docBook);
+            docBookMgr.save();
         } catch ( Exception ex ) {
             log( LogLevel.ERROR,
                  "\nFailed to create DBBook! " + ex.getStackTrace() );
@@ -353,6 +384,48 @@ public class SnapshotPost extends AbstractJavaWebScript {
             throw new Exception( "Failed to create DBBook!", ex );
         }
         return docBookMgr;
+    }
+    
+    private DocBookTable createDocBookTable(JSONObject tblJson){
+    	DocBookTable dbTable = new DocBookTable();
+       	int maxColCount = 0;
+    	try{
+    		int colCount = 0;
+    		JSONArray header = tblJson.getJSONArray( "header" ) ;
+    		dbTable.setHeaderRowCount(header.length());
+    		for(int i=0; i < header.length(); i++){
+    			JSONArray headerRows = header.getJSONArray(i);
+    			colCount = 0;
+    			for(int j=0; j < headerRows.length(); j++){
+    				JSONObject contents = headerRows.getJSONObject(j);
+					String colspan = contents.optString("colspan");
+					int col = 0;
+					if(colspan != null && !colspan.isEmpty()) col = Integer.parseInt(colspan);
+					colCount += col;
+    				if (colCount > maxColCount) maxColCount = colCount;
+    			}
+    		}
+    		JSONArray body = tblJson.getJSONArray( "body" );
+    		dbTable.setBodyRowCount(body.length());
+    		for(int i=0; i < body.length(); i++){
+    			JSONArray headerRows = body.getJSONArray(i);
+    			colCount = 0;
+    			for(int j=0; j < headerRows.length(); j++){
+    				JSONObject contents = headerRows.getJSONObject(j);
+					String colspan = contents.optString("colspan");
+					int col = 0;
+					if(colspan != null && !colspan.isEmpty()) col = Integer.parseInt(colspan);
+					colCount += col;
+    				if (colCount > maxColCount) maxColCount = colCount;
+    			}
+    		}
+    	}
+    	catch(Exception ex){
+    		System.out.println("Failed to setup DocBookTable!");
+    	}
+    	dbTable.setColCount(maxColCount);
+    	dbTable.init();
+    	return dbTable;
     }
 
     private DocumentElement createList( JSONObject obj ) throws JSONException {
@@ -447,7 +520,15 @@ public class SnapshotPost extends AbstractJavaWebScript {
         this.snapshotName = viewId + "_" + System.currentTimeMillis();
         String contextPath = "alfresco/service/";
         EmsScriptNode viewNode = findScriptNodeById(viewId, workspace, null, true);
+        if(viewNode == null){
+        	System.out.println("Failed to find script node with Id: " + viewId);
+        	return null;
+        }
         EmsScriptNode snapshotFolder = getSnapshotFolderNode(viewNode);
+        if(snapshotFolder == null){
+        	System.out.println("Failed to get snapshot folder node!");
+        	return null;
+        }
         return createSnapshot(view, viewId, snapshotName, contextPath, snapshotFolder);
     }
     
@@ -455,38 +536,32 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                          String snapshotName,
                                          String contextPath,
                                          EmsScriptNode snapshotFolder ) {
-        EmsScriptNode snapshotNode = null;
-        if ( !this.isSnapshotNode ) {
-            snapshotNode =
-                    snapshotFolder.createNode( snapshotName, "view2:Snapshot" );
-            snapshotNode.createOrUpdateProperty( "cm:isIndexed", true );
-            snapshotNode.createOrUpdateProperty( "cm:isContentIndexed", false );
-            snapshotNode.createOrUpdateProperty( Acm.ACM_ID, snapshotName );
-
-            view.createOrUpdateAssociation( snapshotNode, "view2:snapshots" );
-        } else {
-            snapshotNode = view;
+        EmsScriptNode snapshotNode = snapshotFolder.createNode( snapshotName, "view2:Snapshot" );
+        if(snapshotNode == null){
+        	System.out.println("Failed to create view2:Snapshot!");
+        	return null;
         }
+        snapshotNode.createOrUpdateProperty( "cm:isIndexed", true );
+        snapshotNode.createOrUpdateProperty( "cm:isContentIndexed", false );
+        snapshotNode.createOrUpdateProperty( Acm.ACM_ID, snapshotName );
+
+        view.createOrUpdateAssociation( snapshotNode, "view2:snapshots" );
 
         JSONObject snapshotJson = new JSONObject();
         try {
-            if ( !this.isSnapshotNode ) {
-                snapshotJson.put( "snapshot", true );
-                ActionUtil.saveStringToFile( snapshotNode, "application/json",
-                                             services,
-                                             snapshotJson.toString( 4 ) );
-            }
-            DocBookWrapper docBookWrapper =
-                    createDocBook( view, viewId, snapshotName, contextPath,
-                                   snapshotNode );
+            snapshotJson.put( "snapshot", true );
+            ActionUtil.saveStringToFile( snapshotNode, "application/json", services, snapshotJson.toString( 4 ) );
+            DocBookWrapper docBookWrapper = createDocBook( view, viewId, snapshotName, contextPath, snapshotNode );
             if ( docBookWrapper == null ) {
                 log( LogLevel.ERROR, "Failed to generate DocBook!" );
+                snapshotNode = null;
             } else {
                 docBookWrapper.save();
-                String id = (String)snapshotNode.getProperty( Acm.ACM_ID );
                 docBookWrapper.saveDocBookToRepo( snapshotFolder );
             }
-        } catch ( Exception e1 ) {
+        } 
+        catch ( Exception e1 ) {
+        	snapshotNode = null;
             e1.printStackTrace();
         }
 
@@ -500,48 +575,79 @@ public class SnapshotPost extends AbstractJavaWebScript {
         table.setId( getSymlId( obj ) );
         table.setTitle( title );
         table.setStyle( style );
-        table.setHeaders( createTableHeader( obj ) );
-        table.setBody( createTableBody( obj ) );
-
+        //int columnNum = getTableColumnMaxCount(obj);
+        DocBookTable dbTable = createDocBookTable(obj);
+        List<DBColSpec> colspecs = createTableColSpec(dbTable.getColCount());
+        table.setColspecs(colspecs);
+        table.setHeaders( createTableHeader( obj, dbTable ));
+        table.setBody( createTableBody( obj, dbTable ));
+        
         // table.setCols(headerCols.length());
         return (DocumentElement)table;
     }
 
-    private List< List< DocumentElement >>
-            createTableBody( JSONObject obj ) throws JSONException {
-        return createTableRows( obj.getJSONArray( "body" ) );
+    private List<DBColSpec> createTableColSpec(int columnNum){
+    	List<DBColSpec> colspecs = new ArrayList<DBColSpec>();
+    	for(int i=1; i <= columnNum; i++){
+    		colspecs.add(new DBColSpec(i, String.valueOf(i)));
+    	}
+    	return colspecs;
     }
     
-    private List< List< DocumentElement >>
-            createTableHeader( JSONObject obj ) throws JSONException {
-        return createTableRows( obj.getJSONArray( "header" ) );
+    private List< List< DocumentElement >> createTableBody( JSONObject obj, DocBookTable dbTable ) throws JSONException {
+        return createTableRows( obj.getJSONArray( "body" ), dbTable, false );
     }
     
-    private List< List< DocumentElement >>
-            createTableRows( JSONArray jsonRows ) throws JSONException {
+    private List< List< DocumentElement >> createTableHeader( JSONObject obj, DocBookTable dbTable ) throws JSONException {
+        return createTableRows( obj.getJSONArray( "header" ), dbTable, true );
+    }
+    
+    private List< List< DocumentElement >> createTableRows( JSONArray jsonRows, DocBookTable dbTable, boolean isHeader ) throws JSONException {
         List< List< DocumentElement >> list =
                 new ArrayList< List< DocumentElement >>();
         for ( int i = 0; i < jsonRows.length(); i++ ) {
             JSONArray headerRows = jsonRows.getJSONArray( i );
             List< DocumentElement > rows = new ArrayList< DocumentElement >();
+            int startCol = 1;
             for ( int j = 0; j < headerRows.length(); j++ ) {
                 JSONObject contents = headerRows.getJSONObject( j );
                 JSONArray headerCols = contents.getJSONArray( "content" );
                 for ( int l = 0; l < headerCols.length(); l++ ) {
                     JSONObject content = headerCols.getJSONObject( l );
-                    String colspan = (String)content.opt( "colspan" );
-                    String rowspan = (String)content.opt( "rowspan" );
-                    DocumentElement e = createElement( content );
-                    if ( e != null ) rows.add( e );
+                    String colspan = contents.optString( "colspan" );
+                    String rowspan = contents.optString( "rowspan" );
+                    DocumentElement cell = null;
+                    int col = 0; int row = 0;
+                    if(colspan != null && !colspan.isEmpty()) col = Integer.parseInt(colspan);
+                    if(rowspan != null && !rowspan.isEmpty()) row = Integer.parseInt(rowspan);
+                    DBTableEntry te = new DBTableEntry();
+                    int startColTemp = dbTable.getStartCol(i, j, row, col, isHeader);
+                    if(startColTemp > startCol) startCol = startColTemp;
+                    if(col > 1 || row > 1){
+                    	if(row > 1) te.setMorerows(row-1);
+                    	if(col > 1){
+                    		int end = startCol + col - 1;
+                    		if(end > dbTable.getColCount()) end = dbTable.getColCount();
+                    		te.setNamest(String.valueOf(startCol));
+                    		te.setNameend(String.valueOf(end));
+                    	}
+                    	te.addElement(createElement(content));
+                    	cell = (DocumentElement)te;
+                    }
+                    else{
+                    	cell = createElement(content);
+                    	//cell = createDBText(content);
+                    }
+                    if ( cell != null ) rows.add( cell );
                 }
             }
             list.add( rows );
         }
         return list;
     }
-    
+ 
     private DBSection emsScriptNodeToDBSection( EmsScriptNode node,
-                                                Boolean isChapter ) throws JSONException {
+                                                Boolean isChapter ) throws Exception {
         DBSection section = new DBSection();
         if ( isChapter ) section.setChapter( isChapter );
         section.setTitle( (String)node.getProperty( Acm.ACM_NAME ) );
@@ -595,20 +701,26 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return jobName;
     }
     
-    public JSONObject generateHTML( String snapshotId ) throws JSONException {
+    public JSONObject generateHTML( String snapshotId ) throws Exception {
         EmsScriptNode snapshotNode = findScriptNodeById( snapshotId, null, null, false ); // TODO -- REVIEW -- Pass in workspace????!!!!
+        if(snapshotNode == null) throw new Exception("Failed to find snapshot with Id: " + snapshotId);
         snapshotNode = generateHTML( snapshotNode );
+        if(snapshotNode == null) throw new Exception("Failed to generate HTML artifact!");
         return populateSnapshotProperties( snapshotNode );
     }
     
-    public EmsScriptNode generateHTML( EmsScriptNode snapshotNode ) {
+    public EmsScriptNode generateHTML( EmsScriptNode snapshotNode ) throws Exception {
         this.snapshotName = (String)snapshotNode.getProperty( Acm.ACM_ID );
+        if(this.snapshotName == null || this.snapshotName.isEmpty()) throw new Exception("Failed to retrieve snapshot Id!");
+        
         ChildAssociationRef childAssociationRef =
                 this.services.getNodeService()
                              .getPrimaryParent( snapshotNode.getNodeRef() );
-        EmsScriptNode snapshotFolderNode =
-                new EmsScriptNode( childAssociationRef.getParentRef(),
-                                   this.services );
+        if(childAssociationRef == null) throw new Exception("Failed to retrieve snapshot association reference!");
+        
+        EmsScriptNode snapshotFolderNode = new EmsScriptNode( childAssociationRef.getParentRef(), this.services );
+        if(snapshotFolderNode == null) throw new Exception("Failed to retrieve snapshot folder!");
+        
         DocBookWrapper docBookWrapper = new DocBookWrapper( this.snapshotName, snapshotNode );
 
         if ( !hasHtmlZip( snapshotNode ) ) {
@@ -618,20 +730,28 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshotNode;
     }
     
-    public JSONObject generatePDF(String snapshotId) throws JSONException{
+    public JSONObject generatePDF(String snapshotId) throws Exception{
         EmsScriptNode snapshotNode = findScriptNodeById(snapshotId, null, null, false); // TODO -- REVIEW -- Pass in workspace????!!!!
-    	    snapshotNode = generatePDF(snapshotNode);
-    	    return populateSnapshotProperties(snapshotNode);
+        if(snapshotNode == null) throw new Exception("Failed to find snapshot with Id: " + snapshotId);
+    	snapshotNode = generatePDF(snapshotNode);
+    	if(snapshotNode == null) throw new Exception("Failed to generate PDF artifact!");
+    	return populateSnapshotProperties(snapshotNode);
     }
     
-    public EmsScriptNode generatePDF( EmsScriptNode snapshotNode ) {
+    public EmsScriptNode generatePDF( EmsScriptNode snapshotNode ) throws Exception {
         this.snapshotName = (String)snapshotNode.getProperty( Acm.ACM_ID );
+        if(this.snapshotName == null || this.snapshotName.isEmpty()) throw new Exception("Failed to retrieve snapshot Id!");
+        
         ChildAssociationRef childAssociationRef =
                 this.services.getNodeService()
                              .getPrimaryParent( snapshotNode.getNodeRef() );
+        if(childAssociationRef == null) throw new Exception("Failed to retrieve snapshot association reference!");
+        
         EmsScriptNode snapshotFolderNode =
                 new EmsScriptNode( childAssociationRef.getParentRef(),
                                    this.services );
+        if(snapshotFolderNode == null) throw new Exception("Failed to retrieve snapshot folder!");
+        
         DocBookWrapper docBookWrapper = new DocBookWrapper( this.snapshotName, snapshotNode );
         if ( !hasPdf( snapshotNode ) ) {
             log( LogLevel.INFO, "Generating PDF..." );
@@ -640,6 +760,26 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshotNode;
     }
 
+    private JSONObject getChildrenViews(String nodeId){
+    	JSONObject childNode = null;
+    	for(int j=0; j < view2view.length(); j++){
+        	JSONObject tmpJson;
+			try {
+				tmpJson = this.view2view.getJSONObject(j);
+				String tmpId = (String)tmpJson.opt("id");
+				if(tmpId == null || tmpId.isEmpty()) tmpId = tmpJson.optString(Acm.SYSMLID);
+				if(tmpId == null || tmpId.isEmpty()) continue;
+	        	if(tmpId.equals(nodeId)){
+	        		childNode = tmpJson;
+	        		break;
+	        	}
+			} catch (JSONException e) {
+				System.out.println("Failed to retrieve view2view children views for: " + nodeId);
+			}
+        }
+    	return childNode;
+    }
+    
     private String getDocumentElementContent( DocumentElement elem ) {
         if ( elem instanceof DBParagraph ) return ( (DBParagraph)elem ).getText().toString();
 
@@ -694,9 +834,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         if ( content != null && !content.isEmpty() ) return content;
         try {
             JSONObject spec = (JSONObject)jsonObj.get( "specialization" );
-            content = (String)spec.opt( transcludedType );
-            if ( content != null && !content.isEmpty() ) return content;
-
+            if(spec != null){ 
+	            content = (String)spec.opt( transcludedType );
+	            if ( content != null && !content.isEmpty() ) return content;
+            }
         } catch ( JSONException ex ) {
             System.out.println( "Failed to retrieve transcluded content!" );
         }
@@ -809,8 +950,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
     {
     	Document document = Jsoup.parseBodyFragment(inputString);
     	Elements images = document.getElementsByTag("img");
+    	//String shareUrl = UrlUtil.getShareUrl(sysAdminParams);
+    	//if(shareUrl != null) System.out.println("Share url: " + shareUrl);
     	for(Element image : images){
     		String src = image.attr("src");
+    		if(src == null) continue;
     		if(src.toLowerCase().startsWith("http")){
     			System.out.println("Embedded image src: " + src);
     			//http://localhost:8081/share/proxy/alfresco/api/node/content/workspace/SpacesStore/74cd8a96-8a21-47e5-9b3b-a1b3e296787d/graph.JPG
@@ -907,9 +1051,33 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     private String HtmlSanitize( String s ) {
+    	/*
+    	Tidy tidy = new Tidy();
+    	tidy.setXHTML(true);
+    	tidy.setForceOutput(true);
+    	tidy.setQuiet(true);
+    	tidy.setShowWarnings(false);
+    	try {
+			ByteArrayInputStream inputStream = new ByteArrayInputStream(s.getBytes("UTF-8"));
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			org.w3c.dom.Document tidyDoc = tidy.parseDOM(inputStream, outputStream);
+			CDATASection data = tidyDoc.createCDATASection(s);
+			return data.toString();
+			//return tidyDoc.getTextContent();
+			//return tidyDoc.createCDATASection(data);
+			//return outputStream.toString("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return "[ERROR Parsing HTML]";		
+		}
+		*/
+    	
     	Document document = Jsoup.parseBodyFragment(s);
     	String retString = Jsoup.parse(document.text()).text();
     	return retString;
+    	
+    	//return HtmlToDocbook.html2docbook(s); 
     }
 
     // private String parseTransclusion(List<String> cirRefList, String
@@ -948,12 +1116,18 @@ public class SnapshotPost extends AbstractJavaWebScript {
 					}
 					else{
 						String doc = getTranscludedContent(jsObj, "documentation");
-						String transcluded = doc;
-						while(true){
-							transcluded = handleTransclusion(id, "doc", transcluded,
-							                                 cirRefList, index);
-							if(transcluded.compareToIgnoreCase(doc) == 0) break;
-							doc = transcluded;
+						String transcluded = null;
+						if(doc == null || doc.isEmpty()){
+							transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
+						}
+						else{
+							transcluded = doc;
+							while(true){
+								transcluded = handleTransclusion(id, "doc", transcluded,
+								                                 cirRefList, index);
+								if(transcluded.compareToIgnoreCase(doc) == 0) break;
+								doc = transcluded;
+							}
 						}
 						element.before(transcluded);
 						element.remove();
@@ -991,11 +1165,17 @@ public class SnapshotPost extends AbstractJavaWebScript {
 					}
 					else{
 						String name = getTranscludedContent(jsObj, "name");
-						String transcluded = name;
-						while(true){
-							transcluded = handleTransclusion(id, "name", transcluded, cirRefList, index);
-							if(transcluded.compareToIgnoreCase(name) == 0) break;
-							name = transcluded;
+						String transcluded = null;
+						if(name == null || name.isEmpty()){
+							transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
+						}
+						else{
+						transcluded = name;
+							while(true){
+								transcluded = handleTransclusion(id, "name", transcluded, cirRefList, index);
+								if(transcluded.compareToIgnoreCase(name) == 0) break;
+								name = transcluded;
+							}
 						}
 						element.before(transcluded);
 						element.remove();
@@ -1050,29 +1230,19 @@ public class SnapshotPost extends AbstractJavaWebScript {
         JSONObject snapshoturl = snapshotNode.toJSONObject( null );
         if ( hasPdf( snapshotNode ) || hasHtmlZip( snapshotNode ) ) {
         	JSONArray formats = new JSONArray();
-            //HashMap< String, String > transformMap;
-            //LinkedList< HashMap > list = new LinkedList< HashMap >();
             if ( hasPdf( snapshotNode ) ) {
                 EmsScriptNode pdfNode = getPdfNode( snapshotNode );
                 JSONObject pdfJson = new JSONObject();
                 pdfJson.put("type", "pdf");
-                pdfJson.put("url", pdfNode.getUrl());
+                pdfJson.put("url", pdfNode.getUrl().replace("jpl.nasa.gov.jpl.nasa.gov", "jpl.nasa.gov"));
                 formats.put(pdfJson);
-                //transformMap = new HashMap< String, String >();
-                //transformMap.put( "type", "pdf" );
-                //transformMap.put( "url", pdfNode.getUrl() );
-                //list.add( transformMap );
             }
             if ( hasHtmlZip( snapshotNode ) ) {
                 EmsScriptNode htmlZipNode = getHtmlZipNode( snapshotNode );
                 JSONObject htmlJson = new JSONObject();
                 htmlJson.put("type","html");
-                htmlJson.put("url", htmlZipNode.getUrl());
+                htmlJson.put("url", htmlZipNode.getUrl().replace("jpl.nasa.gov.jpl.nasa.gov", "jpl.nasa.gov"));
                 formats.put(htmlJson);
-                //transformMap = new HashMap< String, String >();
-                //transformMap.put( "type", "html" );
-                //transformMap.put( "url", htmlZipNode.getUrl() );
-                //list.add( transformMap );
             }
             
             snapshoturl.put( "formats", formats );
@@ -1080,51 +1250,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshoturl;
     }
 
-	private String processTransclusion(List<String> cirRefList, Document document,
-	                                   Elements elements){
-		if(elements == null) return "";
-		
-		for(Element element:elements){
-			//System.out.println("Found transclusion!");
-			String id = element.attr("data-mms-eid");
-			//System.out.println("referenced id: " + id);
-			if(cirRefList.contains(id)){
-				System.out.println("Circular reference!");
-				element.before(" CIRCULAR REFERENCE ");
-				element.remove();
-				continue;
-			}
-			cirRefList.add(id);
-			//System.out.println("findScriptNodeById...");
-			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); // TODO -- REVIEW -- Pass in workspace????!!!!
-			try {
-				//System.out.println("found nameNode!");
-				JSONObject jsObj = nameNode.toJSONObject(null);
-				if(jsObj == null){
-					System.out.println("JSONObject is null");
-				}
-				else{
-					//System.out.println("Creating element...");
-					DocumentElement elm = createElement(jsObj);
-					if(elm instanceof DBParagraph){
-						System.out.println("transcluded paragraph: " + ((DBParagraph)elm).getText());
-						element.before((String)((DBParagraph)elm).getText());
-						element.remove();
-					}
-					else if(elm instanceof DBText){
-						System.out.println("transcluded text: " + ((DBText)elm).getText());
-						element.before((String)((DBText)elm).getText());
-						element.remove();
-					}
-				}
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return document.body().html();
-	}
-	
     private JSONObject saveAndStartAction(WebScriptRequest req, Status status) {
 	    JSONObject jsonObject = null;
 	    String siteName = getSiteName(req);
@@ -1237,9 +1362,48 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	}
 
     private void traverseElements( DBSection section, EmsScriptNode node )
-            throws JSONException {
-        JSONArray contains = node.getView().getContainsJson();
+            throws Exception {
+    	if(node == null) return;
+    	//1st process the node
+    	JSONArray contains = node.getView().getContainsJson();
         createDBSectionContainment( section, contains );
+        
+        //then process it's contains:children if any
+    	String nodeId = (String)node.getProperty(Acm.ACM_ID);
+    	JSONObject viewJson = getChildrenViews(nodeId);
+    	if(viewJson == null) return;
+    	
+    	JSONArray childrenViews = viewJson.getJSONArray("childrenViews");
+        if(childrenViews == null) throw new Exception("Failed to retrieve 'childrenViews'.");
+        for(int k=0; k< childrenViews.length(); k++){
+        	String childId = childrenViews.getString(k);
+        	if(childId.equals(nodeId)) continue;
+        	EmsScriptNode childNode = findScriptNodeById(childId, null, null, false);
+        	traverseElements(section, childNode);
+        }
+        //JSONArray contains = node.getView().getContainsJson();
+        //createDBSectionContainment( section, contains );
+        /*
+    	if(node == null) return;
+    	View view = node.getView();
+    	if(view == null) throw new Exception("Failed to retrieve node view.");
+    	JSONArray contains = view.getContainsJson();
+        if(contains == null || contains.length()==0){ throw new Exception("Failed to retrieve 'contains' JSONArray."); }
+        String nodeId = (String)node.getProperty(Acm.ACM_ID);
+        for(int i=0; i < contains.length(); i++){
+        	JSONObject obj = contains.getJSONObject( i );
+        	DocumentElement e = createElement( obj );
+            if ( e != null ) section.addElement( e );
+            
+            String sourceType = obj.optString("sourceType");
+        	String childNodeId = obj.optString("source");
+        	if(sourceType == null || sourceType.isEmpty()) continue;
+        	if(childNodeId == null || childNodeId.isEmpty()) continue;
+        	if(childNodeId.equalsIgnoreCase(nodeId)) continue;
+        	EmsScriptNode childNode = findScriptNodeById(childNodeId, null, null, false);
+            traverseElements(section, childNode);
+        }
+        */
     	/*
     	  for(int i=0; i < contains.length(); i++){
     		JSONObject obj = contains.getJSONObject(i);
