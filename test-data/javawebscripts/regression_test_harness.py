@@ -475,7 +475,7 @@ None,
 "GetProject",
 "Get project",
 create_curl_cmd(type="GET",data="sites/europa/projects/123456",base_url=BASE_URL_WS,
-                branch=""),
+                branch="master/"),
 False, 
 None,
 ["test","workspaces","develop"]
