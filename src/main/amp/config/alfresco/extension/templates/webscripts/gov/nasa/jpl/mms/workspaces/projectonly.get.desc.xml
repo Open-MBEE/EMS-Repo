@@ -1,7 +1,7 @@
 <webscript> 
   <shortname>Get Project</shortname> 
   <description>
-  	Retrieves the project information in the following format:
+    Retrieves the project information in the following format:
     {elements:[{
             "sysmlid": projectId,
             "name": projectName,
@@ -11,11 +11,11 @@
                             
      }]} 
   </description>
-  <url>/javawebscripts/projects/{projectId}</url>
+  <url>/workspaces/{workspaceId}/projects/{projectId}</url>
   <format default="json">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readonly">required</transaction>
-  <family>EMS Java Webscripts</family>
+  <family>MMS REST API</family>
   <args>
   </args>
 </webscript>

@@ -158,7 +158,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 */
 	abstract protected boolean validateRequest(WebScriptRequest req, Status status);
 
-
+    /**
+     * Returns true if the passed workspaces are equal, checks for master (null) workspaces
+     * also
+     * 
+     * @param ws1
+     * @param ws2
+     * @return
+     */
+	private boolean workspacesEqual(WorkspaceNode ws1, WorkspaceNode ws2)
+	{
+		return ( (ws1 == null && ws2 == null) || (ws1 != null && ws1.equals(ws2)) );
+	}
+	
     /**
      * Get site by name, workspace, and time
      *
@@ -183,6 +195,25 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
         return siteNode;
     }
+    
+    /**
+     * Get site by name, workspace, and time.  This also checks that the returned node is 
+     * in the specified workspace, not just whether its in the workspace or any of its parents.
+     *
+     * @param siteName
+     *            short name of site
+     * @param workspace
+     *            the workspace of the version of the site to return
+     * @param dateTime
+     *            the point in time for the version of the site to return
+     * @return
+     */
+    protected EmsScriptNode getSiteNodeForWorkspace(String siteName, WorkspaceNode workspace,
+                                        			Date dateTime) {
+    	
+        EmsScriptNode siteNode = getSiteNode(siteName, workspace, dateTime);
+		return (siteNode != null && workspacesEqual(siteNode.getWorkspace(),workspace)) ? siteNode : null;
+    }
 
     protected EmsScriptNode getSiteNodeFromRequest(WebScriptRequest req) {
         String siteName = null;
@@ -201,7 +232,26 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
         return getSiteNode( siteName, workspace, dateTime );
     }
+	
+	/**
+	 * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
+	 * This does caching of found elements so they don't need to be looked up with a different API each time.
+	 * This also checks that the returned node is in the specified workspace, not just whether its in the workspace
+	 * or any of its parents.
+	 *
+	 * @param id	Node id to search for
+	 * @param workspace
+     * @param dateTime
+	 * @return		ScriptNode with name if found, null otherwise
+	 */
+	protected EmsScriptNode findScriptNodeByIdForWorkspace(String id,
+	                                           				WorkspaceNode workspace,
+	                                           				Date dateTime, boolean findDeleted) {
+		EmsScriptNode node = NodeUtil.findScriptNodeById( id, workspace, dateTime, findDeleted,
+	                                        services, response );
+		return (node != null && workspacesEqual(node.getWorkspace(),workspace)) ? node : null;
 
+	}
 
 	/**
 	 * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
@@ -304,41 +354,52 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
 
     public EmsScriptNode createSite( String siteName, WorkspaceNode workspace ) {
+    	
         EmsScriptNode siteNode = getSiteNode( siteName, workspace, null );
-        if ( siteNode == null || !siteNode.exists() ) {
-            if ( workspace == null || !workspace.exists() ) {
-                SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, SiteVisibility.PUBLIC );
-                siteNode = new EmsScriptNode( foo.getNodeRef(), services );
-                siteNode.createOrUpdateAspect( "cm:taggable" );
-            } else {
-                EmsScriptNode sitesFolder = null;
-                // check and see if the Sites folder already exists
-                boolean useSimpleCache = workspace == null;
-                NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, useSimpleCache, false, 
-                													workspace, null, true, services, false );
-                if ( sitesNodeRef != null ) {
-                    sitesFolder = new EmsScriptNode( sitesNodeRef, services );
-                    
-                    // If workspace of sitesNodeRef is this workspace then no need to replicate,
-                    // otherwise replicate from the master workspace:
-                    if ( !workspace.equals(sitesFolder.getWorkspace()) ) {
-                        sitesFolder = workspace.replicateWithParentFolders( sitesFolder );
-                    }
-                      
-                } 
-                // This case should never occur b/c the master workspace will always have a Sites folder:
-                else {
-                    Debug.error( "Can't find Sites folder in the workspace " + workspace);
-                }
-                
-                // Now, create the site folder:
-                if (sitesFolder == null ) {
-                    Debug.error("Could not create site " + siteName + "!");
-                } else {
-                    siteNode = sitesFolder.createFolder( siteName );
-                }
-            }
+        boolean validWorkspace = workspace != null && workspace.exists();
+        boolean invalidSiteNode = siteNode == null || !siteNode.exists();
+
+        // Create a alfresco Site if creating the site on the master and if the site does not exists:
+        if ( invalidSiteNode && !validWorkspace ) {
+          
+            SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, SiteVisibility.PUBLIC );
+            siteNode = new EmsScriptNode( foo.getNodeRef(), services );
+            siteNode.createOrUpdateAspect( "cm:taggable" );
         }
+        
+        // If this site is supposed to go into a non-master workspace, then create the site folders
+        // there if needed:
+        if ( validWorkspace && 
+        	( invalidSiteNode || (!invalidSiteNode && !workspace.equals(siteNode.getWorkspace())) ) ) {
+        	
+	        EmsScriptNode sitesFolder = null;
+	        // check and see if the Sites folder already exists
+	        boolean useSimpleCache = workspace == null;
+	        NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, useSimpleCache, false, 
+	        													workspace, null, true, services, false );
+	        if ( sitesNodeRef != null ) {
+	            sitesFolder = new EmsScriptNode( sitesNodeRef, services );
+	            
+	            // If workspace of sitesNodeRef is this workspace then no need to replicate,
+	            // otherwise replicate from the master workspace:
+	            if (sitesFolder != null && !workspace.equals(sitesFolder.getWorkspace()) ) {
+	                sitesFolder = workspace.replicateWithParentFolders( sitesFolder );
+	            }
+	              
+	        } 
+	        // This case should never occur b/c the master workspace will always have a Sites folder:
+	        else {
+	            Debug.error( "Can't find Sites folder in the workspace " + workspace);
+	        }
+	        
+	        // Now, create the site folder:
+	        if (sitesFolder == null ) {
+	            Debug.error("Could not create site " + siteName + "!");
+	        } else {
+	            siteNode = sitesFolder.createFolder( siteName );
+	        }
+        }
+        
         return siteNode;
     }
 

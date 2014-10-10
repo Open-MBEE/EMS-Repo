@@ -46,6 +46,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -127,20 +128,16 @@ public class ProjectGet extends AbstractJavaWebScript {
                                               throws JSONException {
         EmsScriptNode projectNode = null;
         JSONObject json = null;
-        
-        if (siteName == null) {
-            projectNode = findScriptNodeById(projectId, workspace, dateTime, false);
+                
+        EmsScriptNode siteNode = getSiteNodeForWorkspace( siteName, workspace, dateTime );
+
+        if (siteNode == null) {
+            projectNode = findScriptNodeByIdForWorkspace(projectId, workspace, dateTime, false);
         } else {
-            EmsScriptNode siteNode = getSiteNode( siteName, workspace, dateTime );
-            if (siteNode == null) {
-                log(LogLevel.ERROR, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
-                return null;
-            } else {
-                projectNode = siteNode.childByNamePath("/Models/" + projectId);
-                if (projectNode == null) {
-                		// for backwards compatibility
-                		projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
-                }
+            projectNode = siteNode.childByNamePath("/Models/" + projectId);
+            if (projectNode == null) {
+            		// for backwards compatibility
+            		projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
             }
         }
         if (projectNode == null) {
@@ -151,9 +148,17 @@ public class ProjectGet extends AbstractJavaWebScript {
         if (checkPermissions(projectNode, PermissionService.READ)) {
             log(LogLevel.INFO, "Found project", HttpServletResponse.SC_OK);
             json = new JSONObject();
-            json.put(Acm.JSON_ID, projectId);
-            json.put(Acm.JSON_NAME, projectNode.getProperty(Acm.CM_TITLE));
-            json.put(Acm.JSON_PROJECT_VERSION, projectNode.getProperty(Acm.ACM_PROJECT_VERSION));
+            JSONArray elements = new JSONArray();
+            JSONObject project = new JSONObject();
+            JSONObject specialization = new JSONObject();
+            
+            json.put("elements", elements);
+            elements.put(project);
+            project.put(Acm.JSON_ID, projectId);
+            project.put(Acm.JSON_NAME, projectNode.getProperty(Acm.CM_TITLE));
+            project.put(Acm.JSON_SPECIALIZATION, specialization);
+            specialization.put(Acm.JSON_PROJECT_VERSION, projectNode.getProperty(Acm.ACM_PROJECT_VERSION));
+            specialization.put(Acm.JSON_TYPE, projectNode.getProperty(Acm.ACM_TYPE));
         } else {
             log(LogLevel.ERROR, "No permissions to read", HttpServletResponse.SC_UNAUTHORIZED);
         }
