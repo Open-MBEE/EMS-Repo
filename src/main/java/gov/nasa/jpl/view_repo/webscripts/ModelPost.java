@@ -338,7 +338,8 @@ public class ModelPost extends AbstractJavaWebScript {
             if (targetWS != null) {
                 wsId = targetWS.getSysmlId();
             }
-            if ( !sendDeltas(deltaJson, wsId, null) ) {
+            // FIXME: Need to split by projectId
+            if ( !sendDeltas(deltaJson, wsId, elements.first().getProjectId()) ) {
                 log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
             }
 

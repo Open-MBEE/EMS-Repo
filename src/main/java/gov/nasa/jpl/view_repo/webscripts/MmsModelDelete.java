@@ -104,6 +104,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
 
         EmsScriptNode root = findScriptNodeById(elementId, workspace, null, false);
         String siteName = null;
+        String projectId = null;
 
         UserTransaction trx;
         trx = services.getTransactionService().getNonPropagatingUserTransaction();
@@ -133,6 +134,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                     deletedNode.removeAspect( "ems:Updated" );
                     deletedNode.removeAspect( "ems:Moved" );
                     deletedNode.createOrUpdateAspect( "ems:Deleted" );
+                    projectId = deletedNode.getProjectId();
                 }
             }
 
@@ -156,7 +158,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
 
         if (wsDiff.isDiff()) {
             // Send deltas to all listeners
-            if ( !sendDeltas(result, wsId, null) ) {
+            if ( !sendDeltas(result, wsId, projectId) ) {
                 log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
             }
 
