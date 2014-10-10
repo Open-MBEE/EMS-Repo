@@ -136,8 +136,18 @@ public class ProjectGet extends AbstractJavaWebScript {
         } else {
             projectNode = siteNode.childByNamePath("/Models/" + projectId);
             if (projectNode == null) {
-            		// for backwards compatibility
+            	
+            	// If the projectNode is not found, then try just looking for the project if the siteName
+            	// was no_site.  This handles the situation that site was not specified, and a no_site
+            	// is valid for the workspace:
+            	if (siteName.equals(NO_SITE_ID)) {
+            		projectNode = findScriptNodeByIdForWorkspace(projectId, workspace, dateTime, false);
+            	}
+            	
+            	// for backwards compatibility
+            	if (projectNode == null) {
             		projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
+            	}
             }
         }
         if (projectNode == null) {
