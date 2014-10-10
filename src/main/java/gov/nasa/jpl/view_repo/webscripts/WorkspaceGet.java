@@ -83,11 +83,15 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		JSONArray jsonArray = new JSONArray();
 		JSONObject interiorJson = new JSONObject();
 		if(ws == null && wsID.equals("master")){
-			interiorJson.put("creator", "null");
-			interiorJson.put("created",  "null");
-			interiorJson.put("name", wsID);
-			interiorJson.put("parent", "null");
-			interiorJson.put("branched", "null");
+		    WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, ws );
+////			interiorJson.put("creator", "null");
+////			interiorJson.put("created",  "null");
+//			interiorJson.put("name", wsID);
+//            interiorJson.put("id", wsID);
+//            interiorJson.put("qualifiedName", wsID);
+//            interiorJson.put("qualifiedId", wsID);
+////			interiorJson.put("parent", "null");
+////			interiorJson.put("branched", "null");
 			jsonArray.put(interiorJson);
 		}
 		else if(checkPermissions(ws, PermissionService.READ)){

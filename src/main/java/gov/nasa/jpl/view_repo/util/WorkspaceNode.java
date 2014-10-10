@@ -626,12 +626,10 @@ public class WorkspaceNode extends EmsScriptNode {
      * Add the workspace name and id metadata onto the provided JSONObject
      * @param jsonObject
      * @param ws
-     * @param dateTime
      * @throws JSONException
      */
     public static void
-            addWorkspaceNamesAndIds( JSONObject json, WorkspaceNode ws,
-                                     Date dateTime ) throws JSONException {
+            addWorkspaceNamesAndIds( JSONObject json, WorkspaceNode ws ) throws JSONException {
         json.put( "name",  getWorkspaceName(ws) );
         json.put( "id", getId(ws) );
         json.put( "qualifiedName", getQualifiedName( ws ) );
@@ -642,7 +640,7 @@ public class WorkspaceNode extends EmsScriptNode {
     public JSONObject toJSONObject( Date dateTime ) throws JSONException {
         JSONObject json = new JSONObject();
 
-        addWorkspaceNamesAndIds(json, this, dateTime );
+        addWorkspaceNamesAndIds(json, this );
         json.put( "creator", getProperty( "cm:modifier" ) );
         // REVIEW -- This assumes that the workspace does not changed after it
         // is created, but wouldn't it's ems:lastTimeSyncParent property be
