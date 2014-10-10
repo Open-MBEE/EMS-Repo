@@ -345,7 +345,7 @@ def create_curl_cmd(type, data="", base_url=BASE_URL_WS, post_type="elements", b
     
     if type == "POST":
         if project_post:
-            cmd = 'curl %s %s %s "%s%s?fix=true&createSite=true"'%(CURL_FLAGS, CURL_POST_FLAGS, data, base_url, branch)
+            cmd = 'curl %s %s %s "%s%s?createSite=true"'%(CURL_FLAGS, CURL_POST_FLAGS, data, base_url, branch)
         elif data:
             cmd = 'curl %s %s @JsonData/%s "%s%s%s"'%(CURL_FLAGS, CURL_POST_FLAGS, data, base_url, branch, post_type)
         else:

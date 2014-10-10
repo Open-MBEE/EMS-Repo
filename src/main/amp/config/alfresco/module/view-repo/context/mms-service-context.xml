@@ -85,7 +85,7 @@
     </bean>
     
            <!-- adding new bean -->
-    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.projects.project.post"
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.projects.post"
         class="gov.nasa.jpl.view_repo.webscripts.ProjectPost" parent="webscript"
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />
