@@ -423,29 +423,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                                                           dateTime, services,
                                                           response,
                                                           responseStatus ) );
-        //foundElements.putAll(searchResults);
-//		if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
-//			ResultSet resultSet = null;
-//			try {
-//				pattern = type + pattern + "\"";
-//				resultSet = services.getSearchService().query(SEARCH_STORE, SearchService.LANGUAGE_LUCENE, pattern);
-//				for (ResultSetRow row: resultSet) {
-//					EmsScriptNode node = new EmsScriptNode(row.getNodeRef(), services, response);
-//					if (checkPermissions(node, PermissionService.READ)) {
-//    					String id = (String) node.getProperty(Acm.ACM_ID);
-//        					if (id != null) {
-//        						searchResults.put(id, node);
-//        					}
-//					}
-//				}
-//			} catch (Exception e) {
-//				log(LogLevel.ERROR, "Could not parse search: " + pattern + ".\n", HttpServletResponse.SC_BAD_REQUEST);
-//			} finally {
-//				if (resultSet != null) {
-//					resultSet.close();
-//				}
-//			}
-//		}
 
 		return searchResults;
 	}
