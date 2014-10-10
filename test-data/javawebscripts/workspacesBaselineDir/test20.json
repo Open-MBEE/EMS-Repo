@@ -2,21 +2,21 @@
 
     "workspace1": {
 
+        "qualifiedName": "master/wsA",
+
+        "name": "wsA",
+
         "elements": [{
-
-            "creator": "admin",
-
-            "documentation": "something",
-
-            "editable": true,
 
             "name": "300",
 
-            "owner": "holding_bin_no_site_no_project",
-
-            "qualifiedId": "no_project/holding_bin_no_site_no_project/x",
-
             "qualifiedName": "/300",
+
+            "sysmlid": "x",
+
+            "documentation": "something",
+
+            "owner": "holding_bin_no_site_no_project",
 
             "specialization": {
 
@@ -24,51 +24,41 @@
 
                 "isSlot": false,
 
-                "type": "Property",
-
                 "value": [{
 
                     "string": "dlam_string",
 
                     "type": "LiteralString"
 
-                }]
+                }],
+
+                "type": "Property"
 
             },
 
-            "sysmlid": "x"
+            "editable": true,
 
-        }],
+            "creator": "admin",
 
-        "name": "wsA",
-
-        "qualifiedName": "master/wsA"
+        }]
 
     },
 
     "workspace2": {
 
+        "deletedElements": [],
+
         "addedElements": [],
 
         "conflictedElements": [],
 
-        "deletedElements": [],
-
-        "movedElements": [],
-
-        "name": "wsB",
-
-        "qualifiedName": "master/wsA/wsB",
-
         "updatedElements": [{
 
-            "creator": "admin",
+            "sysmlid": "x",
 
             "documentation": "x is x",
 
             "specialization": {
-
-                "type": "Property",
 
                 "value": [{
 
@@ -76,13 +66,21 @@
 
                     "type": "LiteralString"
 
-                }]
+                }],
+
+                "type": "Property"
 
             },
 
-            "sysmlid": "x"
+            "creator": "admin",
 
-        }]
+        }],
+
+        "qualifiedName": "master/wsA/wsB",
+
+        "name": "wsB",
+
+        "movedElements": []
 
     }
 

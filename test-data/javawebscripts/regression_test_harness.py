@@ -345,7 +345,7 @@ def create_curl_cmd(type, data="", base_url=BASE_URL_WS, post_type="elements", b
     
     if type == "POST":
         if project_post:
-            cmd = 'curl %s %s %s "%s%s?fix=true&createSite=true"'%(CURL_FLAGS, CURL_POST_FLAGS, data, base_url, branch)
+            cmd = 'curl %s %s %s "%s%s?createSite=true"'%(CURL_FLAGS, CURL_POST_FLAGS, data, base_url, branch)
         elif data:
             cmd = 'curl %s %s @JsonData/%s "%s%s%s"'%(CURL_FLAGS, CURL_POST_FLAGS, data, base_url, branch, post_type)
         else:
@@ -428,8 +428,9 @@ tests =[\
 1,
 "PostSite",
 "Create a project and site",
-create_curl_cmd(type="POST",data='\'{"name":"JW_TEST"}\'',base_url=BASE_URL_JW,
-                branch="sites/europa/projects/123456",project_post=True),
+create_curl_cmd(type="POST",data='\'{"elements":[{"sysmlid":"123456","name":"JW_TEST","specialization":{"type":"Project"}}]}\'',
+                base_url=BASE_URL_WS,
+                branch="master/sites/europa/projects",project_post=True),
 False, 
 None,
 ["test","workspaces","develop"]
@@ -473,8 +474,8 @@ None,
 5,
 "GetProject",
 "Get project",
-create_curl_cmd(type="GET",data="sites/europa/projects/123456",base_url=BASE_URL_JW,
-                branch=""),
+create_curl_cmd(type="GET",data="sites/europa/projects/123456",base_url=BASE_URL_WS,
+                branch="master/"),
 False, 
 None,
 ["test","workspaces","develop"]

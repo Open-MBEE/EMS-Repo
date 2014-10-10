@@ -1,2 +1,9 @@
-
-000
+{
+  "id": "d75cd45f-7649-4d11-ab46-f3bb57e1612b",
+  "timestamp": "2014-06-09T09:04:45.834-0700",
+  "description": "updating description",
+  "name": "product test 2",
+  "snapshots": [],
+  "modified": "2014-09-12T14:33:00.655-0700"
+}
+200

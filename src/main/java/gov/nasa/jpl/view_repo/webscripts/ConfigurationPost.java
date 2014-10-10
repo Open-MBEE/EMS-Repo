@@ -181,7 +181,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 				startAction(jobNode, siteName, getProductList(postJson));
 				return configWs.getConfigJson( jobNode, siteName, workspace, null );
 			} else {
-				log(LogLevel.ERROR, "Couldn't create configuration job: " + postJson.getString("name"), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				log(LogLevel.ERROR, "Couldn't create configuration job: " + postJson.getString("name"), HttpServletResponse.SC_BAD_REQUEST);
 				return null;
 			}
 		} else {

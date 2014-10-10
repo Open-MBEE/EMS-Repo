@@ -1,11 +1,10 @@
 { "elements" : [
-
-{
- "sysmlid" : "x",
- "documentation" : "x is x",
- "specialization" : {
-   "type": "Property",
-   "value" : [{ "string" : "the x value",
-                "type" : "LiteralString"}]}
- }
+    {
+     "sysmlid" : "x",
+     "documentation" : "x is x",
+     "specialization" : {
+       "type": "Property",
+       "value" : [{ "string" : "the x value",
+                    "type" : "LiteralString"}]}
+     }
 ]}
