@@ -2,7 +2,7 @@
   <shortname>Initialize Project</shortname> 
   <description>
   </description>
-  <url>/javawebscripts/sites/{siteName}/projects/{projectId}?delete={delete?}&amp;fix={fix?}</url>
+  <url>/javawebscripts/sites/{siteName}/projects?delete={delete?}</url>
   <format default="json">any</format> 
   <authentication>user</authentication> 
   <transaction allow="readwrite">required</transaction>
@@ -11,10 +11,14 @@
   	<arg>
   		<name>posted content</name>
   		<description>The request body of the post as json:
-  		{
-  			"name": magicdraw-project-name,
-  			"projectVersion": magicdraw-project-version (if available)
-  		}
+        {elements:[{
+            "sysmlid": projectId,
+            "name": projectName,
+            "specialization":{"type":"Project",
+                              "projectVersion": projectVersion if there is a version
+                             }
+                            
+        }]} 
   		</description>
   	</arg>
   	<arg>
@@ -22,8 +26,8 @@
   		<description>Delete the specified project if true</description>
   	</arg>
   	<arg>
-  		<name>fix</name>
-  		<description>Force the fix (if true) if there are any discrepancies (e.g., project exists, but has different name).</description>
-  	</arg>
+        <name>createSite</name>
+        <description>If true, creates the site if it does not exists already.</description>
+    </arg>
   </args>
 </webscript>

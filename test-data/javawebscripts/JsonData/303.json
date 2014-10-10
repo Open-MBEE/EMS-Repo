@@ -2,10 +2,10 @@
 
 {
  "sysmlid" : "303",
- "documentation" : "CY is really sick",
+ "documentation" : "CY is really sick!",
  "specialization" : {
    "type": "Property",
-   "value" : [{ "string" : "really, really sick",
+   "value" : [{ "string" : "really, really sick!!!!",
                 "type" : "LiteralString"}]}
  }
 ]}

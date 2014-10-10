@@ -755,8 +755,7 @@ public class ModelPost extends AbstractJavaWebScript {
                             ProjectPost pp = new ProjectPost( repository, services );
                             pp.updateOrCreateProject( new JSONObject(),
                                                       workspace, NO_PROJECT_ID,
-                                                      siteName, true,
-                                                      false, false );
+                                                      siteName, true, false );
                         }
                     }
                     rootElements.add(sysmlId);
@@ -2110,7 +2109,7 @@ public class ModelPost extends AbstractJavaWebScript {
             JSONObject json = new JSONObject();
             try {
                 pp.updateOrCreateProject( json, workspace, projectId, siteName,
-                                          createIfNonexistent, false, false );
+                                          createIfNonexistent, false );
                 projectNode = findScriptNodeById( projectId, workspace, null, false );
             } catch ( JSONException e ) {
                 // TODO Auto-generated catch block

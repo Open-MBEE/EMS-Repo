@@ -1,2 +1,12 @@
-
-000
+{"elements": [{
+    "qualifiedId": "123456/300/_comment_300",
+    "name": "New test",
+    "qualifiedName": "/CY Test/300/New test",
+    "documentation": "change testing commnets",
+    "owner": "300",
+    "specialization": {"type": "Comment"},
+    "editable": true,
+    "creator": "admin",
+    "modified": "2014-09-12T14:32:53.281-0700"
+}]}
+200
