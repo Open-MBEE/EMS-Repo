@@ -1920,7 +1920,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
         String user = AuthenticationUtil.getRunAsUser();
         String wsId = null;
-        WorkspaceNode workspace = getWorkspace( req, true, user );
+        WorkspaceNode workspace = getWorkspace( req, //true, // not creating ws!
+                                                user );
         boolean wsFound = workspace != null;
         if ( !wsFound ) {
             wsId = getWorkspaceId( req );

@@ -2,21 +2,19 @@
 
     "workspace1": {
 
-        "name": "wsA",
-
         "elements": [{
 
-            "qualifiedId": "no_project/holding_bin_no_site_no_project/x",
-
-            "name": "300",
-
-            "qualifiedName": "/300",
-
-            "sysmlid": "x",
+            "creator": "admin",
 
             "documentation": "something",
 
+            "editable": true,
+
+            "name": "300",
+
             "owner": "holding_bin_no_site_no_project",
+
+            "qualifiedName": "/300",
 
             "specialization": {
 
@@ -24,41 +22,51 @@
 
                 "isSlot": false,
 
+                "type": "Property",
+
                 "value": [{
 
                     "string": "dlam_string",
 
                     "type": "LiteralString"
 
-                }],
-
-                "type": "Property"
+                }]
 
             },
 
-            "editable": true,
+            "sysmlid": "x"
 
-            "creator": "admin",
+        }],
 
-        }]
+        "name": "wsA",
+
+        "qualifiedName": "master/wsA"
 
     },
 
     "workspace2": {
 
-        "deletedElements": [],
-
         "addedElements": [],
 
         "conflictedElements": [],
 
+        "deletedElements": [],
+
+        "movedElements": [],
+
+        "name": "wsB",
+
+        "qualifiedName": "master/wsA/wsB",
+
         "updatedElements": [{
 
-            "sysmlid": "x",
+            "creator": "admin",
 
             "documentation": "x is x",
 
             "specialization": {
+
+                "type": "Property",
 
                 "value": [{
 
@@ -66,19 +74,13 @@
 
                     "type": "LiteralString"
 
-                }],
-
-                "type": "Property"
+                }]
 
             },
 
-            "creator": "admin",
+            "sysmlid": "x"
 
-        }],
-
-        "name": "wsB",
-
-        "movedElements": []
+        }]
 
     }
 

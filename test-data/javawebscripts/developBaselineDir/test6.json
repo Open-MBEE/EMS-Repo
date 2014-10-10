@@ -1,18 +1,18 @@
 {"elements": [{
 
-    "qualifiedId": "123456",
-
-    "name": "JW_TEST",
-
-    "qualifiedName": "/JW_TEST",
-
-    "sysmlid": "123456",
-
-    "owner": "null",
+    "creator": "admin",
 
     "editable": true,
 
-    "creator": "admin",
+    "name": "JW_TEST",
+
+    "owner": "null",
+
+    "qualifiedId": "123456",
+
+    "qualifiedName": "/JW_TEST",
+
+    "sysmlid": "123456"
 
 }]}
 

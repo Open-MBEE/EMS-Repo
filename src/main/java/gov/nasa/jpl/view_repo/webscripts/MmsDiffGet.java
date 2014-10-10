@@ -30,8 +30,10 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     protected boolean validateRequest( WebScriptRequest req, Status status ) {
         workspaceId1 = req.getParameter( "workspace1" );
         workspaceId2 = req.getParameter( "workspace2" );
-        ws1 = getWorkspaceFromId( workspaceId1, getServices(), response, status, false, null );
-        ws2 = getWorkspaceFromId( workspaceId2, getServices(), response, status, false, null );
+        ws1 = WorkspaceNode.getWorkspaceFromId( workspaceId1, getServices(), response, status, //false, 
+                                  null );
+        ws2 = WorkspaceNode.getWorkspaceFromId( workspaceId2, getServices(), response, status, //false,
+                                  null );
         boolean wsFound1 = ( ws1 != null || ( workspaceId1 != null && workspaceId1.equalsIgnoreCase( "master" ) ) );
         boolean wsFound2 = ( ws2 != null || ( workspaceId2 != null && workspaceId2.equalsIgnoreCase( "master" ) ) );
 
@@ -65,8 +67,10 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         WorkspaceNode ws1, ws2;
         String workspace1 = req.getParameter( "workspace1" );
         String workspace2 = req.getParameter( "workspace2" );
-        ws1 = getWorkspaceFromId( workspace1, services, response, status, false, null );
-        ws2 = getWorkspaceFromId( workspace2, services, response, status, false, null );
+        ws1 = WorkspaceNode.getWorkspaceFromId( workspace1, services, response, status, //false,
+                                  null );
+        ws2 = WorkspaceNode.getWorkspaceFromId( workspace2, services, response, status, //false, 
+                                  null );
 
         String timestamp1 = req.getParameter( "timestamp1" );
         dateTime1 = TimeUtils.dateFromTimestamp( timestamp1 );

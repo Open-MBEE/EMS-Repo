@@ -2,31 +2,29 @@
 
     {
 
+        "creator": "null",
+
         "name": "master",
-
-        "parent": "null",
-
-        "creator": "null"
 
     },
 
     {
+
+        "creator": "admin",
 
         "name": "wsA",
 
-        "parent": "master",
-
-        "creator": "admin"
+        "qualifiedName": "master/wsA"
 
     },
 
     {
 
+        "creator": "admin",
+
         "name": "wsB",
 
-        "parent": "wsA",
-
-        "creator": "admin"
+        "qualifiedName": "master/wsA/wsB"
 
     }
 

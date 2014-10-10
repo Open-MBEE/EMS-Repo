@@ -40,7 +40,9 @@
 
         }],
 
-        "name": "wsA"
+        "name": "wsA",
+
+        "qualifiedName": "master/wsA"
 
     },
 
@@ -55,6 +57,8 @@
         "movedElements": [],
 
         "name": "wsB",
+
+        "qualifiedName": "master/wsA/wsB",
 
         "updatedElements": [{
 

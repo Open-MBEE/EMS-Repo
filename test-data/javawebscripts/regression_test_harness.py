@@ -298,21 +298,21 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
         else:
             # Perform diff:
             if use_json_diff:
-                cp = ".:%s:../../target/view-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes"%mbee_util_jar_path()
+                cp = ".:%s:../../target/mms-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes"%mbee_util_jar_path()
                 diff_cmd = "java -cp %s gov.nasa.jpl.view_repo.util.JsonDiff"%cp
             else:
                 diff_cmd = "diff"
-                 
+
             (status_diff,output_diff) = commands.getstatusoutput("%s %s %s"%(diff_cmd,baseline_json,result_json))
-                 
+
             if output_diff:
-                print_error("Diff returned bad status or diffs found, status: %s, output: '%s'"%(status_diff, output_diff))
+                print_error("Test number %s failed!  Diff returned bad status or diffs found in the filtered .json files (%s,%s), status: %s, output: '%s'"%(test_num,baseline_json,result_json,status_diff, output_diff))
             else:
                 print_pass("Test number %s passed!  No differences in the filtered .json files (%s,%s)"%(test_num,baseline_json,result_json))
 
     else:
         print_error("Curl command return a bad status and output doesnt start with json: %s, output: '%s'"%(status,output))
-        
+
     thick_divider()
     
 def run_test(test):
@@ -546,7 +546,7 @@ create_curl_cmd(type="GET",data="",base_url=BASE_URL_JW,
 True, 
 common_filters,
 ["test","workspaces","develop"],
-120
+80
 ],
 
 # DELETES: ==========================    
@@ -608,7 +608,7 @@ common_filters+['"timestamp"','"id"'],
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="",branch="wsA?sourceWorkspace=master"),
 True, 
-common_filters+['"branched"','"created"'],
+common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
 ["test","workspaces","develop"]
 ],
         
@@ -619,7 +619,7 @@ common_filters+['"branched"','"created"'],
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="",branch="wsB?sourceWorkspace=wsA"),
 True, 
-common_filters+['"branched"','"created"'],
+common_filters+['"branched"','"created"','"id"','"qualifiedId"','"parent"'],
 ["test","workspaces","develop"]
 ],
         
@@ -629,7 +629,7 @@ common_filters+['"branched"','"created"'],
 "Get workspaces",
 create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,branch=""),
 True, 
-common_filters+['"branched"','"created"'],
+common_filters+['"branched"','"created"','"id"','"qualifiedId"','"parent"'],
 ["test","workspaces","develop"]
 ],
 
@@ -651,7 +651,7 @@ common_filters,
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff?workspace1=wsA&workspace2=wsB"),
 True, 
-common_filters,
+common_filters+['"id"','"qualifiedId"'],
 ["test","workspaces","develop"]
 ],
 

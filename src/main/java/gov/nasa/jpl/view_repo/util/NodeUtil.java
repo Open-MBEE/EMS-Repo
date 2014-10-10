@@ -76,7 +76,8 @@ public class NodeUtil {
         STRING( "@sysml\\:string:\"" ),
         BODY( "@sysml\\:body:\"" ),
         CHECKSUM( "@view\\:cs:\"" ),
-        WORKSPACE("@ems\\:workspace:\"" );
+        WORKSPACE("@ems\\:workspace:\"" ),
+        WORKSPACE_NAME("@ems\\:workspace_name:\"" );
 
         public String prefix;
 
@@ -984,6 +985,9 @@ public class NodeUtil {
      *         is printed if the id doesn't have the right syntax.
      */
     public static NodeRef findNodeRefByAlfrescoId(String id) {
+        if ( !id.contains( "://" ) ) {
+            id = "workspace://SpacesStore/" + id;
+        }
         if ( !NodeRef.isNodeRef( id ) ) {
             Debug.error("Bad NodeRef id: " + id );
             return null;
