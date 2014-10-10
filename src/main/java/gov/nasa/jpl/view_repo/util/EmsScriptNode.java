@@ -105,7 +105,7 @@ public class EmsScriptNode extends ScriptNode implements
                                              Comparable< EmsScriptNode > {
     private static final long serialVersionUID = 9132455162871185541L;
 
-    public static final boolean expressionStuff = false;
+    public static final boolean expressionStuff = true;
 
     /**
      * A set of content model property names that serve as workspace metadata
@@ -3338,7 +3338,7 @@ public class EmsScriptNode extends ScriptNode implements
                                         throws JSONException {
         String property;
         property = (String) node.getProperty("view2:contains");
-        if ( expressionStuff ) {//&& ( property == null || property.length() <= 0 ) ) {
+        if ( expressionStuff && ( property == null || property.length() <= 0 ) ) {
             json.put( "contains", getView().getContainsJson(true) );
             json.put( "displayedElements", getView().getDisplayedElements() );
             json.put( "allowedElements", getView().getDisplayedElements() );
