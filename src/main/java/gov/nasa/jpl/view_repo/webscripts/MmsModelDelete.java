@@ -44,6 +44,8 @@ public class MmsModelDelete extends AbstractJavaWebScript {
     @Override
     protected Map< String, Object > executeImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
+        printHeader( req );
+        
         Map<String, Object> model = new HashMap<String, Object>();
 
         MmsModelDelete instance = new MmsModelDelete(repository, services);
@@ -71,6 +73,8 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         // REVIEW -- TODO -- shouldn't responseStatus be called from instance?
         status.setCode(responseStatus.getCode());
 
+        printFooter();
+        
         return model;
     }
 
