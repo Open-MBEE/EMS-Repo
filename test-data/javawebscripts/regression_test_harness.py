@@ -302,9 +302,9 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
                 diff_cmd = "java -cp %s gov.nasa.jpl.view_repo.util.JsonDiff"%cp
             else:
                 diff_cmd = "diff"
-                 
+
             (status_diff,output_diff) = commands.getstatusoutput("%s %s %s"%(diff_cmd,baseline_json,result_json))
-                 
+
             if output_diff:
                 print_error("Test number %s failed!  Diff returned bad status or diffs found in the filtered .json files (%s,%s), status: %s, output: '%s'"%(test_num,baseline_json,result_json,status_diff, output_diff))
             else:
@@ -312,7 +312,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
 
     else:
         print_error("Curl command return a bad status and output doesnt start with json: %s, output: '%s'"%(status,output))
-        
+
     thick_divider()
     
 def run_test(test):
@@ -546,7 +546,7 @@ create_curl_cmd(type="GET",data="",base_url=BASE_URL_JW,
 True, 
 common_filters,
 ["test","workspaces","develop"],
-40
+80
 ],
 
 # DELETES: ==========================    
@@ -651,8 +651,8 @@ common_filters,
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff?workspace1=wsA&workspace2=wsB"),
 True, 
-common_filters,
-["test","workspaces","develop",'"id"','"qualifiedId"']
+common_filters+['"id"','"qualifiedId"'],
+["test","workspaces","develop"]
 ],
 
 # SNAPSHOTS: ==========================    
