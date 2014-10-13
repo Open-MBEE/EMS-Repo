@@ -194,19 +194,17 @@ public class DocBookWrapper {
 		return Arrays.copyOf(list.toArray(), list.toArray().length, String[].class);
 	}
 
-	private void retrieveDocBook(){
+	private void retrieveDocBook() throws Exception{
 		if(this.snapshotNode.hasAspect("view2:docbook")){
-    		//System.out.println("has docbook aspect!");
-    		//System.out.println("getting docbook node...");
     		NodeRef dbNodeRef = (NodeRef)this.snapshotNode.getProperty("view2:docbookNode");
-    		if(dbNodeRef==null) System.out.println("dbNodeRef is null!");
+    		if(dbNodeRef==null) throw new Exception("Failed to retrieve DocBook from repository! NodeRef is null!");
     		try{
     			retrieveStringPropContent(dbNodeRef, this.dbFileName);
     			System.out.println("retrieved docbook!");
     		}
     		catch(Exception ex){
-    			System.out.println("Failed to retrieve DocBook!");
     			ex.printStackTrace();
+    			throw new Exception("Failed to retrieve DocBook!", ex);
     		}
     	}
     }
@@ -240,28 +238,56 @@ public class DocBookWrapper {
 		}	
 	}
 	
-    private void retrieveStringPropContent(NodeRef node, Path savePath) throws IOException{
+    private void retrieveStringPropContent(NodeRef node, Path savePath) throws Exception{
     	if(!Files.exists(savePath.getParent())){
 	    	if(!new File(savePath.getParent().toString()).mkdirs()){
-	    		System.out.println("Could not create path: " + savePath.getParent());
-	    		return;
+	    		throw new Exception("Could not create path: " + savePath.getParent());
 	    	}
     	}
     	ContentService contentService = this.getSnapshotNode().getServices().getContentService();
-    	if(contentService == null) System.out.println("conent service is null!");
+    	if(contentService == null) throw new Exception("Failed to retrieve content from repository! Content service is null!");
+    	
 		ContentReader reader = contentService.getReader(node, ContentModel.PROP_CONTENT);
-		if(reader==null) System.out.println("reader is null!");
-		File srcFile = new File(savePath.toString());
-		reader.getContent(srcFile);
+		if(reader==null) throw new Exception("Failed to retrieve content from repository! Content reader is null!");
+		
+		try{
+			File srcFile = new File(savePath.toString());
+			reader.getContent(srcFile);
+		}
+		catch(Exception ex){
+			throw new Exception("Failed to write repository content to filesystem! " + savePath.toString(), ex);
+		}
+		
+		int counter = 60;
+		File dbFile = new File(this.dbFileName.toString());
+		while(counter-- > 0){
+			if(!dbFile.exists()){ 
+				Thread.sleep(1000);
+				continue;
+			}
+			if(!dbFile.canRead()){
+				Thread.sleep(1000);
+				continue;
+			}
+			return;
+		}
+		if(counter <= 0) throw new Exception("Failed to access DocBook.xml file! " + this.dbFileName.toString());
     }
 
-	public void save() throws IOException{
+	public void save() throws Exception{
 		String docBookXml = this.getContent();
-		new File(this.dbDirName.toString()).mkdirs();
-    	File f = new File(this.dbFileName.toString());
-    	FileWriter fw = new FileWriter(f);
-    	fw.write(docBookXml);
-    	fw.close();
+		if(docBookXml == null || docBookXml.isEmpty()) throw new Exception("Failed to save DBBook! DBBook content is null or empty!");
+		
+		try{
+			new File(this.dbDirName.toString()).mkdirs();
+	    	File f = new File(this.dbFileName.toString());
+	    	FileWriter fw = new FileWriter(f);
+	    	fw.write(docBookXml);
+	    	fw.close();
+		}
+		catch(IOException ex){
+			throw new Exception("Failed to write DBBook to filesystem.", ex);
+		}
 	}
 	
 	public void saveDocBookToRepo(EmsScriptNode snapshotFolder){
@@ -481,4 +507,3 @@ public class DocBookWrapper {
 		return Paths.get(this.getJobDirName(), zipFile).toString();
 	}
 }
-
