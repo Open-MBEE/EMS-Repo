@@ -60,6 +60,8 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     }
     protected Map< String, Object > myExecuteImpl( WebScriptRequest req,
                                                    Status status, Cache cache ) {
+        printHeader( req );
+        
         Map<String, Object> results = new HashMap<String, Object>();
 
         if (!validateRequest(req, status)) return results;
