@@ -214,12 +214,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         DBParagraph p = new DBParagraph();
         p.setId( src );
         if ( srcType.compareTo( "reference" ) == 0 ) {
-            WorkspaceNode workspace = null; // TODO -- REVIEW -- Do we need to
-                                            // pass this in????!
-            EmsScriptNode node =
-                    findScriptNodeById( src, workspace, null, false );
+            WorkspaceNode workspace = null; // TODO -- REVIEW -- Do we need to pass this in????!
+            EmsScriptNode node = findScriptNodeById( src, workspace, null, false );
             if ( srcProp.compareTo( "value" ) == 0 ) {
-                List< NodeRef > nodeRefs =
+                List< NodeRef > nodeRefs = 
                         (List< NodeRef >)node.getProperty( Acm.SYSML + srcProp );
                 StringBuffer sb = new StringBuffer();
                 int size = nodeRefs.size();
@@ -354,30 +352,43 @@ public class SnapshotPost extends AbstractJavaWebScript {
             docBook.setRemoveBlankPages( true );
             
             View productView = product.getView();
+            if(productView == null) throw new Exception("Failed to get product's view!");
+            
             JSONArray contains = productView.getContainsJson();
             if(contains == null || contains.length()==0){ throw new Exception("Failed to retrieve 'contains' JSONArray."); }
+            
             for(int i=0; i < contains.length(); i++){
 	            JSONObject contain = contains.getJSONObject(0);
+	            if(contain == null) throw new Exception("Failed to get contain JSONObject at index: " + i);
+	            
 	            String sourceType = (String)contain.opt("sourceType");
 	            String source = (String)contain.opt("source");
+	            if(source == null || source.isEmpty()) throw new Exception("Failed to get contain source property!");
+	            
 	            this.view2view = productView.getViewToViewPropertyJson();
 	            if(view2view == null || view2view.length()==0) throw new Exception ("Failed to retrieve 'view2view' JSONArray.");
+	            
 	            JSONObject v2vChildNode = getChildrenViews(source);
 	            if(v2vChildNode == null) throw new Exception("Failed to retrieve 'view2view' children view for: " + source);
 	            
 	            JSONArray childrenViews = v2vChildNode.getJSONArray("childrenViews");
 	            if(childrenViews == null) throw new Exception("Failed to retrieve 'childrenViews'.");
+	            
 	            for(int k=0; k< childrenViews.length(); k++){
 	            	String childId = childrenViews.getString(k);
+	            	if(childId == null || childId.isEmpty()) throw new Exception("Failed to get 'childrenViews'[" + k + "] Id!");
+	            	
 	            	EmsScriptNode childNode = findScriptNodeById(childId, null, null, false);
+	            	if(childNode == null) throw new Exception("Failed to find EmsScriptNode with Id: " + childId);
 	            	//creating chapters
 	            	DocumentElement section = (DocumentElement)emsScriptNodeToDBSection(childNode, true);
-	            	docBook.addElement(section);
+	            	if(section != null) docBook.addElement(section);
 	            }
             }
             docBookMgr.setDBBook(docBook);
             docBookMgr.save();
-        } catch ( Exception ex ) {
+        } 
+        catch ( Exception ex ) {
             log( LogLevel.ERROR,
                  "\nFailed to create DBBook! " + ex.getStackTrace() );
             ex.printStackTrace();
@@ -1024,11 +1035,18 @@ public class SnapshotPost extends AbstractJavaWebScript {
             cirRefList = new ArrayList< List< String >>();
         }
         List< String > list = null;
-        if ( cirRefList.size() <= index ) {
-            list = new ArrayList< String >();
-            cirRefList.add( list );
+        while(true){
+	        if ( cirRefList.size() > index ) break;
+	        else{
+	            list = new ArrayList< String >();
+	            cirRefList.add( list );
+	        }
         }
         list = cirRefList.get( index );
+        if(list == null){
+        	System.out.println("Failed to retrieve circular reference list at index: " + index);
+        	return inputString;
+        }
         list.add( id + transclusionType );
         index++;
         String result = parseTransclusionName( cirRefList, index, inputString );
@@ -1094,33 +1112,52 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
 	private String parseTransclusionDoc(List<List<String>> cirRefList, int index,
 	                                    String inputString){
+		if(inputString == null || inputString.isEmpty()) return inputString;
+		
 		Document document = Jsoup.parseBodyFragment(inputString);
+		if(document == null || document.body()==null){
+			System.out.println("Failed to parse HTML fragment: " + inputString);
+			return inputString;
+		}
+		
 		Elements elements = document.getElementsByTag("mms-transclude-doc");
+		if(elements == null || elements.size() < 1) return document.body().html();
+		
 		for(Element element:elements){
 			String id = element.attr("data-mms-eid");
+			if(id == null || id.isEmpty()){
+				System.out.println("Failed to parse transclusion doc Id!");
+				System.out.println(element.html());
+				element.before("[cannot parse Id for " + element.text() + "]");
+				element.remove();
+				continue;
+			}
+			
 			if(isCircularReference(id, "documentation", cirRefList, index)){
 				System.out.println("Circular reference!");
 				element.before("[Circular reference!]");
 				element.remove();
 				continue;
 			}
+			
+			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
 			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); // TODO -- REVIEW -- Pass in workspace????!!!!
-			if(id == null || id.isEmpty()){
+			if(nameNode == null){
 				System.out.println("Failed to find EmsScriptNode Id " + id);
+				element.before(transcluded);
+				element.remove();
 			}
 			else{
 				try {
 					JSONObject jsObj = nameNode.toJSONObject(null);
 					if(jsObj == null){
 						System.out.println("JSONObject is null");
+						element.before(transcluded);
+						element.remove();
 					}
 					else{
 						String doc = getTranscludedContent(jsObj, "documentation");
-						String transcluded = null;
-						if(doc == null || doc.isEmpty()){
-							transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
-						}
-						else{
+						if(doc != null && !doc.isEmpty()){
 							transcluded = doc;
 							while(true){
 								transcluded = handleTransclusion(id, "doc", transcluded,
@@ -1129,12 +1166,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
 								doc = transcluded;
 							}
 						}
+						if(transcluded == null || transcluded.isEmpty()) transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
 						element.before(transcluded);
 						element.remove();
 					}
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
-					System.out.println("Failed to transclude Id: " + id);
+					System.out.println("Failed to transclude doc for Id: " + id);
+					System.out.println(element.html());
 					e.printStackTrace();
 				}
 			}
@@ -1143,72 +1182,117 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	}
 	
 	private String parseTransclusionName(List<List<String>> cirRefList, int index, String inputString){
+		if(inputString == null || inputString.isEmpty()) return inputString;
 		Document document = Jsoup.parseBodyFragment(inputString);
+		if(document == null || document.body() == null){
+			System.out.println("Failed to parse HTML fragment: " + inputString);
+			return inputString;
+		}
+		
 		Elements elements = document.getElementsByTag("mms-transclude-name");
+		if(elements == null || elements.size() < 1) return document.body().html();
+		
 		for(Element element:elements){
 			String id = element.attr("data-mms-eid");
+			if(id == null || id.isEmpty()){
+				System.out.println("Failed to parse transclusion name Id!");
+				System.out.println(element.html());
+				element.before("[cannot parse Id for " + element.text() + "]");
+				element.remove();
+				continue;
+			}
+			
 			if(isCircularReference(id, "name", cirRefList, index)){
 				System.out.println("Circular reference!");
 				element.before("[Circular reference!]");
 				element.remove();
 				continue;
 			}
+			
+			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
 			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); // TODO -- REVIEW -- Pass in workspace????!!!!
-			if(id == null || id.isEmpty()){
-				System.out.println("Failed to find EmsScriptNode Id " + id);
+			if(nameNode == null){
+				System.out.println("Failed to find EmsScriptNode Id: " + id);
+				element.before(transcluded);
+				element.remove();
+				continue;
 			}
-			else{
-				try {
-					JSONObject jsObj = nameNode.toJSONObject(null);
-					if(jsObj == null){
-						System.out.println("JSONObject is null");
-					}
-					else{
-						String name = getTranscludedContent(jsObj, "name");
-						String transcluded = null;
-						if(name == null || name.isEmpty()){
-							transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
-						}
-						else{
-						transcluded = name;
-							while(true){
-								transcluded = handleTransclusion(id, "name", transcluded, cirRefList, index);
-								if(transcluded.compareToIgnoreCase(name) == 0) break;
-								name = transcluded;
-							}
-						}
-						element.before(transcluded);
-						element.remove();
-					}
-				} catch (JSONException e) {
-					System.out.println("Failed to transclude Id: " + id);
-					e.printStackTrace();
+			
+			try {
+				JSONObject jsObj = nameNode.toJSONObject(null);
+				if(jsObj == null){
+					System.out.println("JSONObject is null");
+					element.before(transcluded);
+					element.remove();
 				}
+				else{
+					String name = getTranscludedContent(jsObj, "name");
+					if(name != null && !name.isEmpty()){
+						transcluded = name;
+						while(true){
+							transcluded = handleTransclusion(id, "name", transcluded, cirRefList, index);
+							if(transcluded.compareToIgnoreCase(name) == 0) break;
+							name = transcluded;
+						}
+					}
+					if(transcluded == null || transcluded.isEmpty()) transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
+					element.before(transcluded);
+					element.remove();
+				}
+			} catch (JSONException e) {
+				System.out.println("Failed to transclude name for Id: " + id);
+				System.out.println(element.html());
+				e.printStackTrace();
 			}
 		}
 		return document.body().html();
 	}
 	
 	private String parseTransclusionVal(List<List<String>> cirRefList, int index, String inputString){
+		if(inputString == null || inputString.isEmpty()) return inputString;
+		
 		Document document = Jsoup.parseBodyFragment(inputString);
+		if(document == null || document.body() == null){
+			System.out.println("Failed to parse HTML fragment: " + inputString);
+			return inputString;
+		}
+		
 		Elements elements = document.getElementsByTag("mms-transclude-val");
+		if(elements == null || elements.size() < 1) return document.body().html();
+		
 		for(Element element:elements){
 			String id = element.attr("data-mms-eid");
+			if(id == null || id.isEmpty()){
+				System.out.println("Failed to parse transclusion value Id!");
+				System.out.println(element.html());
+				element.before("[cannot parse Id for " + element.text() + "]");
+				element.remove();
+				continue;
+			}
+			
 			if(isCircularReference(id, "value", cirRefList, index)){
 				System.out.println("Circular reference!");
 				element.before("[Circular reference!]");
 				element.remove();
 				continue;
 			}
+			
+			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
 			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); // TODO -- REVIEW -- Pass in workspace????!!!!
-			if(id == null || id.isEmpty()){
+			if(nameNode == null){
 				System.out.println("Failed to find EmsScriptNode Id " + id);
+				element.before(transcluded);
+				element.remove();
+				continue;
 			}
 			else{
 				try {
 					JSONObject jsObj = nameNode.toJSONObject(null);
 					if(jsObj == null){
 						System.out.println("JSONObject is null");
+						element.before(transcluded);
+						element.remove();
+						continue;
 					}
 					else{
 						String val = getTranscludedVal(jsObj);
@@ -1295,10 +1379,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		return jsonObject;
 	}
 
-    private
-            void
-            saveImage( DBImage image, EmsScriptNode imageEmsScriptNode )
-                                                                        throws Exception {
+    private void saveImage( DBImage image, EmsScriptNode imageEmsScriptNode ) throws Exception {
         String tmpDirName = TempFileProvider.getTempDir().getAbsolutePath();
         Path jobDirName = Paths.get( tmpDirName, this.snapshotName );
         Path dbDirName = Paths.get( jobDirName.toString(), "docbook" );
@@ -1419,4 +1500,3 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return false;
     }
 }
-
