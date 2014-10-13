@@ -207,61 +207,93 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     private DBParagraph createDBParagraph( JSONObject obj ) {
+    	if(obj == null) return null;
         String srcType = (String)obj.opt( "sourceType" );
         String src = (String)obj.opt( "source" );
         String srcProp = (String)obj.opt( "sourceProperty" );
 
+        if(src == null || src.isEmpty()){
+        	System.out.println("Failed to create DBParagraph! Source property is null or empty.");
+        	return null;
+        }
+        
+        if(srcType == null || srcType.isEmpty()){
+        	System.out.println("Failed to create DBParagraph! sourceType property is null or empty.");
+        	return null;
+        }
+        
+        if(srcProp == null || srcProp.isEmpty()){
+        	System.out.println("Failed to create DBParagraph! sourceProperty property is null or empty.");
+        	return null;
+        }
+        
         DBParagraph p = new DBParagraph();
         p.setId( src );
         if ( srcType.compareTo( "reference" ) == 0 ) {
             WorkspaceNode workspace = null; // TODO -- REVIEW -- Do we need to pass this in????!
             EmsScriptNode node = findScriptNodeById( src, workspace, null, false );
+            if(node == null){
+            	System.out.println("Failed to create DBParagraph! Failed to find EmsScriptNode with Id: " + src);
+            	return null;
+            }
+            
             if ( srcProp.compareTo( "value" ) == 0 ) {
-                List< NodeRef > nodeRefs = 
-                        (List< NodeRef >)node.getProperty( Acm.SYSML + srcProp );
+                List< NodeRef > nodeRefs = (List< NodeRef >)node.getProperty( Acm.SYSML + srcProp );
+                if(nodeRefs == null){
+                	System.out.println("Failed to create DBParagraph! Failed to find values node references.");
+                	return null;
+                }
+                
                 StringBuffer sb = new StringBuffer();
                 int size = nodeRefs.size();
                 //if ( size > 0 ) sb.append( "<literallayout>" );
                 for ( int i = 0; i < size; i++ ) {
                     NodeRef nodeRef = nodeRefs.get( i );
-                    EmsScriptNode valueNode =
-                            new EmsScriptNode( nodeRef, node.getServices() );
-                    if ( valueNode != null ) {
-                        String valueProp =
-                                (String)node.getProperty( Acm.SYSML + "name" );
-                        if ( valueProp != null && !valueProp.isEmpty() ) {
-                            Object value =
-                                    valueNode.getProperty( Acm.SYSML
-                                                           + valueProp );
+                    if(nodeRef == null){
+                    	System.out.println("Failed to get value node ref at index: " + i);
+                    	continue;
+                    }
+                    
+                    EmsScriptNode valueNode = new EmsScriptNode( nodeRef, node.getServices() );
+                    if ( valueNode == null ) {
+                    	System.out.println("Failed to retrieve node's value.");
+                    	continue;
+                    }
+                    
+                    String valueProp = (String)node.getProperty( Acm.SYSML + "name" );
+                    if ( valueProp != null && !valueProp.isEmpty() ) {
+                        Object value =
+                                valueNode.getProperty( Acm.SYSML
+                                                       + valueProp );
+                        if ( value == null
+                             || ( value != null && value.toString()
+                                                        .isEmpty() ) ) {
+                            value = extractNodeValue( valueNode );
                             if ( value == null
                                  || ( value != null && value.toString()
-                                                            .isEmpty() ) ) {
-                                value = extractNodeValue( valueNode );
-                                if ( value == null
-                                     || ( value != null && value.toString()
-                                                                .isEmpty() ) ) continue;
-                            }
+                                                            .isEmpty() ) ) continue;
+                        }
 
-                            if ( value instanceof String ) sb.append( HtmlSanitize( (String)value ) );
-                            else sb.append( value );
-                        } else {
-
-                            try {
-                                Object valObj = extractNodeValue( valueNode );
-                                if ( valObj == null ) continue;
-                                if ( valObj instanceof String ) sb.append( HtmlSanitize( (String)valObj ) );
-                                else sb.append( valObj );
-                            } catch ( Exception ex ) {
-                                log( LogLevel.WARNING,
-                                     "Problem extract node value from "
-                                             + node.toJSON() );
-                            }
+                        if ( value instanceof String ) sb.append( HtmlSanitize( (String)value ) );
+                        else sb.append( value );
+                    } else {
+                        try {
+                            Object valObj = extractNodeValue( valueNode );
+                            if ( valObj == null ) continue;
+                            if ( valObj instanceof String ) sb.append( HtmlSanitize( (String)valObj ) );
+                            else sb.append( valObj );
+                        } 
+                        catch ( Exception ex ) {
+                            log( LogLevel.WARNING,
+                                 "Problem extract node value from "
+                                         + node.toJSON() );
                         }
                     }
                 }
                 //if ( size > 0 ) sb.append( "</literallayout>" );
                 p.setText( sb.toString() );
-            } else {
+            } 
+            else {
                 String s = (String)node.getProperty( Acm.SYSML + srcProp );
                 s = handleTransclusion( src, srcProp, s, null, 0 );
                 s = handleEmbeddedImage(src, s);
@@ -271,7 +303,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 //                                            + s
                 //                                            + "</literallayout>" );
             }
-        } else {
+        } 
+        else {
             if ( srcProp != null && !srcProp.isEmpty() ) {
                 String s = (String)obj.opt( Acm.SYSML + srcProp );
                 s = handleTransclusion( src, srcProp, s, null, 0 );
