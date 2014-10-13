@@ -1864,7 +1864,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
             // Solve!!!!
             Debug.turnOn();
-            Random.reset();
+//            Random.reset();
             boolean result = solver.solve(constraints);
             Debug.turnOff();
 

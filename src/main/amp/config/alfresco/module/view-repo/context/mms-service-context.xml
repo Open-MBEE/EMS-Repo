@@ -40,13 +40,6 @@
     </bean>
     
 
-    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.products.snapshots.post"
-        class="gov.nasa.jpl.view_repo.webscripts.SnapshotPost" parent="webscript"
-        singleton="false">
-        <property name="repositoryHelper" ref="repositoryHelper" />
-        <property name="services" ref="ServiceRegistry" />
-    </bean>
-
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.products.get"
         class="gov.nasa.jpl.view_repo.webscripts.MmsProductsGet" parent="webscript"
         singleton="false">
@@ -54,7 +47,6 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
     
-        <!-- adding new bean -->
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.products.product.post"
         class="gov.nasa.jpl.view_repo.webscripts.ProductPost" parent="webscript"
         singleton="false">
@@ -62,7 +54,6 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
     
-        <!-- adding new bean -->
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.products.post"
         class="gov.nasa.jpl.view_repo.webscripts.ProductPost" parent="webscript"
         singleton="false">
@@ -191,8 +182,22 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
 
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.products.snapshots.snapshot.delete "
+        class="gov.nasa.jpl.view_repo.webscripts.MmsSnapshotsDelete" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.products.snapshots.get"
         class="gov.nasa.jpl.view_repo.webscripts.MmsSnapshotsGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.products.snapshots.post"
+        class="gov.nasa.jpl.view_repo.webscripts.SnapshotPost" parent="webscript"
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
