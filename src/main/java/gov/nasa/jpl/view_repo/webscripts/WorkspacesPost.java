@@ -148,7 +148,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                                                               services,
                                                               response, status, // false,
                                                               user );
-            if (!sourceWorkId.equals( "master" ) && srcWs == null) {
+            if (!"master".equals( sourceWorkId ) && srcWs == null) {
                 log(LogLevel.WARNING, "Source workspace not found.", HttpServletResponse.SC_NOT_FOUND);
                 return HttpServletResponse.SC_NOT_FOUND;
             } else {

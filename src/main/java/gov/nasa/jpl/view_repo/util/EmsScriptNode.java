@@ -1939,8 +1939,8 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public EmsScriptNode getProjectNode() {
-        EmsScriptNode parent = this.getParent();
-        while ( !parent.getType().contains( "Project" ) ) {
+        EmsScriptNode parent = this;
+        while ( parent != null && parent.getType() != null && !parent.getType().contains( "Project" ) ) {
             EmsScriptNode oldparent = parent;
             parent = oldparent.getParent();
         }
@@ -1948,6 +1948,10 @@ public class EmsScriptNode extends ScriptNode implements
     }
     
     public String getProjectId() {
+        EmsScriptNode projectNode = getProjectNode();
+        if (projectNode == null) {
+            return "null";
+        }
         return getProjectNode().getSysmlId();
     }
     
