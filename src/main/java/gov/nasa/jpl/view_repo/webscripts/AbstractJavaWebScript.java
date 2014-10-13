@@ -624,14 +624,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * @return          true if publish completed
      * @throws JSONException
      */
-    protected boolean sendDeltas(JSONObject deltaJson, String workspace, String projectId) throws JSONException {
+    protected boolean sendDeltas(JSONObject deltaJson, String workspaceId, String projectId) throws JSONException {
         boolean jmsStatus = false;
         boolean restStatus = false;
 
         if (jmsConnection != null) {
-            jmsConnection.setWorkspace( workspace );
+            jmsConnection.setWorkspace( workspaceId );
             jmsConnection.setProjectId( projectId );
-            jmsStatus = jmsConnection.publish( deltaJson, workspace );
+            jmsStatus = jmsConnection.publish( deltaJson, workspaceId );
         }
         if (restConnection != null) {
             try {
