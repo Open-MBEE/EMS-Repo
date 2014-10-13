@@ -1948,7 +1948,7 @@ public class EmsScriptNode extends ScriptNode implements
     }
     
     public String getProjectId() {
-        EmsScriptNode projectnode = getProjectNode();
+        EmsScriptNode projectNode = getProjectNode();
         if (projectNode == null) {
             return "null";
         }
