@@ -123,7 +123,7 @@ public class ModelGet extends AbstractJavaWebScript {
         boolean findDeleted = true;
         if ( wsFound ) modelRootNode = findScriptNodeById(modelId, workspace, dateTime, findDeleted);
         
-		if (modelRootNode == null || modelRootNode.hasAspect( "ems:Deleted" )) {
+		if (modelRootNode == null || modelRootNode.isDeleted() ) {
             log( LogLevel.ERROR,
                  "Element with id, " + modelId
                  + ( dateTime == null ? "" : " at " + dateTime ) + " not found",

@@ -1940,7 +1940,7 @@ public class EmsScriptNode extends ScriptNode implements
 
     public EmsScriptNode getProjectNode() {
         EmsScriptNode parent = this;
-        while ( parent != null && parent.getType() != null && !parent.getType().contains( "Project" ) ) {
+        while ( parent != null && parent.getSysmlId() != null && !parent.getSysmlId().startsWith( "PROJECT-" ) ) {
             EmsScriptNode oldparent = parent;
             parent = oldparent.getParent();
         }
@@ -2570,8 +2570,16 @@ public class EmsScriptNode extends ScriptNode implements
         // may seem counterintuitive, but if it doesn't exist, it isn't deleted
         return false;
     }
-
-
+    
+    /** 
+     * this is a soft delete that is used to internally track "deleted" elements
+     */
+    public void delete() {
+        if (!isDeleted()) {
+            addAspect( "ems:Deleted" );
+        }
+    }
+    
     public boolean isFolder() {
         try {
             services.getNodeService().getType( this.getNodeRef() );
@@ -2639,7 +2647,7 @@ public class EmsScriptNode extends ScriptNode implements
             if ( hasAspect( "ems:HasWorkspace" ) ) {
                 NodeRef ref = (NodeRef)getProperty( "ems:workspace" );
                 if (ref != null) {
-                	WorkspaceNode ws = new WorkspaceNode( ref, getServices() );
+                    WorkspaceNode ws = new WorkspaceNode( ref, getServices() );
                     setWorkspace( ws, null );
                 }
             }
