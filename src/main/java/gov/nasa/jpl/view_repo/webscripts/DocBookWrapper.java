@@ -318,7 +318,7 @@ public class DocBookWrapper {
 			
 			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, zipPath)) throw new Exception("Failed to save HTML artifact to repository!");
 			if(this.snapshotNode.createOrUpdateAspect("view2:htmlZip")){
-				if(!this.snapshotNode.createOrUpdateProperty("view2:htmlZipNode", node.getNodeRef())) throw new Exception("Failed to create HTML aspect!");
+				this.snapshotNode.createOrUpdateProperty("view2:htmlZipNode", node.getNodeRef());
 			}
 		}
 		catch(Exception ex){
@@ -336,7 +336,7 @@ public class DocBookWrapper {
 			
 			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_PDF, pdfPath)) throw new Exception("Failed to save PDF artifact to repository!");
 			if(this.snapshotNode.createOrUpdateAspect("view2:pdf")){
-				if(!this.snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef())) throw new Exception("Failed to create PDF aspect!");
+				this.snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef());
 			}
 		}
 		catch(Exception ex){
