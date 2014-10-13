@@ -337,7 +337,7 @@ public class ModelPost extends AbstractJavaWebScript {
             JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
             String wsId = "master";
             if (targetWS != null) {
-                wsId = targetWS.getSysmlId();
+                wsId = targetWS.getId();
             }
             // FIXME: Need to split by projectId
             if ( !sendDeltas(deltaJson, wsId, elements.first().getProjectId()) ) {
