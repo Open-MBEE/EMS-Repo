@@ -481,3 +481,4 @@ public class DocBookWrapper {
 		return Paths.get(this.getJobDirName(), zipFile).toString();
 	}
 }
+

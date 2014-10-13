@@ -22,7 +22,10 @@ import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.extensions.surf.RequestContext;
+import org.springframework.extensions.surf.support.ThreadLocalRequestContext;
 import org.springframework.extensions.webscripts.Status;
+import org.springframework.extensions.webscripts.connector.User;
 import org.springframework.web.context.request.WebRequest;
 
 public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAbstractBase {
@@ -123,7 +126,10 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        // Send off notification email
 	        String subject = "[EuropaEMS] Snapshot Generation " + jobStatus;
 	        String msg = buildEmailMessage(snapshot);
-	        ActionUtil.sendEmailToModifier(jobNode, msg, subject, services, response);
+	        //ActionUtil.sendEmailToModifier(jobNode, msg, subject, services, response);
+	        RequestContext context = ThreadLocalRequestContext.getRequestContext();
+	        User recipient = context.getUser(); 
+	        ActionUtil.sendEmailTo("europaems@jpl.nasa.gov", recipient.getEmail(), msg, subject, services);
 	        
 	        System.out.println("Completed snapshot artifact(s) generation.");
         }
