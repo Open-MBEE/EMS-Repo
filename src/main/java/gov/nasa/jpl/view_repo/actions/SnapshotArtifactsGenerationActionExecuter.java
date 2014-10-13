@@ -42,6 +42,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     public static final String PARAM_SITE_NAME = "siteName";
     public static final String PARAM_SNAPSHOT_ID = "snapshotId";
     public static final String PARAM_FORMAT_TYPE = "formatType";
+    public static final String PARAM_USER_EMAIL = "userEmail";
     
     public void setRepository(Repository rep) {
         repository = rep;
@@ -126,31 +127,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        // Send off notification email
 	        String subject = "[EuropaEMS] Snapshot Generation " + jobStatus;
 	        String msg = buildEmailMessage(snapshot);
-	        //ActionUtil.sendEmailToModifier(jobNode, msg, subject, services, response);
-	        boolean isEmailSent = false;
-	        RequestContext context = ThreadLocalRequestContext.getRequestContext();
-	        if(context != null){
-	        	User recipient = context.getUser();
-	        	if(recipient != null){
-	        		String emailAddr = recipient.getEmail();
-	        		if(emailAddr != null && !emailAddr.isEmpty()){
-	        			ActionUtil.sendEmailTo("europaems@jpl.nasa.gov", recipient.getEmail(), msg, subject, services);
-	        			isEmailSent = true;
-	        		}
-	        		else{
-	        			System.out.println("User email address is empty or null.");
-	        		}
-	        	}
-	        	else{
-	        		System.out.println("Failed to retrieve current user object.");
-	        	}
-	        }
-	        else{
-	        	System.out.println("Failed to retrieve RequestContext object.");
-	        }
-	        
-	        if(!isEmailSent) System.out.println("Failed to send notification email!");
-	        
+	        ActionUtil.sendEmailTo("europaems@jpl.nasa.gov", action.getParameterValue(PARAM_USER_EMAIL).toString(), msg, subject, services);
 	        System.out.println("Completed snapshot artifact(s) generation.");
         }
         catch(Exception ex){

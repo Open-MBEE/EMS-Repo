@@ -86,6 +86,7 @@ public class DocBookWrapper {
 		String source = srcFile.getAbsolutePath();
 		String target = source.subSequence(0, source.lastIndexOf(".")) + ".pdf";
 		command.add(this.getFobFileName());
+		//command.add("-r");	//relaxed validation
 		command.add("-xml");
 		command.add(source);
 		command.add("-xsl");
