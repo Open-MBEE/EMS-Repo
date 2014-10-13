@@ -69,6 +69,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.util.TempFileProvider;
 import org.alfresco.util.UrlUtil;
@@ -101,7 +102,20 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	//public void setSysAdminParas(SysAdminParams sysAdminParams){
 	//	this.sysAdminParams = sysAdminParams;
 	//}
-	
+	protected NodeService nodeService;
+	protected PersonService personService;
+
+
+    public void setNodeService(NodeService nodeService)
+    {
+       this.nodeService = nodeService;
+    }
+    
+    public void setPersonService(PersonService personService)
+    {
+    	this.personService = personService;
+    }
+    
     public SnapshotPost() {
         super();
     }
@@ -212,96 +226,78 @@ public class SnapshotPost extends AbstractJavaWebScript {
         String src = (String)obj.opt( "source" );
         String srcProp = (String)obj.opt( "sourceProperty" );
 
-        if(src == null || src.isEmpty()){
-        	System.out.println("Failed to create DBParagraph! Source property is null or empty.");
-        	return null;
-        }
-        
-        if(srcType == null || srcType.isEmpty()){
-        	System.out.println("Failed to create DBParagraph! sourceType property is null or empty.");
-        	return null;
-        }
-        
-        if(srcProp == null || srcProp.isEmpty()){
-        	System.out.println("Failed to create DBParagraph! sourceProperty property is null or empty.");
-        	return null;
-        }
-        
         DBParagraph p = new DBParagraph();
         p.setId( src );
-        if ( srcType.compareTo( "reference" ) == 0 ) {
+        if (srcType != null && srcType.compareTo( "reference" ) == 0 ) {
             WorkspaceNode workspace = null; // TODO -- REVIEW -- Do we need to pass this in????!
             EmsScriptNode node = findScriptNodeById( src, workspace, null, false );
             if(node == null){
             	System.out.println("Failed to create DBParagraph! Failed to find EmsScriptNode with Id: " + src);
-            	return null;
+            	//return null;
             }
-            
-            if ( srcProp.compareTo( "value" ) == 0 ) {
-                List< NodeRef > nodeRefs = (List< NodeRef >)node.getProperty( Acm.SYSML + srcProp );
-                if(nodeRefs == null){
-                	System.out.println("Failed to create DBParagraph! Failed to find values node references.");
-                	return null;
-                }
-                
-                StringBuffer sb = new StringBuffer();
-                int size = nodeRefs.size();
-                //if ( size > 0 ) sb.append( "<literallayout>" );
-                for ( int i = 0; i < size; i++ ) {
-                    NodeRef nodeRef = nodeRefs.get( i );
-                    if(nodeRef == null){
-                    	System.out.println("Failed to get value node ref at index: " + i);
-                    	continue;
-                    }
-                    
-                    EmsScriptNode valueNode = new EmsScriptNode( nodeRef, node.getServices() );
-                    if ( valueNode == null ) {
-                    	System.out.println("Failed to retrieve node's value.");
-                    	continue;
-                    }
-                    
-                    String valueProp = (String)node.getProperty( Acm.SYSML + "name" );
-                    if ( valueProp != null && !valueProp.isEmpty() ) {
-                        Object value =
-                                valueNode.getProperty( Acm.SYSML
-                                                       + valueProp );
-                        if ( value == null
-                             || ( value != null && value.toString()
-                                                        .isEmpty() ) ) {
-                            value = extractNodeValue( valueNode );
-                            if ( value == null
-                                 || ( value != null && value.toString()
-                                                            .isEmpty() ) ) continue;
-                        }
-
-                        if ( value instanceof String ) sb.append( HtmlSanitize( (String)value ) );
-                        else sb.append( value );
-                    } else {
-                        try {
-                            Object valObj = extractNodeValue( valueNode );
-                            if ( valObj == null ) continue;
-                            if ( valObj instanceof String ) sb.append( HtmlSanitize( (String)valObj ) );
-                            else sb.append( valObj );
-                        } 
-                        catch ( Exception ex ) {
-                            log( LogLevel.WARNING,
-                                 "Problem extract node value from "
-                                         + node.toJSON() );
-                        }
-                    }
-                }
-                //if ( size > 0 ) sb.append( "</literallayout>" );
-                p.setText( sb.toString() );
-            } 
-            else {
-                String s = (String)node.getProperty( Acm.SYSML + srcProp );
-                s = handleTransclusion( src, srcProp, s, null, 0 );
-                s = handleEmbeddedImage(src, s);
-                s = HtmlSanitize( s );
-                if(s != null && !s.isEmpty()) p.setText(s);
-                //if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
-                //                                            + s
-                //                                            + "</literallayout>" );
+            else{
+	            if (srcProp != null && srcProp.compareTo( "value" ) == 0 ) {
+	                List< NodeRef > nodeRefs = (List< NodeRef >)node.getProperty( Acm.SYSML + srcProp );
+	                if(nodeRefs == null){
+	                	System.out.println("Failed to create DBParagraph! Failed to find values node references.");
+	                	return null;
+	                }
+	                
+	                StringBuffer sb = new StringBuffer();
+	                int size = nodeRefs.size();
+	                //if ( size > 0 ) sb.append( "<literallayout>" );
+	                for ( int i = 0; i < size; i++ ) {
+	                    NodeRef nodeRef = nodeRefs.get( i );
+	                    if(nodeRef == null){
+	                    	System.out.println("Failed to get value node ref at index: " + i);
+	                    	continue;
+	                    }
+	                    
+	                    EmsScriptNode valueNode = new EmsScriptNode( nodeRef, node.getServices() );
+	                    
+	                    String valueProp = (String)node.getProperty( Acm.SYSML + "name" );
+	                    if ( valueProp != null && !valueProp.isEmpty() ) {
+	                        Object value =
+	                                valueNode.getProperty( Acm.SYSML
+	                                                       + valueProp );
+	                        if ( value == null
+	                             || ( value != null && value.toString()
+	                                                        .isEmpty() ) ) {
+	                            value = extractNodeValue( valueNode );
+	                            if ( value == null
+	                                 || ( value != null && value.toString()
+	                                                            .isEmpty() ) ) continue;
+	                        }
+	
+	                        if ( value instanceof String ) sb.append( HtmlSanitize( (String)value ) );
+	                        else sb.append( value );
+	                    } else {
+	                        try {
+	                            Object valObj = extractNodeValue( valueNode );
+	                            if ( valObj == null ) continue;
+	                            if ( valObj instanceof String ) sb.append( HtmlSanitize( (String)valObj ) );
+	                            else sb.append( valObj );
+	                        } 
+	                        catch ( Exception ex ) {
+	                            log( LogLevel.WARNING,
+	                                 "Problem extracting node value from "
+	                                         + node.toJSON() );
+	                        }
+	                    }
+	                }
+	                //if ( size > 0 ) sb.append( "</literallayout>" );
+	                p.setText( sb.toString() );
+	            } 
+	            else {
+	                String s = (String)node.getProperty( Acm.SYSML + srcProp );
+	                s = handleTransclusion( src, srcProp, s, null, 0 );
+	                s = handleEmbeddedImage(src, s);
+	                s = HtmlSanitize( s );
+	                if(s != null && !s.isEmpty()) p.setText(s);
+	                //if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
+	                //                                            + s
+	                //                                            + "</literallayout>" );
+	            }
             }
         } 
         else {
@@ -314,7 +310,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 //if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
                   //                                          + s
                     //                                        + "</literallayout>" );
-            } else p.setText( HtmlSanitize( (String)obj.opt( "text" ) ) );
+            } 
+            else p.setText( HtmlSanitize( (String)obj.opt( "text" ) ) );
         }
         if ( p.getText() == null || p.getText().toString().isEmpty() ) return null;
 
@@ -830,6 +827,19 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return "";
     }
 
+
+    private String getEmail(String userName) {
+    	try{
+			NodeRef person = getUserProfile(userName);
+			if(person == null) return "";
+			return (String)nodeService.getProperty(person, ContentModel.PROP_EMAIL);
+    	}
+    	catch(Exception ex){
+    		System.out.println("Failed to get email address for " + userName);
+    	}
+    	return "";
+	}
+
     /**
      * Retrieve the snapshot folder for the view (goes up chain until it hits ViewEditor)
      * 
@@ -959,6 +969,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
             System.out.println( "Failed to retrieve document element type!" );
         }
         return null;
+    }
+
+
+    private NodeRef getUserProfile(String userName){
+    	return personService.getPerson(userName, false);
     }
 
     private String getUserProfile( EmsScriptNode node, String userName ) {
@@ -1466,12 +1481,16 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	 * @param snapshot format types
 	 */
 	public void startAction(EmsScriptNode jobNode, String siteName, JSONObject postJson) throws JSONException {
+		String userName = AuthenticationUtil.getFullyAuthenticatedUser();
+        String userEmail = getEmail(userName);
 		ArrayList<String> formats = getSnapshotFormats(postJson);
         ActionService actionService = services.getActionService();
         Action snapshotAction = actionService.createAction(SnapshotArtifactsGenerationActionExecuter.NAME);
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_SITE_NAME, siteName);
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_SNAPSHOT_ID, postJson.getString("id"));
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_FORMAT_TYPE, formats);
+        snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_USER_EMAIL, userEmail);
+        
        	services.getActionService().executeAction(snapshotAction, jobNode.getNodeRef(), true, true);
 	}
 
