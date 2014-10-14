@@ -126,14 +126,16 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                 getConfigurations( siteNode, workspace, timestamp, sort );
             
         for (EmsScriptNode config: configurations) {
-            if (isMms) {
-                configJsonArray.put( getMmsConfigJson( config,
-                                                       req.getContextPath(),
-                                                       workspace, dateTime ) );
-            } else {
-                configJsonArray.put( getConfigJson( config,
-                                                    req.getContextPath(),
-                                                    workspace, dateTime ) );
+            if (!config.isDeleted()) {
+                if (isMms) {
+                    configJsonArray.put( getMmsConfigJson( config,
+                                                           req.getContextPath(),
+                                                           workspace, dateTime ) );
+                } else {
+                    configJsonArray.put( getConfigJson( config,
+                                                        req.getContextPath(),
+                                                        workspace, dateTime ) );
+                }
             }
         }
 
@@ -234,8 +236,10 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                     snapshot.getSourceAssocsNodesByType( "view2:snapshots",
                                                          workspace, timestamp );
             if (views.size() >= 1) {
-                snapshotsJson.put( getSnapshotJson(snapshot, views.get(0),
-                                                   workspace) );
+                if ( !snapshot.isDeleted() ) {
+                    snapshotsJson.put( getSnapshotJson(snapshot, views.get(0),
+                                                       workspace) );
+                }
             }
         }
         
@@ -425,6 +429,17 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             } else {
                 return (yModified.compareTo(xModified));
             }
+        }
+    }
+
+    public void handleDeleteConfiguration( WebScriptRequest req ) {
+        String configId = req.getServiceMatch().getTemplateVars().get("configurationId");
+
+        NodeRef configNodeRef = NodeUtil.findNodeRefByAlfrescoId( configId );
+        
+        if (configNodeRef != null) {
+            EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services, response);
+            configNode.addAspect( "ems:Deleted" );
         }
     }
 }

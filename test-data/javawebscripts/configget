@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ "$#" -eq 1 ]; then
+  echo curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/workspaces/master/sites/$1/configurations"
+  curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/workspaces/master/sites/$1/configurations"
+else
+  echo curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/workspaces/$1/sites/$2/configurations"
+  curl -w "%{http_code}\n" -X GET -u admin:admin "http://localhost:8080/alfresco/service/workspaces/$1/sites/$2/configurations"
+fi;
