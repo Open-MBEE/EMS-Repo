@@ -55,11 +55,7 @@
 <tr><td>/ve/products/{id}</td><td>javawebscripts/moaproduct.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.MoaProductGet</td></tr>
 <tr><td>/workspaces</td><td>mms/workspaces.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.WorkspacesGet</td></tr>
 <tr><td>/workspaces/{workspaceId}</td><td>mms/workspaces/workspace.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.WorkspaceGet</td></tr>
-<tr><td>/workspaces/{workspaceId}/artifacts</td><td>mms/workspaces/artifacts.delete.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/artifacts</td><td>mms/workspaces/artifacts.get.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/artifacts</td><td>mms/workspaces/artifacts.post.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/artifacts</td><td>mms/workspaces/artifacts.put.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/artifacts/{artifactId}</td><td>mms/workspaces/artifacts/artifact.get.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/mms/workspaces/artifacts/artifact.get.js</td></tr>
+<tr><td>/workspaces/{workspaceId}/artifacts/{artifactId}</td><td>mms/workspaces/artifacts/artifact.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ArtifactGet</td></tr>
 <tr><td>/workspaces/{workspaceId}/changesets</td><td>mms/workspaces/changesets.get.desc.xml</td><td>None</td></tr>
 <tr><td>/workspaces/{workspaceId}/changesets/{changesetId}</td><td>mms/workspaces/changesets/changeset.get.desc.xml</td><td>None</td></tr>
 <tr><td>/workspaces/{workspaceId}/elements</td><td>mms/workspaces/elements.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ModelPost</td></tr>
@@ -87,7 +83,7 @@
 <tr><td>/workspaces/{workspaceId}/search?keyword={keyword}</td><td>mms/workspaces/search.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ModelSearch</td></tr>
 <tr><td>/workspaces/{workspaceId}/sites</td><td>mms/workspaces/sites.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.SiteGet</td></tr>
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}</td><td>mms/workspaces/sites/site.get.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/sites/{siteId}/artifacts/{artifactId}</td><td>mms/workspaces/sites/artifacts/artifact.post.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/mms/workspaces/sites/artifacts/artifact.post.js</td></tr>
+<tr><td>/workspaces/{workspaceId}/sites/{siteId}/artifacts/{artifactId}</td><td>mms/workspaces/sites/artifacts/artifact.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ArtifactPost</td></tr>
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}/configurations</td><td>mms/workspaces/sites/configurations.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.MmsConfigurationsGet</td></tr>
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}/configurations</td><td>mms/workspaces/sites/configurations.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ConfigurationPost</td></tr>
 <tr><td>/workspaces/{workspaceId}/sites/{siteId}/configurations/{configurationId}</td><td>mms/workspaces/sites/configurations/configuration.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.MmsConfigurationsGet</td></tr>

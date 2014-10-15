@@ -156,19 +156,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @return			true if request valid and parsed, false otherwise
 	 */
 	abstract protected boolean validateRequest(WebScriptRequest req, Status status);
-
-    /**
-     * Returns true if the passed workspaces are equal, checks for master (null) workspaces
-     * also
-     * 
-     * @param ws1
-     * @param ws2
-     * @return
-     */
-	private boolean workspacesEqual(WorkspaceNode ws1, WorkspaceNode ws2)
-	{
-		return ( (ws1 == null && ws2 == null) || (ws1 != null && ws1.equals(ws2)) );
-	}
 	
     /**
      * Get site by name, workspace, and time
@@ -183,17 +170,38 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      */
     protected EmsScriptNode getSiteNode(String siteName, WorkspaceNode workspace,
                                         Date dateTime) {
-        EmsScriptNode siteNode = null;
-
-        if (siteName == null) {
-            log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
-        } else {
-            siteNode = NodeUtil.getSiteNode( siteName, false, workspace, dateTime,
-                                             services, response );
-        }
-
-        return siteNode;
+        return getSiteNodeImpl(siteName, workspace, dateTime, false);
     }
+    
+    /**
+     * Helper method for getSideNode* methods
+     * 
+     * @param siteName
+     * @param workspace
+     * @param dateTime
+     * @param forWorkspace
+     * @return
+     */
+    private EmsScriptNode getSiteNodeImpl(String siteName, WorkspaceNode workspace,
+            						 	   Date dateTime, boolean forWorkspace) {
+    	
+		EmsScriptNode siteNode = null;
+		
+		if (siteName == null) {
+			log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
+		} else {
+			if (forWorkspace) {
+				siteNode = NodeUtil.getSiteNodeForWorkspace( siteName, false, workspace, dateTime,
+     											 			 services, response );
+			}
+			else {
+				siteNode = NodeUtil.getSiteNode( siteName, false, workspace, dateTime,
+			                 					services, response );
+			}
+		}
+		
+		return siteNode;
+	}
     
     /**
      * Get site by name, workspace, and time.  This also checks that the returned node is 
@@ -210,8 +218,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     protected EmsScriptNode getSiteNodeForWorkspace(String siteName, WorkspaceNode workspace,
                                         			Date dateTime) {
     	
-        EmsScriptNode siteNode = getSiteNode(siteName, workspace, dateTime);
-		return (siteNode != null && workspacesEqual(siteNode.getWorkspace(),workspace)) ? siteNode : null;
+        return getSiteNodeImpl(siteName, workspace, dateTime, true);
     }
 
     protected EmsScriptNode getSiteNodeFromRequest(WebScriptRequest req) {
@@ -246,10 +253,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	protected EmsScriptNode findScriptNodeByIdForWorkspace(String id,
 	                                           				WorkspaceNode workspace,
 	                                           				Date dateTime, boolean findDeleted) {
-		EmsScriptNode node = NodeUtil.findScriptNodeById( id, workspace, dateTime, findDeleted,
-	                                        services, response );
-		return (node != null && workspacesEqual(node.getWorkspace(),workspace)) ? node : null;
-
+		return NodeUtil.findScriptNodeByIdForWorkspace( id, workspace, dateTime, findDeleted,
+	                                        			services, response );
 	}
 
 	/**
@@ -326,6 +331,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
     protected static final String WORKSPACE_ID = "workspaceId";
 	protected static final String PROJECT_ID = "projectId";
+	protected static final String ARTIFACT_ID = "artifactId";
     protected static final String SITE_NAME = "siteName";
     protected static final String SITE_NAME2 = "siteId";
 
@@ -416,6 +422,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             workspaceId = NO_WORKSPACE_ID;
         }
         return workspaceId;
+    }
+    
+    public static String getArtifactId( WebScriptRequest req ) {
+        String artifactId = req.getServiceMatch().getTemplateVars().get(ARTIFACT_ID);
+        if ( artifactId == null || artifactId.length() <= 0 ) {
+        	artifactId = null;
+        }
+        return artifactId;
     }
 
     public WorkspaceNode getWorkspace( WebScriptRequest req ) {
