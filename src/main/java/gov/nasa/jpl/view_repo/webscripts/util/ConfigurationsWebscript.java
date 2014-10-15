@@ -244,10 +244,12 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             }
             
             NodeRef snapshotProductNodeRef = (NodeRef) snapshot.getProperty( "view2:snapshotProduct" );
-            EmsScriptNode snapshotProduct = new EmsScriptNode(snapshotProductNodeRef, services, response);
-            if (snapshotProduct.exists()) {
-                if (!snapshotProduct.isDeleted() && !snapshot.isDeleted()) {
-                    snapshotsJson.put( getSnapshotJson(snapshot, snapshotProduct, workspace) );
+            if ( snapshotProductNodeRef != null ) {
+                EmsScriptNode snapshotProduct = new EmsScriptNode(snapshotProductNodeRef, services, response);
+                if (snapshotProduct.exists()) {
+                    if (!snapshotProduct.isDeleted() && !snapshot.isDeleted()) {
+                        snapshotsJson.put( getSnapshotJson(snapshot, snapshotProduct, workspace) );
+                    }
                 }
             }
         }
