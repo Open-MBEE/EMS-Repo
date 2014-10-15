@@ -49,6 +49,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -154,11 +155,15 @@ public class ArtifactGet extends AbstractJavaWebScript {
 	    	    		if (matchingNode != null) {
 	    	    			
 		    	        	resultJson = new JSONObject();
-		    	        	resultJson.put("id", matchingNode.getSysmlId());
+		    	        	JSONArray jsonArray = new JSONArray();
+		    	        	JSONObject jsonArtifact = new JSONObject();
+		    	        	resultJson.put("artifacts",jsonArray);
+		    	        	jsonArtifact.put("id", matchingNode.getSysmlId());
 		    	        	String url = matchingNode.getUrl();
 		    	        	if (url != null) {
-		    	        		resultJson.put("url", url.replace("/d/d/", "/service/api/node/content/"));  
+		    	        		jsonArtifact.put("url", url.replace("/d/d/", "/service/api/node/content/"));  
 		    	        	}
+		    	        	jsonArray.put(jsonArtifact);
 	    	    		}
 	    	    		else {
 	    	    			String fileStr = "File "+filename;
