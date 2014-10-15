@@ -232,6 +232,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                 config.getTargetAssocsNodesByType( "ems:configuredSnapshots",
                                                    workspace, null );
         for (EmsScriptNode snapshot: snapshots) {
+            // getting by association is deprecated
             List< EmsScriptNode > views =
                     snapshot.getSourceAssocsNodesByType( "view2:snapshots",
                                                          workspace, timestamp );
@@ -239,6 +240,16 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                 if ( !snapshot.isDeleted() ) {
                     snapshotsJson.put( getSnapshotJson(snapshot, views.get(0),
                                                        workspace) );
+                }
+            }
+            
+            NodeRef snapshotProductNodeRef = (NodeRef) snapshot.getProperty( "view2:snapshotProduct" );
+            if ( snapshotProductNodeRef != null ) {
+                EmsScriptNode snapshotProduct = new EmsScriptNode(snapshotProductNodeRef, services, response);
+                if (snapshotProduct.exists()) {
+                    if (!snapshotProduct.isDeleted() && !snapshot.isDeleted()) {
+                        snapshotsJson.put( getSnapshotJson(snapshot, snapshotProduct, workspace) );
+                    }
                 }
             }
         }

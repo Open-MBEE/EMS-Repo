@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -115,6 +116,8 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, response);
         
         JSONArray snapshotsJson = new JSONArray();
+        
+        // for backwards compatibility, keep deprecated targetAssocsNodesByType
         List< EmsScriptNode > snapshots =
                 product.getTargetAssocsNodesByType( "view2:snapshots",
                                                     workspace, timestamp );
@@ -122,6 +125,14 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
             if ( !snapshot.isDeleted() ) {
                 snapshotsJson.put( configWs.getSnapshotJson( snapshot, product,
                                                              workspace ) );
+            }
+        }
+        
+        List< NodeRef > productSnapshots = product.getPropertyNodeRefs( "view2:productSnapshots" );
+        for (NodeRef productSnapshotNodeRef: productSnapshots) {
+            EmsScriptNode productSnapshot = new EmsScriptNode(productSnapshotNodeRef, services, response);
+            if ( !productSnapshot.isDeleted() ) {
+                snapshotsJson.put( configWs.getSnapshotJson( productSnapshot, product, workspace ) );
             }
         }
         

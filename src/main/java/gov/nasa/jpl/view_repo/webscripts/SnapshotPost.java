@@ -578,16 +578,22 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                          String contextPath,
                                          EmsScriptNode snapshotFolder ) {
         EmsScriptNode snapshotNode = snapshotFolder.createNode( snapshotName, "view2:Snapshot" );
-        if(snapshotNode == null){
-        	System.out.println("Failed to create view2:Snapshot!");
-        	return null;
+        if (snapshotNode == null) {
+            	System.out.println("Failed to create view2:Snapshot!");
+            	return null;
         }
         snapshotNode.createOrUpdateProperty( "cm:isIndexed", true );
         snapshotNode.createOrUpdateProperty( "cm:isContentIndexed", false );
         snapshotNode.createOrUpdateProperty( Acm.ACM_ID, snapshotName );
 
-        view.createOrUpdateAssociation( snapshotNode, "view2:snapshots" );
-
+        snapshotNode.createOrUpdateAspect( "view2:Snapshotable" );
+        snapshotNode.createOrUpdateProperty( "view2:snapshotProducts", view.getNodeRef() );
+        view.createOrUpdateAspect( "view2:Snapshotable" );
+        view.appendToPropertyNodeRefs( "view2:productSnapshots", snapshotNode.getNodeRef() );
+        
+        // Association is deprecated
+//        view.createOrUpdateAssociation( snapshotNode, "view2:snapshots" );
+        
         JSONObject snapshotJson = new JSONObject();
         try {
             snapshotJson.put( "snapshot", true );
@@ -602,7 +608,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             }
         } 
         catch ( Exception e1 ) {
-        	snapshotNode = null;
+            snapshotNode = null;
             e1.printStackTrace();
         }
 
