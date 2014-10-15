@@ -815,7 +815,7 @@ None,
 "Get artifact from the master branch",
 create_curl_cmd(type="GET",data="artifacts/xartifact?extension=svg&cs=3956284026",base_url=BASE_URL_WS,
                 branch="master/"),
-True, 
+False, 
 ['"url"'],
 ["test","workspaces","develop"]
 ],
