@@ -1938,7 +1938,7 @@ public class EmsScriptNode extends ScriptNode implements
         if (projectNode == null) {
             return "null";
         }
-        return getProjectNode().getSysmlId();
+        return getProjectNode().getSysmlId().replace("_pkg", "");
     }
     
     private EmsScriptNode convertIdToEmsScriptNode( String valueId,
