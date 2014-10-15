@@ -156,6 +156,7 @@
 				</property>
 			</properties>
 			<associations>
+			     <!--  deprecated: replaced by view2:Snapshotable -->
 				<association name="view2:snapshots">
 					<source>
 						<mandatory>false</mandatory>
@@ -188,6 +189,23 @@
 			<associations />
 			<overrides />
 			<mandatory-aspects />
+		</aspect>
+		<aspect name="view2:Snapshotable">
+		  <!--  replaces view2:snapshots -->
+		  <properties>
+		      <property name="view2:snapshotProduct">
+		          <type>d:noderef</type>
+		          <mandatory>false</mandatory>
+		          <multiple>false</multiple>
+		          <index enabled="false"/>
+		      </property>
+		      <property name="view2:productSnapshots">
+		          <type>d:noderef</type>
+		          <mandatory>false</mandatory>
+		          <multiple>true</multiple>
+		          <index enabled="false"/>
+		      </property>
+		  </properties>
 		</aspect>
 		
 		<aspect name="view2:timestamped">
