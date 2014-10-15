@@ -6,6 +6,8 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,6 +24,8 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.jscript.ScriptVersion;
@@ -30,6 +34,8 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
+import org.alfresco.service.cmr.repository.ContentData;
+import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -877,7 +883,7 @@ public class NodeUtil {
             typeOrAspectName = Acm.getJSON2ACM().get( typeOrAspectName );
         }
         String type = typeOrAspectName;
-        boolean notType = !NodeUtil.isType( type, services );
+        boolean notType = !isType( type, services );
         if ( notType ) {
             type = Acm.ACM_ELEMENT;
         }
@@ -916,7 +922,7 @@ public class NodeUtil {
         if (siteInfo != null) {
             NodeRef siteRef = siteInfo.getNodeRef();
             if ( dateTime != null ) {
-                NodeRef vRef = NodeUtil.getNodeRefAtTime( siteRef, dateTime );
+                NodeRef vRef = getNodeRefAtTime( siteRef, dateTime );
                 if ( vRef != null ) siteRef = vRef;
             }
 
@@ -927,6 +933,26 @@ public class NodeUtil {
             }
         }
         return null;
+    }
+    
+    /**
+     * Get site of specified short name.  This also checks that the returned node is 
+     * in the specified workspace, not just whether its in the workspace or any of its parents.
+     * 
+     * @param siteName
+     * @return  ScriptNode of site with name siteName
+     */
+    public static EmsScriptNode getSiteNodeForWorkspace( String siteName,
+			                                             boolean ignoreWorkspace,
+			                                             WorkspaceNode workspace,
+			                                             Date dateTime,
+			                                             ServiceRegistry services,
+			                                             StringBuffer response ) {
+    	
+    	EmsScriptNode siteNode = getSiteNode(siteName, ignoreWorkspace, workspace,
+    										 dateTime, services, response);
+		return (siteNode != null && workspacesEqual(siteNode.getWorkspace(),workspace)) ? siteNode : null;
+
     }
 
     public static EmsScriptNode getCompanyHome( ServiceRegistry services ) {
@@ -1409,5 +1435,183 @@ public class NodeUtil {
 
     	return result;
     }
+    
+	public static EmsScriptNode findScriptNodeByIdForWorkspace(String id,
+															   WorkspaceNode workspace,
+															   Date dateTime, boolean findDeleted,
+															   ServiceRegistry services,
+			                                                   StringBuffer response) {
+		
+		EmsScriptNode node = findScriptNodeById( id, workspace, dateTime, findDeleted,
+												services, response );
+		return (node != null && workspacesEqual(node.getWorkspace(),workspace)) ? node : null;
+		
+	}
+    
+    /**
+     * Returns true if the passed workspaces are equal, checks for master (null) workspaces
+     * also
+     * 
+     * @param ws1
+     * @param ws2
+     * @return
+     */
+	public static boolean workspacesEqual(WorkspaceNode ws1, WorkspaceNode ws2)
+	{
+		return ( (ws1 == null && ws2 == null) || (ws1 != null && ws1.equals(ws2)) );
+	}
+    
+    /**
+     * Updates or creates a artifact with the passed name/type in the specified site name/workspace
+     * with the specified content.
+     * 
+     * Only updates the artifact if found if updateIfFound is true.
+     * 
+     * @param name
+     * @param type
+     * @param base64content
+     * @param targetSiteName
+     * @param subfolderName
+     * @param workspace
+     * @param dateTime
+     * @param updateIfFound
+     * @param response
+     * @param status
+     * @return
+     */
+    public static EmsScriptNode updateOrCreateArtifact( String name, String type,
+									            		String base64content,
+									            		String targetSiteName,
+									            		String subfolderName,
+									            		WorkspaceNode workspace,
+									            		Date dateTime,
+									            		StringBuffer response, 
+									            		Status status) {
+			
+    	boolean wasOn = Debug.getInstance().getOn();
+    	EmsScriptNode artifactNode;
+    	String myType = Utils.isNullOrEmpty(type) ? "svg" : type;
+		String artifactId = myType.startsWith(".") ? name + myType: name + "." + myType;
+
+		byte[] content =
+		( base64content == null )
+		      ? null
+		      : DatatypeConverter.parseBase64Binary( base64content );
+		long cs = EmsScriptNode.getChecksum( content );
+		
+		if (!wasOn) Debug.turnOn();
+		
+		// see if image already exists by looking up by checksum
+		ArrayList< NodeRef > refs =
+				findNodeRefsByType( "" + cs,
+		          SearchType.CHECKSUM.prefix, false, false,
+		          workspace, dateTime, false, false,
+		          services, false );
+		// ResultSet existingArtifacts =
+		// NodeUtil.findNodeRefsByType( "" + cs, SearchType.CHECKSUM,
+		// services );
+		// Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts
+		// );
+		List< EmsScriptNode > nodeList = EmsScriptNode.toEmsScriptNodeList( refs, services, response, status );
+		// existingArtifacts.close();
+		
+		EmsScriptNode matchingNode = null;
+		
+		if ( nodeList != null && nodeList.size() > 0 ) {
+			matchingNode = nodeList.iterator().next();
+		}
+				
+		// No need to update if the checksum and name match (even if it is in a parent branch):
+		if ( matchingNode != null && matchingNode.getSysmlId().equals(artifactId)) return matchingNode;
+		
+		// Create new artifact:
+		// find subfolder in site or create it
+		String artifactFolderName =
+		"Artifacts"
+		+ ( Utils.isNullOrEmpty( subfolderName )
+		                             ? ""
+		                             : "/"
+		                               + subfolderName );
+		
+		EmsScriptNode targetSiteNode = getSiteNodeForWorkspace( targetSiteName, false, workspace, dateTime,
+									  							services, response );
+		
+		// find site; it must exist!
+		if ( targetSiteNode == null || !targetSiteNode.exists() ) {
+			Debug.err( "Can't find node for site: " + targetSiteName + "!\n" );
+			return null;
+		}
+		
+		// find or create subfolder
+		EmsScriptNode subfolder = mkdir( targetSiteNode, artifactFolderName, services,
+										 response, status );
+		if ( subfolder == null || !subfolder.exists() ) {
+			Debug.err( "Can't create subfolder for site, " + targetSiteName
+			+ ", in artifact folder, " + artifactFolderName + "!\n" );
+			return null;
+		}
+		
+		// find or create node:
+		artifactNode = findScriptNodeByIdForWorkspace(artifactId, workspace, dateTime, false, 
+										  			  services, response);
+		
+		// Node wasnt found, so create one:
+		if (artifactNode == null) {
+			artifactNode = subfolder.createNode( artifactId, "cm:content" );
+		}
+
+		if ( artifactNode == null || !artifactNode.exists() ) {
+			Debug.err( "Failed to create new artifact " + artifactId + "!\n" );
+			return null;
+		}
+		
+		if (!artifactNode.hasAspect( "cm:versionable")) {
+			artifactNode.addAspect( "cm:versionable" );
+		}
+		if (!artifactNode.hasAspect( "cm:indexControl" )) {
+			artifactNode.addAspect( "cm:indexControl" );
+		}
+		if (!artifactNode.hasAspect( Acm.ACM_IDENTIFIABLE )) {
+			artifactNode.addAspect( Acm.ACM_IDENTIFIABLE );
+		}
+		if (!artifactNode.hasAspect( "view:Checksummable" )) {
+			artifactNode.addAspect( "view:Checksummable" );
+		}
+		
+		artifactNode.createOrUpdateProperty( Acm.CM_TITLE, artifactId );
+		artifactNode.createOrUpdateProperty( "cm:isIndexed", true );
+		artifactNode.createOrUpdateProperty( "cm:isContentIndexed", false );
+		artifactNode.createOrUpdateProperty( Acm.ACM_ID, artifactId );
+		artifactNode.createOrUpdateProperty( "view:cs", cs );
+		
+		if ( Debug.isOn() ) {
+			System.out.println( "Creating artifact with indexing: "  + artifactNode.getProperty( "cm:isIndexed" ) );
+		}
+		           
+		ContentWriter writer =
+		services.getContentService().getWriter( artifactNode.getNodeRef(),
+												ContentModel.PROP_CONTENT, true );
+		InputStream contentStream = new ByteArrayInputStream( content );
+		writer.putContent( contentStream );
+		
+		ContentData contentData = writer.getContentData();
+		contentData = ContentData.setMimetype( contentData, EmsScriptNode.getMimeType( myType ) );
+		contentData = ContentData.setEncoding( contentData, "UTF-8");
+		services.getNodeService().setProperty( artifactNode.getNodeRef(),
+		            							ContentModel.PROP_CONTENT,contentData );
+		
+        // if only version, save dummy version so snapshots can reference
+        // versioned images - need to check against 1 since if someone
+        // deleted previously a "dead" version is left in its place
+		Object[] versionHistory = artifactNode.getEmsVersionHistory();
+
+        if (versionHistory == null || versionHistory.length <= 1) {
+        	artifactNode.createVersion("creating the version history", false);
+        }
+        
+    	if (!wasOn) Debug.turnOff();
+
+		return artifactNode;
+	}
 
 }

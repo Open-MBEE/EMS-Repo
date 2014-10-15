@@ -268,4 +268,19 @@
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
     </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.artifacts.artifact.post"
+        class="gov.nasa.jpl.view_repo.webscripts.ArtifactPost" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.artifacts.artifact.get"
+        class="gov.nasa.jpl.view_repo.webscripts.ArtifactGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
 </beans>
