@@ -1,13 +1,12 @@
 #
 # TODO:
+#    -Have script check test list to ensure unique numbers/names
 #    -Fix run server if we use it
 #    -Get SOAP UI tests working
 #    -Add ability to run test functions instead of just curl string commands
 #
 # BUGS (filed defects for these on JIRA):
 #    -Test 14 returning 500 if doing more than once.  This is bug w/ the lock file.
-#     Test 16 returns 404 after doing it more than once, and created time changes.  This is also a bug
-
 
 import os
 import commands
@@ -345,7 +344,7 @@ def create_curl_cmd(type, data="", base_url=BASE_URL_WS, post_type="elements", b
     
     if type == "POST":
         if project_post:
-            cmd = 'curl %s %s %s "%s%s?createSite=true"'%(CURL_FLAGS, CURL_POST_FLAGS, data, base_url, branch)
+            cmd = 'curl %s %s %s "%s%s"'%(CURL_FLAGS, CURL_POST_FLAGS, data, base_url, branch)
         elif data:
             cmd = 'curl %s %s @JsonData/%s "%s%s%s"'%(CURL_FLAGS, CURL_POST_FLAGS, data, base_url, branch, post_type)
         else:
@@ -430,7 +429,7 @@ tests =[\
 "Create a project and site",
 create_curl_cmd(type="POST",data='\'{"elements":[{"sysmlid":"123456","name":"JW_TEST","specialization":{"type":"Project"}}]}\'',
                 base_url=BASE_URL_WS,
-                branch="master/sites/europa/projects",project_post=True),
+                branch="master/sites/europa/projects?createSite=true",project_post=True),
 False, 
 None,
 ["test","workspaces","develop"]
@@ -507,8 +506,8 @@ common_filters,
 8,
 "GetViewElements",
 "Get view elements",
-create_curl_cmd(type="GET",data="views/301/elements",base_url=BASE_URL_JW,
-                branch=""),
+create_curl_cmd(type="GET",data="views/301/elements",base_url=BASE_URL_WS,
+                branch="master/"),
 True, 
 common_filters,
 ["test","workspaces","develop"]
@@ -684,7 +683,143 @@ True,
 common_filters+['"specification"'],
 ["test","workspaces","develop"]
 ],
-                
+        
+[
+23,
+"PostDemo1",
+"Post data for demo 1 of server side docgen",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                data="BluCamNameListExpr.json",
+                branch="master/sites/europa/",
+                post_type="elements"),
+True, 
+common_filters+['"sysmlid"','"qualifiedId"','"message"'],
+["test","workspaces","develop"]
+],
+        
+[
+24,
+"Demo1",
+"Server side docgen demo 1",
+create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148311476_17302_29388/elements",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop"]
+],
+ 
+# TODO: not running test 25/26 for now b/c of issues when running it with 23/24       
+[
+25,
+"PostDemo2",
+"Post data for demo 2 of server side docgen",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                data="BLUCamTest.json",
+                branch="master/sites/europa/",
+                post_type="elements"),
+True, 
+common_filters,
+[]
+],
+        
+[
+26,
+"Demo2",
+"Server side docgen demo 2",
+create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148233838_91795_29332/elements",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+[]
+],
+        
+# NEW URLS: ==========================    
+
+[
+27,
+"GetSites",
+"Get all the sites for a workspace",
+create_curl_cmd(type="GET",data="sites",base_url=BASE_URL_WS,
+                branch="master/"),
+False, 
+None,
+["test","workspaces","develop"]
+],
+     
+[
+28,
+"GetProductViews",
+"Get all views for a product",
+create_curl_cmd(type="GET",data="products/301/views",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop"]
+],
+        
+# Getting the view elements tested in GetViewElements
+
+[
+29,
+"PostElementX",
+"Post element to the master branch/site",
+create_curl_cmd(type="POST",data="x.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/sites/europa/"),
+True, 
+common_filters,
+["test","workspaces","develop"]
+],
+        
+# Posting a new project/site tested in PostSite
+
+[
+30,
+"UpdateProject",
+"Update a project",
+create_curl_cmd(type="POST",data='\'{"elements":[{"sysmlid":"123456","name":"JW_TEST2","specialization":{"type":"Project","projectVersion":"1"}}]}\'',
+                base_url=BASE_URL_WS,
+                branch="master/projects",project_post=True),
+False, 
+None,
+["test","workspaces","develop"]
+],
+        
+# Get project w/ site included tested in GetProject
+
+[
+31,
+"GetProjectOnly",
+"Get project w/o specifying the site",
+create_curl_cmd(type="GET",data="projects/123456",base_url=BASE_URL_WS,
+                branch="master/"),
+False, 
+None,
+["test","workspaces","develop"]
+],
+  
+# ARTIFACTS: ==========================    
+
+[
+32,
+"PostArtifact",
+"Post artifact to the master branch",
+'curl %s %s -H "Content-Type: multipart/form-data;" --form "file=@JsonData/x.json" --form "title=JsonData/x.json" --form "desc=stuffs" --form "content=@JsonData/x.json" %smaster/sites/europa/artifacts/folder1/folder2/xartifact'%(CURL_FLAGS, CURL_POST_FLAGS_NO_DATA, BASE_URL_WS),
+True, 
+None,
+["test","workspaces","develop"]
+],
+        
+[
+33,
+"GetArtifact",
+"Get artifact from the master branch",
+create_curl_cmd(type="GET",data="artifacts/xartifact?extension=svg&cs=3956284026",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+['"url"'],
+["test","workspaces","develop"]
+],
+                   
 ]    
 
 ##########################################################################################    
