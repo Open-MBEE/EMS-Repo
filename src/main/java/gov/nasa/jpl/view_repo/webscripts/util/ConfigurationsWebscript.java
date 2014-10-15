@@ -126,14 +126,16 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                 getConfigurations( siteNode, workspace, timestamp, sort );
             
         for (EmsScriptNode config: configurations) {
-            if (isMms) {
-                configJsonArray.put( getMmsConfigJson( config,
-                                                       req.getContextPath(),
-                                                       workspace, dateTime ) );
-            } else {
-                configJsonArray.put( getConfigJson( config,
-                                                    req.getContextPath(),
-                                                    workspace, dateTime ) );
+            if (!config.isDeleted()) {
+                if (isMms) {
+                    configJsonArray.put( getMmsConfigJson( config,
+                                                           req.getContextPath(),
+                                                           workspace, dateTime ) );
+                } else {
+                    configJsonArray.put( getConfigJson( config,
+                                                        req.getContextPath(),
+                                                        workspace, dateTime ) );
+                }
             }
         }
 
@@ -230,12 +232,25 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                 config.getTargetAssocsNodesByType( "ems:configuredSnapshots",
                                                    workspace, null );
         for (EmsScriptNode snapshot: snapshots) {
+            // getting by association is deprecated
             List< EmsScriptNode > views =
                     snapshot.getSourceAssocsNodesByType( "view2:snapshots",
                                                          workspace, timestamp );
             if (views.size() >= 1) {
-                snapshotsJson.put( getSnapshotJson(snapshot, views.get(0),
-                                                   workspace) );
+                if ( !snapshot.isDeleted() ) {
+                    snapshotsJson.put( getSnapshotJson(snapshot, views.get(0),
+                                                       workspace) );
+                }
+            }
+            
+            NodeRef snapshotProductNodeRef = (NodeRef) snapshot.getProperty( "view2:snapshotProduct" );
+            if ( snapshotProductNodeRef != null ) {
+                EmsScriptNode snapshotProduct = new EmsScriptNode(snapshotProductNodeRef, services, response);
+                if (snapshotProduct.exists()) {
+                    if (!snapshotProduct.isDeleted() && !snapshot.isDeleted()) {
+                        snapshotsJson.put( getSnapshotJson(snapshot, snapshotProduct, workspace) );
+                    }
+                }
             }
         }
         
@@ -425,6 +440,17 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             } else {
                 return (yModified.compareTo(xModified));
             }
+        }
+    }
+
+    public void handleDeleteConfiguration( WebScriptRequest req ) {
+        String configId = req.getServiceMatch().getTemplateVars().get("configurationId");
+
+        NodeRef configNodeRef = NodeUtil.findNodeRefByAlfrescoId( configId );
+        
+        if (configNodeRef != null) {
+            EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services, response);
+            configNode.addAspect( "ems:Deleted" );
         }
     }
 }

@@ -39,15 +39,6 @@
         <property name="restConnection" ref="restConnection" /> 
     </bean>
     
-    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.products.snapshots.post"
-        class="gov.nasa.jpl.view_repo.webscripts.SnapshotPost" parent="webscript"
-        singleton="false">
-        <property name="repositoryHelper" ref="repositoryHelper" />
-        <property name="services" ref="ServiceRegistry" />
-        <property name="personService" ref="PersonService" />
-        <property name="nodeService" ref="NodeService" />
-    </bean>
-
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.products.get"
         class="gov.nasa.jpl.view_repo.webscripts.MmsProductsGet" parent="webscript"
         singleton="false">
@@ -147,6 +138,13 @@
         <property name="type" value="MULTIPLE" />
     </bean>
 
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.configurations.configuration.delete"
+        class="gov.nasa.jpl.view_repo.webscripts.MmsConfigurationsDelete" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.configurations.configuration.get"
         class="gov.nasa.jpl.view_repo.webscripts.MmsConfigurationsGet" parent="webscript"
         singleton="false">
@@ -209,6 +207,8 @@
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
+        <property name="personService" ref="PersonService" />
+        <property name="nodeService" ref="NodeService" />
     </bean>
 
     <bean id="webscript.gov.nasa.jpl.mms.diff.get"
@@ -268,4 +268,19 @@
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
     </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.artifacts.artifact.post"
+        class="gov.nasa.jpl.view_repo.webscripts.ArtifactPost" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.artifacts.artifact.get"
+        class="gov.nasa.jpl.view_repo.webscripts.ArtifactGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
 </beans>

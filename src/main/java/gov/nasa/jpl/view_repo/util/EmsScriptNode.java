@@ -69,6 +69,8 @@ import javax.xml.bind.DatatypeConverter;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.jscript.ScriptNode;
+import org.alfresco.repo.jscript.ScriptVersion;
+import org.alfresco.repo.version.VersionModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
@@ -85,12 +87,14 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
+import org.alfresco.service.cmr.version.VersionType;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.springframework.extensions.webscripts.Status;
 
@@ -160,6 +164,11 @@ public class EmsScriptNode extends ScriptNode implements
      * When writing out JSON, evaluate Expressions and include the results.
      */
     private boolean evaluatingExpressions;
+    
+    /**
+     * Replicates the behavior of ScriptNode versions, which is private.
+     */
+    protected Object[] myVersions = null;
 
     // TODO add nodeService and other member variables when no longer
     // subclassing ScriptNode
@@ -211,6 +220,67 @@ public class EmsScriptNode extends ScriptNode implements
         log( msg );
 //        Debug.error( msg );
         return null;
+    }
+    
+    /**
+     * Gets the version history
+     * 
+     * This is needed b/c the ScriptNode getVersionHistory() generates a NPE
+     * 
+     * @return  version history
+     */
+    public Object[] getEmsVersionHistory()
+    {
+
+    	if (this.myVersions == null && getIsVersioned())
+        {
+            VersionHistory history = this.services.getVersionService().getVersionHistory(this.nodeRef);
+            if (history != null)
+            {
+                Collection<Version> allVersions = history.getAllVersions();
+                Object[] versions = new Object[allVersions.size()];
+                int i = 0;
+                for (Version version : allVersions)
+                {
+                    versions[i++] = new ScriptVersion(version, this.services, this.scope);
+                }
+                this.myVersions = versions;
+            }
+        }
+        return this.myVersions;
+    
+    }
+    
+    /**
+     * Create a version of this document.  Note: this will add the cm:versionable aspect.
+     * 
+     * @param history       Version history note
+     * @param majorVersion  True to save as a major version increment, false for minor version.
+     * 
+     * @return ScriptVersion object representing the newly added version node
+     */
+    @Override
+    public ScriptVersion createVersion(String history, boolean majorVersion)
+    {
+    	this.myVersions = null;
+    	return super.createVersion(history, majorVersion);
+    }
+    
+    /**
+     * Check-in a working copy document. The current state of the working copy is copied to the original node,
+     * this will include any content updated in the working node. Note that this method can only be called on a
+     * working copy Node.
+     * 
+     * @param history       Version history note
+     * @param majorVersion  True to save as a major version increment, false for minor version.
+     * 
+     * @return the original Node that was checked out.
+     */
+    @Override
+    public ScriptNode checkin(String history, boolean majorVersion)
+    {
+    	this.myVersions = null;
+        return super.checkin(history, majorVersion);
     }
 
     /**
@@ -500,13 +570,13 @@ public class EmsScriptNode extends ScriptNode implements
         return null;
     }
 
-    public long getChecksum( String dataString ) {
+    public static long getChecksum( String dataString ) {
         byte[] data = null;
         data = dataString.getBytes(); // ( "UTF-8" );
         return getChecksum( data );
     }
 
-    public long getChecksum( byte[] data ) {
+    public static long getChecksum( byte[] data ) {
         long cs = 0;
         Checksum checksum = new CRC32();
         checksum.update( data, 0, data.length );
@@ -544,94 +614,10 @@ public class EmsScriptNode extends ScriptNode implements
                                                String subfolderName,
                                                WorkspaceNode workspace,
                                                Date dateTime ) {
-        byte[] content =
-                ( base64content == null )
-                                         ? null
-                                         : DatatypeConverter.parseBase64Binary( base64content );
-        long cs = getChecksum( content );
-
-        // see if image already exists by looking up by checksum
-        ArrayList< NodeRef > refs =
-                NodeUtil.findNodeRefsByType( "" + cs,
-                                             SearchType.CHECKSUM.prefix, false, false,
-                                             workspace, dateTime, false, false,
-                                             services, false );
-        // ResultSet existingArtifacts =
-        // NodeUtil.findNodeRefsByType( "" + cs, SearchType.CHECKSUM,
-        // services );
-        // Set< EmsScriptNode > nodeSet = toEmsScriptNodeSet( existingArtifacts
-        // );
-        List< EmsScriptNode > nodeList = toEmsScriptNodeList( refs );
-        // existingArtifacts.close();
-
-        EmsScriptNode matchingNode = null;
-
-        if ( nodeList != null && nodeList.size() > 0 ) {
-            matchingNode = nodeList.iterator().next();
-        }
-
-        EmsScriptNode targetSiteNode =
-                NodeUtil.getSiteNode( targetSiteName, false, workspace, dateTime,
-                                      services, response );
-
-        if ( matchingNode != null ) return matchingNode;
-
-        // create new artifact
-
-        // find subfolder in site or create it
-        String artifactFolderName =
-                "Artifacts"
-                        + ( Utils.isNullOrEmpty( subfolderName )
-                                                                ? ""
-                                                                : "/"
-                                                                  + subfolderName );
-        // find site; it must exist!
-        if ( targetSiteNode == null || !targetSiteNode.exists() ) {
-            log( "Can't find node for site: " + targetSiteName + "!" );
-            return null;
-        }
-        // find or create subfolder
-        EmsScriptNode subfolder =
-                NodeUtil.mkdir( targetSiteNode, artifactFolderName, services,
-                                response, status );
-        if ( subfolder == null || !subfolder.exists() ) {
-            log( "Can't create subfolder for site, " + targetSiteName
-                 + ", in artifact folder, " + artifactFolderName + "!" );
-            return null;
-        }
-
-        String artifactId = name + "." + type;
-        EmsScriptNode artifactNode =
-                subfolder.createNode( artifactId, "cm:content" );
-        if ( artifactNode == null || !artifactNode.exists() ) {
-            log( "Failed to create new artifact " + artifactId + "!" );
-            return null;
-        }
-
-        artifactNode.addAspect( "cm:indexControl" );
-        artifactNode.createOrUpdateProperty( "cm:isIndexed", true );
-        artifactNode.createOrUpdateProperty( "cm:isContentIndexed", false );
-        artifactNode.addAspect( Acm.ACM_IDENTIFIABLE );
-        artifactNode.createOrUpdateProperty( Acm.ACM_ID, artifactId );
-        artifactNode.addAspect( "view:Checksummable" );
-        artifactNode.createOrUpdateProperty( "view:cs", cs );
-
-        if ( Debug.isOn() ) System.out.println( "Creating artifact with indexing: "
-                                                + artifactNode.getProperty( "cm:isIndexed" ) );
-        ContentWriter writer =
-                services.getContentService()
-                        .getWriter( artifactNode.getNodeRef(),
-                                    ContentModel.PROP_CONTENT, true );
-        InputStream contentStream = new ByteArrayInputStream( content );
-        writer.putContent( contentStream );
-
-        ContentData contentData = writer.getContentData();
-        contentData =
-                ContentData.setMimetype( contentData, getMimeType( type ) );
-        services.getNodeService().setProperty( artifactNode.getNodeRef(),
-                                               ContentModel.PROP_CONTENT,
-                                               contentData );
-        return artifactNode;
+        
+    	return NodeUtil.updateOrCreateArtifact(name, type, base64content, targetSiteName,
+    										   subfolderName, workspace, dateTime,
+    										   response, status);
     }
 
     public String extractAndReplaceImageData( String value ) {
@@ -1952,7 +1938,7 @@ public class EmsScriptNode extends ScriptNode implements
         if (projectNode == null) {
             return "null";
         }
-        return getProjectNode().getSysmlId();
+        return getProjectNode().getSysmlId().replace("_pkg", "");
     }
     
     private EmsScriptNode convertIdToEmsScriptNode( String valueId,

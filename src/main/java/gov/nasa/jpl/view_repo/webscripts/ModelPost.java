@@ -877,22 +877,21 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // Check to see if the element has been updated since last read by the
         // posting application.
-       if ( inConflict( element, elementJson ) ) {
-            if ( !ingest ) { // only generate error on first pass
-                String msg =
-                        "Error! Tried to post concurrent edit to element, "
-                                + element + ".\n";
-                if ( getResponse() == null || getResponseStatus() == null ) {
-                    Debug.error( msg );
-                } else {
-                    getResponse().append( msg );
-                    if ( getResponseStatus() != null ) {
-                        getResponseStatus().setCode( HttpServletResponse.SC_CONFLICT,
-                                                     msg );
-                    }
+        // Only generate error on first pass (i.e. when ingest == false).
+       if ( !ingest && inConflict( element, elementJson ) ) {
+            String msg =
+                    "Error! Tried to post concurrent edit to element, "
+                            + element + ".\n";
+            if ( getResponse() == null || getResponseStatus() == null ) {
+                Debug.error( msg );
+            } else {
+                getResponse().append( msg );
+                if ( getResponseStatus() != null ) {
+                    getResponseStatus().setCode( HttpServletResponse.SC_CONFLICT,
+                                                 msg );
                 }
             }
-           return elements;
+            return elements;
        }
 
         JSONArray children = new JSONArray();
@@ -1864,7 +1863,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
             // Solve!!!!
             Debug.turnOn();
-//            Random.reset();
+            Random.reset();
             boolean result = solver.solve(constraints);
             Debug.turnOff();
 

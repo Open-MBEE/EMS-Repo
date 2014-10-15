@@ -353,7 +353,7 @@ public class WorkspaceNode extends EmsScriptNode {
         // with the same cm:name, use the grandparent to disambiguate where it
         // should be.
         if ( parent != null && parent.exists() && !this.equals( parent.getWorkspace() ) ) {
-            EmsScriptNode grandParent = parent.getOwningParent( null );
+            EmsScriptNode grandParent = parent.getParent();
             ArrayList< NodeRef > arr = NodeUtil.findNodeRefsByType( parentName, SearchType.CM_NAME.prefix, false, false, this, null, false, true, getServices(), false );
             for ( NodeRef ref : arr ) {
                 EmsScriptNode p = new EmsScriptNode( ref, getServices() );

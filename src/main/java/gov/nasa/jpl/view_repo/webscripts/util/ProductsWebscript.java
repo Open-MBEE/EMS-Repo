@@ -115,24 +115,32 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         List< EmsScriptNode > snapshotsList =
                 product.getTargetAssocsNodesByType( "view2:snapshots",
                                                     workspace, dateTime );
+        // lets add products from node refs
+        List<NodeRef> productSnapshots = product.getPropertyNodeRefs( "view2:productSnapshots" );
+        for (NodeRef productSnapshotNodeRef: productSnapshots) {
+            EmsScriptNode productSnapshot = new EmsScriptNode(productSnapshotNodeRef, services, response);
+            snapshotsList.add( productSnapshot );
+        }
 
         Collections.sort( snapshotsList,
                           new EmsScriptNode.EmsScriptNodeComparator() );
         for ( EmsScriptNode snapshot : snapshotsList ) {
-            String id = (String)snapshot.getProperty( Acm.ACM_ID );
-            Date date = (Date)snapshot.getLastModified( dateTime );
-
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put( "id", id );
-            jsonObject.put( "created", EmsScriptNode.getIsoTime( date ) );
-            jsonObject.put( "creator",
-                            (String)snapshot.getProperty( "cm:modifier" ) );
-            jsonObject.put( "url", contextPath + "/service/snapshots/"
-                                   + snapshot.getProperty( Acm.ACM_ID ) );
-            jsonObject.put( "tag", (String)SnapshotGet.getConfigurationSet( snapshot,
-                                                                            workspace,
-                                                                            dateTime ) );
-            snapshotsJson.put( jsonObject );
+            if (!snapshot.isDeleted()) {
+                String id = (String)snapshot.getProperty( Acm.ACM_ID );
+                Date date = (Date)snapshot.getLastModified( dateTime );
+    
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put( "id", id );
+                jsonObject.put( "created", EmsScriptNode.getIsoTime( date ) );
+                jsonObject.put( "creator",
+                                (String)snapshot.getProperty( "cm:modifier" ) );
+                jsonObject.put( "url", contextPath + "/service/snapshots/"
+                                       + snapshot.getProperty( Acm.ACM_ID ) );
+                jsonObject.put( "tag", (String)SnapshotGet.getConfigurationSet( snapshot,
+                                                                                workspace,
+                                                                                dateTime ) );
+                snapshotsJson.put( jsonObject );
+            }
         }
 
         return snapshotsJson;
