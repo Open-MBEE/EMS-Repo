@@ -617,7 +617,7 @@ public class EmsScriptNode extends ScriptNode implements
         
     	return NodeUtil.updateOrCreateArtifact(name, type, base64content, targetSiteName,
     										   subfolderName, workspace, dateTime,
-    										   response, status);
+    										   response, status, false);
     }
 
     public String extractAndReplaceImageData( String value ) {

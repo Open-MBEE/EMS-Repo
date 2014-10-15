@@ -151,7 +151,7 @@ public class ArtifactPost extends AbstractJavaWebScript {
 		    	        															 base64content, 
 		    	        															 siteName,
 		    																		 path, workspace, null,
-		    																		 response, null);
+		    																		 response, null, false);
 		    	        	
 		    	        	if (artifact == null) {
 		    	        		 log(LogLevel.ERROR, "Was not able to create the artifact!\n", HttpServletResponse.SC_BAD_REQUEST);
