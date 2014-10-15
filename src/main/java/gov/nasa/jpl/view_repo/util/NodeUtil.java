@@ -1486,7 +1486,8 @@ public class NodeUtil {
 									            		WorkspaceNode workspace,
 									            		Date dateTime,
 									            		StringBuffer response, 
-									            		Status status) {
+									            		Status status,
+									            		boolean ignoreName) {
 			
     	boolean wasOn = Debug.getInstance().getOn();
     	EmsScriptNode artifactNode;
@@ -1522,7 +1523,9 @@ public class NodeUtil {
 		}
 				
 		// No need to update if the checksum and name match (even if it is in a parent branch):
-		if ( matchingNode != null && matchingNode.getSysmlId().equals(artifactId)) return matchingNode;
+		if ( matchingNode != null && (ignoreName || matchingNode.getSysmlId().equals(artifactId)) ) {
+			return matchingNode;
+		}
 		
 		// Create new artifact:
 		// find subfolder in site or create it
