@@ -2538,10 +2538,11 @@ public class EmsScriptNode extends ScriptNode implements
     /**
      * Override exists for EmsScriptNodes
      *
-     * @see java.lang.Object#equals(java.lang.Object)
+     * @see org.alfresco.repo.jscript.ScriptNode#exists()
      */
     @Override
     public boolean exists() {
+        // REVIEW -- TODO -- Will overriding this cause problems in ScriptNode?
         if ( !super.exists() ) return false;
         if ( hasAspect( "ems:Deleted" ) ) {
             return false;

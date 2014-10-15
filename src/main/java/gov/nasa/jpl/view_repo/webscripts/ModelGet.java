@@ -111,11 +111,17 @@ public class ModelGet extends AbstractJavaWebScript {
         EmsScriptNode modelRootNode = null;
         
         WorkspaceNode workspace = getWorkspace( req );
-        boolean wsFound = workspace != null;
+        boolean wsFound = workspace != null && workspace.exists();
         if ( !wsFound ) {
             String wsId = getWorkspaceId( req );
             if ( wsId != null && wsId.equalsIgnoreCase( "master" ) ) {
                 wsFound = true;
+            } else {
+                log( LogLevel.ERROR,
+                     "Workspace with id, " + wsId
+                     + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
+                     HttpServletResponse.SC_NOT_FOUND );
+                return false;
             }
         }
         // need to find deleted elements in workspace, so can return not found rather than
@@ -198,6 +204,8 @@ public class ModelGet extends AbstractJavaWebScript {
 	 * @return
 	 */
 	private JSONArray handleRequest(WebScriptRequest req) {
+        // REVIEW -- Why check for errors here if validate has already been
+        // called?  Is the error checking code different?  Why?
         try {
             String[] idKeys = {"modelid", "elementid", "elementId"};
             String modelId = null;
