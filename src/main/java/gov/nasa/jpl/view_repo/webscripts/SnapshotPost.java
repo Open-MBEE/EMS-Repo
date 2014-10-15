@@ -69,6 +69,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.util.TempFileProvider;
 import org.alfresco.util.UrlUtil;
@@ -101,7 +102,20 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	//public void setSysAdminParas(SysAdminParams sysAdminParams){
 	//	this.sysAdminParams = sysAdminParams;
 	//}
-	
+	protected NodeService nodeService;
+	protected PersonService personService;
+
+
+    public void setNodeService(NodeService nodeService)
+    {
+       this.nodeService = nodeService;
+    }
+    
+    public void setPersonService(PersonService personService)
+    {
+    	this.personService = personService;
+    }
+    
     public SnapshotPost() {
         super();
     }
@@ -207,73 +221,86 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     private DBParagraph createDBParagraph( JSONObject obj ) {
+    	if(obj == null) return null;
         String srcType = (String)obj.opt( "sourceType" );
         String src = (String)obj.opt( "source" );
         String srcProp = (String)obj.opt( "sourceProperty" );
 
         DBParagraph p = new DBParagraph();
         p.setId( src );
-        if ( srcType.compareTo( "reference" ) == 0 ) {
-            WorkspaceNode workspace = null; // TODO -- REVIEW -- Do we need to
-                                            // pass this in????!
-            EmsScriptNode node =
-                    findScriptNodeById( src, workspace, null, false );
-            if ( srcProp.compareTo( "value" ) == 0 ) {
-                List< NodeRef > nodeRefs =
-                        (List< NodeRef >)node.getProperty( Acm.SYSML + srcProp );
-                StringBuffer sb = new StringBuffer();
-                int size = nodeRefs.size();
-                //if ( size > 0 ) sb.append( "<literallayout>" );
-                for ( int i = 0; i < size; i++ ) {
-                    NodeRef nodeRef = nodeRefs.get( i );
-                    EmsScriptNode valueNode =
-                            new EmsScriptNode( nodeRef, node.getServices() );
-                    if ( valueNode != null ) {
-                        String valueProp =
-                                (String)node.getProperty( Acm.SYSML + "name" );
-                        if ( valueProp != null && !valueProp.isEmpty() ) {
-                            Object value =
-                                    valueNode.getProperty( Acm.SYSML
-                                                           + valueProp );
-                            if ( value == null
-                                 || ( value != null && value.toString()
-                                                            .isEmpty() ) ) {
-                                value = extractNodeValue( valueNode );
-                                if ( value == null
-                                     || ( value != null && value.toString()
-                                                                .isEmpty() ) ) continue;
-                            }
-
-                            if ( value instanceof String ) sb.append( HtmlSanitize( (String)value ) );
-                            else sb.append( value );
-                        } else {
-
-                            try {
-                                Object valObj = extractNodeValue( valueNode );
-                                if ( valObj == null ) continue;
-                                if ( valObj instanceof String ) sb.append( HtmlSanitize( (String)valObj ) );
-                                else sb.append( valObj );
-                            } catch ( Exception ex ) {
-                                log( LogLevel.WARNING,
-                                     "Problem extract node value from "
-                                             + node.toJSON() );
-                            }
-                        }
-                    }
-                }
-                //if ( size > 0 ) sb.append( "</literallayout>" );
-                p.setText( sb.toString() );
-            } else {
-                String s = (String)node.getProperty( Acm.SYSML + srcProp );
-                s = handleTransclusion( src, srcProp, s, null, 0 );
-                s = handleEmbeddedImage(src, s);
-                s = HtmlSanitize( s );
-                if(s != null && !s.isEmpty()) p.setText(s);
-                //if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
-                //                                            + s
-                //                                            + "</literallayout>" );
+        if (srcType != null && srcType.compareTo( "reference" ) == 0 ) {
+            WorkspaceNode workspace = null; // TODO -- REVIEW -- Do we need to pass this in????!
+            EmsScriptNode node = findScriptNodeById( src, workspace, null, false );
+            if(node == null){
+            	System.out.println("Failed to create DBParagraph! Failed to find EmsScriptNode with Id: " + src);
+            	//return null;
             }
-        } else {
+            else{
+	            if (srcProp != null && srcProp.compareTo( "value" ) == 0 ) {
+	                List< NodeRef > nodeRefs = (List< NodeRef >)node.getProperty( Acm.SYSML + srcProp );
+	                if(nodeRefs == null){
+	                	System.out.println("Failed to create DBParagraph! Failed to find values node references.");
+	                	return null;
+	                }
+	                
+	                StringBuffer sb = new StringBuffer();
+	                int size = nodeRefs.size();
+	                //if ( size > 0 ) sb.append( "<literallayout>" );
+	                for ( int i = 0; i < size; i++ ) {
+	                    NodeRef nodeRef = nodeRefs.get( i );
+	                    if(nodeRef == null){
+	                    	System.out.println("Failed to get value node ref at index: " + i);
+	                    	continue;
+	                    }
+	                    
+	                    EmsScriptNode valueNode = new EmsScriptNode( nodeRef, node.getServices() );
+	                    
+	                    String valueProp = (String)node.getProperty( Acm.SYSML + "name" );
+	                    if ( valueProp != null && !valueProp.isEmpty() ) {
+	                        Object value =
+	                                valueNode.getProperty( Acm.SYSML
+	                                                       + valueProp );
+	                        if ( value == null
+	                             || ( value != null && value.toString()
+	                                                        .isEmpty() ) ) {
+	                            value = extractNodeValue( valueNode );
+	                            if ( value == null
+	                                 || ( value != null && value.toString()
+	                                                            .isEmpty() ) ) continue;
+	                        }
+	
+	                        if ( value instanceof String ) sb.append( HtmlSanitize( (String)value ) );
+	                        else sb.append( value );
+	                    } else {
+	                        try {
+	                            Object valObj = extractNodeValue( valueNode );
+	                            if ( valObj == null ) continue;
+	                            if ( valObj instanceof String ) sb.append( HtmlSanitize( (String)valObj ) );
+	                            else sb.append( valObj );
+	                        } 
+	                        catch ( Exception ex ) {
+	                            log( LogLevel.WARNING,
+	                                 "Problem extracting node value from "
+	                                         + node.toJSON() );
+	                        }
+	                    }
+	                }
+	                //if ( size > 0 ) sb.append( "</literallayout>" );
+	                p.setText( sb.toString() );
+	            } 
+	            else {
+	                String s = (String)node.getProperty( Acm.SYSML + srcProp );
+	                s = handleTransclusion( src, srcProp, s, null, 0 );
+	                s = handleEmbeddedImage(src, s);
+	                s = HtmlSanitize( s );
+	                if(s != null && !s.isEmpty()) p.setText(s);
+	                //if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
+	                //                                            + s
+	                //                                            + "</literallayout>" );
+	            }
+            }
+        } 
+        else {
             if ( srcProp != null && !srcProp.isEmpty() ) {
                 String s = (String)obj.opt( Acm.SYSML + srcProp );
                 s = handleTransclusion( src, srcProp, s, null, 0 );
@@ -283,7 +310,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 //if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
                   //                                          + s
                     //                                        + "</literallayout>" );
-            } else p.setText( HtmlSanitize( (String)obj.opt( "text" ) ) );
+            } 
+            else p.setText( HtmlSanitize( (String)obj.opt( "text" ) ) );
         }
         if ( p.getText() == null || p.getText().toString().isEmpty() ) return null;
 
@@ -354,30 +382,43 @@ public class SnapshotPost extends AbstractJavaWebScript {
             docBook.setRemoveBlankPages( true );
             
             View productView = product.getView();
+            if(productView == null) throw new Exception("Failed to get product's view!");
+            
             JSONArray contains = productView.getContainsJson();
             if(contains == null || contains.length()==0){ throw new Exception("Failed to retrieve 'contains' JSONArray."); }
+            
             for(int i=0; i < contains.length(); i++){
 	            JSONObject contain = contains.getJSONObject(0);
+	            if(contain == null) throw new Exception("Failed to get contain JSONObject at index: " + i);
+	            
 	            String sourceType = (String)contain.opt("sourceType");
 	            String source = (String)contain.opt("source");
+	            if(source == null || source.isEmpty()) throw new Exception("Failed to get contain source property!");
+	            
 	            this.view2view = productView.getViewToViewPropertyJson();
 	            if(view2view == null || view2view.length()==0) throw new Exception ("Failed to retrieve 'view2view' JSONArray.");
+	            
 	            JSONObject v2vChildNode = getChildrenViews(source);
 	            if(v2vChildNode == null) throw new Exception("Failed to retrieve 'view2view' children view for: " + source);
 	            
 	            JSONArray childrenViews = v2vChildNode.getJSONArray("childrenViews");
 	            if(childrenViews == null) throw new Exception("Failed to retrieve 'childrenViews'.");
+	            
 	            for(int k=0; k< childrenViews.length(); k++){
 	            	String childId = childrenViews.getString(k);
+	            	if(childId == null || childId.isEmpty()) throw new Exception("Failed to get 'childrenViews'[" + k + "] Id!");
+	            	
 	            	EmsScriptNode childNode = findScriptNodeById(childId, null, null, false);
+	            	if(childNode == null) throw new Exception("Failed to find EmsScriptNode with Id: " + childId);
 	            	//creating chapters
 	            	DocumentElement section = (DocumentElement)emsScriptNodeToDBSection(childNode, true);
-	            	docBook.addElement(section);
+	            	if(section != null) docBook.addElement(section);
 	            }
             }
             docBookMgr.setDBBook(docBook);
             docBookMgr.save();
-        } catch ( Exception ex ) {
+        } 
+        catch ( Exception ex ) {
             log( LogLevel.ERROR,
                  "\nFailed to create DBBook! " + ex.getStackTrace() );
             ex.printStackTrace();
@@ -786,6 +827,19 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return "";
     }
 
+
+    private String getEmail(String userName) {
+    	try{
+			NodeRef person = getUserProfile(userName);
+			if(person == null) return "";
+			return (String)nodeService.getProperty(person, ContentModel.PROP_EMAIL);
+    	}
+    	catch(Exception ex){
+    		System.out.println("Failed to get email address for " + userName);
+    	}
+    	return "";
+	}
+
     /**
      * Retrieve the snapshot folder for the view (goes up chain until it hits ViewEditor)
      * 
@@ -917,6 +971,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return null;
     }
 
+
+    private NodeRef getUserProfile(String userName){
+    	return personService.getPerson(userName, false);
+    }
+
     private String getUserProfile( EmsScriptNode node, String userName ) {
         StringBuffer sb = new StringBuffer();
         EmsScriptNode user =
@@ -1024,11 +1083,18 @@ public class SnapshotPost extends AbstractJavaWebScript {
             cirRefList = new ArrayList< List< String >>();
         }
         List< String > list = null;
-        if ( cirRefList.size() <= index ) {
-            list = new ArrayList< String >();
-            cirRefList.add( list );
+        while(true){
+	        if ( cirRefList.size() > index ) break;
+	        else{
+	            list = new ArrayList< String >();
+	            cirRefList.add( list );
+	        }
         }
         list = cirRefList.get( index );
+        if(list == null){
+        	System.out.println("Failed to retrieve circular reference list at index: " + index);
+        	return inputString;
+        }
         list.add( id + transclusionType );
         index++;
         String result = parseTransclusionName( cirRefList, index, inputString );
@@ -1094,33 +1160,52 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
 	private String parseTransclusionDoc(List<List<String>> cirRefList, int index,
 	                                    String inputString){
+		if(inputString == null || inputString.isEmpty()) return inputString;
+		
 		Document document = Jsoup.parseBodyFragment(inputString);
+		if(document == null || document.body()==null){
+			System.out.println("Failed to parse HTML fragment: " + inputString);
+			return inputString;
+		}
+		
 		Elements elements = document.getElementsByTag("mms-transclude-doc");
+		if(elements == null || elements.size() < 1) return document.body().html();
+		
 		for(Element element:elements){
 			String id = element.attr("data-mms-eid");
+			if(id == null || id.isEmpty()){
+				System.out.println("Failed to parse transclusion doc Id!");
+				System.out.println(element.html());
+				element.before("[cannot parse Id for " + element.text() + "]");
+				element.remove();
+				continue;
+			}
+			
 			if(isCircularReference(id, "documentation", cirRefList, index)){
 				System.out.println("Circular reference!");
 				element.before("[Circular reference!]");
 				element.remove();
 				continue;
 			}
+			
+			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
 			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); // TODO -- REVIEW -- Pass in workspace????!!!!
-			if(id == null || id.isEmpty()){
+			if(nameNode == null){
 				System.out.println("Failed to find EmsScriptNode Id " + id);
+				element.before(transcluded);
+				element.remove();
 			}
 			else{
 				try {
 					JSONObject jsObj = nameNode.toJSONObject(null);
 					if(jsObj == null){
 						System.out.println("JSONObject is null");
+						element.before(transcluded);
+						element.remove();
 					}
 					else{
 						String doc = getTranscludedContent(jsObj, "documentation");
-						String transcluded = null;
-						if(doc == null || doc.isEmpty()){
-							transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
-						}
-						else{
+						if(doc != null && !doc.isEmpty()){
 							transcluded = doc;
 							while(true){
 								transcluded = handleTransclusion(id, "doc", transcluded,
@@ -1129,12 +1214,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
 								doc = transcluded;
 							}
 						}
+						if(transcluded == null || transcluded.isEmpty()) transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
 						element.before(transcluded);
 						element.remove();
 					}
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
-					System.out.println("Failed to transclude Id: " + id);
+					System.out.println("Failed to transclude doc for Id: " + id);
+					System.out.println(element.html());
 					e.printStackTrace();
 				}
 			}
@@ -1143,72 +1230,117 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	}
 	
 	private String parseTransclusionName(List<List<String>> cirRefList, int index, String inputString){
+		if(inputString == null || inputString.isEmpty()) return inputString;
 		Document document = Jsoup.parseBodyFragment(inputString);
+		if(document == null || document.body() == null){
+			System.out.println("Failed to parse HTML fragment: " + inputString);
+			return inputString;
+		}
+		
 		Elements elements = document.getElementsByTag("mms-transclude-name");
+		if(elements == null || elements.size() < 1) return document.body().html();
+		
 		for(Element element:elements){
 			String id = element.attr("data-mms-eid");
+			if(id == null || id.isEmpty()){
+				System.out.println("Failed to parse transclusion name Id!");
+				System.out.println(element.html());
+				element.before("[cannot parse Id for " + element.text() + "]");
+				element.remove();
+				continue;
+			}
+			
 			if(isCircularReference(id, "name", cirRefList, index)){
 				System.out.println("Circular reference!");
 				element.before("[Circular reference!]");
 				element.remove();
 				continue;
 			}
+			
+			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
 			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); // TODO -- REVIEW -- Pass in workspace????!!!!
-			if(id == null || id.isEmpty()){
-				System.out.println("Failed to find EmsScriptNode Id " + id);
+			if(nameNode == null){
+				System.out.println("Failed to find EmsScriptNode Id: " + id);
+				element.before(transcluded);
+				element.remove();
+				continue;
 			}
-			else{
-				try {
-					JSONObject jsObj = nameNode.toJSONObject(null);
-					if(jsObj == null){
-						System.out.println("JSONObject is null");
-					}
-					else{
-						String name = getTranscludedContent(jsObj, "name");
-						String transcluded = null;
-						if(name == null || name.isEmpty()){
-							transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
-						}
-						else{
-						transcluded = name;
-							while(true){
-								transcluded = handleTransclusion(id, "name", transcluded, cirRefList, index);
-								if(transcluded.compareToIgnoreCase(name) == 0) break;
-								name = transcluded;
-							}
-						}
-						element.before(transcluded);
-						element.remove();
-					}
-				} catch (JSONException e) {
-					System.out.println("Failed to transclude Id: " + id);
-					e.printStackTrace();
+			
+			try {
+				JSONObject jsObj = nameNode.toJSONObject(null);
+				if(jsObj == null){
+					System.out.println("JSONObject is null");
+					element.before(transcluded);
+					element.remove();
 				}
+				else{
+					String name = getTranscludedContent(jsObj, "name");
+					if(name != null && !name.isEmpty()){
+						transcluded = name;
+						while(true){
+							transcluded = handleTransclusion(id, "name", transcluded, cirRefList, index);
+							if(transcluded.compareToIgnoreCase(name) == 0) break;
+							name = transcluded;
+						}
+					}
+					if(transcluded == null || transcluded.isEmpty()) transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
+					element.before(transcluded);
+					element.remove();
+				}
+			} catch (JSONException e) {
+				System.out.println("Failed to transclude name for Id: " + id);
+				System.out.println(element.html());
+				e.printStackTrace();
 			}
 		}
 		return document.body().html();
 	}
 	
 	private String parseTransclusionVal(List<List<String>> cirRefList, int index, String inputString){
+		if(inputString == null || inputString.isEmpty()) return inputString;
+		
 		Document document = Jsoup.parseBodyFragment(inputString);
+		if(document == null || document.body() == null){
+			System.out.println("Failed to parse HTML fragment: " + inputString);
+			return inputString;
+		}
+		
 		Elements elements = document.getElementsByTag("mms-transclude-val");
+		if(elements == null || elements.size() < 1) return document.body().html();
+		
 		for(Element element:elements){
 			String id = element.attr("data-mms-eid");
+			if(id == null || id.isEmpty()){
+				System.out.println("Failed to parse transclusion value Id!");
+				System.out.println(element.html());
+				element.before("[cannot parse Id for " + element.text() + "]");
+				element.remove();
+				continue;
+			}
+			
 			if(isCircularReference(id, "value", cirRefList, index)){
 				System.out.println("Circular reference!");
 				element.before("[Circular reference!]");
 				element.remove();
 				continue;
 			}
+			
+			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
 			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); // TODO -- REVIEW -- Pass in workspace????!!!!
-			if(id == null || id.isEmpty()){
+			if(nameNode == null){
 				System.out.println("Failed to find EmsScriptNode Id " + id);
+				element.before(transcluded);
+				element.remove();
+				continue;
 			}
 			else{
 				try {
 					JSONObject jsObj = nameNode.toJSONObject(null);
 					if(jsObj == null){
 						System.out.println("JSONObject is null");
+						element.before(transcluded);
+						element.remove();
+						continue;
 					}
 					else{
 						String val = getTranscludedVal(jsObj);
@@ -1295,10 +1427,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		return jsonObject;
 	}
 
-    private
-            void
-            saveImage( DBImage image, EmsScriptNode imageEmsScriptNode )
-                                                                        throws Exception {
+    private void saveImage( DBImage image, EmsScriptNode imageEmsScriptNode ) throws Exception {
         String tmpDirName = TempFileProvider.getTempDir().getAbsolutePath();
         Path jobDirName = Paths.get( tmpDirName, this.snapshotName );
         Path dbDirName = Paths.get( jobDirName.toString(), "docbook" );
@@ -1352,12 +1481,16 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	 * @param snapshot format types
 	 */
 	public void startAction(EmsScriptNode jobNode, String siteName, JSONObject postJson) throws JSONException {
+		String userName = AuthenticationUtil.getFullyAuthenticatedUser();
+        String userEmail = getEmail(userName);
 		ArrayList<String> formats = getSnapshotFormats(postJson);
         ActionService actionService = services.getActionService();
         Action snapshotAction = actionService.createAction(SnapshotArtifactsGenerationActionExecuter.NAME);
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_SITE_NAME, siteName);
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_SNAPSHOT_ID, postJson.getString("id"));
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_FORMAT_TYPE, formats);
+        snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_USER_EMAIL, userEmail);
+        
        	services.getActionService().executeAction(snapshotAction, jobNode.getNodeRef(), true, true);
 	}
 

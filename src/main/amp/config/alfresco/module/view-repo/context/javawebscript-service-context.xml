@@ -20,6 +20,8 @@
 		singleton="false">
 		<property name="repositoryHelper" ref="repositoryHelper" />
 		<property name="services" ref="ServiceRegistry" />
+		<property name="personService" ref="PersonService" />
+		<property name="nodeService" ref="NodeService" />
 	</bean> 
 
 	<bean id="webscript.gov.nasa.jpl.ui.snapshot.get"
