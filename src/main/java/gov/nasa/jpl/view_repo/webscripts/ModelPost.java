@@ -36,6 +36,7 @@ import gov.nasa.jpl.ae.event.Parameter;
 import gov.nasa.jpl.ae.event.ParameterListenerImpl;
 import gov.nasa.jpl.ae.solver.Constraint;
 import gov.nasa.jpl.ae.solver.ConstraintLoopSolver;
+import gov.nasa.jpl.mbee.util.Random;
 import gov.nasa.jpl.ae.sysml.SystemModelSolver;
 import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
 import gov.nasa.jpl.ae.util.ClassData;
@@ -243,7 +244,7 @@ public class ModelPost extends AbstractJavaWebScript {
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
 
-        System.out.println("****** NodeUtil.doCaching = " + NodeUtil.doCaching );
+        log( LogLevel.DEBUG, "****** NodeUtil.doCaching = " + NodeUtil.doCaching );
         
         if(sourceWS == null)
             setWsDiff( targetWS );
@@ -338,7 +339,8 @@ public class ModelPost extends AbstractJavaWebScript {
             if (targetWS != null) {
                 wsId = targetWS.getSysmlId();
             }
-            if ( !sendDeltas(deltaJson, wsId, null) ) {
+            // FIXME: Need to split by projectId
+            if ( !sendDeltas(deltaJson, wsId, elements.first().getProjectId()) ) {
                 log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
             }
 
@@ -1862,6 +1864,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
             // Solve!!!!
             Debug.turnOn();
+            Random.reset();
             boolean result = solver.solve(constraints);
             Debug.turnOff();
 

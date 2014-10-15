@@ -93,11 +93,6 @@
 	            <type>jar</type>
 	            <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
 	        </dependency>
-	        <dependency>
-                    <groupId>gov.nasa.jpl.mbee.docbook</groupId>
-                    <artifactId>docbook</artifactId>
-                    <version>0.0.1</version>
-            </dependency>
             </dependencies>
             <properties>
                 <env.BUILD_NUMBER>1</env.BUILD_NUMBER>
@@ -129,11 +124,6 @@
 	                <type>jar</type>
 	                <systemPath>${project.basedir}/src/main/amp/web/WEB-INF/lib/kexpparser.jar</systemPath>
                </dependency>
-                 <dependency>
-                    <groupId>gov.nasa.jpl.mbee.docbook</groupId>
-                    <artifactId>docbook</artifactId>
-                    <version>0.0.1</version>
-                </dependency>
             </dependencies>
             <properties>
                 <env.BUILD_NUMBER>1</env.BUILD_NUMBER>
@@ -165,11 +155,6 @@
                     <artifactId>bae</artifactId>
                     <version>${mbee.version}</version>
                 </dependency>
-                <dependency>
-                   <groupId>gov.nasa.jpl.mbee.docbook</groupId>
-                   <artifactId>docbook</artifactId>
-                   <version>0.0.1</version>
-               </dependency>
             </dependencies>
         </profile>
     </profiles>
@@ -203,6 +188,11 @@
             <version>${alfresco.version}</version>
         </dependency>
         <!-- Test dependencies -->
+        <dependency>
+            <groupId>gov.nasa.jpl.mbee.docbook</groupId>
+            <artifactId>docbook</artifactId>
+            <version>0.0.1</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

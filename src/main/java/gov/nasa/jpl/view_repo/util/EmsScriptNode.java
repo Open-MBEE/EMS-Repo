@@ -1924,6 +1924,19 @@ public class EmsScriptNode extends ScriptNode implements
         return siteNode;
     }
 
+    public EmsScriptNode getProjectNode() {
+        EmsScriptNode parent = this.getParent();
+        while ( !parent.getType().contains( "Project" ) ) {
+            EmsScriptNode oldparent = parent;
+            parent = oldparent.getParent();
+        }
+        return parent;
+    }
+    
+    public String getProjectId() {
+        return getProjectNode().getSysmlId();
+    }
+    
     private EmsScriptNode convertIdToEmsScriptNode( String valueId,
                                                     boolean ignoreWorkspace,
                                                     WorkspaceNode workspace,

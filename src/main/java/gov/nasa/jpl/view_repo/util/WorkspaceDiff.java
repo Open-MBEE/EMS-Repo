@@ -521,7 +521,7 @@ public class WorkspaceDiff {
      * @throws JSONException
      */
     private void addWorkspaceMetadata(JSONObject jsonObject, WorkspaceNode ws, Date dateTime) throws JSONException {
-        WorkspaceNode.addWorkspaceNamesAndIds( jsonObject, ws, dateTime );
+        WorkspaceNode.addWorkspaceNamesAndIds( jsonObject, ws );
         if (dateTime != null) {
             jsonObject.put( "timestamp", TimeUtils.toTimestamp( dateTime ) );
         }
