@@ -1073,11 +1073,14 @@ public class NodeUtil {
     public static NodeRef getNodeRefAtTime( NodeRef ref,
                                             Date dateTime ) {
         if (Debug.isOn())  Debug.outln("getNodeRefAtTime( " + ref + ", " + dateTime + " )" );
+        if ( !NodeUtil.exists( ref ) && !NodeUtil.isDeleted( ref ) ) {
+            return null;
+        }
         if (ref == null || dateTime == null ) {
             return ref;
         }
         VersionHistory history = getServices().getVersionService().getVersionHistory( ref );
-        if (history == null) {
+        if ( history == null ) {
         		// Versioning doesn't make versions until the first save...
         		EmsScriptNode node = new EmsScriptNode(ref, services);
         		Date createdTime = (Date)node.getProperty("cm:created");
@@ -1273,6 +1276,17 @@ public class NodeUtil {
         return elements;
     }
 
+    public static boolean isDeleted( EmsScriptNode node ) {
+        if ( node == null ) return false;
+        return node.isDeleted();
+    }
+
+    public static boolean isDeleted( NodeRef ref ) {
+        if ( ref == null ) return false;
+        EmsScriptNode node = new EmsScriptNode( ref, getServices() );
+        return node.isDeleted();
+    }
+    
     public static boolean exists( EmsScriptNode node ) {
         if ( node == null ) return false;
         return node.exists();
