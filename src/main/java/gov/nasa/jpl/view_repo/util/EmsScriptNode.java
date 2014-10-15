@@ -615,7 +615,7 @@ public class EmsScriptNode extends ScriptNode implements
                                                WorkspaceNode workspace,
                                                Date dateTime ) {
         
-    	return NodeUtil.updateOrCreateArtifact(name, type, base64content, targetSiteName,
+    	return NodeUtil.updateOrCreateArtifact(name, type, base64content, null, targetSiteName,
     										   subfolderName, workspace, dateTime,
     										   response, status, false);
     }

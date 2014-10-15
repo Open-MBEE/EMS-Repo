@@ -97,7 +97,8 @@ public class ArtifactGet extends AbstractJavaWebScript {
 		clearCaches();
 		
         String cs = req.getParameter("cs"); 
-        String extension = req.getParameter("extension");
+        String extensionArg = req.getParameter("extension");
+        String extension = extensionArg != null ? extensionArg : ".svg";  // Assume .svg if no extension provided
         String timestamp = req.getParameter("timestamp");
 
         if (!Utils.isNullOrEmpty(extension) && !extension.startsWith(".")) {

@@ -8,6 +8,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1481,6 +1482,7 @@ public class NodeUtil {
      */
     public static EmsScriptNode updateOrCreateArtifact( String name, String type,
 									            		String base64content,
+									            		String strContent,
 									            		String targetSiteName,
 									            		String subfolderName,
 									            		WorkspaceNode workspace,
@@ -1498,6 +1500,11 @@ public class NodeUtil {
 		( base64content == null )
 		      ? null
 		      : DatatypeConverter.parseBase64Binary( base64content );
+		
+		if (content == null && strContent != null) {
+			content = strContent.getBytes(Charset.forName("UTF-8"));
+		}
+		
 		long cs = EmsScriptNode.getChecksum( content );
 		
 		if (!wasOn) Debug.turnOn();
@@ -1599,7 +1606,9 @@ public class NodeUtil {
 		
 		ContentData contentData = writer.getContentData();
 		contentData = ContentData.setMimetype( contentData, EmsScriptNode.getMimeType( myType ) );
-		contentData = ContentData.setEncoding( contentData, "UTF-8");
+		if (base64content == null) {
+			contentData = ContentData.setEncoding( contentData, "UTF-8");
+		}
 		services.getNodeService().setProperty( artifactNode.getNodeRef(),
 		            							ContentModel.PROP_CONTENT,contentData );
 		
