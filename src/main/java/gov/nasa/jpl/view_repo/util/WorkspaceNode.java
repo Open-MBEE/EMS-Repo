@@ -34,6 +34,7 @@ import org.springframework.extensions.webscripts.Status;
 public class WorkspaceNode extends EmsScriptNode {
 
     private static final long serialVersionUID = -7143644366531706115L;
+    private static final boolean checkingForEmsSource = true;  // FIXME -- at some point, this should turned off and removed along with the code that uses it.
 
     /**
      * @param nodeRef
@@ -73,7 +74,20 @@ public class WorkspaceNode extends EmsScriptNode {
     @Override
     public WorkspaceNode getParentWorkspace() {
         NodeRef ref = (NodeRef)getProperty("ems:parent");
-        if ( ref == null ) return null;
+        if ( ref == null ) {
+            // Handle data corrupted by a bug (now fixed)
+            if ( checkingForEmsSource ) {
+                try {
+                    ref = (NodeRef)getProperty("ems:source");
+                    if ( ref != null ) {
+                        // clean up
+                        setProperty( "ems:parent", ref );
+                        removeProperty( "ems:source" );
+                    }
+                } catch ( Throwable e ) {}
+            }
+            return null;
+        }
         WorkspaceNode parentWs = new WorkspaceNode( ref, getServices() );
         return parentWs;
     }
