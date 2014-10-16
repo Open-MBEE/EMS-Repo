@@ -296,7 +296,7 @@ public class WorkspaceNode extends EmsScriptNode {
             }
         }
         
-        // Not bothering to remove this workspace's ems:source or ems:children
+        // Not bothering to remove this workspace's ems:parent or ems:children
 
         // Delete children if requested
         if ( deleteChildWorkspaces ) {
@@ -432,7 +432,7 @@ public class WorkspaceNode extends EmsScriptNode {
         Pair< Boolean, Seen< WorkspaceNode > > p = Utils.seen( ws, true, seen );
         if ( p.first ) return null;
         seen = p.second;
-        return getQualifiedId( ws.getSourceWorkspace(), seen ) + "/" + ws.getId();
+        return getQualifiedId( ws.getParentWorkspace(), seen ) + "/" + ws.getId();
     }
 
     public static String getQualifiedName( WorkspaceNode ws ) {
@@ -446,7 +446,7 @@ public class WorkspaceNode extends EmsScriptNode {
         Pair< Boolean, Seen< WorkspaceNode > > p = Utils.seen( ws, true, seen );
         if ( p.first ) return null;
         seen = p.second;
-        return getQualifiedName( ws.getSourceWorkspace(), seen ) + "/" + ws.getWorkspaceName();
+        return getQualifiedName( ws.getParentWorkspace(), seen ) + "/" + ws.getWorkspaceName();
     }
 
     public WorkspaceNode getCommonParent(WorkspaceNode other) {
@@ -661,7 +661,7 @@ public class WorkspaceNode extends EmsScriptNode {
         // is created, but wouldn't it's ems:lastTimeSyncParent property be
         // expected to change?
         json.put( "created", TimeUtils.toTimestamp( (Date)getProperty("cm:modified") ) );
-        json.put( "parent", getId(getSourceWorkspace())); // this handles null as master
+        json.put( "parent", getId(getParentWorkspace())); // this handles null as master
 
         // REVIEW -- Why is ems:lastTimeSyncParent called the "branched"
         // date? Shouldn't the branched date always be the same as the created
