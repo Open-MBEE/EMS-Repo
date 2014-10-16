@@ -34,6 +34,7 @@ import org.springframework.extensions.webscripts.Status;
 public class WorkspaceNode extends EmsScriptNode {
 
     private static final long serialVersionUID = -7143644366531706115L;
+    private static final boolean checkingForEmsSource = true;  // FIXME -- at some point, this should turned off and removed along with the code that uses it.
 
     /**
      * @param nodeRef
@@ -73,7 +74,20 @@ public class WorkspaceNode extends EmsScriptNode {
     @Override
     public WorkspaceNode getParentWorkspace() {
         NodeRef ref = (NodeRef)getProperty("ems:parent");
-        if ( ref == null ) return null;
+        if ( ref == null ) {
+            // Handle data corrupted by a bug (now fixed)
+            if ( checkingForEmsSource ) {
+                try {
+                    ref = (NodeRef)getProperty("ems:source");
+                    if ( ref != null ) {
+                        // clean up
+                        setProperty( "ems:parent", ref );
+                        removeProperty( "ems:source" );
+                    }
+                } catch ( Throwable e ) {}
+            }
+            return null;
+        }
         WorkspaceNode parentWs = new WorkspaceNode( ref, getServices() );
         return parentWs;
     }
@@ -241,7 +255,7 @@ public class WorkspaceNode extends EmsScriptNode {
     	if ( Debug.isOn() ) Debug.outln( "parent workspace: " + parentWorkspace );
     	if(parentWorkspace != null) {
     		parentWorkspace.appendToPropertyNodeRefs( "ems:children", ws.getNodeRef() );
-    		ws.setProperty( "ems:source", parentWorkspace.getNodeRef() );
+    		ws.setProperty( "ems:parent", parentWorkspace.getNodeRef() );
     	}
     	if ( Debug.isOn() ) Debug.outln( "created workspace " + ws + " in folder " + folder );
     	return ws;
@@ -282,7 +296,7 @@ public class WorkspaceNode extends EmsScriptNode {
             }
         }
         
-        // Not bothering to remove this workspace's ems:source or ems:children
+        // Not bothering to remove this workspace's ems:parent or ems:children
 
         // Delete children if requested
         if ( deleteChildWorkspaces ) {
@@ -418,7 +432,7 @@ public class WorkspaceNode extends EmsScriptNode {
         Pair< Boolean, Seen< WorkspaceNode > > p = Utils.seen( ws, true, seen );
         if ( p.first ) return null;
         seen = p.second;
-        return getQualifiedId( ws.getSourceWorkspace(), seen ) + "/" + ws.getId();
+        return getQualifiedId( ws.getParentWorkspace(), seen ) + "/" + ws.getId();
     }
 
     public static String getQualifiedName( WorkspaceNode ws ) {
@@ -432,7 +446,7 @@ public class WorkspaceNode extends EmsScriptNode {
         Pair< Boolean, Seen< WorkspaceNode > > p = Utils.seen( ws, true, seen );
         if ( p.first ) return null;
         seen = p.second;
-        return getQualifiedName( ws.getSourceWorkspace(), seen ) + "/" + ws.getWorkspaceName();
+        return getQualifiedName( ws.getParentWorkspace(), seen ) + "/" + ws.getWorkspaceName();
     }
 
     public WorkspaceNode getCommonParent(WorkspaceNode other) {
@@ -647,7 +661,7 @@ public class WorkspaceNode extends EmsScriptNode {
         // is created, but wouldn't it's ems:lastTimeSyncParent property be
         // expected to change?
         json.put( "created", TimeUtils.toTimestamp( (Date)getProperty("cm:modified") ) );
-        json.put( "parent", getId(getSourceWorkspace())); // this handles null as master
+        json.put( "parent", getId(getParentWorkspace())); // this handles null as master
 
         // REVIEW -- Why is ems:lastTimeSyncParent called the "branched"
         // date? Shouldn't the branched date always be the same as the created

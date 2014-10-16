@@ -1259,7 +1259,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
         EmsScriptNode reifiedNode = null;
-
+    
         String jsonType = null;
         JSONObject specializeJson = null;
         // The type is now found by using the specialization key
@@ -1371,11 +1371,26 @@ public class ModelPost extends AbstractJavaWebScript {
                         if ( nodeToUpdate.move(parent) ) {
                             modStatus.setState( ModStatus.State.MOVED  );
                         }
+                        
+                    // If it has a Product aspect, but want to remove that aspect
+                    // ie downgrading to a View or Element
+                    // Note: this check will not work if downgrading to an Element,
+                    //		 and the type is not included in the specialization.  
+                    // TODO Will need to generalize this for any aspect, and save
+                    //		off the appropriate properties before removing the 
+                    //		aspect, as it will remove all properties pertaining to the
+                    //		aspect.  Will then need to update those saved properties
+                    //		after removing the aspect.
+                    if (nodeToUpdate.hasAspect(Acm.ACM_PRODUCT) &&
+                    	(acmSysmlType != null && !acmSysmlType.equals(Acm.ACM_PRODUCT)) ) {
+                    	nodeToUpdate.removeAspect(Acm.ACM_PRODUCT);
+                    }
+                        
                     if ( !type.equals( acmSysmlType )
                             && NodeUtil.isAspect( acmSysmlType ) ) {
-                        if (nodeToUpdate.createOrUpdateAspect( acmSysmlType )) {
+                        if (nodeToUpdate.createOrUpdateAspect( acmSysmlType )) {                        		
                             modStatus.setState( ModStatus.State.UPDATED  );
-                        }
+                        } 	
                     }
                 }
             } catch (Exception e) {

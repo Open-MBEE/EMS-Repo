@@ -836,7 +836,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     private String getEmail(String userName) {
     	try{
-			NodeRef person = getUserProfile(userName);
+    		if(nodeService == null) System.out.println("NodeService is not instantiated!");
+			
+    		NodeRef person = getUserProfile(userName);
 			if(person == null) return "";
 			return (String)nodeService.getProperty(person, ContentModel.PROP_EMAIL);
     	}
@@ -979,6 +981,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
 
     private NodeRef getUserProfile(String userName){
+    	if(personService == null){ 
+    		System.out.println("PersonService is not instantiated.");
+    		return null;
+    	}
     	return personService.getPerson(userName, false);
     }
 
@@ -1487,8 +1493,15 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	 * @param snapshot format types
 	 */
 	public void startAction(EmsScriptNode jobNode, String siteName, JSONObject postJson) throws JSONException {
+		String userEmail = null;
 		String userName = AuthenticationUtil.getFullyAuthenticatedUser();
-        String userEmail = getEmail(userName);
+		if(userName == null || userName.isEmpty())
+			System.out.println("Failed to get authentiated user name!");
+		else
+			userEmail = getEmail(userName);
+		
+		if(userEmail == null || userEmail.isEmpty()) System.out.println("Failed to get user email address!");
+		
 		ArrayList<String> formats = getSnapshotFormats(postJson);
         ActionService actionService = services.getActionService();
         Action snapshotAction = actionService.createAction(SnapshotArtifactsGenerationActionExecuter.NAME);

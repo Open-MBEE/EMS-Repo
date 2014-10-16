@@ -89,7 +89,7 @@ public class ArtifactPost extends AbstractJavaWebScript {
 	protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
 		
 		String path = null;
-		String base64content = null;
+		String content = null;
 		JSONObject resultJson = null;
 		String filename = null;
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -111,7 +111,7 @@ public class ArtifactPost extends AbstractJavaWebScript {
         for (FormField field : formData.getFields()) {
         	if (field.getName().equals("content") && field.getIsFile()) {
         		try {
-					base64content = field.getContent().getContent();
+					content = field.getContent().getContent();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -145,10 +145,10 @@ public class ArtifactPost extends AbstractJavaWebScript {
 	    	        	resultJson.put("site", siteName);
 	    	        	
 	    	        	// Update or create the artifact if possible:
-	    	        	if (!Utils.isNullOrEmpty(artifactId) && !Utils.isNullOrEmpty(base64content)) {
+	    	        	if (!Utils.isNullOrEmpty(artifactId) && !Utils.isNullOrEmpty(content)) {
 	    	        		
 		    	        	EmsScriptNode artifact = NodeUtil.updateOrCreateArtifact(artifactId, extension, 
-		    	        															 base64content, 
+		    	        															 null, content,
 		    	        															 siteName,
 		    																		 path, workspace, null,
 		    																		 response, null, false);

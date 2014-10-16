@@ -8,6 +8,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -1405,49 +1406,64 @@ public class NodeUtil {
                                                     //Map< String, EmsScriptNode > simpleCache,
                                                     ServiceRegistry services,
                                                     StringBuffer response ) {
-    	EmsScriptNode result = null;
-    
+
         timer = Timer.startTimer(timer, timeEvents);
-        
-    	// be smart about search if possible
-        NodeRef ref = simpleCache.get( id );
-    	if (ref != null) {
-    	    EmsScriptNode esn = new EmsScriptNode( ref, services );
-            EmsScriptNode resultAtTime =
-                    esn.getVersionAtTime( dateTime );
-    		if ( resultAtTime != null && resultAtTime.exists() &&
-    		     ( workspace == null || workspace.equals( resultAtTime.getWorkspace() ) ) ) {
-    		    //if ( resultAtTime != null )
-                if ( Debug.isOn() ) {
-                    Debug.outln( "findScriptNodeById(" + id + ", " + workspace
-                                 + ", " + dateTime
-                                 + "): found in foundElements: " + resultAtTime );
-                }
-    		    result = resultAtTime;
-    		}
-            
-            if (timeEvents) System.out.println("====== findScriptNodeById(): cache time "+timer);
-    	}
-    	if ( result == null ) {
-    		NodeRef nodeRef = findNodeRefById(id, false, workspace, dateTime, services, findDeleted);
-    		if (nodeRef != null) {
-    			result = new EmsScriptNode(nodeRef, services, response);
-//    			simpleCache.put(id, nodeRef); // add to cache
-    		}
-
-    		if (timeEvents) System.out.println("====== findScriptNodeById(): findNodeRefById time "+timer);
-    		
-    	}
-    
-        if ( Debug.isOn() ) {
-            Debug.outln( "findScriptNodeById(" + id + ", " + workspace
-                         + ", " + dateTime
-                         + "): returning " + result );
+        NodeRef nodeRef = findNodeRefById(id, false, workspace, dateTime, services, findDeleted);
+        if ( nodeRef == null ) {
+            Timer.stopTimer(timer, "====== findScriptNodeById(): failed end time", timeEvents);
+            return null;
         }
-
         Timer.stopTimer(timer, "====== findScriptNodeById(): end time", timeEvents);
+        return new EmsScriptNode( nodeRef, services );
 
-    	return result;
+//        EmsScriptNode result = null;
+//    
+//        
+//    	// be smart about search if possible
+//        NodeRef ref = null;
+//        if ( workspace == null ) {
+//            ref = simpleCache.get( id );
+//        } else {
+//            NodeUtil.findNodeRefsByType( id, SearchType.CM_NAME.prefix, false, false, workspace, dateTime, true, true, services, findDeleted );
+//            NodeUtil.getCachedElements( id, SearchType.CM_NAME.prefix, false, workspace, dateTime, true, true, findDeleted );
+//            //ref = elementCache
+//        }
+//    	if (ref != null) {
+//    	    EmsScriptNode esn = new EmsScriptNode( ref, services );
+//            EmsScriptNode resultAtTime = esn.getVersionAtTime( dateTime );
+//    		if ( resultAtTime != null && resultAtTime.exists() &&
+//    		     ( workspace == null || workspace.equals( resultAtTime.getWorkspace() ) ) ) {
+//    		    //if ( resultAtTime != null )
+//                if ( Debug.isOn() ) {
+//                    Debug.outln( "findScriptNodeById(" + id + ", " + workspace
+//                                 + ", " + dateTime
+//                                 + "): found in foundElements: " + resultAtTime );
+//                }
+//    		    result = resultAtTime;
+//    		}
+//            
+//            if (timeEvents) System.out.println("====== findScriptNodeById(): cache time "+timer);
+//    	}
+//    	if ( result == null ) {
+//    		NodeRef nodeRef = findNodeRefById(id, false, workspace, dateTime, services, findDeleted);
+//    		if (nodeRef != null) {
+//    			result = new EmsScriptNode(nodeRef, services, response);
+////    			simpleCache.put(id, nodeRef); // add to cache
+//    		}
+//
+//    		if (timeEvents) System.out.println("====== findScriptNodeById(): findNodeRefById time "+timer);
+//    		
+//    	}
+//    
+//        if ( Debug.isOn() ) {
+//            Debug.outln( "findScriptNodeById(" + id + ", " + workspace
+//                         + ", " + dateTime
+//                         + "): returning " + result );
+//        }
+//
+//        Timer.stopTimer(timer, "====== findScriptNodeById(): end time", timeEvents);
+//
+//    	return result;
     }
     
 	public static EmsScriptNode findScriptNodeByIdForWorkspace(String id,
@@ -1495,6 +1511,7 @@ public class NodeUtil {
      */
     public static EmsScriptNode updateOrCreateArtifact( String name, String type,
 									            		String base64content,
+									            		String strContent,
 									            		String targetSiteName,
 									            		String subfolderName,
 									            		WorkspaceNode workspace,
@@ -1512,6 +1529,11 @@ public class NodeUtil {
 		( base64content == null )
 		      ? null
 		      : DatatypeConverter.parseBase64Binary( base64content );
+		
+		if (content == null && strContent != null) {
+			content = strContent.getBytes(Charset.forName("UTF-8"));
+		}
+		
 		long cs = EmsScriptNode.getChecksum( content );
 		
 		if (!wasOn) Debug.turnOn();
@@ -1613,7 +1635,9 @@ public class NodeUtil {
 		
 		ContentData contentData = writer.getContentData();
 		contentData = ContentData.setMimetype( contentData, EmsScriptNode.getMimeType( myType ) );
-		contentData = ContentData.setEncoding( contentData, "UTF-8");
+		if (base64content == null) {
+			contentData = ContentData.setEncoding( contentData, "UTF-8");
+		}
 		services.getNodeService().setProperty( artifactNode.getNodeRef(),
 		            							ContentModel.PROP_CONTENT,contentData );
 		
