@@ -836,7 +836,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     private String getEmail(String userName) {
     	try{
-			NodeRef person = getUserProfile(userName);
+    		if(nodeService == null) System.out.println("NodeService is not instantiated!");
+			
+    		NodeRef person = getUserProfile(userName);
 			if(person == null) return "";
 			return (String)nodeService.getProperty(person, ContentModel.PROP_EMAIL);
     	}
@@ -979,6 +981,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
 
     private NodeRef getUserProfile(String userName){
+    	if(personService == null){ 
+    		System.out.println("PersonService is not instantiated.");
+    		return null;
+    	}
     	return personService.getPerson(userName, false);
     }
 
