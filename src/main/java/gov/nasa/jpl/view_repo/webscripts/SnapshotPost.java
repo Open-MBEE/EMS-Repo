@@ -1487,8 +1487,15 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	 * @param snapshot format types
 	 */
 	public void startAction(EmsScriptNode jobNode, String siteName, JSONObject postJson) throws JSONException {
+		String userEmail = null;
 		String userName = AuthenticationUtil.getFullyAuthenticatedUser();
-        String userEmail = getEmail(userName);
+		if(userName == null || userName.isEmpty())
+			System.out.println("Failed to get authentiated user name!");
+		else
+			userEmail = getEmail(userName);
+		
+		if(userEmail == null || userEmail.isEmpty()) System.out.println("Failed to get user email address!");
+		
 		ArrayList<String> formats = getSnapshotFormats(postJson);
         ActionService actionService = services.getActionService();
         Action snapshotAction = actionService.createAction(SnapshotArtifactsGenerationActionExecuter.NAME);
