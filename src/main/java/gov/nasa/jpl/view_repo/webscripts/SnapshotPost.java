@@ -587,7 +587,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         snapshotNode.createOrUpdateProperty( Acm.ACM_ID, snapshotName );
 
         snapshotNode.createOrUpdateAspect( "view2:Snapshotable" );
-        snapshotNode.createOrUpdateProperty( "view2:snapshotProducts", view.getNodeRef() );
+        snapshotNode.createOrUpdateProperty( "view2:snapshotProduct", view.getNodeRef() );
         view.createOrUpdateAspect( "view2:Snapshotable" );
         view.appendToPropertyNodeRefs( "view2:productSnapshots", snapshotNode.getNodeRef() );
         
