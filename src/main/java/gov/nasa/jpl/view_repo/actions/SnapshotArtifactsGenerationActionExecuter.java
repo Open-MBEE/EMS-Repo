@@ -127,7 +127,11 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        // Send off notification email
 	        String subject = "[EuropaEMS] Snapshot Generation " + jobStatus;
 	        String msg = buildEmailMessage(snapshot);
-	        ActionUtil.sendEmailTo("europaems@jpl.nasa.gov", action.getParameterValue(PARAM_USER_EMAIL).toString(), msg, subject, services);
+	        String userEmail = (String)action.getParameterValue(PARAM_USER_EMAIL);
+	        if(userEmail == null || userEmail.isEmpty())
+	        	System.out.println("Failed to retrieve user email parameter!");
+	        else
+	        	ActionUtil.sendEmailTo("europaems@jpl.nasa.gov", userEmail, msg, subject, services);
 	        System.out.println("Completed snapshot artifact(s) generation.");
         }
         catch(Exception ex){
