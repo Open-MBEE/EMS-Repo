@@ -331,8 +331,8 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         //Map< String, EmsScriptNode > refs = getAddedElements();
         for ( NodeRef e : getAdded() ) {
             EmsScriptNode node = new EmsScriptNode( e, getServices() );
-            if ( isPropertyOwnedValueSpecification( node ) ) {
-                EmsScriptNode owningProp = getOwningProperty( node );
+            if ( node.isPropertyOwnedValueSpecification() ) {
+                EmsScriptNode owningProp = node.getOwningProperty();
                 // TODO -- REVIEW -- Does the if statement below need to be uncommented?
 //                if ( !getRemoved().contains( owningProp ) ) {
                     owningProperties.add( owningProp );
@@ -342,16 +342,16 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         }
         for ( NodeRef e : getUpdated() ) {
             EmsScriptNode node = new EmsScriptNode( e, getServices() );
-            if ( isPropertyOwnedValueSpecification( node ) ) {
+            if ( node.isPropertyOwnedValueSpecification() ) {
                 valueSpecs.add( node );
-                owningProperties.add( getOwningProperty( node ) );
+                owningProperties.add( node.getOwningProperty() );
             }
         }
         for ( NodeRef e : getRemoved() ) {
             EmsScriptNode node = new EmsScriptNode( e, getServices() );
-            if ( isPropertyOwnedValueSpecification( node ) ) {
+            if ( node.isPropertyOwnedValueSpecification() ) {
                 valueSpecs.add( node );
-                owningProperties.add( getOwningProperty( node ) );
+                owningProperties.add( node.getOwningProperty() );
             }
         }
 
@@ -371,7 +371,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
 
         // Add the owning Properties' values to the nodeDiff property change maps.
         for ( EmsScriptNode valueNode : valueSpecs ) {
-            EmsScriptNode owningPropNode = getOwningProperty( valueNode );
+            EmsScriptNode owningPropNode = valueNode.getOwningProperty();
             Map< String, Pair< Object, Object > > propChanges = getPropertyChanges( owningPropNode.getName() );
 //            if ( propChanges == null ) {
 //                propChanges = new LinkedHashMap< String, Pair<Object,Object> >();
@@ -422,35 +422,6 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         if (Debug.isOn()) Debug.outln("updated properties= " + getUpdatedProperties() );
         if (Debug.isOn()) Debug.outln("property changes = " + getPropertyChanges() );
 
-    }
-
-
-    protected static boolean isProperty( EmsScriptNode node ) {
-        if ( node == null ) return false;
-        if ( node.hasOrInheritsAspect( "sysml:Property" ) ) return true;
-        if ( node.getProperty(Acm.ACM_VALUE ) != null ) return true;
-        return false;
-    }
-
-    protected static EmsScriptNode getOwningProperty( EmsScriptNode node ) {
-        if (Debug.isOn()) Debug.outln("getOwningProperty(" + node + ")");
-        EmsScriptNode parent = node;
-        while ( parent != null && !isProperty( parent ) ) {
-            if (Debug.isOn()) Debug.outln("parent = " + parent );
-            parent = parent.getUnreifiedParent( null );  // TODO -- REVIEW -- need timestamp??!!
-        }
-        if (Debug.isOn()) Debug.outln("returning " + parent );
-        return parent;
-    }
-
-    protected static boolean isPropertyOwnedValueSpecification( EmsScriptNode node ) {
-//        NodeService ns = NodeUtil.getServices().getNodeService();
-//        if ( ns.hasAspect( node.getNodeRef(), NodeUtil.createQName( "sysml:ValueSpecification" ) ) ) {
-        if ( node.hasOrInheritsAspect( "sysml:ValueSpecification" ) ) {
-            EmsScriptNode parent = getOwningProperty( node );
-            return parent != null && isProperty( parent );
-        }
-        return false;
     }
 
 }

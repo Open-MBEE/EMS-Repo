@@ -10,51 +10,13 @@
 
             "editable": true,
 
-            "name": "",
+            "name": "Name",
 
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
 
-            "qualifiedName": "/",
+            "qualifiedName": "/Name",
 
-            "specialization": {
-
-                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-
-                "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-
-                "type": "Expose"
-
-            },
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "Components",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/Components",
-
-            "specialization": {
-
-                "allowedElements": [],
-
-                "childrenViews": [],
-
-                "contains": [],
-
-                "displayedElements": [],
-
-                "type": "View"
-
-            },
+            "specialization": {"type": "Operation"},
 
         },
 
@@ -84,68 +46,6 @@
 
             "editable": true,
 
-            "name": "ComponentViewPoint",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/ComponentViewPoint",
-
-            "specialization": {"type": "Viewpoint"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "viewpoint_op",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/viewpoint_op",
-
-            "specialization": {
-
-                "expression": "vp_expression",
-
-                "parameters": ["exposed_id"],
-
-                "type": "Operation"
-
-            },
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "List",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/List",
-
-            "specialization": {"type": "Operation"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
             "name": "",
 
             "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
@@ -161,42 +61,6 @@
                 "type": "Conform"
 
             },
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "BLUCam CubeSat A",
-
-            "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
-
-            "qualifiedName": "/BLUCam CubeSat A",
-
-            "specialization": {"type": "Package"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "Name",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/Name",
-
-            "specialization": {"type": "Operation"},
 
         },
 
@@ -326,11 +190,165 @@
 
             "editable": true,
 
+            "name": "",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedName": "/",
+
+            "specialization": {
+
+                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+
+                "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+
+                "type": "Expose"
+
+            },
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "BLUCam CubeSat A",
+
+            "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
+
+            "qualifiedName": "/BLUCam CubeSat A",
+
+            "specialization": {"type": "Package"},
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
             "name": "map",
 
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
 
             "qualifiedName": "/map",
+
+            "specialization": {"type": "Operation"},
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "ComponentViewPoint",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedName": "/ComponentViewPoint",
+
+            "specialization": {"type": "Viewpoint"},
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "Components",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedName": "/Components",
+
+            "specialization": {
+
+                "allowedElements": ["{type=Package, id=_17_0_2_4_f3a0363_1394142290412_487571_28478, name=BLUCam CubeSat A, qualified name=/BLUCam CubeSat A, workspace=null}"],
+
+                "childrenViews": [],
+
+                "contains": [{
+
+                    "list": [[{
+
+                        "source": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+
+                        "sourceProperty": "name",
+
+                        "sourceType": "reference",
+
+                        "type": "Paragraph"
+
+                    }]],
+
+                    "ordered": false,
+
+                    "type": "List"
+
+                }],
+
+                "displayedElements": ["{type=Package, id=_17_0_2_4_f3a0363_1394142290412_487571_28478, name=BLUCam CubeSat A, qualified name=/BLUCam CubeSat A, workspace=null}"],
+
+                "type": "View"
+
+            },
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "viewpoint_op",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedName": "/viewpoint_op",
+
+            "specialization": {
+
+                "expression": "vp_expression",
+
+                "parameters": ["exposed_id"],
+
+                "type": "Operation"
+
+            },
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "List",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedName": "/List",
 
             "specialization": {"type": "Operation"},
 
