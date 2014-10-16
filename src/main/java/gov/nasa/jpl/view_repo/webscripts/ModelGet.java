@@ -337,14 +337,16 @@ public class ModelGet extends AbstractJavaWebScript {
 		String sysmlId = (String)root.getProperty(Acm.ACM_ID);
 		if (!elementsFound.containsKey(sysmlId)) {
 		    // dont add reified packages
-		    if (!((String)root.getProperty(Acm.CM_NAME)).contains("_pkg")) {
+		    if (!((String)root.getProperty(Acm.CM_NAME)).contains("_pkg") &&
+		        !root.isPropertyOwnedValueSpecification()) {
 		        elementsFound.put((String)root.getProperty(Acm.ACM_ID), root);
 		    }
 		}
 
 		if (recurse) {
-			// find all the children, recurse or add to array as needed
-		    // TODO: figure out why the child association creation from the reification isn't being picked up
+			// Find all the children, recurse or add to array as needed.
+            // TODO: figure out why the child association creation from the
+            // reification isn't being picked up
 		    String rootName = (String)root.getProperty(Acm.CM_NAME);
 		    if (!rootName.contains("_pkg")) {
                 EmsScriptNode reifiedNode =
@@ -369,7 +371,7 @@ public class ModelGet extends AbstractJavaWebScript {
                 EmsScriptNode child =
                         new EmsScriptNode( childRef, services, response );
                 if ( checkPermissions( child, PermissionService.READ ) ) {
-                    if (child.exists()) {
+                    if (child.exists() && !child.isPropertyOwnedValueSpecification()) {
                         if ( child.getTypeShort().equals( Acm.ACM_ELEMENT_FOLDER ) ) {
                             handleElementHierarchy( child, recurse, workspace,
                                                     dateTime );

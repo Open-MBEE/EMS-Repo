@@ -122,6 +122,7 @@ public class EmsScriptNode extends ScriptNode implements
                 {
                     add( "ems:workspace" );
                     add( "ems:source" );
+                    add( "ems:parent" );
                     add( "ems:lastTimeSyncParent" );
                     add( "ems:mergeSource" );
                 }
@@ -3828,6 +3829,34 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean isModelElement() {
         if ( getTypeShort().equals( "sysml:Element" ) ) {
             return true;
+        }
+        return false;
+    }
+
+    public boolean isProperty() {
+        if ( hasOrInheritsAspect( "sysml:Property" ) ) return true;
+        if ( getProperty(Acm.ACM_VALUE ) != null ) return true;
+        return false;
+    }
+
+    public EmsScriptNode getOwningProperty() {
+        if (Debug.isOn()) Debug.outln("getOwningProperty(" + this + ")");
+        EmsScriptNode parent = this;
+        while ( parent != null && !parent.isProperty() ) { 
+            // TODO -- REVIEW -- Should we return null if parent is something
+            // other than a property or value spec?!
+            // What if it's an Operation?
+            if (Debug.isOn()) Debug.outln("parent = " + parent );
+            parent = parent.getUnreifiedParent( null );  // TODO -- REVIEW -- need timestamp??!!
+        }
+        if (Debug.isOn()) Debug.outln("returning " + parent );
+        return parent;
+    }
+
+    public boolean isPropertyOwnedValueSpecification() {
+        if ( hasOrInheritsAspect( "sysml:ValueSpecification" ) ) {
+            EmsScriptNode parent = getOwningProperty();
+            return parent != null && parent.isProperty();
         }
         return false;
     }
