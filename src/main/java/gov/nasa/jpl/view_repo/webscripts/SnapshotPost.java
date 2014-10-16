@@ -587,7 +587,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         snapshotNode.createOrUpdateProperty( Acm.ACM_ID, snapshotName );
 
         snapshotNode.createOrUpdateAspect( "view2:Snapshotable" );
-        snapshotNode.createOrUpdateProperty( "view2:snapshotProducts", view.getNodeRef() );
+        snapshotNode.createOrUpdateProperty( "view2:snapshotProduct", view.getNodeRef() );
         view.createOrUpdateAspect( "view2:Snapshotable" );
         view.appendToPropertyNodeRefs( "view2:productSnapshots", snapshotNode.getNodeRef() );
         
@@ -836,6 +836,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     private String getEmail(String userName) {
     	try{
+    		if(nodeService == null) nodeService = this.services.getNodeService();
     		if(nodeService == null) System.out.println("NodeService is not instantiated!");
 			
     		NodeRef person = getUserProfile(userName);
@@ -981,6 +982,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
 
     private NodeRef getUserProfile(String userName){
+    	if(personService == null) personService = this.services.getPersonService();
     	if(personService == null){ 
     		System.out.println("PersonService is not instantiated.");
     		return null;
