@@ -1523,7 +1523,8 @@ public class NodeUtil {
     	boolean wasOn = Debug.getInstance().getOn();
     	EmsScriptNode artifactNode;
     	String myType = Utils.isNullOrEmpty(type) ? "svg" : type;
-		String artifactId = myType.startsWith(".") ? name + myType: name + "." + myType;
+    	String finalType = myType.startsWith(".") ? myType.substring(1) : myType;
+		String artifactId = name + "." + finalType;
 
 		byte[] content =
 		( base64content == null )
@@ -1634,7 +1635,7 @@ public class NodeUtil {
 		writer.putContent( contentStream );
 		
 		ContentData contentData = writer.getContentData();
-		contentData = ContentData.setMimetype( contentData, EmsScriptNode.getMimeType( myType ) );
+		contentData = ContentData.setMimetype( contentData, EmsScriptNode.getMimeType( finalType ) );
 		if (base64content == null) {
 			contentData = ContentData.setEncoding( contentData, "UTF-8");
 		}
