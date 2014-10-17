@@ -16,7 +16,10 @@ import commands
 from sets import Set
 from Cheetah.Template import Template
 
-FILENAME_PREFIX = '../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/mms'
+# This folder path is out of date:
+#FILENAME_PREFIX = '../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/mms'
+# Putting results in this temp folder for comparison:
+FILENAME_PREFIX = 'mms_temp'
 
 # keep track of all the template variables
 templateVars = Set([])
@@ -24,10 +27,17 @@ templateVars = Set([])
 readCollection = [
 	'workspaces',
 	'sites',
-	'changesets'
+	'changesets',
+	'diff'
 ]
 
 readCollectionOps = ['get']
+
+postCollection = [
+	'merge'
+]
+
+postCollectionOps = ['post']
 
 collection = [
 	'elements',
@@ -41,7 +51,7 @@ collection = [
 	'artifacts'
 ]
 
-collectionOps = ['get', 'delete', 'post', 'put']
+collectionOps = ['get', 'delete', 'post'] # Removed put
 
 def main():
 	raml = pyraml.parser.load('api.raml')
@@ -100,6 +110,8 @@ def writeMethodFiles(path, name):
 		methods = collectionOps
 	elif lname.replace('/','') in readCollection:
 		methods = readCollectionOps
+	elif lname.replace('/','') in postCollection:
+		methods = postCollectionOps
 
 	# remove the trailing plural if putting into owning folder
 	if name.find('{') >= 0:
