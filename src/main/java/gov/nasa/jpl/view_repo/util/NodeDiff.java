@@ -213,7 +213,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
     public Map<String, Object> getPropertyMap( NodeRef ref ) {
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
         Map< String, Object > props = node.getProperties();
-        // TODO --REVIEW -- HERE!  Do we need to add anything here for specializations? Expressions?
+        props.put( "type", node.getTypeName() );
         Utils.removeAll( props, getPropertyIdsToIgnore() );
         return props;
     }
