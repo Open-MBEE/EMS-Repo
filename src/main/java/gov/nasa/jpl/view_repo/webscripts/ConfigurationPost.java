@@ -178,7 +178,19 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	            ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
 	            configWs.updateConfiguration( jobNode, postJson, siteNode, workspace, date );
 
-				startAction(jobNode, siteName, getProductList(postJson));
+	            HashSet<String> productList = getProductList(postJson);
+	            
+	            // Only need to start the background action if there are products, otherwise
+	            // need to set the job status to succeeded as this is usually done by the 
+	            // the background job.  Note, that if jobNode is non-null, we know that there
+	            // was not a previous job for the configuration still in progress.
+	            if (productList.size() > 0) {
+	            	startAction(jobNode, siteName, productList);
+	            }
+	            else {
+	                jobNode.setProperty("ems:job_status", "Succeeded");
+	            }
+	            
 				return configWs.getConfigJson( jobNode, siteName, workspace, null );
 			} else {
 				log(LogLevel.ERROR, "Couldn't create configuration job: " + postJson.getString("name"), HttpServletResponse.SC_BAD_REQUEST);
