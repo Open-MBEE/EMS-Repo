@@ -386,12 +386,15 @@ public class WorkspaceNode extends EmsScriptNode {
 
         // If the node is not already in this workspace, clone it.
         if ( !this.equals( node.getWorkspace() ) ) {
-            node = findScriptNodeByName( nodeName, false, this, null );
-            if ( node == null || !node.exists() || !this.equals( node.getWorkspace() ) ) {
+            EmsScriptNode nodeGuess = findScriptNodeByName( nodeName, false, this, null );
+            // Note: need the last check of the parent's in case the node found was in the workspace, but
+            // under a different site, ie Models folder
+            if ( nodeGuess == null || !nodeGuess.exists() || !this.equals( nodeGuess.getWorkspace() ) || 
+                 !nodeGuess.getParent().equals( parent )) {
                 newFolder = node.clone(parent);
                 newFolder.setWorkspace( this, node.getNodeRef() );
             } else {
-                newFolder = node;
+                newFolder = nodeGuess;
             }
         }
 

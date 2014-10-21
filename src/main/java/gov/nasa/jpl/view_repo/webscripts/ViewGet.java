@@ -197,6 +197,7 @@ public class ViewGet extends AbstractJavaWebScript {
                 View v = new View(view);
                 v.setGenerate( generate );
                 v.setRecurse( recurse );
+                EmsScriptNode.expressionStuff = true;
                 if ( gettingDisplayedElements ) {
                     if (Debug.isOn()) System.out.println("+ + + + + gettingDisplayedElements");
                     // TODO -- need to use recurse flag!
@@ -220,6 +221,7 @@ public class ViewGet extends AbstractJavaWebScript {
                     if (Debug.isOn()) System.out.println("+ + + + + just the view");
                     viewsJson.put( view.toJSONObject(  dateTime ) );
                 }
+                EmsScriptNode.expressionStuff = false;
             } catch ( JSONException e ) {
                 log( LogLevel.ERROR, "Could not create views JSON array",
                      HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
