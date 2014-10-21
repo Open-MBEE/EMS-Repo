@@ -46,6 +46,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -2726,8 +2727,44 @@ public class EmsScriptNode extends ScriptNode implements
         if ( isSiteOrSites ) {
             type = "cm:folder";
         }
-        EmsScriptNode node = parent.createNode( getName(), type );
-
+        
+        EmsScriptNode node = null;  // the node to be created
+        
+        // See if there's already a node with the same name in the parent folder.
+        EmsScriptNode existingNode = parent.childByNamePath( getName() );
+        if ( existingNode == null || (!existingNode.exists() && !existingNode.isDeleted() ) ) {
+            // This is the typical case where we need to create a new node.
+            node = parent.createNode( getName(), type );
+        } else {
+            if ( existingNode.isDeleted() ) {
+                if ( existingNode.getTypeShort().equals( type ) ) {
+                    // resurrect deleted node
+                    existingNode.removeAspect( "ems:Deleted" );
+                    String existingTypeName = existingNode.getTypeName();
+                    // remove sysml aspect to clear properties
+//                    if ( existingTypeName != null && !existingTypeName.equals( getTypeName() ) ) {
+//                    if ( existingNode.hasAspect( existingTypeName ) ) {
+//                    if ( Arrays.asList( Acm.ACM_ASPECTS ).contains( existingTypeName ) ) {
+                    if ( existingTypeName != null && existingNode.hasAspect( existingTypeName ) ) {
+                        existingNode.removeAspect( existingTypeName );
+                    }
+                    node = existingNode;
+                } else {
+                    String msg =
+                            "ERROR! Trying to resurrect node (" + existingNode
+                                    + ") of type "
+                                    + existingNode.getTypeShort()
+                                    + " when it is expected to be of type "
+                                    + type + "!\n";
+                    response.append( msg );
+                    if ( status != null ) {
+                        status.setCode( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, msg );
+                    }
+                    Debug.error(msg);
+                    return null;
+                }
+            }
+        }
         if ( node == null ) {
             Debug.error( "Could not create node in parent " + parent.getName() );
             return null;
