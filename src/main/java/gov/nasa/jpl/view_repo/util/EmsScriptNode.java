@@ -1486,7 +1486,9 @@ public class EmsScriptNode extends ScriptNode implements
             return;
         }
 
-        json.put( "type", typeName );
+        if ( filter == null || filter.isEmpty() || filter.contains("type") ) {
+            json.put( "type", typeName );
+        }
         
         if ( justTheType ) return;
         
@@ -1637,7 +1639,8 @@ public class EmsScriptNode extends ScriptNode implements
 
         // add read time
         if ( !isExprOrProp ) {
-            element.put( Acm.JSON_READ, getIsoTime( new Date( readTime ) ) );
+            putInJson( element, Acm.JSON_READ, getIsoTime( new Date( readTime ) ), filter );
+            //element.put( Acm.JSON_READ, getIsoTime( new Date( readTime ) ) );
         }
 
         // fix the artifact urls
