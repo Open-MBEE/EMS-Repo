@@ -663,12 +663,14 @@ public class WorkspaceNode extends EmsScriptNode {
         // REVIEW -- This assumes that the workspace does not changed after it
         // is created, but wouldn't it's ems:lastTimeSyncParent property be
         // expected to change?
-        json.put( "created", TimeUtils.toTimestamp( (Date)getProperty("cm:modified") ) );
+        json.put( "created", TimeUtils.toTimestamp( (Date)getProperty("cm:created") ) );
+        json.put( "modified", TimeUtils.toTimestamp( (Date)getProperty("cm:modified") ) );
         json.put( "parent", getId(getParentWorkspace())); // this handles null as master
 
         // REVIEW -- Why is ems:lastTimeSyncParent called the "branched"
         // date? Shouldn't the branched date always be the same as the created
-        // date?
+        // date? This is for future functionality when we track when the child pulls from the
+        // parent last.
         json.put( "branched", TimeUtils.toTimestamp( (Date)getProperty("ems:lastTimeSyncParent") ) );
 
         return json;
