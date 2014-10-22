@@ -1,6 +1,14 @@
 {
 
-  "configurations": [],
+  "configurations": [{
+
+    "description": "test",
+
+    "name": "DocWeb 1000",
+
+    "snapshots": [],
+
+  }],
 
   "products": [
 
