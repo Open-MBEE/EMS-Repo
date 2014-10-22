@@ -64,19 +64,13 @@
 
             "documentation": "x is x",
 
-            "specialization": {
+            "specialization": {"value": [{
 
-                "type": "Property",
+                "string": "the x value",
 
-                "value": [{
+                "type": "LiteralString"
 
-                    "string": "the x value",
-
-                    "type": "LiteralString"
-
-                }]
-
-            },
+            }]},
 
             "sysmlid": "x"
 
