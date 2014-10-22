@@ -1,16 +1,186 @@
 {
 
-  "configurations": [{
+  "configurations": [],
 
-    "description": "test",
+  "products": [
 
-    "name": "DocWeb 1000",
+    {
 
-    "snapshots": [],
+      "creator": "admin",
 
-  }],
+      "documentation": "else",
 
-  "products": []
+      "editable": true,
+
+      "name": "301",
+
+      "owner": "300",
+
+      "qualifiedId": "no_project/holding_bin_no_site_no_project/300/301",
+
+      "qualifiedName": "/300/301",
+
+      "specialization": {
+
+        "allowedElements": [
+
+          "301",
+
+          "302",
+
+          "303"
+
+        ],
+
+        "childrenViews": ["304"],
+
+        "contains": [{
+
+          "source": "301",
+
+          "sourceProperty": "documentation",
+
+          "sourceType": "reference",
+
+          "type": "Paragraph"
+
+        }],
+
+        "displayedElements": [
+
+          "301",
+
+          "302",
+
+          "303"
+
+        ],
+
+        "isDerived": false,
+
+        "isSlot": false,
+
+        "noSections": ["302"],
+
+        "type": "Product",
+
+        "value": [{
+
+          "string": "dlam_string",
+
+          "type": "LiteralString"
+
+        }],
+
+        "view2view": [{
+
+          "childrenViews": [
+
+            "301",
+
+            "302"
+
+          ],
+
+          "sysmlid": "301"
+
+        }]
+
+      },
+
+      "sysmlid": "301"
+
+    },
+
+    {
+
+      "creator": "admin",
+
+      "documentation": "4else",
+
+      "editable": true,
+
+      "name": "401",
+
+      "owner": "4000",
+
+      "qualifiedId": "no_project/holding_bin_no_site_no_project/4000/401",
+
+      "qualifiedName": "/400/401",
+
+      "specialization": {
+
+        "allowedElements": [
+
+          "401",
+
+          "402",
+
+          "403"
+
+        ],
+
+        "childrenViews": ["404"],
+
+        "contains": [{
+
+          "source": "401",
+
+          "sourceProperty": "documentation",
+
+          "sourceType": "reference",
+
+          "type": "Paragraph"
+
+        }],
+
+        "displayedElements": [
+
+          "401",
+
+          "402",
+
+          "403"
+
+        ],
+
+        "isDerived": false,
+
+        "isSlot": false,
+
+        "noSections": ["402"],
+
+        "type": "Product",
+
+        "value": [{
+
+          "string": "dlam_string",
+
+          "type": "LiteralString"
+
+        }],
+
+        "view2view": [{
+
+          "childrenViews": [
+
+            "401",
+
+            "402"
+
+          ],
+
+          "sysmlid": "401"
+
+        }]
+
+      },
+
+      "sysmlid": "401"
+
+    }
+
+  ]
 
 }
 
