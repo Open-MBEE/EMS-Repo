@@ -161,7 +161,7 @@ public class Acm {
     public static final String JSON_OPERATION_EXPRESSION = EXPRESSION; // Used to be "operationExpression"
     public static final String JSON_METHOD = "method";
     public static final String JSON_CONNECTOR = "Connector";
-    public static final String JSON_CONNECTOR_ROLE = "connectorRoles";
+    public static final String JSON_CONNECTOR_ROLE = "roles";
     
     public static final String JSON_READ = "read";
 

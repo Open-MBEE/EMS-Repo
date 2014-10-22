@@ -3045,6 +3045,17 @@ public class EmsScriptNode extends ScriptNode implements
         return elements;
     }
 
+    public EmsScriptNode getPropertyElement( String acmProperty ) {
+        Object e = getProperty( acmProperty );
+        if ( e instanceof NodeRef ) {
+            return new EmsScriptNode( (NodeRef)e, getServices() );
+        } else if ( e == null ) {
+        } else {
+            Debug.error(true, false, "ERROR! Getting a property as a noderef!");
+        }
+        return null;
+    }
+
     public Set< EmsScriptNode > getRelationships() {
         Set< EmsScriptNode > set = new LinkedHashSet< EmsScriptNode >();
         for ( Map.Entry< String, String > e : Acm.PROPERTY_FOR_RELATIONSHIP_PROPERTY_ASPECTS.entrySet() ) {
@@ -3769,7 +3780,7 @@ public class EmsScriptNode extends ScriptNode implements
         ArrayList< NodeRef > nodeRefs =
                 (ArrayList< NodeRef >)node.getProperty( "sysml:roles" );
         JSONArray ids = addNodeRefIdsJSON( nodeRefs, dateTime );
-        putInJson( json, "connectorRoles", ids, filter );
+        putInJson( json, "roles", ids, filter );
     }
 
     /**************************
