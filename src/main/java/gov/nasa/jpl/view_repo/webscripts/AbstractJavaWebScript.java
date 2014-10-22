@@ -39,10 +39,12 @@ import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -501,6 +503,40 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 		return searchResults;
 	}
+	
+	   /**
+     * Perform Lucene search for the specified pattern and ACM type for the specified
+     * siteName.
+     * 
+     * TODO: Scope Lucene search by adding either parent or path context
+     * @param type      escaped ACM type for lucene search: e.g. "@sysml\\:documentation:\""
+     * @param pattern   Pattern to look for
+     */
+    protected List<EmsScriptNode> searchForElementsForSite(String type,
+                                                                  String pattern,
+                                                                  boolean ignoreWorkspace,
+                                                                  WorkspaceNode workspace,
+                                                                  Date dateTime,
+                                                                  String siteName) {
+        
+        List<EmsScriptNode> returnList = new ArrayList<EmsScriptNode>();
+        Map<String, EmsScriptNode> searchResults = this.searchForElements( type, pattern, 
+                                                                           ignoreWorkspace, workspace, 
+                                                                           dateTime );
+        
+        EmsScriptNode node;
+        String nodeSiteName;
+        for ( Entry< String, EmsScriptNode > entry : searchResults.entrySet() ) {
+            node = entry.getValue();
+            nodeSiteName = node != null ? node.getSiteName() : null;
+            if (nodeSiteName != null && nodeSiteName.equals( siteName )) {
+                returnList.add( node );
+            }
+        }
+        
+        return returnList;
+        
+    }
 
 	/**
      * Helper utility to check the value of a request parameter

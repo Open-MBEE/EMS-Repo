@@ -10,11 +10,47 @@
 
             "editable": true,
 
-            "name": "List",
+            "name": "exposed",
 
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
 
-            "qualifiedName": "/List",
+            "qualifiedName": "/exposed",
+
+            "specialization": {"type": "Parameter"},
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "ComponentViewPoint",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedName": "/ComponentViewPoint",
+
+            "specialization": {"type": "Viewpoint"},
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "Name",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedName": "/Name",
 
             "specialization": {"type": "Operation"},
 
@@ -28,13 +64,21 @@
 
             "editable": true,
 
-            "name": "Components",
+            "name": "",
 
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
 
-            "qualifiedName": "/Components",
+            "qualifiedName": "/",
 
-            "specialization": {"type": "View"},
+            "specialization": {
+
+                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+
+                "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+
+                "type": "Expose"
+
+            },
 
         },
 
@@ -46,21 +90,13 @@
 
             "editable": true,
 
-            "name": "",
+            "name": "List",
 
-            "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
 
-            "qualifiedName": "/Components/",
+            "qualifiedName": "/List",
 
-            "specialization": {
-
-                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-
-                "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
-
-                "type": "Conform"
-
-            },
+            "specialization": {"type": "Operation"},
 
         },
 
@@ -122,13 +158,65 @@
 
             "editable": true,
 
-            "name": "ComponentViewPoint",
+            "name": "map",
 
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
 
-            "qualifiedName": "/ComponentViewPoint",
+            "qualifiedName": "/map",
 
-            "specialization": {"type": "Viewpoint"},
+            "specialization": {"type": "Operation"},
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "viewpoint_op",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedName": "/viewpoint_op",
+
+            "specialization": {
+
+                "expression": "vp_expression",
+
+                "parameters": ["exposed_id"],
+
+                "type": "Operation"
+
+            },
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "",
+
+            "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
+
+            "qualifiedName": "/Components/",
+
+            "specialization": {
+
+                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+
+                "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
+
+                "type": "Conform"
+
+            },
 
         },
 
@@ -158,39 +246,13 @@
 
             "editable": true,
 
-            "name": "map",
+            "name": "Components",
 
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
 
-            "qualifiedName": "/map",
+            "qualifiedName": "/Components",
 
-            "specialization": {"type": "Operation"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/",
-
-            "specialization": {
-
-                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-
-                "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-
-                "type": "Expose"
-
-            },
+            "specialization": {"type": "View"},
 
         },
 
@@ -257,68 +319,6 @@
                 ],
 
                 "type": "Expression"
-
-            },
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "exposed",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/exposed",
-
-            "specialization": {"type": "Parameter"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "Name",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/Name",
-
-            "specialization": {"type": "Operation"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "viewpoint_op",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/viewpoint_op",
-
-            "specialization": {
-
-                "expression": "vp_expression",
-
-                "parameters": ["exposed_id"],
-
-                "type": "Operation"
 
             },
 

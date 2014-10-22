@@ -100,15 +100,12 @@ public class ProductsWebscript extends AbstractJavaWebScript {
 //                                                 workspace,
 //                                                 dateTime, services,
 //                                                 response );
-        String siteName = siteNode.getSiteName();
-        Map<String, EmsScriptNode> nodeMap = searchForElements("ASPECT:\"", Acm.ACM_PRODUCT, false,
-                                                               workspace, dateTime);
-        EmsScriptNode node;
-        String nodeSiteName;
-        for ( Entry< String, EmsScriptNode > entry : nodeMap.entrySet() ) {
-            node = entry.getValue();
-            nodeSiteName = node != null ? node.getSiteName() : null;
-            if (nodeSiteName != null && nodeSiteName.equals( siteName )) {
+        List<EmsScriptNode> nodeList = searchForElementsForSite(NodeUtil.SearchType.ASPECT.prefix, 
+                                                                Acm.ACM_PRODUCT, false,
+                                                                workspace, dateTime, 
+                                                                siteNode.getSiteName());
+        for ( EmsScriptNode node : nodeList) {
+            if (node != null) {
                 productsJson.put( node.toJSONObject( null ) );
             }
         }

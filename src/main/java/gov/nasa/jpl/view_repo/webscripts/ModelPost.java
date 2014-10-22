@@ -61,6 +61,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -412,6 +413,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // specified look for its existing owner
         EmsScriptNode owner = null;
         EmsScriptNode reifiedPkg = null;
+        boolean createdHoldingBin = false;
         if (Utils.isNullOrEmpty( ownerName ) ) {
             EmsScriptNode elementNode = findScriptNodeById(elementId, workspace, null, false);
             if (elementNode == null || !elementNode.exists()) {
@@ -421,7 +423,8 @@ public class ModelPost extends AbstractJavaWebScript {
             	// siteInfo will be null if the site was created just for the workspace, but this should never happen.  In that case, can
             	// try using getSiteName(req).
             	String siteName = ((siteInfo == null || siteInfo.getShortName() == null) ? NO_SITE_ID : getSiteInfo().getShortName() );
-            	ownerName = "holding_bin_"+siteName+"_"+projectNodeId;  
+            	ownerName = "holding_bin_"+siteName+"_"+projectNodeId;
+            	createdHoldingBin = true;
             } else {
                 owner = elementNode.getParent();
             }
@@ -450,6 +453,12 @@ public class ModelPost extends AbstractJavaWebScript {
                     // pkg, so pass false.
                     reifiedPkg = getOrCreateReifiedNode(owner, ownerName, workspace,
                                                         foundOwnerElement);
+                    
+                    // Make the holding bin a Package, so that it can be used in magic draw:
+                    if (createdHoldingBin && reifiedPkg != null) {
+                        reifiedPkg.createOrUpdateAspect( Acm.ACM_PACKAGE );
+                    }
+                    
                 } else {
                     log( LogLevel.WARNING, "Could not find owner package: "
                                            + ownerName,
@@ -2083,11 +2092,30 @@ public class ModelPost extends AbstractJavaWebScript {
         WorkspaceNode workspace = getWorkspace( req );
 
         String siteName = getSiteName(req);
-        //String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
-        //String projectId = req.getServiceMatch().getTemplateVars().get(PROJECT_ID);
         String projectId = getProjectId(req);
         EmsScriptNode siteNode = createSite( siteName, workspace );
         setSiteInfo(req); // Setting the site info in case we just created the site for the first time
+        
+        // If the project was not supplied on the URL, then look for the first project found within
+        // the site.  Give a warning if multiple projects are found.  There is a requirement that
+        // there should never be more than one project per site on Europa.
+        if (projectId.equals( NO_PROJECT_ID )) {
+            
+            List<EmsScriptNode> nodeList = searchForElementsForSite(NodeUtil.SearchType.TYPE.prefix, 
+                                                                    Acm.ACM_PROJECT, false,
+                                                                    workspace, null, 
+                                                                    siteName);
+            
+            if (nodeList.size() > 0) {
+                EmsScriptNode projectNodeNew = nodeList.get(0);
+                String projectIdNew = projectNodeNew != null ? projectNodeNew.getSysmlId() : projectId;
+                projectId = projectIdNew != null ? projectIdNew : projectId;
+                
+                if (nodeList.size() > 1) {
+                    log(LogLevel.WARNING, "ProjectId not supplied and multiple projects found for site "+siteName+" using ProjectId "+projectId);
+                }
+            }
+        }
         
         projectNode = siteNode.childByNamePath("/Models/" + projectId);
         if (projectNode == null) {
