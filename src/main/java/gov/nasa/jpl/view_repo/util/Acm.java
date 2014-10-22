@@ -49,7 +49,7 @@ public class Acm {
     // Additions with api.raml file:
     public static final String SYSMLID = "sysmlid"; 
     public static final String SPECIFICATION = "specification";
-    public static final String PARAMETERS = "parameter";
+    public static final String PARAMETERS = "parameters";
     public static final String EXPRESSION = "expression";
     public static final String MAX = "max";
     public static final String MIN = "min";
@@ -161,7 +161,7 @@ public class Acm {
     public static final String JSON_OPERATION_EXPRESSION = EXPRESSION; // Used to be "operationExpression"
     public static final String JSON_METHOD = "method";
     public static final String JSON_CONNECTOR = "Connector";
-    public static final String JSON_CONNECTOR_ROLE = "connectorRole";
+    public static final String JSON_CONNECTOR_ROLE = "connectorRoles";
     
     public static final String JSON_READ = "read";
 

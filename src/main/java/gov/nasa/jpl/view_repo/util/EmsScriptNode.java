@@ -3710,7 +3710,7 @@ public class EmsScriptNode extends ScriptNode implements
                 (ArrayList< NodeRef >)node.getProperty( "sysml:operationParameter" );
         JSONArray ids = addNodeRefIdsJSON( nodeRefs, dateTime );
         if ( ids.length() > 0 ) {
-            putInJson( json, "parameter", ids, filter );
+            putInJson( json, "parameters", ids, filter );
         }
 
         String id =
@@ -3769,7 +3769,7 @@ public class EmsScriptNode extends ScriptNode implements
         ArrayList< NodeRef > nodeRefs =
                 (ArrayList< NodeRef >)node.getProperty( "sysml:roles" );
         JSONArray ids = addNodeRefIdsJSON( nodeRefs, dateTime );
-        putInJson( json, "connectorRole", ids, filter );
+        putInJson( json, "connectorRoles", ids, filter );
     }
 
     /**************************
