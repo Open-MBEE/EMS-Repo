@@ -24,9 +24,9 @@
 
       "owner": "300",
 
-      "qualifiedId": "no_project/holding_bin_no_site_no_project/300/301",
+      "qualifiedId": "123456/300/301",
 
-      "qualifiedName": "/300/301",
+      "qualifiedName": "/JW_TEST/300/301",
 
       "specialization": {
 
@@ -112,9 +112,9 @@
 
       "owner": "4000",
 
-      "qualifiedId": "no_project/holding_bin_no_site_no_project/4000/401",
+      "qualifiedId": "123456/4000/401",
 
-      "qualifiedName": "/400/401",
+      "qualifiedName": "/JW_TEST/400/401",
 
       "specialization": {
 

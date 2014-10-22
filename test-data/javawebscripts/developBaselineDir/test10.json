@@ -1,16 +1,34 @@
 {
 
-    "documents": {},
+    "documents": {
+
+        "301": "301",
+
+        "401": "401"
+
+    },
 
     "name": "europa",
 
-    "projectVolumes": [],
+    "projectVolumes": ["123456"],
 
-    "volume2documents": {},
+    "volume2documents": {
 
-    "volume2volumes": {},
+        "300": ["301"],
 
-    "volumes": {}
+        "4000": ["401"]
+
+    },
+
+    "volume2volumes": {"123456": [
+
+        "300",
+
+        "4000"
+
+    ]},
+
+    "volumes": {"123456": "JW_TEST"}
 
 }
 

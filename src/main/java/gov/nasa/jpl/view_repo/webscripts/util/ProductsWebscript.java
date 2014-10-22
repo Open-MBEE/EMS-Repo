@@ -86,7 +86,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         return configWs.getProducts( config, workspace, dateTime );
     }
     
-    public JSONArray handleContextProducts( WebScriptRequest req, EmsScriptNode context) throws JSONException {
+    public JSONArray handleContextProducts( WebScriptRequest req, EmsScriptNode siteNode) throws JSONException {
         JSONArray productsJson = new JSONArray();
         
         // get timestamp if specified
@@ -100,10 +100,17 @@ public class ProductsWebscript extends AbstractJavaWebScript {
 //                                                 workspace,
 //                                                 dateTime, services,
 //                                                 response );
+        String siteName = siteNode.getSiteName();
         Map<String, EmsScriptNode> nodeMap = searchForElements("ASPECT:\"", Acm.ACM_PRODUCT, false,
                                                                workspace, dateTime);
+        EmsScriptNode node;
+        String nodeSiteName;
         for ( Entry< String, EmsScriptNode > entry : nodeMap.entrySet() ) {
-            productsJson.put( entry.getValue().toJSONObject( null ) );
+            node = entry.getValue();
+            nodeSiteName = node != null ? node.getSiteName() : null;
+            if (nodeSiteName != null && nodeSiteName.equals( siteName )) {
+                productsJson.put( node.toJSONObject( null ) );
+            }
         }
         
         return productsJson;
