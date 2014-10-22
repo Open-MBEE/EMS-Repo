@@ -110,7 +110,7 @@
 
         "creator": "admin",
 
-        "specialization": {"type": "Expression"},
+        "sysmlid": "6666"
 
       },
 
@@ -118,15 +118,11 @@
 
         "creator": "admin",
 
-        "specialization": {"type": "ElementValue"},
-
       },
 
       {
 
         "creator": "admin",
-
-        "specialization": {"type": "ElementValue"},
 
       }
 
