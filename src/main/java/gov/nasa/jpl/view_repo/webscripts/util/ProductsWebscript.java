@@ -15,7 +15,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -92,14 +94,16 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         WorkspaceNode workspace = getWorkspace( req );
         
-        Set< EmsScriptNode > productSet =
-                WebScriptUtil.getAllNodesInPath( context.getQnamePath(),
-                                                 "ASPECT", Acm.ACM_PRODUCT,
-                                                 workspace,
-                                                 dateTime, services,
-                                                 response );
-        for ( EmsScriptNode product : productSet ) {
-            productsJson.put( product.toJSONObject( null ) );
+//        Set< EmsScriptNode > productSet =
+//                WebScriptUtil.getAllNodesInPath( context.getQnamePath(),
+//                                                 "ASPECT", Acm.ACM_PRODUCT,
+//                                                 workspace,
+//                                                 dateTime, services,
+//                                                 response );
+        Map<String, EmsScriptNode> nodeMap = searchForElements("ASPECT:\"", Acm.ACM_PRODUCT, false,
+                                                               workspace, dateTime);
+        for ( Entry< String, EmsScriptNode > entry : nodeMap.entrySet() ) {
+            productsJson.put( entry.getValue().toJSONObject( null ) );
         }
         
         return productsJson;

@@ -386,12 +386,23 @@ public class WorkspaceNode extends EmsScriptNode {
 
         // If the node is not already in this workspace, clone it.
         if ( !this.equals( node.getWorkspace() ) ) {
-            node = findScriptNodeByName( nodeName, false, this, null );
-            if ( node == null || !node.exists() || !this.equals( node.getWorkspace() ) ) {
+            EmsScriptNode nodeGuess = null;
+            ArrayList< NodeRef > array = NodeUtil.findNodeRefsByType( nodeName, SearchType.CM_NAME.prefix, false, false, this, null, false, true, getServices(), false );
+            for ( NodeRef ref : array ) {
+                EmsScriptNode n = new EmsScriptNode( ref, getServices() );
+                EmsScriptNode np = n.getParent();
+                // Note: need the last check of the parent's in case the node found was in the workspace, but
+                // under a different site, ie Models folder
+                if (n != null && n.exists() && this.equals( n.getWorkspace() ) && np != null && np.equals( parent )) {
+                    nodeGuess = n;
+                    break;
+                }
+            }
+            if ( nodeGuess == null) {
                 newFolder = node.clone(parent);
                 newFolder.setWorkspace( this, node.getNodeRef() );
             } else {
-                newFolder = node;
+                newFolder = nodeGuess;
             }
         }
 
@@ -660,12 +671,14 @@ public class WorkspaceNode extends EmsScriptNode {
         // REVIEW -- This assumes that the workspace does not changed after it
         // is created, but wouldn't it's ems:lastTimeSyncParent property be
         // expected to change?
-        json.put( "created", TimeUtils.toTimestamp( (Date)getProperty("cm:modified") ) );
+        json.put( "created", TimeUtils.toTimestamp( (Date)getProperty("cm:created") ) );
+        json.put( "modified", TimeUtils.toTimestamp( (Date)getProperty("cm:modified") ) );
         json.put( "parent", getId(getParentWorkspace())); // this handles null as master
 
         // REVIEW -- Why is ems:lastTimeSyncParent called the "branched"
         // date? Shouldn't the branched date always be the same as the created
-        // date?
+        // date? This is for future functionality when we track when the child pulls from the
+        // parent last.
         json.put( "branched", TimeUtils.toTimestamp( (Date)getProperty("ems:lastTimeSyncParent") ) );
 
         return json;

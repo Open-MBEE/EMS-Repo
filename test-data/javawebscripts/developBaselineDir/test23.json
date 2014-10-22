@@ -10,11 +10,11 @@
 
             "editable": true,
 
-            "name": "Name",
+            "name": "List",
 
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
 
-            "qualifiedName": "/Name",
+            "qualifiedName": "/List",
 
             "specialization": {"type": "Operation"},
 
@@ -28,13 +28,13 @@
 
             "editable": true,
 
-            "name": "exposed",
+            "name": "Components",
 
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
 
-            "qualifiedName": "/exposed",
+            "qualifiedName": "/Components",
 
-            "specialization": {"type": "Parameter"},
+            "specialization": {"type": "View"},
 
         },
 
@@ -59,6 +59,136 @@
                 "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
 
                 "type": "Conform"
+
+            },
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedName": "/",
+
+            "specialization": {
+
+                "operand": [
+
+                    {
+
+                        "element": "op_map",
+
+                        "type": "ElementValue"
+
+                    },
+
+                    {
+
+                        "element": "exposed_id",
+
+                        "type": "ElementValue"
+
+                    },
+
+                    {
+
+                        "element": "op_name_arg",
+
+                        "type": "ElementValue"
+
+                    }
+
+                ],
+
+                "type": "Expression"
+
+            },
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "ComponentViewPoint",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedName": "/ComponentViewPoint",
+
+            "specialization": {"type": "Viewpoint"},
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "BLUCam CubeSat A",
+
+            "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
+
+            "qualifiedName": "/BLUCam CubeSat A",
+
+            "specialization": {"type": "Package"},
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "map",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedName": "/map",
+
+            "specialization": {"type": "Operation"},
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedName": "/",
+
+            "specialization": {
+
+                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+
+                "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+
+                "type": "Expose"
 
             },
 
@@ -140,45 +270,13 @@
 
             "editable": true,
 
-            "name": "",
+            "name": "exposed",
 
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
 
-            "qualifiedName": "/",
+            "qualifiedName": "/exposed",
 
-            "specialization": {
-
-                "operand": [
-
-                    {
-
-                        "element": "op_map",
-
-                        "type": "ElementValue"
-
-                    },
-
-                    {
-
-                        "element": "exposed_id",
-
-                        "type": "ElementValue"
-
-                    },
-
-                    {
-
-                        "element": "op_name_arg",
-
-                        "type": "ElementValue"
-
-                    }
-
-                ],
-
-                "type": "Expression"
-
-            },
+            "specialization": {"type": "Parameter"},
 
         },
 
@@ -190,123 +288,13 @@
 
             "editable": true,
 
-            "name": "",
+            "name": "Name",
 
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
 
-            "qualifiedName": "/",
-
-            "specialization": {
-
-                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-
-                "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-
-                "type": "Expose"
-
-            },
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "BLUCam CubeSat A",
-
-            "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
-
-            "qualifiedName": "/BLUCam CubeSat A",
-
-            "specialization": {"type": "Package"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "map",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/map",
+            "qualifiedName": "/Name",
 
             "specialization": {"type": "Operation"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "ComponentViewPoint",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/ComponentViewPoint",
-
-            "specialization": {"type": "Viewpoint"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "Components",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/Components",
-
-            "specialization": {
-
-                "allowedElements": ["{type=Package, id=_17_0_2_4_f3a0363_1394142290412_487571_28478, name=BLUCam CubeSat A, qualified name=/BLUCam CubeSat A, workspace=null}"],
-
-                "childrenViews": [],
-
-                "contains": [{
-
-                    "list": [[{
-
-                        "source": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-
-                        "sourceProperty": "name",
-
-                        "sourceType": "reference",
-
-                        "type": "Paragraph"
-
-                    }]],
-
-                    "ordered": false,
-
-                    "type": "List"
-
-                }],
-
-                "displayedElements": ["{type=Package, id=_17_0_2_4_f3a0363_1394142290412_487571_28478, name=BLUCam CubeSat A, qualified name=/BLUCam CubeSat A, workspace=null}"],
-
-                "type": "View"
-
-            },
 
         },
 
@@ -333,24 +321,6 @@
                 "type": "Operation"
 
             },
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "List",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/List",
-
-            "specialization": {"type": "Operation"},
 
         }
 
