@@ -39,7 +39,7 @@
         <!-- Defines the alfresco edition to compile against. Allowed values are [org.alfresco|org.alfresco.enterprise]--> 
         <alfresco.groupId>org.alfresco.enterprise</alfresco.groupId>
         <!-- Defines the alfresco version to compile against -->
-        <alfresco.version>4.2.3.1</alfresco.version>
+        <alfresco.version>4.1.9.4</alfresco.version>
         <app.log.root.level>WARN</app.log.root.level>
         <alfresco.data.location>alf_data</alfresco.data.location>
         <!-- Defines the target WAR artifactId to run this amp, only used with the -Pamp-to-war switch
@@ -49,7 +49,7 @@
         .    | Could be org.alfresco | org.alfresco.enterprise or your corporate groupId -->
         <alfresco.client.war.groupId>org.alfresco.enterprise</alfresco.client.war.groupId>
         <!-- Defines the target WAR version to run this amp, only used with the -Pamp-to-war switch -->
-        <alfresco.client.war.version>4.2.3.1</alfresco.client.war.version>
+        <alfresco.client.war.version>4.1.9.4</alfresco.client.war.version>
         <!-- This controls which properties will be picked in src/test/properties for embedded run -->
         <env>local</env>
         <maven.test.skip>false</maven.test.skip>
@@ -161,15 +161,32 @@
 
     <!-- Here we realize the connection with the Alfresco selected platform 
         (e.g.version and edition) -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- This will import the dependencyManagement for all artifacts in the 
+                selected Alfresco version/edition (see http://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#Importing_Dependencies) 
+                NOTE: You still need to define dependencies in your POM, but you can omit 
+                version as it's enforced by this dependencyManagement. NOTE: It defaults 
+                to the latest version this SDK pom has been tested with, but alfresco version 
+                can/should be overridden in your project's pom -->
+            <dependency>
+                <groupId>${alfresco.groupId}</groupId>
+                <artifactId>alfresco-platform-distribution</artifactId>
+                <version>${alfresco.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     
     <!-- Following dependencies are needed for compiling Java code in src/main/java; 
 		<scope>provided</scope> is inherited for each of the following; for more 
 		info, please refer to alfresco-platform-distribution POM -->
     <dependencies>
 	    <dependency>
-		    <groupId>org.alfresco</groupId>
+		    <groupId>org.alfresco.enterprise</groupId>
 		    <artifactId>alfresco</artifactId>
-		    <version>4.2.3.1</version>
+		    <version>4.1.9.4</version>
 		
 		    <type>war</type>
         </dependency>
