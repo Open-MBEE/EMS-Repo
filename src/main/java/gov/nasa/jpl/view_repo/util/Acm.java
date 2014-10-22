@@ -49,7 +49,7 @@ public class Acm {
     // Additions with api.raml file:
     public static final String SYSMLID = "sysmlid"; 
     public static final String SPECIFICATION = "specification";
-    public static final String PARAMETERS = "parameters";
+    public static final String PARAMETERS = "parameter";
     public static final String EXPRESSION = "expression";
     public static final String MAX = "max";
     public static final String MIN = "min";
@@ -72,8 +72,6 @@ public class Acm {
     public static final String JSON_PACKAGE = "Package";
     public static final String JSON_PROPERTY = "Property";
     public static final String JSON_VIEWPOINT = "Viewpoint";
-//    public static final String JSON_PARAMETER = "Parameter";
-//    public static final String JSON_OPERATION = "Operation";
     public static final String JSON_IS_DERIVED = "isDerived";
     public static final String JSON_IS_SLOT = "isSlot";
     public static final String JSON_DOCUMENTATION = "documentation";
@@ -274,7 +272,7 @@ public class Acm {
     public static final String ACM_OPERATION_EXPRESSION = SYSML + "operationExpression";
     public static final String ACM_METHOD = SYSML + JSON_METHOD;
     public static final String ACM_CONNECTOR = SYSML + JSON_CONNECTOR;
-    public static final String ACM_CONNECTOR_ROLE = SYSML + JSON_CONNECTOR_ROLE;
+    public static final String ACM_CONNECTOR_ROLE = SYSML + "roles";
 
     // relationship property aspect names
     public static final String ACM_RELATIONSHIPS_AS_SOURCE = "sysml:relationshipsAsSource";
