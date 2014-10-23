@@ -392,7 +392,7 @@ public class ModelPost extends AbstractJavaWebScript {
     protected EmsScriptNode getOwner( String elementId,
                                       EmsScriptNode projectNode,
                                       WorkspaceNode workspace,
-                                      boolean createOwnerPkgIfNotFound ) {
+                                      boolean createOwnerPkgIfNotFound ) throws Exception {
         JSONObject element = elementMap.get(elementId);
         if ( element == null || element.equals( "null" ) ) {
             log(LogLevel.ERROR, "Trying to get owner of null element!",
@@ -438,8 +438,22 @@ public class ModelPost extends AbstractJavaWebScript {
                 log( LogLevel.WARNING, "Could not find owner with name: "
                                        + ownerName + " putting " + elementId
                                        + " into project: " + projectNode);
-                owner = projectNode;  
-                foundOwnerElement = false;
+                
+                // FIXME: HERE! ATTENTION BRAD!  add to elements, so it is returned, and remind Doris
+                //        to fix her code also.  also add call to updateTransactionableWsState()
+                // If creating a holding bin, then need to create a node for it also for
+                // magic draw sync.
+                if (createdHoldingBin) {
+                    ModStatus modStatus = new ModStatus();
+                    EmsScriptNode nodeBin = projectNode.createSysmlNode(ownerName, Acm.ACM_PACKAGE,
+                                                                        modStatus, workspace);
+                    owner = nodeBin != null ? nodeBin : projectNode;
+                    //updateTransactionableWsState(nodeBin, ownerName, modStatus, false);
+                }
+                else {
+                    owner = projectNode;  
+                }
+                foundOwnerElement = owner != projectNode;
             }
             // really want to add pkg as owner
             reifiedPkg = findScriptNodeById(ownerName + "_pkg", workspace, null, false);
@@ -453,11 +467,6 @@ public class ModelPost extends AbstractJavaWebScript {
                     // pkg, so pass false.
                     reifiedPkg = getOrCreateReifiedNode(owner, ownerName, workspace,
                                                         foundOwnerElement);
-                    
-                    // Make the holding bin a Package, so that it can be used in magic draw:
-                    if (createdHoldingBin && reifiedPkg != null) {
-                        reifiedPkg.createOrUpdateAspect( Acm.ACM_PACKAGE );
-                    }
                     
                 } else {
                     log( LogLevel.WARNING, "Could not find owner package: "
@@ -1344,16 +1353,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 log( LogLevel.INFO, "\tcreating node" );
                 try {
 //                    if ( parent != null && parent.exists() ) {
-                        nodeToUpdate = parent.createSysmlNode( id, acmSysmlType );
-                        if ( nodeToUpdate == null || !nodeToUpdate.exists() ) {
-                            throw new Exception( "createNode() failed." );
-                        }
-                        nodeToUpdate.setProperty( Acm.CM_NAME, id );
-                        nodeToUpdate.setProperty( Acm.ACM_ID, id );
-                        modStatus.setState( ModStatus.State.ADDED  );
-                        if ( workspace != null && workspace.exists() ) {
-                            nodeToUpdate.setWorkspace( workspace, null );
-                        }
+                        nodeToUpdate = parent.createSysmlNode( id, acmSysmlType, modStatus, workspace );
 //                    } else {
 //                        Debug.error( true, true,
 //                                     "Error! Attempt to create node, " + id
