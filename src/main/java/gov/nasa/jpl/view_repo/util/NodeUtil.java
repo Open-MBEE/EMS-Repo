@@ -84,7 +84,9 @@ public class NodeUtil {
         BODY( "@sysml\\:body:\"" ),
         CHECKSUM( "@view\\:cs:\"" ),
         WORKSPACE("@ems\\:workspace:\"" ),
-        WORKSPACE_NAME("@ems\\:workspace_name:\"" );
+        WORKSPACE_NAME("@ems\\:workspace_name:\"" ),
+        ASPECT("ASPECT:\""),
+        TYPE("TYPE:\"");
 
         public String prefix;
 
