@@ -10,9 +10,11 @@
 
                 "editable": true,
 
+                "name": "holding_bin",
+
                 "owner": "no_project",
 
-                "qualifiedName": "/null",
+                "qualifiedName": "/holding_bin",
 
                 "specialization": {"type": "Package"},
 
@@ -32,7 +34,7 @@
 
                 "owner": "holding_bin_no_site_no_project",
 
-                "qualifiedName": "/300",
+                "qualifiedName": "/holding_bin/300",
 
                 "specialization": {
 

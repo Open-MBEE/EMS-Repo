@@ -20,7 +20,7 @@
 
         "owner": "holding_bin_no_site_no_project",
 
-        "qualifiedName": "/6666_name",
+        "qualifiedName": "/holding_bin/6666_name",
 
         "specialization": {
 
@@ -60,7 +60,7 @@
 
         "owner": "6666",
 
-        "qualifiedName": "/6666_name/null",
+        "qualifiedName": "/holding_bin/6666_name/null",
 
         "specialization": {
 
@@ -80,7 +80,7 @@
 
         "owner": "6666",
 
-        "qualifiedName": "/6666_name/null",
+        "qualifiedName": "/holding_bin/6666_name/null",
 
         "specialization": {
 
