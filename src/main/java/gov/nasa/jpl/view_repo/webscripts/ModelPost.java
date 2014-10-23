@@ -1337,12 +1337,17 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // Move the node to the specified workspace if the node is not a
         // workspace itself.
-        if ( workspace != null && workspace.exists() && nodeToUpdate != null
-             && nodeToUpdate.exists() && !nodeToUpdate.isWorkspace() && !workspace.equals( nodeToUpdate.getWorkspace() ) ) {
-            parent = workspace.replicateWithParentFolders( parent );
-            EmsScriptNode oldNode = nodeToUpdate;
-            nodeToUpdate = nodeToUpdate.clone(parent);
-            nodeToUpdate.setWorkspace( workspace, oldNode.getNodeRef() );
+        if ( workspace != null && workspace.exists() ) {
+            if ( nodeToUpdate == null || !nodeToUpdate.exists() ) {
+                parent = workspace.replicateWithParentFolders( parent );
+            } else if ( nodeToUpdate != null && nodeToUpdate.exists()
+                        && !nodeToUpdate.isWorkspace()
+                        && !workspace.equals( nodeToUpdate.getWorkspace() ) ) {
+                parent = workspace.replicateWithParentFolders( parent );
+                EmsScriptNode oldNode = nodeToUpdate;
+                nodeToUpdate = nodeToUpdate.clone(parent);
+                nodeToUpdate.setWorkspace( workspace, oldNode.getNodeRef() );
+            }
         }
 
         if ( nodeToUpdate == null || !nodeToUpdate.exists() ) {// && newElements.contains( id ) ) {
@@ -1425,6 +1430,18 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
 
+//        EmsScriptNode p = nodeToUpdate;//.getParent();
+//        String s = "nodeToUpdate";
+//        while ( p != null ) {
+//            EmsScriptNode owner = p.getPropertyElement( "ems:owner" );
+//            List<EmsScriptNode> ownedChildren = p.getPropertyElements( "ems:ownedChildren" );
+//            EmsScriptNode refiNode = p.getPropertyElement( "ems:reifiedNode" );
+//            EmsScriptNode refiPackage = p.getPropertyElement( "ems:reifiedPkg" );
+//            System.out.println(s + "=" + p + ", owner=" + owner + ", ownedChildren=" + ownedChildren + ", reifiedNode=" + refiNode + ", reifiedPkg=" + refiPackage);
+//            s = s + ".p";
+//            p = p.getParent();
+//        }
+        
         // update metadata
         if (ingest && nodeExists && checkPermissions(nodeToUpdate, PermissionService.WRITE)) {
             log(LogLevel.INFO, "\tinserting metadata");
@@ -1504,11 +1521,6 @@ public class ModelPost extends AbstractJavaWebScript {
             reifiedNode = findScriptNodeById(pkgName, workspace, null, true);
             if (reifiedNode == null || !reifiedNode.exists()) {
                 try {
-                    log( LogLevel.ERROR,
-                         "\t trying to create reified node " + pkgName
-                                 + " in parent, "
-                                 + parent.getProperty( Acm.CM_NAME ) + " = "
-                                 + parent + "." );
                     reifiedNode = parent.createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER);
                 } catch ( Throwable e ) {
                     log( LogLevel.ERROR,

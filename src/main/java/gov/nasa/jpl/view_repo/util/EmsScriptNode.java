@@ -46,6 +46,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -2741,8 +2742,9 @@ public class EmsScriptNode extends ScriptNode implements
         if ( isSiteOrSites ) {
             type = "cm:folder";
         }
+        
         EmsScriptNode node = parent.createNode( getName(), type );
-
+        
         if ( node == null ) {
             Debug.error( "Could not create node in parent " + parent.getName() );
             return null;
@@ -3056,6 +3058,17 @@ public class EmsScriptNode extends ScriptNode implements
             elements.add( new EmsScriptNode( ref, services ) );
         }
         return elements;
+    }
+
+    public EmsScriptNode getPropertyElement( String acmProperty ) {
+        Object e = getProperty( acmProperty );
+        if ( e instanceof NodeRef ) {
+            return new EmsScriptNode( (NodeRef)e, getServices() );
+        } else if ( e == null ) {
+        } else {
+            Debug.error(true, false, "ERROR! Getting a property as a noderef!");
+        }
+        return null;
     }
 
     public Set< EmsScriptNode > getRelationships() {
@@ -3782,7 +3795,7 @@ public class EmsScriptNode extends ScriptNode implements
         ArrayList< NodeRef > nodeRefs =
                 (ArrayList< NodeRef >)node.getProperty( "sysml:roles" );
         JSONArray ids = addNodeRefIdsJSON( nodeRefs, dateTime );
-        putInJson( json, "connectorRoles", ids, filter );
+        putInJson( json, "roles", ids, filter );
     }
 
     /**************************
