@@ -447,7 +447,13 @@ public class ModelPost extends AbstractJavaWebScript {
                     ModStatus modStatus = new ModStatus();
                     EmsScriptNode nodeBin = projectNode.createSysmlNode(ownerName, Acm.ACM_PACKAGE,
                                                                         modStatus, workspace);
-                    owner = nodeBin != null ? nodeBin : projectNode;
+                    if (nodeBin != null) {
+                        nodeBin.setProperty( Acm.ACM_NAME, "holding_bin" );
+                        owner = nodeBin;
+                    }
+                    else {
+                        owner = projectNode;
+                    }
                     updateTransactionableWsState(nodeBin, ownerName, modStatus, false);
                 }
                 else {
@@ -2116,13 +2122,13 @@ public class ModelPost extends AbstractJavaWebScript {
         // there should never be more than one project per site on Europa.
         if (projectId.equals( NO_PROJECT_ID )) {
             
-            List<EmsScriptNode> nodeList = searchForElementsForSite(NodeUtil.SearchType.TYPE.prefix, 
+            Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.TYPE.prefix, 
                                                                     Acm.ACM_PROJECT, false,
                                                                     workspace, null, 
                                                                     siteName);
             
-            if (nodeList.size() > 0) {
-                EmsScriptNode projectNodeNew = nodeList.get(0);
+            if (nodeList != null && nodeList.size() > 0) {
+                EmsScriptNode projectNodeNew = nodeList.values().iterator().next();
                 String projectIdNew = projectNodeNew != null ? projectNodeNew.getSysmlId() : projectId;
                 projectId = projectIdNew != null ? projectIdNew : projectId;
                 

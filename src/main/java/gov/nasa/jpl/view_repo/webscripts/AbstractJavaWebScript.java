@@ -493,15 +493,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	                                                       boolean ignoreWorkspace,
 	                                                       WorkspaceNode workspace,
 	                                                       Date dateTime) {
-		Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
-
-        searchResults.putAll( NodeUtil.searchForElements( type, pattern, ignoreWorkspace,
-                                                          workspace,
-                                                          dateTime, services,
-                                                          response,
-                                                          responseStatus ) );
-
-		return searchResults;
+		return this.searchForElements( type, pattern, ignoreWorkspace, 
+		                               workspace, dateTime, null );
 	}
 	
 	   /**
@@ -512,29 +505,23 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * @param type      escaped ACM type for lucene search: e.g. "@sysml\\:documentation:\""
      * @param pattern   Pattern to look for
      */
-    protected List<EmsScriptNode> searchForElementsForSite(String type,
+    protected Map<String, EmsScriptNode> searchForElements(String type,
                                                                   String pattern,
                                                                   boolean ignoreWorkspace,
                                                                   WorkspaceNode workspace,
                                                                   Date dateTime,
                                                                   String siteName) {
         
-        List<EmsScriptNode> returnList = new ArrayList<EmsScriptNode>();
-        Map<String, EmsScriptNode> searchResults = this.searchForElements( type, pattern, 
-                                                                           ignoreWorkspace, workspace, 
-                                                                           dateTime );
-        
-        EmsScriptNode node;
-        String nodeSiteName;
-        for ( Entry< String, EmsScriptNode > entry : searchResults.entrySet() ) {
-            node = entry.getValue();
-            nodeSiteName = node != null ? node.getSiteName() : null;
-            if (nodeSiteName != null && nodeSiteName.equals( siteName )) {
-                returnList.add( node );
-            }
-        }
-        
-        return returnList;
+        Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
+
+        searchResults.putAll( NodeUtil.searchForElements( type, pattern, ignoreWorkspace,
+                                                          workspace,
+                                                          dateTime, services,
+                                                          response,
+                                                          responseStatus,
+                                                          siteName) );
+
+        return searchResults;
         
     }
 

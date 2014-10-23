@@ -39,10 +39,14 @@ import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -134,10 +138,18 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         }
         EmsScriptNode site = new EmsScriptNode(siteRef, services, response);
 
-        Set< EmsScriptNode > productSet =
-                WebScriptUtil.getAllNodesInPath( site.getQnamePath(), "ASPECT",
-                                                 Acm.ACM_PRODUCT, workspace,
-                                                 dateTime, services, response );
+//        Set< EmsScriptNode > productSet =
+//                WebScriptUtil.getAllNodesInPath( site.getQnamePath(), "ASPECT",
+//                                                 Acm.ACM_PRODUCT, workspace,
+//                                                 dateTime, services, response );
+        Set<EmsScriptNode> productSet = new HashSet<EmsScriptNode>();
+        Map< String, EmsScriptNode > nodeList = NodeUtil.searchForElements(NodeUtil.SearchType.ASPECT.prefix, 
+                                                                          Acm.ACM_PRODUCT, false,
+                                                                          workspace, dateTime, services, response,
+                                                                          responseStatus, site.getSiteName());
+        if (nodeList != null) {
+            productSet.addAll( nodeList.values() );
+        }
         
         // create snapshots of all documents
         // TODO: perhaps roll these in their own transactions

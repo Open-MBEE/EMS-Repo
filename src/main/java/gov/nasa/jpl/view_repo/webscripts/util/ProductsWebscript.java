@@ -14,6 +14,7 @@ import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -100,13 +101,16 @@ public class ProductsWebscript extends AbstractJavaWebScript {
 //                                                 workspace,
 //                                                 dateTime, services,
 //                                                 response );
-        List<EmsScriptNode> nodeList = searchForElementsForSite(NodeUtil.SearchType.ASPECT.prefix, 
+        Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix, 
                                                                 Acm.ACM_PRODUCT, false,
                                                                 workspace, dateTime, 
                                                                 siteNode.getSiteName());
-        for ( EmsScriptNode node : nodeList) {
-            if (node != null) {
-                productsJson.put( node.toJSONObject( null ) );
+        if (nodeList != null) {
+            Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
+            for ( EmsScriptNode node : nodes) {
+                if (node != null) {
+                    productsJson.put( node.toJSONObject( null ) );
+                }
             }
         }
         
