@@ -440,7 +440,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                        + " into project: " + projectNode);
                 
                 // FIXME: HERE! ATTENTION BRAD!  add to elements, so it is returned, and remind Doris
-                //        to fix her code also.  also add call to updateTransactionableWsState()
+                //        to fix her code also.
                 // If creating a holding bin, then need to create a node for it also for
                 // magic draw sync.
                 if (createdHoldingBin) {
@@ -448,7 +448,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     EmsScriptNode nodeBin = projectNode.createSysmlNode(ownerName, Acm.ACM_PACKAGE,
                                                                         modStatus, workspace);
                     owner = nodeBin != null ? nodeBin : projectNode;
-                    //updateTransactionableWsState(nodeBin, ownerName, modStatus, false);
+                    updateTransactionableWsState(nodeBin, ownerName, modStatus, false);
                 }
                 else {
                     owner = projectNode;  
@@ -968,15 +968,22 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         element = findScriptNodeById( jsonId, workspace, null, true );
+        updateTransactionableWsState(element, jsonId, modStatus, ingest);
+        elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
+        return elements;
+    }
+
+    private void updateTransactionableWsState(EmsScriptNode element, String jsonId, ModStatus modStatus, boolean ingest) {
+        
         if (runWithoutTransactions) {
-            updateTransactionableWsState(element, jsonId, modStatus, ingest);
+            updateTransactionableWsStateImpl(element, jsonId, modStatus, ingest);
         } else {
             UserTransaction trx;
             trx = services.getTransactionService().getNonPropagatingUserTransaction();
             try {
                 trx.begin();
                 timerCommit = Timer.startTimer(timerCommit, timeEvents);
-                updateTransactionableWsState( element, jsonId, modStatus, ingest );
+                updateTransactionableWsStateImpl( element, jsonId, modStatus, ingest );
                 trx.commit();
                 Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): ws metadata time", timeEvents);
             } catch (Throwable e) {
@@ -991,13 +998,9 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
             }
         }
-        
-        elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
-        return elements;
     }
-
     
-    private void updateTransactionableWsState(EmsScriptNode element, String jsonId, ModStatus modStatus, boolean ingest) {
+    private void updateTransactionableWsStateImpl(EmsScriptNode element, String jsonId, ModStatus modStatus, boolean ingest) {
         if (element != null && (element.exists() || element.isDeleted())) {
             // can't add the node JSON yet since properties haven't been tied in yet
             switch (modStatus.getState()) {
