@@ -269,10 +269,10 @@ public class ModelGet extends AbstractJavaWebScript {
                                            |
                                            Z
                           
-                          1. If a get is done on element Proj, then it will return the B from the master
+                          1. If a get is done on element Proj from WS w/ recurse = true, then it will return the B from the master
                              instead of the B from WS1.
-                          2. If a get is done on element A, then B will be returned, but shouldn't
-                             be b/c it was moved from A's containment in WS2.
+                          2. If a get is done on element A from WS2 w/ recurse = true, then A,B,Z will be returned, but shouldn't
+                             be b/c it was moved from A's containment in WS1.
                                        
                 */
 //                // Process the elements for the desired workspace first, and then use the
