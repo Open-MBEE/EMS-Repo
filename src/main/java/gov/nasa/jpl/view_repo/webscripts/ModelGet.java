@@ -248,7 +248,69 @@ public class ModelGet extends AbstractJavaWebScript {
             if (isViewRequest) {
                 handleViewHierarchy(modelRootNode, recurse, workspace, dateTime);
             } else {
-                handleElementHierarchy(modelRootNode, recurse, workspace, dateTime);
+                /*
+                 FIXME: The solution below is more efficient, but has corner cases
+                        it does not handle correctly.  
+                        Two cases it does not handle are:
+                         Let WS1 be master of WS2, and A,B,Z are elements.
+                              Master WS: Proj
+                                           |
+                                           A
+                                           |
+                                           B
+                                       
+                              WS1:       Proj
+                                           |
+                                           B
+                                           
+                              WS2:       Proj
+                                           |
+                                           A
+                                           |
+                                           Z
+                          
+                          1. If a get is done on element Proj, then it will return the B from the master
+                             instead of the B from WS1.
+                          2. If a get is done on element A, then B will be returned, but shouldn't
+                             be b/c it was moved from A's containment in WS2.
+                                       
+                */
+//                // Process the elements for the desired workspace first, and then use the
+//                // ems:source property to process the needed parent workspaces:
+//                // Note: Doing two passes, so that we first get the nodes for the desired workspace
+//                // before checking the parent workspace.  This is needed in case a node moved
+//                // locations.  Otherwise, could do this in one call with source=true:
+//                handleElementHierarchy(modelRootNode, recurse, workspace, dateTime, false);
+//                if (recurse) {
+//                    handleElementHierarchy(modelRootNode, recurse, workspace, dateTime, true);
+//                }
+                
+                /* FIXME
+                 * This solution is less efficient, as it has do a lucene search on every
+                 * workspace, but solves the 1st corner case described above.  It does NOT
+                 * handle the second case correctly.
+                 */
+                // Go up the workspace tree, and process each workspace that contains the
+                // desired element or its reified package:
+                handleElementHierarchy(modelRootNode, recurse, workspace, dateTime, false);
+                if (recurse) {
+                    while (workspace != null) {
+                        workspace = workspace.getParentWorkspace();
+                        modelRootNode = findScriptNodeByIdForWorkspace(modelId, workspace, 
+                                                                       dateTime, false);
+                        if (modelRootNode != null) {
+                            handleElementHierarchy(modelRootNode, recurse, workspace, dateTime, false);
+                        }
+                        // Try the reified pkg:
+                        else {
+                            modelRootNode = findScriptNodeByIdForWorkspace(modelId+"_pkg", workspace, 
+                                                                           dateTime, false);
+                            if (modelRootNode != null) {
+                                handleElementHierarchy(modelRootNode, recurse, workspace, dateTime, false);
+                            }
+                        }
+                    } // ends while loop
+                }  // ends if (recurse)
             }
             
             handleElements(dateTime);
@@ -317,15 +379,24 @@ public class ModelGet extends AbstractJavaWebScript {
 	
 	
 	/**
-	 * Build up the element hierarchy from the specified root
+	 * Build up the element hierarchy from the specified root.  This was extended
+	 * to work correctly with workspaces by using the source arg.  When this
+	 * argument is set to true, it will look up source workspace recursively also
+	 * to add any needed elements that were not in the current workspace.  It will
+	 * never overwrite elements already found, so the current workspace
+	 * must be processed first.
+	 * 
 	 * @param root		Root node to get children for
 	 * @param workspace 
 	 * @param dateTime 
+	 * @param source Set to true to look up nodes in source workspaces if needed
 	 * @throws JSONException
 	 */
 	protected void handleElementHierarchy(EmsScriptNode root, boolean recurse,
-	                                      WorkspaceNode workspace, Date dateTime)
+	                                      WorkspaceNode workspace, Date dateTime,
+	                                      boolean source)
 	                                              throws JSONException {
+	    
 		JSONArray array = new JSONArray();
 		
 		// don't return any elements
@@ -339,7 +410,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		    // dont add reified packages
 		    if (!((String)root.getProperty(Acm.CM_NAME)).contains("_pkg") &&
 		        !root.isPropertyOwnedValueSpecification()) {
-		        elementsFound.put((String)root.getProperty(Acm.ACM_ID), root);
+		        elementsFound.put(sysmlId, root);
 		    }
 		}
 
@@ -348,15 +419,18 @@ public class ModelGet extends AbstractJavaWebScript {
             // TODO: figure out why the child association creation from the
             // reification isn't being picked up
 		    String rootName = (String)root.getProperty(Acm.CM_NAME);
+		    EmsScriptNode reifiedNode = root;
 		    if (!rootName.contains("_pkg")) {
-                EmsScriptNode reifiedNode =
-                        findScriptNodeById( rootName + "_pkg", workspace,
-                                            dateTime, false );
+		        reifiedNode = findScriptNodeById( rootName + "_pkg", workspace,
+		                                          dateTime, false );
+		        
 		        if (reifiedNode != null) {
                     handleElementHierarchy( reifiedNode, recurse, workspace,
-                                            dateTime );
+                                            dateTime, source );
 		        } // TODO -- REVIEW -- Warning or error?
 		    }
+		    
+		    // Handle all the children in this workspace:
 			for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
 			    NodeRef childRef = assoc.getChildRef();
 			    NodeRef vChildRef = NodeUtil.getNodeRefAtTime( childRef, workspace, dateTime );
@@ -372,22 +446,61 @@ public class ModelGet extends AbstractJavaWebScript {
                         new EmsScriptNode( childRef, services, response );
                 if ( checkPermissions( child, PermissionService.READ ) ) {
                     if (child.exists() && !child.isPropertyOwnedValueSpecification()) {
+                        boolean elementFolder = false;
                         if ( child.getTypeShort().equals( Acm.ACM_ELEMENT_FOLDER ) ) {
                             handleElementHierarchy( child, recurse, workspace,
-                                                    dateTime );
+                                                    dateTime, source );
+                            elementFolder = true;
                         } else {
                             String value = (String)child.getProperty( Acm.ACM_ID );
                             if ( value != null ) {
                                 array.put( value );
-                                elementsFound.put( value, child );
+                                if (!elementsFound.containsKey( value )) {
+                                    elementsFound.put( value, child );
+                                }
                                 // add empty hierarchies as well
-                                elementHierarchy.put( value, new JSONArray() );
+                                if (!elementHierarchy.has( value )){
+                                    elementHierarchy.put( value, new JSONArray() );
+                                }
                             }
                         }
+                        
+                    } // ends if (child.exists() && !child.isPropertyOwnedValueSpecification())
+                } // ends if ( checkPermissions( child, PermissionService.READ ) ) 
+			}
+			
+	    	// Handle the reified package for the source workspace:
+			if (reifiedNode != null && source) {
+			    EmsScriptNode sourceNode = null;
+			    
+                // Easiest way to find the parent workspace node is the source
+                // property:
+                NodeRef sourceRef = (NodeRef)reifiedNode.getProperty( "ems:source" );
+                
+                if (sourceRef != null) {
+                    sourceNode = new EmsScriptNode(sourceRef, services, response);
+                    
+                    if (sourceNode != null) {
+                        handleElementHierarchy( sourceNode, recurse, sourceNode.getWorkspace(),
+                                                dateTime, source );
                     }
                 }
-			}
-	    	
+                
+                // Was not able to find the node using the source property, so lets try
+                // to find it by tracing up the workspace tree:
+                if (sourceNode == null && reifiedNode.getWorkspace() != null) {
+                    sourceNode = findScriptNodeById( reifiedNode.getSysmlId(), 
+                                                     reifiedNode.getParentWorkspace(),
+                                                     dateTime, false );
+                    
+                    if (sourceNode != null) {
+                        handleElementHierarchy( sourceNode, recurse, sourceNode.getWorkspace(),
+                                                dateTime, source );
+                    }
+                }
+                
+            } 
+			
 			// if there were any children add them to the hierarchy object
 			String key = (String)root.getProperty(Acm.ACM_ID);
 			if (root.getTypeShort().equals(Acm.ACM_ELEMENT_FOLDER) && key == null) {
@@ -395,8 +508,32 @@ public class ModelGet extends AbstractJavaWebScript {
 				key = root.getProperty(Acm.CM_NAME).toString().replace("_pkg", "");
 			}
 			
-			elementHierarchy.put(key, array);
-		}
+			// Add the array to the elemenHierarchy if needed:
+            if (!elementHierarchy.has( key )){
+                elementHierarchy.put(key, array);
+            }
+            else {
+                JSONArray oldArray = elementHierarchy.getJSONArray(key);
+                boolean foundObject;
+                Object obj;
+                for (int i = 0; i < array.length(); i++) {
+                    obj = array.get( i );
+                    foundObject = false;
+                    if (obj != null) {
+                        for (int j = 0; j < oldArray.length(); j++) {
+                            if (obj.equals(oldArray.get(j))) {
+                                foundObject = true;
+                                break;
+                            }
+                        }
+                        if (!foundObject) {
+                            oldArray.put( obj );
+                        }
+                    }
+                }
+            }
+            
+		}  // ends if (recurse)
 	}
 	
 	/**

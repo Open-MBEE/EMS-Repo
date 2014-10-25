@@ -219,6 +219,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 			if (projectVersion != null) {
 			    projectNode.setProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
 			}
+			// TODO: add source?
 			projectNode.setWorkspace(workspace, null);
 			log(LogLevel.INFO, "Project created.\n", HttpServletResponse.SC_OK);
 		} else {
