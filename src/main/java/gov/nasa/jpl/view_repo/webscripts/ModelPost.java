@@ -902,17 +902,20 @@ public class ModelPost extends AbstractJavaWebScript {
         // Check to see if the element has been updated since last read by the
         // posting application.
         // Only generate error on first pass (i.e. when ingest == false).
-       if ( !ingest && inConflict( element, elementJson ) ) {
-            String msg =
-                    "Error! Tried to post concurrent edit to element, "
-                            + element + ".\n";
-            if ( getResponse() == null || getResponseStatus() == null ) {
-                Debug.error( msg );
-            } else {
-                getResponse().append( msg );
-                if ( getResponseStatus() != null ) {
-                    getResponseStatus().setCode( HttpServletResponse.SC_CONFLICT,
-                                                 msg );
+       if (inConflict( element, elementJson ) ) {
+           
+            if (!ingest) {
+                String msg =
+                        "Error! Tried to post concurrent edit to element, "
+                                + element + ".\n";
+                if ( getResponse() == null || getResponseStatus() == null ) {
+                    Debug.error( msg );
+                } else {
+                    getResponse().append( msg );
+                    if ( getResponseStatus() != null ) {
+                        getResponseStatus().setCode( HttpServletResponse.SC_CONFLICT,
+                                                     msg );
+                    }
                 }
             }
             return elements;
@@ -1222,6 +1225,11 @@ public class ModelPost extends AbstractJavaWebScript {
         // TODO -- could check for which properties changed since the "read"
         // date to allow concurrent edits to different properties of the same
         // element.    	
+        
+        if (element == null) {
+            return false;
+        }
+        
         String readTime = null;
         try {
             readTime = elementJson.getString( Acm.JSON_READ );//"read" );
@@ -1229,10 +1237,10 @@ public class ModelPost extends AbstractJavaWebScript {
             return false;
         }
         if (Debug.isOn()) System.out.println( "%% %% %% readTime = " + readTime );
-        if ( readTime == null ) return false;
-        Date lastModified = new Date();
-        if(element != null)
-            lastModified = element.getLastModified( null );
+        if ( readTime == null) {
+            return false;
+        }
+        Date lastModified = element.getLastModified( null );
         if (Debug.isOn()) System.out.println( "%% %% %% lastModified = " + lastModified );
         //DateTimeFormatter parser = ISODateTimeFormat.dateParser(); // format is different than what is printed
 
