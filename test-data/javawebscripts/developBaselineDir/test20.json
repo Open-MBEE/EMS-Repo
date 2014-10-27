@@ -2,41 +2,63 @@
 
     "workspace1": {
 
-        "elements": [{
+        "elements": [
 
-            "creator": "admin",
+            {
 
-            "documentation": "something",
+                "creator": "admin",
 
-            "editable": true,
+                "editable": true,
 
-            "name": "300",
+                "name": "holding_bin",
 
-            "owner": "holding_bin_no_site_no_project",
+                "owner": "no_project",
 
-            "qualifiedName": "/300",
+                "qualifiedName": "/holding_bin",
 
-            "specialization": {
+                "specialization": {"type": "Package"},
 
-                "isDerived": false,
-
-                "isSlot": false,
-
-                "type": "Property",
-
-                "value": [{
-
-                    "string": "dlam_string",
-
-                    "type": "LiteralString"
-
-                }]
+                "sysmlid": "holding_bin_no_site_no_project"
 
             },
 
-            "sysmlid": "x"
+            {
 
-        }],
+                "creator": "admin",
+
+                "documentation": "something",
+
+                "editable": true,
+
+                "name": "300",
+
+                "owner": "holding_bin_no_site_no_project",
+
+                "qualifiedName": "/holding_bin/300",
+
+                "specialization": {
+
+                    "isDerived": false,
+
+                    "isSlot": false,
+
+                    "type": "Property",
+
+                    "value": [{
+
+                        "string": "dlam_string",
+
+                        "type": "LiteralString"
+
+                    }]
+
+                },
+
+                "sysmlid": "x"
+
+            }
+
+        ],
 
         "name": "wsA",
 

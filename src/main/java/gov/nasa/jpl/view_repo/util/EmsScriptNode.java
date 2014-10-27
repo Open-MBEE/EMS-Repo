@@ -749,8 +749,10 @@ public class EmsScriptNode extends ScriptNode implements
      * @param sysmlAcmType
      *            Alfresco Content Model type of node to create or an aspect
      * @return created child EmsScriptNode
+     * @throws Exception 
      */
-    public EmsScriptNode createSysmlNode( String sysmlId, String sysmlAcmType ) {
+    public EmsScriptNode createSysmlNode( String sysmlId, String sysmlAcmType, ModStatus modStatus,
+                                          WorkspaceNode nodeWorkspace) throws Exception {
         String type = NodeUtil.getContentModelTypeName( sysmlAcmType, services );
         EmsScriptNode node = createNode( sysmlId, type );
 
@@ -776,7 +778,20 @@ public class EmsScriptNode extends ScriptNode implements
             } else {
                 // TODO error handling
             }
+            
+
+            node.setProperty( Acm.CM_NAME, sysmlId );
+            node.setProperty( Acm.ACM_ID, sysmlId );
+            modStatus.setState( ModStatus.State.ADDED  );
+            if ( nodeWorkspace != null && nodeWorkspace.exists() ) {
+                node.setWorkspace( nodeWorkspace, null );
+            }
         }
+        
+        if ( node == null || !node.exists() ) {
+            throw new Exception( "createNode() failed." );
+        }
+        
         return node;
     }
 

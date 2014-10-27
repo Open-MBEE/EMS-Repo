@@ -246,9 +246,7 @@ public class ModelGet extends AbstractJavaWebScript {
             if (isViewRequest) {
                 handleViewHierarchy(modelRootNode, recurse, workspace, dateTime);
             } else {
-                // not walking workspace hierarchy
-                handleElementHierarchy( modelRootNode, recurse, workspace, dateTime ); // not walking workspace hierarchy
-                // not walking workspace hierarchy
+                handleElementHierarchy( modelRootNode, recurse, workspace, dateTime );
             }
             
             handleElements(dateTime);
@@ -317,19 +315,18 @@ public class ModelGet extends AbstractJavaWebScript {
 	
 	
     /**
-     * Build up the element hierarchy from the specified root without walking
-     * workspace hierarchy
+     * Get all elements in tree from the specified root
      * 
      * @param root
      *            Root node to get children for
      * @param workspace
      * @param dateTime
-     * 
      * @throws JSONException
      */
 	protected void handleElementHierarchy( EmsScriptNode root, boolean recurse,
 	                                       WorkspaceNode workspace, Date dateTime )
 	                                              throws JSONException {
+	    
 		JSONArray array = new JSONArray();
 		
 		// don't return any elements
@@ -339,9 +336,10 @@ public class ModelGet extends AbstractJavaWebScript {
 		
 		// add root element to elementsFound if its not already there (if it's there, it's probably because the root is a reified pkg node)
 		String sysmlId = (String)root.getProperty(Acm.ACM_ID);
+		String rootName = (String)root.getProperty(Acm.CM_NAME);
 		if (!elementsFound.containsKey(sysmlId)) {
 		    // dont add reified packages
-		    if (!((String)root.getProperty(Acm.CM_NAME)).contains("_pkg") &&
+		    if (!rootName.contains("_pkg") &&
 		        !root.isPropertyOwnedValueSpecification()) {
 		        elementsFound.put(sysmlId, root);
 		    }
@@ -351,7 +349,6 @@ public class ModelGet extends AbstractJavaWebScript {
 			// Find all the children, recurse or add to array as needed.
             // TODO: figure out why the child association creation from the
             // reification isn't being picked up
-		    String rootName = (String)root.getProperty( Acm.CM_NAME );
 		    if ( !rootName.contains("_pkg") ) {
                 EmsScriptNode reifiedNode = findScriptNodeById( rootName + "_pkg",
                                                                 workspace,
@@ -376,7 +373,7 @@ public class ModelGet extends AbstractJavaWebScript {
                 EmsScriptNode child =
                         new EmsScriptNode( childRef, services, response );
                 if ( checkPermissions( child, PermissionService.READ ) ) {
-                    if ( child.exists() && !child.isPropertyOwnedValueSpecification() ) {
+                    if (child.exists() && !child.isPropertyOwnedValueSpecification()) {
                         if ( child.getTypeShort().equals( Acm.ACM_ELEMENT_FOLDER ) ) {
                             handleElementHierarchy( child, recurse, workspace, dateTime );
                         } else {
@@ -385,19 +382,18 @@ public class ModelGet extends AbstractJavaWebScript {
                                 elementsFound.put( value, child );
                             }
                         }
-                    }
-                    // don't add stuff here for workspaces
-                }
+                        
+                    } // ends if (child.exists() && !child.isPropertyOwnedValueSpecification())
+                } // ends if ( checkPermissions( child, PermissionService.READ ) ) 
 			}
-	    	
+						
 			// if there were any children add them to the hierarchy object
 			String key = (String)root.getProperty(Acm.ACM_ID);
 			if (root.getTypeShort().equals(Acm.ACM_ELEMENT_FOLDER) && key == null) {
 				// TODO this is temporary? until we can get sysml:id from Element Folder?
-				key = root.getProperty(Acm.CM_NAME).toString().replace("_pkg", "");
+				key = rootName.replace("_pkg", "");
 			}
 			
-            // don't add stuff here for workspaces
 		}  // ends if (recurse)
 	}
 	

@@ -392,7 +392,7 @@ public class ModelPost extends AbstractJavaWebScript {
     protected EmsScriptNode getOwner( String elementId,
                                       EmsScriptNode projectNode,
                                       WorkspaceNode workspace,
-                                      boolean createOwnerPkgIfNotFound ) {
+                                      boolean createOwnerPkgIfNotFound ) throws Exception {
         JSONObject element = elementMap.get(elementId);
         if ( element == null || element.equals( "null" ) ) {
             log(LogLevel.ERROR, "Trying to get owner of null element!",
@@ -438,8 +438,28 @@ public class ModelPost extends AbstractJavaWebScript {
                 log( LogLevel.WARNING, "Could not find owner with name: "
                                        + ownerName + " putting " + elementId
                                        + " into project: " + projectNode);
-                owner = projectNode;  
-                foundOwnerElement = false;
+                
+                // FIXME: HERE! ATTENTION BRAD!  add to elements, so it is returned, and remind Doris
+                //        to fix her code also.
+                // If creating a holding bin, then need to create a node for it also for
+                // magic draw sync.
+                if (createdHoldingBin) {
+                    ModStatus modStatus = new ModStatus();
+                    EmsScriptNode nodeBin = projectNode.createSysmlNode(ownerName, Acm.ACM_PACKAGE,
+                                                                        modStatus, workspace);
+                    if (nodeBin != null) {
+                        nodeBin.setProperty( Acm.ACM_NAME, "holding_bin" );
+                        owner = nodeBin;
+                    }
+                    else {
+                        owner = projectNode;
+                    }
+                    updateTransactionableWsState(nodeBin, ownerName, modStatus, false);
+                }
+                else {
+                    owner = projectNode;  
+                }
+                foundOwnerElement = owner != projectNode;
             }
             // really want to add pkg as owner
             reifiedPkg = findScriptNodeById(ownerName + "_pkg", workspace, null, false);
@@ -453,11 +473,6 @@ public class ModelPost extends AbstractJavaWebScript {
                     // pkg, so pass false.
                     reifiedPkg = getOrCreateReifiedNode(owner, ownerName, workspace,
                                                         foundOwnerElement);
-                    
-                    // Make the holding bin a Package, so that it can be used in magic draw:
-                    if (createdHoldingBin && reifiedPkg != null) {
-                        reifiedPkg.createOrUpdateAspect( Acm.ACM_PACKAGE );
-                    }
                     
                 } else {
                     log( LogLevel.WARNING, "Could not find owner package: "
@@ -887,17 +902,20 @@ public class ModelPost extends AbstractJavaWebScript {
         // Check to see if the element has been updated since last read by the
         // posting application.
         // Only generate error on first pass (i.e. when ingest == false).
-       if ( !ingest && inConflict( element, elementJson ) ) {
-            String msg =
-                    "Error! Tried to post concurrent edit to element, "
-                            + element + ".\n";
-            if ( getResponse() == null || getResponseStatus() == null ) {
-                Debug.error( msg );
-            } else {
-                getResponse().append( msg );
-                if ( getResponseStatus() != null ) {
-                    getResponseStatus().setCode( HttpServletResponse.SC_CONFLICT,
-                                                 msg );
+       if (inConflict( element, elementJson ) ) {
+           
+            if (!ingest) {
+                String msg =
+                        "Error! Tried to post concurrent edit to element, "
+                                + element + ".\n";
+                if ( getResponse() == null || getResponseStatus() == null ) {
+                    Debug.error( msg );
+                } else {
+                    getResponse().append( msg );
+                    if ( getResponseStatus() != null ) {
+                        getResponseStatus().setCode( HttpServletResponse.SC_CONFLICT,
+                                                     msg );
+                    }
                 }
             }
             return elements;
@@ -959,15 +977,22 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         element = findScriptNodeById( jsonId, workspace, null, true );
+        updateTransactionableWsState(element, jsonId, modStatus, ingest);
+        elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
+        return elements;
+    }
+
+    private void updateTransactionableWsState(EmsScriptNode element, String jsonId, ModStatus modStatus, boolean ingest) {
+        
         if (runWithoutTransactions) {
-            updateTransactionableWsState(element, jsonId, modStatus, ingest);
+            updateTransactionableWsStateImpl(element, jsonId, modStatus, ingest);
         } else {
             UserTransaction trx;
             trx = services.getTransactionService().getNonPropagatingUserTransaction();
             try {
                 trx.begin();
                 timerCommit = Timer.startTimer(timerCommit, timeEvents);
-                updateTransactionableWsState( element, jsonId, modStatus, ingest );
+                updateTransactionableWsStateImpl( element, jsonId, modStatus, ingest );
                 trx.commit();
                 Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): ws metadata time", timeEvents);
             } catch (Throwable e) {
@@ -982,13 +1007,9 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
             }
         }
-        
-        elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
-        return elements;
     }
-
     
-    private void updateTransactionableWsState(EmsScriptNode element, String jsonId, ModStatus modStatus, boolean ingest) {
+    private void updateTransactionableWsStateImpl(EmsScriptNode element, String jsonId, ModStatus modStatus, boolean ingest) {
         if (element != null && (element.exists() || element.isDeleted())) {
             // can't add the node JSON yet since properties haven't been tied in yet
             switch (modStatus.getState()) {
@@ -1204,6 +1225,11 @@ public class ModelPost extends AbstractJavaWebScript {
         // TODO -- could check for which properties changed since the "read"
         // date to allow concurrent edits to different properties of the same
         // element.    	
+        
+        if (element == null) {
+            return false;
+        }
+        
         String readTime = null;
         try {
             readTime = elementJson.getString( Acm.JSON_READ );//"read" );
@@ -1211,10 +1237,10 @@ public class ModelPost extends AbstractJavaWebScript {
             return false;
         }
         if (Debug.isOn()) System.out.println( "%% %% %% readTime = " + readTime );
-        if ( readTime == null ) return false;
-        Date lastModified = new Date();
-        if(element != null)
-            lastModified = element.getLastModified( null );
+        if ( readTime == null) {
+            return false;
+        }
+        Date lastModified = element.getLastModified( null );
         if (Debug.isOn()) System.out.println( "%% %% %% lastModified = " + lastModified );
         //DateTimeFormatter parser = ISODateTimeFormat.dateParser(); // format is different than what is printed
 
@@ -1349,16 +1375,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 log( LogLevel.INFO, "\tcreating node" );
                 try {
 //                    if ( parent != null && parent.exists() ) {
-                        nodeToUpdate = parent.createSysmlNode( id, acmSysmlType );
-                        if ( nodeToUpdate == null || !nodeToUpdate.exists() ) {
-                            throw new Exception( "createNode() failed." );
-                        }
-                        nodeToUpdate.setProperty( Acm.CM_NAME, id );
-                        nodeToUpdate.setProperty( Acm.ACM_ID, id );
-                        modStatus.setState( ModStatus.State.ADDED  );
-                        if ( workspace != null && workspace.exists() ) {
-                            nodeToUpdate.setWorkspace( workspace, null );
-                        }
+                        nodeToUpdate = parent.createSysmlNode( id, acmSysmlType, modStatus, workspace );
 //                    } else {
 //                        Debug.error( true, true,
 //                                     "Error! Attempt to create node, " + id
@@ -2113,13 +2130,13 @@ public class ModelPost extends AbstractJavaWebScript {
         // there should never be more than one project per site on Europa.
         if (projectId.equals( NO_PROJECT_ID )) {
             
-            List<EmsScriptNode> nodeList = searchForElementsForSite(NodeUtil.SearchType.TYPE.prefix, 
+            Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.TYPE.prefix, 
                                                                     Acm.ACM_PROJECT, false,
                                                                     workspace, null, 
                                                                     siteName);
             
-            if (nodeList.size() > 0) {
-                EmsScriptNode projectNodeNew = nodeList.get(0);
+            if (nodeList != null && nodeList.size() > 0) {
+                EmsScriptNode projectNodeNew = nodeList.values().iterator().next();
                 String projectIdNew = projectNodeNew != null ? projectNodeNew.getSysmlId() : projectId;
                 projectId = projectIdNew != null ? projectIdNew : projectId;
                 
