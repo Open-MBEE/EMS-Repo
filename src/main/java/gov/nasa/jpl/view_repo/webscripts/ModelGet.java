@@ -73,7 +73,6 @@ public class ModelGet extends AbstractJavaWebScript {
     // injected via spring configuration
     protected boolean isViewRequest = false;
     
-	private JSONObject elementHierarchy = new JSONObject();
 	protected JSONArray elements = new JSONArray();
 	protected Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
 
@@ -82,7 +81,6 @@ public class ModelGet extends AbstractJavaWebScript {
     @Override
 	protected void clearCaches() {
 		super.clearCaches();
-		elementHierarchy = new JSONObject();
 		elements = new JSONArray();
 		elementsFound = new HashMap<String, EmsScriptNode>();
 	}
@@ -248,7 +246,9 @@ public class ModelGet extends AbstractJavaWebScript {
             if (isViewRequest) {
                 handleViewHierarchy(modelRootNode, recurse, workspace, dateTime);
             } else {
-                handleElementHierarchy(modelRootNode, recurse, workspace, dateTime);
+                // not walking workspace hierarchy
+                handleElementHierarchy( modelRootNode, recurse, workspace, dateTime ); // not walking workspace hierarchy
+                // not walking workspace hierarchy
             }
             
             handleElements(dateTime);
@@ -316,15 +316,19 @@ public class ModelGet extends AbstractJavaWebScript {
 	}
 	
 	
-	/**
-	 * Build up the element hierarchy from the specified root
-	 * @param root		Root node to get children for
-	 * @param workspace 
-	 * @param dateTime 
-	 * @throws JSONException
-	 */
-	protected void handleElementHierarchy(EmsScriptNode root, boolean recurse,
-	                                      WorkspaceNode workspace, Date dateTime)
+    /**
+     * Build up the element hierarchy from the specified root without walking
+     * workspace hierarchy
+     * 
+     * @param root
+     *            Root node to get children for
+     * @param workspace
+     * @param dateTime
+     * 
+     * @throws JSONException
+     */
+	protected void handleElementHierarchy( EmsScriptNode root, boolean recurse,
+	                                       WorkspaceNode workspace, Date dateTime )
 	                                              throws JSONException {
 		JSONArray array = new JSONArray();
 		
@@ -339,7 +343,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		    // dont add reified packages
 		    if (!((String)root.getProperty(Acm.CM_NAME)).contains("_pkg") &&
 		        !root.isPropertyOwnedValueSpecification()) {
-		        elementsFound.put((String)root.getProperty(Acm.ACM_ID), root);
+		        elementsFound.put(sysmlId, root);
 		    }
 		}
 
@@ -347,16 +351,17 @@ public class ModelGet extends AbstractJavaWebScript {
 			// Find all the children, recurse or add to array as needed.
             // TODO: figure out why the child association creation from the
             // reification isn't being picked up
-		    String rootName = (String)root.getProperty(Acm.CM_NAME);
-		    if (!rootName.contains("_pkg")) {
-                EmsScriptNode reifiedNode =
-                        findScriptNodeById( rootName + "_pkg", workspace,
-                                            dateTime, false );
+		    String rootName = (String)root.getProperty( Acm.CM_NAME );
+		    if ( !rootName.contains("_pkg") ) {
+                EmsScriptNode reifiedNode = findScriptNodeById( rootName + "_pkg",
+                                                                workspace,
+                                                                dateTime, false );
 		        if (reifiedNode != null) {
-                    handleElementHierarchy( reifiedNode, recurse, workspace,
-                                            dateTime );
+                    handleElementHierarchy( reifiedNode, recurse, workspace, dateTime );
 		        } // TODO -- REVIEW -- Warning or error?
 		    }
+		    
+		    // Handle all the children in this workspace:
 			for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
 			    NodeRef childRef = assoc.getChildRef();
 			    NodeRef vChildRef = NodeUtil.getNodeRefAtTime( childRef, workspace, dateTime );
@@ -371,20 +376,17 @@ public class ModelGet extends AbstractJavaWebScript {
                 EmsScriptNode child =
                         new EmsScriptNode( childRef, services, response );
                 if ( checkPermissions( child, PermissionService.READ ) ) {
-                    if (child.exists() && !child.isPropertyOwnedValueSpecification()) {
+                    if ( child.exists() && !child.isPropertyOwnedValueSpecification() ) {
                         if ( child.getTypeShort().equals( Acm.ACM_ELEMENT_FOLDER ) ) {
-                            handleElementHierarchy( child, recurse, workspace,
-                                                    dateTime );
+                            handleElementHierarchy( child, recurse, workspace, dateTime );
                         } else {
                             String value = (String)child.getProperty( Acm.ACM_ID );
                             if ( value != null ) {
-                                array.put( value );
                                 elementsFound.put( value, child );
-                                // add empty hierarchies as well
-                                elementHierarchy.put( value, new JSONArray() );
                             }
                         }
                     }
+                    // don't add stuff here for workspaces
                 }
 			}
 	    	
@@ -395,8 +397,8 @@ public class ModelGet extends AbstractJavaWebScript {
 				key = root.getProperty(Acm.CM_NAME).toString().replace("_pkg", "");
 			}
 			
-			elementHierarchy.put(key, array);
-		}
+            // don't add stuff here for workspaces
+		}  // ends if (recurse)
 	}
 	
 	/**
