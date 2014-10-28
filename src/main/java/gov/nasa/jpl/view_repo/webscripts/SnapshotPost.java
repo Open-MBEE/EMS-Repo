@@ -44,6 +44,7 @@ import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -94,11 +95,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class SnapshotPost extends AbstractJavaWebScript {
 	protected String snapshotName;
-	//TODO obsolete
-	//private boolean isSnapshotNode = false;	//determines whether we're working with a view/product or a snapshot node reference; true for snapshot node reference
 	private JSONArray view2view;
-	//private SysAdminParams sysAdminParams;
-	
+	private DocBookWrapper docBookMgr;
 	//public void setSysAdminParas(SysAdminParams sysAdminParams){
 	//	this.sysAdminParams = sysAdminParams;
 	//}
@@ -220,7 +218,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         setDocumentElementContent( elem1, sb.toString() );
     }
 
-    private DBParagraph createDBParagraph( JSONObject obj ) {
+    private DBParagraph createDBParagraph( JSONObject obj, DBSection section ) {
     	if(obj == null) return null;
         String srcType = (String)obj.opt( "sourceType" );
         String src = (String)obj.opt( "source" );
@@ -284,6 +282,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	                                         + node.toJSON() );
 	                        }
 	                    }
+	                    sb.append(" ");
 	                }
 	                //if ( size > 0 ) sb.append( "</literallayout>" );
 	                p.setText( sb.toString() );
@@ -291,7 +290,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	            else {
 	                String s = (String)node.getProperty( Acm.SYSML + srcProp );
 	                s = handleTransclusion( src, srcProp, s, null, 0 );
-	                s = handleEmbeddedImage(src, s);
+	                s = handleEmbeddedImage(src, s, section);
 	                s = HtmlSanitize( s );
 	                if(s != null && !s.isEmpty()) p.setText(s);
 	                //if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
@@ -304,7 +303,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             if ( srcProp != null && !srcProp.isEmpty() ) {
                 String s = (String)obj.opt( Acm.SYSML + srcProp );
                 s = handleTransclusion( src, srcProp, s, null, 0 );
-                s = handleEmbeddedImage(src, s);
+                s = handleEmbeddedImage(src, s, section);
                 s = HtmlSanitize( s );
                 if(s != null && !s.isEmpty()) p.setText(s);
                 //if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
@@ -329,7 +328,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                             JSONArray jsonContains) throws JSONException{
         for ( int i = 0; i < jsonContains.length(); i++ ) {
             JSONObject obj = jsonContains.getJSONObject( i );
-            DocumentElement e = createElement( obj );
+            DocumentElement e = createElement( obj, section );
             if ( e != null ) section.addElement( e );
             
             //traverseElements(section, node);
@@ -376,7 +375,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             return null;
         }
 
-        DocBookWrapper docBookMgr = new DocBookWrapper( this.snapshotName, snapshotFolder );
+        docBookMgr = new DocBookWrapper( this.snapshotName, snapshotFolder );
         try {
             DBBook docBook = createDocBook( product );
             docBook.setRemoveBlankPages( true );
@@ -469,7 +468,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	return dbTable;
     }
 
-    private DocumentElement createList( JSONObject obj ) throws JSONException {
+    private DocumentElement createList( JSONObject obj, DBSection section ) throws JSONException {
         Boolean isOrdered = (Boolean)obj.opt( "ordered" );
 
         DBList list = new DBList();
@@ -480,7 +479,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             DocumentElement docElem = null;
             for ( int j = 0; j < listItems.length(); j++ ) {
                 JSONObject jsObj = listItems.getJSONObject( j );
-                DocumentElement e = createElement( jsObj );
+                DocumentElement e = createElement( jsObj, section );
                 if ( j > 0 ) {
                     appendElement( docElem, e );
                 } else docElem = e;
@@ -491,17 +490,17 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return (DocumentElement)list;
     }
 
-    private DocumentElement createElement( JSONObject obj ) throws JSONException {
+    private DocumentElement createElement( JSONObject obj, DBSection section ) throws JSONException {
         DocumentElement e = null;
         switch ( getType( obj ) ) {
             case "Paragraph":
-                e = createDBParagraph( obj );
+                e = createDBParagraph( obj, section );
                 break;
             case "List":
-                e = createList( obj );
+                e = createList( obj, section );
                 break;
             case "Table":
-                e = createTable( obj );
+                e = createTable( obj, section );
                 break;
             case "Image":
                 e = createImage( obj );
@@ -615,7 +614,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshotNode;
     }
 
-    private DocumentElement createTable( JSONObject obj ) throws JSONException {
+    private DocumentElement createTable( JSONObject obj, DBSection section ) throws JSONException {
         DBTable table = new DBTable();
         String title = (String)obj.opt( "title" );
         String style = (String)obj.opt( "sytle" );
@@ -626,8 +625,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
         DocBookTable dbTable = createDocBookTable(obj);
         List<DBColSpec> colspecs = createTableColSpec(dbTable.getColCount());
         table.setColspecs(colspecs);
-        table.setHeaders( createTableHeader( obj, dbTable ));
-        table.setBody( createTableBody( obj, dbTable ));
+        table.setHeaders( createTableHeader( obj, section, dbTable ));
+        table.setBody( createTableBody( obj, section, dbTable ));
         
         // table.setCols(headerCols.length());
         return (DocumentElement)table;
@@ -641,15 +640,15 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	return colspecs;
     }
     
-    private List< List< DocumentElement >> createTableBody( JSONObject obj, DocBookTable dbTable ) throws JSONException {
-        return createTableRows( obj.getJSONArray( "body" ), dbTable, false );
+    private List< List< DocumentElement >> createTableBody( JSONObject obj, DBSection section, DocBookTable dbTable ) throws JSONException {
+        return createTableRows( obj.getJSONArray( "body" ), section, dbTable, false );
     }
     
-    private List< List< DocumentElement >> createTableHeader( JSONObject obj, DocBookTable dbTable ) throws JSONException {
-        return createTableRows( obj.getJSONArray( "header" ), dbTable, true );
+    private List< List< DocumentElement >> createTableHeader( JSONObject obj, DBSection section, DocBookTable dbTable ) throws JSONException {
+        return createTableRows( obj.getJSONArray( "header" ), section, dbTable, true );
     }
     
-    private List< List< DocumentElement >> createTableRows( JSONArray jsonRows, DocBookTable dbTable, boolean isHeader ) throws JSONException {
+    private List< List< DocumentElement >> createTableRows( JSONArray jsonRows, DBSection section, DocBookTable dbTable, boolean isHeader ) throws JSONException {
         List< List< DocumentElement >> list =
                 new ArrayList< List< DocumentElement >>();
         for ( int i = 0; i < jsonRows.length(); i++ ) {
@@ -659,34 +658,49 @@ public class SnapshotPost extends AbstractJavaWebScript {
             for ( int j = 0; j < headerRows.length(); j++ ) {
                 JSONObject contents = headerRows.getJSONObject( j );
                 JSONArray headerCols = contents.getJSONArray( "content" );
+                //create DBTableEntry at this scope level
+                String colspan = contents.optString( "colspan" );
+                String rowspan = contents.optString( "rowspan" );
+                int col = 0; int row = 0;
+                if(colspan != null && !colspan.isEmpty()) col = Integer.parseInt(colspan);
+                if(rowspan != null && !rowspan.isEmpty()) row = Integer.parseInt(rowspan);
+                DBTableEntry te = new DBTableEntry();
+                int startColTemp = dbTable.getStartCol(i, j, row, col, isHeader);
+                if(startColTemp > startCol) startCol = startColTemp;
+                DocumentElement cellContent = null;
+                
                 for ( int l = 0; l < headerCols.length(); l++ ) {
+                	//gather table cells content
                     JSONObject content = headerCols.getJSONObject( l );
-                    String colspan = contents.optString( "colspan" );
-                    String rowspan = contents.optString( "rowspan" );
                     DocumentElement cell = null;
-                    int col = 0; int row = 0;
-                    if(colspan != null && !colspan.isEmpty()) col = Integer.parseInt(colspan);
-                    if(rowspan != null && !rowspan.isEmpty()) row = Integer.parseInt(rowspan);
-                    DBTableEntry te = new DBTableEntry();
-                    int startColTemp = dbTable.getStartCol(i, j, row, col, isHeader);
-                    if(startColTemp > startCol) startCol = startColTemp;
-                    if(col > 1 || row > 1){
-                    	if(row > 1) te.setMorerows(row-1);
-                    	if(col > 1){
-                    		int end = startCol + col - 1;
-                    		if(end > dbTable.getColCount()) end = dbTable.getColCount();
-                    		te.setNamest(String.valueOf(startCol));
-                    		te.setNameend(String.valueOf(end));
-                    	}
-                    	te.addElement(createElement(content));
-                    	cell = (DocumentElement)te;
-                    }
-                    else{
-                    	cell = createElement(content);
-                    	//cell = createDBText(content);
-                    }
-                    if ( cell != null ) rows.add( cell );
+                    cell = createElement(content, section);
+                    if(l > 0)
+                    	appendElement(cellContent, cell);
+                    else
+                    	cellContent = cell;
+                    
                 }
+                
+                if(col > 1 || row > 1){
+                	if(row > 1) te.setMorerows(row-1);
+                	if(col > 1){
+                		int end = startCol + col - 1;
+                		if(end > dbTable.getColCount()) end = dbTable.getColCount();
+                		te.setNamest(String.valueOf(startCol));
+                		te.setNameend(String.valueOf(end));
+                	}
+                	//te.addElement(cellContent);
+                	//cell = (DocumentElement)te;
+                }
+                //else{
+                	//cell = createElement(content);
+                	////cell = createDBText(content);
+                //}
+                if(cellContent != null){ 
+                	te.addElement(cellContent);
+                	rows.add( (DocumentElement)te );
+                }
+                
             }
             list.add( rows );
         }
@@ -833,7 +847,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return "";
     }
 
-
     private String getEmail(String userName) {
     	try{
     		if(nodeService == null) nodeService = this.services.getNodeService();
@@ -880,6 +893,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshotNode;
     }
 
+    private String getHostname(){
+    	SysAdminParams sysAdminParams = this.services.getSysAdminParams();
+    	String hostname = sysAdminParams.getAlfrescoHost();
+    	if(hostname.startsWith("ip-128-149")) hostname = "localhost";
+    	return String.format("%s://%s", sysAdminParams.getAlfrescoProtocol(), hostname);
+    }
+    
     public static EmsScriptNode getHtmlZipNode( EmsScriptNode snapshotNode ) {
         NodeRef node = (NodeRef)snapshotNode.getProperty( "view2:htmlZipNode" );
         return new EmsScriptNode( node, snapshotNode.getServices() );
@@ -1019,18 +1039,66 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return viewId;
     }
 
-    private String handleEmbeddedImage( String id, String inputString)
+    private String buildEmbeddedImage(String nodeId, String imgPath){
+    	StringBuffer sb = new StringBuffer();
+    	sb.append("<figure xml:id='");
+    	sb.append(nodeId);
+    	sb.append("' pgwide='1'><title></title><mediaobject><imageobject role='fo'><imagedata fileref='");
+    	sb.append(imgPath);
+    	sb.append("' format='SVG' scalefit='1' width='100%'/></imageobject><imageobject role='html'><imagedata fileref='");
+    	sb.append(imgPath);
+    	sb.append("' /></imageobject></mediaobject></figure>");
+    	return sb.toString();
+    }
+    
+    private String handleEmbeddedImage( String id, String inputString, DBSection section)
     {
+    	if(id == null || id.isEmpty()) return "";
+    	if(inputString == null || inputString.isEmpty()) return "";
+    	
     	Document document = Jsoup.parseBodyFragment(inputString);
+    	if(document == null) return "";
+    	
     	Elements images = document.getElementsByTag("img");
-    	//String shareUrl = UrlUtil.getShareUrl(sysAdminParams);
-    	//if(shareUrl != null) System.out.println("Share url: " + shareUrl);
+
     	for(Element image : images){
     		String src = image.attr("src");
     		if(src == null) continue;
     		if(src.toLowerCase().startsWith("http")){
-    			System.out.println("Embedded image src: " + src);
-    			//http://localhost:8081/share/proxy/alfresco/api/node/content/workspace/SpacesStore/74cd8a96-8a21-47e5-9b3b-a1b3e296787d/graph.JPG
+    			String hostname = getHostname();
+               
+                try{
+                	URL url = new URL(src);
+                	String embedHostname = String.format("%s://%s", url.getProtocol(), url.getHost());
+                	if(embedHostname.compareToIgnoreCase(hostname)==0){
+                		String alfrescoContext = "workspace/SpacesStore/";	//this.services.getSysAdminParams().getAlfrescoContext();
+                		String filePath = url.getFile();
+                		if(filePath == null || filePath.isEmpty()) return "";
+                		
+                		String nodeId = null;
+                		if(filePath.contains(alfrescoContext)){ 
+                			//filePath = "alfresco/d/d/" + filePath.substring(filePath.indexOf(alfrescoContext));
+                			nodeId = filePath.substring(filePath.indexOf(alfrescoContext) + alfrescoContext.length());
+                			nodeId = nodeId.substring(0, nodeId.indexOf("/"));
+                		}
+                		if(nodeId == null || nodeId.isEmpty()) return "";
+                		
+                		String filename = filePath.substring(filePath.lastIndexOf("/") + 1);
+                		DBImage dbImage = retrieveEmbeddedImage(nodeId, filename, null, null);
+                		//String imgDB = buildEmbeddedImage(nodeId, imgFilename);
+                		section.addElement(dbImage);
+                		image.remove();
+                		
+                		//if(imgFilename != null && !imgFilename.isEmpty()){
+                			//image.attr("src", imgFilename);
+                		//}
+                	}
+                	//http://localhost:8081/share/proxy/alfresco/api/node/content/workspace/SpacesStore/74cd8a96-8a21-47e5-9b3b-a1b3e296787d/graph.JPG
+                }
+                catch(Exception ex){
+                	System.out.println("Failed to retrieve embedded image.");
+                	ex.printStackTrace();
+                }
     		}
     	}
     	return inputString;
@@ -1131,33 +1199,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     private String HtmlSanitize( String s ) {
-    	/*
-    	Tidy tidy = new Tidy();
-    	tidy.setXHTML(true);
-    	tidy.setForceOutput(true);
-    	tidy.setQuiet(true);
-    	tidy.setShowWarnings(false);
-    	try {
-			ByteArrayInputStream inputStream = new ByteArrayInputStream(s.getBytes("UTF-8"));
-			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-			org.w3c.dom.Document tidyDoc = tidy.parseDOM(inputStream, outputStream);
-			CDATASection data = tidyDoc.createCDATASection(s);
-			return data.toString();
-			//return tidyDoc.getTextContent();
-			//return tidyDoc.createCDATASection(data);
-			//return outputStream.toString("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return "[ERROR Parsing HTML]";		
-		}
-		*/
-    	
     	Document document = Jsoup.parseBodyFragment(s);
-    	String retString = Jsoup.parse(document.text()).text();
-    	return retString;
-    	
-    	//return HtmlToDocbook.html2docbook(s); 
+    	removeHtmlTags(document);
+    	StringBuffer sb = new StringBuffer();
+    	traverseHtml(document.body(), sb);
+    	return sb.toString();
     }
 
     // private String parseTransclusion(List<String> cirRefList, String
@@ -1396,6 +1442,114 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshoturl;
     }
 
+    private void removeHtmlTags(Document doc){
+    	Elements elems = doc.getElementsByTag("A");
+    	for(Element e:elems){
+    		e.before(e.text());
+    		e.remove();
+    	}
+    	elems = doc.getElementsByTag("B");
+    	for(Element e:elems){
+    		e.before(e.text());
+    		e.remove();
+    	}
+    	elems = doc.getElementsByTag("BIG");
+    	for(Element e:elems){
+    		e.before(e.text());
+    		e.remove();
+    	}
+    	elems = doc.getElementsByTag("CENTER");
+    	for(Element e:elems){
+    		e.before(e.text());
+    		e.remove();
+    	}
+    	elems = doc.getElementsByTag("EM");
+    	for(Element e:elems){
+    		e.before(e.text());
+    		e.remove();
+    	}
+    	elems = doc.getElementsByTag("FONT");
+    	for(Element e:elems){
+    		e.before(e.text());
+    		e.remove();
+    	}
+    	elems = doc.getElementsByTag("I");
+    	for(Element e:elems){
+    		e.before(e.text());
+    		e.remove();
+    	}
+    	elems = doc.getElementsByTag("SMALL");
+    	for(Element e:elems){
+    		e.before(e.text());
+    		e.remove();
+    	}
+    	elems = doc.getElementsByTag("SPAN");
+    	for(Element e:elems){
+    		e.before(e.text());
+    		e.remove();
+    	}
+    	elems = doc.getElementsByTag("STRIKE");
+    	for(Element e:elems){
+    		e.before(e.text());
+    		e.remove();
+    	}
+    	elems = doc.getElementsByTag("STRONG");
+    	for(Element e:elems){
+    		e.before(e.text());
+    		e.remove();
+    	}
+    	elems = doc.getElementsByTag("SUB");
+    	for(Element e:elems){
+    		e.before(e.text());
+    		e.remove();
+    	}
+    	elems = doc.getElementsByTag("U");
+    	for(Element e:elems){
+    		e.before(e.text());
+    		e.remove();
+    	}
+    }
+    
+    private DBImage retrieveEmbeddedImage(String nodeId, String imgName, String workspace, Object timestamp){
+		//NodeUtil.getNodeRefAtTime(nodeId, workspace, timestamp);
+		NodeRef imgNodeRef = NodeUtil.getNodeRefFromNodeId(nodeId);
+		if(imgNodeRef == null) return null;
+		
+		String imgFilename = this.docBookMgr.getDBDirImage() + File.separator + imgName;
+		File imgFile = new File(imgFilename);
+		ContentReader imgReader;
+		imgReader = this.services.getContentService().getReader(imgNodeRef, ContentModel.PROP_CONTENT);
+		if(!Files.exists(Paths.get(this.docBookMgr.getDBDirImage()))){ 
+			if(!new File(this.docBookMgr.getDBDirImage()).mkdirs()){
+				System.out.println("Failed to create directory for " + this.docBookMgr.getDBDirImage());
+			}
+		}
+		imgReader.getContent(imgFile);
+		
+		DBImage image = new DBImage();
+		image.setId(nodeId);
+		image.setFilePath("images/" + imgName);
+		return image;
+		
+		/*
+		ResultSet rs = findNodeRef(nodeId);
+		ContentReader imgReader;
+		for (NodeRef nr: rs.getNodeRefs()) {
+			imgReader = this.services.getContentService().getReader(nr, ContentModel.PROP_CONTENT);
+			if(!Files.exists(Paths.get(this.docBookMgr.getDBDirImage()))){ 
+				if(!new File(this.docBookMgr.getDBDirImage()).mkdirs()){
+					System.out.println("Failed to create directory for " + this.docBookMgr.getDBDirImage());
+				}
+			}
+			imgReader.getContent(imgFile);
+			break;
+		}
+		return imgFilename;
+		*/
+    }
+    
+    //nodeUtil.getNodeRefById(id)	//need to get the correct version as well. and workspace
+    
     private JSONObject saveAndStartAction(WebScriptRequest req, Status status) {
 	    JSONObject jsonObject = null;
 	    String siteName = getSiteName(req);
@@ -1533,38 +1687,29 @@ public class SnapshotPost extends AbstractJavaWebScript {
         	String childId = childrenViews.getString(k);
         	if(childId.equals(nodeId)) continue;
         	EmsScriptNode childNode = findScriptNodeById(childId, null, null, false);
-        	traverseElements(section, childNode);
+        	DBSection subSection = emsScriptNodeToDBSection(childNode, false);
+        	section.addElement(subSection);
+        	//traverseElements(subSection, childNode);
         }
-        //JSONArray contains = node.getView().getContainsJson();
-        //createDBSectionContainment( section, contains );
-        /*
-    	if(node == null) return;
-    	View view = node.getView();
-    	if(view == null) throw new Exception("Failed to retrieve node view.");
-    	JSONArray contains = view.getContainsJson();
-        if(contains == null || contains.length()==0){ throw new Exception("Failed to retrieve 'contains' JSONArray."); }
-        String nodeId = (String)node.getProperty(Acm.ACM_ID);
-        for(int i=0; i < contains.length(); i++){
-        	JSONObject obj = contains.getJSONObject( i );
-        	DocumentElement e = createElement( obj );
-            if ( e != null ) section.addElement( e );
-            
-            String sourceType = obj.optString("sourceType");
-        	String childNodeId = obj.optString("source");
-        	if(sourceType == null || sourceType.isEmpty()) continue;
-        	if(childNodeId == null || childNodeId.isEmpty()) continue;
-        	if(childNodeId.equalsIgnoreCase(nodeId)) continue;
-        	EmsScriptNode childNode = findScriptNodeById(childNodeId, null, null, false);
-            traverseElements(section, childNode);
-        }
-        */
-    	/*
-    	  for(int i=0; i < contains.length(); i++){
-    		JSONObject obj = contains.getJSONObject(i);
-			DocumentElement e = createElement(obj);
-			if(e != null) section.addElement(e);
+    }
+    
+    private void traverseHtml(Element elm, StringBuffer sb){
+    	if(elm == null) return;
+    	if(sb == null) return;
+    	
+    	if(elm.isBlock()){
+    		sb.append("<?linebreak?>");
     	}
-    	*/
+    	else{
+    		sb.append(" ");
+    	}
+    	sb.append(elm.ownText());
+    	
+    	if(elm.children() != null && elm.children().size() > 0){
+    		for(Element e: elm.children()){
+    			traverseHtml(e,sb);
+    		}
+    	}
     }
     
     @Override

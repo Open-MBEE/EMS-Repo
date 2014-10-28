@@ -433,6 +433,12 @@ public class DocBookWrapper {
 		command.add("-param");
 		command.add("html.stylesheet");
 		command.add("docgen.css");
+		command.add("-param");
+		command.add("chunk.first.sections");
+		command.add("1");
+		command.add("-param");
+		command.add("chunk.section.depth");
+		command.add("10");
 
 		//System.out.println("DO_TRANSFORM source: " + source);
 		//System.out.println("DO_TRANSFORM target: " + target);
