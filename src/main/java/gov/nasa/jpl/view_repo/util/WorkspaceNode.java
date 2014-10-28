@@ -344,8 +344,9 @@ public class WorkspaceNode extends EmsScriptNode {
      *
      * @param node
      * @return
+     * @throws Exception 
      */
-    public EmsScriptNode replicateWithParentFolders( EmsScriptNode node ) {
+    public EmsScriptNode replicateWithParentFolders( EmsScriptNode node ) throws Exception {
         if ( Debug.isOn() ) Debug.outln( "replicateFolderWithChain( " + node + " )" );
         if ( node == null ) return null;
         EmsScriptNode newFolder = node;
@@ -357,9 +358,7 @@ public class WorkspaceNode extends EmsScriptNode {
         EmsScriptNode parent = node.getParent();
 
         if ( parent == null || parent.isWorkspaceTop() ) {
-            parent = this;
-//            if ( Debug.isOn() ) Debug.outln( "returning newFolder for workspace top: " + newFolder );
-//            return newFolder;
+            parent = this; // put in the workspace
         }
         String parentName = parent != null && parent.exists() ? parent.getName() : null;
 

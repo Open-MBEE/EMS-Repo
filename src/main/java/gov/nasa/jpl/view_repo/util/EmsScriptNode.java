@@ -41,12 +41,9 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -65,13 +62,10 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.bind.DatatypeConverter;
-
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.jscript.ScriptVersion;
-import org.alfresco.repo.version.VersionModel;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
@@ -79,8 +73,6 @@ import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
 import org.alfresco.service.cmr.repository.AssociationRef;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
-import org.alfresco.service.cmr.repository.ContentData;
-import org.alfresco.service.cmr.repository.ContentWriter;
 import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -88,14 +80,12 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
-import org.alfresco.service.cmr.version.VersionType;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.springframework.extensions.webscripts.Status;
 
@@ -741,6 +731,28 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     /**
+     * @param parent - this could be the reified package or the reified node
+     */
+    public EmsScriptNode setOwnerToReifiedNode( EmsScriptNode parent ) {
+        // everything is created in a reified package, so need to make
+        // relations to the reified node rather than the package
+        EmsScriptNode reifiedNode = parent.getReifiedNode();
+        if ( reifiedNode == null ) reifiedNode = parent; // just in case
+        if ( reifiedNode != null ) {
+            // store owner with created node
+            this.createOrUpdateAspect( "ems:Owned" );
+            this.createOrUpdateProperty( "ems:owner",
+                                         reifiedNode.getNodeRef() );
+
+            // add child to the parent as necessary
+            reifiedNode.createOrUpdateAspect( "ems:Owned" );
+            reifiedNode.appendToPropertyNodeRefs( "ems:ownedChildren",
+                                                  this.getNodeRef() );
+        }
+        return reifiedNode;
+    }
+    
+    /**
      * Create an EmsScriptNode adding aspects based on the input sysml type
      * name.
      *
@@ -764,18 +776,8 @@ public class EmsScriptNode extends ScriptNode implements
 
             // everything is created in a reified package, so need to make
             // relations to the reified node rather than the package
-            EmsScriptNode reifiedNode = this.getReifiedNode();
-            if ( reifiedNode != null ) {
-                // store owner with created node
-                node.createOrUpdateAspect( "ems:Owned" );
-                node.createOrUpdateProperty( "ems:owner",
-                                             reifiedNode.getNodeRef() );
-
-                // add child to the parent as necessary
-                reifiedNode.createOrUpdateAspect( "ems:Owned" );
-                reifiedNode.appendToPropertyNodeRefs( "ems:ownedChildren",
-                                                      node.getNodeRef() );
-            } else {
+            EmsScriptNode reifiedNode = node.setOwnerToReifiedNode( this );
+            if ( reifiedNode == null ) {
                 // TODO error handling
             }
             
@@ -2744,6 +2746,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         
         EmsScriptNode node = parent.createNode( getName(), type );
+//        EmsScriptNode node =  parent.createSysmlNode( getName(), type, modStatus, workspace );
         
         if ( node == null ) {
             Debug.error( "Could not create node in parent " + parent.getName() );
@@ -2765,6 +2768,17 @@ public class EmsScriptNode extends ScriptNode implements
             properties.remove( createQName( "st:sitePreset" ) );
         }
         nodeService.setProperties( node.getNodeRef(), properties );
+        
+        // update ems:owner
+        if ( isModelElement() ) {
+            // everything is created in a reified package, so need to make
+            // relations to the reified node rather than the package
+            EmsScriptNode reifiedNode = node.setOwnerToReifiedNode( parent );
+            if ( reifiedNode == null ) {
+                // TODO error handling
+            }
+        }
+
         return node;
     }
 
@@ -2945,14 +2959,7 @@ public class EmsScriptNode extends ScriptNode implements
                     new EmsScriptNode( destination.getNodeRef(), services,
                                        response );
             if (newParent != null) {
-                EmsScriptNode newReifiedNode = newParent.getReifiedNode();
-                if (newReifiedNode != null) {
-                    newReifiedNode.appendToPropertyNodeRefs( "ems:ownedChildren",
-                                                             this.getNodeRef() );
-
-                    this.createOrUpdateProperty( "ems:owner",
-                                                 newReifiedNode.getNodeRef() );
-                }
+                setOwnerToReifiedNode( newParent );
             }
 
             // make sure to move package as well
