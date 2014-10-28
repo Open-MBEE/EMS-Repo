@@ -739,12 +739,13 @@ public class EmsScriptNode extends ScriptNode implements
         // everything is created in a reified package, so need to make
         // relations to the reified node rather than the package
         EmsScriptNode reifiedNode = parent.getReifiedNode();
-        EmsScriptNode nodeInWs =
-                NodeUtil.findScriptNodeById( reifiedNode.getSysmlId(), ws,
-                                             null, false, getServices(),
-                                             getResponse() );
         if ( reifiedNode == null ) reifiedNode = parent; // just in case
         if ( reifiedNode != null ) {
+            EmsScriptNode nodeInWs =
+                    NodeUtil.findScriptNodeById( reifiedNode.getSysmlId(), ws,
+                                                 null, false, getServices(),
+                                                 getResponse() );
+            if ( nodeInWs != null ) reifiedNode = nodeInWs;
             // store owner with created node
             this.createOrUpdateAspect( "ems:Owned" );
             this.createOrUpdateProperty( "ems:owner",
