@@ -346,7 +346,7 @@ public class WorkspaceNode extends EmsScriptNode {
      * @return
      * @throws Exception 
      */
-    public EmsScriptNode replicateWithParentFolders( EmsScriptNode node ) throws Exception {
+    public EmsScriptNode replicateWithParentFolders( EmsScriptNode node ) {// throws Exception {
         if ( Debug.isOn() ) Debug.outln( "replicateFolderWithChain( " + node + " )" );
         if ( node == null ) return null;
         EmsScriptNode newFolder = node;

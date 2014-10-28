@@ -38,6 +38,7 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -246,6 +247,8 @@ public class ModelGet extends AbstractJavaWebScript {
             if (isViewRequest) {
                 handleViewHierarchy(modelRootNode, recurse, workspace, dateTime);
             } else {
+                ArrayList<NodeRef> refs = modelRootNode.getOwnedChildren( workspace, dateTime );
+                
                 handleElementHierarchy( modelRootNode, recurse, workspace, dateTime );
             }
             

@@ -1530,7 +1530,17 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         if ( workspace != null && workspace.exists() ) {
-            parent = workspace.replicateWithParentFolders( parent );
+            try {
+                parent = workspace.replicateWithParentFolders( parent );
+            } catch ( Exception e ) {
+                log( LogLevel.ERROR,
+                     "\t failed to replicate folder, " + parent.getName()
+                             + ", in workspace, "
+                             + WorkspaceNode.getName( workspace ) );
+                e.printStackTrace();
+                //throw e; // pass it up the chain to roll back transaction // REVIEW -- compiler won't allow throw like below--why??
+                return null;
+            }
         }
 
         if (checkPermissions(parent, PermissionService.WRITE)) {
