@@ -1177,7 +1177,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                 nestedParent = reifiedPkgNode;
                             }
 
-                            EmsScriptNode reifiedPkgInWorkspace = null;
+                            EmsScriptNode reifiedPkgInWorkspace = nestedParent;
                             if ( !nestedParent.getWorkspace().equals( workspace ) ) {
                                 reifiedPkgInWorkspace =
                                 workspace.replicateWithParentFolders( nestedParent );
