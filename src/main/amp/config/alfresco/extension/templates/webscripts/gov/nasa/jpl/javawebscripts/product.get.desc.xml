@@ -16,7 +16,7 @@
 		<url>/javawebscripts/products/{id}</url>
 		<format default="json">any</format>
 		<authentication>user</authentication>
-		<transaction allow="readonly">required</transaction>
+		<transaction allow="readwrite">required</transaction>
 		<family>EMS Java Read Webscripts</family>
 		<args>
 			<arg>

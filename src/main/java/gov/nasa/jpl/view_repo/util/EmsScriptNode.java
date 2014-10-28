@@ -735,10 +735,14 @@ public class EmsScriptNode extends ScriptNode implements
     /**
      * @param parent - this could be the reified package or the reified node
      */
-    public EmsScriptNode setOwnerToReifiedNode( EmsScriptNode parent ) {
+    public EmsScriptNode setOwnerToReifiedNode( EmsScriptNode parent, WorkspaceNode ws ) {
         // everything is created in a reified package, so need to make
         // relations to the reified node rather than the package
         EmsScriptNode reifiedNode = parent.getReifiedNode();
+        EmsScriptNode nodeInWs =
+                NodeUtil.findScriptNodeById( reifiedNode.getSysmlId(), ws,
+                                             null, false, getServices(),
+                                             getResponse() );
         if ( reifiedNode == null ) reifiedNode = parent; // just in case
         if ( reifiedNode != null ) {
             // store owner with created node
@@ -778,7 +782,7 @@ public class EmsScriptNode extends ScriptNode implements
 
             // everything is created in a reified package, so need to make
             // relations to the reified node rather than the package
-            EmsScriptNode reifiedNode = node.setOwnerToReifiedNode( this );
+            EmsScriptNode reifiedNode = node.setOwnerToReifiedNode( this, nodeWorkspace );
             if ( reifiedNode == null ) {
                 // TODO error handling
             }
@@ -2836,7 +2840,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( isModelElement() ) {
             // everything is created in a reified package, so need to make
             // relations to the reified node rather than the package
-            EmsScriptNode reifiedNode = node.setOwnerToReifiedNode( parent );
+            EmsScriptNode reifiedNode = node.setOwnerToReifiedNode( parent, getWorkspace() );
             if ( reifiedNode == null ) {
                 // TODO error handling
             }
@@ -3015,14 +3019,14 @@ public class EmsScriptNode extends ScriptNode implements
 
             if ( oldParentReifiedNode != null ) {
                 oldParentReifiedNode.removeFromPropertyNodeRefs( "ems:ownedChildren",
-                                                             this.getNodeRef() );
+                                                                 this.getNodeRef() );
             }
 
             EmsScriptNode newParent =
                     new EmsScriptNode( destination.getNodeRef(), services,
                                        response );
             if (newParent != null) {
-                setOwnerToReifiedNode( newParent );
+                setOwnerToReifiedNode( newParent, newParent.getWorkspace() );
             }
 
             // make sure to move package as well
