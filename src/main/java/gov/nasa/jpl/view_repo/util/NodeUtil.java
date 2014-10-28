@@ -85,6 +85,7 @@ public class NodeUtil {
         CHECKSUM( "@view\\:cs:\"" ),
         WORKSPACE("@ems\\:workspace:\"" ),
         WORKSPACE_NAME("@ems\\:workspace_name:\"" ),
+        OWNER("@ems\\:owner:\"" ),
         ASPECT("ASPECT:\""),
         TYPE("TYPE:\"");
 

@@ -38,6 +38,7 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -285,6 +286,9 @@ public class ModelGet extends AbstractJavaWebScript {
 //                    handleElementHierarchy(modelRootNode, recurse, workspace, dateTime, true);
 //                }
                 
+                
+                ArrayList<NodeRef> refs = modelRootNode.getOwnedChildren( workspace, dateTime );
+                                
                 /* FIXME
                  * This solution is less efficient, as it has do a lucene search on every
                  * workspace, but solves the 1st corner case described above.  It does NOT
