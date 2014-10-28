@@ -162,7 +162,7 @@ public class EmsScriptNode extends ScriptNode implements
      */
     protected Object[] myVersions = null;
     
-    public static boolean fixOwnedChildren = true;
+    public static boolean fixOwnedChildren = false;
 
     // TODO add nodeService and other member variables when no longer
     // subclassing ScriptNode
@@ -1007,7 +1007,6 @@ public class EmsScriptNode extends ScriptNode implements
     
     /**
      * Returns the children for this node.  Uses the ems:ownedChildren property.
-     * Replaces the ownedChildren property if fixOwnedChildren is true, which it currently is.
      * 
      * @param workspace
      * @param dateTime
@@ -1059,7 +1058,10 @@ public class EmsScriptNode extends ScriptNode implements
             this.createOrUpdateProperty( "ems:ownedChildren", ownedChildren);
         }
         else {
-            ownedChildren = this.getPropertyNodeRefs( "ems:ownedChildren" );
+            ArrayList<NodeRef> oldChildren = this.getPropertyNodeRefs( "ems:ownedChildren" );
+            if (oldChildren != null) {
+                ownedChildren = oldChildren;
+            }
         }
         
         return ownedChildren;

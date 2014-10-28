@@ -38,7 +38,6 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +46,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
@@ -246,9 +244,7 @@ public class ModelGet extends AbstractJavaWebScript {
             
             if (isViewRequest) {
                 handleViewHierarchy(modelRootNode, recurse, workspace, dateTime);
-            } else {
-                ArrayList<NodeRef> refs = modelRootNode.getOwnedChildren( workspace, dateTime );
-                
+            } else {                
                 handleElementHierarchy( modelRootNode, recurse, workspace, dateTime );
             }
             
@@ -329,15 +325,14 @@ public class ModelGet extends AbstractJavaWebScript {
 	protected void handleElementHierarchy( EmsScriptNode root, boolean recurse,
 	                                       WorkspaceNode workspace, Date dateTime )
 	                                              throws JSONException {
-	    
-		JSONArray array = new JSONArray();
-		
+	    		
 		// don't return any elements
 		if (!root.exists()) {
 		    return;
 		}
-		
-		// add root element to elementsFound if its not already there (if it's there, it's probably because the root is a reified pkg node)
+	
+		// add root element to elementsFound if its not already there 
+		// (if it's there, it's probably because the root is a reified pkg node)
 		String sysmlId = (String)root.getProperty(Acm.ACM_ID);
 		String rootName = (String)root.getProperty(Acm.CM_NAME);
 		if (!elementsFound.containsKey(sysmlId)) {
@@ -350,8 +345,6 @@ public class ModelGet extends AbstractJavaWebScript {
 
 		if (recurse) {
 			// Find all the children, recurse or add to array as needed.
-            // TODO: figure out why the child association creation from the
-            // reification isn't being picked up
 		    if ( !rootName.contains("_pkg") ) {
                 EmsScriptNode reifiedNode = findScriptNodeById( rootName + "_pkg",
                                                                 workspace,
@@ -362,8 +355,6 @@ public class ModelGet extends AbstractJavaWebScript {
 		    }
 		    
 		    // Handle all the children in this workspace:
-//			for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
-//			    NodeRef childRef = assoc.getChildRef();
 		    for ( NodeRef childRef : root.getOwnedChildren( workspace, dateTime ) ) {
 			    NodeRef vChildRef = NodeUtil.getNodeRefAtTime( childRef, workspace, dateTime );
                 if ( vChildRef == null ) {
@@ -373,31 +364,21 @@ public class ModelGet extends AbstractJavaWebScript {
                          + ( dateTime == null ? "" : " at " + dateTime ) + " not found");
 			        continue;
 			    }
-                childRef = vChildRef;
-                EmsScriptNode child =
-                        new EmsScriptNode( childRef, services, response );
+                EmsScriptNode child = new EmsScriptNode( vChildRef, services, response );
                 if ( checkPermissions( child, PermissionService.READ ) ) {
                     if (child.exists() && !child.isPropertyOwnedValueSpecification()) {
-                        if ( child.getTypeShort().equals( Acm.ACM_ELEMENT_FOLDER ) ) {
-                            handleElementHierarchy( child, recurse, workspace, dateTime );
-                        } else {
-                            String value = (String)child.getProperty( Acm.ACM_ID );
-                            if ( value != null ) {
-                                elementsFound.put( value, child );
-                            }
+                        
+                        String value = (String)child.getProperty( Acm.ACM_ID );
+                        if ( value != null ) {
+                            elementsFound.put( value, child );
                         }
+                        
+                        handleElementHierarchy( child, recurse, workspace, dateTime );
                         
                     } // ends if (child.exists() && !child.isPropertyOwnedValueSpecification())
                 } // ends if ( checkPermissions( child, PermissionService.READ ) ) 
 			}
 						
-			// if there were any children add them to the hierarchy object
-			String key = (String)root.getProperty(Acm.ACM_ID);
-			if (root.getTypeShort().equals(Acm.ACM_ELEMENT_FOLDER) && key == null) {
-				// TODO this is temporary? until we can get sysml:id from Element Folder?
-				key = rootName.replace("_pkg", "");
-			}
-			
 		}  // ends if (recurse)
 	}
 	
