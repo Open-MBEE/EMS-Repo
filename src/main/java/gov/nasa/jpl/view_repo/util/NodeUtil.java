@@ -355,10 +355,8 @@ public class NodeUtil {
                     if ( !esn.exists() ) {
                         if ( !(includeDeleted && esn.isDeleted()) ) {
                             if ( Debug.isOn() ) {
-                                Debug.turnOff();
                                 System.out.println( "findNodeRefsByType(): element does not exist "
                                              + esn );
-                                Debug.turnOn();
                             }
                             continue;
                         }
@@ -372,10 +370,8 @@ public class NodeUtil {
                                  ( esn != null && esn.getWorkspace() != null ) )
                              ) ) {
                             if ( Debug.isOn() && !Debug.isOn()) {
-                                Debug.turnOff();
                                 System.out.println( "findNodeRefsByType(): wrong workspace "
                                                     + workspace );
-                                Debug.turnOn();
                             }
                             continue;
                         }
@@ -1559,7 +1555,6 @@ public class NodeUtil {
 									            		Status status,
 									            		boolean ignoreName) {
 			
-    	boolean wasOn = Debug.getInstance().getOn();
     	EmsScriptNode artifactNode;
     	String myType = Utils.isNullOrEmpty(type) ? "svg" : type;
     	String finalType = myType.startsWith(".") ? myType.substring(1) : myType;
@@ -1575,8 +1570,6 @@ public class NodeUtil {
 		}
 		
 		long cs = EmsScriptNode.getChecksum( content );
-		
-		if (!wasOn) Debug.turnOn();
 		
 		// see if image already exists by looking up by checksum
 		ArrayList< NodeRef > refs =
@@ -1690,8 +1683,6 @@ public class NodeUtil {
         	artifactNode.createVersion("creating the version history", false);
         }
         
-    	if (!wasOn) Debug.turnOff();
-
 		return artifactNode;
 	}
 

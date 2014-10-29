@@ -1991,11 +1991,14 @@ public class ModelPost extends AbstractJavaWebScript {
             }
 
             // Solve!!!!
-            Debug.turnOn();
-            Random.reset();
-            boolean result = solver.solve(constraints);
-            Debug.turnOff();
-
+            boolean result = false;
+            try {
+                Debug.turnOn();
+                Random.reset();
+                result = solver.solve(constraints);
+            } finally {
+                Debug.turnOff();
+            }
             if (!result) {
                 log( LogLevel.ERROR, "Was not able to satisfy all of the constraints!" );
             }
