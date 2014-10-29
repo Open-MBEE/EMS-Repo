@@ -1157,7 +1157,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
               			nodeNames.add(oldValNode.getName());
 
-                        if ( workspace != null
+                        if ( workspace != null && workspace.exists()
                              && !workspace.equals( oldValNode.getWorkspace() ) ) {
 
 //                            EmsScriptNode newNode =
@@ -1167,20 +1167,20 @@ public class ModelPost extends AbstractJavaWebScript {
                             
                             EmsScriptNode nestedParent = null;
                             if (reifiedPkgNode == null) {
-                            EmsScriptNode reifiedPkg =
+                                EmsScriptNode reifiedPkg =
                                     getOrCreateReifiedPackageNode( node, id,
                                                                    workspace,
                                                                    true );
-                                 nestedParent = reifiedPkg == null ? parent : reifiedPkg;
+                                nestedParent = reifiedPkg == null ? parent : reifiedPkg;
                             }
                             else {
                                 nestedParent = reifiedPkgNode;
                             }
 
                             EmsScriptNode reifiedPkgInWorkspace = nestedParent;
-                            if ( !nestedParent.getWorkspace().equals( workspace ) ) {
+                            if ( !workspace.equals( nestedParent.getWorkspace() ) ) {
                                 reifiedPkgInWorkspace =
-                                workspace.replicateWithParentFolders( nestedParent );
+                                        workspace.replicateWithParentFolders( nestedParent );
                             }
                             EmsScriptNode newNode = oldValNode.clone(reifiedPkgInWorkspace);
                             newNode.setWorkspace( workspace, oldValNode.getNodeRef() );
@@ -1386,9 +1386,9 @@ public class ModelPost extends AbstractJavaWebScript {
             jsonType = ( existingNodeType == null ? "Element" : existingNodeType );
         }
 
-        	if (existingNodeType != null && !jsonType.equals(existingNodeType)) {
-        		log(LogLevel.WARNING, "The type supplied "+jsonType+" is different than the stored type "+existingNodeType);
-        	}
+    	if (existingNodeType != null && !jsonType.equals(existingNodeType)) {
+    		log(LogLevel.WARNING, "The type supplied "+jsonType+" is different than the stored type "+existingNodeType);
+    	}
 
         String acmSysmlType = null;
         String type = null;
@@ -1415,7 +1415,18 @@ public class ModelPost extends AbstractJavaWebScript {
             } else if ( nodeToUpdate != null && nodeToUpdate.exists()
                         && !nodeToUpdate.isWorkspace()
                         && !workspace.equals( nodeToUpdate.getWorkspace() ) ) {
-                parent = workspace.replicateWithParentFolders( parent );
+
+                // If its owner is changing, need to bring in the old parent
+                // into the new workspace and remove the old child.  Not bringing
+                // in the corresponding reified package--hope that's okay!  REVIEW
+                EmsScriptNode oldParent = nodeToUpdate.getOwningParent( null );
+                EmsScriptNode newOldParent =
+                        workspace.replicateWithParentFolders( oldParent );
+                newOldParent.removeFromPropertyNodeRefs( "ems:ownedChildren",
+                                                         nodeToUpdate.getNodeRef() );
+
+                // Now create in the new, new parent.
+                parent = workspace.replicateWithParentFolders( parent ); // This gets the new, new parent.
                 EmsScriptNode oldNode = nodeToUpdate;
                 nodeToUpdate = nodeToUpdate.clone(parent);
                 nodeToUpdate.setWorkspace( workspace, oldNode.getNodeRef() );

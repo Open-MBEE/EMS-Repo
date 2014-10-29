@@ -804,7 +804,7 @@ public class EmsScriptNode extends ScriptNode implements
         return node;
     }
 
-    private EmsScriptNode getReifiedNode() {
+    public EmsScriptNode getReifiedNode() {
         NodeRef nodeRef = (NodeRef)getProperty( "ems:reifiedNode" );
         if ( nodeRef != null ) {
             return new EmsScriptNode( nodeRef, services, response );
@@ -812,7 +812,7 @@ public class EmsScriptNode extends ScriptNode implements
         return null;
     }
 
-    private EmsScriptNode getReifiedPkg() {
+    protected EmsScriptNode getReifiedPkg() {
         NodeRef nodeRef = (NodeRef)getProperty( "ems:reifiedPkg" );
         if ( nodeRef != null ) {
             return new EmsScriptNode( nodeRef, services, response );
@@ -2816,7 +2816,11 @@ public class EmsScriptNode extends ScriptNode implements
         }
         
         EmsScriptNode node = parent.createNode( getName(), type );
-//        EmsScriptNode node =  parent.createSysmlNode( getName(), type, modStatus, workspace );
+
+        if ( parent.getWorkspace() != null && !parent.getWorkspace().equals( getWorkspace() ) ) {
+            node.setWorkspace( parent.getWorkspace(), this.getNodeRef() );
+        }
+        // EmsScriptNode node =  parent.createSysmlNode( getName(), type, modStatus, workspace );
         
         if ( node == null ) {
             Debug.error( "Could not create node in parent " + parent.getName() );
@@ -2843,7 +2847,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( isModelElement() ) {
             // everything is created in a reified package, so need to make
             // relations to the reified node rather than the package
-            EmsScriptNode reifiedNode = node.setOwnerToReifiedNode( parent, getWorkspace() );
+            EmsScriptNode reifiedNode = node.setOwnerToReifiedNode( parent, parent.getWorkspace() );
             if ( reifiedNode == null ) {
                 // TODO error handling
             }
