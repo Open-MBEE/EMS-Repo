@@ -1012,58 +1012,15 @@ public class EmsScriptNode extends ScriptNode implements
      * @param dateTime
      * @return children of this node
      */
-    public ArrayList<NodeRef> getOwnedChildren(WorkspaceNode workspace,
-                                               Date dateTime) {
+    public ArrayList<NodeRef> getOwnedChildren() {
                 
         ArrayList<NodeRef> ownedChildren = new ArrayList<NodeRef>();
         
-        // Fix 'dem churrin:
-        if (fixOwnedChildren) {
-            
-            // Get all the node refs for this node (will have different node refs for different workspaces):
-            ArrayList<NodeRef> res = NodeUtil.findNodeRefsByType( this.getSysmlId(), 
-                                                                  NodeUtil.SearchType.ID.prefix, 
-                                                                  false, true, workspace, dateTime, 
-                                                                  false, false, getServices(), false );
-            
-            // Get all the nodes in any workspace that has desired node as a owner:
-            ArrayList<NodeRef> foundResults = new ArrayList<NodeRef>();
-            for (NodeRef nref : res) {
-                foundResults.addAll( NodeUtil.findNodeRefsByType( nref.toString(), 
-                                                                  NodeUtil.SearchType.OWNER.prefix, 
-                                                                  false, true, workspace, dateTime, 
-                                                                  false, false, getServices(), false ) );
-            }
-            
-            // Get the desired node ref for the desired workspace at the desired time:
-            for (NodeRef ref : foundResults) {
-                
-                // See if the node is in the desired workspace at the desired time.  
-                NodeRef foundRef = NodeUtil.getNodeRefAtTime( ref, workspace, dateTime );
-                
-                if (foundRef != null) {
-                    EmsScriptNode childNode = new EmsScriptNode(foundRef, getServices());
-                    
-                    // Check if the parent is this node, in case the parent was from another
-                    // workspace:
-                    if (childNode.getOwningParent( dateTime ).equals(this) &&
-                        !ownedChildren.contains( foundRef )) {
-                        
-                        ownedChildren.add( foundRef );
-                    }
-                }
-            }
-            
-            // Replace ownedChildren property:
-            this.createOrUpdateProperty( "ems:ownedChildren", ownedChildren);
+        ArrayList<NodeRef> oldChildren = this.getPropertyNodeRefs( "ems:ownedChildren" );
+        if (oldChildren != null) {
+            ownedChildren = oldChildren;
         }
-        else {
-            ArrayList<NodeRef> oldChildren = this.getPropertyNodeRefs( "ems:ownedChildren" );
-            if (oldChildren != null) {
-                ownedChildren = oldChildren;
-            }
-        }
-        
+    
         return ownedChildren;
        
     }
@@ -2816,10 +2773,6 @@ public class EmsScriptNode extends ScriptNode implements
         }
         
         EmsScriptNode node = parent.createNode( getName(), type );
-
-        if ( parent.getWorkspace() != null && !parent.getWorkspace().equals( getWorkspace() ) ) {
-            node.setWorkspace( parent.getWorkspace(), this.getNodeRef() );
-        }
         // EmsScriptNode node =  parent.createSysmlNode( getName(), type, modStatus, workspace );
         
         if ( node == null ) {
@@ -2842,6 +2795,11 @@ public class EmsScriptNode extends ScriptNode implements
             properties.remove( createQName( "st:sitePreset" ) );
         }
         nodeService.setProperties( node.getNodeRef(), properties );
+        
+        // THIS MUST BE CALLED AFTER setProperties()!
+        if ( parent.getWorkspace() != null) {
+            node.setWorkspace( parent.getWorkspace(), this.getNodeRef() );
+        }
         
         // update ems:owner
         if ( isModelElement() ) {

@@ -376,26 +376,26 @@ public class WorkspaceNode extends EmsScriptNode {
                     break;
                 }
             }
-            // First replicate the reified node (corresponding to parent, which
-            // is the reified package).
-            EmsScriptNode oldReifiedNode = parent.getReifiedNode();
-            EmsScriptNode newReifiedNode = oldReifiedNode;
-            if ( oldReifiedNode != null && !this.equals( oldReifiedNode.getWorkspace() ) ) {
-                newReifiedNode = replicateWithParentFolders( oldReifiedNode );
-                if ( NodeUtil.exists( newReifiedNode ) && NodeUtil.exists(newReifiedNode.getParent() ) ) {
-                    parent = newReifiedNode.getParent();
-                }
-            }
+//            // First replicate the reified node (corresponding to parent, which
+//            // is the reified package).
+//            EmsScriptNode oldReifiedNode = parent.getReifiedNode();
+//            EmsScriptNode newReifiedNode = oldReifiedNode;
+//            if ( oldReifiedNode != null && !this.equals( oldReifiedNode.getWorkspace() ) ) {
+//                newReifiedNode = replicateWithParentFolders( oldReifiedNode );
+//                if ( NodeUtil.exists( newReifiedNode ) && NodeUtil.exists(newReifiedNode.getParent() ) ) {
+//                    parent = newReifiedNode.getParent();
+//                }
+//            }
             
             if ( !this.equals( parent.getWorkspace() ) ) {
                 parent = replicateWithParentFolders( parent );
 
-                if ( newReifiedNode != null ) {
-                    newReifiedNode.createOrUpdateAspect( "ems:Reified" );
-                    newReifiedNode.createOrUpdateProperty( "ems:reifiedPkg", parent.getNodeRef() );
-                    parent.createOrUpdateAspect( "ems:Reified" );
-                    parent.createOrUpdateProperty( "ems:reifiedNode", newReifiedNode.getNodeRef() );
-                }
+//                if ( newReifiedNode != null ) {
+//                    newReifiedNode.createOrUpdateAspect( "ems:Reified" );
+//                    newReifiedNode.createOrUpdateProperty( "ems:reifiedPkg", parent.getNodeRef() );
+//                    parent.createOrUpdateAspect( "ems:Reified" );
+//                    parent.createOrUpdateProperty( "ems:reifiedNode", newReifiedNode.getNodeRef() );
+//                }
             }
         } else if ( parent == null || !parent.exists() ) {
             Debug.error("Error! Bad parent when replicating folder chain! " + parent );
@@ -416,8 +416,30 @@ public class WorkspaceNode extends EmsScriptNode {
                 }
             }
             if ( nodeGuess == null) {
+                
+                // Clone the reified node if possible and not already in the workspace:
+                EmsScriptNode oldReifiedNode = node.getReifiedNode();
+                EmsScriptNode newReifiedNode = null;
+                if (oldReifiedNode != null) {
+                    
+                    EmsScriptNode foundReifiedNode = NodeUtil.findScriptNodeByIdForWorkspace( oldReifiedNode.getSysmlId(), 
+                                                                                              this, null, false, 
+                                                                                              getServices(), getResponse());
+
+                   newReifiedNode = foundReifiedNode == null ? oldReifiedNode.clone(parent) : foundReifiedNode;    
+                }
+
+                // Clone the node:
                 newFolder = node.clone(parent);
                 //newFolder.setWorkspace( this, node.getNodeRef() );  // now done in clone()
+                
+                if ( newReifiedNode != null && newFolder != null) {
+                    newReifiedNode.createOrUpdateAspect( "ems:Reified" );
+                    newReifiedNode.createOrUpdateProperty( "ems:reifiedPkg", newFolder.getNodeRef() );
+                    newFolder.createOrUpdateAspect( "ems:Reified" );
+                    newFolder.createOrUpdateProperty( "ems:reifiedNode", newReifiedNode.getNodeRef() );
+                }
+                
             } else {
                 newFolder = nodeGuess;
             }
