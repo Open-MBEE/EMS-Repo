@@ -382,6 +382,9 @@ public class WorkspaceNode extends EmsScriptNode {
             EmsScriptNode newReifiedNode = oldReifiedNode;
             if ( oldReifiedNode != null && !this.equals( oldReifiedNode.getWorkspace() ) ) {
                 newReifiedNode = replicateWithParentFolders( oldReifiedNode );
+                if ( NodeUtil.exists( newReifiedNode ) && NodeUtil.exists(newReifiedNode.getParent() ) ) {
+                    parent = newReifiedNode.getParent();
+                }
             }
             
             if ( !this.equals( parent.getWorkspace() ) ) {
