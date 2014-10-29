@@ -1039,15 +1039,15 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return viewId;
     }
 
-    private String buildEmbeddedImage(String nodeId, String imgPath){
+    private String buildInlineImageTag(String nodeId, String imgPath){
     	StringBuffer sb = new StringBuffer();
-    	sb.append("<figure xml:id='");
-    	sb.append(nodeId);
-    	sb.append("' pgwide='1'><title></title><mediaobject><imageobject role='fo'><imagedata fileref='");
-    	sb.append(imgPath);
-    	sb.append("' format='SVG' scalefit='1' width='100%'/></imageobject><imageobject role='html'><imagedata fileref='");
-    	sb.append(imgPath);
-    	sb.append("' /></imageobject></mediaobject></figure>");
+    	sb.append("<inlinemediaobject>");
+        sb.append("<imageobject condition='web'>");
+        sb.append("<imagedata fileref='");
+		sb.append(imgPath);
+		sb.append("' />");
+        sb.append("</imageobject>");
+        sb.append("</inlinemediaobject>");
     	return sb.toString();
     }
     
@@ -1085,8 +1085,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 		
                 		String filename = filePath.substring(filePath.lastIndexOf("/") + 1);
                 		DBImage dbImage = retrieveEmbeddedImage(nodeId, filename, null, null);
-                		//String imgDB = buildEmbeddedImage(nodeId, imgFilename);
-                		section.addElement(dbImage);
+                		String inlineImageTag = buildInlineImageTag(nodeId, "images/" + filename);
+                		//section.addElement(dbImage);
+                		image.before(inlineImageTag);
                 		image.remove();
                 		
                 		//if(imgFilename != null && !imgFilename.isEmpty()){
@@ -1101,7 +1102,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 }
     		}
     	}
-    	return inputString;
+    	return document.body().html().toString();
     }
 
     private
@@ -1707,6 +1708,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	
     	if(elm.children() != null && elm.children().size() > 0){
     		for(Element e: elm.children()){
+    			if(e.tagName().compareToIgnoreCase("inlinemediaobject") == 0){
+    				sb.append(e.outerHtml());
+    				continue;
+    			}
     			traverseHtml(e,sb);
     		}
     	}
