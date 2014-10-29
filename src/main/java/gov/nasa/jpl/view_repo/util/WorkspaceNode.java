@@ -417,11 +417,16 @@ public class WorkspaceNode extends EmsScriptNode {
             }
             if ( nodeGuess == null) {
                 
-                // Clone the reified node if possible:
+                // Clone the reified node if possible and not already in the workspace:
                 EmsScriptNode oldReifiedNode = node.getReifiedNode();
                 EmsScriptNode newReifiedNode = null;
                 if (oldReifiedNode != null) {
-                    newReifiedNode = oldReifiedNode.clone(parent);
+                    
+                    EmsScriptNode foundReifiedNode = NodeUtil.findScriptNodeByIdForWorkspace( oldReifiedNode.getSysmlId(), 
+                                                                                              this, null, false, 
+                                                                                              getServices(), getResponse());
+
+                   newReifiedNode = foundReifiedNode == null ? oldReifiedNode.clone(parent) : foundReifiedNode;    
                 }
 
                 // Clone the node:

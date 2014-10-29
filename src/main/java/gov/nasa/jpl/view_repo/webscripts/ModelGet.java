@@ -345,8 +345,9 @@ public class ModelGet extends AbstractJavaWebScript {
 
 		if (recurse) {
 			// Find all the children, recurse or add to array as needed.
-		    if ( !rootName.contains("_pkg") ) {
-                EmsScriptNode reifiedNode = findScriptNodeById( rootName + "_pkg",
+		    // If it is a reified package, then need get the reifiedNode
+		    if ( rootName.endsWith("_pkg") ) {
+                EmsScriptNode reifiedNode = findScriptNodeById( rootName.substring( 0, rootName.lastIndexOf("_pkg") ),
                                                                 workspace,
                                                                 dateTime, false );
 		        if (reifiedNode != null) {
