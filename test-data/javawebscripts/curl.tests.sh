@@ -27,7 +27,7 @@ export CURL_SECURITY=" -k -3"
 # TODO: CURL commands aren't executed from bash using environment variables
 echo POSTS
 # create project and site
-echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/project.json $SERVICE_URL"alfresco/service/workspaces/master/sites/europa/projects?createSite=true\""
+echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/project.json $SERVICE_URL"workspaces/master/sites/europa/projects?createSite=true\""
 
 # post elements to project
 echo curl $CURL_FLAGS $CURL_POST_FLAGS @JsonData/elementsNew.json $BASE_URL"sites/europa/projects/123456/elements\""
