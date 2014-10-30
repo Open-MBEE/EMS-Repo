@@ -52,6 +52,8 @@ public class CommitUtil {
         if (commitPkg == null && create) {
             commitPkg = context.createFolder( "commits" );
         }
+        
+        commitPkg = NodeUtil.getOrCreateDateFolder( commitPkg );
 
         return commitPkg;
     }
@@ -88,16 +90,6 @@ public class CommitUtil {
 	                                           ServiceRegistry services,
 	                                           StringBuffer response) {
 	    ArrayList<EmsScriptNode> commits = new ArrayList<EmsScriptNode>();
-//        if ( Utils.isNullOrEmpty( siteName ) ) {
-//            String userName = NodeUtil.getUserName();
-//            List< SiteInfo > sites = services.getSiteService().listSites( userName );
-//            for ( SiteInfo si : sites ) {
-//                String aSiteName = si.getShortName();
-//                ArrayList< EmsScriptNode > siteCommits = getCommits( workspace, aSiteName, services, response );
-//                commits.addAll( siteCommits );
-//            }
-//            return commits;
-//        }
 	    if (workspace == null && siteName == null) {
 	        return commits;
 	    }
