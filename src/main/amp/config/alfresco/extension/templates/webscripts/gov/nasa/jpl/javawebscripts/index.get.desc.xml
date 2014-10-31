@@ -13,7 +13,7 @@
   <url>/ve/index/{id}</url> 
   <format default="html">any</format> 
   <authentication>user</authentication> 
-  <transaction allow="readonly">required</transaction>
+  <transaction allow="readwrite">required</transaction>
   <family>EMS Java Read Webscripts</family>
   <args>
   	<arg>

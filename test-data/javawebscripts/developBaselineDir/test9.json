@@ -10,9 +10,9 @@
 
     "owner": "300",
 
-    "qualifiedId": "no_project/holding_bin_no_site_no_project/300/301",
+    "qualifiedId": "123456/300/301",
 
-    "qualifiedName": "/300/301",
+    "qualifiedName": "/JW_TEST/300/301",
 
     "specialization": {
 
@@ -85,8 +85,6 @@
     "sysmlid": "301"
 
 }]}
-
-
 
 200
 

@@ -84,7 +84,10 @@ public class NodeUtil {
         BODY( "@sysml\\:body:\"" ),
         CHECKSUM( "@view\\:cs:\"" ),
         WORKSPACE("@ems\\:workspace:\"" ),
-        WORKSPACE_NAME("@ems\\:workspace_name:\"" );
+        WORKSPACE_NAME("@ems\\:workspace_name:\"" ),
+        OWNER("@ems\\:owner:\"" ),
+        ASPECT("ASPECT:\""),
+        TYPE("TYPE:\"");
 
         public String prefix;
 
@@ -260,12 +263,26 @@ public class NodeUtil {
 //    }
 
     public static ArrayList< NodeRef >
+    findNodeRefsByType( String specifier, String prefix,
+                        boolean useSimpleCache,
+                        boolean ignoreWorkspace,
+                        WorkspaceNode workspace, Date dateTime,
+                        boolean justFirst, boolean exactMatch,
+                        ServiceRegistry services, boolean includeDeleted ) {
+        
+        return findNodeRefsByType(specifier, prefix, useSimpleCache, ignoreWorkspace, 
+                                  workspace, dateTime, justFirst, exactMatch, 
+                                  services, includeDeleted, null);
+    }
+    
+    public static ArrayList< NodeRef >
             findNodeRefsByType( String specifier, String prefix,
                                 boolean useSimpleCache,
                                 boolean ignoreWorkspace,
                                 WorkspaceNode workspace, Date dateTime,
                                 boolean justFirst, boolean exactMatch,
-                                ServiceRegistry services, boolean includeDeleted ) {
+                                ServiceRegistry services, boolean includeDeleted,
+                                String siteName) {
         ArrayList<NodeRef> results = null;
     	
         timerByType = Timer.startTimer(timerByType, timeEvents);
@@ -306,7 +323,7 @@ public class NodeUtil {
                 }
             }
             if ( results != null ) {
-                if ( wasCached && dateTime == null ) {
+                if ( wasCached && dateTime == null && siteName == null) {
                     nodeRefs = results;
                 } else for (NodeRef nr: results) {
                     NodeRef lowest = null;
@@ -338,10 +355,8 @@ public class NodeUtil {
                     if ( !esn.exists() ) {
                         if ( !(includeDeleted && esn.isDeleted()) ) {
                             if ( Debug.isOn() ) {
-                                Debug.turnOff();
                                 System.out.println( "findNodeRefsByType(): element does not exist "
                                              + esn );
-                                Debug.turnOn();
                             }
                             continue;
                         }
@@ -355,10 +370,8 @@ public class NodeUtil {
                                  ( esn != null && esn.getWorkspace() != null ) )
                              ) ) {
                             if ( Debug.isOn() && !Debug.isOn()) {
-                                Debug.turnOff();
                                 System.out.println( "findNodeRefsByType(): wrong workspace "
                                                     + workspace );
-                                Debug.turnOn();
                             }
                             continue;
                         }
@@ -384,6 +397,10 @@ public class NodeUtil {
                                 match = false;
                             }
                         }
+                        // Check that it from the desired site if desired:
+                        if (siteName != null && !siteName.equals( esn.getSiteName() )) {
+                            match = false;
+                        }
                         if ( match ) {
                             nodeRef = nr;
                             if ( exists(workspace) && (lowest == null || isWorkspaceSource(lowest, nodeRef)
@@ -401,7 +418,7 @@ public class NodeUtil {
                                 break;
                             }
                         } else {
-                            if ( Debug.isOn() ) Debug.outln( "findNodeRefsByType(): not an exact match" );
+                            if ( Debug.isOn() ) Debug.outln( "findNodeRefsByType(): not an exact match or incorrect site" );
                         }
 
                     } catch ( Throwable e ) {
@@ -607,7 +624,8 @@ public class NodeUtil {
             searchForElements( String type, String pattern, boolean ignoreWorkspace,
                                WorkspaceNode workspace, Date dateTime,
                                ServiceRegistry services, StringBuffer response,
-                               Status status ) {
+                               Status status,
+                               String siteName) {
         Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
 
 
@@ -617,7 +635,7 @@ public class NodeUtil {
 
         resultSet = findNodeRefsByType( pattern, type, false, ignoreWorkspace, workspace,
                                         dateTime, false, false, getServices(),
-                                        false );
+                                        false, siteName );
             for ( NodeRef nodeRef : resultSet ) {
                 EmsScriptNode node =
                         new EmsScriptNode( nodeRef, services, response );
@@ -630,6 +648,23 @@ public class NodeUtil {
             }
 
         return searchResults;
+    }
+    
+    /**
+     * Perform Lucene search for the specified pattern and ACM type
+     * TODO: Scope Lucene search by adding either parent or path context
+     * @param type      escaped ACM type for lucene search: e.g. "@sysml\\:documentation:\""
+     * @param pattern   Pattern to look for
+     */
+    public static Map< String, EmsScriptNode >
+            searchForElements( String type, String pattern, boolean ignoreWorkspace,
+                               WorkspaceNode workspace, Date dateTime,
+                               ServiceRegistry services, StringBuffer response,
+                               Status status ) {
+        
+        return searchForElements(type, pattern, ignoreWorkspace, 
+                                 workspace, dateTime, services, response, 
+                                 status, null);
     }
 
     /**
@@ -1520,7 +1555,6 @@ public class NodeUtil {
 									            		Status status,
 									            		boolean ignoreName) {
 			
-    	boolean wasOn = Debug.getInstance().getOn();
     	EmsScriptNode artifactNode;
     	String myType = Utils.isNullOrEmpty(type) ? "svg" : type;
     	String finalType = myType.startsWith(".") ? myType.substring(1) : myType;
@@ -1536,8 +1570,6 @@ public class NodeUtil {
 		}
 		
 		long cs = EmsScriptNode.getChecksum( content );
-		
-		if (!wasOn) Debug.turnOn();
 		
 		// see if image already exists by looking up by checksum
 		ArrayList< NodeRef > refs =
@@ -1651,8 +1683,6 @@ public class NodeUtil {
         	artifactNode.createVersion("creating the version history", false);
         }
         
-    	if (!wasOn) Debug.turnOff();
-
 		return artifactNode;
 	}
 

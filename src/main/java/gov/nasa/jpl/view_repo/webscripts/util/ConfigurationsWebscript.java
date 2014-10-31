@@ -19,7 +19,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -76,23 +78,34 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
      * @param sort
      * @return
      */
-    public List< EmsScriptNode > getConfigurations( EmsScriptNode context,
+    public List< EmsScriptNode > getConfigurations( EmsScriptNode siteNode,
                                                     WorkspaceNode workspace,
                                                     String timestamp,
                                                     boolean sort ) {
         List<EmsScriptNode> configurations = new ArrayList<EmsScriptNode>();
-        if (context != null) {
+        if (siteNode != null) {
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
             // grab all configurations in site and order by date
-            Set< EmsScriptNode > nodes =
-                    WebScriptUtil.getAllNodesInPath( context.getQnamePath(),
-                                                     "TYPE",
-                                                     "ems:ConfigurationSet",
-                                                     workspace, 
-                                                     dateTime, services,
-                                                     response );
-            configurations.addAll(nodes);
+//            Set< EmsScriptNode > nodes =
+//                    WebScriptUtil.getAllNodesInPath( context.getQnamePath(),
+//                                                     "TYPE",
+//                                                     "ems:ConfigurationSet",
+//                                                     workspace, 
+//                                                     dateTime, services,
+//                                                     response );
+            // Note: not using searchForElements() b/c it checks if the return element has a sysml:id, which
+            //       configurations do not
+            ArrayList<NodeRef> resultSet = NodeUtil.findNodeRefsByType( "ems:ConfigurationSet", NodeUtil.SearchType.TYPE.prefix, 
+                                                                        false, false, workspace,
+                                                                        dateTime, false, false, services, false,
+                                                                        siteNode.getSiteName());
+            List< EmsScriptNode > nodeList = EmsScriptNode.toEmsScriptNodeList( resultSet, services, response, 
+                                                                             responseStatus );
+            if (nodeList != null) {
+                Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList);
+                configurations.addAll(nodes);
+            }
             if (sort) {
                 Collections.sort(configurations, new EmsScriptNodeCreatedAscendingComparator());
             }

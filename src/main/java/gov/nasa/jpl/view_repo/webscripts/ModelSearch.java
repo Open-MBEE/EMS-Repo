@@ -125,11 +125,13 @@ public class ModelSearch extends ModelGet {
                                                          workspace, dateTime ) );
             }
             
-            // need to filter based on workspace
+            // need to filter based on workspace and filter out _pkgs
             for (Entry< String, EmsScriptNode > element: rawResults.entrySet()) {
                 NodeRef nodeRef = NodeUtil.findNodeRefById( element.getKey(), false, workspace, dateTime, services, true );
                 if ( nodeRef.equals( element.getValue().getNodeRef() ) ) {
-                    elementsFound.put( element.getKey(), element.getValue() );
+                    if (!element.getValue().getName().endsWith( "_pkg" )) {
+                        elementsFound.put( element.getKey(), element.getValue() );
+                    }
                 }
             }
 

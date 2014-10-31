@@ -14,6 +14,7 @@ import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -86,7 +87,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         return configWs.getProducts( config, workspace, dateTime );
     }
     
-    public JSONArray handleContextProducts( WebScriptRequest req, EmsScriptNode context) throws JSONException {
+    public JSONArray handleContextProducts( WebScriptRequest req, EmsScriptNode siteNode) throws JSONException {
         JSONArray productsJson = new JSONArray();
         
         // get timestamp if specified
@@ -100,10 +101,17 @@ public class ProductsWebscript extends AbstractJavaWebScript {
 //                                                 workspace,
 //                                                 dateTime, services,
 //                                                 response );
-        Map<String, EmsScriptNode> nodeMap = searchForElements("ASPECT:\"", Acm.ACM_PRODUCT, false,
-                                                               workspace, dateTime);
-        for ( Entry< String, EmsScriptNode > entry : nodeMap.entrySet() ) {
-            productsJson.put( entry.getValue().toJSONObject( null ) );
+        Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix, 
+                                                                Acm.ACM_PRODUCT, false,
+                                                                workspace, dateTime, 
+                                                                siteNode.getSiteName());
+        if (nodeList != null) {
+            Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
+            for ( EmsScriptNode node : nodes) {
+                if (node != null) {
+                    productsJson.put( node.toJSONObject( null ) );
+                }
+            }
         }
         
         return productsJson;

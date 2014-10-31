@@ -21,7 +21,7 @@
             "properties": {
                 "sysmlid": {
                     "type": "string",
-                    "description": "Unique identifier of the element. Equivalent to MDID"
+                    "description": "Unique identifier of the element. Equivalent to MDID unless element is a slot. If a slot, id is constructed using the pattern [instanceSpecId]-slot-[definingFeatureId]."
                 },
                 "name": {
                     "type": "string",

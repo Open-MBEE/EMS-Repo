@@ -39,10 +39,12 @@ import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -491,16 +493,37 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	                                                       boolean ignoreWorkspace,
 	                                                       WorkspaceNode workspace,
 	                                                       Date dateTime) {
-		Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
+		return this.searchForElements( type, pattern, ignoreWorkspace, 
+		                               workspace, dateTime, null );
+	}
+	
+	   /**
+     * Perform Lucene search for the specified pattern and ACM type for the specified
+     * siteName.
+     * 
+     * TODO: Scope Lucene search by adding either parent or path context
+     * @param type      escaped ACM type for lucene search: e.g. "@sysml\\:documentation:\""
+     * @param pattern   Pattern to look for
+     */
+    protected Map<String, EmsScriptNode> searchForElements(String type,
+                                                                  String pattern,
+                                                                  boolean ignoreWorkspace,
+                                                                  WorkspaceNode workspace,
+                                                                  Date dateTime,
+                                                                  String siteName) {
+        
+        Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
 
         searchResults.putAll( NodeUtil.searchForElements( type, pattern, ignoreWorkspace,
                                                           workspace,
                                                           dateTime, services,
                                                           response,
-                                                          responseStatus ) );
+                                                          responseStatus,
+                                                          siteName) );
 
-		return searchResults;
-	}
+        return searchResults;
+        
+    }
 
 	/**
      * Helper utility to check the value of a request parameter

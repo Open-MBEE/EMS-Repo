@@ -10,47 +10,11 @@
 
             "editable": true,
 
-            "name": "List",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/List",
-
-            "specialization": {"type": "Operation"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "Components",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/Components",
-
-            "specialization": {"type": "View"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
             "name": "",
 
             "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
 
-            "qualifiedName": "/Components/",
+            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components/",
 
             "specialization": {
 
@@ -72,63 +36,13 @@
 
             "editable": true,
 
-            "name": "",
+            "name": "exposed",
 
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
 
-            "qualifiedName": "/",
+            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/exposed",
 
-            "specialization": {
-
-                "operand": [
-
-                    {
-
-                        "element": "op_map",
-
-                        "type": "ElementValue"
-
-                    },
-
-                    {
-
-                        "element": "exposed_id",
-
-                        "type": "ElementValue"
-
-                    },
-
-                    {
-
-                        "element": "op_name_arg",
-
-                        "type": "ElementValue"
-
-                    }
-
-                ],
-
-                "type": "Expression"
-
-            },
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "ComponentViewPoint",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/ComponentViewPoint",
-
-            "specialization": {"type": "Viewpoint"},
+            "specialization": {"type": "Parameter"},
 
         },
 
@@ -144,7 +58,7 @@
 
             "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
 
-            "qualifiedName": "/BLUCam CubeSat A",
+            "qualifiedName": "/_17_0_2_4_f3a0363_1394140430311_23731_27741/BLUCam CubeSat A",
 
             "specialization": {"type": "Package"},
 
@@ -158,13 +72,13 @@
 
             "editable": true,
 
-            "name": "map",
+            "name": "ComponentViewPoint",
 
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
 
-            "qualifiedName": "/map",
+            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/ComponentViewPoint",
 
-            "specialization": {"type": "Operation"},
+            "specialization": {"type": "Viewpoint"},
 
         },
 
@@ -180,33 +94,7 @@
 
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
 
-            "qualifiedName": "/",
-
-            "specialization": {
-
-                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-
-                "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-
-                "type": "Expose"
-
-            },
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/",
+            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
 
             "specialization": {
 
@@ -270,13 +158,57 @@
 
             "editable": true,
 
-            "name": "exposed",
+            "name": "viewpoint_op",
 
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
 
-            "qualifiedName": "/exposed",
+            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/viewpoint_op",
 
-            "specialization": {"type": "Parameter"},
+            "specialization": {
+
+                "expression": "vp_expression",
+
+                "parameters": ["exposed_id"],
+
+                "type": "Operation"
+
+            },
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "List",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/List",
+
+            "specialization": {"type": "Operation"},
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "Components",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components",
+
+            "specialization": {"type": "View"},
 
         },
 
@@ -292,7 +224,7 @@
 
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
 
-            "qualifiedName": "/Name",
+            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/Name",
 
             "specialization": {"type": "Operation"},
 
@@ -306,21 +238,89 @@
 
             "editable": true,
 
-            "name": "viewpoint_op",
+            "name": "",
 
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
 
-            "qualifiedName": "/viewpoint_op",
+            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
 
             "specialization": {
 
-                "expression": "vp_expression",
+                "operand": [
 
-                "parameters": ["exposed_id"],
+                    {
 
-                "type": "Operation"
+                        "element": "op_map",
+
+                        "type": "ElementValue"
+
+                    },
+
+                    {
+
+                        "element": "exposed_id",
+
+                        "type": "ElementValue"
+
+                    },
+
+                    {
+
+                        "element": "op_name_arg",
+
+                        "type": "ElementValue"
+
+                    }
+
+                ],
+
+                "type": "Expression"
 
             },
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+
+            "specialization": {
+
+                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+
+                "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+
+                "type": "Expose"
+
+            },
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "map",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/map",
+
+            "specialization": {"type": "Operation"},
 
         }
 

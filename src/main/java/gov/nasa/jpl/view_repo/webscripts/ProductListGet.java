@@ -33,8 +33,10 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -154,24 +156,30 @@ public class ProductListGet extends AbstractJavaWebScript {
 		return model;
 	}
 
-	public Set<EmsScriptNode> getProductSet(String qnamePath,
+	public Set<EmsScriptNode> getProductSet(EmsScriptNode siteNode,
 	                                        WorkspaceNode workspace,
 	                                        Date dateTime) {
-        // TODO -- need to pass in workspace to getAllNodesInPath()
-	    productSet =
-                WebScriptUtil.getAllNodesInPath( qnamePath, "ASPECT",
-                                                 Acm.ACM_PRODUCT, workspace,
-                                                 dateTime,
-                                                 services, response );
-
+//	    productSet =
+//                WebScriptUtil.getAllNodesInPath( qnamePath, "ASPECT",
+//                                                 Acm.ACM_PRODUCT, workspace,
+//                                                 dateTime,
+//                                                 services, response );
+        Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix, 
+                                                                   Acm.ACM_PRODUCT, false,
+                                                                   workspace, dateTime, 
+                                                                   siteNode.getSiteName());
+        if (nodeList != null) {
+            productSet.addAll(nodeList.values());
+        }
+        
         return productSet;
 	}
 
-	public JSONObject handleProductList(EmsScriptNode pnode,
+	public JSONObject handleProductList(EmsScriptNode siteNode,
 	                                    WorkspaceNode workspace,
 	                                    Date dateTime) throws JSONException {
 	    initDataStructs();
-	    getProductSet(pnode.getQnamePath(), workspace, dateTime);
+	    getProductSet(siteNode, workspace, dateTime);
 
         for (EmsScriptNode node: productSet) {
             if (checkPermissions(node, PermissionService.READ)) {
@@ -193,7 +201,7 @@ public class ProductListGet extends AbstractJavaWebScript {
             }
         }
 
-        productJson.put("name", pnode.getProperty(Acm.CM_TITLE));
+        productJson.put("name", siteNode.getProperty(Acm.CM_TITLE));
         productJson.put("volumes", volumes);
         // lets clean volume2volumes - html page doesn't support empty volume2volumes
         Set<String> emptyV = new HashSet<String>();

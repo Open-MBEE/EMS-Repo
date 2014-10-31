@@ -10,33 +10,75 @@
 
             "editable": true,
 
-            "name": "duration_1",
+            "name": "x",
 
-            "owner": "e_38304",
+            "owner": "op_ev_31835",
 
-            "qualifiedId": "123456/e_38304/arg_ev_38307_1",
+            "qualifiedId": "123456/e_31828/op_ev_31835/op_param_31868",
 
-            "qualifiedName": "/duration_1",
+            "qualifiedName": "/e_31828/GreaterEquals/x",
+
+            "specialization": {"type": "Element"},
+
+            "sysmlid": "op_param_31868"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "GreaterEquals",
+
+            "owner": "e_31828",
+
+            "qualifiedId": "123456/e_31828/op_ev_31835",
+
+            "qualifiedName": "/e_31828/GreaterEquals",
 
             "specialization": {
 
-                "isDerived": false,
+                "parameters": [
 
-                "isSlot": false,
+                    "op_param_31867",
 
-                "type": "Property",
+                    "op_param_31868",
 
-                "value": [{
+                    "op_param_31869"
 
-                    "integer": 10,
+                ],
 
-                    "type": "LiteralInteger"
-
-                }]
+                "type": "Operation"
 
             },
 
-            "sysmlid": "arg_ev_38307_1"
+            "sysmlid": "op_ev_31835"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "result",
+
+            "owner": "op_ev_31835",
+
+            "qualifiedId": "123456/e_31828/op_ev_31835/op_param_31867",
+
+            "qualifiedName": "/e_31828/GreaterEquals/result",
+
+            "specialization": {"type": "Element"},
+
+            "sysmlid": "op_param_31867"
 
         },
 
@@ -54,7 +96,7 @@
 
             "qualifiedId": "123456/e_38304/arg_ev_38307",
 
-            "qualifiedName": "/duration",
+            "qualifiedName": "/e_38304/duration",
 
             "specialization": {
 
@@ -86,13 +128,51 @@
 
             "editable": true,
 
+            "name": "duration_1",
+
+            "owner": "e_38304",
+
+            "qualifiedId": "123456/e_38304/arg_ev_38307_1",
+
+            "qualifiedName": "/e_38304/duration_1",
+
+            "specialization": {
+
+                "isDerived": false,
+
+                "isSlot": false,
+
+                "type": "Property",
+
+                "value": [{
+
+                    "integer": 10,
+
+                    "type": "LiteralInteger"
+
+                }]
+
+            },
+
+            "sysmlid": "arg_ev_38307_1"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
             "name": "",
 
             "owner": "e_32169",
 
             "qualifiedId": "123456/e_32169/expr_32165",
 
-            "qualifiedName": "/",
+            "qualifiedName": "/e_32169/",
 
             "specialization": {
 
@@ -146,7 +226,7 @@
 
             "qualifiedId": "123456/e_32169/constraint_32165",
 
-            "qualifiedName": "/",
+            "qualifiedName": "/e_32169/",
 
             "specialization": {
 
@@ -172,69 +252,11 @@
 
             "qualifiedId": "123456/e_31828/op_ev_31835/op_param_31869",
 
-            "qualifiedName": "/GreaterEquals/y",
+            "qualifiedName": "/e_31828/GreaterEquals/y",
 
             "specialization": {"type": "Element"},
 
             "sysmlid": "op_param_31869"
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "result",
-
-            "owner": "op_ev_31835",
-
-            "qualifiedId": "123456/e_31828/op_ev_31835/op_param_31867",
-
-            "qualifiedName": "/GreaterEquals/result",
-
-            "specialization": {"type": "Element"},
-
-            "sysmlid": "op_param_31867"
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "GreaterEquals",
-
-            "owner": "e_31828",
-
-            "qualifiedId": "123456/e_31828/op_ev_31835",
-
-            "qualifiedName": "/GreaterEquals",
-
-            "specialization": {
-
-                "parameters": [
-
-                    "op_param_31867",
-
-                    "op_param_31868",
-
-                    "op_param_31869"
-
-                ],
-
-                "type": "Operation"
-
-            },
-
-            "sysmlid": "op_ev_31835"
 
         },
 
@@ -252,7 +274,7 @@
 
             "qualifiedId": "123456/e_38263/arg_ev_33001",
 
-            "qualifiedName": "/initialDuration",
+            "qualifiedName": "/e_38263/initialDuration",
 
             "specialization": {
 
@@ -274,33 +296,11 @@
 
             "sysmlid": "arg_ev_33001"
 
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "x",
-
-            "owner": "op_ev_31835",
-
-            "qualifiedId": "123456/e_31828/op_ev_31835/op_param_31868",
-
-            "qualifiedName": "/GreaterEquals/x",
-
-            "specialization": {"type": "Element"},
-
-            "sysmlid": "op_param_31868"
-
         }
 
     ],
 
-    "message": "[WARNING]: Could not find owner with name: e_32169 putting constraint_32165 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[ERROR]: \t trying to create reified node e_32169_pkg in parent, 123456 = {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}.\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307_1 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[ERROR]: \t trying to create reified node e_38304_pkg in parent, 123456 = {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}.\n[WARNING]: Could not find owner with name: e_32169 putting expr_32165 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_31828 putting op_ev_31835 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[ERROR]: \t trying to create reified node e_31828_pkg in parent, 123456 = {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}.\n[ERROR]: \t trying to create reified node op_ev_31835_pkg in parent, e_31828_pkg = {type=null, id=e_31828_pkg, name=e_31828, qualified name=/e_31828, workspace=null}.\n[WARNING]: Could not find owner with name: e_38263 putting arg_ev_33001 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[ERROR]: \t trying to create reified node e_38263_pkg in parent, 123456 = {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}.\n[WARNING]: Could not find owner with name: e_32169 putting constraint_32165 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307_1 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[ERROR]: \t trying to create reified node arg_ev_38307_1_pkg in parent, e_38304_pkg = {type=null, id=e_38304_pkg, name=e_38304, qualified name=/e_38304, workspace=null}.\n[WARNING]: Could not find owner with name: e_32169 putting expr_32165 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[ERROR]: \t trying to create reified node expr_32165_pkg in parent, e_32169_pkg = {type=null, id=e_32169_pkg, name=e_32169, qualified name=/e_32169, workspace=null}.\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[ERROR]: \t trying to create reified node arg_ev_38307_pkg in parent, e_38304_pkg = {type=null, id=e_38304_pkg, name=e_38304, qualified name=/e_38304, workspace=null}.\n[WARNING]: Could not find owner with name: e_31828 putting op_ev_31835 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38263 putting arg_ev_33001 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[ERROR]: \t trying to create reified node arg_ev_33001_pkg in parent, e_38263_pkg = {type=null, id=e_38263_pkg, name=e_38263, qualified name=/e_38263, workspace=null}.\n[WARNING]: createOrUpdateModel deltas not posted properly\n"
+    "message": "[WARNING]: Could not find owner with name: e_32169 putting constraint_32165 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307_1 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_32169 putting expr_32165 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_31828 putting op_ev_31835 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38263 putting arg_ev_33001 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_32169 putting constraint_32165 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307_1 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_32169 putting expr_32165 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_31828 putting op_ev_31835 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38263 putting arg_ev_33001 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: createOrUpdateModel deltas not posted properly\n"
 
 }
 
