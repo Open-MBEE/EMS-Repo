@@ -74,6 +74,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
     public static final String NAME = "configurationGeneration";
     public static final String PARAM_SITE_NAME = "siteName";
     public static final String PARAM_PRODUCT_LIST = "docList";
+    public static final String PARAM_TIME_STAMP = "timeStamp";
 
     public void setRepository(Repository rep) {
         repository = rep;
@@ -90,6 +91,8 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         // Get timestamp if specified. This is for the products, not the
         // snapshots or configuration.
         Date dateTime = null;
+        dateTime = (Date)action.getParameterValue(PARAM_TIME_STAMP);
+        
         WorkspaceNode workspace = null;
         if ( action instanceof WebScriptRequest) {
             WebScriptRequest req = (WebScriptRequest)action;
@@ -98,7 +101,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
                                                             response,
                                                             responseStatus, //false
                                                             null );
-            dateTime = TimeUtils.dateFromTimestamp( timestamp );
+            if(dateTime == null) dateTime = TimeUtils.dateFromTimestamp( timestamp );
         }
 
         // Do not get an older version of the node based on the timestamp since
@@ -151,7 +154,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
 	            snapshotService.setServices(services);
 	            snapshotService.setLogLevel(LogLevel.DEBUG);
 	            Status status = new Status();
-	            EmsScriptNode snapshot = snapshotService.createSnapshot(product, (String)product.getProperty(Acm.ACM_ID), workspace);
+	            EmsScriptNode snapshot = snapshotService.createSnapshot(product, (String)product.getProperty(Acm.ACM_ID), workspace, dateTime);
 	            if (snapshot == null || status.getCode() != HttpServletResponse.SC_OK) {
 	                jobStatus = "Failed";
 	                response.append("[ERROR]: could not make snapshot for " + product.getProperty(Acm.ACM_NAME));

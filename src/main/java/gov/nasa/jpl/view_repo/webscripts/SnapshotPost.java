@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.docbook.model.*;
 import gov.nasa.jpl.docbook.utils.HtmlToDocbook;
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.SnapshotArtifactsGenerationActionExecuter;
@@ -50,6 +51,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,6 +135,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         clearCaches();
 
         WorkspaceNode workspace = getWorkspace( req );
+        Date timestamp = getTimestamp(req);
 
         Map< String, Object > model = new HashMap< String, Object >();
         log( LogLevel.INFO, "Starting snapshot creation or snapshot artifact generation..." );
@@ -141,7 +144,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             if ( reqPostJson != null ) {
                 log( LogLevel.INFO, "Generating snapshot artifact..." );
                 SnapshotPost instance = new SnapshotPost( repository, services );
-                JSONObject result = instance.saveAndStartAction( req, status );
+                JSONObject result = instance.saveAndStartAction( req, status, workspace );
                 appendResponseStatusInfo( instance );
 
                 status.setCode( responseStatus.getCode() );
@@ -169,7 +172,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
                     snapshotNode =
                             createSnapshot( topview, viewId, snapshotName,
                                             req.getContextPath(),
-                                            snapshotFolderNode );
+                                            snapshotFolderNode,
+                                            workspace, timestamp);
                 }
 
                 if ( snapshotNode != null ) {
@@ -218,7 +222,19 @@ public class SnapshotPost extends AbstractJavaWebScript {
         setDocumentElementContent( elem1, sb.toString() );
     }
 
-    private DBParagraph createDBParagraph( JSONObject obj, DBSection section ) {
+    private String buildInlineImageTag(String nodeId, String imgPath){
+    	StringBuffer sb = new StringBuffer();
+    	sb.append("<inlinemediaobject>");
+        sb.append("<imageobject condition='web'>");
+        sb.append("<imagedata scalefit='1' width='100%' fileref='");
+		sb.append(imgPath);
+		sb.append("' />");
+        sb.append("</imageobject>");
+        sb.append("</inlinemediaobject>");
+    	return sb.toString();
+    }
+    
+    private DBParagraph createDBParagraph( JSONObject obj, DBSection section, WorkspaceNode workspace, Date timestamp  ) {
     	if(obj == null) return null;
         String srcType = (String)obj.opt( "sourceType" );
         String src = (String)obj.opt( "source" );
@@ -227,7 +243,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
         DBParagraph p = new DBParagraph();
         p.setId( src );
         if (srcType != null && srcType.compareTo( "reference" ) == 0 ) {
-            WorkspaceNode workspace = null; // TODO -- REVIEW -- Do we need to pass this in????!
             EmsScriptNode node = findScriptNodeById( src, workspace, null, false );
             if(node == null){
             	System.out.println("Failed to create DBParagraph! Failed to find EmsScriptNode with Id: " + src);
@@ -317,25 +332,26 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return p;
     }
     
-    private DocumentElement createDBSection( JSONObject obj ) throws JSONException {
+    private DocumentElement createDBSection( JSONObject obj, WorkspaceNode workspace, Date timestamp ) throws JSONException {
         DBSection section = new DBSection();
         section.setTitle( (String)obj.opt( "name" ) );
-        createDBSectionContainment( section, obj.getJSONArray( "contains" ) );
+        createDBSectionContainment( section, obj.getJSONArray( "contains" ), workspace, timestamp );
         return section;
     }
 
     private void createDBSectionContainment(DBSection section,
-                                            JSONArray jsonContains) throws JSONException{
+                                            JSONArray jsonContains,
+                                            WorkspaceNode workspace, Date timestamp) throws JSONException{
         for ( int i = 0; i < jsonContains.length(); i++ ) {
             JSONObject obj = jsonContains.getJSONObject( i );
-            DocumentElement e = createElement( obj, section );
+            DocumentElement e = createElement( obj, section, workspace, timestamp );
             if ( e != null ) section.addElement( e );
             
             //traverseElements(section, node);
         }
 	}
 
-    private DocumentElement createDBText( JSONObject obj ) throws JSONException {
+    private DocumentElement createDBText( JSONObject obj, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
         DBText text = new DBText();
         String value = null;
         String sourceType = obj.optString("sourceType");
@@ -365,7 +381,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
    
     private DocBookWrapper createDocBook( EmsScriptNode product, String productId,
                                           String snapshotName, String contextPath,
-                                          EmsScriptNode snapshotFolder ) throws Exception {
+                                          EmsScriptNode snapshotFolder,
+                                          WorkspaceNode workspace, Date timestamp) throws Exception {
         log( LogLevel.INFO, "\ncreating DocBook snapshot for view Id: "
                             + productId );
         log( LogLevel.INFO, "\ncreating DocBook snapshotname: " + snapshotName );
@@ -407,10 +424,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	            	String childId = childrenViews.getString(k);
 	            	if(childId == null || childId.isEmpty()) throw new Exception("Failed to get 'childrenViews'[" + k + "] Id!");
 	            	
-	            	EmsScriptNode childNode = findScriptNodeById(childId, null, null, false);
+	            	EmsScriptNode childNode = findScriptNodeById(childId, workspace, timestamp, false);
 	            	if(childNode == null) throw new Exception("Failed to find EmsScriptNode with Id: " + childId);
 	            	//creating chapters
-	            	DocumentElement section = (DocumentElement)emsScriptNodeToDBSection(childNode, true);
+	            	DocumentElement section = (DocumentElement)emsScriptNodeToDBSection(childNode, true, workspace, timestamp);
 	            	if(section != null) docBook.addElement(section);
 	            }
             }
@@ -468,7 +485,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	return dbTable;
     }
 
-    private DocumentElement createList( JSONObject obj, DBSection section ) throws JSONException {
+    private DocumentElement createList( JSONObject obj, DBSection section, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
         Boolean isOrdered = (Boolean)obj.opt( "ordered" );
 
         DBList list = new DBList();
@@ -479,7 +496,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             DocumentElement docElem = null;
             for ( int j = 0; j < listItems.length(); j++ ) {
                 JSONObject jsObj = listItems.getJSONObject( j );
-                DocumentElement e = createElement( jsObj, section );
+                DocumentElement e = createElement( jsObj, section, workspace, timestamp );
                 if ( j > 0 ) {
                     appendElement( docElem, e );
                 } else docElem = e;
@@ -490,26 +507,26 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return (DocumentElement)list;
     }
 
-    private DocumentElement createElement( JSONObject obj, DBSection section ) throws JSONException {
+    private DocumentElement createElement( JSONObject obj, DBSection section, WorkspaceNode workspace, Date timestamp ) throws JSONException {
         DocumentElement e = null;
         switch ( getType( obj ) ) {
             case "Paragraph":
-                e = createDBParagraph( obj, section );
+                e = createDBParagraph( obj, section, workspace, timestamp );
                 break;
             case "List":
-                e = createList( obj, section );
+                e = createList( obj, section, workspace, timestamp );
                 break;
             case "Table":
-                e = createTable( obj, section );
+                e = createTable( obj, section, workspace, timestamp );
                 break;
             case "Image":
-                e = createImage( obj );
+                e = createImage( obj, workspace, timestamp );
                 break;
             case "Section":
-                e = createDBSection( obj );
+                e = createDBSection( obj, workspace, timestamp );
                 break;
             case "Element":
-                e = createDBText( obj );
+                e = createDBText( obj, workspace, timestamp );
                 break;
             default:
                 log( LogLevel.WARNING, "Unexpected type: " + getType( obj ) );
@@ -518,12 +535,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return e;
     }
     
-    private DocumentElement createImage( JSONObject obj ) {
+    private DocumentElement createImage( JSONObject obj, WorkspaceNode workspace, Date timestamp  ) {
         DBImage image = new DBImage();
         image.setId( getSymlId( obj ) );
 
         String id = (String)obj.opt( Acm.SYSMLID );
-        EmsScriptNode imgNode = findScriptNodeById( id, null, null, false );  // TODO -- REVIEW -- Pass in workspace????!!!!
+        EmsScriptNode imgNode = findScriptNodeById( id, null, null, false );  //snapshot => ok to get the latest from 'master'
         if ( imgNode == null ) {
             // TODO error handling
             return image;
@@ -556,10 +573,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
     
     public EmsScriptNode createSnapshot( EmsScriptNode view, String viewId,
-                                         WorkspaceNode workspace ) {
+                                         WorkspaceNode workspace, Date timestamp ) {
         this.snapshotName = viewId + "_" + System.currentTimeMillis();
         String contextPath = "alfresco/service/";
-        EmsScriptNode viewNode = findScriptNodeById(viewId, workspace, null, true);
+        EmsScriptNode viewNode = findScriptNodeById(viewId, workspace, timestamp, true);
         if(viewNode == null){
         	System.out.println("Failed to find script node with Id: " + viewId);
         	return null;
@@ -569,13 +586,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
         	System.out.println("Failed to get snapshot folder node!");
         	return null;
         }
-        return createSnapshot(view, viewId, snapshotName, contextPath, snapshotFolder);
+        return createSnapshot(view, viewId, snapshotName, contextPath, snapshotFolder, workspace, timestamp);
     }
     
     public EmsScriptNode createSnapshot( EmsScriptNode view, String viewId,
                                          String snapshotName,
                                          String contextPath,
-                                         EmsScriptNode snapshotFolder ) {
+                                         EmsScriptNode snapshotFolder,
+                                         WorkspaceNode workspace, Date timestamp) {
         EmsScriptNode snapshotNode = snapshotFolder.createNode( snapshotName, "view2:Snapshot" );
         if (snapshotNode == null) {
             	System.out.println("Failed to create view2:Snapshot!");
@@ -590,20 +608,17 @@ public class SnapshotPost extends AbstractJavaWebScript {
         view.createOrUpdateAspect( "view2:Snapshotable" );
         view.appendToPropertyNodeRefs( "view2:productSnapshots", snapshotNode.getNodeRef() );
         
-        // Association is deprecated
-//        view.createOrUpdateAssociation( snapshotNode, "view2:snapshots" );
-        
         JSONObject snapshotJson = new JSONObject();
         try {
             snapshotJson.put( "snapshot", true );
             ActionUtil.saveStringToFile( snapshotNode, "application/json", services, snapshotJson.toString( 4 ) );
-            DocBookWrapper docBookWrapper = createDocBook( view, viewId, snapshotName, contextPath, snapshotNode );
+            DocBookWrapper docBookWrapper = createDocBook( view, viewId, snapshotName, contextPath, snapshotNode, workspace, timestamp );
             if ( docBookWrapper == null ) {
                 log( LogLevel.ERROR, "Failed to generate DocBook!" );
                 snapshotNode = null;
             } else {
                 docBookWrapper.save();
-                docBookWrapper.saveDocBookToRepo( snapshotFolder );
+                docBookWrapper.saveDocBookToRepo( snapshotFolder, timestamp );
             }
         } 
         catch ( Exception e1 ) {
@@ -614,7 +629,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshotNode;
     }
 
-    private DocumentElement createTable( JSONObject obj, DBSection section ) throws JSONException {
+    private DocumentElement createTable( JSONObject obj, DBSection section, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
         DBTable table = new DBTable();
         String title = (String)obj.opt( "title" );
         String style = (String)obj.opt( "sytle" );
@@ -625,8 +640,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
         DocBookTable dbTable = createDocBookTable(obj);
         List<DBColSpec> colspecs = createTableColSpec(dbTable.getColCount());
         table.setColspecs(colspecs);
-        table.setHeaders( createTableHeader( obj, section, dbTable ));
-        table.setBody( createTableBody( obj, section, dbTable ));
+        table.setHeaders( createTableHeader( obj, section, dbTable, workspace, timestamp ));
+        table.setBody( createTableBody( obj, section, dbTable, workspace, timestamp ));
         
         // table.setCols(headerCols.length());
         return (DocumentElement)table;
@@ -640,15 +655,15 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	return colspecs;
     }
     
-    private List< List< DocumentElement >> createTableBody( JSONObject obj, DBSection section, DocBookTable dbTable ) throws JSONException {
-        return createTableRows( obj.getJSONArray( "body" ), section, dbTable, false );
+    private List< List< DocumentElement >> createTableBody( JSONObject obj, DBSection section, DocBookTable dbTable, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
+        return createTableRows( obj.getJSONArray( "body" ), section, dbTable, false, workspace, timestamp );
     }
     
-    private List< List< DocumentElement >> createTableHeader( JSONObject obj, DBSection section, DocBookTable dbTable ) throws JSONException {
-        return createTableRows( obj.getJSONArray( "header" ), section, dbTable, true );
+    private List< List< DocumentElement >> createTableHeader( JSONObject obj, DBSection section, DocBookTable dbTable, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
+        return createTableRows( obj.getJSONArray( "header" ), section, dbTable, true, workspace, timestamp );
     }
     
-    private List< List< DocumentElement >> createTableRows( JSONArray jsonRows, DBSection section, DocBookTable dbTable, boolean isHeader ) throws JSONException {
+    private List< List< DocumentElement >> createTableRows( JSONArray jsonRows, DBSection section, DocBookTable dbTable, boolean isHeader, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
         List< List< DocumentElement >> list =
                 new ArrayList< List< DocumentElement >>();
         for ( int i = 0; i < jsonRows.length(); i++ ) {
@@ -673,7 +688,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 	//gather table cells content
                     JSONObject content = headerCols.getJSONObject( l );
                     DocumentElement cell = null;
-                    cell = createElement(content, section);
+                    cell = createElement(content, section, workspace, timestamp);
                     if(l > 0)
                     	appendElement(cellContent, cell);
                     else
@@ -708,13 +723,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
  
     private DBSection emsScriptNodeToDBSection( EmsScriptNode node,
-                                                Boolean isChapter ) throws Exception {
+                                                Boolean isChapter,
+                                                WorkspaceNode workspace, Date timestamp) throws Exception {
         DBSection section = new DBSection();
         if ( isChapter ) section.setChapter( isChapter );
         section.setTitle( (String)node.getProperty( Acm.ACM_NAME ) );
         section.setId( (String)node.getProperty( Acm.ACM_ID ) );
 
-        traverseElements( section, node );
+        traverseElements( section, node, workspace, timestamp );
         return section;
     }
    
@@ -762,15 +778,17 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return jobName;
     }
     
-    public JSONObject generateHTML( String snapshotId ) throws Exception {
-        EmsScriptNode snapshotNode = findScriptNodeById( snapshotId, null, null, false ); // TODO -- REVIEW -- Pass in workspace????!!!!
+    //TODO passing workspace
+    public JSONObject generateHTML( String snapshotId, WorkspaceNode workspace ) throws Exception {
+        EmsScriptNode snapshotNode = findScriptNodeById( snapshotId, workspace, null, false );
+        //snapshotNode.getProperty(acmType)
         if(snapshotNode == null) throw new Exception("Failed to find snapshot with Id: " + snapshotId);
-        snapshotNode = generateHTML( snapshotNode );
+        snapshotNode = generateHTML( snapshotNode, workspace );
         if(snapshotNode == null) throw new Exception("Failed to generate HTML artifact!");
         return populateSnapshotProperties( snapshotNode );
     }
     
-    public EmsScriptNode generateHTML( EmsScriptNode snapshotNode ) throws Exception {
+    public EmsScriptNode generateHTML( EmsScriptNode snapshotNode, WorkspaceNode workspace ) throws Exception {
         this.snapshotName = (String)snapshotNode.getProperty( Acm.ACM_ID );
         if(this.snapshotName == null || this.snapshotName.isEmpty()) throw new Exception("Failed to retrieve snapshot Id!");
         
@@ -782,24 +800,25 @@ public class SnapshotPost extends AbstractJavaWebScript {
         EmsScriptNode snapshotFolderNode = new EmsScriptNode( childAssociationRef.getParentRef(), this.services );
         if(snapshotFolderNode == null) throw new Exception("Failed to retrieve snapshot folder!");
         
-        DocBookWrapper docBookWrapper = new DocBookWrapper( this.snapshotName, snapshotNode );
+        Date timestamp = (Date)snapshotNode.getProperty("view2:timestamp");
+        DocBookWrapper docBookWrapper = new DocBookWrapper( this.snapshotName, snapshotNode );//need workspace and timestamp
 
         if ( !hasHtmlZip( snapshotNode ) ) {
             log( LogLevel.INFO, "Generating HTML zip..." );
-            docBookWrapper.saveHtmlZipToRepo( snapshotFolderNode );
+            docBookWrapper.saveHtmlZipToRepo( snapshotFolderNode, workspace, timestamp );
         }
         return snapshotNode;
     }
     
-    public JSONObject generatePDF(String snapshotId) throws Exception{
-        EmsScriptNode snapshotNode = findScriptNodeById(snapshotId, null, null, false); // TODO -- REVIEW -- Pass in workspace????!!!!
+    public JSONObject generatePDF(String snapshotId, WorkspaceNode workspace) throws Exception{
+        EmsScriptNode snapshotNode = findScriptNodeById(snapshotId, workspace, null, false); // TODO -- REVIEW -- Pass in workspace????!!!!
         if(snapshotNode == null) throw new Exception("Failed to find snapshot with Id: " + snapshotId);
-    	snapshotNode = generatePDF(snapshotNode);
+    	snapshotNode = generatePDF(snapshotNode, workspace);
     	if(snapshotNode == null) throw new Exception("Failed to generate PDF artifact!");
     	return populateSnapshotProperties(snapshotNode);
     }
     
-    public EmsScriptNode generatePDF( EmsScriptNode snapshotNode ) throws Exception {
+    public EmsScriptNode generatePDF( EmsScriptNode snapshotNode, WorkspaceNode workspace ) throws Exception {
         this.snapshotName = (String)snapshotNode.getProperty( Acm.ACM_ID );
         if(this.snapshotName == null || this.snapshotName.isEmpty()) throw new Exception("Failed to retrieve snapshot Id!");
         
@@ -813,10 +832,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                    this.services );
         if(snapshotFolderNode == null) throw new Exception("Failed to retrieve snapshot folder!");
         
+        Date timestamp = (Date)snapshotNode.getProperty("view2:timestamp");
+        
         DocBookWrapper docBookWrapper = new DocBookWrapper( this.snapshotName, snapshotNode );
         if ( !hasPdf( snapshotNode ) ) {
             log( LogLevel.INFO, "Generating PDF..." );
-            docBookWrapper.savePdfToRepo( snapshotFolderNode );
+            docBookWrapper.savePdfToRepo( snapshotFolderNode, workspace, timestamp );
         }
         return snapshotNode;
     }
@@ -903,6 +924,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
     public static EmsScriptNode getHtmlZipNode( EmsScriptNode snapshotNode ) {
         NodeRef node = (NodeRef)snapshotNode.getProperty( "view2:htmlZipNode" );
         return new EmsScriptNode( node, snapshotNode.getServices() );
+    }
+    
+    private Date getTimestamp(WebScriptRequest req){
+    	if(req == null) return null;
+    	String timestamp = req.getParameter("timestamp");
+        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
+        return dateTime;
     }
 
     /**
@@ -1039,18 +1067,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return viewId;
     }
 
-    private String buildInlineImageTag(String nodeId, String imgPath){
-    	StringBuffer sb = new StringBuffer();
-    	sb.append("<inlinemediaobject>");
-        sb.append("<imageobject condition='web'>");
-        sb.append("<imagedata fileref='");
-		sb.append(imgPath);
-		sb.append("' />");
-        sb.append("</imageobject>");
-        sb.append("</inlinemediaobject>");
-    	return sb.toString();
-    }
-    
     private String handleEmbeddedImage( String id, String inputString, DBSection section)
     {
     	if(id == null || id.isEmpty()) return "";
@@ -1105,11 +1121,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	return document.body().html().toString();
     }
 
-    private
-            JSONObject
-            handleGenerateArtifacts( JSONObject postJson,
-                                     EmsScriptNode siteNode, Status status )
-                                                                            throws JSONException {
+    private JSONObject handleGenerateArtifacts( JSONObject postJson,
+                                     EmsScriptNode siteNode, Status status, WorkspaceNode workspace ) throws JSONException {
         String siteName = (String)siteNode.getProperty( Acm.CM_NAME );
         EmsScriptNode jobNode = null;
 
@@ -1136,7 +1149,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                      HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
                 return null;
             }
-            startAction( jobNode, siteName, postJson );
+            startAction( jobNode, siteName, postJson, workspace );
             return postJson;
         } catch ( JSONException ex ) {
             log( LogLevel.ERROR, "Failed to create snapshot job!" );
@@ -1250,7 +1263,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 			
 			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
-			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); // TODO -- REVIEW -- Pass in workspace????!!!!
+			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); //snapshot => ok to get the latest from 'master'
 			if(nameNode == null){
 				System.out.println("Failed to find EmsScriptNode Id " + id);
 				element.before(transcluded);
@@ -1319,7 +1332,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 			
 			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
-			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); // TODO -- REVIEW -- Pass in workspace????!!!!
+			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); // snapshot => ok to get latest
 			if(nameNode == null){
 				System.out.println("Failed to find EmsScriptNode Id: " + id);
 				element.before(transcluded);
@@ -1387,7 +1400,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 			
 			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
-			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); // TODO -- REVIEW -- Pass in workspace????!!!!
+			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); // snapshot => ok to get latest
 			if(nameNode == null){
 				System.out.println("Failed to find EmsScriptNode Id " + id);
 				element.before(transcluded);
@@ -1443,72 +1456,33 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshoturl;
     }
 
+    private void removeHtmlTag(Document doc, String tagName){
+    	Elements elems = doc.getElementsByTag(tagName);
+    	for(Element e:elems){
+    		e.before(e.text());
+    		e.remove();
+    	}
+    }
+    
     private void removeHtmlTags(Document doc){
     	Elements elems = doc.getElementsByTag("A");
     	for(Element e:elems){
-    		e.before(e.text());
+    		e.before(e.text() + " (" + e.attr("href") + ") ");
     		e.remove();
     	}
-    	elems = doc.getElementsByTag("B");
-    	for(Element e:elems){
-    		e.before(e.text());
-    		e.remove();
-    	}
-    	elems = doc.getElementsByTag("BIG");
-    	for(Element e:elems){
-    		e.before(e.text());
-    		e.remove();
-    	}
-    	elems = doc.getElementsByTag("CENTER");
-    	for(Element e:elems){
-    		e.before(e.text());
-    		e.remove();
-    	}
-    	elems = doc.getElementsByTag("EM");
-    	for(Element e:elems){
-    		e.before(e.text());
-    		e.remove();
-    	}
-    	elems = doc.getElementsByTag("FONT");
-    	for(Element e:elems){
-    		e.before(e.text());
-    		e.remove();
-    	}
-    	elems = doc.getElementsByTag("I");
-    	for(Element e:elems){
-    		e.before(e.text());
-    		e.remove();
-    	}
-    	elems = doc.getElementsByTag("SMALL");
-    	for(Element e:elems){
-    		e.before(e.text());
-    		e.remove();
-    	}
-    	elems = doc.getElementsByTag("SPAN");
-    	for(Element e:elems){
-    		e.before(e.text());
-    		e.remove();
-    	}
-    	elems = doc.getElementsByTag("STRIKE");
-    	for(Element e:elems){
-    		e.before(e.text());
-    		e.remove();
-    	}
-    	elems = doc.getElementsByTag("STRONG");
-    	for(Element e:elems){
-    		e.before(e.text());
-    		e.remove();
-    	}
-    	elems = doc.getElementsByTag("SUB");
-    	for(Element e:elems){
-    		e.before(e.text());
-    		e.remove();
-    	}
-    	elems = doc.getElementsByTag("U");
-    	for(Element e:elems){
-    		e.before(e.text());
-    		e.remove();
-    	}
+    	
+    	removeHtmlTag(doc, "B");
+    	removeHtmlTag(doc, "BIG");
+    	removeHtmlTag(doc, "CENTER");
+    	removeHtmlTag(doc, "EM");
+    	removeHtmlTag(doc, "FONT");
+    	removeHtmlTag(doc, "I");
+    	removeHtmlTag(doc, "SMALL");
+    	removeHtmlTag(doc, "SPAN");
+    	removeHtmlTag(doc, "STRIKE");
+    	removeHtmlTag(doc, "STRONG");
+    	removeHtmlTag(doc, "SUB");
+    	removeHtmlTag(doc, "U");
     }
     
     private DBImage retrieveEmbeddedImage(String nodeId, String imgName, String workspace, Object timestamp){
@@ -1551,7 +1525,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     
     //nodeUtil.getNodeRefById(id)	//need to get the correct version as well. and workspace
     
-    private JSONObject saveAndStartAction(WebScriptRequest req, Status status) {
+    private JSONObject saveAndStartAction(WebScriptRequest req, Status status, WorkspaceNode workspace) {
 	    JSONObject jsonObject = null;
 	    String siteName = getSiteName(req);
 		if (siteName == null) {
@@ -1580,7 +1554,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 				log(LogLevel.ERROR, "Missing snapshot formats!", HttpServletResponse.SC_BAD_REQUEST);
 			} else {
 				try{
-					jsonObject = handleGenerateArtifacts(postJson, siteNode, status);
+					jsonObject = handleGenerateArtifacts(postJson, siteNode, status, workspace);
 				}
 				catch(JSONException ex){
 					log(LogLevel.ERROR, "Failed to generate snapshot artifact(s)!");
@@ -1649,7 +1623,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	 * @param snapshot Id
 	 * @param snapshot format types
 	 */
-	public void startAction(EmsScriptNode jobNode, String siteName, JSONObject postJson) throws JSONException {
+	public void startAction(EmsScriptNode jobNode, String siteName, JSONObject postJson, WorkspaceNode workspace) throws JSONException {
 		String userEmail = null;
 		String userName = AuthenticationUtil.getFullyAuthenticatedUser();
 		if(userName == null || userName.isEmpty())
@@ -1666,16 +1640,17 @@ public class SnapshotPost extends AbstractJavaWebScript {
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_SNAPSHOT_ID, postJson.getString("id"));
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_FORMAT_TYPE, formats);
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_USER_EMAIL, userEmail);
+        snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_WORKSPACE, workspace);
         
        	services.getActionService().executeAction(snapshotAction, jobNode.getNodeRef(), true, true);
 	}
 
-    private void traverseElements( DBSection section, EmsScriptNode node )
+    private void traverseElements( DBSection section, EmsScriptNode node, WorkspaceNode workspace, Date timestamp )
             throws Exception {
     	if(node == null) return;
     	//1st process the node
     	JSONArray contains = node.getView().getContainsJson();
-        createDBSectionContainment( section, contains );
+        createDBSectionContainment( section, contains, workspace, timestamp );
         
         //then process it's contains:children if any
     	String nodeId = (String)node.getProperty(Acm.ACM_ID);
@@ -1687,8 +1662,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
         for(int k=0; k< childrenViews.length(); k++){
         	String childId = childrenViews.getString(k);
         	if(childId.equals(nodeId)) continue;
-        	EmsScriptNode childNode = findScriptNodeById(childId, null, null, false);
-        	DBSection subSection = emsScriptNodeToDBSection(childNode, false);
+        	EmsScriptNode childNode = findScriptNodeById(childId, workspace, timestamp, false);
+        	DBSection subSection = emsScriptNodeToDBSection(childNode, false, workspace, timestamp);
         	section.addElement(subSection);
         	//traverseElements(subSection, childNode);
         }
