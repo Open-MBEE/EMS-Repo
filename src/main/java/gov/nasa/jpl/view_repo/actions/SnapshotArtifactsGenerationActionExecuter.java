@@ -3,6 +3,7 @@ package gov.nasa.jpl.view_repo.actions;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
 
@@ -43,6 +44,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     public static final String PARAM_SNAPSHOT_ID = "snapshotId";
     public static final String PARAM_FORMAT_TYPE = "formatType";
     public static final String PARAM_USER_EMAIL = "userEmail";
+    public static final String PARAM_WORKSPACE = "workspace";
     
     public void setRepository(Repository rep) {
         repository = rep;
@@ -96,10 +98,11 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         Status status = new Status();
         JSONObject snapshot = null;
         try{
+        	WorkspaceNode workspace = (WorkspaceNode)action.getParameterValue(PARAM_WORKSPACE);
 	        for(String format:formats){
 	        	if(format.compareToIgnoreCase("pdf") == 0){
 	        		try{
-	        			snapshot = snapshotService.generatePDF(snapshotId);
+	        			snapshot = snapshotService.generatePDF(snapshotId, workspace);
 	        		}
 	        		catch(JSONException ex){
 	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -108,7 +111,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        	}
 	        	else if(format.compareToIgnoreCase("html") == 0){
 	        		try{
-	        			snapshot = snapshotService.generateHTML(snapshotId);
+	        			snapshot = snapshotService.generateHTML(snapshotId, workspace);
 	        		}
 	        		catch(JSONException ex){
 	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

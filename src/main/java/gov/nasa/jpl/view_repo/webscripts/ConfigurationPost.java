@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ConfigurationGenerationActionExecuter;
@@ -185,7 +186,9 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	            // the background job.  Note, that if jobNode is non-null, we know that there
 	            // was not a previous job for the configuration still in progress.
 	            if (productList.size() > 0) {
-	            	startAction(jobNode, siteName, productList);
+	            	String timestamp = postJson.getString("timestamp");
+	            	Date datetime = TimeUtils.dateFromTimestamp(timestamp);
+	            	startAction(jobNode, siteName, productList, datetime);
 	            }
 	            else {
 	                jobNode.setProperty("ems:job_status", "Succeeded");
@@ -243,12 +246,13 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	 * @param siteName
 	 * @param productList
 	 */
-	public void startAction(EmsScriptNode jobNode, String siteName, HashSet<String> productList) {
+	public void startAction(EmsScriptNode jobNode, String siteName, HashSet<String> productList, Date timestamp) {
 	    if (productList.size() > 0) {
         		ActionService actionService = services.getActionService();
         		Action configurationAction = actionService.createAction(ConfigurationGenerationActionExecuter.NAME);
         		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_SITE_NAME, siteName);
         		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_PRODUCT_LIST, productList);
+        		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_TIME_STAMP, timestamp);
         		services.getActionService().executeAction(configurationAction, jobNode.getNodeRef(), true, true);
 	    }
 	}
