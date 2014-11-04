@@ -1469,7 +1469,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     private void removeHtmlTag(Element elem){
     	if(elem == null) return;
     	String tagName = elem.tagName().toUpperCase();
-    	System.out.println("tag name: " + tagName);
+    	//System.out.println("tag name: " + tagName);
     	switch(tagName){
     	case "P":
     	case "DIV":
@@ -1477,23 +1477,23 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	case "INLINEMEDIAOBJECT":
     	case "IMAGEOBJECT":
     		for(Element child:elem.children()){
-    			System.out.println("removing Html tags...");
+    			//System.out.println("removing Html tags...");
     			removeHtmlTag(child);
     		}
     		break;
     	case "A":
-    		System.out.println("Anchor tag...");
+    		//System.out.println("Anchor tag...");
 			elem.before(elem.text() + " (" + elem.attr("href") + ") ");
     		elem.remove();
     		break;
     		default:
-    			System.out.println("replacing elem with its text...");
+    			//System.out.println("replacing elem with its text...");
     			elem.before(elem.text());
     			for(Element child:elem.children()){
-    				System.out.println("removing Html tags...");
+    				//System.out.println("removing Html tags...");
     				removeHtmlTag(child);
     			}
-    			System.out.println("removing element...");
+    			//System.out.println("removing element...");
     			elem.remove();
     	}
     }
