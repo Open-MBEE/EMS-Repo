@@ -16,8 +16,6 @@
 
     "specialization": {
 
-        "isSite": false,
-
         "type": "Package"
 
     },

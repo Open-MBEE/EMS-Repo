@@ -117,7 +117,6 @@
                 <property name="sysml:isSite">
                     <type>d:boolean</type>
                     <mandatory>false</mandatory>
-                    <default>false</default>
                     <index enabled="true">
                         <atomic>false</atomic>
                         <stored>false</stored>
