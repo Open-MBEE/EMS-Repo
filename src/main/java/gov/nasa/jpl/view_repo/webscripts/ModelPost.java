@@ -451,18 +451,21 @@ public class ModelPost extends AbstractJavaWebScript {
        		boolean foundOwnerElement = true;
             owner = findScriptNodeById(ownerName, workspace, null, false);
             if (owner == null || !owner.exists()) {
-                // FIX: Need to respond with warning that owner couldn't be found?
-                log( LogLevel.WARNING, "Could not find owner with name: "
-                                       + ownerName + " putting " + elementId
-                                       + " into project: " + projectNode);
-                
+               
                 // FIXME: HERE! ATTENTION BRAD!  add to elements, so it is returned, and remind Doris
                 //        to fix her code also.
                 // If creating a holding bin, then need to create a node for it also for
                 // magic draw sync.
                 if (createdHoldingBin) {
                     ModStatus modStatus = new ModStatus();
-                    EmsScriptNode sitePackageReifPkg = sitePackageNode != null ? sitePackageNode.getReifiedPkg() : null;
+                    EmsScriptNode sitePackageReifPkg = null;
+                                        
+                    // Get or create the reified package for the site package if needed:
+                    if (sitePackageNode != null) {
+                         sitePackageReifPkg = getOrCreateReifiedPackageNode(sitePackageNode, sitePackageNode.getSysmlId(), 
+                                                                            workspace, true);
+                    }
+                    
                     EmsScriptNode nodeBinOwner = sitePackageReifPkg != null ? sitePackageReifPkg : projectNode;
                     EmsScriptNode nodeBin = nodeBinOwner.createSysmlNode(ownerName, Acm.ACM_PACKAGE,
                                                                         modStatus, workspace);
@@ -479,6 +482,11 @@ public class ModelPost extends AbstractJavaWebScript {
                     owner = projectNode;  
                 }
                 foundOwnerElement = owner != projectNode;
+                
+                // FIXME: Need to respond with warning that owner couldn't be found?
+                log( LogLevel.WARNING, "Could not find owner with name: "
+                                       + ownerName + " putting " + elementId
+                                       + " into: " + owner);
             }
             // really want to add pkg as owner
             reifiedPkg = findScriptNodeById(ownerName + "_pkg", workspace, null, false);

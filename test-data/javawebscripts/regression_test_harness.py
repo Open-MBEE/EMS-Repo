@@ -822,6 +822,34 @@ False,
 ["test","workspaces","develop"]
 ],
                    
+# SITE PACKAGES: ==========================    
+
+[
+34,
+"PostSitePackage",
+"Create a site package",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                data="SitePackage.json",
+                branch="master/sites/europa/",
+                post_type="elements"),
+True, 
+common_filters,
+["test","workspaces","develop"]
+],
+        
+[
+35,
+"PostElementSitePackage",
+"Post a element to a site package",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                data="ElementSitePackage.json",
+                branch="master/sites/site_package/",
+                post_type="elements"),
+True, 
+common_filters,
+["test","workspaces","develop"]
+],
+        
 ]    
 
 ##########################################################################################    

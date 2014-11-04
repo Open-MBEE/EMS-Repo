@@ -1,0 +1,7 @@
+{ "elements" : [
+    {"documentation" : "Element to post to a site package", 
+     "sysmlid":"elementInPkg", 
+     "name":"elementInPkg",
+     "specialization": {"type":"Element"}
+    },
+]}
