@@ -113,6 +113,11 @@ public class WorkspaceNode extends EmsScriptNode {
         Debug.error( msg );
     }
 
+    public Date getCopyTime() {
+        Date time = (Date)getProperty("ems:copyTime");
+        return time;
+    }
+    
 //    /**
 //     * Create a workspace folder within the specified folder or (if the folder
 //     * is null) within the specified user's home folder.

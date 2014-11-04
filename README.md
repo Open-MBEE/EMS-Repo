@@ -233,6 +233,9 @@ This should speed up the rebuild significantly.
      mv target /mnt/ramdisk
      ln -s /mnt/ramdisk/target .
 
+For an mvn purge on the ramdisk, running this command may be helpful:
+     mvn clean -Ppurge; mkdir /mnt/ramdisk/target; mkdir /mnt/ramdisk/alf_data; ./runserver.sh
+
 THE FOLLOWING DOESN'T WORK: To attempt to turn off indexing (maybe because it slows down junit test runs), change VALIDATE to NONE for index.recovery.mode in
  
     target/mms-repo-war/WEB-INF/classes/alfresco/repository.properties
