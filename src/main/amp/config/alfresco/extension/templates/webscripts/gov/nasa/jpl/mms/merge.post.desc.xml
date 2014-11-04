@@ -5,7 +5,7 @@
 	post merge
 	</description>
 	<url>/merge?target={target}&amp;source={source}</url>
-	<format default="json">any</format>
+	<format default="json">argument</format>
 	<authentication>user</authentication>
 	<transaction allow="readwrite">required</transaction>
 	<family>MMS REST API</family>

@@ -11,7 +11,7 @@
 	 	}  	
   </description>
   <url>/ve/index/{id}</url> 
-  <format default="html">any</format> 
+  <format default="html">argument</format> 
   <authentication>user</authentication> 
   <transaction allow="readwrite">required</transaction>
   <family>EMS Java Read Webscripts</family>

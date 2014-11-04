@@ -2,7 +2,7 @@
   <shortname>Unlock nodes</shortname> 
   <description>Unlocks all nodes recursively for use after replication</description>
   <url>/nodeunlock</url> 
-  <format default="json">any</format> 
+  <format default="json">argument</format> 
   <authentication>user</authentication> 
   <transaction allow="readwrite">required</transaction>
   <family>EMS Utility</family>
