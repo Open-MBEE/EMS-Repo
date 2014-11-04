@@ -1712,13 +1712,15 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	if(elm == null) return;
     	if(sb == null) return;
     	
-    	if(elm.isBlock()){
-    		sb.append("<?linebreak?>");
-    	}
-    	else{
+    	if(!elm.isBlock()){
     		sb.append(" ");
     	}
-    	sb.append(elm.ownText());
+
+    	if(elm.ownText().length() > 0){
+    		sb.append("<![CDATA[");
+    		sb.append(elm.ownText());
+        	sb.append("]]>");
+    	}
     	
     	if(elm.children() != null && elm.children().size() > 0){
     		for(Element e: elm.children()){
@@ -1729,6 +1731,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
     			traverseHtml(e,sb);
     		}
     	}
+    	
+    	if(elm.isBlock()) sb.append("<?linebreak?>");
     }
     
     @Override
