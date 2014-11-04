@@ -2,7 +2,7 @@
   <shortname>Post View</shortname> 
   <description>Handles posting of view from magicdraw</description>
   <url>/rest/views/{viewid}?force={force?}&amp;recurse={recurse?}&amp;doc={doc?}&amp;product={product?}&amp;user={user}</url> 
-  <format default="json">any</format> 
+  <format default="json">argument</format> 
   <authentication>user</authentication> 
   <transaction allow="readwrite">required</transaction>
   <family>View Editor</family>

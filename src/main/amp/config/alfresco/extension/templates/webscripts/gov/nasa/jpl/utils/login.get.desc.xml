@@ -3,6 +3,6 @@
   <description>dummy page to check user login credentials</description>
   <url>/checklogin</url>
   <authentication>user</authentication>
-  <format default="json">any</format>
+  <format default="json">argument</format>
   <family>EMS Utils</family>
 </webscript>

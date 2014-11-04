@@ -3085,7 +3085,7 @@ public class EmsScriptNode extends ScriptNode implements
 
             }
         } else {
-            refs = Utils.asList( (Collection< ? >)o, NodeRef.class );
+            refs = Utils.asList( (Collection< ? >)o, NodeRef.class, false );
         }
         return refs;
     }

@@ -4,7 +4,7 @@
     	delete snapshots
 	</description>
   	<url>/workspaces/{workspaceId}/sites/{siteId}/configurations/{configurationId}/snapshots</url>
-  	<format default="json">any</format>
+  	<format default="json">argument</format>
   	<authentication>user</authentication>
   	<transaction>none</transaction>
   	<family>MMS REST API</family>

@@ -2,7 +2,7 @@
   <shortname>Post View hierarchy</shortname> 
   <description>Handles posting of view hierarchy from magicdraw</description>
   <url>/rest/views/{viewid}/hierarchy</url> 
-  <format default="json">any</format> 
+  <format default="json">argument</format> 
   <authentication>user</authentication> 
   <transaction allow="readwrite">required</transaction>
   <family>View Editor</family>
