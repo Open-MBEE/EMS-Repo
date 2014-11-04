@@ -462,6 +462,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     				if (colCount > maxColCount) maxColCount = colCount;
     			}
     		}
+    		
     		JSONArray body = tblJson.getJSONArray( "body" );
     		dbTable.setBodyRowCount(body.length());
     		for(int i=0; i < body.length(); i++){
@@ -638,8 +639,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         table.setStyle( style );
         //int columnNum = getTableColumnMaxCount(obj);
         DocBookTable dbTable = createDocBookTable(obj);
-        List<DBColSpec> colspecs = createTableColSpec(dbTable.getColCount());
+        int cols = dbTable.getColCount();
+        List<DBColSpec> colspecs = createTableColSpec(cols);
         table.setColspecs(colspecs);
+        table.setCols(cols);
         table.setHeaders( createTableHeader( obj, section, dbTable, workspace, timestamp ));
         table.setBody( createTableBody( obj, section, dbTable, workspace, timestamp ));
         
