@@ -16,7 +16,13 @@
 
                 "qualifiedName": "/holding_bin",
 
-                "specialization": {"type": "Package"},
+                "specialization": {
+
+                    "isSite": false,
+
+                    "type": "Package"
+
+                },
 
                 "sysmlid": "holding_bin_no_site_no_project"
 

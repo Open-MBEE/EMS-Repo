@@ -164,6 +164,9 @@ public class Acm {
     public static final String JSON_CONNECTOR_ROLE = "roles";
     
     public static final String JSON_READ = "read";
+    
+    // Site packages additions:
+    public static final String JSON_IS_SITE = "isSite";
 
     // ACM types with the different name spaces
     public static final String SYSML = "sysml:";
@@ -303,7 +306,12 @@ public class Acm {
 //    public static final String ACM_CM_NAME = CM + "name";
 //    public static final String ACM_CM_TITLE = CM + "title";
     
-    
+    // Site packages additions:
+    public static final String ACM_SITE = "ems:Site";
+    public static final String ACM_SITE_PARENT = "ems:siteParent";
+    public static final String ACM_SITE_CHILDREN = "ems:siteChildren";
+    public static final String ACM_IS_SITE = SYSML + JSON_IS_SITE;
+
     /**
      *  JSON to Alfresco Content Model mapping
      */
