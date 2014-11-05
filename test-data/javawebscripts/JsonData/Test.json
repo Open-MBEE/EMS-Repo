@@ -1,4 +1,8 @@
-{"elements": [{
-    "name" : "XXXXXXXXXXXXXXXXXXXXXXXX",	
-    "sysmlid": "YYYYYYYYYYYYYYYYYYYYYY",
-}]}
+{ "elements" : [
+    {"documentation" : "poo", 
+     "sysmlid":"not_found_owner6", 
+     "name":"not_found_owner_name6",
+     "owner":"im_not_found6",
+     "specialization": {"type":"Package"}
+    },
+]}

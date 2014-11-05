@@ -1617,7 +1617,7 @@ public class EmsScriptNode extends ScriptNode implements
                         addStringExpressionJSON( json, node, filter, dateTime );
                         break;
                     case TimeExpression:
-                        addStringExpressionJSON( json, node, filter, dateTime );
+                        addTimeExpressionJSON( json, node, filter, dateTime );
                         break;
                     case TimeInterval:
                         addTimeIntervalJSON( json, node, filter, dateTime );
@@ -3074,7 +3074,7 @@ public class EmsScriptNode extends ScriptNode implements
 
             }
         } else {
-            refs = Utils.asList( (Collection< ? >)o, NodeRef.class );
+            refs = Utils.asList( (Collection< ? >)o, NodeRef.class, false );
         }
         return refs;
     }

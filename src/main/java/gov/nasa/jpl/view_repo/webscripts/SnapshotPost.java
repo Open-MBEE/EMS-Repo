@@ -462,6 +462,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     				if (colCount > maxColCount) maxColCount = colCount;
     			}
     		}
+    		
     		JSONArray body = tblJson.getJSONArray( "body" );
     		dbTable.setBodyRowCount(body.length());
     		for(int i=0; i < body.length(); i++){
@@ -638,8 +639,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         table.setStyle( style );
         //int columnNum = getTableColumnMaxCount(obj);
         DocBookTable dbTable = createDocBookTable(obj);
-        List<DBColSpec> colspecs = createTableColSpec(dbTable.getColCount());
+        int cols = dbTable.getColCount();
+        List<DBColSpec> colspecs = createTableColSpec(cols);
         table.setColspecs(colspecs);
+        table.setCols(cols);
         table.setHeaders( createTableHeader( obj, section, dbTable, workspace, timestamp ));
         table.setBody( createTableBody( obj, section, dbTable, workspace, timestamp ));
         
@@ -1445,6 +1448,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshoturl;
     }
 
+    /*
     private void removeHtmlTag(Document doc, String tagName){
     	Elements elems = doc.getElementsByTag(tagName);
     	for(Element e:elems){
@@ -1452,8 +1456,42 @@ public class SnapshotPost extends AbstractJavaWebScript {
     		e.remove();
     	}
     }
+    */
+    
+    private void removeHtmlTag(Element elem){
+    	if(elem == null) return;
+    	String tagName = elem.tagName().toUpperCase();
+    	//System.out.println("tag name: " + tagName);
+    	switch(tagName){
+    	case "P":
+    	case "DIV":
+    	case "BODY":
+    	case "INLINEMEDIAOBJECT":
+    	case "IMAGEOBJECT":
+    		for(Element child:elem.children()){
+    			//System.out.println("removing Html tags...");
+    			removeHtmlTag(child);
+    		}
+    		break;
+    	case "A":
+    		//System.out.println("Anchor tag...");
+			elem.before(elem.text() + " (" + elem.attr("href") + ") ");
+    		elem.remove();
+    		break;
+    		default:
+    			//System.out.println("replacing elem with its text...");
+    			elem.before(elem.text());
+    			for(Element child:elem.children()){
+    				//System.out.println("removing Html tags...");
+    				removeHtmlTag(child);
+    			}
+    			//System.out.println("removing element...");
+    			elem.remove();
+    	}
+    }
     
     private void removeHtmlTags(Document doc){
+    	/*
     	Elements elems = doc.getElementsByTag("A");
     	for(Element e:elems){
     		e.before(e.text() + " (" + e.attr("href") + ") ");
@@ -1472,7 +1510,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	removeHtmlTag(doc, "STRONG");
     	removeHtmlTag(doc, "SUB");
     	removeHtmlTag(doc, "U");
-    }
+    	*/
+    	for(Element child : doc.body().children()){
+    		removeHtmlTag(child);
+    	}
+	}
     
     private DBImage retrieveEmbeddedImage(String nodeId, String imgName, String workspace, Object timestamp){
 		//NodeUtil.getNodeRefAtTime(nodeId, workspace, timestamp);
@@ -1662,13 +1704,15 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	if(elm == null) return;
     	if(sb == null) return;
     	
-    	if(elm.isBlock()){
-    		sb.append("<?linebreak?>");
-    	}
-    	else{
+    	if(!elm.isBlock()){
     		sb.append(" ");
     	}
-    	sb.append(elm.ownText());
+
+    	if(elm.ownText().length() > 0){
+    		sb.append("<![CDATA[");
+    		sb.append(elm.ownText());
+        	sb.append("]]>");
+    	}
     	
     	if(elm.children() != null && elm.children().size() > 0){
     		for(Element e: elm.children()){
@@ -1679,6 +1723,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
     			traverseHtml(e,sb);
     		}
     	}
+    	
+    	if(elm.isBlock()) sb.append("<?linebreak?>");
     }
     
     @Override

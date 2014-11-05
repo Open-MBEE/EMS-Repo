@@ -4,7 +4,7 @@
   Retrieves everything in a product, views, elements, snapshots, etc. - look at element and view get respectively
   </description>
   <url>/ve/products/{id}</url>
-  <format default="html">any</format> 
+  <format default="html">argument</format> 
   <authentication>user</authentication> 
   <transaction allow="readonly">required</transaction>
   <family>EMS Java Read Webscripts</family>

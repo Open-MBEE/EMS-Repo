@@ -4,7 +4,7 @@
     
   	</description>
 		<url>/ve/configurations/{site}</url>
-		<format default="html">any</format>
+		<format default="html">argument</format>
 		<authentication>user</authentication>
 		<transaction allow="readonly">required</transaction>
 		<family>EMS Java Read Webscripts</family>
