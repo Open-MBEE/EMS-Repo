@@ -3,7 +3,7 @@
   <description>toggle debug off</description>
   <url>/debug?on={on?}&amp;off={off?}</url>
   <authentication>user</authentication>
-  <format default="html">any</format>
+  <format default="html">argument</format>
   <family>EMS Utils</family>
   <args>
     <arg>

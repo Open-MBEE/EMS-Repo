@@ -4,8 +4,8 @@
     	get view with {viewId}
 	</description>
   	<url>/workspaces/{workspaceId}/views/{viewId}</url>
-  	<format default="json">any</format>
+  	<format default="json">argument</format>
   	<authentication>user</authentication>
-  	<transaction allow="readonly">required</transaction>
+  	<transaction allow="readwrite">required</transaction>
   	<family>MMS REST API</family>
  </webscript>

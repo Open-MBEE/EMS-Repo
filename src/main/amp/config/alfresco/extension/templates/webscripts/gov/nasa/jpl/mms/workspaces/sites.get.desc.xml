@@ -13,7 +13,7 @@
 	]}
   	</description>
   	<url>/workspaces/{workspaceId}/sites</url>
-  	<format default="json">any</format>
+  	<format default="json">argument</format>
   	<authentication>user</authentication>
   	<transaction allow="readonly">required</transaction>
   	<family>MMS REST API</family>

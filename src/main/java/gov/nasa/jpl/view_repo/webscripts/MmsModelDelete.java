@@ -116,9 +116,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             trx.begin();
 
             if (root != null && root.exists()) {
-                delete(root, workspace, null);
-                EmsScriptNode pkgNode = findScriptNodeById(elementId + "_pkg", workspace, null, false);
-                handleElementHierarchy( pkgNode, workspace, true );
+                handleElementHierarchy( root, workspace, true );
             } else {
                 log( LogLevel.ERROR, "Could not find node " + elementId + " in workspace " + wsId,
                      HttpServletResponse.SC_NOT_FOUND);
@@ -245,12 +243,24 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         }
 
         if (recurse) {
-            for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
-                EmsScriptNode child = new EmsScriptNode(assoc.getChildRef(), services, response);
+            for ( NodeRef childRef : root.getOwnedChildren() ) {
+                EmsScriptNode child = new EmsScriptNode(childRef, services, response);
                 handleElementHierarchy(child, workspace, recurse);
             }
         }
+        
+        // Delete the node:
         delete(root, workspace, null);
+        
+        // TODO: REVIEW may not need this b/c addToWsDiff() does not add in reified packages
+        //       Brad says we may want them
+//        // Delete the reified pkg if it exists also:
+//        EmsScriptNode pkgNode = findScriptNodeById(root.getSysmlId() + "_pkg", 
+//                                                   workspace, null, false);
+//        
+//        if (pkgNode != null) {
+//            delete(pkgNode, workspace, null);
+//        }
     }
 
     /**
