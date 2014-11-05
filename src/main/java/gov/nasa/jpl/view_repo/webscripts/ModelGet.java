@@ -334,7 +334,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		// add root element to elementsFound if its not already there 
 		// (if it's there, it's probably because the root is a reified pkg node)
 		String sysmlId = (String)root.getProperty(Acm.ACM_ID);
-		String rootName = (String)root.getProperty(Acm.CM_NAME);
+		String rootName = sysmlId;
 		if (!elementsFound.containsKey(sysmlId)) {
 		    // dont add reified packages
 		    if (!rootName.contains("_pkg") &&

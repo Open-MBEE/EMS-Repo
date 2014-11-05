@@ -75,7 +75,7 @@ public class ElementReference implements Viewable<EmsScriptNode> {
         try {
             json.put("type", "Paragraph");
             json.put("sourceType", "reference");
-            json.put("source", element.getName()); // this is the sysml id = the alfresco name
+            json.put("source", element.getSysmlId()); 
             json.put("sourceProperty", attribute.toString().toLowerCase() );
 
         } catch ( JSONException e ) {

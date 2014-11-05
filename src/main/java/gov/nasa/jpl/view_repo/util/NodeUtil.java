@@ -556,11 +556,11 @@ public class NodeUtil {
     }
 
     /**
-     * Find a NodeReference by name (returns first match, assuming things are
-     * unique)
+     * Find a NodeReference by id (returns first match, assuming things are
+     * unique).
      *
      * @param id
-     *            Node name to search for
+     *            Node sysml:id or cm:name to search for
      * @param workspace
      * @param dateTime
      *            the time specifying which version of the NodeRef to find; null
@@ -581,7 +581,7 @@ public class NodeUtil {
             esn = new EmsScriptNode( r, getServices() );
         }
         if ( r == null || (!esn.exists() && !esn.isDeleted()) ) {
-            r = findNodeRefByType( id, "@cm\\:name:\"",
+            r = findNodeRefByType( id, SearchType.CM_NAME.prefix,
                                    //parentScopeName,
                                    useSimpleCache,
                                    ignoreWorkspace,
@@ -1409,10 +1409,22 @@ public class NodeUtil {
                 new TreeSet< String >( EmsScriptNode.getNames( nodes ) );
         return names;
     }
+    
+    public static Set< String > getSysmlIds( Collection< NodeRef > refs ) {
+        List< EmsScriptNode > nodes = EmsScriptNode.toEmsScriptNodeList( refs );
+        TreeSet< String > names =
+                new TreeSet< String >( EmsScriptNode.getSysmlIds( nodes ) );
+        return names;
+    }
 
     public static String getName( NodeRef ref ) {
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
         return node.getName();
+    }
+    
+    public static String getSysmlId( NodeRef ref ) {
+        EmsScriptNode node = new EmsScriptNode( ref, getServices() );
+        return node.getSysmlId();
     }
 
     public static Set<NodeRef> getModelElements( Set<NodeRef> s1 ) {
