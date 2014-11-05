@@ -1629,7 +1629,7 @@ public class EmsScriptNode extends ScriptNode implements
                         addStringExpressionJSON( json, node, filter, dateTime );
                         break;
                     case TimeExpression:
-                        addStringExpressionJSON( json, node, filter, dateTime );
+                        addTimeExpressionJSON( json, node, filter, dateTime );
                         break;
                     case TimeInterval:
                         addTimeIntervalJSON( json, node, filter, dateTime );
