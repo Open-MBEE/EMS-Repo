@@ -1448,6 +1448,9 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public enum SpecEnum  {
+      Association,
+      Binding,
+      Characterizes,
       Conform,
       Connector,
       Constraint,
@@ -1475,6 +1478,7 @@ public class EmsScriptNode extends ScriptNode implements
       Product,
       Property,
       StringExpression,
+      Succession,
       TimeExpression,
       TimeInterval,
       ValueSpecification,
@@ -1485,6 +1489,9 @@ public class EmsScriptNode extends ScriptNode implements
         private static final long serialVersionUID = -2080928480362524333L;
 
         {
+            put("Association", SpecEnum.Association);
+            put("Binding", SpecEnum.Binding);
+            put("Characterizes", SpecEnum.Characterizes);
             put("Conform", SpecEnum.Conform);
             put("Connector", SpecEnum.Connector);
             put("Constraint", SpecEnum.Constraint);
@@ -1512,6 +1519,7 @@ public class EmsScriptNode extends ScriptNode implements
             put("Product", SpecEnum.Product);
             put("Property", SpecEnum.Property);
             put("StringExpression", SpecEnum.StringExpression);
+            put("Succession", SpecEnum.StringExpression);
             put("TimeExpression", SpecEnum.TimeExpression);
             put("TimeInterval", SpecEnum.TimeInterval);
             put("ValueSpecification", SpecEnum.ValueSpecification);
@@ -1547,6 +1555,15 @@ public class EmsScriptNode extends ScriptNode implements
                 
             } else {
                 switch (aspect) {
+                    case Association:
+                        addAssociationJSON( json, node, filter, dateTime );
+                        break;
+                    case Binding:
+                        addBindingJSON( json, node, filter, dateTime );
+                        break;
+                    case Characterizes:
+                        addCharacterizesJSON( json, node, filter, dateTime );
+                        break;
                     case Conform:
                         addConformJSON( json, node, filter, dateTime );
                         break;
@@ -1627,6 +1644,9 @@ public class EmsScriptNode extends ScriptNode implements
                         break;
                     case StringExpression:
                         addStringExpressionJSON( json, node, filter, dateTime );
+                        break;
+                    case Succession:
+                        addSuccessionJSON( json, node, filter, dateTime );
                         break;
                     case TimeExpression:
                         addTimeExpressionJSON( json, node, filter, dateTime );
@@ -3444,6 +3464,12 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
         // TODO: Snapshots?
+        // TODO: Eventually the server side will do the processing to get the contents, but
+        //       for now MDK will do this.
+        String id = getSysmlIdOfProperty( Acm.ACM_CONTENTS, dateTime );
+        if (id != null) {
+            putInJson( json, Acm.JSON_CONTENTS, id, filter );
+        }
     }
 
     protected void addProductJSON( JSONObject json, EmsScriptNode node,
@@ -3826,15 +3852,70 @@ public class EmsScriptNode extends ScriptNode implements
         }
     }
 
-    protected
-            void
-            addConnectorJSON( JSONObject json, EmsScriptNode node,
-                              Set< String > filter, Date dateTime )
+    protected void addConnectorJSON( JSONObject json, EmsScriptNode node,
+                                     Set< String > filter, Date dateTime )
                                                                    throws JSONException {
-        ArrayList< NodeRef > nodeRefs =
-                (ArrayList< NodeRef >)node.getProperty( "sysml:roles" );
-        JSONArray ids = addNodeRefIdsJSON( nodeRefs, dateTime );
-        putInJson( json, "roles", ids, filter );
+        
+        addDirectedRelationshipJSON(json, node, filter, dateTime);
+        
+        ArrayList< NodeRef > nodeRefsSource =
+                (ArrayList< NodeRef >)node.getProperty( Acm.ACM_SOURCE_PATH );
+        JSONArray sourceIds = addNodeRefIdsJSON( nodeRefsSource, dateTime );
+        putInJson( json, Acm.JSON_SOURCE_PATH, sourceIds, filter );
+        
+        ArrayList< NodeRef > nodeRefsTarget =
+                (ArrayList< NodeRef >)node.getProperty( Acm.ACM_TARGET_PATH );
+        JSONArray targetIds = addNodeRefIdsJSON( nodeRefsTarget, dateTime );
+        putInJson( json, Acm.JSON_TARGET_PATH, targetIds, filter );
+        
+        String id = node.getSysmlIdOfProperty( Acm.ACM_CONNECTOR_TYPE,
+                                               dateTime );
+        if ( id != null ) {
+            putInJson( json, Acm.JSON_CONNECTOR_TYPE, id, filter );
+        }        
+    }
+    
+    protected void addAssociationJSON( JSONObject json, EmsScriptNode node,
+                                     Set< String > filter, Date dateTime )
+                                                                   throws JSONException {
+        
+        addDirectedRelationshipJSON(json, node, filter, dateTime);
+
+        ArrayList< NodeRef > nodeRefsOwnedEnd =
+                (ArrayList< NodeRef >)node.getProperty( Acm.ACM_OWNED_END );
+        JSONArray ownedEndIds = addNodeRefIdsJSON( nodeRefsOwnedEnd, dateTime );
+        putInJson( json, Acm.JSON_OWNED_END, ownedEndIds, filter );
+        
+        putInJson( json, Acm.JSON_SOURCE_AGGREGATION, node.getProperty( Acm.ACM_SOURCE_AGGREGATION ), filter );
+        putInJson( json, Acm.JSON_TARGET_AGGREGATION, node.getProperty( Acm.ACM_TARGET_AGGREGATION ), filter );
+     
+    }
+    
+    protected void addCharacterizesJSON( JSONObject json, EmsScriptNode node,
+                                       Set< String > filter, Date dateTime )
+                                                                     throws JSONException {
+          
+          addDirectedRelationshipJSON(json, node, filter, dateTime);
+
+          ArrayList< NodeRef > nodeRefs =
+                  (ArrayList< NodeRef >)node.getProperty( Acm.ACM_PROPERTIES_TRANSFERRED );
+          JSONArray ids = addNodeRefIdsJSON( nodeRefs, dateTime );
+          putInJson( json, Acm.JSON_PROPERTIES_TRANSFERRED, ids, filter );
+          
+    }
+    
+    protected void addSuccessionJSON( JSONObject json, EmsScriptNode node,
+                                         Set< String > filter, Date dateTime )
+                                                                       throws JSONException {
+            
+         addConnectorJSON(json, node, filter, dateTime);   
+    }
+    
+    protected void addBindingJSON( JSONObject json, EmsScriptNode node,
+                                      Set< String > filter, Date dateTime )
+                                                                    throws JSONException {
+         
+         addConnectorJSON(json, node, filter, dateTime);   
     }
 
     /**************************
