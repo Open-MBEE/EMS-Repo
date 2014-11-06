@@ -84,7 +84,12 @@
                         { "$ref": "#/definitions/DirectedRelationship"},
                         { "$ref": "#/definitions/Conform"},
                         { "$ref": "#/definitions/Dependency"},
-                        { "$ref": "#/definitions/Expose"}
+                        { "$ref": "#/definitions/Expose"},
+                        { "$ref": "#/definitions/Connector"},
+                        { "$ref": "#/definitions/Association"},
+                        { "$ref": "#/definitions/Characterizes"},
+                        { "$ref": "#/definitions/Succession"},
+                        { "$ref": "#/definitions/Binding"}                      
                     ]
                 }
             }
@@ -258,6 +263,10 @@
                         "type": "string",
                         "description": "ID of views"
                     }
+                },
+                "contents": {
+                    "type": "string",
+                    "description": "Node ID"
                 }
             }
         },
@@ -519,14 +528,82 @@
         "Connector": {
             "properties": {
                 "type": { "enum": ["Connector"] },
-                "roles": {
+                "sourcePath": {
                     "type": "array",
                     "items": {
                         "type": "string",
-                        "description": "ID of the role elements"
+                        "description": "IDs of the Nodes"
+                    }
+                },
+                "targetPath": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "IDs of the Nodes"
+                    }
+                },
+                "connectorType": {
+                    "type": "string",
+                    "description": "Node ID"
+                }
+            },
+            "allOf": [
+                {"$ref": "#/definitions/DirectedRelationship"}
+            ]
+        },
+        "Association": {
+            "properties": {
+                "type": { "enum": ["Association"] },
+                "ownedEnd": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "IDs of the Nodes"
+                    }
+                },
+                "sourceAggregation": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "can be COMPOSITE, SHARED, NONE"
+                    }
+                },
+                "targetAggregation": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "can be COMPOSITE, SHARED, NONE"
                     }
                 }
-            }
+            },
+            "allOf": [
+                {"$ref": "#/definitions/DirectedRelationship"}
+            ]
+        },
+        "Characterizes": {
+            "properties": {
+                "type": { "enum": ["Characterizes"] },
+                "propertiesTransferred": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "IDs of the Nodes"
+                    }
+                }
+            },
+            "allOf": [
+                {"$ref": "#/definitions/DirectedRelationship"}
+            ]
+        },
+        "Succession": {
+            "allOf": [
+                {"$ref": "#/definitions/Connector"}
+            ]
+        },
+        "Binding": {
+            "allOf": [
+                {"$ref": "#/definitions/Connector"}
+            ]
         },
         
         "Paragraph": {
