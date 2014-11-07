@@ -82,23 +82,20 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		JSONObject json = new JSONObject();
 		JSONArray jsonArray = new JSONArray();
 		JSONObject interiorJson = new JSONObject();
-		if(ws == null && wsID.equals("master")){
-		    WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, ws );
-////			interiorJson.put("creator", "null");
-////			interiorJson.put("created",  "null");
-//			interiorJson.put("name", wsID);
-//            interiorJson.put("id", wsID);
-//            interiorJson.put("qualifiedName", wsID);
-//            interiorJson.put("qualifiedId", wsID);
-////			interiorJson.put("parent", "null");
-////			interiorJson.put("branched", "null");
-			jsonArray.put(interiorJson);
+		if(ws == null){
+		    if (wsID.equals("master")) {
+		        WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, ws );
+		        jsonArray.put(interiorJson);
+		    } else {
+	            log(LogLevel.WARNING, "Workspace not found: " + (ws == null ? null : ws.getSysmlId()), HttpServletResponse.SC_NOT_FOUND);
+		    }
+		} else {
+		    if(checkPermissions(ws, PermissionService.READ))  {
+		        jsonArray.put(ws.toJSONObject(null));
+		    } else {
+                log(LogLevel.WARNING, "No read permissions for workspace: " + (ws == null ? null : ws.getSysmlId()), HttpServletResponse.SC_FORBIDDEN);
+		    }
 		}
-		else if(checkPermissions(ws, PermissionService.READ)){
-			jsonArray.put(ws.toJSONObject(null));
-		}
-		else
-			log(LogLevel.WARNING, "No permission to read: " + (ws == null ? null : ws.getSysmlId()), HttpServletResponse.SC_NOT_FOUND);
 		json.put("workspace" , jsonArray);
 		return json;
 	}
