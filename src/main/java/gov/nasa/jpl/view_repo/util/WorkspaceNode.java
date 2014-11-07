@@ -723,7 +723,7 @@ public class WorkspaceNode extends EmsScriptNode {
         json.put( "modified", TimeUtils.toTimestamp( (Date)getProperty("cm:modified") ) );
         Date copyTime = getCopyTime();
         if ( copyTime != null ) {
-            json.put( "copyTime", TimeUtils.toTimestamp( copyTime ) );
+            json.put( "branched", TimeUtils.toTimestamp( copyTime ) );
         }
         json.put( "parent", getId(getParentWorkspace())); // this handles null as master
 
@@ -731,10 +731,10 @@ public class WorkspaceNode extends EmsScriptNode {
         // date? Shouldn't the branched date always be the same as the created
         // date? This is for future functionality when we track when the child pulls from the
         // parent last.
-        Date lastTimeSyncParent = (Date)getProperty("ems:lastTimeSyncParent");
-        if ( lastTimeSyncParent != null ) {
-            json.put( "lastTimeSyncParent", TimeUtils.toTimestamp( lastTimeSyncParent ) );
-        }
+//        Date lastTimeSyncParent = (Date)getProperty("ems:lastTimeSyncParent");
+//        if ( lastTimeSyncParent != null ) {
+//            json.put( "branched", TimeUtils.toTimestamp( lastTimeSyncParent ) );
+//        }
         return json;
     }
 
