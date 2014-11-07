@@ -44,6 +44,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchService;
+import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
@@ -303,8 +304,10 @@ public class NodeUtil {
 //                            && ( prefix.equals( SearchType.CM_NAME.prefix ) || prefix.equals( SearchType.ID.prefix ) );
             if ( useSimpleCache ) {
                 NodeRef ref = simpleCache.get( specifier );
-                if ( exists(ref ) ) {
-                    results = Utils.newList( ref );
+                if (services.getPermissionService().hasPermission( ref, PermissionService.READ ) == AccessStatus.ALLOWED) {
+                    if ( exists(ref ) ) {
+                        results = Utils.newList( ref );
+                    }
                 }
             } else  {
                 results = getCachedElements( specifier, prefix, ignoreWorkspace, workspace, dateTime, justFirst,

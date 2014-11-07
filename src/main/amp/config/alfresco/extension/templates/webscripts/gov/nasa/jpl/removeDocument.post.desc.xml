@@ -2,7 +2,7 @@
   <shortname>Remove Document</shortname> 
   <description>remove a document to a volume</description>
   <url>/rest/projects/document/{docid}/delete</url> 
-  <format default="json">any</format> 
+  <format default="json">argument</format> 
   <authentication>user</authentication> 
   <transaction allow="readwrite">required</transaction>
   <family>View Editor</family>

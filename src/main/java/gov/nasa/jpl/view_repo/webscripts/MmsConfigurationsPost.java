@@ -92,7 +92,7 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
         ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
         HashSet<String> productSet = configWs.updateConfiguration( config, (JSONObject)req.parseContent(), siteNode, workspace, null );
         ConfigurationPost configPost = new ConfigurationPost( repository, services );
-        configPost.startAction( config, (String)siteNode.getProperty( Acm.CM_NAME ), productSet );
+        configPost.startAction( config, (String)siteNode.getProperty( Acm.CM_NAME ), productSet, null );	//TODO: need timestamp???
         
         return configWs.getConfigJson( config,
                                        (String)siteNode.getProperty( Acm.CM_NAME ),
