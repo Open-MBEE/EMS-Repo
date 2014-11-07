@@ -62,12 +62,14 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 import javax.servlet.http.HttpServletResponse;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.jscript.ScriptVersion;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
+import org.alfresco.service.cmr.dictionary.ClassDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
@@ -378,10 +380,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
 
-        if ( !hasAspect( type ) ) {
-            return addAspect( type );
-        }
-        return false;
+        return changeAspect( type );
     }
 
     /**
@@ -3239,7 +3238,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
     }
 
-    public Set<QName> getAllAspectsAndInherited() {
+    private Set<QName> getAllAspectsAndInherited() {
         Set<QName> aspects = new LinkedHashSet< QName >();
         aspects.addAll( getAspectsSet() );
         ArrayList<QName> queue = new ArrayList< QName >( aspects );
@@ -3256,8 +3255,6 @@ public class EmsScriptNode extends ScriptNode implements
         }
         return aspects;
     }
-
-
 
     public boolean hasOrInheritsAspect( String aspectName ) {
         if ( hasAspect( aspectName ) ) return true;
@@ -3277,6 +3274,100 @@ public class EmsScriptNode extends ScriptNode implements
 //
 //        }
 //        return false;
+    }
+    
+    /**
+     * Changes the aspect of the node to the one specified, taking care
+     * to save off and re-apply properties from current aspect if 
+     * downgrading.  Handles downgrading to a Element, by removing all
+     * the needed aspects.
+     *      
+     * @param aspectName The aspect to change to
+     */
+    private boolean changeAspect(String aspectName) {
+        
+        Set<QName> aspects = new LinkedHashSet< QName >();
+        boolean retVal = false;
+        Map<String,Object> oldProps = null;
+        DictionaryService dServ = services.getDictionaryService();
+        AspectDefinition aspectDef;
+        
+        if (aspectName == null) {
+            return false;
+        }
+        
+        QName qName = NodeUtil.createQName( aspectName );
+        
+        // If downgrading to an Element, then need to remove
+        // all aspects without saving any properties or adding
+        // any aspects:
+        if (aspectName.equals(Acm.ACM_ELEMENT)) {
+            for (String aspect : Acm.ACM_ASPECTS) {
+                if (hasAspect(aspect)) {
+                    retVal = retVal || removeAspect(aspect);
+                }
+            }
+            
+            return retVal;
+        }
+        
+        // Get all the aspects for this node, find all of their parents, and see if
+        // the new aspect is any of the parents.  If it is, then we need to remove the
+        // aspect who is a child of that parent:
+        QName aspectToRemove = null;
+        aspects.addAll( getAspectsSet() );
+        ArrayList<QName> queue = new ArrayList< QName >( aspects );
+        QName name;
+        QName parentQName;
+        while(!queue.isEmpty()) {
+            name = queue.get(0);
+            queue.remove(0);
+            aspectDef = dServ.getAspect(name);
+            parentQName = aspectDef.getParentName();
+            if (parentQName != null) {
+                if (parentQName.equals( qName )) {
+                    aspectToRemove = name;
+                    break;
+                }
+                if (!queue.contains(parentQName)) {
+                    queue.add(parentQName);
+                }
+            }
+        }
+        
+        // If changing aspects to a parent aspect (ie downgrading), then we must save off the
+        // properties before removing the current aspect, and then re-apply them:        
+        if (aspectToRemove != null) {
+            oldProps = getProperties();
+            
+            // Remove the old aspect:
+            retVal = removeAspect(aspectToRemove.toString());
+        }
+
+        // Apply the new aspect if needed:
+        if (!hasAspect(aspectName)) {
+            retVal = addAspect(aspectName);
+        }
+        
+        // Add the saved properties if needed:
+        if (oldProps != null) {
+            aspectDef = dServ.getAspect(qName);
+            Set<QName> aspectProps = aspectDef.getProperties().keySet();
+
+            // Only add the properties that are valid for the new aspect:
+            String propName;
+            QName propQName;
+            for (Entry<String,Object> entry : oldProps.entrySet()) {
+                propName = entry.getKey();
+                propQName = NodeUtil.createQName(propName);
+                
+                if (aspectProps.contains(propQName)) {
+                    setProperty(propName, (Serializable)entry.getValue());
+                }
+            }
+        }
+        
+        return retVal;
     }
 
 

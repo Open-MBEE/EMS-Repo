@@ -1466,26 +1466,16 @@ public class ModelPost extends AbstractJavaWebScript {
                 if (nodeToUpdate != null && nodeToUpdate.exists() ) {
                     if ( Debug.isOn() ) Debug.outln("moving node <<<" + nodeToUpdate + ">>>");
                     if ( Debug.isOn() ) Debug.outln("to parent <<<" + parent + ">>>");
-                        if ( nodeToUpdate.move(parent) ) {
-                            modStatus.setState( ModStatus.State.MOVED  );
-                        }
-                        
-                    // If it has a Product aspect, but want to remove that aspect
-                    // ie downgrading to a View or Element
-                    // Note: this check will not work if downgrading to an Element,
-                    //		 and the type is not included in the specialization.  
-                    // TODO Will need to generalize this for any aspect, and save
-                    //		off the appropriate properties before removing the 
-                    //		aspect, as it will remove all properties pertaining to the
-                    //		aspect.  Will then need to update those saved properties
-                    //		after removing the aspect.
-                    if (nodeToUpdate.hasAspect(Acm.ACM_PRODUCT) &&
-                    	(acmSysmlType != null && !acmSysmlType.equals(Acm.ACM_PRODUCT)) ) {
-                    	nodeToUpdate.removeAspect(Acm.ACM_PRODUCT);
+                    
+                    if ( nodeToUpdate.move(parent) ) {
+                        modStatus.setState( ModStatus.State.MOVED  );
                     }
-                        
-                    if ( !type.equals( acmSysmlType )
-                            && NodeUtil.isAspect( acmSysmlType ) ) {
+
+                    // Update the aspect if the type has changed and its a aspect, or if it is
+                    // being changed to an Element.  Need to call this for Elements for downgrading,
+                    // which will remove all of the needed aspects.
+                    if ( (!type.equals( acmSysmlType ) && NodeUtil.isAspect( acmSysmlType )) ||
+                         acmSysmlType.equals(Acm.ACM_ELEMENT)) {
                         if (nodeToUpdate.createOrUpdateAspect( acmSysmlType )) {                        		
                             modStatus.setState( ModStatus.State.UPDATED  );
                         } 	
