@@ -1,0 +1,88 @@
+package gov.nasa.jpl.view_repo.webscripts;
+
+import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.CommitUtil;
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.transaction.UserTransaction;
+
+import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
+import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.security.PermissionService;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.extensions.webscripts.Cache;
+import org.springframework.extensions.webscripts.Status;
+import org.springframework.extensions.webscripts.WebScriptRequest;
+
+public class WorkspacesDelete {
+    public WorkspacesDelete() {
+        super();
+    }
+    
+    public WorkspacesDelete(Repository repositoryHelper, ServiceRegistry service) {
+        super(repositoryHelper, service);
+    }
+    
+    @Override
+    protected boolean validateRequest(WebScriptRequest req, Status status) {
+        if(!checkRequestContent( req ) == false) {
+            return false;
+        }
+        
+        String wsID = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
+        if(checkRequestVariable(wsId, WORKSPACE_ID) == false) {
+            return false;
+        }
+        return true;
+        }
+    
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+       printHeader(req);
+       clearCaches();
+       Map<String, Object> model = new HashMap<String, Object>();
+       String user = AuthenticationUtil.getRunAsUser();
+       JSONObject result = null;
+       try {
+           if( validateRequest(req, status) ){
+               String wsId = req.getParameter("target");
+               
+               WorkspaceNode target = WorkspaceNode.getWorkspaceFromId(wsId, getServices(), 
+                                                                       getResponse(), status, user);
+               json = printObject(target);
+               target.delete( true );
+           }
+       } catch (JSONException e) {
+           log(LogLevel.ERROR, "JSON object could not be created \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+           e.printStackTrace();
+       } catch (Exception e) {
+           log(LogLevel.ERROR, "Internal stack trace error \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+           e.printStackTrace();
+       }
+       
+       if(object == null) {
+              model.put("res", response.ToString());
+       }
+       else {
+           try {
+               if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
+               model.put("res", json.toString(4));
+           } catch (JSONException e) {
+               // TODO Auto-generated catch block
+               e.printStackTrace();
+           }
+       }
+       status.setCode(statusCode);
+       printFooter();
+       return model;
+    }
+    
+}
+
