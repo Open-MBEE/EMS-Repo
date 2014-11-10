@@ -1983,44 +1983,49 @@ public class ModelPost extends AbstractJavaWebScript {
             // Add all of the Parameter constraints:
             ClassData cd = getSystemModelAe().getClassData();
 
-            // Loop through all the listeners:
-            for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
-
-                // TODO: REVIEW
-                //       Can we get duplicate ParameterListeners in the aeClassses map?
-                constraints.addAll( listener.getConstraints( true, null ) );
-            }
-
-            // Solve!!!!
-            boolean result = false;
-            try {
-                Debug.turnOn();
-                Random.reset();
-                result = solver.solve(constraints);
-            } finally {
-                Debug.turnOff();
-            }
-            if (!result) {
-                log( LogLevel.ERROR, "Was not able to satisfy all of the constraints!" );
-            }
-            else {
-                log( LogLevel.INFO, "Satisfied all of the constraints!" );
-                
-                // Update the values of the nodes after solving the constraints:
-                EmsScriptNode node;
-                Parameter<Object> param;
-                Set<Entry<EmsScriptNode, Parameter<Object>>> entrySet = sysmlToAe.getExprParamMap().entrySet();
-                for (Entry<EmsScriptNode, Parameter<Object>> entry : entrySet) {
-                	
-                	node = entry.getKey();
-                	param = entry.getValue();
-                	systemModel.setValue(node, (Serializable)param.getValue());
-                }
-                
-                log( LogLevel.INFO, "Updated all node values to satisfy the constraints!" );
-                
-            }
-
+            //loop x times for now
+            for(int i=0; i<10; i++)
+            { 
+	            // Loop through all the listeners:
+	            for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
+	
+	                // TODO: REVIEW
+	                //       Can we get duplicate ParameterListeners in the aeClassses map?
+	                constraints.addAll( listener.getConstraints( true, null ) );
+	            }
+	
+	            // Solve!!!!
+	            boolean result = false;
+	            try {
+	                Debug.turnOn();
+	                Random.reset();
+	                result = solver.solve(constraints);
+	                // loop to check thru all constraints
+	                
+	            } finally {
+	                Debug.turnOff();
+	            }
+	            if (!result) {
+	                log( LogLevel.ERROR, "Was not able to satisfy all of the constraints!" );
+	            }
+	            else {
+	                log( LogLevel.INFO, "Satisfied all of the constraints!" );
+	                
+	                // Update the values of the nodes after solving the constraints:
+	                EmsScriptNode node;
+	                Parameter<Object> param;
+	                Set<Entry<EmsScriptNode, Parameter<Object>>> entrySet = sysmlToAe.getExprParamMap().entrySet();
+	                for (Entry<EmsScriptNode, Parameter<Object>> entry : entrySet) {
+	                	
+	                	node = entry.getKey();
+	                	param = entry.getValue();
+	                	systemModel.setValue(node, (Serializable)param.getValue());
+	                }
+	                
+	                log( LogLevel.INFO, "Updated all node values to satisfy the constraints!" );
+	                
+	            }
+        	}
         } // End if constraints list is non-empty
 
     }
