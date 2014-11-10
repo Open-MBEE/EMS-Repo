@@ -66,6 +66,8 @@ echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"ve/documents/europa?format=js
 # get search
 echo curl $CURL_FLAGS $CURL_GET_FLAGS $BASE_URL"element/search?keyword=some*\""
 
+# get multiple elements
+echo curl $CURL_FLAGS $CURL_GET_FLAGS $SERVICE_URL"workspaces/master/elements\"" -d @JsonData/elementsGet.json -H "\"Content-Type:application/json\""
 
 echo ""
 echo DELETE
