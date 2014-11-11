@@ -189,9 +189,8 @@ public class ProductListGet extends AbstractJavaWebScript {
 
                 EmsScriptNode parent = node.getOwningParent(dateTime);
                 String parentId = (String)parent.getProperty(Acm.ACM_ID);
-                String parentName = (String)parent.getProperty(Acm.CM_NAME);
-                if (parentName.contains("_pkg")) {
-                    parentId = parentName.replace("_pkg", "");
+                if (parentId.contains("_pkg")) {
+                    parentId = parentId.replace("_pkg", "");
                 }
                 if (!volume2documents.has(parentId)) {
                     volume2documents.put(parentId, new JSONArray());
@@ -231,39 +230,33 @@ public class ProductListGet extends AbstractJavaWebScript {
 	protected void handleParents(EmsScriptNode node) throws JSONException {
         String id = (String)node.getProperty(Acm.ACM_ID);
         String sysmlName = (String)node.getProperty(Acm.ACM_NAME);
-        if (id == null) {
-            String cmName = (String)node.getProperty(Acm.CM_NAME);
-            id = cmName.replace("_pkg", "");
-        } else {
+        
+        if (id != null) {
             id = id.replace("_pkg", "");
-        }
-        if (!documents.has(id)) {
-            volumes.put(id, sysmlName);
-        }
-
-        EmsScriptNode parent = node.getParent();
-        if (checkPermissions(parent, PermissionService.READ)) {
-            String parentSysmlName = (String)parent.getProperty(Acm.ACM_NAME);
-            String parentId = (String)parent.getProperty(Acm.ACM_ID);
-            String parentCmName = (String)parent.getProperty(Acm.CM_NAME);
-            if (parentCmName.contains("_pkg")) {
-                parentId = parentCmName.replace("_pkg", "");
+            
+            if (!documents.has(id) && sysmlName != null) {
+                volumes.put(id, sysmlName);
             }
+        }
+        
+        EmsScriptNode parent = node.getParent();
+        if (parent != null && checkPermissions(parent, PermissionService.READ)) {
+            String parentId = (String)parent.getProperty(Acm.ACM_ID);
             if (parentId == null) {
-                if (!projectVolumes.toString().contains(id)) {
+                if (id != null && !projectVolumes.toString().contains(id)) {
                     projectVolumes.put(id);
                 }
             } else {
-                parentSysmlName = (String)parent.getProperty(Acm.CM_NAME);
-                if (parentSysmlName.contains("_pkg")) {
-                    parentId = parentSysmlName.replace("_pkg", "");
+                if (parentId.contains("_pkg")) {
+                    parentId = parentId.replace("_pkg", "");
                 }
+                
                 if (!volume2volumes.has(parentId)) {
                     volume2volumes.put(parentId, new JSONArray());
                 }
-                if (!documents.has(id)) {
+                if (id != null && !documents.has(id)) {
                     JSONArray array = (JSONArray)volume2volumes.get(parentId);
-                    if (!array.toString().contains(id)) {
+                    if (array != null && !array.toString().contains(id)) {
                         array.put(id);
                     }
                 }

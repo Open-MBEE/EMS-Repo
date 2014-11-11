@@ -442,25 +442,33 @@ public class ModelPost extends AbstractJavaWebScript {
                 
                 // FIXME: HERE! ATTENTION BRAD!  add to elements, so it is returned, and remind Doris
                 //        to fix her code also.
-                // If creating a holding bin, then need to create a node for it also for
-                // magic draw sync.
+                // Creating a reifiedNode here also, for magic draw sync to work with holding bin,
+                // and for ems:owner to be correct for the node this reifiedNode will own, and to get 
+                // the correct cm:name for the reifiedPackage as it is based on the reifiedNode cm:name.
+                String type;
+                String acmName;
                 if (createdHoldingBin) {
-                    ModStatus modStatus = new ModStatus();
-                    EmsScriptNode nodeBin = projectNode.createSysmlNode(ownerName, Acm.ACM_PACKAGE,
-                                                                        modStatus, workspace);
-                    if (nodeBin != null) {
-                        nodeBin.setProperty( Acm.ACM_NAME, "holding_bin" );
-                        owner = nodeBin;
-                    }
-                    else {
-                        owner = projectNode;
-                    }
-                    updateTransactionableWsState(nodeBin, ownerName, modStatus, false);
+                    type = Acm.ACM_PACKAGE;
+                    acmName = "holding_bin";
                 }
                 else {
-                    owner = projectNode;  
+                    type = Acm.ACM_ELEMENT;
+                    acmName = ownerName;
                 }
-                foundOwnerElement = owner != projectNode;
+                
+                ModStatus modStatus = new ModStatus();
+                EmsScriptNode nodeBin = projectNode.createSysmlNode(ownerName, type,
+                                                                    modStatus, workspace);
+                if (nodeBin != null) {
+                    nodeBin.setProperty( Acm.ACM_NAME, acmName );
+                    owner = nodeBin;
+                }
+                else {
+                    foundOwnerElement = false;
+                    owner = projectNode;
+                }
+                updateTransactionableWsState(nodeBin, ownerName, modStatus, false);
+                
             }
             // really want to add pkg as owner
             reifiedPkg = findScriptNodeById(ownerName + "_pkg", workspace, null, false);
@@ -473,7 +481,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     // project folder, the actual folder in which to create the
                     // pkg, so pass false.
                     reifiedPkg = getOrCreateReifiedPackageNode(owner, ownerName, workspace,
-                                                        foundOwnerElement);
+                                                               foundOwnerElement);
                     
                 } else {
                     log( LogLevel.WARNING, "Could not find owner package: "
@@ -1156,7 +1164,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 	if (iter != null && iter.hasNext()) {
                 		EmsScriptNode oldValNode = iter.next();
 
-              			nodeNames.add(oldValNode.getName());
+              			nodeNames.add(oldValNode.getSysmlId());
 
                         if ( workspace != null && workspace.exists()
                              && !workspace.equals( oldValNode.getWorkspace() ) ) {
@@ -1229,7 +1237,7 @@ public class ModelPost extends AbstractJavaWebScript {
 //                		ModStatus modStatus = new ModStatus();
 //                    EmsScriptNode newValNode = updateOrCreateTransactionableElement((JSONObject)newVal,nestedParent,
 //            																		null, workspace, ingest, true, modStatus );
-                		nodeNames.add(newValNode.getName());
+                		nodeNames.add(newValNode.getSysmlId());
 
                 		changed = true;
                 	}
@@ -1620,7 +1628,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     log( LogLevel.ERROR,
                          "\t failed to create reified node " + pkgName
                                  + " in parent, "
-                                 + parent.getProperty( Acm.CM_NAME ) + " = "
+                                 + parent.getProperty( Acm.ACM_ID ) + " = "
                                  + parent + " because of exception." );
                     throw e; // pass it up the chain to roll back transaction
                 }
@@ -1628,18 +1636,18 @@ public class ModelPost extends AbstractJavaWebScript {
                     log( LogLevel.ERROR,
                          "\t failed to create reified node " + pkgName
                                  + " in parent, "
-                                 + parent.getProperty( Acm.CM_NAME ) + " = "
+                                 + parent.getProperty( Acm.ACM_ID ) + " = "
                                  + parent );
                     return null;
                 } else {
                     reifiedPkgNode.setProperty(Acm.ACM_ID, pkgName);
-                    reifiedPkgNode.setProperty(Acm.CM_NAME, pkgName);
+               
                     if ( useParent ) {
                         reifiedPkgNode.setProperty(Acm.ACM_NAME, (String) node.getProperty(Acm.ACM_NAME));
                     } else {
                         reifiedPkgNode.setProperty( Acm.ACM_NAME, pkgName.replaceAll( "_pkg$", "" ) );
                     }
-                    log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getProperty(Acm.CM_NAME) + " : " + reifiedPkgNode.getNodeRef().toString());
+                    log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getProperty(Acm.ACM_ID) + " : " + reifiedPkgNode.getNodeRef().toString());
                 }
             }
             if (checkPermissions(reifiedPkgNode, PermissionService.WRITE)) {
@@ -1653,6 +1661,11 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
 
                 if (node != null) {
+                    
+                    // We are now setting the cm:name to the alfresco id.  
+                    // Note: this must be set after getting the correct node above
+                    reifiedPkgNode.setProperty(Acm.CM_NAME, node.getName()+"_pkg");
+                    
                     // lets keep track of reification
                     node.createOrUpdateAspect( "ems:Reified" );
                     node.createOrUpdateProperty( "ems:reifiedPkg", reifiedPkgNode.getNodeRef() );

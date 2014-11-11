@@ -353,7 +353,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
     @Deprecated
     public JSONObject getProductJson(EmsScriptNode product) throws JSONException {
         JSONObject productJson = new JSONObject();
-        productJson.put("sysmlid", product.getProperty(Acm.CM_NAME));
+        productJson.put("sysmlid", product.getProperty(Acm.ACM_ID));
         productJson.put( "created",  EmsScriptNode.getIsoTime( (Date)product.getProperty( "cm:created" )));
         productJson.put( "creator", product.getProperty( "cm:modifier" ) );
             
