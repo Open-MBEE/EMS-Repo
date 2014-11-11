@@ -183,12 +183,12 @@ public class ProductListGet extends AbstractJavaWebScript {
 
         for (EmsScriptNode node: productSet) {
             if (checkPermissions(node, PermissionService.READ)) {
-                String id = (String)node.getProperty(Acm.ACM_ID);
+                String id = node.getSysmlId();
                 String name = (String)node.getProperty(Acm.ACM_NAME);
                 documents.put(id, name);
 
                 EmsScriptNode parent = node.getOwningParent(dateTime);
-                String parentId = (String)parent.getProperty(Acm.ACM_ID);
+                String parentId = parent.getSysmlId();
                 if (parentId.contains("_pkg")) {
                     parentId = parentId.replace("_pkg", "");
                 }
@@ -228,7 +228,7 @@ public class ProductListGet extends AbstractJavaWebScript {
 	 * @throws JSONException
 	 */
 	protected void handleParents(EmsScriptNode node) throws JSONException {
-        String id = (String)node.getProperty(Acm.ACM_ID);
+        String id = node.getSysmlId();
         String sysmlName = (String)node.getProperty(Acm.ACM_NAME);
         
         if (id != null) {
@@ -241,7 +241,7 @@ public class ProductListGet extends AbstractJavaWebScript {
         
         EmsScriptNode parent = node.getParent();
         if (parent != null && checkPermissions(parent, PermissionService.READ)) {
-            String parentId = (String)parent.getProperty(Acm.ACM_ID);
+            String parentId = parent.getSysmlId();
             if (parentId == null) {
                 if (id != null && !projectVolumes.toString().contains(id)) {
                     projectVolumes.put(id);

@@ -633,24 +633,55 @@ public class NodeUtil {
                                           boolean ignoreWorkspace,
                                           WorkspaceNode workspace,
                                           Date dateTime, ServiceRegistry services, boolean findDeleted) {
+        ArrayList< NodeRef > array = findNodeRefsById(id, ignoreWorkspace, workspace, dateTime, services,
+                                                      findDeleted, true);
+        
+        return !Utils.isNullOrEmpty(array) ? array.get( 0 ) : null;
+    }
+    
+    /**
+     * Find a NodeReferences by id 
+     *
+     * @param id
+     *            Node sysml:id or cm:name to search for
+     * @param workspace
+     * @param dateTime
+     *            the time specifying which version of the NodeRef to find; null
+     *            defaults to the latest version
+     * @return Array of NodeRefs found or empty list
+     */
+    public static ArrayList<NodeRef> findNodeRefsById(String id,
+                                          boolean ignoreWorkspace,
+                                          WorkspaceNode workspace,
+                                          Date dateTime, ServiceRegistry services, boolean findDeleted,
+                                          boolean justFirst) {
+        
+        ArrayList<NodeRef> returnArray = new ArrayList<NodeRef>();
         boolean useSimpleCache = !ignoreWorkspace && !findDeleted && workspace == null && dateTime == null;
-        NodeRef r = findNodeRefByType(id, SearchType.ID.prefix, //parentScopeName,
-                                      useSimpleCache,
-                                      ignoreWorkspace,
-                                      workspace, dateTime, true, services, findDeleted); // TODO: temporarily search by ID
+        ArrayList< NodeRef > array = findNodeRefsByType(id, SearchType.ID.prefix, 
+                                                        useSimpleCache,
+                                                        ignoreWorkspace,
+                                                        workspace, dateTime, justFirst, true, 
+                                                        services, findDeleted); 
+
         EmsScriptNode esn = null;
-        if ( r != null ) {
-            esn = new EmsScriptNode( r, getServices() );
+        if (array != null) {
+            for (NodeRef r : array) {
+                if ( r != null ) {
+                    esn = new EmsScriptNode( r, getServices() );
+                }
+                if ( r == null || (!esn.exists() && !esn.isDeleted()) ) {
+                    r = findNodeRefByType( id, SearchType.CM_NAME.prefix,
+                                           useSimpleCache,
+                                           ignoreWorkspace,
+                                           workspace, dateTime,
+                                           true, services, findDeleted );
+                }
+                returnArray.add(r);
+            }
         }
-        if ( r == null || (!esn.exists() && !esn.isDeleted()) ) {
-            r = findNodeRefByType( id, SearchType.CM_NAME.prefix,
-                                   //parentScopeName,
-                                   useSimpleCache,
-                                   ignoreWorkspace,
-                                   workspace, dateTime,
-                                   true, services, findDeleted );
-        }
-        return r;
+        
+        return returnArray;
     }
 
 
@@ -702,7 +733,7 @@ public class NodeUtil {
                 EmsScriptNode node =
                         new EmsScriptNode( nodeRef, services, response );
                 if ( node.checkPermissions( PermissionService.READ, response, status ) ) {
-                    String id = (String)node.getProperty( Acm.ACM_ID );
+                    String id = node.getSysmlId();
                     if ( id != null ) {
                         searchResults.put( id, node );
                     }

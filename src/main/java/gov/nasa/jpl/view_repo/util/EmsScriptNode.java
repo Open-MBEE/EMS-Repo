@@ -964,6 +964,9 @@ public class EmsScriptNode extends ScriptNode implements
 
     public String getSysmlId() {
         String id = (String)getProperty( Acm.ACM_ID );
+        if (id == null) {
+            id = getName();
+        }
         return id;
     }
 
@@ -1347,7 +1350,7 @@ public class EmsScriptNode extends ScriptNode implements
 
     public String nodeRefToSysmlId( NodeRef ref ) throws JSONException {
         EmsScriptNode node = new EmsScriptNode( ref, services );
-        Object sysmlId = node.getProperty( Acm.ACM_ID );
+        Object sysmlId = node.getSysmlId();
         if ( sysmlId != null ) {
             return "" + sysmlId;
         } else {
@@ -2025,12 +2028,11 @@ public class EmsScriptNode extends ScriptNode implements
                                       WorkspaceNode workspace,
                                       Date dateTime, ServiceRegistry services,
                                       StringBuffer response, Status status ) {
-        boolean useSimpleCache = !ignoreWorkspace && workspace == null && dateTime == null;
         ArrayList< NodeRef > refs =
-                NodeUtil.findNodeRefsByType( valueId, NodeUtil.SearchType.ID.prefix, 
-                                             useSimpleCache, ignoreWorkspace,
-                                             workspace, dateTime, true, true,
-                                             services, false );
+                NodeUtil.findNodeRefsById( valueId, ignoreWorkspace,
+                                           workspace, dateTime,
+                                           services, false, false );
+        
         List< EmsScriptNode > nodeList =
                 toEmsScriptNodeList( refs, services, response, status );
 

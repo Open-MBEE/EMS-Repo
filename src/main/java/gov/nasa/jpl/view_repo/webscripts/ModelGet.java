@@ -333,7 +333,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	
 		// add root element to elementsFound if its not already there 
 		// (if it's there, it's probably because the root is a reified pkg node)
-		String sysmlId = (String)root.getProperty(Acm.ACM_ID);
+		String sysmlId = root.getSysmlId();
 		String rootName = sysmlId;
 		if (!elementsFound.containsKey(sysmlId)) {
 		    // dont add reified packages
@@ -369,7 +369,7 @@ public class ModelGet extends AbstractJavaWebScript {
                 if ( checkPermissions( child, PermissionService.READ ) ) {
                     if (child.exists() && !child.isPropertyOwnedValueSpecification()) {
                         
-                        String value = (String)child.getProperty( Acm.ACM_ID );
+                        String value = child.getSysmlId();
                         if ( value != null ) {
                             elementsFound.put( value, child );
                         }

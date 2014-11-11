@@ -776,7 +776,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 // if owner is null, leave at project root level
                 if (ownerId == null || ownerId.equals("null")) {
                     if ( projectNode != null ) {
-                        ownerId = (String) projectNode.getProperty(Acm.ACM_ID);
+                        ownerId = projectNode.getSysmlId();
                     } else {
                         // If project is null, put it in NO_PROJECT.
 
@@ -900,7 +900,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			if (name == null) {
 				name = (String) parent.getProperty(Acm.CM_NAME);
 			}
-			String id = (String) parent.getProperty(Acm.ACM_ID);
+			String id = parent.getSysmlId();
 			if (id == null) {
 				id = "not sysml type";
 			}
@@ -1628,7 +1628,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     log( LogLevel.ERROR,
                          "\t failed to create reified node " + pkgName
                                  + " in parent, "
-                                 + parent.getProperty( Acm.ACM_ID ) + " = "
+                                 + parent.getSysmlId() + " = "
                                  + parent + " because of exception." );
                     throw e; // pass it up the chain to roll back transaction
                 }
@@ -1636,7 +1636,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     log( LogLevel.ERROR,
                          "\t failed to create reified node " + pkgName
                                  + " in parent, "
-                                 + parent.getProperty( Acm.ACM_ID ) + " = "
+                                 + parent.getSysmlId() + " = "
                                  + parent );
                     return null;
                 } else {
@@ -1647,7 +1647,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     } else {
                         reifiedPkgNode.setProperty( Acm.ACM_NAME, pkgName.replaceAll( "_pkg$", "" ) );
                     }
-                    log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getProperty(Acm.ACM_ID) + " : " + reifiedPkgNode.getNodeRef().toString());
+                    log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getSysmlId() + " : " + reifiedPkgNode.getNodeRef().toString());
                 }
             }
             if (checkPermissions(reifiedPkgNode, PermissionService.WRITE)) {
