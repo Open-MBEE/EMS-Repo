@@ -1579,6 +1579,8 @@ public class ModelPost extends AbstractJavaWebScript {
                                                            WorkspaceNode workspace,
                                                            boolean useParent ) {
         EmsScriptNode reifiedPkgNode = null;
+        EmsScriptNode reifiedPkgNodeAll = null;
+
         if ( node == null || !node.exists() ) {
             log( LogLevel.ERROR,
                  "Trying to create reified node for missing node! id = " + id );
@@ -1612,10 +1614,13 @@ public class ModelPost extends AbstractJavaWebScript {
 
         if (checkPermissions(parent, PermissionService.WRITE)) {
             String pkgName = id + "_pkg";
-            reifiedPkgNode = findScriptNodeByIdForWorkspace( pkgName, workspace, null, true );
+            reifiedPkgNodeAll = findScriptNodeById( pkgName, workspace, null, true );
+            reifiedPkgNode = (reifiedPkgNodeAll != null && NodeUtil.workspacesEqual(reifiedPkgNodeAll.getWorkspace(),workspace)) ? 
+                                                                                                         reifiedPkgNodeAll : null;
             if (reifiedPkgNode == null || !reifiedPkgNode.exists()) {
                 try {
-                    reifiedPkgNode = parent.createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER);
+                    reifiedPkgNode = parent.createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER,
+                                                         reifiedPkgNodeAll != null ? reifiedPkgNodeAll.getNodeRef() : null);
                 } catch ( Throwable e ) {
                     log( LogLevel.ERROR,
                          "\t failed to create reified node " + pkgName

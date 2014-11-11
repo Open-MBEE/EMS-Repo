@@ -181,7 +181,8 @@ public class EmsScriptNode extends ScriptNode implements
         setResponse( response );
     }
 
-    public EmsScriptNode childByNamePath( String path, boolean ignoreWorkspace, WorkspaceNode workspace ) {
+    public EmsScriptNode childByNamePath( String path, boolean ignoreWorkspace, WorkspaceNode workspace,
+                                          boolean onlyWorkspace) {
         // Make sure this node is in the target workspace.
         EmsScriptNode node = this;
         if ( !ignoreWorkspace && workspace != null && !workspace.equals( getWorkspace() ) ) {
@@ -192,15 +193,18 @@ public class EmsScriptNode extends ScriptNode implements
         if ( child != null && child.exists() ) {
             return child;
         }
-        // Find the path/child in a parent workspace.
-        EmsScriptNode source = node.getWorkspaceSource();
-        while ( source != null && source.exists()
-                && ( child == null || !child.exists() ) ) {
-            child = source.childByNamePath( path );
-            source = source.getWorkspaceSource();
-        }
-        if ( child != null && child.exists() ) {
-            return child;
+        
+        // Find the path/child in a parent workspace if not constraining only to the current workspace:
+        if (!onlyWorkspace) {
+            EmsScriptNode source = node.getWorkspaceSource();
+            while ( source != null && source.exists()
+                    && ( child == null || !child.exists() ) ) {
+                child = source.childByNamePath( path );
+                source = source.getWorkspaceSource();
+            }
+            if ( child != null && child.exists() ) {
+                return child;
+            }
         }
         return null;
     }
@@ -325,32 +329,27 @@ public class EmsScriptNode extends ScriptNode implements
 
     @Override
     public EmsScriptNode createFolder( String name ) {
-        EmsScriptNode folder =
-                new EmsScriptNode( super.createFolder( name ).getNodeRef(),
-                                   services, response, status );
-        WorkspaceNode ws = getWorkspace();
-        EmsScriptNode source = getWorkspaceSource();
-        // TODO -- the folder is not getting a source here! is that okay?
-        // Scriptable myChildren = source.getChildren();
-        if ( ws != null && !folder.isWorkspace() ) folder.setWorkspace( ws,
-                                                                        null );
-        if ( Debug.isOn() ) {
-            Debug.outln( "createFolder(" + name + "): returning " + folder );
-        }
-
-        return folder;
+        return createFolder(name, null);
     }
 
     @Override
     public EmsScriptNode createFolder( String name, String type ) {
-        EmsScriptNode folder =
-                new EmsScriptNode( super.createFolder( name, type )
-                                        .getNodeRef(), services, response,
-                                   status );
+        return createFolder(name, type, null);
+    }
+    
+    public EmsScriptNode createFolder( String name, String type, NodeRef sourceFolder ) {
+        
+        NodeRef folderRef = super.createFolder( name, type ).getNodeRef();
+        EmsScriptNode folder = new EmsScriptNode(folderRef,services, response, status );
         WorkspaceNode ws = getWorkspace();
-        // TODO -- the folder is not getting a source here!
-        if ( ws != null && !folder.isWorkspace() ) folder.setWorkspace( ws,
-                                                                        null );
+
+        if ( ws != null && !folder.isWorkspace() ) {
+            folder.setWorkspace( ws, sourceFolder );
+        }
+        if ( Debug.isOn() ) {
+            Debug.outln( "createFolder(" + name + "): returning " + folder );
+        }
+
         return folder;
     }
 

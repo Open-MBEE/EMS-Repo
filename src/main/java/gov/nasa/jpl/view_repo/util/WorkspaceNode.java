@@ -222,7 +222,7 @@ public class WorkspaceNode extends EmsScriptNode {
     	String cmName = wsName + '_' + getName( parentWorkspace );
     	
     	// Make sure the workspace does not already exist in the target folder 
-    	EmsScriptNode child = folder.childByNamePath( "/" + cmName, true, null );
+    	EmsScriptNode child = folder.childByNamePath( "/" + cmName, true, null, false );
     	if ( child != null && child.exists() ) {
             String msg = "ERROR! Trying to create an workspace in the same folder with the same name, " + cmName + "!\n";
             response.append( msg );

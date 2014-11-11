@@ -543,6 +543,7 @@ public class NodeUtil {
         // TODO: removed exists so we can include ems:Deleted nodes in results, may need to revisit
 //        if (!exists(source) || !exists(changed)) return false;
         //if ( changed.equals( source ) ) return true;
+        if ( source == null || changed == null ) return false;
         if ( !changed.hasAspect( "ems:HasWorkspace" ) ) return false;
         EmsScriptNode directSource = changed.getWorkspaceSource();
 //        if ( !exists(directSource) ) return false;
