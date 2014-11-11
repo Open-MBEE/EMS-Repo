@@ -434,6 +434,10 @@ public class ModelPost extends AbstractJavaWebScript {
         if (!Utils.isNullOrEmpty(ownerName)) {
        		boolean foundOwnerElement = true;
             owner = findScriptNodeById(ownerName, workspace, null, false);
+            // owner null holding bin
+            // owner != null, exists, skip
+            // owner != null, deleted, resurrect
+            // ownner != null, doesnt exists, not deleted, holding bin
             if (owner == null || !owner.exists()) {
                 // FIX: Need to respond with warning that owner couldn't be found?
                 log( LogLevel.WARNING, "Could not find owner with name: "
