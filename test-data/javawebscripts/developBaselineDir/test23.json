@@ -1,330 +1,224 @@
 {
 
-    "elements": [
+    "workspace1": {
 
-        {
+        "elements": [
 
-            "creator": "admin",
+            {
 
-            "documentation": "",
+                "creator": "admin",
 
-            "editable": true,
+                "documentation": "something",
 
-            "name": "Components",
+                "editable": true,
 
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+                "name": "300",
 
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components",
+                "owner": "123456",
 
-            "specialization": {"type": "View"},
+                "qualifiedName": "/JW_TEST/300",
 
-        },
+                "specialization": {
 
-        {
+                    "isDerived": false,
 
-            "creator": "admin",
+                    "isSlot": false,
 
-            "documentation": "",
+                    "type": "Property",
 
-            "editable": true,
+                    "value": [{
 
-            "name": "",
+                        "string": "dlam_string",
 
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+                        "type": "LiteralString"
 
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+                    }]
 
-            "specialization": {
+                },
 
-                "operand": [
-
-                    {
-
-                        "element": "op_map",
-
-                        "type": "ElementValue"
-
-                    },
-
-                    {
-
-                        "element": "exposed_id",
-
-                        "type": "ElementValue"
-
-                    },
-
-                    {
-
-                        "element": "op_name_arg",
-
-                        "type": "ElementValue"
-
-                    }
-
-                ],
-
-                "type": "Expression"
+                "sysmlid": "300"
 
             },
 
-        },
+            {
 
-        {
+                "creator": "admin",
 
-            "creator": "admin",
+                "documentation": "else",
 
-            "documentation": "",
+                "editable": true,
 
-            "editable": true,
+                "name": "301",
 
-            "name": "Name",
+                "owner": "300",
 
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+                "qualifiedName": "/JW_TEST/300/301",
 
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Name",
+                "specialization": {
 
-            "specialization": {"type": "Operation"},
+                    "allowedElements": [
 
-        },
+                        "301",
 
-        {
+                        "302",
 
-            "creator": "admin",
+                        "303"
 
-            "documentation": "",
+                    ],
 
-            "editable": true,
+                    "childrenViews": ["304"],
 
-            "name": "viewpoint_op",
+                    "contains": [{
 
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+                        "source": "301",
 
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/viewpoint_op",
+                        "sourceProperty": "documentation",
 
-            "specialization": {
+                        "sourceType": "reference",
 
-                "expression": "vp_expression",
+                        "type": "Paragraph"
 
-                "parameters": ["exposed_id"],
+                    }],
 
-                "type": "Operation"
+                    "displayedElements": [
 
-            },
+                        "301",
 
-        },
+                        "302",
 
-        {
+                        "303"
 
-            "creator": "admin",
+                    ],
 
-            "documentation": "",
+                    "isDerived": false,
 
-            "editable": true,
+                    "isSlot": false,
 
-            "name": "",
+                    "noSections": ["302"],
 
-            "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
+                    "type": "Product",
 
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components/",
+                    "value": [{
 
-            "specialization": {
+                        "string": "dlam_string",
 
-                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+                        "type": "LiteralString"
 
-                "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
+                    }],
 
-                "type": "Conform"
+                    "view2view": [{
 
-            },
+                        "childrenViews": [
 
-        },
+                            "301",
 
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
-
-            "specialization": {
-
-                "operand": [
-
-                    {
-
-                        "element": "op_list",
-
-                        "type": "ElementValue"
-
-                    },
-
-                    {
-
-                        "operand": [
-
-                            {
-
-                                "element": "op_map",
-
-                                "type": "ElementValue"
-
-                            },
-
-                            {
-
-                                "element": "exposed_id",
-
-                                "type": "ElementValue"
-
-                            },
-
-                            {
-
-                                "element": "op_name_arg",
-
-                                "type": "ElementValue"
-
-                            }
+                            "302"
 
                         ],
 
-                        "type": "Expression"
+                        "sysmlid": "301"
 
-                    }
+                    }]
 
-                ],
+                },
 
-                "type": "Expression"
+                "sysmlid": "301"
 
             },
 
-        },
+            {
 
-        {
+                "creator": "admin",
 
-            "creator": "admin",
+                "documentation": "to",
 
-            "documentation": "",
+                "editable": true,
 
-            "editable": true,
+                "name": "302",
 
-            "name": "exposed",
+                "owner": "301",
 
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+                "qualifiedName": "/JW_TEST/300/301/302",
 
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/exposed",
+                "specialization": {
 
-            "specialization": {"type": "Parameter"},
+                    "isDerived": false,
 
-        },
+                    "isSlot": false,
 
-        {
+                    "type": "Property",
 
-            "creator": "admin",
+                    "value": [{
 
-            "documentation": "",
+                        "string": "dlam_string",
 
-            "editable": true,
+                        "type": "LiteralString"
 
-            "name": "map",
+                    }]
 
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+                },
 
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/map",
+                "sysmlid": "302"
 
-            "specialization": {"type": "Operation"},
+            }
 
-        },
+        ],
 
-        {
+        "name": "wsA",
 
-            "creator": "admin",
+        "qualifiedName": "master/wsA"
 
-            "documentation": "",
+    },
 
-            "editable": true,
+    "workspace2": {
 
-            "name": "ComponentViewPoint",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/ComponentViewPoint",
-
-            "specialization": {"type": "Viewpoint"},
-
-        },
-
-        {
+        "addedElements": [{
 
             "creator": "admin",
 
-            "documentation": "",
+            "documentation": "y is y",
 
             "editable": true,
 
-            "name": "",
+            "owner": "302",
 
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+            "qualifiedName": "/JW_TEST/300/301/302/null",
 
             "specialization": {
 
-                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+                "isDerived": false,
 
-                "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+                "isSlot": false,
 
-                "type": "Expose"
+                "type": "Property",
+
+                "value": [{
+
+                    "string": "the y value",
+
+                    "type": "LiteralString"
+
+                }]
 
             },
 
-        },
+            "sysmlid": "y"
 
-        {
+        }],
 
-            "creator": "admin",
+        "conflictedElements": [],
 
-            "documentation": "",
+        "deletedElements": [],
 
-            "editable": true,
+        "movedElements": [],
 
-            "name": "List",
+        "name": "wsT",
 
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "qualifiedName": "master/wsA/wsT",
 
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/List",
+        "updatedElements": []
 
-            "specialization": {"type": "Operation"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "BLUCam CubeSat A",
-
-            "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
-
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394140430311_23731_27741/BLUCam CubeSat A",
-
-            "specialization": {"type": "Package"},
-
-        }
-
-    ],
+    }
 
 }
 

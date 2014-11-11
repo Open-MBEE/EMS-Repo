@@ -139,26 +139,28 @@ public class WorkspacesPost extends AbstractJavaWebScript{
     public int createWorkSpace(String sourceWorkId, String newWorkID, Date copyTime,
                                JSONObject jsonObject, String user, Status status) {
         if(newWorkID.equals( "master" )){
-            log(LogLevel.WARNING, "Workspace already exists.", HttpServletResponse.SC_BAD_REQUEST);
+            log(LogLevel.WARNING, "Cannot change attributes of the master workspace.", HttpServletResponse.SC_BAD_REQUEST);
             return HttpServletResponse.SC_BAD_REQUEST;
         }
-        else if ( WorkspaceNode.getWorkspaceFromId( newWorkID, services,
-                                                            response, status, // false,
-                                                            user ) != null ) {
+        WorkspaceNode existingWs = 
+                WorkspaceNode.getWorkspaceFromId( newWorkID, services,
+                                                  response, status, // false,
+                                                  user );
+        if ( existingWs != null ) {
             log(LogLevel.WARNING, "Workspace already exists.", HttpServletResponse.SC_BAD_REQUEST);
             return HttpServletResponse.SC_BAD_REQUEST;
         } else {
             WorkspaceNode srcWs =
                     WorkspaceNode.getWorkspaceFromId( sourceWorkId,
-                                                              services,
-                                                              response, status, // false,
-                                                              user );
+                                                      services,
+                                                      response, status, // false,
+                                                      user );
             if (!"master".equals( sourceWorkId ) && srcWs == null) {
                 log(LogLevel.WARNING, "Source workspace not found.", HttpServletResponse.SC_NOT_FOUND);
                 return HttpServletResponse.SC_NOT_FOUND;
             } else {
-                    EmsScriptNode folder = null;
-                    WorkspaceNode dstWs = null;
+                EmsScriptNode folder = null;
+                WorkspaceNode dstWs = null;
                 UserTransaction trx;
                 trx = services.getTransactionService().getNonPropagatingUserTransaction();
                 try {

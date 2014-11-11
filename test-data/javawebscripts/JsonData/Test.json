@@ -1,4 +1,11 @@
-{"elements": [{
-    "name" : "XXXXXXXXXXXXXXXXXXXXXXXX",	
-    "sysmlid": "YYYYYYYYYYYYYYYYYYYYYY",
-}]}
+{ "elements" : [
+
+    {
+        "sysmlid" : "ForAllChildChildGGG",
+        "owner" : "ForAllChildGGG",
+        "specialization" : {
+            "type" : "Operation"
+        }
+    }
+    
+]}
