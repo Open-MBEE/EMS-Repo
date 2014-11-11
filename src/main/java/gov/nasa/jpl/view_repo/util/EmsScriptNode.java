@@ -36,6 +36,8 @@ import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Diff;
 import gov.nasa.jpl.mbee.util.Pair;
+import gov.nasa.jpl.mbee.util.Seen;
+import gov.nasa.jpl.mbee.util.SeenHashSet;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
@@ -49,6 +51,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -62,6 +65,7 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 import javax.servlet.http.HttpServletResponse;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.jscript.ScriptNode;
@@ -1975,11 +1979,40 @@ public class EmsScriptNode extends ScriptNode implements
 
     public EmsScriptNode getProjectNode() {
         EmsScriptNode parent = this;
-        while ( parent != null && parent.getSysmlId() != null && !parent.getSysmlId().startsWith( "PROJECT-" ) ) {
-            EmsScriptNode oldparent = parent;
-            parent = oldparent.getParent();
+        EmsScriptNode sites = null;
+        EmsScriptNode projectPkg = null;
+        EmsScriptNode models = null;
+        EmsScriptNode oldparent = null;
+        Set<EmsScriptNode> seen = new HashSet<EmsScriptNode>(); 
+        while ( parent != null && parent.getSysmlId() != null &&
+                !seen.contains( parent ) ) {
+            if ( models == null && parent.getName().equals( "Models" ) ) {
+                models = parent;
+                projectPkg = oldparent;
+            } else if ( models != null && sites == null && 
+                        parent.getName().equals( "Sites" ) ) {
+                sites = parent;
+            } else if ( sites != null && parent.isWorkspaceTop() ) {
+                EmsScriptNode projectNode = projectPkg.getReifiedNode();
+                if ( Debug.isOn() ) Debug.outln( getName()
+                                                 + ".getProjectNode() = "
+                                                 + projectNode.getName() );
+                return projectNode;
+            }
+            seen.add(parent);
+            oldparent = parent;
+            parent = parent.getParent();
         }
-        return parent;
+        if ( seen.contains(parent) ) {
+            String msg ="ERROR! recursive parent hierarchy detected for " + parent.getName() + " having visited " + seen + ".\n";
+            if ( getResponse() == null || getStatus() == null ) {
+                Debug.error( msg );
+            } else {
+                getResponse().append( msg );
+                getStatus().setCode( HttpServletResponse.SC_INTERNAL_SERVER_ERROR, msg );
+            }
+        }
+        return projectPkg;
     }
     
     public String getProjectId() {

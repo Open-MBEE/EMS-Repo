@@ -52,6 +52,7 @@ import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ApplicationContextHelper;
+import org.junit.Assert;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
 
@@ -388,6 +389,7 @@ public class NodeUtil {
                     // Make sure we didn't just get a near match.
                     try {
                         if ( !esn.checkPermissions( PermissionService.READ ) ) {
+                            
                             continue;
                         }
                         boolean match = true;
@@ -428,6 +430,63 @@ public class NodeUtil {
                         e.printStackTrace();
                     }
 //                    }
+                }
+            }
+            
+            // If the workspace is copied at a time point (as opposed to
+            // floating with the parent), then we need to check each element
+            // found to see if it is in some parent workspace and last modified
+            // after the copy time. If so, then we need to get the element in
+            // the parent workspace at the time of the copy.
+            if ( nodeRefs != null && workspace != null && !ignoreWorkspace ) {
+                Date copyTime = workspace.getCopyTime();
+                if ( copyTime != null ) {
+                    // loop through each result
+                    ArrayList<NodeRef> correctedRefs = new ArrayList<NodeRef>();
+                    for ( NodeRef r : nodeRefs) {
+                        if ( r == null ) continue;
+                        WorkspaceNode resultWs = getWorkspace( r );
+                        EmsScriptNode esn;
+                        // If a native member of the workspace, no need to correct.
+                        if ( workspace.equals( resultWs ) ) {
+                            correctedRefs.add( r );
+                        } else {
+                            esn = new EmsScriptNode( r, getServices() );
+                            Date lastModified = esn.getLastModified( dateTime );
+                            // Check if modified after the copyTime.
+                            if ( lastModified != null &&
+                                    lastModified.after( copyTime ) ) {
+                                // Replace with the versioned ref at the copy time
+                                ArrayList< NodeRef > refs =
+                                        findNodeRefsByType( specifier, prefix,
+                                                            useSimpleCache,
+                                                            ignoreWorkspace,
+                                                            resultWs, copyTime,
+                                                            true, exactMatch,
+                                                            services,
+                                                            includeDeleted,
+                                                            siteName );
+                                if ( !Utils.isNullOrEmpty( refs ) ) {
+                                    // only asked for one
+                                    NodeRef newRef = refs.get( 0 );
+                                    correctedRefs.add( r );
+                                }
+//                                r = getNodeRefAtTime( r, resultWs, copyTime );
+//                                if ( r != null ) {
+//                                    esn = new EmsScriptNode( r, getServices() );
+//                                } else {
+//                                    esn = null;
+//                                }
+                            } else if ( lastModified == null ) {
+                                Debug.error( "ERROR!  Should never have null modified date!" );
+                                correctedRefs.add( r );
+                            }
+//                            if ( exists( esn ) || ( includeDeleted && esn.isDeleted() &&
+//                                    ()!exactMatch ) ) {
+//                                correctedRefs.add( r );
+//                            }
+                        } 
+                    }
                 }
             }
             if ( doCaching && caching && !Utils.isNullOrEmpty( nodeRefs ) ) {
