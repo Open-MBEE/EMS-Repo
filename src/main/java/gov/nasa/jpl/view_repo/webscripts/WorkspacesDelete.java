@@ -22,7 +22,7 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-public class WorkspacesDelete {
+public class WorkspacesDelete extends AbstractJavaWebScript {
     public WorkspacesDelete() {
         super();
     }
@@ -37,7 +37,7 @@ public class WorkspacesDelete {
             return false;
         }
         
-        String wsID = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
+        String wsId = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
         if(checkRequestVariable(wsId, WORKSPACE_ID) == false) {
             return false;
         }
@@ -56,33 +56,40 @@ public class WorkspacesDelete {
                
                WorkspaceNode target = WorkspaceNode.getWorkspaceFromId(wsId, getServices(), 
                                                                        getResponse(), status, user);
-               json = printObject(target);
+               result = printObject(target);
                target.delete( true );
+               status.setCode(HttpServletResponse.SC_OK);
            }
        } catch (JSONException e) {
+    	   status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
            log(LogLevel.ERROR, "JSON object could not be created \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
            e.printStackTrace();
        } catch (Exception e) {
+    	   status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
            log(LogLevel.ERROR, "Internal stack trace error \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
            e.printStackTrace();
        }
        
-       if(object == null) {
-              model.put("res", response.ToString());
+       if(result == null) {
+              model.put("res", response.toString());
        }
        else {
            try {
-               if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
-               model.put("res", json.toString(4));
+               if (!Utils.isNullOrEmpty(response.toString())) result.put("message", response.toString());
+               model.put("res", result.toString(4));
            } catch (JSONException e) {
                // TODO Auto-generated catch block
                e.printStackTrace();
            }
        }
-       status.setCode(statusCode);
        printFooter();
        return model;
     }
     
+    private JSONObject printObject(WorkspaceNode workspace) throws JSONException{
+    	JSONObject json = new JSONObject();
+    	
+    	return json;
+    }
 }
 
