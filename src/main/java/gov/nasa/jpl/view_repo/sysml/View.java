@@ -478,25 +478,25 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         try {
             json.put("views", jsonArray);
             jsonArray.put( viewProperties );
-            viewProperties.put("id", viewNode.getName() );
+            viewProperties.put("id", viewNode.getSysmlId() );
 
             JSONArray elements = new JSONArray();
             viewProperties.put("displayedElements", elements );
             for ( EmsScriptNode elem : getDisplayedElements( workspace, null, doGenerate, doRecurse, null ) ) {
-                elements.put( elem.getName() );
+                elements.put( elem.getSysmlId() );
             }
 
             elements = new JSONArray();
             viewProperties.put("allowedElements", elements );
             for ( EmsScriptNode elem : getAllowedElements() ) {
-                elements.put( elem.getName() );
+                elements.put( elem.getSysmlId() );
             }
 
             elements = new JSONArray();
             viewProperties.put("childrenViews", elements );
             for ( sysml.view.View<EmsScriptNode> view : getChildViews() ) {
                 if ( view instanceof View ) {
-                    elements.put( view.getElement().getName() );
+                    elements.put( view.getElement().getSysmlId() );
                 }
             }
 

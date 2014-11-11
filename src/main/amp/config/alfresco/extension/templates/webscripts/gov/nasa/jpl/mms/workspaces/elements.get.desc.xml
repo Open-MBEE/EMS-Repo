@@ -6,6 +6,6 @@
   	<url>/workspaces/{workspaceId}/elements</url>
   	<format default="json">argument</format>
   	<authentication>user</authentication>
-  	<transaction allow="readwrite">required</transaction>
+  	<transaction allow="readonly">required</transaction>
   	<family>MMS REST API</family>
  </webscript>

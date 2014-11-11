@@ -1,330 +1,224 @@
 {
 
-    "elements": [
+    "workspace1": {
 
-        {
+        "elements": [
 
-            "creator": "admin",
+            {
 
-            "documentation": "",
+                "creator": "admin",
 
-            "editable": true,
+                "documentation": "something",
 
-            "name": "",
+                "editable": true,
 
-            "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
+                "name": "300",
 
-            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components/",
+                "owner": "123456",
 
-            "specialization": {
+                "qualifiedName": "/JW_TEST/300",
 
-                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+                "specialization": {
 
-                "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
+                    "isDerived": false,
 
-                "type": "Conform"
+                    "isSlot": false,
+
+                    "type": "Property",
+
+                    "value": [{
+
+                        "string": "dlam_string",
+
+                        "type": "LiteralString"
+
+                    }]
+
+                },
+
+                "sysmlid": "300"
 
             },
 
-        },
+            {
 
-        {
+                "creator": "admin",
 
-            "creator": "admin",
+                "documentation": "else",
 
-            "documentation": "",
+                "editable": true,
 
-            "editable": true,
+                "name": "301",
 
-            "name": "exposed",
+                "owner": "300",
 
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+                "qualifiedName": "/JW_TEST/300/301",
 
-            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/exposed",
+                "specialization": {
 
-            "specialization": {"type": "Parameter"},
+                    "allowedElements": [
 
-        },
+                        "301",
 
-        {
+                        "302",
 
-            "creator": "admin",
+                        "303"
 
-            "documentation": "",
+                    ],
 
-            "editable": true,
+                    "childrenViews": ["304"],
 
-            "name": "BLUCam CubeSat A",
+                    "contains": [{
 
-            "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
+                        "source": "301",
 
-            "qualifiedName": "/_17_0_2_4_f3a0363_1394140430311_23731_27741/BLUCam CubeSat A",
+                        "sourceProperty": "documentation",
 
-            "specialization": {"type": "Package"},
+                        "sourceType": "reference",
 
-        },
+                        "type": "Paragraph"
 
-        {
+                    }],
 
-            "creator": "admin",
+                    "displayedElements": [
 
-            "documentation": "",
+                        "301",
 
-            "editable": true,
+                        "302",
 
-            "name": "ComponentViewPoint",
+                        "303"
 
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+                    ],
 
-            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/ComponentViewPoint",
+                    "isDerived": false,
 
-            "specialization": {"type": "Viewpoint"},
+                    "isSlot": false,
 
-        },
+                    "noSections": ["302"],
 
-        {
+                    "type": "Product",
 
-            "creator": "admin",
+                    "value": [{
 
-            "documentation": "",
+                        "string": "dlam_string",
 
-            "editable": true,
+                        "type": "LiteralString"
 
-            "name": "",
+                    }],
 
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+                    "view2view": [{
 
-            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+                        "childrenViews": [
 
-            "specialization": {
+                            "301",
 
-                "operand": [
-
-                    {
-
-                        "element": "op_list",
-
-                        "type": "ElementValue"
-
-                    },
-
-                    {
-
-                        "operand": [
-
-                            {
-
-                                "element": "op_map",
-
-                                "type": "ElementValue"
-
-                            },
-
-                            {
-
-                                "element": "exposed_id",
-
-                                "type": "ElementValue"
-
-                            },
-
-                            {
-
-                                "element": "op_name_arg",
-
-                                "type": "ElementValue"
-
-                            }
+                            "302"
 
                         ],
 
-                        "type": "Expression"
+                        "sysmlid": "301"
 
-                    }
+                    }]
 
-                ],
+                },
 
-                "type": "Expression"
+                "sysmlid": "301"
 
             },
 
-        },
+            {
 
-        {
+                "creator": "admin",
+
+                "documentation": "to",
+
+                "editable": true,
+
+                "name": "302",
+
+                "owner": "301",
+
+                "qualifiedName": "/JW_TEST/300/301/302",
+
+                "specialization": {
+
+                    "isDerived": false,
+
+                    "isSlot": false,
+
+                    "type": "Property",
+
+                    "value": [{
+
+                        "string": "dlam_string",
+
+                        "type": "LiteralString"
+
+                    }]
+
+                },
+
+                "sysmlid": "302"
+
+            }
+
+        ],
+
+        "name": "wsA",
+
+        "qualifiedName": "master/wsA"
+
+    },
+
+    "workspace2": {
+
+        "addedElements": [{
 
             "creator": "admin",
 
-            "documentation": "",
+            "documentation": "y is y",
 
             "editable": true,
 
-            "name": "viewpoint_op",
+            "owner": "302",
 
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/viewpoint_op",
+            "qualifiedName": "/JW_TEST/300/301/302/null",
 
             "specialization": {
 
-                "expression": "vp_expression",
+                "isDerived": false,
 
-                "parameters": ["exposed_id"],
+                "isSlot": false,
 
-                "type": "Operation"
+                "type": "Property",
 
-            },
+                "value": [{
 
-        },
+                    "string": "the y value",
 
-        {
+                    "type": "LiteralString"
 
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "List",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/List",
-
-            "specialization": {"type": "Operation"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "Components",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components",
-
-            "specialization": {"type": "View"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "Name",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/Name",
-
-            "specialization": {"type": "Operation"},
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
-
-            "specialization": {
-
-                "operand": [
-
-                    {
-
-                        "element": "op_map",
-
-                        "type": "ElementValue"
-
-                    },
-
-                    {
-
-                        "element": "exposed_id",
-
-                        "type": "ElementValue"
-
-                    },
-
-                    {
-
-                        "element": "op_name_arg",
-
-                        "type": "ElementValue"
-
-                    }
-
-                ],
-
-                "type": "Expression"
+                }]
 
             },
 
-        },
+            "sysmlid": "y"
 
-        {
+        }],
 
-            "creator": "admin",
+        "conflictedElements": [],
 
-            "documentation": "",
+        "deletedElements": [],
 
-            "editable": true,
+        "movedElements": [],
 
-            "name": "",
+        "name": "wsT",
 
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "qualifiedName": "master/wsA/wsT",
 
-            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+        "updatedElements": []
 
-            "specialization": {
-
-                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-
-                "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-
-                "type": "Expose"
-
-            },
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "map",
-
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/map",
-
-            "specialization": {"type": "Operation"},
-
-        }
-
-    ],
+    }
 
 }
 

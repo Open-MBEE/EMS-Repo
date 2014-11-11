@@ -283,8 +283,8 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             getSnapshotJson( EmsScriptNode snapshot, EmsScriptNode view,
                              WorkspaceNode workspace ) throws JSONException {
         JSONObject snapshotJson = new JSONObject();
-        //snapshotJson.put("url", contextPath + "/service/snapshots/" + snapshot.getProperty(Acm.ACM_ID));
-        snapshotJson.put("sysmlid", view.getProperty(Acm.ACM_ID));
+        //snapshotJson.put("url", contextPath + "/service/snapshots/" + snapshot.getSysmlId());
+        snapshotJson.put("sysmlid", view.getSysmlId());
         snapshotJson.put("sysmlname", view.getProperty(Acm.ACM_NAME));
         snapshotJson.put("id", snapshot.getProperty(Acm.CM_NAME));
         snapshotJson.put( "created",  EmsScriptNode.getIsoTime( (Date)snapshot.getProperty( "cm:created" )));
@@ -353,7 +353,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
     @Deprecated
     public JSONObject getProductJson(EmsScriptNode product) throws JSONException {
         JSONObject productJson = new JSONObject();
-        productJson.put("sysmlid", product.getProperty(Acm.CM_NAME));
+        productJson.put("sysmlid", product.getSysmlId());
         productJson.put( "created",  EmsScriptNode.getIsoTime( (Date)product.getProperty( "cm:created" )));
         productJson.put( "creator", product.getProperty( "cm:modifier" ) );
             

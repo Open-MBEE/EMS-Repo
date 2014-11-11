@@ -246,7 +246,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
                 continue;
             }
 
-            String id = (String)snapshot.getProperty(Acm.ACM_ID);
+            String id = snapshot.getSysmlId();
             Date date = (Date)snapshot.getLastModified( dateTime );
             
             JSONObject jsonObject = new JSONObject();
