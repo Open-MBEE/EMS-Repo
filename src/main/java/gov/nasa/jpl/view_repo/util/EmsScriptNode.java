@@ -328,9 +328,14 @@ public class EmsScriptNode extends ScriptNode implements
 
     @Override
     public EmsScriptNode createFolder( String name ) {
-        EmsScriptNode folder =
-                new EmsScriptNode( super.createFolder( name ).getNodeRef(),
-                                   services, response, status );
+        return createFolder(name, null);
+    }
+
+    @Override
+    public EmsScriptNode createFolder( String name, String type ) {
+        
+        NodeRef folderRef = super.createFolder( name, type ).getNodeRef();
+        EmsScriptNode folder = new EmsScriptNode(folderRef,services, response, status );
         WorkspaceNode ws = getWorkspace();
         EmsScriptNode source = getWorkspaceSource();
         // TODO -- the folder is not getting a source here! is that okay?
@@ -341,19 +346,6 @@ public class EmsScriptNode extends ScriptNode implements
             Debug.outln( "createFolder(" + name + "): returning " + folder );
         }
 
-        return folder;
-    }
-
-    @Override
-    public EmsScriptNode createFolder( String name, String type ) {
-        EmsScriptNode folder =
-                new EmsScriptNode( super.createFolder( name, type )
-                                        .getNodeRef(), services, response,
-                                   status );
-        WorkspaceNode ws = getWorkspace();
-        // TODO -- the folder is not getting a source here!
-        if ( ws != null && !folder.isWorkspace() ) folder.setWorkspace( ws,
-                                                                        null );
         return folder;
     }
 
@@ -768,7 +760,7 @@ public class EmsScriptNode extends ScriptNode implements
      * name.
      *
      * @param sysmlId
-     *            the @sysml:id which is also the @cm:name
+     *            the @sysml:id
      * @param sysmlAcmType
      *            Alfresco Content Model type of node to create or an aspect
      * @return created child EmsScriptNode
@@ -792,8 +784,12 @@ public class EmsScriptNode extends ScriptNode implements
                 // TODO error handling
             }
             
-
-            node.setProperty( Acm.CM_NAME, sysmlId );
+            // We are now setting the cm:name to the alfresco id because we found that
+            // magicdraw sysmlids can have the same id with only differing cases, which 
+            // alfresco does not allow.  Also, setting the cm:name to the alrefsco id does
+            // not work, so pre-pending with "cm_"
+            String alfrescoId = node.getId();
+            node.setProperty( Acm.CM_NAME, "cm_"+alfrescoId);
             node.setProperty( Acm.ACM_ID, sysmlId );
             modStatus.setState( ModStatus.State.ADDED  );
             if ( nodeWorkspace != null && nodeWorkspace.exists() ) {
@@ -968,9 +964,6 @@ public class EmsScriptNode extends ScriptNode implements
 
     public String getSysmlId() {
         String id = (String)getProperty( Acm.ACM_ID );
-        if ( id == null ) {
-            id = getName();
-        }
         return id;
     }
 
@@ -1244,24 +1237,17 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public String getSysmlQPath( boolean isName ) {
         String qname = "";
-        boolean noDisplayPath = true;
+        String pkgSuffix = "_pkg";
+        
+        // TODO REVIEW
+        // This is currently not called on reified packages, so as long as the ems:owner always points
+        // to reified nodes, as it should, then we dont need to replace pkgSuffix in the qname.
+        
         if ( isName ) {
-            qname = "/" + this.getProperty( "sysml:name" );
+            qname = "/" + getProperty( "sysml:name" );
         } else {
-            String displayPath = getDisplayPath();
-            if (displayPath.length() > 0) {
-                noDisplayPath = false; // versioned nodes don't have, so need to look up path if that's the case
-            }
-            qname = displayPath + "/" + getProperty( "sysml:id" );
-
-            int pos = qname.indexOf( "Models/" );
-            if ( pos >= 0 ) {
-                pos += 7; // to skip past "Models/"
-                if ( qname.length() >= pos ) {
-                    qname = qname.substring( pos );
-                }
-            }
-            qname = qname.replace( "_pkg", "" );
+            qname =  "/" + getProperty( "sysml:id" );
+            //qname = qname.endsWith(pkgSuffix) ? qname.replace(pkgSuffix, "" ) : qname;
         }
 
         NodeRef ownerRef = (NodeRef)this.getProperty( "ems:owner" );
@@ -1272,12 +1258,13 @@ public class EmsScriptNode extends ScriptNode implements
             String nameProp = null;
             if ( isName ) {
                 nameProp = (String)owner.getProperty( "sysml:name" );
-            } else if (noDisplayPath) {
+            } else {
                 nameProp = (String)owner.getProperty( "sysml:id" );
             }
             if ( nameProp == null ) {
                 break;
             }
+            //nameProp = nameProp.endsWith(pkgSuffix) ? nameProp.replace(pkgSuffix, "" ) : nameProp;
             qname = "/" + nameProp + qname;
 
             ownerRef = (NodeRef)owner.getProperty( "ems:owner" );
@@ -1321,12 +1308,13 @@ public class EmsScriptNode extends ScriptNode implements
         }
         String deleted = isDeleted() ? "DELETED: " : "";
         String name = getName();
+        String id = getSysmlId();
         String sysmlName = getSysmlName();
         String qualifiedName = getSysmlQName();
         String type = getTypeName();
         String workspaceName = getWorkspaceName();
         String result =
-                deleted + "{type=" + type + ", id=" + name + ", name=" + sysmlName
+                deleted + "{type=" + type + ", id=" + id + ", cm_name=" + name + ", sysml_name=" + sysmlName
                         + ", qualified name=" + qualifiedName + ", workspace="
                         + workspaceName + "}";
         if ( wasOn ) Debug.turnOn();
@@ -1702,7 +1690,7 @@ public class EmsScriptNode extends ScriptNode implements
 
     public JSONObject toSimpleJSONObject( Date dateTime ) throws JSONException {
         JSONObject element = new JSONObject();
-        element.put( "sysmlid", getName() );
+        element.put( "sysmlid", getSysmlId() );
         if ( dateTime == null ) {
             element.put( "name", getSysmlName() );
         } else {
@@ -2017,10 +2005,10 @@ public class EmsScriptNode extends ScriptNode implements
     
     public String getProjectId() {
         EmsScriptNode projectNode = getProjectNode();
-        if (projectNode == null) {
+        if (projectNode == null || projectNode.getSysmlId() == null) {
             return "null";
         }
-        return getProjectNode().getSysmlId().replace("_pkg", "");
+        return projectNode.getSysmlId().replace("_pkg", "");
     }
     
     private EmsScriptNode convertIdToEmsScriptNode( String valueId,
@@ -2039,7 +2027,8 @@ public class EmsScriptNode extends ScriptNode implements
                                       StringBuffer response, Status status ) {
         boolean useSimpleCache = !ignoreWorkspace && workspace == null && dateTime == null;
         ArrayList< NodeRef > refs =
-                NodeUtil.findNodeRefsByType( valueId, "@cm\\:name:\"", useSimpleCache, ignoreWorkspace,
+                NodeUtil.findNodeRefsByType( valueId, NodeUtil.SearchType.ID.prefix, 
+                                             useSimpleCache, ignoreWorkspace,
                                              workspace, dateTime, true, true,
                                              services, false );
         List< EmsScriptNode > nodeList =
@@ -2898,7 +2887,7 @@ public class EmsScriptNode extends ScriptNode implements
         boolean changed = false;
 
 
-        for ( String aspect : diff.getRemovedAspects(getName()) ) {
+        for ( String aspect : diff.getRemovedAspects(getSysmlId()) ) {
             NodeService ns = getServices().getNodeService();
             if ( hasAspect( aspect ) ) {
                 try {
@@ -2910,7 +2899,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
 
-        for ( String aspect : diff.getAddedAspects(getName()) ) {
+        for ( String aspect : diff.getAddedAspects(getSysmlId()) ) {
             NodeService ns = getServices().getNodeService();
             if ( !hasAspect( aspect ) ) {
                 try {
@@ -2923,7 +2912,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
         Map< String, Object > removedProps =
-                diff.getRemovedProperties().get(getName());
+                diff.getRemovedProperties().get(getSysmlId());
         if ( removedProps != null )
         for ( Entry< String, Object > e : removedProps.entrySet() ) {
             if ( workspaceMetaProperties.contains( e.getKey() ) ) continue;
@@ -2933,7 +2922,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
         Map< String,  Pair< Object, Object > > propChanges =
-                diff.getPropertyChanges().get(getName());
+                diff.getPropertyChanges().get(getSysmlId());
         if ( propChanges != null )
         for ( Entry< String, Pair< Object, Object > > e : propChanges.entrySet() ) {
             if ( workspaceMetaProperties.contains( e.getKey() ) ) continue;
@@ -3887,16 +3876,25 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public static List< String > getNames( List< EmsScriptNode > nodes ) {
+        return getNamesOrIdsImpl(nodes, true);
+    }
+    
+    public static List< String > getSysmlIds( List< EmsScriptNode > nodes ) {
+        return getNamesOrIdsImpl(nodes, false);
+    }
+    
+    private static List< String > getNamesOrIdsImpl( List< EmsScriptNode > nodes, boolean getName ) {
+        
         List< String > names = new ArrayList< String >();
         for ( EmsScriptNode node : nodes ) {
-            String name = node.getName();
+            String name = getName ? node.getName() : node.getSysmlId();
             if ( !Utils.isNullOrEmpty( name ) ) {
                 names.add( name );
             }
         }
         return names;
     }
-
+    
     public static Collection< ? extends NodeRef >
             getNodeRefs( List< EmsScriptNode > nodes ) {
         List< NodeRef > refs = new ArrayList< NodeRef >();

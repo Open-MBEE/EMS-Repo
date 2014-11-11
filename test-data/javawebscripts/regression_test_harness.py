@@ -74,7 +74,7 @@ def do20():
     ''' Gets the "modified" date out of the json output and sets gv1 to it.'''
     modDate = None
     json_output = ""
-    print 'orig_output=' + str(orig_output)
+    #print 'orig_output=' + str(orig_output)
     if orig_output != None and len(str(orig_output)) > 5:
         # find the status code at the end of the string and remove it
         # comput i as the index to the start of the status code
@@ -94,9 +94,9 @@ def do20():
             json_output = orig_output[0:i]
 #         json_output = re.sub(r'^[2][0-9][0-9]', r'', orig_output, 1)
 #         #json_output = re.sub("^$", "", json_output)
-        print 'json_output=' + str(json_output)
+        #print 'json_output=' + str(json_output)
         j = json.loads(json_output)
-        print "j=" + str(j)
+        #print "j=" + str(j)
         modDate = j['workspace2']['updatedElements'][0]['modified']
     set_gv1(modDate)
 
