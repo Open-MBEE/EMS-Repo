@@ -323,10 +323,12 @@ public class NodeUtil {
                 }
             }
             if ( results != null ) {
+                NodeRef lowest = null;
                 if ( wasCached && dateTime == null && siteName == null) {
                     nodeRefs = results;
-                } else for (NodeRef nr: results) {
-                    NodeRef lowest = null;
+                } 
+                else 
+                for (NodeRef nr: results) {
                     //int minParentDistance = Integer.MAX_VALUE;
                     if ( nr == null ) continue;
                     EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
@@ -425,7 +427,7 @@ public class NodeUtil {
                         e.printStackTrace();
                     }
 //                    }
-                }
+                } // ends else for
             }
             if ( doCaching && caching && !Utils.isNullOrEmpty( nodeRefs ) ) {
                 if ( useSimpleCache ) {
@@ -1068,10 +1070,16 @@ public class NodeUtil {
             new VersionLowerBoundComparator();
 
     public static NodeRef getNodeRefAtTime( NodeRef nodeRef, WorkspaceNode workspace,
-                                            Date timestamp ) {
+                                            Date dateTime ) {
+        return getNodeRefAtTime( nodeRef, workspace, dateTime, false, false);
+    }
+    
+    public static NodeRef getNodeRefAtTime( NodeRef nodeRef, WorkspaceNode workspace,
+                                            Date dateTime, boolean ignoreWorkspace,
+                                            boolean findDeleted) {
         EmsScriptNode node = new EmsScriptNode( nodeRef, getServices() );
         String id = node.getSysmlId();
-        return getNodeRefAtTime( id, workspace, timestamp );
+        return findNodeRefById( id, ignoreWorkspace, workspace, dateTime, getServices(), findDeleted );
     }
 
     public static NodeRef getNodeRefAtTime( String id, WorkspaceNode workspace,

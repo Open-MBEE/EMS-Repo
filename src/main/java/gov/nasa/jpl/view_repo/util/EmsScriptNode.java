@@ -62,6 +62,7 @@ import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
 import javax.servlet.http.HttpServletResponse;
+
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.jscript.ScriptNode;
@@ -1008,15 +1009,15 @@ public class EmsScriptNode extends ScriptNode implements
     /**
      * Returns the children for this node.  Uses the ems:ownedChildren property.
      * 
-     * @param workspace
-     * @param dateTime
+     * @param findDeleted Find deleted nodes also
      * @return children of this node
      */
-    public ArrayList<NodeRef> getOwnedChildren() {
+    public ArrayList<NodeRef> getOwnedChildren(boolean findDeleted) {
                 
         ArrayList<NodeRef> ownedChildren = new ArrayList<NodeRef>();
         
-        ArrayList<NodeRef> oldChildren = this.getPropertyNodeRefs( "ems:ownedChildren" );
+        ArrayList<NodeRef> oldChildren = this.getPropertyNodeRefs( "ems:ownedChildren",
+                                                                   false, null, findDeleted);
         if (oldChildren != null) {
             ownedChildren = oldChildren;
         }
@@ -1058,6 +1059,21 @@ public class EmsScriptNode extends ScriptNode implements
      * @return
      */
     public Object getProperty( String acmType ) {
+        // FIXME Sometimes we wont want these defaults, ie want to find the deleted elements. 
+        //       Need to check all calls to getProperty() with properties that are NodeRefs.
+        return getProperty(acmType, false, null, false);
+    }
+    
+    /**
+     * Get the property of the specified type
+     *
+     * @param acmType
+     *            Short name of property to get
+     * @return
+     */
+    public Object getProperty( String acmType, boolean ignoreWorkspace,
+                               Date dateTime, boolean findDeleted ) {
+        
         if ( Utils.isNullOrEmpty( acmType ) ) return null;
         Object result = null;
         if ( useFoundationalApi ) {
@@ -1071,7 +1087,8 @@ public class EmsScriptNode extends ScriptNode implements
         if ( !workspaceMetaProperties.contains( acmType ) ) {
             if ( result instanceof NodeRef ) {
                 result = NodeUtil.getNodeRefAtTime( (NodeRef)result,
-                                                    getWorkspace(), null );
+                                                    getWorkspace(), dateTime,
+                                                    ignoreWorkspace, findDeleted);
             } else if ( result instanceof Collection ) {
                 Collection< ? > resultColl = (Collection< ? >)result;
                 ArrayList< Object > arr = new ArrayList< Object >();
@@ -1079,7 +1096,8 @@ public class EmsScriptNode extends ScriptNode implements
                     if ( o instanceof NodeRef ) {
                         NodeRef ref =
                                 NodeUtil.getNodeRefAtTime( (NodeRef)o,
-                                                           getWorkspace(), null );
+                                                           getWorkspace(), dateTime,
+                                                           ignoreWorkspace, findDeleted);
                         arr.add( ref );
                     } else {
                         arr.add( o );
@@ -1088,6 +1106,7 @@ public class EmsScriptNode extends ScriptNode implements
                 result = arr;
             }
         }
+        
         return result;
     }
 
@@ -3071,7 +3090,12 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public ArrayList< NodeRef > getPropertyNodeRefs( String acmProperty ) {
-        Object o = getProperty( acmProperty );
+        return getPropertyNodeRefs(acmProperty, false, null, false);
+    }
+    
+    public ArrayList< NodeRef > getPropertyNodeRefs( String acmProperty, boolean ignoreWorkspace,
+                                                     Date dateTime, boolean findDeleted  ) {
+        Object o = getProperty( acmProperty, ignoreWorkspace, dateTime, findDeleted );
         ArrayList< NodeRef > refs = null;
         if ( !( o instanceof Collection ) ) {
             if ( o instanceof NodeRef ) {
