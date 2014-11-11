@@ -241,7 +241,9 @@ public class ProductListGet extends AbstractJavaWebScript {
         
         EmsScriptNode parent = node.getParent();
         if (parent != null && checkPermissions(parent, PermissionService.READ)) {
-            String parentId = parent.getSysmlId();
+            // This parentId cannot use getSysmlId() b/c it depends on it being
+            // null for projects, folders ,etc
+            String parentId = (String)parent.getProperty(Acm.ACM_ID);
             if (parentId == null) {
                 if (id != null && !projectVolumes.toString().contains(id)) {
                     projectVolumes.put(id);

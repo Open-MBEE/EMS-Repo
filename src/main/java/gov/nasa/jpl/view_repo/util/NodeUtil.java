@@ -665,7 +665,7 @@ public class NodeUtil {
                                                         services, findDeleted); 
 
         EmsScriptNode esn = null;
-        if (array != null) {
+        if (!Utils.isNullOrEmpty(array)) {
             for (NodeRef r : array) {
                 if ( r != null ) {
                     esn = new EmsScriptNode( r, getServices() );
@@ -679,6 +679,13 @@ public class NodeUtil {
                 }
                 returnArray.add(r);
             }
+        }
+        else {
+            returnArray = findNodeRefsByType(id, SearchType.CM_NAME.prefix, 
+                                             useSimpleCache,
+                                             ignoreWorkspace,
+                                             workspace, dateTime, justFirst, true, 
+                                             services, findDeleted); 
         }
         
         return returnArray;
