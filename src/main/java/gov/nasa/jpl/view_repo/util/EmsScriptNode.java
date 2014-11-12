@@ -525,7 +525,11 @@ public class EmsScriptNode extends ScriptNode implements
             value = t;
         }
         @SuppressWarnings( "unchecked" )
-        T oldValue = (T)getProperty( acmType );
+        // It is important we ignore the workspace when getting the property, so we make sure
+        // to update this property when needed.  Otherwise, property may have a noderef in 
+        // a parent workspace, and this wont detect it; however, all the getProperty() will look
+        // for the correct workspace node, so perhaps this is overkill:
+        T oldValue = (T)getProperty( acmType, true, null, false, true );
         if ( oldValue != null ) {
             if ( !value.equals( oldValue ) ) {
                 setProperty( acmType, value );
@@ -812,15 +816,20 @@ public class EmsScriptNode extends ScriptNode implements
         return node;
     }
 
-    public EmsScriptNode getReifiedNode() {
-        NodeRef nodeRef = (NodeRef)getProperty( "ems:reifiedNode" );
+    public EmsScriptNode getReifiedNode(boolean findDeleted) {
+        NodeRef nodeRef = (NodeRef)getProperty( "ems:reifiedNode", false, null, 
+                                                findDeleted, false );
         if ( nodeRef != null ) {
             return new EmsScriptNode( nodeRef, services, response );
         }
         return null;
     }
+    
+    public EmsScriptNode getReifiedNode() {
+        return getReifiedNode(false);
+    }
 
-    protected EmsScriptNode getReifiedPkg() {
+    public EmsScriptNode getReifiedPkg() {
         NodeRef nodeRef = (NodeRef)getProperty( "ems:reifiedPkg" );
         if ( nodeRef != null ) {
             return new EmsScriptNode( nodeRef, services, response );
@@ -1024,7 +1033,7 @@ public class EmsScriptNode extends ScriptNode implements
         ArrayList<NodeRef> ownedChildren = new ArrayList<NodeRef>();
         
         ArrayList<NodeRef> oldChildren = this.getPropertyNodeRefs( "ems:ownedChildren",
-                                                                   false, null, findDeleted);
+                                                                   false, null, findDeleted, false);
         if (oldChildren != null) {
             ownedChildren = oldChildren;
         }
@@ -1068,7 +1077,7 @@ public class EmsScriptNode extends ScriptNode implements
     public Object getProperty( String acmType ) {
         // FIXME Sometimes we wont want these defaults, ie want to find the deleted elements. 
         //       Need to check all calls to getProperty() with properties that are NodeRefs.
-        return getProperty(acmType, false, null, false);
+        return getProperty(acmType, false, null, false, false);
     }
     
     /**
@@ -1079,7 +1088,8 @@ public class EmsScriptNode extends ScriptNode implements
      * @return
      */
     public Object getProperty( String acmType, boolean ignoreWorkspace,
-                               Date dateTime, boolean findDeleted ) {
+                               Date dateTime, boolean findDeleted, 
+                               boolean skipNodeRefCheck ) {
         
         if ( Utils.isNullOrEmpty( acmType ) ) return null;
         Object result = null;
@@ -1091,7 +1101,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         // get noderefs from the proper workspace unless the property is a
         // workspace meta-property
-        if ( !workspaceMetaProperties.contains( acmType ) ) {
+        if ( !skipNodeRefCheck && !workspaceMetaProperties.contains( acmType )) {
             if ( result instanceof NodeRef ) {
                 result = NodeUtil.getNodeRefAtTime( (NodeRef)result,
                                                     getWorkspace(), dateTime,
@@ -2119,8 +2129,12 @@ public class EmsScriptNode extends ScriptNode implements
         // only change if old list is different than new
         if ( checkPermissions( PermissionService.WRITE, response, status ) ) {
             @SuppressWarnings( "unchecked" )
+            // It is important we ignore the workspace when getting the property, so we make sure
+            // to update this property when needed.  Otherwise, property may have a noderef in 
+            // a parent workspace, and this wont detect it; however, all the getProperty() will look
+            // for the correct workspace node, so perhaps this is overkill::
             ArrayList< Serializable > oldValues =
-                    (ArrayList< Serializable >)getProperty( acmProperty );
+                    (ArrayList< Serializable >)getProperty( acmProperty, true, null, false, true );
             if ( !EmsScriptNode.checkIfListsEquivalent( values, oldValues ) ) {
                 setProperty( acmProperty, values );
                 changed = true;
@@ -3121,12 +3135,13 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public ArrayList< NodeRef > getPropertyNodeRefs( String acmProperty ) {
-        return getPropertyNodeRefs(acmProperty, false, null, false);
+        return getPropertyNodeRefs(acmProperty, false, null, false, false);
     }
     
     public ArrayList< NodeRef > getPropertyNodeRefs( String acmProperty, boolean ignoreWorkspace,
-                                                     Date dateTime, boolean findDeleted  ) {
-        Object o = getProperty( acmProperty, ignoreWorkspace, dateTime, findDeleted );
+                                                     Date dateTime, boolean findDeleted,
+                                                     boolean skipNodeRefCheck) {
+        Object o = getProperty( acmProperty, ignoreWorkspace, dateTime, findDeleted, skipNodeRefCheck );
         ArrayList< NodeRef > refs = null;
         if ( !( o instanceof Collection ) ) {
             if ( o instanceof NodeRef ) {

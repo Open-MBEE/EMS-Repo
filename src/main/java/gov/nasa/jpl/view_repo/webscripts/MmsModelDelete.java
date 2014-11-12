@@ -264,6 +264,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         }
         
         // TODO: REVIEW may not need this b/c addToWsDiff() does not add in reified packages
+        //       Also, code in ModelPost assumes we never delete reified packages
 //        // Delete the reified pkg if it exists also:
 //        EmsScriptNode pkgNode = findScriptNodeById(root.getSysmlId() + "_pkg", 
 //                                                   workspace, null, false);
