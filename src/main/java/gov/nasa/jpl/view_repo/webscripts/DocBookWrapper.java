@@ -113,17 +113,6 @@ public class DocBookWrapper {
 
 		return target;
 	}
-
-    /**
-	 * Utility function to find all the NodeRefs for the specified name
-	 * @param name
-	 * @return
-	 */
-	private ResultSet findNodeRef(String name) {
-	    String pattern = "@cm\\:name:\"" + name + "\"";
-		ResultSet query = NodeUtil.luceneSearch( pattern);
-		return query;
-	}
 	
 	private String formatContent(String rawContent){
 		Document document = Jsoup.parseBodyFragment(rawContent);

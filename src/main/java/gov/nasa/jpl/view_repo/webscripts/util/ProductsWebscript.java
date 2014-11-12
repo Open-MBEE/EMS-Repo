@@ -138,7 +138,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                           new EmsScriptNode.EmsScriptNodeComparator() );
         for ( EmsScriptNode snapshot : snapshotsList ) {
             if (!snapshot.isDeleted()) {
-                String id = (String)snapshot.getProperty( Acm.ACM_ID );
+                String id = snapshot.getSysmlId();
                 Date date = (Date)snapshot.getLastModified( dateTime );
     
                 JSONObject jsonObject = new JSONObject();
@@ -147,7 +147,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                 jsonObject.put( "creator",
                                 (String)snapshot.getProperty( "cm:modifier" ) );
                 jsonObject.put( "url", contextPath + "/service/snapshots/"
-                                       + snapshot.getProperty( Acm.ACM_ID ) );
+                                       + snapshot.getSysmlId() );
                 jsonObject.put( "tag", (String)SnapshotGet.getConfigurationSet( snapshot,
                                                                                 workspace,
                                                                                 dateTime ) );

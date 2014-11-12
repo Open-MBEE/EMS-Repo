@@ -1,10 +1,11 @@
-{"elements": [
-   {
-        "documentation": "",
-        "sysmlid": "testProd",
-        "name": "testProd",
-        "owner": "123456",
-        "specialization": {"type": "LiteralBoolean"
-                          }
+{ "elements" : [
+
+    {
+        "sysmlid" : "ForAllChildChildGGG",
+        "owner" : "ForAllChildGGG",
+        "specialization" : {
+            "type" : "Operation"
+        }
     }
+    
 ]}

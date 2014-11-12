@@ -12,7 +12,7 @@
 
         "owner": "300",
 
-        "qualifiedId": "123456/300/301",
+        "qualifiedId": "/123456/300/301",
 
         "qualifiedName": "/JW_TEST/300/301",
 
@@ -100,7 +100,7 @@
 
         "owner": "301",
 
-        "qualifiedId": "123456/300/301/302",
+        "qualifiedId": "/123456/300/301/302",
 
         "qualifiedName": "/JW_TEST/300/301/302",
 
@@ -138,7 +138,7 @@
 
         "owner": "302",
 
-        "qualifiedId": "123456/300/301/302/303",
+        "qualifiedId": "/123456/300/301/302/303",
 
         "qualifiedName": "/JW_TEST/300/301/302/303",
 

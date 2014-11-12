@@ -731,7 +731,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         DBSection section = new DBSection();
         if ( isChapter ) section.setChapter( isChapter );
         section.setTitle( (String)node.getProperty( Acm.ACM_NAME ) );
-        section.setId( (String)node.getProperty( Acm.ACM_ID ) );
+        section.setId( node.getSysmlId() );
 
         traverseElements( section, node, workspace, timestamp );
         return section;
@@ -755,17 +755,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return valObj;
     }
     
-    /**
-	 * Utility function to find all the NodeRefs for the specified name
-	 * @param name
-	 * @return
-	 */
-	private ResultSet findNodeRef(String name) {
-	    String pattern = "@cm\\:name:\"" + name + "\"";
-		ResultSet query = NodeUtil.luceneSearch( pattern);
-		return query;
-	}
-
     private String gatherJobName( JSONObject postJson ) {
         String jobName = "";
         try {
@@ -792,7 +781,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
     
     public EmsScriptNode generateHTML( EmsScriptNode snapshotNode, WorkspaceNode workspace ) throws Exception {
-        this.snapshotName = (String)snapshotNode.getProperty( Acm.ACM_ID );
+        this.snapshotName = snapshotNode.getSysmlId();
         if(this.snapshotName == null || this.snapshotName.isEmpty()) throw new Exception("Failed to retrieve snapshot Id!");
         
         ChildAssociationRef childAssociationRef =
@@ -822,7 +811,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
     
     public EmsScriptNode generatePDF( EmsScriptNode snapshotNode, WorkspaceNode workspace ) throws Exception {
-        this.snapshotName = (String)snapshotNode.getProperty( Acm.ACM_ID );
+        this.snapshotName = snapshotNode.getSysmlId();
         if(this.snapshotName == null || this.snapshotName.isEmpty()) throw new Exception("Failed to retrieve snapshot Id!");
         
         ChildAssociationRef childAssociationRef =
@@ -1695,7 +1684,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         createDBSectionContainment( section, contains, workspace, timestamp );
         
         //then process it's contains:children if any
-    	String nodeId = (String)node.getProperty(Acm.ACM_ID);
+    	String nodeId = node.getSysmlId();
     	JSONObject viewJson = getChildrenViews(nodeId);
     	if(viewJson == null) return;
     	

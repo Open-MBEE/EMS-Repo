@@ -29,11 +29,13 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -92,7 +94,9 @@ public class WorkspacesPost extends AbstractJavaWebScript{
             if(validateRequest(req, status)){
                 String sourceWorkspaceParam = req.getParameter("sourceWorkspace");
                 String newName = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
-                statusCode = createWorkSpace(sourceWorkspaceParam, newName, (JSONObject)req.parseContent(), user, status);
+                String copyTime = req.getParameter("copyTime");
+                Date copyDateTime = TimeUtils.dateFromTimestamp( copyTime );
+                statusCode = createWorkSpace(sourceWorkspaceParam, newName, copyDateTime, (JSONObject)req.parseContent(), user, status);
                 WorkspaceNode ws = WorkspaceNode.getWorkspaceFromId(newName, getServices(), getResponse(), status, //false,
                                                                             user);
                 json = printObject(ws);
@@ -132,33 +136,36 @@ public class WorkspacesPost extends AbstractJavaWebScript{
         return json;
     }
 
-    public int createWorkSpace(String sourceWorkId, String newWorkID, JSONObject jsonObject, String user, Status status) {
+    public int createWorkSpace(String sourceWorkId, String newWorkID, Date copyTime,
+                               JSONObject jsonObject, String user, Status status) {
         if(newWorkID.equals( "master" )){
-            log(LogLevel.WARNING, "Workspace already exists.", HttpServletResponse.SC_BAD_REQUEST);
+            log(LogLevel.WARNING, "Cannot change attributes of the master workspace.", HttpServletResponse.SC_BAD_REQUEST);
             return HttpServletResponse.SC_BAD_REQUEST;
         }
-        else if ( WorkspaceNode.getWorkspaceFromId( newWorkID, services,
-                                                            response, status, // false,
-                                                            user ) != null ) {
+        WorkspaceNode existingWs = 
+                WorkspaceNode.getWorkspaceFromId( newWorkID, services,
+                                                  response, status, // false,
+                                                  user );
+        if ( existingWs != null ) {
             log(LogLevel.WARNING, "Workspace already exists.", HttpServletResponse.SC_BAD_REQUEST);
             return HttpServletResponse.SC_BAD_REQUEST;
         } else {
             WorkspaceNode srcWs =
                     WorkspaceNode.getWorkspaceFromId( sourceWorkId,
-                                                              services,
-                                                              response, status, // false,
-                                                              user );
+                                                      services,
+                                                      response, status, // false,
+                                                      user );
             if (!"master".equals( sourceWorkId ) && srcWs == null) {
                 log(LogLevel.WARNING, "Source workspace not found.", HttpServletResponse.SC_NOT_FOUND);
                 return HttpServletResponse.SC_NOT_FOUND;
             } else {
-                    EmsScriptNode folder = null;
-                    WorkspaceNode dstWs = null;
+                EmsScriptNode folder = null;
+                WorkspaceNode dstWs = null;
                 UserTransaction trx;
                 trx = services.getTransactionService().getNonPropagatingUserTransaction();
                 try {
                     trx.begin();
-                    dstWs = WorkspaceNode.createWorkspaceFromSource(newWorkID, user, sourceWorkId, folder, getServices(), getResponse(), status);
+                    dstWs = WorkspaceNode.createWorkspaceFromSource(newWorkID, user, sourceWorkId, copyTime, folder, getServices(), getResponse(), status);
                     trx.commit();
                 } catch (Throwable e) {
                     try {

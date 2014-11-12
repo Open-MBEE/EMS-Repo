@@ -1,306 +1,42 @@
 {
 
-    "elements": [
+    "elements": [{
 
-        {
+        "creator": "admin",
 
-            "creator": "admin",
+        "documentation": "y is y",
 
-            "documentation": "",
+        "editable": true,
 
-            "editable": true,
+        "owner": "302",
 
-            "name": "",
+        "qualifiedId": "/123456/300/301/302/y",
 
-            "owner": "e_32169",
+        "qualifiedName": "/JW_TEST/300/301/302/null",
 
-            "qualifiedId": "123456/e_32169/expr_32165",
+        "specialization": {
 
-            "qualifiedName": "/e_32169/",
+            "isDerived": false,
 
-            "specialization": {
+            "isSlot": false,
 
-                "operand": [
+            "type": "Property",
 
-                    {
+            "value": [{
 
-                        "element": "op_ev_31835",
+                "string": "the y value",
 
-                        "type": "ElementValue"
+                "type": "LiteralString"
 
-                    },
-
-                    {
-
-                        "element": "arg_ev_38307_1",
-
-                        "type": "ElementValue"
-
-                    },
-
-                    {
-
-                        "element": "arg_ev_33001",
-
-                        "type": "ElementValue"
-
-                    }
-
-                ],
-
-                "type": "Expression"
-
-            },
-
-            "sysmlid": "expr_32165"
+            }]
 
         },
 
-        {
+        "sysmlid": "y"
 
-            "creator": "admin",
+    }],
 
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "initialDuration",
-
-            "owner": "e_38263",
-
-            "qualifiedId": "123456/e_38263/arg_ev_33001",
-
-            "qualifiedName": "/e_38263/initialDuration",
-
-            "specialization": {
-
-                "isDerived": false,
-
-                "isSlot": false,
-
-                "type": "Property",
-
-                "value": [{
-
-                    "integer": -1145811380,
-
-                    "type": "LiteralInteger"
-
-                }]
-
-            },
-
-            "sysmlid": "arg_ev_33001"
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "y",
-
-            "owner": "op_ev_31835",
-
-            "qualifiedId": "123456/e_31828/op_ev_31835/op_param_31869",
-
-            "qualifiedName": "/e_31828/GreaterEquals/y",
-
-            "specialization": {"type": "Element"},
-
-            "sysmlid": "op_param_31869"
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "duration_1",
-
-            "owner": "e_38304",
-
-            "qualifiedId": "123456/e_38304/arg_ev_38307_1",
-
-            "qualifiedName": "/e_38304/duration_1",
-
-            "specialization": {
-
-                "isDerived": false,
-
-                "isSlot": false,
-
-                "type": "Property",
-
-                "value": [{
-
-                    "integer": 10,
-
-                    "type": "LiteralInteger"
-
-                }]
-
-            },
-
-            "sysmlid": "arg_ev_38307_1"
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "",
-
-            "owner": "e_32169",
-
-            "qualifiedId": "123456/e_32169/constraint_32165",
-
-            "qualifiedName": "/e_32169/",
-
-            "specialization": {
-
-                "type": "Constraint"
-
-            },
-
-            "sysmlid": "constraint_32165"
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "duration",
-
-            "owner": "e_38304",
-
-            "qualifiedId": "123456/e_38304/arg_ev_38307",
-
-            "qualifiedName": "/e_38304/duration",
-
-            "specialization": {
-
-                "isDerived": false,
-
-                "isSlot": false,
-
-                "type": "Property",
-
-                "value": [{
-
-                    "integer": 22,
-
-                    "type": "LiteralInteger"
-
-                }]
-
-            },
-
-            "sysmlid": "arg_ev_38307"
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "GreaterEquals",
-
-            "owner": "e_31828",
-
-            "qualifiedId": "123456/e_31828/op_ev_31835",
-
-            "qualifiedName": "/e_31828/GreaterEquals",
-
-            "specialization": {
-
-                "parameters": [
-
-                    "op_param_31867",
-
-                    "op_param_31868",
-
-                    "op_param_31869"
-
-                ],
-
-                "type": "Operation"
-
-            },
-
-            "sysmlid": "op_ev_31835"
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "x",
-
-            "owner": "op_ev_31835",
-
-            "qualifiedId": "123456/e_31828/op_ev_31835/op_param_31868",
-
-            "qualifiedName": "/e_31828/GreaterEquals/x",
-
-            "specialization": {"type": "Element"},
-
-            "sysmlid": "op_param_31868"
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "result",
-
-            "owner": "op_ev_31835",
-
-            "qualifiedId": "123456/e_31828/op_ev_31835/op_param_31867",
-
-            "qualifiedName": "/e_31828/GreaterEquals/result",
-
-            "specialization": {"type": "Element"},
-
-            "sysmlid": "op_param_31867"
-
-        }
-
-    ],
-
-    "message": "[WARNING]: Could not find owner with name: e_32169 putting constraint_32165 into project: {type=null, id=123456, name=JW_TEST2, qualified name=/JW_TEST2, workspace=null}\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307_1 into project: {type=null, id=123456, name=JW_TEST2, qualified name=/JW_TEST2, workspace=null}\n[WARNING]: Could not find owner with name: e_32169 putting expr_32165 into project: {type=null, id=123456, name=JW_TEST2, qualified name=/JW_TEST2, workspace=null}\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307 into project: {type=null, id=123456, name=JW_TEST2, qualified name=/JW_TEST2, workspace=null}\n[WARNING]: Could not find owner with name: e_31828 putting op_ev_31835 into project: {type=null, id=123456, name=JW_TEST2, qualified name=/JW_TEST2, workspace=null}\n[WARNING]: Could not find owner with name: e_38263 putting arg_ev_33001 into project: {type=null, id=123456, name=JW_TEST2, qualified name=/JW_TEST2, workspace=null}\n[WARNING]: Could not find owner with name: e_32169 putting constraint_32165 into project: {type=null, id=123456, name=JW_TEST2, qualified name=/JW_TEST2, workspace=null}\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307_1 into project: {type=null, id=123456, name=JW_TEST2, qualified name=/JW_TEST2, workspace=null}\n[WARNING]: Could not find owner with name: e_32169 putting expr_32165 into project: {type=null, id=123456, name=JW_TEST2, qualified name=/JW_TEST2, workspace=null}\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307 into project: {type=null, id=123456, name=JW_TEST2, qualified name=/JW_TEST2, workspace=null}\n[WARNING]: Could not find owner with name: e_31828 putting op_ev_31835 into project: {type=null, id=123456, name=JW_TEST2, qualified name=/JW_TEST2, workspace=null}\n[WARNING]: Could not find owner with name: e_38263 putting arg_ev_33001 into project: {type=null, id=123456, name=JW_TEST2, qualified name=/JW_TEST2, workspace=null}\n[WARNING]: createOrUpdateModel deltas not posted properly\n"
+    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
 
 }
 
