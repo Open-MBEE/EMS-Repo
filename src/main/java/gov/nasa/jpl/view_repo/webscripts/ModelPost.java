@@ -487,7 +487,8 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
                     
                     // Place the reified node in project reified package:
-                    EmsScriptNode projectNodePkg = projectNode.getReifiedPkg();
+                    EmsScriptNode projectNodePkg = getOrCreateReifiedPackageNode(projectNode, projectNode.getSysmlId(),
+                                                                            workspace, true);
                     EmsScriptNode ownerNode = projectNodePkg != null ? projectNodePkg : projectNode;
                     
                     // FIXME: Need to respond with warning that owner couldn't be found?

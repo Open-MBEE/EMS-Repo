@@ -63,7 +63,6 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         try {
             result = handleRequest( req );
             if (result != null) {
-                appendResponseStatusInfo( this );
                 if (!Utils.isNullOrEmpty(response.toString())) result.put("message", response.toString()); 
                 model.put( "res", result.toString(2) );
             }
