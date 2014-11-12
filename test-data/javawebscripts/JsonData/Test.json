@@ -1,4 +1,10 @@
-{"elements": [{
-    "name" : "XXXXXXXXXXXXXXXXXXXXXXXX",	
-    "sysmlid": "YYYYYYYYYYYYYYYYYYYYYY",
-}]}
+{"elements": [
+   {
+        "documentation": "",
+        "sysmlid": "testProd",
+        "name": "testProd",
+        "owner": "123456",
+        "specialization": {"type": "LiteralBoolean"
+                          }
+    }
+]}

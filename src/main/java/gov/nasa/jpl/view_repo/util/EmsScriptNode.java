@@ -44,6 +44,7 @@ import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -365,19 +366,6 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean createOrUpdateAspect( String type ) {
         if ( Acm.getJSON2ACM().keySet().contains( type ) ) {
             type = Acm.getJSON2ACM().get( type );
-        }
-
-        // FIXME: reconsider whether all aspects are mutually exclusive
-        if (Acm.VALUESPEC_ASPECTS.contains( type )) {
-            if ( hasAspect(type) ) {
-                return false;
-            }
-
-            // if refactoring, need to remove any prior valuespecs since they're
-            // mutually exclusive
-            for (String valuespec: Acm.VALUESPEC_ASPECTS) {
-                removeAspect(valuespec);
-            }
         }
 
         return changeAspect( type );
@@ -3280,7 +3268,8 @@ public class EmsScriptNode extends ScriptNode implements
      * Changes the aspect of the node to the one specified, taking care
      * to save off and re-apply properties from current aspect if 
      * downgrading.  Handles downgrading to a Element, by removing all
-     * the needed aspects.
+     * the needed aspects.  Also removing old sysml aspects if changing
+     * the sysml aspect.
      *      
      * @param aspectName The aspect to change to
      */
@@ -3291,6 +3280,7 @@ public class EmsScriptNode extends ScriptNode implements
         Map<String,Object> oldProps = null;
         DictionaryService dServ = services.getDictionaryService();
         AspectDefinition aspectDef;
+        boolean saveProps = false;
         
         if (aspectName == null) {
             return false;
@@ -3312,9 +3302,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         
         // Get all the aspects for this node, find all of their parents, and see if
-        // the new aspect is any of the parents.  If it is, then we need to remove the
-        // aspect who is a child of that parent:
-        QName aspectToRemove = null;
+        // the new aspect is any of the parents.  
         aspects.addAll( getAspectsSet() );
         ArrayList<QName> queue = new ArrayList< QName >( aspects );
         QName name;
@@ -3326,7 +3314,7 @@ public class EmsScriptNode extends ScriptNode implements
             parentQName = aspectDef.getParentName();
             if (parentQName != null) {
                 if (parentQName.equals( qName )) {
-                    aspectToRemove = name;
+                    saveProps = true;
                     break;
                 }
                 if (!queue.contains(parentQName)) {
@@ -3337,13 +3325,34 @@ public class EmsScriptNode extends ScriptNode implements
         
         // If changing aspects to a parent aspect (ie downgrading), then we must save off the
         // properties before removing the current aspect, and then re-apply them:        
-        if (aspectToRemove != null) {
+        if (saveProps) {
             oldProps = getProperties();
-            
-            // Remove the old aspect:
-            retVal = removeAspect(aspectToRemove.toString());
         }
-
+        
+        // Remove all the existing sysml aspects if the aspect is not a parent of the new aspect,
+        // and it is a sysml aspect:
+        List<String> sysmlAspects = Arrays.asList(Acm.ACM_ASPECTS);
+        if (sysmlAspects.contains( aspectName)) {
+            
+            Set<QName> parentAspectNames = new LinkedHashSet< QName >();
+            parentAspectNames.add(qName);
+            name = qName; // The new aspect QName
+            while (name != null) {
+                aspectDef = dServ.getAspect(name);
+                parentQName = aspectDef.getParentName();
+                if (parentQName != null) {
+                    parentAspectNames.add(parentQName);
+                }
+                name = parentQName;
+            }
+                    
+            for (String aspect : Acm.ACM_ASPECTS) { 
+                if (hasAspect(aspect) && !parentAspectNames.contains(NodeUtil.createQName( aspect ))) {
+                    retVal = retVal || removeAspect(aspect);
+                }
+            }
+        }
+        
         // Apply the new aspect if needed:
         if (!hasAspect(aspectName)) {
             retVal = addAspect(aspectName);
