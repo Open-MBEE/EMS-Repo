@@ -96,9 +96,8 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 String newName = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
                 String copyTime = req.getParameter("copyTime");
                 Date copyDateTime = TimeUtils.dateFromTimestamp( copyTime );
-                statusCode = createWorkSpace(sourceWorkspaceParam, newName, copyDateTime, (JSONObject)req.parseContent(), user, status);
-                WorkspaceNode ws = WorkspaceNode.getWorkspaceFromId(newName, getServices(), getResponse(), status, //false,
-                                                                            user);
+                WorkspaceNode ws = createWorkSpace(sourceWorkspaceParam, newName, copyDateTime, (JSONObject)req.parseContent(), user, status);
+                statusCode = status.getCode();
                 json = printObject(ws);
             } else {
                 statusCode = responseStatus.getCode();
@@ -136,19 +135,29 @@ public class WorkspacesPost extends AbstractJavaWebScript{
         return json;
     }
 
-    public int createWorkSpace(String sourceWorkId, String newWorkID, Date copyTime,
+    public WorkspaceNode createWorkSpace(String sourceWorkId, String newWorkID, Date copyTime,
                                JSONObject jsonObject, String user, Status status) {
+        status.setCode( HttpServletResponse.SC_OK );
+
         if(newWorkID.equals( "master" )){
             log(LogLevel.WARNING, "Cannot change attributes of the master workspace.", HttpServletResponse.SC_BAD_REQUEST);
-            return HttpServletResponse.SC_BAD_REQUEST;
+            status.setCode( HttpServletResponse.SC_BAD_REQUEST );
+            return null;
         }
         WorkspaceNode existingWs = 
                 WorkspaceNode.getWorkspaceFromId( newWorkID, services,
                                                   response, status, // false,
-                                                  user );
+                                                  user );   
         if ( existingWs != null ) {
-            log(LogLevel.WARNING, "Workspace already exists.", HttpServletResponse.SC_BAD_REQUEST);
-            return HttpServletResponse.SC_BAD_REQUEST;
+            if (existingWs.isDeleted()) {
+                existingWs.removeAspect( "ems:Deleted" );
+                log(LogLevel.INFO, "Workspace undeleted", HttpServletResponse.SC_OK);
+                return existingWs;
+            } else {
+                log(LogLevel.WARNING, "Workspace already exists.", HttpServletResponse.SC_BAD_REQUEST);
+                status.setCode( HttpServletResponse.SC_BAD_REQUEST );
+                return null;
+            }
         } else {
             WorkspaceNode srcWs =
                     WorkspaceNode.getWorkspaceFromId( sourceWorkId,
@@ -157,7 +166,8 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                                                       user );
             if (!"master".equals( sourceWorkId ) && srcWs == null) {
                 log(LogLevel.WARNING, "Source workspace not found.", HttpServletResponse.SC_NOT_FOUND);
-                return HttpServletResponse.SC_NOT_FOUND;
+                status.setCode( HttpServletResponse.SC_NOT_FOUND );
+                return null;
             } else {
                 EmsScriptNode folder = null;
                 WorkspaceNode dstWs = null;
@@ -177,12 +187,13 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 }
 
                 if (dstWs != null) {
-                        // keep history of the branch
-                        CommitUtil.branch( srcWs, dstWs, null, "", false, services, response );
+                    // keep history of the branch
+                    CommitUtil.branch( srcWs, dstWs, null, "", false, services, response );
+                    return dstWs;
                 }
+                return null;
             }
         }
-        return HttpServletResponse.SC_OK;
     }
 }
 

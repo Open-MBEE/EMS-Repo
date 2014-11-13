@@ -41,7 +41,7 @@ test_dir_path = "test-data/javawebscripts"
 test_nums = []
 test_names = []
 create_baselines = False
-common_filters = ['"read"','"lastModified"','"modified"']
+common_filters = ['"created"','"read"','"lastModified"','"modified"']
 cmd_git_branch = None
 
 # Some global variables for lambda functions in tests
@@ -950,7 +950,74 @@ False,
 ['"url"'],
 ["test","workspaces","develop"]
 ],
-                   
+        
+[
+37,
+"CreateWorkspaceDelete1",
+"Create workspace to be deleted",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                post_type="",branch="AA?sourceWorkspace=master"),
+True,
+common_filters + ['"parent"','"id"','"qualifiedId"'],
+["develop"]
+],
+
+[
+38,
+"CreateWorkspaceDelete2",
+"Create workspace to be deleted",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                post_type="",branch="BB?sourceWorkspace=AA"),
+True,
+common_filters + ['"parent"','"id"','"qualifiedId"'],
+["develop"]
+],
+
+[
+39,
+"DeleteWorkspace",
+"Delete workspace and its children",
+create_curl_cmd(type="DELETE",base_url=BASE_URL_WS,
+                post_type="",branch="AA"),
+True,
+common_filters + ['"parent"','"id"','"qualifiedId"'],
+["develop"]
+],
+
+[
+40,
+"CheckDeleted1",
+"Make sure that AA and its children no longer show up in workspaces",
+create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,
+                post_type="", branch=""),
+True,
+common_filters + ['"parent"','"id"','"qualifiedId"'],
+["develop"]
+],
+
+[
+41,
+"CheckDeleted2",
+"Make sure that AA and its children show up in deleted",
+create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,
+                post_type="", branch="?deleted"),
+True,
+common_filters + ['"parent"','"id"','"qualifiedId"'],
+["develop"]
+],
+
+## TODO: placeholder to put in post to get back workspace A (need the ID from 38)
+[
+42,
+"UnDeleteWorkspace",
+"Undelete workspace",
+'echo',
+False,
+None,
+["develop"]
+],
+
+                           
 ]    
 
 ##########################################################################################    

@@ -1,50 +1,47 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.util.CommitUtil;
-import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.security.PermissionService;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-public class WorkspacesDelete extends AbstractJavaWebScript {
-    public WorkspacesDelete() {
+public class WorkspaceDelete extends AbstractJavaWebScript {
+    public WorkspaceDelete() {
         super();
     }
     
-    public WorkspacesDelete(Repository repositoryHelper, ServiceRegistry service) {
+    public WorkspaceDelete(Repository repositoryHelper, ServiceRegistry service) {
         super(repositoryHelper, service);
     }
     
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
-        if(!checkRequestContent( req ) == false) {
-            return false;
-        }
-        
         String wsId = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
         if(checkRequestVariable(wsId, WORKSPACE_ID) == false) {
             return false;
         }
         return true;
-        }
-    
+    }
+
+    @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        WorkspaceDelete instance = new WorkspaceDelete();
+        return instance.executeImplImpl( req, status, cache );
+    }
+    
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
        printHeader(req);
        clearCaches();
        Map<String, Object> model = new HashMap<String, Object>();
@@ -52,33 +49,37 @@ public class WorkspacesDelete extends AbstractJavaWebScript {
        JSONObject result = null;
        try {
            if( validateRequest(req, status) ){
-               String wsId = req.getParameter("target");
+               String wsId = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
                
-               WorkspaceNode target = WorkspaceNode.getWorkspaceFromId(wsId, getServices(), 
-                                                                       getResponse(), status, user);
-               result = printObject(target);
-               target.delete( true );
-               status.setCode(HttpServletResponse.SC_OK);
+               // can't delete master
+               if (wsId.equals( "master") ) {
+                   log(LogLevel.ERROR, "Cannot delete master workspace", HttpServletResponse.SC_BAD_REQUEST);
+               } else {
+                   WorkspaceNode target = WorkspaceNode.getWorkspaceFromId(wsId, getServices(), 
+                                                                           getResponse(), status, user);
+                   result = printObject(target);
+                   target.delete( true );
+                   status.setCode(HttpServletResponse.SC_OK);
+               }
            }
        } catch (JSONException e) {
-    	   status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+           status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
            log(LogLevel.ERROR, "JSON object could not be created \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
            e.printStackTrace();
        } catch (Exception e) {
-    	   status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+           status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
            log(LogLevel.ERROR, "Internal stack trace error \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
            e.printStackTrace();
        }
        
-       if(result == null) {
-              model.put("res", response.toString());
+       if (result == null) {
+          model.put("res", response.toString());
        }
        else {
            try {
                if (!Utils.isNullOrEmpty(response.toString())) result.put("message", response.toString());
                model.put("res", result.toString(4));
            } catch (JSONException e) {
-               // TODO Auto-generated catch block
                e.printStackTrace();
            }
        }
