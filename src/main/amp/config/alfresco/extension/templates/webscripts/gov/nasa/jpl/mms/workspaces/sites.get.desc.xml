@@ -4,7 +4,7 @@
 	{"sites": [
 	  {
 	      "sysmlid": sysmlid,
-	      "title": title,
+	      "name": name,
 	      "parent": parent
 	      ]
 	  }, ...  

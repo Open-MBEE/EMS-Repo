@@ -147,7 +147,7 @@ public class SiteGet extends AbstractJavaWebScript {
         		
         		JSONObject siteJson = new JSONObject();
         		siteJson.put("sysmlid", name);
-        		siteJson.put("title", siteInfo.getTitle());
+        		siteJson.put("name", siteInfo.getTitle());
         		siteJson.put("parent", parentId );
         		    
         		json.put(siteJson);

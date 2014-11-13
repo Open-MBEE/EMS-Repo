@@ -17,7 +17,7 @@
     "definitions": {
         "Sites": {
             "properties": {
-              "title": {
+              "name": {
                 "type": "string",
                 "description": "Human readable name for the site"
               },
