@@ -4,7 +4,7 @@
     <description>
     delete workspace
     </description>
-    <url>/workspaces/delete?target={workspaceId}</url>
+    <url>/workspaces/{workspaceId}</url>
     <format default="json">argument</format>
     <authentication>user</authentication>
     <transaction allow="readwrite">required</transaction>

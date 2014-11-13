@@ -1122,6 +1122,10 @@ public class NodeUtil {
      *         is printed if the id doesn't have the right syntax.
      */
     public static NodeRef findNodeRefByAlfrescoId(String id) {
+        return findNodeRefByAlfrescoId(id, false);
+    }
+    
+    public static NodeRef findNodeRefByAlfrescoId(String id, boolean includeDeleted) {
         if ( !id.contains( "://" ) ) {
             id = "workspace://SpacesStore/" + id;
         }
@@ -1131,7 +1135,13 @@ public class NodeUtil {
         }
         NodeRef n = new NodeRef(id);
         EmsScriptNode node = new EmsScriptNode( n, getServices() );
-        if ( !node.exists() ) return null;
+        if ( !node.exists() ) {
+            if (includeDeleted && node.isDeleted()) {
+                return n;
+            } else {
+                return null;
+            }
+        }
         return n;
     }
 
