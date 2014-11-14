@@ -481,6 +481,31 @@
 				</property>
 			</properties>
 		</aspect>
+        <aspect name="sysml:Enumeration">
+            <parent>sysml:ValueSpecification</parent>
+            <properties>
+                <property name="sysml:enumeratedValue">
+                    <type>d:noderef</type>
+                    <mandatory>true</mandatory>
+                    <multiple>true</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+                <property name="sysml:selectedValue">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+            </properties>
+        </aspect>
 		<aspect name="sysml:Expression">
 			<parent>sysml:ValueSpecification</parent>
 			<properties>
@@ -753,6 +778,16 @@
 						<tokenised>false</tokenised>
 					</index>
 				</property>
+				<property name="sysml:connectorValue">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
 			</properties>
 		</aspect>
         <aspect name="sysml:Association">
@@ -770,7 +805,7 @@
                 </property>
                 <property name="sysml:sourceAggregation">
                     <!-- can be COMPOSITE, SHARED, NONE -->
-                    <type>d:text</type>
+                    <type>d:noderef</type>
                     <mandatory>true</mandatory>
                     <multiple>false</multiple>
                     <index enabled="true">
@@ -778,21 +813,10 @@
                         <stored>false</stored>
                         <tokenised>false</tokenised>
                     </index>                    
-                    <constraints>
-                        <constraint name="sysml:sourceAggregation_constraint" type="LIST">
-                            <parameter name="allowedValues">
-                                <list>
-                                    <value>COMPOSITE</value>
-                                    <value>SHARED</value>
-                                    <value>NONE</value>
-                                </list>
-                            </parameter>
-                        </constraint>
-                    </constraints>
                 </property>
                 <property name="sysml:targetAggregation">
                     <!-- can be COMPOSITE, SHARED, NONE -->
-                    <type>d:text</type>
+                    <type>d:noderef</type>
                     <mandatory>true</mandatory>
                     <multiple>false</multiple>
                     <index enabled="true">
@@ -800,17 +824,6 @@
                         <stored>false</stored>
                         <tokenised>false</tokenised>
                     </index>                    
-                    <constraints>
-                        <constraint name="sysml:targetAggregation_constraint" type="LIST">
-                            <parameter name="allowedValues">
-                                <list>
-                                    <value>COMPOSITE</value>
-                                    <value>SHARED</value>
-                                    <value>NONE</value>
-                                </list>
-                            </parameter>
-                        </constraint>
-                    </constraints>
                 </property>
             </properties>
         </aspect>

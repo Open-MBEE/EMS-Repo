@@ -282,6 +282,21 @@
                 </property>
             </properties>
         </aspect>
+        
+        <aspect name="ems:MagicDrawData">
+          <properties>
+              <property name="ems:mdData">
+                  <type>d:text</type>
+                  <mandatory>false</mandatory>
+                  <multiple>false</multiple>
+                  <index enabled="false">
+                      <atomic>false</atomic>
+                      <stored>false</stored>
+                      <tokenised>false</tokenised>
+                  </index>
+              </property>
+          </properties>
+        </aspect>
 
      </aspects>
 

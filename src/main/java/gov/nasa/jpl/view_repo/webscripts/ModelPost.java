@@ -1074,9 +1074,10 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
     }
+    
     /**
-     * Special processing for Expression and Property elements.  Modifies the passed elementJson
-     * or specializeJson.
+     * Special processing for elements with properties that point to ValueSpecifications.  
+     * Modifies the passed elementJson or specializeJson.
      *
      * @param type
      * @param nestedNode
@@ -1089,7 +1090,7 @@ public class ModelPost extends AbstractJavaWebScript {
      * @param id
      * @throws Exception
      */
-    private boolean processExpressionOrProperty(String type, boolean nestedNode, JSONObject elementJson,
+    private boolean processValueSpecProperty(String type, boolean nestedNode, JSONObject elementJson,
     										 JSONObject specializeJson, EmsScriptNode node,
     										 boolean ingest, EmsScriptNode reifiedPkgNode,
     										 EmsScriptNode parent, String id,
@@ -1101,150 +1102,204 @@ public class ModelPost extends AbstractJavaWebScript {
         //		b/c you need the node itself to retrieve its properties, to see if it already has value or
         //		operand property values stored.  This would involve duplicating a lot of the above code to
         //		create a node if needed, etc.
-        //
-        //		This may be easier if the operand and values objects have their own sysmlid in them, so we dont
-        //		need to create one ourselves.  Brad didnt want this, but perhaps we should?
 
-        // If it is a value or operand property then need to convert
+        // If it is a property that points to a ValueSpecification then need to convert
         // the elementJson to just contain the sysmlid for the nodes,
-        // instead of the nodes themselves.  Also, need to create
-        // or modify nodes the properties map to.
-
+        // instead of the nodes themselves.  Also, need to create or modify nodes the 
+        // properties map to.
         boolean changed = false;
-
+        
         // If it is a nested node then it doesnt have a specialize property
         JSONObject jsonToCheck = nestedNode ? elementJson : specializeJson;
 
-        // If it is a Property or Expression and json has the properties of interest:
-        if ( (type.equals(Acm.ACM_PROPERTY) && jsonToCheck != null && jsonToCheck.has(Acm.JSON_VALUE)) ||
-        	 (type.equals(Acm.ACM_EXPRESSION) && jsonToCheck != null && jsonToCheck.has(Acm.JSON_OPERAND)) ) {
-        	boolean isProperty = type.equals(Acm.ACM_PROPERTY);
-        	String jsonKey = isProperty ? Acm.JSON_VALUE : Acm.JSON_OPERAND;
-            Collection< EmsScriptNode > oldVals =
-                    isProperty ? Utils.asList( getSystemModel().getValue( node, null ),
-                                               EmsScriptNode.class )
-                               : getSystemModel().getProperty( node, Acm.ACM_OPERAND );
-
-            JSONArray newVals = jsonToCheck.getJSONArray(jsonKey);
-            Iterator<EmsScriptNode> iter = !Utils.isNullOrEmpty(oldVals) ?
-            									oldVals.iterator() : null;
-            ArrayList<String> nodeNames = new ArrayList<String>();
-
-            // Check for workspace disagreement in arguments.
-            WorkspaceNode nodeWorkspace = node.getWorkspace();
-            if (nodeWorkspace != null && !nodeWorkspace.equals(workspace)) {
-                if ( workspace == null ) {
-                    workspace = node.getWorkspace();
-                } else {
-                    log( LogLevel.WARNING,
-                         "Property owner's workspace ("
-                                 + node.getWorkspaceName()
-                                 + ") and specified workspace for property ("
-                                 + workspace.getName()
-                                 + ") are different!" );
+        // If the json has the type/properties of interest:
+        if (Acm.TYPES_WITH_VALUESPEC.containsKey(type) && jsonToCheck != null) {
+            
+            // Loop through all the properties that need to be processed:
+            for (String acmType : Acm.TYPES_WITH_VALUESPEC.get(type)) {
+                String jsonType = Acm.getACM2JSON().get( acmType );
+                if (jsonType != null && jsonToCheck.has(jsonType)) {
+                    Collection< EmsScriptNode > oldVals = getSystemModel().getProperty( node, acmType);
+                    
+                    boolean myChanged = processValueSpecPropertyImpl( jsonToCheck, jsonType, oldVals, node, 
+                                                                      ingest, reifiedPkgNode, parent, id, 
+                                                                      workspace );
+                    changed = changed || myChanged;
                 }
             }
+            
+//            if ( (type.equals(Acm.ACM_PROPERTY) && jsonToCheck != null && jsonToCheck.has(Acm.JSON_VALUE)) ||
+//            	 (type.equals(Acm.ACM_EXPRESSION) && jsonToCheck != null && jsonToCheck.has(Acm.JSON_OPERAND)) ) {
+//            	boolean isProperty = type.equals(Acm.ACM_PROPERTY);
+//            	String jsonKey = isProperty ? Acm.JSON_VALUE : Acm.JSON_OPERAND;
+//                Collection< EmsScriptNode > oldVals =
+//                        isProperty ? Utils.asList( getSystemModel().getValue( node, null ),
+//                                                   EmsScriptNode.class )
+//                                   : getSystemModel().getProperty( node, Acm.ACM_OPERAND );
+//                
+//                
+//        
+//            } 
 
-            // Compare the existing values to the new ones
-            // in the JSON element.  Assume that they maintain the
-            // same ordering.  If there are more values in the
-            // JSON element, then make new nodes for them.
-            for (int i = 0; i < newVals.length(); ++i) {
-            	    Object newVal = newVals.optJSONObject(i);
+        }
+        
+        return changed;
+    }
+    
+    /**
+     * Special processing for elements with properties that point to ValueSpecifications.  
+     * Modifies the passed jsonToCheck.
+     *
+     * @throws Exception
+     */
+    private boolean processValueSpecPropertyImpl(JSONObject jsonToCheck, 
+                                                 String jsonKey,
+                                                 Collection< EmsScriptNode > oldVals,
+                                                 EmsScriptNode node,
+                                                 boolean ingest, 
+                                                 EmsScriptNode reifiedPkgNode,
+                                                 EmsScriptNode parent, 
+                                                 String id,
+                                                 WorkspaceNode workspace) throws Exception {
 
-                	// Get the sysmlid of the old value if it exists:
-                	if (iter != null && iter.hasNext()) {
-                		EmsScriptNode oldValNode = iter.next();
+        boolean changed = false;
+        JSONArray newVals = jsonToCheck.optJSONArray(jsonKey);
+        JSONObject newVal = newVals != null ? null : jsonToCheck.optJSONObject(jsonKey);
+        Iterator<EmsScriptNode> iter = !Utils.isNullOrEmpty(oldVals) ?
+                                            oldVals.iterator() : null;
+        ArrayList<String> nodeNames = new ArrayList<String>();
 
-              			nodeNames.add(oldValNode.getName());
-
-                        if ( workspace != null && workspace.exists()
-                             && !workspace.equals( oldValNode.getWorkspace() ) ) {
-
-//                            EmsScriptNode newNode =
-//                                processValue( node, id, reifiedPkgNode, parent,
-//                                              nodeWorkspace,
-//                                              (JSONObject)newVal, ingest );
-                            
-                            EmsScriptNode nestedParent = null;
-                            if (reifiedPkgNode == null) {
-                                EmsScriptNode reifiedPkg =
-                                    getOrCreateReifiedPackageNode( node, id,
-                                                                   workspace,
-                                                                   true );
-                                nestedParent = reifiedPkg == null ? parent : reifiedPkg;
-                            }
-                            else {
-                                nestedParent = reifiedPkgNode;
-                            }
-
-                            EmsScriptNode reifiedPkgInWorkspace = nestedParent;
-                            if ( !workspace.equals( nestedParent.getWorkspace() ) ) {
-                                reifiedPkgInWorkspace =
-                                        workspace.replicateWithParentFolders( nestedParent );
-                            }
-                            EmsScriptNode newNode = oldValNode.clone(reifiedPkgInWorkspace);
-                            newNode.setWorkspace( workspace, oldValNode.getNodeRef() );
-
-                            //EmsScriptNode newNode = oldValNode.clone( node );
-                            //newNode.setWorkspace( workspace, oldValNode.getNodeRef() );
-                            oldValNode = newNode;
-              			}
-
-                        JSONObject newValJson = (JSONObject) newVal;
-                        // types are mutually exclusive so put in right aspect
-                        if (newValJson.has( "type" )) {
-                            if (oldValNode.createOrUpdateAspect(newValJson.getString( "type" ))) {
-                                changed = true;
-                            }
-                        }
-
-                        // Ingest the JSON for the value to update properties
-                        timerIngest = Timer.startTimer(timerIngest, timeEvents);
-                        if ( oldValNode.ingestJSON( newValJson ) ) {
-                            changed = true;
-                        }
-                        Timer.stopTimer(timerIngest, "!!!!! processExpressionOrProperty(): ingestJSON time", timeEvents);
-
-                	}
-                	// Old value doesnt exists, so create a new node:
-                	else {
-
-                        EmsScriptNode newValNode =
-                                processValue( node, id, reifiedPkgNode, parent,
-                                              nodeWorkspace, (JSONObject)newVal, ingest );
-//                		//	The refiedNode will be null if the node is not in the elementHierachy, which
-//                		//	will be the case if no other elements have it as a owner, so in that case
-//                		//	we make a reifiedNode for it here.  If all of that fails, then use the parent
-//                		EmsScriptNode nestedParent = null;
-//                		if (reifiedPkgNode == null) {
-//                			 EmsScriptNode reifiedPkg = getOrCreateReifiedPackageNode(node, id, workspace, true);
-//                			 nestedParent = reifiedPkg == null ? parent : reifiedPkg;
-//                		}
-//                		else {
-//                			nestedParent = reifiedPkgNode;
-//                		}
-//
-//                		// TODO: Need to get the MODIFICATION STATUS out of here?!!
-//                		ModStatus modStatus = new ModStatus();
-//                    EmsScriptNode newValNode = updateOrCreateTransactionableElement((JSONObject)newVal,nestedParent,
-//            																		null, workspace, ingest, true, modStatus );
-                		nodeNames.add(newValNode.getName());
-
-                		changed = true;
-                	}
+        // Check for workspace disagreement in arguments.
+        WorkspaceNode nodeWorkspace = node.getWorkspace();
+        if (nodeWorkspace != null && !nodeWorkspace.equals(workspace)) {
+            if ( workspace == null ) {
+                workspace = node.getWorkspace();
+            } else {
+                log( LogLevel.WARNING,
+                     "Property owner's workspace ("
+                             + node.getWorkspaceName()
+                             + ") and specified workspace for property ("
+                             + workspace.getName()
+                             + ") are different!" );
             }
+        }
 
+        // Compare the existing values to the new ones
+        // in the JSON element.  Assume that they maintain the
+        // same ordering.  If there are more values in the
+        // JSON element, then make new nodes for them.
+        if (newVals != null) {
+            for (int i = 0; i < newVals.length(); ++i) {
+                newVal = newVals.optJSONObject(i);
+                boolean myChanged = processValueSpecPropertyImplImpl( jsonToCheck, jsonKey, oldVals, 
+                                                                       node, ingest, reifiedPkgNode, 
+                                                                       parent, id, nodeWorkspace, 
+                                                                       iter, nodeNames, newVal,
+                                                                       nodeWorkspace);
+                changed = changed || myChanged;
+            }
+            
             // Replace the property in the JSON with the sysmlids
             // before ingesting:
-            	JSONArray jsonArry = new JSONArray(nodeNames);
-            	jsonToCheck.put(jsonKey, jsonArry);
-        } // ends if Property and elementJson has a value or Expression and elementJson has a operand
+            JSONArray jsonArry = new JSONArray(nodeNames);
+            jsonToCheck.put(jsonKey, jsonArry);
+        }
+        // The property is not multi-valued, so just have one value to process:
+        else if (newVal != null){
+            changed = processValueSpecPropertyImplImpl( jsonToCheck, jsonKey, oldVals, 
+                                                        node, ingest, reifiedPkgNode, 
+                                                        parent, id, nodeWorkspace, 
+                                                        iter, nodeNames, newVal,
+                                                        nodeWorkspace);
+            
+            // Replace the property in the JSON with the sysmlids
+            // before ingesting:
+            jsonToCheck.put(jsonKey, nodeNames.get(0));
+        }
 
         return changed;
     }
+    
+    private boolean processValueSpecPropertyImplImpl(JSONObject jsonToCheck, 
+                                                 String jsonKey,
+                                                 Collection< EmsScriptNode > oldVals,
+                                                 EmsScriptNode node,
+                                                 boolean ingest, 
+                                                 EmsScriptNode reifiedPkgNode,
+                                                 EmsScriptNode parent, 
+                                                 String id,
+                                                 WorkspaceNode workspace,
+                                                 Iterator<EmsScriptNode> iter,
+                                                 ArrayList<String> nodeNames,
+                                                 JSONObject newVal,
+                                                 WorkspaceNode nodeWorkspace) throws Exception {
 
-    public EmsScriptNode processValue( EmsScriptNode node, String id,
+        boolean changed = false;
+        
+        // Get the sysmlid of the old value if it exists:
+        if (iter != null && iter.hasNext()) {
+            EmsScriptNode oldValNode = iter.next();
+
+            nodeNames.add(oldValNode.getName());
+
+            if ( workspace != null && workspace.exists()
+                 && !workspace.equals( oldValNode.getWorkspace() ) ) {
+                
+                EmsScriptNode nestedParent = null;
+                if (reifiedPkgNode == null) {
+                    EmsScriptNode reifiedPkg =
+                        getOrCreateReifiedPackageNode( node, id,
+                                                       workspace,
+                                                       true );
+                    nestedParent = reifiedPkg == null ? parent : reifiedPkg;
+                }
+                else {
+                    nestedParent = reifiedPkgNode;
+                }
+
+                EmsScriptNode reifiedPkgInWorkspace = nestedParent;
+                if ( !workspace.equals( nestedParent.getWorkspace() ) ) {
+                    reifiedPkgInWorkspace =
+                            workspace.replicateWithParentFolders( nestedParent );
+                }
+                EmsScriptNode newNode = oldValNode.clone(reifiedPkgInWorkspace);
+                newNode.setWorkspace( workspace, oldValNode.getNodeRef() );
+
+                //EmsScriptNode newNode = oldValNode.clone( node );
+                //newNode.setWorkspace( workspace, oldValNode.getNodeRef() );
+                oldValNode = newNode;
+            }
+
+            JSONObject newValJson = newVal;
+            // types are mutually exclusive so put in right aspect
+            if (newValJson.has( "type" )) {
+                if (oldValNode.createOrUpdateAspect(newValJson.getString( "type" ))) {
+                    changed = true;
+                }
+            }
+
+            // Ingest the JSON for the value to update properties
+            timerIngest = Timer.startTimer(timerIngest, timeEvents);
+            if ( oldValNode.ingestJSON( newValJson ) ) {
+                changed = true;
+            }
+            Timer.stopTimer(timerIngest, "!!!!! processExpressionOrProperty(): ingestJSON time", timeEvents);
+
+        }
+        // Old value doesnt exists, so create a new node:
+        else {
+
+            EmsScriptNode newValNode =
+                    processValue( node, id, reifiedPkgNode, parent,
+                                  nodeWorkspace, newVal, ingest );
+            nodeNames.add(newValNode.getName());
+            changed = true;
+        }
+        
+        return changed;
+    }
+
+    private EmsScriptNode processValue( EmsScriptNode node, String id,
                                        EmsScriptNode reifiedPkgNode,
                                        EmsScriptNode parent,
                                        WorkspaceNode workspace,
@@ -1530,9 +1585,9 @@ public class ModelPost extends AbstractJavaWebScript {
         if (ingest && nodeExists && checkPermissions(nodeToUpdate, PermissionService.WRITE)) {
             log(LogLevel.INFO, "\tinserting metadata");
 
-            // Special processing for Expression or Property:
+            // Special processing for elements with properties that are value specs:
             //	Note: this will modify elementJson
-            if ( processExpressionOrProperty(acmSysmlType, nestedNode, elementJson, specializeJson, nodeToUpdate,
+            if ( processValueSpecProperty(acmSysmlType, nestedNode, elementJson, specializeJson, nodeToUpdate,
 										ingest, reifiedPkgNode, parent, id, workspace) ) {
                 modStatus.setState( ModStatus.State.UPDATED );
             }

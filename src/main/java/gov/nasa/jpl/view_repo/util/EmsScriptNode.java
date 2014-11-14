@@ -1458,6 +1458,7 @@ public class EmsScriptNode extends ScriptNode implements
       DirectedRelationship,
       DurationInterval,
       Duration,
+      Enumeration,
       ElementValue,
       Expose,
       Expression,
@@ -1471,6 +1472,7 @@ public class EmsScriptNode extends ScriptNode implements
       LiteralReal,
       LiteralString,
       LiteralUnlimitedNatural,
+      MagicDrawData,
       OpaqueExpression,
       Operation,
       Package,
@@ -1499,6 +1501,7 @@ public class EmsScriptNode extends ScriptNode implements
             put("DirectedRelationship", SpecEnum.DirectedRelationship);
             put("DurationInterval", SpecEnum.DurationInterval);
             put("Duration", SpecEnum.Duration);
+            put("Enumeration", SpecEnum.Enumeration);
             put("ElementValue", SpecEnum.ElementValue);
             put("Expose", SpecEnum.Expose);
             put("Expression", SpecEnum.Expression);
@@ -1512,6 +1515,7 @@ public class EmsScriptNode extends ScriptNode implements
             put("LiteralReal", SpecEnum.LiteralReal);
             put("LiteralString", SpecEnum.LiteralString);
             put("LiteralUnlimitedNatural", SpecEnum.LiteralUnlimitedNatural);
+            put("MagicDrawData", SpecEnum.MagicDrawData);
             put("OpaqueExpression", SpecEnum.OpaqueExpression);
             put("Operation", SpecEnum.Operation);
             put("Package", SpecEnum.Package);
@@ -1588,6 +1592,9 @@ public class EmsScriptNode extends ScriptNode implements
                     case ElementValue:
                         addElementValueJSON( json, node, filter, dateTime );
                         break;
+                    case Enumeration:
+                        addEnumerationJSON( json, node, filter, dateTime );
+                        break;
                     case Expose:
                         addExposeJSON( json, node, filter, dateTime );
                         break;
@@ -1623,6 +1630,9 @@ public class EmsScriptNode extends ScriptNode implements
                         break;
                     case LiteralUnlimitedNatural:
                         addLiteralUnlimitedNaturalJSON( json, node, filter, dateTime );
+                        break;
+                    case MagicDrawData:
+                        addMagicDrawDataJSON( json, node, filter, dateTime );
                         break;
                     case OpaqueExpression:
                         addOpaqueExpressionJSON( json, node, filter, dateTime );
@@ -3464,9 +3474,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
         // TODO: Snapshots?
-        // TODO: Eventually the server side will do the processing to get the contents, but
-        //       for now MDK will do this.
-        String id = getSysmlIdOfProperty( Acm.ACM_CONTENTS, dateTime );
+        String id = node.getSysmlIdOfProperty( Acm.ACM_CONTENTS, dateTime );
         if (id != null) {
             putInJson( json, Acm.JSON_CONTENTS, id, filter );
         }
@@ -3520,12 +3528,12 @@ public class EmsScriptNode extends ScriptNode implements
                                                                               throws JSONException {
         String id;
 
-        id = getSysmlIdOfProperty( "sysml:source", dateTime );
+        id = node.getSysmlIdOfProperty( "sysml:source", dateTime );
         if ( id != null ) {
             putInJson( json, "source", id, filter );
         }
 
-        id = getSysmlIdOfProperty( "sysml:target", dateTime );
+        id = node.getSysmlIdOfProperty( "sysml:target", dateTime );
         if ( id != null ) {
             putInJson( json, "target", id, filter );
         }
@@ -3592,12 +3600,12 @@ public class EmsScriptNode extends ScriptNode implements
 
         String id;
 
-        id = getSysmlIdOfProperty( "sysml:durationMax", dateTime );
+        id = node.getSysmlIdOfProperty( "sysml:durationMax", dateTime );
         if ( id != null ) {
             putInJson( json, "max", id, filter );
         }
 
-        id = getSysmlIdOfProperty( "sysml:durationMin", dateTime );
+        id = node.getSysmlIdOfProperty( "sysml:durationMin", dateTime );
         if ( id != null ) {
             putInJson( json, "min", id, filter );
         }
@@ -3621,6 +3629,22 @@ public class EmsScriptNode extends ScriptNode implements
             putInJson( json, "element", elementId, filter );
         }
     }
+    
+    protected void addEnumerationJSON( JSONObject json, EmsScriptNode node,
+                                        Set< String > filter, Date dateTime )
+                                                              throws JSONException {
+        addValueSpecificationJSON( json, node, filter, dateTime );
+        
+        putInJson( json, Acm.JSON_ENUMERATED_VALUE, 
+                   addInternalJSON( node.getProperty(Acm.ACM_ENUMERATED_VALUE), dateTime ), 
+                   filter );
+
+        putInJson( json, Acm.JSON_SELECTED_VALUE, 
+                   addInternalJSON( node.getProperty(Acm.ACM_SELECTED_VALUE), dateTime ), 
+                   filter );
+        
+    }
+
 
     protected void addExpressionJSON( JSONObject json, EmsScriptNode node,
                                       Set< String > filter, Date dateTime )
@@ -3747,6 +3771,16 @@ public class EmsScriptNode extends ScriptNode implements
                    node.getProperty( "sysml:naturalValue" ), filter );
     }
 
+    protected void addMagicDrawDataJSON( JSONObject json,
+                                    EmsScriptNode node,
+                                    Set< String > filter, Date dateTime )
+                                                                         throws JSONException {
+        String data = (String) node.getProperty( Acm.ACM_MD_DATA);
+        if (data != null) {
+            putInJson( json, Acm.JSON_MD_DATA, data, filter );
+        }
+    }
+    
     protected
             void
             addOpaqueExpressionJSON( JSONObject json, EmsScriptNode node,
@@ -3781,12 +3815,12 @@ public class EmsScriptNode extends ScriptNode implements
         addValueSpecificationJSON( json, node, filter, dateTime );
         String id;
 
-        id = getSysmlIdOfProperty( "sysml:timeIntervalMax", dateTime );
+        id = node.getSysmlIdOfProperty( "sysml:timeIntervalMax", dateTime );
         if ( id != null ) {
             putInJson( json, "max", id, filter );
         }
 
-        id = getSysmlIdOfProperty( "sysml:timeIntervalMin", dateTime );
+        id = node.getSysmlIdOfProperty( "sysml:timeIntervalMin", dateTime );
         if ( id != null ) {
             putInJson( json, "min", id, filter );
         }
@@ -3805,7 +3839,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
         String id =
-                getSysmlIdOfProperty( "sysml:operationExpression", dateTime );
+                node.getSysmlIdOfProperty( "sysml:operationExpression", dateTime );
         if ( id != null ) {
             putInJson( json, "expression", id, filter );
         }
@@ -3828,7 +3862,7 @@ public class EmsScriptNode extends ScriptNode implements
                                Set< String > filter, Date dateTime )
                                                                     throws JSONException {
         String specId =
-                getSysmlIdOfProperty( "sysml:constraintSpecification", dateTime );
+                node.getSysmlIdOfProperty( "sysml:constraintSpecification", dateTime );
         if ( specId != null ) {
             putInJson( json, "specification", specId, filter );
         }
@@ -3872,7 +3906,12 @@ public class EmsScriptNode extends ScriptNode implements
                                                dateTime );
         if ( id != null ) {
             putInJson( json, Acm.JSON_CONNECTOR_TYPE, id, filter );
-        }        
+        }   
+        
+        putInJson( json, Acm.JSON_CONNECTOR_VALUE, 
+                   addInternalJSON( node.getProperty(Acm.ACM_CONNECTOR_VALUE), dateTime ), 
+                   filter );
+    
     }
     
     protected void addAssociationJSON( JSONObject json, EmsScriptNode node,
@@ -3886,8 +3925,10 @@ public class EmsScriptNode extends ScriptNode implements
         JSONArray ownedEndIds = addNodeRefIdsJSON( nodeRefsOwnedEnd, dateTime );
         putInJson( json, Acm.JSON_OWNED_END, ownedEndIds, filter );
         
-        putInJson( json, Acm.JSON_SOURCE_AGGREGATION, node.getProperty( Acm.ACM_SOURCE_AGGREGATION ), filter );
-        putInJson( json, Acm.JSON_TARGET_AGGREGATION, node.getProperty( Acm.ACM_TARGET_AGGREGATION ), filter );
+        putInJson( json, Acm.JSON_SOURCE_AGGREGATION, 
+                   node.getSysmlIdOfProperty( Acm.ACM_SOURCE_AGGREGATION, dateTime), filter );
+        putInJson( json, Acm.JSON_TARGET_AGGREGATION, 
+                   node.getSysmlIdOfProperty( Acm.ACM_TARGET_AGGREGATION, dateTime ), filter );
      
     }
     
