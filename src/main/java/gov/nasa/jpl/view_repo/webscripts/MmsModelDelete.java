@@ -41,21 +41,28 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         super(repositoryHelper, registry);
     }
 
+    /**
+     * Entry point
+     */
     @Override
-    protected Map< String, Object > executeImpl( WebScriptRequest req,
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        
+        MmsModelDelete instance = new MmsModelDelete(repository, services);
+        instance.setServices( getServices() );
+        return instance.executeImplImpl(req,  status, cache);
+    }
+    
+    protected Map< String, Object > executeImplImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
         printHeader( req );
         
         Map<String, Object> model = new HashMap<String, Object>();
 
-        MmsModelDelete instance = new MmsModelDelete(repository, services);
-
         JSONObject result = null;
 
         try {
-            result = instance.handleRequest( req );
+            result = handleRequest( req );
             if (result != null) {
-                appendResponseStatusInfo( instance );
                 if (!Utils.isNullOrEmpty(response.toString())) result.put("message", response.toString()); 
                 model.put( "res", result.toString(2) );
             }
@@ -67,10 +74,9 @@ public class MmsModelDelete extends AbstractJavaWebScript {
            e.printStackTrace();
         }
         if (result == null) {
-            model.put( "res", "");
+            model.put( "res", response.toString());
         }
 
-        // REVIEW -- TODO -- shouldn't responseStatus be called from instance?
         status.setCode(responseStatus.getCode());
 
         printFooter();
@@ -106,7 +112,9 @@ public class MmsModelDelete extends AbstractJavaWebScript {
 
         String elementId = req.getServiceMatch().getTemplateVars().get("elementId");
 
-        EmsScriptNode root = findScriptNodeById(elementId, workspace, null, false);
+        // Searching for deleted nodes also, in case they try to delete a element that has
+        // already been deleted in the current workspace.
+        EmsScriptNode root = findScriptNodeById(elementId, workspace, null, true);
         String siteName = null;
         String projectId = null;
 
@@ -118,7 +126,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             if (root != null && root.exists()) {
                 handleElementHierarchy( root, workspace, true );
             } else {
-                log( LogLevel.ERROR, "Could not find node " + elementId + " in workspace " + wsId,
+                log( LogLevel.ERROR, "Could not find node " + elementId + " in workspace " + wsId + ",it is either deleted or not present.",
                      HttpServletResponse.SC_NOT_FOUND);
                 return result;
             }
@@ -243,17 +251,19 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         }
 
         if (recurse) {
-            for ( NodeRef childRef : root.getOwnedChildren() ) {
+            for ( NodeRef childRef : root.getOwnedChildren(true) ) {
                 EmsScriptNode child = new EmsScriptNode(childRef, services, response);
                 handleElementHierarchy(child, workspace, recurse);
             }
         }
         
         // Delete the node:
-        delete(root, workspace, null);
+        if (root.exists()) {
+            delete(root, workspace, null);
+        }
         
         // TODO: REVIEW may not need this b/c addToWsDiff() does not add in reified packages
-        //       Brad says we may want them
+        //       Also, code in ModelPost assumes we never delete reified packages
 //        // Delete the reified pkg if it exists also:
 //        EmsScriptNode pkgNode = findScriptNodeById(root.getSysmlId() + "_pkg", 
 //                                                   workspace, null, false);

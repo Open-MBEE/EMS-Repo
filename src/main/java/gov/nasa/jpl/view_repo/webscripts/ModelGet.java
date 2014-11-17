@@ -356,7 +356,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		    }
 		    
 		    // Handle all the children in this workspace:
-		    for ( NodeRef childRef : root.getOwnedChildren() ) {
+		    for ( NodeRef childRef : root.getOwnedChildren(false) ) {
 			    NodeRef vChildRef = NodeUtil.getNodeRefAtTime( childRef, workspace, dateTime );
                 if ( vChildRef == null ) {
                     // this doesn't elicit a not found response

@@ -187,7 +187,8 @@ public class EmsScriptNode extends ScriptNode implements
         setResponse( response );
     }
 
-    public EmsScriptNode childByNamePath( String path, boolean ignoreWorkspace, WorkspaceNode workspace ) {
+    public EmsScriptNode childByNamePath( String path, boolean ignoreWorkspace, WorkspaceNode workspace,
+                                          boolean onlyWorkspace) {
         // Make sure this node is in the target workspace.
         EmsScriptNode node = this;
         if ( !ignoreWorkspace && workspace != null && !workspace.equals( getWorkspace() ) ) {
@@ -198,15 +199,18 @@ public class EmsScriptNode extends ScriptNode implements
         if ( child != null && child.exists() ) {
             return child;
         }
-        // Find the path/child in a parent workspace.
-        EmsScriptNode source = node.getWorkspaceSource();
-        while ( source != null && source.exists()
-                && ( child == null || !child.exists() ) ) {
-            child = source.childByNamePath( path );
-            source = source.getWorkspaceSource();
-        }
-        if ( child != null && child.exists() ) {
-            return child;
+        
+        // Find the path/child in a parent workspace if not constraining only to the current workspace:
+        if (!onlyWorkspace) {
+            EmsScriptNode source = node.getWorkspaceSource();
+            while ( source != null && source.exists()
+                    && ( child == null || !child.exists() ) ) {
+                child = source.childByNamePath( path );
+                source = source.getWorkspaceSource();
+            }
+            if ( child != null && child.exists() ) {
+                return child;
+            }
         }
         return null;
     }
@@ -336,15 +340,19 @@ public class EmsScriptNode extends ScriptNode implements
 
     @Override
     public EmsScriptNode createFolder( String name, String type ) {
+        return createFolder(name, type, null);
+    }
+    
+    public EmsScriptNode createFolder( String name, String type, NodeRef sourceFolder ) {
         
         NodeRef folderRef = super.createFolder( name, type ).getNodeRef();
         EmsScriptNode folder = new EmsScriptNode(folderRef,services, response, status );
         WorkspaceNode ws = getWorkspace();
-        EmsScriptNode source = getWorkspaceSource();
-        // TODO -- the folder is not getting a source here! is that okay?
-        // Scriptable myChildren = source.getChildren();
-        if ( ws != null && !folder.isWorkspace() ) folder.setWorkspace( ws,
-                                                                        null );
+
+        if ( ws != null && !folder.isWorkspace() ) {
+            folder.setWorkspace( ws, sourceFolder );
+        }
+
         if ( Debug.isOn() ) {
             Debug.outln( "createFolder(" + name + "): returning " + folder );
         }
@@ -504,7 +512,11 @@ public class EmsScriptNode extends ScriptNode implements
             value = t;
         }
         @SuppressWarnings( "unchecked" )
-        T oldValue = (T)getProperty( acmType );
+        // It is important we ignore the workspace when getting the property, so we make sure
+        // to update this property when needed.  Otherwise, property may have a noderef in 
+        // a parent workspace, and this wont detect it; however, all the getProperty() will look
+        // for the correct workspace node, so perhaps this is overkill:
+        T oldValue = (T)getProperty( acmType, true, null, false, true );
         if ( oldValue != null ) {
             if ( !value.equals( oldValue ) ) {
                 setProperty( acmType, value );
@@ -791,15 +803,20 @@ public class EmsScriptNode extends ScriptNode implements
         return node;
     }
 
-    public EmsScriptNode getReifiedNode() {
-        NodeRef nodeRef = (NodeRef)getProperty( "ems:reifiedNode" );
+    public EmsScriptNode getReifiedNode(boolean findDeleted) {
+        NodeRef nodeRef = (NodeRef)getProperty( "ems:reifiedNode", false, null, 
+                                                findDeleted, false );
         if ( nodeRef != null ) {
             return new EmsScriptNode( nodeRef, services, response );
         }
         return null;
     }
+    
+    public EmsScriptNode getReifiedNode() {
+        return getReifiedNode(false);
+    }
 
-    protected EmsScriptNode getReifiedPkg() {
+    public EmsScriptNode getReifiedPkg() {
         NodeRef nodeRef = (NodeRef)getProperty( "ems:reifiedPkg" );
         if ( nodeRef != null ) {
             return new EmsScriptNode( nodeRef, services, response );
@@ -995,15 +1012,15 @@ public class EmsScriptNode extends ScriptNode implements
     /**
      * Returns the children for this node.  Uses the ems:ownedChildren property.
      * 
-     * @param workspace
-     * @param dateTime
+     * @param findDeleted Find deleted nodes also
      * @return children of this node
      */
-    public ArrayList<NodeRef> getOwnedChildren() {
+    public ArrayList<NodeRef> getOwnedChildren(boolean findDeleted) {
                 
         ArrayList<NodeRef> ownedChildren = new ArrayList<NodeRef>();
         
-        ArrayList<NodeRef> oldChildren = this.getPropertyNodeRefs( "ems:ownedChildren" );
+        ArrayList<NodeRef> oldChildren = this.getPropertyNodeRefs( "ems:ownedChildren",
+                                                                   false, null, findDeleted, false);
         if (oldChildren != null) {
             ownedChildren = oldChildren;
         }
@@ -1045,6 +1062,22 @@ public class EmsScriptNode extends ScriptNode implements
      * @return
      */
     public Object getProperty( String acmType ) {
+        // FIXME Sometimes we wont want these defaults, ie want to find the deleted elements. 
+        //       Need to check all calls to getProperty() with properties that are NodeRefs.
+        return getProperty(acmType, false, null, false, false);
+    }
+    
+    /**
+     * Get the property of the specified type
+     *
+     * @param acmType
+     *            Short name of property to get
+     * @return
+     */
+    public Object getProperty( String acmType, boolean ignoreWorkspace,
+                               Date dateTime, boolean findDeleted, 
+                               boolean skipNodeRefCheck ) {
+        
         if ( Utils.isNullOrEmpty( acmType ) ) return null;
         Object result = null;
         if ( useFoundationalApi ) {
@@ -1055,10 +1088,11 @@ public class EmsScriptNode extends ScriptNode implements
         }
         // get noderefs from the proper workspace unless the property is a
         // workspace meta-property
-        if ( !workspaceMetaProperties.contains( acmType ) ) {
+        if ( !skipNodeRefCheck && !workspaceMetaProperties.contains( acmType )) {
             if ( result instanceof NodeRef ) {
                 result = NodeUtil.getNodeRefAtTime( (NodeRef)result,
-                                                    getWorkspace(), null );
+                                                    getWorkspace(), dateTime,
+                                                    ignoreWorkspace, findDeleted);
             } else if ( result instanceof Collection ) {
                 Collection< ? > resultColl = (Collection< ? >)result;
                 ArrayList< Object > arr = new ArrayList< Object >();
@@ -1066,7 +1100,8 @@ public class EmsScriptNode extends ScriptNode implements
                     if ( o instanceof NodeRef ) {
                         NodeRef ref =
                                 NodeUtil.getNodeRefAtTime( (NodeRef)o,
-                                                           getWorkspace(), null );
+                                                           getWorkspace(), dateTime,
+                                                           ignoreWorkspace, findDeleted);
                         arr.add( ref );
                     } else {
                         arr.add( o );
@@ -1075,6 +1110,7 @@ public class EmsScriptNode extends ScriptNode implements
                 result = arr;
             }
         }
+        
         return result;
     }
 
@@ -2080,8 +2116,12 @@ public class EmsScriptNode extends ScriptNode implements
         // only change if old list is different than new
         if ( checkPermissions( PermissionService.WRITE, response, status ) ) {
             @SuppressWarnings( "unchecked" )
+            // It is important we ignore the workspace when getting the property, so we make sure
+            // to update this property when needed.  Otherwise, property may have a noderef in 
+            // a parent workspace, and this wont detect it; however, all the getProperty() will look
+            // for the correct workspace node, so perhaps this is overkill::
             ArrayList< Serializable > oldValues =
-                    (ArrayList< Serializable >)getProperty( acmProperty );
+                    (ArrayList< Serializable >)getProperty( acmProperty, true, null, false, true );
             if ( !EmsScriptNode.checkIfListsEquivalent( values, oldValues ) ) {
                 setProperty( acmProperty, values );
                 changed = true;
@@ -2609,6 +2649,10 @@ public class EmsScriptNode extends ScriptNode implements
         }
         return true;
     }
+    
+    public boolean scriptNodeExists() {
+        return super.exists();
+    }
 
     public boolean isDeleted() {
         if (super.exists()) {
@@ -3082,7 +3126,13 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public ArrayList< NodeRef > getPropertyNodeRefs( String acmProperty ) {
-        Object o = getProperty( acmProperty );
+        return getPropertyNodeRefs(acmProperty, false, null, false, false);
+    }
+    
+    public ArrayList< NodeRef > getPropertyNodeRefs( String acmProperty, boolean ignoreWorkspace,
+                                                     Date dateTime, boolean findDeleted,
+                                                     boolean skipNodeRefCheck) {
+        Object o = getProperty( acmProperty, ignoreWorkspace, dateTime, findDeleted, skipNodeRefCheck );
         ArrayList< NodeRef > refs = null;
         if ( !( o instanceof Collection ) ) {
             if ( o instanceof NodeRef ) {
