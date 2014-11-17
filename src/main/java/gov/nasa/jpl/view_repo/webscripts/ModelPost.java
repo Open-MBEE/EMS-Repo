@@ -406,6 +406,30 @@ public class ModelPost extends AbstractJavaWebScript {
         updateTransactionableWsStateImpl(owner, owner.getSysmlId(), modStatus, ingest);
     }
     
+    /**
+     * Resurrect the parents of the node from the dead if needed
+     * 
+     */
+    protected void resurrectParents(EmsScriptNode nodeToUpdate, boolean ingest) {
+    
+        EmsScriptNode nodeParent = nodeToUpdate.getParent();
+        EmsScriptNode reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true) : null;
+        while (nodeParent != null  && nodeParent.scriptNodeExists()) {
+            if (nodeParent.isDeleted()) {
+                resurrectParent(nodeParent, ingest);
+            }
+            if (reifiedNodeParent != null && reifiedNodeParent.isDeleted()) {
+                resurrectParent(reifiedNodeParent, ingest);
+            }
+            if (nodeParent.isWorkspaceTop()) {
+                break;
+            }
+            nodeParent = nodeParent.getParent();
+            reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true) : null;
+        }
+            
+    }
+    
     protected EmsScriptNode getOwner( String elementId,
                                       EmsScriptNode projectNode,
                                       WorkspaceNode workspace,
@@ -1520,24 +1544,9 @@ public class ModelPost extends AbstractJavaWebScript {
                         modStatus.setState( ModStatus.State.MOVED  );
                     }
                     
-                    // TODO pull this out
                     // Resurrect any parent nodes if needed:
-                    EmsScriptNode nodeParent = nodeToUpdate.getParent();
-                    EmsScriptNode reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true) : null;
-                    while (nodeParent != null  && nodeParent.scriptNodeExists()) {
-                        if (nodeParent.isDeleted()) {
-                            resurrectParent(nodeParent, ingest);
-                        }
-                        if (reifiedNodeParent != null && reifiedNodeParent.isDeleted()) {
-                            resurrectParent(reifiedNodeParent, ingest);
-                        }
-                        if (nodeParent.isWorkspaceTop()) {
-                            break;
-                        }
-                        nodeParent = nodeParent.getParent();
-                        reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true) : null;
-                    }
-                        
+                    resurrectParents(nodeToUpdate, ingest);
+                    
                     // If it has a Product aspect, but want to remove that aspect
                     // ie downgrading to a View or Element
                     // Note: this check will not work if downgrading to an Element,
