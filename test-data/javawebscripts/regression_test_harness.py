@@ -991,7 +991,7 @@ common_filters + ['"parent"','"id"','"qualifiedId"'],
 create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,
                 post_type="", branch=""),
 True,
-common_filters + ['"parent"','"id"','"qualifiedId"'],
+common_filters + ['"parent"','"id"','"qualifiedId"','"branched"'],
 ["develop", "develop2"]
 ],
 
