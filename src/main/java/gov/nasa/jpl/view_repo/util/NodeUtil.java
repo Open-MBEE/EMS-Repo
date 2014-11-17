@@ -328,10 +328,12 @@ public class NodeUtil {
                 }
             }
             if ( results != null ) {
+                NodeRef lowest = null;
                 if ( wasCached && dateTime == null && siteName == null) {
                     nodeRefs = results;
-                } else for (NodeRef nr: results) {
-                    NodeRef lowest = null;
+                } 
+                else 
+                for (NodeRef nr: results) {
                     //int minParentDistance = Integer.MAX_VALUE;
                     if ( nr == null ) continue;
                     EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
@@ -430,10 +432,9 @@ public class NodeUtil {
                     } catch ( Throwable e ) {
                         e.printStackTrace();
                     }
-//                    }
-                }
-            }
-            
+                } // ends else for
+            } // ends if (results != null)
+           
             // If the workspace is copied at a time point (as opposed to
             // floating with the parent), then we need to check each element
             // found to see if it is in some parent workspace and last modified
@@ -604,6 +605,7 @@ public class NodeUtil {
         // TODO: removed exists so we can include ems:Deleted nodes in results, may need to revisit
 //        if (!exists(source) || !exists(changed)) return false;
         //if ( changed.equals( source ) ) return true;
+        if ( source == null || changed == null ) return false;
         if ( !changed.hasAspect( "ems:HasWorkspace" ) ) return false;
         EmsScriptNode directSource = changed.getWorkspaceSource();
 //        if ( !exists(directSource) ) return false;
@@ -1179,10 +1181,16 @@ public class NodeUtil {
             new VersionLowerBoundComparator();
 
     public static NodeRef getNodeRefAtTime( NodeRef nodeRef, WorkspaceNode workspace,
-                                            Date timestamp ) {
+                                            Date dateTime ) {
+        return getNodeRefAtTime( nodeRef, workspace, dateTime, false, false);
+    }
+    
+    public static NodeRef getNodeRefAtTime( NodeRef nodeRef, WorkspaceNode workspace,
+                                            Date dateTime, boolean ignoreWorkspace,
+                                            boolean findDeleted) {
         EmsScriptNode node = new EmsScriptNode( nodeRef, getServices() );
         String id = node.getSysmlId();
-        return getNodeRefAtTime( id, workspace, timestamp );
+        return findNodeRefById( id, ignoreWorkspace, workspace, dateTime, getServices(), findDeleted );
     }
 
     public static NodeRef getNodeRefAtTime( String id, WorkspaceNode workspace,

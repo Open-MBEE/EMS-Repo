@@ -90,9 +90,21 @@
 
                     ],
 
+                    "isDerived": false,
+
+                    "isSlot": false,
+
                     "noSections": ["302"],
 
                     "type": "Product",
+
+                    "value": [{
+
+                        "string": "dlam_string",
+
+                        "type": "LiteralString"
+
+                    }],
 
                     "view2view": [{
 
@@ -204,7 +216,13 @@
 
         "qualifiedName": "master/wsA/wsT",
 
-        "updatedElements": []
+        "updatedElements": [{
+
+            "creator": "admin",
+
+            "sysmlid": "301"
+
+        }]
 
     }
 

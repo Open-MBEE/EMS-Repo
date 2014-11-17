@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
@@ -186,7 +187,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 
 		// make sure Model package under site exists
         EmsScriptNode modelContainerNode =
-                siteNode.childByNamePath( MODEL_PATH_SEARCH, false, workspace );
+                siteNode.childByNamePath( MODEL_PATH_SEARCH, false, workspace, true );
 		if (modelContainerNode == null) {
 			modelContainerNode = siteNode.createFolder("Models");
 			log(LogLevel.INFO, "Model folder created.\n", HttpServletResponse.SC_OK);
@@ -195,7 +196,10 @@ public class ProjectPost extends AbstractJavaWebScript {
 		// create project if doesn't exist or update
 		// Note: Also checking if the workspace for the projectNode differs from the desired workspace, 
 		// which will occur if the project is in the master, but not in the workspace yet.
-		EmsScriptNode projectNode = findScriptNodeByIdForWorkspace(projectId, workspace, null, true);
+		EmsScriptNode projectNodeAll = findScriptNodeById(projectId, workspace, null, true);
+		EmsScriptNode projectNode = (projectNodeAll != null && NodeUtil.workspacesEqual(projectNodeAll.getWorkspace(),workspace)) ? 
+		                                                                                                     projectNodeAll : null;
+		
 		String projectName = null;
 		if (jsonObject.has(Acm.JSON_NAME)) {
 		    projectName = jsonObject.getString(Acm.JSON_NAME);
@@ -209,7 +213,8 @@ public class ProjectPost extends AbstractJavaWebScript {
 		}
 
 		if ( projectNode == null ) {
-			projectNode = modelContainerNode.createFolder(projectId, Acm.ACM_PROJECT);
+			projectNode = modelContainerNode.createFolder(projectId, Acm.ACM_PROJECT, 
+			                                              projectNodeAll != null ? projectNodeAll.getNodeRef() : null);
 			projectNode.setProperty(Acm.ACM_ID, projectId);
 			projectNode.setProperty(Acm.ACM_TYPE, "Project");
             if (projectName != null) {

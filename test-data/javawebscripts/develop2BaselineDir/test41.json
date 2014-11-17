@@ -1,0 +1,26 @@
+{"workspaces": [
+
+    {
+
+        "creator": "admin",
+
+        "name": "BB",
+
+        "qualifiedName": "master/AA/BB"
+
+    },
+
+    {
+
+        "creator": "admin",
+
+        "name": "AA",
+
+        "qualifiedName": "master/AA"
+
+    }
+
+]}
+
+200
+

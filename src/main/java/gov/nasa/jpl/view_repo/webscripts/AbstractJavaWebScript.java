@@ -405,7 +405,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	        if (sitesFolder == null ) {
 	            Debug.error("Could not create site " + siteName + "!");
 	        } else {
-	            siteNode = sitesFolder.createFolder( siteName );
+	            siteNode = sitesFolder.createFolder( siteName, null, !invalidSiteNode ? siteNode.getNodeRef() : null );
 	        }
         }
         

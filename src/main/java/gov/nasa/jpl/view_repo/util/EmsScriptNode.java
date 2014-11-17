@@ -46,6 +46,7 @@ import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -72,6 +73,7 @@ import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.jscript.ScriptVersion;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
+import org.alfresco.service.cmr.dictionary.ClassDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
@@ -185,7 +187,8 @@ public class EmsScriptNode extends ScriptNode implements
         setResponse( response );
     }
 
-    public EmsScriptNode childByNamePath( String path, boolean ignoreWorkspace, WorkspaceNode workspace ) {
+    public EmsScriptNode childByNamePath( String path, boolean ignoreWorkspace, WorkspaceNode workspace,
+                                          boolean onlyWorkspace) {
         // Make sure this node is in the target workspace.
         EmsScriptNode node = this;
         if ( !ignoreWorkspace && workspace != null && !workspace.equals( getWorkspace() ) ) {
@@ -196,15 +199,18 @@ public class EmsScriptNode extends ScriptNode implements
         if ( child != null && child.exists() ) {
             return child;
         }
-        // Find the path/child in a parent workspace.
-        EmsScriptNode source = node.getWorkspaceSource();
-        while ( source != null && source.exists()
-                && ( child == null || !child.exists() ) ) {
-            child = source.childByNamePath( path );
-            source = source.getWorkspaceSource();
-        }
-        if ( child != null && child.exists() ) {
-            return child;
+        
+        // Find the path/child in a parent workspace if not constraining only to the current workspace:
+        if (!onlyWorkspace) {
+            EmsScriptNode source = node.getWorkspaceSource();
+            while ( source != null && source.exists()
+                    && ( child == null || !child.exists() ) ) {
+                child = source.childByNamePath( path );
+                source = source.getWorkspaceSource();
+            }
+            if ( child != null && child.exists() ) {
+                return child;
+            }
         }
         return null;
     }
@@ -334,15 +340,19 @@ public class EmsScriptNode extends ScriptNode implements
 
     @Override
     public EmsScriptNode createFolder( String name, String type ) {
+        return createFolder(name, type, null);
+    }
+    
+    public EmsScriptNode createFolder( String name, String type, NodeRef sourceFolder ) {
         
         NodeRef folderRef = super.createFolder( name, type ).getNodeRef();
         EmsScriptNode folder = new EmsScriptNode(folderRef,services, response, status );
         WorkspaceNode ws = getWorkspace();
-        EmsScriptNode source = getWorkspaceSource();
-        // TODO -- the folder is not getting a source here! is that okay?
-        // Scriptable myChildren = source.getChildren();
-        if ( ws != null && !folder.isWorkspace() ) folder.setWorkspace( ws,
-                                                                        null );
+
+        if ( ws != null && !folder.isWorkspace() ) {
+            folder.setWorkspace( ws, sourceFolder );
+        }
+
         if ( Debug.isOn() ) {
             Debug.outln( "createFolder(" + name + "): returning " + folder );
         }
@@ -362,23 +372,7 @@ public class EmsScriptNode extends ScriptNode implements
             type = Acm.getJSON2ACM().get( type );
         }
 
-        // FIXME: reconsider whether all aspects are mutually exclusive
-        if (Acm.VALUESPEC_ASPECTS.contains( type )) {
-            if ( hasAspect(type) ) {
-                return false;
-            }
-
-            // if refactoring, need to remove any prior valuespecs since they're
-            // mutually exclusive
-            for (String valuespec: Acm.VALUESPEC_ASPECTS) {
-                removeAspect(valuespec);
-            }
-        }
-
-        if ( !hasAspect( type ) ) {
-            return addAspect( type );
-        }
-        return false;
+        return changeAspect( type );
     }
 
     /**
@@ -518,7 +512,11 @@ public class EmsScriptNode extends ScriptNode implements
             value = t;
         }
         @SuppressWarnings( "unchecked" )
-        T oldValue = (T)getProperty( acmType );
+        // It is important we ignore the workspace when getting the property, so we make sure
+        // to update this property when needed.  Otherwise, property may have a noderef in 
+        // a parent workspace, and this wont detect it; however, all the getProperty() will look
+        // for the correct workspace node, so perhaps this is overkill:
+        T oldValue = (T)getProperty( acmType, true, null, false, true );
         if ( oldValue != null ) {
             if ( !value.equals( oldValue ) ) {
                 setProperty( acmType, value );
@@ -805,12 +803,17 @@ public class EmsScriptNode extends ScriptNode implements
         return node;
     }
 
-    public EmsScriptNode getReifiedNode() {
-        NodeRef nodeRef = (NodeRef)getProperty( "ems:reifiedNode" );
+    public EmsScriptNode getReifiedNode(boolean findDeleted) {
+        NodeRef nodeRef = (NodeRef)getProperty( "ems:reifiedNode", false, null, 
+                                                findDeleted, false );
         if ( nodeRef != null ) {
             return new EmsScriptNode( nodeRef, services, response );
         }
         return null;
+    }
+    
+    public EmsScriptNode getReifiedNode() {
+        return getReifiedNode(false);
     }
 
     public EmsScriptNode getReifiedPkg() {
@@ -1009,15 +1012,15 @@ public class EmsScriptNode extends ScriptNode implements
     /**
      * Returns the children for this node.  Uses the ems:ownedChildren property.
      * 
-     * @param workspace
-     * @param dateTime
+     * @param findDeleted Find deleted nodes also
      * @return children of this node
      */
-    public ArrayList<NodeRef> getOwnedChildren() {
+    public ArrayList<NodeRef> getOwnedChildren(boolean findDeleted) {
                 
         ArrayList<NodeRef> ownedChildren = new ArrayList<NodeRef>();
         
-        ArrayList<NodeRef> oldChildren = this.getPropertyNodeRefs( "ems:ownedChildren" );
+        ArrayList<NodeRef> oldChildren = this.getPropertyNodeRefs( "ems:ownedChildren",
+                                                                   false, null, findDeleted, false);
         if (oldChildren != null) {
             ownedChildren = oldChildren;
         }
@@ -1059,6 +1062,22 @@ public class EmsScriptNode extends ScriptNode implements
      * @return
      */
     public Object getProperty( String acmType ) {
+        // FIXME Sometimes we wont want these defaults, ie want to find the deleted elements. 
+        //       Need to check all calls to getProperty() with properties that are NodeRefs.
+        return getProperty(acmType, false, null, false, false);
+    }
+    
+    /**
+     * Get the property of the specified type
+     *
+     * @param acmType
+     *            Short name of property to get
+     * @return
+     */
+    public Object getProperty( String acmType, boolean ignoreWorkspace,
+                               Date dateTime, boolean findDeleted, 
+                               boolean skipNodeRefCheck ) {
+        
         if ( Utils.isNullOrEmpty( acmType ) ) return null;
         Object result = null;
         if ( useFoundationalApi ) {
@@ -1069,10 +1088,11 @@ public class EmsScriptNode extends ScriptNode implements
         }
         // get noderefs from the proper workspace unless the property is a
         // workspace meta-property
-        if ( !workspaceMetaProperties.contains( acmType ) ) {
+        if ( !skipNodeRefCheck && !workspaceMetaProperties.contains( acmType )) {
             if ( result instanceof NodeRef ) {
                 result = NodeUtil.getNodeRefAtTime( (NodeRef)result,
-                                                    getWorkspace(), null );
+                                                    getWorkspace(), dateTime,
+                                                    ignoreWorkspace, findDeleted);
             } else if ( result instanceof Collection ) {
                 Collection< ? > resultColl = (Collection< ? >)result;
                 ArrayList< Object > arr = new ArrayList< Object >();
@@ -1080,7 +1100,8 @@ public class EmsScriptNode extends ScriptNode implements
                     if ( o instanceof NodeRef ) {
                         NodeRef ref =
                                 NodeUtil.getNodeRefAtTime( (NodeRef)o,
-                                                           getWorkspace(), null );
+                                                           getWorkspace(), dateTime,
+                                                           ignoreWorkspace, findDeleted);
                         arr.add( ref );
                     } else {
                         arr.add( o );
@@ -1089,6 +1110,7 @@ public class EmsScriptNode extends ScriptNode implements
                 result = arr;
             }
         }
+        
         return result;
     }
 
@@ -2094,8 +2116,12 @@ public class EmsScriptNode extends ScriptNode implements
         // only change if old list is different than new
         if ( checkPermissions( PermissionService.WRITE, response, status ) ) {
             @SuppressWarnings( "unchecked" )
+            // It is important we ignore the workspace when getting the property, so we make sure
+            // to update this property when needed.  Otherwise, property may have a noderef in 
+            // a parent workspace, and this wont detect it; however, all the getProperty() will look
+            // for the correct workspace node, so perhaps this is overkill::
             ArrayList< Serializable > oldValues =
-                    (ArrayList< Serializable >)getProperty( acmProperty );
+                    (ArrayList< Serializable >)getProperty( acmProperty, true, null, false, true );
             if ( !EmsScriptNode.checkIfListsEquivalent( values, oldValues ) ) {
                 setProperty( acmProperty, values );
                 changed = true;
@@ -2623,6 +2649,10 @@ public class EmsScriptNode extends ScriptNode implements
         }
         return true;
     }
+    
+    public boolean scriptNodeExists() {
+        return super.exists();
+    }
 
     public boolean isDeleted() {
         if (super.exists()) {
@@ -3096,7 +3126,13 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public ArrayList< NodeRef > getPropertyNodeRefs( String acmProperty ) {
-        Object o = getProperty( acmProperty );
+        return getPropertyNodeRefs(acmProperty, false, null, false, false);
+    }
+    
+    public ArrayList< NodeRef > getPropertyNodeRefs( String acmProperty, boolean ignoreWorkspace,
+                                                     Date dateTime, boolean findDeleted,
+                                                     boolean skipNodeRefCheck) {
+        Object o = getProperty( acmProperty, ignoreWorkspace, dateTime, findDeleted, skipNodeRefCheck );
         ArrayList< NodeRef > refs = null;
         if ( !( o instanceof Collection ) ) {
             if ( o instanceof NodeRef ) {
@@ -3264,7 +3300,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
     }
 
-    public Set<QName> getAllAspectsAndInherited() {
+    private Set<QName> getAllAspectsAndInherited() {
         Set<QName> aspects = new LinkedHashSet< QName >();
         aspects.addAll( getAspectsSet() );
         ArrayList<QName> queue = new ArrayList< QName >( aspects );
@@ -3281,8 +3317,6 @@ public class EmsScriptNode extends ScriptNode implements
         }
         return aspects;
     }
-
-
 
     public boolean hasOrInheritsAspect( String aspectName ) {
         if ( hasAspect( aspectName ) ) return true;
@@ -3302,6 +3336,128 @@ public class EmsScriptNode extends ScriptNode implements
 //
 //        }
 //        return false;
+    }
+    
+    /**
+     * Changes the aspect of the node to the one specified, taking care
+     * to save off and re-apply properties from current aspect if 
+     * downgrading.  Handles downgrading to a Element, by removing all
+     * the needed aspects.  Also removing old sysml aspects if changing
+     * the sysml aspect.
+     *      
+     * @param aspectName The aspect to change to
+     */
+    private boolean changeAspect(String aspectName) {
+        
+        Set<QName> aspects = new LinkedHashSet< QName >();
+        boolean retVal = false;
+        Map<String,Object> oldProps = null;
+        DictionaryService dServ = services.getDictionaryService();
+        AspectDefinition aspectDef;
+        boolean saveProps = false;
+        
+        if (aspectName == null) {
+            return false;
+        }
+        
+        QName qName = NodeUtil.createQName( aspectName );
+        
+        // If downgrading to an Element, then need to remove
+        // all aspects without saving any properties or adding
+        // any aspects:
+        if (aspectName.equals(Acm.ACM_ELEMENT)) {
+            for (String aspect : Acm.ACM_ASPECTS) {
+                if (hasAspect(aspect)) {
+                    boolean myRetVal = removeAspect(aspect);
+                    retVal = retVal || myRetVal;
+                }
+            }
+            
+            return retVal;
+        }
+        
+        // Get all the aspects for this node, find all of their parents, and see if
+        // the new aspect is any of the parents.  
+        aspects.addAll( getAspectsSet() );
+        ArrayList<QName> queue = new ArrayList< QName >( aspects );
+        QName name;
+        QName parentQName;
+        while(!queue.isEmpty()) {
+            name = queue.get(0);
+            queue.remove(0);
+            aspectDef = dServ.getAspect(name);
+            parentQName = aspectDef.getParentName();
+            if (parentQName != null) {
+                if (parentQName.equals( qName )) {
+                    saveProps = true;
+                    break;
+                }
+                if (!queue.contains(parentQName)) {
+                    queue.add(parentQName);
+                }
+            }
+        }
+        
+        // If changing aspects to a parent aspect (ie downgrading), then we must save off the
+        // properties before removing the current aspect, and then re-apply them:        
+        if (saveProps) {
+            oldProps = getProperties();
+        }
+        // No need to go any further if it already has the aspect and the new aspect is not
+        // a parent of the current aspect:
+        else if (hasAspect(aspectName)){
+            return false;
+        }
+        
+        // Remove all the existing sysml aspects if the aspect is not a parent of the new aspect,
+        // and it is a sysml aspect:
+        List<String> sysmlAspects = Arrays.asList(Acm.ACM_ASPECTS);
+        if (sysmlAspects.contains( aspectName)) {
+            
+            Set<QName> parentAspectNames = new LinkedHashSet< QName >();
+            parentAspectNames.add(qName);
+            name = qName; // The new aspect QName
+            while (name != null) {
+                aspectDef = dServ.getAspect(name);
+                parentQName = aspectDef.getParentName();
+                if (parentQName != null) {
+                    parentAspectNames.add(parentQName);
+                }
+                name = parentQName;
+            }
+                    
+            for (String aspect : Acm.ACM_ASPECTS) { 
+                if (hasAspect(aspect) && !parentAspectNames.contains(NodeUtil.createQName( aspect ))) {
+                    boolean removeVal = removeAspect(aspect);
+                    retVal = retVal || removeVal;
+                }
+            }
+        }
+        
+        // Apply the new aspect if needed:
+        if (!hasAspect(aspectName)) {
+            retVal = addAspect(aspectName);
+        }
+        
+        // Add the saved properties if needed:
+        if (oldProps != null) {
+            aspectDef = dServ.getAspect(qName);
+            Set<QName> aspectProps = aspectDef.getProperties().keySet();
+
+            // Only add the properties that are valid for the new aspect:
+            String propName;
+            QName propQName;
+            for (Entry<String,Object> entry : oldProps.entrySet()) {
+                propName = entry.getKey();
+                propQName = NodeUtil.createQName(propName);
+                
+                if (aspectProps.contains(propQName)) {
+                    setProperty(propName, (Serializable)entry.getValue());
+                }
+            }
+        }
+        
+        return retVal;
     }
 
 
