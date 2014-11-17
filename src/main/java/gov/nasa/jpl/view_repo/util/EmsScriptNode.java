@@ -3317,7 +3317,8 @@ public class EmsScriptNode extends ScriptNode implements
         if (aspectName.equals(Acm.ACM_ELEMENT)) {
             for (String aspect : Acm.ACM_ASPECTS) {
                 if (hasAspect(aspect)) {
-                    retVal = retVal || removeAspect(aspect);
+                    boolean myRetVal = removeAspect(aspect);
+                    retVal = retVal || myRetVal;
                 }
             }
             
@@ -3371,7 +3372,8 @@ public class EmsScriptNode extends ScriptNode implements
                     
             for (String aspect : Acm.ACM_ASPECTS) { 
                 if (hasAspect(aspect) && !parentAspectNames.contains(NodeUtil.createQName( aspect ))) {
-                    retVal = retVal || removeAspect(aspect);
+                    boolean removeVal = removeAspect(aspect);
+                    retVal = retVal || removeVal;
                 }
             }
         }
