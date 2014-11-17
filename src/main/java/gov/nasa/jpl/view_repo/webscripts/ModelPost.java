@@ -1520,10 +1520,11 @@ public class ModelPost extends AbstractJavaWebScript {
                         modStatus.setState( ModStatus.State.MOVED  );
                     }
                     
+                    // TODO pull this out
                     // Resurrect any parent nodes if needed:
                     EmsScriptNode nodeParent = nodeToUpdate.getParent();
                     EmsScriptNode reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true) : null;
-                    while (nodeParent != null) {
+                    while (nodeParent != null  && nodeParent.scriptNodeExists()) {
                         if (nodeParent.isDeleted()) {
                             resurrectParent(nodeParent, ingest);
                         }

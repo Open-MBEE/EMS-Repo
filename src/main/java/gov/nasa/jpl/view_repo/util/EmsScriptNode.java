@@ -2662,6 +2662,10 @@ public class EmsScriptNode extends ScriptNode implements
         }
         return true;
     }
+    
+    public boolean scriptNodeExists() {
+        return super.exists();
+    }
 
     public boolean isDeleted() {
         if (super.exists()) {
