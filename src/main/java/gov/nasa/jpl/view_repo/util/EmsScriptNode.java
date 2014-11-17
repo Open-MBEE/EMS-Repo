@@ -3352,6 +3352,11 @@ public class EmsScriptNode extends ScriptNode implements
         if (saveProps) {
             oldProps = getProperties();
         }
+        // No need to go any further if it already has the aspect and the new aspect is not
+        // a parent of the current aspect:
+        else if (hasAspect(aspectName)){
+            return false;
+        }
         
         // Remove all the existing sysml aspects if the aspect is not a parent of the new aspect,
         // and it is a sysml aspect:
