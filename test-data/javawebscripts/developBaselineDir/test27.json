@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-{"sites":[{"title":"Sample: Web Site Design Project","sysmlid":"swsdp"},{"title":"europa","sysmlid":"europa"}]}
-=======
 {"elements": [{
 
     "creator": "admin",
@@ -23,6 +20,5 @@
 
 }]}
 
->>>>>>> refs/remotes/origin/develop
 200
 
