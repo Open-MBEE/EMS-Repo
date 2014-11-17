@@ -390,6 +390,22 @@ public class ModelPost extends AbstractJavaWebScript {
         return elements;
     }
 
+    /**
+     * Resurrect the parent from the dead
+     * 
+     * @param owner
+     */
+    protected void resurrectParent(EmsScriptNode owner, boolean ingest) {
+        
+        log( LogLevel.WARNING, "Owner with name: "
+             + owner.getSysmlId() + " was deleted.  Will resurrect it");
+        
+        ModStatus modStatus = new ModStatus();
+        owner.removeAspect( "ems:Deleted" );
+        modStatus.setState( ModStatus.State.ADDED );
+        updateTransactionableWsStateImpl(owner, owner.getSysmlId(), modStatus, ingest);
+    }
+    
     protected EmsScriptNode getOwner( String elementId,
                                       EmsScriptNode projectNode,
                                       WorkspaceNode workspace,
@@ -416,8 +432,9 @@ public class ModelPost extends AbstractJavaWebScript {
         EmsScriptNode reifiedPkg = null;
         boolean createdHoldingBin = false;
         if (Utils.isNullOrEmpty( ownerName ) ) {
-            EmsScriptNode elementNode = findScriptNodeById(elementId, workspace, null, false);
-            if (elementNode == null || !elementNode.exists()) {
+            EmsScriptNode elementNode = findScriptNodeById(elementId, workspace, null, true);
+            // If the element was not found, or it was found but does not exist, then create holding bin:
+            if ( elementNode == null || (!elementNode.exists() && !elementNode.isDeleted()) ) {
             	// Place elements with no owner in a holding_bin_<site>_<project> package:
                 //owner = projectNode; 
             	String projectNodeId = ((projectNode == null || projectNode.getSysmlId() == null) ? NO_PROJECT_ID : projectNode.getSysmlId());
@@ -427,50 +444,74 @@ public class ModelPost extends AbstractJavaWebScript {
             	ownerName = "holding_bin_"+siteName+"_"+projectNodeId;
             	createdHoldingBin = true;
             } else {
+                // Parent will be a reified package, which we never delete, so no need to 
+                // check if we need to resurrect it.  If elementNode is deleted, it will
+                // resurrected later when processing that node.
                 owner = elementNode.getParent();
             }
         } 
         
         if (!Utils.isNullOrEmpty(ownerName)) {
        		boolean foundOwnerElement = true;
-            owner = findScriptNodeById(ownerName, workspace, null, false);
+            owner = findScriptNodeById(ownerName, workspace, null, true);
+
             if (owner == null || !owner.exists()) {
-                // FIX: Need to respond with warning that owner couldn't be found?
-                log( LogLevel.WARNING, "Could not find owner with name: "
-                                       + ownerName + " putting " + elementId
-                                       + " into project: " + projectNode);
                 
-                // FIXME: HERE! ATTENTION BRAD!  add to elements, so it is returned, and remind Doris
-                //        to fix her code also.
-                // Creating a reifiedNode here also, for magic draw sync to work with holding bin,
-                // and for ems:owner to be correct for the node this reifiedNode will own, and to get 
-                // the correct cm:name for the reifiedPackage as it is based on the reifiedNode cm:name.
-                String type;
-                String acmName;
-                if (createdHoldingBin) {
-                    type = Acm.ACM_PACKAGE;
-                    acmName = "holding_bin";
+                // If the owner was found, but deleted, then make a zombie node!
+                if (owner != null && owner.isDeleted()) {                   
+                    log( LogLevel.WARNING, "Owner with name: "
+                            + ownerName + " was deleted.  Will resurrect it, and put "+elementId
+                            + " into it.");
+                    
+                    resurrectParent(owner, false);
                 }
+                // Otherwise, owner wasnt found, or found but doesnt exists:
                 else {
-                    type = Acm.ACM_ELEMENT;
-                    acmName = ownerName;
+                   
+                    // FIXME: HERE! ATTENTION BRAD!  add to elements, so it is returned, and remind Doris
+                    //        to fix her code also.
+                    // Creating a reifiedNode here also, for magic draw sync to work with holding bin,
+                    // and for ems:owner to be correct for the node this reifiedNode will own, and to get 
+                    // the correct cm:name for the reifiedPackage as it is based on the reifiedNode cm:name.
+                    String type;
+                    String acmName;
+                    ModStatus modStatus = new ModStatus();
+
+                    if (createdHoldingBin) {
+                        type = Acm.ACM_PACKAGE;
+                        acmName = "holding_bin";
+                    }
+                    else {
+                        type = Acm.ACM_ELEMENT;
+                        acmName = ownerName;
+                    }
+                    
+                    // Place the reified node in project reified package:
+                    EmsScriptNode projectNodePkg = getOrCreateReifiedPackageNode(projectNode, projectNode.getSysmlId(),
+                                                                            workspace, true);
+                    EmsScriptNode ownerNode = projectNodePkg != null ? projectNodePkg : projectNode;
+                    
+                    // FIXME: Need to respond with warning that owner couldn't be found?
+                    log( LogLevel.WARNING, "Could not find owner with name: "
+                                           + ownerName + " putting " + elementId
+                                           + " into project: " + ownerNode);
+                    
+                    EmsScriptNode nodeBin = ownerNode.createSysmlNode(ownerName, type,
+                                                                        modStatus, workspace);
+                    if (nodeBin != null) {
+                        nodeBin.setProperty( Acm.ACM_NAME, acmName );
+                        owner = nodeBin;
+                    }
+                    else {
+                        foundOwnerElement = false;
+                        owner = ownerNode;
+                    }
+                    updateTransactionableWsStateImpl(nodeBin, ownerName, modStatus, false);
                 }
-                
-                ModStatus modStatus = new ModStatus();
-                EmsScriptNode nodeBin = projectNode.createSysmlNode(ownerName, type,
-                                                                    modStatus, workspace);
-                if (nodeBin != null) {
-                    nodeBin.setProperty( Acm.ACM_NAME, acmName );
-                    owner = nodeBin;
-                }
-                else {
-                    foundOwnerElement = false;
-                    owner = projectNode;
-                }
-                updateTransactionableWsState(nodeBin, ownerName, modStatus, false);
                 
             }
-            // really want to add pkg as owner
+            // really want to add pkg as owner.  Currently we do not delete reified pkgs,
+            // so dont need to check for deleted nodes.
             reifiedPkg = findScriptNodeById(ownerName + "_pkg", workspace, null, false);
             if (reifiedPkg == null || !reifiedPkg.exists()) {
                 if ( createOwnerPkgIfNotFound) {
@@ -1441,7 +1482,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 nodeToUpdate.setWorkspace( workspace, oldNode.getNodeRef() );
             }
         }
-
+        
         if ( nodeToUpdate == null || !nodeToUpdate.exists() ) {// && newElements.contains( id ) ) {
             if ( type == null || type.trim().isEmpty() ) {
                 if (Debug.isOn()) System.out.println( "PREFIX: type not found for " + jsonType );
@@ -1474,9 +1515,28 @@ public class ModelPost extends AbstractJavaWebScript {
                 if (nodeToUpdate != null && nodeToUpdate.exists() ) {
                     if ( Debug.isOn() ) Debug.outln("moving node <<<" + nodeToUpdate + ">>>");
                     if ( Debug.isOn() ) Debug.outln("to parent <<<" + parent + ">>>");
-                        if ( nodeToUpdate.move(parent) ) {
-                            modStatus.setState( ModStatus.State.MOVED  );
+                    
+                    if ( nodeToUpdate.move(parent) ) {
+                        modStatus.setState( ModStatus.State.MOVED  );
+                    }
+                    
+                    // TODO pull this out
+                    // Resurrect any parent nodes if needed:
+                    EmsScriptNode nodeParent = nodeToUpdate.getParent();
+                    EmsScriptNode reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true) : null;
+                    while (nodeParent != null  && nodeParent.scriptNodeExists()) {
+                        if (nodeParent.isDeleted()) {
+                            resurrectParent(nodeParent, ingest);
                         }
+                        if (reifiedNodeParent != null && reifiedNodeParent.isDeleted()) {
+                            resurrectParent(reifiedNodeParent, ingest);
+                        }
+                        if (nodeParent.isWorkspaceTop()) {
+                            break;
+                        }
+                        nodeParent = nodeParent.getParent();
+                        reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true) : null;
+                    }
                         
                     // If it has a Product aspect, but want to remove that aspect
                     // ie downgrading to a View or Element
@@ -1587,6 +1647,8 @@ public class ModelPost extends AbstractJavaWebScript {
                                                            WorkspaceNode workspace,
                                                            boolean useParent ) {
         EmsScriptNode reifiedPkgNode = null;
+        EmsScriptNode reifiedPkgNodeAll = null;
+
         if ( node == null || !node.exists() ) {
             log( LogLevel.ERROR,
                  "Trying to create reified node for missing node! id = " + id );
@@ -1620,10 +1682,13 @@ public class ModelPost extends AbstractJavaWebScript {
 
         if (checkPermissions(parent, PermissionService.WRITE)) {
             String pkgName = id + "_pkg";
-            reifiedPkgNode = findScriptNodeByIdForWorkspace( pkgName, workspace, null, true );
+            reifiedPkgNodeAll = findScriptNodeById( pkgName, workspace, null, true );
+            reifiedPkgNode = (reifiedPkgNodeAll != null && NodeUtil.workspacesEqual(reifiedPkgNodeAll.getWorkspace(),workspace)) ? 
+                                                                                                         reifiedPkgNodeAll : null;
             if (reifiedPkgNode == null || !reifiedPkgNode.exists()) {
                 try {
-                    reifiedPkgNode = parent.createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER);
+                    reifiedPkgNode = parent.createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER,
+                                                         reifiedPkgNodeAll != null ? reifiedPkgNodeAll.getNodeRef() : null);
                 } catch ( Throwable e ) {
                     log( LogLevel.ERROR,
                          "\t failed to create reified node " + pkgName
