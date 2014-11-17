@@ -577,7 +577,7 @@ create_curl_cmd(type="GET",data="elements/123456?recurse=true",base_url=BASE_URL
                 branch="master/"),
 True, 
 common_filters,
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop"]
 ],
         
 [
