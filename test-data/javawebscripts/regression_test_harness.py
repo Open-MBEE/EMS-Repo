@@ -16,6 +16,7 @@ import subprocess
 import sys
 import optparse
 import glob
+import json
 
 CURL_STATUS = '-w "\\n%{http_code}\\n"'
 CURL_POST_FLAGS_NO_DATA = "-X POST"
@@ -40,9 +41,64 @@ test_dir_path = "test-data/javawebscripts"
 test_nums = []
 test_names = []
 create_baselines = False
-common_filters = ['"read"','"lastModified"','"modified"']
+common_filters = ['"created"','"read"','"lastModified"','"modified"']
 cmd_git_branch = None
 
+# Some global variables for lambda functions in tests
+gv1 = None
+gv2 = None
+gv3 = None
+gv4 = None
+# These capture the curl output for any teardown functions
+orig_output = None
+filtered_output = None
+orig_json = None
+filtered_json = None
+
+def set_gv1( v ):
+    global gv1
+    gv1 = v
+def set_gv2( v ):
+    global gv2
+    gv2 = v
+def set_gv3( v ):
+    global gv3
+    gv3 = v
+def set_gv4( v ):
+    global gv4
+    gv4 = v
+
+import re
+
+def do20():
+    ''' Gets the "modified" date out of the json output and sets gv1 to it.'''
+    modDate = None
+    json_output = ""
+    #print 'orig_output=' + str(orig_output)
+    if orig_output != None and len(str(orig_output)) > 5:
+        # find the status code at the end of the string and remove it
+        # comput i as the index to the start of the status code
+        # walk backwards over whitespace 
+        i=len(orig_output)-1
+        while i >= 0:
+            if not (orig_output[i] in [' ', '\n', '\t' ]):
+                break
+            i = i - 1
+        # walk backwards over digits
+        while i >= 0:
+            if not (orig_output[i] >= '0' and orig_output[i] <= '9'):
+                break
+            i = i - 1
+        # set json_output to orig_output without the ststus code
+        if i > 0:
+            json_output = orig_output[0:i]
+#         json_output = re.sub(r'^[2][0-9][0-9]', r'', orig_output, 1)
+#         #json_output = re.sub("^$", "", json_output)
+        #print 'json_output=' + str(json_output)
+        j = json.loads(json_output)
+        #print "j=" + str(j)
+        modDate = j['workspace2']['updatedElements'][0]['modified']
+    set_gv1(modDate)
 
 def create_command_line_options():
 
@@ -225,7 +281,7 @@ def mbee_util_jar_path():
         return path+"0.0.16/mbee_util-0.0.16.jar"
 
 def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False, filters=None,
-                  delay=None):
+                  setupFcn=None, teardownFcn=None, delay=None):
     '''
     Runs the curl test and diffs against the baseline if create_baselines is false, otherwise
     runs the curl command and creates the baseline .json file. 
@@ -238,11 +294,21 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
     filters: A list of strings that should be removed from the post output, ie ['"modified"']
     delay: Delay time in seconds before running the test
     '''
+    
+    global orig_output
+    global filtered_output
+    global orig_json
+    global filtered_json
+    global gv1, gv2, gv3, gv4
 
     result_json = "%s/test%d.json"%(result_dir,test_num)
     result_orig_json = "%s/test%d_orig.json"%(result_dir,test_num)
     baseline_json = "%s/test%d.json"%(baseline_dir,test_num)
     baseline_orig_json = "%s/test%d_orig.json"%(baseline_dir,test_num)
+#     result_json = "%s/test%d.json"%(result_dir,test_name)
+#     result_orig_json = "%s/test%d_orig.json"%(result_dir,test_name)
+#     baseline_json = "%s/test%d.json"%(baseline_dir,test_name)
+#     baseline_orig_json = "%s/test%d_orig.json"%(baseline_dir,test_name)
 
     thick_divider()
     if create_baselines:
@@ -259,6 +325,17 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
         time.sleep(delay)
         
     print "TEST DESCRIPTION: "+test_desc
+    
+    if setupFcn:
+        print "calling setup function"
+        setupFcn()
+
+    #replace gv variable references in curl command
+    curl_cmd = str(curl_cmd).replace("$gv1", str(gv1))
+    curl_cmd = str(curl_cmd).replace("$gv2", str(gv2))
+    curl_cmd = str(curl_cmd).replace("$gv3", str(gv3))
+    curl_cmd = str(curl_cmd).replace("$gv4", str(gv4))
+
     print "Executing curl cmd: \n"+str(curl_cmd)
     
     (status,output) = commands.getstatusoutput(curl_cmd+"> "+orig_json)
@@ -268,6 +345,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
         file_orig = open(orig_json, "r")
         
         # Apply filters to output of curl cmd (not using output b/c getstatusoutput pipes stderr to stdout):
+        orig_output = ""
         filter_output = ""
         if filters:
             for line in file_orig:
@@ -281,14 +359,23 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
                 # Add line if it does not contain the filter:
                 if not filterFnd:
                     filter_output += (line+"\n")
+                    
+                # Always add lines to orig_output
+                orig_output += (line+"\n")
         else:
-            filter_output = file_orig.read()
+            stuffRead = file_orig.read()
+            filter_output = stuffRead
+            orig_output = stuffRead
         
         # Write to result .json file:
         file = open(filtered_json, "w")
         file.write(filter_output)
         file.close()
         file_orig.close()
+     
+        if teardownFcn:
+            print "calling teardown function"
+            teardownFcn()
         
         if create_baselines:
             
@@ -305,9 +392,9 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
             (status_diff,output_diff) = commands.getstatusoutput("%s %s %s"%(diff_cmd,baseline_json,result_json))
 
             if output_diff:
-                print_error("Test number %s failed!  Diff returned bad status or diffs found in the filtered .json files (%s,%s), status: %s, output: '%s'"%(test_num,baseline_json,result_json,status_diff, output_diff))
+                print_error("Test number %s (%s) failed!  Diff returned bad status or diffs found in the filtered .json files (%s,%s), status: %s, output: '%s'"%(test_num,test_name,baseline_json,result_json,status_diff, output_diff))
             else:
-                print_pass("Test number %s passed!  No differences in the filtered .json files (%s,%s)"%(test_num,baseline_json,result_json))
+                print_pass("Test number %s (%s) passed!  No differences in the filtered .json files (%s,%s)"%(test_num,test_name,baseline_json,result_json))
 
     else:
         print_error("Curl command return a bad status and output doesnt start with json: %s, output: '%s'"%(status,output))
@@ -322,7 +409,9 @@ def run_test(test):
     run_curl_test(test_num=test[0],test_name=test[1],
                   test_desc=test[2],curl_cmd=test[3],
                   use_json_diff=test[4],filters=test[5],
-                  delay=test[7] if (len(test) > 7) else None)
+                  setupFcn=test[7] if (len(test) > 7) else None,
+                  teardownFcn=test[8] if (len(test) > 8) else None,
+                  delay=test[9] if (len(test) > 9) else None)
     
     
 def create_curl_cmd(type, data="", base_url=BASE_URL_WS, post_type="elements", branch="master/", 
@@ -546,6 +635,8 @@ create_curl_cmd(type="GET",data="element/search?keyword=some*",base_url=BASE_URL
 True, 
 common_filters,
 ["test","workspaces","develop"],
+None,
+None,
 80
 ],
 
@@ -625,7 +716,7 @@ common_filters+['"branched"','"created"','"id"','"qualifiedId"','"parent"'],
 ],
         
 [
-18, 
+18,
 "GetWorkspaces",
 "Get workspaces",
 create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,branch=""),
@@ -653,13 +744,51 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff?workspace1=wsA&workspace2=wsB"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
+["test","workspaces","develop"],
+None,
+do20 # lambda : set_gv1(json.loads(orig_json)['workspace2']['updatedElements'][0]['modified'] if (orig_json != None and len(str(orig_json)) > 0) else None)
+],
+
+# This test case depends on the previous one and uses gv1 set by the previous test
+[
+21,
+"CreateWorkspaceWithBranchTime",
+"Create workspace with a branch time",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                post_type="",branch="wsT?sourceWorkspace=wsA&copyTime=$gv1"),
+True, 
+common_filters+['"branched"','"created"','"id"','"qualifiedId"', '"parent"'],
+["test","workspaces","develop"],
+],
+
+# This test case depends on the previous one
+[
+22,
+"PostToWorkspaceWithBranchTime",
+"Post element to workspace with a branch time",
+create_curl_cmd(type="POST",data="y.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="wsT/"),
+True, 
+common_filters,
+["test","workspaces","develop"]
+],
+
+# This test case depends on the previous two
+[
+23,
+"CompareWorkspacesWithBranchTime",
+"Compare workspaces",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff?workspace1=wsA&workspace2=wsT"),
+True, 
+common_filters+['"id"','"qualifiedId"'],
 ["test","workspaces","develop"]
 ],
 
 # SNAPSHOTS: ==========================    
 
 [
-21,
+24,
 "PostSnapshot",
 "Post snapshot test",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -674,20 +803,20 @@ common_filters+['"created"','"id"','"url"'],
 
 # Note: currently not an equivalent in workspaces for this URL, but we may add it
 [
-22,
+25,
 "SolveConstraint",
 "Post expressions with a constraint and solves for the constraint.",
 create_curl_cmd(type="POST",base_url=BASE_URL_JW,
                 data="expressionElementsNew.json",
                 branch="sites/europa/projects/123456/",
                 post_type="elements?fix=true"),
-True, 
+True,
 common_filters+['"specification"'],
 ["test","workspaces","develop"]
 ],
-        
+
 [
-23,
+26,
 "PostDemo1",
 "Post data for demo 1 of server side docgen",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -700,7 +829,7 @@ common_filters+['"sysmlid"','"qualifiedId"','"message"'],
 ],
         
 [
-24,
+27,
 "Demo1",
 "Server side docgen demo 1",
 create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148311476_17302_29388/elements",base_url=BASE_URL_WS,
@@ -712,7 +841,7 @@ common_filters,
  
 # TODO: not running test 25/26 for now b/c of issues when running it with 23/24       
 [
-25,
+28,
 "PostDemo2",
 "Post data for demo 2 of server side docgen",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -725,7 +854,7 @@ common_filters,
 ],
         
 [
-26,
+29,
 "Demo2",
 "Server side docgen demo 2",
 create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148233838_91795_29332/elements",base_url=BASE_URL_WS,
@@ -738,7 +867,7 @@ common_filters,
 # NEW URLS: ==========================    
 
 [
-27,
+30,
 "GetSites",
 "Get all the sites for a workspace",
 create_curl_cmd(type="GET",data="sites",base_url=BASE_URL_WS,
@@ -747,9 +876,9 @@ False,
 None,
 ["test","workspaces","develop"]
 ],
-     
+
 [
-28,
+31,
 "GetProductViews",
 "Get all views for a product",
 create_curl_cmd(type="GET",data="products/301/views",base_url=BASE_URL_WS,
@@ -762,7 +891,7 @@ common_filters,
 # Getting the view elements tested in GetViewElements
 
 [
-29,
+32,
 "PostElementX",
 "Post element to the master branch/site",
 create_curl_cmd(type="POST",data="x.json",base_url=BASE_URL_WS,
@@ -775,7 +904,7 @@ common_filters,
 # Posting a new project/site tested in PostSite
 
 [
-30,
+33,
 "UpdateProject",
 "Update a project",
 create_curl_cmd(type="POST",data='\'{"elements":[{"sysmlid":"123456","name":"JW_TEST2","specialization":{"type":"Project","projectVersion":"1"}}]}\'',
@@ -789,7 +918,7 @@ None,
 # Get project w/ site included tested in GetProject
 
 [
-31,
+34,
 "GetProjectOnly",
 "Get project w/o specifying the site",
 create_curl_cmd(type="GET",data="projects/123456",base_url=BASE_URL_WS,
@@ -802,7 +931,7 @@ None,
 # ARTIFACTS: ==========================    
 
 [
-32,
+35,
 "PostArtifact",
 "Post artifact to the master branch",
 'curl %s %s -H "Content-Type: multipart/form-data;" --form "file=@JsonData/x.json" --form "title=JsonData/x.json" --form "desc=stuffs" --form "content=@JsonData/x.json" %smaster/sites/europa/artifacts/folder1/folder2/xartifact'%(CURL_FLAGS, CURL_POST_FLAGS_NO_DATA, BASE_URL_WS),
@@ -812,7 +941,7 @@ None,
 ],
         
 [
-33,
+36,
 "GetArtifact",
 "Get artifact from the master branch",
 create_curl_cmd(type="GET",data="artifacts/xartifact?extension=svg&cs=3463563326",base_url=BASE_URL_WS,
@@ -821,11 +950,77 @@ False,
 ['"url"'],
 ["test","workspaces","develop"]
 ],
-                   
+                                   
+[
+37,
+"CreateWorkspaceDelete1",
+"Create workspace to be deleted",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                post_type="",branch="AA?sourceWorkspace=master"),
+True,
+common_filters + ['"parent"','"id"','"qualifiedId"'],
+["develop"]
+],
+
+[
+38,
+"CreateWorkspaceDelete2",
+"Create workspace to be deleted",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                post_type="",branch="BB?sourceWorkspace=AA"),
+True,
+common_filters + ['"parent"','"id"','"qualifiedId"'],
+["develop"]
+],
+
+[
+39,
+"DeleteWorkspace",
+"Delete workspace and its children",
+create_curl_cmd(type="DELETE",base_url=BASE_URL_WS,
+                post_type="",branch="AA"),
+True,
+common_filters + ['"parent"','"id"','"qualifiedId"'],
+["develop"]
+],
+
+[
+40,
+"CheckDeleted1",
+"Make sure that AA and its children no longer show up in workspaces",
+create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,
+                post_type="", branch=""),
+True,
+common_filters + ['"parent"','"id"','"qualifiedId"'],
+["develop"]
+],
+
+[
+41,
+"CheckDeleted2",
+"Make sure that AA and its children show up in deleted",
+create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,
+                post_type="", branch="?deleted"),
+True,
+common_filters + ['"parent"','"id"','"qualifiedId"'],
+["develop"]
+],
+
+## TODO: placeholder to put in post to get back workspace A (need the ID from 38)
+[
+42,
+"UnDeleteWorkspace",
+"Undelete workspace",
+'echo',
+False,
+None,
+["develop"]
+],
+
 # SITE PACKAGES: ==========================    
 
 [
-34,
+43,
 "PostSitePackage",
 "Create a site package",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
@@ -838,7 +1033,7 @@ common_filters,
 ],
         
 [
-35,
+44,
 "PostElementSitePackage",
 "Post a element to a site package",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,

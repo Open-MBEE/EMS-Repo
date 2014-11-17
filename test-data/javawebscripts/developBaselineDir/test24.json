@@ -1,7 +1,8 @@
-{"elements": [{
+{
 
     "creator": "admin",
 
+<<<<<<< HEAD
     "documentation": "",
 
     "editable": true,
@@ -23,6 +24,9 @@
     "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478"
 
 }]}
+=======
+}
+>>>>>>> refs/remotes/origin/develop
 
 200
 

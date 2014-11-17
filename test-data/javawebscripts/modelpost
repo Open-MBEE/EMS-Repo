@@ -1,39 +1,12 @@
 #!/bin/bash
 
-usage() {
-  echo
-  echo "usage: modelpost [<workspace id or name>] <element json file name>";
-  echo ;
-  echo "Set the ALF_SERVER environment variable to the name of the host running Alfresco.  The default is localhost.  If running without setting ALF_SECURE, the \":8080\" is added to the end of the hostname in the URL.";
-  echo "Set the ALF_SECURE environment variable to a non-empty value for ssh authentication to Alfresco";
-  echo
-}
+if [ "$#" -eq 1 ]; then     # the json file is imported into the project
 
-if [ -n "$ALF_SECURE" ]; then
-  . secureCurlParams
-else
-  . localCurlParams
-fi
+echo  curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data @JsonData/$1 "http://localhost:8080/alfresco/service/workspaces/master/elements"
+curl -w "\n%{http_code}\n" -u admin:admin -X POST -H "Content-Type:application/json" --data @JsonData/$1 "http://localhost:8080/alfresco/service/workspaces/master/elements"
 
-if [ "$#" -eq 0 ]; then
-  echo "${0}: Error: No arguments!  Expected 1 or 2 arguments.";
-  usage
-  exit 1
-fi
+else      # 
 
-if [[ "$#" -gt 2 ]]; then
-  echo "${0}: Warning: Extra arguments!  Only using the first two, \"$1\" \"$2\".";
-  usage
-  exit 1
-fi
-
-if [ "$#" -eq 1 ]; then
-  echo curl $CURL_FLAGS $CURL_POST_FLAGS @$1 ${BASE_URL}elements
-  curl $CURL_FLAGS $CURL_POST_FLAGS @$1 ${BASE_URL}elements
-  #echo curl -w "%{http_code}\n" -X POST -u admin:admin -H "Content-Type:application/json" --data @$1 "http://localhost:8080/alfresco/service/workspaces/master/elements"
-  #curl -w "%{http_code}\n" -X POST -u admin:admin -H "Content-Type:application/json" --data @$1 "http://localhost:8080/alfresco/service/workspaces/master/elements"
-else
-  echo curl -w "%{http_code}\n" -X POST -u admin:admin -H "Content-Type:application/json" --data @$2 "http://localhost:8080/alfresco/service/workspaces/$1/elements"
-  curl -w "%{http_code}\n" -X POST -u admin:admin -H "Content-Type:application/json" --data @$2 "http://localhost:8080/alfresco/service/workspaces/$1/elements"
+echo curl -w %{http_code}\n -X POST -u admin:admin -H Content-Type:application/json --data @JsonData/$2 http://localhost:8080/alfresco/service/workspaces/$1/elements
+curl -w %{http_code}\n -X POST -u admin:admin -H Content-Type:application/json --data @JsonData/$2 http://localhost:8080/alfresco/service/workspaces/$1/elements
 fi;
-

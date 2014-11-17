@@ -129,7 +129,7 @@ public class ModelSearch extends ModelGet {
             for (Entry< String, EmsScriptNode > element: rawResults.entrySet()) {
                 NodeRef nodeRef = NodeUtil.findNodeRefById( element.getKey(), false, workspace, dateTime, services, true );
                 if ( nodeRef.equals( element.getValue().getNodeRef() ) ) {
-                    if (!element.getValue().getName().endsWith( "_pkg" )) {
+                    if (!element.getValue().getSysmlId().endsWith( "_pkg" )) {
                         elementsFound.put( element.getKey(), element.getValue() );
                     }
                 }

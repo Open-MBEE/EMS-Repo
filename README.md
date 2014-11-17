@@ -109,6 +109,10 @@ Eclipse/Maven
     to the build path by adding the projects to build path.  Make sure that in Order and Export tab, that they are
     above the Maven Dependencies.
     
+    ----- If Eclipse closes when trying to commit with a response like:
+    cairo-misc.c:380: _cairo_operator_bounded_by_source: Assertion `NOT_REACHED' failed."
+    try adding:    adding "-Dorg.eclipse.swt.internal.gtk.cairoGraphics=false" to eclipse.ini.
+    
 # building, setting up maven, jrebel
 Make sure to install both the JRebel plug-in for Eclipse and download the Jrebel .jar and store it somewhere like "/Applications/jrebel".  
 The path to the jrebel.jar will be used by mvn via the MAVEN_OPTS environment variable.
@@ -232,6 +236,9 @@ This should speed up the rebuild significantly.
      cd ~/git/alfresco-view-repo
      mv target /mnt/ramdisk
      ln -s /mnt/ramdisk/target .
+
+For an mvn purge on the ramdisk, running this command may be helpful:
+     mvn clean -Ppurge; mkdir /mnt/ramdisk/target; mkdir /mnt/ramdisk/alf_data; ./runserver.sh
 
 THE FOLLOWING DOESN'T WORK: To attempt to turn off indexing (maybe because it slows down junit test runs), change VALIDATE to NONE for index.recovery.mode in
  

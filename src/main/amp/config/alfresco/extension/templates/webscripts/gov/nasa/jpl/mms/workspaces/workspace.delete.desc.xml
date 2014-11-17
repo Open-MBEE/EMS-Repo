@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<webscript>
+    <shortname>delete workspace</shortname>
+    <description>
+    delete workspace
+    </description>
+    <url>/workspaces/{workspaceId}</url>
+    <format default="json">argument</format>
+    <authentication>user</authentication>
+    <transaction allow="readwrite">required</transaction>
+    <family>MMS REST API</family>
+</webscript>

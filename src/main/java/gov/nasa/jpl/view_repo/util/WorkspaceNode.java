@@ -113,6 +113,11 @@ public class WorkspaceNode extends EmsScriptNode {
         Debug.error( msg );
     }
 
+    public Date getCopyTime() {
+        Date time = (Date)getProperty("ems:copyTime");
+        return time;
+    }
+    
 //    /**
 //     * Create a workspace folder within the specified folder or (if the folder
 //     * is null) within the specified user's home folder.
@@ -195,6 +200,7 @@ public class WorkspaceNode extends EmsScriptNode {
     public static WorkspaceNode createWorkspaceFromSource( String wsName,
                                                            String userName,
                                                            String sourceNameOrId,
+                                                           Date copyTime,
                                                            EmsScriptNode folder,
                                                            ServiceRegistry services,
                                                            StringBuffer response,
@@ -252,6 +258,9 @@ public class WorkspaceNode extends EmsScriptNode {
     	ws.addAspect( "ems:Workspace" );
         ws.setProperty("ems:workspace_name", wsName );
     	ws.createOrUpdateProperty( "ems:lastTimeSyncParent", new Date() );
+    	if ( copyTime != null ) {
+    	    ws.createOrUpdateProperty( "ems:copyTime", copyTime );
+    	}
     	if ( Debug.isOn() ) Debug.outln( "parent workspace: " + parentWorkspace );
     	if(parentWorkspace != null) {
     		parentWorkspace.appendToPropertyNodeRefs( "ems:children", ws.getNodeRef() );
@@ -276,25 +285,25 @@ public class WorkspaceNode extends EmsScriptNode {
         // Update parent/child workspace references
         
         // Remove this workspace from parent's children
-        WorkspaceNode source = getParentWorkspace();
-        if ( Debug.isOn() ) Debug.outln( "deleted workspace " + this + " from source " + getName(source) );
-        if ( source == null || !source.exists() ) {
-            // TODO -- do we keep the master's children anywhere?
-            if ( !source.exists() ) {
-                log( "no write permissions to remove reference to child workpsace, " + getName() + ", from parent, " + getName(source) );
-            }
-        } else {
-            if ( !source.checkPermissions( PermissionService.WRITE, getResponse(), getStatus() ) ) {
-                String msg = "Warning! No write permissions to delete workpsace " + getName() + ".\n";
-                getResponse().append( msg );
-                log( msg );
-//                if ( getStatus() != null ) {
-//                    getStatus().setCode( HttpServletResponse.SC_, msg );
-//                }
-            } else {
-                source.removeFromPropertyNodeRefs( "ems:children", getNodeRef() );
-            }
-        }
+//        WorkspaceNode source = getParentWorkspace();
+//        if ( Debug.isOn() ) Debug.outln( "deleted workspace " + this + " from source " + getName(source) );
+//        if ( source == null || !source.exists() ) {
+//            // TODO -- do we keep the master's children anywhere?
+//            if ( !source.exists() ) {
+//                log( "no write permissions to remove reference to child workpsace, " + getName() + ", from parent, " + getName(source) );
+//            }
+//        } else {
+//            if ( !source.checkPermissions( PermissionService.WRITE, getResponse(), getStatus() ) ) {
+//                String msg = "Warning! No write permissions to delete workpsace " + getName() + ".\n";
+//                getResponse().append( msg );
+//                log( msg );
+////                if ( getStatus() != null ) {
+////                    getStatus().setCode( HttpServletResponse.SC_, msg );
+////                }
+//            } else {
+//                source.removeFromPropertyNodeRefs( "ems:children", getNodeRef() );
+//            }
+//        }
         
         // Not bothering to remove this workspace's ems:parent or ems:children
 
@@ -712,14 +721,20 @@ public class WorkspaceNode extends EmsScriptNode {
         // expected to change?
         json.put( "created", TimeUtils.toTimestamp( (Date)getProperty("cm:created") ) );
         json.put( "modified", TimeUtils.toTimestamp( (Date)getProperty("cm:modified") ) );
+        Date copyTime = getCopyTime();
+        if ( copyTime != null ) {
+            json.put( "branched", TimeUtils.toTimestamp( copyTime ) );
+        }
         json.put( "parent", getId(getParentWorkspace())); // this handles null as master
 
         // REVIEW -- Why is ems:lastTimeSyncParent called the "branched"
         // date? Shouldn't the branched date always be the same as the created
         // date? This is for future functionality when we track when the child pulls from the
         // parent last.
-        json.put( "branched", TimeUtils.toTimestamp( (Date)getProperty("ems:lastTimeSyncParent") ) );
-
+//        Date lastTimeSyncParent = (Date)getProperty("ems:lastTimeSyncParent");
+//        if ( lastTimeSyncParent != null ) {
+//            json.put( "branched", TimeUtils.toTimestamp( lastTimeSyncParent ) );
+//        }
         return json;
     }
 
@@ -801,8 +816,8 @@ public class WorkspaceNode extends EmsScriptNode {
         if ( ref != null ) {
             WorkspaceNode workspace = new WorkspaceNode( ref, services, response,
                                                          responseStatus );
-            if ( workspace.exists() && workspace.hasAspect( "ems:Workspace" ) ) {
-                // TODO -- check read permissions
+            // workspace exists should have been checked already
+            if ( workspace.hasAspect( "ems:Workspace" ) ) {
                 if ( workspace.checkPermissions( PermissionService.READ ) ) {
                     if ( Debug.isOn() ) Debug.outln( "workspace exists: " + workspace );
                     return workspace;
@@ -830,8 +845,8 @@ public class WorkspaceNode extends EmsScriptNode {
         }
         WorkspaceNode workspace = null;
     
-        // Tyr to match the alfresco id
-        NodeRef ref = NodeUtil.findNodeRefByAlfrescoId( nameOrId );
+        // Try to match the alfresco id
+        NodeRef ref = NodeUtil.findNodeRefByAlfrescoId( nameOrId, true );
         if ( ref != null ) {
             workspace = existingReadableWorkspaceFromNodeRef( ref, services,
                                                               response,

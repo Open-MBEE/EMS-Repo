@@ -1,83 +1,190 @@
 {
 
-    "elements": [
+    "workspace1": {
 
-        {
+        "elements": [
 
-            "creator": "admin",
+            {
 
-            "documentation": "",
+                "creator": "admin",
 
-            "editable": true,
+                "documentation": "something",
 
-            "name": "",
+                "editable": true,
 
+<<<<<<< HEAD
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+=======
+                "name": "300",
 
-            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+                "owner": "123456",
 
-            "specialization": {
+                "qualifiedName": "/JW_TEST/300",
 
-                "operand": [
+                "specialization": {
 
-                    {
+                    "isDerived": false,
 
-                        "element": "op_list",
+                    "isSlot": false,
 
-                        "type": "ElementValue"
+                    "type": "Property",
 
-                    },
+                    "value": [{
 
-                    {
+                        "string": "dlam_string",
 
-                        "operand": [
+                        "type": "LiteralString"
 
-                            {
+                    }]
 
-                                "element": "op_map",
+                },
 
-                                "type": "ElementValue"
-
-                            },
-
-                            {
-
-                                "element": "exposed_id",
-
-                                "type": "ElementValue"
-
-                            },
-
-                            {
-
-                                "element": "op_name_arg",
-
-                                "type": "ElementValue"
-
-                            }
-
-                        ],
-
-                        "type": "Expression"
-
-                    }
-
-                ],
-
-                "type": "Expression"
+                "sysmlid": "300"
 
             },
 
-        },
+            {
 
-        {
+                "creator": "admin",
+
+                "documentation": "else",
+
+                "editable": true,
+
+                "name": "301",
+
+                "owner": "300",
+
+                "qualifiedName": "/JW_TEST/300/301",
+
+                "specialization": {
+
+                    "allowedElements": [
+
+                        "301",
+
+                        "302",
+
+                        "303"
+
+                    ],
+
+                    "childrenViews": ["304"],
+
+                    "contains": [{
+
+                        "source": "301",
+
+                        "sourceProperty": "documentation",
+
+                        "sourceType": "reference",
+
+                        "type": "Paragraph"
+
+                    }],
+
+                    "displayedElements": [
+
+                        "301",
+
+                        "302",
+
+                        "303"
+
+                    ],
+
+                    "isDerived": false,
+
+                    "isSlot": false,
+
+                    "noSections": ["302"],
+
+                    "type": "Product",
+
+                    "value": [{
+
+                        "string": "dlam_string",
+
+                        "type": "LiteralString"
+
+                    }],
+
+                    "view2view": [{
+>>>>>>> refs/remotes/origin/develop
+
+                        "childrenViews": [
+
+                            "301",
+
+                            "302"
+
+                        ],
+
+                        "sysmlid": "301"
+
+                    }]
+
+                },
+
+                "sysmlid": "301"
+
+            },
+
+            {
+
+                "creator": "admin",
+
+                "documentation": "to",
+
+                "editable": true,
+
+                "name": "302",
+
+                "owner": "301",
+
+                "qualifiedName": "/JW_TEST/300/301/302",
+
+                "specialization": {
+
+                    "isDerived": false,
+
+                    "isSlot": false,
+
+                    "type": "Property",
+
+                    "value": [{
+
+                        "string": "dlam_string",
+
+                        "type": "LiteralString"
+
+                    }]
+
+                },
+
+                "sysmlid": "302"
+
+            }
+
+        ],
+
+        "name": "wsA",
+
+        "qualifiedName": "master/wsA"
+
+    },
+
+    "workspace2": {
+
+        "addedElements": [{
 
             "creator": "admin",
 
-            "documentation": "",
+            "documentation": "y is y",
 
             "editable": true,
 
+<<<<<<< HEAD
             "name": "exposed",
 
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
@@ -199,37 +306,55 @@
             "editable": true,
 
             "name": "viewpoint_op",
+=======
+            "owner": "302",
+>>>>>>> refs/remotes/origin/develop
 
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-
-            "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/viewpoint_op",
+            "qualifiedName": "/JW_TEST/300/301/302/null",
 
             "specialization": {
 
-                "expression": "vp_expression",
+                "isDerived": false,
 
-                "parameters": ["exposed_id"],
+                "isSlot": false,
 
-                "type": "Operation"
+                "type": "Property",
+
+                "value": [{
+
+                    "string": "the y value",
+
+                    "type": "LiteralString"
+
+                }]
 
             },
 
-        },
+            "sysmlid": "y"
 
-        {
+        }],
 
-            "creator": "admin",
+        "conflictedElements": [],
 
-            "documentation": "",
+        "deletedElements": [],
 
-            "editable": true,
+        "movedElements": [],
 
+<<<<<<< HEAD
             "name": "",
+=======
+        "name": "wsT",
+>>>>>>> refs/remotes/origin/develop
 
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "qualifiedName": "master/wsA/wsT",
 
+<<<<<<< HEAD
             "qualifiedName": "/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+=======
+        "updatedElements": []
+>>>>>>> refs/remotes/origin/develop
 
+<<<<<<< HEAD
             "specialization": {
 
                 "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
@@ -329,6 +454,9 @@
         }
 
     ],
+=======
+    }
+>>>>>>> refs/remotes/origin/develop
 
 }
 

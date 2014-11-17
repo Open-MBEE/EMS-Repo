@@ -62,6 +62,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -451,42 +452,50 @@ public class ModelPost extends AbstractJavaWebScript {
        		boolean foundOwnerElement = true;
             owner = findScriptNodeById(ownerName, workspace, null, false);
             if (owner == null || !owner.exists()) {
-               
-                // FIXME: HERE! ATTENTION BRAD!  add to elements, so it is returned, and remind Doris
-                //        to fix her code also.
-                // If creating a holding bin, then need to create a node for it also for
-                // magic draw sync.
-                if (createdHoldingBin) {
-                    ModStatus modStatus = new ModStatus();
-                    EmsScriptNode sitePackageReifPkg = null;
-                                        
-                    // Get or create the reified package for the site package if needed:
-                    if (sitePackageNode != null) {
-                         sitePackageReifPkg = getOrCreateReifiedPackageNode(sitePackageNode, sitePackageNode.getSysmlId(), 
-                                                                            workspace, true);
-                    }
-                    
-                    EmsScriptNode nodeBinOwner = sitePackageReifPkg != null ? sitePackageReifPkg : projectNode;
-                    EmsScriptNode nodeBin = nodeBinOwner.createSysmlNode(ownerName, Acm.ACM_PACKAGE,
-                                                                        modStatus, workspace);
-                    if (nodeBin != null) {
-                        nodeBin.setProperty( Acm.ACM_NAME, "holding_bin" );
-                        owner = nodeBin;
-                    }
-                    else {
-                        owner = nodeBinOwner;
-                    }
-                    updateTransactionableWsState(nodeBin, ownerName, modStatus, false);
-                }
-                else {
-                    owner = projectNode;  
-                }
-                foundOwnerElement = owner != projectNode;
-                
                 // FIXME: Need to respond with warning that owner couldn't be found?
                 log( LogLevel.WARNING, "Could not find owner with name: "
                                        + ownerName + " putting " + elementId
                                        + " into: " + owner);
+               
+                // FIXME: HERE! ATTENTION BRAD!  add to elements, so it is returned, and remind Doris
+                //        to fix her code also.
+                // Creating a reifiedNode here also, for magic draw sync to work with holding bin,
+                // and for ems:owner to be correct for the node this reifiedNode will own, and to get 
+                // the correct cm:name for the reifiedPackage as it is based on the reifiedNode cm:name.
+                String type;
+                String acmName;
+                if (createdHoldingBin) {
+                    type = Acm.ACM_PACKAGE;
+                    acmName = "holding_bin";
+                }
+                else {
+                    type = Acm.ACM_ELEMENT;
+                    acmName = ownerName;
+                }
+                
+                ModStatus modStatus = new ModStatus();
+                EmsScriptNode sitePackageReifPkg = null;
+                
+                // Get or create the reified package for the site package if needed:
+                if (sitePackageNode != null) {
+                     sitePackageReifPkg = getOrCreateReifiedPackageNode(sitePackageNode, sitePackageNode.getSysmlId(), 
+                                                                        workspace, true);
+                }
+                
+                EmsScriptNode nodeBinOwner = sitePackageReifPkg != null ? sitePackageReifPkg : projectNode;                             
+                EmsScriptNode nodeBin = nodeBinOwner.createSysmlNode(ownerName, type,
+                                                                     modStatus, workspace);
+           
+                if (nodeBin != null) {
+                    nodeBin.setProperty( Acm.ACM_NAME, acmName );
+                    owner = nodeBin;
+                }
+                else {
+                    foundOwnerElement = false;
+                    owner = projectNode;
+                }
+                updateTransactionableWsState(nodeBin, ownerName, modStatus, false);
+                
             }
             // really want to add pkg as owner
             reifiedPkg = findScriptNodeById(ownerName + "_pkg", workspace, null, false);
@@ -499,7 +508,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     // project folder, the actual folder in which to create the
                     // pkg, so pass false.
                     reifiedPkg = getOrCreateReifiedPackageNode(owner, ownerName, workspace,
-                                                        foundOwnerElement);
+                                                               foundOwnerElement);
                     
                 } else {
                     log( LogLevel.WARNING, "Could not find owner package: "
@@ -793,7 +802,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 // if owner is null, leave at project root level
                 if (ownerId == null || ownerId.equals("null")) {
                     if ( projectNode != null ) {
-                        ownerId = (String) projectNode.getProperty(Acm.ACM_ID);
+                        ownerId = projectNode.getSysmlId();
                     } else {
                         // If project is null, put it in NO_PROJECT.
 
@@ -917,7 +926,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			if (name == null) {
 				name = (String) parent.getProperty(Acm.CM_NAME);
 			}
-			String id = (String) parent.getProperty(Acm.ACM_ID);
+			String id = parent.getSysmlId();
 			if (id == null) {
 				id = "not sysml type";
 			}
@@ -1181,7 +1190,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 	if (iter != null && iter.hasNext()) {
                 		EmsScriptNode oldValNode = iter.next();
 
-              			nodeNames.add(oldValNode.getName());
+              			nodeNames.add(oldValNode.getSysmlId());
 
                         if ( workspace != null && workspace.exists()
                              && !workspace.equals( oldValNode.getWorkspace() ) ) {
@@ -1254,7 +1263,7 @@ public class ModelPost extends AbstractJavaWebScript {
 //                		ModStatus modStatus = new ModStatus();
 //                    EmsScriptNode newValNode = updateOrCreateTransactionableElement((JSONObject)newVal,nestedParent,
 //            																		null, workspace, ingest, true, modStatus );
-                		nodeNames.add(newValNode.getName());
+                		nodeNames.add(newValNode.getSysmlId());
 
                 		changed = true;
                 	}
@@ -1735,7 +1744,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     log( LogLevel.ERROR,
                          "\t failed to create reified node " + pkgName
                                  + " in parent, "
-                                 + parent.getProperty( Acm.CM_NAME ) + " = "
+                                 + parent.getSysmlId() + " = "
                                  + parent + " because of exception." );
                     throw e; // pass it up the chain to roll back transaction
                 }
@@ -1743,18 +1752,18 @@ public class ModelPost extends AbstractJavaWebScript {
                     log( LogLevel.ERROR,
                          "\t failed to create reified node " + pkgName
                                  + " in parent, "
-                                 + parent.getProperty( Acm.CM_NAME ) + " = "
+                                 + parent.getSysmlId() + " = "
                                  + parent );
                     return null;
                 } else {
                     reifiedPkgNode.setProperty(Acm.ACM_ID, pkgName);
-                    reifiedPkgNode.setProperty(Acm.CM_NAME, pkgName);
+               
                     if ( useParent ) {
                         reifiedPkgNode.setProperty(Acm.ACM_NAME, (String) node.getProperty(Acm.ACM_NAME));
                     } else {
                         reifiedPkgNode.setProperty( Acm.ACM_NAME, pkgName.replaceAll( "_pkg$", "" ) );
                     }
-                    log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getProperty(Acm.CM_NAME) + " : " + reifiedPkgNode.getNodeRef().toString());
+                    log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getSysmlId() + " : " + reifiedPkgNode.getNodeRef().toString());
                 }
             }
             if (checkPermissions(reifiedPkgNode, PermissionService.WRITE)) {
@@ -1768,6 +1777,11 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
 
                 if (node != null) {
+                    
+                    // We are now setting the cm:name to the alfresco id.  
+                    // Note: this must be set after getting the correct node above
+                    reifiedPkgNode.setProperty(Acm.CM_NAME, node.getName()+"_pkg");
+                    
                     // lets keep track of reification
                     node.createOrUpdateAspect( "ems:Reified" );
                     node.createOrUpdateProperty( "ems:reifiedPkg", reifiedPkgNode.getNodeRef() );
@@ -1981,7 +1995,7 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     private Set<String> getConstraintElementNames(EmsScriptNode constraintNode) {
 
-    	Set<String> names = new HashSet<String>();
+    	Set<String> names = new LinkedHashSet<String>();
 
     	if (constraintNode != null) {
 
@@ -2098,44 +2112,49 @@ public class ModelPost extends AbstractJavaWebScript {
             // Add all of the Parameter constraints:
             ClassData cd = getSystemModelAe().getClassData();
 
-            // Loop through all the listeners:
-            for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
-
-                // TODO: REVIEW
-                //       Can we get duplicate ParameterListeners in the aeClassses map?
-                constraints.addAll( listener.getConstraints( true, null ) );
-            }
-
-            // Solve!!!!
-            boolean result = false;
-            try {
-                Debug.turnOn();
-                Random.reset();
-                result = solver.solve(constraints);
-            } finally {
-                Debug.turnOff();
-            }
-            if (!result) {
-                log( LogLevel.ERROR, "Was not able to satisfy all of the constraints!" );
-            }
-            else {
-                log( LogLevel.INFO, "Satisfied all of the constraints!" );
-                
-                // Update the values of the nodes after solving the constraints:
-                EmsScriptNode node;
-                Parameter<Object> param;
-                Set<Entry<EmsScriptNode, Parameter<Object>>> entrySet = sysmlToAe.getExprParamMap().entrySet();
-                for (Entry<EmsScriptNode, Parameter<Object>> entry : entrySet) {
-                	
-                	node = entry.getKey();
-                	param = entry.getValue();
-                	systemModel.setValue(node, (Serializable)param.getValue());
-                }
-                
-                log( LogLevel.INFO, "Updated all node values to satisfy the constraints!" );
-                
-            }
-
+            //loop x times for now
+            for(int i=0; i<10; i++)
+            { 
+	            // Loop through all the listeners:
+	            for (ParameterListenerImpl listener : cd.getAeClasses().values()) {
+	
+	                // TODO: REVIEW
+	                //       Can we get duplicate ParameterListeners in the aeClassses map?
+	                constraints.addAll( listener.getConstraints( true, null ) );
+	            }
+	
+	            // Solve!!!!
+	            boolean result = false;
+	            try {
+	                Debug.turnOn();
+	                Random.reset();
+	                result = solver.solve(constraints);
+	                // loop to check thru all constraints
+	                
+	            } finally {
+	                Debug.turnOff();
+	            }
+	            if (!result) {
+	                log( LogLevel.ERROR, "Was not able to satisfy all of the constraints!" );
+	            }
+	            else {
+	                log( LogLevel.INFO, "Satisfied all of the constraints!" );
+	                
+	                // Update the values of the nodes after solving the constraints:
+	                EmsScriptNode node;
+	                Parameter<Object> param;
+	                Set<Entry<EmsScriptNode, Parameter<Object>>> entrySet = sysmlToAe.getExprParamMap().entrySet();
+	                for (Entry<EmsScriptNode, Parameter<Object>> entry : entrySet) {
+	                	
+	                	node = entry.getKey();
+	                	param = entry.getValue();
+	                	systemModel.setValue(node, (Serializable)param.getValue());
+	                }
+	                
+	                log( LogLevel.INFO, "Updated all node values to satisfy the constraints!" );
+	                
+	            }
+        	}
         } // End if constraints list is non-empty
 
     }

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
 
     "elements": [{
@@ -34,3 +35,7 @@
 
 200
 
+=======
+{"elements":[{"name":"JW_TEST2","sysmlid":"123456","specialization":{"projectVersion":"1","type":"Project"}}]}
+200
+>>>>>>> refs/remotes/origin/develop
