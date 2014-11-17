@@ -285,25 +285,25 @@ public class WorkspaceNode extends EmsScriptNode {
         // Update parent/child workspace references
         
         // Remove this workspace from parent's children
-        WorkspaceNode source = getParentWorkspace();
-        if ( Debug.isOn() ) Debug.outln( "deleted workspace " + this + " from source " + getName(source) );
-        if ( source == null || !source.exists() ) {
-            // TODO -- do we keep the master's children anywhere?
-            if ( !source.exists() ) {
-                log( "no write permissions to remove reference to child workpsace, " + getName() + ", from parent, " + getName(source) );
-            }
-        } else {
-            if ( !source.checkPermissions( PermissionService.WRITE, getResponse(), getStatus() ) ) {
-                String msg = "Warning! No write permissions to delete workpsace " + getName() + ".\n";
-                getResponse().append( msg );
-                log( msg );
-//                if ( getStatus() != null ) {
-//                    getStatus().setCode( HttpServletResponse.SC_, msg );
-//                }
-            } else {
-                source.removeFromPropertyNodeRefs( "ems:children", getNodeRef() );
-            }
-        }
+//        WorkspaceNode source = getParentWorkspace();
+//        if ( Debug.isOn() ) Debug.outln( "deleted workspace " + this + " from source " + getName(source) );
+//        if ( source == null || !source.exists() ) {
+//            // TODO -- do we keep the master's children anywhere?
+//            if ( !source.exists() ) {
+//                log( "no write permissions to remove reference to child workpsace, " + getName() + ", from parent, " + getName(source) );
+//            }
+//        } else {
+//            if ( !source.checkPermissions( PermissionService.WRITE, getResponse(), getStatus() ) ) {
+//                String msg = "Warning! No write permissions to delete workpsace " + getName() + ".\n";
+//                getResponse().append( msg );
+//                log( msg );
+////                if ( getStatus() != null ) {
+////                    getStatus().setCode( HttpServletResponse.SC_, msg );
+////                }
+//            } else {
+//                source.removeFromPropertyNodeRefs( "ems:children", getNodeRef() );
+//            }
+//        }
         
         // Not bothering to remove this workspace's ems:parent or ems:children
 
@@ -816,8 +816,8 @@ public class WorkspaceNode extends EmsScriptNode {
         if ( ref != null ) {
             WorkspaceNode workspace = new WorkspaceNode( ref, services, response,
                                                          responseStatus );
-            if ( workspace.exists() && workspace.hasAspect( "ems:Workspace" ) ) {
-                // TODO -- check read permissions
+            // workspace exists should have been checked already
+            if ( workspace.hasAspect( "ems:Workspace" ) ) {
                 if ( workspace.checkPermissions( PermissionService.READ ) ) {
                     if ( Debug.isOn() ) Debug.outln( "workspace exists: " + workspace );
                     return workspace;
@@ -845,8 +845,8 @@ public class WorkspaceNode extends EmsScriptNode {
         }
         WorkspaceNode workspace = null;
     
-        // Tyr to match the alfresco id
-        NodeRef ref = NodeUtil.findNodeRefByAlfrescoId( nameOrId );
+        // Try to match the alfresco id
+        NodeRef ref = NodeUtil.findNodeRefByAlfrescoId( nameOrId, true );
         if ( ref != null ) {
             workspace = existingReadableWorkspaceFromNodeRef( ref, services,
                                                               response,

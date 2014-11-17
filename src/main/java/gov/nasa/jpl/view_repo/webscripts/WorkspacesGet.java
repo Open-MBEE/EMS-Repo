@@ -41,8 +41,19 @@ public class WorkspacesGet extends AbstractJavaWebScript{
 	 */
 	@Override
 	protected Map<String, Object> executeImpl (WebScriptRequest req, Status status, Cache cache) {
-
-		printHeader( req );
+	    WorkspacesGet instance = new WorkspacesGet(repository, services);
+        return instance.executeImplImpl( req, status, cache );
+	}
+	
+	/**
+	 * Need wrapper for actual execution to be run in different instance since 
+	 * @param req
+	 * @param status
+	 * @param cache
+	 * @return
+	 */
+    protected Map<String, Object> executeImplImpl (WebScriptRequest req, Status status, Cache cache) {
+        printHeader( req );
 
         clearCaches();
 
@@ -51,11 +62,9 @@ public class WorkspacesGet extends AbstractJavaWebScript{
 
         try {
             if (validateRequest(req, status)) {
-
                 String userName = AuthenticationUtil.getRunAsUser();
                 EmsScriptNode homeFolder = NodeUtil.getUserHomeFolder(userName);
-
-                json = handleWorkspace (homeFolder, status, userName);
+                json = handleWorkspace (homeFolder, status, userName, req.getParameter( "deleted" ) == null ? false : true);
             }
         } catch (JSONException e) {
             log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -68,7 +77,7 @@ public class WorkspacesGet extends AbstractJavaWebScript{
             model.put("res", response.toString());
         } else {
             try {
-            	if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
+                if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
                 model.put("res", json.toString(4));
             } catch ( JSONException e ) {
                 e.printStackTrace();
@@ -77,23 +86,33 @@ public class WorkspacesGet extends AbstractJavaWebScript{
         status.setCode(responseStatus.getCode());
 
         printFooter();
-
+        
         return model;
-	}
+    }
 
-	protected JSONObject handleWorkspace (EmsScriptNode homeFolder, Status status, String user) throws JSONException{
-
+	protected JSONObject handleWorkspace (EmsScriptNode homeFolder, Status status, String user, boolean findDeleted) throws JSONException{
 		JSONObject json = new JSONObject ();
 		JSONArray jArray = new JSONArray ();
+        if (!findDeleted) {
+            //This is for the master workspace (not located in the user home folder).
+            JSONObject interiorJson = new JSONObject();
+            WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, null );
+            jArray.put(interiorJson);
+        }
+
         Collection <EmsScriptNode> nodes = NodeUtil.luceneSearchElements("ASPECT:\"ems:workspace\"" );
-        //This is for the master workspace (not located in the user home folder).
-    	JSONObject interiorJson = new JSONObject();
-        WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, null );
-		jArray.put(interiorJson);
         for (EmsScriptNode workspaceNode: nodes) {
             	if (checkPermissions(workspaceNode, PermissionService.READ)){
             	    WorkspaceNode wsNode = new WorkspaceNode(workspaceNode.getNodeRef(), services, response);
-            	    jArray.put(wsNode.toJSONObject( null ));
+            	    if (findDeleted) {
+            	        if (wsNode.isDeleted()) {
+            	            jArray.put(wsNode.toJSONObject( null ));
+            	        }
+            	    } else {
+            	        if (wsNode.exists()) {
+            	            jArray.put(wsNode.toJSONObject( null ));
+            	        }
+            	    }
             }
         }
 
@@ -114,7 +133,4 @@ public class WorkspacesGet extends AbstractJavaWebScript{
 		return true;
 
 	}
-
-
-
 }

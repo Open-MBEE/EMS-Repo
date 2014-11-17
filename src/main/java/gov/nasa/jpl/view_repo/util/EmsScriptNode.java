@@ -120,6 +120,7 @@ public class EmsScriptNode extends ScriptNode implements
                     add( "ems:workspace" );
                     add( "ems:source" );
                     add( "ems:parent" );
+                    add( "ems:children" );
                     add( "ems:lastTimeSyncParent" );
                     add( "ems:mergeSource" );
                 }
