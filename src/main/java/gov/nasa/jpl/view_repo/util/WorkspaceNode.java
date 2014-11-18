@@ -226,6 +226,7 @@ public class WorkspaceNode extends EmsScriptNode {
                                                   response, status, //false
                                                   userName );
     	String cmName = wsName + '_' + getName( parentWorkspace );
+    	String cmTitle = cmName;
     	
     	// Make sure the workspace does not already exist in the target folder 
     	EmsScriptNode child = folder.childByNamePath( "/" + cmName, true, null, false );
@@ -239,34 +240,43 @@ public class WorkspaceNode extends EmsScriptNode {
     	}
     	
     	// Make sure the workspace does not already exist otherwise
-        NodeRef ref = NodeUtil.findNodeRefById( cmName, true, null, null, services, false );
-        // FIXME -- This does not find workspaces that are not visible to the user!
-        if ( ref != null ) {
-            String msg = "ERROR! Trying to create an existing workspace, " + cmName + "!\n";
-            response.append( msg );
-            if ( status != null ) {
-                status.setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
-            }
-            return null;
+    	// So workspaces can be named the same, we store the name as the title, then update the
+    	// name to be unique with the nodeID as the name
+    NodeRef ref = NodeUtil.findNodeRefById( cmName, true, null, null, services, false );
+    // FIXME -- This does not find workspaces that are not visible to the user!
+    if ( ref != null ) {
+        String msg = "ERROR! Trying to create an existing workspace, " + cmName + "!\n";
+        response.append( msg );
+        if ( status != null ) {
+            status.setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
         }
-    	
+        return null;
+    }
+        
     	WorkspaceNode ws = new WorkspaceNode( folder.createFolder( cmName ).getNodeRef(),
     	                                      services, response, status );
-        ws.addAspect( "ems:HasWorkspace" );
-        ws.setProperty("ems:workspace", ws.getNodeRef() );
+    	
+    ws.setProperty("cm:title", cmTitle);
+    cmName = ws.getId() + "_" + getId( parentWorkspace );
+    ws.setProperty( "cm:name", cmName );
+
+    ws.addAspect( "ems:HasWorkspace" );
+    ws.setProperty("ems:workspace", ws.getNodeRef() );
 
     	ws.addAspect( "ems:Workspace" );
-        ws.setProperty("ems:workspace_name", wsName );
+    ws.setProperty("ems:workspace_name", wsName );
     	ws.createOrUpdateProperty( "ems:lastTimeSyncParent", new Date() );
     	if ( copyTime != null ) {
     	    ws.createOrUpdateProperty( "ems:copyTime", copyTime );
     	}
+    	
     	if ( Debug.isOn() ) Debug.outln( "parent workspace: " + parentWorkspace );
     	if(parentWorkspace != null) {
     		parentWorkspace.appendToPropertyNodeRefs( "ems:children", ws.getNodeRef() );
     		ws.setProperty( "ems:parent", parentWorkspace.getNodeRef() );
     	}
     	if ( Debug.isOn() ) Debug.outln( "created workspace " + ws + " in folder " + folder );
+
     	return ws;
     }
 
