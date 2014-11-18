@@ -2997,8 +2997,8 @@ public class EmsScriptNode extends ScriptNode implements
                     getPropertyNodeRefs( acmProperty );
             if ( Utils.isNullOrEmpty( relationships ) ) {
                 relationships = Utils.newList( ref );
-            } else {
-                relationships.add( ref );
+            } else if (!relationships.contains(ref )) {
+                    relationships.add( ref );
             }
             setProperty( acmProperty, relationships );
         } else {
@@ -3588,7 +3588,8 @@ public class EmsScriptNode extends ScriptNode implements
             addPackageJSON( JSONObject json, EmsScriptNode node,
                             Set< String > filter, Date dateTime )
                                                                  throws JSONException {
-        // do nothing - package currently doesn't have any additional metadata
+        putInJson( json, Acm.JSON_IS_SITE, node.getProperty( Acm.ACM_IS_SITE ),
+                   filter );   
     }
 
     protected void addViewpointJSON( JSONObject json, Set< String > filter,

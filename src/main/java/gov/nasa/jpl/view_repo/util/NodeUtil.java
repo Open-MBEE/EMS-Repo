@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -1816,4 +1817,63 @@ public class NodeUtil {
 		return artifactNode;
 	}
 
+    
+    /**
+     * Given a parent and path, builds the path recursively as necessary
+     * @param parent
+     * @param path
+     * @return
+     */
+    public static EmsScriptNode getOrCreatePath(EmsScriptNode parent, String path) {
+        String tokens[] = path.split( "/" );
+        
+        String childPath = null;
+        for (int ii = 0; ii < tokens.length; ii++) {
+            if (!tokens[ii].isEmpty()) {
+                childPath = tokens[ii];
+                break;
+            }
+        }
+        
+        if (childPath != null) {
+            EmsScriptNode child = parent.childByNamePath( childPath );
+            if (child == null) {
+                child = parent.createFolder( childPath );
+            }
+
+            if (child != null) {
+                if (path.startsWith( "/" )) {
+                    if (path.length() >= 1) {
+                        path = path.substring( 1 );
+                    }
+                }
+                path = path.replace( childPath, "" );
+                if (!path.isEmpty()) {
+                    return getOrCreatePath(child, path.replace(childPath, ""));
+                } else {
+                    return child;
+                }
+            }
+        }
+
+        return null;
+    }
+    
+    
+    /**
+     * Get or create the date folder based on /year/month/day_of_month provided
+     * a parent folder
+     * @param parent
+     * @return
+     */
+    public static EmsScriptNode getOrCreateDateFolder(EmsScriptNode parent) {
+        Calendar cal = Calendar.getInstance();
+        
+        String year = Integer.toString( cal.get(Calendar.YEAR) );
+        String month = Integer.toString( cal.get(Calendar.MONTH) + 1);
+        String day = Integer.toString( cal.get(Calendar.DAY_OF_MONTH) );
+        
+        String path = String.format("/%s/%s/%s", year, month, day);
+        return getOrCreatePath(parent, path);
+    }
 }

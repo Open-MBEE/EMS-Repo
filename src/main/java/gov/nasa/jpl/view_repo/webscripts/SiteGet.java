@@ -29,14 +29,19 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletResponse;
+
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -113,7 +118,9 @@ public class SiteGet extends AbstractJavaWebScript {
     	
     	JSONArray json = new JSONArray();      
         EmsScriptNode emsNode;
-
+        String name;
+        NodeRef parentRef;
+        
         // TODO: get all the sites in this workspace along w/ parent workspaces, as this
         //		 will not get the specific site folders created for a workspace
         List<SiteInfo> sites = services.getSiteService().listSites(null);
@@ -123,7 +130,15 @@ public class SiteGet extends AbstractJavaWebScript {
         for (SiteInfo siteInfo : sites ) {
         	
         	emsNode = new EmsScriptNode(siteInfo.getNodeRef(), services);
-        	String name = emsNode.getName();
+        	name = emsNode.getName();
+        	parentRef = (NodeRef)emsNode.getProperty(Acm.ACM_SITE_PARENT);
+        	
+        	EmsScriptNode parentNode = null;
+        	String parentId = null;
+        	if (parentRef != null) {
+        	    parentNode = new EmsScriptNode(parentRef, services, response);
+        	    parentId = parentNode.getSysmlId();
+        	}
         	
         	// Note: workspace is null if its the master, and in that case we consider it to contain
         	//		 all sites.
@@ -131,15 +146,10 @@ public class SiteGet extends AbstractJavaWebScript {
         		(workspace == null || (workspace != null && workspace.contains(emsNode))) ) {
         		
         		JSONObject siteJson = new JSONObject();
-        		JSONArray catArray = new JSONArray();
-        		siteJson.put("name", name);
-        		siteJson.put("title", siteInfo.getTitle());
-        		siteJson.put("categories", catArray);
-        		
-        		for (String tag : emsNode.getTags()) {
-        			catArray.put(tag);
-        		}
-        		
+        		siteJson.put("sysmlid", name);
+        		siteJson.put("name", siteInfo.getTitle());
+        		siteJson.put("parent", parentId );
+        		    
         		json.put(siteJson);
         	}
         }

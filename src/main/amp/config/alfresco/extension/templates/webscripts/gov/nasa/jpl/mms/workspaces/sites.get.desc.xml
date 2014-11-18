@@ -3,11 +3,9 @@
     <description> Return all sites in the workspace
 	{"sites": [
 	  {
+	      "sysmlid": sysmlid,
 	      "name": name,
-	      "title": title
-	      "categories": [
-	          tag name,
-	          ...
+	      "parent": parent
 	      ]
 	  }, ...  
 	]}

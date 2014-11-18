@@ -17,20 +17,17 @@
     "definitions": {
         "Sites": {
             "properties": {
-              "id": {
-                "type": "string",
-                "description": "The Alfresco id used for URL resolution"
-              },
               "name": {
                 "type": "string",
                 "description": "Human readable name for the site"
               },
-              "categories": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "description": "Category name - sites can be organized in categories, which can be hierarchical"
-                }
+              "sysmlid": {
+                "type": "string",
+                "description": "If applicable, the symlid of the site element"
+              },
+              "parent": {
+                "type": "string",
+                "description": "SysML ID of the parent site"
               }
             }
         }

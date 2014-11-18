@@ -950,7 +950,7 @@ False,
 ['"url"'],
 ["test","workspaces","develop", "develop2"]
 ],
-        
+                                   
 [
 37,
 "CreateWorkspaceDelete1",
@@ -1017,7 +1017,34 @@ None,
 ["develop", "develop2"]
 ],
 
-                           
+# SITE PACKAGES: ==========================    
+
+[
+43,
+"PostSitePackage",
+"Create a site package",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                data="SitePackage.json",
+                branch="master/sites/europa/",
+                post_type="elements"),
+True, 
+common_filters,
+["test","workspaces","develop"]
+],
+        
+[
+44,
+"PostElementSitePackage",
+"Post a element to a site package",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                data="ElementSitePackage.json",
+                branch="master/sites/site_package/",
+                post_type="elements"),
+True, 
+common_filters,
+["test","workspaces","develop"]
+],
+        
 ]    
 
 ##########################################################################################    

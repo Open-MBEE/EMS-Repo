@@ -121,35 +121,38 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				
 				// Error here, projectNode isn't 123456, but rather no_project.
 				EmsScriptNode projectNode = instance.getProjectNodeFromRequest(req, true);
-				 Set< EmsScriptNode > elements =
+				if (projectNode != null) {
+				    
+				    Set< EmsScriptNode > elements =
 	                        instance.createOrUpdateModel( top.getJSONObject("workspace2"), status,
-	                                                      projectNode, targetWS, sourceWS );
-	                    // REVIEW -- TODO -- shouldn't this be called from instance?
-	                    instance.addRelationshipsToProperties( elements );
-	                    if ( !Utils.isNullOrEmpty( elements ) ) {
+	                                                      targetWS, sourceWS );
+                    // REVIEW -- TODO -- shouldn't this be called from instance?
+                    instance.addRelationshipsToProperties( elements );
+                    if ( !Utils.isNullOrEmpty( elements ) ) {
 
-	                        // Create JSON object of the elements to return:
-	                        JSONArray elementsJson = new JSONArray();
-	                        for ( EmsScriptNode element : elements ) {
-	                            elementsJson.put( element.toJSONObject(null) );
-	                        }
-	                       //top.put( "elements", elementsJson );
-	                        //model.put( "res", top.toString( 4 ) );
+                        // Create JSON object of the elements to return:
+                        JSONArray elementsJson = new JSONArray();
+                        for ( EmsScriptNode element : elements ) {
+                            elementsJson.put( element.toJSONObject(null) );
+                        }
+                       //top.put( "elements", elementsJson );
+                        //model.put( "res", top.toString( 4 ) );
 	                    }
-	            result = handleDelete(deletedCollection, targetWS, targetId, null /*time*/, wsDiff); 
-	            
-                // FIXME!! We can't just leave the changes on the merged
-                // branch! If an element is changed in the parent, it could
-                // result in a conflict! But we can't mark them deleted since
-                // that would be making changes in the workspace. Can we
-                // purge???!!! Do we need another aspect, ems:Purged? Do we
-                // check to see if the last commit in the history is before the
-                // lastTimeSync?
-	            
-
-	            // keep history of the branch
-                CommitUtil.merge( sourceWS, targetWS, null, "", false,
-                                  services, response );
+    	            result = handleDelete(deletedCollection, targetWS, targetId, null /*time*/, wsDiff); 
+    	            
+                    // FIXME!! We can't just leave the changes on the merged
+                    // branch! If an element is changed in the parent, it could
+                    // result in a conflict! But we can't mark them deleted since
+                    // that would be making changes in the workspace. Can we
+                    // purge???!!! Do we need another aspect, ems:Purged? Do we
+                    // check to see if the last commit in the history is before the
+                    // lastTimeSync?
+    	            
+    
+    	            // keep history of the branch
+                    CommitUtil.merge( sourceWS, targetWS, null, "", false,
+                                      services, response );
+				}
 			}
 		 } catch (JSONException e) {
 	           log(LogLevel.ERROR, "Could not create JSON\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

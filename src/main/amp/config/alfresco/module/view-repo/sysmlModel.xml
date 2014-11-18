@@ -113,6 +113,17 @@
 			</properties>
 		</aspect>
         <aspect name="sysml:Package">
+            <properties>
+                <property name="sysml:isSite">
+                    <type>d:boolean</type>
+                    <mandatory>false</mandatory>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+            </properties>
         </aspect>
         <aspect name="sysml:Viewpoint">
             <properties>
