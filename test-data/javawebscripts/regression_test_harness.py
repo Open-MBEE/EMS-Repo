@@ -1041,7 +1041,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 branch="master/sites/site_package/",
                 post_type="elements"),
 True, 
-common_filters,
+common_filters+['"message"'],
 ["test","workspaces","develop"]
 ],
         
