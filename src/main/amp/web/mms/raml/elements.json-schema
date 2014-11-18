@@ -679,7 +679,7 @@
             "properties": {
                 "type": { "enum": ["MagicDrawData"] },
                 "mdData": {
-                    "type": "string",
+                    "type": "string"
                 }
             }
         },
