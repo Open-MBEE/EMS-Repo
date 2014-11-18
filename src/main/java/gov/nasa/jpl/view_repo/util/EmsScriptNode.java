@@ -3525,7 +3525,7 @@ public class EmsScriptNode extends ScriptNode implements
         return false;
     }
 
-    private String getSysmlIdOfProperty( String propertyName, Date dateTime ) {
+    private String getSysmlIdOfProperty( String propertyName ) {
         NodeRef elementRef = (NodeRef)this.getProperty( propertyName );
         return getSysmlIdFromNodeRef( elementRef );
     }
@@ -3625,7 +3625,7 @@ public class EmsScriptNode extends ScriptNode implements
     protected void addViewpointJSON( JSONObject json, Set< String > filter,
                                      Date dateTime ) throws JSONException {
         json.put( "method",
-                  this.getSysmlIdOfProperty( "sysml:method", dateTime ) );
+                  this.getSysmlIdOfProperty( "sysml:method" ) );
     }
 
     protected void addViewJSON( JSONObject json, EmsScriptNode node,
@@ -3656,7 +3656,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
         // TODO: Snapshots?
-        String id = node.getSysmlIdOfProperty( Acm.ACM_CONTENTS, dateTime );
+        String id = node.getSysmlIdOfProperty( Acm.ACM_CONTENTS );
         if (id != null) {
             putInJson( json, Acm.JSON_CONTENTS, id, filter );
         }
@@ -3710,12 +3710,12 @@ public class EmsScriptNode extends ScriptNode implements
                                                                               throws JSONException {
         String id;
 
-        id = node.getSysmlIdOfProperty( "sysml:source", dateTime );
+        id = node.getSysmlIdOfProperty( "sysml:source" );
         if ( id != null ) {
             putInJson( json, "source", id, filter );
         }
 
-        id = node.getSysmlIdOfProperty( "sysml:target", dateTime );
+        id = node.getSysmlIdOfProperty( "sysml:target" );
         if ( id != null ) {
             putInJson( json, "target", id, filter );
         }
@@ -3759,7 +3759,7 @@ public class EmsScriptNode extends ScriptNode implements
                                        Set< String > filter, Date dateTime )
                                                                             throws JSONException {
         String valueExpressionId =
-                node.getSysmlIdOfProperty( "sysml:valueExpression", dateTime );
+                node.getSysmlIdOfProperty( "sysml:valueExpression" );
         if ( valueExpressionId != null ) {
             putInJson( json, "expression", valueExpressionId, filter );
         }
@@ -3782,12 +3782,12 @@ public class EmsScriptNode extends ScriptNode implements
 
         String id;
 
-        id = node.getSysmlIdOfProperty( "sysml:durationMax", dateTime );
+        id = node.getSysmlIdOfProperty( "sysml:durationMax" );
         if ( id != null ) {
             putInJson( json, "max", id, filter );
         }
 
-        id = node.getSysmlIdOfProperty( "sysml:durationMin", dateTime );
+        id = node.getSysmlIdOfProperty( "sysml:durationMin" );
         if ( id != null ) {
             putInJson( json, "min", id, filter );
         }
@@ -3804,8 +3804,7 @@ public class EmsScriptNode extends ScriptNode implements
 //                node.getSysmlIdOfProperty( "sysml:element", dateTime );
 //        if ( elementId == null ) {
         String elementId =
-                node.getSysmlIdOfProperty( "sysml:elementValueOfElement",
-                                           dateTime );
+                node.getSysmlIdOfProperty( "sysml:elementValueOfElement" );
         //        }
         if ( elementId != null ) {
             putInJson( json, "element", elementId, filter );
@@ -3884,7 +3883,7 @@ public class EmsScriptNode extends ScriptNode implements
                                                                        throws JSONException {
         addValueSpecificationJSON( json, node, filter, dateTime );
 
-        String id = node.getSysmlIdOfProperty( "sysml:instance", dateTime );
+        String id = node.getSysmlIdOfProperty( "sysml:instance" );
         if ( id != null ) {
             putInJson( json, "instance", id, filter );
         }
@@ -3997,12 +3996,12 @@ public class EmsScriptNode extends ScriptNode implements
         addValueSpecificationJSON( json, node, filter, dateTime );
         String id;
 
-        id = node.getSysmlIdOfProperty( "sysml:timeIntervalMax", dateTime );
+        id = node.getSysmlIdOfProperty( "sysml:timeIntervalMax" );
         if ( id != null ) {
             putInJson( json, "max", id, filter );
         }
 
-        id = node.getSysmlIdOfProperty( "sysml:timeIntervalMin", dateTime );
+        id = node.getSysmlIdOfProperty( "sysml:timeIntervalMin" );
         if ( id != null ) {
             putInJson( json, "min", id, filter );
         }
@@ -4021,7 +4020,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
 
         String id =
-                node.getSysmlIdOfProperty( "sysml:operationExpression", dateTime );
+                node.getSysmlIdOfProperty( "sysml:operationExpression" );
         if ( id != null ) {
             putInJson( json, "expression", id, filter );
         }
@@ -4044,7 +4043,7 @@ public class EmsScriptNode extends ScriptNode implements
                                Set< String > filter, Date dateTime )
                                                                     throws JSONException {
         String specId =
-                node.getSysmlIdOfProperty( "sysml:constraintSpecification", dateTime );
+                node.getSysmlIdOfProperty( "sysml:constraintSpecification" );
         if ( specId != null ) {
             putInJson( json, "specification", specId, filter );
         }
@@ -4061,8 +4060,7 @@ public class EmsScriptNode extends ScriptNode implements
                    node.getProperty( "sysml:parameterType" ), filter );
 
         String id =
-                node.getSysmlIdOfProperty( "sysml:parameterDefaultValue",
-                                           dateTime );
+                node.getSysmlIdOfProperty( "sysml:parameterDefaultValue" );
         if ( id != null ) {
             putInJson( json, "defaultValue", id, filter );
         }
@@ -4084,8 +4082,7 @@ public class EmsScriptNode extends ScriptNode implements
         JSONArray targetIds = addNodeRefIdsJSON( nodeRefsTarget, dateTime );
         putInJson( json, Acm.JSON_TARGET_PATH, targetIds, filter );
         
-        String id = node.getSysmlIdOfProperty( Acm.ACM_CONNECTOR_TYPE,
-                                               dateTime );
+        String id = node.getSysmlIdOfProperty( Acm.ACM_CONNECTOR_TYPE );
         if ( id != null ) {
             putInJson( json, Acm.JSON_CONNECTOR_TYPE, id, filter );
         }   
@@ -4108,9 +4105,9 @@ public class EmsScriptNode extends ScriptNode implements
         putInJson( json, Acm.JSON_OWNED_END, ownedEndIds, filter );
         
         putInJson( json, Acm.JSON_SOURCE_AGGREGATION, 
-                   node.getSysmlIdOfProperty( Acm.ACM_SOURCE_AGGREGATION, dateTime), filter );
+                   node.getSysmlIdOfProperty( Acm.ACM_SOURCE_AGGREGATION), filter );
         putInJson( json, Acm.JSON_TARGET_AGGREGATION, 
-                   node.getSysmlIdOfProperty( Acm.ACM_TARGET_AGGREGATION, dateTime ), filter );
+                   node.getSysmlIdOfProperty( Acm.ACM_TARGET_AGGREGATION ), filter );
      
     }
     
