@@ -110,16 +110,16 @@ public class WorkspaceDiff {
         if ( !exists2 ) {
             if ( exists1 ) {
                 // node1 exists but not node2
-                name = node1.getName();
+                name = node1.getSysmlId();
                 deletedElements.put( name, node1 );
             } else {
                 // neither exist so no difference!
             }
         } else {
-            name = node2.getName();
+            name = node2.getSysmlId();
             if ( exists1 ) {
                 // both node1 and node2 exist
-                name = node1.getName();
+                name = node1.getSysmlId();
                 updatedElements.put( name, node2 );
             } else {
                 // node2 exists but not node1
@@ -204,7 +204,7 @@ public class WorkspaceDiff {
                     while ( parent != null && parent.isModelElement() ) {
                         elements.put( parentId, parent );
                         parent = parent.getOwningParent( null );
-                        parentId = parent.getName();
+                        parentId = parent.getSysmlId();
                     }
                 }
             }
@@ -226,8 +226,8 @@ public class WorkspaceDiff {
     protected void computeConflicted() {
         // Get intersection.
         Set< NodeRef > nodes = nodeDiff.get1();
-        Set<String> intersection = NodeUtil.getNames( nodes );
-        Set<String> names2 = NodeUtil.getNames( nodeDiff.get2() );
+        Set<String> intersection = NodeUtil.getSysmlIds( nodes );
+        Set<String> names2 = NodeUtil.getSysmlIds( nodeDiff.get2() );
         boolean intersects = Utils.intersect( intersection, names2 );
         if ( intersects ) {
             for ( String name : intersection ) {
@@ -274,7 +274,7 @@ public class WorkspaceDiff {
      *         changed in the respective workspaces to different values.
      */
     protected boolean samePropertyChanged( NodeRef ref1, NodeRef ref2 ) {
-        String elementName = NodeUtil.getName( ref1 );
+        String elementName = NodeUtil.getSysmlId( ref1 );
         Map< String, Pair< Object, Object > > changes =
                 new LinkedHashMap< String, Pair<Object,Object> >( nodeDiff.getPropertyChanges( elementName ) );
         Utils.removeAll( changes, WorkspaceNode.workspaceMetaProperties );
@@ -597,7 +597,7 @@ public class WorkspaceDiff {
             // allow the possibility that nodeDiff isn't being used to make the diff call
             if ( nodeDiff != null ) {
                 Map< String, Pair< Object, Object > > propChanges =
-                        nodeDiff.getPropertyChanges( node.getName() );
+                        nodeDiff.getPropertyChanges( node.getSysmlId() );
                 if ( !showAll && propChanges != null && !propChanges.isEmpty() ) {
                     filter = new LinkedHashSet< String >(filter);
                     for ( Entry< String, Pair< Object, Object > > e : propChanges.entrySet() ) {
@@ -615,7 +615,7 @@ public class WorkspaceDiff {
                 array.put( node.toJSONObject( filter, dateTime ) );
             } else {
                 JSONObject jsonObject = node.toJSONObject( filter, dateTime );
-                Version version = versions.get( node.getName() );
+                Version version = versions.get( node.getSysmlId() );
                 if ( version != null ) {
                     // TODO: perhaps add service and response in method call rather than using the nodes?
                     EmsScriptNode changedNode = new EmsScriptNode(version.getVersionedNodeRef(), node.getServices(), node.getResponse());

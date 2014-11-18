@@ -140,7 +140,11 @@
         },
         "Package": {
             "properties": {
-                "type": { "enum": ["Package"] }
+                "type": { "enum": ["Package"] },
+                "isSite": {
+                    "type": "boolean",
+                    "description": "True if site characterization exists"
+                }
             }
         },
         "Product": {

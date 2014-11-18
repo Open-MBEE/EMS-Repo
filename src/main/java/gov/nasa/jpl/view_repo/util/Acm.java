@@ -185,6 +185,8 @@ public class Acm {
     public static final String JSON_MAGICDRAW_DATA = "MagicDrawData";
     public static final String JSON_MD_DATA = "mdData";
 
+    // Site packages additions:
+    public static final String JSON_IS_SITE = "isSite";
     
     // ACM types with the different name spaces
     public static final String SYSML = "sysml:";
@@ -345,6 +347,12 @@ public class Acm {
     public static final String ACM_MAGICDRAW_DATA = EMS + JSON_MAGICDRAW_DATA;
     public static final String ACM_MD_DATA = EMS + JSON_MD_DATA;
     
+    // Site packages additions:
+    public static final String ACM_SITE = "ems:Site";
+    public static final String ACM_SITE_PARENT = "ems:siteParent";
+    public static final String ACM_SITE_CHILDREN = "ems:siteChildren";
+    public static final String ACM_IS_SITE = SYSML + JSON_IS_SITE;
+
     /**
      *  JSON to Alfresco Content Model mapping
      */

@@ -120,10 +120,11 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
             ModelPost modelService = new ModelPost(repository, services);
             modelService.setLogLevel(LogLevel.DEBUG);
             modelService.setRunWithoutTransactions(false);
+            modelService.setProjectNode( projectNode );
             Status status = new Status();
             try {
                 Set<EmsScriptNode> elements = 
-                        modelService.createOrUpdateModel(content, status, projectNode, workspace, null);
+                        modelService.createOrUpdateModel(content, status, workspace, null);
                 modelService.addRelationshipsToProperties( elements );
             } catch (Exception e) {
                 status.setCode(HttpServletResponse.SC_BAD_REQUEST);

@@ -33,6 +33,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.connections.JmsConnection;
 import gov.nasa.jpl.view_repo.connections.RestPostConnection;
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
@@ -372,6 +373,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, SiteVisibility.PUBLIC );
             siteNode = new EmsScriptNode( foo.getNodeRef(), services );
             siteNode.createOrUpdateAspect( "cm:taggable" );
+            siteNode.createOrUpdateAspect(Acm.ACM_SITE);
         }
         
         // If this site is supposed to go into a non-master workspace, then create the site folders
@@ -403,7 +405,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	        if (sitesFolder == null ) {
 	            Debug.error("Could not create site " + siteName + "!");
 	        } else {
-	            siteNode = sitesFolder.createFolder( siteName );
+	            siteNode = sitesFolder.createFolder( siteName, null, !invalidSiteNode ? siteNode.getNodeRef() : null );
 	        }
         }
         

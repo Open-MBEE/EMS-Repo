@@ -12,7 +12,7 @@
 
         "owner": "123456",
 
-        "qualifiedId": "123456/300",
+        "qualifiedId": "/123456/300",
 
         "qualifiedName": "/JW_TEST/300",
 
@@ -50,7 +50,7 @@
 
         "owner": "301",
 
-        "qualifiedId": "123456/300/301/302",
+        "qualifiedId": "/123456/300/301/302",
 
         "qualifiedName": "/JW_TEST/300/301/302",
 
@@ -88,7 +88,7 @@
 
         "owner": "403",
 
-        "qualifiedId": "123456/4000/401/402/403/404",
+        "qualifiedId": "/123456/4000/401/402/403/404",
 
         "qualifiedName": "/JW_TEST/400/401/402/403/404",
 
@@ -126,7 +126,7 @@
 
         "owner": "300",
 
-        "qualifiedId": "123456/300/301",
+        "qualifiedId": "/123456/300/301",
 
         "qualifiedName": "/JW_TEST/300/301",
 
@@ -166,21 +166,9 @@
 
             ],
 
-            "isDerived": false,
-
-            "isSlot": false,
-
             "noSections": ["302"],
 
             "type": "Product",
-
-            "value": [{
-
-                "string": "dlam_string",
-
-                "type": "LiteralString"
-
-            }],
 
             "view2view": [{
 
@@ -214,7 +202,7 @@
 
         "owner": "303",
 
-        "qualifiedId": "123456/300/301/302/303/304",
+        "qualifiedId": "/123456/300/301/302/303/304",
 
         "qualifiedName": "/JW_TEST/300/301/302/303/304",
 
@@ -252,7 +240,7 @@
 
         "owner": "302",
 
-        "qualifiedId": "123456/300/301/302/303",
+        "qualifiedId": "/123456/300/301/302/303",
 
         "qualifiedName": "/JW_TEST/300/301/302/303",
 
@@ -290,7 +278,7 @@
 
         "owner": "4000",
 
-        "qualifiedId": "123456/4000/401",
+        "qualifiedId": "/123456/4000/401",
 
         "qualifiedName": "/JW_TEST/400/401",
 
@@ -330,21 +318,9 @@
 
             ],
 
-            "isDerived": false,
-
-            "isSlot": false,
-
             "noSections": ["402"],
 
             "type": "Product",
-
-            "value": [{
-
-                "string": "dlam_string",
-
-                "type": "LiteralString"
-
-            }],
 
             "view2view": [{
 
@@ -378,7 +354,7 @@
 
         "owner": "402",
 
-        "qualifiedId": "123456/4000/401/402/403",
+        "qualifiedId": "/123456/4000/401/402/403",
 
         "qualifiedName": "/JW_TEST/400/401/402/403",
 
@@ -414,7 +390,7 @@
 
         "owner": "null",
 
-        "qualifiedId": "123456",
+        "qualifiedId": "/123456",
 
         "qualifiedName": "/JW_TEST",
 
@@ -434,7 +410,7 @@
 
         "owner": "401",
 
-        "qualifiedId": "123456/4000/401/402",
+        "qualifiedId": "/123456/4000/401/402",
 
         "qualifiedName": "/JW_TEST/400/401/402",
 
@@ -472,7 +448,7 @@
 
         "owner": "123456",
 
-        "qualifiedId": "123456/4000",
+        "qualifiedId": "/123456/4000",
 
         "qualifiedName": "/JW_TEST/400",
 
@@ -510,7 +486,7 @@
 
         "owner": "300",
 
-        "qualifiedId": "123456/300/500",
+        "qualifiedId": "/123456/300/500",
 
         "qualifiedName": "/JW_TEST/300/500",
 

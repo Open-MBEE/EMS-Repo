@@ -160,13 +160,13 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         Set<EmsScriptNode> snapshots = new HashSet<EmsScriptNode>();
         for (EmsScriptNode product: productSet) {
     		// only create the filtered list of documents
-    		if (productList.isEmpty() || productList.contains(product.getProperty(Acm.ACM_ID))) {
+    		if (productList.isEmpty() || productList.contains(product.getSysmlId())) {
 	            SnapshotPost snapshotService = new SnapshotPost(repository, services);
 	            snapshotService.setRepositoryHelper(repository);
 	            snapshotService.setServices(services);
 	            snapshotService.setLogLevel(LogLevel.DEBUG);
 	            Status status = new Status();
-	            EmsScriptNode snapshot = snapshotService.createSnapshot(product, (String)product.getProperty(Acm.ACM_ID), workspace, dateTime);
+	            EmsScriptNode snapshot = snapshotService.createSnapshot(product, product.getSysmlId(), workspace, dateTime);
 	            if (snapshot == null || status.getCode() != HttpServletResponse.SC_OK) {
 	                jobStatus = "Failed";
 	                response.append("[ERROR]: could not make snapshot for " + product.getProperty(Acm.ACM_NAME));

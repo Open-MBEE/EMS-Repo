@@ -134,7 +134,18 @@
                         <tokenised>false</tokenised>
                     </index>
                 </property>
+				<!-- This is the last time the changes from the parent workspace were applied 
+					to this one. -->
                 <property name="ems:lastTimeSyncParent">
+                    <type>d:datetime</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+				<!-- The time point at which the workspace is a copy. If a workspace does 
+					not have this property, the workspace "walks" with its parent; in other words,
+					changes in the parent workspace pass through to the child (unless they conflict). -->
+                <property name="ems:copyTime">
                     <type>d:datetime</type>
                     <mandatory>false</mandatory>
                     <multiple>false</multiple>
@@ -281,8 +292,7 @@
                     <index enabled="false"/>
                 </property>
             </properties>
-        </aspect>
-        
+        </aspect>        
         <aspect name="ems:MagicDrawData">
           <properties>
               <property name="ems:mdData">
@@ -297,7 +307,30 @@
               </property>
           </properties>
         </aspect>
-
+        <aspect name="ems:Site">
+            <properties>
+                 <property name="ems:siteParent">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+                <property name="ems:siteChildren">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>true</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+            </properties>
+        </aspect>
      </aspects>
 
 </model>

@@ -10,7 +10,7 @@
 
     "owner": "300",
 
-    "qualifiedId": "123456/300/301",
+    "qualifiedId": "/123456/300/301",
 
     "qualifiedName": "/JW_TEST/300/301",
 
@@ -50,21 +50,9 @@
 
         ],
 
-        "isDerived": false,
-
-        "isSlot": false,
-
         "noSections": ["302"],
 
         "type": "Product",
-
-        "value": [{
-
-            "string": "dlam_string",
-
-            "type": "LiteralString"
-
-        }],
 
         "view2view": [{
 

@@ -298,7 +298,7 @@ public class DocBookContentTransformer extends AbstractContentTransformer2 {
 	 * @return
 	 */
 	private ResultSet findNodeRef(String name) {
-	    String pattern = "@cm\\:name:\"" + name + "\"";
+	    String pattern = NodeUtil.SearchType.CM_NAME.prefix + name + "\"";
 		ResultSet query = NodeUtil.luceneSearch( pattern, searchService);
 		return query;
 	}
