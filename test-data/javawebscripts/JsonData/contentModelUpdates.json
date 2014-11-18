@@ -1,0 +1,136 @@
+{ "elements" : [
+
+    {"documentation" : "View updates", 
+     "sysmlid":"viewWithContents", 
+     "name":"viewWithContents", 
+     "owner":"123456", 
+     "specialization": {"type":"View",
+                        "contents":"viewContents"}
+    },
+    
+    {"documentation" : "View content", 
+     "sysmlid":"viewContents", 
+     "name":"viewContents", 
+     "owner":"123456", 
+     "specialization": {"type":"Expression"}
+    },
+    
+    {"documentation" : "Enumeration", 
+     "sysmlid":"enumeration", 
+     "name":"enumeration", 
+     "owner":"123456", 
+     "specialization": {"type":"Enumeration",
+                        "enumeratedValue":[{"type":"LiteralString",
+                                            "string":"COMPOSITE"},
+                                           {"type":"LiteralString",
+                                            "string":"AGGREGATE"},
+                                           {"type":"LiteralString",
+                                            "string":"NONE"}],
+                        "selectedValue":{"type":"LiteralString",
+                                         "string":"AGGREGATE"}}
+    },
+        
+    {"documentation" : "Magic Draw Meta-Data", 
+     "sysmlid":"md", 
+     "name":"md", 
+     "owner":"123456", 
+     "specialization": {"type":"MagicDrawData",
+                        "mdData":"A blob of meta-data"}
+    },
+    
+    {"documentation" : "Connector updates", 
+     "sysmlid":"connector", 
+     "name":"connector", 
+     "owner":"123456", 
+     "specialization": {"type":"Connector",
+                        "sourcePath":["connectorSource"],
+                        "targetPath":["connectorTarget"],
+                        "connectorType":"connectorTypeAssoc",
+                        "connectorValue":{"type":"LiteralString",
+                                           "string":"Ninja Attack!"}}
+    },
+      
+    {"documentation" : "Connector source", 
+     "sysmlid":"connectorSource", 
+     "name":"connectorSource", 
+     "owner":"123456", 
+     "specialization": {"type":"Property"}
+    },
+    
+    {"documentation" : "Connector target", 
+     "sysmlid":"connectorTarget", 
+     "name":"connectorTarget", 
+     "owner":"123456", 
+     "specialization": {"type":"Property"}
+    },
+    
+    {"documentation" : "Connector type", 
+     "sysmlid":"connectorTypeAssoc", 
+     "name":"connectorTypeAssoc", 
+     "owner":"123456", 
+     "specialization": {"type":"Association",
+                        "ownedEnd":["AssocOwnedEnd"],
+                        "source":"sourceId",
+                        "target":"targetId",
+                        "sourceAggregation":"enumeration",
+                        "targetAggregation":"enumeration"}
+    },
+    
+    {"documentation" : "Associations's owned end", 
+     "sysmlid":"AssocOwnedEnd", 
+     "name":"AssocOwnedEnd", 
+     "owner":"123456", 
+     "specialization": {"type":"Property"}
+    },
+    
+    {"documentation" : "Characterizes", 
+     "sysmlid":"characterizes", 
+     "name":"characterizes", 
+     "owner":"123456", 
+     "specialization": {"type":"Characterizes",
+                        "source":"sourceId",
+                        "target":"targetId",
+                        "propertiesTransferred":["propsTransferred"]}
+    },
+    
+    {"documentation" : "propsTransferred", 
+     "sysmlid":"propsTransferred", 
+     "name":"propsTransferred", 
+     "owner":"123456", 
+     "specialization": {"type":"Property"}
+    },
+    
+    {"documentation" : "source", 
+     "sysmlid":"sourceId", 
+     "name":"sourceId", 
+     "owner":"123456", 
+     "specialization": {"type":"Property"}
+    },
+    
+    {"documentation" : "target", 
+     "sysmlid":"targetId", 
+     "name":"targetId", 
+     "owner":"123456", 
+     "specialization": {"type":"Property"}
+    },
+    
+    {"documentation" : "succession", 
+     "sysmlid":"succession", 
+     "name":"succession", 
+     "owner":"123456", 
+     "specialization": {"type":"Succession",
+                        "sourcePath":["connectorSource"],
+                        "targetPath":["connectorTarget"],
+                        "connectorType":"connectorTypeAssoc"}
+    },
+    
+    {"documentation" : "binding", 
+     "sysmlid":"binding", 
+     "name":"binding", 
+     "owner":"123456", 
+     "specialization": {"type":"Binding",
+                        "sourcePath":["connectorSource"],
+                        "targetPath":["connectorTarget"],
+                        "connectorType":"connectorTypeAssoc"}
+    }
+]}
