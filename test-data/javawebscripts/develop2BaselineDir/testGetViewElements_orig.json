@@ -1,0 +1,85 @@
+{"elements": [
+    {
+        "creator": "admin",
+        "documentation": "else",
+        "editable": true,
+        "modified": "2014-11-19T11:06:30.086-0800",
+        "name": "301",
+        "owner": "300",
+        "qualifiedId": "/123456/300/301",
+        "qualifiedName": "/JW_TEST/300/301",
+        "read": "2014-11-19T11:06:31.960-0800",
+        "specialization": {
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "childrenViews": ["304"],
+            "contains": [{
+                "source": "301",
+                "sourceProperty": "documentation",
+                "sourceType": "reference",
+                "type": "Paragraph"
+            }],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "noSections": ["302"],
+            "type": "Product",
+            "view2view": [{
+                "childrenViews": [
+                    "301",
+                    "302"
+                ],
+                "sysmlid": "301"
+            }]
+        },
+        "sysmlid": "301"
+    },
+    {
+        "creator": "admin",
+        "documentation": "to",
+        "editable": true,
+        "modified": "2014-11-19T10:53:27.698-0800",
+        "name": "302",
+        "owner": "301",
+        "qualifiedId": "/123456/300/301/302",
+        "qualifiedName": "/JW_TEST/300/301/302",
+        "read": "2014-11-19T11:06:31.970-0800",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property",
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }]
+        },
+        "sysmlid": "302"
+    },
+    {
+        "creator": "admin",
+        "documentation": "talk",
+        "editable": true,
+        "modified": "2014-11-19T10:55:00.208-0800",
+        "name": "303",
+        "owner": "302",
+        "qualifiedId": "/123456/300/301/302/303",
+        "qualifiedName": "/JW_TEST/300/301/302/303",
+        "read": "2014-11-19T11:06:31.985-0800",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property",
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }]
+        },
+        "sysmlid": "303"
+    }
+]}
+200

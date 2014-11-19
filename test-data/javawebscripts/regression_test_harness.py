@@ -272,7 +272,7 @@ def print_error(msg, outpt):
     global failed_tests
     failed_tests += 1
     errs.append(msg)
-    print "\nFAIL: "+str(msg)+"\n"+str(outpt)
+    print "\nFAIL: "+str(msg)+str(outpt)
     
 def mbee_util_jar_path():
     path = "../../../../.m2/repository/gov/nasa/jpl/mbee/util/mbee_util/"
@@ -303,14 +303,14 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
     global filtered_json
     global gv1, gv2, gv3, gv4
 
-    result_json = "%s/test%d.json"%(result_dir,test_num)
-    result_orig_json = "%s/test%d_orig.json"%(result_dir,test_num)
-    baseline_json = "%s/test%d.json"%(baseline_dir,test_num)
-    baseline_orig_json = "%s/test%d_orig.json"%(baseline_dir,test_num)
-#     result_json = "%s/test%d.json"%(result_dir,test_name)
-#     result_orig_json = "%s/test%d_orig.json"%(result_dir,test_name)
-#     baseline_json = "%s/test%d.json"%(baseline_dir,test_name)
-#     baseline_orig_json = "%s/test%d_orig.json"%(baseline_dir,test_name)
+#     result_json = "%s/test%d.json"%(result_dir,test_num)
+#     result_orig_json = "%s/test%d_orig.json"%(result_dir,test_num)
+#     baseline_json = "%s/test%d.json"%(baseline_dir,test_num)
+#     baseline_orig_json = "%s/test%d_orig.json"%(baseline_dir,test_num)
+    result_json = "%s/test%s.json"%(result_dir,test_name)
+    result_orig_json = "%s/test%s_orig.json"%(result_dir,test_name)
+    baseline_json = "%s/test%s.json"%(baseline_dir,test_name)
+    baseline_orig_json = "%s/test%s_orig.json"%(baseline_dir,test_name)
 
     thick_divider()
     if create_baselines:
@@ -394,7 +394,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
             (status_diff,output_diff) = commands.getstatusoutput("%s %s %s"%(diff_cmd,baseline_json,result_json))
 
             if output_diff:
-                print_error("Test number %s (%s) failed!"%(test_num,test_name), "  Diff returned bad status or diffs found in the filtered .json files (%s,%s), status: %s\n, output: '%s'"%(baseline_json,result_json,status_diff,output_diff))
+                print_error("Test number %s (%s) failed!"%(test_num,test_name), "  Diff returned bad status or diffs found in the filtered .json files (%s,%s), status: %s, output: \n'%s'"%(baseline_json,result_json,status_diff,output_diff))
             else:
                 print_pass("Test number %s (%s) passed!  No differences in the filtered .json files (%s,%s)"%(test_num,test_name,baseline_json,result_json))
     else:
@@ -1030,7 +1030,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="elements"),
 True, 
 common_filters,
-["test","workspaces","develop"]
+["test","workspaces","develop", "develop2"]
 ],
         
 [
@@ -1043,7 +1043,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="elements"),
 True, 
 common_filters+['"message"'],
-["test","workspaces","develop"]
+["test","workspaces","develop", "develop2"]
 ],
         
 [
@@ -1054,7 +1054,7 @@ create_curl_cmd(type="GET",data="products",base_url=BASE_URL_WS,
                 branch="master/sites/site_package/"),
 True, 
 common_filters,
-["test","workspaces","develop"]
+["test","workspaces","develop", "develop2"]
 ],
         
 ]    

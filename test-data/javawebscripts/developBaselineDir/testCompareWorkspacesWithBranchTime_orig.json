@@ -1,0 +1,123 @@
+{
+    "workspace1": {
+        "elements": [
+            {
+                "creator": "admin",
+                "documentation": "something",
+                "editable": true,
+                "modified": "2014-11-19T10:53:13.341-0800",
+                "name": "300",
+                "owner": "123456",
+                "qualifiedId": "/123456/300",
+                "qualifiedName": "/JW_TEST/300",
+                "read": "2014-11-19T10:55:21.364-0800",
+                "specialization": {
+                    "isDerived": false,
+                    "isSlot": false,
+                    "type": "Property",
+                    "value": [{
+                        "string": "dlam_string",
+                        "type": "LiteralString"
+                    }]
+                },
+                "sysmlid": "300"
+            },
+            {
+                "creator": "admin",
+                "documentation": "else",
+                "editable": true,
+                "modified": "2014-11-19T10:53:32.673-0800",
+                "name": "301",
+                "owner": "300",
+                "qualifiedId": "/123456/300/301",
+                "qualifiedName": "/JW_TEST/300/301",
+                "read": "2014-11-19T10:55:21.393-0800",
+                "specialization": {
+                    "allowedElements": [
+                        "301",
+                        "302",
+                        "303"
+                    ],
+                    "childrenViews": ["304"],
+                    "contains": [{
+                        "source": "301",
+                        "sourceProperty": "documentation",
+                        "sourceType": "reference",
+                        "type": "Paragraph"
+                    }],
+                    "displayedElements": [
+                        "301",
+                        "302",
+                        "303"
+                    ],
+                    "noSections": ["302"],
+                    "type": "Product",
+                    "view2view": [{
+                        "childrenViews": [
+                            "301",
+                            "302"
+                        ],
+                        "sysmlid": "301"
+                    }]
+                },
+                "sysmlid": "301"
+            },
+            {
+                "creator": "admin",
+                "documentation": "to",
+                "editable": true,
+                "modified": "2014-11-19T10:53:27.698-0800",
+                "name": "302",
+                "owner": "301",
+                "qualifiedId": "/123456/300/301/302",
+                "qualifiedName": "/JW_TEST/300/301/302",
+                "read": "2014-11-19T10:55:21.409-0800",
+                "specialization": {
+                    "isDerived": false,
+                    "isSlot": false,
+                    "type": "Property",
+                    "value": [{
+                        "string": "dlam_string",
+                        "type": "LiteralString"
+                    }]
+                },
+                "sysmlid": "302"
+            }
+        ],
+        "id": "2cad5ea5-c241-439e-a400-cf4053dd1d26",
+        "name": "wsA",
+        "qualifiedId": "master/2cad5ea5-c241-439e-a400-cf4053dd1d26",
+        "qualifiedName": "master/wsA"
+    },
+    "workspace2": {
+        "addedElements": [{
+            "creator": "admin",
+            "documentation": "y is y",
+            "editable": true,
+            "modified": "2014-11-19T10:55:18.474-0800",
+            "owner": "302",
+            "qualifiedId": "/123456/300/301/302/y",
+            "qualifiedName": "/JW_TEST/300/301/302/null",
+            "read": "2014-11-19T10:55:21.424-0800",
+            "specialization": {
+                "isDerived": false,
+                "isSlot": false,
+                "type": "Property",
+                "value": [{
+                    "string": "the y value",
+                    "type": "LiteralString"
+                }]
+            },
+            "sysmlid": "y"
+        }],
+        "conflictedElements": [],
+        "deletedElements": [],
+        "id": "320180f2-aae1-4e07-aa31-05e4a4355964",
+        "movedElements": [],
+        "name": "wsT",
+        "qualifiedId": "master/2cad5ea5-c241-439e-a400-cf4053dd1d26/320180f2-aae1-4e07-aa31-05e4a4355964",
+        "qualifiedName": "master/wsA/wsT",
+        "updatedElements": []
+    }
+}
+200

@@ -1,0 +1,173 @@
+{
+    "elements": [
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T10:55:38.664-0800",
+            "name": "y",
+            "owner": "op_ev_31835",
+            "qualifiedId": "/123456/e_31828/op_ev_31835/op_param_31869",
+            "qualifiedName": "/JW_TEST/e_31828/GreaterEquals/y",
+            "read": "2014-11-19T11:08:10.358-0800",
+            "specialization": {"type": "Element"},
+            "sysmlid": "op_param_31869"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T10:55:36.207-0800",
+            "name": "",
+            "owner": "e_32169",
+            "qualifiedId": "/123456/e_32169/expr_32165",
+            "qualifiedName": "/JW_TEST/e_32169/",
+            "read": "2014-11-19T11:08:10.392-0800",
+            "specialization": {
+                "operand": [
+                    {
+                        "element": "op_ev_31835",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "arg_ev_38307_1",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "arg_ev_33001",
+                        "type": "ElementValue"
+                    }
+                ],
+                "type": "Expression"
+            },
+            "sysmlid": "expr_32165"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T10:55:38.460-0800",
+            "name": "x",
+            "owner": "op_ev_31835",
+            "qualifiedId": "/123456/e_31828/op_ev_31835/op_param_31868",
+            "qualifiedName": "/JW_TEST/e_31828/GreaterEquals/x",
+            "read": "2014-11-19T11:08:10.478-0800",
+            "specialization": {"type": "Element"},
+            "sysmlid": "op_param_31868"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T10:55:37.168-0800",
+            "name": "duration",
+            "owner": "e_38304",
+            "qualifiedId": "/123456/e_38304/arg_ev_38307",
+            "qualifiedName": "/JW_TEST/e_38304/duration",
+            "read": "2014-11-19T11:08:10.514-0800",
+            "specialization": {
+                "isDerived": false,
+                "isSlot": false,
+                "type": "Property",
+                "value": [{
+                    "integer": 22,
+                    "type": "LiteralInteger"
+                }]
+            },
+            "sysmlid": "arg_ev_38307"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T10:55:34.416-0800",
+            "name": "duration_1",
+            "owner": "e_38304",
+            "qualifiedId": "/123456/e_38304/arg_ev_38307_1",
+            "qualifiedName": "/JW_TEST/e_38304/duration_1",
+            "read": "2014-11-19T11:08:10.569-0800",
+            "specialization": {
+                "isDerived": false,
+                "isSlot": false,
+                "type": "Property",
+                "value": [{
+                    "integer": 10,
+                    "type": "LiteralInteger"
+                }]
+            },
+            "sysmlid": "arg_ev_38307_1"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T11:08:10.080-0800",
+            "name": "initialDuration",
+            "owner": "e_38263",
+            "qualifiedId": "/123456/e_38263/arg_ev_33001",
+            "qualifiedName": "/JW_TEST/e_38263/initialDuration",
+            "read": "2014-11-19T11:08:10.619-0800",
+            "specialization": {
+                "isDerived": false,
+                "isSlot": false,
+                "type": "Property",
+                "value": [{
+                    "integer": -1145811380,
+                    "type": "LiteralInteger"
+                }]
+            },
+            "sysmlid": "arg_ev_33001"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T10:55:33.902-0800",
+            "name": "",
+            "owner": "e_32169",
+            "qualifiedId": "/123456/e_32169/constraint_32165",
+            "qualifiedName": "/JW_TEST/e_32169/",
+            "read": "2014-11-19T11:08:10.661-0800",
+            "specialization": {
+                "specification": "workspace://SpacesStore/20430aa0-5369-452f-bbf6-639dee070e17",
+                "type": "Constraint"
+            },
+            "sysmlid": "constraint_32165"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T10:55:38.192-0800",
+            "name": "result",
+            "owner": "op_ev_31835",
+            "qualifiedId": "/123456/e_31828/op_ev_31835/op_param_31867",
+            "qualifiedName": "/JW_TEST/e_31828/GreaterEquals/result",
+            "read": "2014-11-19T11:08:10.694-0800",
+            "specialization": {"type": "Element"},
+            "sysmlid": "op_param_31867"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T10:55:37.856-0800",
+            "name": "GreaterEquals",
+            "owner": "e_31828",
+            "qualifiedId": "/123456/e_31828/op_ev_31835",
+            "qualifiedName": "/JW_TEST/e_31828/GreaterEquals",
+            "read": "2014-11-19T11:08:10.725-0800",
+            "specialization": {
+                "parameters": [
+                    "op_param_31867",
+                    "op_param_31868",
+                    "op_param_31869"
+                ],
+                "type": "Operation"
+            },
+            "sysmlid": "op_ev_31835"
+        }
+    ],
+    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"   *** This regression test has a known error ***
+}
+200

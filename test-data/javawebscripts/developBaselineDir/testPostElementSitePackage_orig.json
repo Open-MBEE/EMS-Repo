@@ -1,0 +1,17 @@
+{
+    "elements": [{
+        "creator": "admin",
+        "documentation": "Element to post to a site package",
+        "editable": true,
+        "modified": "2014-11-19T10:56:33.399-0800",
+        "name": "elementInPkg",
+        "owner": "holding_bin_package_123456",
+        "qualifiedId": "/123456/package/holding_bin_package_123456/elementInPkg",
+        "qualifiedName": "/JW_TEST2/package/holding_bin/elementInPkg",
+        "read": "2014-11-19T10:56:34.539-0800",
+        "specialization": {"type": "Product"},
+        "sysmlid": "elementInPkg"
+    }],
+    "message": "[WARNING]: Could not find owner with name: holding_bin_package_123456 putting elementInPkg into: {type=null, id=package_pkg, cm_name=cm_f02599d9-1bdb-402e-944f-0e609b4b8fee_pkg, sysml_name=package, qualified name=/package, workspace=null}\n[WARNING]: createOrUpdateModel deltas not posted properly\n"
+}
+200
