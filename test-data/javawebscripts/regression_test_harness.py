@@ -272,7 +272,8 @@ def print_error(msg, outpt):
     global failed_tests
     failed_tests += 1
     errs.append(msg)
-    print "\nFAIL: "+str(msg)+str(outpt)
+    print "\nFAIL: "+str(msg)
+    print str(outpt)
     
 def mbee_util_jar_path():
     path = "../../../../.m2/repository/gov/nasa/jpl/mbee/util/mbee_util/"
@@ -307,10 +308,10 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
 #     result_orig_json = "%s/test%d_orig.json"%(result_dir,test_num)
 #     baseline_json = "%s/test%d.json"%(baseline_dir,test_num)
 #     baseline_orig_json = "%s/test%d_orig.json"%(baseline_dir,test_num)
-    result_json = "%s/test%s.json"%(result_dir,test_name)
-    result_orig_json = "%s/test%s_orig.json"%(result_dir,test_name)
-    baseline_json = "%s/test%s.json"%(baseline_dir,test_name)
-    baseline_orig_json = "%s/test%s_orig.json"%(baseline_dir,test_name)
+    result_json = "%s/%s.json"%(result_dir,test_name)
+    result_orig_json = "%s/%s_orig.json"%(result_dir,test_name)
+    baseline_json = "%s/%s.json"%(baseline_dir,test_name)
+    baseline_orig_json = "%s/%s_orig.json"%(baseline_dir,test_name)
 
     thick_divider()
     if create_baselines:
@@ -1132,10 +1133,11 @@ if __name__ == '__main__':
     if not create_baselines:
         print "\nNUMBER OF PASSED TESTS: "+str(passed_tests)
         print "NUMBER OF FAILED TESTS: "+str(failed_tests)+"\n"
-        print "FAILED TESTS:"
-        for item in errs[:]:
-            print item
-        print "\n"
+        if failed_tests > 0:
+            print "FAILED TESTS:"
+            for item in errs[:]:
+                print item
+            print "\n"
     
     sys.exit(failed_tests)
     

@@ -1,0 +1,215 @@
+{
+    "elements": [
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T13:46:49.515-0800",
+            "name": "BLUCam CubeSat A",
+            "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394140430311_23731_27741/_17_0_2_4_f3a0363_1394142290412_487571_28478",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394140430311_23731_27741/BLUCam CubeSat A",
+            "read": "2014-11-19T13:46:50.324-0800",
+            "specialization": {"type": "Package"},
+            "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T13:46:40.122-0800",
+            "name": "viewpoint_op",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/name_list",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/viewpoint_op",
+            "read": "2014-11-19T13:46:50.350-0800",
+            "specialization": {
+                "expression": "vp_expression",
+                "parameters": ["exposed_id"],
+                "type": "Operation"
+            },
+            "sysmlid": "name_list"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T13:46:50.162-0800",
+            "name": "ComponentViewPoint",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148449252_91190_29556",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/ComponentViewPoint",
+            "read": "2014-11-19T13:46:50.382-0800",
+            "specialization": {"type": "Viewpoint"},
+            "sysmlid": "_17_0_2_3_e610336_1394148449252_91190_29556"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T13:46:39.943-0800",
+            "name": "Name",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_name_arg",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Name",
+            "read": "2014-11-19T13:46:50.407-0800",
+            "specialization": {"type": "Operation"},
+            "sysmlid": "op_name_arg"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T13:46:39.441-0800",
+            "name": "",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/MMS_1416433590511_0917de15-9fc6-41c8-aa87-5ea6594828df",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+            "read": "2014-11-19T13:46:50.433-0800",
+            "specialization": {
+                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+                "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+                "type": "Expose"
+            },
+            "sysmlid": "MMS_1416433590511_0917de15-9fc6-41c8-aa87-5ea6594828df"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T13:46:44.343-0800",
+            "name": "",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/vp_expression",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+            "read": "2014-11-19T13:46:50.472-0800",
+            "specialization": {
+                "operand": [
+                    {
+                        "element": "op_list",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "operand": [
+                            {
+                                "element": "op_map",
+                                "type": "ElementValue"
+                            },
+                            {
+                                "element": "exposed_id",
+                                "type": "ElementValue"
+                            },
+                            {
+                                "element": "op_name_arg",
+                                "type": "ElementValue"
+                            }
+                        ],
+                        "type": "Expression"
+                    }
+                ],
+                "type": "Expression"
+            },
+            "sysmlid": "vp_expression"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T13:46:46.434-0800",
+            "name": "",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_map_arg",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+            "read": "2014-11-19T13:46:50.567-0800",
+            "specialization": {
+                "operand": [
+                    {
+                        "element": "op_map",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "exposed_id",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "op_name_arg",
+                        "type": "ElementValue"
+                    }
+                ],
+                "type": "Expression"
+            },
+            "sysmlid": "op_map_arg"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T13:46:45.218-0800",
+            "name": "map",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_map",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/map",
+            "read": "2014-11-19T13:46:50.634-0800",
+            "specialization": {"type": "Operation"},
+            "sysmlid": "op_map"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T13:46:39.761-0800",
+            "name": "exposed",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/exposed_id",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/exposed",
+            "read": "2014-11-19T13:46:50.661-0800",
+            "specialization": {"type": "Parameter"},
+            "sysmlid": "exposed_id"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T13:46:42.167-0800",
+            "name": "",
+            "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148311476_17302_29388/_17_0_2_3_e610336_1394148464681_90735_29608",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components/",
+            "read": "2014-11-19T13:46:50.688-0800",
+            "specialization": {
+                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+                "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
+                "type": "Conform"
+            },
+            "sysmlid": "_17_0_2_3_e610336_1394148464681_90735_29608"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T13:46:49.848-0800",
+            "name": "Components",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148311476_17302_29388",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components",
+            "read": "2014-11-19T13:46:50.734-0800",
+            "specialization": {"type": "View"},
+            "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T13:46:38.743-0800",
+            "name": "List",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_list",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/List",
+            "read": "2014-11-19T13:46:50.763-0800",
+            "specialization": {"type": "Operation"},
+            "sysmlid": "op_list"
+        }
+    ],
+    "message": "[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting op_list into: {type=null, id=123456_pkg, cm_name=123456_pkg, sysml_name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394140430311_23731_27741 putting _17_0_2_4_f3a0363_1394142290412_487571_28478 into: {type=null, id=123456_pkg, cm_name=123456_pkg, sysml_name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: createOrUpdateModel deltas not posted properly\n"
+}
+200

@@ -1,0 +1,41 @@
+{"products": [{
+    "creator": "admin",
+    "documentation": "else",
+    "editable": true,
+    "modified": "2014-11-19T13:15:10.539-0800",
+    "name": "301",
+    "owner": "300",
+    "qualifiedId": "/123456/300/301",
+    "qualifiedName": "/JW_TEST/300/301",
+    "read": "2014-11-19T13:15:12.229-0800",
+    "specialization": {
+        "allowedElements": [
+            "301",
+            "302",
+            "303"
+        ],
+        "childrenViews": ["304"],
+        "contains": [{
+            "source": "301",
+            "sourceProperty": "documentation",
+            "sourceType": "reference",
+            "type": "Paragraph"
+        }],
+        "displayedElements": [
+            "301",
+            "302",
+            "303"
+        ],
+        "noSections": ["302"],
+        "type": "Product",
+        "view2view": [{
+            "childrenViews": [
+                "301",
+                "302"
+            ],
+            "sysmlid": "301"
+        }]
+    },
+    "sysmlid": "301"
+}]}
+200
