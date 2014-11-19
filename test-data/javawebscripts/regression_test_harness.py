@@ -1035,13 +1035,24 @@ common_filters,
 [
 44,
 "PostElementSitePackage",
-"Post a element to a site package",
+"Post a product to a site package",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 data="ElementSitePackage.json",
                 branch="master/sites/site_package/",
                 post_type="elements"),
 True, 
 common_filters+['"message"'],
+["test","workspaces","develop"]
+],
+        
+[
+45,
+"GetSitePackageProducts",
+"Get site package products",
+create_curl_cmd(type="GET",data="products",base_url=BASE_URL_WS,
+                branch="master/sites/site_package/"),
+True, 
+common_filters,
 ["test","workspaces","develop"]
 ],
         
