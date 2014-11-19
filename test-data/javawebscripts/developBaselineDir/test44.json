@@ -16,7 +16,7 @@
 
         "qualifiedName": "/JW_TEST2/package/holding_bin/elementInPkg",
 
-        "specialization": {"type": "Element"},
+        "specialization": {"type": "Product"},
 
         "sysmlid": "elementInPkg"
 
