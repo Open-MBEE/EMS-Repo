@@ -53,7 +53,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                                                            throws JSONException {
         JSONArray productsJson = new JSONArray();
 
-        EmsScriptNode siteNode = getSiteNodeFromRequest( req );
+        EmsScriptNode siteNode = getSiteNodeFromRequest( req, true );
         if (siteNode == null) {
             log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
             return productsJson;

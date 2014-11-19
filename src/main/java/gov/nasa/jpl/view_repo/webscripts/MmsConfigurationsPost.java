@@ -75,7 +75,7 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
     private JSONObject handleUpdate(WebScriptRequest req) throws JSONException {
         WorkspaceNode workspace = getWorkspace( req );
 
-        EmsScriptNode siteNode = getSiteNodeFromRequest(req);
+        EmsScriptNode siteNode = getSiteNodeFromRequest(req, false);
         if (siteNode == null) {
             log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
             return new JSONObject();

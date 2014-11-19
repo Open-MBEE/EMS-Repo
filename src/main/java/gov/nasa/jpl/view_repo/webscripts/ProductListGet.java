@@ -87,7 +87,7 @@ public class ProductListGet extends AbstractJavaWebScript {
             return false;
         }
 
-        siteNode = getSiteNodeFromRequest(req);
+        siteNode = getSiteNodeFromRequest(req, true);
 
         if (!checkPermissions(siteNode, PermissionService.READ)) {
             return false;

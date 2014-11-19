@@ -30,6 +30,7 @@ package gov.nasa.jpl.view_repo.actions;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -123,24 +124,30 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
 		HashSet<String> productList = (HashSet<String>) action.getParameterValue(PARAM_PRODUCT_LIST);
         
         String siteName = (String) action.getParameterValue(PARAM_SITE_NAME);
-        if (Debug.isOn()) System.out.println("ConfigurationGenerationActionExecuter started execution of " + siteName);
-        SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-        if (siteInfo == null) {
-        		if (Debug.isOn()) System.out.println("[ERROR]: could not find site: " + siteName);
-            return;
-        }
-        NodeRef siteRef = siteInfo.getNodeRef();
-        
-        // If the version of the site ever changes, its products may also
-        // change, so get the products for the version of the site according to
-        // the specified date/time. Actually, this probably doesn't matter based
-        // on how the site node is used.
-       if ( dateTime != null ) {
-            NodeRef vRef = NodeUtil.getNodeRefAtTime( siteRef, dateTime );
-            if ( vRef != null ) siteRef = vRef;
-        }
-        EmsScriptNode site = new EmsScriptNode(siteRef, services, response);
-
+        String fndSiteName = null;
+        // If siteName is null then we're searching for elements across all
+        // sites in the workspace.
+        if ( !Utils.isNullOrEmpty( siteName ) ) {
+            if (Debug.isOn()) System.out.println("ConfigurationGenerationActionExecuter started execution of " + siteName);
+            SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+            if (siteInfo == null) {
+            		if (Debug.isOn()) System.out.println("[ERROR]: could not find site: " + siteName);
+                return;
+            }
+            NodeRef siteRef = siteInfo.getNodeRef();
+            
+            // If the version of the site ever changes, its products may also
+            // change, so get the products for the version of the site according to
+            // the specified date/time. Actually, this probably doesn't matter based
+            // on how the site node is used.
+           if ( dateTime != null ) {
+                NodeRef vRef = NodeUtil.getNodeRefAtTime( siteRef, dateTime );
+                if ( vRef != null ) siteRef = vRef;
+            }
+           EmsScriptNode site = new EmsScriptNode(siteRef, services, response);
+           fndSiteName = site.getSiteName();
+        }       
+       
 //        Set< EmsScriptNode > productSet =
 //                WebScriptUtil.getAllNodesInPath( site.getQnamePath(), "ASPECT",
 //                                                 Acm.ACM_PRODUCT, workspace,
@@ -149,7 +156,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         Map< String, EmsScriptNode > nodeList = NodeUtil.searchForElements(NodeUtil.SearchType.ASPECT.prefix, 
                                                                           Acm.ACM_PRODUCT, false,
                                                                           workspace, dateTime, services, response,
-                                                                          responseStatus, site.getSiteName());
+                                                                          responseStatus, fndSiteName);
         if (nodeList != null) {
             productSet.addAll( nodeList.values() );
         }
@@ -166,7 +173,10 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
 	            snapshotService.setServices(services);
 	            snapshotService.setLogLevel(LogLevel.DEBUG);
 	            Status status = new Status();
-	            EmsScriptNode snapshot = snapshotService.createSnapshot(product, product.getSysmlId(), workspace, dateTime);
+                EmsScriptNode snapshot =
+                        snapshotService.createSnapshot( product,
+                                                        product.getSysmlId(),
+                                                        workspace, dateTime );
 	            if (snapshot == null || status.getCode() != HttpServletResponse.SC_OK) {
 	                jobStatus = "Failed";
 	                response.append("[ERROR]: could not make snapshot for " + product.getProperty(Acm.ACM_NAME));
@@ -198,7 +208,11 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         String contextUrl = "https://" + hostname + "/alfresco";
         
         // Send off notification email
-        String subject = "[EuropaEMS] Configuration " + siteName + " Generation " + jobStatus;
+        String subject =
+                "[EuropaEMS] Configuration generation in workspace "
+                        + WorkspaceNode.getWorkspaceName( workspace )
+                        + ( siteName == null ? "" : ", siteName " + siteName )
+                        + ": status = " + jobStatus;
         String msg = "Log URL: " + contextUrl + logNode.getUrl();
         // TODO: NOTE!!! The following needs to be commented out for local testing....
         ActionUtil.sendEmailToModifier(jobNode, msg, subject, services, response);

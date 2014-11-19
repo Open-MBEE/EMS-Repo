@@ -1492,7 +1492,9 @@ public class ModelPost extends AbstractJavaWebScript {
             nodeToUpdate.setResponse( getResponse() );
             nodeToUpdate.setStatus( getResponseStatus() );
             existingNodeType = nodeToUpdate.getTypeName();
-            if ( nodeToUpdate.isDeleted() ) {
+            // Resurrect if found node is deleted and is in this exact workspace.
+            if ( nodeToUpdate.isDeleted() && 
+                 NodeUtil.workspacesEqual( nodeToUpdate.getWorkspace(), workspace ) ) {
                 nodeToUpdate.removeAspect( "ems:Deleted" );
                 modStatus.setState( ModStatus.State.ADDED );
             }
@@ -2391,7 +2393,7 @@ public class ModelPost extends AbstractJavaWebScript {
         //String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
         //SiteInfo siteInfo = services.getSiteService().getSite(siteName);
         SiteInfo sInfo = getSiteInfo(req);
-        EmsScriptNode siteNode = getSiteNodeFromRequest( req );
+        EmsScriptNode siteNode = getSiteNodeFromRequest( req, true );
         if ( sInfo == null ) {
             log(LogLevel.ERROR, "No site to start model load!", HttpServletResponse.SC_BAD_REQUEST);
             return;

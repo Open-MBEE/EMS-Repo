@@ -121,7 +121,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
      * @throws JSONException
      */
     public JSONArray handleConfigurations(WebScriptRequest req, boolean isMms) throws JSONException {
-        EmsScriptNode siteNode = getSiteNodeFromRequest(req);
+        EmsScriptNode siteNode = getSiteNodeFromRequest(req, false);
         if (siteNode == null) {
             log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
             return new JSONArray();
@@ -142,11 +142,9 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             if (!config.isDeleted()) {
                 if (isMms) {
                     configJsonArray.put( getMmsConfigJson( config,
-                                                           req.getContextPath(),
                                                            workspace, dateTime ) );
                 } else {
                     configJsonArray.put( getConfigJson( config,
-                                                        req.getContextPath(),
                                                         workspace, dateTime ) );
                 }
             }
@@ -190,10 +188,10 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
      * @return
      * @throws JSONException
      */
-    public JSONObject getMmsConfigJson(EmsScriptNode config, String contextPath,
+    public JSONObject getMmsConfigJson(EmsScriptNode config, 
                                        WorkspaceNode workspace, Date dateTime)
                                                throws JSONException {
-        JSONObject json = getConfigJson( config, contextPath, workspace, dateTime );
+        JSONObject json = getConfigJson( config, workspace, dateTime );
         
         json.remove( "snapshots" );
         
@@ -209,7 +207,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
      * @return
      * @throws JSONException
      */
-    public JSONObject getConfigJson(EmsScriptNode config, String contextPath,
+    public JSONObject getConfigJson(EmsScriptNode config,
                                     WorkspaceNode workspace, Date dateTime) throws JSONException {
         JSONObject json = new JSONObject();
         Date date = (Date)config.getProperty("cm:created");
@@ -413,7 +411,6 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         } else if (postJson.has( "snapshots" )) {
             config.removeAssociations("ems:configuredSnapshots");
             JSONArray snapshotsJson = postJson.getJSONArray("snapshots");
-            EmsScriptNode snapshotFolder = context.childByNamePath("/snapshots");
             for (int ii = 0; ii < snapshotsJson.length(); ii++) {
                 Object snapshotObject = snapshotsJson.get( ii );
                 String snapshotId = "";
@@ -422,7 +419,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
                 } else if (snapshotObject instanceof JSONObject) {
                     snapshotId = ((JSONObject)snapshotObject).getString( "id" );
                 }
-                EmsScriptNode snapshot = snapshotFolder.childByNamePath("/" + snapshotId);
+                EmsScriptNode snapshot = findScriptNodeById(snapshotId, workspace, null, false);
                 if (snapshot != null) {
                     config.createOrUpdateAssociation(snapshot, "ems:configuredSnapshots", true);
                 }

@@ -172,10 +172,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * @return
      */
     protected EmsScriptNode getSiteNode(String siteName, WorkspaceNode workspace,
-                                        Date dateTime) {
-        return getSiteNodeImpl(siteName, workspace, dateTime, false);
+                                        Date dateTime ) {
+        return getSiteNode( siteName, workspace, dateTime, true );
     }
-    
+    protected EmsScriptNode getSiteNode(String siteName, WorkspaceNode workspace,
+                                        Date dateTime, boolean errorOnNull) {
+        return getSiteNodeImpl(siteName, workspace, dateTime, false, errorOnNull);
+    }
+
     /**
      * Helper method for getSideNode* methods
      * 
@@ -186,12 +190,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * @return
      */
     private EmsScriptNode getSiteNodeImpl(String siteName, WorkspaceNode workspace,
-            						 	   Date dateTime, boolean forWorkspace) {
+            						 	   Date dateTime, boolean forWorkspace, boolean errorOnNull) {
     	
 		EmsScriptNode siteNode = null;
 		
 		if (siteName == null) {
-			log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
+		    if ( errorOnNull ) log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
 		} else {
 			if (forWorkspace) {
 				siteNode = NodeUtil.getSiteNodeForWorkspace( siteName, false, workspace, dateTime,
@@ -201,6 +205,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 				siteNode = NodeUtil.getSiteNode( siteName, false, workspace, dateTime,
 			                 					services, response );
 			}
+	        if ( errorOnNull && siteNode == null ) log(LogLevel.ERROR, "Site node is null", HttpServletResponse.SC_BAD_REQUEST);
 		}
 		
 		return siteNode;
@@ -221,10 +226,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     protected EmsScriptNode getSiteNodeForWorkspace(String siteName, WorkspaceNode workspace,
                                         			Date dateTime) {
     	
-        return getSiteNodeImpl(siteName, workspace, dateTime, true);
+        return getSiteNodeImpl(siteName, workspace, dateTime, true, true);
     }
 
-    protected EmsScriptNode getSiteNodeFromRequest(WebScriptRequest req) {
+    protected EmsScriptNode getSiteNodeFromRequest(WebScriptRequest req, boolean errorOnNull) {
         String siteName = null;
         // get timestamp if specified
         String timestamp = req.getParameter("timestamp");
@@ -239,7 +244,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             if (siteName != null) break;
         }
 
-        return getSiteNode( siteName, workspace, dateTime );
+        return getSiteNode( siteName, workspace, dateTime, errorOnNull );
     }
 	
 	/**
@@ -361,9 +366,36 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return siteName;
     }
 
+    EmsScriptNode getSitesFolder( WorkspaceNode workspace ) {
+        EmsScriptNode sitesFolder = null;
+        // check and see if the Sites folder already exists
+        boolean useSimpleCache = workspace == null;
+        NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, useSimpleCache, false, 
+                                                           workspace, null, true, services, false );
+        if ( sitesNodeRef != null ) {
+            sitesFolder = new EmsScriptNode( sitesNodeRef, services );
+
+            // If workspace of sitesNodeRef is this workspace then no need to
+            // replicate, otherwise replicate from the master workspace:
+            if ( sitesFolder != null
+                 && !workspace.equals( sitesFolder.getWorkspace() ) ) {
+                sitesFolder = workspace.replicateWithParentFolders( sitesFolder );
+            }
+
+        }
+        // This case should never occur b/c the master workspace will always
+        // have a Sites folder:
+        else {
+            Debug.error( "Can't find Sites folder in the workspace " + workspace );
+        }
+        return sitesFolder;
+//        EmsScriptNode sf = NodeUtil.getCompanyHome( getServices() ).childByNamePath( "Sites" );
+//        return sf;
+    }
+    
     public EmsScriptNode createSite( String siteName, WorkspaceNode workspace ) {
     	
-        EmsScriptNode siteNode = getSiteNode( siteName, workspace, null );
+        EmsScriptNode siteNode = getSiteNode( siteName, workspace, null, true );
         boolean validWorkspace = workspace != null && workspace.exists();
         boolean invalidSiteNode = siteNode == null || !siteNode.exists();
 
@@ -381,25 +413,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         if ( validWorkspace && 
         	( invalidSiteNode || (!invalidSiteNode && !workspace.equals(siteNode.getWorkspace())) ) ) {
         	
-	        EmsScriptNode sitesFolder = null;
-	        // check and see if the Sites folder already exists
-	        boolean useSimpleCache = workspace == null;
-	        NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, useSimpleCache, false, 
-	        													workspace, null, true, services, false );
-	        if ( sitesNodeRef != null ) {
-	            sitesFolder = new EmsScriptNode( sitesNodeRef, services );
-	            
-	            // If workspace of sitesNodeRef is this workspace then no need to replicate,
-	            // otherwise replicate from the master workspace:
-	            if (sitesFolder != null && !workspace.equals(sitesFolder.getWorkspace()) ) {
-	                sitesFolder = workspace.replicateWithParentFolders( sitesFolder );
-	            }
-	              
-	        } 
-	        // This case should never occur b/c the master workspace will always have a Sites folder:
-	        else {
-	            Debug.error( "Can't find Sites folder in the workspace " + workspace);
-	        }
+	        EmsScriptNode sitesFolder = getSitesFolder(workspace);
 	        
 	        // Now, create the site folder:
 	        if (sitesFolder == null ) {

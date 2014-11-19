@@ -2788,6 +2788,18 @@ public class EmsScriptNode extends ScriptNode implements
         return workspaceName;
     }
 
+    public void setWorkspace( WorkspaceNode workspace ) {
+        setWorkspace( workspace, null );
+    }
+
+    public NodeRef findSourceInParentWorkspace() {
+        if ( getWorkspace() == null ) return null;
+        WorkspaceNode parentWs = getParentWorkspace();
+        NodeRef r = NodeUtil.findNodeRefById( getSysmlId(), false, parentWs,
+                                              null, getServices(), false );
+        return r;
+    }
+    
     /**
      * @param workspace
      *            the workspace to set
@@ -2805,6 +2817,9 @@ public class EmsScriptNode extends ScriptNode implements
             setProperty( "ems:workspace", workspace.getNodeRef() );
         } else if ( workspace == null && ref != null ) {
             removeAspect( "ems:HasWorkspace" );
+        }
+        if ( source == null ) {
+            source = findSourceInParentWorkspace();
         }
         if ( source != null ) {
             setProperty( "ems:source", source );
