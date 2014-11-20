@@ -171,7 +171,7 @@ public class ProjectPost extends AbstractJavaWebScript {
                                      boolean createSite,
                                      boolean delete) throws JSONException {
 		// make sure site exists
-		EmsScriptNode siteNode = getSiteNodeForWorkspace(siteName, workspace, null);
+		EmsScriptNode siteNode = getSiteNodeForWorkspace(siteName, workspace, null, false);
 
 		if (siteNode == null) {
 		    if (createSite) {

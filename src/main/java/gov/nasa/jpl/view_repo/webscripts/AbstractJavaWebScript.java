@@ -227,9 +227,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * @return
      */
     protected EmsScriptNode getSiteNodeForWorkspace(String siteName, WorkspaceNode workspace,
-                                        			Date dateTime) {
+                                                    Date dateTime) {
+        return getSiteNode( siteName, workspace, dateTime, true );
+    }
+    protected EmsScriptNode getSiteNodeForWorkspace(String siteName, WorkspaceNode workspace,
+                                        			Date dateTime, boolean errorOnNull) {
     	
-        return getSiteNodeImpl(siteName, workspace, dateTime, true, true);
+        return getSiteNodeImpl(siteName, workspace, dateTime, true, errorOnNull);
     }
 
     protected EmsScriptNode getSiteNodeFromRequest(WebScriptRequest req, boolean errorOnNull) {
