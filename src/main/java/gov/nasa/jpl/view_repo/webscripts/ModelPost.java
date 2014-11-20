@@ -36,11 +36,12 @@ import gov.nasa.jpl.ae.event.Parameter;
 import gov.nasa.jpl.ae.event.ParameterListenerImpl;
 import gov.nasa.jpl.ae.solver.Constraint;
 import gov.nasa.jpl.ae.solver.ConstraintLoopSolver;
-import gov.nasa.jpl.mbee.util.Random;
 import gov.nasa.jpl.ae.sysml.SystemModelSolver;
 import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
 import gov.nasa.jpl.ae.util.ClassData;
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.Pair;
+import gov.nasa.jpl.mbee.util.Random;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
@@ -53,8 +54,7 @@ import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
-import gov.nasa.jpl.mbee.util.Pair;
+import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -64,7 +64,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -79,7 +78,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
@@ -1709,27 +1707,30 @@ public class ModelPost extends AbstractJavaWebScript {
         return nestedNode ? nodeToUpdate : reifiedPkgNode;
     }
     
-    private EmsScriptNode createSitePkgStub(EmsScriptNode pkgSiteNode,
+    private EmsScriptNode createSitePkg(EmsScriptNode pkgSiteNode,
                                             WorkspaceNode workspace) {
         // site packages are only for major site, nothing to do with workspaces
         String siteName = "site_" + pkgSiteNode.getSysmlId();
         
-        EmsScriptNode siteNode = getSiteNode( siteName, workspace, null );
+        EmsScriptNode siteNode = null;
         
         SiteInfo siteInfo = services.getSiteService().getSite( siteName );
         if ( siteInfo != null ) {
-            
+            String sitePreset = "site-dashboard";
+            String siteTitle = pkgSiteNode.getSysmlName();
+            String siteDescription = (String) pkgSiteNode.getProperty( Acm.ACM_DOCUMENTATION );
+            boolean isPublic = true;
+            ShareUtils.constructSiteDashboard( sitePreset, siteName, siteTitle, siteDescription, isPublic );
+            siteInfo = services.getSiteService().getSite( siteName );
+            if ( siteInfo != null ) {
+                siteNode = new EmsScriptNode( siteInfo.getNodeRef(), services, response );
+                siteNode.createOrUpdateAspect( "cm:taggable" );
+                siteNode.createOrUpdateAspect( Acm.ACM_SITE );
+                siteNode.createOrUpdateProperty( Acm.ACM_SITE_PACKAGE, pkgSiteNode.getNodeRef() );
+                pkgSiteNode.createOrUpdateProperty( Acm.ACM_SITE_SITE, siteNode.getNodeRef() );
+            }
         }
-        
-        
-        if (siteNode == null || !siteNode.exists()) {
-            
-            SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, SiteVisibility.PUBLIC );
-            siteNode = new EmsScriptNode( foo.getNodeRef(), services );
-            siteNode.createOrUpdateAspect( "cm:taggable" );
-            siteNode.createOrUpdateAspect(Acm.ACM_SITE);
-        }
-        
+                       
         return siteNode;
     }
     
@@ -1748,8 +1749,7 @@ public class ModelPost extends AbstractJavaWebScript {
         if (isSite != null) {
             // Create site/permissions if needed:
             if (isSite) {
-                // TODO call CY method.  Will it check if the site already exists first?
-                EmsScriptNode pkgSiteNode = createSitePkgStub(nodeToUpdate, workspace);
+                EmsScriptNode pkgSiteNode = createSitePkg(nodeToUpdate, workspace);
                 
                 // Determine the parent package:
                 // Note: will do this everytime, even if the site package node already existed, as the parent site

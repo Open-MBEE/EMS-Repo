@@ -721,13 +721,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         EmsScriptNode siteNode = null;
         
         // If it is a package site:
+        // CYL FIXME can find using siteService
         if (siteName != null && siteName.startsWith(NodeUtil.sitePkgPrefix)) {
             
             // Get the corresponding package for the site:
             String[] splitArry = siteName.split(NodeUtil.sitePkgPrefix);
             if (splitArry != null && splitArry.length > 0) {
                 String sitePkgName = splitArry[splitArry.length-1];
-                
+
                 sitePackageNode = findScriptNodeById(sitePkgName,workspace, null, false );
 
                 // Found the package for the site:
@@ -799,6 +800,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                     // cm:name = "site_"+sysmlid of site package node:
                     String sysmlid = siteParentReifNode.getSysmlId();
                     if (sysmlid != null) {
+                        // CYL FIXME to use relationship
                         pkgSiteParentNode = findScriptNodeById(NodeUtil.sitePkgPrefix+sysmlid, workspace, null, false);
                         break;
                     }

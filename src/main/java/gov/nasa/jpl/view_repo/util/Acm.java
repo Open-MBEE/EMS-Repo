@@ -361,6 +361,8 @@ public class Acm {
     public static final String ACM_SITE = "ems:Site";
     public static final String ACM_SITE_PARENT = "ems:siteParent";
     public static final String ACM_SITE_CHILDREN = "ems:siteChildren";
+    public static final String ACM_SITE_PACKAGE = "ems:sitePackage";
+    public static final String ACM_SITE_SITE = "ems:siteSite";
     public static final String ACM_IS_SITE = SYSML + JSON_IS_SITE;
 
     /**
