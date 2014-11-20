@@ -11,23 +11,23 @@
     {"documentation" : "View content", 
      "sysmlid":"viewContents", 
      "name":"viewContents", 
-     "owner":"123456", 
+     "owner":"123456",      
      "specialization": {"type":"Expression"}
     },
     
-    {"documentation" : "Enumeration", 
-     "sysmlid":"enumeration", 
-     "name":"enumeration", 
+    {"documentation" : "LiteralSet", 
+     "sysmlid":"literalSet", 
+     "name":"literalSet", 
      "owner":"123456", 
-     "specialization": {"type":"Enumeration",
-                        "enumeratedValue":[{"type":"LiteralString",
-                                            "string":"COMPOSITE"},
-                                           {"type":"LiteralString",
-                                            "string":"AGGREGATE"},
-                                           {"type":"LiteralString",
-                                            "string":"NONE"}],
-                        "selectedValue":{"type":"LiteralString",
-                                         "string":"AGGREGATE"}}
+     "specialization": {"type":"LiteralSet",
+                        "set":[{"type":"LiteralString",
+                                "string":"I"},
+                               {"type":"LiteralString",
+                                "string":"Love"},
+                               {"type":"LiteralString",
+                                "string":"Bears"}],
+                        "setOperand":{"type":"LiteralString",
+                                      "string":"Bears"}}
     },
         
     {"documentation" : "Magic Draw Meta-Data", 
@@ -43,9 +43,17 @@
      "name":"connector", 
      "owner":"123456", 
      "specialization": {"type":"Connector",
+                        "targetLower":{"type":"LiteralString",
+                                       "string":"targetLower!"},
+                        "targetUpper":{"type":"LiteralString",
+                                       "string":"targetUpper!"},
+                        "sourceLower":{"type":"LiteralString",
+                                       "string":"sourceLower!"},
+                        "sourceUpper":{"type":"LiteralString",
+                                       "string":"sourceUpper!"},
                         "sourcePath":["connectorSource"],
                         "targetPath":["connectorTarget"],
-                        "connectorType":"connectorTypeAssoc",
+                        "connectorKind":"BINDING",
                         "connectorValue":{"type":"LiteralString",
                                            "string":"Ninja Attack!"}}
     },
@@ -54,7 +62,11 @@
      "sysmlid":"connectorSource", 
      "name":"connectorSource", 
      "owner":"123456", 
-     "specialization": {"type":"Property"}
+     "specialization": {"type":"Property",
+                        "lower":{"type":"LiteralString",
+                                 "string":"lower!"},
+                        "upper":{"type":"LiteralString",
+                                 "string":"upper!"}}
     },
     
     {"documentation" : "Connector target", 
@@ -64,16 +76,16 @@
      "specialization": {"type":"Property"}
     },
     
-    {"documentation" : "Connector type", 
-     "sysmlid":"connectorTypeAssoc", 
-     "name":"connectorTypeAssoc", 
+    {"documentation" : "association", 
+     "sysmlid":"association", 
+     "name":"association", 
      "owner":"123456", 
      "specialization": {"type":"Association",
                         "ownedEnd":["AssocOwnedEnd"],
                         "source":"sourceId",
                         "target":"targetId",
-                        "sourceAggregation":"enumeration",
-                        "targetAggregation":"enumeration"}
+                        "sourceAggregation":"COMPOSITE",
+                        "targetAggregation":"SHARED"}
     },
     
     {"documentation" : "Associations's owned end", 
@@ -89,15 +101,7 @@
      "owner":"123456", 
      "specialization": {"type":"Characterizes",
                         "source":"sourceId",
-                        "target":"targetId",
-                        "propertiesTransferred":["propsTransferred"]}
-    },
-    
-    {"documentation" : "propsTransferred", 
-     "sysmlid":"propsTransferred", 
-     "name":"propsTransferred", 
-     "owner":"123456", 
-     "specialization": {"type":"Property"}
+                        "target":"targetId"}
     },
     
     {"documentation" : "source", 
@@ -112,25 +116,6 @@
      "name":"targetId", 
      "owner":"123456", 
      "specialization": {"type":"Property"}
-    },
-    
-    {"documentation" : "succession", 
-     "sysmlid":"succession", 
-     "name":"succession", 
-     "owner":"123456", 
-     "specialization": {"type":"Succession",
-                        "sourcePath":["connectorSource"],
-                        "targetPath":["connectorTarget"],
-                        "connectorType":"connectorTypeAssoc"}
-    },
-    
-    {"documentation" : "binding", 
-     "sysmlid":"binding", 
-     "name":"binding", 
-     "owner":"123456", 
-     "specialization": {"type":"Binding",
-                        "sourcePath":["connectorSource"],
-                        "targetPath":["connectorTarget"],
-                        "connectorType":"connectorTypeAssoc"}
     }
+    
 ]}
