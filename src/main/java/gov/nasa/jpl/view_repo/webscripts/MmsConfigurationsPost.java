@@ -95,7 +95,7 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
         HashSet<String> productSet = configWs.updateConfiguration( config, (JSONObject)req.parseContent(), siteNode, workspace, null );
         ConfigurationPost configPost = new ConfigurationPost( repository, services );
         String siteName = siteNode == null ? null : siteNode.getName();
-        configPost.startAction( config, siteName, productSet, null );
+        configPost.startAction( config, siteName, productSet, workspace, null );
         
         return configWs.getConfigJson( config, workspace, null );
     }

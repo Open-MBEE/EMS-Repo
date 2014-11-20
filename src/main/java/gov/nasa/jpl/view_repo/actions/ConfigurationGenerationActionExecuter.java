@@ -29,26 +29,18 @@
 package gov.nasa.jpl.view_repo.actions;
 
 import gov.nasa.jpl.mbee.util.Debug;
-import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
-import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
-
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
@@ -59,10 +51,9 @@ import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.springframework.extensions.webscripts.Status;
-import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
- * Action for loading the project model in the background asynchronously
+ * Action for loading a configuration in the background asynchronously
  * @author cinyoung
  */
 public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstractBase {
@@ -80,6 +71,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
     public static final String PARAM_SITE_NAME = "siteName";
     public static final String PARAM_PRODUCT_LIST = "docList";
     public static final String PARAM_TIME_STAMP = "timeStamp";
+    public static final String PARAM_WORKSPACE = "workspace";
 
     public void setRepository(Repository rep) {
         repository = rep;
@@ -93,22 +85,6 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
     protected void executeImpl(Action action, NodeRef nodeRef) {
         clearCache();
 
-        // Get timestamp if specified. This is for the products, not the
-        // snapshots or configuration.
-        Date dateTime = null;
-        dateTime = (Date)action.getParameterValue(PARAM_TIME_STAMP);
-        
-        WorkspaceNode workspace = null;
-        if ( action instanceof WebScriptRequest) {
-            WebScriptRequest req = (WebScriptRequest)action;
-            String timestamp = req.getParameter("timestamp");
-            workspace = AbstractJavaWebScript.getWorkspace( req, services,
-                                                            response,
-                                                            responseStatus, //false
-                                                            null );
-            if(dateTime == null) dateTime = TimeUtils.dateFromTimestamp( timestamp );
-        }
-
         // Do not get an older version of the node based on the timestamp since
         // new snapshots should be associated with a new configuration. The
         // timestamp refers to the products, not the snapshots themselves.
@@ -119,6 +95,27 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         EmsScriptNode jobNode = new EmsScriptNode(nodeRef, services, response);
         // clear out any existing associated snapshots
         jobNode.removeAssociations("ems:configuredSnapshots");
+
+        // Get timestamp if specified. This is for the products, not the
+        // snapshots or configuration.
+        Date dateTime = null;
+        dateTime = (Date)action.getParameterValue(PARAM_TIME_STAMP);
+        
+        WorkspaceNode workspace = null;
+//        if ( action instanceof WebScriptRequest) {
+//            response.append( "\n********* IS A REQ *********\n\n");
+//            WebScriptRequest req = (WebScriptRequest)action;
+//            String timestamp = req.getParameter("timestamp");
+//            workspace = AbstractJavaWebScript.getWorkspace( req, services,
+//                                                            response,
+//                                                            responseStatus, //false
+//                                                            null );
+//            if(dateTime == null) dateTime = TimeUtils.dateFromTimestamp( timestamp );
+//        } else {
+//            response.append("\n******** IS NOT A REQ *********\n\n");
+//        }
+//        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
+        workspace = (WorkspaceNode)action.getParameterValue(PARAM_WORKSPACE);
 
         @SuppressWarnings("unchecked")
 		HashSet<String> productList = (HashSet<String>) action.getParameterValue(PARAM_PRODUCT_LIST);

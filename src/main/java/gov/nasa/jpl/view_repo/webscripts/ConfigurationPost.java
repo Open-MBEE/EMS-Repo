@@ -152,7 +152,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
                      HttpServletResponse.SC_BAD_REQUEST );
             } else {
     			if (postJson.has("nodeid") || postJson.has( "id" )) {
-    				jsonObject = handleUpdate(postJson, context, workspace, status);
+    				jsonObject = handleUpdate(postJson, siteName, context, workspace, status);
     			} else {
     				jsonObject = handleCreate(postJson, siteName, context, workspace, status);
     			}
@@ -208,7 +208,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	                String timestamp = postJson.getString("timestamp");
 	                datetime = TimeUtils.dateFromTimestamp(timestamp);
 	            }
-            	startAction(jobNode, siteName, productList, datetime);
+            	startAction(jobNode, siteName, productList, workspace, datetime);
 	            
 				return configWs.getConfigJson( jobNode, workspace, null );
 			} else {
@@ -223,6 +223,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
 
 	private JSONObject handleUpdate(JSONObject postJson,
+	                                String siteName,
 	                                EmsScriptNode context,
 	                                WorkspaceNode workspace, Status status)
 	                                        throws JSONException {
@@ -242,9 +243,21 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		    return null;
 		}
 
-		NodeRef configNodeRef = NodeUtil.getNodeRefFromNodeId( nodeId );
-		if (configNodeRef != null) {
-	        EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services);
+        NodeRef configNodeRef = NodeUtil.getNodeRefFromNodeId( nodeId );
+        EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services);
+
+        if ( workspace != null && workspace.exists() ) {
+            String cmName = configNode.getName();
+            NodeRef r = NodeUtil.findNodeRefById( cmName, false, workspace, null,
+                                                  getServices(), false );
+            EmsScriptNode node = new EmsScriptNode( r, getServices() );
+            if ( !workspace.equals( node.getWorkspace() ) ) {
+                System.out.println("****************** " + node );
+                configNode = workspace.replicateWithParentFolders( node );
+            }
+        }
+		
+		if ( NodeUtil.exists( configNodeRef ) ) {
 	        ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
             configWs.updateConfiguration( configNode, postJson, context,
                                           workspace, null );
@@ -261,14 +274,17 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	 * @param jobNode
 	 * @param siteName
 	 * @param productList
+	 * @param workspace 
 	 */
 	public void startAction(EmsScriptNode jobNode, String siteName,
-	                        HashSet<String> productList, Date timestamp) {
+	                        HashSet<String> productList, WorkspaceNode workspace,
+	                        Date timestamp) {
 		ActionService actionService = services.getActionService();
 		Action configurationAction = actionService.createAction(ConfigurationGenerationActionExecuter.NAME);
 		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_SITE_NAME, siteName);
 		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_PRODUCT_LIST, productList);
 		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_TIME_STAMP, timestamp);
+        configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_WORKSPACE, workspace);
 		services.getActionService().executeAction(configurationAction, jobNode.getNodeRef(), true, true);
 	}
 }
