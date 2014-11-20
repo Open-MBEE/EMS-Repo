@@ -1,0 +1,456 @@
+{
+
+    "elements": [
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "LiteralSet",
+
+            "editable": true,
+
+            "name": "literalSet",
+
+            "owner": "123456",
+
+            "qualifiedId": "/123456/literalSet",
+
+            "qualifiedName": "/JW_TEST/literalSet",
+
+            "specialization": {
+
+                "set": [
+
+                    {
+
+                        "string": "I",
+
+                        "type": "LiteralString"
+
+                    },
+
+                    {
+
+                        "string": "Love",
+
+                        "type": "LiteralString"
+
+                    },
+
+                    {
+
+                        "string": "Bears",
+
+                        "type": "LiteralString"
+
+                    }
+
+                ],
+
+                "setOperand": {
+
+                    "string": "Bears",
+
+                    "type": "LiteralString"
+
+                },
+
+                "type": "LiteralSet"
+
+            },
+
+            "sysmlid": "literalSet"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "target",
+
+            "editable": true,
+
+            "name": "targetId",
+
+            "owner": "123456",
+
+            "qualifiedId": "/123456/targetId",
+
+            "qualifiedName": "/JW_TEST/targetId",
+
+            "specialization": {
+
+                "isDerived": false,
+
+                "isSlot": false,
+
+                "type": "Property"
+
+            },
+
+            "sysmlid": "targetId"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "Magic Draw Meta-Data",
+
+            "editable": true,
+
+            "name": "md",
+
+            "owner": "123456",
+
+            "qualifiedId": "/123456/md",
+
+            "qualifiedName": "/JW_TEST/md",
+
+            "specialization": {
+
+                "mdData": "A blob of meta-data",
+
+                "type": "MagicDrawData"
+
+            },
+
+            "sysmlid": "md"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "Connector target",
+
+            "editable": true,
+
+            "name": "connectorTarget",
+
+            "owner": "123456",
+
+            "qualifiedId": "/123456/connectorTarget",
+
+            "qualifiedName": "/JW_TEST/connectorTarget",
+
+            "specialization": {
+
+                "isDerived": false,
+
+                "isSlot": false,
+
+                "type": "Property"
+
+            },
+
+            "sysmlid": "connectorTarget"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "association",
+
+            "editable": true,
+
+            "name": "association",
+
+            "owner": "123456",
+
+            "qualifiedId": "/123456/association",
+
+            "qualifiedName": "/JW_TEST/association",
+
+            "specialization": {
+
+                "ownedEnd": ["AssocOwnedEnd"],
+
+                "source": "sourceId",
+
+                "sourceAggregation": "COMPOSITE",
+
+                "target": "targetId",
+
+                "targetAggregation": "SHARED",
+
+                "type": "Association"
+
+            },
+
+            "sysmlid": "association"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "Connector source",
+
+            "editable": true,
+
+            "name": "connectorSource",
+
+            "owner": "123456",
+
+            "qualifiedId": "/123456/connectorSource",
+
+            "qualifiedName": "/JW_TEST/connectorSource",
+
+            "specialization": {
+
+                "isDerived": false,
+
+                "isSlot": false,
+
+                "lower": {
+
+                    "string": "lower!",
+
+                    "type": "LiteralString"
+
+                },
+
+                "type": "Property",
+
+                "upper": {
+
+                    "string": "lower!",
+
+                    "type": "LiteralString"
+
+                }
+
+            },
+
+            "sysmlid": "connectorSource"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "source",
+
+            "editable": true,
+
+            "name": "sourceId",
+
+            "owner": "123456",
+
+            "qualifiedId": "/123456/sourceId",
+
+            "qualifiedName": "/JW_TEST/sourceId",
+
+            "specialization": {
+
+                "isDerived": false,
+
+                "isSlot": false,
+
+                "type": "Property"
+
+            },
+
+            "sysmlid": "sourceId"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "View updates",
+
+            "editable": true,
+
+            "name": "viewWithContents",
+
+            "owner": "123456",
+
+            "qualifiedId": "/123456/viewWithContents",
+
+            "qualifiedName": "/JW_TEST/viewWithContents",
+
+            "specialization": {
+
+                "contents": "viewContents",
+
+                "type": "View"
+
+            },
+
+            "sysmlid": "viewWithContents"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "Connector updates",
+
+            "editable": true,
+
+            "name": "connector",
+
+            "owner": "123456",
+
+            "qualifiedId": "/123456/connector",
+
+            "qualifiedName": "/JW_TEST/connector",
+
+            "specialization": {
+
+                "connectorKind": "BINDING",
+
+                "connectorValue": {
+
+                    "string": "Ninja Attack!",
+
+                    "type": "LiteralString"
+
+                },
+
+                "sourceLower": {
+
+                    "string": "sourceLower!",
+
+                    "type": "LiteralString"
+
+                },
+
+                "sourcePath": ["connectorSource"],
+
+                "sourceUpper": {
+
+                    "string": "sourceUpper!",
+
+                    "type": "LiteralString"
+
+                },
+
+                "targetLower": {
+
+                    "string": "targetLower!",
+
+                    "type": "LiteralString"
+
+                },
+
+                "targetPath": ["connectorTarget"],
+
+                "targetUpper": {
+
+                    "string": "targetUpper!",
+
+                    "type": "LiteralString"
+
+                },
+
+                "type": "Connector"
+
+            },
+
+            "sysmlid": "connector"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "View content",
+
+            "editable": true,
+
+            "name": "viewContents",
+
+            "owner": "123456",
+
+            "qualifiedId": "/123456/viewContents",
+
+            "qualifiedName": "/JW_TEST/viewContents",
+
+            "specialization": {"type": "Expression"},
+
+            "sysmlid": "viewContents"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "Characterizes",
+
+            "editable": true,
+
+            "name": "characterizes",
+
+            "owner": "123456",
+
+            "qualifiedId": "/123456/characterizes",
+
+            "qualifiedName": "/JW_TEST/characterizes",
+
+            "specialization": {
+
+                "source": "sourceId",
+
+                "target": "targetId",
+
+                "type": "Characterizes"
+
+            },
+
+            "sysmlid": "characterizes"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "Associations's owned end",
+
+            "editable": true,
+
+            "name": "AssocOwnedEnd",
+
+            "owner": "123456",
+
+            "qualifiedId": "/123456/AssocOwnedEnd",
+
+            "qualifiedName": "/JW_TEST/AssocOwnedEnd",
+
+            "specialization": {
+
+                "isDerived": false,
+
+                "isSlot": false,
+
+                "type": "Property"
+
+            },
+
+            "sysmlid": "AssocOwnedEnd"
+
+        }
+
+    ],
+
+    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
+
+}
+
+200
+

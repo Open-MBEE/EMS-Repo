@@ -1056,6 +1056,19 @@ common_filters,
 ["test","workspaces","develop"]
 ],
         
+# CONTENT MODEL UPDATES: ==========================    
+
+[
+46,
+"PostContentModelUpdates",
+"Post content model udpates for sysml 2.0",
+create_curl_cmd(type="POST",data="contentModelUpdates.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop"]
+],
+        
 ]    
 
 ##########################################################################################    
