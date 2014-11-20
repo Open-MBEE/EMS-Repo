@@ -205,7 +205,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 				siteNode = NodeUtil.getSiteNode( siteName, false, workspace, dateTime,
 			                 					services, response );
 			}
-	        if ( errorOnNull && siteNode == null ) log(LogLevel.ERROR, "Site node is null", HttpServletResponse.SC_BAD_REQUEST);
+	        if ( errorOnNull && siteNode == null ) {
+	            
+	            log(LogLevel.ERROR, "Site node is null", HttpServletResponse.SC_BAD_REQUEST);
+	        }
 		}
 		
 		return siteNode;
@@ -377,7 +380,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
             // If workspace of sitesNodeRef is this workspace then no need to
             // replicate, otherwise replicate from the master workspace:
-            if ( sitesFolder != null
+            if ( NodeUtil.exists(sitesFolder) && NodeUtil.exists( workspace )
                  && !workspace.equals( sitesFolder.getWorkspace() ) ) {
                 sitesFolder = workspace.replicateWithParentFolders( sitesFolder );
             }
@@ -395,7 +398,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     
     public EmsScriptNode createSite( String siteName, WorkspaceNode workspace ) {
     	
-        EmsScriptNode siteNode = getSiteNode( siteName, workspace, null, true );
+        EmsScriptNode siteNode = getSiteNode( siteName, workspace, null, false );
         boolean validWorkspace = workspace != null && workspace.exists();
         boolean invalidSiteNode = siteNode == null || !siteNode.exists();
 

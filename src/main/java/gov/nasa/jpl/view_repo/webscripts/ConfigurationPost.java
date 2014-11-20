@@ -203,8 +203,11 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
 	            HashSet<String> productList = getProductList(postJson);
 	            
-            	String timestamp = postJson.getString("timestamp");
-            	Date datetime = TimeUtils.dateFromTimestamp(timestamp);
+	            Date datetime = null;
+	            if ( postJson.has( "timestamp" ) ) {
+	                String timestamp = postJson.getString("timestamp");
+	                datetime = TimeUtils.dateFromTimestamp(timestamp);
+	            }
             	startAction(jobNode, siteName, productList, datetime);
 	            
 				return configWs.getConfigJson( jobNode, workspace, null );
