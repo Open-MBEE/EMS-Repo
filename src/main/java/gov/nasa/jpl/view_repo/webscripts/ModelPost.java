@@ -1006,28 +1006,6 @@ public class ModelPost extends AbstractJavaWebScript {
 			return elements;
 		}
 
-        // Check to see if the element has been updated since last read by the
-        // posting application.
-        // Only generate error on first pass (i.e. when ingest == false).
-       if (inConflict( element, elementJson ) ) {
-           
-            if (!ingest) {
-                String msg =
-                        "Error! Tried to post concurrent edit to element, "
-                                + element + ".\n";
-                if ( getResponse() == null || getResponseStatus() == null ) {
-                    Debug.error( msg );
-                } else {
-                    getResponse().append( msg );
-                    if ( getResponseStatus() != null ) {
-                        getResponseStatus().setCode( HttpServletResponse.SC_CONFLICT,
-                                                     msg );
-                    }
-                }
-            }
-            return elements;
-       }
-
         JSONArray children = new JSONArray();
 
         EmsScriptNode reifiedNode = null;
@@ -1036,12 +1014,32 @@ public class ModelPost extends AbstractJavaWebScript {
         if (runWithoutTransactions) {
             reifiedNode =
                     updateOrCreateTransactionableElement( elementJson, parent,
-                                                          children, workspace, ingest, false, modStatus );
+                                                          children, workspace, ingest, false, modStatus);
         } else {
             UserTransaction trx;
             trx = services.getTransactionService().getNonPropagatingUserTransaction();
             try {
                 trx.begin();
+                
+                // Check to see if the element has been updated since last read by the
+                // posting application.
+                if (inConflict( element, elementJson ) ) {
+                   
+                    String msg =
+                            "Error! Tried to post concurrent edit to element, "
+                                    + element + ".\n";
+                    if ( getResponse() == null || getResponseStatus() == null ) {
+                        Debug.error( msg );
+                    } else {
+                        getResponse().append( msg );
+                        if ( getResponseStatus() != null ) {
+                            getResponseStatus().setCode( HttpServletResponse.SC_CONFLICT,
+                                                         msg );
+                        }
+                    }
+                    return elements;
+                }
+               
                 log(LogLevel.INFO, "updateOrCreateElement begin transaction {");
                 reifiedNode =
                         updateOrCreateTransactionableElement( elementJson,
@@ -1068,6 +1066,10 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
             }
         }
+        
+        // Update the read time in the json, so that we do not get any conflicts on the second pass, as
+        // we may modify the node on the first pass:
+        elementJson.put( Acm.JSON_READ, EmsScriptNode.getIsoTime( new Date(System.currentTimeMillis())));
 
         // create the children elements
         if (reifiedNode != null && reifiedNode.exists()) {
