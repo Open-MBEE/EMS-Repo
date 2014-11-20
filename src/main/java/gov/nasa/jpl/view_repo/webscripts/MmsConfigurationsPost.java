@@ -76,7 +76,9 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
         WorkspaceNode workspace = getWorkspace( req );
 
         EmsScriptNode siteNode = getSiteNodeFromRequest(req, false);
-        if (siteNode == null) {
+        String siteNameFromReq = getSiteName( req );
+        if ( siteNode == null && !Utils.isNullOrEmpty( siteNameFromReq )
+             && !siteNameFromReq.equals( NO_SITE_ID ) ) {
             log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
             return new JSONObject();
         }
@@ -92,10 +94,9 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
         ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
         HashSet<String> productSet = configWs.updateConfiguration( config, (JSONObject)req.parseContent(), siteNode, workspace, null );
         ConfigurationPost configPost = new ConfigurationPost( repository, services );
-        configPost.startAction( config, (String)siteNode.getProperty( Acm.CM_NAME ), productSet, null );	//TODO: need timestamp???
+        String siteName = siteNode == null ? null : siteNode.getName();
+        configPost.startAction( config, siteName, productSet, null );
         
-        return configWs.getConfigJson( config,
-                                       (String)siteNode.getProperty( Acm.CM_NAME ),
-                                       workspace, null );
+        return configWs.getConfigJson( config, workspace, null );
     }
 }

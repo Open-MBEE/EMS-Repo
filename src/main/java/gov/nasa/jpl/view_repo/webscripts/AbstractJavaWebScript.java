@@ -366,14 +366,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return siteName;
     }
 
-    EmsScriptNode getSitesFolder( WorkspaceNode workspace ) {
+    public static EmsScriptNode getSitesFolder( WorkspaceNode workspace ) {
         EmsScriptNode sitesFolder = null;
         // check and see if the Sites folder already exists
         boolean useSimpleCache = workspace == null;
         NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, useSimpleCache, false, 
-                                                           workspace, null, true, services, false );
+                                                           workspace, null, true, NodeUtil.getServices(), false );
         if ( sitesNodeRef != null ) {
-            sitesFolder = new EmsScriptNode( sitesNodeRef, services );
+            sitesFolder = new EmsScriptNode( sitesNodeRef, NodeUtil.getServices() );
 
             // If workspace of sitesNodeRef is this workspace then no need to
             // replicate, otherwise replicate from the master workspace:

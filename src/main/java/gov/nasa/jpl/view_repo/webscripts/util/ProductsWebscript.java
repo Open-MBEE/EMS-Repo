@@ -95,16 +95,10 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         WorkspaceNode workspace = getWorkspace( req );
         
-//        Set< EmsScriptNode > productSet =
-//                WebScriptUtil.getAllNodesInPath( context.getQnamePath(),
-//                                                 "ASPECT", Acm.ACM_PRODUCT,
-//                                                 workspace,
-//                                                 dateTime, services,
-//                                                 response );
         Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix, 
                                                                 Acm.ACM_PRODUCT, false,
                                                                 workspace, dateTime, 
-                                                                siteNode.getSiteName());
+                                                                siteNode.getName());
         if (nodeList != null) {
             Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
             for ( EmsScriptNode node : nodes) {

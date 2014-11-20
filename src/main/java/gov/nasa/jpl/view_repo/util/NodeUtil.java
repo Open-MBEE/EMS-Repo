@@ -1825,6 +1825,7 @@ public class NodeUtil {
      * @return
      */
     public static EmsScriptNode getOrCreatePath(EmsScriptNode parent, String path) {
+        if ( parent == null ) return null;
         String tokens[] = path.split( "/" );
         
         String childPath = null;

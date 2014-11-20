@@ -165,18 +165,26 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 EmsScriptNode topview = findScriptNodeById( viewId, workspace, null, true );
                 EmsScriptNode snapshotFolderNode =
                         getSnapshotFolderNode( topview );
-                this.snapshotName = viewId + "_" + now.getMillis();
-
-                if ( checkPermissions( snapshotFolderNode,
-                                       PermissionService.WRITE ) ) {
-                    snapshotNode =
-                            createSnapshot( topview, viewId, snapshotName,
-                                            req.getContextPath(),
-                                            snapshotFolderNode,
-                                            workspace, timestamp);
+                if ( snapshotFolderNode == null ) {
+                    log( LogLevel.ERROR, "Cannot create folder for snapshot",
+                         HttpServletResponse.SC_BAD_REQUEST );
+                } else {
+                    this.snapshotName = viewId + "_" + now.getMillis();
+    
+                    if ( checkPermissions( snapshotFolderNode,
+                                           PermissionService.WRITE ) ) {
+                        snapshotNode =
+                                createSnapshot( topview, viewId, snapshotName,
+                                                req.getContextPath(),
+                                                snapshotFolderNode,
+                                                workspace, timestamp);
+                    }
                 }
 
-                if ( snapshotNode != null ) {
+                if ( snapshotNode == null ) {
+                    log( LogLevel.ERROR, "Error creating snapshot node",
+                         HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                } else {
                     try {
                         JSONObject snapshoturl = new JSONObject();
                         if (!Utils.isNullOrEmpty(response.toString())) snapshoturl.put("message", response.toString());
@@ -194,9 +202,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
                              "Error generating JSON for snapshot",
                              HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
                     }
-                } else {
-                    log( LogLevel.ERROR, "Error creating snapshot node",
-                         HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
                 }
                 status.setCode( responseStatus.getCode() );
                 if ( status.getCode() != HttpServletResponse.SC_OK ) {
@@ -584,7 +589,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
         }
         EmsScriptNode snapshotFolder = getSnapshotFolderNode(viewNode);
         if(snapshotFolder == null){
-        	System.out.println("Failed to get snapshot folder node!");
+            log( LogLevel.ERROR, "Failed to get snapshot folder node!",
+                 HttpServletResponse.SC_BAD_REQUEST );
         	return null;
         }
         return createSnapshot(view, viewId, snapshotName, contextPath, snapshotFolder, workspace, timestamp);
@@ -882,30 +888,24 @@ public class SnapshotPost extends AbstractJavaWebScript {
      * @return
      */
     public static EmsScriptNode getSnapshotFolderNode(EmsScriptNode viewNode) {
-        EmsScriptNode parent = viewNode.getParent();
-
-        String parentName = (String) parent.getProperty(Acm.CM_NAME);
-        getSitesFolder();
-        while (!parentName.equals("Models") && !parentName.equals("ViewEditor")) {
-            EmsScriptNode oldparent = parent;
-            parent = oldparent.getParent();
-            parentName = (String) parent.getProperty(Acm.CM_NAME);
-        }
-        // put snapshots at the project level
-        parent = parent.getParent();
-        
-        EmsScriptNode snapshotNode = parent.childByNamePath("snapshots");
-        if ( viewNode.getWorkspace() != null && viewNode.getWorkspace().exists() &&
-                !viewNode.getWorkspace().contains(snapshotNode) ) {
-            viewNode.getWorkspace().replicateWithParentFolders( snapshotNode );
+        EmsScriptNode sitesFolder = getSitesFolder(viewNode.getWorkspace());
+        if ( sitesFolder == null ) {
+            return null;
         }
        
+        EmsScriptNode snapshotNode = sitesFolder.childByNamePath("snapshots");
+
         if (snapshotNode == null) {
-            String snapshotFolderPath = "snapshots";
-            snapshotNode = parent.createFolder("snapshots");
+            snapshotNode = sitesFolder.createFolder("snapshots");
         }
 
-        return snapshotNode;
+        if ( snapshotNode == null ) {
+            return null;
+        }
+        
+        EmsScriptNode snapshotDateFolder = NodeUtil.getOrCreateDateFolder(snapshotNode);
+
+        return snapshotDateFolder;
     }
 
     private String getHostname(){

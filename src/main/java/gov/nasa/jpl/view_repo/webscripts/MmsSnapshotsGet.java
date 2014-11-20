@@ -85,7 +85,9 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
 
     private JSONArray handleConfigurationSnapshot( WebScriptRequest req, String configurationId ) throws JSONException {
         EmsScriptNode siteNode = getSiteNodeFromRequest( req, false );
-        if (siteNode == null) {
+        String siteNameFromReq = getSiteName( req );
+        if ( siteNode == null && !Utils.isNullOrEmpty( siteNameFromReq )
+             && !siteNameFromReq.equals( NO_SITE_ID ) ) {
             log( LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND );
             return new JSONArray();
         }
