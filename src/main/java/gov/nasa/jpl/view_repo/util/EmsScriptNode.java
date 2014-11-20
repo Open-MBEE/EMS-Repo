@@ -1476,7 +1476,6 @@ public class EmsScriptNode extends ScriptNode implements
       DirectedRelationship,
       DurationInterval,
       Duration,
-      Enumeration,
       ElementValue,
       Expose,
       Expression,
@@ -1488,6 +1487,7 @@ public class EmsScriptNode extends ScriptNode implements
       LiteralInteger,
       LiteralNull,
       LiteralReal,
+      LiteralSet,
       LiteralString,
       LiteralUnlimitedNatural,
       MagicDrawData,
@@ -1519,7 +1519,6 @@ public class EmsScriptNode extends ScriptNode implements
             put("DirectedRelationship", SpecEnum.DirectedRelationship);
             put("DurationInterval", SpecEnum.DurationInterval);
             put("Duration", SpecEnum.Duration);
-            put("Enumeration", SpecEnum.Enumeration);
             put("ElementValue", SpecEnum.ElementValue);
             put("Expose", SpecEnum.Expose);
             put("Expression", SpecEnum.Expression);
@@ -1531,6 +1530,7 @@ public class EmsScriptNode extends ScriptNode implements
             put("LiteralInteger", SpecEnum.LiteralInteger);
             put("LiteralNull", SpecEnum.LiteralNull);
             put("LiteralReal", SpecEnum.LiteralReal);
+            put("LiteralSet", SpecEnum.LiteralSet);
             put("LiteralString", SpecEnum.LiteralString);
             put("LiteralUnlimitedNatural", SpecEnum.LiteralUnlimitedNatural);
             put("MagicDrawData", SpecEnum.MagicDrawData);
@@ -1610,8 +1610,8 @@ public class EmsScriptNode extends ScriptNode implements
                     case ElementValue:
                         addElementValueJSON( json, node, filter, dateTime );
                         break;
-                    case Enumeration:
-                        addEnumerationJSON( json, node, filter, dateTime );
+                    case LiteralSet:
+                        addLiteralSetJSON( json, node, filter, dateTime );
                         break;
                     case Expose:
                         addExposeJSON( json, node, filter, dateTime );
@@ -3701,6 +3701,14 @@ public class EmsScriptNode extends ScriptNode implements
             EmsScriptNode propertyTypeNode = new EmsScriptNode(propertyType, services, response);
             putInJson( json, "propertyType", propertyTypeNode.getSysmlId(), filter);
         }
+        
+        putInJson( json, Acm.JSON_LOWER, 
+                   addInternalJSON( node.getProperty(Acm.ACM_LOWER), dateTime ), 
+                   filter );
+        
+        putInJson( json, Acm.JSON_UPPER, 
+                   addInternalJSON( node.getProperty(Acm.ACM_LOWER), dateTime ), 
+                   filter );
     }
 
     protected
@@ -3811,17 +3819,17 @@ public class EmsScriptNode extends ScriptNode implements
         }
     }
     
-    protected void addEnumerationJSON( JSONObject json, EmsScriptNode node,
+    protected void addLiteralSetJSON( JSONObject json, EmsScriptNode node,
                                         Set< String > filter, Date dateTime )
                                                               throws JSONException {
         addValueSpecificationJSON( json, node, filter, dateTime );
         
-        putInJson( json, Acm.JSON_ENUMERATED_VALUE, 
-                   addInternalJSON( node.getProperty(Acm.ACM_ENUMERATED_VALUE), dateTime ), 
+        putInJson( json, Acm.JSON_SET, 
+                   addInternalJSON( node.getProperty(Acm.ACM_SET), dateTime ), 
                    filter );
 
-        putInJson( json, Acm.JSON_SELECTED_VALUE, 
-                   addInternalJSON( node.getProperty(Acm.ACM_SELECTED_VALUE), dateTime ), 
+        putInJson( json, Acm.JSON_SET_OPERAND, 
+                   addInternalJSON( node.getProperty(Acm.ACM_SET_OPERAND), dateTime ), 
                    filter );
         
     }
@@ -4082,13 +4090,29 @@ public class EmsScriptNode extends ScriptNode implements
         JSONArray targetIds = addNodeRefIdsJSON( nodeRefsTarget, dateTime );
         putInJson( json, Acm.JSON_TARGET_PATH, targetIds, filter );
         
-        String id = node.getSysmlIdOfProperty( Acm.ACM_CONNECTOR_TYPE );
-        if ( id != null ) {
-            putInJson( json, Acm.JSON_CONNECTOR_TYPE, id, filter );
+        String kind = (String) node.getProperty( Acm.ACM_CONNECTOR_KIND );
+        if ( kind != null ) {
+            putInJson( json, Acm.JSON_CONNECTOR_KIND, kind, filter );
         }   
         
         putInJson( json, Acm.JSON_CONNECTOR_VALUE, 
                    addInternalJSON( node.getProperty(Acm.ACM_CONNECTOR_VALUE), dateTime ), 
+                   filter );
+        
+        putInJson( json, Acm.JSON_TARGET_LOWER, 
+                   addInternalJSON( node.getProperty(Acm.ACM_TARGET_LOWER), dateTime ), 
+                   filter );
+        
+        putInJson( json, Acm.JSON_TARGET_UPPER, 
+                   addInternalJSON( node.getProperty(Acm.ACM_TARGET_UPPER), dateTime ), 
+                   filter );
+        
+        putInJson( json, Acm.JSON_SOURCE_LOWER, 
+                   addInternalJSON( node.getProperty(Acm.ACM_SOURCE_LOWER), dateTime ), 
+                   filter );
+        
+        putInJson( json, Acm.JSON_SOURCE_UPPER, 
+                   addInternalJSON( node.getProperty(Acm.ACM_SOURCE_UPPER), dateTime ), 
                    filter );
     
     }
@@ -4105,9 +4129,9 @@ public class EmsScriptNode extends ScriptNode implements
         putInJson( json, Acm.JSON_OWNED_END, ownedEndIds, filter );
         
         putInJson( json, Acm.JSON_SOURCE_AGGREGATION, 
-                   node.getSysmlIdOfProperty( Acm.ACM_SOURCE_AGGREGATION), filter );
+                   node.getProperty( Acm.ACM_SOURCE_AGGREGATION), filter );
         putInJson( json, Acm.JSON_TARGET_AGGREGATION, 
-                   node.getSysmlIdOfProperty( Acm.ACM_TARGET_AGGREGATION ), filter );
+                   node.getProperty( Acm.ACM_TARGET_AGGREGATION ), filter );
      
     }
     
@@ -4115,13 +4139,7 @@ public class EmsScriptNode extends ScriptNode implements
                                        Set< String > filter, Date dateTime )
                                                                      throws JSONException {
           
-          addDirectedRelationshipJSON(json, node, filter, dateTime);
-
-          ArrayList< NodeRef > nodeRefs =
-                  (ArrayList< NodeRef >)node.getProperty( Acm.ACM_PROPERTIES_TRANSFERRED );
-          JSONArray ids = addNodeRefIdsJSON( nodeRefs, dateTime );
-          putInJson( json, Acm.JSON_PROPERTIES_TRANSFERRED, ids, filter );
-          
+          addDirectedRelationshipJSON(json, node, filter, dateTime);          
     }
     
     protected void addSuccessionJSON( JSONObject json, EmsScriptNode node,

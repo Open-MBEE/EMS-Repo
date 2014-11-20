@@ -301,6 +301,26 @@
 		</aspect>
 		<aspect name="sysml:Property">
 			<properties>
+			    <property name="sysml:lower">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+                <property name="sysml:upper">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
 				<property name="sysml:isDerived">
 					<type>d:boolean</type>
 					<mandatory>false</mandatory>
@@ -492,10 +512,10 @@
 				</property>
 			</properties>
 		</aspect>
-        <aspect name="sysml:Enumeration">
+        <aspect name="sysml:LiteralSet">
             <parent>sysml:ValueSpecification</parent>
             <properties>
-                <property name="sysml:enumeratedValue">
+                <property name="sysml:set">
                     <type>d:noderef</type>
                     <mandatory>true</mandatory>
                     <multiple>true</multiple>
@@ -505,7 +525,7 @@
                         <tokenised>false</tokenised>
                     </index>
                 </property>
-                <property name="sysml:selectedValue">
+                <property name="sysml:setOperand">
                     <type>d:noderef</type>
                     <mandatory>false</mandatory>
                     <multiple>false</multiple>
@@ -759,6 +779,46 @@
 		<aspect name="sysml:Connector">
 		    <parent>sysml:DirectedRelationship</parent>
 			<properties>
+			    <property name="sysml:targetLower">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+                <property name="sysml:targetUpper">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+                <property name="sysml:sourceLower">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+                <property name="sysml:sourceUpper">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
                 <property name="sysml:sourcePath">
                     <type>d:noderef</type>
                     <mandatory>true</mandatory>
@@ -779,8 +839,8 @@
                         <tokenised>false</tokenised>
                     </index>
                 </property>
-				<property name="sysml:connectorType">
-					<type>d:noderef</type>
+				<property name="sysml:connectorKind">
+					<type>d:text</type>
 					<mandatory>false</mandatory>
 					<multiple>false</multiple>
 					<index enabled="true">
@@ -788,6 +848,17 @@
 						<stored>false</stored>
 						<tokenised>false</tokenised>
 					</index>
+					<constraints>
+                        <constraint name="sysml:connectorKind_constraint" type="LIST">
+                            <parameter name="allowedValues">
+                                <list>
+                                    <value>BINDING</value>
+                                    <value>DIRECTED</value>
+                                    <value>NONE</value>
+                                </list>
+                            </parameter>
+                        </constraint>
+                    </constraints>
 				</property>
 				<property name="sysml:connectorValue">
                     <type>d:noderef</type>
@@ -816,42 +887,52 @@
                 </property>
                 <property name="sysml:sourceAggregation">
                     <!-- can be COMPOSITE, SHARED, NONE -->
-                    <type>d:noderef</type>
+                    <type>d:text</type>
                     <mandatory>true</mandatory>
                     <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>                    
-                </property>
-                <property name="sysml:targetAggregation">
-                    <!-- can be COMPOSITE, SHARED, NONE -->
-                    <type>d:noderef</type>
-                    <mandatory>true</mandatory>
-                    <multiple>false</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>                    
-                </property>
-            </properties>
-        </aspect>
-        <aspect name="sysml:Characterizes">
-            <parent>sysml:DirectedRelationship</parent>
-            <properties>
-                <property name="sysml:propertiesTransferred">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
-                    <multiple>true</multiple>
                     <index enabled="true">
                         <atomic>false</atomic>
                         <stored>false</stored>
                         <tokenised>false</tokenised>
                     </index>
+                    <constraints>
+                        <constraint name="sysml:sourceAggregation_constraint" type="LIST">
+                            <parameter name="allowedValues">
+                                <list>
+                                    <value>COMPOSITE</value>
+                                    <value>SHARED</value>
+                                    <value>NONE</value>
+                                </list>
+                            </parameter>
+                        </constraint>
+                    </constraints>
+                </property>
+                <property name="sysml:targetAggregation">
+                    <!-- can be COMPOSITE, SHARED, NONE -->
+                    <type>d:text</type>
+                    <mandatory>true</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                    <constraints>
+                        <constraint name="sysml:targetAggregation_constraint" type="LIST">
+                            <parameter name="allowedValues">
+                                <list>
+                                    <value>COMPOSITE</value>
+                                    <value>SHARED</value>
+                                    <value>NONE</value>
+                                </list>
+                            </parameter>
+                        </constraint>
+                    </constraints>
                 </property>
             </properties>
+        </aspect>
+        <aspect name="sysml:Characterizes">
+            <parent>sysml:DirectedRelationship</parent>
         </aspect>
         <aspect name="sysml:Succession">
             <parent>sysml:Connector</parent>
