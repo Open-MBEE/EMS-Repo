@@ -5,5 +5,5 @@
      "owner":"123456",
      "specialization": {"type":"Package",
                         "isSite":true}
-    },
+    }
 ]}

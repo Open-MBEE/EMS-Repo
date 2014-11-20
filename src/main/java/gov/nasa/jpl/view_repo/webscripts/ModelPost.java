@@ -1711,9 +1711,16 @@ public class ModelPost extends AbstractJavaWebScript {
     
     private EmsScriptNode createSitePkgStub(EmsScriptNode pkgSiteNode,
                                             WorkspaceNode workspace) {
-        
+        // site packages are only for major site, nothing to do with workspaces
         String siteName = "site_" + pkgSiteNode.getSysmlId();
+        
         EmsScriptNode siteNode = getSiteNode( siteName, workspace, null );
+        
+        SiteInfo siteInfo = services.getSiteService().getSite( siteName );
+        if ( siteInfo != null ) {
+            
+        }
+        
         
         if (siteNode == null || !siteNode.exists()) {
             
