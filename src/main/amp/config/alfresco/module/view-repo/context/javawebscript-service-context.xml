@@ -208,6 +208,14 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
 
+
+    <bean id="webscript.gov.nasa.jpl.javawebscripts.hostname.get"
+        class="gov.nasa.jpl.view_repo.webscripts.HostnameGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
 	<!-- Create proxies for the service beans: Interceptors don't work... -->
 	<!-- 
 	<bean class="org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator">
