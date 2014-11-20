@@ -1012,6 +1012,13 @@ public class ModelPost extends AbstractJavaWebScript {
         ModStatus modStatus = new ModStatus();
 
         if (runWithoutTransactions) {
+            
+            // Check to see if the element has been updated since last read by the
+            // posting application.
+            if (inConflict(element, elementJson)) {
+                return elements;
+            }
+            
             reifiedNode =
                     updateOrCreateTransactionableElement( elementJson, parent,
                                                           children, workspace, ingest, false, modStatus);
@@ -1022,21 +1029,8 @@ public class ModelPost extends AbstractJavaWebScript {
                 trx.begin();
                 
                 // Check to see if the element has been updated since last read by the
-                // posting application.
-                if (inConflict( element, elementJson ) ) {
-                   
-                    String msg =
-                            "Error! Tried to post concurrent edit to element, "
-                                    + element + ".\n";
-                    if ( getResponse() == null || getResponseStatus() == null ) {
-                        Debug.error( msg );
-                    } else {
-                        getResponse().append( msg );
-                        if ( getResponseStatus() != null ) {
-                            getResponseStatus().setCode( HttpServletResponse.SC_CONFLICT,
-                                                         msg );
-                        }
-                    }
+                // posting application.  Want this to be within the transaction
+                if (inConflict(element, elementJson)) {
                     return elements;
                 }
                
@@ -1067,10 +1061,6 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
         
-        // Update the read time in the json, so that we do not get any conflicts on the second pass, as
-        // we may modify the node on the first pass:
-        elementJson.put( Acm.JSON_READ, EmsScriptNode.getIsoTime( new Date(System.currentTimeMillis())));
-
         // create the children elements
         if (reifiedNode != null && reifiedNode.exists()) {
             //elements.add( reifiedNode );
@@ -1088,6 +1078,12 @@ public class ModelPost extends AbstractJavaWebScript {
         element = findScriptNodeById( jsonId, workspace, null, true );
         updateTransactionableWsState(element, jsonId, modStatus, ingest);
         elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
+        
+        // Update the read time in the json, so that we do not get any conflicts on the second pass, as
+        // we may modify the node on the first pass.  Make sure this is after any modifications to the
+        // node.
+        elementJson.put( Acm.JSON_READ, EmsScriptNode.getIsoTime( new Date(System.currentTimeMillis())));
+
         return elements;
     }
 
@@ -1428,9 +1424,37 @@ public class ModelPost extends AbstractJavaWebScript {
      * @return whether the "read" date is older than the last modification date.
      */
     public boolean inConflict( EmsScriptNode element, JSONObject elementJson ) {
+
+        if (inConflictImpl( element, elementJson ) ) {
+            
+            String msg =
+                    "Error! Tried to post concurrent edit to element, "
+                            + element + ".\n";
+            if ( getResponse() == null || getResponseStatus() == null ) {
+                Debug.error( msg );
+            } else {
+                getResponse().append( msg );
+                if ( getResponseStatus() != null ) {
+                    getResponseStatus().setCode( HttpServletResponse.SC_CONFLICT,
+                                                 msg );
+                }
+            }
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Determine whether the post to the element is based on old information based on a "read" JSON attribute whose value is the date when the posting process originally read the element's data.
+     * @param element
+     * @param elementJson
+     * @return whether the "read" date is older than the last modification date.
+     */
+    private boolean inConflictImpl( EmsScriptNode element, JSONObject elementJson ) {
         // TODO -- could check for which properties changed since the "read"
         // date to allow concurrent edits to different properties of the same
-        // element.    	
+        // element.     
         
         if (element == null) {
             return false;
