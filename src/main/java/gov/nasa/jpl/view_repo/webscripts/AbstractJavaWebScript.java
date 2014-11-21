@@ -720,55 +720,95 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         EmsScriptNode sitePackageNode = null;
         EmsScriptNode siteNode = null;
         
-        // If it is a package site:
-        // CYL FIXME can find using siteService
-        if (siteName != null && siteName.startsWith(NodeUtil.sitePkgPrefix)) {
+        // If it is a package site, get the corresponding package for the site:
+        NodeRef sitePackageRef = (NodeRef) initialSiteNode.getProperty( Acm.ACM_SITE_PACKAGE );
+        if (sitePackageRef != null) {
+            sitePackageNode = new EmsScriptNode(sitePackageRef, services);
+        }
+        // Could find the package site using the property, try searching for it:
+        else if (siteName != null && siteName.startsWith(NodeUtil.sitePkgPrefix)) {
             
-            // Get the corresponding package for the site:
             String[] splitArry = siteName.split(NodeUtil.sitePkgPrefix);
             if (splitArry != null && splitArry.length > 0) {
                 String sitePkgName = splitArry[splitArry.length-1];
 
                 sitePackageNode = findScriptNodeById(sitePkgName,workspace, null, false );
-
-                // Found the package for the site:
-                if (sitePackageNode != null) {
-                    // Get the project site by tracing up the parents until the parent is null:
-                    // Note: the assumption here is that this will never be the project site, so must have a parent
-                    NodeRef siteParentRef = (NodeRef) initialSiteNode.getProperty( Acm.ACM_SITE_PARENT );
-                    EmsScriptNode siteParent = siteParentRef != null ? new EmsScriptNode(siteParentRef, services, response) : null;
-                    EmsScriptNode oldSiteParent = null;
-                    
-                    while (siteParent != null) {
-                        oldSiteParent = siteParent;
-                        siteParentRef = (NodeRef) siteParent.getProperty( Acm.ACM_SITE_PARENT );
-                        siteParent = siteParentRef != null ? new EmsScriptNode(siteParentRef, services, response) : null;
-                    }
-                    
-                    if (oldSiteParent != null && oldSiteParent.exists()) {
-                        siteNode = oldSiteParent;
-                    }
-                    else {
-                        log(LogLevel.ERROR, "Could not find parent project site for site package name "+siteName, 
-                            HttpServletResponse.SC_NOT_FOUND);
-                        return null;
-                    }
+                
+                if (sitePackageNode == null) {
+                    log(LogLevel.ERROR, "Could not find site package node for site package name "+siteName, 
+                        HttpServletResponse.SC_NOT_FOUND);
+                    return null;
                 }
             }
+        }
+
+        // Found the package for the site:
+        if (sitePackageNode != null) {
+            // Sanity check:
+            NodeRef sitePackageSiteRef = (NodeRef) sitePackageNode.getProperty( Acm.ACM_SITE_SITE );
+            if (sitePackageSiteRef != null && !sitePackageSiteRef.equals( initialSiteNode.getNodeRef() )) {
+                log(LogLevel.ERROR, "Mismatch between site/package for site package name "+siteName, 
+                    HttpServletResponse.SC_NOT_FOUND);
+                return null;
+            }
             
-            if (sitePackageNode == null || siteNode == null) {
-                log(LogLevel.ERROR, "Could not find site package node for site package name "+siteName, 
+            // Get the project site by tracing up the parents until the parent is null:
+            NodeRef siteParentRef = (NodeRef) initialSiteNode.getProperty( Acm.ACM_SITE_PARENT );
+            EmsScriptNode siteParent = siteParentRef != null ? new EmsScriptNode(siteParentRef, services, response) : null;
+            EmsScriptNode oldSiteParent = null;
+            
+            while (siteParent != null) {
+                oldSiteParent = siteParent;
+                siteParentRef = (NodeRef) siteParent.getProperty( Acm.ACM_SITE_PARENT );
+                siteParent = siteParentRef != null ? new EmsScriptNode(siteParentRef, services, response) : null;
+            }
+            
+            if (oldSiteParent != null && oldSiteParent.exists()) {
+                siteNode = oldSiteParent;
+            }
+            else {
+                log(LogLevel.ERROR, "Could not find parent project site for site package name "+siteName, 
                     HttpServletResponse.SC_NOT_FOUND);
                 return null;
             }
             
         }
-        // Otherwise, it is a project site:
+        // Otherwise, assume it is a project site:
         else {
             siteNode = initialSiteNode;
         }
         
         return new Pair<EmsScriptNode,EmsScriptNode>(sitePackageNode, siteNode);
+    }
+    
+    /**
+     * Return the matching alfresco site for the Package, or null
+     * 
+     * @param pkgNode
+     * @param workspace
+     * @return
+     */
+    public EmsScriptNode getSiteForPkgSite(EmsScriptNode pkgNode, WorkspaceNode workspace) {
+        
+        NodeRef pkgSiteParentRef = (NodeRef)pkgNode.getProperty( Acm.ACM_SITE_SITE );
+        EmsScriptNode pkgSiteParentNode = null;
+        
+        if (pkgSiteParentRef != null) {
+            pkgSiteParentNode = new EmsScriptNode(pkgSiteParentRef, services);
+        }
+        // Couldn't find it using the property, try searching for it:
+        else {
+            // Search for it. Will have a cm:name = "site_"+sysmlid of site package node:
+            String sysmlid = pkgNode.getSysmlId();
+            if (sysmlid != null) {
+                pkgSiteParentNode = findScriptNodeById(NodeUtil.sitePkgPrefix+sysmlid, workspace, null, false);
+            }
+            else {
+                log(LogLevel.WARNING, "Parent package site does not have a sysmlid.  Node "+pkgNode);
+            }
+        }
+        
+        return pkgSiteParentNode;
     }
     
     /**
@@ -796,17 +836,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 Boolean isSiteParent = (Boolean) siteParentReifNode.getProperty( Acm.ACM_IS_SITE );
                 if (isSiteParent != null && isSiteParent) {
                     
-                    // Get the alfresco Site for the site package node, it will have a 
-                    // cm:name = "site_"+sysmlid of site package node:
-                    String sysmlid = siteParentReifNode.getSysmlId();
-                    if (sysmlid != null) {
-                        // CYL FIXME to use relationship
-                        pkgSiteParentNode = findScriptNodeById(NodeUtil.sitePkgPrefix+sysmlid, workspace, null, false);
-                        break;
-                    }
-                    else {
-                        log(LogLevel.WARNING, "Parent package site does not have a sysmlid.  Node "+siteParentReifNode);
-                    }
+                    // Get the alfresco Site for the site package node:
+                    pkgSiteParentNode = getSiteForPkgSite(siteParentReifNode, workspace);
+                    break;
                 }
             }
             

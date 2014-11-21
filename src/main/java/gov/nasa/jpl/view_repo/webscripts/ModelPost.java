@@ -1741,18 +1741,19 @@ public class ModelPost extends AbstractJavaWebScript {
         EmsScriptNode siteNode = null;
         
         SiteInfo siteInfo = services.getSiteService().getSite( siteName );
-        if ( siteInfo != null ) {
+        if ( siteInfo == null ) {
             String sitePreset = "site-dashboard";
             String siteTitle = pkgSiteNode.getSysmlName();
             String siteDescription = (String) pkgSiteNode.getProperty( Acm.ACM_DOCUMENTATION );
             boolean isPublic = true;
             ShareUtils.constructSiteDashboard( sitePreset, siteName, siteTitle, siteDescription, isPublic );
-            siteInfo = services.getSiteService().getSite( siteName );
-            if ( siteInfo != null ) {
-                siteNode = new EmsScriptNode( siteInfo.getNodeRef(), services, response );
+            // siteInfo doesnt give the node ref we want, so must search for it:
+            siteNode = getSiteNode( siteName, null, null ); 
+            if (siteNode != null) {
                 siteNode.createOrUpdateAspect( "cm:taggable" );
                 siteNode.createOrUpdateAspect( Acm.ACM_SITE );
                 siteNode.createOrUpdateProperty( Acm.ACM_SITE_PACKAGE, pkgSiteNode.getNodeRef() );
+                pkgSiteNode.createOrUpdateAspect( Acm.ACM_SITE_CHARACTERIZATION);
                 pkgSiteNode.createOrUpdateProperty( Acm.ACM_SITE_SITE, siteNode.getNodeRef() );
             }
         }
