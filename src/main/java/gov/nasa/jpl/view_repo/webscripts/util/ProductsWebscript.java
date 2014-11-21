@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts.util;
 
+import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
@@ -10,6 +11,7 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotGet;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -43,6 +45,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class ProductsWebscript extends AbstractJavaWebScript {
 
     public boolean simpleJson = false;
+    private EmsScriptNode sitePackageNode = null;
 
     public ProductsWebscript( Repository repository, ServiceRegistry services,
                               StringBuffer response ) {
@@ -53,11 +56,24 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                                                            throws JSONException {
         JSONArray productsJson = new JSONArray();
 
-        EmsScriptNode siteNode = getSiteNodeFromRequest( req, false );
-        if ( !NodeUtil.exists( siteNode ) ) {
+        EmsScriptNode siteNode = null;
+        EmsScriptNode mySiteNode = getSiteNodeFromRequest( req, false );
+        WorkspaceNode workspace = getWorkspace( req );
+        String siteName = getSiteName(req);
+        
+        if (!NodeUtil.exists( mySiteNode )) {
             log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
             return productsJson;
         }
+        
+        // Find the project site and site package node if applicable:
+        Pair<EmsScriptNode,EmsScriptNode> sitePair = findProjectSite(req, siteName, workspace, mySiteNode);
+        if (sitePair == null) {
+            return productsJson;
+        }
+
+        sitePackageNode = sitePair.first;
+        siteNode = sitePair.second;  // Should be non-null
 
         String configurationId = req.getServiceMatch().getTemplateVars().get( "configurationId" );
         if (configurationId == null) {
@@ -95,15 +111,33 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         WorkspaceNode workspace = getWorkspace( req );
         
+        // Search for all products within the project site:
         Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix, 
                                                                 Acm.ACM_PRODUCT, false,
                                                                 workspace, dateTime, 
                                                                 siteNode.getName());
         if (nodeList != null) {
+            
+            boolean checkSitePkg = (sitePackageNode != null && sitePackageNode.exists());
+            // Get the alfresco Site for the site package node, it will have a 
+            // cm:name = "site_"+sysmlid of site package node:
+            EmsScriptNode pkgSite = checkSitePkg ? findScriptNodeById(NodeUtil.sitePkgPrefix+sitePackageNode.getSysmlId(), 
+                                                                      workspace, null, false) : null;
+            
             Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
             for ( EmsScriptNode node : nodes) {
                 if (node != null) {
-                    productsJson.put( node.toJSONObject( null ) );
+                    // If we are just retrieving the products for a site package, then filter out the ones
+                    // that do not have the site package as the first site package parent:
+                    if (checkSitePkg) {
+                        if (pkgSite != null &&
+                            pkgSite.equals(findParentPkgSite(node, siteNode, null, workspace))) {
+                            productsJson.put( node.toJSONObject( null ) );
+                        }
+                    }
+                    else {
+                        productsJson.put( node.toJSONObject( null ) );
+                    }
                 }
             }
         }

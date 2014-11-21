@@ -54,6 +54,7 @@ import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
+import gov.nasa.jpl.mbee.util.Pair;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -143,7 +144,6 @@ public class ModelPost extends AbstractJavaWebScript {
     private EmsScriptNode projectNode = null;
     private EmsScriptNode siteNode = null;
     private EmsScriptNode sitePackageNode = null;
-    private final String sitePkgPrefix = "site_";
     
     /**
      * JSONObject of the relationships
@@ -1749,46 +1749,8 @@ public class ModelPost extends AbstractJavaWebScript {
                 // Determine the parent package:
                 // Note: will do this everytime, even if the site package node already existed, as the parent site
                 //       could have changed with this post
-                EmsScriptNode pkgSiteParentNode = null;
-                EmsScriptNode siteParent = nodeToUpdate.getParent();
-                EmsScriptNode siteParentReifNode;
-                while (siteParent != null && siteParent.exists()) {
-                    
-                    siteParentReifNode = siteParent.getReifiedNode();
-                    
-                    // If the parent is a package and a site, then its the parent site node:
-                    if (siteParentReifNode != null && siteParentReifNode.hasAspect(Acm.ACM_PACKAGE) ) {
-                        Boolean isSiteParent = (Boolean) siteParentReifNode.getProperty( Acm.ACM_IS_SITE );
-                        if (isSiteParent != null && isSiteParent) {
-                            
-                            // Get the alfresco Site for the site package node, it will have a 
-                            // cm:name = "site_"+sysmlid of site package node:
-                            String sysmlid = siteParentReifNode.getSysmlId();
-                            if (sysmlid != null) {
-                                pkgSiteParentNode = findScriptNodeById(sitePkgPrefix+sysmlid, workspace, null, false);
-                                break;
-                            }
-                            else {
-                                log(LogLevel.WARNING, "Parent package site does not have a sysmlid.  Node "+siteParentReifNode);
-                            }
-                        }
-                    }
-                    
-                    // If the parent is the project, then the site will be the project Site:
-                    if ((siteParentReifNode != null && siteParentReifNode.equals( projectNode )) ||
-                        siteParent.equals(projectNode)) {
-                        if (siteNode != null) {
-                            pkgSiteParentNode = siteNode;
-                        }
-                        break;  // break no matter what b/c we have reached the project node
-                    }
-                    
-                    if (siteParent.isWorkspaceTop()) {
-                        break;
-                    }
-                    
-                    siteParent = siteParent.getParent();
-                }
+                EmsScriptNode pkgSiteParentNode = findParentPkgSite(nodeToUpdate, siteNode,
+                                                                    projectNode, workspace);
                 
                 // Add the children/parent properties:
                 if (pkgSiteParentNode != null && pkgSiteNode != null) {
@@ -2447,11 +2409,10 @@ public class ModelPost extends AbstractJavaWebScript {
     protected EmsScriptNode getProjectNodeFromRequest(WebScriptRequest req, boolean createIfNonexistent) {
 
         WorkspaceNode workspace = getWorkspace( req );
-
-        String siteName = getSiteName(req);
         String projectId = getProjectId(req);
+        String siteName = getSiteName(req);
         EmsScriptNode mySiteNode = getSiteNode( siteName, workspace, null, false );
-                
+
         // If the site was not found and site was specified in URL, then return a 404.
         if (mySiteNode == null || !mySiteNode.exists()) {
             
@@ -2465,57 +2426,21 @@ public class ModelPost extends AbstractJavaWebScript {
                     HttpServletResponse.SC_NOT_FOUND);
                 return null;
             }
-        }        
+        } 
         
-        // If it is a package site:
-        if (siteName != null && siteName.startsWith(sitePkgPrefix)) {
-            
-            // Get the corresponding package for the site:
-            String[] splitArry = siteName.split(sitePkgPrefix);
-            if (splitArry != null && splitArry.length > 0) {
-                String sitePkgName = splitArry[splitArry.length-1];
-                
-                sitePackageNode = findScriptNodeById(sitePkgName,workspace, null, false );
+        // Find the project site and site package node if applicable:
+        Pair<EmsScriptNode,EmsScriptNode> sitePair = findProjectSite(req, siteName, workspace, mySiteNode);
+        if (sitePair == null) {
+            return null;
+        }
 
-                // Found the package for the site:
-                if (sitePackageNode != null) {
-                    // Get the project site by tracing up the parents until the parent is null:
-                    // Note: the assumption here is that this will never be the project site, so must have a parent
-                    NodeRef siteParentRef = (NodeRef) mySiteNode.getProperty( Acm.ACM_SITE_PARENT );
-                    EmsScriptNode siteParent = siteParentRef != null ? new EmsScriptNode(siteParentRef, services, response) : null;
-                    EmsScriptNode oldSiteParent = null;
-                    
-                    while (siteParent != null) {
-                        oldSiteParent = siteParent;
-                        siteParentRef = (NodeRef) siteParent.getProperty( Acm.ACM_SITE_PARENT );
-                        siteParent = siteParentRef != null ? new EmsScriptNode(siteParentRef, services, response) : null;
-                    }
-                    
-                    if (oldSiteParent != null && oldSiteParent.exists()) {
-                        siteNode = oldSiteParent;
-                    }
-                    else {
-                        log(LogLevel.ERROR, "Could not find parent project site for site package name "+siteName, 
-                            HttpServletResponse.SC_NOT_FOUND);
-                        return null;
-                    }
-                }
-            }
-            
-            if (sitePackageNode == null || siteNode == null) {
-                log(LogLevel.ERROR, "Could not find site package node for site package name "+siteName, 
-                    HttpServletResponse.SC_NOT_FOUND);
-                return null;
-            }
-            
+        sitePackageNode = sitePair.first;
+        siteNode = sitePair.second;  // Should be non-null
+       
+        if (sitePackageNode != null) {
             siteName = siteNode.getName();
+        }
 
-        }
-        // Otherwise, it is a project site:
-        else {
-            siteNode = mySiteNode;
-        }
-        
         setSiteInfoImpl(siteName); // Setting the site info in case we just created the site for the first time
         
         // If the project was not supplied on the URL, then look for the first project found within
@@ -2598,7 +2523,7 @@ public class ModelPost extends AbstractJavaWebScript {
     }
     
     private void setSiteInfoImpl(String siteName) {
-        if (!siteName.startsWith(sitePkgPrefix)) {
+        if (!siteName.startsWith(NodeUtil.sitePkgPrefix)) {
             siteInfo = services.getSiteService().getSite(siteName);
         }
     }

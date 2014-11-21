@@ -5,6 +5,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -26,6 +27,7 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
 
 import org.alfresco.model.ContentModel;
@@ -56,10 +58,14 @@ import org.alfresco.util.ApplicationContextHelper;
 import org.junit.Assert;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
+import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class NodeUtil {
 
     public static boolean doCaching = false;
+    
+    public static String sitePkgPrefix = "site_";
+
     
     /**
      * A cache of alfresco nodes stored as a map from cm:name to node for the master branch only.
@@ -1877,4 +1883,5 @@ public class NodeUtil {
         String path = String.format("/%s/%s/%s", year, month, day);
         return getOrCreatePath(parent, path);
     }
+    
 }
