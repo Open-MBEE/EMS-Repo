@@ -29,6 +29,8 @@
 
 package gov.nasa.jpl.view_repo.webscripts.util;
 
+import gov.nasa.jpl.view_repo.util.Acm;
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
 import java.util.HashMap;
@@ -37,9 +39,9 @@ import java.util.Map;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteMemberInfo;
-import org.alfresco.service.cmr.site.SiteService;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -82,25 +84,37 @@ public class SitePermSync extends AbstractJavaWebScript{
     private Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
         
-        SiteService siteService = services.getSiteService();
-        List<SiteInfo> sites = siteService.listSites(null);
+        List<SiteInfo> sites = services.getSiteService().listSites(null);
         
-        String name = "newone";
-        if (siteService.getSite( name ) == null) {
-            ShareUtils.constructSiteDashboard( "site-dashboard", name, name, name, true );
-        }
-        
-        for (SiteInfo site : sites ) {
-            List<SiteMemberInfo> members = siteService.listMembersInfo( site.getShortName(), null, null, 0, true );
-            for ( SiteMemberInfo authorityObj : members ) {
-                authorityObj.getMemberRole();
-                authorityObj.getMemberName();
-            }            
+        for (SiteInfo siteInfo : sites ) {
+            EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
+            NodeRef sitePkgNR = (NodeRef) siteNode.getProperty(Acm.ACM_SITE_PACKAGE);
+            if (sitePkgNR != null) {
+                EmsScriptNode sitePkg = new EmsScriptNode(sitePkgNR, services, response);
+                updatePermissions(siteInfo, sitePkg);
+            }
         }
         
         model.put( "res", "okay" );
         return model;
     }
-    
+
+    private void updatePermissions(SiteInfo siteInfo, EmsScriptNode sitePkg) {
+        NodeRef nr = sitePkg.getNodeRef();
+
+        // remove any previous permissions then override
+        services.getPermissionService().setInheritParentPermissions( nr, false );
+        services.getPermissionService().deletePermissions( nr );
+        
+        List<SiteMemberInfo> members = services.getSiteService().listMembersInfo( siteInfo.getShortName(), null, null, 0, true );
+        for ( SiteMemberInfo authorityObj : members ) {
+            sitePkg.setPermission( authorityObj.getMemberRole(), authorityObj.getMemberName() );
+            EmsScriptNode reifiedSitePkg = sitePkg.getReifiedPkg();
+            if (reifiedSitePkg != null) {
+                reifiedSitePkg.setPermission( authorityObj.getMemberRole(), authorityObj.getMemberName() );
+            }
+        }
+    }    
 }
+
 

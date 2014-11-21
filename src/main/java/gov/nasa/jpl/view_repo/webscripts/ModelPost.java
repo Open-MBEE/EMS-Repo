@@ -78,6 +78,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
@@ -1715,7 +1716,7 @@ public class ModelPost extends AbstractJavaWebScript {
         EmsScriptNode siteNode = null;
         
         SiteInfo siteInfo = services.getSiteService().getSite( siteName );
-        if ( siteInfo != null ) {
+        if ( siteInfo == null ) {
             String sitePreset = "site-dashboard";
             String siteTitle = pkgSiteNode.getSysmlName();
             String siteDescription = (String) pkgSiteNode.getProperty( Acm.ACM_DOCUMENTATION );
@@ -1765,10 +1766,16 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
                 
             } // ends if (isSite)
-            
-            // Otherwise, archive the site, and permissions revert to owning site permissions:
             else {
-                // TODO will CY provide a method for this?
+                // Revert permissions to inherit
+                services.getPermissionService().deletePermissions(nodeToUpdate.getNodeRef());
+                nodeToUpdate.setInheritsPermissions( true );
+                
+                NodeRef reifiedPkg = (NodeRef) nodeToUpdate.getProperty( "ems:reifiedPkg" );
+                if (reifiedPkg != null) {
+                    services.getPermissionService().deletePermissions( reifiedPkg );
+                    services.getPermissionService().setInheritParentPermissions( reifiedPkg, true );
+                }
             }
         } // ends if (isSite != null)
         
@@ -2298,30 +2305,34 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
                 else {
                     JSONObject postJson = (JSONObject)req.parseContent();
-                    EmsScriptNode myProjectNode = getProjectNodeFromRequest( req, true );
-                    if (myProjectNode != null) {
-                        Set< EmsScriptNode > elements =
-                        createOrUpdateModel( postJson, status, workspace, null );
-
-                        addRelationshipsToProperties( elements );
-                        if ( !Utils.isNullOrEmpty( elements ) ) {
+                    if (postJson == null) {
+                        log(LogLevel.ERROR, "JSON body not provided", HttpServletResponse.SC_BAD_REQUEST);
+                    } else {
+                        EmsScriptNode myProjectNode = getProjectNodeFromRequest( req, true );
+                        if (myProjectNode != null) {
+                            Set< EmsScriptNode > elements =
+                            createOrUpdateModel( postJson, status, workspace, null );
     
-                            // Fix constraints if desired:
-                            if (fix) {
-                                fix(elements);
+                            addRelationshipsToProperties( elements );
+                            if ( !Utils.isNullOrEmpty( elements ) ) {
+        
+                                // Fix constraints if desired:
+                                if (fix) {
+                                    fix(elements);
+                                }
+        
+                                // Create JSON object of the elements to return:
+                                JSONArray elementsJson = new JSONArray();
+                                timerToJson = Timer.startTimer(timerToJson, timeEvents);
+                                for ( EmsScriptNode element : elements ) {
+                                    elementsJson.put( element.toJSONObject(null) );
+                                }
+                                Timer.stopTimer(timerToJson, "!!!!! executeImpl(): toJSON time", timeEvents);
+                                top.put( "elements", elementsJson );
+                                if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
+                                if ( prettyPrint ) model.put( "res", top.toString( 4 ) );
+                                else model.put( "res", top.toString() );
                             }
-    
-                            // Create JSON object of the elements to return:
-                            JSONArray elementsJson = new JSONArray();
-                            timerToJson = Timer.startTimer(timerToJson, timeEvents);
-                            for ( EmsScriptNode element : elements ) {
-                                elementsJson.put( element.toJSONObject(null) );
-                            }
-                            Timer.stopTimer(timerToJson, "!!!!! executeImpl(): toJSON time", timeEvents);
-                            top.put( "elements", elementsJson );
-                            if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-                            if ( prettyPrint ) model.put( "res", top.toString( 4 ) );
-                            else model.put( "res", top.toString() );
                         }
                     }
                 }
