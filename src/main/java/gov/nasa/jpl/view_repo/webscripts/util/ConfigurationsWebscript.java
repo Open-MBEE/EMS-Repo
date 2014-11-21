@@ -287,6 +287,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         snapshotJson.put( "created",  EmsScriptNode.getIsoTime( (Date)snapshot.getProperty( "cm:created" )));
         snapshotJson.put( "creator", snapshot.getProperty( "cm:modifier" ) );
 
+        @SuppressWarnings( "rawtypes" )
         LinkedList<HashMap> list = new LinkedList<HashMap>();
         if(SnapshotPost.hasPdf(snapshot) || SnapshotPost.hasHtmlZip(snapshot)){
         	String contextUrl = "https://" + ActionUtil.getHostName() + ".jpl.nasa.gov/alfresco";
