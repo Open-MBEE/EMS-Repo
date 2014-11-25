@@ -128,4 +128,13 @@
     <bean id="restConnection" class="gov.nasa.jpl.view_repo.connections.RestPostConnection">
         <property name="uri" value="https://orasoa-dev07.jpl.nasa.gov:8121/PublishMessageRestful" />
     </bean>
+
+	<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+		<property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setUsername" />
+		<property name="arguments" value="placeholderusername"/>
+	</bean>
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setPassword" />
+        <property name="arguments" value="placeholderpassword"/>
+    </bean>
 </beans>

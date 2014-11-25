@@ -24,13 +24,13 @@ public class ShareUtils {
     private static String BASE_URL = "http://localhost:8081/share";
     private static final String LOGIN_URL = BASE_URL + "/page/dologin";
     private static final String CREATE_SITE_URL = BASE_URL + "/page/modules/create-site";
-    private static String alfrescoUsername = "admin";
-    private static String alfrescoPwd = "admin";
+    private static String username = "admin";
+    private static String password = "admin";
 
     public static void constructSiteDashboard(String sitePreset, String siteId, String siteTitle, String siteDescription, boolean isPublic) {
         HttpClient httpClient = new HttpClient();
         
-        String loginData = "username=" + alfrescoUsername + "&password=" + alfrescoPwd;
+        String loginData = "username=" + username + "&password=" + password;
         makePostCall(httpClient, LOGIN_URL, loginData, CONTENT_TYPE_FORM, "Login to Alfresco Share", HttpStatus.SC_MOVED_TEMPORARILY);
         
         JSONObject json = new JSONObject();
@@ -62,7 +62,7 @@ public class ShareUtils {
 
             if (status == expectedStatus) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug(callName + " with user " + alfrescoUsername);
+                    logger.debug(callName + " with user " + username);
                 }
             } else {
                 logger.error("Could not " + callName + ", HTTP Status code : " + status);
@@ -85,5 +85,13 @@ public class ShareUtils {
         postMethod.setRequestEntity(new StringRequestEntity(body, CONTENT_TYPE_TEXT_PLAIN, UTF_8));
 
         return postMethod;
+    }
+    
+    public static void setUsername(String username) {
+        ShareUtils.username = username;
+    }
+    
+    public static void setPassword(String password) {
+        ShareUtils.password = password;
     }
 }
