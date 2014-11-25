@@ -116,10 +116,8 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         if (nodeList != null) {
             
             boolean checkSitePkg = (sitePackageNode != null && sitePackageNode.exists());
-            // Get the alfresco Site for the site package node, it will have a 
-            // cm:name = "site_"+sysmlid of site package node:
-            EmsScriptNode pkgSite = checkSitePkg ? findScriptNodeById(NodeUtil.sitePkgPrefix+sitePackageNode.getSysmlId(), 
-                                                                      workspace, null, false) : null;
+            // Get the alfresco Site for the site package node:
+            EmsScriptNode pkgSite = checkSitePkg ? getSiteForPkgSite(sitePackageNode, workspace) : null;
             
             Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
             for ( EmsScriptNode node : nodes) {

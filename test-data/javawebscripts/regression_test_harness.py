@@ -1018,7 +1018,8 @@ None,
 ],
 
 # SITE PACKAGES: ==========================    
-
+# Cant run these tests in regression b/c you need
+# to bring up share also.
 [
 43,
 "PostSitePackage",
@@ -1029,7 +1030,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="elements"),
 True, 
 common_filters,
-["test","workspaces","develop"]
+["test"]
 ],
         
 [
@@ -1042,7 +1043,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="elements"),
 True, 
 common_filters+['"message"'],
-["test","workspaces","develop"]
+["test"]
 ],
         
 [
@@ -1053,7 +1054,7 @@ create_curl_cmd(type="GET",data="products",base_url=BASE_URL_WS,
                 branch="master/sites/site_package/"),
 True, 
 common_filters,
-["test","workspaces","develop"]
+["test"]
 ],
         
 # CONTENT MODEL UPDATES: ==========================    

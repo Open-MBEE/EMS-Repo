@@ -339,6 +339,10 @@
                         <tokenised>false</tokenised>
                     </index>
                 </property>
+            </properties>
+        </aspect>
+        <aspect name="ems:SiteCharacterization">
+            <properties>
                 <property name="ems:siteSite">
                     <type>d:noderef</type>
                     <mandatory>false</mandatory>
