@@ -5,7 +5,7 @@
 	</description>
   	<url>/javawebscripts/hostname</url>
   	<format default="json">argument</format>
-  	<authentication>user</authentication>
-  	<transaction allow="readonly">required</transaction>
+  	<authentication>none</authentication>
+  	<transaction>none</transaction>
   	<family>MMS REST API</family>
  </webscript>

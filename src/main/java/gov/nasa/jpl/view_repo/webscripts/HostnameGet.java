@@ -35,7 +35,7 @@ public class HostnameGet extends AbstractJavaWebScript {
 			jsonObj.put("alfresco", alfrescoJson);
 			jsonObj.put("share", shareJson);
 			
-			model.put( "res", jsonObj.toString() );
+			model.put( "res", jsonObj.toString(4) );
 		}
 		catch(JSONException js)
 		{
