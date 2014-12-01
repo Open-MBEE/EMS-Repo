@@ -1085,6 +1085,30 @@ common_filters,
 ["test","workspaces","develop"]
 ],
         
+# CMED-416: ==========================    
+
+[
+47,
+"PostDuplicateSysmlNames1",
+"Post a element that will be used in the next test to generate a error",
+create_curl_cmd(type="POST",data="cmed416_1.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop"]
+],
+        
+[
+48,
+"PostDuplicateSysmlNames2",
+"Post a element with the same type, sysml name, and parent as the previous test to generate at error",
+create_curl_cmd(type="POST",data="cmed416_2.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+False, 
+None,
+["test","workspaces","develop"]
+],
+        
 ]    
 
 ##########################################################################################    

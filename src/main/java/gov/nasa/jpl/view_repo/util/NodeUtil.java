@@ -699,6 +699,75 @@ public class NodeUtil {
         
         return returnArray;
     }
+    
+    /**
+     * Find a NodeReferences by sysml:name 
+     *
+     * @param name
+     * @param workspace
+     * @param dateTime
+     *            the time specifying which version of the NodeRef to find; null
+     *            defaults to the latest version
+     * @return Array of NodeRefs found or empty list
+     */
+    public static ArrayList<NodeRef> findNodeRefsBySysmlName(String name,
+                                          boolean ignoreWorkspace,
+                                          WorkspaceNode workspace,
+                                          Date dateTime, ServiceRegistry services, boolean findDeleted,
+                                          boolean justFirst) {
+        
+        ArrayList<NodeRef> returnArray = new ArrayList<NodeRef>();
+        boolean useSimpleCache = !ignoreWorkspace && !findDeleted && workspace == null && dateTime == null;
+        ArrayList< NodeRef > array = findNodeRefsByType(name, SearchType.NAME.prefix, 
+                                                        useSimpleCache,
+                                                        ignoreWorkspace,
+                                                        workspace, dateTime, justFirst, true, 
+                                                        services, findDeleted); 
+
+        if (!Utils.isNullOrEmpty(array)) {
+            for (NodeRef r : array) {
+                if ( r != null ) {
+                    returnArray.add(r);
+                }
+            }
+        }
+        
+        return returnArray;
+    }
+    
+    /**
+     * Find EmsScriptNodes by sysml:name 
+     *
+     * @param name
+     * @param workspace
+     * @param dateTime
+     *            the time specifying which version of the NodeRef to find; null
+     *            defaults to the latest version
+     * @return Array of EmsScriptNodes found or empty list
+     */
+    public static ArrayList<EmsScriptNode> findScriptNodesBySysmlName(String name,
+                                          boolean ignoreWorkspace,
+                                          WorkspaceNode workspace,
+                                          Date dateTime, ServiceRegistry services, boolean findDeleted,
+                                          boolean justFirst) {
+        
+        ArrayList<EmsScriptNode> returnArray = new ArrayList<EmsScriptNode>();
+        ArrayList<NodeRef> array = findNodeRefsBySysmlName(name,
+                                                           ignoreWorkspace,
+                                                           workspace,
+                                                           dateTime, services, findDeleted,
+                                                           justFirst);
+        
+        if (!Utils.isNullOrEmpty(array)) {
+            for (NodeRef r : array) {
+                if ( r != null ) {
+                    returnArray.add(new EmsScriptNode(r, services));
+                }
+            }
+        }
+        
+        return returnArray;
+    }
 
 
     /**

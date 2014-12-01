@@ -277,6 +277,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	    return NodeUtil.findScriptNodeById( id, workspace, dateTime, findDeleted,
 	                                        services, response );
 	}
+	
+	/**
+     * Find nodes of specified sysml:name
+     *
+     */
+    protected ArrayList<EmsScriptNode> findScriptNodesBySysmlName(String name,
+                                                       WorkspaceNode workspace,
+                                                       Date dateTime, boolean findDeleted) {
+        return NodeUtil.findScriptNodesBySysmlName( name, false, workspace, dateTime, services, findDeleted, false );
+    }
 
     protected void log(LogLevel level, String msg, int code) {
 		if (level.value >= logLevel.value || level.value == LogLevel.ERROR.value) {

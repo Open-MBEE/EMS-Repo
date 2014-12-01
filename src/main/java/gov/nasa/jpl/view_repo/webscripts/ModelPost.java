@@ -1514,10 +1514,12 @@ public class ModelPost extends AbstractJavaWebScript {
         // find node if exists, otherwise create
         EmsScriptNode nodeToUpdate = findScriptNodeById( id, workspace, null, true );
         String existingNodeType = null;
+        String existingNodeName = null;
         if ( nodeToUpdate != null ) {
             nodeToUpdate.setResponse( getResponse() );
             nodeToUpdate.setStatus( getResponseStatus() );
             existingNodeType = nodeToUpdate.getTypeName();
+            existingNodeName = nodeToUpdate.getSysmlName();
             if ( nodeToUpdate.isDeleted() ) {
                 nodeToUpdate.removeAspect( "ems:Deleted" );
                 modStatus.setState( ModStatus.State.ADDED );
@@ -1578,6 +1580,27 @@ public class ModelPost extends AbstractJavaWebScript {
             	log(LogLevel.ERROR,"Type was not supplied and no existing node to query for the type",
             		HttpServletResponse.SC_BAD_REQUEST);
             	return null;
+        }
+        
+        // Error if posting a element with the same sysml name, type, and parent as another:
+        String sysmlName = elementJson.has( Acm.JSON_NAME ) ? elementJson.getString( Acm.JSON_NAME ) :
+                                                              existingNodeName;
+        if (!Utils.isNullOrEmpty( sysmlName )) {
+            ArrayList<EmsScriptNode> nodeArray = findScriptNodesBySysmlName(sysmlName, workspace, null, false);
+            
+            if (!Utils.isNullOrEmpty( nodeArray )) {
+                for (EmsScriptNode n : nodeArray) {
+                    if ( (id != null && !id.equals( n.getSysmlId() )) &&
+                         (jsonType != null && jsonType.equals( n.getTypeName() )) &&
+                         (parent != null && parent.equals( n.getParent() )) ) {
+                        log(LogLevel.ERROR,"Found another element with the same sysml name: "
+                                           +n.getSysmlName()+" type: "+n.getTypeName()
+                                           +" parent: "+n.getParent()+" as the element trying to be posted",
+                            HttpServletResponse.SC_BAD_REQUEST);
+                        return null;
+                    }
+                }
+            }
         }
 
         type = NodeUtil.getContentModelTypeName( acmSysmlType, services );
