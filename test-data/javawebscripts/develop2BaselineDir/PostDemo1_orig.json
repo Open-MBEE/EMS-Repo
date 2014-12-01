@@ -1,0 +1,215 @@
+{
+    "elements": [
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T12:57:18.282-0800",
+            "name": "map",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_map",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/map",
+            "read": "2014-11-19T13:16:55.136-0800",
+            "specialization": {"type": "Operation"},
+            "sysmlid": "op_map"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T12:57:14.696-0800",
+            "name": "viewpoint_op",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/name_list",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/viewpoint_op",
+            "read": "2014-11-19T13:16:55.162-0800",
+            "specialization": {
+                "expression": "vp_expression",
+                "parameters": ["exposed_id"],
+                "type": "Operation"
+            },
+            "sysmlid": "name_list"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T13:16:54.658-0800",
+            "name": "Components",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148311476_17302_29388",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components",
+            "read": "2014-11-19T13:16:55.195-0800",
+            "specialization": {"type": "View"},
+            "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T12:57:14.051-0800",
+            "name": "Name",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_name_arg",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Name",
+            "read": "2014-11-19T13:16:55.223-0800",
+            "specialization": {"type": "Operation"},
+            "sysmlid": "op_name_arg"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T13:16:52.528-0800",
+            "name": "",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/MMS_1416431811291_9099bc33-18de-4706-8f6f-9c6b22a67640",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+            "read": "2014-11-19T13:16:55.251-0800",
+            "specialization": {
+                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+                "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+                "type": "Expose"
+            },
+            "sysmlid": "MMS_1416431811291_9099bc33-18de-4706-8f6f-9c6b22a67640"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T12:57:15.087-0800",
+            "name": "",
+            "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148311476_17302_29388/_17_0_2_3_e610336_1394148464681_90735_29608",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components/",
+            "read": "2014-11-19T13:16:55.291-0800",
+            "specialization": {
+                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+                "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
+                "type": "Conform"
+            },
+            "sysmlid": "_17_0_2_3_e610336_1394148464681_90735_29608"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T12:57:13.644-0800",
+            "name": "List",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_list",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/List",
+            "read": "2014-11-19T13:16:55.337-0800",
+            "specialization": {"type": "Operation"},
+            "sysmlid": "op_list"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T12:57:19.533-0800",
+            "name": "",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_map_arg",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+            "read": "2014-11-19T13:16:55.363-0800",
+            "specialization": {
+                "operand": [
+                    {
+                        "element": "op_map",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "exposed_id",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "op_name_arg",
+                        "type": "ElementValue"
+                    }
+                ],
+                "type": "Expression"
+            },
+            "sysmlid": "op_map_arg"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T12:57:17.272-0800",
+            "name": "",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/vp_expression",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+            "read": "2014-11-19T13:16:55.430-0800",
+            "specialization": {
+                "operand": [
+                    {
+                        "element": "op_list",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "operand": [
+                            {
+                                "element": "op_map",
+                                "type": "ElementValue"
+                            },
+                            {
+                                "element": "exposed_id",
+                                "type": "ElementValue"
+                            },
+                            {
+                                "element": "op_name_arg",
+                                "type": "ElementValue"
+                            }
+                        ],
+                        "type": "Expression"
+                    }
+                ],
+                "type": "Expression"
+            },
+            "sysmlid": "vp_expression"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T12:57:13.830-0800",
+            "name": "exposed",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/exposed_id",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/exposed",
+            "read": "2014-11-19T13:16:55.522-0800",
+            "specialization": {"type": "Parameter"},
+            "sysmlid": "exposed_id"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T12:57:23.144-0800",
+            "name": "ComponentViewPoint",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148449252_91190_29556",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/ComponentViewPoint",
+            "read": "2014-11-19T13:16:55.548-0800",
+            "specialization": {"type": "Viewpoint"},
+            "sysmlid": "_17_0_2_3_e610336_1394148449252_91190_29556"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-11-19T13:16:54.947-0800",
+            "name": "BLUCam CubeSat A",
+            "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
+            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394140430311_23731_27741/_17_0_2_4_f3a0363_1394142290412_487571_28478",
+            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394140430311_23731_27741/BLUCam CubeSat A",
+            "read": "2014-11-19T13:16:55.574-0800",
+            "specialization": {"type": "Package"},
+            "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478"
+        }
+    ],
+    "message": "[ERROR]: updateOrCreateElement: DB transaction failed: String index out of range: -2\n[WARNING]: createOrUpdateModel deltas not posted properly\n"
+}
+500
