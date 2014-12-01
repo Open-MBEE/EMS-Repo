@@ -814,7 +814,21 @@ create_curl_cmd(type="POST",base_url=BASE_URL_JW,
                 post_type="elements?fix=true"),
 True,
 common_filters+['"specification"'],
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop"]
+],
+        
+# Note: this is same as 25 but calls different json for second run in order to avoid resetting variables
+[
+50,
+"SolveConstraint",
+"Post expressions with a constraint and solves for the constraint.",
+create_curl_cmd(type="POST",base_url=BASE_URL_JW,
+                data="expressionElementsFix.json",
+                branch="sites/europa/projects/123456/",
+                post_type="elements?fix=true"),
+True,
+common_filters+['"specification"'],
+["develop2"]
 ],
 
 [
@@ -961,7 +975,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="",branch="AA?sourceWorkspace=master"),
 True,
 common_filters + ['"parent"','"id"','"qualifiedId"'],
-["develop", "develop2"]
+["develop"]
 ],
 
 [
@@ -972,7 +986,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="",branch="BB?sourceWorkspace=AA"),
 True,
 common_filters + ['"parent"','"id"','"qualifiedId"'],
-["develop", "develop2"]
+["develop"]
 ],
 
 [
@@ -983,7 +997,7 @@ create_curl_cmd(type="DELETE",base_url=BASE_URL_WS,
                 post_type="",branch="AA"),
 True,
 common_filters + ['"parent"','"id"','"qualifiedId"'],
-["develop", "develop2"]
+["develop"]
 ],
 
 [
@@ -994,7 +1008,7 @@ create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,
                 post_type="", branch=""),
 True,
 common_filters + ['"parent"','"id"','"qualifiedId"','"branched"'],
-["develop", "develop2"]
+["develop"]
 ],
 
 [
@@ -1005,7 +1019,7 @@ create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,
                 post_type="", branch="?deleted"),
 True,
 common_filters + ['"parent"','"id"','"qualifiedId"'],
-["develop", "develop2"]
+["develop"]
 ],
 
 ## TODO: placeholder to put in post to get back workspace A (need the ID from 38)
@@ -1016,7 +1030,7 @@ common_filters + ['"parent"','"id"','"qualifiedId"'],
 'echo',
 False,
 None,
-["develop", "develop2"]
+["develop"]
 ],
 
 # SITE PACKAGES: ==========================    
