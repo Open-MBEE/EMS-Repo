@@ -33,6 +33,7 @@ BASE_URL_WS = BASE_URL_WS_NOBS+"/"
 BASE_URL_JW = SERVICE_URL+"javawebscripts/"
 
 failed_tests = 0
+errs = []
 passed_tests = 0
 result_dir = ""
 baseline_dir = ""
@@ -267,10 +268,11 @@ def print_pass(msg):
     passed_tests += 1
     print "\nPASS: "+str(msg)
 
-def print_error(msg):
+def print_error(msg, outpt):
     global failed_tests
     failed_tests += 1
-    print "\nFAIL: "+str(msg)
+    errs.append(msg)
+    print "\nFAIL: "+str(msg)+"\n"+str(outpt)
     
 def mbee_util_jar_path():
     path = "../../../../.m2/repository/gov/nasa/jpl/mbee/util/mbee_util/"
@@ -392,10 +394,9 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
             (status_diff,output_diff) = commands.getstatusoutput("%s %s %s"%(diff_cmd,baseline_json,result_json))
 
             if output_diff:
-                print_error("Test number %s (%s) failed!  Diff returned bad status or diffs found in the filtered .json files (%s,%s), status: %s, output: '%s'"%(test_num,test_name,baseline_json,result_json,status_diff, output_diff))
+                print_error("Test number %s (%s) failed!"%(test_num,test_name), "  Diff returned bad status or diffs found in the filtered .json files (%s,%s), status: %s\n, output: '%s'"%(baseline_json,result_json,status_diff,output_diff))
             else:
                 print_pass("Test number %s (%s) passed!  No differences in the filtered .json files (%s,%s)"%(test_num,test_name,baseline_json,result_json))
-
     else:
         print_error("Curl command return a bad status and output doesnt start with json: %s, output: '%s'"%(status,output))
 
@@ -1144,6 +1145,10 @@ if __name__ == '__main__':
     if not create_baselines:
         print "\nNUMBER OF PASSED TESTS: "+str(passed_tests)
         print "NUMBER OF FAILED TESTS: "+str(failed_tests)+"\n"
+        print "FAILED TESTS:"
+        for item in errs[:]:
+            print item
+        print "\n"
     
     sys.exit(failed_tests)
     
