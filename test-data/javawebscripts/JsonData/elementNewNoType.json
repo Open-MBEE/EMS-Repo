@@ -1,0 +1,12 @@
+{"elements": [
+    {
+        "sysmlid": "poop666",
+        "documentation": "new documentation!",
+        "specialization": {
+             "value": [{
+                "string": "new string!!!",
+                "type": "LiteralString"
+            }],
+        },
+    }
+]}

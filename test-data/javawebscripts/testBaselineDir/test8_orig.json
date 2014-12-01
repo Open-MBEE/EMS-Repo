@@ -1,0 +1,91 @@
+{"elements": [
+    {
+        "creator": "admin",
+        "documentation": "else",
+        "editable": true,
+        "modified": "2014-10-23T15:44:29.289-0700",
+        "name": "301",
+        "owner": "300",
+        "qualifiedId": "123456/300/301",
+        "qualifiedName": "/JW_TEST/300/301",
+        "read": "2014-10-23T15:44:30.540-0700",
+        "specialization": {
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "childrenViews": ["304"],
+            "contains": [{
+                "source": "301",
+                "sourceProperty": "documentation",
+                "sourceType": "reference",
+                "type": "Paragraph"
+            }],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "isDerived": false,
+            "isSlot": false,
+            "noSections": ["302"],
+            "type": "Product",
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "view2view": [{
+                "childrenViews": [
+                    "301",
+                    "302"
+                ],
+                "sysmlid": "301"
+            }]
+        },
+        "sysmlid": "301"
+    },
+    {
+        "creator": "admin",
+        "documentation": "to",
+        "editable": true,
+        "modified": "2014-10-23T15:44:27.400-0700",
+        "name": "302",
+        "owner": "301",
+        "qualifiedId": "123456/300/301/302",
+        "qualifiedName": "/JW_TEST/300/301/302",
+        "read": "2014-10-23T15:44:30.559-0700",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property",
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }]
+        },
+        "sysmlid": "302"
+    },
+    {
+        "creator": "admin",
+        "documentation": "talk",
+        "editable": true,
+        "modified": "2014-10-23T15:44:27.481-0700",
+        "name": "303",
+        "owner": "302",
+        "qualifiedId": "123456/300/301/302/303",
+        "qualifiedName": "/JW_TEST/300/301/302/303",
+        "read": "2014-10-23T15:44:30.575-0700",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property",
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }]
+        },
+        "sysmlid": "303"
+    }
+]}
+200

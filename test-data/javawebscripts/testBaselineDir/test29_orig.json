@@ -1,0 +1,25 @@
+{
+    "elements": [{
+        "creator": "admin",
+        "documentation": "x is x",
+        "editable": true,
+        "modified": "2014-10-23T15:46:27.926-0700",
+        "name": "300",
+        "owner": "holding_bin_no_site_no_project",
+        "qualifiedId": "no_project/holding_bin_no_site_no_project/x",
+        "qualifiedName": "/holding_bin/300",
+        "read": "2014-10-23T15:46:28.536-0700",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property",
+            "value": [{
+                "string": "the x value",
+                "type": "LiteralString"
+            }]
+        },
+        "sysmlid": "x"
+    }],
+    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
+}
+200

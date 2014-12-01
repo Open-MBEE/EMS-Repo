@@ -1,0 +1,173 @@
+{
+    "elements": [
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-10-23T15:45:59.899-0700",
+            "name": "duration",
+            "owner": "e_38304",
+            "qualifiedId": "123456/e_38304/arg_ev_38307",
+            "qualifiedName": "/duration",
+            "read": "2014-10-23T15:46:06.470-0700",
+            "specialization": {
+                "isDerived": false,
+                "isSlot": false,
+                "type": "Property",
+                "value": [{
+                    "integer": 22,
+                    "type": "LiteralInteger"
+                }]
+            },
+            "sysmlid": "arg_ev_38307"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-10-23T15:46:00.048-0700",
+            "name": "GreaterEquals",
+            "owner": "e_31828",
+            "qualifiedId": "123456/e_31828/op_ev_31835",
+            "qualifiedName": "/GreaterEquals",
+            "read": "2014-10-23T15:46:06.500-0700",
+            "specialization": {
+                "parameters": [
+                    "op_param_31867",
+                    "op_param_31868",
+                    "op_param_31869"
+                ],
+                "type": "Operation"
+            },
+            "sysmlid": "op_ev_31835"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-10-23T15:46:06.441-0700",
+            "name": "initialDuration",
+            "owner": "e_38263",
+            "qualifiedId": "123456/e_38263/arg_ev_33001",
+            "qualifiedName": "/initialDuration",
+            "read": "2014-10-23T15:46:06.524-0700",
+            "specialization": {
+                "isDerived": false,
+                "isSlot": false,
+                "type": "Property",
+                "value": [{
+                    "integer": -1145811380,
+                    "type": "LiteralInteger"
+                }]
+            },
+            "sysmlid": "arg_ev_33001"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-10-23T15:45:59.339-0700",
+            "name": "duration_1",
+            "owner": "e_38304",
+            "qualifiedId": "123456/e_38304/arg_ev_38307_1",
+            "qualifiedName": "/duration_1",
+            "read": "2014-10-23T15:46:06.553-0700",
+            "specialization": {
+                "isDerived": false,
+                "isSlot": false,
+                "type": "Property",
+                "value": [{
+                    "integer": 10,
+                    "type": "LiteralInteger"
+                }]
+            },
+            "sysmlid": "arg_ev_38307_1"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-10-23T15:45:59.518-0700",
+            "name": "",
+            "owner": "e_32169",
+            "qualifiedId": "123456/e_32169/expr_32165",
+            "qualifiedName": "/",
+            "read": "2014-10-23T15:46:06.583-0700",
+            "specialization": {
+                "operand": [
+                    {
+                        "element": "op_ev_31835",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "arg_ev_38307_1",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "element": "arg_ev_33001",
+                        "type": "ElementValue"
+                    }
+                ],
+                "type": "Expression"
+            },
+            "sysmlid": "expr_32165"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-10-23T15:46:00.195-0700",
+            "name": "result",
+            "owner": "op_ev_31835",
+            "qualifiedId": "123456/e_31828/op_ev_31835/op_param_31867",
+            "qualifiedName": "/GreaterEquals/result",
+            "read": "2014-10-23T15:46:06.635-0700",
+            "specialization": {"type": "Element"},
+            "sysmlid": "op_param_31867"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-10-23T15:45:59.220-0700",
+            "name": "",
+            "owner": "e_32169",
+            "qualifiedId": "123456/e_32169/constraint_32165",
+            "qualifiedName": "/",
+            "read": "2014-10-23T15:46:06.656-0700",
+            "specialization": {
+                "specification": "workspace://SpacesStore/6104300b-774d-42d4-91cc-1e51781013dc",
+                "type": "Constraint"
+            },
+            "sysmlid": "constraint_32165"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-10-23T15:46:00.250-0700",
+            "name": "x",
+            "owner": "op_ev_31835",
+            "qualifiedId": "123456/e_31828/op_ev_31835/op_param_31868",
+            "qualifiedName": "/GreaterEquals/x",
+            "read": "2014-10-23T15:46:06.674-0700",
+            "specialization": {"type": "Element"},
+            "sysmlid": "op_param_31868"
+        },
+        {
+            "creator": "admin",
+            "documentation": "",
+            "editable": true,
+            "modified": "2014-10-23T15:46:00.306-0700",
+            "name": "y",
+            "owner": "op_ev_31835",
+            "qualifiedId": "123456/e_31828/op_ev_31835/op_param_31869",
+            "qualifiedName": "/GreaterEquals/y",
+            "read": "2014-10-23T15:46:06.697-0700",
+            "specialization": {"type": "Element"},
+            "sysmlid": "op_param_31869"
+        }
+    ],
+    "message": "[WARNING]: Could not find owner with name: e_32169 putting constraint_32165 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307_1 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_32169 putting expr_32165 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_31828 putting op_ev_31835 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38263 putting arg_ev_33001 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_32169 putting constraint_32165 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307_1 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_32169 putting expr_32165 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38304 putting arg_ev_38307 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_31828 putting op_ev_31835 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: e_38263 putting arg_ev_33001 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: createOrUpdateModel deltas not posted properly\n"
+}
+200

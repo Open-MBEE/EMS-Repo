@@ -1,0 +1,21 @@
+{
+    "elements": [{
+        "creator": "admin",
+        "documentation": "directed_relationship2",
+        "editable": true,
+        "modified": "2014-10-23T15:45:52.271-0700",
+        "name": "500",
+        "owner": "300",
+        "qualifiedId": "123456/300/500",
+        "qualifiedName": "/JW_TEST/300/500",
+        "read": "2014-10-23T15:45:53.886-0700",
+        "specialization": {
+            "source": "303",
+            "target": "304",
+            "type": "DirectedRelationship"
+        },
+        "sysmlid": "500"
+    }],
+    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
+}
+200
