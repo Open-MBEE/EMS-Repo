@@ -169,21 +169,26 @@ public class Acm {
     public static final String JSON_CONTENTS = "contents";
     public static final String JSON_SOURCE_PATH = "sourcePath";
     public static final String JSON_TARGET_PATH = "targetPath";
-    public static final String JSON_CONNECTOR_TYPE = "connectorType";
+    public static final String JSON_CONNECTOR_KIND = "connectorKind";
     public static final String JSON_CONNECTOR_VALUE = "connectorValue";
     public static final String JSON_ASSOCIATION = "Association";
     public static final String JSON_OWNED_END = "ownedEnd";
     public static final String JSON_SOURCE_AGGREGATION = "sourceAggregation";
     public static final String JSON_TARGET_AGGREGATION = "targetAggregation";
     public static final String JSON_CHARACTERIZES = "Characterizes";
-    public static final String JSON_PROPERTIES_TRANSFERRED = "propertiesTransferred";
     public static final String JSON_SUCCESSION = "Succession";
     public static final String JSON_BINDING = "Binding";
-    public static final String JSON_ENUMERATION = "Enumeration";
-    public static final String JSON_ENUMERATED_VALUE = "enumeratedValue";
-    public static final String JSON_SELECTED_VALUE = "selectedValue";
+    public static final String JSON_LITERAL_SET = "LiteralSet";
+    public static final String JSON_SET = "set";
+    public static final String JSON_SET_OPERAND = "setOperand";
     public static final String JSON_MAGICDRAW_DATA = "MagicDrawData";
     public static final String JSON_MD_DATA = "mdData";
+    public static final String JSON_LOWER = "lower";
+    public static final String JSON_UPPER = "upper";
+    public static final String JSON_TARGET_LOWER = "targetLower";
+    public static final String JSON_TARGET_UPPER = "targetUpper";
+    public static final String JSON_SOURCE_LOWER = "sourceLower";
+    public static final String JSON_SOURCE_UPPER = "sourceUpper";
 
     // Site packages additions:
     public static final String JSON_IS_SITE = "isSite";
@@ -331,21 +336,26 @@ public class Acm {
     public static final String ACM_CONTENTS = SYSML + JSON_CONTENTS;
     public static final String ACM_SOURCE_PATH = SYSML + JSON_SOURCE_PATH;
     public static final String ACM_TARGET_PATH = SYSML + JSON_TARGET_PATH;
-    public static final String ACM_CONNECTOR_TYPE = SYSML + JSON_CONNECTOR_TYPE;
+    public static final String ACM_CONNECTOR_KIND = SYSML + JSON_CONNECTOR_KIND;
     public static final String ACM_CONNECTOR_VALUE = SYSML + JSON_CONNECTOR_VALUE;
     public static final String ACM_ASSOCIATION = SYSML + JSON_ASSOCIATION;
     public static final String ACM_OWNED_END = SYSML + JSON_OWNED_END;
     public static final String ACM_SOURCE_AGGREGATION = SYSML + JSON_SOURCE_AGGREGATION;
     public static final String ACM_TARGET_AGGREGATION = SYSML + JSON_TARGET_AGGREGATION;
     public static final String ACM_CHARACTERIZES = SYSML + JSON_CHARACTERIZES;
-    public static final String ACM_PROPERTIES_TRANSFERRED = SYSML + JSON_PROPERTIES_TRANSFERRED;
     public static final String ACM_SUCCESSION = SYSML + JSON_SUCCESSION;
     public static final String ACM_BINDING = SYSML + JSON_BINDING;
-    public static final String ACM_ENUMERATION = SYSML + JSON_ENUMERATION;
-    public static final String ACM_ENUMERATED_VALUE = SYSML + JSON_ENUMERATED_VALUE;
-    public static final String ACM_SELECTED_VALUE = SYSML + JSON_SELECTED_VALUE;
+    public static final String ACM_LITERAL_SET = SYSML + JSON_LITERAL_SET;
+    public static final String ACM_SET = SYSML + JSON_SET;
+    public static final String ACM_SET_OPERAND = SYSML + JSON_SET_OPERAND;
     public static final String ACM_MAGICDRAW_DATA = EMS + JSON_MAGICDRAW_DATA;
     public static final String ACM_MD_DATA = EMS + JSON_MD_DATA;
+    public static final String ACM_LOWER = SYSML + JSON_LOWER;
+    public static final String ACM_UPPER = SYSML + JSON_UPPER;
+    public static final String ACM_TARGET_LOWER = SYSML + JSON_TARGET_LOWER;
+    public static final String ACM_TARGET_UPPER = SYSML + JSON_TARGET_UPPER;
+    public static final String ACM_SOURCE_LOWER = SYSML + JSON_SOURCE_LOWER;
+    public static final String ACM_SOURCE_UPPER = SYSML + JSON_SOURCE_UPPER;
     
     // Site packages additions:
     public static final String ACM_SITE = "ems:Site";
@@ -424,9 +434,6 @@ public class Acm {
             add(JSON_CONTAINS);
             add(JSON_VIEW_2_VIEW);
             add(JSON_NO_SECTIONS);
-            add(JSON_VALUE);
-            add(JSON_OPERATION_PARAMETER);
-            add(JSON_OPERAND);
             add(JSON_CONNECTOR_ROLE);
 //            add(JSON_ANNOTATED_ELEMENTS);
         }
@@ -672,7 +679,7 @@ public class Acm {
         Acm.ACM_CONNECTOR,
         Acm.ACM_DEPENDENCY,
         Acm.ACM_CHARACTERIZES,
-        Acm.ACM_ENUMERATION,
+        Acm.ACM_LITERAL_SET,
         Acm.ACM_ASSOCIATION,
         Acm.ACM_DIRECTED_RELATIONSHIP,
         Acm.ACM_VALUE_SPECIFICATION,
@@ -721,6 +728,8 @@ public class Acm {
         private static final long serialVersionUID = -3103946764628743702L;
         {
             add(ACM_VALUE);
+            add(ACM_LOWER);
+            add(ACM_UPPER);
         }
     };
     
@@ -734,8 +743,8 @@ public class Acm {
     private static final Set<String> ENUMERATION_VALUESPECS = new HashSet<String>() {
         private static final long serialVersionUID = -9213542282537528782L;
         {
-            add(ACM_ENUMERATED_VALUE);
-            add(ACM_SELECTED_VALUE);
+            add(ACM_SET);
+            add(ACM_SET_OPERAND);
         }
     };
     
@@ -743,6 +752,10 @@ public class Acm {
         private static final long serialVersionUID = 1807385978686490394L;
         {
             add(ACM_CONNECTOR_VALUE);
+            add(ACM_TARGET_LOWER);
+            add(ACM_TARGET_UPPER);
+            add(ACM_SOURCE_LOWER);
+            add(ACM_SOURCE_UPPER);
         }
     };
     
@@ -756,7 +769,7 @@ public class Acm {
         {
             put(ACM_PROPERTY,PROPERTY_VALUESPECS);
             put(ACM_EXPRESSION,EXPRESSION_VALUESPECS);
-            put(ACM_ENUMERATION,ENUMERATION_VALUESPECS);
+            put(ACM_LITERAL_SET,ENUMERATION_VALUESPECS);
             put(ACM_CONNECTOR,CONNECTOR_VALUESPECS);
         }
     };

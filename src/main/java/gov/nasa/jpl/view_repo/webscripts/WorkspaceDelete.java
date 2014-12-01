@@ -58,9 +58,14 @@ public class WorkspaceDelete extends AbstractJavaWebScript {
                } else {
                    WorkspaceNode target = WorkspaceNode.getWorkspaceFromId(wsId, getServices(), 
                                                                            getResponse(), status, user);
-                   result = printObject(target);
-                   target.delete( true );
-                   status.setCode(HttpServletResponse.SC_OK);
+                   if (target != null) {
+                       result = printObject(target);
+                       target.delete( true );
+                       status.setCode(HttpServletResponse.SC_OK);
+                   } else {
+                       log(LogLevel.WARNING, "Could not find workspace " + wsId, HttpServletResponse.SC_NOT_FOUND);
+                       status.setCode(HttpServletResponse.SC_NOT_FOUND);
+                   }
                }
            }
        } catch (JSONException e) {
