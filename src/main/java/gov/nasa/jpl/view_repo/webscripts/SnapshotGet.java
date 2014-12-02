@@ -137,7 +137,7 @@ public class SnapshotGet extends AbstractJavaWebScript {
 		if (snapshot != null) {
             List< EmsScriptNode > configurationSets =
                     snapshot.getSourceAssocsNodesByType( "ems:configuredSnapshots",
-                                                         workspace, dateTime );
+                                                         workspace, null );
 			if (!configurationSets.isEmpty()) {
 				EmsScriptNode configurationSet = configurationSets.get(0);
 				String configurationSetName = (String) configurationSet.getProperty(Acm.CM_NAME);

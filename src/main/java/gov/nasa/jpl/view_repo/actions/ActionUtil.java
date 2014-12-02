@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -144,10 +145,16 @@ public class ActionUtil {
      * Create a job inside a particular site
      * @return The created job node
      */
-    public static EmsScriptNode getOrCreateJob(EmsScriptNode siteNode, String jobName, String jobType, Status status, StringBuffer response) {
-        EmsScriptNode jobPkgNode = siteNode.childByNamePath("Jobs");
+    public static EmsScriptNode getOrCreateJob(EmsScriptNode contextFolder,
+                                               String jobName, String jobType,
+                                               Status status, StringBuffer response) {
+        EmsScriptNode jobPkgNode = contextFolder.childByNamePath("Jobs");
         if (jobPkgNode == null) {
-            jobPkgNode = siteNode.createFolder("Jobs", "cm:folder");
+            jobPkgNode = contextFolder.createFolder("Jobs", "cm:folder");
+            WorkspaceNode ws = contextFolder.getWorkspace();
+            if ( ws != null ) {
+                jobPkgNode.setWorkspace( ws );
+            }
         }
         
         EmsScriptNode jobNode = jobPkgNode.childByNamePath(jobName);

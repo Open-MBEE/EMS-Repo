@@ -1,0 +1,22 @@
+{"elements": [{
+    "creator": "admin",
+    "documentation": "x is x",
+    "editable": true,
+    "modified": "2014-11-19T12:56:26.788-0800",
+    "name": "300",
+    "owner": "holding_bin_no_site_no_project",
+    "qualifiedId": "/no_project/holding_bin_no_site_no_project/x",
+    "qualifiedName": "/holding_bin/300",
+    "read": "2014-11-19T13:16:38.912-0800",
+    "specialization": {
+        "isDerived": false,
+        "isSlot": false,
+        "type": "Property",
+        "value": [{
+            "string": "the x value",
+            "type": "LiteralString"
+        }]
+    },
+    "sysmlid": "x"
+}]}
+200
