@@ -93,16 +93,14 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         }
         ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, response);
         
-        String timestamp = req.getParameter("timestamp");
-        
         WorkspaceNode workspace = getWorkspace( req );
 
-        EmsScriptNode config = configWs.getConfiguration( configurationId, timestamp );
+        EmsScriptNode config = configWs.getConfiguration( configurationId );
         if (config == null) {
             return new JSONArray();
         }
         
-        return configWs.getSnapshots( config, workspace, TimeUtils.dateFromTimestamp(timestamp) );
+        return configWs.getSnapshots( config, workspace );
     }
 
     private JSONArray handleProductSnapshot( WebScriptRequest req, String productId ) throws JSONException {

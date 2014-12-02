@@ -61,7 +61,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         return handleConfigurations( req, false );
     }
     
-    public EmsScriptNode getConfiguration(String id, String timestamp) {
+    public EmsScriptNode getConfiguration(String id) {
         NodeRef configNodeRef = NodeUtil.getNodeRefFromNodeId( id );
         if (configNodeRef != null) {
             EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services);
@@ -232,13 +232,12 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         // need to unravel id with the storeref, which by default is workspace://SpacesStore/
         json.put("id", config.getNodeRef().getId());
         
-        json.put("snapshots", getSnapshots(config, workspace, timestamp));
+        json.put("snapshots", getSnapshots(config, workspace));
         
         return json;
     }
  
-    public JSONArray getSnapshots(EmsScriptNode config, WorkspaceNode workspace,
-                                  Date timestamp) throws JSONException {
+    public JSONArray getSnapshots(EmsScriptNode config, WorkspaceNode workspace) throws JSONException {
         JSONArray snapshotsJson = new JSONArray();
         
         // Need to put in null timestamp so we always get latest version of snapshot
