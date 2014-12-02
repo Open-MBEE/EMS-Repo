@@ -81,7 +81,7 @@ public class CommitGet extends AbstractJavaWebScript {
         WorkspaceNode workspace = getWorkspace( req );
 
         String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
-        EmsScriptNode siteNode = getSiteNode( siteName, workspace, dateTime );
+        EmsScriptNode siteNode = getSiteNode( siteName, workspace, dateTime, false );
         //EmsScriptNode siteNode = new EmsScriptNode(services.getSiteService().getSite(siteName).getNodeRef(), services, response);
         JSONObject changeSets = new JSONObject();
         try {

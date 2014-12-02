@@ -87,7 +87,7 @@ public class ProductListGet extends AbstractJavaWebScript {
             return false;
         }
 
-        siteNode = getSiteNodeFromRequest(req);
+        siteNode = getSiteNodeFromRequest(req, true);
 
         if (!checkPermissions(siteNode, PermissionService.READ)) {
             return false;
@@ -167,7 +167,7 @@ public class ProductListGet extends AbstractJavaWebScript {
         Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix, 
                                                                    Acm.ACM_PRODUCT, false,
                                                                    workspace, dateTime, 
-                                                                   siteNode.getSiteName());
+                                                                   siteNode.getName());
         if (nodeList != null) {
             productSet.addAll(nodeList.values());
         }

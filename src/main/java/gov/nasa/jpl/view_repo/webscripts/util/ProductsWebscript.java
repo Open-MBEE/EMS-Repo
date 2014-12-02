@@ -57,11 +57,11 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         JSONArray productsJson = new JSONArray();
 
         EmsScriptNode siteNode = null;
-        EmsScriptNode mySiteNode = getSiteNodeFromRequest( req );
+        EmsScriptNode mySiteNode = getSiteNodeFromRequest( req, false );
         WorkspaceNode workspace = getWorkspace( req );
         String siteName = getSiteName(req);
         
-        if (mySiteNode == null) {
+        if (!NodeUtil.exists( mySiteNode )) {
             log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
             return productsJson;
         }
@@ -115,8 +115,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix, 
                                                                 Acm.ACM_PRODUCT, false,
                                                                 workspace, dateTime, 
-                                                                siteNode.getSiteName());
-        
+                                                                siteNode.getName());
         if (nodeList != null) {
             
             boolean checkSitePkg = (sitePackageNode != null && sitePackageNode.exists());
@@ -155,7 +154,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         JSONArray snapshotsJson = new JSONArray();
         List< EmsScriptNode > snapshotsList =
                 product.getTargetAssocsNodesByType( "view2:snapshots",
-                                                    workspace, dateTime );
+                                                    workspace, null );
         // lets add products from node refs
         List<NodeRef> productSnapshots = product.getPropertyNodeRefs( "view2:productSnapshots" );
         for (NodeRef productSnapshotNodeRef: productSnapshots) {

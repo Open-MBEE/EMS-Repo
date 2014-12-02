@@ -84,8 +84,10 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
     }
 
     private JSONArray handleConfigurationSnapshot( WebScriptRequest req, String configurationId ) throws JSONException {
-        EmsScriptNode siteNode = getSiteNodeFromRequest( req );
-        if (siteNode == null) {
+        EmsScriptNode siteNode = getSiteNodeFromRequest( req, false );
+        String siteNameFromReq = getSiteName( req );
+        if ( siteNode == null && !Utils.isNullOrEmpty( siteNameFromReq )
+             && !siteNameFromReq.equals( NO_SITE_ID ) ) {
             log( LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND );
             return new JSONArray();
         }
@@ -120,7 +122,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         // for backwards compatibility, keep deprecated targetAssocsNodesByType
         List< EmsScriptNode > snapshots =
                 product.getTargetAssocsNodesByType( "view2:snapshots",
-                                                    workspace, timestamp );
+                                                    workspace, null );
         for (EmsScriptNode snapshot: snapshots) {
             if ( !snapshot.isDeleted() ) {
                 snapshotsJson.put( configWs.getSnapshotJson( snapshot, product,
