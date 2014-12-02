@@ -223,7 +223,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
         JSONArray snapshotsJson = new JSONArray();
         List<EmsScriptNode> snapshotsList = 
                 product.getTargetAssocsNodesByType("view2:snapshots", workspace,
-                                                   dateTime);
+                                                   null);
 
         Collections.sort(snapshotsList, new EmsScriptNode.EmsScriptNodeComparator());
         for (EmsScriptNode snapshot: snapshotsList) {

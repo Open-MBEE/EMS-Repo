@@ -1520,7 +1520,10 @@ public class ModelPost extends AbstractJavaWebScript {
             nodeToUpdate.setStatus( getResponseStatus() );
             existingNodeType = nodeToUpdate.getTypeName();
             existingNodeName = nodeToUpdate.getSysmlName();
-            if ( nodeToUpdate.isDeleted() ) {
+
+            // Resurrect if found node is deleted and is in this exact workspace.
+            if ( nodeToUpdate.isDeleted() && 
+                 NodeUtil.workspacesEqual( nodeToUpdate.getWorkspace(), workspace ) ) {
                 nodeToUpdate.removeAspect( "ems:Deleted" );
                 modStatus.setState( ModStatus.State.ADDED );
             }
@@ -1762,7 +1765,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                             WorkspaceNode workspace) {
         
         String siteName = "site_" + pkgSiteNode.getSysmlId();
-        EmsScriptNode siteNode = getSiteNode( siteName, workspace, null );
+        EmsScriptNode siteNode = getSiteNode( siteName, workspace, null, false );
         
         if (siteNode == null || !siteNode.exists()) {
             
@@ -2402,7 +2405,7 @@ public class ModelPost extends AbstractJavaWebScript {
         //String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
         //SiteInfo siteInfo = services.getSiteService().getSite(siteName);
         SiteInfo sInfo = getSiteInfo(req);
-        EmsScriptNode siteNode = getSiteNodeFromRequest( req );
+        EmsScriptNode siteNode = getSiteNodeFromRequest( req, false ); // REVIEW -- siteNode is reassigned later, so why are we assigning it here?
         if ( sInfo == null ) {
             log(LogLevel.ERROR, "No site to start model load!", HttpServletResponse.SC_BAD_REQUEST);
             return;
@@ -2458,8 +2461,8 @@ public class ModelPost extends AbstractJavaWebScript {
         WorkspaceNode workspace = getWorkspace( req );
         String projectId = getProjectId(req);
         String siteName = getSiteName(req);
-        EmsScriptNode mySiteNode = getSiteNode( siteName, workspace, null );
-                
+        EmsScriptNode mySiteNode = getSiteNode( siteName, workspace, null, false );
+
         // If the site was not found and site was specified in URL, then return a 404.
         if (mySiteNode == null || !mySiteNode.exists()) {
             

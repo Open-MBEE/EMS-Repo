@@ -1897,7 +1897,7 @@ public class EmsScriptNode extends ScriptNode implements
                     targetRef = aref.getTargetRef();
                 }
                 if ( targetRef == null ) continue;
-                if ( dateTime != null ) {
+                if ( dateTime != null || workspace != null ) {
                     targetRef =
                             NodeUtil.getNodeRefAtTime( targetRef, workspace,
                                                        dateTime );
@@ -2769,7 +2769,7 @@ public class EmsScriptNode extends ScriptNode implements
                 NodeRef ref = (NodeRef)getProperty( "ems:workspace" );
                 if (ref != null) {
                     WorkspaceNode ws = new WorkspaceNode( ref, getServices() );
-                    setWorkspace( ws, null );
+                    workspace = ws;
                 }
             }
         }
@@ -2788,6 +2788,78 @@ public class EmsScriptNode extends ScriptNode implements
         return workspaceName;
     }
 
+    public void setWorkspace( WorkspaceNode workspace ) {
+        setWorkspace( workspace, null );
+    }
+
+    // Warning: this may not work if the cm:name is not unique!
+    public NodeRef findSourceInParentWorkspace() {
+        if ( getWorkspace() == null ) return null;
+        WorkspaceNode parentWs = getParentWorkspace();
+//        NodeRef r = NodeUtil.findNodeRefById( getSysmlId(), false, parentWs,
+//                                              null, getServices(), false );
+        ArrayList< NodeRef > refs = NodeUtil.findNodeRefsById( getSysmlId(), false, parentWs,
+                                               null, getServices(), false, false );
+        NodeRef r = null;
+        for ( NodeRef ref : refs ) {
+            EmsScriptNode node = new EmsScriptNode( ref, getServices() );
+            EmsScriptNode parent1 = getParent();
+            EmsScriptNode parent2 = node.getParent();
+            boolean failed = false;
+            while ( NodeUtil.exists( parent1 ) && NodeUtil.exists( parent2 ) &&
+                    !parent1.isWorkspaceTop() && !parent2.isWorkspaceTop() ) {
+//                if ( parent1 == parent2 || ( grandParent != null && gp != null && grandParent.getName().equals( gp.getName() ) ) ) {
+                if ( !parent1.getName().equals( parent2.getName() ) ) {
+                    failed = true;
+                    break;
+                } else {
+                    if ( parent1.equals( parent2 ) ) break;
+                }
+                parent1 = parent1.getParent();
+                parent2 = parent2.getParent();
+            }
+            if ( !failed && ( ( parent1 == null ) == ( parent2 == null ) )
+                 && ( parent1.isWorkspaceTop() == parent2.isWorkspaceTop() ) ) {
+               r = ref;
+               break;
+            }
+        }
+        return r;
+    }
+
+//    public NodeRef findSourceInParentWorkspace() {
+//        EmsScriptNode node = this;
+//        // make sure the folder's parent is replicated
+//        EmsScriptNode parent = node.getParent();
+//    
+//        if ( parent == null || parent.isWorkspaceTop() ) {
+//            parent = this; // put in the workspace
+//        }
+//        String parentName = parent != null && parent.exists() ? parent.getName() : null;
+//    
+//        // Get the parent in this workspace. In case there are multiple nodes
+//        // with the same cm:name, use the grandparent to disambiguate where it
+//        // should be.
+//        if ( parent != null && parent.exists() && !this.equals( parent.getWorkspace() ) ) {
+//            EmsScriptNode grandParent = parent.getParent();
+//            ArrayList< NodeRef > arr = NodeUtil.findNodeRefsByType( parentName, SearchType.CM_NAME.prefix, false, false, this, null, false, true, getServices(), false );
+//            for ( NodeRef ref : arr ) {
+//                EmsScriptNode p = new EmsScriptNode( ref, getServices() );
+//                EmsScriptNode gp = p.getParent();
+//                if ( grandParent == gp || ( grandParent != null && gp != null && grandParent.getName().equals( gp.getName() ) ) ) {
+//                    parent = p;
+//                    break;
+//                }
+//            }
+//            
+//            if ( !this.equals( parent.getWorkspace() ) ) {
+//                parent = replicateWithParentFolders( parent );
+//            }
+//        } else if ( parent == null || !parent.exists() ) {
+//            Debug.error("Error! Bad parent when replicating folder chain! " + parent );
+//        }
+//    }
+    
     /**
      * @param workspace
      *            the workspace to set
@@ -2805,6 +2877,9 @@ public class EmsScriptNode extends ScriptNode implements
             setProperty( "ems:workspace", workspace.getNodeRef() );
         } else if ( workspace == null && ref != null ) {
             removeAspect( "ems:HasWorkspace" );
+        }
+        if ( source == null ) {
+            source = findSourceInParentWorkspace();
         }
         if ( source != null ) {
             setProperty( "ems:source", source );

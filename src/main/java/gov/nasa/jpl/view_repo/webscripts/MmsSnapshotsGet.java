@@ -84,23 +84,23 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
     }
 
     private JSONArray handleConfigurationSnapshot( WebScriptRequest req, String configurationId ) throws JSONException {
-        EmsScriptNode siteNode = getSiteNodeFromRequest( req );
-        if (siteNode == null) {
+        EmsScriptNode siteNode = getSiteNodeFromRequest( req, false );
+        String siteNameFromReq = getSiteName( req );
+        if ( siteNode == null && !Utils.isNullOrEmpty( siteNameFromReq )
+             && !siteNameFromReq.equals( NO_SITE_ID ) ) {
             log( LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND );
             return new JSONArray();
         }
         ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, response);
         
-        String timestamp = req.getParameter("timestamp");
-        
         WorkspaceNode workspace = getWorkspace( req );
 
-        EmsScriptNode config = configWs.getConfiguration( configurationId, timestamp );
+        EmsScriptNode config = configWs.getConfiguration( configurationId );
         if (config == null) {
             return new JSONArray();
         }
         
-        return configWs.getSnapshots( config, workspace, TimeUtils.dateFromTimestamp(timestamp) );
+        return configWs.getSnapshots( config, workspace );
     }
 
     private JSONArray handleProductSnapshot( WebScriptRequest req, String productId ) throws JSONException {
@@ -120,7 +120,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         // for backwards compatibility, keep deprecated targetAssocsNodesByType
         List< EmsScriptNode > snapshots =
                 product.getTargetAssocsNodesByType( "view2:snapshots",
-                                                    workspace, timestamp );
+                                                    workspace, null );
         for (EmsScriptNode snapshot: snapshots) {
             if ( !snapshot.isDeleted() ) {
                 snapshotsJson.put( configWs.getSnapshotJson( snapshot, product,
