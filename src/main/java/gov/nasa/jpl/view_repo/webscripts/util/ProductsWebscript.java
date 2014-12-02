@@ -154,7 +154,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         JSONArray snapshotsJson = new JSONArray();
         List< EmsScriptNode > snapshotsList =
                 product.getTargetAssocsNodesByType( "view2:snapshots",
-                                                    workspace, dateTime );
+                                                    workspace, null );
         // lets add products from node refs
         List<NodeRef> productSnapshots = product.getPropertyNodeRefs( "view2:productSnapshots" );
         for (NodeRef productSnapshotNodeRef: productSnapshots) {

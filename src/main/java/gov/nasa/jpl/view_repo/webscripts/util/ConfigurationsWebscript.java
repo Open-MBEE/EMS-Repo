@@ -99,6 +99,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         String siteName = siteNode == null ? null : siteNode.getName();
         ArrayList<NodeRef> resultSet = NodeUtil.findNodeRefsByType( "ems:ConfigurationSet", NodeUtil.SearchType.TYPE.prefix, 
                                                                     false, false, workspace,
+                                                                    true, // onlyThisWorkspace
                                                                     dateTime, false, false, services, false,
                                                                     siteName );
         List< EmsScriptNode > nodeList = EmsScriptNode.toEmsScriptNodeList( resultSet, services, response, 
@@ -248,7 +249,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             // getting by association is deprecated
             List< EmsScriptNode > views =
                     snapshot.getSourceAssocsNodesByType( "view2:snapshots",
-                                                         workspace, timestamp );
+                                                         workspace, null );
             if (views.size() >= 1) {
                 if ( !snapshot.isDeleted() ) {
                     snapshotsJson.put( getSnapshotJson(snapshot, views.get(0),

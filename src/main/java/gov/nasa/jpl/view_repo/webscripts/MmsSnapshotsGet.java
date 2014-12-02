@@ -122,7 +122,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         // for backwards compatibility, keep deprecated targetAssocsNodesByType
         List< EmsScriptNode > snapshots =
                 product.getTargetAssocsNodesByType( "view2:snapshots",
-                                                    workspace, timestamp );
+                                                    workspace, null );
         for (EmsScriptNode snapshot: snapshots) {
             if ( !snapshot.isDeleted() ) {
                 snapshotsJson.put( configWs.getSnapshotJson( snapshot, product,

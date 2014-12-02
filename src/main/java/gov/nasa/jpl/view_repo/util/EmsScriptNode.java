@@ -1897,7 +1897,7 @@ public class EmsScriptNode extends ScriptNode implements
                     targetRef = aref.getTargetRef();
                 }
                 if ( targetRef == null ) continue;
-                if ( dateTime != null ) {
+                if ( dateTime != null || workspace != null ) {
                     targetRef =
                             NodeUtil.getNodeRefAtTime( targetRef, workspace,
                                                        dateTime );

@@ -285,10 +285,27 @@ public class NodeUtil {
     }
     
     public static ArrayList< NodeRef >
+    findNodeRefsByType( String specifier, String prefix,
+                        boolean useSimpleCache,
+                        boolean ignoreWorkspace,
+                        WorkspaceNode workspace,
+                        Date dateTime,
+                        boolean justFirst, boolean exactMatch,
+                        ServiceRegistry services, boolean includeDeleted,
+                        String siteName) {
+        return findNodeRefsByType( specifier, prefix, useSimpleCache,
+                                   ignoreWorkspace, workspace, 
+                                   false, // onlyThisWorkspace
+                                   dateTime, justFirst, exactMatch, services,
+                                   includeDeleted, siteName );
+    }
+    public static ArrayList< NodeRef >
             findNodeRefsByType( String specifier, String prefix,
                                 boolean useSimpleCache,
                                 boolean ignoreWorkspace,
-                                WorkspaceNode workspace, Date dateTime,
+                                WorkspaceNode workspace,
+                                boolean onlyThisWorkspace,
+                                Date dateTime,
                                 boolean justFirst, boolean exactMatch,
                                 ServiceRegistry services, boolean includeDeleted,
                                 String siteName) {
@@ -376,17 +393,17 @@ public class NodeUtil {
                     }
                     try {
                         // Make sure it's in the right workspace.
-                        if ( !ignoreWorkspace && 
-                             ( ( workspace != null &&
-                                 !workspace.contains( esn ) ) ||
-                               ( workspace == null && 
-                                 ( esn != null && esn.getWorkspace() != null ) )
-                             ) ) {
-                            if ( Debug.isOn() && !Debug.isOn()) {
-                                System.out.println( "findNodeRefsByType(): wrong workspace "
-                                                    + workspace );
+                        if ( !ignoreWorkspace && esn != null ) {
+                            WorkspaceNode esnWs = esn.getWorkspace();
+                            if ( ( onlyThisWorkspace && !workspacesEqual( workspace, esnWs ) ) ||
+                                 ( workspace == null && esnWs != null ) ||
+                                 ( workspace != null && !workspace.contains( esn ) ) ) {
+                                if ( Debug.isOn() && !Debug.isOn()) {
+                                    System.out.println( "findNodeRefsByType(): wrong workspace "
+                                            + workspace );
+                                }
+                                continue;
                             }
-                            continue;
                         }
                     } catch( InvalidNodeRefException e ) {
                         if ( Debug.isOn() ) e.printStackTrace();
