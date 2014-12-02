@@ -37,11 +37,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.activiti.engine.impl.util.json.JSONArray;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteMemberInfo;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -81,24 +86,50 @@ public class SitePermSync extends AbstractJavaWebScript{
         return instance.executeImplImpl(req, status, cache);
     }
     
+    /**
+     * Wrapped executeImpl so this can run in its own scopes.
+     * @param req
+     * @param status
+     * @param cache
+     * @return
+     */
     private Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
         
         List<SiteInfo> sites = services.getSiteService().listSites(null);
         
+        JSONArray msgs = new JSONArray();
+        
         for (SiteInfo siteInfo : sites ) {
             EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
             NodeRef sitePkgNR = (NodeRef) siteNode.getProperty(Acm.ACM_SITE_PACKAGE);
-            if (sitePkgNR != null) {
+            if (sitePkgNR == null) {
+                msgs.put( "Could not find site package for site: " + siteNode.getName() );
+            } else {
                 EmsScriptNode sitePkg = new EmsScriptNode(sitePkgNR, services, response);
                 updatePermissions(siteInfo, sitePkg);
             }
         }
         
-        model.put( "res", "okay" );
+        JSONObject json = new JSONObject();
+        try {
+            json.put( "msgs", msgs );
+            model.put( "res", json.toString() );
+            status.setCode( HttpServletResponse.SC_ACCEPTED );
+        } catch ( JSONException e ) {
+            model.put("res", "Error creating JSON output");
+            status.setCode( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+        }
+        
         return model;
     }
 
+    
+    /**
+     * Update permissions based on the provided site and site package
+     * @param siteInfo  Site who's permissions should be copied onto the site package
+     * @param sitePkg   Site packge to update permissions for
+     */
     private void updatePermissions(SiteInfo siteInfo, EmsScriptNode sitePkg) {
         NodeRef nr = sitePkg.getNodeRef();
 

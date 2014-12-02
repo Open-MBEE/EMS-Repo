@@ -2287,6 +2287,9 @@ public class ModelPost extends AbstractJavaWebScript {
 
     protected Map<String, Object> executeImplImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
+        // this is a hack for alfresco to create the admin user needed for creating sites
+        ShareUtils.createAdminUser( );
+        
         NodeUtil.doCaching = true;  
         Timer timer = new Timer();
 

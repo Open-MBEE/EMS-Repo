@@ -129,12 +129,65 @@
         <property name="uri" value="https://orasoa-dev07.jpl.nasa.gov:8121/PublishMessageRestful" />
     </bean>
 
-	<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
 		<property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setUsername" />
-		<property name="arguments" value="placeholderusername"/>
+		<property name="arguments" value="mmsAdmin"/>
 	</bean>
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setPassword" />
-        <property name="arguments" value="placeholderpassword"/>
+        <property name="arguments" value="letmein"/>
     </bean>
-</beans>
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setServices" />
+        <property name="arguments" ref="ServiceRegistry"/>
+    </bean>
+    <!-- 
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.createAdminUser" />
+        <property name="arguments">
+            <list>
+                <value>mmsAdmin</value>
+                <value>letmein</value>
+                <ref bean="ServiceRegistry" />
+            </list>
+        </property>
+    </bean>
+ -->   
+    <!-- bootstrap users into the module -->
+<!--       <bean id="mms-repo_boostrapUsers" class="org.alfresco.repo.module.ImporterModuleComponent" parent="module.baseComponent">
+        <property name="moduleId" value="mms-repo" />
+        <property name="name" value="mms-repo.bootstrapUsers" />
+        <property name="description" value="Initial data requirements" />
+        <property name="sinceVersion" value="0.0.1" />
+        <property name="appliesFromVersion" value="0.0.1" />
+        <property name="executeOnceOnly" value="true" />
+        <property name="importer" ref="spacesBootstrap"/>
+        <property name="bootstrapViews">
+            <list>
+                <props>
+                    <prop key="path">/sys:system/sys:people</prop>
+                    <prop key="location">alfresco/bootstrap/people.xml</prop>
+                </props>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="mms-repo_bootstrapUserGroups" class="org.alfresco.repo.module.ImporterModuleComponent" parent="module.baseComponent">
+        <property name="moduleId" value="mms-repo" />
+        <property name="name" value="mms-repo.bootstrapGroups" />
+        <property name="description" value="Initial data requirements" />
+        <property name="sinceVersion" value="0.0.1" />
+        <property name="appliesFromVersion" value="0.0.1" />
+        <property name="executeOnceOnly" value="false" />
+        <property name="importer" ref="userBootstrap"/>
+        <property name="bootstrapViews">
+            <list>
+                <props>
+                    <prop key="path">/sys:system/sys:people</prop>
+                    <prop key="location">alfresco/bootstrap/authorities.xml</prop>
+                </props>
+            </list>
+        </property>
+    </bean>       
+ -->
+ </beans>
