@@ -114,12 +114,14 @@ public class AdminUserPost extends AbstractJavaWebScript {
                         properties.put( ContentModel.PROP_LASTNAME, "Admin");
                         properties.put( ContentModel.PROP_EMAIL, email );
                         properties.put( ContentModel.PROP_PASSWORD, password );
-                        services.getPersonService().createPerson( properties );
+                        person = services.getPersonService().createPerson( properties );
                         
                         ShareUtils.setPassword( password );
                         ShareUtils.setUsername( username );
                     }
 
+                    services.getAuthenticationService().setAuthenticationEnabled( username, true );
+                    services.getPermissionService().setPermission( person, username, services.getPermissionService().getAllPermission(), true );
                     services.getAuthenticationService().setAuthentication( username, password.toCharArray() );
                     services.getAuthorityService().addAuthority( "GROUP_ALFRESCO_ADMINISTRATORS", username );
 
