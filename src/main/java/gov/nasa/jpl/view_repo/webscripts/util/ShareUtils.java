@@ -114,61 +114,33 @@ public class ShareUtils {
     }
     
     public static void createAdminUser() {
-//        AuthenticationUtil.runAs( new AuthenticationUtil.RunAsWork< NodeRef >() {
-//            @Override
-//            public NodeRef doWork() throws Exception {
-                NodeRef personRef = services.getPersonService().getPerson( username );
-                if ( personRef == null ) {
-                    UserTransaction trx;
-                    trx = services.getTransactionService().getNonPropagatingUserTransaction();
-                    try {
-                        trx.begin();
+        AuthenticationUtil.runAs( new AuthenticationUtil.RunAsWork< NodeRef >() {
+            @Override
+            public NodeRef doWork() throws Exception {
+                UserTransaction trx;
+                trx = services.getTransactionService().getNonPropagatingUserTransaction();
+                try {
+                    trx.begin();
+                    if (services.getAuthenticationService().authenticationExists( username ) == false) {
+                        services.getAuthenticationService().createAuthentication( username, password.toCharArray() );
+                        services.getAuthorityService().addAuthority( "GROUP_ALFRESCO_ADMINISTRATORS", username );
+                        services.getAuthenticationService().setAuthenticationEnabled( username, true );
+
                         Map< QName, Serializable > properties = new HashMap< QName, Serializable >();
                         properties.put( ContentModel.PROP_USERNAME, username );
                         properties.put( ContentModel.PROP_FIRSTNAME, "MMS" );
                         properties.put( ContentModel.PROP_LASTNAME, "Admin");
                         properties.put( ContentModel.PROP_EMAIL, "mmsadmin@ems.gov" );
-                        properties.put( ContentModel.PROP_PASSWORD, password );
-                        personRef = services.getPersonService().createPerson( properties );
-//
-//                        QName firstNameQName = QName.createQName("{http://www.alfresco.org/model/content/1.0}firstName");
-//                        QName lastNameQName = QName.createQName("{http://www.alfresco.org/model/content/1.0}lastName");
-//                        QName passwordQName = QName.createQName("{http://www.alfresco.org/model/content/1.0}password");
-//                        QName homeFolderQName = QName.createQName("{http://www.alfresco.org/model/content/1.0}homeFolder");
-//                        QName usernameQName = QName.createQName("{http://www.alfresco.org/model/content/1.0}username");
-//                     
-//                        Map<QName, Serializable> props = null;
-//                        props = new HashMap<QName, Serializable>(4);
-//                        
-//                        props.put(firstNameQName, "MMS Admin");
-//                        props.put(lastNameQName, "");
-//                        props.put(passwordQName, Hex.encodeHex( md4(password) ));
-//                        props.put( homeFolderQName, username );
-//                        props.put( usernameQName, username );
-//                    
-//                        personRef = services.getPersonService().createPerson( props );
-                        trx.commit();
-                    } catch (Throwable e) {
-                        
+//                        properties.put( ContentModel.PROP_PASSWORD, password );
+                        services.getPersonService().createPerson( properties );
                     }
-                }
-                
-                UserTransaction trx;
-                trx = services.getTransactionService().getNonPropagatingUserTransaction();
-                try {
-                    trx.begin();
-                    services.getAuthenticationService().setAuthenticationEnabled( username, true );
-//                    services.getAuthenticationService().setAuthentication( username, Hex.encodeHex( md4(password) ) );
-                    services.getPermissionService().setPermission( personRef, username, services.getPermissionService().getAllPermission(), true );
-                    services.getAuthenticationService().setAuthentication( username, password.toCharArray() );
-                    services.getAuthorityService().addAuthority( "GROUP_ALFRESCO_ADMINISTRATORS", username );
                     trx.commit();
                 } catch (Throwable e) {
                 }
-                
-//                return personRef;
-//            }
-//        }, "admin" );
+                                             
+                return null;
+            }
+        }, "admin" );
         
     }
     
