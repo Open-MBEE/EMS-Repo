@@ -2,12 +2,12 @@
     "creator": "admin",
     "documentation": "else",
     "editable": true,
-    "modified": "2014-11-19T13:44:18.023-0800",
+    "modified": "2014-12-02T17:22:14.925-0800",
     "name": "301",
     "owner": "300",
     "qualifiedId": "/123456/300/301",
     "qualifiedName": "/JW_TEST/300/301",
-    "read": "2014-11-19T13:44:21.299-0800",
+    "read": "2014-12-02T17:22:16.680-0800",
     "specialization": {
         "allowedElements": [
             "301",

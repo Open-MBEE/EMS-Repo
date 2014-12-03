@@ -1,11 +1,11 @@
 {"workspaces": [{
-    "created": "2014-11-19T13:45:49.484-0800",
+    "created": "2014-12-02T17:23:42.497-0800",
     "creator": "admin",
-    "id": "3ce832f2-2b61-4d2e-ab91-b9380d2811dc",
-    "modified": "2014-11-19T13:45:49.484-0800",
+    "id": "13aa146d-05a3-4912-9014-64004c888893",
+    "modified": "2014-12-02T17:23:42.497-0800",
     "name": "wsA",
     "parent": "master",
-    "qualifiedId": "master/3ce832f2-2b61-4d2e-ab91-b9380d2811dc",
+    "qualifiedId": "master/13aa146d-05a3-4912-9014-64004c888893",
     "qualifiedName": "master/wsA"
 }]}
 200

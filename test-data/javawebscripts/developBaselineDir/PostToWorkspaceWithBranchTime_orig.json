@@ -3,11 +3,11 @@
         "creator": "admin",
         "documentation": "y is y",
         "editable": true,
-        "modified": "2014-11-19T13:46:02.286-0800",
+        "modified": "2014-12-02T17:23:53.386-0800",
         "owner": "302",
         "qualifiedId": "/123456/300/301/302/y",
         "qualifiedName": "/JW_TEST/300/301/302/null",
-        "read": "2014-11-19T13:46:04.427-0800",
+        "read": "2014-12-02T17:23:55.099-0800",
         "specialization": {
             "isDerived": false,
             "isSlot": false,

@@ -10,17 +10,17 @@
 
             "editable": true,
 
-            "name": "result",
+            "name": "y",
 
             "owner": "op_ev_31835",
 
-            "qualifiedId": "/123456/e_31828/op_ev_31835/op_param_31867",
+            "qualifiedId": "/123456/e_31828/op_ev_31835/op_param_31869",
 
-            "qualifiedName": "/JW_TEST/e_31828/GreaterEquals/result",
+            "qualifiedName": "/JW_TEST/e_31828/GreaterEquals/y",
 
             "specialization": {"type": "Element"},
 
-            "sysmlid": "op_param_31867"
+            "sysmlid": "op_param_31869"
 
         },
 
@@ -32,33 +32,53 @@
 
             "editable": true,
 
-            "name": "duration",
+            "name": "GreaterEquals",
 
-            "owner": "e_38304",
+            "owner": "e_31828",
 
-            "qualifiedId": "/123456/e_38304/arg_ev_38307",
+            "qualifiedId": "/123456/e_31828/op_ev_31835",
 
-            "qualifiedName": "/JW_TEST/e_38304/duration",
+            "qualifiedName": "/JW_TEST/e_31828/GreaterEquals",
 
             "specialization": {
 
-                "isDerived": false,
+                "parameters": [
 
-                "isSlot": false,
+                    "op_param_31867",
 
-                "type": "Property",
+                    "op_param_31868",
 
-                "value": [{
+                    "op_param_31869"
 
-                    "integer": 22,
+                ],
 
-                    "type": "LiteralInteger"
-
-                }]
+                "type": "Operation"
 
             },
 
-            "sysmlid": "arg_ev_38307"
+            "sysmlid": "op_ev_31835"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "x",
+
+            "owner": "op_ev_31835",
+
+            "qualifiedId": "/123456/e_31828/op_ev_31835/op_param_31868",
+
+            "qualifiedName": "/JW_TEST/e_31828/GreaterEquals/x",
+
+            "specialization": {"type": "Element"},
+
+            "sysmlid": "op_param_31868"
 
         },
 
@@ -108,17 +128,17 @@
 
             "editable": true,
 
-            "name": "y",
+            "name": "result",
 
             "owner": "op_ev_31835",
 
-            "qualifiedId": "/123456/e_31828/op_ev_31835/op_param_31869",
+            "qualifiedId": "/123456/e_31828/op_ev_31835/op_param_31867",
 
-            "qualifiedName": "/JW_TEST/e_31828/GreaterEquals/y",
+            "qualifiedName": "/JW_TEST/e_31828/GreaterEquals/result",
 
             "specialization": {"type": "Element"},
 
-            "sysmlid": "op_param_31869"
+            "sysmlid": "op_param_31867"
 
         },
 
@@ -156,31 +176,33 @@
 
             "editable": true,
 
-            "name": "GreaterEquals",
+            "name": "duration",
 
-            "owner": "e_31828",
+            "owner": "e_38304",
 
-            "qualifiedId": "/123456/e_31828/op_ev_31835",
+            "qualifiedId": "/123456/e_38304/arg_ev_38307",
 
-            "qualifiedName": "/JW_TEST/e_31828/GreaterEquals",
+            "qualifiedName": "/JW_TEST/e_38304/duration",
 
             "specialization": {
 
-                "parameters": [
+                "isDerived": false,
 
-                    "op_param_31867",
+                "isSlot": false,
 
-                    "op_param_31868",
+                "type": "Property",
 
-                    "op_param_31869"
+                "value": [{
 
-                ],
+                    "integer": 22,
 
-                "type": "Operation"
+                    "type": "LiteralInteger"
+
+                }]
 
             },
 
-            "sysmlid": "op_ev_31835"
+            "sysmlid": "arg_ev_38307"
 
         },
 
@@ -235,28 +257,6 @@
             },
 
             "sysmlid": "expr_32165"
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "x",
-
-            "owner": "op_ev_31835",
-
-            "qualifiedId": "/123456/e_31828/op_ev_31835/op_param_31868",
-
-            "qualifiedName": "/JW_TEST/e_31828/GreaterEquals/x",
-
-            "specialization": {"type": "Element"},
-
-            "sysmlid": "op_param_31868"
 
         },
 

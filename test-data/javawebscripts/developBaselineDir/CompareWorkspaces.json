@@ -14,7 +14,7 @@
 
                 "owner": "no_project",
 
-                "qualifiedName": "/holding_bin",
+                "qualifiedName": "/no_project/holding_bin",
 
                 "specialization": {"type": "Package"},
 
@@ -34,7 +34,7 @@
 
                 "owner": "holding_bin_no_site_no_project",
 
-                "qualifiedName": "/holding_bin/300",
+                "qualifiedName": "/no_project/holding_bin/300",
 
                 "specialization": {
 
