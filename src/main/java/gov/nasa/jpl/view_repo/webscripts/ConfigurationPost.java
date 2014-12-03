@@ -188,11 +188,15 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		EmsScriptNode jobNode = null;
 
 		if (postJson.has("name")) {
+		    String name = postJson.getString( "name" );
+		    if ( ActionUtil.jobExists( context, name) ) {
+		        return handleUpdate( postJson, siteName, context, workspace, status );
+		    }
+		    
 		    Date date = new Date();
-            jobNode = ActionUtil.getOrCreateJob( context,
-                                                postJson.getString( "name" ),
-                                                "ems:ConfigurationSet", status,
-                                                response );
+            jobNode = ActionUtil.getOrCreateJob( context, name, 
+                                                 "ems:ConfigurationSet",
+                                                 status, response );
 
 			if (jobNode != null) {
                 ConfigurationsWebscript configWs =

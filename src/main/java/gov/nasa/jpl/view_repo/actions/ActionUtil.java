@@ -141,6 +141,16 @@ public class ActionUtil {
         sr.getNodeService().setProperty(node.getNodeRef(), ContentModel.PROP_CONTENT, contentData);
     }
     
+    
+    public static boolean jobExists( EmsScriptNode contextFolder, String jobName ) {
+        EmsScriptNode jobPkgNode = contextFolder.childByNamePath("Jobs");
+        if (jobPkgNode == null) return false;
+        EmsScriptNode jobNode = jobPkgNode.childByNamePath(jobName);
+        if (jobNode == null) return false;
+        if ( !jobNode.exists() ) return false;
+        return true;
+    }
+    
     /**
      * Create a job inside a particular site
      * @return The created job node
@@ -161,9 +171,16 @@ public class ActionUtil {
         if (jobNode == null) {
             jobNode = jobPkgNode.createNode(jobName, jobType);
             jobNode.createOrUpdateProperty("cm:isContentIndexed", false);
+        } else if ( jobNode.isDeleted() ) {
+            // resurrect
+            jobNode.removeAspect( "ems:Deleted" );
+        } else if ( !jobNode.exists() ) {
+            // TODO -- REVIEW -- Don't know if this works or if it's possible to get here.
+            jobNode = jobPkgNode.createNode(jobName, jobType);
+            jobNode.createOrUpdateProperty("cm:isContentIndexed", false);
         } else {
             String jobStatus = (String)jobNode.getProperty("ems:job_status");
-            if (jobStatus.equals("Active")) {
+            if (jobStatus != null && jobStatus.equals("Active")) {
                 status.setCode(HttpServletResponse.SC_CONFLICT, "Previous job is still active.");
                 return null;
             }
