@@ -2402,38 +2402,31 @@ public class ModelPost extends AbstractJavaWebScript {
     protected void saveAndStartAction( WebScriptRequest req,
                                        WorkspaceNode workspace,
                                        Status status ) throws Exception {
-        //String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
-        //SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-        SiteInfo sInfo = getSiteInfo(req);
-        EmsScriptNode siteNode = getSiteNodeFromRequest( req, false ); // REVIEW -- siteNode is reassigned later, so why are we assigning it here?
-        if ( sInfo == null ) {
-            log(LogLevel.ERROR, "No site to start model load!", HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        } else {
-            siteNode = new EmsScriptNode(sInfo.getNodeRef(), services, response);
-        }
-        String projectId = getProjectId( req );
 
-        String jobName = "Load Job " + projectId + ".json";
-        EmsScriptNode jobNode = ActionUtil.getOrCreateJob(siteNode, jobName, "ems:Job", status, response);
-
-        // write out the json
-        ActionUtil.saveStringToFile(jobNode, "application/json", services, ((JSONObject)req.parseContent()).toString(4));
-
-        projectNode = findScriptNodeById(projectId, workspace, null, false);
-        // kick off the action
-        ActionService actionService = services.getActionService();
-        Action loadAction = actionService.createAction(ModelLoadActionExecuter.NAME);
-        loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_ID, projectId);
-        if ( projectNode != null ) {
+        // Find the siteNode and projectNode:
+        getProjectNodeFromRequest(req, true);
+        
+        if (projectNode != null) {
+            String projectId = projectNode.getSysmlId();
+            
+            String jobName = "Load Job " + projectId + ".json";
+            EmsScriptNode jobNode = ActionUtil.getOrCreateJob(siteNode, jobName, "ems:Job", status, response);
+    
+            // write out the json
+            ActionUtil.saveStringToFile(jobNode, "application/json", services, ((JSONObject)req.parseContent()).toString(4));
+    
+            // kick off the action
+            ActionService actionService = services.getActionService();
+            Action loadAction = actionService.createAction(ModelLoadActionExecuter.NAME);
+            loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_ID, projectId);
             loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_NAME, (String)projectNode.getProperty(Acm.ACM_NAME));
+            loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_NODE, projectNode);
+    
+            String workspaceId = getWorkspaceId( req );
+            loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_WORKSPACE_ID, workspaceId);
+    
+            services.getActionService().executeAction(loadAction , jobNode.getNodeRef(), true, true);
         }
-        loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_NODE, projectNode);
-
-        String workspaceId = getWorkspaceId( req );
-        loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_WORKSPACE_ID, workspaceId);
-
-        services.getActionService().executeAction(loadAction , jobNode.getNodeRef(), true, true);
     }
 
     @Override
@@ -2549,6 +2542,7 @@ public class ModelPost extends AbstractJavaWebScript {
             ProjectPost pp = new ProjectPost( repository, services );
             JSONObject json = new JSONObject();
             try {
+                json.put( Acm.JSON_NAME, projectId );
                 pp.updateOrCreateProject( json, workspace, projectId, siteName,
                                           createIfNonexistent, false );
                 projectNode = findScriptNodeById( projectId, workspace, null, false );
