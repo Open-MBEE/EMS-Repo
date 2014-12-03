@@ -275,7 +275,7 @@ public class CommitUtil {
             }
         }
 	}
-
+    
 
 	private static void commitTransactionable( JSONObject wsDiff,
 	                                           WorkspaceNode workspace,
@@ -289,7 +289,49 @@ public class CommitUtil {
     }
 
 
-	/**
+    public static void merge(JSONObject wsDiff,
+                             WorkspaceNode source,
+                             WorkspaceNode target,
+                             String siteName,
+                             String msg,
+                             boolean runWithoutTransactions,
+                             ServiceRegistry services,
+                             StringBuffer response) {
+        if (runWithoutTransactions) {
+            mergeTransactionable(wsDiff, source, target, siteName, msg, services, response);
+        } else {
+            UserTransaction trx;
+            trx = services.getTransactionService()
+                    .getNonPropagatingUserTransaction();
+            try {
+                trx.begin();
+                mergeTransactionable(wsDiff, source, target, siteName, msg, services, response);
+                trx.commit();
+            } catch (Throwable e) {
+                try {
+                    e.printStackTrace();
+                    trx.rollback();
+                } catch (Throwable ee) {
+                    ee.printStackTrace();
+                }
+            }
+        }
+    }
+
+    
+    
+	private static void mergeTransactionable( JSONObject wsDiff,
+                                              WorkspaceNode source,
+                                              WorkspaceNode target,
+                                              String siteName, String msg,
+                                              ServiceRegistry services,
+                                              StringBuffer response ) {
+        createCommitNode( source, target, "MERGE", msg,
+                          wsDiff.toString(), siteName,
+                          services, response );
+    }
+
+    /**
 	 */
 	public static boolean revertCommit(EmsScriptNode commit,
 			ServiceRegistry services) {
@@ -474,7 +516,7 @@ public class CommitUtil {
             currCommit.createOrUpdateAspect( "ems:Committable" );
             currCommit.createOrUpdateProperty( "ems:commitType", type );
             currCommit.createOrUpdateProperty( "ems:commit", body );
-
+            
             updateCommitHistory(prevCommit, currCommit);
 
             return true;

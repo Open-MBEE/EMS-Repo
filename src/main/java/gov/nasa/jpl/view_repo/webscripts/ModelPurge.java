@@ -53,6 +53,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
+@Deprecated
 public class ModelPurge extends AbstractJavaWebScript {
     public ModelPurge() {
         super();

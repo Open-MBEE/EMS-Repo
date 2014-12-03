@@ -216,13 +216,12 @@ public class ModelPost extends AbstractJavaWebScript {
      * @throws JSONException
      *             Parse error
      */
-
     public Set< EmsScriptNode >
             createOrUpdateModel( Object content, Status status,
                                  WorkspaceNode targetWS, WorkspaceNode sourceWS ) throws Exception {
-    	JSONObject postJson = (JSONObject) content;
-    	
-    	JSONArray updatedArray = postJson.optJSONArray("updatedElements");
+        	JSONObject postJson = (JSONObject) content;
+        	
+        	JSONArray updatedArray = postJson.optJSONArray("updatedElements");
 		JSONArray movedArray = postJson.optJSONArray("movedElements");
 		JSONArray addedArray = postJson.optJSONArray("addedElements");
 		JSONArray elementsArray = postJson.optJSONArray("elements");
@@ -252,8 +251,10 @@ public class ModelPost extends AbstractJavaWebScript {
 			object.put("elements", jsonArray);
 			elements.addAll(createOrUpdateModel2(object, status, targetWS, sourceWS));
 		}
-    	return elements;
+		
+		return elements;
     }
+    
     public Set< EmsScriptNode >
     		createOrUpdateModel2( Object content, Status status,
     							  WorkspaceNode targetWS, WorkspaceNode sourceWS ) throws Exception {
@@ -2345,29 +2346,33 @@ public class ModelPost extends AbstractJavaWebScript {
                     JSONObject postJson = (JSONObject)req.parseContent();
                     EmsScriptNode myProjectNode = getProjectNodeFromRequest( req, true );
                     if (myProjectNode != null) {
-                        Set< EmsScriptNode > elements =
-                        createOrUpdateModel( postJson, status, workspace, null );
-
-                        addRelationshipsToProperties( elements );
-                        if ( !Utils.isNullOrEmpty( elements ) ) {
-    
-                            // Fix constraints if desired:
-                            if (fix) {
-                                fix(elements);
-                            }
-    
-                            // Create JSON object of the elements to return:
-                            JSONArray elementsJson = new JSONArray();
-                            timerToJson = Timer.startTimer(timerToJson, timeEvents);
-                            for ( EmsScriptNode element : elements ) {
-                                elementsJson.put( element.toJSONObject(null) );
-                            }
-                            Timer.stopTimer(timerToJson, "!!!!! executeImpl(): toJSON time", timeEvents);
-                            top.put( "elements", elementsJson );
-                            if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-                            if ( prettyPrint ) model.put( "res", top.toString( 4 ) );
-                            else model.put( "res", top.toString() );
-                        }
+                        handleUpdate( postJson, status, workspace, fix, model );
+//                        Set< EmsScriptNode > elements =
+//                        createOrUpdateModel( postJson, status, workspace, null );
+//
+//                        addRelationshipsToProperties( elements );
+//                        if ( !Utils.isNullOrEmpty( elements ) ) {
+//    
+//                            // Fix constraints if desired:
+//                            if (fix) {
+//                                fix(elements);
+//                            }
+//    
+//                            // Create JSON object of the elements to return:
+//                            JSONArray elementsJson = new JSONArray();
+//                            timerToJson = Timer.startTimer(timerToJson, timeEvents);
+//                            for ( EmsScriptNode element : elements ) {
+//                                elementsJson.put( element.toJSONObject(null) );
+//                            }
+//                            Timer.stopTimer(timerToJson, "!!!!! executeImpl(): toJSON time", timeEvents);
+//                            top.put( "elements", elementsJson );
+//                            if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
+//                            if ( prettyPrint ) { 
+//                                model.put( "res", top.toString( 4 ) ); 
+//                            } else { 
+//                                model.put( "res", top.toString() );
+//                            }
+//                        }
                     }
                 }
             } catch (JSONException e) {
@@ -2393,6 +2398,35 @@ public class ModelPost extends AbstractJavaWebScript {
         return model;
     }
 
+    protected void handleUpdate(JSONObject postJson, Status status, WorkspaceNode workspace, boolean fix, Map<String, Object> model) throws Exception {
+        JSONObject top = new JSONObject();
+        Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null );
+
+        addRelationshipsToProperties( elements );
+        if ( !Utils.isNullOrEmpty( elements ) ) {
+
+            // Fix constraints if desired:
+            if (fix) {
+                fix(elements);
+            }
+
+            // Create JSON object of the elements to return:
+            JSONArray elementsJson = new JSONArray();
+            timerToJson = Timer.startTimer(timerToJson, timeEvents);
+            for ( EmsScriptNode element : elements ) {
+                elementsJson.put( element.toJSONObject(null) );
+            }
+            Timer.stopTimer(timerToJson, "!!!!! executeImpl(): toJSON time", timeEvents);
+            top.put( "elements", elementsJson );
+            if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
+            if ( prettyPrint ) { 
+                model.put( "res", top.toString( 4 ) ); 
+            } else { 
+                model.put( "res", top.toString() );
+            }
+        }
+    }
+    
     public void addRelationshipsToProperties( Set< EmsScriptNode > elems ) {
         for ( EmsScriptNode element : elems ) {
             element.addRelationshipToPropertiesOfParticipants();

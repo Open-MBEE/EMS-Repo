@@ -42,9 +42,6 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 		JSONObject result = new JSONObject();
 		try{
 			if(validateRequest(req, status)){
-				//String timeSource = req.getParameter("timestampSource");
-				//Date time = TimeUtils.dateFromTimestamp(timeSource);
-				
 				String targetId = req.getParameter("target");
                 WorkspaceNode targetWS =
                         WorkspaceNode.getWorkspaceFromId( targetId,

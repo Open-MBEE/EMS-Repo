@@ -1,0 +1,11 @@
+<webscript>
+	<shortname>get diffs</shortname>
+    <description>
+    	get diffs
+	</description>
+  	<url>/diff</url>
+  	<format default="json">argument</format>
+  	<authentication>user</authentication>
+  	<transaction allow="readwrite">required</transaction>
+  	<family>MMS REST API</family>
+ </webscript>
