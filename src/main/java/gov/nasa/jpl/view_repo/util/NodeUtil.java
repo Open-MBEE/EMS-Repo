@@ -71,8 +71,8 @@ public class NodeUtil {
     /**
      * A cache of alfresco nodes stored as a map from sysml:id to a set of nodes
      */
-    public static HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > > elementCache =
-            new HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > >();
+    public static HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > > 
+        elementCache = new HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > >();
 //    /**
 //     * A cache of alfresco nodes stored as a map from sysml:id to workspaceId to node
 //     */
@@ -711,9 +711,9 @@ public class NodeUtil {
                                                           String siteName) {
         String wsId = getWorkspaceId( workspace, ignoreWorkspaces );
         Long dateLong = dateTime == null ? 0 : dateTime.getTime();
-        Utils.get( elementCache, specifier, prefix, wsId, onlyThisWorkspace, dateLong, justFirst,
+        ArrayList< NodeRef > results = Utils.get( elementCache, specifier, prefix, wsId, onlyThisWorkspace, dateLong, justFirst,
                    exactMatch, includeDeleted, "" + siteName );
-        return null;
+        return results;
     }
 
 
