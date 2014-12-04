@@ -1,7 +1,7 @@
 { "elements" : [
-    {"documentation" : "A site package", 
-     "sysmlid":"package", 
-     "name":"package",
+    {"documentation" : "A site aminess", 
+     "sysmlid":"ami", 
+     "name":"ami",
      "owner":"123456",
      "specialization": {"type":"Package",
                         "isSite":true}

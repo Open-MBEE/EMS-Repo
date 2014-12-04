@@ -49,7 +49,7 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
- * Adds an admin user so synchronization of sites cna be done properly
+ * Adds an admin user so synchronization of sites can be done properly
  * 
  * @author cinyoung
  *
@@ -106,6 +106,7 @@ public class AdminUserPost extends AbstractJavaWebScript {
                     String password = jsonObject.getString( "password" );
                     String email = jsonObject.getString( "email" );
 
+                    services.getAuthenticationService().createAuthentication( username, password.toCharArray() );
                     NodeRef person = services.getPersonService().getPerson( username );
                     if (person == null) {
                         Map< QName, Serializable > properties = new HashMap< QName, Serializable >();
@@ -120,9 +121,8 @@ public class AdminUserPost extends AbstractJavaWebScript {
                         ShareUtils.setUsername( username );
                     }
 
-                    services.getAuthenticationService().setAuthenticationEnabled( username, true );
-                    services.getPermissionService().setPermission( person, username, services.getPermissionService().getAllPermission(), true );
-                    services.getAuthenticationService().setAuthentication( username, password.toCharArray() );
+//                    services.getAuthenticationService().setAuthenticationEnabled( username, true );
+//                    services.getPermissionService().setPermission( person, username, services.getPermissionService().getAllPermission(), true );
                     services.getAuthorityService().addAuthority( "GROUP_ALFRESCO_ADMINISTRATORS", username );
 
                     responseStatus.setCode( HttpServletResponse.SC_OK );

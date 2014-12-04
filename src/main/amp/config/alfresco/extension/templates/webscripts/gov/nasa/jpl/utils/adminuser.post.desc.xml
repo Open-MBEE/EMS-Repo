@@ -4,5 +4,5 @@
   <url>/admin/user</url>
   <authentication>admin</authentication>
   <format default="json">argument</format>
-  <family>EMS Utils</family>
+  <family>Utils</family>
 </webscript>

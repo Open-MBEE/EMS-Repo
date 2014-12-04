@@ -1747,7 +1747,9 @@ public class ModelPost extends AbstractJavaWebScript {
             String siteTitle = pkgSiteNode.getSysmlName();
             String siteDescription = (String) pkgSiteNode.getProperty( Acm.ACM_DOCUMENTATION );
             boolean isPublic = true;
-            ShareUtils.constructSiteDashboard( sitePreset, siteName, siteTitle, siteDescription, isPublic );
+            if (false == ShareUtils.constructSiteDashboard( sitePreset, siteName, siteTitle, siteDescription, isPublic )) {
+                // FIXME: add some logging and response here that there were issues creating the site
+            }
             // siteInfo doesnt give the node ref we want, so must search for it:
             siteNode = getSiteNode( siteName, null, null ); 
             if (siteNode != null) {
@@ -2287,9 +2289,6 @@ public class ModelPost extends AbstractJavaWebScript {
 
     protected Map<String, Object> executeImplImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
-        // this is a hack for alfresco to create the admin user needed for creating sites
-        ShareUtils.createAdminUser( );
-        
         NodeUtil.doCaching = true;  
         Timer timer = new Timer();
 
