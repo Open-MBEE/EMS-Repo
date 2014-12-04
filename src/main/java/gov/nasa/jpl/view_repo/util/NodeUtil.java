@@ -57,7 +57,8 @@ import org.springframework.extensions.webscripts.Status;
 
 public class NodeUtil {
 
-    public static boolean doCaching = false;
+    public static boolean doFullCaching = false;
+    public static boolean doSimpleCaching = false;
     
     public static String sitePkgPrefix = "site_";
 
@@ -314,21 +315,21 @@ public class NodeUtil {
         
         // look in cache first
         //boolean simpleCacheLookup = false;
-        if ( doCaching ) {
+        if ( doSimpleCaching || doFullCaching ) {
 //            simpleCacheLookup =
 //                    !ignoreWorkspace
 //                            && workspace == null
 //                            && dateTime == null
 //                            && !includeDeleted
 //                            && ( prefix.equals( SearchType.CM_NAME.prefix ) || prefix.equals( SearchType.ID.prefix ) );
-            if ( useSimpleCache ) {
+            if ( useSimpleCache && doSimpleCaching ) {
                 NodeRef ref = simpleCache.get( specifier );
                 if (services.getPermissionService().hasPermission( ref, PermissionService.READ ) == AccessStatus.ALLOWED) {
                     if ( exists(ref ) ) {
                         results = Utils.newList( ref );
                     }
                 }
-            } else  {
+            } else if ( doFullCaching ) {
                 results = getCachedElements( specifier, prefix, ignoreWorkspace, workspace, onlyThisWorkspace, dateTime, justFirst,
                                              exactMatch, includeDeleted, siteName );
             }
@@ -341,7 +342,7 @@ public class NodeUtil {
                 wasCached = true; // doCaching must be true here
             } else {
                 results = findNodeRefsByType( specifier, prefix, services );
-                if ( doCaching && !Utils.isNullOrEmpty( results ) ) {
+                if ( (doSimpleCaching || doFullCaching) && !Utils.isNullOrEmpty( results ) ) {
                     caching = true;
                 }
             }
@@ -360,11 +361,12 @@ public class NodeUtil {
            
             
             // Update cache with results
-            if ( doCaching && caching && !Utils.isNullOrEmpty( nodeRefs ) ) {
-                if ( useSimpleCache ) {
+            if ( ( doSimpleCaching || doFullCaching ) && caching
+                 && !Utils.isNullOrEmpty( nodeRefs ) ) {
+                if ( useSimpleCache && doSimpleCaching ) {
                     NodeRef r = nodeRefs.get( 0 ); 
                     simpleCache.put( specifier, r );
-                } else {
+                } else if ( doFullCaching ){
                     putInCache( specifier, prefix, ignoreWorkspace, workspace,
                                 onlyThisWorkspace, dateTime, justFirst,
                                 exactMatch, includeDeleted, siteName, nodeRefs );
@@ -713,7 +715,7 @@ public class NodeUtil {
         Long dateLong = dateTime == null ? 0 : dateTime.getTime();
         ArrayList< NodeRef > results = Utils.get( elementCache, specifier, prefix, wsId, onlyThisWorkspace, dateLong, justFirst,
                    exactMatch, includeDeleted, "" + siteName );
-        return results;
+        return null;
     }
 
 

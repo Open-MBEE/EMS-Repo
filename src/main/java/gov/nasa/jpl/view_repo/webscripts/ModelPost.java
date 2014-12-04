@@ -261,7 +261,8 @@ public class ModelPost extends AbstractJavaWebScript {
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
 
-        log( LogLevel.DEBUG, "****** NodeUtil.doCaching = " + NodeUtil.doCaching );
+        log( LogLevel.DEBUG, "****** NodeUtil.doSimpleCaching = " + NodeUtil.doSimpleCaching );
+        log( LogLevel.DEBUG, "****** NodeUtil.doFullCaching = " + NodeUtil.doFullCaching );
         
         if(sourceWS == null)
             setWsDiff( targetWS );
@@ -2298,7 +2299,6 @@ public class ModelPost extends AbstractJavaWebScript {
 
     protected Map<String, Object> executeImplImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
-        NodeUtil.doCaching = true;  
         Timer timer = new Timer();
 
         printHeader( req );
