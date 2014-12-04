@@ -5,8 +5,6 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -27,7 +25,6 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
 
 import org.alfresco.model.ContentModel;
@@ -55,10 +52,8 @@ import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ApplicationContextHelper;
-import org.junit.Assert;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
-import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class NodeUtil {
 
@@ -76,8 +71,8 @@ public class NodeUtil {
     /**
      * A cache of alfresco nodes stored as a map from sysml:id to a set of nodes
      */
-    public static HashMap< String, Map< String, Map< String, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, ArrayList< NodeRef > > > > > > > > elementCache =
-            new HashMap< String, Map< String, Map< String, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, ArrayList< NodeRef > > > > > > > >();
+    public static HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > > elementCache =
+            new HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > >();
 //    /**
 //     * A cache of alfresco nodes stored as a map from sysml:id to workspaceId to node
 //     */
@@ -334,8 +329,8 @@ public class NodeUtil {
                     }
                 }
             } else  {
-                results = getCachedElements( specifier, prefix, ignoreWorkspace, workspace, dateTime, justFirst,
-                                             exactMatch, includeDeleted );
+                results = getCachedElements( specifier, prefix, ignoreWorkspace, workspace, onlyThisWorkspace, dateTime, justFirst,
+                                             exactMatch, includeDeleted, siteName );
             }
         }
 
@@ -351,190 +346,39 @@ public class NodeUtil {
                 }
             }
             if ( results != null ) {
-                NodeRef lowest = null;
-                if ( wasCached && dateTime == null && siteName == null) {
+                if ( wasCached && dateTime == null ) {
                     nodeRefs = results;
                 } 
-                else 
-                for (NodeRef nr: results) {
-                    //int minParentDistance = Integer.MAX_VALUE;
-                    if ( nr == null ) continue;
-                    EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
-
-                    if ( Debug.isOn() && !Debug.isOn() ) {
-                        Debug.outln( "findNodeRefsByType(" + specifier + ", " + prefix + ", " + workspace + ", " + dateTime + ", justFirst=" + justFirst + ", exactMatch=" + exactMatch + "): candidate " + esn.getWorkspaceName() + "::" + esn.getName() );
-                    }
-
-                    // Get the version for the date/time if specified.
-                    if ( dateTime != null ) {
-                        nr = getNodeRefAtTime( nr, dateTime );
-
-                        // null check
-                        if ( nr == null ) {
-                            if ( Debug.isOn() ) {
-                                Debug.outln( "findNodeRefsByType(): no nodeRef at time " + dateTime );
-                            }
-                            continue;
-                        }
-
-                        // get EmsScriptNode for versioned node ref
-                        esn = new EmsScriptNode( nr, getServices() );
-                    }
-                    
-                    // make sure it still exists if !findDeleted)
-                    if ( !esn.exists() ) {
-                        if ( !(includeDeleted && esn.isDeleted()) ) {
-                            if ( Debug.isOn() ) {
-                                System.out.println( "findNodeRefsByType(): element does not exist "
-                                             + esn );
-                            }
-                            continue;
-                        }
-                    }
-                    try {
-                        // Make sure it's in the right workspace.
-                        if ( !ignoreWorkspace && esn != null ) {
-                            WorkspaceNode esnWs = esn.getWorkspace();
-                            if ( ( onlyThisWorkspace && !workspacesEqual( workspace, esnWs ) ) ||
-                                 ( workspace == null && esnWs != null ) ||
-                                 ( workspace != null && !workspace.contains( esn ) ) ) {
-                                if ( Debug.isOn() && !Debug.isOn()) {
-                                    System.out.println( "findNodeRefsByType(): wrong workspace "
-                                            + workspace );
-                                }
-                                continue;
-                            }
-                        }
-                    } catch( InvalidNodeRefException e ) {
-                        if ( Debug.isOn() ) e.printStackTrace();
-                        continue;
-                    } catch( Throwable e ) {
-                        e.printStackTrace();
-                    }
-
-                    // Make sure we didn't just get a near match.
-                    try {
-                        if ( !esn.checkPermissions( PermissionService.READ ) ) {
-                            
-                            continue;
-                        }
-                        boolean match = true;
-                        if ( exactMatch ) {
-                            String acmType =
-                                    Utils.join( prefix.split( "[\\W]+" ), ":" )
-                                         .replaceFirst( "^:", "" );
-                            Object o = esn.getProperty( acmType );
-                            if ( !( "" + o ).equals( specifier ) ) {
-                                match = false;
-                            }
-                        }
-                        // Check that it from the desired site if desired:
-                        if (siteName != null && !siteName.equals( esn.getSiteName() )) {
-                            match = false;
-                        }
-                        if ( match ) {
-                            nodeRef = nr;
-                            if ( exists(workspace) && (lowest == null || isWorkspaceSource(lowest, nodeRef)
-                                    ) ) {
-                                lowest = nodeRef;
-                                nodeRefs.add( 0, nodeRef );
-                            } else {
-                                nodeRefs.add( nodeRef );
-                            }
-                            if ( Debug.isOn() ) Debug.outln( "findNodeRefsByType(): matched!" );
-                            if ( justFirst &&
-                                 ( !exists( workspace ) ||
-                                   ( exists( lowest ) &&
-                                           workspace.equals( getWorkspace( nodeRef ) ) ) ) ) {
-                                break;
-                            }
-                        } else {
-                            if ( Debug.isOn() ) Debug.outln( "findNodeRefsByType(): not an exact match or incorrect site" );
-                        }
-
-                    } catch ( Throwable e ) {
-                        e.printStackTrace();
-                    }
-                } // ends else for
+                else {
+                    nodeRefs = filterResults( results, specifier, prefix,
+                                              useSimpleCache, ignoreWorkspace,
+                                              workspace, onlyThisWorkspace,
+                                              dateTime, justFirst, exactMatch,
+                                              services, includeDeleted, siteName );
+                }
             } // ends if (results != null)
            
-            // If the workspace is copied at a time point (as opposed to
-            // floating with the parent), then we need to check each element
-            // found to see if it is in some parent workspace and last modified
-            // after the copy time. If so, then we need to get the element in
-            // the parent workspace at the time of the copy.
-            if ( nodeRefs != null && workspace != null && !ignoreWorkspace ) {
-                Date copyTime = workspace.getCopyTime();
-                if ( copyTime != null ) {
-                    // loop through each result
-                    ArrayList<NodeRef> correctedRefs = new ArrayList<NodeRef>();
-                    for ( NodeRef r : nodeRefs) {
-                        if ( r == null ) continue;
-                        WorkspaceNode resultWs = getWorkspace( r );
-                        EmsScriptNode esn;
-                        // If a native member of the workspace, no need to correct.
-                        if ( workspace.equals( resultWs ) ) {
-                            correctedRefs.add( r );
-                        } else {
-                            esn = new EmsScriptNode( r, getServices() );
-                            Date lastModified = esn.getLastModified( dateTime );
-                            // Check if modified after the copyTime.
-                            if ( lastModified != null &&
-                                    lastModified.after( copyTime ) ) {
-                                // Replace with the versioned ref at the copy time
-                                ArrayList< NodeRef > refs =
-                                        findNodeRefsByType( specifier, prefix,
-                                                            useSimpleCache,
-                                                            ignoreWorkspace,
-                                                            resultWs, copyTime,
-                                                            true, exactMatch,
-                                                            services,
-                                                            includeDeleted,
-                                                            siteName );
-                                if ( !Utils.isNullOrEmpty( refs ) ) {
-                                    // only asked for one
-                                    NodeRef newRef = refs.get( 0 );
-                                    correctedRefs.add( r );
-                                }
-//                                r = getNodeRefAtTime( r, resultWs, copyTime );
-//                                if ( r != null ) {
-//                                    esn = new EmsScriptNode( r, getServices() );
-//                                } else {
-//                                    esn = null;
-//                                }
-                            } else if ( lastModified == null ) {
-                                Debug.error( "ERROR!  Should never have null modified date!" );
-                                correctedRefs.add( r );
-                            }
-//                            if ( exists( esn ) || ( includeDeleted && esn.isDeleted() &&
-//                                    ()!exactMatch ) ) {
-//                                correctedRefs.add( r );
-//                            }
-                        } 
-                    }
-                }
-            }
+            
+            // Update cache with results
             if ( doCaching && caching && !Utils.isNullOrEmpty( nodeRefs ) ) {
                 if ( useSimpleCache ) {
                     NodeRef r = nodeRefs.get( 0 ); 
                     simpleCache.put( specifier, r );
                 } else {
-                    putInCache( specifier, prefix, ignoreWorkspace, workspace, dateTime, justFirst,
-                                exactMatch, includeDeleted, nodeRefs );
+                    putInCache( specifier, prefix, ignoreWorkspace, workspace,
+                                onlyThisWorkspace, dateTime, justFirst,
+                                exactMatch, includeDeleted, siteName, nodeRefs );
                 }
             }
         } finally {
-            if (results != null) {
-                if ( Debug.isOn() ) {
+            if ( Debug.isOn() && !Debug.isOn() ) {
+                if (results != null) {
                     List< EmsScriptNode > set =
                             EmsScriptNode.toEmsScriptNodeList( nodeRefs,
                                                                services, null,
                                                                null );
-                    if ( Debug.isOn() && !Debug.isOn() ) {
-                        Debug.outln( "findNodeRefsByType(" + specifier + ", " + prefix + ", " + workspace + ", " + dateTime + ", justFirst=" + justFirst + ", exactMatch=" + exactMatch + "): returning " + set );
-                    }
+                    Debug.outln( "findNodeRefsByType(" + specifier + ", " + prefix + ", " + workspace + ", " + dateTime + ", justFirst=" + justFirst + ", exactMatch=" + exactMatch + "): returning " + set );
                 }
-
             }
         }
 //        // If we found a NodeRef but still have null (maybe because a version
@@ -552,6 +396,265 @@ public class NodeUtil {
     }
 
 
+    protected static ArrayList<NodeRef> filterResults(ArrayList<NodeRef> results,
+                                                      String specifier, String prefix,
+                                                      boolean useSimpleCache,
+                                                      boolean ignoreWorkspace,
+                                                      WorkspaceNode workspace,
+                                                      boolean onlyThisWorkspace,
+                                                      Date dateTime,
+                                                      boolean justFirst, boolean exactMatch,
+                                                      ServiceRegistry services, boolean includeDeleted,
+                                                      String siteName) {
+        ArrayList<NodeRef> nodeRefs = new ArrayList<NodeRef>();
+        NodeRef lowest = null;
+        NodeRef nodeRef = null;
+        
+        for (NodeRef nr: results) {
+            //int minParentDistance = Integer.MAX_VALUE;
+            if ( nr == null ) continue;
+            EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
+
+            if ( Debug.isOn() && !Debug.isOn() ) {
+                Debug.outln( "findNodeRefsByType(" + specifier + ", " + prefix + ", " + workspace + ", " + dateTime + ", justFirst=" + justFirst + ", exactMatch=" + exactMatch + "): candidate " + esn.getWorkspaceName() + "::" + esn.getName() );
+            }
+
+            // Get the version for the date/time if specified.
+            if ( dateTime != null ) {
+                nr = getNodeRefAtTime( nr, dateTime );
+
+                // null check
+                if ( nr == null ) {
+                    if ( Debug.isOn() ) {
+                        Debug.outln( "findNodeRefsByType(): no nodeRef at time " + dateTime );
+                    }
+                    continue;
+                }
+
+                // get EmsScriptNode for versioned node ref
+                esn = new EmsScriptNode( nr, getServices() );
+            }
+            
+            // make sure it still exists if !findDeleted)
+            if ( !esn.scriptNodeExists() ) {
+                continue;
+            }
+//            if ( !esn.exists() ) {
+//                if ( !(includeDeleted && esn.isDeleted()) ) {
+//                    if ( Debug.isOn() ) {
+//                        System.out.println( "findNodeRefsByType(): element does not exist "
+//                                     + esn );
+//                    }
+//                    continue;
+//                }
+//            }
+            try {
+                // Make sure it's in the right workspace.
+                if ( !ignoreWorkspace && esn != null ) {
+                    WorkspaceNode esnWs = esn.getWorkspace();
+                    if ( ( onlyThisWorkspace && !workspacesEqual( workspace, esnWs ) ) ||
+                         ( workspace == null && esnWs != null ) ||
+                         ( workspace != null && !workspace.contains( esn ) ) ) {
+                        if ( Debug.isOn() && !Debug.isOn()) {
+                            System.out.println( "findNodeRefsByType(): wrong workspace "
+                                    + workspace );
+                        }
+                        continue;
+                    }
+                }
+            } catch( InvalidNodeRefException e ) {
+                if ( Debug.isOn() ) e.printStackTrace();
+                continue;
+            } catch( Throwable e ) {
+                e.printStackTrace();
+            }
+
+            // Make sure we didn't just get a near match.
+            try {
+                if ( !esn.checkPermissions( PermissionService.READ ) ) {
+                    
+                    continue;
+                }
+                boolean match = true;
+                if ( exactMatch ) {
+                    String acmType =
+                            Utils.join( prefix.split( "[\\W]+" ), ":" )
+                                 .replaceFirst( "^:", "" );
+                    Object o = esn.getProperty( acmType );
+                    if ( !( "" + o ).equals( specifier ) ) {
+                        match = false;
+                    }
+                }
+                // Check that it from the desired site if desired:
+                if (siteName != null && !siteName.equals( esn.getSiteName() )) {
+                    match = false;
+                }
+                if ( match ) {
+                    nodeRef = nr;
+                    if ( exists(workspace) && (lowest == null ||
+                            isWorkspaceAncestor(lowest, nodeRef, false)
+                            ) ) {
+                        lowest = nodeRef;
+                        nodeRefs.add( 0, nodeRef );
+                    } else {
+                        nodeRefs.add( nodeRef );
+                    }
+                    if ( Debug.isOn() ) Debug.outln( "findNodeRefsByType(): matched!" );
+                    if ( justFirst && 
+                         (ignoreWorkspace || !exists( workspace ) || workspace.getCopyTime() == null ) &&
+                         ( scriptNodeExists( lowest ) && ( includeDeleted || !isDeleted( lowest ) ) ) &&
+                         ( !exists( workspace ) ||
+                                   workspace.equals( getWorkspace( nodeRef ) ) ) ) {
+                        break;
+                    }
+                } else {
+                    if ( Debug.isOn() ) Debug.outln( "findNodeRefsByType(): not an exact match or incorrect site" );
+                }
+
+            } catch ( Throwable e ) {
+                e.printStackTrace();
+            }
+        } // ends else for
+        
+        nodeRefs = correctForWorkspaceCopyTime( nodeRefs, specifier, prefix,
+                                                useSimpleCache, ignoreWorkspace,
+                                                workspace, onlyThisWorkspace,
+                                                dateTime, justFirst, exactMatch,
+                                                services, includeDeleted, siteName );
+
+        nodeRefs = correctForDeleted( nodeRefs, specifier, prefix,
+                                      useSimpleCache, ignoreWorkspace,
+                                      workspace, onlyThisWorkspace,
+                                      dateTime, justFirst, exactMatch,
+                                      services, includeDeleted, siteName );
+        
+        return nodeRefs;
+    }
+    
+    protected static ArrayList<NodeRef> correctForWorkspaceCopyTime(ArrayList<NodeRef> nodeRefs,
+                                                                    String specifier, String prefix,
+                                                                    boolean useSimpleCache,
+                                                                    boolean ignoreWorkspace,
+                                                                    WorkspaceNode workspace,
+                                                                    boolean onlyThisWorkspace,
+                                                                    Date dateTime,
+                                                                    boolean justFirst, boolean exactMatch,
+                                                                    ServiceRegistry services, boolean includeDeleted,
+                                                                    String siteName) {
+        // If the workspace is copied at a time point (as opposed to
+        // floating with the parent), then we need to check each element
+        // found to see if it is in some parent workspace and last modified
+        // after the copy time. If so, then we need to get the element in
+        // the parent workspace at the time of the copy.
+        if ( nodeRefs != null && workspace != null && !ignoreWorkspace ) {
+            Date copyTime = workspace.getCopyTime();
+            if ( copyTime != null ) {
+                // loop through each result
+                ArrayList<NodeRef> correctedRefs = new ArrayList<NodeRef>();
+                for ( NodeRef r : nodeRefs) {
+                    if ( r == null ) continue;
+                    WorkspaceNode resultWs = getWorkspace( r );
+                    EmsScriptNode esn;
+                    // If a native member of the workspace, no need to correct.
+                    if ( workspace.equals( resultWs ) ) {
+                        correctedRefs.add( r );
+                    } else {
+                        esn = new EmsScriptNode( r, getServices() );
+                        Date lastModified = esn.getLastModified( dateTime );
+                        // Check if modified after the copyTime.
+                        if ( lastModified != null &&
+                                lastModified.after( copyTime ) ) {
+                            // Replace with the versioned ref at the copy time
+                            ArrayList< NodeRef > refs =
+                                    findNodeRefsByType( specifier, prefix,
+                                                        useSimpleCache,
+                                                        ignoreWorkspace,
+                                                        resultWs, copyTime,
+                                                        true, // justOne
+                                                        exactMatch, services,
+                                                        includeDeleted,
+                                                        siteName );
+                            if ( !Utils.isNullOrEmpty( refs ) ) {
+                                // only asked for one
+                                NodeRef newRef = refs.get( 0 );
+                                correctedRefs.add( newRef );
+                            }
+//                            r = getNodeRefAtTime( r, resultWs, copyTime );
+//                            if ( r != null ) {
+//                                esn = new EmsScriptNode( r, getServices() );
+//                            } else {
+//                                esn = null;
+//                            }
+                        } else {
+                            if ( lastModified == null ) {
+                                Debug.error( "ERROR!  Should never have null modified date!" );
+                            }
+                            correctedRefs.add( r );
+                        }
+//                        if ( exists( esn ) || ( includeDeleted && esn.isDeleted() &&
+//                                ()!exactMatch ) ) {
+//                            correctedRefs.add( r );
+//                        }
+                    } 
+                }
+                nodeRefs = correctedRefs;
+            }
+        }
+        
+        return nodeRefs;
+    }
+
+    protected static ArrayList< NodeRef >
+            correctForDeleted( ArrayList< NodeRef > nodeRefs, String specifier,
+                               String prefix, boolean useSimpleCache,
+                               boolean ignoreWorkspace,
+                               WorkspaceNode workspace,
+                               boolean onlyThisWorkspace, Date dateTime,
+                               boolean justFirst, boolean exactMatch,
+                               ServiceRegistry services,
+                               boolean includeDeleted, String siteName ) {
+        // Remove isDeleted elements unless includeDeleted.
+        // If !ignoreWorkspace, then any deleted 
+        if ( includeDeleted || nodeRefs == null ) {
+            return nodeRefs;
+        }
+        // loop through each result
+        ArrayList<NodeRef> correctedRefs = new ArrayList<NodeRef>();
+        ArrayList<NodeRef> deletedRefs = null;
+        boolean workspaceMatters = !ignoreWorkspace && workspace != null;
+        if ( workspaceMatters ) {
+            deletedRefs = new ArrayList<NodeRef>();
+        }
+        for ( NodeRef r : nodeRefs ) {
+            if ( isDeleted( r ) ) {
+                if ( workspaceMatters ) {
+                    deletedRefs.add( r );
+                }
+            } else {
+                correctedRefs.add( r );
+            }
+        }
+        if ( workspaceMatters ) {
+            for ( NodeRef deleted : deletedRefs ) {
+                EmsScriptNode dnode = new EmsScriptNode( deleted, getServices() );
+                String dId = dnode.getSysmlId(); // assumes cm_name as backup to sysmlid
+                // remove all nodes with the same ID in parent workspaces
+                ArrayList<NodeRef> correctedRefsCopy = new ArrayList<NodeRef>(correctedRefs);
+                for ( NodeRef corrected : correctedRefsCopy ) {
+                    EmsScriptNode cnode = new EmsScriptNode( corrected, services );
+                    String cId = cnode.getSysmlId();
+                    if ( dId.equals( cId ) ) {
+                        if ( isWorkspaceSource( corrected, deleted, includeDeleted ) ) {
+                            correctedRefs.remove( corrected );
+                        }
+                    }
+                }
+            }
+        }
+        nodeRefs = correctedRefs;
+
+        return nodeRefs;
+    }    
 //    protected static Map< String, Map< EmsScriptNode, Integer > > parentCache =
 //            new HashMap< String, Map< EmsScriptNode, Integer > >();
 //
@@ -583,29 +686,33 @@ public class NodeUtil {
     public static ArrayList< NodeRef > putInCache( String specifier, String prefix,
                                                    boolean ignoreWorkspaces,
                                                    WorkspaceNode workspace,
+                                                   boolean onlyThisWorkspace,
                                                    Date dateTime,
                                                    boolean justFirst,
                                                    boolean exactMatch,
                                                    boolean includeDeleted,
+                                                   String siteName,
                                                    ArrayList< NodeRef > results ) {
         String wsId = getWorkspaceId( workspace, ignoreWorkspaces );
         Long dateLong = dateTime == null ? 0 : dateTime.getTime();
-        return Utils.put( elementCache, specifier, prefix, wsId, dateLong,
-                          justFirst, exactMatch, includeDeleted, results );
+        return Utils.put( elementCache, specifier, prefix, wsId, onlyThisWorkspace,
+                          dateLong, justFirst, exactMatch, includeDeleted, "" + siteName, results );
     }
 
     public static ArrayList< NodeRef > getCachedElements( String specifier,
                                                           String prefix,
                                                           boolean ignoreWorkspaces,
                                                           WorkspaceNode workspace,
+                                                          boolean onlyThisWorkspace,
                                                           Date dateTime,
                                                           boolean justFirst,
                                                           boolean exactMatch,
-                                                          boolean includeDeleted ) {
+                                                          boolean includeDeleted,
+                                                          String siteName) {
         String wsId = getWorkspaceId( workspace, ignoreWorkspaces );
         Long dateLong = dateTime == null ? 0 : dateTime.getTime();
-        Utils.get( elementCache, specifier, prefix, wsId, dateLong, justFirst,
-                   exactMatch, includeDeleted );
+        Utils.get( elementCache, specifier, prefix, wsId, onlyThisWorkspace, dateLong, justFirst,
+                   exactMatch, includeDeleted, "" + siteName );
         return null;
     }
 
@@ -624,23 +731,60 @@ public class NodeUtil {
         return node.getWorkspace();
     }
 
-    public static boolean isWorkspaceSource( EmsScriptNode source, EmsScriptNode changed ) {
+    public static boolean isWorkspaceAncestor( WorkspaceNode ancestor,
+                                               WorkspaceNode child,
+                                               boolean includeDeleted ) {
+        if ( ancestor == null ) return true;
+        if ( !exists(ancestor, includeDeleted) || !exists(child, includeDeleted) ) return false;
+        WorkspaceNode parent = child.getParentWorkspace();
+        if ( !exists( parent, includeDeleted ) ) return false;
+        if ( ancestor.equals( parent, true ) ) return true;
+        return isWorkspaceAncestor( ancestor, parent, includeDeleted );
+    }
+
+    /**
+     * Determine whether the workspace of the source an ancestor of that of the
+     * changed node.
+     * 
+     * @param source
+     * @param changed
+     * @param includeDeleted whether to consider deleted workspaces
+     * @return
+     */
+    public static boolean isWorkspaceAncestor( NodeRef source,
+                                               NodeRef changed,
+                                               boolean includeDeleted ) {
+        if ( !exists( source, true )
+                || !exists( changed, true ) ) return false;
+        WorkspaceNode ancestor = getWorkspace( source );
+        WorkspaceNode child = getWorkspace( changed );
+        return isWorkspaceAncestor( ancestor, child, includeDeleted );
+    }
+    
+    public static boolean isWorkspaceSource( EmsScriptNode source,
+                                             EmsScriptNode changed,
+                                             boolean includeDeleted ) {
         // TODO: removed exists so we can include ems:Deleted nodes in results, may need to revisit
 //        if (!exists(source) || !exists(changed)) return false;
         //if ( changed.equals( source ) ) return true;
-        if ( source == null || changed == null ) return false;
+        if ( !exists( source, includeDeleted )
+             || !exists( changed, includeDeleted ) ) return false;
         if ( !changed.hasAspect( "ems:HasWorkspace" ) ) return false;
         EmsScriptNode directSource = changed.getWorkspaceSource();
 //        if ( !exists(directSource) ) return false;
+        if ( directSource == null || !directSource.scriptNodeExists() ) return false;
         if ( source.equals( directSource ) ) return true;
-        return isWorkspaceSource( source, directSource );
+        return isWorkspaceSource( source, directSource, includeDeleted );
     }
 
-    public static boolean isWorkspaceSource( NodeRef source, NodeRef changed ) {
-        if ( source == null || changed == null ) return false;
+    public static boolean isWorkspaceSource( NodeRef source, NodeRef changed,
+                                             boolean includeDeleted ) {
+        if ( !exists( source, includeDeleted )
+                || !exists( changed, includeDeleted ) ) return false;
+//        if ( source == null || changed == null ) return false;
         EmsScriptNode sourceNode = new EmsScriptNode( source, getServices() );
         EmsScriptNode changedNode = new EmsScriptNode( changed, getServices() );
-        return isWorkspaceSource( sourceNode, changedNode );
+        return isWorkspaceSource( sourceNode, changedNode, includeDeleted );
     }
 
     /**
@@ -1534,14 +1678,26 @@ public class NodeUtil {
     }
     
     public static boolean exists( EmsScriptNode node ) {
+        return exists( node, false );
+    }
+    public static boolean exists( EmsScriptNode node, boolean includeDeleted ) {
         if ( node == null ) return false;
-        return node.exists();
+        return node.exists( includeDeleted );
     }
 
     public static boolean exists( NodeRef ref ) {
+        return exists( ref, false );
+    }
+    public static boolean exists( NodeRef ref, boolean includeDeleted ) {
         if ( ref == null ) return false;
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
-        return node.exists();
+        return node.exists( includeDeleted );
+    }
+
+    public static boolean scriptNodeExists( NodeRef ref ) {
+        if ( ref == null ) return false;
+        EmsScriptNode node = new EmsScriptNode( ref, getServices() );
+        return node.scriptNodeExists();
     }
 
     public static String getUserName() {

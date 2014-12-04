@@ -36,8 +36,6 @@ import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Diff;
 import gov.nasa.jpl.mbee.util.Pair;
-import gov.nasa.jpl.mbee.util.Seen;
-import gov.nasa.jpl.mbee.util.SeenHashSet;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
@@ -73,7 +71,6 @@ import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.jscript.ScriptVersion;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
-import org.alfresco.service.cmr.dictionary.ClassDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
@@ -86,6 +83,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
+import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
@@ -2656,13 +2654,27 @@ public class EmsScriptNode extends ScriptNode implements
      */
     @Override
     public boolean equals( Object obj ) {
+        return equals( obj, false );
+    }
+    public boolean equals( Object obj, boolean ignoreVersion ) {
 
-        if ( obj instanceof EmsScriptNode ) {
-            EmsScriptNode that = (EmsScriptNode)obj;
-            return this.nodeRef.equals( that.nodeRef );
-        } else {
-            return false;
-        }
+        if ( !( obj instanceof EmsScriptNode ) ) return false;
+        EmsScriptNode that = (EmsScriptNode)obj;
+        boolean same = this.nodeRef.equals( that.nodeRef );
+        if ( same || !ignoreVersion ) return same;
+        
+        // See if they are different versions of the same node.
+        VersionService vs = getServices().getVersionService();
+        boolean isThisV = vs.isAVersion( this.nodeRef );
+        boolean isThatV = vs.isAVersion( that.nodeRef );
+        if ( !isThisV && !isThatV ) return same;
+        NodeRef thisCurrent =
+                vs.getCurrentVersion( this.nodeRef ).getVersionedNodeRef();
+        NodeRef thatCurrent =
+                vs.getCurrentVersion( that.nodeRef ).getVersionedNodeRef();
+        if ( thisCurrent == thatCurrent ) return true;
+        if ( thisCurrent == null || thatCurrent == null ) return false;
+        return thisCurrent.equals( thatCurrent );
     }
 
     /**
@@ -2672,9 +2684,12 @@ public class EmsScriptNode extends ScriptNode implements
      */
     @Override
     public boolean exists() {
+        return exists( false );
+    }
+    public boolean exists(boolean includeDeleted) {
         // REVIEW -- TODO -- Will overriding this cause problems in ScriptNode?
         if ( !super.exists() ) return false;
-        if ( hasAspect( "ems:Deleted" ) ) {
+        if ( !includeDeleted && hasAspect( "ems:Deleted" ) ) {
             return false;
         }
         return true;
