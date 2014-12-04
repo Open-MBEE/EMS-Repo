@@ -58,7 +58,7 @@ import org.springframework.extensions.webscripts.Status;
 public class NodeUtil {
 
     public static boolean doFullCaching = false;
-    public static boolean doSimpleCaching = false;
+    public static boolean doSimpleCaching = true;
     
     public static String sitePkgPrefix = "site_";
 
@@ -775,7 +775,7 @@ public class NodeUtil {
         EmsScriptNode directSource = changed.getWorkspaceSource();
 //        if ( !exists(directSource) ) return false;
         if ( directSource == null || !directSource.scriptNodeExists() ) return false;
-        if ( source.equals( directSource ) ) return true;
+        if ( source.equals( directSource, true ) ) return true;
         return isWorkspaceSource( source, directSource, includeDeleted );
     }
 
