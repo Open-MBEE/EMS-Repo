@@ -1123,7 +1123,8 @@ public class EmsScriptNode extends ScriptNode implements
         if ( Utils.isNullOrEmpty( acmType ) ) return null;
         Object result = null;
         
-        checkNodeRefVersion(dateTime);
+        // Taking this out for now b/c of performance hit:
+        //checkNodeRefVersion(dateTime);
         
         if ( useFoundationalApi ) {
             QName typeQName = createQName( acmType );
@@ -1212,7 +1213,8 @@ public class EmsScriptNode extends ScriptNode implements
     @Override
     public Map< String, Object > getProperties() {
         
-        checkNodeRefVersion(null);
+        // Taking this out for now b/c of performance hit:
+        //checkNodeRefVersion(null);
 
         if ( useFoundationalApi ) {
             return Utils.toMap( services.getNodeService()
