@@ -132,11 +132,11 @@ public class WorkspaceDiff {
     protected void addDiffs( Set<NodeRef> refs ) {
         for ( NodeRef ref : refs ) {
             EmsScriptNode nodeFromRef = new EmsScriptNode( ref, getServices() );
-            String name = nodeFromRef.getName();
-            NodeRef ref1 = NodeUtil.findNodeRefById( name, false, getWs1(),
+            String sysmlid = nodeFromRef.getSysmlId();
+            NodeRef ref1 = NodeUtil.findNodeRefById( sysmlid, false, getWs1(),
                                                      getTimestamp1(), getServices(), true );
             EmsScriptNode node1 = ref1 == null ? null : new EmsScriptNode( ref1, getServices() );
-            NodeRef ref2 = NodeUtil.findNodeRefById( name, false, getWs2(),
+            NodeRef ref2 = NodeUtil.findNodeRefById( sysmlid, false, getWs2(),
                                                      getTimestamp2(), getServices(), true );
             EmsScriptNode node2 = ref2 == null ? null : new EmsScriptNode( ref2, getServices() );
             addToDiff( node1, node2 );
