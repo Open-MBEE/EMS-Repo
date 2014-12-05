@@ -2387,32 +2387,6 @@ public class ModelPost extends AbstractJavaWebScript {
                     getProjectNodeFromRequest( req, true );
                     if (projectNode != null) {
                         handleUpdate( postJson, status, workspace, fix, model );
-//                        Set< EmsScriptNode > elements =
-//                        createOrUpdateModel( postJson, status, workspace, null );
-//
-//                        addRelationshipsToProperties( elements );
-//                        if ( !Utils.isNullOrEmpty( elements ) ) {
-//    
-//                            // Fix constraints if desired:
-//                            if (fix) {
-//                                fix(elements);
-//                            }
-//    
-//                            // Create JSON object of the elements to return:
-//                            JSONArray elementsJson = new JSONArray();
-//                            timerToJson = Timer.startTimer(timerToJson, timeEvents);
-//                            for ( EmsScriptNode element : elements ) {
-//                                elementsJson.put( element.toJSONObject(null) );
-//                            }
-//                            Timer.stopTimer(timerToJson, "!!!!! executeImpl(): toJSON time", timeEvents);
-//                            top.put( "elements", elementsJson );
-//                            if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-//                            if ( prettyPrint ) { 
-//                                model.put( "res", top.toString( 4 ) ); 
-//                            } else { 
-//                                model.put( "res", top.toString() );
-//                            }
-//                        }
                     }
                 }
             } catch (JSONException e) {

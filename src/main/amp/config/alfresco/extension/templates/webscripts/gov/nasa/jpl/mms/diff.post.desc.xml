@@ -1,7 +1,7 @@
 <webscript>
-	<shortname>get diffs</shortname>
+	<shortname>post diffs</shortname>
     <description>
-    	get diffs
+    	Post the passed diff json changes to the target workspace.  In the json file, assumes the target workspace is workspace1, and the source workspace is workspace2.
 	</description>
   	<url>/diff</url>
   	<format default="json">argument</format>
