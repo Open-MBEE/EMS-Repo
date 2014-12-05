@@ -2344,8 +2344,8 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
                 else {
                     JSONObject postJson = (JSONObject)req.parseContent();
-                    EmsScriptNode myProjectNode = getProjectNodeFromRequest( req, true );
-                    if (myProjectNode != null) {
+                    getProjectNodeFromRequest( req, true );
+                    if (projectNode != null) {
                         handleUpdate( postJson, status, workspace, fix, model );
 //                        Set< EmsScriptNode > elements =
 //                        createOrUpdateModel( postJson, status, workspace, null );

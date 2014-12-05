@@ -100,32 +100,35 @@ public class MmsWorkspaceDiffPost extends ModelPost {
     
 	private void handleDiff(JSONObject jsonDiff, Status status, Map<String, Object> model) throws Exception {
 		if (jsonDiff.has( "workspace1" ) && jsonDiff.has("workspace2")) {
-		    JSONObject srcJson = jsonDiff.getJSONObject( "workspace1" );
-		    JSONObject targetJson = jsonDiff.getJSONObject( "workspace2" );
+		    JSONObject srcJson = jsonDiff.getJSONObject( "workspace2" );
+		    JSONObject targetJson = jsonDiff.getJSONObject( "workspace1" );
 		    
 		    if (srcJson.has( "id" ) && targetJson.has("id")) {
-                String srcWsId = jsonDiff.getString( "id" );
+                String srcWsId = srcJson.getString( "id" );
                 WorkspaceNode srcWs = WorkspaceNode.getWorkspaceFromId( srcWsId, services, response, responseStatus, null );
                 
-		        String targetWsId = jsonDiff.getString( "id" );
+		        String targetWsId = targetJson.getString( "id" );
 	            WorkspaceNode targetWs = WorkspaceNode.getWorkspaceFromId( targetWsId, services, response, responseStatus, null );
 	            
 	            JSONObject top = new JSONObject();
 	            JSONArray elements = new JSONArray();
-	            if (jsonDiff.has( "addedElements" )) {
-	                JSONArray added = jsonDiff.getJSONArray("addedElements");
-	                for (int ii = 0; ii < elements.length(); ii++) elements.put( added.getJSONObject( ii ) );
+	            
+	            // Add/update the elements in the target workspace:
+	            if (srcJson.has( "addedElements" )) {
+	                JSONArray added = srcJson.getJSONArray("addedElements");
+	                for (int ii = 0; ii < added.length(); ii++) elements.put( added.getJSONObject( ii ) );
 	            }
-	            if (jsonDiff.has( "updatedElements" )) {
-                    JSONArray updated = jsonDiff.getJSONArray("updatedElements");
-                    for (int ii = 0; ii < elements.length(); ii++) elements.put( updated.getJSONObject( ii ) );
+	            if (srcJson.has( "updatedElements" )) {
+                    JSONArray updated = srcJson.getJSONArray("updatedElements");
+                    for (int ii = 0; ii < updated.length(); ii++) elements.put( updated.getJSONObject( ii ) );
 	            }
 	            top.put( "elements", elements );
 	            
 	            handleUpdate( top, status, targetWs, false, model );
 	            
-	            if (jsonDiff.has( "deletedElements" )) {
-	                JSONArray deleted = jsonDiff.getJSONArray( "deletedElements" );
+	            // Delete the elements in the target workspace:
+	            if (srcJson.has( "deletedElements" )) {
+	                JSONArray deleted = srcJson.getJSONArray( "deletedElements" );
 	                MmsModelDelete deleteService = new MmsModelDelete(repository, services);
 	                deleteService.setWsDiff( targetWs );
                     for (int ii = 0; ii < deleted.length(); ii++) {
@@ -133,8 +136,19 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                         EmsScriptNode root = NodeUtil.findScriptNodeById( id, targetWs, null, false, services, response );
                         deleteService.handleElementHierarchy( root, targetWs, false );
                     }
+                    
+                    // Update the needed aspects of the deleted nodes:
+                    for (EmsScriptNode deletedNode: deleteService.getWsDiff().getDeletedElements().values()) {
+                        if (deletedNode.exists()) {
+                            deletedNode.removeAspect( "ems:Added" );
+                            deletedNode.removeAspect( "ems:Updated" );
+                            deletedNode.removeAspect( "ems:Moved" );
+                            deletedNode.createOrUpdateAspect( "ems:Deleted" );
+                        }
+                    }
 	            }
 	            
+	            // FIXME specify the parent commit nodes
 	            CommitUtil.merge( jsonDiff, srcWs, targetWs, null, null, false, services, response );
 		    }
 		}
