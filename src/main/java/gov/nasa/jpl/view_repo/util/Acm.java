@@ -120,7 +120,7 @@ public class Acm {
     
     public static final String JSON_TYPE = "type";
     public static final String JSON_OWNER = "owner";
-    public static final String JSON_LAST_MODIFIED = "lastModified";
+    public static final String JSON_LAST_MODIFIED = "modified";
     public static final String JSON_AUTHOR = "author";
     public static final String JSON_PROPERTY_TYPE = "propertyType";
 

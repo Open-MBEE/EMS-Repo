@@ -86,6 +86,7 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
+import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
@@ -142,6 +143,10 @@ public class EmsScriptNode extends ScriptNode implements
                 }
             };
 
+    // Flag to indicate whether we checked the nodeRef version for this script node,
+    // when doing getProperty().
+    private boolean checkedNodeVersion = false;
+    
     // provide logging capability of what is done
     private StringBuffer response = null;
 
@@ -1068,6 +1073,43 @@ public class EmsScriptNode extends ScriptNode implements
     }
     
     /**
+     * Verifies that the nodeRef is the most recent if dateTime is null and not
+     * already checked for this node.  Replaces the nodeRef with the most recent
+     * if needed.  This is needed b/c of a alfresco bug.
+     */
+    public void checkNodeRefVersion(Date dateTime) {
+        
+        // Because of a alfresco bug, we must verify that we are getting the latest version
+        // of the nodeRef if not specifying a dateTime:
+        if (dateTime == null && !checkedNodeVersion) {
+            
+            checkedNodeVersion = true;
+            VersionService versionService = services.getVersionService();
+            
+            if (versionService != null) {
+                Version currentVersion = versionService.getCurrentVersion( nodeRef );
+                Version headVersion = getHeadVersion();
+                
+                if (currentVersion != null && headVersion != null) {
+                    
+                    String currentVerLabel = currentVersion.getVersionLabel();
+                    String headVerLabel = headVersion.getVersionLabel();
+                    
+                    // If this is not the most current node ref, replace it with the most current:
+                    if (currentVerLabel != null && headVerLabel != null &&
+                        !currentVerLabel.equals( headVerLabel ) ) {
+                        
+                        NodeRef fnr = headVersion.getFrozenStateNodeRef();
+                        if (fnr != null) {
+                            nodeRef = fnr;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
      * Get the property of the specified type
      *
      * @param acmType
@@ -1080,12 +1122,17 @@ public class EmsScriptNode extends ScriptNode implements
         
         if ( Utils.isNullOrEmpty( acmType ) ) return null;
         Object result = null;
+        
+        // Taking this out for now b/c of performance hit:
+        //checkNodeRefVersion(dateTime);
+        
         if ( useFoundationalApi ) {
             QName typeQName = createQName( acmType );
             result = services.getNodeService().getProperty( nodeRef, typeQName );
         } else {
             result = getProperties().get( acmType );
         }
+        
         // get noderefs from the proper workspace unless the property is a
         // workspace meta-property
         if ( !skipNodeRefCheck && !workspaceMetaProperties.contains( acmType )) {
@@ -1117,23 +1164,25 @@ public class EmsScriptNode extends ScriptNode implements
     public Date getLastModified( Date dateTime ) {
         Date lastModifiedDate = (Date)getProperty( Acm.ACM_LAST_MODIFIED );
 
-        // TODO FIXME should look at other properties besides VALUE:
-        Object value = getProperty( Acm.ACM_VALUE );
-        ArrayList< NodeRef > dependentNodes = new ArrayList< NodeRef >();
-        if ( value instanceof Collection ) {
-            Collection< ? > c = (Collection< ? >)value;
-            dependentNodes.addAll( Utils.asList( c, NodeRef.class ) );
-        }
-        for ( NodeRef nodeRef : dependentNodes ) {
-            nodeRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
-            if ( nodeRef == null ) continue;
-            EmsScriptNode oNode = new EmsScriptNode( nodeRef, services );
-            if ( !oNode.exists() ) continue;
-            Date modified = oNode.getLastModified( dateTime );
-            if ( modified.after( lastModifiedDate ) ) {
-                lastModifiedDate = modified;
-            }
-        }
+        // We no longer need to check this, as values specs are always embedded within
+        // the nodes that use them, ie Property, so the modified time will always be updated
+        // when modifying the value spec
+//        Object value = getProperty( Acm.ACM_VALUE );
+//        ArrayList< NodeRef > dependentNodes = new ArrayList< NodeRef >();
+//        if ( value instanceof Collection ) {
+//            Collection< ? > c = (Collection< ? >)value;
+//            dependentNodes.addAll( Utils.asList( c, NodeRef.class ) );
+//        }
+//        for ( NodeRef nodeRef : dependentNodes ) {
+//            nodeRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
+//            if ( nodeRef == null ) continue;
+//            EmsScriptNode oNode = new EmsScriptNode( nodeRef, services );
+//            if ( !oNode.exists() ) continue;
+//            Date modified = oNode.getLastModified( dateTime );
+//            if ( modified.after( lastModifiedDate ) ) {
+//                lastModifiedDate = modified;
+//            }
+//        }
         return lastModifiedDate;
     }
 
@@ -1165,6 +1214,10 @@ public class EmsScriptNode extends ScriptNode implements
      */
     @Override
     public Map< String, Object > getProperties() {
+        
+        // Taking this out for now b/c of performance hit:
+        //checkNodeRefVersion(null);
+
         if ( useFoundationalApi ) {
             return Utils.toMap( services.getNodeService()
                                         .getProperties( nodeRef ),
@@ -1434,7 +1487,7 @@ public class EmsScriptNode extends ScriptNode implements
         elementJson.put( "creator", node.getProperty( "cm:modifier" ) );
 //        elementJson.put( "modified",
 //                         TimeUtils.toTimestamp( getLastModified( (Date)node.getProperty( "cm:modified" ) ) ) );
-        elementJson.put( "modified",
+        elementJson.put( Acm.JSON_LAST_MODIFIED,
                 TimeUtils.toTimestamp( getLastModified( dateTime) ) );
 
         putInJson( elementJson, Acm.JSON_NAME,
