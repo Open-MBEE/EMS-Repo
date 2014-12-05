@@ -229,6 +229,27 @@ resourceTypes:
         uriParameters:
           elementId:
             description: Sysml ID for the element under consideration
+    /configurations:
+      #type: collection
+      get:
+      post:
+      /{configurationId}:
+        #type: collection
+        delete:
+        get:
+        uriParameters:
+          configurationId:
+            description: ID for the configuration under consideration
+        /products:
+          description: Get products for the specified configuration
+          #type: collection
+          post:
+          get:
+        /snapshots:
+          description: Get snapshots for the specified configuration
+          #type: collection
+          post:
+          get:
     /sites:
       type: readCollection
       get:
@@ -240,27 +261,27 @@ resourceTypes:
         uriParameters:
           siteId:
             description: Alfresco site identifier for the project under consideration
-        /configurations:
-          #type: collection
-          get:
-          post:
-          /{configurationId}:
-            #type: collection
-            delete:
-            get:
-            uriParameters:
-              configurationId:
-                description: ID for the configuration under consideration
-            /products:
-              description: Get products for the specified configuration
-              #type: collection
-              post:
-              get:
-            /snapshots:
-              description: Get snapshots for the specified configuration
-              #type: collection
-              post:
-              get:
+#        /configurations:
+#          #type: collection
+#          get:
+#          post:
+#          /{configurationId}:
+#            #type: collection
+#            delete:
+#            get:
+#            uriParameters:
+#              configurationId:
+#                description: ID for the configuration under consideration
+#            /products:
+#              description: Get products for the specified configuration
+#              #type: collection
+#              post:
+#              get:
+#            /snapshots:
+#              description: Get snapshots for the specified configuration
+#              #type: collection
+#              post:
+#              get:
         /projects:
           post: 
           #type: readCollection

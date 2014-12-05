@@ -1513,11 +1513,16 @@ public class ModelPost extends AbstractJavaWebScript {
         // find node if exists, otherwise create
         EmsScriptNode nodeToUpdate = findScriptNodeById( id, workspace, null, true );
         String existingNodeType = null;
+        String existingNodeName = null;
         if ( nodeToUpdate != null ) {
             nodeToUpdate.setResponse( getResponse() );
             nodeToUpdate.setStatus( getResponseStatus() );
             existingNodeType = nodeToUpdate.getTypeName();
-            if ( nodeToUpdate.isDeleted() ) {
+            existingNodeName = nodeToUpdate.getSysmlName();
+
+            // Resurrect if found node is deleted and is in this exact workspace.
+            if ( nodeToUpdate.isDeleted() && 
+                 NodeUtil.workspacesEqual( nodeToUpdate.getWorkspace(), workspace ) ) {
                 nodeToUpdate.removeAspect( "ems:Deleted" );
                 modStatus.setState( ModStatus.State.ADDED );
             }
@@ -1577,6 +1582,27 @@ public class ModelPost extends AbstractJavaWebScript {
             	log(LogLevel.ERROR,"Type was not supplied and no existing node to query for the type",
             		HttpServletResponse.SC_BAD_REQUEST);
             	return null;
+        }
+        
+        // Error if posting a element with the same sysml name, type, and parent as another:
+        String sysmlName = elementJson.has( Acm.JSON_NAME ) ? elementJson.getString( Acm.JSON_NAME ) :
+                                                              existingNodeName;
+        if (!Utils.isNullOrEmpty( sysmlName )) {
+            ArrayList<EmsScriptNode> nodeArray = findScriptNodesBySysmlName(sysmlName, workspace, null, false);
+            
+            if (!Utils.isNullOrEmpty( nodeArray )) {
+                for (EmsScriptNode n : nodeArray) {
+                    if ( (id != null && !id.equals( n.getSysmlId() )) &&
+                         (jsonType != null && jsonType.equals( n.getTypeName() )) &&
+                         (parent != null && parent.equals( n.getParent() )) ) {
+                        log(LogLevel.ERROR,"Found another element with the same sysml name: "
+                                           +n.getSysmlName()+" type: "+n.getTypeName()
+                                           +" parent: "+n.getParent()+" as the element trying to be posted",
+                            HttpServletResponse.SC_BAD_REQUEST);
+                        return null;
+                    }
+                }
+            }
         }
 
         type = NodeUtil.getContentModelTypeName( acmSysmlType, services );
@@ -1738,8 +1764,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                             WorkspaceNode workspace) {
         // site packages are only for major site, nothing to do with workspaces
         String siteName = "site_" + pkgSiteNode.getSysmlId();
-        
-        EmsScriptNode siteNode = null;
+        EmsScriptNode siteNode = getSiteNode( siteName, workspace, null, false );
         
         SiteInfo siteInfo = services.getSiteService().getSite( siteName );
         if ( siteInfo == null ) {
@@ -2397,38 +2422,31 @@ public class ModelPost extends AbstractJavaWebScript {
     protected void saveAndStartAction( WebScriptRequest req,
                                        WorkspaceNode workspace,
                                        Status status ) throws Exception {
-        //String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
-        //SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-        SiteInfo sInfo = getSiteInfo(req);
-        EmsScriptNode siteNode = getSiteNodeFromRequest( req );
-        if ( sInfo == null ) {
-            log(LogLevel.ERROR, "No site to start model load!", HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        } else {
-            siteNode = new EmsScriptNode(sInfo.getNodeRef(), services, response);
-        }
-        String projectId = getProjectId( req );
 
-        String jobName = "Load Job " + projectId + ".json";
-        EmsScriptNode jobNode = ActionUtil.getOrCreateJob(siteNode, jobName, "ems:Job", status, response);
-
-        // write out the json
-        ActionUtil.saveStringToFile(jobNode, "application/json", services, ((JSONObject)req.parseContent()).toString(4));
-
-        projectNode = findScriptNodeById(projectId, workspace, null, false);
-        // kick off the action
-        ActionService actionService = services.getActionService();
-        Action loadAction = actionService.createAction(ModelLoadActionExecuter.NAME);
-        loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_ID, projectId);
-        if ( projectNode != null ) {
+        // Find the siteNode and projectNode:
+        getProjectNodeFromRequest(req, true);
+        
+        if (projectNode != null) {
+            String projectId = projectNode.getSysmlId();
+            
+            String jobName = "Load Job " + projectId + ".json";
+            EmsScriptNode jobNode = ActionUtil.getOrCreateJob(siteNode, jobName, "ems:Job", status, response);
+    
+            // write out the json
+            ActionUtil.saveStringToFile(jobNode, "application/json", services, ((JSONObject)req.parseContent()).toString(4));
+    
+            // kick off the action
+            ActionService actionService = services.getActionService();
+            Action loadAction = actionService.createAction(ModelLoadActionExecuter.NAME);
+            loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_ID, projectId);
             loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_NAME, (String)projectNode.getProperty(Acm.ACM_NAME));
+            loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_NODE, projectNode);
+    
+            String workspaceId = getWorkspaceId( req );
+            loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_WORKSPACE_ID, workspaceId);
+    
+            services.getActionService().executeAction(loadAction , jobNode.getNodeRef(), true, true);
         }
-        loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_PROJECT_NODE, projectNode);
-
-        String workspaceId = getWorkspaceId( req );
-        loadAction.setParameterValue(ModelLoadActionExecuter.PARAM_WORKSPACE_ID, workspaceId);
-
-        services.getActionService().executeAction(loadAction , jobNode.getNodeRef(), true, true);
     }
 
     @Override
@@ -2456,8 +2474,8 @@ public class ModelPost extends AbstractJavaWebScript {
         WorkspaceNode workspace = getWorkspace( req );
         String projectId = getProjectId(req);
         String siteName = getSiteName(req);
-        EmsScriptNode mySiteNode = getSiteNode( siteName, workspace, null );
-                
+        EmsScriptNode mySiteNode = getSiteNode( siteName, workspace, null, false );
+
         // If the site was not found and site was specified in URL, then return a 404.
         if (mySiteNode == null || !mySiteNode.exists()) {
             
@@ -2544,6 +2562,7 @@ public class ModelPost extends AbstractJavaWebScript {
             ProjectPost pp = new ProjectPost( repository, services );
             JSONObject json = new JSONObject();
             try {
+                json.put( Acm.JSON_NAME, projectId );
                 pp.updateOrCreateProject( json, workspace, projectId, siteName,
                                           createIfNonexistent, false );
                 projectNode = findScriptNodeById( projectId, workspace, null, false );

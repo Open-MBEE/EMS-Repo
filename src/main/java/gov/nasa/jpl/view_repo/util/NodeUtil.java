@@ -281,10 +281,27 @@ public class NodeUtil {
     }
     
     public static ArrayList< NodeRef >
+    findNodeRefsByType( String specifier, String prefix,
+                        boolean useSimpleCache,
+                        boolean ignoreWorkspace,
+                        WorkspaceNode workspace,
+                        Date dateTime,
+                        boolean justFirst, boolean exactMatch,
+                        ServiceRegistry services, boolean includeDeleted,
+                        String siteName) {
+        return findNodeRefsByType( specifier, prefix, useSimpleCache,
+                                   ignoreWorkspace, workspace, 
+                                   false, // onlyThisWorkspace
+                                   dateTime, justFirst, exactMatch, services,
+                                   includeDeleted, siteName );
+    }
+    public static ArrayList< NodeRef >
             findNodeRefsByType( String specifier, String prefix,
                                 boolean useSimpleCache,
                                 boolean ignoreWorkspace,
-                                WorkspaceNode workspace, Date dateTime,
+                                WorkspaceNode workspace,
+                                boolean onlyThisWorkspace,
+                                Date dateTime,
                                 boolean justFirst, boolean exactMatch,
                                 ServiceRegistry services, boolean includeDeleted,
                                 String siteName) {
@@ -372,17 +389,17 @@ public class NodeUtil {
                     }
                     try {
                         // Make sure it's in the right workspace.
-                        if ( !ignoreWorkspace && 
-                             ( ( workspace != null &&
-                                 !workspace.contains( esn ) ) ||
-                               ( workspace == null && 
-                                 ( esn != null && esn.getWorkspace() != null ) )
-                             ) ) {
-                            if ( Debug.isOn() && !Debug.isOn()) {
-                                System.out.println( "findNodeRefsByType(): wrong workspace "
-                                                    + workspace );
+                        if ( !ignoreWorkspace && esn != null ) {
+                            WorkspaceNode esnWs = esn.getWorkspace();
+                            if ( ( onlyThisWorkspace && !workspacesEqual( workspace, esnWs ) ) ||
+                                 ( workspace == null && esnWs != null ) ||
+                                 ( workspace != null && !workspace.contains( esn ) ) ) {
+                                if ( Debug.isOn() && !Debug.isOn()) {
+                                    System.out.println( "findNodeRefsByType(): wrong workspace "
+                                            + workspace );
+                                }
+                                continue;
                             }
-                            continue;
                         }
                     } catch( InvalidNodeRefException e ) {
                         if ( Debug.isOn() ) e.printStackTrace();
@@ -691,6 +708,75 @@ public class NodeUtil {
                                              ignoreWorkspace,
                                              workspace, dateTime, justFirst, true, 
                                              services, findDeleted); 
+        }
+        
+        return returnArray;
+    }
+    
+    /**
+     * Find a NodeReferences by sysml:name 
+     *
+     * @param name
+     * @param workspace
+     * @param dateTime
+     *            the time specifying which version of the NodeRef to find; null
+     *            defaults to the latest version
+     * @return Array of NodeRefs found or empty list
+     */
+    public static ArrayList<NodeRef> findNodeRefsBySysmlName(String name,
+                                          boolean ignoreWorkspace,
+                                          WorkspaceNode workspace,
+                                          Date dateTime, ServiceRegistry services, boolean findDeleted,
+                                          boolean justFirst) {
+        
+        ArrayList<NodeRef> returnArray = new ArrayList<NodeRef>();
+        boolean useSimpleCache = !ignoreWorkspace && !findDeleted && workspace == null && dateTime == null;
+        ArrayList< NodeRef > array = findNodeRefsByType(name, SearchType.NAME.prefix, 
+                                                        useSimpleCache,
+                                                        ignoreWorkspace,
+                                                        workspace, dateTime, justFirst, true, 
+                                                        services, findDeleted); 
+
+        if (!Utils.isNullOrEmpty(array)) {
+            for (NodeRef r : array) {
+                if ( r != null ) {
+                    returnArray.add(r);
+                }
+            }
+        }
+        
+        return returnArray;
+    }
+    
+    /**
+     * Find EmsScriptNodes by sysml:name 
+     *
+     * @param name
+     * @param workspace
+     * @param dateTime
+     *            the time specifying which version of the NodeRef to find; null
+     *            defaults to the latest version
+     * @return Array of EmsScriptNodes found or empty list
+     */
+    public static ArrayList<EmsScriptNode> findScriptNodesBySysmlName(String name,
+                                          boolean ignoreWorkspace,
+                                          WorkspaceNode workspace,
+                                          Date dateTime, ServiceRegistry services, boolean findDeleted,
+                                          boolean justFirst) {
+        
+        ArrayList<EmsScriptNode> returnArray = new ArrayList<EmsScriptNode>();
+        ArrayList<NodeRef> array = findNodeRefsBySysmlName(name,
+                                                           ignoreWorkspace,
+                                                           workspace,
+                                                           dateTime, services, findDeleted,
+                                                           justFirst);
+        
+        if (!Utils.isNullOrEmpty(array)) {
+            for (NodeRef r : array) {
+                if ( r != null ) {
+                    returnArray.add(new EmsScriptNode(r, services));
+                }
+            }
         }
         
         return returnArray;
@@ -1827,6 +1913,7 @@ public class NodeUtil {
      * @return
      */
     public static EmsScriptNode getOrCreatePath(EmsScriptNode parent, String path) {
+        if ( parent == null ) return null;
         String tokens[] = path.split( "/" );
         
         String childPath = null;

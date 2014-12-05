@@ -1,0 +1,12 @@
+{"workspaces": [{
+    "branched": "2014-10-23T15:45:54.542-0700",
+    "created": "2014-10-23T15:45:54.533-0700",
+    "creator": "admin",
+    "id": "a9aa16f9-86a2-437f-b166-4299f8107699",
+    "modified": "2014-10-23T15:45:54.533-0700",
+    "name": "wsA",
+    "parent": "master",
+    "qualifiedId": "master/a9aa16f9-86a2-437f-b166-4299f8107699",
+    "qualifiedName": "master/wsA"
+}]}
+200

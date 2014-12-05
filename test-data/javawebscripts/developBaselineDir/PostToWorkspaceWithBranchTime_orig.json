@@ -1,0 +1,24 @@
+{
+    "elements": [{
+        "creator": "admin",
+        "documentation": "y is y",
+        "editable": true,
+        "modified": "2014-12-02T17:23:53.386-0800",
+        "owner": "302",
+        "qualifiedId": "/123456/300/301/302/y",
+        "qualifiedName": "/JW_TEST/300/301/302/null",
+        "read": "2014-12-02T17:23:55.099-0800",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property",
+            "value": [{
+                "string": "the y value",
+                "type": "LiteralString"
+            }]
+        },
+        "sysmlid": "y"
+    }],
+    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
+}
+200

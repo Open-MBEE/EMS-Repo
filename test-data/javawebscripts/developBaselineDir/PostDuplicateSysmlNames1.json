@@ -1,0 +1,36 @@
+{
+
+    "elements": [{
+
+        "creator": "admin",
+
+        "editable": true,
+
+        "name": "testName",
+
+        "owner": "123456",
+
+        "qualifiedId": "/123456/testCmed416",
+
+        "qualifiedName": "/JW_TEST2/testName",
+
+        "specialization": {
+
+            "isDerived": false,
+
+            "isSlot": false,
+
+            "type": "Property"
+
+        },
+
+        "sysmlid": "testCmed416"
+
+    }],
+
+    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
+
+}
+
+200
+

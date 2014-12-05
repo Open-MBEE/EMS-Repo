@@ -1,0 +1,101 @@
+{
+  "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n",
+  "sequence": 0,
+  "workspace1": {
+    "elements": [
+      {
+        "creator": "admin",
+        "documentation": "",
+        "editable": true,
+        "id": "194762b6-7aed-4209-9ec8-aff2ac45aa6b",
+        "modified": "2014-10-23T15:44:20.012-0700",
+        "name": "6666_name",
+        "owner": "holding_bin_no_site_no_project",
+        "qualifiedId": "/holding_bin_no_site_no_project/6666",
+        "qualifiedName": "/holding_bin/6666_name",
+        "read": "2014-10-23T15:45:51.353-0700",
+        "specialization": {
+          "operand": [
+            {
+              "element": "300",
+              "type": "ElementValue"
+            },
+            {
+              "element": "302",
+              "type": "ElementValue"
+            }
+          ],
+          "type": "Expression"
+        },
+        "sysmlid": "6666",
+        "version": "1.1"
+      },
+      {
+        "creator": "admin",
+        "editable": true,
+        "id": "d85284f2-bc82-41f5-aac8-26edb7023353",
+        "modified": "2014-10-23T15:44:20.075-0700",
+        "owner": "6666",
+        "qualifiedId": "/holding_bin_no_site_no_project/6666/MMS_1414104260032_d38a398e-0846-4550-ad38-61a5c4c48b35",
+        "qualifiedName": "/holding_bin/6666_name/null",
+        "read": "2014-10-23T15:45:51.426-0700",
+        "specialization": {
+          "element": "300",
+          "type": "ElementValue"
+        },
+        "sysmlid": "MMS_1414104260032_d38a398e-0846-4550-ad38-61a5c4c48b35",
+        "version": "1.0"
+      },
+      {
+        "creator": "admin",
+        "editable": true,
+        "id": "07a26a63-85cc-4dd3-9a6e-b2bb0082ee4c",
+        "modified": "2014-10-23T15:44:20.276-0700",
+        "owner": "6666",
+        "qualifiedId": "/holding_bin_no_site_no_project/6666/MMS_1414104260262_aec49643-42b2-47c9-a3bd-2975957406ed",
+        "qualifiedName": "/holding_bin/6666_name/null",
+        "read": "2014-10-23T15:45:51.443-0700",
+        "specialization": {
+          "element": "302",
+          "type": "ElementValue"
+        },
+        "sysmlid": "MMS_1414104260262_aec49643-42b2-47c9-a3bd-2975957406ed",
+        "version": "1.0"
+      }
+    ],
+    "id": "master",
+    "name": "master",
+    "qualifiedId": "master",
+    "qualifiedName": "master",
+    "timestamp": "2014-10-23T15:45:51.343-0700"
+  },
+  "workspace2": {
+    "addedElements": [],
+    "conflictedElements": [],
+    "deletedElements": [
+      {
+        "creator": "admin",
+        "modified": "2014-10-23T15:44:20.012-0700",
+        "sysmlid": "6666"
+      },
+      {
+        "creator": "admin",
+        "modified": "2014-10-23T15:44:20.075-0700",
+        "sysmlid": "MMS_1414104260032_d38a398e-0846-4550-ad38-61a5c4c48b35"
+      },
+      {
+        "creator": "admin",
+        "modified": "2014-10-23T15:44:20.276-0700",
+        "sysmlid": "MMS_1414104260262_aec49643-42b2-47c9-a3bd-2975957406ed"
+      }
+    ],
+    "id": "master",
+    "movedElements": [],
+    "name": "master",
+    "qualifiedId": "master",
+    "qualifiedName": "master",
+    "timestamp": "2014-10-23T15:45:51.353-0700",
+    "updatedElements": []
+  }
+}
+200

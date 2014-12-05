@@ -33,6 +33,7 @@ BASE_URL_WS = BASE_URL_WS_NOBS+"/"
 BASE_URL_JW = SERVICE_URL+"javawebscripts/"
 
 failed_tests = 0
+errs = []
 passed_tests = 0
 result_dir = ""
 baseline_dir = ""
@@ -267,10 +268,12 @@ def print_pass(msg):
     passed_tests += 1
     print "\nPASS: "+str(msg)
 
-def print_error(msg):
+def print_error(msg, outpt):
     global failed_tests
     failed_tests += 1
+    errs.append(msg)
     print "\nFAIL: "+str(msg)
+    print str(outpt)
     
 def mbee_util_jar_path():
     path = "../../../../.m2/repository/gov/nasa/jpl/mbee/util/mbee_util/"
@@ -301,14 +304,14 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
     global filtered_json
     global gv1, gv2, gv3, gv4
 
-    result_json = "%s/test%d.json"%(result_dir,test_num)
-    result_orig_json = "%s/test%d_orig.json"%(result_dir,test_num)
-    baseline_json = "%s/test%d.json"%(baseline_dir,test_num)
-    baseline_orig_json = "%s/test%d_orig.json"%(baseline_dir,test_num)
-#     result_json = "%s/test%d.json"%(result_dir,test_name)
-#     result_orig_json = "%s/test%d_orig.json"%(result_dir,test_name)
-#     baseline_json = "%s/test%d.json"%(baseline_dir,test_name)
-#     baseline_orig_json = "%s/test%d_orig.json"%(baseline_dir,test_name)
+#     result_json = "%s/test%d.json"%(result_dir,test_num)
+#     result_orig_json = "%s/test%d_orig.json"%(result_dir,test_num)
+#     baseline_json = "%s/test%d.json"%(baseline_dir,test_num)
+#     baseline_orig_json = "%s/test%d_orig.json"%(baseline_dir,test_num)
+    result_json = "%s/%s.json"%(result_dir,test_name)
+    result_orig_json = "%s/%s_orig.json"%(result_dir,test_name)
+    baseline_json = "%s/%s.json"%(baseline_dir,test_name)
+    baseline_orig_json = "%s/%s_orig.json"%(baseline_dir,test_name)
 
     thick_divider()
     if create_baselines:
@@ -392,10 +395,9 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
             (status_diff,output_diff) = commands.getstatusoutput("%s %s %s"%(diff_cmd,baseline_json,result_json))
 
             if output_diff:
-                print_error("Test number %s (%s) failed!  Diff returned bad status or diffs found in the filtered .json files (%s,%s), status: %s, output: '%s'"%(test_num,test_name,baseline_json,result_json,status_diff, output_diff))
+                print_error("Test number %s (%s) failed!"%(test_num,test_name), "  Diff returned bad status or diffs found in the filtered .json files (%s,%s), status: %s, output: \n'%s'"%(baseline_json,result_json,status_diff,output_diff))
             else:
                 print_pass("Test number %s (%s) passed!  No differences in the filtered .json files (%s,%s)"%(test_num,test_name,baseline_json,result_json))
-
     else:
         print_error("Curl command return a bad status and output doesnt start with json: %s, output: '%s'"%(status,output))
 
@@ -812,7 +814,21 @@ create_curl_cmd(type="POST",base_url=BASE_URL_JW,
                 post_type="elements?fix=true"),
 True,
 common_filters+['"specification"'],
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop"]
+],
+        
+# Note: this is same as 25 but calls different json for second run in order to avoid resetting variables
+[
+50,
+"SolveConstraint",
+"Post expressions with a constraint and solves for the constraint.",
+create_curl_cmd(type="POST",base_url=BASE_URL_JW,
+                data="expressionElementsFix.json",
+                branch="sites/europa/projects/123456/",
+                post_type="elements?fix=true"),
+True,
+common_filters+['"specification"'],
+["develop2"]
 ],
 
 [
@@ -959,7 +975,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="",branch="AA?sourceWorkspace=master"),
 True,
 common_filters + ['"parent"','"id"','"qualifiedId"'],
-["develop", "develop2"]
+["develop"]
 ],
 
 [
@@ -970,7 +986,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="",branch="BB?sourceWorkspace=AA"),
 True,
 common_filters + ['"parent"','"id"','"qualifiedId"'],
-["develop", "develop2"]
+["develop"]
 ],
 
 [
@@ -981,7 +997,7 @@ create_curl_cmd(type="DELETE",base_url=BASE_URL_WS,
                 post_type="",branch="AA"),
 True,
 common_filters + ['"parent"','"id"','"qualifiedId"'],
-["develop", "develop2"]
+["develop"]
 ],
 
 [
@@ -992,7 +1008,7 @@ create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,
                 post_type="", branch=""),
 True,
 common_filters + ['"parent"','"id"','"qualifiedId"','"branched"'],
-["develop", "develop2"]
+["develop"]
 ],
 
 [
@@ -1003,7 +1019,7 @@ create_curl_cmd(type="GET",base_url=BASE_URL_WS_NOBS,
                 post_type="", branch="?deleted"),
 True,
 common_filters + ['"parent"','"id"','"qualifiedId"'],
-["develop", "develop2"]
+["develop"]
 ],
 
 ## TODO: placeholder to put in post to get back workspace A (need the ID from 38)
@@ -1014,7 +1030,7 @@ common_filters + ['"parent"','"id"','"qualifiedId"'],
 'echo',
 False,
 None,
-["develop", "develop2"]
+["develop"]
 ],
 
 # SITE PACKAGES: ==========================    
@@ -1030,7 +1046,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="elements"),
 True, 
 common_filters,
-["test"]
+["test","workspaces","develop", "develop2"]
 ],
         
 [
@@ -1043,7 +1059,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="elements"),
 True, 
 common_filters+['"message"'],
-["test"]
+["test","workspaces","develop", "develop2"]
 ],
         
 [
@@ -1054,7 +1070,7 @@ create_curl_cmd(type="GET",data="products",base_url=BASE_URL_WS,
                 branch="master/sites/site_package/"),
 True, 
 common_filters,
-["test"]
+["test","workspaces","develop", "develop2"]
 ],
         
 # CONTENT MODEL UPDATES: ==========================    
@@ -1067,6 +1083,30 @@ create_curl_cmd(type="POST",data="contentModelUpdates.json",base_url=BASE_URL_WS
                 post_type="elements",branch="master/"),
 True, 
 common_filters,
+["test","workspaces","develop"]
+],
+        
+# CMED-416: ==========================    
+
+[
+47,
+"PostDuplicateSysmlNames1",
+"Post a element that will be used in the next test to generate a error",
+create_curl_cmd(type="POST",data="cmed416_1.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop"]
+],
+        
+[
+48,
+"PostDuplicateSysmlNames2",
+"Post a element with the same type, sysml name, and parent as the previous test to generate at error",
+create_curl_cmd(type="POST",data="cmed416_2.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+False, 
+None,
 ["test","workspaces","develop"]
 ],
         
@@ -1145,6 +1185,11 @@ if __name__ == '__main__':
     if not create_baselines:
         print "\nNUMBER OF PASSED TESTS: "+str(passed_tests)
         print "NUMBER OF FAILED TESTS: "+str(failed_tests)+"\n"
+        if failed_tests > 0:
+            print "FAILED TESTS:"
+            for item in errs[:]:
+                print item
+            print "\n"
     
     sys.exit(failed_tests)
     

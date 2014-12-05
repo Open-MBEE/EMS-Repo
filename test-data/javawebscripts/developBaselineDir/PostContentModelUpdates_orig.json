@@ -1,0 +1,252 @@
+{
+    "elements": [
+        {
+            "creator": "admin",
+            "documentation": "Connector source",
+            "editable": true,
+            "modified": "2014-12-02T17:25:19.055-0800",
+            "name": "connectorSource",
+            "owner": "123456",
+            "qualifiedId": "/123456/connectorSource",
+            "qualifiedName": "/JW_TEST2/connectorSource",
+            "read": "2014-12-02T17:25:22.850-0800",
+            "specialization": {
+                "isDerived": false,
+                "isSlot": false,
+                "lower": {
+                    "string": "lower!",
+                    "type": "LiteralString"
+                },
+                "type": "Property",
+                "upper": {
+                    "string": "lower!",
+                    "type": "LiteralString"
+                }
+            },
+            "sysmlid": "connectorSource"
+        },
+        {
+            "creator": "admin",
+            "documentation": "Connector target",
+            "editable": true,
+            "modified": "2014-12-02T17:25:16.191-0800",
+            "name": "connectorTarget",
+            "owner": "123456",
+            "qualifiedId": "/123456/connectorTarget",
+            "qualifiedName": "/JW_TEST2/connectorTarget",
+            "read": "2014-12-02T17:25:22.931-0800",
+            "specialization": {
+                "isDerived": false,
+                "isSlot": false,
+                "type": "Property"
+            },
+            "sysmlid": "connectorTarget"
+        },
+        {
+            "creator": "admin",
+            "documentation": "View updates",
+            "editable": true,
+            "modified": "2014-12-02T17:25:18.695-0800",
+            "name": "viewWithContents",
+            "owner": "123456",
+            "qualifiedId": "/123456/viewWithContents",
+            "qualifiedName": "/JW_TEST2/viewWithContents",
+            "read": "2014-12-02T17:25:22.975-0800",
+            "specialization": {
+                "contents": "viewContents",
+                "type": "View"
+            },
+            "sysmlid": "viewWithContents"
+        },
+        {
+            "creator": "admin",
+            "documentation": "target",
+            "editable": true,
+            "modified": "2014-12-02T17:25:22.782-0800",
+            "name": "targetId",
+            "owner": "123456",
+            "qualifiedId": "/123456/targetId",
+            "qualifiedName": "/JW_TEST2/targetId",
+            "read": "2014-12-02T17:25:23.029-0800",
+            "specialization": {
+                "isDerived": false,
+                "isSlot": false,
+                "type": "Property"
+            },
+            "sysmlid": "targetId"
+        },
+        {
+            "creator": "admin",
+            "documentation": "Characterizes",
+            "editable": true,
+            "modified": "2014-12-02T17:25:16.385-0800",
+            "name": "characterizes",
+            "owner": "123456",
+            "qualifiedId": "/123456/characterizes",
+            "qualifiedName": "/JW_TEST2/characterizes",
+            "read": "2014-12-02T17:25:23.069-0800",
+            "specialization": {
+                "source": "sourceId",
+                "target": "targetId",
+                "type": "Characterizes"
+            },
+            "sysmlid": "characterizes"
+        },
+        {
+            "creator": "admin",
+            "documentation": "Associations's owned end",
+            "editable": true,
+            "modified": "2014-12-02T17:25:17.089-0800",
+            "name": "AssocOwnedEnd",
+            "owner": "123456",
+            "qualifiedId": "/123456/AssocOwnedEnd",
+            "qualifiedName": "/JW_TEST2/AssocOwnedEnd",
+            "read": "2014-12-02T17:25:23.141-0800",
+            "specialization": {
+                "isDerived": false,
+                "isSlot": false,
+                "type": "Property"
+            },
+            "sysmlid": "AssocOwnedEnd"
+        },
+        {
+            "creator": "admin",
+            "documentation": "Connector updates",
+            "editable": true,
+            "modified": "2014-12-02T17:25:17.344-0800",
+            "name": "connector",
+            "owner": "123456",
+            "qualifiedId": "/123456/connector",
+            "qualifiedName": "/JW_TEST2/connector",
+            "read": "2014-12-02T17:25:23.206-0800",
+            "specialization": {
+                "connectorKind": "BINDING",
+                "connectorValue": {
+                    "string": "Ninja Attack!",
+                    "type": "LiteralString"
+                },
+                "sourceLower": {
+                    "string": "sourceLower!",
+                    "type": "LiteralString"
+                },
+                "sourcePath": ["connectorSource"],
+                "sourceUpper": {
+                    "string": "sourceUpper!",
+                    "type": "LiteralString"
+                },
+                "targetLower": {
+                    "string": "targetLower!",
+                    "type": "LiteralString"
+                },
+                "targetPath": ["connectorTarget"],
+                "targetUpper": {
+                    "string": "targetUpper!",
+                    "type": "LiteralString"
+                },
+                "type": "Connector"
+            },
+            "sysmlid": "connector"
+        },
+        {
+            "creator": "admin",
+            "documentation": "association",
+            "editable": true,
+            "modified": "2014-12-02T17:25:16.633-0800",
+            "name": "association",
+            "owner": "123456",
+            "qualifiedId": "/123456/association",
+            "qualifiedName": "/JW_TEST2/association",
+            "read": "2014-12-02T17:25:23.395-0800",
+            "specialization": {
+                "ownedEnd": ["AssocOwnedEnd"],
+                "source": "sourceId",
+                "sourceAggregation": "COMPOSITE",
+                "target": "targetId",
+                "targetAggregation": "SHARED",
+                "type": "Association"
+            },
+            "sysmlid": "association"
+        },
+        {
+            "creator": "admin",
+            "documentation": "Magic Draw Meta-Data",
+            "editable": true,
+            "modified": "2014-12-02T17:25:16.877-0800",
+            "name": "md",
+            "owner": "123456",
+            "qualifiedId": "/123456/md",
+            "qualifiedName": "/JW_TEST2/md",
+            "read": "2014-12-02T17:25:23.501-0800",
+            "specialization": {
+                "mdData": "A blob of meta-data",
+                "type": "MagicDrawData"
+            },
+            "sysmlid": "md"
+        },
+        {
+            "creator": "admin",
+            "documentation": "LiteralSet",
+            "editable": true,
+            "modified": "2014-12-02T17:25:16.020-0800",
+            "name": "literalSet",
+            "owner": "123456",
+            "qualifiedId": "/123456/literalSet",
+            "qualifiedName": "/JW_TEST2/literalSet",
+            "read": "2014-12-02T17:25:23.541-0800",
+            "specialization": {
+                "set": [
+                    {
+                        "string": "I",
+                        "type": "LiteralString"
+                    },
+                    {
+                        "string": "Love",
+                        "type": "LiteralString"
+                    },
+                    {
+                        "string": "Bears",
+                        "type": "LiteralString"
+                    }
+                ],
+                "setOperand": {
+                    "string": "Bears",
+                    "type": "LiteralString"
+                },
+                "type": "LiteralSet"
+            },
+            "sysmlid": "literalSet"
+        },
+        {
+            "creator": "admin",
+            "documentation": "source",
+            "editable": true,
+            "modified": "2014-12-02T17:25:22.694-0800",
+            "name": "sourceId",
+            "owner": "123456",
+            "qualifiedId": "/123456/sourceId",
+            "qualifiedName": "/JW_TEST2/sourceId",
+            "read": "2014-12-02T17:25:23.673-0800",
+            "specialization": {
+                "isDerived": false,
+                "isSlot": false,
+                "type": "Property"
+            },
+            "sysmlid": "sourceId"
+        },
+        {
+            "creator": "admin",
+            "documentation": "View content",
+            "editable": true,
+            "modified": "2014-12-02T17:25:18.859-0800",
+            "name": "viewContents",
+            "owner": "123456",
+            "qualifiedId": "/123456/viewContents",
+            "qualifiedName": "/JW_TEST2/viewContents",
+            "read": "2014-12-02T17:25:23.715-0800",
+            "specialization": {"type": "Expression"},
+            "sysmlid": "viewContents"
+        }
+    ],
+    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
+}
+200

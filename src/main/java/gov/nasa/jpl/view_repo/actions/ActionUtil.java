@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -140,23 +141,46 @@ public class ActionUtil {
         sr.getNodeService().setProperty(node.getNodeRef(), ContentModel.PROP_CONTENT, contentData);
     }
     
+    
+    public static boolean jobExists( EmsScriptNode contextFolder, String jobName ) {
+        EmsScriptNode jobPkgNode = contextFolder.childByNamePath("Jobs");
+        if (jobPkgNode == null) return false;
+        EmsScriptNode jobNode = jobPkgNode.childByNamePath(jobName);
+        if (jobNode == null) return false;
+        if ( !jobNode.exists() ) return false;
+        return true;
+    }
+    
     /**
      * Create a job inside a particular site
      * @return The created job node
      */
-    public static EmsScriptNode getOrCreateJob(EmsScriptNode siteNode, String jobName, String jobType, Status status, StringBuffer response) {
-        EmsScriptNode jobPkgNode = siteNode.childByNamePath("Jobs");
+    public static EmsScriptNode getOrCreateJob(EmsScriptNode contextFolder,
+                                               String jobName, String jobType,
+                                               Status status, StringBuffer response) {
+        EmsScriptNode jobPkgNode = contextFolder.childByNamePath("Jobs");
         if (jobPkgNode == null) {
-            jobPkgNode = siteNode.createFolder("Jobs", "cm:folder");
+            jobPkgNode = contextFolder.createFolder("Jobs", "cm:folder");
+            WorkspaceNode ws = contextFolder.getWorkspace();
+            if ( ws != null ) {
+                jobPkgNode.setWorkspace( ws );
+            }
         }
         
         EmsScriptNode jobNode = jobPkgNode.childByNamePath(jobName);
         if (jobNode == null) {
             jobNode = jobPkgNode.createNode(jobName, jobType);
             jobNode.createOrUpdateProperty("cm:isContentIndexed", false);
+        } else if ( jobNode.isDeleted() ) {
+            // resurrect
+            jobNode.removeAspect( "ems:Deleted" );
+        } else if ( !jobNode.exists() ) {
+            // TODO -- REVIEW -- Don't know if this works or if it's possible to get here.
+            jobNode = jobPkgNode.createNode(jobName, jobType);
+            jobNode.createOrUpdateProperty("cm:isContentIndexed", false);
         } else {
             String jobStatus = (String)jobNode.getProperty("ems:job_status");
-            if (jobStatus.equals("Active")) {
+            if (jobStatus != null && jobStatus.equals("Active")) {
                 status.setCode(HttpServletResponse.SC_CONFLICT, "Previous job is still active.");
                 return null;
             }

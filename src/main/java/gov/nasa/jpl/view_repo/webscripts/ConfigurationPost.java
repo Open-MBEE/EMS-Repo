@@ -123,7 +123,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
         WorkspaceNode workspace = getWorkspace( req );
 
-        EmsScriptNode siteNode = getSiteNodeFromRequest( req );
+        EmsScriptNode siteNode = getSiteNodeFromRequest( req, false );
 
 		JSONObject reqPostJson = (JSONObject) req.parseContent();
 		JSONObject postJson;
@@ -136,11 +136,27 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		        postJson = reqPostJson;
 		    }
 
-			if (postJson.has("nodeid") || postJson.has( "id" )) {
-				jsonObject = handleUpdate(postJson, siteNode, workspace, status);
-			} else {
-				jsonObject = handleCreate(postJson, siteNode, workspace, status);
-			}
+            String siteName = null;
+            EmsScriptNode context = null;
+
+            if ( siteNode == null ) {
+                context = getSitesFolder( workspace );
+            } else {
+                context = siteNode;
+                siteName = siteNode.getName();
+            }
+            if ( context == null ) {
+                log( LogLevel.ERROR,
+                     "Couldn't find a place to create the configuration: "
+                             + postJson.getString( "name" ),
+                     HttpServletResponse.SC_BAD_REQUEST );
+            } else {
+    			if (postJson.has("nodeid") || postJson.has( "id" )) {
+    				jsonObject = handleUpdate(postJson, siteName, context, workspace, status);
+    			} else {
+    				jsonObject = handleCreate(postJson, siteName, context, workspace, status);
+    			}
+            }
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "Could not parse JSON", HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();
@@ -165,36 +181,40 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		return productList;
 	}
 
-	private JSONObject handleCreate(JSONObject postJson, EmsScriptNode siteNode,
+	private JSONObject handleCreate(JSONObject postJson, String siteName,
+	                                EmsScriptNode context,
                                     WorkspaceNode workspace, Status status)
                                             throws JSONException {
-		String siteName = (String)siteNode.getProperty(Acm.CM_NAME);
 		EmsScriptNode jobNode = null;
 
 		if (postJson.has("name")) {
+		    String name = postJson.getString( "name" );
+		    if ( ActionUtil.jobExists( context, name) ) {
+		        return handleUpdate( postJson, siteName, context, workspace, status );
+		    }
+		    
 		    Date date = new Date();
-			jobNode = ActionUtil.getOrCreateJob(siteNode, postJson.getString("name"), "ems:ConfigurationSet", status, response);
+            jobNode = ActionUtil.getOrCreateJob( context, name, 
+                                                 "ems:ConfigurationSet",
+                                                 status, response );
 
 			if (jobNode != null) {
-	            ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
-	            configWs.updateConfiguration( jobNode, postJson, siteNode, workspace, date );
+                ConfigurationsWebscript configWs =
+                        new ConfigurationsWebscript( repository, services,
+                                                     response );
+                configWs.updateConfiguration( jobNode, postJson, context,
+                                              workspace, date );
 
 	            HashSet<String> productList = getProductList(postJson);
 	            
-	            // Only need to start the background action if there are products, otherwise
-	            // need to set the job status to succeeded as this is usually done by the 
-	            // the background job.  Note, that if jobNode is non-null, we know that there
-	            // was not a previous job for the configuration still in progress.
-	            if (productList.size() > 0) {
-	            	String timestamp = postJson.getString("timestamp");
-	            	Date datetime = TimeUtils.dateFromTimestamp(timestamp);
-	            	startAction(jobNode, siteName, productList, datetime);
+	            Date datetime = null;
+	            if ( postJson.has( "timestamp" ) ) {
+	                String timestamp = postJson.getString("timestamp");
+	                datetime = TimeUtils.dateFromTimestamp(timestamp);
 	            }
-	            else {
-	                jobNode.setProperty("ems:job_status", "Succeeded");
-	            }
+            	startAction(jobNode, siteName, productList, workspace, datetime);
 	            
-				return configWs.getConfigJson( jobNode, siteName, workspace, null );
+				return configWs.getConfigJson( jobNode, workspace, null );
 			} else {
 				log(LogLevel.ERROR, "Couldn't create configuration job: " + postJson.getString("name"), HttpServletResponse.SC_BAD_REQUEST);
 				return null;
@@ -206,10 +226,13 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	}
 
 
-	private JSONObject handleUpdate(JSONObject postJson, EmsScriptNode siteNode,
+	private JSONObject handleUpdate(JSONObject postJson,
+	                                String siteName,
+	                                EmsScriptNode context,
 	                                WorkspaceNode workspace, Status status)
 	                                        throws JSONException {
-		String[] idKeys = {"nodeid", "id"};
+
+        String[] idKeys = {"nodeid", "id"};
 	    String nodeId = null;
 
 		for (String key: idKeys) {
@@ -224,15 +247,25 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		    return null;
 		}
 
-		NodeRef configNodeRef = NodeUtil.getNodeRefFromNodeId( nodeId );
-		if (configNodeRef != null) {
-	        EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services);
+        NodeRef configNodeRef = NodeUtil.getNodeRefFromNodeId( nodeId );
+        EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services);
+
+        if ( workspace != null && workspace.exists() ) {
+            String cmName = configNode.getName();
+            NodeRef r = NodeUtil.findNodeRefById( cmName, false, workspace, null,
+                                                  getServices(), false );
+            EmsScriptNode node = new EmsScriptNode( r, getServices() );
+            if ( !workspace.equals( node.getWorkspace() ) ) {
+                System.out.println("****************** " + node );
+                configNode = workspace.replicateWithParentFolders( node );
+            }
+        }
+		
+		if ( NodeUtil.exists( configNodeRef ) ) {
 	        ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
-            configWs.updateConfiguration( configNode, postJson, siteNode,
+            configWs.updateConfiguration( configNode, postJson, context,
                                           workspace, null );
-            return configWs.getConfigJson( configNode,
-                                           (String)siteNode.getProperty( Acm.CM_NAME ),
-                                           workspace, null );
+            return configWs.getConfigJson( configNode, workspace, null );
 		} else {
 		    log(LogLevel.WARNING, "Could not find configuration with id " + nodeId, HttpServletResponse.SC_NOT_FOUND);
 		    return null;
@@ -245,15 +278,17 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	 * @param jobNode
 	 * @param siteName
 	 * @param productList
+	 * @param workspace 
 	 */
-	public void startAction(EmsScriptNode jobNode, String siteName, HashSet<String> productList, Date timestamp) {
-	    if (productList.size() > 0) {
-        		ActionService actionService = services.getActionService();
-        		Action configurationAction = actionService.createAction(ConfigurationGenerationActionExecuter.NAME);
-        		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_SITE_NAME, siteName);
-        		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_PRODUCT_LIST, productList);
-        		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_TIME_STAMP, timestamp);
-        		services.getActionService().executeAction(configurationAction, jobNode.getNodeRef(), true, true);
-	    }
+	public void startAction(EmsScriptNode jobNode, String siteName,
+	                        HashSet<String> productList, WorkspaceNode workspace,
+	                        Date timestamp) {
+		ActionService actionService = services.getActionService();
+		Action configurationAction = actionService.createAction(ConfigurationGenerationActionExecuter.NAME);
+		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_SITE_NAME, siteName);
+		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_PRODUCT_LIST, productList);
+		configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_TIME_STAMP, timestamp);
+        configurationAction.setParameterValue(ConfigurationGenerationActionExecuter.PARAM_WORKSPACE, workspace);
+		services.getActionService().executeAction(configurationAction, jobNode.getNodeRef(), true, true);
 	}
 }

@@ -1,0 +1,37 @@
+{"elements": [
+    {
+        "creator": "admin",
+        "documentation": "",
+        "editable": true,
+        "modified": "2014-10-23T15:46:23.389-0700",
+        "name": "radiation",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "qualifiedId": "123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_4_f3a0363_1394141831980_671275_28387",
+        "qualifiedName": "/radiation",
+        "read": "2014-10-23T15:46:27.236-0700",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        },
+        "sysmlid": "_17_0_2_4_f3a0363_1394141831980_671275_28387"
+    },
+    {
+        "creator": "admin",
+        "documentation": "",
+        "editable": true,
+        "modified": "2014-10-23T15:46:23.192-0700",
+        "name": "ionosphere",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "qualifiedId": "123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_4_f3a0363_1394141845089_115460_28389",
+        "qualifiedName": "/ionosphere",
+        "read": "2014-10-23T15:46:27.240-0700",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property"
+        },
+        "sysmlid": "_17_0_2_4_f3a0363_1394141845089_115460_28389"
+    }
+]}
+200
