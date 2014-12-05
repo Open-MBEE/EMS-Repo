@@ -1074,7 +1074,7 @@ public class EmsScriptNode extends ScriptNode implements
      * already checked for this node.  Replaces the nodeRef with the most recent
      * if needed.  This is needed b/c of a alfresco bug.
      */
-    private void checkNodeRefVersion(Date dateTime) {
+    public void checkNodeRefVersion(Date dateTime) {
         
         // Because of a alfresco bug, we must verify that we are getting the latest version
         // of the nodeRef if not specifying a dateTime:
@@ -1161,23 +1161,25 @@ public class EmsScriptNode extends ScriptNode implements
     public Date getLastModified( Date dateTime ) {
         Date lastModifiedDate = (Date)getProperty( Acm.ACM_LAST_MODIFIED );
 
-        // TODO FIXME should look at other properties besides VALUE:
-        Object value = getProperty( Acm.ACM_VALUE );
-        ArrayList< NodeRef > dependentNodes = new ArrayList< NodeRef >();
-        if ( value instanceof Collection ) {
-            Collection< ? > c = (Collection< ? >)value;
-            dependentNodes.addAll( Utils.asList( c, NodeRef.class ) );
-        }
-        for ( NodeRef nodeRef : dependentNodes ) {
-            nodeRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
-            if ( nodeRef == null ) continue;
-            EmsScriptNode oNode = new EmsScriptNode( nodeRef, services );
-            if ( !oNode.exists() ) continue;
-            Date modified = oNode.getLastModified( dateTime );
-            if ( modified.after( lastModifiedDate ) ) {
-                lastModifiedDate = modified;
-            }
-        }
+        // We no longer need to check this, as values specs are always embedded within
+        // the nodes that use them, ie Property, so the modified time will always be updated
+        // when modifying the value spec
+//        Object value = getProperty( Acm.ACM_VALUE );
+//        ArrayList< NodeRef > dependentNodes = new ArrayList< NodeRef >();
+//        if ( value instanceof Collection ) {
+//            Collection< ? > c = (Collection< ? >)value;
+//            dependentNodes.addAll( Utils.asList( c, NodeRef.class ) );
+//        }
+//        for ( NodeRef nodeRef : dependentNodes ) {
+//            nodeRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
+//            if ( nodeRef == null ) continue;
+//            EmsScriptNode oNode = new EmsScriptNode( nodeRef, services );
+//            if ( !oNode.exists() ) continue;
+//            Date modified = oNode.getLastModified( dateTime );
+//            if ( modified.after( lastModifiedDate ) ) {
+//                lastModifiedDate = modified;
+//            }
+//        }
         return lastModifiedDate;
     }
 
@@ -1482,7 +1484,7 @@ public class EmsScriptNode extends ScriptNode implements
         elementJson.put( "creator", node.getProperty( "cm:modifier" ) );
 //        elementJson.put( "modified",
 //                         TimeUtils.toTimestamp( getLastModified( (Date)node.getProperty( "cm:modified" ) ) ) );
-        elementJson.put( "modified",
+        elementJson.put( Acm.JSON_LAST_MODIFIED,
                 TimeUtils.toTimestamp( getLastModified( dateTime) ) );
 
         putInJson( elementJson, Acm.JSON_NAME,
