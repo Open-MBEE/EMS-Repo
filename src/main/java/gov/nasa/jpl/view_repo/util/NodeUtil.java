@@ -437,8 +437,8 @@ public class NodeUtil {
                 esn = new EmsScriptNode( nr, getServices() );
             }
             
-            // make sure it still exists if !findDeleted)
-            if ( !esn.scriptNodeExists() ) {
+            // make sure the node still exists
+            if ( esn != null && !esn.scriptNodeExists() ) {
                 continue;
             }
 //            if ( !esn.exists() ) {
@@ -491,26 +491,51 @@ public class NodeUtil {
                 if (siteName != null && !siteName.equals( esn.getSiteName() )) {
                     match = false;
                 }
-                if ( match ) {
+                if ( !match ) {
+                    if ( Debug.isOn() ) Debug.outln( "findNodeRefsByType(): not an exact match or incorrect site" );
+                } else {
+                    // Make sure the lowest/deepest element in the workspace
+                    // chain is first in the list. We do this by tracking the
+                    // lowest so far, and if it is upstream from current, then
+                    // the current becomes the lowest and put in front of the
+                    // list. This assumes that the elements have the same
+                    // sysmlId, but it is not checked. We fix for isDeleted()
+                    // later.
                     nodeRef = nr;
-                    if ( exists(workspace) && (lowest == null ||
-                            isWorkspaceAncestor(lowest, nodeRef, false)
-                            ) ) {
+                    if ( exists( workspace )
+                         && ( lowest == null ||
+                              isWorkspaceAncestor( lowest, nodeRef, true ) ) ) {
                         lowest = nodeRef;
                         nodeRefs.add( 0, nodeRef );
                     } else {
                         nodeRefs.add( nodeRef );
                     }
                     if ( Debug.isOn() ) Debug.outln( "findNodeRefsByType(): matched!" );
+                    // If only wanting the first matching element, we try to
+                    // break out of the loop when we find it. There are many
+                    // conditions under which we may not be able to do this.
                     if ( justFirst && 
+                         // This isn't necessary since we check earlier for
+                         // this. Just being robust by re-checking.
+                         scriptNodeExists( lowest ) &&
+                         // If we care about the workspace and it is a branch in
+                         // time, then it's possible that this (and other)
+                         // noderefs will change due to post processing, so we
+                         // don't break in fear of the unknown. We assume the
+                         // workspace will not change, so the lowest should
+                         // still be valid during post-processing.
                          (ignoreWorkspace || !exists( workspace ) || workspace.getCopyTime() == null ) &&
-                         ( scriptNodeExists( lowest ) && ( includeDeleted || !isDeleted( lowest ) ) ) &&
+                         // Since we clean up for deleted nodes later, we can't
+                         // break unless we don't care whether it's deleted, or
+                         // it's not deleted.
+                         ( includeDeleted || !isDeleted( lowest ) ) &&
+                         // We cannot break early if looking in a specific
+                         // workspace unless we found one that is only in the
+                         // target workspace.
                          ( !exists( workspace ) ||
                                    workspace.equals( getWorkspace( nodeRef ) ) ) ) {
                         break;
                     }
-                } else {
-                    if ( Debug.isOn() ) Debug.outln( "findNodeRefsByType(): not an exact match or incorrect site" );
                 }
 
             } catch ( Throwable e ) {
@@ -616,17 +641,22 @@ public class NodeUtil {
                                ServiceRegistry services,
                                boolean includeDeleted, String siteName ) {
         // Remove isDeleted elements unless includeDeleted.
-        // If !ignoreWorkspace, then any deleted 
         if ( includeDeleted || nodeRefs == null ) {
             return nodeRefs;
         }
-        // loop through each result
+
+        // initialize local variables
         ArrayList<NodeRef> correctedRefs = new ArrayList<NodeRef>();
         ArrayList<NodeRef> deletedRefs = null;
         boolean workspaceMatters = !ignoreWorkspace && workspace != null;
         if ( workspaceMatters ) {
             deletedRefs = new ArrayList<NodeRef>();
         }
+
+        // Remove from the results the nodes that are flagged as deleted since
+        // we are not including deleted nodes. If the workspace matters, then we
+        // need to remove nodes that are upstream from its deletion, so we keep
+        // track of which are deleted in this case.
         for ( NodeRef r : nodeRefs ) {
             if ( isDeleted( r ) ) {
                 if ( workspaceMatters ) {
@@ -637,16 +667,25 @@ public class NodeUtil {
             }
         }
         if ( workspaceMatters ) {
+            // Remove from the results the nodes that are upstream from their
+            // deletion.
             for ( NodeRef deleted : deletedRefs ) {
                 EmsScriptNode dnode = new EmsScriptNode( deleted, getServices() );
-                String dId = dnode.getSysmlId(); // assumes cm_name as backup to sysmlid
-                // remove all nodes with the same ID in parent workspaces
+                String dId = dnode.getSysmlId(); // assumes cm_name as backup to sysmlid for non-model elements
+                // Remove all nodes with the same ID in parent workspaces.
                 ArrayList<NodeRef> correctedRefsCopy = new ArrayList<NodeRef>(correctedRefs);
                 for ( NodeRef corrected : correctedRefsCopy ) {
                     EmsScriptNode cnode = new EmsScriptNode( corrected, services );
                     String cId = cnode.getSysmlId();
+                    // TODO -- REVIEW -- If the nodes are not model elements, and
+                    // the cm:name is used, then the ids may not be the same across
+                    // workspaces, in which case this fails.
                     if ( dId.equals( cId ) ) {
-                        if ( isWorkspaceSource( corrected, deleted, includeDeleted ) ) {
+                        // Remove the upstream deleted node. Pass true since it
+                        // doesn't hurt to remove nodes that should have already
+                        // been removed, and we want to make sure we don't trip
+                        // over a deleted intermediate source.
+                        if ( isWorkspaceSource( corrected, deleted, true ) ) {
                             correctedRefs.remove( corrected );
                         }
                     }
@@ -713,9 +752,11 @@ public class NodeUtil {
                                                           String siteName) {
         String wsId = getWorkspaceId( workspace, ignoreWorkspaces );
         Long dateLong = dateTime == null ? 0 : dateTime.getTime();
-        ArrayList< NodeRef > results = Utils.get( elementCache, specifier, prefix, wsId, onlyThisWorkspace, dateLong, justFirst,
-                   exactMatch, includeDeleted, "" + siteName );
-        return null;
+        ArrayList< NodeRef > results =
+                Utils.get( elementCache, specifier, prefix, wsId,
+                           onlyThisWorkspace, dateLong, justFirst, exactMatch,
+                           includeDeleted, "" + siteName );
+        return results;
     }
 
 
@@ -745,12 +786,13 @@ public class NodeUtil {
     }
 
     /**
-     * Determine whether the workspace of the source an ancestor of that of the
-     * changed node.
+     * Determine whether the workspace of the source is an ancestor of that of
+     * the changed node.
      * 
      * @param source
      * @param changed
-     * @param includeDeleted whether to consider deleted workspaces
+     * @param includeDeleted
+     *            whether to consider deleted workspaces
      * @return
      */
     public static boolean isWorkspaceAncestor( NodeRef source,
@@ -775,6 +817,8 @@ public class NodeUtil {
         EmsScriptNode directSource = changed.getWorkspaceSource();
 //        if ( !exists(directSource) ) return false;
         if ( directSource == null || !directSource.scriptNodeExists() ) return false;
+        // We pass true for tryCurrentVersions since they might be different
+        // versions, and we don't care which versions.
         if ( source.equals( directSource, true ) ) return true;
         return isWorkspaceSource( source, directSource, includeDeleted );
     }
