@@ -280,6 +280,13 @@
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
     </bean>
+
+    <bean id="webscript.gov.nasa.jpl.mms.diff.post"
+        class="gov.nasa.jpl.view_repo.webscripts.MmsWorkspaceDiffPost" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
     
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.get"
         class="gov.nasa.jpl.view_repo.webscripts.WorkspacesGet" parent="webscript"

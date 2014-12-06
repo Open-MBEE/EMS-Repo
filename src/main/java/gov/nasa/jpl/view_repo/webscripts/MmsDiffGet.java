@@ -17,6 +17,11 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+/**
+ * Workspace diffing service
+ * @author cinyoung
+ *
+ */
 public class MmsDiffGet extends AbstractJavaWebScript {
 
     protected WorkspaceNode ws1, ws2;
