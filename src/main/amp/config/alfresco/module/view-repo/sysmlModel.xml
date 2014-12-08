@@ -941,7 +941,6 @@
             <parent>sysml:Connector</parent>
         </aspect>
         <aspect name="sysml:Untyped">
-            <parent>sysml:Connector</parent>
         </aspect>
 	</aspects>
 </model>
