@@ -25,6 +25,7 @@ import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.util.TempFileProvider;
 import org.alfresco.util.exec.RuntimeExec;
 import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
+import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -328,6 +329,7 @@ public class DocBookWrapper {
 	public void saveHtmlZipToRepo(EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp) throws Exception{
 		try{
 			this.transformToHTML(workspace, timestamp);
+			tableToCSV();
 			String zipPath = this.zipHtml();
 			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip HTML files and resources!");
 			
@@ -389,6 +391,38 @@ public class DocBookWrapper {
 		this.xalanDirName = Paths.get(docgenDirName, "xalan-j_2_7_1");
 		this.htmlXslFileName = Paths.get(docgenDirName, "xsl/html", "chunk_custom.xsl");
 		this.docGenCssFileName = Paths.get(docgenDirName, "xsl", "docgen.css");
+	}
+	
+	private void tableToCSV() throws Exception{
+		File input = new File(this.dbFileName.toString());
+		try {
+			Document document = Jsoup.parse(input, "UTF-8");
+			if(document == null) throw new Exception("Failed to convert tables to CSV! Unabled to load file: " + this.dbFileName.toString());
+			int counter = 1;
+			String filename = "";
+			int cols = 0;
+			for(Element table:document.body().getElementsByTag("TABLE")){
+				cols = Integer.parseInt(table.getElementsByTag("tgroup").get(0).attr("cols"));
+				List<List<String>> csv = new ArrayList<List<String>>();
+				filename = "Table " + counter;
+				for(Element row: table.getElementsByTag("row")){
+					//TO DO - handle multi rows and columns spanned cell
+					List<String> csvRow = new ArrayList<String>();
+					for(Element entry:row.getElementsByTag("entry")){
+						csvRow.add(entry.text());
+					}
+					csv.add(csvRow);
+				}
+				writeCSV(csv, filename);
+				counter++;
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new Exception("IOException: unable to read/access file: " + this.dbFileName.toString());
+		}
+		
+		
 	}
 	
 	private void transformToHTML(WorkspaceNode workspace, Date timestamp) throws Exception{
@@ -455,6 +489,38 @@ public class DocBookWrapper {
 			catch(Exception ex){
 				throw new Exception("Failed to transform DocBook to HTML!", ex);
 			}
+		}
+	}
+	
+	private void writeCSV(List<List<String>> csv, String filename) throws Exception{
+		String QUOTE = "\"";
+	    String ESCAPED_QUOTE = "\"\"";
+	    char[] CHARACTERS_THAT_MUST_BE_QUOTED = { ',', '"', '\n' };
+	    
+		File outputFile = new File(Paths.get(this.dbDirName.toString(), filename+".csv").toString());
+		try {
+			FileWriter fw = new FileWriter(outputFile);
+			BufferedWriter writer = new BufferedWriter(fw);
+			for(List<String> row : csv){
+				for(int i=0; i < row.size(); i++){
+					String s = row.get(i);
+					if(s.contains(QUOTE)){
+						s = s.replace(QUOTE, ESCAPED_QUOTE);
+					}
+					if(StringUtils.indexOfAny(s, CHARACTERS_THAT_MUST_BE_QUOTED) > -1){
+						s = QUOTE + s + QUOTE;
+					}
+					writer.write(s);
+					if(i < row.size()-1) writer.write(",");
+				}
+				writer.write(System.lineSeparator());
+			}
+			writer.close();
+			fw.flush();
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new Exception("Failed to save table-CSV to file system!");
 		}
 	}
 	
