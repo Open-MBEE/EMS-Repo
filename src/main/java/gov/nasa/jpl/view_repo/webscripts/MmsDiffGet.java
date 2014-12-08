@@ -64,7 +64,11 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         
         Map<String, Object> results = new HashMap<String, Object>();
 
-        if (!validateRequest(req, status)) return results;
+        if (!validateRequest(req, status)) {
+            status.setCode(responseStatus.getCode());
+            results.put("res", response.toString());
+            return results;
+        }
 
         WorkspaceNode ws1, ws2;
         String workspace1 = req.getParameter( "workspace1" );

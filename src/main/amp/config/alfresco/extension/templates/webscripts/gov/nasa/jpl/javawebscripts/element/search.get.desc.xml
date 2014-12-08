@@ -4,7 +4,7 @@
   	Search all elements for keyword.
   </description>
   <url>/javawebscripts/element/search?keyword={keyword}</url>
-  <format default="json">any</format> 
+  <format default="json">argument</format> 
   <authentication>user</authentication> 
   <transaction allow="readonly">required</transaction>
   <family>EMS Java Webscripts</family>

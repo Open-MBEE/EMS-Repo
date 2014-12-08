@@ -13,3 +13,4 @@ debug*.out
 /src/main/amp/web/scripts/raml/
 activemq-data/
 /target
+/target

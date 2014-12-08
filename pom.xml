@@ -4,16 +4,17 @@
     <modelVersion>4.0.0</modelVersion>
     
     <groupId>gov.nasa.jpl</groupId>
-    <artifactId>mms-repo</artifactId>
-    <version>2.1.9-SNAPSHOT</version>
+    <artifactId>mms-repo-ent</artifactId>
+    <version>2.1.0-SNAPSHOT</version>
     <name>view-repo AMP project</name>
     <packaging>amp</packaging>
     <description>Manages the lifecycle of the view-repo AMP (Alfresco Module Package)</description>
-
+    
     <parent>
         <groupId>org.alfresco.maven</groupId>
         <artifactId>alfresco-sdk-parent</artifactId>
         <version>1.1.1</version>
+        <relativePath/>
     </parent>
 
   <distributionManagement>
@@ -299,24 +300,17 @@
             <id>alfresco-private-repository</id>
             <url>https://artifacts.alfresco.com/nexus/content/groups/private</url>
         </repository>
+
         <repository>
               <id>artifactory-snapshots</id>
               <name>snapshots</name>
               <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-snapshot-local</url>
         </repository>
+        
         <repository>
               <id>artifactory-releases</id>
               <name>releases</name>
               <url>http://europambee-build.jpl.nasa.gov:8082/artifactory/libs-release-local</url>
-        </repository>
-       
-        <repository>
-            <id>alfresco-public-snapshots</id>
-            <url>https://artifacts.alfresco.com/nexus/content/groups/public-snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
         </repository>
         
         <!-- soap ui plugin -->
@@ -328,7 +322,7 @@
 
 	<build>
 		<plugins>
-			<plugin>
+      		<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<version>1.8</version>
@@ -336,6 +330,15 @@
 					<configuration> <sources> <source>/CS/src/gov/nasa/jpl/ae</source> <source>/CS/src/thirdParty</source> 
 					</sources> </configuration> </execution> </executions> -->
 			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.1</version>
+                <configuration>
+                    <show>private</show>
+                    <nohelp>true</nohelp>
+                </configuration>
+            </plugin>
 			<plugin>
 				<groupId>org.zeroturnaround</groupId>
 				<artifactId>jrebel-maven-plugin</artifactId>
@@ -635,4 +638,17 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+    <reporting>
+     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.10.1</version>
+        <configuration>
+<!--           <stylesheetfile>${basedir}/src/main/javadoc/stylesheet.css</stylesheetfile>
+ -->          <show>public</show>
+        </configuration>
+      </plugin>
+     </plugins>
+    </reporting>
 </project>

@@ -21,7 +21,7 @@
             "properties": {
                 "sysmlid": {
                     "type": "string",
-                    "description": "Unique identifier of the element. Equivalent to MDID"
+                    "description": "Unique identifier of the element. Equivalent to MDID unless element is a slot. If a slot, id is constructed using the pattern [instanceSpecId]-slot-[definingFeatureId]."
                 },
                 "name": {
                     "type": "string",
@@ -84,7 +84,14 @@
                         { "$ref": "#/definitions/DirectedRelationship"},
                         { "$ref": "#/definitions/Conform"},
                         { "$ref": "#/definitions/Dependency"},
-                        { "$ref": "#/definitions/Expose"}
+                        { "$ref": "#/definitions/Expose"},
+                        { "$ref": "#/definitions/Connector"},
+                        { "$ref": "#/definitions/Association"},
+                        { "$ref": "#/definitions/Characterizes"},
+                        { "$ref": "#/definitions/Succession"},
+                        { "$ref": "#/definitions/Binding"},
+                        { "$ref": "#/definitions/MagicDrawData"}
+                        
                     ]
                 }
             }
@@ -133,7 +140,11 @@
         },
         "Package": {
             "properties": {
-                "type": { "enum": ["Package"] }
+                "type": { "enum": ["Package"] },
+                "isSite": {
+                    "type": "boolean",
+                    "description": "True if site characterization exists"
+                }
             }
         },
         "Product": {
@@ -166,6 +177,52 @@
         "Property": {
             "properties": {
                 "type": { "enum": ["Property"] },
+                "lower": {
+                    "type": "object",
+                    "description": "",
+                    "oneOf": [
+                        { "$ref": "#/definitions/ValueSpecification"},
+                        { "$ref": "#/definitions/Duration"},
+                        { "$ref": "#/definitions/DurationInterval"},
+                        { "$ref": "#/definitions/ElementValue"},
+                        { "$ref": "#/definitions/Expression"},
+                        { "$ref": "#/definitions/OpaqueExpression"},
+                        { "$ref": "#/definitions/InstanceValue"},
+                        { "$ref": "#/definitions/Interval"},
+                        { "$ref": "#/definitions/StringExpression"},
+                        { "$ref": "#/definitions/LiteralBoolean"},
+                        { "$ref": "#/definitions/LiteralNull"},
+                        { "$ref": "#/definitions/LiteralInteger"},
+                        { "$ref": "#/definitions/LiteralReal"},
+                        { "$ref": "#/definitions/LiteralString"},
+                        { "$ref": "#/definitions/LiteralUnlimitedNatural"},
+                        { "$ref": "#/definitions/TimeExpression"},
+                        { "$ref": "#/definitions/TimeInterval"}
+                    ]
+                },
+                "upper": {
+                    "type": "object",
+                    "description": "",
+                    "oneOf": [
+                        { "$ref": "#/definitions/ValueSpecification"},
+                        { "$ref": "#/definitions/Duration"},
+                        { "$ref": "#/definitions/DurationInterval"},
+                        { "$ref": "#/definitions/ElementValue"},
+                        { "$ref": "#/definitions/Expression"},
+                        { "$ref": "#/definitions/OpaqueExpression"},
+                        { "$ref": "#/definitions/InstanceValue"},
+                        { "$ref": "#/definitions/Interval"},
+                        { "$ref": "#/definitions/StringExpression"},
+                        { "$ref": "#/definitions/LiteralBoolean"},
+                        { "$ref": "#/definitions/LiteralNull"},
+                        { "$ref": "#/definitions/LiteralInteger"},
+                        { "$ref": "#/definitions/LiteralReal"},
+                        { "$ref": "#/definitions/LiteralString"},
+                        { "$ref": "#/definitions/LiteralUnlimitedNatural"},
+                        { "$ref": "#/definitions/TimeExpression"},
+                        { "$ref": "#/definitions/TimeInterval"}
+                    ]
+                },
                 "isDerived": {
                     "type": "boolean",
                     "description": "Indicates whether the property is a free variable (if true) or not (if false)"
@@ -258,6 +315,10 @@
                         "type": "string",
                         "description": "ID of views"
                     }
+                },
+                "contents": {
+                    "type": "string",
+                    "description": "Node ID"
                 }
             }
         },
@@ -349,6 +410,63 @@
                 "element": {
                     "type": "string",
                     "description": "ID of the element that stores this element value"
+                }
+            },
+            "allOf": [
+                {"$ref": "#/definitions/ValueSpecification"}
+            ]
+        },
+        "LiteralSet": {
+            "properties": {
+                "type": { "enum": ["LiteralSet"] },
+                "set": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "description": "The value specs",
+                        "oneOf": [
+                            { "$ref": "#/definitions/ValueSpecification"},
+                            { "$ref": "#/definitions/Duration"},
+                            { "$ref": "#/definitions/DurationInterval"},
+                            { "$ref": "#/definitions/ElementValue"},
+                            { "$ref": "#/definitions/Expression"},
+                            { "$ref": "#/definitions/OpaqueExpression"},
+                            { "$ref": "#/definitions/InstanceValue"},
+                            { "$ref": "#/definitions/Interval"},
+                            { "$ref": "#/definitions/StringExpression"},
+                            { "$ref": "#/definitions/LiteralBoolean"},
+                            { "$ref": "#/definitions/LiteralNull"},
+                            { "$ref": "#/definitions/LiteralInteger"},
+                            { "$ref": "#/definitions/LiteralReal"},
+                            { "$ref": "#/definitions/LiteralString"},
+                            { "$ref": "#/definitions/LiteralUnlimitedNatural"},
+                            { "$ref": "#/definitions/TimeExpression"},
+                            { "$ref": "#/definitions/TimeInterval"}
+                        ]
+                    }
+                },
+                "setOperand": {
+                    "type": "object",
+                    "description": "The value specs",
+                    "oneOf": [
+                        { "$ref": "#/definitions/ValueSpecification"},
+                        { "$ref": "#/definitions/Duration"},
+                        { "$ref": "#/definitions/DurationInterval"},
+                        { "$ref": "#/definitions/ElementValue"},
+                        { "$ref": "#/definitions/Expression"},
+                        { "$ref": "#/definitions/OpaqueExpression"},
+                        { "$ref": "#/definitions/InstanceValue"},
+                        { "$ref": "#/definitions/Interval"},
+                        { "$ref": "#/definitions/StringExpression"},
+                        { "$ref": "#/definitions/LiteralBoolean"},
+                        { "$ref": "#/definitions/LiteralNull"},
+                        { "$ref": "#/definitions/LiteralInteger"},
+                        { "$ref": "#/definitions/LiteralReal"},
+                        { "$ref": "#/definitions/LiteralString"},
+                        { "$ref": "#/definitions/LiteralUnlimitedNatural"},
+                        { "$ref": "#/definitions/TimeExpression"},
+                        { "$ref": "#/definitions/TimeInterval"}
+                    ]
                 }
             },
             "allOf": [
@@ -519,14 +637,192 @@
         "Connector": {
             "properties": {
                 "type": { "enum": ["Connector"] },
-                "roles": {
+                "targetLower": {
+                    "type": "object",
+                    "description": "",
+                    "oneOf": [
+                        { "$ref": "#/definitions/ValueSpecification"},
+                        { "$ref": "#/definitions/Duration"},
+                        { "$ref": "#/definitions/DurationInterval"},
+                        { "$ref": "#/definitions/ElementValue"},
+                        { "$ref": "#/definitions/Expression"},
+                        { "$ref": "#/definitions/OpaqueExpression"},
+                        { "$ref": "#/definitions/InstanceValue"},
+                        { "$ref": "#/definitions/Interval"},
+                        { "$ref": "#/definitions/StringExpression"},
+                        { "$ref": "#/definitions/LiteralBoolean"},
+                        { "$ref": "#/definitions/LiteralNull"},
+                        { "$ref": "#/definitions/LiteralInteger"},
+                        { "$ref": "#/definitions/LiteralReal"},
+                        { "$ref": "#/definitions/LiteralString"},
+                        { "$ref": "#/definitions/LiteralUnlimitedNatural"},
+                        { "$ref": "#/definitions/TimeExpression"},
+                        { "$ref": "#/definitions/TimeInterval"}
+                    ]
+                },
+                "targetUpper": {
+                    "type": "object",
+                    "description": "",
+                    "oneOf": [
+                        { "$ref": "#/definitions/ValueSpecification"},
+                        { "$ref": "#/definitions/Duration"},
+                        { "$ref": "#/definitions/DurationInterval"},
+                        { "$ref": "#/definitions/ElementValue"},
+                        { "$ref": "#/definitions/Expression"},
+                        { "$ref": "#/definitions/OpaqueExpression"},
+                        { "$ref": "#/definitions/InstanceValue"},
+                        { "$ref": "#/definitions/Interval"},
+                        { "$ref": "#/definitions/StringExpression"},
+                        { "$ref": "#/definitions/LiteralBoolean"},
+                        { "$ref": "#/definitions/LiteralNull"},
+                        { "$ref": "#/definitions/LiteralInteger"},
+                        { "$ref": "#/definitions/LiteralReal"},
+                        { "$ref": "#/definitions/LiteralString"},
+                        { "$ref": "#/definitions/LiteralUnlimitedNatural"},
+                        { "$ref": "#/definitions/TimeExpression"},
+                        { "$ref": "#/definitions/TimeInterval"}
+                    ]
+                },
+                "sourceLower": {
+                    "type": "object",
+                    "description": "",
+                    "oneOf": [
+                        { "$ref": "#/definitions/ValueSpecification"},
+                        { "$ref": "#/definitions/Duration"},
+                        { "$ref": "#/definitions/DurationInterval"},
+                        { "$ref": "#/definitions/ElementValue"},
+                        { "$ref": "#/definitions/Expression"},
+                        { "$ref": "#/definitions/OpaqueExpression"},
+                        { "$ref": "#/definitions/InstanceValue"},
+                        { "$ref": "#/definitions/Interval"},
+                        { "$ref": "#/definitions/StringExpression"},
+                        { "$ref": "#/definitions/LiteralBoolean"},
+                        { "$ref": "#/definitions/LiteralNull"},
+                        { "$ref": "#/definitions/LiteralInteger"},
+                        { "$ref": "#/definitions/LiteralReal"},
+                        { "$ref": "#/definitions/LiteralString"},
+                        { "$ref": "#/definitions/LiteralUnlimitedNatural"},
+                        { "$ref": "#/definitions/TimeExpression"},
+                        { "$ref": "#/definitions/TimeInterval"}
+                    ]
+                },
+                "sourceUpper": {
+                    "type": "object",
+                    "description": "",
+                    "oneOf": [
+                        { "$ref": "#/definitions/ValueSpecification"},
+                        { "$ref": "#/definitions/Duration"},
+                        { "$ref": "#/definitions/DurationInterval"},
+                        { "$ref": "#/definitions/ElementValue"},
+                        { "$ref": "#/definitions/Expression"},
+                        { "$ref": "#/definitions/OpaqueExpression"},
+                        { "$ref": "#/definitions/InstanceValue"},
+                        { "$ref": "#/definitions/Interval"},
+                        { "$ref": "#/definitions/StringExpression"},
+                        { "$ref": "#/definitions/LiteralBoolean"},
+                        { "$ref": "#/definitions/LiteralNull"},
+                        { "$ref": "#/definitions/LiteralInteger"},
+                        { "$ref": "#/definitions/LiteralReal"},
+                        { "$ref": "#/definitions/LiteralString"},
+                        { "$ref": "#/definitions/LiteralUnlimitedNatural"},
+                        { "$ref": "#/definitions/TimeExpression"},
+                        { "$ref": "#/definitions/TimeInterval"}
+                    ]
+                },
+                "sourcePath": {
                     "type": "array",
                     "items": {
                         "type": "string",
-                        "description": "ID of the role elements"
+                        "description": "IDs of the Nodes"
                     }
+                },
+                "targetPath": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "IDs of the Nodes"
+                    }
+                },
+                "connectorKind": {
+                    "type": "string",
+                    "description": "Can be BINDING, DIRECTED, NONE"
+                },
+                "connectorValue": {
+                    "type": "object",
+                    "description": "The value specs",
+                    "oneOf": [
+                        { "$ref": "#/definitions/ValueSpecification"},
+                        { "$ref": "#/definitions/Duration"},
+                        { "$ref": "#/definitions/DurationInterval"},
+                        { "$ref": "#/definitions/ElementValue"},
+                        { "$ref": "#/definitions/Expression"},
+                        { "$ref": "#/definitions/OpaqueExpression"},
+                        { "$ref": "#/definitions/InstanceValue"},
+                        { "$ref": "#/definitions/Interval"},
+                        { "$ref": "#/definitions/StringExpression"},
+                        { "$ref": "#/definitions/LiteralBoolean"},
+                        { "$ref": "#/definitions/LiteralNull"},
+                        { "$ref": "#/definitions/LiteralInteger"},
+                        { "$ref": "#/definitions/LiteralReal"},
+                        { "$ref": "#/definitions/LiteralString"},
+                        { "$ref": "#/definitions/LiteralUnlimitedNatural"},
+                        { "$ref": "#/definitions/TimeExpression"},
+                        { "$ref": "#/definitions/TimeInterval"}
+                    ]
+                }
+            },
+            "allOf": [
+                {"$ref": "#/definitions/DirectedRelationship"}
+            ]
+        },
+        "Association": {
+            "properties": {
+                "type": { "enum": ["Association"] },
+                "ownedEnd": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "description": "IDs of the Nodes"
+                    }
+                },
+                "sourceAggregation": {
+                    "type": "string",
+                    "description": "can be COMPOSITE, SHARED, NONE"
+                },
+                "targetAggregation": {
+                    "type": "string",
+                    "description": "can be COMPOSITE, SHARED, NONE"
+                }
+            },
+            "allOf": [
+                {"$ref": "#/definitions/DirectedRelationship"}
+            ]
+        },
+        "Characterizes": {
+            "properties": {
+                "type": { "enum": ["Characterizes"] },
+            },
+            "allOf": [
+                {"$ref": "#/definitions/DirectedRelationship"}
+            ]
+        },
+        "MagicDrawData": {
+            "properties": {
+                "type": { "enum": ["MagicDrawData"] },
+                "mdData": {
+                    "type": "string"
                 }
             }
+        },
+        "Succession": {
+            "allOf": [
+                {"$ref": "#/definitions/Connector"}
+            ]
+        },
+        "Binding": {
+            "allOf": [
+                {"$ref": "#/definitions/Connector"}
+            ]
         },
         
         "Paragraph": {

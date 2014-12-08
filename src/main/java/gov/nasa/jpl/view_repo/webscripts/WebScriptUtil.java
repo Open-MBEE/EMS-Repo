@@ -57,6 +57,19 @@ public class WebScriptUtil {
         // do nothing
     }
     
+    /**
+     * WARNING: this method does not handle workspaces with the same sites as the master correctly.
+     * Use findNodeRefsByType() or searchForElements() instead.
+     * 
+     * @param qnamePath
+     * @param luceneContext
+     * @param acmType
+     * @param workspace
+     * @param dateTime
+     * @param services
+     * @param response
+     * @return
+     */
     public static Set< EmsScriptNode >
             getAllNodesInPath( String qnamePath, String luceneContext,
                                String acmType, WorkspaceNode workspace,

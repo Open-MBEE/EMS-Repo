@@ -72,8 +72,6 @@ public class Acm {
     public static final String JSON_PACKAGE = "Package";
     public static final String JSON_PROPERTY = "Property";
     public static final String JSON_VIEWPOINT = "Viewpoint";
-//    public static final String JSON_PARAMETER = "Parameter";
-//    public static final String JSON_OPERATION = "Operation";
     public static final String JSON_IS_DERIVED = "isDerived";
     public static final String JSON_IS_SLOT = "isSlot";
     public static final String JSON_DOCUMENTATION = "documentation";
@@ -163,15 +161,44 @@ public class Acm {
     public static final String JSON_OPERATION_EXPRESSION = EXPRESSION; // Used to be "operationExpression"
     public static final String JSON_METHOD = "method";
     public static final String JSON_CONNECTOR = "Connector";
-    public static final String JSON_CONNECTOR_ROLE = "connectorRole";
+    public static final String JSON_CONNECTOR_ROLE = "roles";
     
     public static final String JSON_READ = "read";
+    
+    // Sysml 2.0 additions:
+    public static final String JSON_CONTENTS = "contents";
+    public static final String JSON_SOURCE_PATH = "sourcePath";
+    public static final String JSON_TARGET_PATH = "targetPath";
+    public static final String JSON_CONNECTOR_KIND = "connectorKind";
+    public static final String JSON_CONNECTOR_VALUE = "connectorValue";
+    public static final String JSON_ASSOCIATION = "Association";
+    public static final String JSON_OWNED_END = "ownedEnd";
+    public static final String JSON_SOURCE_AGGREGATION = "sourceAggregation";
+    public static final String JSON_TARGET_AGGREGATION = "targetAggregation";
+    public static final String JSON_CHARACTERIZES = "Characterizes";
+    public static final String JSON_SUCCESSION = "Succession";
+    public static final String JSON_BINDING = "Binding";
+    public static final String JSON_LITERAL_SET = "LiteralSet";
+    public static final String JSON_SET = "set";
+    public static final String JSON_SET_OPERAND = "setOperand";
+    public static final String JSON_MAGICDRAW_DATA = "MagicDrawData";
+    public static final String JSON_MD_DATA = "mdData";
+    public static final String JSON_LOWER = "lower";
+    public static final String JSON_UPPER = "upper";
+    public static final String JSON_TARGET_LOWER = "targetLower";
+    public static final String JSON_TARGET_UPPER = "targetUpper";
+    public static final String JSON_SOURCE_LOWER = "sourceLower";
+    public static final String JSON_SOURCE_UPPER = "sourceUpper";
 
+    // Site packages additions:
+    public static final String JSON_IS_SITE = "isSite";
+    
     // ACM types with the different name spaces
     public static final String SYSML = "sysml:";
     public static final String VIEW = "view2:";
     public static final String CM = "cm:";
-    
+    public static final String EMS = "ems:";
+
     public static final String ACM_COMMENT = SYSML + JSON_COMMENT;
     public static final String ACM_CONSTRAINT = SYSML + JSON_CONSTRAINT;
     public static final String ACM_CONSTRAINT_SPECIFICATION = SYSML + "constraintSpecification";
@@ -274,7 +301,7 @@ public class Acm {
     public static final String ACM_OPERATION_EXPRESSION = SYSML + "operationExpression";
     public static final String ACM_METHOD = SYSML + JSON_METHOD;
     public static final String ACM_CONNECTOR = SYSML + JSON_CONNECTOR;
-    public static final String ACM_CONNECTOR_ROLE = SYSML + JSON_CONNECTOR_ROLE;
+    public static final String ACM_CONNECTOR_ROLE = SYSML + "roles";
 
     // relationship property aspect names
     public static final String ACM_RELATIONSHIPS_AS_SOURCE = "sysml:relationshipsAsSource";
@@ -305,7 +332,37 @@ public class Acm {
 //    public static final String ACM_CM_NAME = CM + "name";
 //    public static final String ACM_CM_TITLE = CM + "title";
     
+    // Sysml 2.0 additions:
+    public static final String ACM_CONTENTS = SYSML + JSON_CONTENTS;
+    public static final String ACM_SOURCE_PATH = SYSML + JSON_SOURCE_PATH;
+    public static final String ACM_TARGET_PATH = SYSML + JSON_TARGET_PATH;
+    public static final String ACM_CONNECTOR_KIND = SYSML + JSON_CONNECTOR_KIND;
+    public static final String ACM_CONNECTOR_VALUE = SYSML + JSON_CONNECTOR_VALUE;
+    public static final String ACM_ASSOCIATION = SYSML + JSON_ASSOCIATION;
+    public static final String ACM_OWNED_END = SYSML + JSON_OWNED_END;
+    public static final String ACM_SOURCE_AGGREGATION = SYSML + JSON_SOURCE_AGGREGATION;
+    public static final String ACM_TARGET_AGGREGATION = SYSML + JSON_TARGET_AGGREGATION;
+    public static final String ACM_CHARACTERIZES = SYSML + JSON_CHARACTERIZES;
+    public static final String ACM_SUCCESSION = SYSML + JSON_SUCCESSION;
+    public static final String ACM_BINDING = SYSML + JSON_BINDING;
+    public static final String ACM_LITERAL_SET = SYSML + JSON_LITERAL_SET;
+    public static final String ACM_SET = SYSML + JSON_SET;
+    public static final String ACM_SET_OPERAND = SYSML + JSON_SET_OPERAND;
+    public static final String ACM_MAGICDRAW_DATA = EMS + JSON_MAGICDRAW_DATA;
+    public static final String ACM_MD_DATA = EMS + JSON_MD_DATA;
+    public static final String ACM_LOWER = SYSML + JSON_LOWER;
+    public static final String ACM_UPPER = SYSML + JSON_UPPER;
+    public static final String ACM_TARGET_LOWER = SYSML + JSON_TARGET_LOWER;
+    public static final String ACM_TARGET_UPPER = SYSML + JSON_TARGET_UPPER;
+    public static final String ACM_SOURCE_LOWER = SYSML + JSON_SOURCE_LOWER;
+    public static final String ACM_SOURCE_UPPER = SYSML + JSON_SOURCE_UPPER;
     
+    // Site packages additions:
+    public static final String ACM_SITE = "ems:Site";
+    public static final String ACM_SITE_PARENT = "ems:siteParent";
+    public static final String ACM_SITE_CHILDREN = "ems:siteChildren";
+    public static final String ACM_IS_SITE = SYSML + JSON_IS_SITE;
+
     /**
      *  JSON to Alfresco Content Model mapping
      */
@@ -377,9 +434,6 @@ public class Acm {
             add(JSON_CONTAINS);
             add(JSON_VIEW_2_VIEW);
             add(JSON_NO_SECTIONS);
-            add(JSON_VALUE);
-            add(JSON_OPERATION_PARAMETER);
-            add(JSON_OPERAND);
             add(JSON_CONNECTOR_ROLE);
 //            add(JSON_ANNOTATED_ELEMENTS);
         }
@@ -588,7 +642,7 @@ public class Acm {
         // out intentionally since they are not intended to be sysml types
         // like those above.
 
-        // The type written to element json is the first of these found for
+        // READ THIS: The type written to element json is the first of these found for
         // an element, so subclasses should precede parents, and more
         // likely matches should precede less likely ones.
         Acm.ACM_PRODUCT,
@@ -620,10 +674,16 @@ public class Acm {
         Acm.ACM_OPERATION,
         Acm.ACM_INSTANCE_SPECIFICATION,
         Acm.ACM_PARAMETER,
+        Acm.ACM_SUCCESSION,
+        Acm.ACM_BINDING,
         Acm.ACM_CONNECTOR,
         Acm.ACM_DEPENDENCY,
+        Acm.ACM_CHARACTERIZES,
+        Acm.ACM_LITERAL_SET,
+        Acm.ACM_ASSOCIATION,
         Acm.ACM_DIRECTED_RELATIONSHIP,
-        Acm.ACM_VALUE_SPECIFICATION
+        Acm.ACM_VALUE_SPECIFICATION,
+        Acm.ACM_MAGICDRAW_DATA
     };
     
     public static final String[] ACM_RELATIONSHIP_PROPERTY_ASPECTS = {
@@ -661,6 +721,56 @@ public class Acm {
             add("sysml:TimeExpression");
             add("sysml:TimeInterval");
             add("sysml:Operation");
+        }
+    };
+    
+    private static final Set<String> PROPERTY_VALUESPECS = new HashSet<String>() {
+        private static final long serialVersionUID = -3103946764628743702L;
+        {
+            add(ACM_VALUE);
+            add(ACM_LOWER);
+            add(ACM_UPPER);
+        }
+    };
+    
+    private static final Set<String> EXPRESSION_VALUESPECS = new HashSet<String>() {
+        private static final long serialVersionUID = -3646524138517088328L;
+        {
+            add(ACM_OPERAND);
+        }
+    };
+    
+    private static final Set<String> ENUMERATION_VALUESPECS = new HashSet<String>() {
+        private static final long serialVersionUID = -9213542282537528782L;
+        {
+            add(ACM_SET);
+            add(ACM_SET_OPERAND);
+        }
+    };
+    
+    private static final Set<String> CONNECTOR_VALUESPECS = new HashSet<String>() {
+        private static final long serialVersionUID = 1807385978686490394L;
+        {
+            add(ACM_CONNECTOR_VALUE);
+            add(ACM_TARGET_LOWER);
+            add(ACM_TARGET_UPPER);
+            add(ACM_SOURCE_LOWER);
+            add(ACM_SOURCE_UPPER);
+        }
+    };
+    
+    /**
+     * Maps types that have properties that point to ValueSpecs and a list of those
+     * properties.
+     */
+    public static final HashMap<String,Set<String>> TYPES_WITH_VALUESPEC = new HashMap<String,Set<String>>() {
+
+        private static final long serialVersionUID = 2157925925273966466L;
+        {
+            put(ACM_PROPERTY,PROPERTY_VALUESPECS);
+            put(ACM_EXPRESSION,EXPRESSION_VALUESPECS);
+            put(ACM_LITERAL_SET,ENUMERATION_VALUESPECS);
+            put(ACM_CONNECTOR,CONNECTOR_VALUESPECS);
         }
     };
 }

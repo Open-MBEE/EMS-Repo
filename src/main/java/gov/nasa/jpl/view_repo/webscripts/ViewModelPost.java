@@ -36,6 +36,7 @@ import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -225,6 +226,7 @@ public class ViewModelPost extends ModelPost {
                     }
                 }
             }
+
         }
     }
 }

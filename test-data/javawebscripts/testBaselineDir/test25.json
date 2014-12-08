@@ -1,0 +1,506 @@
+{
+
+    "elements": [
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedId": "123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/get_two_names_expression",
+
+            "qualifiedName": "/",
+
+            "specialization": {
+
+                "operand": [
+
+                    {
+
+                        "element": "get_names",
+
+                        "type": "ElementValue"
+
+                    },
+
+                    {
+
+                        "element": "_17_0_2_4_f3a0363_1394141845089_115460_28389",
+
+                        "type": "ElementValue"
+
+                    },
+
+                    {
+
+                        "element": "_17_0_2_4_f3a0363_1394141831980_671275_28387",
+
+                        "type": "ElementValue"
+
+                    }
+
+                ],
+
+                "type": "Expression"
+
+            },
+
+            "sysmlid": "get_two_names_expression"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "get_names_op",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedId": "123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/get_names",
+
+            "qualifiedName": "/get_names_op",
+
+            "specialization": {
+
+                "expression": "vp_expression_2",
+
+                "parameters": [
+
+                    "s1_param",
+
+                    "s2_param"
+
+                ],
+
+                "type": "Operation"
+
+            },
+
+            "sysmlid": "get_names"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedId": "123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/s2_param",
+
+            "qualifiedName": "/",
+
+            "specialization": {"type": "Parameter"},
+
+            "sysmlid": "s2_param"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedId": "123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/MMS_1414104382105_d6b032ad-d421-48f0-9f9e-7434d9ab067c",
+
+            "qualifiedName": "/",
+
+            "specialization": {
+
+                "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
+
+                "target": "_17_0_2_4_f3a0363_1394140326296_809805_27600",
+
+                "type": "Expose"
+
+            },
+
+            "sysmlid": "MMS_1414104382105_d6b032ad-d421-48f0-9f9e-7434d9ab067c"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedId": "123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/s1_param",
+
+            "qualifiedName": "/",
+
+            "specialization": {"type": "Parameter"},
+
+            "sysmlid": "s1_param"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "Name",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedId": "123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_name_arg_1",
+
+            "qualifiedName": "/Name",
+
+            "specialization": {
+
+                "operand": [
+
+                    {
+
+                        "element": "op_name_arg",
+
+                        "type": "ElementValue"
+
+                    },
+
+                    {
+
+                        "element": "s1_param",
+
+                        "type": "ElementValue"
+
+                    }
+
+                ],
+
+                "type": "Expression"
+
+            },
+
+            "sysmlid": "op_name_arg_1"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "Context",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedId": "123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148233838_91795_29332",
+
+            "qualifiedName": "/Context",
+
+            "specialization": {"type": "View"},
+
+            "sysmlid": "_17_0_2_3_e610336_1394148233838_91795_29332"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "radiation",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedId": "123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_4_f3a0363_1394141831980_671275_28387",
+
+            "qualifiedName": "/radiation",
+
+            "specialization": {
+
+                "isDerived": false,
+
+                "isSlot": false,
+
+                "type": "Property"
+
+            },
+
+            "sysmlid": "_17_0_2_4_f3a0363_1394141831980_671275_28387"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "ionosphere",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedId": "123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_4_f3a0363_1394141845089_115460_28389",
+
+            "qualifiedName": "/ionosphere",
+
+            "specialization": {
+
+                "isDerived": false,
+
+                "isSlot": false,
+
+                "type": "Property"
+
+            },
+
+            "sysmlid": "_17_0_2_4_f3a0363_1394141845089_115460_28389"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "get_two_names_op",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedId": "123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/get_two_names",
+
+            "qualifiedName": "/get_two_names_op",
+
+            "specialization": {
+
+                "expression": "get_two_names_expression",
+
+                "type": "Operation"
+
+            },
+
+            "sysmlid": "get_two_names"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "ContextViewpoint",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedId": "123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148443742_79128_29536",
+
+            "qualifiedName": "/ContextViewpoint",
+
+            "specialization": {"type": "Viewpoint"},
+
+            "sysmlid": "_17_0_2_3_e610336_1394148443742_79128_29536"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedId": "123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/vp_expression_2",
+
+            "qualifiedName": "/",
+
+            "specialization": {
+
+                "operand": [
+
+                    {
+
+                        "element": "op_list",
+
+                        "type": "ElementValue"
+
+                    },
+
+                    {
+
+                        "element": "op_name_arg_1",
+
+                        "type": "ElementValue"
+
+                    },
+
+                    {
+
+                        "element": "op_name_arg_2",
+
+                        "type": "ElementValue"
+
+                    }
+
+                ],
+
+                "type": "Expression"
+
+            },
+
+            "sysmlid": "vp_expression_2"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "ContextStuffs",
+
+            "owner": "_17_0_2_4_f3a0363_1394140452779_641658_27742",
+
+            "qualifiedId": "123456/_17_0_2_4_f3a0363_1394140452779_641658_27742/_17_0_2_4_f3a0363_1394140326296_809805_27600",
+
+            "qualifiedName": "/ContextStuffs",
+
+            "specialization": {"type": "Element"},
+
+            "sysmlid": "_17_0_2_4_f3a0363_1394140326296_809805_27600"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "Name",
+
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+
+            "qualifiedId": "123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_name_arg_2",
+
+            "qualifiedName": "/Name",
+
+            "specialization": {
+
+                "operand": [
+
+                    {
+
+                        "element": "op_name_arg",
+
+                        "type": "ElementValue"
+
+                    },
+
+                    {
+
+                        "element": "s2_param",
+
+                        "type": "ElementValue"
+
+                    }
+
+                ],
+
+                "type": "Expression"
+
+            },
+
+            "sysmlid": "op_name_arg_2"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "",
+
+            "owner": "_17_0_2_3_e610336_1394148233838_91795_29332",
+
+            "qualifiedId": "123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148233838_91795_29332/_17_0_2_3_e610336_1394148461465_93174_29599",
+
+            "qualifiedName": "/Context/",
+
+            "specialization": {
+
+                "source": "_17_0_2_3_e610336_1394148233838_91795_29332",
+
+                "target": "_17_0_2_3_e610336_1394148443742_79128_29536",
+
+                "type": "Conform"
+
+            },
+
+            "sysmlid": "_17_0_2_3_e610336_1394148461465_93174_29599"
+
+        }
+
+    ],
+
+    "message": "[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting _17_0_2_4_f3a0363_1394141845089_115460_28389 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting _17_0_2_3_e610336_1394148233838_91795_29332 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting _17_0_2_4_f3a0363_1394141831980_671275_28387 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting s1_param into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting vp_expression_2 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting MMS_1414104382105_d6b032ad-d421-48f0-9f9e-7434d9ab067c into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting get_two_names_expression into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting get_names into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting op_name_arg_1 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting op_name_arg_2 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting get_two_names into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting _17_0_2_3_e610336_1394148443742_79128_29536 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394140452779_641658_27742 putting _17_0_2_4_f3a0363_1394140326296_809805_27600 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting s2_param into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting _17_0_2_4_f3a0363_1394141845089_115460_28389 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting _17_0_2_3_e610336_1394148233838_91795_29332 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting _17_0_2_4_f3a0363_1394141831980_671275_28387 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting s1_param into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting vp_expression_2 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting MMS_1414104382105_d6b032ad-d421-48f0-9f9e-7434d9ab067c into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting get_two_names_expression into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting get_names into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting op_name_arg_1 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting op_name_arg_2 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting get_two_names into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting _17_0_2_3_e610336_1394148443742_79128_29536 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394140452779_641658_27742 putting _17_0_2_4_f3a0363_1394140326296_809805_27600 into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting s2_param into project: {type=null, id=123456, name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: createOrUpdateModel deltas not posted properly\n"
+
+}
+
+200
+

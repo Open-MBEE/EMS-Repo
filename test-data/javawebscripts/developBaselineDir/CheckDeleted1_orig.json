@@ -1,0 +1,40 @@
+{"workspaces": [
+    {
+        "id": "master",
+        "name": "master",
+        "qualifiedId": "master",
+        "qualifiedName": "master"
+    },
+    {
+        "created": "2014-11-19T13:45:50.332-0800",
+        "creator": "admin",
+        "id": "2d3fab0f-27f5-408a-a7c1-0a534dee6f78",
+        "modified": "2014-11-19T13:45:53.931-0800",
+        "name": "wsB",
+        "parent": "3ce832f2-2b61-4d2e-ab91-b9380d2811dc",
+        "qualifiedId": "master/3ce832f2-2b61-4d2e-ab91-b9380d2811dc/2d3fab0f-27f5-408a-a7c1-0a534dee6f78",
+        "qualifiedName": "master/wsA/wsB"
+    },
+    {
+        "branched": "2014-11-19T13:45:55.115-0800",
+        "created": "2014-11-19T13:45:57.726-0800",
+        "creator": "admin",
+        "id": "7a69521f-5812-4710-94e9-6fd5151472a9",
+        "modified": "2014-11-19T13:46:01.689-0800",
+        "name": "wsT",
+        "parent": "3ce832f2-2b61-4d2e-ab91-b9380d2811dc",
+        "qualifiedId": "master/3ce832f2-2b61-4d2e-ab91-b9380d2811dc/7a69521f-5812-4710-94e9-6fd5151472a9",
+        "qualifiedName": "master/wsA/wsT"
+    },
+    {
+        "created": "2014-11-19T13:45:49.484-0800",
+        "creator": "admin",
+        "id": "3ce832f2-2b61-4d2e-ab91-b9380d2811dc",
+        "modified": "2014-11-19T13:45:57.746-0800",
+        "name": "wsA",
+        "parent": "master",
+        "qualifiedId": "master/3ce832f2-2b61-4d2e-ab91-b9380d2811dc",
+        "qualifiedName": "master/wsA"
+    }
+]}
+200

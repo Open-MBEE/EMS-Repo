@@ -29,21 +29,18 @@
 package gov.nasa.jpl.view_repo.actions;
 
 import gov.nasa.jpl.mbee.util.Debug;
-import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
-import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
-
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
@@ -54,10 +51,9 @@ import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.springframework.extensions.webscripts.Status;
-import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
- * Action for loading the project model in the background asynchronously
+ * Action for loading a configuration in the background asynchronously
  * @author cinyoung
  */
 public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstractBase {
@@ -74,6 +70,8 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
     public static final String NAME = "configurationGeneration";
     public static final String PARAM_SITE_NAME = "siteName";
     public static final String PARAM_PRODUCT_LIST = "docList";
+    public static final String PARAM_TIME_STAMP = "timeStamp";
+    public static final String PARAM_WORKSPACE = "workspace";
 
     public void setRepository(Repository rep) {
         repository = rep;
@@ -87,20 +85,6 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
     protected void executeImpl(Action action, NodeRef nodeRef) {
         clearCache();
 
-        // Get timestamp if specified. This is for the products, not the
-        // snapshots or configuration.
-        Date dateTime = null;
-        WorkspaceNode workspace = null;
-        if ( action instanceof WebScriptRequest) {
-            WebScriptRequest req = (WebScriptRequest)action;
-            String timestamp = req.getParameter("timestamp");
-            workspace = AbstractJavaWebScript.getWorkspace( req, services,
-                                                            response,
-                                                            responseStatus, //false
-                                                            null );
-            dateTime = TimeUtils.dateFromTimestamp( timestamp );
-        }
-
         // Do not get an older version of the node based on the timestamp since
         // new snapshots should be associated with a new configuration. The
         // timestamp refers to the products, not the snapshots themselves.
@@ -112,32 +96,67 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         // clear out any existing associated snapshots
         jobNode.removeAssociations("ems:configuredSnapshots");
 
+        // Get timestamp if specified. This is for the products, not the
+        // snapshots or configuration.
+        Date dateTime = null;
+        dateTime = (Date)action.getParameterValue(PARAM_TIME_STAMP);
+        
+        WorkspaceNode workspace = null;
+//        if ( action instanceof WebScriptRequest) {
+//            response.append( "\n********* IS A REQ *********\n\n");
+//            WebScriptRequest req = (WebScriptRequest)action;
+//            String timestamp = req.getParameter("timestamp");
+//            workspace = AbstractJavaWebScript.getWorkspace( req, services,
+//                                                            response,
+//                                                            responseStatus, //false
+//                                                            null );
+//            if(dateTime == null) dateTime = TimeUtils.dateFromTimestamp( timestamp );
+//        } else {
+//            response.append("\n******** IS NOT A REQ *********\n\n");
+//        }
+//        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
+        workspace = (WorkspaceNode)action.getParameterValue(PARAM_WORKSPACE);
+
         @SuppressWarnings("unchecked")
 		HashSet<String> productList = (HashSet<String>) action.getParameterValue(PARAM_PRODUCT_LIST);
         
         String siteName = (String) action.getParameterValue(PARAM_SITE_NAME);
-        if (Debug.isOn()) System.out.println("ConfigurationGenerationActionExecuter started execution of " + siteName);
-        SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-        if (siteInfo == null) {
-        		if (Debug.isOn()) System.out.println("[ERROR]: could not find site: " + siteName);
-            return;
+        String fndSiteName = null;
+        // If siteName is null then we're searching for elements across all
+        // sites in the workspace.
+        if ( !Utils.isNullOrEmpty( siteName ) ) {
+            if (Debug.isOn()) System.out.println("ConfigurationGenerationActionExecuter started execution of " + siteName);
+            SiteInfo siteInfo = services.getSiteService().getSite(siteName);
+            if (siteInfo == null) {
+            		if (Debug.isOn()) System.out.println("[ERROR]: could not find site: " + siteName);
+                return;
+            }
+            NodeRef siteRef = siteInfo.getNodeRef();
+            
+            // If the version of the site ever changes, its products may also
+            // change, so get the products for the version of the site according to
+            // the specified date/time. Actually, this probably doesn't matter based
+            // on how the site node is used.
+           if ( dateTime != null ) {
+                NodeRef vRef = NodeUtil.getNodeRefAtTime( siteRef, dateTime );
+                if ( vRef != null ) siteRef = vRef;
+            }
+           EmsScriptNode site = new EmsScriptNode(siteRef, services, response);
+           fndSiteName = site.getSiteName();
+        }       
+       
+//        Set< EmsScriptNode > productSet =
+//                WebScriptUtil.getAllNodesInPath( site.getQnamePath(), "ASPECT",
+//                                                 Acm.ACM_PRODUCT, workspace,
+//                                                 dateTime, services, response );
+        Set<EmsScriptNode> productSet = new HashSet<EmsScriptNode>();
+        Map< String, EmsScriptNode > nodeList = NodeUtil.searchForElements(NodeUtil.SearchType.ASPECT.prefix, 
+                                                                          Acm.ACM_PRODUCT, false,
+                                                                          workspace, dateTime, services, response,
+                                                                          responseStatus, fndSiteName);
+        if (nodeList != null) {
+            productSet.addAll( nodeList.values() );
         }
-        NodeRef siteRef = siteInfo.getNodeRef();
-        
-        // If the version of the site ever changes, its products may also
-        // change, so get the products for the version of the site according to
-        // the specified date/time. Actually, this probably doesn't matter based
-        // on how the site node is used.
-       if ( dateTime != null ) {
-            NodeRef vRef = NodeUtil.getNodeRefAtTime( siteRef, dateTime );
-            if ( vRef != null ) siteRef = vRef;
-        }
-        EmsScriptNode site = new EmsScriptNode(siteRef, services, response);
-
-        Set< EmsScriptNode > productSet =
-                WebScriptUtil.getAllNodesInPath( site.getQnamePath(), "ASPECT",
-                                                 Acm.ACM_PRODUCT, workspace,
-                                                 dateTime, services, response );
         
         // create snapshots of all documents
         // TODO: perhaps roll these in their own transactions
@@ -145,13 +164,16 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         Set<EmsScriptNode> snapshots = new HashSet<EmsScriptNode>();
         for (EmsScriptNode product: productSet) {
     		// only create the filtered list of documents
-    		if (productList.isEmpty() || productList.contains(product.getProperty(Acm.ACM_ID))) {
+    		if (productList.isEmpty() || productList.contains(product.getSysmlId())) {
 	            SnapshotPost snapshotService = new SnapshotPost(repository, services);
 	            snapshotService.setRepositoryHelper(repository);
 	            snapshotService.setServices(services);
 	            snapshotService.setLogLevel(LogLevel.DEBUG);
 	            Status status = new Status();
-	            EmsScriptNode snapshot = snapshotService.createSnapshot(product, (String)product.getProperty(Acm.ACM_ID), workspace);
+                EmsScriptNode snapshot =
+                        snapshotService.createSnapshot( product,
+                                                        product.getSysmlId(),
+                                                        workspace, dateTime );
 	            if (snapshot == null || status.getCode() != HttpServletResponse.SC_OK) {
 	                jobStatus = "Failed";
 	                response.append("[ERROR]: could not make snapshot for " + product.getProperty(Acm.ACM_NAME));
@@ -183,7 +205,11 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         String contextUrl = "https://" + hostname + "/alfresco";
         
         // Send off notification email
-        String subject = "[EuropaEMS] Configuration " + siteName + " Generation " + jobStatus;
+        String subject =
+                "[EuropaEMS] Configuration generation in workspace "
+                        + WorkspaceNode.getWorkspaceName( workspace )
+                        + ( siteName == null ? "" : ", siteName " + siteName )
+                        + ": status = " + jobStatus;
         String msg = "Log URL: " + contextUrl + logNode.getUrl();
         // TODO: NOTE!!! The following needs to be commented out for local testing....
         ActionUtil.sendEmailToModifier(jobNode, msg, subject, services, response);

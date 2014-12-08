@@ -5,7 +5,7 @@
 	get workspace 
 	</description>
 	<url>/workspaces/{workspaceId}</url>
-	<format default="json">any</format>
+	<format default="json">argument</format>
 	<authentication>user</authentication>
 	<transaction allow="readonly">required</transaction>
 	<family>MMS REST API</family>
