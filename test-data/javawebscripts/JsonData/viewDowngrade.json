@@ -1,0 +1,5 @@
+{ "elements": [
+        {"sysmlid": "54321",
+        "specialization": {"type": "View"},
+        }
+]}
