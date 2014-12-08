@@ -387,8 +387,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     public static EmsScriptNode getSitesFolder( WorkspaceNode workspace ) {
         EmsScriptNode sitesFolder = null;
         // check and see if the Sites folder already exists
-        boolean useSimpleCache = workspace == null;
-        NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, useSimpleCache, false, 
+        NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, false, 
                                                            workspace, null, true, NodeUtil.getServices(), false );
         if ( sitesNodeRef != null ) {
             sitesFolder = new EmsScriptNode( sitesNodeRef, NodeUtil.getServices() );

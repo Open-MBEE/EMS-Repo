@@ -127,7 +127,7 @@ public class ArtifactGet extends AbstractJavaWebScript {
 	    	        	// Search for artifact file by checksum (this may return nodes in parent workspaces):
 	        			if (!Utils.isNullOrEmpty(cs)) {
 		    	        	ArrayList< NodeRef > refs = NodeUtil.findNodeRefsByType( "" + cs,
-																	          SearchType.CHECKSUM.prefix, false, false,
+																	          SearchType.CHECKSUM.prefix, false,
 																	          workspace,
 																	          TimeUtils.dateFromTimestamp( timestamp ), 
 																	          false, false,

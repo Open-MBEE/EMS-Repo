@@ -1619,7 +1619,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         // Error if could not determine the type and processing the non-nested node:
-        //	Note:  Must also have a specialization in case they are posting just a Element, whic
+        //	Note:  Must also have a specialization in case they are posting just a Element, which
         //		   doesnt need a specialization key
         if (acmSysmlType == null && !nestedNode && elementJson.has(Acm.JSON_SPECIALIZATION)) {
             	log(LogLevel.ERROR,"Type was not supplied and no existing node to query for the type",
@@ -1627,17 +1627,19 @@ public class ModelPost extends AbstractJavaWebScript {
             	return null;
         }
         
-        // Error if posting a element with the same sysml name, type, and parent as another:
+        // Error if posting a element with the same sysml name, type, and parent as another if the
+        // name is non-empty and its not a Untyped type:
         String sysmlName = elementJson.has( Acm.JSON_NAME ) ? elementJson.getString( Acm.JSON_NAME ) :
                                                               existingNodeName;
-        if (!Utils.isNullOrEmpty( sysmlName )) {
+        if (!Utils.isNullOrEmpty( sysmlName ) && jsonType != null && !jsonType.equals( Acm.JSON_UNTYPED )
+            && id != null && parent != null) {
             ArrayList<EmsScriptNode> nodeArray = findScriptNodesBySysmlName(sysmlName, workspace, null, false);
             
             if (!Utils.isNullOrEmpty( nodeArray )) {
                 for (EmsScriptNode n : nodeArray) {
-                    if ( (id != null && !id.equals( n.getSysmlId() )) &&
-                         (jsonType != null && jsonType.equals( n.getTypeName() )) &&
-                         (parent != null && parent.equals( n.getParent() )) ) {
+                    if ( !id.equals( n.getSysmlId() ) &&
+                         jsonType.equals( n.getTypeName() ) &&
+                         parent.equals( n.getParent() ) ) {
                         log(LogLevel.ERROR,"Found another element with the same sysml name: "
                                            +n.getSysmlName()+" type: "+n.getTypeName()
                                            +" parent: "+n.getParent()+" as the element trying to be posted",
