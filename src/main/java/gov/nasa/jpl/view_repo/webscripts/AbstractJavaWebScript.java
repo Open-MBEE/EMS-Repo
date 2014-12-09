@@ -44,9 +44,7 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -61,10 +59,10 @@ import org.alfresco.service.cmr.site.SiteVisibility;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mozilla.javascript.Scriptable;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
+
 
 /**
  * Base class for all EMS Java backed webscripts. Provides helper functions and
@@ -102,9 +100,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     protected StringBuffer response = new StringBuffer();
     protected Status responseStatus = new Status();
 
-    private JmsConnection jmsConnection = null;
-    private RestPostConnection restConnection = null;
-
     protected WorkspaceDiff wsDiff;
 
     protected void initMemberVariables(String siteName) {
@@ -130,10 +125,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     public AbstractJavaWebScript(Repository repositoryHelper, ServiceRegistry registry) {
         this.setRepositoryHelper(repositoryHelper);
         this.setServices(registry);
-
-        // FIXME: needs to be injected via spring
-        jmsConnection = new JmsConnection();
-        restConnection = new RestPostConnection();
     }
 
     public AbstractJavaWebScript() {
@@ -692,34 +683,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return gotSuffix;
     }
 
-
-    /**
-     * Send off the deltas to various endpoints
-     * @param deltas    JSONObject of the deltas to be published
-     * @return          true if publish completed
-     * @throws JSONException
-     */
-    protected boolean sendDeltas(JSONObject deltaJson, String workspaceId, String projectId) throws JSONException {
-        boolean jmsStatus = false;
-        boolean restStatus = false;
-
-        if (jmsConnection != null) {
-            jmsConnection.setWorkspace( workspaceId );
-            jmsConnection.setProjectId( projectId );
-            jmsStatus = jmsConnection.publish( deltaJson, workspaceId );
-        }
-        if (restConnection != null) {
-            try {
-                restStatus = restConnection.publish( deltaJson, "MMS" );
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-
-        return jmsStatus && restStatus ? true : false;
-    }
-
+    
     public void setWsDiff(WorkspaceNode workspace) {
         wsDiff = new WorkspaceDiff(workspace, workspace);
     }
@@ -731,14 +695,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return wsDiff;
     }
 
-    public void setJmsConnection(JmsConnection jmsConnection) {
-        this.jmsConnection = jmsConnection;
-    }
-
-    public void setRestConnection(RestPostConnection restConnection) {
-        this.restConnection = restConnection;
-    }
-    
     /**
      * Determines the project site for the passed site node.  Also, determines the
      * site package node if applicable.  
