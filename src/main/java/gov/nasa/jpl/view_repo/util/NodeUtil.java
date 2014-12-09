@@ -1333,14 +1333,15 @@ public class NodeUtil {
         if (siteInfo != null) {
             NodeRef siteRef = siteInfo.getNodeRef();
             if ( dateTime != null ) {
-                NodeRef vRef = getNodeRefAtTime( siteRef, dateTime );
-                if ( vRef != null ) siteRef = vRef;
+                siteRef = getNodeRefAtTime( siteRef, dateTime );
             }
-
-            EmsScriptNode siteNode = new EmsScriptNode(siteRef, services, response);
-            if ( siteNode != null
-                 && ( workspace == null || workspace.contains( siteNode ) ) ) {
-                return siteNode;
+            
+            if (siteRef != null) {
+                EmsScriptNode siteNode = new EmsScriptNode(siteRef, services, response);
+                if ( siteNode != null
+                     && ( workspace == null || workspace.contains( siteNode ) ) ) {
+                    return siteNode;
+                }
             }
         }
         return null;

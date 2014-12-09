@@ -181,7 +181,7 @@ public class WorkspaceDiff {
             if ( changes != null ) {
                 Pair< Object, Object > ownerChange = changes.get( "ems:owner" );
                 if ( ownerChange != null && ownerChange.first != null
-                     && ownerChange.first != null
+                     && ownerChange.second != null
                      && !ownerChange.first.equals( ownerChange.second ) ) {
                     movedElements.put( e.getKey(), e.getValue() );
                 }

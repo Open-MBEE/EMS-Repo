@@ -29,10 +29,13 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,8 +85,10 @@ public class SiteGet extends AbstractJavaWebScript {
             if (validateRequest(req, status)) {
                 
                 WorkspaceNode workspace = getWorkspace( req );
+                String timestamp = req.getParameter( "timestamp" );
+                Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
                 
-                JSONArray jsonArray = handleSite(workspace);
+                JSONArray jsonArray = handleSite(workspace, dateTime);
                 json = new JSONObject();
                 json.put("sites", jsonArray);
             }
@@ -111,47 +116,54 @@ public class SiteGet extends AbstractJavaWebScript {
      * info in it.
      * 
      * @param workspace  The workspace to get sites for
+     * @param dateTime The time to base the site retrieval, or null
      * @return json to return
      * @throws JSONException 
      */
-    private JSONArray handleSite(WorkspaceNode workspace) throws JSONException {
+    private JSONArray handleSite(WorkspaceNode workspace, Date dateTime) throws JSONException {
     	
     	JSONArray json = new JSONArray();      
         EmsScriptNode emsNode;
         String name;
         NodeRef parentRef;
-        
-        // TODO: get all the sites in this workspace along w/ parent workspaces, as this
-        //		 will not get the specific site folders created for a workspace
+        NodeRef siteRef;
+                
         List<SiteInfo> sites = services.getSiteService().listSites(null);
         
         // Create json array of info for each site in the workspace:
         //	Note: currently every workspace should contain every site created
         for (SiteInfo siteInfo : sites ) {
         	
-        	emsNode = new EmsScriptNode(siteInfo.getNodeRef(), services);
-        	name = emsNode.getName();
-        	parentRef = (NodeRef)emsNode.getProperty(Acm.ACM_SITE_PARENT);
-        	
-        	EmsScriptNode parentNode = null;
-        	String parentId = null;
-        	if (parentRef != null) {
-        	    parentNode = new EmsScriptNode(parentRef, services, response);
-        	    parentId = parentNode.getSysmlId();
-        	}
-        	
-        	// Note: workspace is null if its the master, and in that case we consider it to contain
-        	//		 all sites.
-        	if (!name.equals("no_site") && 
-        		(workspace == null || (workspace != null && workspace.contains(emsNode))) ) {
-        		
-        		JSONObject siteJson = new JSONObject();
-        		siteJson.put("sysmlid", name);
-        		siteJson.put("name", siteInfo.getTitle());
-        		siteJson.put("parent", parentId );
-        		    
-        		json.put(siteJson);
-        	}
+            siteRef = siteInfo.getNodeRef();
+            if ( dateTime != null ) {
+                siteRef = NodeUtil.getNodeRefAtTime( siteRef, dateTime );
+            }
+            
+            if (siteRef != null) {
+            	emsNode = new EmsScriptNode(siteRef, services);
+            	name = emsNode.getName();
+            	parentRef = (NodeRef)emsNode.getProperty(Acm.ACM_SITE_PARENT);
+            	
+            	EmsScriptNode parentNode = null;
+            	String parentId = null;
+            	if (parentRef != null) {
+            	    parentNode = new EmsScriptNode(parentRef, services, response);
+            	    parentId = parentNode.getSysmlId();
+            	}
+            	
+            	// Note: workspace is null if its the master, and in that case we consider it to contain
+            	//		 all sites.
+            	if (!name.equals("no_site") && 
+            		(workspace == null || (workspace != null && workspace.contains(emsNode))) ) {
+            		
+            		JSONObject siteJson = new JSONObject();
+            		siteJson.put("sysmlid", name);
+            		siteJson.put("name", siteInfo.getTitle());
+            		siteJson.put("parent", parentId );
+            		    
+            		json.put(siteJson);
+            	}
+            }
         }
                 
         return json;
@@ -166,8 +178,8 @@ public class SiteGet extends AbstractJavaWebScript {
             return false;
         }
 
-        String viewId = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
-        if (!checkRequestVariable(viewId, WORKSPACE_ID)) {
+        String id = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
+        if (!checkRequestVariable(id, WORKSPACE_ID)) {
             return false;
         }
 
