@@ -318,7 +318,7 @@ public class NodeUtil {
             // them to the cache:
             useSimpleCache = !ignoreWorkspace && !includeDeleted && workspace == null 
                              && dateTime == null && justFirst &&
-                             (prefix.equals( SearchType.CM_NAME ) || prefix.equals( SearchType.ID ));
+                             (prefix.equals( SearchType.CM_NAME.prefix ) || prefix.equals( SearchType.ID.prefix ));
             if ( useSimpleCache && doSimpleCaching ) {
                 NodeRef ref = simpleCache.get( specifier );
                 if (services.getPermissionService().hasPermission( ref, PermissionService.READ ) == AccessStatus.ALLOWED) {
