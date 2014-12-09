@@ -54,6 +54,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
+@Deprecated
 public class SnapshotGet extends AbstractJavaWebScript {
     public SnapshotGet() {
         super();

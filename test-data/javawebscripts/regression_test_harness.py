@@ -693,6 +693,29 @@ common_filters+['"timestamp"','"id"'],
 ["test","workspaces","develop", "develop2"]
 ],
         
+[
+51,
+"PostConfigAgain",
+"Post same configuration again",
+create_curl_cmd(type="POST",data="configuration.json",base_url=BASE_URL_WS,
+                branch="master/",post_type="configurations"),
+True, 
+common_filters+['"timestamp"','"id"'],
+#["test","workspaces","develop", "develop2"]
+[] # TODO add these back once the baseline is checked in
+],
+        
+[
+52,
+"GetConfig",
+"Get configurations",
+create_curl_cmd(type="GET",data="sites/europa/configurations",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"timestamp"','"id"'],
+["test","workspaces","develop", "develop2"]
+],
+        
 # WORKSPACES: ==========================    
 
 [
@@ -817,9 +840,10 @@ common_filters+['"specification"'],
 ["test","workspaces","develop"]
 ],
         
+        
 # Note: this is same as 25 but calls different json for second run in order to avoid resetting variables
 [
-50,
+49,
 "SolveConstraint",
 "Post expressions with a constraint and solves for the constraint.",
 create_curl_cmd(type="POST",base_url=BASE_URL_JW,
@@ -1108,8 +1132,45 @@ False,
 None,
 ["test","workspaces","develop"]
 ],
-        
-]    
+
+# 49 used earlier after 25: ==================   
+
+# DOWNGRADE TO VIEW AND ELEMENT: ==================    
+
+[
+50,
+"PostModelForDowngrade",
+"Post model for downgrade test",
+create_curl_cmd(type="POST",data="productsDowngrade.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+], 
+
+[
+51,
+"PostModelForViewDowngrade",
+"Post model for view downgrade",
+create_curl_cmd(type="POST",data="viewDowngrade.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],    
+
+[
+52,
+"PostModelForElementDowngrade",
+"Post model for element downgrade",
+create_curl_cmd(type="POST",data="elementDowngrade.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+]
+      
+]     
 
 ##########################################################################################    
 #

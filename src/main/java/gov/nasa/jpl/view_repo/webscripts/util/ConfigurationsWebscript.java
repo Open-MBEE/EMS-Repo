@@ -86,19 +86,11 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         List<EmsScriptNode> configurations = new ArrayList<EmsScriptNode>();
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
-            // grab all configurations in site and order by date
-//            Set< EmsScriptNode > nodes =
-//                    WebScriptUtil.getAllNodesInPath( context.getQnamePath(),
-//                                                     "TYPE",
-//                                                     "ems:ConfigurationSet",
-//                                                     workspace, 
-//                                                     dateTime, services,
-//                                                     response );
         // Note: not using searchForElements() b/c it checks if the return element has a sysml:id, which
         //       configurations do not
         String siteName = siteNode == null ? null : siteNode.getName();
         ArrayList<NodeRef> resultSet = NodeUtil.findNodeRefsByType( "ems:ConfigurationSet", NodeUtil.SearchType.TYPE.prefix, 
-                                                                    false, false, workspace,
+                                                                    false, workspace,
                                                                     true, // onlyThisWorkspace
                                                                     dateTime, false, false, services, false,
                                                                     siteName );

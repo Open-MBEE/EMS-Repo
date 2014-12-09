@@ -1,0 +1,13 @@
+{ "elements": [
+        {"sysmlid": "54321",
+        "specialization": {
+        	"type": "Product",
+        	"displayedElements": ["301","302", "303"],
+        	"view2view": [
+            	{"sysmlid": "301", 
+            	"childrenViews": ["301","302"]
+        	}],
+        	"noSections": ["302"]
+        }
+        }
+]}

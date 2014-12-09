@@ -8,6 +8,28 @@
 
         "editable": true,
 
+        "name": "y",
+
+        "owner": "op_ev_31835",
+
+        "qualifiedId": "/123456/e_31828/op_ev_31835/op_param_31869",
+
+        "qualifiedName": "/JW_TEST2/e_31828/GreaterEquals/y",
+
+        "specialization": {"type": "Element"},
+
+        "sysmlid": "op_param_31869"
+
+    },
+
+    {
+
+        "creator": "admin",
+
+        "documentation": "",
+
+        "editable": true,
+
         "name": "x",
 
         "owner": "op_ev_31835",
@@ -110,6 +132,28 @@
 
         "editable": true,
 
+        "name": "result",
+
+        "owner": "op_ev_31835",
+
+        "qualifiedId": "/123456/e_31828/op_ev_31835/op_param_31867",
+
+        "qualifiedName": "/JW_TEST2/e_31828/GreaterEquals/result",
+
+        "specialization": {"type": "Element"},
+
+        "sysmlid": "op_param_31867"
+
+    },
+
+    {
+
+        "creator": "admin",
+
+        "documentation": "",
+
+        "editable": true,
+
         "name": "GreaterEquals",
 
         "owner": "e_31828",
@@ -135,50 +179,6 @@
         },
 
         "sysmlid": "op_ev_31835"
-
-    },
-
-    {
-
-        "creator": "admin",
-
-        "documentation": "",
-
-        "editable": true,
-
-        "name": "result",
-
-        "owner": "op_ev_31835",
-
-        "qualifiedId": "/123456/e_31828/op_ev_31835/op_param_31867",
-
-        "qualifiedName": "/JW_TEST2/e_31828/GreaterEquals/result",
-
-        "specialization": {"type": "Element"},
-
-        "sysmlid": "op_param_31867"
-
-    },
-
-    {
-
-        "creator": "admin",
-
-        "documentation": "",
-
-        "editable": true,
-
-        "name": "y",
-
-        "owner": "op_ev_31835",
-
-        "qualifiedId": "/123456/e_31828/op_ev_31835/op_param_31869",
-
-        "qualifiedName": "/JW_TEST2/e_31828/GreaterEquals/y",
-
-        "specialization": {"type": "Element"},
-
-        "sysmlid": "op_param_31869"
 
     }
 
