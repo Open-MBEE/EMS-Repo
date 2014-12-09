@@ -701,7 +701,8 @@ create_curl_cmd(type="POST",data="configuration.json",base_url=BASE_URL_WS,
                 branch="master/",post_type="configurations"),
 True, 
 common_filters+['"timestamp"','"id"'],
-["test","workspaces","develop", "develop2"]
+#["test","workspaces","develop", "develop2"]
+[] # TODO add these back once the baseline is checked in
 ],
         
 [
