@@ -24,6 +24,7 @@ import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
@@ -34,6 +35,8 @@ import org.springframework.extensions.webscripts.Status;
  *
  */
 public class CommitUtil {
+    static Logger logger = Logger.getLogger(CommitUtil.class);
+
     private CommitUtil() {
         // defeat instantiation
     }
@@ -43,14 +46,17 @@ public class CommitUtil {
     private static ServiceRegistry services = null;
 
     public static void setJmsConnection(JmsConnection jmsConnection) {
+        if (logger.isInfoEnabled()) logger.info( "Setting jms" );
         CommitUtil.jmsConnection = jmsConnection;
     }
 
     public static void setRestConnection(RestPostConnection restConnection) {
+        if (logger.isInfoEnabled()) logger.info( "Setting rest" );
         CommitUtil.restConnection = restConnection;
     }
     
     public static void setServices(ServiceRegistry services) {
+        if (logger.isInfoEnabled()) logger.info( "Setting services" );
         CommitUtil.services = services;
     }
 
@@ -579,10 +585,15 @@ public class CommitUtil {
 	 */
 	public static void updateCommitNodeRef(NodeRef commitRef, String body, String msg, ServiceRegistry services, StringBuffer response) {
 	    EmsScriptNode commitNode = new EmsScriptNode(commitRef, services, response);
-	    if (msg != null) {
-	        commitNode.createOrUpdateProperty("cm:description", msg );
+	    if (commitNode != null && commitNode.exists()) {
+        	    if (msg != null) {
+        	        commitNode.createOrUpdateProperty("cm:description", msg );
+        	    }
+        	    commitNode.createOrUpdateProperty( "ems:commit", body );
+	    } else {
+	        logger.error("CommitNode doesn't exist for updating, dumping out content");
+	        logger.error(body);
 	    }
-	    commitNode.createOrUpdateProperty( "ems:commit", body );
 	}
 
 	

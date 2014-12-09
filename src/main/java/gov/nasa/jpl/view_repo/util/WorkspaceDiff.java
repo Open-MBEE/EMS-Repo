@@ -5,6 +5,7 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -31,7 +32,8 @@ import org.json.JSONObject;
  * @author cinyoung
  *
  */
-public class WorkspaceDiff {
+public class WorkspaceDiff implements Serializable {
+    private static final long serialVersionUID = 2532475442685498671L;
 
     /**
      * A conflict between two workspaces may be defined as
@@ -847,4 +849,18 @@ public class WorkspaceDiff {
         return false;
     }
     
+    
+//    public String toSimpleString() {
+//        JSONObject top = new JSONObject();
+//        JSONObject ws1 = new JSONObject();
+//        JSONObject ws2 = new JSONObject();
+//        
+//        ws1.put( "workspace", arg1 )
+//        
+//        for (int ii = 0; ii < addedElements.size(); ii++) {
+//            
+//        }
+//        
+//        return top.toString();
+//    }
 }
