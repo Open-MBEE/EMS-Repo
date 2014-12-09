@@ -53,7 +53,6 @@ import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 import gov.nasa.jpl.mbee.util.Pair;
 
 import java.io.Serializable;
@@ -64,7 +63,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -79,7 +77,6 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
@@ -90,6 +87,9 @@ import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
+
+import kexpparser.KExpParser;
+//import k.frontend.Frontend;
 
 /**
  * Descriptor file:
@@ -2372,9 +2372,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         String expressionString = req.getParameter( "expression" );
-
-        JSONObject top = new JSONObject();
-        ArrayList<JSONObject> foo = new ArrayList<JSONObject>();
+        
         if (wsFound && validateRequest(req, status)) {
             try {
                 if (runInBackground) {
@@ -2384,6 +2382,24 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
                 else {
                     JSONObject postJson = (JSONObject)req.parseContent();
+                    JSONArray jarr = postJson.getJSONArray("elements");
+
+                    if ( !Utils.isNullOrEmpty( expressionString ) ) {
+                        
+//                        String exprJsonStr0 = Frontend.exp2Json( expressionString );
+//                        JSONObject exprJson0 = new JSONObject( exprJsonStr0 );
+                        
+                        JSONObject exprJson = new JSONObject(KExpParser.parseExpression(expressionString));
+                        log(LogLevel.DEBUG, "********************************************************************************");
+                        log(LogLevel.DEBUG, expressionString);
+                        log(LogLevel.DEBUG, exprJson.toString(4));
+//                        log(LogLevel.DEBUG, exprJson0.toString(4));
+                        log(LogLevel.DEBUG, "********************************************************************************");
+                        JSONArray expJarr = exprJson.getJSONArray("elements");
+                        for (int i=0; i<expJarr.length(); ++i) {
+                            jarr.put(expJarr.get( i ) );
+                        }
+                    }
                     getProjectNodeFromRequest( req, true );
                     if (projectNode != null) {
                         handleUpdate( postJson, status, workspace, fix, model );
