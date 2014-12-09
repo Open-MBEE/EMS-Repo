@@ -2053,7 +2053,16 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public EmsScriptNode getSiteNode() {
         if ( siteNode != null ) return siteNode;
-        EmsScriptNode parent = this;
+        
+        // If it is a node from the version store, then we cant trace up the parents
+        // to find the site, so must use its owner till we have a non version node:
+        VersionService vs = getServices().getVersionService();
+        EmsScriptNode owner = this;
+        while (owner != null && vs.isAVersion( owner.getNodeRef() )) {
+            owner = owner.getOwningParent( null );
+        }
+        
+        EmsScriptNode parent = owner != null ? owner : this;
         String parentName = parent.getName();
         while ( !parentName.equals( "Models" )
                 || !parentName.equals( "ViewEditor" ) ) {
