@@ -2584,9 +2584,8 @@ public class EmsScriptNode extends ScriptNode implements
             filename = filename.replace( "_latest", "" );
             filename = filename.replace( "\\", "" );
             filename = filename.replace( "src=/editor/images/docgen/", "" );
-            boolean useSimpleCache = getWorkspace() == null;
             NodeRef nodeRef =
-                    findNodeRefByType( filename, SearchType.CM_NAME.prefix, useSimpleCache,
+                    findNodeRefByType( filename, SearchType.CM_NAME.prefix,
                                        getWorkspace(), null, false );
             if ( nodeRef != null ) {
                 // this should grab whatever is the latest versions purl - so
@@ -2627,9 +2626,9 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     protected NodeRef
-            findNodeRefByType( String name, String type, boolean useSimpleCache,
+            findNodeRefByType( String name, String type,
                                WorkspaceNode workspace, Date dateTime, boolean findDeleted ) {
-        return NodeUtil.findNodeRefByType( name, type, useSimpleCache, false, workspace, dateTime,
+        return NodeUtil.findNodeRefByType( name, type, false, workspace, dateTime,
                                            true, services, findDeleted );
     }
 

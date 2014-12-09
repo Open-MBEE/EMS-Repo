@@ -193,6 +193,8 @@ public class Acm {
     // Site packages additions:
     public static final String JSON_IS_SITE = "isSite";
     
+    public static final String JSON_UNTYPED = "Untyped";
+    
     // ACM types with the different name spaces
     public static final String SYSML = "sysml:";
     public static final String VIEW = "view2:";
@@ -362,6 +364,8 @@ public class Acm {
     public static final String ACM_SITE_PARENT = "ems:siteParent";
     public static final String ACM_SITE_CHILDREN = "ems:siteChildren";
     public static final String ACM_IS_SITE = SYSML + JSON_IS_SITE;
+
+    public static final String ACM_UNTYPED = SYSML + JSON_UNTYPED;
 
     /**
      *  JSON to Alfresco Content Model mapping
@@ -683,7 +687,8 @@ public class Acm {
         Acm.ACM_ASSOCIATION,
         Acm.ACM_DIRECTED_RELATIONSHIP,
         Acm.ACM_VALUE_SPECIFICATION,
-        Acm.ACM_MAGICDRAW_DATA
+        Acm.ACM_MAGICDRAW_DATA,
+        Acm.ACM_UNTYPED
     };
     
     public static final String[] ACM_RELATIONSHIP_PROPERTY_ASPECTS = {
