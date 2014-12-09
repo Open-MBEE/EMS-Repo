@@ -1534,7 +1534,7 @@ public class ModelPost extends AbstractJavaWebScript {
                      + ", date = " + readDate + ", elementJson="
                      + elementJson );
         
-        return readTime.compareTo( lastModString ) >= 0;
+        return readTime.compareTo( lastModString ) > 0;
     }
 
     protected EmsScriptNode
