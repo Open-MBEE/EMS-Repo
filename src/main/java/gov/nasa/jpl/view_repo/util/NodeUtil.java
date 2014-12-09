@@ -317,7 +317,7 @@ public class NodeUtil {
             // may want multiple nodes in our results, or they could have changed since we added
             // them to the cache:
             useSimpleCache = !ignoreWorkspace && !includeDeleted && workspace == null 
-                             && dateTime == null && justFirst &&
+                             && dateTime == null && justFirst && siteName == null &&
                              (prefix.equals( SearchType.CM_NAME.prefix ) || prefix.equals( SearchType.ID.prefix ));
             if ( useSimpleCache && doSimpleCaching ) {
                 NodeRef ref = simpleCache.get( specifier );
