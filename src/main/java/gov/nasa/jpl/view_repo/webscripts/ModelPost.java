@@ -216,13 +216,12 @@ public class ModelPost extends AbstractJavaWebScript {
      * @throws JSONException
      *             Parse error
      */
-
     public Set< EmsScriptNode >
             createOrUpdateModel( Object content, Status status,
                                  WorkspaceNode targetWS, WorkspaceNode sourceWS ) throws Exception {
-    	JSONObject postJson = (JSONObject) content;
-    	
-    	JSONArray updatedArray = postJson.optJSONArray("updatedElements");
+        	JSONObject postJson = (JSONObject) content;
+        	
+        	JSONArray updatedArray = postJson.optJSONArray("updatedElements");
 		JSONArray movedArray = postJson.optJSONArray("movedElements");
 		JSONArray addedArray = postJson.optJSONArray("addedElements");
 		JSONArray elementsArray = postJson.optJSONArray("elements");
@@ -252,8 +251,10 @@ public class ModelPost extends AbstractJavaWebScript {
 			object.put("elements", jsonArray);
 			elements.addAll(createOrUpdateModel2(object, status, targetWS, sourceWS));
 		}
-    	return elements;
+		
+		return elements;
     }
+    
     public Set< EmsScriptNode >
     		createOrUpdateModel2( Object content, Status status,
     							  WorkspaceNode targetWS, WorkspaceNode sourceWS ) throws Exception {
@@ -261,7 +262,8 @@ public class ModelPost extends AbstractJavaWebScript {
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
 
-        log( LogLevel.DEBUG, "****** NodeUtil.doCaching = " + NodeUtil.doCaching );
+        log( LogLevel.DEBUG, "****** NodeUtil.doSimpleCaching = " + NodeUtil.doSimpleCaching );
+        log( LogLevel.DEBUG, "****** NodeUtil.doFullCaching = " + NodeUtil.doFullCaching );
         
         if(sourceWS == null)
             setWsDiff( targetWS );
@@ -973,6 +975,13 @@ public class ModelPost extends AbstractJavaWebScript {
         String jsonId = elementJson.getString( Acm.JSON_ID );
         element = findScriptNodeById( jsonId, workspace, null, true );
         if ( element != null ) {
+            
+            // Make sure we have the most recent version of the element's node ref.  This is needed for conflict
+            // checks below, and also to make sure we get the most recent properties of the element.
+            // This is only needed b/c of an alfresco bug, where it intermittently does not give the most
+            // recent node ref.  This does have a performance hit, so commenting out for now:
+            //element.checkNodeRefVersion( null );
+            
             elements.add( element );
             nodeMap.put( element.getName(), element );
             // only add to original element map if it exists on first pass
@@ -1013,7 +1022,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         if (runWithoutTransactions) {
             
-            // Check to see if the element has been updated since last read by the
+            // Check to see if the element has been updated since last read/modified by the
             // posting application.
             if (inConflict(element, elementJson)) {
                 return elements;
@@ -1021,14 +1030,15 @@ public class ModelPost extends AbstractJavaWebScript {
             
             reifiedNode =
                     updateOrCreateTransactionableElement( elementJson, parent,
-                                                          children, workspace, ingest, false, modStatus);
+                                                          children, workspace, ingest, false, modStatus,
+                                                          element);
         } else {
             UserTransaction trx;
             trx = services.getTransactionService().getNonPropagatingUserTransaction();
             try {
                 trx.begin();
                 
-                // Check to see if the element has been updated since last read by the
+                // Check to see if the element has been updated since last read/modified by the
                 // posting application.  Want this to be within the transaction
                 if (inConflict(element, elementJson)) {
                     return elements;
@@ -1039,7 +1049,7 @@ public class ModelPost extends AbstractJavaWebScript {
                         updateOrCreateTransactionableElement( elementJson,
                                                               parent, children,
                                                               workspace,
-                                                              ingest, false, modStatus );
+                                                              ingest, false, modStatus, element );
                 log(LogLevel.INFO, "} updateOrCreateElement end transaction");
                 timerCommit = Timer.startTimer(timerCommit, timeEvents);
                 trx.commit();
@@ -1075,14 +1085,25 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
 
-        element = findScriptNodeById( jsonId, workspace, null, true );
+        // Only need to search again for the element, if it was created again for the first time:
+        if (element == null) {
+            element = findScriptNodeById( jsonId, workspace, null, true );
+            
+            // Make sure we have the most recent version of the element's node ref.  This is needed 
+            // to make sure we get the most recent properties of the element.
+            // This is only needed b/c of an alfresco bug, where it intermittently does not give the most
+            // recent node ref.  This does have a performance hit, so commenting out for now:
+            //if (element != null) element.checkNodeRefVersion( null );
+        }
         updateTransactionableWsState(element, jsonId, modStatus, ingest);
         elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
         
-        // Update the read time in the json, so that we do not get any conflicts on the second pass, as
+        // Update the read/modified time in the json, so that we do not get any conflicts on the second pass, as
         // we may modify the node on the first pass.  Make sure this is after any modifications to the
         // node.
-        elementJson.put( Acm.JSON_READ, EmsScriptNode.getIsoTime( new Date(System.currentTimeMillis())));
+        String currentTime = EmsScriptNode.getIsoTime( new Date(System.currentTimeMillis()));
+        elementJson.put( Acm.JSON_READ, currentTime);
+        elementJson.put( Acm.JSON_LAST_MODIFIED, currentTime);
 
         return elements;
     }
@@ -1413,23 +1434,48 @@ public class ModelPost extends AbstractJavaWebScript {
                 updateOrCreateTransactionableElement( (JSONObject)newVal,
                                                       nestedParent, null,
                                                       workspace, ingest, true,
-                                                      modStatus );
+                                                      modStatus, null );
         return newValNode;
     }
     
     /**
-     * Determine whether the post to the element is based on old information based on a "read" JSON attribute whose value is the date when the posting process originally read the element's data.
+     * Determine whether the post to the element is based on old information based on a "read" JSON attribute 
+     * whose value is the date when the posting process originally read the element's data, and the "modified"
+     * JSON attribute whose value is the date when the posting process originally modified the element's data.
+     * 
      * @param element
      * @param elementJson
-     * @return whether the "read" date is older than the last modification date.
+     * @return whether the "read" date or "modified" date is older than the last modification date.
      */
     public boolean inConflict( EmsScriptNode element, JSONObject elementJson ) {
 
-        if (inConflictImpl( element, elementJson ) ) {
+        if (element == null) {
+            return false;
+        }
+        
+        // Make sure we have the most recent version of 
+        // Get the last modified time from the element:
+        Date lastModified = element.getLastModified( null );
+        if (Debug.isOn()) System.out.println( "%% %% %% lastModified = " + lastModified );
+        String lastModString = TimeUtils.toTimestamp( lastModified );
+        String msg = null;
+        
+        // Compare read time to last modified time:
+        if (inConflictImpl( element, elementJson, lastModified, lastModString, true ) ) {
             
-            String msg =
-                    "Error! Tried to post concurrent edit to element, "
+            msg = "Error! Tried to post concurrent edit to element, "
                             + element + ".\n";
+        }
+        
+        // Compare last modified to last modified time:
+        if (msg == null && inConflictImpl( element, elementJson, lastModified, lastModString, false )) {
+            
+            msg = "Error! Tried to post overwrite to element, "
+                            + element + ".\n";
+        }
+        
+        // If there was one of the conflicts then return true:
+        if (msg != null) {
             if ( getResponse() == null || getResponseStatus() == null ) {
                 Debug.error( msg );
             } else {
@@ -1446,50 +1492,47 @@ public class ModelPost extends AbstractJavaWebScript {
     }
     
     /**
-     * Determine whether the post to the element is based on old information based on a "read" JSON attribute whose value is the date when the posting process originally read the element's data.
+     * Determine whether the post to the element is based on old information based on a "read" JSON attribute 
+     * whose value is the date when the posting process originally read the element's data, and the "modified"
+     * JSON attribute whose value is the date when the posting process originally modified the element's data.
+     * 
      * @param element
      * @param elementJson
-     * @return whether the "read" date is older than the last modification date.
+     * @param lastModified
+     * @param lastModString
+     * @param checkRead True to check the "read" date, otherwise checks the "modified" date in the JSON
+     * @return whether the "read" date or "modified" date is older than the last modification date.
      */
-    private boolean inConflictImpl( EmsScriptNode element, JSONObject elementJson ) {
+    private boolean inConflictImpl( EmsScriptNode element, JSONObject elementJson,
+                                    Date lastModified, String lastModString,
+                                    boolean checkRead) {
         // TODO -- could check for which properties changed since the "read"
         // date to allow concurrent edits to different properties of the same
         // element.     
         
-        if (element == null) {
-            return false;
-        }
-        
         String readTime = null;
         try {
-            readTime = elementJson.getString( Acm.JSON_READ );//"read" );
+            readTime = elementJson.getString( checkRead ? Acm.JSON_READ : Acm.JSON_LAST_MODIFIED );
         } catch ( JSONException e ) {
             return false;
         }
-        if (Debug.isOn()) System.out.println( "%% %% %% readTime = " + readTime );
+        if (Debug.isOn()) System.out.println( "%% %% %% time = " + readTime );
         if ( readTime == null) {
             return false;
         }
-        Date lastModified = element.getLastModified( null );
-        if (Debug.isOn()) System.out.println( "%% %% %% lastModified = " + lastModified );
-        //DateTimeFormatter parser = ISODateTimeFormat.dateParser(); // format is different than what is printed
-
-//        DateTime readDateTime = parser.parseDateTime( readTime );
+        
         Date readDate = null;
         readDate = TimeUtils.dateFromTimestamp( readTime );
-        if (Debug.isOn()) System.out.println( "%% %% %% readDate = " + readDate );
-//        if ( readDateTime != null ) { // return false;
-//            readDate = readDateTime.toDate();
-        if ( readDate != null ) { // return false;
+        if (Debug.isOn()) System.out.println( "%% %% %% date = " + readDate );
+
+        if ( readDate != null ) { 
             return readDate.compareTo( lastModified ) < 0;
         }
-//        }
+
         Debug.error( "Bad date format or parse bug! lastModified = "
-                     + lastModified //+ ", readDateTime = " + readDateTime
-                     + ", readDate = " + readDate + ", elementJson="
+                     + lastModified 
+                     + ", date = " + readDate + ", elementJson="
                      + elementJson );
-        String lastModString = TimeUtils.toTimestamp( lastModified );
-        
         
         return readTime.compareTo( lastModString ) >= 0;
     }
@@ -1501,7 +1544,8 @@ public class ModelPost extends AbstractJavaWebScript {
                                                   WorkspaceNode workspace,
                                                   boolean ingest,
                                                   boolean nestedNode,
-                                                  ModStatus modStatus) throws Exception {
+                                                  ModStatus modStatus,
+                                                  EmsScriptNode nodeToUpdate) throws Exception {
         if (!elementJson.has(Acm.JSON_ID)) {
             elementJson.put( Acm.JSON_ID, NodeUtil.createId( services ) );
             //return null;
@@ -1511,8 +1555,6 @@ public class ModelPost extends AbstractJavaWebScript {
         log(LogLevel.INFO, "updateOrCreateElement " + id);
 
         // TODO Need to permission check on new node creation
-        // find node if exists, otherwise create
-        EmsScriptNode nodeToUpdate = findScriptNodeById( id, workspace, null, true );
         String existingNodeType = null;
         String existingNodeName = null;
         if ( nodeToUpdate != null ) {
@@ -2298,7 +2340,6 @@ public class ModelPost extends AbstractJavaWebScript {
 
     protected Map<String, Object> executeImplImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
-        NodeUtil.doCaching = true;  
         Timer timer = new Timer();
 
         printHeader( req );
@@ -2343,31 +2384,9 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
                 else {
                     JSONObject postJson = (JSONObject)req.parseContent();
-                    EmsScriptNode myProjectNode = getProjectNodeFromRequest( req, true );
-                    if (myProjectNode != null) {
-                        Set< EmsScriptNode > elements =
-                        createOrUpdateModel( postJson, status, workspace, null );
-
-                        addRelationshipsToProperties( elements );
-                        if ( !Utils.isNullOrEmpty( elements ) ) {
-    
-                            // Fix constraints if desired:
-                            if (fix) {
-                                fix(elements);
-                            }
-    
-                            // Create JSON object of the elements to return:
-                            JSONArray elementsJson = new JSONArray();
-                            timerToJson = Timer.startTimer(timerToJson, timeEvents);
-                            for ( EmsScriptNode element : elements ) {
-                                elementsJson.put( element.toJSONObject(null) );
-                            }
-                            Timer.stopTimer(timerToJson, "!!!!! executeImpl(): toJSON time", timeEvents);
-                            top.put( "elements", elementsJson );
-                            if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-                            if ( prettyPrint ) model.put( "res", top.toString( 4 ) );
-                            else model.put( "res", top.toString() );
-                        }
+                    getProjectNodeFromRequest( req, true );
+                    if (projectNode != null) {
+                        handleUpdate( postJson, status, workspace, fix, model );
                     }
                 }
             } catch (JSONException e) {
@@ -2393,6 +2412,35 @@ public class ModelPost extends AbstractJavaWebScript {
         return model;
     }
 
+    protected void handleUpdate(JSONObject postJson, Status status, WorkspaceNode workspace, boolean fix, Map<String, Object> model) throws Exception {
+        JSONObject top = new JSONObject();
+        Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null );
+
+        addRelationshipsToProperties( elements );
+        if ( !Utils.isNullOrEmpty( elements ) ) {
+
+            // Fix constraints if desired:
+            if (fix) {
+                fix(elements);
+            }
+
+            // Create JSON object of the elements to return:
+            JSONArray elementsJson = new JSONArray();
+            timerToJson = Timer.startTimer(timerToJson, timeEvents);
+            for ( EmsScriptNode element : elements ) {
+                elementsJson.put( element.toJSONObject(null) );
+            }
+            Timer.stopTimer(timerToJson, "!!!!! executeImpl(): toJSON time", timeEvents);
+            top.put( "elements", elementsJson );
+            if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
+            if ( prettyPrint ) { 
+                model.put( "res", top.toString( 4 ) ); 
+            } else { 
+                model.put( "res", top.toString() );
+            }
+        }
+    }
+    
     public void addRelationshipsToProperties( Set< EmsScriptNode > elems ) {
         for ( EmsScriptNode element : elems ) {
             element.addRelationshipToPropertiesOfParticipants();
