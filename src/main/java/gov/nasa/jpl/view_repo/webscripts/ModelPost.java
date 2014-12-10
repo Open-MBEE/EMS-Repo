@@ -90,6 +90,9 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+import kexpparser.KExpParser;
+//import k.frontend.Frontend;
+
 /**
  * Descriptor file:
  * /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts
@@ -177,14 +180,15 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         return systemModel;
     }
+    
     private SystemModelToAeExpression getSystemModelAe() {
         if ( sysmlToAe == null ) {
             setSystemModelAe();
         }
         return sysmlToAe;
     }
+    
     private void setSystemModelAe() {
-
         sysmlToAe =
         		new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getSystemModel() );
 
@@ -261,7 +265,8 @@ public class ModelPost extends AbstractJavaWebScript {
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
 
-        log( LogLevel.DEBUG, "****** NodeUtil.doCaching = " + NodeUtil.doCaching );
+        log( LogLevel.DEBUG, "****** NodeUtil.doSimpleCaching = " + NodeUtil.doSimpleCaching );
+        log( LogLevel.DEBUG, "****** NodeUtil.doFullCaching = " + NodeUtil.doFullCaching );
         
         if(sourceWS == null)
             setWsDiff( targetWS );
@@ -351,25 +356,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // Send deltas to all listeners
         if (wsDiff.isDiff()) {
-            JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
-            String wsId = "master";
-            if (targetWS != null) {
-                wsId = targetWS.getId();
-            }
-            // FIXME: Need to split by projectId
-            if ( !sendDeltas(deltaJson, wsId, elements.first().getProjectId()) ) {
-                log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
-            }
-
-            // Commit history
-            String siteName = null;
-            if (projectNode != null) {
-                // Note: not use siteNode here, in case its incorrect.
-                EmsScriptNode siteNodeProject = projectNode.getSiteNode();
-                siteName = siteNodeProject.getName();
-            }
-            CommitUtil.commit( deltaJson, targetWS, siteName,
-                               "", false, services, response );
+            // FIXME: Need to split elements by project Id - since they won't always be in same project
+            CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), projectNode, status );
         }
 
         Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): Deltas time", timeEvents);
@@ -1532,7 +1520,7 @@ public class ModelPost extends AbstractJavaWebScript {
                      + ", date = " + readDate + ", elementJson="
                      + elementJson );
         
-        return readTime.compareTo( lastModString ) >= 0;
+        return readTime.compareTo( lastModString ) > 0;
     }
 
     protected EmsScriptNode
@@ -1617,7 +1605,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         // Error if could not determine the type and processing the non-nested node:
-        //	Note:  Must also have a specialization in case they are posting just a Element, whic
+        //	Note:  Must also have a specialization in case they are posting just a Element, which
         //		   doesnt need a specialization key
         if (acmSysmlType == null && !nestedNode && elementJson.has(Acm.JSON_SPECIALIZATION)) {
             	log(LogLevel.ERROR,"Type was not supplied and no existing node to query for the type",
@@ -1625,17 +1613,19 @@ public class ModelPost extends AbstractJavaWebScript {
             	return null;
         }
         
-        // Error if posting a element with the same sysml name, type, and parent as another:
+        // Error if posting a element with the same sysml name, type, and parent as another if the
+        // name is non-empty and its not a Untyped type:
         String sysmlName = elementJson.has( Acm.JSON_NAME ) ? elementJson.getString( Acm.JSON_NAME ) :
                                                               existingNodeName;
-        if (!Utils.isNullOrEmpty( sysmlName )) {
+        if (!Utils.isNullOrEmpty( sysmlName ) && jsonType != null && !jsonType.equals( Acm.JSON_UNTYPED )
+            && id != null && parent != null) {
             ArrayList<EmsScriptNode> nodeArray = findScriptNodesBySysmlName(sysmlName, workspace, null, false);
             
             if (!Utils.isNullOrEmpty( nodeArray )) {
                 for (EmsScriptNode n : nodeArray) {
-                    if ( (id != null && !id.equals( n.getSysmlId() )) &&
-                         (jsonType != null && jsonType.equals( n.getTypeName() )) &&
-                         (parent != null && parent.equals( n.getParent() )) ) {
+                    if ( !id.equals( n.getSysmlId() ) &&
+                         jsonType.equals( n.getTypeName() ) &&
+                         parent.equals( n.getParent() ) ) {
                         log(LogLevel.ERROR,"Found another element with the same sysml name: "
                                            +n.getSysmlName()+" type: "+n.getTypeName()
                                            +" parent: "+n.getParent()+" as the element trying to be posted",
@@ -2355,7 +2345,6 @@ public class ModelPost extends AbstractJavaWebScript {
 
     protected Map<String, Object> executeImplImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
-        NodeUtil.doCaching = true;  
         Timer timer = new Timer();
 
         printHeader( req );
@@ -2388,9 +2377,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         String expressionString = req.getParameter( "expression" );
-
-        JSONObject top = new JSONObject();
-        ArrayList<JSONObject> foo = new ArrayList<JSONObject>();
+        
         if (wsFound && validateRequest(req, status)) {
             try {
                 if (runInBackground) {
@@ -2400,6 +2387,24 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
                 else {
                     JSONObject postJson = (JSONObject)req.parseContent();
+                    JSONArray jarr = postJson.getJSONArray("elements");
+
+                    if ( !Utils.isNullOrEmpty( expressionString ) ) {
+                        
+//                        String exprJsonStr0 = Frontend.exp2Json( expressionString );
+//                        JSONObject exprJson0 = new JSONObject( exprJsonStr0 );
+                        
+                        JSONObject exprJson = new JSONObject(KExpParser.parseExpression(expressionString));
+                        log(LogLevel.DEBUG, "********************************************************************************");
+                        log(LogLevel.DEBUG, expressionString);
+                        log(LogLevel.DEBUG, exprJson.toString(4));
+//                        log(LogLevel.DEBUG, exprJson0.toString(4));
+                        log(LogLevel.DEBUG, "********************************************************************************");
+                        JSONArray expJarr = exprJson.getJSONArray("elements");
+                        for (int i=0; i<expJarr.length(); ++i) {
+                            jarr.put(expJarr.get( i ) );
+                        }
+                    }
                     getProjectNodeFromRequest( req, true );
                     if (projectNode != null) {
                         handleUpdate( postJson, status, workspace, fix, model );
@@ -2493,6 +2498,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
     }
 
+    
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
         if (!checkRequestContent(req)) {

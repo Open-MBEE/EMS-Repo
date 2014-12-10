@@ -940,5 +940,7 @@
         <aspect name="sysml:Binding">
             <parent>sysml:Connector</parent>
         </aspect>
+        <aspect name="sysml:Untyped">
+        </aspect>
 	</aspects>
 </model>

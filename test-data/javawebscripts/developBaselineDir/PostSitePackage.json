@@ -1,36 +1,30 @@
-{
+{"elements": [{
 
-    "elements": [{
+    "creator": "admin",
 
-        "creator": "admin",
+    "documentation": "A site package",
 
-        "documentation": "A site package",
+    "editable": true,
 
-        "editable": true,
+    "name": "package",
 
-        "name": "package",
+    "owner": "123456",
 
-        "owner": "123456",
+    "qualifiedId": "/123456/package",
 
-        "qualifiedId": "/123456/package",
+    "qualifiedName": "/JW_TEST2/package",
 
-        "qualifiedName": "/JW_TEST2/package",
+    "specialization": {
 
-        "specialization": {
+        "isSite": true,
 
-            "isSite": true,
+        "type": "Package"
 
-            "type": "Package"
+    },
 
-        },
+    "sysmlid": "package"
 
-        "sysmlid": "package"
-
-    }],
-
-    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
-
-}
+}]}
 
 200
 

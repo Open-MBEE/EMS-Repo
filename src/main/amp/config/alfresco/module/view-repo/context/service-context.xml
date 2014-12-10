@@ -116,6 +116,10 @@
    		<property name="discussionService" ref="DiscussionService" />
    		<property name="siteService" ref="SiteService" />
   	</bean>
+
+    <bean id="commit" class="gov.nasa.jpl.view_repo.actions.CommitActionExecuter" parent="action-executer">
+        <property name="services" ref="ServiceRegistry"/>
+    </bean> 
   	
 	<bean id="extendPermissionModel" parent="permissionModelBootstrap">
    		<property name="model" value="alfresco/extension/permissionDefinitionsExtension.xml" /> 
@@ -128,7 +132,8 @@
     <bean id="restConnection" class="gov.nasa.jpl.view_repo.connections.RestPostConnection">
         <property name="uri" value="https://orasoa-dev07.jpl.nasa.gov:8121/PublishMessageRestful" />
     </bean>
-
+    
+    
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
 		<property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setUsername" />
 		<property name="arguments" value="admin"/>
@@ -141,18 +146,23 @@
         <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.setServices" />
         <property name="arguments" ref="ServiceRegistry"/>
     </bean>
-    <!-- 
+        
     <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="staticMethod" value="gov.nasa.jpl.view_repo.webscripts.util.ShareUtils.createAdminUser" />
-        <property name="arguments">
-            <list>
-                <value>mmsAdmin</value>
-                <value>letmein</value>
-                <ref bean="ServiceRegistry" />
-            </list>
-        </property>
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.util.CommitUtil.setServices" />
+        <property name="arguments" ref="ServiceRegistry"/>
     </bean>
- -->   
+
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.util.CommitUtil.setJmsConnection" />
+        <property name="arguments" ref="jmsConnection"/>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="gov.nasa.jpl.view_repo.util.CommitUtil.setRestConnection" />
+        <property name="arguments" ref="restConnection"/>
+    </bean>
+
+    
     <!-- bootstrap users into the module -->
 <!--       <bean id="mms-repo_boostrapUsers" class="org.alfresco.repo.module.ImporterModuleComponent" parent="module.baseComponent">
         <property name="moduleId" value="mms-repo" />
@@ -190,4 +200,4 @@
         </property>
     </bean>       
  -->
- </beans>
+</beans>

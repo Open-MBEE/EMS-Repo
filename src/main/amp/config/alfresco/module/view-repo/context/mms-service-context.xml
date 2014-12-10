@@ -19,8 +19,6 @@
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
-        <property name="jmsConnection" ref="jmsConnection" />
-        <property name="restConnection" ref="restConnection" /> 
     </bean>
 
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.projects.project.get"
@@ -35,8 +33,6 @@
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
-        <property name="jmsConnection" ref="jmsConnection" />
-        <property name="restConnection" ref="restConnection" /> 
     </bean>
     
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.sites.products.get"
@@ -328,8 +324,6 @@
         singleton="false">
         <property name="repositoryHelper" ref="repositoryHelper" />
         <property name="services" ref="ServiceRegistry" />
-        <property name="jmsConnection" ref="jmsConnection" />
-        <property name="restConnection" ref="restConnection" /> 
     </bean>
     
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.search.get"

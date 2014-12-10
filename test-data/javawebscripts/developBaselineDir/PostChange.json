@@ -1,38 +1,32 @@
-{
+{"elements": [{
 
-    "elements": [{
+    "creator": "admin",
 
-        "creator": "admin",
+    "documentation": "directed_relationship2",
 
-        "documentation": "directed_relationship2",
+    "editable": true,
 
-        "editable": true,
+    "name": "500",
 
-        "name": "500",
+    "owner": "300",
 
-        "owner": "300",
+    "qualifiedId": "/123456/300/500",
 
-        "qualifiedId": "/123456/300/500",
+    "qualifiedName": "/JW_TEST/300/500",
 
-        "qualifiedName": "/JW_TEST/300/500",
+    "specialization": {
 
-        "specialization": {
+        "source": "303",
 
-            "source": "303",
+        "target": "304",
 
-            "target": "304",
+        "type": "DirectedRelationship"
 
-            "type": "DirectedRelationship"
+    },
 
-        },
+    "sysmlid": "500"
 
-        "sysmlid": "500"
-
-    }],
-
-    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
-
-}
+}]}
 
 200
 

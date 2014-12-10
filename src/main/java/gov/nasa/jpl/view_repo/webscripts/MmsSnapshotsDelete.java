@@ -66,7 +66,7 @@ public class MmsSnapshotsDelete extends AbstractJavaWebScript {
 
     private void handleRequest( WebScriptRequest req ) throws JSONException {
         String snapshotId = req.getServiceMatch().getTemplateVars().get("snapshotId");
-        NodeRef snapshotNodeRef = NodeUtil.findNodeRefByType( snapshotId, SearchType.CM_NAME, false, true, 
+        NodeRef snapshotNodeRef = NodeUtil.findNodeRefByType( snapshotId, SearchType.CM_NAME, true, 
                                                            null, null, true, services, false );
         if (snapshotNodeRef == null) {
             log(LogLevel.ERROR, "Could not find snapshot", HttpServletResponse.SC_NOT_FOUND);

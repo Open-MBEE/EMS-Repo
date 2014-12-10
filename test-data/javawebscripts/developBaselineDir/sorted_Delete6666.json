@@ -9,7 +9,7 @@
                 "editable": true,
                 "name": "6666_name",
                 "owner": "holding_bin_no_site_no_project",
-                "qualifiedName": "/holding_bin/6666_name",
+                "qualifiedName": "/no_project/holding_bin/6666_name",
                 "specialization": {
                     "operand": [
                         {
@@ -29,7 +29,7 @@
                 "creator": "admin",
                 "editable": true,
                 "owner": "6666",
-                "qualifiedName": "/holding_bin/6666_name/null",
+                "qualifiedName": "/no_project/holding_bin/6666_name/null",
                 "specialization": {
                     "element": "300",
                     "type": "ElementValue"
@@ -39,7 +39,7 @@
                 "creator": "admin",
                 "editable": true,
                 "owner": "6666",
-                "qualifiedName": "/holding_bin/6666_name/null",
+                "qualifiedName": "/no_project/holding_bin/6666_name/null",
                 "specialization": {
                     "element": "302",
                     "type": "ElementValue"

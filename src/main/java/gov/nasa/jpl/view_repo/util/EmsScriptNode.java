@@ -2053,7 +2053,16 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public EmsScriptNode getSiteNode() {
         if ( siteNode != null ) return siteNode;
-        EmsScriptNode parent = this;
+        
+        // If it is a node from the version store, then we cant trace up the parents
+        // to find the site, so must use its owner till we have a non version node:
+        VersionService vs = getServices().getVersionService();
+        EmsScriptNode owner = this;
+        while (owner != null && vs.isAVersion( owner.getNodeRef() )) {
+            owner = owner.getOwningParent( null );
+        }
+        
+        EmsScriptNode parent = owner != null ? owner : this;
         String parentName = parent.getName();
         while ( !parentName.equals( "Models" )
                 || !parentName.equals( "ViewEditor" ) ) {
@@ -2575,17 +2584,14 @@ public class EmsScriptNode extends ScriptNode implements
             filename = filename.replace( "_latest", "" );
             filename = filename.replace( "\\", "" );
             filename = filename.replace( "src=/editor/images/docgen/", "" );
-            boolean useSimpleCache = getWorkspace() == null;
             NodeRef nodeRef =
-                    findNodeRefByType( filename, SearchType.CM_NAME.prefix, useSimpleCache,
+                    findNodeRefByType( filename, SearchType.CM_NAME.prefix,
                                        getWorkspace(), null, false );
             if ( nodeRef != null ) {
                 // this should grab whatever is the latest versions purl - so
                 // fine for snapshots
-                NodeRef versionedNodeRef =
-                        services.getVersionService()
-                                .getCurrentVersion( nodeRef )
-                                .getVersionedNodeRef();
+                EmsScriptNode node = new EmsScriptNode( nodeRef, getServices() );
+                NodeRef versionedNodeRef = node.getHeadVersion().getVersionedNodeRef();
                 EmsScriptNode versionedNode =
                         new EmsScriptNode( versionedNodeRef, services, response );
                 String nodeurl = "";
@@ -2620,9 +2626,9 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     protected NodeRef
-            findNodeRefByType( String name, String type, boolean useSimpleCache,
+            findNodeRefByType( String name, String type,
                                WorkspaceNode workspace, Date dateTime, boolean findDeleted ) {
-        return NodeUtil.findNodeRefByType( name, type, useSimpleCache, false, workspace, dateTime,
+        return NodeUtil.findNodeRefByType( name, type, false, workspace, dateTime,
                                            true, services, findDeleted );
     }
 
@@ -2706,13 +2712,34 @@ public class EmsScriptNode extends ScriptNode implements
      */
     @Override
     public boolean equals( Object obj ) {
+        return equals( obj, false );
+    }
+    
+    /**
+     * Check to see if the nodes are the same or (if tryCurrentVersions is true)
+     * if their currentVersions are the same.
+     * 
+     * @param obj
+     * @param tryCurrentVersions
+     * @return true iff equal
+     */
+    public boolean equals( Object obj, boolean tryCurrentVersions ) {
 
-        if ( obj instanceof EmsScriptNode ) {
-            EmsScriptNode that = (EmsScriptNode)obj;
-            return this.nodeRef.equals( that.nodeRef );
-        } else {
-            return false;
-        }
+        if ( !( obj instanceof EmsScriptNode ) ) return false;
+        EmsScriptNode that = (EmsScriptNode)obj;
+        boolean same = this.nodeRef.equals( that.nodeRef );
+        if ( same || !tryCurrentVersions ) return same;
+        
+        // See if they are different versions of the same node.
+        VersionService vs = getServices().getVersionService();
+        boolean isThisV = vs.isAVersion( this.nodeRef );
+        boolean isThatV = vs.isAVersion( that.nodeRef );
+        if ( !isThisV && !isThatV ) return same;
+        NodeRef thisCurrent = this.getHeadVersion().getVersionedNodeRef();
+        NodeRef thatCurrent = that.getHeadVersion().getVersionedNodeRef();
+        if ( thisCurrent == thatCurrent ) return true;
+        if ( thisCurrent == null || thatCurrent == null ) return false;
+        return thisCurrent.equals( thatCurrent );
     }
 
     /**
@@ -2722,9 +2749,12 @@ public class EmsScriptNode extends ScriptNode implements
      */
     @Override
     public boolean exists() {
+        return exists( false );
+    }
+    public boolean exists(boolean includeDeleted) {
         // REVIEW -- TODO -- Will overriding this cause problems in ScriptNode?
-        if ( !super.exists() ) return false;
-        if ( hasAspect( "ems:Deleted" ) ) {
+        if ( !scriptNodeExists() ) return false;
+        if ( !includeDeleted && hasAspect( "ems:Deleted" ) ) {
             return false;
         }
         return true;

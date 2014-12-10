@@ -642,6 +642,20 @@ None,
 80
 ],
 
+#[
+#99,
+#"GetSearch",
+#"Get search",
+#create_curl_cmd(type="GET",data="element/search?keyword=some*",base_url=BASE_URL_WS,
+#                branch="master/"),
+#True, 
+#common_filters,
+#["foo"],
+#None,
+#None,
+#0
+#],
+
 # DELETES: ==========================    
       
 [
@@ -691,6 +705,28 @@ create_curl_cmd(type="GET",data="sites/europa/configurations",base_url=BASE_URL_
 True, 
 common_filters+['"timestamp"','"id"'],
 ["test","workspaces","develop", "develop2"]
+],
+        
+[
+54,
+"PostConfigAgain",
+"Post same configuration again",
+create_curl_cmd(type="POST",data="configuration.json",base_url=BASE_URL_WS,
+                branch="master/",post_type="configurations"),
+True, 
+common_filters+['"timestamp"','"id"'],
+["test","workspaces","develop"]
+],
+        
+[
+55,
+"GetConfigAgain",
+"Get configurations",
+create_curl_cmd(type="GET",data="sites/europa/configurations",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"timestamp"','"id"'],
+["test","workspaces","develop"]
 ],
         
 # WORKSPACES: ==========================    
@@ -817,9 +853,10 @@ common_filters+['"specification"'],
 ["test","workspaces","develop"]
 ],
         
+        
 # Note: this is same as 25 but calls different json for second run in order to avoid resetting variables
 [
-50,
+49,
 "SolveConstraint",
 "Post expressions with a constraint and solves for the constraint.",
 create_curl_cmd(type="POST",base_url=BASE_URL_JW,
@@ -1109,8 +1146,58 @@ False,
 None,
 ["test","workspaces","develop"]
 ],
+
+# 49 used earlier after 25: ==================   
+
+# DOWNGRADE TO VIEW AND ELEMENT: ==================    
+
+[
+50,
+"PostModelForDowngrade",
+"Post model for downgrade test",
+create_curl_cmd(type="POST",data="productsDowngrade.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+], 
+
+[
+51,
+"PostModelForViewDowngrade",
+"Post model for view downgrade",
+create_curl_cmd(type="POST",data="viewDowngrade.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],    
+
+[
+52,
+"PostModelForElementDowngrade",
+"Post model for element downgrade",
+create_curl_cmd(type="POST",data="elementDowngrade.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],     
         
-]    
+# EXPRESSION PARSING
+
+[
+53,
+"ParseSimpleExpression",
+"Parse \"1 + 1\" and create expression elements",
+create_curl_cmd(type="POST",data="operation.json",base_url=BASE_URL_WS,
+                post_type="elements?expression=1%2B1",branch="master/"),
+True, 
+common_filters+['MMS_'],
+["test","workspaces","develop", "develop2"]
+],
+
+]
 
 ##########################################################################################    
 #
