@@ -73,7 +73,11 @@ public class SiteGet extends AbstractJavaWebScript {
      */
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        SiteGet instance = new SiteGet(repository, services);
+        return instance.executeImplImpl( req, status, cache );
+    }
 
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
         clearCaches();
@@ -122,7 +126,7 @@ public class SiteGet extends AbstractJavaWebScript {
      */
     private JSONArray handleSite(WorkspaceNode workspace, Date dateTime) throws JSONException {
     	
-    	JSONArray json = new JSONArray();      
+        JSONArray json = new JSONArray();      
         EmsScriptNode emsNode;
         String name;
         NodeRef parentRef;
@@ -133,36 +137,35 @@ public class SiteGet extends AbstractJavaWebScript {
         // Create json array of info for each site in the workspace:
         //	Note: currently every workspace should contain every site created
         for (SiteInfo siteInfo : sites ) {
-        	
             siteRef = siteInfo.getNodeRef();
             if ( dateTime != null ) {
                 siteRef = NodeUtil.getNodeRefAtTime( siteRef, dateTime );
             }
             
             if (siteRef != null) {
-            	emsNode = new EmsScriptNode(siteRef, services);
-            	name = emsNode.getName();
-            	parentRef = (NodeRef)emsNode.getProperty(Acm.ACM_SITE_PARENT);
-            	
-            	EmsScriptNode parentNode = null;
-            	String parentId = null;
-            	if (parentRef != null) {
-            	    parentNode = new EmsScriptNode(parentRef, services, response);
-            	    parentId = parentNode.getSysmlId();
-            	}
-            	
-            	// Note: workspace is null if its the master, and in that case we consider it to contain
-            	//		 all sites.
-            	if (!name.equals("no_site") && 
-            		(workspace == null || (workspace != null && workspace.contains(emsNode))) ) {
-            		
-            		JSONObject siteJson = new JSONObject();
-            		siteJson.put("sysmlid", name);
-            		siteJson.put("name", siteInfo.getTitle());
-            		siteJson.put("parent", parentId );
-            		    
-            		json.put(siteJson);
-            	}
+                	emsNode = new EmsScriptNode(siteRef, services);
+                	name = emsNode.getName();
+                	parentRef = (NodeRef)emsNode.getProperty(Acm.ACM_SITE_PARENT);
+                	
+                	EmsScriptNode parentNode = null;
+                	String parentId = null;
+                	if (parentRef != null) {
+                	    parentNode = new EmsScriptNode(parentRef, services, response);
+                	    parentId = parentNode.getSysmlId();
+                	}
+                	
+                	// Note: workspace is null if its the master, and in that case we consider it to contain
+                	//		 all sites.
+                	if (!name.equals("no_site") && 
+                		(workspace == null || (workspace != null && workspace.contains(emsNode))) ) {
+                		
+                		JSONObject siteJson = new JSONObject();
+                		siteJson.put("sysmlid", name);
+                		siteJson.put("name", siteInfo.getTitle());
+                		siteJson.put("parent", parentId );
+                		    
+                		json.put(siteJson);
+                	}
             }
         }
                 

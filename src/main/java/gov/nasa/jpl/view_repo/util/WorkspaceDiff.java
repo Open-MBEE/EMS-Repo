@@ -797,7 +797,6 @@ public class WorkspaceDiff implements Serializable {
     }
 
     protected void captureDeltas(WorkspaceNode node) {
-        Set< NodeRef > newSet = Utils.newSet();
         Set< NodeRef > s1 =
                 WorkspaceNode.getChangedNodeRefsWithRespectTo( ws1, node,
                                                                timestamp1,
