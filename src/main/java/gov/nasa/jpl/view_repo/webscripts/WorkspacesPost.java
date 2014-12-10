@@ -188,7 +188,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
 
                 if (dstWs != null) {
                     // keep history of the branch
-                    CommitUtil.branch( srcWs, dstWs, null, "", false, services, response );
+                    CommitUtil.branch( srcWs, dstWs,"", false, services, response );
                     return dstWs;
                 }
                 return null;

@@ -364,14 +364,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
 
             // Commit history
-            String siteName = null;
-            if (projectNode != null) {
-                // Note: not use siteNode here, in case its incorrect.
-                EmsScriptNode siteNodeProject = projectNode.getSiteNode();
-                siteName = siteNodeProject.getName();
-            }
-            CommitUtil.commit( deltaJson, targetWS, siteName,
-                               "", false, services, response );
+            CommitUtil.commit( deltaJson, targetWS,"", false, services, response );
         }
 
         Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): Deltas time", timeEvents);

@@ -544,9 +544,8 @@ public class WorkspaceNode extends EmsScriptNode {
 
         // remove commits
         ArrayList< EmsScriptNode > commits =
-                CommitUtil.getCommits( this, null, getServices(), getResponse() );
-        commits.add( CommitUtil.getCommitPkg( this, null, getServices(),
-                                              getResponse() ) );
+                CommitUtil.getCommits( this, getServices(), getResponse() );
+        commits.add( CommitUtil.getCommitPkg( this, getServices(), getResponse() ) );
         List<NodeRef> commitRefs = NodeUtil.getNodeRefs( commits );
         changedNodeRefs.removeAll(commitRefs);
 
@@ -626,12 +625,12 @@ public class WorkspaceNode extends EmsScriptNode {
         // entire workspace, which could be master, and that would be too big.
         if ( otherTime != null && dateTime != null && dateTime.after( otherTime ) ) {
             ArrayList< EmsScriptNode > commits =
-                    CommitUtil.getCommitsAllSitesInDateTimeRange( otherTime,
-                                                                  dateTime,
-                                                                  lastParent,
-                                                                  services,
-                                                                  response,
-                                                                  false );
+                    CommitUtil.getCommitsInDateTimeRange( otherTime,
+                                                          dateTime,
+                                                          lastParent,
+                                                          services,
+                                                          response,
+                                                          false );
             // TODO -- REVIEW -- The created time of the commit is after the
             // modified times of the items in the diff (right?). Thus, it is
             // unclear whether any commits after the later time point can be

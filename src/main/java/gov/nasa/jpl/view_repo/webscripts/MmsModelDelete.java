@@ -115,7 +115,6 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         // Searching for deleted nodes also, in case they try to delete a element that has
         // already been deleted in the current workspace.
         EmsScriptNode root = findScriptNodeById(elementId, workspace, null, true);
-        String siteName = null;
         String projectId = null;
 
         UserTransaction trx;
@@ -130,7 +129,6 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                      HttpServletResponse.SC_NOT_FOUND);
                 return result;
             }
-            siteName = root.getSiteName();
 
             long end = System.currentTimeMillis();
 
@@ -172,7 +170,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
             }
 
-            CommitUtil.commit( result, workspace, siteName, "", false, services, response );
+            CommitUtil.commit( result, workspace, "", false, services, response );
         }
 
         return result;
