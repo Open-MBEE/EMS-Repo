@@ -360,9 +360,12 @@ public class Acm {
     public static final String ACM_SOURCE_UPPER = SYSML + JSON_SOURCE_UPPER;
     
     // Site packages additions:
-    public static final String ACM_SITE = "ems:Site";
-    public static final String ACM_SITE_PARENT = "ems:siteParent";
-    public static final String ACM_SITE_CHILDREN = "ems:siteChildren";
+    public static final String ACM_SITE = EMS + "Site";
+    public static final String ACM_SITE_PARENT = EMS + "siteParent";
+    public static final String ACM_SITE_CHILDREN = EMS + "siteChildren";
+    public static final String ACM_SITE_PACKAGE = EMS + "sitePackage";
+    public static final String ACM_SITE_SITE = EMS + "siteSite";
+    public static final String ACM_SITE_CHARACTERIZATION = EMS + "SiteCharacterization";
     public static final String ACM_IS_SITE = SYSML + JSON_IS_SITE;
 
     public static final String ACM_UNTYPED = SYSML + JSON_UNTYPED;

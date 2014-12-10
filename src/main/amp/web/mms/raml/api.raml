@@ -24,11 +24,9 @@ schemas:
   - views:    !include elements.json-schema
   - products: !include elements.json-schema
 
-  - comments:       !include elements.json-schema    
   - configurations: !include configurations.json-schema
   - projects:       !include projects.json-schema
   - snapshots:      !include snapshots.json-schema
-  - versions:       !include versions.json-schema
     
   - sites:       !include sites.json-schema
   - workspaces:  !include workspaces.json-schema
@@ -349,20 +347,6 @@ resourceTypes:
             uriParameters:
               elementId:
                 description: Sysml ID for the element under consideration
-            /comments:
-              type: collection
-              /{commentId}:
-                type: collection
-                uriParameters:
-                  commentId:
-                    description: Sysml ID for comment under consideration
-            /versions:
-              type: collection
-              /{versionId}:
-                type: collection
-                uriParameters:
-                  versionId:
-                    description: Sysml ID for the version under consideration
     /changesets:
       type: readCollection
       description: Track groups of changes together so they can be rolled back together if
@@ -403,6 +387,9 @@ resourceTypes:
   post:
     is: [diffable]
     description: workspace merge post
+/sites/permmissions:
+  post:
+    description: Service for syncing permissions from Alfresco Share sites to corresponding model packages
 #/client:
 #  post:
 #    queryParameters:

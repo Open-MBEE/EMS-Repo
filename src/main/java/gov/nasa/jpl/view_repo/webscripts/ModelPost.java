@@ -54,6 +54,7 @@ import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -77,6 +78,7 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
+import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
@@ -1789,20 +1791,32 @@ public class ModelPost extends AbstractJavaWebScript {
         return nestedNode ? nodeToUpdate : reifiedPkgNode;
     }
     
-    private EmsScriptNode createSitePkgStub(EmsScriptNode pkgSiteNode,
+    private EmsScriptNode createSitePkg(EmsScriptNode pkgSiteNode,
                                             WorkspaceNode workspace) {
-        
+        // site packages are only for major site, nothing to do with workspaces
         String siteName = "site_" + pkgSiteNode.getSysmlId();
         EmsScriptNode siteNode = getSiteNode( siteName, workspace, null, false );
         
-        if (siteNode == null || !siteNode.exists()) {
-            
-            SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, SiteVisibility.PUBLIC );
-            siteNode = new EmsScriptNode( foo.getNodeRef(), services );
-            siteNode.createOrUpdateAspect( "cm:taggable" );
-            siteNode.createOrUpdateAspect(Acm.ACM_SITE);
+        SiteInfo siteInfo = services.getSiteService().getSite( siteName );
+        if ( siteInfo == null ) {
+            String sitePreset = "site-dashboard";
+            String siteTitle = pkgSiteNode.getSysmlName();
+            String siteDescription = (String) pkgSiteNode.getProperty( Acm.ACM_DOCUMENTATION );
+            boolean isPublic = true;
+            if (false == ShareUtils.constructSiteDashboard( sitePreset, siteName, siteTitle, siteDescription, isPublic )) {
+                // FIXME: add some logging and response here that there were issues creating the site
+            }
+            // siteInfo doesnt give the node ref we want, so must search for it:
+            siteNode = getSiteNode( siteName, null, null ); 
+            if (siteNode != null) {
+                siteNode.createOrUpdateAspect( "cm:taggable" );
+                siteNode.createOrUpdateAspect( Acm.ACM_SITE );
+                siteNode.createOrUpdateProperty( Acm.ACM_SITE_PACKAGE, pkgSiteNode.getNodeRef() );
+                pkgSiteNode.createOrUpdateAspect( Acm.ACM_SITE_CHARACTERIZATION);
+                pkgSiteNode.createOrUpdateProperty( Acm.ACM_SITE_SITE, siteNode.getNodeRef() );
+            }
         }
-        
+                       
         return siteNode;
     }
     
@@ -1821,8 +1835,7 @@ public class ModelPost extends AbstractJavaWebScript {
         if (isSite != null) {
             // Create site/permissions if needed:
             if (isSite) {
-                // TODO call CY method.  Will it check if the site already exists first?
-                EmsScriptNode pkgSiteNode = createSitePkgStub(nodeToUpdate, workspace);
+                EmsScriptNode pkgSiteNode = createSitePkg(nodeToUpdate, workspace);
                 
                 // Determine the parent package:
                 // Note: will do this everytime, even if the site package node already existed, as the parent site
@@ -1838,10 +1851,16 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
                 
             } // ends if (isSite)
-            
-            // Otherwise, archive the site, and permissions revert to owning site permissions:
             else {
-                // TODO will CY provide a method for this?
+                // Revert permissions to inherit
+                services.getPermissionService().deletePermissions(nodeToUpdate.getNodeRef());
+                nodeToUpdate.setInheritsPermissions( true );
+                
+                NodeRef reifiedPkg = (NodeRef) nodeToUpdate.getProperty( "ems:reifiedPkg" );
+                if (reifiedPkg != null) {
+                    services.getPermissionService().deletePermissions( reifiedPkg );
+                    services.getPermissionService().setInheritParentPermissions( reifiedPkg, true );
+                }
             }
         } // ends if (isSite != null)
         

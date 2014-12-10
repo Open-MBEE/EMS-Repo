@@ -1071,7 +1071,8 @@ None,
 ],
 
 # SITE PACKAGES: ==========================    
-
+# Cant run these tests in regression b/c you need
+# to bring up share also.
 [
 43,
 "PostSitePackage",
