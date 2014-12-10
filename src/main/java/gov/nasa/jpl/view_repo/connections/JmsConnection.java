@@ -24,8 +24,8 @@ public class JmsConnection extends AbstractConnection {
     }
 
     public void setUri(String uri) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("uri set to: " + uri);
+        if (logger.isInfoEnabled()) {
+            logger.info("uri set to: " + uri);
         }
         JmsConnection.uri = uri;
     }

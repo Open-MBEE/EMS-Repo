@@ -32,7 +32,7 @@
 
     }],
 
-    "message": "[WARNING]: The type supplied View is different than the stored type Product\n[WARNING]: createOrUpdateModel deltas not posted properly\n"
+    "message": "[WARNING]: The type supplied View is different than the stored type Product\n"
 
 }
 
