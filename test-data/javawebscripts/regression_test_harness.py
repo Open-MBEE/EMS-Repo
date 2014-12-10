@@ -715,7 +715,7 @@ create_curl_cmd(type="POST",data="configuration.json",base_url=BASE_URL_WS,
                 branch="master/",post_type="configurations"),
 True, 
 common_filters+['"timestamp"','"id"'],
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop"]
 ],
         
 [
@@ -726,7 +726,7 @@ create_curl_cmd(type="GET",data="sites/europa/configurations",base_url=BASE_URL_
                 branch="master/"),
 True, 
 common_filters+['"timestamp"','"id"'],
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop"]
 ],
         
 # WORKSPACES: ==========================    
