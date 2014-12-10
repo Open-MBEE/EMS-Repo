@@ -1,6 +1,9 @@
 package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.actions.CommitActionExecuter;
+import gov.nasa.jpl.view_repo.connections.JmsConnection;
+import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
@@ -17,12 +20,45 @@ import javax.transaction.UserTransaction;
 import junit.framework.Assert;
 
 import org.alfresco.service.ServiceRegistry;
+import org.alfresco.service.cmr.action.Action;
+import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.extensions.webscripts.Status;
 
+/**
+ * Utilities for saving commits and sending out deltas based on commits
+ * @author cinyoung
+ *
+ */
 public class CommitUtil {
+    static Logger logger = Logger.getLogger(CommitUtil.class);
+
+    private CommitUtil() {
+        // defeat instantiation
+    }
+    
+    private static JmsConnection jmsConnection = null;
+    private static RestPostConnection restConnection = null;
+    private static ServiceRegistry services = null;
+
+    public static void setJmsConnection(JmsConnection jmsConnection) {
+        if (logger.isInfoEnabled()) logger.info( "Setting jms" );
+        CommitUtil.jmsConnection = jmsConnection;
+    }
+
+    public static void setRestConnection(RestPostConnection restConnection) {
+        if (logger.isInfoEnabled()) logger.info( "Setting rest" );
+        CommitUtil.restConnection = restConnection;
+    }
+    
+    public static void setServices(ServiceRegistry services) {
+        if (logger.isInfoEnabled()) logger.info( "Setting services" );
+        CommitUtil.services = services;
+    }
 
     /**
 	 * Gets the commit package in the specified workspace (creates if possible)
@@ -178,15 +214,16 @@ public class CommitUtil {
         return parentRefs;
     }
 
-    public static void commit(JSONObject wsDiff,
+    public static NodeRef commit(JSONObject wsDiff,
                        WorkspaceNode workspace,
                        String msg,
                        boolean runWithoutTransactions,
                        ServiceRegistry services,
                        StringBuffer response) {
+        NodeRef commitRef = null;
         if (runWithoutTransactions) {
             try {
-                commitTransactionable(wsDiff, workspace, msg, services, response);
+                commitRef = commitTransactionable(wsDiff, workspace, msg, services, response);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -196,7 +233,7 @@ public class CommitUtil {
                     .getNonPropagatingUserTransaction();
             try {
                 trx.begin();
-                commitTransactionable(wsDiff, workspace, msg, services, response);
+                commitRef = commitTransactionable(wsDiff, workspace, msg, services, response);
                 trx.commit();
             } catch (Throwable e) {
                 try {
@@ -207,36 +244,42 @@ public class CommitUtil {
                 }
             }
         }
+        return commitRef;
 	}
     
 
-	private static void commitTransactionable( JSONObject wsDiff,
+	private static NodeRef commitTransactionable( JSONObject wsDiff,
 	                                           WorkspaceNode workspace,
 	                                           String msg,
 	                                           ServiceRegistry services,
 	                                           StringBuffer response) throws JSONException {
-	    createCommitNode( workspace, null, workspace, "COMMIT", msg,
-	                      wsDiff.toString(),
-	                      services, response );
+
+	    String body = null;
+	    if (wsDiff != null) {
+	        body = wsDiff.toString();
+	    }
+	    return createCommitNode( workspace, null, workspace, "COMMIT", msg,
+	                             body, services, response );
     }
 
 
-    public static void merge(JSONObject wsDiff,
+    public static NodeRef merge(JSONObject wsDiff,
                              WorkspaceNode source,
                              WorkspaceNode target,
                              String msg,
                              boolean runWithoutTransactions,
                              ServiceRegistry services,
                              StringBuffer response) {
+        NodeRef mergeRef = null;
         if (runWithoutTransactions) {
-            mergeTransactionable(wsDiff, source, target, target, msg, services, response);
+            mergeRef = mergeTransactionable(wsDiff, source, target, target, msg, services, response);
         } else {
             UserTransaction trx;
             trx = services.getTransactionService()
                     .getNonPropagatingUserTransaction();
             try {
                 trx.begin();
-                mergeTransactionable(wsDiff, source, target, target, msg, services, response);
+                mergeRef = mergeTransactionable(wsDiff, source, target, target, msg, services, response);
                 trx.commit();
             } catch (Throwable e) {
                 try {
@@ -247,20 +290,19 @@ public class CommitUtil {
                 }
             }
         }
+        return mergeRef;
     }
 
-    
-    
-	private static void mergeTransactionable( JSONObject wsDiff,
+	private static NodeRef mergeTransactionable( JSONObject wsDiff,
                                               WorkspaceNode source1,
                                               WorkspaceNode source2,
                                               WorkspaceNode target,
                                               String msg,
                                               ServiceRegistry services,
                                               StringBuffer response ) {
-        createCommitNode( source1, source2, target, "MERGE", msg,
-                          wsDiff.toString(), 
-                          services, response );
+
+        return createCommitNode( source1, source2, target, "MERGE", msg,
+                                 wsDiff.toString(),services, response );
     }
 
     /**
@@ -312,23 +354,23 @@ public class CommitUtil {
 		return null;
 	}
 	
-	public static void branch(WorkspaceNode srcWs, WorkspaceNode dstWs,
-	                          String msg,
-	                          boolean runWithoutTransactions,
-	                          ServiceRegistry services, StringBuffer response) {
+	public static NodeRef branch(WorkspaceNode srcWs, WorkspaceNode dstWs,
+	                             String msg,
+	                             boolean runWithoutTransactions,
+	                             ServiceRegistry services, StringBuffer response) {
+	    NodeRef branchRef = null;
         if (runWithoutTransactions) {
             try {
-                branchTransactionable(srcWs, dstWs, msg, services, response);
+                branchRef = branchTransactionable(srcWs, dstWs, msg, services, response);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         } else {
             UserTransaction trx;
-            trx = services.getTransactionService()
-                    .getNonPropagatingUserTransaction();
+            trx = services.getTransactionService().getNonPropagatingUserTransaction();
             try {
                 trx.begin();
-                branchTransactionable(srcWs, dstWs, msg, services, response);
+                branchRef = branchTransactionable(srcWs, dstWs, msg, services, response);
                 trx.commit();
             } catch (Throwable e) {
                 try {
@@ -339,23 +381,25 @@ public class CommitUtil {
                 }
             }
         }
+        return branchRef;
 	}
 
-    private static void branchTransactionable( WorkspaceNode srcWs,
+    private static NodeRef branchTransactionable( WorkspaceNode srcWs,
                                                WorkspaceNode dstWs,
                                                String msg,
                                                ServiceRegistry services,
                                                StringBuffer response )
                                                        throws JSONException {
-	    createCommitNode(srcWs, null, dstWs, "BRANCH", msg, "{}", services, response);
+
+	    return createCommitNode(srcWs, null, dstWs, "BRANCH", msg, "{}", services, response);
 	}
 
-    // TODO -- REVIEW -- Just copied branch and search/replaced "branch" with "merge" 
-    public static void merge(WorkspaceNode srcWs,
-                             WorkspaceNode dstWs,
-                              String siteName, String msg,
-                              boolean runWithoutTransactions,
-                              ServiceRegistry services, StringBuffer response) {
+    // TODO -- REVIEW -- Just copied branch and search/replaced "branch" with "merge"
+    @Deprecated
+    public static void merge(WorkspaceNode srcWs, WorkspaceNode dstWs,
+                             String msg,
+                             boolean runWithoutTransactions,
+                             ServiceRegistry services, StringBuffer response) {
         if (runWithoutTransactions) {
             try {
                 mergeTransactionable(srcWs, dstWs, dstWs, msg, services, response);
@@ -390,7 +434,6 @@ public class CommitUtil {
                                                        throws JSONException {
         createCommitNode(srcWs1, srcWs2, dstWs, "MERGE", msg, "{}", services, response);
     }
-
 
 	/**
 	 * Update a commit with the parent and child information
@@ -429,16 +472,18 @@ public class CommitUtil {
 
 
 	/**
-	 * Create a commit node specifying the workspaces
+	 * Create a commit node specifying the workspaces. Typically, since the serialization takes
+	 * a while, the commit node is created first, then it is updated in the background using the
+	 * ActionExecuter.
 	 */
-	protected static boolean createCommitNode(WorkspaceNode srcWs1, WorkspaceNode srcWs2,
+	protected static NodeRef createCommitNode(WorkspaceNode srcWs1, WorkspaceNode srcWs2,
 	                                          WorkspaceNode dstWs,
 	                                          String type, String msg, String body,
 	                                          ServiceRegistry services, StringBuffer response) {
         EmsScriptNode commitPkg = getOrCreateCommitPkg( dstWs, services, response, true );
 
         if (commitPkg == null) {
-            return false;
+            return null;
         } else {
             // get the most recent commit before creating a new one
             EmsScriptNode prevCommit1 = srcWs1 != null ? getLastCommit( srcWs1, services, response ) : null;
@@ -447,11 +492,15 @@ public class CommitUtil {
             Date now = new Date();
             EmsScriptNode currCommit = commitPkg.createNode("commit_" + now.getTime(), "cm:content");
             currCommit.createOrUpdateAspect( "cm:titled");
-            currCommit.createOrUpdateProperty("cm:description", msg);
+            if (msg != null) currCommit.createOrUpdateProperty("cm:description", msg);
 
             currCommit.createOrUpdateAspect( "ems:Committable" );
-            currCommit.createOrUpdateProperty( "ems:commitType", type );
-            currCommit.createOrUpdateProperty( "ems:commit", body );
+            if (type != null) { 
+                currCommit.createOrUpdateProperty( "ems:commitType", type );
+            } else {
+                // TODO throw exception
+            }
+            if (body != null) currCommit.createOrUpdateProperty( "ems:commit", body );
             
             if (prevCommit1 != null) {
                 updateCommitHistory(prevCommit1, currCommit);
@@ -459,7 +508,97 @@ public class CommitUtil {
             if (prevCommit2 != null) {
                 updateCommitHistory(prevCommit2, currCommit);
             }
-            return true;
+            
+            return currCommit.getNodeRef();
         }
 	}
+	
+	
+	/**
+	 * Update commit node reference with final body 
+	 * @param commitRef
+	 * @param body
+	 * @param msg
+	 * @param services
+	 * @param response
+	 */
+	public static void updateCommitNodeRef(NodeRef commitRef, String body, String msg, ServiceRegistry services, StringBuffer response) {
+	    EmsScriptNode commitNode = new EmsScriptNode(commitRef, services, response);
+	    if (commitNode != null && commitNode.exists()) {
+        	    if (msg != null) {
+        	        commitNode.createOrUpdateProperty("cm:description", msg );
+        	    }
+        	    commitNode.createOrUpdateProperty( "ems:commit", body );
+	    } else {
+	        logger.error("CommitNode doesn't exist for updating, dumping out content");
+	        logger.error(body);
+	    }
+	}
+
+	
+    /**
+     * Send off the deltas to various endpoints
+     * @param deltas    JSONObject of the deltas to be published
+     * @return          true if publish completed
+     * @throws JSONException
+     */
+    public static boolean sendDeltas(JSONObject deltaJson, String workspaceId, String projectId) throws JSONException {
+        boolean jmsStatus = false;
+        boolean restStatus = false;
+
+        if (jmsConnection != null) {
+            jmsConnection.setWorkspace( workspaceId );
+            jmsConnection.setProjectId( projectId );
+            jmsStatus = jmsConnection.publish( deltaJson, workspaceId );
+        }
+        if (restConnection != null) {
+            try {
+                restStatus = restConnection.publish( deltaJson, "MMS" );
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+
+        return jmsStatus && restStatus;
+    }
+
+
+    /**
+     * 
+     * @param targetWS
+     * @param start
+     * @param end
+     * @param projectId
+     * @param status
+     * @throws Exception
+     */
+    public static void commitAndStartAction( WorkspaceNode targetWS,
+                                             WorkspaceDiff wsDiff,
+                                             long start, long end,
+                                             String projectId,
+                                             Status status ) throws Exception {
+        if (false == wsDiff.isDiff()) {
+            return;
+        }
+
+        String wsId = "master";
+        if (targetWS != null) {
+            wsId = targetWS.getId();
+        }
+
+        // Commit history
+        ActionService actionService = services.getActionService();
+        Action commitAction = actionService.createAction(CommitActionExecuter.NAME);
+        commitAction.setParameterValue(CommitActionExecuter.PARAM_PROJECT_ID, projectId);
+        commitAction.setParameterValue(CommitActionExecuter.PARAM_WS_ID, wsId);
+        commitAction.setParameterValue(CommitActionExecuter.PARAM_WS_DIFF, wsDiff);
+        commitAction.setParameterValue(CommitActionExecuter.PARAM_START, start);
+        commitAction.setParameterValue(CommitActionExecuter.PARAM_END, end);
+        
+        // create empty commit for now (executing action will fill it in later)
+        NodeRef commitRef = CommitUtil.commit(null, targetWS, "", false, services, new StringBuffer() );
+
+        services.getActionService().executeAction(commitAction , commitRef, true, true);
+    }
 }

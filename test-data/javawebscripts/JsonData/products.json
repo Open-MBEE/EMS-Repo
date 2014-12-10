@@ -1,24 +1,63 @@
-{ "products":
-    [
-        {
-        "sysmlid": "301",
-        "view2view": [
-            {"sysmlid": "301", 
-            "childrenViews": ["301","302"]
-        }],
-        "noSections": [
-        "302" 
-        ]
-        },
-        {
-        "sysmlid": "401",
-        "view2view": [
-            {"sysmlid": "401", 
-            "childrenViews": ["401","402"]
-        }],
-        "noSections": [
-        "402"
-        ]
-        }
-    ]
+{
+    "workspace1": {
+        "elements": [
+            {
+                "creator": "admin",
+                "editable": true,
+                "modified": "2014-12-10T08:43:53.427-0800",
+                "name": "holding_bin",
+                "owner": "no_project",
+                "qualifiedId": "/no_project/holding_bin_no_site_no_project",
+                "qualifiedName": "/no_project/holding_bin",
+                "read": "2014-12-10T08:45:53.103-0800",
+                "specialization": {"type": "Package"},
+                "sysmlid": "holding_bin_no_site_no_project"
+            },
+            {
+                "creator": "admin",
+                "documentation": "something",
+                "editable": true,
+                "modified": "2014-12-10T08:43:57.594-0800",
+                "name": "300",
+                "owner": "holding_bin_no_site_no_project",
+                "qualifiedId": "/no_project/holding_bin_no_site_no_project/x",
+                "qualifiedName": "/no_project/holding_bin/300",
+                "read": "2014-12-10T08:45:53.107-0800",
+                "specialization": {
+                    "isDerived": false,
+                    "isSlot": false,
+                    "type": "Property",
+                    "value": [{
+                        "string": "dlam_string",
+                        "type": "LiteralString"
+                    }]
+                },
+                "sysmlid": "x"
+            }
+        ],
+        "id": "1db0c903-df84-468d-82d1-45619d77172d",
+        "name": "wsA",
+        "qualifiedId": "master/1db0c903-df84-468d-82d1-45619d77172d",
+        "qualifiedName": "master/wsA"
+    },
+    "workspace2": {
+        "addedElements": [],
+        "conflictedElements": [],
+        "deletedElements": [],
+        "id": "ad7ddba9-3ac2-4cf8-be2a-385d460666c5",
+        "movedElements": [],
+        "name": "wsB",
+        "qualifiedId": "master/1db0c903-df84-468d-82d1-45619d77172d/ad7ddba9-3ac2-4cf8-be2a-385d460666c5",
+        "qualifiedName": "master/wsA/wsB",
+        "updatedElements": [{
+            "creator": "admin",
+            "documentation": "x is x",
+            "modified": "2014-12-10T08:45:51.639-0800",
+            "specialization": {"value": [{
+                "string": "the x value",
+                "type": "LiteralString"
+            }]},
+            "sysmlid": "x"
+        }]
+    }
 }

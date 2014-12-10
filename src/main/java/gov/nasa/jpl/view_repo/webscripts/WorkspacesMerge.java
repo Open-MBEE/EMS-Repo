@@ -147,7 +147,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
     	            
     
     	            // keep history of the branch
-                    CommitUtil.merge( sourceWS, targetWS, null, "", false,
+                CommitUtil.merge( sourceWS, targetWS, "", false,
                                       services, response );
 				}
 			}

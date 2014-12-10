@@ -7,7 +7,7 @@
             "name": "6666_name",
             "owner": "holding_bin_no_site_no_project",
             "qualifiedId": "/no_project/holding_bin_no_site_no_project/6666",
-            "qualifiedName": "/holding_bin/6666_name",
+            "qualifiedName": "/no_project/holding_bin/6666_name",
             "specialization": {
                 "operand": [
                     {
@@ -159,7 +159,7 @@
             "name": "600",
             "owner": "holding_bin_no_site_no_project",
             "qualifiedId": "/no_project/holding_bin_no_site_no_project/600",
-            "qualifiedName": "/holding_bin/600",
+            "qualifiedName": "/no_project/holding_bin/600",
             "specialization": {
                 "isDerived": false,
                 "isSlot": false,
@@ -203,7 +203,7 @@
             "name": "305",
             "owner": "999",
             "qualifiedId": "/no_project/999/305",
-            "qualifiedName": "/999/305",
+            "qualifiedName": "/no_project/999/305",
             "specialization": {
                 "isDerived": false,
                 "isSlot": false,
@@ -241,7 +241,7 @@
             "name": "300",
             "owner": "holding_bin_no_site_no_project",
             "qualifiedId": "/no_project/holding_bin_no_site_no_project/x",
-            "qualifiedName": "/holding_bin/300",
+            "qualifiedName": "/no_project/holding_bin/300",
             "specialization": {
                 "isDerived": false,
                 "isSlot": false,
@@ -279,7 +279,7 @@
             "name": "dlam",
             "owner": "cdelp",
             "qualifiedId": "/no_project/cdelp/dlam",
-            "qualifiedName": "/cdelp/dlam",
+            "qualifiedName": "/no_project/cdelp/dlam",
             "specialization": {"type": "Element"},
             "sysmlid": "dlam"
         },
@@ -303,5 +303,5 @@
             "sysmlid": "302"
         }
     ],
-    "message": "[WARNING]: Could not find owner with name: holding_bin_no_site_no_project putting 600 into: {type=null, id=no_project_pkg, cm_name=no_project_pkg, sysml_name=null, qualified name=/null, workspace=null}\n[WARNING]: Could not find owner with name: 999 putting 305 into: {type=null, id=no_project_pkg, cm_name=no_project_pkg, sysml_name=null, qualified name=/null, workspace=null}\n[WARNING]: Could not find owner with name: cdelp putting dlam into: {type=null, id=no_project_pkg, cm_name=no_project_pkg, sysml_name=null, qualified name=/null, workspace=null}\n[WARNING]: createOrUpdateModel deltas not posted properly\n"
+    "message": "[WARNING]: Could not find owner with name: holding_bin_no_site_no_project putting 600 into: {type=null, id=no_project_pkg, cm_name=no_project_pkg, sysml_name=no_project, qualified name=/no_project, workspace=null}\n[WARNING]: Could not find owner with name: 999 putting 305 into: {type=null, id=no_project_pkg, cm_name=no_project_pkg, sysml_name=no_project, qualified name=/no_project, workspace=null}\n[WARNING]: Could not find owner with name: cdelp putting dlam into: {type=null, id=no_project_pkg, cm_name=no_project_pkg, sysml_name=no_project, qualified name=/no_project, workspace=null}\n[WARNING]: createOrUpdateModel deltas not posted properly\n"
 }

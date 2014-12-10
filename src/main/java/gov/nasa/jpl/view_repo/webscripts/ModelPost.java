@@ -36,11 +36,12 @@ import gov.nasa.jpl.ae.event.Parameter;
 import gov.nasa.jpl.ae.event.ParameterListenerImpl;
 import gov.nasa.jpl.ae.solver.Constraint;
 import gov.nasa.jpl.ae.solver.ConstraintLoopSolver;
-import gov.nasa.jpl.mbee.util.Random;
 import gov.nasa.jpl.ae.sysml.SystemModelSolver;
 import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
 import gov.nasa.jpl.ae.util.ClassData;
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.Pair;
+import gov.nasa.jpl.mbee.util.Random;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
@@ -53,7 +54,6 @@ import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.mbee.util.Pair;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -178,14 +178,15 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         return systemModel;
     }
+    
     private SystemModelToAeExpression getSystemModelAe() {
         if ( sysmlToAe == null ) {
             setSystemModelAe();
         }
         return sysmlToAe;
     }
+    
     private void setSystemModelAe() {
-
         sysmlToAe =
         		new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getSystemModel() );
 
@@ -353,18 +354,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // Send deltas to all listeners
         if (wsDiff.isDiff()) {
-            JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
-            String wsId = "master";
-            if (targetWS != null) {
-                wsId = targetWS.getId();
-            }
-            // FIXME: Need to split by projectId
-            if ( !sendDeltas(deltaJson, wsId, elements.first().getProjectId()) ) {
-                log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
-            }
-
-            // Commit history
-            CommitUtil.commit( deltaJson, targetWS,"", false, services, response );
+            // FIXME: Need to split elements by project Id - since they won't always be in same project
+            CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), status );
         }
 
         Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): Deltas time", timeEvents);
@@ -2488,6 +2479,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
     }
 
+    
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
         if (!checkRequestContent(req)) {

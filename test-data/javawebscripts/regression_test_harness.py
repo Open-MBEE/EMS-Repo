@@ -642,6 +642,20 @@ None,
 80
 ],
 
+#[
+#99,
+#"GetSearch",
+#"Get search",
+#create_curl_cmd(type="GET",data="element/search?keyword=some*",base_url=BASE_URL_WS,
+#                branch="master/"),
+#True, 
+#common_filters,
+#["foo"],
+#None,
+#None,
+#0
+#],
+
 # DELETES: ==========================    
       
 [
@@ -694,26 +708,25 @@ common_filters+['"timestamp"','"id"'],
 ],
         
 [
-51,
+54,
 "PostConfigAgain",
 "Post same configuration again",
 create_curl_cmd(type="POST",data="configuration.json",base_url=BASE_URL_WS,
                 branch="master/",post_type="configurations"),
 True, 
 common_filters+['"timestamp"','"id"'],
-#["test","workspaces","develop", "develop2"]
-[] # TODO add these back once the baseline is checked in
+["test","workspaces","develop"]
 ],
         
 [
-52,
-"GetConfig",
+55,
+"GetConfigAgain",
 "Get configurations",
 create_curl_cmd(type="GET",data="sites/europa/configurations",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
 common_filters+['"timestamp"','"id"'],
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop"]
 ],
         
 # WORKSPACES: ==========================    
@@ -1168,9 +1181,22 @@ create_curl_cmd(type="POST",data="elementDowngrade.json",base_url=BASE_URL_WS,
 True, 
 common_filters,
 ["test","workspaces","develop", "develop2"]
+],     
+        
+# EXPRESSION PARSING
+
+[
+53,
+"ParseSimpleExpression",
+"Parse \"1 + 1\" and create expression elements",
+create_curl_cmd(type="POST",data="operation.json",base_url=BASE_URL_WS,
+                post_type="elements?expression=1%2B1",branch="master/"),
+True, 
+common_filters+['MMS_'],
+["test","workspaces","develop", "develop2"]
+],
+
 ]
-      
-]     
 
 ##########################################################################################    
 #
