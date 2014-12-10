@@ -642,6 +642,20 @@ None,
 80
 ],
 
+#[
+#99,
+#"GetSearch",
+#"Get search",
+#create_curl_cmd(type="GET",data="element/search?keyword=some*",base_url=BASE_URL_WS,
+#                branch="master/"),
+#True, 
+#common_filters,
+#["foo"],
+#None,
+#None,
+#0
+#],
+
 # DELETES: ==========================    
       
 [
@@ -706,7 +720,7 @@ common_filters+['"timestamp"','"id"'],
         
 [
 52,
-"GetConfig",
+"GetConfigAgain",
 "Get configurations",
 create_curl_cmd(type="GET",data="sites/europa/configurations",base_url=BASE_URL_WS,
                 branch="master/"),
@@ -1131,6 +1145,20 @@ None,
 ["test","workspaces","develop"]
 ],
         
+        
+# EXPRESSION PARSING
+
+[
+53,
+"ParseSimpleExpression",
+"Parse \"1 + 1\" and create expression elements",
+create_curl_cmd(type="POST",data="operation.json",base_url=BASE_URL_WS,
+                post_type="elements?expression=1%2B1",branch="master/"),
+True, 
+common_filters+['MMS_'],
+["test","workspaces","develop", "develop2"]
+],
+
 ]    
 
 ##########################################################################################    
