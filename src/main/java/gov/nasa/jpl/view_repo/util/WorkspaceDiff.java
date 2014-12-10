@@ -5,6 +5,8 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -812,7 +814,11 @@ public class WorkspaceDiff {
             s1 = NodeUtil.getModelElements(s1);
             s2 = NodeUtil.getModelElements(s2);
         }
-
+        
+        // create lists of deleted in s1 and deleted in s2 
+        List< NodeRef > deletedFromS1 = new ArrayList< NodeRef >();
+        List< NodeRef > deletedFromS2 = new ArrayList< NodeRef >();
+        
         // need to make sure both sets have each others' nodes
         for ( NodeRef n : s1 ) {
             String cmName = NodeUtil.getName( n );
@@ -820,6 +826,8 @@ public class WorkspaceDiff {
                     NodeUtil.findNodeRefById( cmName, false, node, timestamp2,
                                               getServices(), false );
             if ( ref != null ) s2.add( ref );
+            if ( NodeUtil.isDeleted(n))
+            	deletedFromS1.add(n);
         }
         for ( NodeRef n : s2 ) {
             String cmName = NodeUtil.getName( n );
@@ -827,7 +835,15 @@ public class WorkspaceDiff {
                     NodeUtil.findNodeRefById( cmName, false, ws1, timestamp1,
                                               getServices(), false );
             if ( ref != null ) s1.add( ref );
+            if ( NodeUtil.isDeleted(n))
+            	deletedFromS2.add(n);
         }
+        
+        // delete the nodes from s1 and s2  
+        for ( NodeRef n : deletedFromS1 )
+        	s1.remove(n);
+        for ( NodeRef n : deletedFromS2 )
+        	s2.remove(n);
 
         nodeDiff = new NodeDiff( s1, s2 );
         nodeDiff.addPropertyIdsToIgnore( getIgnoredPropIds() );
