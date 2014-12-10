@@ -1083,7 +1083,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="elements"),
 True, 
 common_filters,
-["test","workspaces","develop", "develop2"]
+[]
 ],
         
 [
@@ -1096,7 +1096,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="elements"),
 True, 
 common_filters+['"message"'],
-["test","workspaces","develop", "develop2"]
+[]
 ],
         
 [
@@ -1107,7 +1107,7 @@ create_curl_cmd(type="GET",data="products",base_url=BASE_URL_WS,
                 branch="master/sites/site_package/"),
 True, 
 common_filters,
-["test","workspaces","develop", "develop2"]
+[]
 ],
         
 # CONTENT MODEL UPDATES: ==========================    
