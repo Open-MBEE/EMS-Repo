@@ -621,7 +621,7 @@ public class CommitUtil {
             }
         }
 
-        return jmsStatus && restStatus ? true : false;
+        return jmsStatus && restStatus;
     }
 
 
