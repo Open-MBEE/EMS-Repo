@@ -7,6 +7,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -33,7 +34,8 @@ import org.json.JSONObject;
  * @author cinyoung
  *
  */
-public class WorkspaceDiff {
+public class WorkspaceDiff implements Serializable {
+    private static final long serialVersionUID = 2532475442685498671L;
 
     /**
      * A conflict between two workspaces may be defined as
@@ -183,7 +185,7 @@ public class WorkspaceDiff {
             if ( changes != null ) {
                 Pair< Object, Object > ownerChange = changes.get( "ems:owner" );
                 if ( ownerChange != null && ownerChange.first != null
-                     && ownerChange.first != null
+                     && ownerChange.second != null
                      && !ownerChange.first.equals( ownerChange.second ) ) {
                     movedElements.put( e.getKey(), e.getValue() );
                 }
@@ -797,7 +799,6 @@ public class WorkspaceDiff {
     }
 
     protected void captureDeltas(WorkspaceNode node) {
-        Set< NodeRef > newSet = Utils.newSet();
         Set< NodeRef > s1 =
                 WorkspaceNode.getChangedNodeRefsWithRespectTo( ws1, node,
                                                                timestamp1,
@@ -863,4 +864,18 @@ public class WorkspaceDiff {
         return false;
     }
     
+    
+//    public String toSimpleString() {
+//        JSONObject top = new JSONObject();
+//        JSONObject ws1 = new JSONObject();
+//        JSONObject ws2 = new JSONObject();
+//        
+//        ws1.put( "workspace", arg1 )
+//        
+//        for (int ii = 0; ii < addedElements.size(); ii++) {
+//            
+//        }
+//        
+//        return top.toString();
+//    }
 }

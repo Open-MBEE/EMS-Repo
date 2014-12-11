@@ -909,10 +909,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     private String getHostname(){
-    	SysAdminParams sysAdminParams = this.services.getSysAdminParams();
-    	String hostname = sysAdminParams.getAlfrescoHost();
-    	if(hostname.startsWith("ip-128-149")) hostname = "localhost";
-    	return String.format("%s://%s", sysAdminParams.getAlfrescoProtocol(), hostname);
+        	SysAdminParams sysAdminParams = this.services.getSysAdminParams();
+        	String hostname = sysAdminParams.getAlfrescoHost();
+        	if(hostname.startsWith("ip-128-149")) hostname = "localhost";
+        	return String.format("%s://%s", sysAdminParams.getAlfrescoProtocol(), hostname);
     }
     
     public static EmsScriptNode getHtmlZipNode( EmsScriptNode snapshotNode ) {

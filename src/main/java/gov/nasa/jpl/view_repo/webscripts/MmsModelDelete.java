@@ -17,7 +17,6 @@ import javax.transaction.UserTransaction;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONException;
@@ -168,7 +167,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
 
         if (wsDiff.isDiff()) {
             // Send deltas to all listeners
-            if ( !sendDeltas(result, wsId, projectId) ) {
+            if ( !CommitUtil.sendDeltas(result, wsId, projectId) ) {
                 log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
             }
 

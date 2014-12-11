@@ -642,6 +642,20 @@ None,
 80
 ],
 
+#[
+#99,
+#"GetSearch",
+#"Get search",
+#create_curl_cmd(type="GET",data="element/search?keyword=some*",base_url=BASE_URL_WS,
+#                branch="master/"),
+#True, 
+#common_filters,
+#["foo"],
+#None,
+#None,
+#0
+#],
+
 # DELETES: ==========================    
       
 [
@@ -691,6 +705,28 @@ create_curl_cmd(type="GET",data="sites/europa/configurations",base_url=BASE_URL_
 True, 
 common_filters+['"timestamp"','"id"'],
 ["test","workspaces","develop", "develop2"]
+],
+        
+[
+54,
+"PostConfigAgain",
+"Post same configuration again",
+create_curl_cmd(type="POST",data="configuration.json",base_url=BASE_URL_WS,
+                branch="master/",post_type="configurations"),
+True, 
+common_filters+['"timestamp"','"id"'],
+["test","workspaces","develop"]
+],
+        
+[
+55,
+"GetConfigAgain",
+"Get configurations",
+create_curl_cmd(type="GET",data="sites/europa/configurations",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"timestamp"','"id"'],
+["test","workspaces","develop"]
 ],
         
 # WORKSPACES: ==========================    
@@ -1035,7 +1071,8 @@ None,
 ],
 
 # SITE PACKAGES: ==========================    
-
+# Cant run these tests in regression b/c you need
+# to bring up share also.
 [
 430,
 "PostSitePackage",
@@ -1210,10 +1247,23 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff?workspace1=ws2&workspace2=ws1"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
-["test","workspaces","develop", "develop2"],
+["test","workspaces","develop", "develop2"]
+],     
+        
+# EXPRESSION PARSING
+
+[
+600,
+"ParseSimpleExpression",
+"Parse \"1 + 1\" and create expression elements",
+create_curl_cmd(type="POST",data="operation.json",base_url=BASE_URL_WS,
+                post_type="elements?expression=1%2B1",branch="master/"),
+True, 
+common_filters+['MMS_'],
+["test","workspaces","develop", "develop2"]
 ]
-      
-]     
+        
+]
 
 ##########################################################################################    
 #

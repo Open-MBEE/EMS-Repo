@@ -61,6 +61,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
+@Deprecated
 public class MoaProductGet extends AbstractJavaWebScript {
     public MoaProductGet() {
         super();

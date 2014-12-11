@@ -4,23 +4,19 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
-import gov.nasa.jpl.view_repo.util.NodeUtil;
-import gov.nasa.jpl.view_repo.util.Acm.JSON_TYPE_FILTER;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotGet;
-import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -119,10 +115,8 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         if (nodeList != null) {
             
             boolean checkSitePkg = (sitePackageNode != null && sitePackageNode.exists());
-            // Get the alfresco Site for the site package node, it will have a 
-            // cm:name = "site_"+sysmlid of site package node:
-            EmsScriptNode pkgSite = checkSitePkg ? findScriptNodeById(NodeUtil.sitePkgPrefix+sitePackageNode.getSysmlId(), 
-                                                                      workspace, null, false) : null;
+            // Get the alfresco Site for the site package node:
+            EmsScriptNode pkgSite = checkSitePkg ? getSiteForPkgSite(sitePackageNode, workspace) : null;
             
             Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
             for ( EmsScriptNode node : nodes) {

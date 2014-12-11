@@ -3,12 +3,12 @@
         "creator": "admin",
         "documentation": "A site package",
         "editable": true,
-        "modified": "2014-11-19T13:47:13.574-0800",
+        "modified": "2014-12-10T14:58:00.406-0800",
         "name": "package",
         "owner": "123456",
         "qualifiedId": "/123456/package",
         "qualifiedName": "/JW_TEST2/package",
-        "read": "2014-11-19T13:47:15.134-0800",
+        "read": "2014-12-10T14:58:01.762-0800",
         "specialization": {
             "isSite": true,
             "type": "Package"

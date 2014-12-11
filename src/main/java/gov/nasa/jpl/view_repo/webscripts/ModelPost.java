@@ -36,11 +36,12 @@ import gov.nasa.jpl.ae.event.Parameter;
 import gov.nasa.jpl.ae.event.ParameterListenerImpl;
 import gov.nasa.jpl.ae.solver.Constraint;
 import gov.nasa.jpl.ae.solver.ConstraintLoopSolver;
-import gov.nasa.jpl.mbee.util.Random;
 import gov.nasa.jpl.ae.sysml.SystemModelSolver;
 import gov.nasa.jpl.ae.sysml.SystemModelToAeExpression;
 import gov.nasa.jpl.ae.util.ClassData;
 import gov.nasa.jpl.mbee.util.Debug;
+import gov.nasa.jpl.mbee.util.Pair;
+import gov.nasa.jpl.mbee.util.Random;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
@@ -53,8 +54,7 @@ import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
-import gov.nasa.jpl.mbee.util.Pair;
+import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -64,7 +64,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -90,6 +89,9 @@ import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
+
+import kexpparser.KExpParser;
+//import k.frontend.Frontend;
 
 /**
  * Descriptor file:
@@ -178,14 +180,15 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         return systemModel;
     }
+    
     private SystemModelToAeExpression getSystemModelAe() {
         if ( sysmlToAe == null ) {
             setSystemModelAe();
         }
         return sysmlToAe;
     }
+    
     private void setSystemModelAe() {
-
         sysmlToAe =
         		new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( getSystemModel() );
 
@@ -353,25 +356,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // Send deltas to all listeners
         if (wsDiff.isDiff()) {
-            JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
-            String wsId = "master";
-            if (targetWS != null) {
-                wsId = targetWS.getId();
-            }
-            // FIXME: Need to split by projectId
-            if ( !sendDeltas(deltaJson, wsId, elements.first().getProjectId()) ) {
-                log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
-            }
-
-            // Commit history
-            String siteName = null;
-            if (projectNode != null) {
-                // Note: not use siteNode here, in case its incorrect.
-                EmsScriptNode siteNodeProject = projectNode.getSiteNode();
-                siteName = siteNodeProject.getName();
-            }
-            CommitUtil.commit( deltaJson, targetWS, siteName,
-                               "", false, services, response );
+            // FIXME: Need to split elements by project Id - since they won't always be in same project
+            CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), projectNode, status );
         }
 
         Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): Deltas time", timeEvents);
@@ -1534,7 +1520,7 @@ public class ModelPost extends AbstractJavaWebScript {
                      + ", date = " + readDate + ", elementJson="
                      + elementJson );
         
-        return readTime.compareTo( lastModString ) >= 0;
+        return readTime.compareTo( lastModString ) > 0;
     }
 
     protected EmsScriptNode
@@ -1619,7 +1605,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         // Error if could not determine the type and processing the non-nested node:
-        //	Note:  Must also have a specialization in case they are posting just a Element, whic
+        //	Note:  Must also have a specialization in case they are posting just a Element, which
         //		   doesnt need a specialization key
         if (acmSysmlType == null && !nestedNode && elementJson.has(Acm.JSON_SPECIALIZATION)) {
             	log(LogLevel.ERROR,"Type was not supplied and no existing node to query for the type",
@@ -1627,17 +1613,19 @@ public class ModelPost extends AbstractJavaWebScript {
             	return null;
         }
         
-        // Error if posting a element with the same sysml name, type, and parent as another:
+        // Error if posting a element with the same sysml name, type, and parent as another if the
+        // name is non-empty and its not a Untyped type:
         String sysmlName = elementJson.has( Acm.JSON_NAME ) ? elementJson.getString( Acm.JSON_NAME ) :
                                                               existingNodeName;
-        if (!Utils.isNullOrEmpty( sysmlName )) {
+        if (!Utils.isNullOrEmpty( sysmlName ) && jsonType != null && !jsonType.equals( Acm.JSON_UNTYPED )
+            && id != null && parent != null) {
             ArrayList<EmsScriptNode> nodeArray = findScriptNodesBySysmlName(sysmlName, workspace, null, false);
             
             if (!Utils.isNullOrEmpty( nodeArray )) {
                 for (EmsScriptNode n : nodeArray) {
-                    if ( (id != null && !id.equals( n.getSysmlId() )) &&
-                         (jsonType != null && jsonType.equals( n.getTypeName() )) &&
-                         (parent != null && parent.equals( n.getParent() )) ) {
+                    if ( !id.equals( n.getSysmlId() ) &&
+                         jsonType.equals( n.getTypeName() ) &&
+                         parent.equals( n.getParent() ) ) {
                         log(LogLevel.ERROR,"Found another element with the same sysml name: "
                                            +n.getSysmlName()+" type: "+n.getTypeName()
                                            +" parent: "+n.getParent()+" as the element trying to be posted",
@@ -1803,20 +1791,32 @@ public class ModelPost extends AbstractJavaWebScript {
         return nestedNode ? nodeToUpdate : reifiedPkgNode;
     }
     
-    private EmsScriptNode createSitePkgStub(EmsScriptNode pkgSiteNode,
+    private EmsScriptNode createSitePkg(EmsScriptNode pkgSiteNode,
                                             WorkspaceNode workspace) {
-        
+        // site packages are only for major site, nothing to do with workspaces
         String siteName = "site_" + pkgSiteNode.getSysmlId();
         EmsScriptNode siteNode = getSiteNode( siteName, workspace, null, false );
         
-        if (siteNode == null || !siteNode.exists()) {
-            
-            SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, SiteVisibility.PUBLIC );
-            siteNode = new EmsScriptNode( foo.getNodeRef(), services );
-            siteNode.createOrUpdateAspect( "cm:taggable" );
-            siteNode.createOrUpdateAspect(Acm.ACM_SITE);
+        SiteInfo siteInfo = services.getSiteService().getSite( siteName );
+        if ( siteInfo == null ) {
+            String sitePreset = "site-dashboard";
+            String siteTitle = pkgSiteNode.getSysmlName();
+            String siteDescription = (String) pkgSiteNode.getProperty( Acm.ACM_DOCUMENTATION );
+            boolean isPublic = true;
+            if (false == ShareUtils.constructSiteDashboard( sitePreset, siteName, siteTitle, siteDescription, isPublic )) {
+                // FIXME: add some logging and response here that there were issues creating the site
+            }
+            // siteInfo doesnt give the node ref we want, so must search for it:
+            siteNode = getSiteNode( siteName, null, null ); 
+            if (siteNode != null) {
+                siteNode.createOrUpdateAspect( "cm:taggable" );
+                siteNode.createOrUpdateAspect( Acm.ACM_SITE );
+                siteNode.createOrUpdateProperty( Acm.ACM_SITE_PACKAGE, pkgSiteNode.getNodeRef() );
+                pkgSiteNode.createOrUpdateAspect( Acm.ACM_SITE_CHARACTERIZATION);
+                pkgSiteNode.createOrUpdateProperty( Acm.ACM_SITE_SITE, siteNode.getNodeRef() );
+            }
         }
-        
+                       
         return siteNode;
     }
     
@@ -1835,8 +1835,7 @@ public class ModelPost extends AbstractJavaWebScript {
         if (isSite != null) {
             // Create site/permissions if needed:
             if (isSite) {
-                // TODO call CY method.  Will it check if the site already exists first?
-                EmsScriptNode pkgSiteNode = createSitePkgStub(nodeToUpdate, workspace);
+                EmsScriptNode pkgSiteNode = createSitePkg(nodeToUpdate, workspace);
                 
                 // Determine the parent package:
                 // Note: will do this everytime, even if the site package node already existed, as the parent site
@@ -1852,10 +1851,16 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
                 
             } // ends if (isSite)
-            
-            // Otherwise, archive the site, and permissions revert to owning site permissions:
             else {
-                // TODO will CY provide a method for this?
+                // Revert permissions to inherit
+                services.getPermissionService().deletePermissions(nodeToUpdate.getNodeRef());
+                nodeToUpdate.setInheritsPermissions( true );
+                
+                NodeRef reifiedPkg = (NodeRef) nodeToUpdate.getProperty( "ems:reifiedPkg" );
+                if (reifiedPkg != null) {
+                    services.getPermissionService().deletePermissions( reifiedPkg );
+                    services.getPermissionService().setInheritParentPermissions( reifiedPkg, true );
+                }
             }
         } // ends if (isSite != null)
         
@@ -2372,9 +2377,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         String expressionString = req.getParameter( "expression" );
-
-        JSONObject top = new JSONObject();
-        ArrayList<JSONObject> foo = new ArrayList<JSONObject>();
+        
         if (wsFound && validateRequest(req, status)) {
             try {
                 if (runInBackground) {
@@ -2384,6 +2387,24 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
                 else {
                     JSONObject postJson = (JSONObject)req.parseContent();
+                    JSONArray jarr = postJson.getJSONArray("elements");
+
+                    if ( !Utils.isNullOrEmpty( expressionString ) ) {
+                        
+//                        String exprJsonStr0 = Frontend.exp2Json( expressionString );
+//                        JSONObject exprJson0 = new JSONObject( exprJsonStr0 );
+                        
+                        JSONObject exprJson = new JSONObject(KExpParser.parseExpression(expressionString));
+                        log(LogLevel.DEBUG, "********************************************************************************");
+                        log(LogLevel.DEBUG, expressionString);
+                        log(LogLevel.DEBUG, exprJson.toString(4));
+//                        log(LogLevel.DEBUG, exprJson0.toString(4));
+                        log(LogLevel.DEBUG, "********************************************************************************");
+                        JSONArray expJarr = exprJson.getJSONArray("elements");
+                        for (int i=0; i<expJarr.length(); ++i) {
+                            jarr.put(expJarr.get( i ) );
+                        }
+                    }
                     getProjectNodeFromRequest( req, true );
                     if (projectNode != null) {
                         handleUpdate( postJson, status, workspace, fix, model );
@@ -2477,6 +2498,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
     }
 
+    
     @Override
     protected boolean validateRequest(WebScriptRequest req, Status status) {
         if (!checkRequestContent(req)) {

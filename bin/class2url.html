@@ -4,6 +4,8 @@
 <tr><td>None</td><td>ui/snapshot.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.SnapshotGet</td></tr>
 <tr><td>None</td><td>mms/workspaces/sites.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ModelPost</td></tr>
 <tr><td>None</td><td>mms/workspaces/sites/products/snapshots/snapshot.delete .desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.MmsSnapshotsDelete</td></tr>
+<tr><td>/admin/user</td><td>utils/adminuser.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.util.AdminUserPost</td></tr>
+<tr><td>/artifacts/{path}?cs={cs?}&amp;extension={extension?}</td><td>artifacts.get.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/artifacts.get.js</td></tr>
 <tr><td>/artifacts/{path}?cs={cs?}&amp;extension={extension?}</td><td>artifacts.post.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/artifacts.post.js</td></tr>
 <tr><td>/artifacts/{path}?cs={cs?}&amp;extension={extension?}</td><td>artifacts.get.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/artifacts.get.js</td></tr>
 <tr><td>/checklogin</td><td>utils/login.get.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/utils/login.get.js</td></tr>
@@ -50,6 +52,7 @@
 <tr><td>/rest/views/{viewid}/hierarchy</td><td>viewhierarchy.post.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/viewhierarchy.post.json.js</td></tr>
 <tr><td>/rest/views/{viewid}?force={force?}&amp;recurse={recurse?}&amp;doc={doc?}&amp;product={product?}&amp;user={user}</td><td>view.post.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/view.post.json.js</td></tr>
 <tr><td>/rest/views/{viewid}?recurse={recurse?}</td><td>view.get.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/view.get.js</td></tr>
+<tr><td>/sites/permissions</td><td>mms/utils/site_perm_sync.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.util.SitePermSync</td></tr>
 <tr><td>/ve/configurations/{site}</td><td>javawebscripts/configurationPage.get.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/configurationPage.get.js</td></tr>
 <tr><td>/ve/documents/{id}</td><td>javawebscripts/home.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ProductListGet</td></tr>
 <tr><td>/ve/index/{id}</td><td>javawebscripts/index.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.IndexGet</td></tr>
@@ -72,18 +75,6 @@
 <tr><td>/workspaces/{workspaceId}/elements</td><td>mms/workspaces/elements.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ModelsGet</td></tr>
 <tr><td>/workspaces/{workspaceId}/elements/{elementId}</td><td>mms/workspaces/elements/element.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ModelGet</td></tr>
 <tr><td>/workspaces/{workspaceId}/elements/{elementId}</td><td>mms/workspaces/elements/element.delete.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.MmsModelDelete</td></tr>
-<tr><td>/workspaces/{workspaceId}/elements/{elementId}/comments</td><td>mms/workspaces/elements/comments.delete.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/elements/{elementId}/comments</td><td>mms/workspaces/elements/comments.get.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/elements/{elementId}/comments</td><td>mms/workspaces/elements/comments.post.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/elements/{elementId}/comments/{commentId}</td><td>mms/workspaces/elements/comments/comment.post.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/elements/{elementId}/comments/{commentId}</td><td>mms/workspaces/elements/comments/comment.delete.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/elements/{elementId}/comments/{commentId}</td><td>mms/workspaces/elements/comments/comment.get.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/elements/{elementId}/versions</td><td>mms/workspaces/elements/versions.get.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/elements/{elementId}/versions</td><td>mms/workspaces/elements/versions.delete.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/elements/{elementId}/versions</td><td>mms/workspaces/elements/versions.post.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/elements/{elementId}/versions/{versionId}</td><td>mms/workspaces/elements/versions/version.post.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/elements/{elementId}/versions/{versionId}</td><td>mms/workspaces/elements/versions/version.delete.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/elements/{elementId}/versions/{versionId}</td><td>mms/workspaces/elements/versions/version.get.desc.xml</td><td>None</td></tr>
 <tr><td>/workspaces/{workspaceId}/products/{productId}/views</td><td>mms/workspaces/products/views.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ProductGet</td></tr>
 <tr><td>/workspaces/{workspaceId}/projects</td><td>mms/workspaces/projectonly.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ProjectPost</td></tr>
 <tr><td>/workspaces/{workspaceId}/projects/{projectId}</td><td>mms/workspaces/projectonly.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ProjectGet</td></tr>
@@ -120,17 +111,5 @@
 <tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}</td><td>mms/workspaces/views/elements/element.post.desc.xml</td><td>None</td></tr>
 <tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}</td><td>mms/workspaces/views/elements/element.delete.desc.xml</td><td>None</td></tr>
 <tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}</td><td>mms/workspaces/views/elements/element.get.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}/comments</td><td>mms/workspaces/views/elements/comments.delete.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}/comments</td><td>mms/workspaces/views/elements/comments.get.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}/comments</td><td>mms/workspaces/views/elements/comments.post.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}/comments/{commentId}</td><td>mms/workspaces/views/elements/comments/comment.post.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}/comments/{commentId}</td><td>mms/workspaces/views/elements/comments/comment.delete.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}/comments/{commentId}</td><td>mms/workspaces/views/elements/comments/comment.get.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}/versions</td><td>mms/workspaces/views/elements/versions.get.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}/versions</td><td>mms/workspaces/views/elements/versions.delete.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}/versions</td><td>mms/workspaces/views/elements/versions.post.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}/versions/{versionId}</td><td>mms/workspaces/views/elements/versions/version.post.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}/versions/{versionId}</td><td>mms/workspaces/views/elements/versions/version.delete.desc.xml</td><td>None</td></tr>
-<tr><td>/workspaces/{workspaceId}/views/{viewId}/elements/{elementId}/versions/{versionId}</td><td>mms/workspaces/views/elements/versions/version.get.desc.xml</td><td>None</td></tr>
 <tr><td>/workspaces/{workspaceId}?sourceWorkspace={sourceWorkspace}</td><td>mms/workspaces.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.WorkspacesPost</td></tr>
 </body></table></html>
