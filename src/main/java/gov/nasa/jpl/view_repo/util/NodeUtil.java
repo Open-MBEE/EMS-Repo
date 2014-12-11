@@ -2109,7 +2109,7 @@ public class NodeUtil {
         
         String year = Integer.toString( cal.get(Calendar.YEAR) );
         String month = Integer.toString( cal.get(Calendar.MONTH) + 1);
-        String day = Integer.toString( cal.get(Calendar.DAY_OF_MONTH) );
+        String day = Integer.toString( cal.get(Calendar.DAY_OF_MONTH));
         
         String path = String.format("/%s/%s/%s", year, month, day);
         return getOrCreatePath(parent, path);

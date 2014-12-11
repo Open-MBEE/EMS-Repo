@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -22,12 +23,15 @@ import junit.framework.Assert;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
+import org.alfresco.service.cmr.model.FileInfo;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
+
+import com.ibm.icu.util.Calendar;
 
 /**
  * Utilities for saving commits and sending out deltas based on commits
@@ -89,7 +93,7 @@ public class CommitUtil {
             commitPkg = context.createFolder( "commits" );
         }
         
-        // Create the DOY folders if needed.  Want to return the "commit" folder
+        // Create the date folders if needed.  Want to return the "commit" folder
         // if create is false:
         if (create) {
             commitPkg = NodeUtil.getOrCreateDateFolder( commitPkg );
@@ -130,8 +134,6 @@ public class CommitUtil {
 	    EmsScriptNode commitPkg = getCommitPkg(workspace, services, response);
 
 	    if (commitPkg != null) {
-	        // FIXME: getting the commits this way is inefficient, when getting the
-	        //        latest commit in getLastCommit() should use the latest date folder
             commits.addAll(WebScriptUtil.getAllNodesInPath(commitPkg.getQnamePath(),
                                                            "TYPE",
                                                            "cm:content",
@@ -145,6 +147,57 @@ public class CommitUtil {
 
 	    return commits;
 	}
+	
+	/**
+	 * Gets the latest created folder in the passed context
+	 * @param context
+	 * @return
+	 */
+	private static EmsScriptNode getLatestFolder(EmsScriptNode context) {
+	    
+	      Set<EmsScriptNode> folders = context.getChildNodes();
+          ArrayList<EmsScriptNode> foldersList = new ArrayList<EmsScriptNode>(folders);
+          Collections.sort( foldersList, 
+                            new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator() );
+          
+          if (foldersList.size() > 0) {
+              return foldersList.get( 0 );
+          }
+          
+          return null;
+	}
+	
+	/**
+     * Gets the latest created folder in the passed context before the passed time
+     * @param context
+     * @return
+     */
+    private static EmsScriptNode getLatestFolderBeforeTime(EmsScriptNode context,
+                                                           int time) {
+        
+        // TODO finish this method and test it
+        EmsScriptNode latestFolder = null;
+          Set<EmsScriptNode> folders = context.getChildNodes();
+          ArrayList<EmsScriptNode> foldersList = new ArrayList<EmsScriptNode>(folders);
+          Collections.sort( foldersList, 
+                            new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator() );
+
+          // Loop through the list from smallest to greatest folder number:
+          // REVIEW Binary search instead?
+          ListIterator<EmsScriptNode> it = foldersList.listIterator(foldersList.size());
+          while(it.hasPrevious()) {
+              EmsScriptNode folder = it.previous();
+              String folderName = folder.getName();
+              if (folderName != null && time >= Integer.valueOf( folderName )) {
+                  latestFolder = folder;
+              }
+              else if (folderName != null && time < Integer.valueOf( folderName )) {
+                  break;
+              }
+          }
+          
+          return latestFolder;
+    }
 
 	/**
 	 * Get the most recent commit in a workspace
@@ -157,7 +210,42 @@ public class CommitUtil {
 	public static EmsScriptNode getLastCommit(WorkspaceNode ws, 
 	                                          ServiceRegistry services,
 	                                          StringBuffer response) {
-	    ArrayList<EmsScriptNode> commits = getCommits(ws, services, response);
+	    
+	    EmsScriptNode yearFolder = null;
+	    EmsScriptNode monthFolder = null;
+        EmsScriptNode dayFolder = null;
+        ArrayList<EmsScriptNode> commits = new ArrayList<EmsScriptNode>();
+        
+	    // Note: if workspace is null, then will get the master workspace commits
+        EmsScriptNode commitPkg = getCommitPkg(ws, services, response);
+
+        if (commitPkg != null) {
+            
+            // Get the latest year/month/day folder and search for all content within it, then
+            // sort:
+            yearFolder = getLatestFolder(commitPkg);
+            if (yearFolder != null) {
+                monthFolder = getLatestFolder(yearFolder);
+                if (monthFolder != null) {
+                    dayFolder = getLatestFolder(monthFolder);
+                    if (dayFolder != null) {
+                        commits.addAll(WebScriptUtil.getAllNodesInPath(dayFolder.getQnamePath(),
+                                                                       "TYPE",
+                                                                       "cm:content",
+                                                                       ws,
+                                                                       null,
+                                                                       services,
+                                                                       response));
+
+                        Collections.sort( commits, new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator() );
+                    }
+                }
+            }
+
+        }
+        
+        // This method is too inefficient to use
+	    //ArrayList<EmsScriptNode> commits = getCommits(ws, services, response);
 
 	    if (commits.size() > 0) {
 	        return commits.get( 0 );
@@ -165,13 +253,71 @@ public class CommitUtil {
 
 	    return null;
 	}
+	
+	public static EmsScriptNode getLatestCommitAtTime(Date date, 
+	                                                  WorkspaceNode workspace,
+                                                      ServiceRegistry services,
+                                                      StringBuffer response) {
+	    
+	    // TODO: test this method out, not sure if it is correct
+	    
+        EmsScriptNode yearFolder = null;
+        EmsScriptNode monthFolder = null;
+        EmsScriptNode dayFolder = null;
+        ArrayList<EmsScriptNode> commits = new ArrayList<EmsScriptNode>();
+
+	    if (date != null) {
+    	    Calendar cal = Calendar.getInstance();
+    	    cal.setTime( date );
+    	    int day = cal.get(Calendar.DAY_OF_MONTH);
+            int month = cal.get(Calendar.MONTH) + 1;
+            int year = cal.get(Calendar.YEAR);
+            
+            // Note: if workspace is null, then will get the master workspace commits
+            EmsScriptNode commitPkg = getCommitPkg(workspace, services, response);
+
+            if (commitPkg != null) {
+                
+                // Get the latest year/day/month folder before the date:
+                yearFolder = getLatestFolderBeforeTime(commitPkg, year);
+                if (yearFolder != null) {
+                    monthFolder = getLatestFolderBeforeTime(yearFolder, month);
+                    if (monthFolder != null) {
+                        dayFolder = getLatestFolderBeforeTime(monthFolder, day);
+                        if (dayFolder != null) {
+                            
+                            commits.addAll(WebScriptUtil.getAllNodesInPath(dayFolder.getQnamePath(),
+                                                                           "TYPE",
+                                                                           "cm:content",
+                                                                           workspace,
+                                                                           null,
+                                                                           services,
+                                                                           response));
+
+                            Collections.sort( commits, new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator() );
+                        }
+                    }
+                }
+            }
+	    }
+	    
+	    if (commits.size() > 0) {
+            return commits.get( 0 );
+        }
+
+	    return null;
+
+	}
 
 	public static ArrayList<EmsScriptNode> getCommitsInDateTimeRange( Date fromDateTime,
 	                                                                  Date toDateTime,
 	                                                                  WorkspaceNode workspace,
 	                                                                  ServiceRegistry services,
-	                                                                  StringBuffer response,
-	                                                                  boolean justFirst ) {
+	                                                                  StringBuffer response) {
+	    
+	    // FIXME consider using date folders to narrow the range of commits to be parsed
+	    //       through, rather than using getLastCommit().  
+	    
 	    // skip over too new workspaces
 	    while ( workspace != null ) {
 	        Date created = workspace.getCreationDate();

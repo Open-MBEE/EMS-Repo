@@ -629,8 +629,7 @@ public class WorkspaceNode extends EmsScriptNode {
                                                           dateTime,
                                                           lastParent,
                                                           services,
-                                                          response,
-                                                          false );
+                                                          response);
             // TODO -- REVIEW -- The created time of the commit is after the
             // modified times of the items in the diff (right?). Thus, it is
             // unclear whether any commits after the later time point can be
