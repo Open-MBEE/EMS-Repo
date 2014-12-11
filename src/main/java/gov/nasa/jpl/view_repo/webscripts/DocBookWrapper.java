@@ -2,16 +2,19 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Stack;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.admin.registry.RegistryService;
@@ -29,6 +32,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 
 import gov.nasa.jpl.docbook.model.DBBook;
@@ -396,25 +400,61 @@ public class DocBookWrapper {
 	private void tableToCSV() throws Exception{
 		File input = new File(this.dbFileName.toString());
 		try {
-			Document document = Jsoup.parse(input, "UTF-8");
+			FileInputStream fileStream = new FileInputStream(input);
+			Document document = Jsoup.parse(fileStream, "UTF-8", "http://xml.org", Parser.xmlParser());
 			if(document == null) throw new Exception("Failed to convert tables to CSV! Unabled to load file: " + this.dbFileName.toString());
 			int counter = 1;
 			String filename = "";
 			int cols = 0;
-			for(Element table:document.body().getElementsByTag("TABLE")){
-				cols = Integer.parseInt(table.getElementsByTag("tgroup").get(0).attr("cols"));
+			for(Element table:document.select("table")){
+				Elements tgroups = table.select("tgroup");
+				if(tgroups==null || tgroups.size()==0) continue;
+				Element tgroup = tgroups.first();
+				cols = Integer.parseInt(tgroup.attr("cols"));
 				List<List<String>> csv = new ArrayList<List<String>>();
-				filename = "Table " + counter;
-				for(Element row: table.getElementsByTag("row")){
+				Stack<Integer> rowStack = new Stack<Integer>();
+				for(Element row: table.select("row")){
 					//TO DO - handle multi rows and columns spanned cell
 					List<String> csvRow = new ArrayList<String>();
-					for(Element entry:row.getElementsByTag("entry")){
-						csvRow.add(entry.text());
+					
+					for(int i=0; i < cols; i++){
+						if(i >= row.children().size()){
+							for(int k=cols; k > i; k--) csvRow.add("");
+							break;
+						}
+						Element entry = row.child(i);
+						if(entry != null && entry.text() != null && !entry.text().isEmpty()) csvRow.add(entry.text());
+						else csvRow.add("");
+						
+						//***handling multi-columns***
+						String colStart = entry.attr("namest");
+						String colEnd = entry.attr("namend");
+						if(colStart == null || colEnd == null || colStart.isEmpty() || colEnd.isEmpty()) continue;
+						
+						int icolStart = Integer.parseInt(colStart);
+						int icolEnd = Integer.parseInt(colEnd);
+						for(int j=icolEnd; j > icolStart; j--, i++){
+							csvRow.add("");
+						}
+						//***handling multi-columns***
 					}
 					csv.add(csvRow);
 				}
+
+				boolean hasTitle = false;
+				Elements title = table.select("title");
+				if(title != null && title.size() > 0){
+					String titleText = title.first().text();
+					if(titleText != null && !titleText.isEmpty()){
+						filename = title.first().text();
+						hasTitle = true;
+					}
+				}
+				
+				if(!hasTitle) filename = "Untitled"; 
+				filename = "table_" + counter++ + "_" + filename;
+				
 				writeCSV(csv, filename);
-				counter++;
 			}
 			
 		} catch (IOException e) {
@@ -484,7 +524,7 @@ public class DocBookWrapper {
 				BufferedWriter writer = new BufferedWriter(new FileWriter(frame));
 				writer.write("<html><head><title>" + title + "</title></head><frameset cols='30%,*' frameborder='1' framespacing='0' border='1'><frame src='bk01-toc.html' name='list'><frame src='index.html' name='body'></frameset></html>");
 		        writer.close();
-		        Files.copy(Paths.get(this.getDocGenCssFileName()), Paths.get(this.getDBDirName(), "docgen.css"));
+		        Files.copy(Paths.get(this.getDocGenCssFileName()), Paths.get(this.getDBDirName(), "docgen.css"), StandardCopyOption.REPLACE_EXISTING);
 			}
 			catch(Exception ex){
 				throw new Exception("Failed to transform DocBook to HTML!", ex);
@@ -516,7 +556,6 @@ public class DocBookWrapper {
 				writer.write(System.lineSeparator());
 			}
 			writer.close();
-			fw.flush();
 			fw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
