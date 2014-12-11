@@ -10,13 +10,13 @@
 
             "editable": true,
 
-            "name": "initialDuration",
+            "name": "duration",
 
-            "owner": "e_38263",
+            "owner": "e_38304",
 
-            "qualifiedId": "/123456/e_38263/arg_ev_33001",
+            "qualifiedId": "/123456/e_38304/arg_ev_38307",
 
-            "qualifiedName": "/JW_TEST/e_38263/initialDuration",
+            "qualifiedName": "/JW_TEST/e_38304/duration",
 
             "specialization": {
 
@@ -28,7 +28,7 @@
 
                 "value": [{
 
-                    "integer": -1145811380,
+                    "integer": 22,
 
                     "type": "LiteralInteger"
 
@@ -36,7 +36,7 @@
 
             },
 
-            "sysmlid": "arg_ev_33001"
+            "sysmlid": "arg_ev_38307"
 
         },
 
@@ -102,6 +102,28 @@
 
             "editable": true,
 
+            "name": "result",
+
+            "owner": "op_ev_31835",
+
+            "qualifiedId": "/123456/e_31828/op_ev_31835/op_param_31867",
+
+            "qualifiedName": "/JW_TEST/e_31828/GreaterEquals/result",
+
+            "specialization": {"type": "Element"},
+
+            "sysmlid": "op_param_31867"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
             "name": "y",
 
             "owner": "op_ev_31835",
@@ -124,44 +146,6 @@
 
             "editable": true,
 
-            "name": "duration",
-
-            "owner": "e_38304",
-
-            "qualifiedId": "/123456/e_38304/arg_ev_38307",
-
-            "qualifiedName": "/JW_TEST/e_38304/duration",
-
-            "specialization": {
-
-                "isDerived": false,
-
-                "isSlot": false,
-
-                "type": "Property",
-
-                "value": [{
-
-                    "integer": 22,
-
-                    "type": "LiteralInteger"
-
-                }]
-
-            },
-
-            "sysmlid": "arg_ev_38307"
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
             "name": "",
 
             "owner": "e_32169",
@@ -173,6 +157,44 @@
             "specialization": {"type": "Constraint"},
 
             "sysmlid": "constraint_32165"
+
+        },
+
+        {
+
+            "creator": "admin",
+
+            "documentation": "",
+
+            "editable": true,
+
+            "name": "initialDuration",
+
+            "owner": "e_38263",
+
+            "qualifiedId": "/123456/e_38263/arg_ev_33001",
+
+            "qualifiedName": "/JW_TEST/e_38263/initialDuration",
+
+            "specialization": {
+
+                "isDerived": false,
+
+                "isSlot": false,
+
+                "type": "Property",
+
+                "value": [{
+
+                    "integer": -1145811380,
+
+                    "type": "LiteralInteger"
+
+                }]
+
+            },
+
+            "sysmlid": "arg_ev_33001"
 
         },
 
@@ -269,28 +291,6 @@
             },
 
             "sysmlid": "arg_ev_38307_1"
-
-        },
-
-        {
-
-            "creator": "admin",
-
-            "documentation": "",
-
-            "editable": true,
-
-            "name": "result",
-
-            "owner": "op_ev_31835",
-
-            "qualifiedId": "/123456/e_31828/op_ev_31835/op_param_31867",
-
-            "qualifiedName": "/JW_TEST/e_31828/GreaterEquals/result",
-
-            "specialization": {"type": "Element"},
-
-            "sysmlid": "op_param_31867"
 
         }
 

@@ -1,46 +1,40 @@
-{
+{"elements": [{
 
-    "elements": [{
+    "creator": "admin",
 
-        "creator": "admin",
+    "documentation": "x is x",
 
-        "documentation": "x is x",
+    "editable": true,
 
-        "editable": true,
+    "name": "402",
 
-        "name": "402",
+    "owner": "401",
 
-        "owner": "401",
+    "qualifiedId": "/123456/4000/401/402",
 
-        "qualifiedId": "/123456/4000/401/402",
+    "qualifiedName": "/JW_TEST2/400/401/402",
 
-        "qualifiedName": "/JW_TEST2/400/401/402",
+    "specialization": {
 
-        "specialization": {
+        "isDerived": false,
 
-            "isDerived": false,
+        "isSlot": false,
 
-            "isSlot": false,
+        "type": "Property",
 
-            "type": "Property",
+        "value": [{
 
-            "value": [{
+            "string": "the x value",
 
-                "string": "the x value",
+            "type": "LiteralString"
 
-                "type": "LiteralString"
+        }]
 
-            }]
+    },
 
-        },
+    "sysmlid": "402"
 
-        "sysmlid": "402"
-
-    }],
-
-    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
-
-}
+}]}
 
 200
 

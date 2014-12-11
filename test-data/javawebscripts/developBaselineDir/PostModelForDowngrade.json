@@ -1,56 +1,50 @@
-{
+{"elements": [{
 
-    "elements": [{
+    "creator": "admin",
 
-        "creator": "admin",
+    "editable": true,
 
-        "editable": true,
+    "owner": "holding_bin_no_site_no_project",
 
-        "owner": "holding_bin_no_site_no_project",
+    "qualifiedId": "/no_project/holding_bin_no_site_no_project/54321",
 
-        "qualifiedId": "/no_project/holding_bin_no_site_no_project/54321",
+    "qualifiedName": "/no_project/holding_bin/null",
 
-        "qualifiedName": "/no_project/holding_bin/null",
+    "specialization": {
 
-        "specialization": {
+        "displayedElements": [
 
-            "displayedElements": [
+            "301",
+
+            "302",
+
+            "303"
+
+        ],
+
+        "noSections": ["302"],
+
+        "type": "Product",
+
+        "view2view": [{
+
+            "childrenViews": [
 
                 "301",
 
-                "302",
-
-                "303"
+                "302"
 
             ],
 
-            "noSections": ["302"],
+            "sysmlid": "301"
 
-            "type": "Product",
+        }]
 
-            "view2view": [{
+    },
 
-                "childrenViews": [
+    "sysmlid": "54321"
 
-                    "301",
-
-                    "302"
-
-                ],
-
-                "sysmlid": "301"
-
-            }]
-
-        },
-
-        "sysmlid": "54321"
-
-    }],
-
-    "message": "[WARNING]: Could not find owner with name: holding_bin_no_site_no_project putting 54321 into: {type=null, id=no_project_pkg, cm_name=no_project_pkg, sysml_name=no_project, qualified name=/no_project, workspace=null}\n"
-
-}
+}]}
 
 200
 
