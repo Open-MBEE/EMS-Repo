@@ -125,12 +125,13 @@ public class CommitUtil {
 	                                           ServiceRegistry services,
 	                                           StringBuffer response) {
 	    ArrayList<EmsScriptNode> commits = new ArrayList<EmsScriptNode>();
-	    if (workspace == null) {
-	        return commits;
-	    }
+	    
+	    // Note: if workspace is null, then will get the master workspace commits
 	    EmsScriptNode commitPkg = getCommitPkg(workspace, services, response);
 
 	    if (commitPkg != null) {
+	        // FIXME: getting the commits this way is inefficient, when getting the
+	        //        latest commit in getLastCommit() should use the latest date folder
             commits.addAll(WebScriptUtil.getAllNodesInPath(commitPkg.getQnamePath(),
                                                            "TYPE",
                                                            "cm:content",
@@ -302,7 +303,7 @@ public class CommitUtil {
                                               StringBuffer response ) {
 
         return createCommitNode( source1, source2, target, "MERGE", msg,
-                                 wsDiff.toString(),services, response );
+                                 wsDiff.toString(),services, response, true );
     }
 
     /**
@@ -432,7 +433,7 @@ public class CommitUtil {
                                                ServiceRegistry services,
                                                StringBuffer response )
                                                        throws JSONException {
-        createCommitNode(srcWs1, srcWs2, dstWs, "MERGE", msg, "{}", services, response);
+        createCommitNode(srcWs1, srcWs2, dstWs, "MERGE", msg, "{}", services, response, true);
     }
 
 	/**
@@ -454,7 +455,10 @@ public class CommitUtil {
             if ( parentRefs == null ) {
                 parentRefs = new ArrayList< NodeRef >();
             }
-            parentRefs.add( prevCommit.getNodeRef() );
+            NodeRef nr = prevCommit.getNodeRef();
+            if (!parentRefs.contains( nr )) {
+                parentRefs.add( nr );
+            }
             currCommit.setProperty( "ems:commitParents", parentRefs );
 
 //            ArrayList< NodeRef > childRefs = prevCommit.getPropertyNodeRefs( "ems:commitChildren" );
@@ -464,12 +468,28 @@ public class CommitUtil {
             if ( childRefs == null ) {
                 childRefs = new ArrayList< NodeRef >();
             }
-            childRefs.add( currCommit.getNodeRef() );
+            NodeRef nrCurr = currCommit.getNodeRef();
+            if (!childRefs.contains( nrCurr )) {
+                childRefs.add( nrCurr );
+            }
             prevCommit.setProperty( "ems:commitChildren", childRefs );
 	    }
         return true;
 	}
 
+	/**
+     * Create a commit node specifying the workspaces. Typically, since the serialization takes
+     * a while, the commit node is created first, then it is updated in the background using the
+     * ActionExecuter.
+     */
+    protected static NodeRef createCommitNode(WorkspaceNode srcWs1, WorkspaceNode srcWs2,
+                                              WorkspaceNode dstWs,
+                                              String type, String msg, String body,
+                                              ServiceRegistry services, StringBuffer response) {
+        
+        return createCommitNode(srcWs1, srcWs2, dstWs, type, msg, body,
+                                services, response, false);
+    }
 
 	/**
 	 * Create a commit node specifying the workspaces. Typically, since the serialization takes
@@ -479,15 +499,16 @@ public class CommitUtil {
 	protected static NodeRef createCommitNode(WorkspaceNode srcWs1, WorkspaceNode srcWs2,
 	                                          WorkspaceNode dstWs,
 	                                          String type, String msg, String body,
-	                                          ServiceRegistry services, StringBuffer response) {
+	                                          ServiceRegistry services, StringBuffer response,
+	                                          boolean twoSourceWorkspaces) {
         EmsScriptNode commitPkg = getOrCreateCommitPkg( dstWs, services, response, true );
 
         if (commitPkg == null) {
             return null;
         } else {
             // get the most recent commit before creating a new one
-            EmsScriptNode prevCommit1 = srcWs1 != null ? getLastCommit( srcWs1, services, response ) : null;
-            EmsScriptNode prevCommit2 = srcWs2 != null ? getLastCommit( srcWs2, services, response ) : null;
+            EmsScriptNode prevCommit1 = getLastCommit( srcWs1, services, response );
+            EmsScriptNode prevCommit2 = twoSourceWorkspaces ? getLastCommit( srcWs2, services, response ) : null;
 
             Date now = new Date();
             EmsScriptNode currCommit = commitPkg.createNode("commit_" + now.getTime(), "cm:content");
@@ -524,6 +545,7 @@ public class CommitUtil {
 	 */
 	public static void updateCommitNodeRef(NodeRef commitRef, String body, String msg, ServiceRegistry services, StringBuffer response) {
 	    EmsScriptNode commitNode = new EmsScriptNode(commitRef, services, response);
+	    // FIXME: make commitNode read only after updating it, so it can no longer be updated
 	    if (commitNode != null && commitNode.exists()) {
         	    if (msg != null) {
         	        commitNode.createOrUpdateProperty("cm:description", msg );
