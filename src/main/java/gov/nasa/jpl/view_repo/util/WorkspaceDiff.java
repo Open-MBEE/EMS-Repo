@@ -199,7 +199,7 @@ public class WorkspaceDiff implements Serializable {
         Set< String > ids = new TreeSet< String >( nodeDiff.getMap1().keySet() );
         ids.addAll( nodeDiff.getMap2().keySet() );
         for ( String id : ids ) {
-            NodeRef ref = NodeUtil.findNodeRefById( id, false, getWs1(), getTimestamp1(), null, true );
+            NodeRef ref = NodeUtil.findNodeRefById( id, false, getWs1(), getTimestamp1(), getServices(), true );
             if ( ref != null ) {
                 EmsScriptNode node = new EmsScriptNode( ref, getServices() );
                 if ( node.exists() ) {
@@ -822,18 +822,18 @@ public class WorkspaceDiff implements Serializable {
         
         // need to make sure both sets have each others' nodes
         for ( NodeRef n : s1 ) {
-            String cmName = NodeUtil.getName( n );
+            String sysmlId = NodeUtil.getSysmlId( n );
             NodeRef ref =
-                    NodeUtil.findNodeRefById( cmName, false, node, timestamp2,
+                    NodeUtil.findNodeRefById( sysmlId, false, node, timestamp2,
                                               getServices(), false );
             if ( ref != null ) s2.add( ref );
             if ( NodeUtil.isDeleted(n))
             	deletedFromS1.add(n);
         }
         for ( NodeRef n : s2 ) {
-            String cmName = NodeUtil.getName( n );
+            String sysmlId = NodeUtil.getSysmlId( n );
             NodeRef ref =
-                    NodeUtil.findNodeRefById( cmName, false, ws1, timestamp1,
+                    NodeUtil.findNodeRefById( sysmlId, false, ws1, timestamp1,
                                               getServices(), false );
             if ( ref != null ) s1.add( ref );
             if ( NodeUtil.isDeleted(n))
