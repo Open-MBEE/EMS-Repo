@@ -24,11 +24,9 @@ schemas:
   - views:    !include elements.json-schema
   - products: !include elements.json-schema
 
-  - comments:       !include elements.json-schema    
   - configurations: !include configurations.json-schema
   - projects:       !include projects.json-schema
   - snapshots:      !include snapshots.json-schema
-  - versions:       !include versions.json-schema
     
   - sites:       !include sites.json-schema
   - workspaces:  !include workspaces.json-schema
@@ -192,7 +190,7 @@ resourceTypes:
   description: All resources are "namespaced" by the workspace (aka branch).
   type: readCollection
   /{workspaceId}:
-    type: collection
+    #type: collection   # delete is not implemented yet
     uriParameters:
       workspaceId:
         description: Workspace ID under consideration. "master" is always defined and is the
@@ -203,31 +201,55 @@ resourceTypes:
         sourceWorkspace:
           description: The source workspace to branch from 
           type: string
+    get:
+      description: Get the specified workspace
     /elements:
-      type: collection
+      type: readCollection
+      get:
+        description: Returns the elements specified in the request body if they exist
+        body:
+          application/json:
+            schema: <<resourcePathName>>
+        responses:
+          200:
+            body:
+              application/json:
+                schema: <<resourcePathName>>
+            description: <<resourcePathName>> are returned if they existed
+          500:
+            description: Could not retrieve <<resourcePathName>> due to internal server error   
       /{elementId}:
-        post:
-          is: [constrainable]
+#        post:
+#          is: [constrainable]
 #        put:
 #          is: [constrainable]
-        type: collection
+        #type: collection
+        get:
+        delete:
         uriParameters:
           elementId:
             description: Sysml ID for the element under consideration
-        /comments:
-          type: collection
-          /{commentId}:
-            type: collection
-            uriParameters:
-              commentId:
-                description: Sysml ID for comment under consideration
-        /versions:
-          type: collection
-          /{versionId}:
-            type: collection
-            uriParameters:
-              versionId:
-                description: Sysml ID for the version under consideration
+    /configurations:
+      #type: collection
+      get:
+      post:
+      /{configurationId}:
+        #type: collection
+        delete:
+        get:
+        uriParameters:
+          configurationId:
+            description: ID for the configuration under consideration
+        /products:
+          description: Get products for the specified configuration
+          #type: collection
+          post:
+          get:
+        /snapshots:
+          description: Get snapshots for the specified configuration
+          #type: collection
+          post:
+          get:
     /sites:
       type: readCollection
       get:
@@ -235,63 +257,87 @@ resourceTypes:
         responses:
           200:
       /{siteId}:
+        get:
         uriParameters:
           siteId:
             description: Alfresco site identifier for the project under consideration
-        /configurations:
-          type: collection
-          /{configurationId}:
-            type: collection
-            uriParameters:
-              configurationId:
-                description: ID for the configuration under consideration
-            /products:
-              description: Get products for the specified configuration
-              type: collection
-            /snapshots:
-              description: Get snapshots for the specified configuration
-              type: collection
+#        /configurations:
+#          #type: collection
+#          get:
+#          post:
+#          /{configurationId}:
+#            #type: collection
+#            delete:
+#            get:
+#            uriParameters:
+#              configurationId:
+#                description: ID for the configuration under consideration
+#            /products:
+#              description: Get products for the specified configuration
+#              #type: collection
+#              post:
+#              get:
+#            /snapshots:
+#              description: Get snapshots for the specified configuration
+#              #type: collection
+#              post:
+#              get:
         /projects:
-          type: readCollection
-          get:
-            description: Retrieve all projects for which user has read permissions
-            responses:
-              200:
+          post: 
+          #type: readCollection
+          #get:
+          #  description: Retrieve all projects for which user has read permissions
+          #  responses:
+          #    200:
           /{projectId}:
             type: readCollection
             uriParameters:
               projectId:
                 description: MD project ID for the project under consideration
         /products:
-          type: collection
+          #type: collection
+          post:
           get:
             description: Retrieve all products for which user has read permissions
             responses:
               200:
           /{productId}:
-            type: collection
+            #type: collection
+            post:
+            get:
             uriParameters:
               productId:
                 description: Sysml ID for the product (document) under consideration
-            /views:
-              type: readCollection
+            #/views:
+            #  type: readCollection
             /snapshots:
               description: Scoped under /configurations and /products
-              type: collection
+              #type: collection
+              get:
+              post:
               /{snapshotId}:
                 type: collection
                 uriParameters:
                   snapshotId:
                     description: ID for the snapshot under consideration
+        /elements:
+            post:   
+        /artifacts:
+          /{artifactId}:
+            post:
+                description: Post artifact with {artifactId}
     /views:
-      type: collection
+      #type: collection
+      post:
       /{viewId}:
-        type: collection
+        #type: collection
+        get:
         uriParameters:
           viewId:
             description: Sysml ID for the view under consideration
         /elements:
-          type: collection
+          #type: collection
+          get:
           /{elementId}:
             post:
               is: [constrainable]
@@ -301,50 +347,56 @@ resourceTypes:
             uriParameters:
               elementId:
                 description: Sysml ID for the element under consideration
-            /comments:
-              type: collection
-              /{commentId}:
-                type: collection
-                uriParameters:
-                  commentId:
-                    description: Sysml ID for comment under consideration
-            /versions:
-              type: collection
-              /{versionId}:
-                type: collection
-                uriParameters:
-                  versionId:
-                    description: Sysml ID for the version under consideration
     /changesets:
       type: readCollection
       description: Track groups of changes together so they can be rolled back together if
                    necessary as well
       /{changesetId}:
-        post:
-          description: Revert Alfresco to the specified change set
-          responses:
-            200:
-              description: Successfully reverted the changeset
+        get:
+        #post:
+        #  description: Revert Alfresco to the specified change set
+        #  responses:
+        #    200:
+        #      description: Successfully reverted the changeset
     /artifacts:
       /{artifactId}:
-        type: collection
+        get:
+    /products:
+        /{productId}:
+            /views:
+              get:
+                description: Retrieve all views for the specified product for which user has read permissions
+                responses:
+                  200:
+    /projects:
+      post:
+      /{projectId}:
+        type: readCollection
+        uriParameters:
+          projectId:
+            description: MD project ID for the project under consideration
 /operations:
   description: Service for executing operations, e.g., like the OCL Execution capabilities in MDK. Details still TBD.
 /diff:
   description: Service for diffing between two model versions between projects
-  type: collection
   get:
     is: [diffable]
+    description: workspace diff get
 /merge:
+  description: Service for merging two workspaces.  timestamp args are not implemented yet.
   post:
     is: [diffable]
-/client:
+    description: workspace merge post
+/sites/permmissions:
   post:
-    queryParameters:
-      unregister:
-        description: if specified, indicates deregistration, otherwise if not specified, always registration or update 
-        type: boolean
-    body:
-      application/json:
-        schema:
-          client
+    description: Service for syncing permissions from Alfresco Share sites to corresponding model packages
+#/client:
+#  post:
+#    queryParameters:
+#      unregister:
+#        description: if specified, indicates deregistration, otherwise if not specified, always registration or update 
+#        type: boolean
+#    body:
+#      application/json:
+#        schema:
+#          client

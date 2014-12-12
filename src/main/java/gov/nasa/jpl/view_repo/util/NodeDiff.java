@@ -187,7 +187,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
     @Override
     public String getId( NodeRef t ) {
         EmsScriptNode node = new EmsScriptNode( t, getServices() );
-        return node.getName();
+        return node.getSysmlId();
     }
 
     @Override
@@ -213,7 +213,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
     public Map<String, Object> getPropertyMap( NodeRef ref ) {
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
         Map< String, Object > props = node.getProperties();
-        // TODO --REVIEW -- HERE!  Do we need to add anything here for specializations? Expressions?
+        props.put( "type", node.getTypeName() );
         Utils.removeAll( props, getPropertyIdsToIgnore() );
         return props;
     }
@@ -372,10 +372,10 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         // Add the owning Properties' values to the nodeDiff property change maps.
         for ( EmsScriptNode valueNode : valueSpecs ) {
             EmsScriptNode owningPropNode = valueNode.getOwningProperty();
-            Map< String, Pair< Object, Object > > propChanges = getPropertyChanges( owningPropNode.getName() );
+            Map< String, Pair< Object, Object > > propChanges = getPropertyChanges( owningPropNode.getSysmlId() );
 //            if ( propChanges == null ) {
 //                propChanges = new LinkedHashMap< String, Pair<Object,Object> >();
-//                getPropertyChanges().put( owningPropNode.getName(), propChanges );
+//                getPropertyChanges().put( owningPropNode.getSysmlId(), propChanges );
 //            }
             String valueName = NodeUtil.createQName( "sysml:value", getServices() ).toString();
             Pair< Object, Object > valueChange = propChanges.get( valueName );
@@ -385,13 +385,13 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
             }
             if ( getRemoved().contains( valueNode.getNodeRef() ) ) {
                 valueChange.first = valueNode;
-                getRemovedProperties( owningPropNode.getName() ).put( valueName, valueNode );
+                getRemovedProperties( owningPropNode.getSysmlId() ).put( valueName, valueNode );
             } else {
                 valueChange.second = valueNode;
                 if ( getAdded().contains( valueNode.getNodeRef() ) ) {
-                    getAddedProperties( valueNode.getName() ).put( valueName, valueNode );
+                    getAddedProperties( valueNode.getSysmlId() ).put( valueName, valueNode );
                 } else {
-                    getUpdatedProperties( valueNode.getName() ).put( valueName, valueChange );
+                    getUpdatedProperties( valueNode.getSysmlId() ).put( valueName, valueChange );
                 }
             }
         }
@@ -402,15 +402,15 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
             getUpdated().remove( node.getNodeRef() );
             getRemoved().remove( node.getNodeRef() ); // Is this right?????!!!
 
-            getPropertyChanges().remove( node.getName() );
-            getAddedProperties().remove( node.getName() );
-            getRemovedProperties().remove( node.getName() );
-            getUpdatedProperties().remove( node.getName() );
+            getPropertyChanges().remove( node.getSysmlId() );
+            getAddedProperties().remove( node.getSysmlId() );
+            getRemovedProperties().remove( node.getSysmlId() );
+            getUpdatedProperties().remove( node.getSysmlId() );
 
             get1().remove( node.getNodeRef() );
-            getMap1().remove( node.getName() );
+            getMap1().remove( node.getSysmlId() );
             get2().remove( node.getNodeRef() );
-            getMap2().remove( node.getName() );
+            getMap2().remove( node.getSysmlId() );
         }
 
         if (Debug.isOn()) Debug.outln("added = " + getAdded() );

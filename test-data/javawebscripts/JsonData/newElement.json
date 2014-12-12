@@ -1,0 +1,10 @@
+{ "elements" : [
+    {
+     "sysmlid" : "newElement",
+     "documentation" : "x is x",
+     "specialization" : {
+       "type": "Property",
+       "value" : [{ "string" : "the element added to ws1",
+                    "type" : "LiteralString"}]}
+     }
+]}

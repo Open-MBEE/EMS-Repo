@@ -53,6 +53,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
+@Deprecated
 public class ModelPurge extends AbstractJavaWebScript {
     public ModelPurge() {
         super();
@@ -144,7 +145,7 @@ public class ModelPurge extends AbstractJavaWebScript {
 	    }
 	    
 	    // don't delete a _pkg node since it will be automatically deleted by its refied component
-	    String id = (String) node.getProperty(Acm.ACM_ID);
+	    String id = node.getSysmlId();
 	    if (id.endsWith("_pkg")) {
 	        return;
 	    }
@@ -160,7 +161,7 @@ public class ModelPurge extends AbstractJavaWebScript {
         trx = services.getTransactionService().getNonPropagatingUserTransaction();
         try {
             trx.begin();
-            String key = (String)node.getProperty(Acm.ACM_ID);
+            String key = node.getSysmlId();
             log(LogLevel.INFO, "delete: beginning transaction {" + node.getNodeRef());
             services.getNodeService().deleteNode(node.getNodeRef());
             log(LogLevel.INFO, "} delete ending transaction: " + key);

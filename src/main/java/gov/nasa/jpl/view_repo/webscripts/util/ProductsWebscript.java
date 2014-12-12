@@ -1,20 +1,21 @@
 package gov.nasa.jpl.view_repo.webscripts.util;
 
+import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.Acm;
-import gov.nasa.jpl.view_repo.util.NodeUtil;
-import gov.nasa.jpl.view_repo.util.Acm.JSON_TYPE_FILTER;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotGet;
-import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -40,6 +41,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 public class ProductsWebscript extends AbstractJavaWebScript {
 
     public boolean simpleJson = false;
+    private EmsScriptNode sitePackageNode = null;
 
     public ProductsWebscript( Repository repository, ServiceRegistry services,
                               StringBuffer response ) {
@@ -50,11 +52,24 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                                                            throws JSONException {
         JSONArray productsJson = new JSONArray();
 
-        EmsScriptNode siteNode = getSiteNodeFromRequest( req );
-        if (siteNode == null) {
+        EmsScriptNode siteNode = null;
+        EmsScriptNode mySiteNode = getSiteNodeFromRequest( req, false );
+        WorkspaceNode workspace = getWorkspace( req );
+        String siteName = getSiteName(req);
+        
+        if (!NodeUtil.exists( mySiteNode )) {
             log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
             return productsJson;
         }
+        
+        // Find the project site and site package node if applicable:
+        Pair<EmsScriptNode,EmsScriptNode> sitePair = findProjectSite(req, siteName, workspace, mySiteNode);
+        if (sitePair == null) {
+            return productsJson;
+        }
+
+        sitePackageNode = sitePair.first;
+        siteNode = sitePair.second;  // Should be non-null
 
         String configurationId = req.getServiceMatch().getTemplateVars().get( "configurationId" );
         if (configurationId == null) {
@@ -84,7 +99,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         return configWs.getProducts( config, workspace, dateTime );
     }
     
-    public JSONArray handleContextProducts( WebScriptRequest req, EmsScriptNode context) throws JSONException {
+    public JSONArray handleContextProducts( WebScriptRequest req, EmsScriptNode siteNode) throws JSONException {
         JSONArray productsJson = new JSONArray();
         
         // get timestamp if specified
@@ -92,14 +107,33 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         WorkspaceNode workspace = getWorkspace( req );
         
-        Set< EmsScriptNode > productSet =
-                WebScriptUtil.getAllNodesInPath( context.getQnamePath(),
-                                                 "ASPECT", Acm.ACM_PRODUCT,
-                                                 workspace,
-                                                 dateTime, services,
-                                                 response );
-        for ( EmsScriptNode product : productSet ) {
-            productsJson.put( product.toJSONObject( null ) );
+        // Search for all products within the project site:
+        Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix, 
+                                                                Acm.ACM_PRODUCT, false,
+                                                                workspace, dateTime, 
+                                                                siteNode.getName());
+        if (nodeList != null) {
+            
+            boolean checkSitePkg = (sitePackageNode != null && sitePackageNode.exists());
+            // Get the alfresco Site for the site package node:
+            EmsScriptNode pkgSite = checkSitePkg ? getSiteForPkgSite(sitePackageNode, workspace) : null;
+            
+            Set<EmsScriptNode> nodes = new HashSet<EmsScriptNode>(nodeList.values());
+            for ( EmsScriptNode node : nodes) {
+                if (node != null) {
+                    // If we are just retrieving the products for a site package, then filter out the ones
+                    // that do not have the site package as the first site package parent:
+                    if (checkSitePkg) {
+                        if (pkgSite != null &&
+                            pkgSite.equals(findParentPkgSite(node, siteNode, null, workspace))) {
+                            productsJson.put( node.toJSONObject( null ) );
+                        }
+                    }
+                    else {
+                        productsJson.put( node.toJSONObject( null ) );
+                    }
+                }
+            }
         }
         
         return productsJson;
@@ -114,7 +148,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         JSONArray snapshotsJson = new JSONArray();
         List< EmsScriptNode > snapshotsList =
                 product.getTargetAssocsNodesByType( "view2:snapshots",
-                                                    workspace, dateTime );
+                                                    workspace, null );
         // lets add products from node refs
         List<NodeRef> productSnapshots = product.getPropertyNodeRefs( "view2:productSnapshots" );
         for (NodeRef productSnapshotNodeRef: productSnapshots) {
@@ -126,7 +160,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                           new EmsScriptNode.EmsScriptNodeComparator() );
         for ( EmsScriptNode snapshot : snapshotsList ) {
             if (!snapshot.isDeleted()) {
-                String id = (String)snapshot.getProperty( Acm.ACM_ID );
+                String id = snapshot.getSysmlId();
                 Date date = (Date)snapshot.getLastModified( dateTime );
     
                 JSONObject jsonObject = new JSONObject();
@@ -135,7 +169,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                 jsonObject.put( "creator",
                                 (String)snapshot.getProperty( "cm:modifier" ) );
                 jsonObject.put( "url", contextPath + "/service/snapshots/"
-                                       + snapshot.getProperty( Acm.ACM_ID ) );
+                                       + snapshot.getSysmlId() );
                 jsonObject.put( "tag", (String)SnapshotGet.getConfigurationSet( snapshot,
                                                                                 workspace,
                                                                                 dateTime ) );

@@ -17,6 +17,11 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+/**
+ * Workspace diffing service
+ * @author cinyoung
+ *
+ */
 public class MmsDiffGet extends AbstractJavaWebScript {
 
     protected WorkspaceNode ws1, ws2;
@@ -64,7 +69,11 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         
         Map<String, Object> results = new HashMap<String, Object>();
 
-        if (!validateRequest(req, status)) return results;
+        if (!validateRequest(req, status)) {
+            status.setCode(responseStatus.getCode());
+            results.put("res", response.toString());
+            return results;
+        }
 
         WorkspaceNode ws1, ws2;
         String workspace1 = req.getParameter( "workspace1" );

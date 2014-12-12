@@ -1,0 +1,279 @@
+{"elements": [
+    {
+        "creator": "admin",
+        "documentation": "something",
+        "editable": true,
+        "modified": "2014-12-10T14:54:26.227-0800",
+        "name": "300",
+        "owner": "123456",
+        "qualifiedId": "/123456/300",
+        "qualifiedName": "/JW_TEST/300",
+        "read": "2014-12-10T14:54:54.578-0800",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property",
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }]
+        },
+        "sysmlid": "300"
+    },
+    {
+        "creator": "admin",
+        "documentation": "to",
+        "editable": true,
+        "modified": "2014-12-10T14:54:46.387-0800",
+        "name": "302",
+        "owner": "301",
+        "qualifiedId": "/123456/300/301/302",
+        "qualifiedName": "/JW_TEST/300/301/302",
+        "read": "2014-12-10T14:54:54.588-0800",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property",
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }]
+        },
+        "sysmlid": "302"
+    },
+    {
+        "creator": "admin",
+        "documentation": "4about",
+        "editable": true,
+        "modified": "2014-12-10T14:54:34.622-0800",
+        "name": "404",
+        "owner": "403",
+        "qualifiedId": "/123456/4000/401/402/403/404",
+        "qualifiedName": "/JW_TEST/400/401/402/403/404",
+        "read": "2014-12-10T14:54:54.603-0800",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property",
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }]
+        },
+        "sysmlid": "404"
+    },
+    {
+        "creator": "admin",
+        "documentation": "else",
+        "editable": true,
+        "modified": "2014-12-10T14:54:51.366-0800",
+        "name": "301",
+        "owner": "300",
+        "qualifiedId": "/123456/300/301",
+        "qualifiedName": "/JW_TEST/300/301",
+        "read": "2014-12-10T14:54:54.620-0800",
+        "specialization": {
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "childrenViews": ["304"],
+            "contains": [{
+                "source": "301",
+                "sourceProperty": "documentation",
+                "sourceType": "reference",
+                "type": "Paragraph"
+            }],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "noSections": ["302"],
+            "type": "Product",
+            "view2view": [{
+                "childrenViews": [
+                    "301",
+                    "302"
+                ],
+                "sysmlid": "301"
+            }]
+        },
+        "sysmlid": "301"
+    },
+    {
+        "creator": "admin",
+        "documentation": "about",
+        "editable": true,
+        "modified": "2014-12-10T14:54:28.960-0800",
+        "name": "304",
+        "owner": "303",
+        "qualifiedId": "/123456/300/301/302/303/304",
+        "qualifiedName": "/JW_TEST/300/301/302/303/304",
+        "read": "2014-12-10T14:54:54.631-0800",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property",
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }]
+        },
+        "sysmlid": "304"
+    },
+    {
+        "creator": "admin",
+        "documentation": "talk",
+        "editable": true,
+        "modified": "2014-12-10T14:54:46.923-0800",
+        "name": "303",
+        "owner": "302",
+        "qualifiedId": "/123456/300/301/302/303",
+        "qualifiedName": "/JW_TEST/300/301/302/303",
+        "read": "2014-12-10T14:54:54.649-0800",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property",
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }]
+        },
+        "sysmlid": "303"
+    },
+    {
+        "creator": "admin",
+        "documentation": "4else",
+        "editable": true,
+        "modified": "2014-12-10T14:54:53.627-0800",
+        "name": "401",
+        "owner": "4000",
+        "qualifiedId": "/123456/4000/401",
+        "qualifiedName": "/JW_TEST/400/401",
+        "read": "2014-12-10T14:54:54.665-0800",
+        "specialization": {
+            "allowedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "childrenViews": ["404"],
+            "contains": [{
+                "source": "401",
+                "sourceProperty": "documentation",
+                "sourceType": "reference",
+                "type": "Paragraph"
+            }],
+            "displayedElements": [
+                "401",
+                "402",
+                "403"
+            ],
+            "noSections": ["402"],
+            "type": "Product",
+            "view2view": [{
+                "childrenViews": [
+                    "401",
+                    "402"
+                ],
+                "sysmlid": "401"
+            }]
+        },
+        "sysmlid": "401"
+    },
+    {
+        "creator": "admin",
+        "documentation": "4talk",
+        "editable": true,
+        "modified": "2014-12-10T14:54:33.908-0800",
+        "name": "403",
+        "owner": "402",
+        "qualifiedId": "/123456/4000/401/402/403",
+        "qualifiedName": "/JW_TEST/400/401/402/403",
+        "read": "2014-12-10T14:54:54.676-0800",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property",
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }]
+        },
+        "sysmlid": "403"
+    },
+    {
+        "creator": "admin",
+        "editable": true,
+        "modified": "2014-12-10T14:54:19.614-0800",
+        "name": "JW_TEST",
+        "owner": "null",
+        "qualifiedId": "/123456",
+        "qualifiedName": "/JW_TEST",
+        "read": "2014-12-10T14:54:54.691-0800",
+        "sysmlid": "123456"
+    },
+    {
+        "creator": "admin",
+        "documentation": "4to",
+        "editable": true,
+        "modified": "2014-12-10T14:54:33.238-0800",
+        "name": "402",
+        "owner": "401",
+        "qualifiedId": "/123456/4000/401/402",
+        "qualifiedName": "/JW_TEST/400/401/402",
+        "read": "2014-12-10T14:54:54.694-0800",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property",
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }]
+        },
+        "sysmlid": "402"
+    },
+    {
+        "creator": "admin",
+        "documentation": "4something",
+        "editable": true,
+        "modified": "2014-12-10T14:54:32.120-0800",
+        "name": "400",
+        "owner": "123456",
+        "qualifiedId": "/123456/4000",
+        "qualifiedName": "/JW_TEST/400",
+        "read": "2014-12-10T14:54:54.708-0800",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "type": "Property",
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }]
+        },
+        "sysmlid": "4000"
+    },
+    {
+        "creator": "admin",
+        "documentation": "directed_relationship",
+        "editable": true,
+        "modified": "2014-12-10T14:54:29.539-0800",
+        "name": "500",
+        "owner": "300",
+        "qualifiedId": "/123456/300/500",
+        "qualifiedName": "/JW_TEST/300/500",
+        "read": "2014-12-10T14:54:54.718-0800",
+        "specialization": {
+            "source": "302",
+            "target": "303",
+            "type": "DirectedRelationship"
+        },
+        "sysmlid": "500"
+    }
+]}
+200

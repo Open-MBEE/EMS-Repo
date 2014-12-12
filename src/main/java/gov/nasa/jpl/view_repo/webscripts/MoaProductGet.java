@@ -61,6 +61,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
+@Deprecated
 public class MoaProductGet extends AbstractJavaWebScript {
     public MoaProductGet() {
         super();
@@ -223,7 +224,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
         JSONArray snapshotsJson = new JSONArray();
         List<EmsScriptNode> snapshotsList = 
                 product.getTargetAssocsNodesByType("view2:snapshots", workspace,
-                                                   dateTime);
+                                                   null);
 
         Collections.sort(snapshotsList, new EmsScriptNode.EmsScriptNodeComparator());
         for (EmsScriptNode snapshot: snapshotsList) {
@@ -246,7 +247,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
                 continue;
             }
 
-            String id = (String)snapshot.getProperty(Acm.ACM_ID);
+            String id = snapshot.getSysmlId();
             Date date = (Date)snapshot.getLastModified( dateTime );
             
             JSONObject jsonObject = new JSONObject();

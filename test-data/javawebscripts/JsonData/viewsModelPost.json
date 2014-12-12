@@ -1,0 +1,16 @@
+{ "elements":
+    [
+        {
+           "sysmlid": "301",
+                   "specialization": {
+                      "type":"View"
+           }
+                },
+                {
+           "sysmlid": "401",
+                   "specialization": {
+                      "type":"View"
+           }
+                }
+    ]
+}

@@ -98,9 +98,9 @@ public class ArtifactPost extends AbstractJavaWebScript {
 		clearCaches();
 		
         String cs = req.getParameter("cs"); // Ignoring this b/c we calculate it from the data
-        String extension = req.getParameter("extension");
-                
-        if (!Utils.isNullOrEmpty(extension) && !extension.startsWith(".")) {
+        String extension = req.getParameter("extension") != null ? req.getParameter("extension") : ".svg";
+
+        if (!extension.startsWith(".")) {
         	extension = "." + extension;
         }
         

@@ -1,0 +1,12 @@
+{ "elements" : [
+
+    {
+        "sysmlid" : "testCmed416_2",
+        "owner" : "123456",
+        "name"  : "testName",
+        "specialization" : {
+            "type" : "Property"
+        }
+    }
+    
+]}

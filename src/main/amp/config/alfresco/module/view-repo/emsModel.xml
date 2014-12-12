@@ -3,26 +3,19 @@
     <description>EMS Unique Models</description>
     <author>JPL</author>
     <version>1.0</version>
+    
     <imports>
         <import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d"/>
         <import uri="http://www.alfresco.org/model/content/1.0" prefix="cm"/>
         <import uri="http://jpl.nasa.gov/model/view/2.0" prefix="view2"/>
     </imports>
+    
     <namespaces>
         <namespace uri="http://jpl.nasa.gov/model/ems/1.0" prefix="ems"/>
     </namespaces>
+    
     <data-types/>
-    <constraints>
-    		<constraint name="ems:job_status_constraint" type="LIST">
-    			<parameter name="allowedValues">
-    				<list>
-    					<value>Active</value>
-    					<value>Succeeded</value>
-    					<value>Failed</value>
-    				</list>
-    			</parameter>
-    		</constraint>
-    </constraints>
+    
     <types>      
         <type name="ems:Job">
             <parent>cm:content</parent>
@@ -31,9 +24,17 @@
 	                	<type>d:text</type>
 	                	<mandatory>true</mandatory>
 	                	<index enabled="false"/>
-	                	<constraints>
-	                		<constraint ref="ems:job_status_constraint"/>
-	                	</constraints>
+				    <constraints>
+				            <constraint name="ems:job_status_constraint" type="LIST">
+				                <parameter name="allowedValues">
+				                    <list>
+				                        <value>Active</value>
+				                        <value>Succeeded</value>
+				                        <value>Failed</value>
+				                    </list>
+				                </parameter>
+				            </constraint>
+				    </constraints>
                 </property>
                 <property name="ems:job_log">
 	                	<type>d:noderef</type>
@@ -51,6 +52,7 @@
 	            	<aspect>cm:titled</aspect>
             </mandatory-aspects>
         </type>
+        
         <type name="ems:ConfigurationSet">
             <parent>ems:Job</parent>
             <properties/>
@@ -84,21 +86,23 @@
             </mandatory-aspects>
         </type>
      </types>
+     
      <aspects>
-        <aspect name="ems:HasChildren">
-            <properties>
-                <property name="ems:children">
-                    <type>d:noderef</type>
-                    <mandatory>false</mandatory>
-                    <multiple>true</multiple>
-                    <index enabled="true">
-                        <atomic>false</atomic>
-                        <stored>false</stored>
-                        <tokenised>false</tokenised>
-                    </index>
-                </property>
-            </properties>
-        </aspect>
+		<aspect name="ems:HasChildren">
+		    <properties>
+		        <property name="ems:children">
+		            <type>d:noderef</type>
+		            <mandatory>false</mandatory>
+		            <multiple>true</multiple>
+		            <index enabled="true">
+		                <atomic>false</atomic>
+		                <stored>false</stored>
+		                <tokenised>false</tokenised>
+		            </index>
+		        </property>
+		    </properties>
+		</aspect>
+        
          <aspect name="ems:TreeNode">
             <parent>ems:HasChildren</parent>
             <properties>
@@ -114,6 +118,7 @@
                 </property>
             </properties>
         </aspect>
+        
         <aspect name="ems:Workspace">
             <parent>ems:TreeNode</parent>
             <properties>
@@ -129,7 +134,18 @@
                         <tokenised>false</tokenised>
                     </index>
                 </property>
+				<!-- This is the last time the changes from the parent workspace were applied 
+					to this one. -->
                 <property name="ems:lastTimeSyncParent">
+                    <type>d:datetime</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false"/>
+                </property>
+				<!-- The time point at which the workspace is a copy. If a workspace does 
+					not have this property, the workspace "walks" with its parent; in other words,
+					changes in the parent workspace pass through to the child (unless they conflict). -->
+                <property name="ems:copyTime">
                     <type>d:datetime</type>
                     <mandatory>false</mandatory>
                     <multiple>false</multiple>
@@ -137,6 +153,7 @@
                 </property>
             </properties>
         </aspect>
+        
         <aspect name="ems:HasWorkspace">
             <properties>
                 <property name="ems:workspace">
@@ -236,7 +253,6 @@
         
         <aspect name="ems:Committable">
             <properties>
-                
                 <property name="ems:commitParents">
                     <!-- multiple parents only for MERGE -->
                     <type>d:noderef</type>
@@ -257,6 +273,17 @@
                     <mandatory>false</mandatory>
                     <multiple>false</multiple>
                     <index enabled="false"/>
+				    <constraints>
+				        <constraint name="ems:commitType_constraint" type="LIST">
+				            <parameter name="allowedValues">
+				                <list>
+				                    <value>COMMIT</value>
+				                    <value>MERGE</value>
+				                    <value>BRANCH</value>
+				                </list>
+				            </parameter>
+				        </constraint>
+				    </constraints>
                 </property>
                 <property name="ems:commit">
                     <type>d:text</type>
@@ -265,6 +292,69 @@
                     <index enabled="false"/>
                 </property>
             </properties>
+        </aspect>        
+        <aspect name="ems:MagicDrawData">
+          <properties>
+              <property name="ems:mdData">
+                  <type>d:text</type>
+                  <mandatory>false</mandatory>
+                  <multiple>false</multiple>
+                  <index enabled="false">
+                      <atomic>false</atomic>
+                      <stored>false</stored>
+                      <tokenised>false</tokenised>
+                  </index>
+              </property>
+          </properties>
+        </aspect>
+        <aspect name="ems:Site">
+            <properties>
+                 <property name="ems:siteParent">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+                <property name="ems:siteChildren">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>true</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+                <property name="ems:sitePackage">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+            </properties>
+        </aspect>
+        <aspect name="ems:SiteCharacterization">
+            <properties>
+                <property name="ems:siteSite">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+            </properties>
         </aspect>
      </aspects>
+
 </model>

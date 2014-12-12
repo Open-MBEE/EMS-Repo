@@ -4,9 +4,9 @@
     See newview.post.desc.xml for format. 
   	</description>
 		<url>/javawebscripts/views/{id}?recurse={recurse?}</url>
-		<format default="json">any</format>
+		<format default="json">argument</format>
 		<authentication>user</authentication>
-		<transaction allow="readonly">required</transaction>
+		<transaction allow="readwrite">required</transaction>
 		<family>EMS Java Webscripts</family>
 		<args>
 			<arg>

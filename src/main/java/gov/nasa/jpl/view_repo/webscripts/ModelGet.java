@@ -46,7 +46,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONArray;
@@ -73,7 +72,6 @@ public class ModelGet extends AbstractJavaWebScript {
     // injected via spring configuration
     protected boolean isViewRequest = false;
     
-	private JSONObject elementHierarchy = new JSONObject();
 	protected JSONArray elements = new JSONArray();
 	protected Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
 
@@ -82,7 +80,6 @@ public class ModelGet extends AbstractJavaWebScript {
     @Override
 	protected void clearCaches() {
 		super.clearCaches();
-		elementHierarchy = new JSONObject();
 		elements = new JSONArray();
 		elementsFound = new HashMap<String, EmsScriptNode>();
 	}
@@ -247,8 +244,8 @@ public class ModelGet extends AbstractJavaWebScript {
             
             if (isViewRequest) {
                 handleViewHierarchy(modelRootNode, recurse, workspace, dateTime);
-            } else {
-                handleElementHierarchy(modelRootNode, recurse, workspace, dateTime);
+            } else {                
+                handleElementHierarchy( modelRootNode, recurse, workspace, dateTime );
             }
             
             handleElements(dateTime);
@@ -316,49 +313,50 @@ public class ModelGet extends AbstractJavaWebScript {
 	}
 	
 	
-	/**
-	 * Build up the element hierarchy from the specified root
-	 * @param root		Root node to get children for
-	 * @param workspace 
-	 * @param dateTime 
-	 * @throws JSONException
-	 */
-	protected void handleElementHierarchy(EmsScriptNode root, boolean recurse,
-	                                      WorkspaceNode workspace, Date dateTime)
+    /**
+     * Get all elements in tree from the specified root
+     * 
+     * @param root
+     *            Root node to get children for
+     * @param workspace
+     * @param dateTime
+     * @throws JSONException
+     */
+	protected void handleElementHierarchy( EmsScriptNode root, boolean recurse,
+	                                       WorkspaceNode workspace, Date dateTime )
 	                                              throws JSONException {
-		JSONArray array = new JSONArray();
-		
+	    		
 		// don't return any elements
 		if (!root.exists()) {
 		    return;
 		}
-		
-		// add root element to elementsFound if its not already there (if it's there, it's probably because the root is a reified pkg node)
-		String sysmlId = (String)root.getProperty(Acm.ACM_ID);
+	
+		// add root element to elementsFound if its not already there 
+		// (if it's there, it's probably because the root is a reified pkg node)
+		String sysmlId = root.getSysmlId();
+		String rootName = sysmlId;
 		if (!elementsFound.containsKey(sysmlId)) {
 		    // dont add reified packages
-		    if (!((String)root.getProperty(Acm.CM_NAME)).contains("_pkg") &&
+		    if (!rootName.contains("_pkg") &&
 		        !root.isPropertyOwnedValueSpecification()) {
-		        elementsFound.put((String)root.getProperty(Acm.ACM_ID), root);
+		        elementsFound.put(sysmlId, root);
 		    }
 		}
 
 		if (recurse) {
 			// Find all the children, recurse or add to array as needed.
-            // TODO: figure out why the child association creation from the
-            // reification isn't being picked up
-		    String rootName = (String)root.getProperty(Acm.CM_NAME);
-		    if (!rootName.contains("_pkg")) {
-                EmsScriptNode reifiedNode =
-                        findScriptNodeById( rootName + "_pkg", workspace,
-                                            dateTime, false );
+		    // If it is a reified package, then need get the reifiedNode
+		    if ( rootName.endsWith("_pkg") ) {
+                EmsScriptNode reifiedNode = findScriptNodeById( rootName.substring( 0, rootName.lastIndexOf("_pkg") ),
+                                                                workspace,
+                                                                dateTime, false );
 		        if (reifiedNode != null) {
-                    handleElementHierarchy( reifiedNode, recurse, workspace,
-                                            dateTime );
+                    handleElementHierarchy( reifiedNode, recurse, workspace, dateTime );
 		        } // TODO -- REVIEW -- Warning or error?
 		    }
-			for (ChildAssociationRef assoc: root.getChildAssociationRefs()) {
-			    NodeRef childRef = assoc.getChildRef();
+		    
+		    // Handle all the children in this workspace:
+		    for ( NodeRef childRef : root.getOwnedChildren(false) ) {
 			    NodeRef vChildRef = NodeUtil.getNodeRefAtTime( childRef, workspace, dateTime );
                 if ( vChildRef == null ) {
                     // this doesn't elicit a not found response
@@ -367,36 +365,22 @@ public class ModelGet extends AbstractJavaWebScript {
                          + ( dateTime == null ? "" : " at " + dateTime ) + " not found");
 			        continue;
 			    }
-                childRef = vChildRef;
-                EmsScriptNode child =
-                        new EmsScriptNode( childRef, services, response );
+                EmsScriptNode child = new EmsScriptNode( vChildRef, services, response );
                 if ( checkPermissions( child, PermissionService.READ ) ) {
                     if (child.exists() && !child.isPropertyOwnedValueSpecification()) {
-                        if ( child.getTypeShort().equals( Acm.ACM_ELEMENT_FOLDER ) ) {
-                            handleElementHierarchy( child, recurse, workspace,
-                                                    dateTime );
-                        } else {
-                            String value = (String)child.getProperty( Acm.ACM_ID );
-                            if ( value != null ) {
-                                array.put( value );
-                                elementsFound.put( value, child );
-                                // add empty hierarchies as well
-                                elementHierarchy.put( value, new JSONArray() );
-                            }
+                        
+                        String value = child.getSysmlId();
+                        if ( value != null ) {
+                            elementsFound.put( value, child );
                         }
-                    }
-                }
+                        
+                        handleElementHierarchy( child, recurse, workspace, dateTime );
+                        
+                    } // ends if (child.exists() && !child.isPropertyOwnedValueSpecification())
+                } // ends if ( checkPermissions( child, PermissionService.READ ) ) 
 			}
-	    	
-			// if there were any children add them to the hierarchy object
-			String key = (String)root.getProperty(Acm.ACM_ID);
-			if (root.getTypeShort().equals(Acm.ACM_ELEMENT_FOLDER) && key == null) {
-				// TODO this is temporary? until we can get sysml:id from Element Folder?
-				key = root.getProperty(Acm.CM_NAME).toString().replace("_pkg", "");
-			}
-			
-			elementHierarchy.put(key, array);
-		}
+						
+		}  // ends if (recurse)
 	}
 	
 	/**

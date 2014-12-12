@@ -65,6 +65,12 @@
 					"type": "date",
 					"description": "Last time workspace pulled from base branch, used for calculating conflicts"
 				},
+				
+				"modified":
+				{
+				    "type": "date",
+				    "description": "Last modification time of workspace"
+			    },
 
 				"permissions": 
 				{

@@ -1,0 +1,20 @@
+{
+    "elements": [{
+        "creator": "admin",
+        "documentation": "A site package",
+        "editable": true,
+        "modified": "2014-11-20T08:55:15.044-0800",
+        "name": "package",
+        "owner": "123456",
+        "qualifiedId": "/123456/package",
+        "qualifiedName": "/JW_TEST2/package",
+        "read": "2014-11-20T08:55:15.790-0800",
+        "specialization": {
+            "isSite": true,
+            "type": "Package"
+        },
+        "sysmlid": "package"
+    }],
+    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
+}
+200
