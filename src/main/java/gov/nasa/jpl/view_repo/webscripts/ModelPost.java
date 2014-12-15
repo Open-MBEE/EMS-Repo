@@ -1880,7 +1880,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         EmsScriptNode parent;
         if (useParent) {
-            parent= node.getParent();
+            parent= node.getParent();     
         } else {
             parent = node;
         }
@@ -1900,6 +1900,19 @@ public class ModelPost extends AbstractJavaWebScript {
                              + WorkspaceNode.getName( workspace ) );
                 e.printStackTrace();
                 //throw e; // pass it up the chain to roll back transaction // REVIEW -- compiler won't allow throw like below--why??
+                return null;
+            }
+        }
+        
+        // If node is not in the correct workspace then clone it:
+        //  Note: this can occur if the parent workspace has the reified node, but not the
+        //        reified pkg when getOwner() calls this.  See CMED-501.
+        if (!NodeUtil.workspacesEqual( workspace, node.getWorkspace() )) {
+            node = node.clone( parent );
+            
+            if ( node == null || !node.exists() ) {
+                log( LogLevel.ERROR,
+                     "Clone failed for node id = " + id );
                 return null;
             }
         }
