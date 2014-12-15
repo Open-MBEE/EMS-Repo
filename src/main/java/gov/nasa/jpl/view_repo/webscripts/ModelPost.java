@@ -357,7 +357,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // Send deltas to all listeners
         if (wsDiff.isDiff()) {
             // FIXME: Need to split elements by project Id - since they won't always be in same project
-            CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), projectNode, status );
+            CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), status );
         }
 
         Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): Deltas time", timeEvents);
