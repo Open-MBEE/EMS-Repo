@@ -22,9 +22,9 @@
 
         "creator": "admin",
 
-        "name": "wsT",
+        "name": "wsA",
 
-        "qualifiedName": "master/wsA/wsT"
+        "qualifiedName": "master/wsA"
 
     },
 
@@ -32,9 +32,9 @@
 
         "creator": "admin",
 
-        "name": "wsA",
+        "name": "wsT",
 
-        "qualifiedName": "master/wsA"
+        "qualifiedName": "master/wsA/wsT"
 
     }
 

@@ -4,100 +4,6 @@
 
         "creator": "admin",
 
-        "documentation": "Magic Draw Meta-Data",
-
-        "editable": true,
-
-        "name": "md",
-
-        "owner": "123456",
-
-        "qualifiedId": "/123456/md",
-
-        "qualifiedName": "/JW_TEST2/md",
-
-        "specialization": {
-
-            "mdData": "A blob of meta-data",
-
-            "type": "MagicDrawData"
-
-        },
-
-        "sysmlid": "md"
-
-    },
-
-    {
-
-        "creator": "admin",
-
-        "documentation": "Associations's owned end",
-
-        "editable": true,
-
-        "name": "AssocOwnedEnd",
-
-        "owner": "123456",
-
-        "qualifiedId": "/123456/AssocOwnedEnd",
-
-        "qualifiedName": "/JW_TEST2/AssocOwnedEnd",
-
-        "specialization": {
-
-            "isDerived": false,
-
-            "isSlot": false,
-
-            "type": "Property"
-
-        },
-
-        "sysmlid": "AssocOwnedEnd"
-
-    },
-
-    {
-
-        "creator": "admin",
-
-        "documentation": "association",
-
-        "editable": true,
-
-        "name": "association",
-
-        "owner": "123456",
-
-        "qualifiedId": "/123456/association",
-
-        "qualifiedName": "/JW_TEST2/association",
-
-        "specialization": {
-
-            "ownedEnd": ["AssocOwnedEnd"],
-
-            "source": "sourceId",
-
-            "sourceAggregation": "COMPOSITE",
-
-            "target": "targetId",
-
-            "targetAggregation": "SHARED",
-
-            "type": "Association"
-
-        },
-
-        "sysmlid": "association"
-
-    },
-
-    {
-
-        "creator": "admin",
-
         "documentation": "Connector source",
 
         "editable": true,
@@ -144,6 +50,34 @@
 
         "creator": "admin",
 
+        "documentation": "Magic Draw Meta-Data",
+
+        "editable": true,
+
+        "name": "md",
+
+        "owner": "123456",
+
+        "qualifiedId": "/123456/md",
+
+        "qualifiedName": "/JW_TEST2/md",
+
+        "specialization": {
+
+            "mdData": "A blob of meta-data",
+
+            "type": "MagicDrawData"
+
+        },
+
+        "sysmlid": "md"
+
+    },
+
+    {
+
+        "creator": "admin",
+
         "documentation": "View updates",
 
         "editable": true,
@@ -165,6 +99,58 @@
         },
 
         "sysmlid": "viewWithContents"
+
+    },
+
+    {
+
+        "creator": "admin",
+
+        "documentation": "View content",
+
+        "editable": true,
+
+        "name": "viewContents",
+
+        "owner": "123456",
+
+        "qualifiedId": "/123456/viewContents",
+
+        "qualifiedName": "/JW_TEST2/viewContents",
+
+        "specialization": {"type": "Expression"},
+
+        "sysmlid": "viewContents"
+
+    },
+
+    {
+
+        "creator": "admin",
+
+        "documentation": "source",
+
+        "editable": true,
+
+        "name": "sourceId",
+
+        "owner": "123456",
+
+        "qualifiedId": "/123456/sourceId",
+
+        "qualifiedName": "/JW_TEST2/sourceId",
+
+        "specialization": {
+
+            "isDerived": false,
+
+            "isSlot": false,
+
+            "type": "Property"
+
+        },
+
+        "sysmlid": "sourceId"
 
     },
 
@@ -195,6 +181,134 @@
         },
 
         "sysmlid": "characterizes"
+
+    },
+
+    {
+
+        "creator": "admin",
+
+        "documentation": "association",
+
+        "editable": true,
+
+        "name": "association",
+
+        "owner": "123456",
+
+        "qualifiedId": "/123456/association",
+
+        "qualifiedName": "/JW_TEST2/association",
+
+        "specialization": {
+
+            "ownedEnd": ["AssocOwnedEnd"],
+
+            "source": "sourceId",
+
+            "sourceAggregation": "COMPOSITE",
+
+            "target": "targetId",
+
+            "targetAggregation": "SHARED",
+
+            "type": "Association"
+
+        },
+
+        "sysmlid": "association"
+
+    },
+
+    {
+
+        "creator": "admin",
+
+        "documentation": "LiteralSet",
+
+        "editable": true,
+
+        "name": "literalSet",
+
+        "owner": "123456",
+
+        "qualifiedId": "/123456/literalSet",
+
+        "qualifiedName": "/JW_TEST2/literalSet",
+
+        "specialization": {
+
+            "set": [
+
+                {
+
+                    "string": "I",
+
+                    "type": "LiteralString"
+
+                },
+
+                {
+
+                    "string": "Love",
+
+                    "type": "LiteralString"
+
+                },
+
+                {
+
+                    "string": "Bears",
+
+                    "type": "LiteralString"
+
+                }
+
+            ],
+
+            "setOperand": {
+
+                "string": "Bears",
+
+                "type": "LiteralString"
+
+            },
+
+            "type": "LiteralSet"
+
+        },
+
+        "sysmlid": "literalSet"
+
+    },
+
+    {
+
+        "creator": "admin",
+
+        "documentation": "target",
+
+        "editable": true,
+
+        "name": "targetId",
+
+        "owner": "123456",
+
+        "qualifiedId": "/123456/targetId",
+
+        "qualifiedName": "/JW_TEST2/targetId",
+
+        "specialization": {
+
+            "isDerived": false,
+
+            "isSlot": false,
+
+            "type": "Property"
+
+        },
+
+        "sysmlid": "targetId"
 
     },
 
@@ -274,98 +388,6 @@
 
         "creator": "admin",
 
-        "documentation": "LiteralSet",
-
-        "editable": true,
-
-        "name": "literalSet",
-
-        "owner": "123456",
-
-        "qualifiedId": "/123456/literalSet",
-
-        "qualifiedName": "/JW_TEST2/literalSet",
-
-        "specialization": {
-
-            "set": [
-
-                {
-
-                    "string": "I",
-
-                    "type": "LiteralString"
-
-                },
-
-                {
-
-                    "string": "Love",
-
-                    "type": "LiteralString"
-
-                },
-
-                {
-
-                    "string": "Bears",
-
-                    "type": "LiteralString"
-
-                }
-
-            ],
-
-            "setOperand": {
-
-                "string": "Bears",
-
-                "type": "LiteralString"
-
-            },
-
-            "type": "LiteralSet"
-
-        },
-
-        "sysmlid": "literalSet"
-
-    },
-
-    {
-
-        "creator": "admin",
-
-        "documentation": "source",
-
-        "editable": true,
-
-        "name": "sourceId",
-
-        "owner": "123456",
-
-        "qualifiedId": "/123456/sourceId",
-
-        "qualifiedName": "/JW_TEST2/sourceId",
-
-        "specialization": {
-
-            "isDerived": false,
-
-            "isSlot": false,
-
-            "type": "Property"
-
-        },
-
-        "sysmlid": "sourceId"
-
-    },
-
-    {
-
-        "creator": "admin",
-
         "documentation": "Connector target",
 
         "editable": true,
@@ -396,39 +418,17 @@
 
         "creator": "admin",
 
-        "documentation": "View content",
+        "documentation": "Associations's owned end",
 
         "editable": true,
 
-        "name": "viewContents",
+        "name": "AssocOwnedEnd",
 
         "owner": "123456",
 
-        "qualifiedId": "/123456/viewContents",
+        "qualifiedId": "/123456/AssocOwnedEnd",
 
-        "qualifiedName": "/JW_TEST2/viewContents",
-
-        "specialization": {"type": "Expression"},
-
-        "sysmlid": "viewContents"
-
-    },
-
-    {
-
-        "creator": "admin",
-
-        "documentation": "target",
-
-        "editable": true,
-
-        "name": "targetId",
-
-        "owner": "123456",
-
-        "qualifiedId": "/123456/targetId",
-
-        "qualifiedName": "/JW_TEST2/targetId",
+        "qualifiedName": "/JW_TEST2/AssocOwnedEnd",
 
         "specialization": {
 
@@ -440,7 +440,7 @@
 
         },
 
-        "sysmlid": "targetId"
+        "sysmlid": "AssocOwnedEnd"
 
     }
 

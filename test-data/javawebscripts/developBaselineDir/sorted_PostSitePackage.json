@@ -1,17 +1,14 @@
-{
-    "elements": [{
-        "creator": "admin",
-        "documentation": "A site package",
-        "editable": true,
-        "name": "package",
-        "owner": "123456",
-        "qualifiedId": "/123456/package",
-        "qualifiedName": "/JW_TEST2/package",
-        "specialization": {
-            "isSite": true,
-            "type": "Package"
-        },
-        "sysmlid": "package"
-    }],
-    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
-}
+{"elements": [{
+    "creator": "admin",
+    "documentation": "A site package",
+    "editable": true,
+    "name": "package",
+    "owner": "123456",
+    "qualifiedId": "/123456/package",
+    "qualifiedName": "/JW_TEST2/package",
+    "specialization": {
+        "isSite": true,
+        "type": "Package"
+    },
+    "sysmlid": "package"
+}]}

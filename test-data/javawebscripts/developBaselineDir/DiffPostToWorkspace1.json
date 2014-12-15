@@ -1,44 +1,38 @@
-{
+{"elements": [{
 
-    "elements": [{
+    "creator": "admin",
 
-        "creator": "admin",
+    "documentation": "x is x",
 
-        "documentation": "x is x",
+    "editable": true,
 
-        "editable": true,
+    "owner": "holding_bin_no_site_no_project",
 
-        "owner": "holding_bin_no_site_no_project",
+    "qualifiedId": "/no_project/holding_bin_no_site_no_project/newElement",
 
-        "qualifiedId": "/no_project/holding_bin_no_site_no_project/newElement",
+    "qualifiedName": "/no_project/holding_bin/null",
 
-        "qualifiedName": "/no_project/holding_bin/null",
+    "specialization": {
 
-        "specialization": {
+        "isDerived": false,
 
-            "isDerived": false,
+        "isSlot": false,
 
-            "isSlot": false,
+        "type": "Property",
 
-            "type": "Property",
+        "value": [{
 
-            "value": [{
+            "string": "the element added to ws1",
 
-                "string": "the element added to ws1",
+            "type": "LiteralString"
 
-                "type": "LiteralString"
+        }]
 
-            }]
+    },
 
-        },
+    "sysmlid": "newElement"
 
-        "sysmlid": "newElement"
-
-    }],
-
-    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
-
-}
+}]}
 
 200
 

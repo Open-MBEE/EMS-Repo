@@ -539,7 +539,7 @@ public class NodeUtil {
                          // workspace unless we found one that is only in the
                          // target workspace.
                          ( !exists( workspace ) ||
-                                   workspace.equals( getWorkspace( nodeRef ) ) ) ) {
+                                    workspace.equals( getWorkspace( nodeRef ) ) ) ) {
                         break;
                     }
                 }
@@ -1019,7 +1019,10 @@ public class NodeUtil {
                         new EmsScriptNode( nodeRef, services, response );
                 if ( node.checkPermissions( PermissionService.READ, response, status ) ) {
                     String id = node.getSysmlId();
-                    if ( id != null ) {
+                    // We assume that order matters and that if two nodes have the
+                    // same id, then the first is preferred (for example, because it
+                    // is in the closest workspace).
+                    if ( id != null && !searchResults.containsKey( id ) ) {
                         searchResults.put( id, node );
                     }
                 }
