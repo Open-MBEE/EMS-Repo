@@ -141,6 +141,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		foundElements = new HashMap<String, EmsScriptNode>();
 		response = new StringBuffer();
 		responseStatus.setCode(HttpServletResponse.SC_OK);
+        NodeUtil.initHeisenCache();
 	}
 
 	/**

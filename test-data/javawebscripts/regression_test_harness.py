@@ -399,7 +399,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
             else:
                 print_pass("Test number %s (%s) passed!  No differences in the filtered .json files (%s,%s)"%(test_num,test_name,baseline_json,result_json))
     else:
-        print_error("Curl command return a bad status and output doesnt start with json: %s, output: '%s'"%(status,output))
+        print_error("Test number %s (%s) failed!"%(test_num,test_name), "Curl command return a bad status and output doesnt start with json: %s, output: '%s'"%(status,output))
 
     thick_divider()
     
