@@ -329,6 +329,30 @@
                         <tokenised>false</tokenised>
                     </index>
                 </property>
+                <property name="ems:sitePackage">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
+            </properties>
+        </aspect>
+        <aspect name="ems:SiteCharacterization">
+            <properties>
+                <property name="ems:siteSite">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="false">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
             </properties>
         </aspect>
      </aspects>

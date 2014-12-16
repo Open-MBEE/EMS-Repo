@@ -1,0 +1,15 @@
+{
+    "elements": [{
+        "creator": "admin",
+        "editable": true,
+        "modified": "2014-12-10T14:58:28.537-0800",
+        "owner": "holding_bin_no_site_no_project",
+        "qualifiedId": "/no_project/holding_bin_no_site_no_project/54321",
+        "qualifiedName": "/no_project/holding_bin/null",
+        "read": "2014-12-10T14:58:29.598-0800",
+        "specialization": {"type": "Element"},
+        "sysmlid": "54321"
+    }],
+    "message": "[WARNING]: The type supplied Element is different than the stored type View\n[WARNING]: createOrUpdateModel deltas not posted properly\n"
+}
+200

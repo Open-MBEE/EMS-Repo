@@ -386,7 +386,7 @@ public class WorkspaceNode extends EmsScriptNode {
         // should be.
         if ( parent != null && parent.exists() && !this.equals( parent.getWorkspace() ) ) {
             EmsScriptNode grandParent = parent.getParent();
-            ArrayList< NodeRef > arr = NodeUtil.findNodeRefsByType( parentName, SearchType.CM_NAME.prefix, false, false, this, null, false, true, getServices(), false );
+            ArrayList< NodeRef > arr = NodeUtil.findNodeRefsByType( parentName, SearchType.CM_NAME.prefix, false, this, null, false, true, getServices(), false );
             for ( NodeRef ref : arr ) {
                 EmsScriptNode p = new EmsScriptNode( ref, getServices() );
                 EmsScriptNode gp = p.getParent();
@@ -406,7 +406,7 @@ public class WorkspaceNode extends EmsScriptNode {
         // If the node is not already in this workspace, clone it.
         if ( !this.equals( node.getWorkspace() ) ) {
             EmsScriptNode nodeGuess = null;
-            ArrayList< NodeRef > array = NodeUtil.findNodeRefsByType( nodeName, SearchType.CM_NAME.prefix, false, false, this, null, false, true, getServices(), false );
+            ArrayList< NodeRef > array = NodeUtil.findNodeRefsByType( nodeName, SearchType.CM_NAME.prefix, false, this, null, false, true, getServices(), false );
             for ( NodeRef ref : array ) {
                 EmsScriptNode n = new EmsScriptNode( ref, getServices() );
                 EmsScriptNode np = n.getParent();
@@ -537,16 +537,15 @@ public class WorkspaceNode extends EmsScriptNode {
         }
         ArrayList< NodeRef > refs =
                 NodeUtil.findNodeRefsByType( getNodeRef().toString(),
-                                             SearchType.WORKSPACE.prefix, false,
+                                             SearchType.WORKSPACE.prefix,
                                              true, null, dateTime, false, true,
                                              getServices(), true );
         changedNodeRefs.addAll( refs );
 
         // remove commits
         ArrayList< EmsScriptNode > commits =
-                CommitUtil.getCommits( this, null, getServices(), getResponse() );
-        commits.add( CommitUtil.getCommitPkg( this, null, getServices(),
-                                              getResponse() ) );
+                CommitUtil.getCommits( this, getServices(), getResponse() );
+        commits.add( CommitUtil.getCommitPkg( this, getServices(), getResponse() ) );
         List<NodeRef> commitRefs = NodeUtil.getNodeRefs( commits );
         changedNodeRefs.removeAll(commitRefs);
 
@@ -626,12 +625,11 @@ public class WorkspaceNode extends EmsScriptNode {
         // entire workspace, which could be master, and that would be too big.
         if ( otherTime != null && dateTime != null && dateTime.after( otherTime ) ) {
             ArrayList< EmsScriptNode > commits =
-                    CommitUtil.getCommitsAllSitesInDateTimeRange( otherTime,
-                                                                  dateTime,
-                                                                  lastParent,
-                                                                  services,
-                                                                  response,
-                                                                  false );
+                    CommitUtil.getCommitsInDateTimeRange( otherTime,
+                                                          dateTime,
+                                                          lastParent,
+                                                          services,
+                                                          response);
             // TODO -- REVIEW -- The created time of the commit is after the
             // modified times of the items in the diff (right?). Thus, it is
             // unclear whether any commits after the later time point can be
@@ -756,7 +754,7 @@ public class WorkspaceNode extends EmsScriptNode {
         // to check the results and at least try to match to the user.
         ArrayList< NodeRef > refs =
                 NodeUtil.findNodeRefsByType( workspaceName, SearchType.WORKSPACE_NAME.prefix,
-                                             true, true, null, null,
+                                             /*true,*/ true, null, null,
                                              true, true, services,
                                              false );
         if ( Utils.isNullOrEmpty( refs ) ) {

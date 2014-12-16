@@ -5,6 +5,9 @@ import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -31,7 +34,8 @@ import org.json.JSONObject;
  * @author cinyoung
  *
  */
-public class WorkspaceDiff {
+public class WorkspaceDiff implements Serializable {
+    private static final long serialVersionUID = 2532475442685498671L;
 
     /**
      * A conflict between two workspaces may be defined as
@@ -132,11 +136,11 @@ public class WorkspaceDiff {
     protected void addDiffs( Set<NodeRef> refs ) {
         for ( NodeRef ref : refs ) {
             EmsScriptNode nodeFromRef = new EmsScriptNode( ref, getServices() );
-            String name = nodeFromRef.getName();
-            NodeRef ref1 = NodeUtil.findNodeRefById( name, false, getWs1(),
+            String sysmlid = nodeFromRef.getSysmlId();
+            NodeRef ref1 = NodeUtil.findNodeRefById( sysmlid, false, getWs1(),
                                                      getTimestamp1(), getServices(), true );
             EmsScriptNode node1 = ref1 == null ? null : new EmsScriptNode( ref1, getServices() );
-            NodeRef ref2 = NodeUtil.findNodeRefById( name, false, getWs2(),
+            NodeRef ref2 = NodeUtil.findNodeRefById( sysmlid, false, getWs2(),
                                                      getTimestamp2(), getServices(), true );
             EmsScriptNode node2 = ref2 == null ? null : new EmsScriptNode( ref2, getServices() );
             addToDiff( node1, node2 );
@@ -181,7 +185,7 @@ public class WorkspaceDiff {
             if ( changes != null ) {
                 Pair< Object, Object > ownerChange = changes.get( "ems:owner" );
                 if ( ownerChange != null && ownerChange.first != null
-                     && ownerChange.first != null
+                     && ownerChange.second != null
                      && !ownerChange.first.equals( ownerChange.second ) ) {
                     movedElements.put( e.getKey(), e.getValue() );
                 }
@@ -195,7 +199,7 @@ public class WorkspaceDiff {
         Set< String > ids = new TreeSet< String >( nodeDiff.getMap1().keySet() );
         ids.addAll( nodeDiff.getMap2().keySet() );
         for ( String id : ids ) {
-            NodeRef ref = NodeUtil.findNodeRefById( id, false, getWs1(), getTimestamp1(), null, true );
+            NodeRef ref = NodeUtil.findNodeRefById( id, false, getWs1(), getTimestamp1(), getServices(), true );
             if ( ref != null ) {
                 EmsScriptNode node = new EmsScriptNode( ref, getServices() );
                 if ( node.exists() ) {
@@ -795,7 +799,6 @@ public class WorkspaceDiff {
     }
 
     protected void captureDeltas(WorkspaceNode node) {
-        Set< NodeRef > newSet = Utils.newSet();
         Set< NodeRef > s1 =
                 WorkspaceNode.getChangedNodeRefsWithRespectTo( ws1, node,
                                                                timestamp1,
@@ -812,21 +815,39 @@ public class WorkspaceDiff {
             s1 = NodeUtil.getModelElements(s1);
             s2 = NodeUtil.getModelElements(s2);
         }
-
+        
+        // create lists of deleted in s1 and deleted in s2 
+        List< NodeRef > deletedFromS1 = new ArrayList< NodeRef >();
+        List< NodeRef > deletedFromS2 = new ArrayList< NodeRef >();
+        
         // need to make sure both sets have each others' nodes
         for ( NodeRef n : s1 ) {
-            String cmName = NodeUtil.getName( n );
+            String sysmlId = NodeUtil.getSysmlId( n );
             NodeRef ref =
-                    NodeUtil.findNodeRefById( cmName, false, node, timestamp2,
+                    NodeUtil.findNodeRefById( sysmlId, false, node, timestamp2,
                                               getServices(), false );
             if ( ref != null ) s2.add( ref );
+            if ( NodeUtil.isDeleted(n)) {
+            	deletedFromS1.add(n);
+            }
         }
         for ( NodeRef n : s2 ) {
-            String cmName = NodeUtil.getName( n );
+            String sysmlId = NodeUtil.getSysmlId( n );
             NodeRef ref =
-                    NodeUtil.findNodeRefById( cmName, false, ws1, timestamp1,
+                    NodeUtil.findNodeRefById( sysmlId, false, ws1, timestamp1,
                                               getServices(), false );
             if ( ref != null ) s1.add( ref );
+            if ( NodeUtil.isDeleted(n)) {
+            	deletedFromS2.add(n);
+            }
+        }
+        
+        // delete the nodes from s1 and s2  
+        for ( NodeRef n : deletedFromS1 ) {
+        	s1.remove(n);
+        }
+        for ( NodeRef n : deletedFromS2 ) {
+        	s2.remove(n);
         }
 
         nodeDiff = new NodeDiff( s1, s2 );
@@ -847,4 +868,18 @@ public class WorkspaceDiff {
         return false;
     }
     
+    
+//    public String toSimpleString() {
+//        JSONObject top = new JSONObject();
+//        JSONObject ws1 = new JSONObject();
+//        JSONObject ws2 = new JSONObject();
+//        
+//        ws1.put( "workspace", arg1 )
+//        
+//        for (int ii = 0; ii < addedElements.size(); ii++) {
+//            
+//        }
+//        
+//        return top.toString();
+//    }
 }

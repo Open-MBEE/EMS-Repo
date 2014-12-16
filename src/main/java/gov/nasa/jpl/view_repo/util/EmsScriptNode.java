@@ -36,8 +36,6 @@ import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Diff;
 import gov.nasa.jpl.mbee.util.Pair;
-import gov.nasa.jpl.mbee.util.Seen;
-import gov.nasa.jpl.mbee.util.SeenHashSet;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
@@ -73,7 +71,6 @@ import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.jscript.ScriptVersion;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.AspectDefinition;
-import org.alfresco.service.cmr.dictionary.ClassDefinition;
 import org.alfresco.service.cmr.dictionary.DataTypeDefinition;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.dictionary.PropertyDefinition;
@@ -1077,7 +1074,7 @@ public class EmsScriptNode extends ScriptNode implements
      * already checked for this node.  Replaces the nodeRef with the most recent
      * if needed.  This is needed b/c of a alfresco bug.
      */
-    private void checkNodeRefVersion(Date dateTime) {
+    public void checkNodeRefVersion(Date dateTime) {
         
         // Because of a alfresco bug, we must verify that we are getting the latest version
         // of the nodeRef if not specifying a dateTime:
@@ -1123,7 +1120,8 @@ public class EmsScriptNode extends ScriptNode implements
         if ( Utils.isNullOrEmpty( acmType ) ) return null;
         Object result = null;
         
-        checkNodeRefVersion(dateTime);
+        // Taking this out for now b/c of performance hit:
+        //checkNodeRefVersion(dateTime);
         
         if ( useFoundationalApi ) {
             QName typeQName = createQName( acmType );
@@ -1163,23 +1161,25 @@ public class EmsScriptNode extends ScriptNode implements
     public Date getLastModified( Date dateTime ) {
         Date lastModifiedDate = (Date)getProperty( Acm.ACM_LAST_MODIFIED );
 
-        // TODO FIXME should look at other properties besides VALUE:
-        Object value = getProperty( Acm.ACM_VALUE );
-        ArrayList< NodeRef > dependentNodes = new ArrayList< NodeRef >();
-        if ( value instanceof Collection ) {
-            Collection< ? > c = (Collection< ? >)value;
-            dependentNodes.addAll( Utils.asList( c, NodeRef.class ) );
-        }
-        for ( NodeRef nodeRef : dependentNodes ) {
-            nodeRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
-            if ( nodeRef == null ) continue;
-            EmsScriptNode oNode = new EmsScriptNode( nodeRef, services );
-            if ( !oNode.exists() ) continue;
-            Date modified = oNode.getLastModified( dateTime );
-            if ( modified.after( lastModifiedDate ) ) {
-                lastModifiedDate = modified;
-            }
-        }
+        // We no longer need to check this, as values specs are always embedded within
+        // the nodes that use them, ie Property, so the modified time will always be updated
+        // when modifying the value spec
+//        Object value = getProperty( Acm.ACM_VALUE );
+//        ArrayList< NodeRef > dependentNodes = new ArrayList< NodeRef >();
+//        if ( value instanceof Collection ) {
+//            Collection< ? > c = (Collection< ? >)value;
+//            dependentNodes.addAll( Utils.asList( c, NodeRef.class ) );
+//        }
+//        for ( NodeRef nodeRef : dependentNodes ) {
+//            nodeRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
+//            if ( nodeRef == null ) continue;
+//            EmsScriptNode oNode = new EmsScriptNode( nodeRef, services );
+//            if ( !oNode.exists() ) continue;
+//            Date modified = oNode.getLastModified( dateTime );
+//            if ( modified.after( lastModifiedDate ) ) {
+//                lastModifiedDate = modified;
+//            }
+//        }
         return lastModifiedDate;
     }
 
@@ -1212,7 +1212,8 @@ public class EmsScriptNode extends ScriptNode implements
     @Override
     public Map< String, Object > getProperties() {
         
-        checkNodeRefVersion(null);
+        // Taking this out for now b/c of performance hit:
+        //checkNodeRefVersion(null);
 
         if ( useFoundationalApi ) {
             return Utils.toMap( services.getNodeService()
@@ -1483,7 +1484,7 @@ public class EmsScriptNode extends ScriptNode implements
         elementJson.put( "creator", node.getProperty( "cm:modifier" ) );
 //        elementJson.put( "modified",
 //                         TimeUtils.toTimestamp( getLastModified( (Date)node.getProperty( "cm:modified" ) ) ) );
-        elementJson.put( "modified",
+        elementJson.put( Acm.JSON_LAST_MODIFIED,
                 TimeUtils.toTimestamp( getLastModified( dateTime) ) );
 
         putInJson( elementJson, Acm.JSON_NAME,
@@ -2052,7 +2053,16 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public EmsScriptNode getSiteNode() {
         if ( siteNode != null ) return siteNode;
-        EmsScriptNode parent = this;
+        
+        // If it is a node from the version store, then we cant trace up the parents
+        // to find the site, so must use its owner till we have a non version node:
+        VersionService vs = getServices().getVersionService();
+        EmsScriptNode owner = this;
+        while (owner != null && vs.isAVersion( owner.getNodeRef() )) {
+            owner = owner.getOwningParent( null );
+        }
+        
+        EmsScriptNode parent = owner != null ? owner : this;
         String parentName = parent.getName();
         while ( !parentName.equals( "Models" )
                 || !parentName.equals( "ViewEditor" ) ) {
@@ -2574,17 +2584,14 @@ public class EmsScriptNode extends ScriptNode implements
             filename = filename.replace( "_latest", "" );
             filename = filename.replace( "\\", "" );
             filename = filename.replace( "src=/editor/images/docgen/", "" );
-            boolean useSimpleCache = getWorkspace() == null;
             NodeRef nodeRef =
-                    findNodeRefByType( filename, SearchType.CM_NAME.prefix, useSimpleCache,
+                    findNodeRefByType( filename, SearchType.CM_NAME.prefix,
                                        getWorkspace(), null, false );
             if ( nodeRef != null ) {
                 // this should grab whatever is the latest versions purl - so
                 // fine for snapshots
-                NodeRef versionedNodeRef =
-                        services.getVersionService()
-                                .getCurrentVersion( nodeRef )
-                                .getVersionedNodeRef();
+                EmsScriptNode node = new EmsScriptNode( nodeRef, getServices() );
+                NodeRef versionedNodeRef = node.getHeadVersion().getVersionedNodeRef();
                 EmsScriptNode versionedNode =
                         new EmsScriptNode( versionedNodeRef, services, response );
                 String nodeurl = "";
@@ -2619,9 +2626,9 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     protected NodeRef
-            findNodeRefByType( String name, String type, boolean useSimpleCache,
+            findNodeRefByType( String name, String type,
                                WorkspaceNode workspace, Date dateTime, boolean findDeleted ) {
-        return NodeUtil.findNodeRefByType( name, type, useSimpleCache, false, workspace, dateTime,
+        return NodeUtil.findNodeRefByType( name, type, false, workspace, dateTime,
                                            true, services, findDeleted );
     }
 
@@ -2705,13 +2712,34 @@ public class EmsScriptNode extends ScriptNode implements
      */
     @Override
     public boolean equals( Object obj ) {
+        return equals( obj, false );
+    }
+    
+    /**
+     * Check to see if the nodes are the same or (if tryCurrentVersions is true)
+     * if their currentVersions are the same.
+     * 
+     * @param obj
+     * @param tryCurrentVersions
+     * @return true iff equal
+     */
+    public boolean equals( Object obj, boolean tryCurrentVersions ) {
 
-        if ( obj instanceof EmsScriptNode ) {
-            EmsScriptNode that = (EmsScriptNode)obj;
-            return this.nodeRef.equals( that.nodeRef );
-        } else {
-            return false;
-        }
+        if ( !( obj instanceof EmsScriptNode ) ) return false;
+        EmsScriptNode that = (EmsScriptNode)obj;
+        boolean same = this.nodeRef.equals( that.nodeRef );
+        if ( same || !tryCurrentVersions ) return same;
+        
+        // See if they are different versions of the same node.
+        VersionService vs = getServices().getVersionService();
+        boolean isThisV = vs.isAVersion( this.nodeRef );
+        boolean isThatV = vs.isAVersion( that.nodeRef );
+        if ( !isThisV && !isThatV ) return same;
+        NodeRef thisCurrent = this.getHeadVersion().getVersionedNodeRef();
+        NodeRef thatCurrent = that.getHeadVersion().getVersionedNodeRef();
+        if ( thisCurrent == thatCurrent ) return true;
+        if ( thisCurrent == null || thatCurrent == null ) return false;
+        return thisCurrent.equals( thatCurrent );
     }
 
     /**
@@ -2721,9 +2749,12 @@ public class EmsScriptNode extends ScriptNode implements
      */
     @Override
     public boolean exists() {
+        return exists( false );
+    }
+    public boolean exists(boolean includeDeleted) {
         // REVIEW -- TODO -- Will overriding this cause problems in ScriptNode?
-        if ( !super.exists() ) return false;
-        if ( hasAspect( "ems:Deleted" ) ) {
+        if ( !scriptNodeExists() ) return false;
+        if ( !includeDeleted && hasAspect( "ems:Deleted" ) ) {
             return false;
         }
         return true;
