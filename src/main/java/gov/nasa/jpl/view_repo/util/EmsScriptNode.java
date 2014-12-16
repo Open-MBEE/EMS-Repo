@@ -1147,6 +1147,12 @@ public class EmsScriptNode extends ScriptNode implements
                     
                     NodeRef fnr = headVersion.getFrozenStateNodeRef();
                     if (fnr != null) {
+                        // Cache is correct -- fix esn's nodeRef
+                        String msg = "Warning! Alfresco Heisenbug returning wrong current version of node, " + this + ".  Replacing node with unmodifiable versioned node, " + getId() + ".";
+                        logger.warn( msg );
+                        if ( response != null ) {
+                            response.append( msg + "\n");
+                        }
                         nodeRef = fnr;
                         return true;
                     }
