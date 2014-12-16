@@ -56,13 +56,12 @@ import org.alfresco.util.ApplicationContextHelper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
 
-import ucar.ma2.Range.Iterator;
-
 public class NodeUtil {
 
     public static boolean doFullCaching = false;
     public static boolean doSimpleCaching = true;
     public static boolean doVersionCaching = true;
+    public static boolean doHeisenCheck = true;
     
     public static String sitePkgPrefix = "site_";
 
@@ -90,10 +89,36 @@ public class NodeUtil {
      * alfresco ids. This is to get around the "Heisenbug" where alfresco's
      * current version is sometimes tied to an old version.
      */
-    public static HashMap<String, String> versionLabelCache =
-            new HashMap<String, String>(); 
+//    public static HashMap<String, String> versionLabelCache =
+//            new HashMap<String, String>(); 
     public static HashMap<String, Version> versionCache =
             new HashMap<String, Version>(); 
+    
+    protected static HashMap<String, NodeRef> heisenCache = null;
+    /**
+     * clear or create the cache for correcting bad node refs (that refer to
+     * wrong versions)
+     */
+    public static void initHeisenCache() {
+        // TODO -- the problem with this is that concurrent services could clear
+        // this common cache. It would be better to pass around a context or
+        // something with a service identifier as a key to the cache. So, each
+        // web service invocation would have its own cache.
+        synchronized ( heisenCache ) {
+            heisenCache = new HashMap<String, NodeRef>();
+        }
+    }
+    public static NodeRef heisenCachePut( String id, NodeRef nodeRef ) {
+        synchronized ( heisenCache ) {
+            return heisenCache.put( id, nodeRef );
+        }
+    }
+    public static NodeRef heisenCacheGet( String id ) {
+        synchronized ( heisenCache ) {
+            return heisenCache.get( id );
+        }
+    }
+
     
     public enum SearchType {
         DOCUMENTATION( "@sysml\\:documentation:\"" ),
@@ -422,11 +447,13 @@ public class NodeUtil {
 
     public static ArrayList<NodeRef> fixVersions( ArrayList<NodeRef> nodeRefs ) {
         // check for alfresco bug where SpacesStore ref is the wrong version
-        if ( !doVersionCaching ) return nodeRefs;
+        //if ( !doVersionCaching ) return nodeRefs;
+        if ( !doHeisenCheck ) return nodeRefs;
         ArrayList<NodeRef> newNodeRefs = null;
         for ( NodeRef nr : nodeRefs ) {
             EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
-            if ( esn.getOrSetCachedVersion() ) {
+//            if ( esn.getOrSetCachedVersion() ) {
+            if ( !esn.checkNodeRefVersion2( null ) ) {
                 if ( newNodeRefs == null ) {
                     newNodeRefs = new ArrayList<NodeRef>();
                     @SuppressWarnings( "unchecked" )

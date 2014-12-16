@@ -38,7 +38,6 @@ import gov.nasa.jpl.mbee.util.Diff;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.connections.JmsConnection;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
@@ -89,8 +88,6 @@ import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.log4j.Logger;
-import org.apache.log4j.Priority;
-import org.apache.log4j.lf5.LogLevel;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1103,9 +1100,26 @@ public class EmsScriptNode extends ScriptNode implements
         VersionService versionService = services.getVersionService();
         return versionService.isAVersion( getNodeRef() );
     }
-    
-    public void setNodeRef(NodeRef nr) {
-        nodeRef = nr;
+
+    public boolean checkNodeRefVersion2( Date dateTime ) {
+
+        // Because of a alfresco bug, we must verify that we are getting the latest version
+        // of the nodeRef if not specifying a dateTime:
+        if ( checkedNodeVersion || dateTime != null ) return false; //|| isAVersion()) return false;
+
+        String id = getId();
+        NodeRef nr = NodeUtil.heisenCacheGet( id );
+        if ( nr != null ) {
+            if ( nr.equals( nodeRef ) ) return false;
+            nodeRef = nr;
+            return true;
+        }
+
+        // Not in cache -- need to compute
+        boolean changed = checkNodeRefVersion( null );
+        NodeUtil.heisenCachePut( id, nodeRef );
+
+        return changed;
     }
     
     /**
@@ -1113,11 +1127,11 @@ public class EmsScriptNode extends ScriptNode implements
      * already checked for this node.  Replaces the nodeRef with the most recent
      * if needed.  This is needed b/c of a alfresco bug.
      */
-    public void checkNodeRefVersion(Date dateTime) {
+    public boolean checkNodeRefVersion(Date dateTime) {
         
         // Because of a alfresco bug, we must verify that we are getting the latest version
         // of the nodeRef if not specifying a dateTime:
-        if (dateTime == null && !checkedNodeVersion) {
+        if (dateTime == null && !checkedNodeVersion && !isAVersion()) {
             
             checkedNodeVersion = true;
             Version currentVersion = getCurrentVersion();
@@ -1135,10 +1149,12 @@ public class EmsScriptNode extends ScriptNode implements
                     NodeRef fnr = headVersion.getFrozenStateNodeRef();
                     if (fnr != null) {
                         nodeRef = fnr;
+                        return true;
                     }
                 }
             }
         }
+        return false;
     }
     
     protected boolean getOrSetCachedVersion() {
@@ -1146,6 +1162,7 @@ public class EmsScriptNode extends ScriptNode implements
             if ( checkedNodeVersion ) {
                 return false;
             }
+            checkedNodeVersion = true;
             String id = getId();
             Version cachedVersion = NodeUtil.versionCache.get(id);
             Version thisVersion = getCurrentVersion();
@@ -1154,6 +1171,7 @@ public class EmsScriptNode extends ScriptNode implements
                     NodeUtil.versionCache.put( id, thisVersion );
                 } else {
                     cachedVersion = getHeadVersion();
+                    NodeUtil.versionCache.put( id, cachedVersion );
                 }
             }
             if ( cachedVersion != null ) {
@@ -1166,11 +1184,7 @@ public class EmsScriptNode extends ScriptNode implements
                         if ( response != null ) {
                             response.append( msg + "\n");
                         }
-//                        if ( status != null ) {
-//                            status.setCode( HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-//                                            msg );
-//                        }
-                        setNodeRef( cachedVersion.getFrozenStateNodeRef() );
+                        nodeRef = cachedVersion.getFrozenStateNodeRef();
                     } else {
                         // Cache is incorrect -- update cache
                         NodeUtil.versionCache.put( id, thisVersion );
