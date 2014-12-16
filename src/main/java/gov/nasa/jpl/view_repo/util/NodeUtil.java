@@ -94,7 +94,7 @@ public class NodeUtil {
     public static HashMap<String, Version> versionCache =
             new HashMap<String, Version>(); 
     
-    protected static HashMap<String, NodeRef> heisenCache = null;
+    protected static HashMap<String, NodeRef> heisenCache = new HashMap<String, NodeRef>();
     /**
      * clear or create the cache for correcting bad node refs (that refer to
      * wrong versions)
@@ -105,7 +105,7 @@ public class NodeUtil {
         // something with a service identifier as a key to the cache. So, each
         // web service invocation would have its own cache.
         synchronized ( heisenCache ) {
-            heisenCache = new HashMap<String, NodeRef>();
+            heisenCache.clear();
         }
     }
     public static NodeRef heisenCachePut( String id, NodeRef nodeRef ) {
