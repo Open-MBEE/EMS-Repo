@@ -48,8 +48,13 @@ public class DebugGet extends FlagSet {
 
     @Override
     protected void set( boolean val ) {
-        if ( val ) Debug.turnOn();
-        else Debug.turnOff();
+        if ( val ) {
+            Debug.turnOn();
+            AbstractJavaWebScript.alwaysTurnOffDebugOut = false;
+        } else {
+            Debug.turnOff();
+            AbstractJavaWebScript.alwaysTurnOffDebugOut = true;
+        }
     }
 
     @Override

@@ -17,7 +17,7 @@ public class ModelPostTimeEventsGet extends FlagSet {
 
     @Override
     protected String flagName() {
-        return "timeEvents";
+        return "ModelPost.timeEvents";
     }
  
 }

@@ -3087,6 +3087,7 @@ public class EmsScriptNode extends ScriptNode implements
                 nodeService.getProperties( getNodeRef() );
         if ( isSiteOrSites ) {
             properties.remove( createQName( "st:sitePreset" ) );
+            properties.remove( createQName( "sys:undeletable" ) );
         }
         nodeService.setProperties( node.getNodeRef(), properties );
         
