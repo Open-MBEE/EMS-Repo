@@ -896,7 +896,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             return null;
         }
        
-        EmsScriptNode snapshotNode = sitesFolder.childByNamePath("snapshots");
+        EmsScriptNode snapshotNode = sitesFolder.childByNamePath("/snapshots");
 
         if (snapshotNode == null) {
             snapshotNode = sitesFolder.createFolder("snapshots");
