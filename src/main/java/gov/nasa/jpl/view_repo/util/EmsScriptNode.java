@@ -2008,12 +2008,12 @@ public class EmsScriptNode extends ScriptNode implements
                 }
                 if ( targetRef == null ) {
                     String msg =
-                            "Error! Element " + targetRef
+                            "Error! Target of association " + aref
                                     + " did not exist in workspace "
                                     + WorkspaceNode.getName(workspace) + " at "
                                     + dateTime + ".\n";
                     if ( getResponse() == null || getStatus() == null ) {
-                        Debug.error( msg );
+                        Debug.error( false, msg );
                     } else {
                         getResponse().append( msg );
                         getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
