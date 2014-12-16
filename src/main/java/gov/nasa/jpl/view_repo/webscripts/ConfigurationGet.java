@@ -68,6 +68,11 @@ public class ConfigurationGet extends AbstractJavaWebScript {
 
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+    	ConfigurationGet instance = new ConfigurationGet(repository, services);
+    	return instance.executeImplImpl(req, status, cache);
+    }
+    
+    protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
 
         printHeader( req );

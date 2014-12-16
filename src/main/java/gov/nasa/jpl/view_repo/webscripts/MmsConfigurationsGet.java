@@ -49,6 +49,11 @@ public class MmsConfigurationsGet extends AbstractJavaWebScript {
     
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+		MmsConfigurationsGet instance = new MmsConfigurationsGet(repository, services);
+    	return instance.executeImplImpl(req, status, cache);
+    }
+    
+    protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
         
         clearCaches();

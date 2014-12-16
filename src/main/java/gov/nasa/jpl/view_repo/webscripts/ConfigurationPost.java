@@ -33,7 +33,6 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ConfigurationGenerationActionExecuter;
-import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -81,7 +80,12 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	}
 
 	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req,
+    protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+		ConfigurationPost instance = new ConfigurationPost(repository, services);
+    	return instance.executeImplImpl(req, status, cache);
+    }
+    
+	protected Map<String, Object> executeImplImpl(WebScriptRequest req,
 			Status status, Cache cache) {
 		Map<String, Object> model = new HashMap<String, Object>();
 
