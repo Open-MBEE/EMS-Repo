@@ -107,7 +107,7 @@ public class EmsScriptNode extends ScriptNode implements
 
     static Logger logger = Logger.getLogger(ScriptNode.class);
 
-    public static boolean expressionStuff = false;
+    public static boolean expressionStuff = false; // The value here is ignored.
 
     /**
      * A set of content model property names that serve as workspace metadata
@@ -146,12 +146,6 @@ public class EmsScriptNode extends ScriptNode implements
     // Flag to indicate whether we checked the nodeRef version for this script node,
     // when doing getProperty().
     private boolean checkedNodeVersion = false;
-    
-    /**
-     * Assume that Heisenbug will not appear on first cache, risking that
-     * current versions of elements will not be current.
-     */
-    public static boolean optimisticAndFoolish = false;
     
     // provide logging capability of what is done
     private StringBuffer response = null;
@@ -1426,6 +1420,7 @@ public class EmsScriptNode extends ScriptNode implements
 
     @Override
     public String toString() {
+        String result = "";
         boolean wasOn = Debug.isOn();
         if ( wasOn ) Debug.turnOff();
         // try {
@@ -1435,6 +1430,7 @@ public class EmsScriptNode extends ScriptNode implements
         // e.printStackTrace();
         // }
         // return null;
+        try {
         if ( !exists() && !isDeleted() ) {
             return "NON-EXISTENT-NODE";
         }
@@ -1445,10 +1441,12 @@ public class EmsScriptNode extends ScriptNode implements
         String qualifiedName = getSysmlQName();
         String type = getTypeName();
         String workspaceName = getWorkspaceName();
-        String result =
-                deleted + "{type=" + type + ", id=" + id + ", cm_name=" + name + ", sysml_name=" + sysmlName
-                        + ", qualified name=" + qualifiedName + ", workspace="
-                        + workspaceName + "}";
+        result = deleted + "{type=" + type + ", id=" + id + ", cm_name=" + name + ", sysml_name=" + sysmlName
+                         + ", qualified name=" + qualifiedName + ", workspace="
+                         + workspaceName + "}";
+        } catch (Throwable t) {
+            // ignore
+        }
         if ( wasOn ) Debug.turnOn();
         return result;
     }

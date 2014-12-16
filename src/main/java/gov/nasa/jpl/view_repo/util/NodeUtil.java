@@ -132,7 +132,7 @@ public class NodeUtil {
     
     // Set the flag to time events that occur during a model post using the timers
     // below
-    private static boolean timeEvents = false;
+    public static boolean timeEvents = false;
     private static Timer timer = null;
     private static Timer timerByType = null;
     private static Timer timerLucene = null;

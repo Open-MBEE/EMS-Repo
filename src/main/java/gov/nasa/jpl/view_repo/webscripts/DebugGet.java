@@ -30,48 +30,63 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.extensions.webscripts.Cache;
-import org.springframework.extensions.webscripts.DeclarativeWebScript;
-import org.springframework.extensions.webscripts.Status;
-import org.springframework.extensions.webscripts.WebScriptRequest;
+//import java.util.Date;
+//import java.util.HashMap;
+//import java.util.Map;
+//
+//import org.springframework.extensions.webscripts.Cache;
+//import org.springframework.extensions.webscripts.DeclarativeWebScript;
+//import org.springframework.extensions.webscripts.Status;
+//import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
- * Provides the WWW-Authenticate response header that browsers need to
- * clear authentication caches...
- * 
- * Extends AbstractWebScript that provides access to response header
+ * Web service to turn debug output on off.
  * @author cinyoung
  *
  */
-public class DebugGet extends DeclarativeWebScript {
+public class DebugGet extends FlagSet {
+
+    @Override
+    protected void set( boolean val ) {
+        if ( val ) Debug.turnOn();
+        else Debug.turnOff();
+    }
+
+    @Override
+    protected boolean get() {
+        return Debug.isOn();
+    }
+
+    @Override
+    protected String flagName() {
+        return "debug";
+    }
 	
-	protected Map<String, Object> executeImpl(WebScriptRequest req,
-			Status status, Cache cache) {
-        Map< String, Object > model = new HashMap< String, Object >();
-
-        String turnOnStr = req.getParameter( "on" );
-        String turnOffStr = req.getParameter( "off" );
-
-        boolean turnOn = !( turnOnStr == null ||
-                            turnOnStr.trim().equalsIgnoreCase( "false" ) ||
-                            ( turnOffStr != null &&
-                              turnOffStr.trim().equalsIgnoreCase( "true" ) ) );
-        turnOnStr = turnOn ? "on" : "off";
-        if ( turnOn == Debug.isOn() ) {
-            System.out.println( ( new Date() ) + ": debug is already "
-                                + turnOnStr );
-        } else {
-            if ( turnOn ) Debug.turnOn();
-            else Debug.turnOff();
-            System.out.println( ( new Date() ) + ": debug turned " + turnOnStr );
-        }
-        model.put( "res", "debug " + turnOnStr );
-
-        return model;
-	}
+    
+    
+//	protected Map<String, Object> executeImpl(WebScriptRequest req,
+//			Status status, Cache cache) {
+//        Map< String, Object > model = new HashMap< String, Object >();
+//
+//        String turnOnStr = req.getParameter( "on" );
+//        String turnOffStr = req.getParameter( "off" );
+//
+//        boolean turnOn = !( turnOnStr == null ||
+//                            turnOnStr.trim().equalsIgnoreCase( "false" ) ||
+//                            ( turnOffStr != null &&
+//                              turnOffStr.trim().equalsIgnoreCase( "true" ) ) );
+//        turnOnStr = turnOn ? "on" : "off";
+//        if ( turnOn == Debug.isOn() ) {
+//            System.out.println( ( new Date() ) + ": debug is already "
+//                                + turnOnStr );
+//        } else {
+//            if ( turnOn ) Debug.turnOn();
+//            else Debug.turnOff();
+//            System.out.println( ( new Date() ) + ": debug turned " + turnOnStr );
+//        }
+//        model.put( "res", "debug " + turnOnStr );
+//
+//        return model;
+//	}
 
 }
