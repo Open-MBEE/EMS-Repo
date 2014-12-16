@@ -229,13 +229,18 @@ Get a directory of available services including the REST API
 
 Sometimes, eclipse will lock the GUI with a popup saying that the user operation is waiting on other tasks, typically a rebuild.
 If this is annoying because the rebuild takes a long time, you can create a ram disk to store the target directory and create a soft link to it.
-This should speed up the rebuild significantly.
+This should speed up the rebuild significantly:
 
-     sudo mkdir /mnt/ramdisk
-     sudo mount -t tmpfs -o size=1024m tmpfs /mnt/ramdisk
+     mkdir ~/myramdisk
+     sudo mount -t tmpfs -o size=1g tmpfs ~/myramdisk
      cd ~/git/alfresco-view-repo
-     mv target /mnt/ramdisk
-     ln -s /mnt/ramdisk/target .
+     mv target ~/myramdisk 
+     ln -s ~/myramdisk/target .
+ 
+You may also benefit from putting the database on the ramdisk, too, but you will probably want to have a bigger sized ramdisk; 1g is not enough.
+ 
+     mv alf_data ~/myramdisk
+     ln -s ~/myramdisk/alf_data .
 
 For an mvn purge on the ramdisk, running this command may be helpful:
      mvn clean -Ppurge; mkdir /mnt/ramdisk/target; mkdir /mnt/ramdisk/alf_data; ./runserver.sh

@@ -1097,8 +1097,7 @@ public class EmsScriptNode extends ScriptNode implements
     }
     
     public boolean isAVersion() {
-        VersionService versionService = services.getVersionService();
-        return versionService.isAVersion( getNodeRef() );
+      return getIsVersioned();
     }
 
     public boolean checkNodeRefVersion2( Date dateTime ) {
@@ -1156,49 +1155,6 @@ public class EmsScriptNode extends ScriptNode implements
         }
         return false;
     }
-    
-    protected boolean getOrSetCachedVersion() {
-        if ( NodeUtil.doVersionCaching && !isAVersion() ) {
-            if ( checkedNodeVersion ) {
-                return false;
-            }
-            checkedNodeVersion = true;
-            String id = getId();
-            Version cachedVersion = NodeUtil.versionCache.get(id);
-            Version thisVersion = getCurrentVersion();
-            if ( cachedVersion == null ) {
-                if ( optimisticAndFoolish ) {
-                    NodeUtil.versionCache.put( id, thisVersion );
-                } else {
-                    cachedVersion = getHeadVersion();
-                    NodeUtil.versionCache.put( id, cachedVersion );
-                }
-            }
-            if ( cachedVersion != null ) {
-                int comp = NodeUtil.compare( thisVersion, cachedVersion );
-                if ( comp != 0 ) {
-                    if ( comp < 0 ) {
-                        // Cache is correct -- fix esn's nodeRef
-                        String msg = "Warning! Alfresco Heisenbug returning wrong current version of node, " + this + ".  Replacing node with unmodifiable versioned node, " + getId() + ".";
-                        logger.warn( msg );
-                        if ( response != null ) {
-                            response.append( msg + "\n");
-                        }
-                        nodeRef = cachedVersion.getFrozenStateNodeRef();
-                    } else {
-                        // Cache is incorrect -- update cache
-                        NodeUtil.versionCache.put( id, thisVersion );
-                    }
-//                // This fixes the nodeRef in esn
-//                esn.checkNodeRefVersion( null );
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-
     
     /**
      * Get the property of the specified type

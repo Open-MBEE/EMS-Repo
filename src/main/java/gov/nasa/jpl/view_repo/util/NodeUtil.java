@@ -60,8 +60,7 @@ public class NodeUtil {
 
     public static boolean doFullCaching = false;
     public static boolean doSimpleCaching = true;
-    public static boolean doVersionCaching = true;
-    public static boolean doHeisenCheck = true;
+    public static boolean doHeisenCheck = false;
     
     public static String sitePkgPrefix = "site_";
 
@@ -77,24 +76,14 @@ public class NodeUtil {
      */
     public static HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > > 
         elementCache = new HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > >();
-//    /**
-//     * A cache of alfresco nodes stored as a map from sysml:id to workspaceId to node
-//     */
-//    public static HashMap< String, Map< String, Map< Boolean, Map< Boolean, Map< Boolean, ArrayList< NodeRef > > > > > > elementCache =
-//            new HashMap< String, Map< String, Map< Boolean, Map< Boolean, Map< Boolean, ArrayList< NodeRef > > > > > >();
-
     
     /**
-     * A cache of the most current version labels of nodes, keyed by the nodes'
-     * alfresco ids. This is to get around the "Heisenbug" where alfresco's
-     * current version is sometimes tied to an old version.
+     * A cache of the most nodeRefs, keyed by the nodes' alfresco ids. This is
+     * to get around the "Heisenbug" where alfresco's current version is
+     * sometimes tied to an old version.
      */
-//    public static HashMap<String, String> versionLabelCache =
-//            new HashMap<String, String>(); 
-    public static HashMap<String, Version> versionCache =
-            new HashMap<String, Version>(); 
-    
     protected static HashMap<String, NodeRef> heisenCache = new HashMap<String, NodeRef>();
+
     /**
      * clear or create the cache for correcting bad node refs (that refer to
      * wrong versions)
@@ -384,7 +373,7 @@ public class NodeUtil {
                 }
             }
             if ( results != null ) {
-                if ( doVersionCaching ) {
+                if ( doHeisenCheck ) {
                     results = fixVersions( results );
                 }
                 if ( wasCached && dateTime == null ) {
