@@ -349,3 +349,31 @@ Note: Following shortcuts are mainly for Linux.
 	refresh view-share page
 	the final, integrated content model is displayed in view-share in your dashboard (under sites) and in Repository
 	
+### Enterprise settings with Maven
+
+Need to update settings.xml to connect to the Alfresco private repository. Ask Ly or Cin-Young
+for username and password.
+
+'''
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <localRepository/>
+  <interactiveMode/>
+  <usePluginRegistry/>
+  <offline/>
+  <pluginGroups/>
+  <servers>
+        <server>
+                <id>alfresco-private-repository</id>
+                <username>username</username>
+                <password>password</password>
+        </server>
+  </servers>
+  <mirrors/>
+  <proxies/>
+  <profiles/>
+  <activeProfiles/>
+</settings>
+'''
