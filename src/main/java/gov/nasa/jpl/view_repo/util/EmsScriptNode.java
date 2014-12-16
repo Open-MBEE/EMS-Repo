@@ -2481,7 +2481,7 @@ public class EmsScriptNode extends ScriptNode implements
                             "Error! Could not find element for sysml id = "
                                     + sysmlId + ".\n";
                     if ( getResponse() == null || getStatus() == null ) {
-                        Debug.error( msg );
+                        Debug.error( false, msg );
                     } else {
                         getResponse().append( msg );
                         getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
@@ -2500,7 +2500,7 @@ public class EmsScriptNode extends ScriptNode implements
                     "Error! Couldn't get property " + propDef + "=" + property
                             + ".\n";
             if ( getResponse() == null || getStatus() == null ) {
-                Debug.error( msg );
+                Debug.error( false, msg );
             } else {
                 getResponse().append( msg );
                 getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
