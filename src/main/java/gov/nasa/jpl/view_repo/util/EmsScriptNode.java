@@ -38,6 +38,7 @@ import gov.nasa.jpl.mbee.util.Diff;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.connections.JmsConnection;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
@@ -87,6 +88,9 @@ import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
+import org.apache.log4j.Logger;
+import org.apache.log4j.Priority;
+import org.apache.log4j.lf5.LogLevel;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -103,6 +107,8 @@ public class EmsScriptNode extends ScriptNode implements
                                              Comparator< EmsScriptNode >,
                                              Comparable< EmsScriptNode > {
     private static final long serialVersionUID = 9132455162871185541L;
+
+    static Logger logger = Logger.getLogger(ScriptNode.class);
 
     public static boolean expressionStuff = false;
 
@@ -144,6 +150,12 @@ public class EmsScriptNode extends ScriptNode implements
     // when doing getProperty().
     private boolean checkedNodeVersion = false;
     
+    /**
+     * Assume that Heisenbug will not appear on first cache, risking that
+     * current versions of elements will not be current.
+     */
+    public static boolean optimisticAndFoolish = false;
+    
     // provide logging capability of what is done
     private StringBuffer response = null;
 
@@ -170,7 +182,7 @@ public class EmsScriptNode extends ScriptNode implements
      * Replicates the behavior of ScriptNode versions, which is private.
      */
     protected Object[] myVersions = null;
-    
+
     public static boolean fixOwnedChildren = false;
 
     // TODO add nodeService and other member variables when no longer
@@ -1069,6 +1081,33 @@ public class EmsScriptNode extends ScriptNode implements
         return getProperty(acmType, false, null, false, false);
     }
     
+    public String getVersionLabel() {
+        Version v = getCurrentVersion();
+        if ( v != null ) {
+            return v.getVersionLabel();
+        }
+        return null;
+    }
+    
+    public Version getCurrentVersion() {
+        VersionService versionService = services.getVersionService();
+        
+        if (versionService != null) {
+            Version currentVersion = versionService.getCurrentVersion( nodeRef );
+            return currentVersion;
+        }
+        return null;
+    }
+    
+    public boolean isAVersion() {
+        VersionService versionService = services.getVersionService();
+        return versionService.isAVersion( getNodeRef() );
+    }
+    
+    public void setNodeRef(NodeRef nr) {
+        nodeRef = nr;
+    }
+    
     /**
      * Verifies that the nodeRef is the most recent if dateTime is null and not
      * already checked for this node.  Replaces the nodeRef with the most recent
@@ -1081,30 +1120,71 @@ public class EmsScriptNode extends ScriptNode implements
         if (dateTime == null && !checkedNodeVersion) {
             
             checkedNodeVersion = true;
-            VersionService versionService = services.getVersionService();
+            Version currentVersion = getCurrentVersion();
+            Version headVersion = getHeadVersion();
             
-            if (versionService != null) {
-                Version currentVersion = versionService.getCurrentVersion( nodeRef );
-                Version headVersion = getHeadVersion();
+            if (currentVersion != null && headVersion != null) {
                 
-                if (currentVersion != null && headVersion != null) {
+                String currentVerLabel = currentVersion.getVersionLabel();
+                String headVerLabel = headVersion.getVersionLabel();
+                
+                // If this is not the most current node ref, replace it with the most current:
+                if (currentVerLabel != null && headVerLabel != null &&
+                    !currentVerLabel.equals( headVerLabel ) ) {
                     
-                    String currentVerLabel = currentVersion.getVersionLabel();
-                    String headVerLabel = headVersion.getVersionLabel();
-                    
-                    // If this is not the most current node ref, replace it with the most current:
-                    if (currentVerLabel != null && headVerLabel != null &&
-                        !currentVerLabel.equals( headVerLabel ) ) {
-                        
-                        NodeRef fnr = headVersion.getFrozenStateNodeRef();
-                        if (fnr != null) {
-                            nodeRef = fnr;
-                        }
+                    NodeRef fnr = headVersion.getFrozenStateNodeRef();
+                    if (fnr != null) {
+                        nodeRef = fnr;
                     }
                 }
             }
         }
     }
+    
+    protected boolean getOrSetCachedVersion() {
+        if ( NodeUtil.doVersionCaching && !isAVersion() ) {
+            if ( checkedNodeVersion ) {
+                return false;
+            }
+            String id = getId();
+            Version cachedVersion = NodeUtil.versionCache.get(id);
+            Version thisVersion = getCurrentVersion();
+            if ( cachedVersion == null ) {
+                if ( optimisticAndFoolish ) {
+                    NodeUtil.versionCache.put( id, thisVersion );
+                } else {
+                    cachedVersion = getHeadVersion();
+                }
+            }
+            if ( cachedVersion != null ) {
+                int comp = NodeUtil.compare( thisVersion, cachedVersion );
+                if ( comp != 0 ) {
+                    if ( comp < 0 ) {
+                        // Cache is correct -- fix esn's nodeRef
+                        String msg = "Warning! Alfresco Heisenbug returning wrong current version of node, " + this + ".  Replacing node with unmodifiable versioned node, " + getId() + ".";
+                        logger.warn( msg );
+                        if ( response != null ) {
+                            response.append( msg + "\n");
+                        }
+//                        if ( status != null ) {
+//                            status.setCode( HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+//                                            msg );
+//                        }
+                        setNodeRef( cachedVersion.getFrozenStateNodeRef() );
+                    } else {
+                        // Cache is incorrect -- update cache
+                        NodeUtil.versionCache.put( id, thisVersion );
+                    }
+//                // This fixes the nodeRef in esn
+//                esn.checkNodeRefVersion( null );
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
     
     /**
      * Get the property of the specified type
