@@ -38,6 +38,11 @@ public class MmsSnapshotsDelete extends AbstractJavaWebScript {
     
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+		MmsSnapshotsDelete instance = new MmsSnapshotsDelete(repository, services);
+    	return instance.executeImplImpl(req, status, cache);
+    }
+    
+    protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();

@@ -32,8 +32,6 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.connections.JmsConnection;
-import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -57,8 +55,6 @@ import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
 import org.apache.log4j.Logger;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -102,6 +98,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
     protected WorkspaceDiff wsDiff;
 
+    public static boolean alwaysTurnOffDebugOut = true;
+
     protected void initMemberVariables(String siteName) {
 		companyhome = new ScriptNode(repository.getCompanyHome(), services);
 	}
@@ -142,6 +140,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		response = new StringBuffer();
 		responseStatus.setCode(HttpServletResponse.SC_OK);
         NodeUtil.initHeisenCache();
+        if ( alwaysTurnOffDebugOut  ) {
+            Debug.turnOff();
+        }
 	}
 
 	/**
@@ -619,17 +620,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
 
     protected void printFooter() {
-        if ( !Debug.isOn() ) return;
-        log( LogLevel.DEBUG, "*** completed " + ( new Date() ) + " "
+        log( LogLevel.INFO, "*** completed " + ( new Date() ) + " "
                             + getClass().getSimpleName() );
     }
 
     protected void printHeader( WebScriptRequest req ) {
-        if ( !Debug.isOn() ) return;
-        log( LogLevel.DEBUG, "*** starting " + ( new Date() ) + " "
+        log( LogLevel.INFO, "*** starting " + ( new Date() ) + " "
                              + getClass().getSimpleName() );
         String reqStr = req.getURL();
-        log( LogLevel.DEBUG,
+        log( LogLevel.INFO,
              "*** request = " + 
              ( reqStr.length() <= MAX_PRINT ? 
                reqStr : reqStr.substring( 0, MAX_PRINT ) + "..." ) );
