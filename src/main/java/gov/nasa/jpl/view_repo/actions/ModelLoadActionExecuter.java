@@ -31,7 +31,6 @@ package gov.nasa.jpl.view_repo.actions;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 import gov.nasa.jpl.view_repo.webscripts.ModelPost;
 
 import java.util.List;
@@ -39,6 +38,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
 import org.alfresco.repo.model.Repository;
@@ -118,7 +118,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
             response.append("ERROR: Could not load JSON file for job\n");
         } else {
             ModelPost modelService = new ModelPost(repository, services);
-            modelService.setLogLevel(LogLevel.DEBUG);
+            modelService.setLogLevel(Level.DEBUG);
             modelService.setRunWithoutTransactions(false);
             modelService.setProjectNode( projectNode );
             Status status = new Status();

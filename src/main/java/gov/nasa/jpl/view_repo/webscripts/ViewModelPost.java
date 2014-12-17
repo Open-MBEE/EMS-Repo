@@ -180,7 +180,7 @@ public class ViewModelPost extends ModelPost {
                     }
 
                     if (!parentFound) {
-                        log(Level.WARNING, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
+                        log(Level.WARN, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
                     }
                 }
             }
@@ -223,7 +223,7 @@ public class ViewModelPost extends ModelPost {
                     }
 
                     if (!parentFound) {
-                        log(Level.WARNING, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
+                        log(Level.WARN, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
                     }
                 }
             }

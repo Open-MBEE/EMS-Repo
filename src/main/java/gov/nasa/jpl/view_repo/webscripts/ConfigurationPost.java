@@ -244,7 +244,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		}
 
 		if (nodeId == null) {
-		    log(Level.WARNING, "JSON malformed does not include Alfresco id for configuration", HttpServletResponse.SC_BAD_REQUEST);
+		    log(Level.WARN, "JSON malformed does not include Alfresco id for configuration", HttpServletResponse.SC_BAD_REQUEST);
 		    return null;
 		}
 
@@ -268,7 +268,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
                                           workspace, null );
             return configWs.getConfigJson( configNode, workspace, null );
 		} else {
-		    log(Level.WARNING, "Could not find configuration with id " + nodeId, HttpServletResponse.SC_NOT_FOUND);
+		    log(Level.WARN, "Could not find configuration with id " + nodeId, HttpServletResponse.SC_NOT_FOUND);
 		    return null;
 		}
 	}

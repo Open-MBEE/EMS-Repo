@@ -43,6 +43,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -169,31 +170,31 @@ public class ArtifactGet extends AbstractJavaWebScript {
 	    	    			String fileStr = "File "+filename;
 	    	    			String err = Utils.isNullOrEmpty(cs) ? fileStr+" not found!\n" : 
 	    	    												  (fileStr+" with cs="+cs+" not found!\n");
-						    log(LogLevel.ERROR, err, HttpServletResponse.SC_BAD_REQUEST);
+						    log(Level.ERROR, err, HttpServletResponse.SC_BAD_REQUEST);
 						    model.put("res", response.toString());
 	    	    		}
 	    	        	
 	        		}
 	        		else {
-	        			  log(LogLevel.ERROR, "Invalid artifactId!\n", HttpServletResponse.SC_BAD_REQUEST);
+	        			  log(Level.ERROR, "Invalid artifactId!\n", HttpServletResponse.SC_BAD_REQUEST);
 	    		          model.put("res", response.toString());
 	    		    }
 	        		
 	        	}
 	        	else {
-	        		  log(LogLevel.ERROR, "artifactId not supplied!\n", HttpServletResponse.SC_BAD_REQUEST);
+	        		  log(Level.ERROR, "artifactId not supplied!\n", HttpServletResponse.SC_BAD_REQUEST);
     		          model.put("res", response.toString());
     		    }
 	        	
         	}
 	        catch (JSONException e) {
-	            log(LogLevel.ERROR, "Issues creating return JSON\n", HttpServletResponse.SC_BAD_REQUEST);
+	            log(Level.ERROR, "Issues creating return JSON\n", HttpServletResponse.SC_BAD_REQUEST);
 	            e.printStackTrace();
 	            model.put("res", response.toString());
 	        }
         }
         else {
-        	log(LogLevel.ERROR, "Invalid request!\n", HttpServletResponse.SC_BAD_REQUEST);
+        	log(Level.ERROR, "Invalid request!\n", HttpServletResponse.SC_BAD_REQUEST);
         	model.put("res", response.toString());
 	    }
         

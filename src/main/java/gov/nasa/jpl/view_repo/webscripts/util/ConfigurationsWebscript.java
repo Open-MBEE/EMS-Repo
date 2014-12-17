@@ -23,6 +23,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -64,7 +65,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services);
             return configNode;
         } else {
-            log(LogLevel.WARNING, "Could not find configuration with id " + id, HttpServletResponse.SC_NOT_FOUND);
+            log(Level.WARN, "Could not find configuration with id " + id, HttpServletResponse.SC_NOT_FOUND);
             return null;
         }
     }
@@ -115,7 +116,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         String siteNameFromReq = getSiteName( req );
         if ( siteNode == null && !Utils.isNullOrEmpty( siteNameFromReq )
              && !siteNameFromReq.equals( NO_SITE_ID ) ) {
-            log(LogLevel.WARNING, "Could not find site " + siteNameFromReq, HttpServletResponse.SC_NOT_FOUND);
+            log(Level.WARN, "Could not find site " + siteNameFromReq, HttpServletResponse.SC_NOT_FOUND);
             return new JSONArray();
         }
         JSONArray configJsonArray = new JSONArray();

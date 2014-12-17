@@ -136,7 +136,7 @@ public class ModelsGet extends AbstractJavaWebScript {
                 if ( prettyPrint ) model.put("res", top.toString(4));
                 else model.put("res", top.toString());
             } else {
-                log(Level.WARNING, "No elements found",
+                log(Level.WARN, "No elements found",
                     HttpServletResponse.SC_NOT_FOUND);
                 model.put("res", response.toString());
             }

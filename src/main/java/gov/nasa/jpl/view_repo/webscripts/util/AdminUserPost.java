@@ -37,6 +37,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
@@ -88,7 +89,7 @@ public class AdminUserPost extends AbstractJavaWebScript {
         if (handleRequest(req)) {
             model.put( "res", "success" );
         } else {
-            log(LogLevel.ERROR, "Invalid request!\n", HttpServletResponse.SC_BAD_REQUEST);
+            log(Level.ERROR, "Invalid request!\n", HttpServletResponse.SC_BAD_REQUEST);
             model.put("res", response.toString());
         }
 
@@ -128,13 +129,13 @@ public class AdminUserPost extends AbstractJavaWebScript {
                     responseStatus.setCode( HttpServletResponse.SC_OK );
                     return true;
                 } catch ( JSONException e ) {
-                    log(LogLevel.ERROR, "JSON malformed", HttpServletResponse.SC_BAD_REQUEST);
+                    log(Level.ERROR, "JSON malformed", HttpServletResponse.SC_BAD_REQUEST);
                     return false;
                 }
             }
         }
         
-        log(LogLevel.ERROR, "Please provide JSON body (perhaps -H Content-Type not specified?)", HttpServletResponse.SC_BAD_REQUEST);
+        log(Level.ERROR, "Please provide JSON body (perhaps -H Content-Type not specified?)", HttpServletResponse.SC_BAD_REQUEST);
         return false;
     }
 }

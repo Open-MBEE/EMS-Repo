@@ -20,6 +20,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -58,7 +59,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         String siteName = getSiteName(req);
         
         if (!NodeUtil.exists( mySiteNode )) {
-            log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
+            log(Level.WARN, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
             return productsJson;
         }
         
@@ -82,7 +83,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                 EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services);
                 return handleConfigurationProducts(req, configNode);
             } else {
-                log(LogLevel.WARNING, "Could not find configuration with id " + configurationId, HttpServletResponse.SC_NOT_FOUND);
+                log(Level.WARN, "Could not find configuration with id " + configurationId, HttpServletResponse.SC_NOT_FOUND);
                 return productsJson;
             }
         }
@@ -195,7 +196,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         EmsScriptNode product = findScriptNodeById( productId, workspace, dateTime, false );
 
         if ( product == null ) {
-            log( LogLevel.ERROR, "Product not found with ID: " + productId,
+            log( Level.ERROR, "Product not found with ID: " + productId,
                  HttpServletResponse.SC_NOT_FOUND );
         }
 
@@ -228,7 +229,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     productsJson.put( product.toJSONObject( dateTime ) );
                 }
             } catch ( JSONException e ) {
-                log( LogLevel.ERROR, "Could not create JSON for product",
+                log( Level.ERROR, "Could not create JSON for product",
                      HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
                 e.printStackTrace();
             }
