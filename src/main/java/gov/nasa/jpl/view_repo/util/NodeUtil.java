@@ -474,6 +474,7 @@ public class NodeUtil {
         ArrayList<NodeRef> newNodeRefs = null;
         for ( NodeRef nr : nodeRefs ) {
             EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
+            if ( !esn.scriptNodeExists() ) continue;
 //            if ( esn.getOrSetCachedVersion() ) {
             if ( !esn.checkNodeRefVersion2( null ) ) {
                 if ( newNodeRefs == null ) {
@@ -483,6 +484,7 @@ public class NodeUtil {
                     // Back up and copy nodes we already skipped
                     ArrayList<NodeRef> copy = (ArrayList<NodeRef>)nodeRefs.clone();
                     for ( NodeRef earlier : copy ) {
+                        if ( !scriptNodeExists( earlier ) ) continue;
                         if ( earlier.equals( nr ) ) {
                             break;
                         }
