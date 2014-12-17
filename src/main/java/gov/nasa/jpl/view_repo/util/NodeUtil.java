@@ -60,7 +60,7 @@ public class NodeUtil {
 
     public static boolean doFullCaching = false;
     public static boolean doSimpleCaching = true;
-    public static boolean doHeisenCheck = false;
+    public static boolean doHeisenCheck = true;
     
     public static String sitePkgPrefix = "site_";
 
