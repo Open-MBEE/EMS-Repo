@@ -146,9 +146,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
             JSONObject reqPostJson = (JSONObject)req.parseContent();
             if ( reqPostJson != null ) {
                 log( LogLevel.INFO, "Generating snapshot artifact..." );
-                SnapshotPost instance = new SnapshotPost( repository, services );
-                JSONObject result = instance.saveAndStartAction( req, status, workspace );
-                appendResponseStatusInfo( instance );
+                //SnapshotPost instance = new SnapshotPost( repository, services );
+                JSONObject result = //instance.
+                        saveAndStartAction( req, status, workspace );
+                //appendResponseStatusInfo( instance );
 
                 status.setCode( responseStatus.getCode() );
                 if ( result == null ) {
