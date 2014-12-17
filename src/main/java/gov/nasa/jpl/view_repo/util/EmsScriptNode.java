@@ -87,6 +87,7 @@ import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -104,7 +105,9 @@ public class EmsScriptNode extends ScriptNode implements
                                              Comparable< EmsScriptNode > {
     private static final long serialVersionUID = 9132455162871185541L;
 
-    public static boolean expressionStuff = false;
+    static Logger logger = Logger.getLogger(ScriptNode.class);
+
+    public static boolean expressionStuff = false; // The value here is ignored.
 
     /**
      * A set of content model property names that serve as workspace metadata
@@ -170,7 +173,7 @@ public class EmsScriptNode extends ScriptNode implements
      * Replicates the behavior of ScriptNode versions, which is private.
      */
     protected Object[] myVersions = null;
-    
+
     public static boolean fixOwnedChildren = false;
 
     // TODO add nodeService and other member variables when no longer
@@ -1069,41 +1072,88 @@ public class EmsScriptNode extends ScriptNode implements
         return getProperty(acmType, false, null, false, false);
     }
     
+    public String getVersionLabel() {
+        Version v = getCurrentVersion();
+        if ( v != null ) {
+            return v.getVersionLabel();
+        }
+        return null;
+    }
+    
+    public Version getCurrentVersion() {
+        VersionService versionService = services.getVersionService();
+        
+        if (versionService != null) {
+            Version currentVersion = versionService.getCurrentVersion( nodeRef );
+            return currentVersion;
+        }
+        return null;
+    }
+    
+    public boolean isAVersion() {
+      return getIsVersioned();
+    }
+
+    public boolean checkNodeRefVersion2( Date dateTime ) {
+
+        // Because of a alfresco bug, we must verify that we are getting the latest version
+        // of the nodeRef if not specifying a dateTime:
+        if ( checkedNodeVersion || dateTime != null ) return false; //|| isAVersion()) return false;
+
+        String id = getId();
+        NodeRef nr = NodeUtil.heisenCacheGet( id );
+        if ( nr != null ) {
+            if ( nr.equals( nodeRef ) ) return false;
+            nodeRef = nr;
+            return true;
+        }
+
+        // Not in cache -- need to compute
+        boolean changed = checkNodeRefVersion( null );
+        NodeUtil.heisenCachePut( id, nodeRef );
+
+        return changed;
+    }
+    
     /**
      * Verifies that the nodeRef is the most recent if dateTime is null and not
      * already checked for this node.  Replaces the nodeRef with the most recent
      * if needed.  This is needed b/c of a alfresco bug.
      */
-    public void checkNodeRefVersion(Date dateTime) {
+    public boolean checkNodeRefVersion(Date dateTime) {
         
         // Because of a alfresco bug, we must verify that we are getting the latest version
         // of the nodeRef if not specifying a dateTime:
-        if (dateTime == null && !checkedNodeVersion) {
+        if (dateTime == null && !checkedNodeVersion && !isAVersion()) {
             
             checkedNodeVersion = true;
-            VersionService versionService = services.getVersionService();
+            Version currentVersion = getCurrentVersion();
+            Version headVersion = getHeadVersion();
             
-            if (versionService != null) {
-                Version currentVersion = versionService.getCurrentVersion( nodeRef );
-                Version headVersion = getHeadVersion();
+            if (currentVersion != null && headVersion != null) {
                 
-                if (currentVersion != null && headVersion != null) {
+                String currentVerLabel = currentVersion.getVersionLabel();
+                String headVerLabel = headVersion.getVersionLabel();
+                
+                // If this is not the most current node ref, replace it with the most current:
+                if (currentVerLabel != null && headVerLabel != null &&
+                    !currentVerLabel.equals( headVerLabel ) ) {
                     
-                    String currentVerLabel = currentVersion.getVersionLabel();
-                    String headVerLabel = headVersion.getVersionLabel();
-                    
-                    // If this is not the most current node ref, replace it with the most current:
-                    if (currentVerLabel != null && headVerLabel != null &&
-                        !currentVerLabel.equals( headVerLabel ) ) {
-                        
-                        NodeRef fnr = headVersion.getFrozenStateNodeRef();
-                        if (fnr != null) {
-                            nodeRef = fnr;
+                    NodeRef fnr = headVersion.getFrozenStateNodeRef();
+                    if (fnr != null) {
+                        // Cache is correct -- fix esn's nodeRef
+                        String msg = "Warning! Alfresco Heisenbug returning wrong current version of node, " + this + ".  Replacing node with unmodifiable versioned node, " + getId() + ".";
+                        logger.warn( msg );
+                        if ( response != null ) {
+                            response.append( msg + "\n");
                         }
+                        nodeRef = fnr;
+                        return true;
                     }
                 }
             }
         }
+        return false;
     }
     
     /**
@@ -1370,6 +1420,7 @@ public class EmsScriptNode extends ScriptNode implements
 
     @Override
     public String toString() {
+        String result = "";
         boolean wasOn = Debug.isOn();
         if ( wasOn ) Debug.turnOff();
         // try {
@@ -1379,6 +1430,7 @@ public class EmsScriptNode extends ScriptNode implements
         // e.printStackTrace();
         // }
         // return null;
+        try {
         if ( !exists() && !isDeleted() ) {
             return "NON-EXISTENT-NODE";
         }
@@ -1389,10 +1441,12 @@ public class EmsScriptNode extends ScriptNode implements
         String qualifiedName = getSysmlQName();
         String type = getTypeName();
         String workspaceName = getWorkspaceName();
-        String result =
-                deleted + "{type=" + type + ", id=" + id + ", cm_name=" + name + ", sysml_name=" + sysmlName
-                        + ", qualified name=" + qualifiedName + ", workspace="
-                        + workspaceName + "}";
+        result = deleted + "{type=" + type + ", id=" + id + ", cm_name=" + name + ", sysml_name=" + sysmlName
+                         + ", qualified name=" + qualifiedName + ", workspace="
+                         + workspaceName + "}";
+        } catch (Throwable t) {
+            // ignore
+        }
         if ( wasOn ) Debug.turnOn();
         return result;
     }
@@ -1954,12 +2008,12 @@ public class EmsScriptNode extends ScriptNode implements
                 }
                 if ( targetRef == null ) {
                     String msg =
-                            "Error! Element " + targetRef
+                            "Error! Target of association " + aref
                                     + " did not exist in workspace "
                                     + WorkspaceNode.getName(workspace) + " at "
                                     + dateTime + ".\n";
                     if ( getResponse() == null || getStatus() == null ) {
-                        Debug.error( msg );
+                        Debug.error( false, msg );
                     } else {
                         getResponse().append( msg );
                         getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
@@ -2425,7 +2479,7 @@ public class EmsScriptNode extends ScriptNode implements
                             "Error! Could not find element for sysml id = "
                                     + sysmlId + ".\n";
                     if ( getResponse() == null || getStatus() == null ) {
-                        Debug.error( msg );
+                        Debug.error( false, msg );
                     } else {
                         getResponse().append( msg );
                         getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
@@ -2444,7 +2498,7 @@ public class EmsScriptNode extends ScriptNode implements
                     "Error! Couldn't get property " + propDef + "=" + property
                             + ".\n";
             if ( getResponse() == null || getStatus() == null ) {
-                Debug.error( msg );
+                Debug.error( false, msg );
             } else {
                 getResponse().append( msg );
                 getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
@@ -3033,6 +3087,7 @@ public class EmsScriptNode extends ScriptNode implements
                 nodeService.getProperties( getNodeRef() );
         if ( isSiteOrSites ) {
             properties.remove( createQName( "st:sitePreset" ) );
+            properties.remove( createQName( "sys:undeletable" ) );
         }
         nodeService.setProperties( node.getNodeRef(), properties );
         

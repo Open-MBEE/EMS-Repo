@@ -28,7 +28,6 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
     public static final String PARAM_WS_DIFF = "wsDiff";
     public static final String PARAM_START = "start";
     public static final String PARAM_END = "end";
-    public static final String PARAM_SITE_NAME = "siteName";
 
     /**
      * Injected variables from Spring configuration
@@ -48,8 +47,6 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
         String projectId = (String) action.getParameterValue(PARAM_PROJECT_ID);
         String wsId = (String) action.getParameterValue(PARAM_WS_ID);
         WorkspaceDiff wsDiff = (WorkspaceDiff) action.getParameterValue(PARAM_WS_DIFF);
-//        String siteName = (String) action.getParameterValue(PARAM_SITE_NAME);
-        // site name isn't necessary to update
         Long start = (Long) action.getParameterValue(PARAM_START);
         Long end = (Long) action.getParameterValue(PARAM_END);
         

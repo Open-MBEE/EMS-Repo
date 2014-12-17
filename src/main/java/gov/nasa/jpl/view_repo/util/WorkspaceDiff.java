@@ -661,6 +661,13 @@ public class WorkspaceDiff implements Serializable {
                     ignoredPropIds.add( propName.toString() );
                 }
             }
+            ignoredPropIds.add( "view2:snapshotProduct" );
+            ignoredPropIds.add( "view2:productSnapshots" );
+            ignoredPropIds.add( "view2:docbookNode" );
+            ignoredPropIds.add( "view2:pdfNode" );
+            ignoredPropIds.add( "view2:htmlZipNode" );
+            ignoredPropIds.add( "view2:timestamp" );
+
             List<String> prefixes = Utils.newList(
 //                                                  "cm:name",
 //                                                  "cm:content",
@@ -827,8 +834,9 @@ public class WorkspaceDiff implements Serializable {
                     NodeUtil.findNodeRefById( sysmlId, false, node, timestamp2,
                                               getServices(), false );
             if ( ref != null ) s2.add( ref );
-            if ( NodeUtil.isDeleted(n))
+            if ( NodeUtil.isDeleted(n)) {
             	deletedFromS1.add(n);
+            }
         }
         for ( NodeRef n : s2 ) {
             String sysmlId = NodeUtil.getSysmlId( n );
@@ -836,15 +844,18 @@ public class WorkspaceDiff implements Serializable {
                     NodeUtil.findNodeRefById( sysmlId, false, ws1, timestamp1,
                                               getServices(), false );
             if ( ref != null ) s1.add( ref );
-            if ( NodeUtil.isDeleted(n))
+            if ( NodeUtil.isDeleted(n)) {
             	deletedFromS2.add(n);
+            }
         }
         
         // delete the nodes from s1 and s2  
-        for ( NodeRef n : deletedFromS1 )
+        for ( NodeRef n : deletedFromS1 ) {
         	s1.remove(n);
-        for ( NodeRef n : deletedFromS2 )
+        }
+        for ( NodeRef n : deletedFromS2 ) {
         	s2.remove(n);
+        }
 
         nodeDiff = new NodeDiff( s1, s2 );
         nodeDiff.addPropertyIdsToIgnore( getIgnoredPropIds() );

@@ -119,7 +119,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
     // Set the flag to time events that occur during a model post using the timers
     // below
-    private static boolean timeEvents = false;
+    public static boolean timeEvents = false;
     private Timer timerCommit = null;
     private Timer timerIngest = null;
     private Timer timerUpdateModel = null;
@@ -357,7 +357,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // Send deltas to all listeners
         if (wsDiff.isDiff()) {
             // FIXME: Need to split elements by project Id - since they won't always be in same project
-            CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), projectNode, status );
+            CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), status );
         }
 
         Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): Deltas time", timeEvents);
@@ -1880,7 +1880,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         EmsScriptNode parent;
         if (useParent) {
-            parent= node.getParent();
+            parent= node.getParent();     
         } else {
             parent = node;
         }
@@ -1900,6 +1900,19 @@ public class ModelPost extends AbstractJavaWebScript {
                              + WorkspaceNode.getName( workspace ) );
                 e.printStackTrace();
                 //throw e; // pass it up the chain to roll back transaction // REVIEW -- compiler won't allow throw like below--why??
+                return null;
+            }
+        }
+        
+        // If node is not in the correct workspace then clone it:
+        //  Note: this can occur if the parent workspace has the reified node, but not the
+        //        reified pkg when getOwner() calls this.  See CMED-501.
+        if (!NodeUtil.workspacesEqual( workspace, node.getWorkspace() )) {
+            node = node.clone( parent );
+            
+            if ( node == null || !node.exists() ) {
+                log( LogLevel.ERROR,
+                     "Clone failed for node id = " + id );
                 return null;
             }
         }

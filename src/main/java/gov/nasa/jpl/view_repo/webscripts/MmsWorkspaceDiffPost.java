@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -114,13 +115,27 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	            JSONArray elements = new JSONArray();
 	            
 	            // Add/update the elements in the target workspace:
+	            // Must remove the modified time, as it is for the source workspace, not the target
+	            // workspace, so may get errors for trying to modify a element with a old modified time.
 	            if (srcJson.has( "addedElements" )) {
 	                JSONArray added = srcJson.getJSONArray("addedElements");
-	                for (int ii = 0; ii < added.length(); ii++) elements.put( added.getJSONObject( ii ) );
+	                for (int ii = 0; ii < added.length(); ii++) {
+	                    JSONObject obj = added.getJSONObject( ii );
+	                    if (obj.has( Acm.JSON_LAST_MODIFIED )) {
+	                        obj.remove( Acm.JSON_LAST_MODIFIED );
+	                    }
+	                    elements.put( obj );
+	                }
 	            }
 	            if (srcJson.has( "updatedElements" )) {
                     JSONArray updated = srcJson.getJSONArray("updatedElements");
-                    for (int ii = 0; ii < updated.length(); ii++) elements.put( updated.getJSONObject( ii ) );
+                    for (int ii = 0; ii < updated.length(); ii++) {
+                        JSONObject obj = updated.getJSONObject( ii );
+                        if (obj.has( Acm.JSON_LAST_MODIFIED )) {
+                            obj.remove( Acm.JSON_LAST_MODIFIED );
+                        }
+                        elements.put( obj );
+                    }
 	            }
 	            top.put( "elements", elements );
 	            
@@ -148,8 +163,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                     }
 	            }
 	            
-	            // FIXME specify the parent commit nodes
-	            CommitUtil.merge( jsonDiff, srcWs, targetWs, null, null, false, services, response );
+	            CommitUtil.merge( jsonDiff, srcWs, targetWs, null, false, services, response );
 		    }
 		}
 	}	
