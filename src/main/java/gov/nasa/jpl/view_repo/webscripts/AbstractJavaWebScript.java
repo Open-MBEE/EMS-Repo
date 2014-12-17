@@ -56,8 +56,6 @@ import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
 import org.apache.log4j.Level;
 import org.apache.log4j.*;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -101,6 +99,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     protected Status responseStatus = new Status();
 
     protected WorkspaceDiff wsDiff;
+
+    public static boolean alwaysTurnOffDebugOut = true;
 
     protected void initMemberVariables(String siteName) {
 		companyhome = new ScriptNode(repository.getCompanyHome(), services);
@@ -146,6 +146,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		foundElements = new HashMap<String, EmsScriptNode>();
 		response = new StringBuffer();
 		responseStatus.setCode(HttpServletResponse.SC_OK);
+        NodeUtil.initHeisenCache();
+        if ( alwaysTurnOffDebugOut  ) {
+            Debug.turnOff();
+        }
 	}
 
 	/**

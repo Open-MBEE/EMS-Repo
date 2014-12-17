@@ -60,6 +60,7 @@ public class NodeUtil {
 
     public static boolean doFullCaching = false;
     public static boolean doSimpleCaching = true;
+    public static boolean doHeisenCheck = false;
     
     public static String sitePkgPrefix = "site_";
 
@@ -75,12 +76,39 @@ public class NodeUtil {
      */
     public static HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > > 
         elementCache = new HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > >();
-//    /**
-//     * A cache of alfresco nodes stored as a map from sysml:id to workspaceId to node
-//     */
-//    public static HashMap< String, Map< String, Map< Boolean, Map< Boolean, Map< Boolean, ArrayList< NodeRef > > > > > > elementCache =
-//            new HashMap< String, Map< String, Map< Boolean, Map< Boolean, Map< Boolean, ArrayList< NodeRef > > > > > >();
+    
+    /**
+     * A cache of the most nodeRefs, keyed by the nodes' alfresco ids. This is
+     * to get around the "Heisenbug" where alfresco's current version is
+     * sometimes tied to an old version.
+     */
+    protected static HashMap<String, NodeRef> heisenCache = new HashMap<String, NodeRef>();
 
+    /**
+     * clear or create the cache for correcting bad node refs (that refer to
+     * wrong versions)
+     */
+    public static void initHeisenCache() {
+        // TODO -- the problem with this is that concurrent services could clear
+        // this common cache. It would be better to pass around a context or
+        // something with a service identifier as a key to the cache. So, each
+        // web service invocation would have its own cache.
+        synchronized ( heisenCache ) {
+            heisenCache.clear();
+        }
+    }
+    public static NodeRef heisenCachePut( String id, NodeRef nodeRef ) {
+        synchronized ( heisenCache ) {
+            return heisenCache.put( id, nodeRef );
+        }
+    }
+    public static NodeRef heisenCacheGet( String id ) {
+        synchronized ( heisenCache ) {
+            return heisenCache.get( id );
+        }
+    }
+
+    
     public enum SearchType {
         DOCUMENTATION( "@sysml\\:documentation:\"" ),
         NAME( "@sysml\\:name:\"" ),
@@ -104,7 +132,7 @@ public class NodeUtil {
     
     // Set the flag to time events that occur during a model post using the timers
     // below
-    private static boolean timeEvents = false;
+    public static boolean timeEvents = false;
     private static Timer timer = null;
     private static Timer timerByType = null;
     private static Timer timerLucene = null;
@@ -345,6 +373,9 @@ public class NodeUtil {
                 }
             }
             if ( results != null ) {
+                if ( doHeisenCheck ) {
+                    results = fixVersions( results );
+                }
                 if ( wasCached && dateTime == null ) {
                     nodeRefs = results;
                 } 
@@ -403,7 +434,46 @@ public class NodeUtil {
         return nodeRefs;
     }
 
+    public static ArrayList<NodeRef> fixVersions( ArrayList<NodeRef> nodeRefs ) {
+        // check for alfresco bug where SpacesStore ref is the wrong version
+        //if ( !doVersionCaching ) return nodeRefs;
+        if ( !doHeisenCheck ) return nodeRefs;
+        ArrayList<NodeRef> newNodeRefs = null;
+        for ( NodeRef nr : nodeRefs ) {
+            EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
+//            if ( esn.getOrSetCachedVersion() ) {
+            if ( !esn.checkNodeRefVersion2( null ) ) {
+                if ( newNodeRefs == null ) {
+                    newNodeRefs = new ArrayList<NodeRef>();
+                    @SuppressWarnings( "unchecked" )
 
+                    // Back up and copy nodes we already skipped
+                    ArrayList<NodeRef> copy = (ArrayList<NodeRef>)nodeRefs.clone();
+                    for ( NodeRef earlier : copy ) {
+                        if ( earlier.equals( nr ) ) {
+                            break;
+                        }
+                        newNodeRefs.add( earlier );
+                    }
+                }
+                newNodeRefs.add( esn.getNodeRef() );
+            } else if ( newNodeRefs != null ) {
+                newNodeRefs.add( nr );
+            }
+        }
+        if ( newNodeRefs == null ) {
+            newNodeRefs = nodeRefs;
+        }
+        return newNodeRefs;
+    }
+    
+    public static int compare( Version v1, Version v2 ) {
+        if ( v1 == v2 ) return 0;
+        Date d1 = v1.getFrozenModifiedDate();
+        Date d2 = v2.getFrozenModifiedDate();
+        return d1.compareTo( d2 );
+    }
+    
     protected static ArrayList<NodeRef> filterResults(ArrayList<NodeRef> results,
                                                       String specifier, String prefix,
                                                       boolean useSimpleCache,
@@ -418,11 +488,11 @@ public class NodeUtil {
         NodeRef lowest = null;
         NodeRef nodeRef = null;
         
-        for (NodeRef nr: results) {
+        for ( NodeRef nr : results ) {
             //int minParentDistance = Integer.MAX_VALUE;
             if ( nr == null ) continue;
             EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
-
+            
             if ( Debug.isOn() && !Debug.isOn() ) {
                 Debug.outln( "findNodeRefsByType(" + specifier + ", " + prefix + ", " + workspace + ", " + dateTime + ", justFirst=" + justFirst + ", exactMatch=" + exactMatch + "): candidate " + esn.getWorkspaceName() + "::" + esn.getName() );
             }
