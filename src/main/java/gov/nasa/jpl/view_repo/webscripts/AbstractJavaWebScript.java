@@ -620,17 +620,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
 
     protected void printFooter() {
-        if ( !Debug.isOn() ) return;
-        log( LogLevel.DEBUG, "*** completed " + ( new Date() ) + " "
+        log( LogLevel.INFO, "*** completed " + ( new Date() ) + " "
                             + getClass().getSimpleName() );
     }
 
     protected void printHeader( WebScriptRequest req ) {
-        if ( !Debug.isOn() ) return;
-        log( LogLevel.DEBUG, "*** starting " + ( new Date() ) + " "
+        log( LogLevel.INFO, "*** starting " + ( new Date() ) + " "
                              + getClass().getSimpleName() );
         String reqStr = req.getURL();
-        log( LogLevel.DEBUG,
+        log( LogLevel.INFO,
              "*** request = " + 
              ( reqStr.length() <= MAX_PRINT ? 
                reqStr : reqStr.substring( 0, MAX_PRINT ) + "..." ) );
