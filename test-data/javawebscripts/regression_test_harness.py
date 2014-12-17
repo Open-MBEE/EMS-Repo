@@ -823,6 +823,23 @@ common_filters+['"id"','"qualifiedId"'],
 ["test","workspaces","develop", "develop2"]
 ],
 
+# SNAPSHOTS: ==========================    
+
+[
+240,
+"PostSnapshot",
+"Post snapshot test",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                branch="master/sites/europa/products/301/",
+                post_type="snapshots"),
+True, 
+common_filters+['"created"','"id"','"url"'],
+["test","workspaces","develop", "develop2"],
+None,
+None,
+3
+],
+
 # EXPRESSIONS: ==========================    
 
 # Note: currently not an equivalent in workspaces for this URL, but we may add it
@@ -901,23 +918,6 @@ create_curl_cmd(type="GET",data="views/_17_0_2_3_e610336_1394148233838_91795_293
 True, 
 common_filters,
 []
-],
-        
-# SNAPSHOTS: ==========================
-
-# This depends on PostConfig and may result in an exception
-# if the configuration hasn't yet been created because it is
-# a job run in the background.
-[
-295,
-"PostSnapshot",
-"Post snapshot test",
-create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                branch="master/sites/europa/products/301/",
-                post_type="snapshots"),
-True, 
-common_filters+['"created"','"id"','"url"'],
-["test","workspaces","develop", "develop2"]
 ],
 
 # NEW URLS: ==========================    
