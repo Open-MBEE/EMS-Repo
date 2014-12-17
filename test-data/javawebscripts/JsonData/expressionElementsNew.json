@@ -6,24 +6,16 @@
         "name": "",
         "owner": "e_32169",
         "specialization": {"type": "Constraint",
-                          "specification":"expr_32165"
-                          }
-    },
-    {
-        "documentation": "",
-        "sysmlid": "expr_32165",
-        "name": "",
-        "owner": "e_32169",
-        "specialization": {"type": "Expression",
-        				   "symbol": "",
-					       "operand": [
-					                   {"type":"ElementValue",
-					                    "element":"op_ev_31835"},
-					                   {"type":"ElementValue",
-					                    "element":"arg_ev_38307_1"},
-					                   {"type":"ElementValue",
-					                    "element":"arg_ev_33001"}
-					                   ]}
+                          "specification":
+                            {"type": "Expression",
+        				     "symbol": "",
+					         "operand": [{"type":"ElementValue",
+					                      "element":"op_ev_31835"},
+					                     {"type":"ElementValue",
+					                      "element":"arg_ev_38307_1"},
+					                     {"type":"ElementValue",
+					                      "element":"arg_ev_33001"}
+					                     ]}
     },
     {
         "documentation": "",

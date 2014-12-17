@@ -174,6 +174,10 @@ public class EmsScriptNode extends ScriptNode implements
      */
     protected Object[] myVersions = null;
 
+    public boolean embeddingExpressionInConstraint = true;
+    public boolean embeddingExpressionInOperation = true;
+    public boolean embeddingExpressionInConnector = true;
+
     public static boolean fixOwnedChildren = false;
 
     // TODO add nodeService and other member variables when no longer
@@ -2535,10 +2539,11 @@ public class EmsScriptNode extends ScriptNode implements
                 continue;
             } else {
                 QName qName = createQName( acmType );
-                if ( acmType.equals( Acm.ACM_VALUE ) ) {
-                    if ( Debug.isOn() ) System.out.println( "qName of "
-                                                            + acmType + " = "
-                                                            + qName.toString() );
+                if ( Debug.isOn() ) {
+                    if ( acmType.equals( Acm.ACM_VALUE ) ) {
+                        System.out.println( "qName of " + acmType + " = "
+                                            + qName.toString() );
+                    }
                 }
 
                 // If it is a specialization, then process the json object it
@@ -4238,10 +4243,17 @@ public class EmsScriptNode extends ScriptNode implements
             putInJson( json, "parameters", ids, filter );
         }
 
-        String id =
-                node.getSysmlIdOfProperty( "sysml:operationExpression" );
-        if ( id != null ) {
-            putInJson( json, "expression", id, filter );
+        if ( !embeddingExpressionInOperation  ) { 
+            String id = node.getSysmlIdOfProperty( "sysml:operationExpression" );
+            if ( id != null ) {
+              putInJson( json, "expression", id, filter );
+            }
+        } else {
+            Object property = node.getProperty( "sysml:operationExpression" );
+            if ( property != null ) {
+                putInJson( json, "expression", addInternalJSON( property, dateTime ),
+                           filter );
+            }
         }
     }
 
@@ -4261,11 +4273,19 @@ public class EmsScriptNode extends ScriptNode implements
             addConstraintJSON( JSONObject json, EmsScriptNode node,
                                Set< String > filter, Date dateTime )
                                                                     throws JSONException {
-        String specId =
-                node.getSysmlIdOfProperty( "sysml:constraintSpecification" );
-        if ( specId != null ) {
-            putInJson( json, "specification", specId, filter );
-        }
+        if ( !embeddingExpressionInConstraint  ) { 
+            String specId =
+                    node.getSysmlIdOfProperty( "sysml:constraintSpecification" );
+            if ( specId != null ) {
+                putInJson( json, "specification", specId, filter );
+            }
+        } else {
+            Object property = node.getProperty( "sysml:constraintSpecification" );
+            if ( property != null ) {
+              putInJson( json, "expression", addInternalJSON( property, dateTime ),
+                         filter );
+            }
+      }
     }
 
     protected
