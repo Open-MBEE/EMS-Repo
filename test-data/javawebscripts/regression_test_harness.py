@@ -636,7 +636,7 @@ create_curl_cmd(type="GET",data="search?keyword=some*",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
 common_filters,
-["test","workspaces","develop", "develop2"],
+["test","workspaces","develop"],
 None,
 None,
 80

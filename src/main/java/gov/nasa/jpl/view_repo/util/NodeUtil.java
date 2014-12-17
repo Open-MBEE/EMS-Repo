@@ -58,24 +58,46 @@ import org.springframework.extensions.webscripts.Status;
 
 public class NodeUtil {
 
-    public static boolean doFullCaching = false;
+    public enum SearchType {
+        DOCUMENTATION( "@sysml\\:documentation:\"" ),
+        NAME( "@sysml\\:name:\"" ),
+        CM_NAME( "@cm\\:name:\"" ),
+        ID( "@sysml\\:id:\"" ),
+        STRING( "@sysml\\:string:\"" ),
+        BODY( "@sysml\\:body:\"" ),
+        CHECKSUM( "@view\\:cs:\"" ),
+        WORKSPACE("@ems\\:workspace:\"" ),
+        WORKSPACE_NAME("@ems\\:workspace_name:\"" ),
+        OWNER("@ems\\:owner:\"" ),
+        ASPECT("ASPECT:\""),
+        TYPE("TYPE:\"");
+
+        public String prefix;
+
+        SearchType( String prefix ) {
+            this.prefix = prefix;
+        }
+    }
+    
+    /* static flags and constants */
+    
+    public static boolean doFullCaching = true;
     public static boolean doSimpleCaching = true;
     public static boolean doHeisenCheck = true;
     
     public static String sitePkgPrefix = "site_";
 
-    
     /**
      * A cache of alfresco nodes stored as a map from cm:name to node for the master branch only.
      */
-    public static HashMap< String, NodeRef > simpleCache =
-            new HashMap< String, NodeRef >();
+    public static Map< String, NodeRef > simpleCache =
+            Collections.synchronizedMap( new HashMap< String, NodeRef >() );
 
     /**
      * A cache of alfresco nodes stored as a map from sysml:id to a set of nodes
      */
-    public static HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > > 
-        elementCache = new HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > >();
+    public static Map< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > > 
+        elementCache = Collections.synchronizedMap( new HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > >() );
     
     /**
      * A cache of the most nodeRefs, keyed by the nodes' alfresco ids. This is
@@ -83,6 +105,21 @@ public class NodeUtil {
      * sometimes tied to an old version.
      */
     protected static HashMap<String, NodeRef> heisenCache = new HashMap<String, NodeRef>();
+
+    // Set the flag to time events that occur during a model post using the timers
+    // below
+    public static boolean timeEvents = false;
+    private static Timer timer = null;
+    private static Timer timerByType = null;
+    private static Timer timerLucene = null;
+
+    public static final Comparator< ? super NodeRef > nodeRefComparator = GenericComparator.instance();
+
+    public static ServiceRegistry services = null;
+
+    // needed for Lucene search
+    public static StoreRef SEARCH_STORE = null;
+            //new StoreRef( StoreRef.PROTOCOL_WORKSPACE, "SpacesStore" );
 
     /**
      * clear or create the cache for correcting bad node refs (that refer to
@@ -109,42 +146,6 @@ public class NodeUtil {
     }
 
     
-    public enum SearchType {
-        DOCUMENTATION( "@sysml\\:documentation:\"" ),
-        NAME( "@sysml\\:name:\"" ),
-        CM_NAME( "@cm\\:name:\"" ),
-        ID( "@sysml\\:id:\"" ),
-        STRING( "@sysml\\:string:\"" ),
-        BODY( "@sysml\\:body:\"" ),
-        CHECKSUM( "@view\\:cs:\"" ),
-        WORKSPACE("@ems\\:workspace:\"" ),
-        WORKSPACE_NAME("@ems\\:workspace_name:\"" ),
-        OWNER("@ems\\:owner:\"" ),
-        ASPECT("ASPECT:\""),
-        TYPE("TYPE:\"");
-
-        public String prefix;
-
-        SearchType( String prefix ) {
-            this.prefix = prefix;
-        }
-    }
-    
-    // Set the flag to time events that occur during a model post using the timers
-    // below
-    public static boolean timeEvents = false;
-    private static Timer timer = null;
-    private static Timer timerByType = null;
-    private static Timer timerLucene = null;
-
-    public static final Comparator< ? super NodeRef > nodeRefComparator = GenericComparator.instance();
-
-    public static ServiceRegistry services = null;
-
-    // needed for Lucene search
-    public static StoreRef SEARCH_STORE = null;
-            //new StoreRef( StoreRef.PROTOCOL_WORKSPACE, "SpacesStore" );
-
     public static StoreRef getStoreRef() {
         if ( SEARCH_STORE == null ) {
             SEARCH_STORE =
@@ -436,7 +437,7 @@ public class NodeUtil {
                 if ( useSimpleCache && doSimpleCaching ) {
                     NodeRef r = nodeRefs.get( 0 ); 
                     simpleCache.put( specifier, r );
-                } else if ( doFullCaching ){
+                } else if ( useFullCache && doFullCaching  ){
                     putInCache( specifier, prefix, ignoreWorkspace, workspace,
                                 onlyThisWorkspace, dateTime, justFirst,
                                 exactMatch, includeDeleted, siteName, nodeRefs );
