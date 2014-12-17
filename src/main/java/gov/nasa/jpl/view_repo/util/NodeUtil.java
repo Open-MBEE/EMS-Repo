@@ -1942,9 +1942,11 @@ public class NodeUtil {
 
     public static Set<NodeRef> getModelElements( Set<NodeRef> s1 ) {
         Set<NodeRef> newSet1 = new LinkedHashSet< NodeRef >();
-        for ( NodeRef ref : s1 ) {
-            if ( EmsScriptNode.isModelElement( ref ) ) {
-                newSet1.add( ref );
+        if (s1 != null) {
+            for ( NodeRef ref : s1 ) {
+                if ( EmsScriptNode.isModelElement( ref ) ) {
+                    newSet1.add( ref );
+                }
             }
         }
         return newSet1;

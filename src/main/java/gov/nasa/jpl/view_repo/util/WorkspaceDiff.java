@@ -94,6 +94,7 @@ public class WorkspaceDiff implements Serializable {
     }
 
     public WorkspaceDiff(WorkspaceNode ws1, WorkspaceNode ws2, Date timestamp1, Date timestamp2 ) {
+
         this(ws1, ws2);
         this.timestamp1 = timestamp1;
         this.timestamp2 = timestamp2;
@@ -817,6 +818,13 @@ public class WorkspaceDiff implements Serializable {
                                                                timestamp1,
                                                                getServices(),
                                                                null, null );
+        
+        // If either of these are null then we caught an exception above, 
+        // so just bail
+        if (s1 == null || s2 == null) {
+            return;
+        }
+        
         if ( onlyModelElements ) {
             s1 = NodeUtil.getModelElements(s1);
             s2 = NodeUtil.getModelElements(s2);

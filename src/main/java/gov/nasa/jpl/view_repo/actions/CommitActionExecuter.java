@@ -58,7 +58,7 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
                 logger.warn("send deltas not posted properly");
             }
 
-            CommitUtil.updateCommitNodeRef( nodeRef, "", deltaJson.toString(), services, response );
+            CommitUtil.updateCommitNodeRef( nodeRef, deltaJson.toString(), "", services, response );
         } catch ( JSONException e ) {
             // TODO Auto-generated catch block
             logger.error( "JSON creation error in when updating the difference" );
