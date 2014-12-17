@@ -29,6 +29,7 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -37,6 +38,7 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -81,7 +83,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		Map<String, Object> model = new HashMap<String, Object>();
         
 		try {
-			handleDiff((JSONObject)req.parseContent(), status, model);
+			handleDiff(req, (JSONObject)req.parseContent(), status, model);
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();
@@ -99,7 +101,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	}
 	
     
-	private void handleDiff(JSONObject jsonDiff, Status status, Map<String, Object> model) throws Exception {
+	private void handleDiff(WebScriptRequest req, JSONObject jsonDiff, Status status, Map<String, Object> model) throws Exception {
 		if (jsonDiff.has( "workspace1" ) && jsonDiff.has("workspace2")) {
 		    JSONObject srcJson = jsonDiff.getJSONObject( "workspace2" );
 		    JSONObject targetJson = jsonDiff.getJSONObject( "workspace1" );
@@ -163,7 +165,14 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                     }
 	            }
 	            
-	            CommitUtil.merge( jsonDiff, srcWs, targetWs, null, false, services, response );
+	            String timestamp1 = req.getParameter( "timestamp1" );
+	            Date dateTimeTarget = TimeUtils.dateFromTimestamp( timestamp1 );
+
+	            String timestamp2 = req.getParameter( "timestamp2" );
+	            Date dateTimeSrc = TimeUtils.dateFromTimestamp( timestamp2 );
+	            
+	            CommitUtil.merge( jsonDiff, srcWs, targetWs, dateTimeSrc, dateTimeTarget,
+	                              null, false, services, response );
 		    }
 		}
 	}	
