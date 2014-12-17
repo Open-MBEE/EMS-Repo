@@ -1091,7 +1091,8 @@ public class EmsScriptNode extends ScriptNode implements
     }
     
     public boolean isAVersion() {
-      return getIsVersioned();
+        VersionService versionService = services.getVersionService();
+        return versionService.isAVersion( getNodeRef() );
     }
 
     public boolean checkNodeRefVersion2( Date dateTime ) {
