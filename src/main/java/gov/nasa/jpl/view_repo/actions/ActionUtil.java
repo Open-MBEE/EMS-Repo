@@ -170,6 +170,9 @@ public class ActionUtil {
         EmsScriptNode jobNode = jobPkgNode.childByNamePath(jobName);
         if (jobNode == null) {
             jobNode = jobPkgNode.createNode(jobName, jobType);
+            if ( jobNode == null ) {
+                return null;
+            }
             jobNode.createOrUpdateProperty("cm:isContentIndexed", false);
         } else if ( jobNode.isDeleted() ) {
             // resurrect

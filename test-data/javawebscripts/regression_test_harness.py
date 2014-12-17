@@ -632,7 +632,7 @@ common_filters,
 110,
 "GetSearch",
 "Get search",
-create_curl_cmd(type="GET",data="element/search?keyword=some*",base_url=BASE_URL_WS,
+create_curl_cmd(type="GET",data="search?keyword=some*",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
 common_filters,
@@ -834,7 +834,10 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="snapshots"),
 True, 
 common_filters+['"created"','"id"','"url"'],
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop", "develop2"],
+None,
+None,
+3
 ],
 
 # EXPRESSIONS: ==========================    
@@ -916,7 +919,7 @@ True,
 common_filters,
 []
 ],
-        
+
 # NEW URLS: ==========================    
 
 [

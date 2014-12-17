@@ -72,6 +72,11 @@ public class ProjectGet extends AbstractJavaWebScript {
      */
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        ProjectGet instance = new ProjectGet(repository, services);
+        return instance.executeImplImpl(req,  status, cache);
+    }
+	
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
 //    	String userName = AuthenticationUtil.getRunAsUser();
         printHeader( req );
 
