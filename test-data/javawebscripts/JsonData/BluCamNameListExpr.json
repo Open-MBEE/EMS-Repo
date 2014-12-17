@@ -34,7 +34,7 @@
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
       "specialization" : {
         "parameters": ["exposed_id"],
-        "type": "Operation"
+        "type": "Operation",
         "expression":{
           "operand":[{"type":"ElementValue",
                       "element":"op_list"},
