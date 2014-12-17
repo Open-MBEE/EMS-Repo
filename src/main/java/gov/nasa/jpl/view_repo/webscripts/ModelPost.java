@@ -119,7 +119,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
     // Set the flag to time events that occur during a model post using the timers
     // below
-    private static boolean timeEvents = false;
+    public static boolean timeEvents = false;
     private Timer timerCommit = null;
     private Timer timerIngest = null;
     private Timer timerUpdateModel = null;

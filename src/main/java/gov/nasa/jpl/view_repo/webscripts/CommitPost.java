@@ -35,8 +35,6 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.springframework.extensions.webscripts.Cache;
@@ -70,15 +68,22 @@ public class CommitPost extends AbstractJavaWebScript {
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
+		CommitPost instance = new CommitPost(repository, services);
+		return instance.executeImplImpl(req, status, cache);
+	}
+	
+	protected Map<String, Object> executeImplImpl(WebScriptRequest req,
+			Status status, Cache cache) {
 		Map<String, Object> model = new HashMap<String, Object>();
 
 		clearCaches();
 
 		// Isn't necessary since we have the commit ID
+        //FIXME: need to add revert capabilities back in
 //        String siteName = req.getServiceMatch().getTemplateVars().get(SITE_NAME);
         String nodeId = req.getServiceMatch().getTemplateVars().get(COMMIT_ID);
         
-        EmsScriptNode changeSet = CommitUtil.getScriptNodeByNodeRefId(nodeId, services);
+//        EmsScriptNode changeSet = CommitUtil.getScriptNodeByNodeRefId(nodeId, services);
 //        if (changeSet != null) {
 //        		if (CommitUtil.revertCommit(changeSet, services)) {
 //        			responseStatus.setCode(HttpServletResponse.SC_OK);

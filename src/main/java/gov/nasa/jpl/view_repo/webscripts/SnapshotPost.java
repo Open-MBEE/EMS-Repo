@@ -30,7 +30,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.docbook.model.*;
-import gov.nasa.jpl.docbook.utils.HtmlToDocbook;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
@@ -75,7 +74,6 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.util.TempFileProvider;
-import org.alfresco.util.UrlUtil;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -129,7 +127,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
      * Otherwise, it's a snapshot creation.
      */
     @Override
-    protected Map< String, Object > executeImpl( WebScriptRequest req,
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        SnapshotPost instance = new SnapshotPost(repository, services);
+        return instance.executeImplImpl(req,  status, cache);
+    }
+	
+    protected Map< String, Object > executeImplImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
         printHeader( req );
         clearCaches();
@@ -893,7 +896,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             return null;
         }
        
-        EmsScriptNode snapshotNode = sitesFolder.childByNamePath("snapshots");
+        EmsScriptNode snapshotNode = sitesFolder.childByNamePath("/snapshots");
 
         if (snapshotNode == null) {
             snapshotNode = sitesFolder.createFolder("snapshots");

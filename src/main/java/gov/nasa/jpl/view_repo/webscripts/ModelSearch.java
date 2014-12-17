@@ -78,7 +78,12 @@ public class ModelSearch extends ModelGet {
 
     
 	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        ModelSearch instance = new ModelSearch(repository, services);
+        return instance.executeImplImpl(req,  status, cache);
+    }
+	
+	protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
 		clearCaches();
@@ -125,14 +130,18 @@ public class ModelSearch extends ModelGet {
                                                          workspace, dateTime ) );
             }
             
-            // need to filter based on workspace and filter out _pkgs
+            // need to filter out _pkgs:
             for (Entry< String, EmsScriptNode > element: rawResults.entrySet()) {
-                NodeRef nodeRef = NodeUtil.findNodeRefById( element.getKey(), false, workspace, dateTime, services, true );
-                if ( nodeRef.equals( element.getValue().getNodeRef() ) ) {
-                    if (!element.getValue().getSysmlId().endsWith( "_pkg" )) {
-                        elementsFound.put( element.getKey(), element.getValue() );
-                    }
+                 
+                if (!element.getValue().getSysmlId().endsWith( "_pkg" )) {
+                    elementsFound.put( element.getKey(), element.getValue() );
                 }
+//                NodeRef nodeRef = NodeUtil.findNodeRefById( element.getKey(), false, workspace, dateTime, services, true );
+//                if ( nodeRef.equals( element.getValue().getNodeRef() ) ) {
+//                    if (!element.getValue().getSysmlId().endsWith( "_pkg" )) {
+//                        elementsFound.put( element.getKey(), element.getValue() );
+//                    }
+//                }
             }
 
             handleElements(dateTime);
