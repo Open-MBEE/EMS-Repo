@@ -32,8 +32,6 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.connections.JmsConnection;
-import gov.nasa.jpl.view_repo.connections.RestPostConnection;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -56,7 +54,8 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
-import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
+import org.apache.log4j.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
@@ -74,20 +73,21 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
-    public enum LogLevel {
+    public Level maxLevel = Level.WARN;
+    
+    /*public enum LogLevel {
 		DEBUG(0), INFO(1), WARNING(2), ERROR(3);
 		private int value;
 		private LogLevel(int value) {
 			this.value = value;
 		}
-	}
+	}*/
 
     public static final int MAX_PRINT = 200;
-
+    
     // injected members
 	protected ServiceRegistry services;		// get any of the Alfresco services
 	protected Repository repository;		// used for lucene search
-	protected LogLevel logLevel = LogLevel.WARNING;
 
 	// internal members
 	protected ScriptNode companyhome;
@@ -120,19 +120,24 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         this.setRepositoryHelper( repository );
         this.setServices( services );
         this.response = response ;
+        // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
+        logger.setLevel(maxLevel);
     }
 
     public AbstractJavaWebScript(Repository repositoryHelper, ServiceRegistry registry) {
         this.setRepositoryHelper(repositoryHelper);
         this.setServices(registry);
+        // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
+        logger.setLevel(maxLevel);
     }
 
     public AbstractJavaWebScript() {
         // default constructor for spring
         super();
+        // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
+        logger.setLevel(maxLevel);
     }
-
-
+    
     /**
 	 * Utility for clearing out caches
 	 * TODO: do we need to clear caches if Spring isn't making singleton instances
@@ -187,7 +192,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		EmsScriptNode siteNode = null;
 		
 		if (siteName == null) {
-		    if ( errorOnNull ) log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
+		    if ( errorOnNull ) log(Level.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
 		} else {
 			if (forWorkspace) {
 				siteNode = NodeUtil.getSiteNodeForWorkspace( siteName, false, workspace, dateTime,
@@ -199,7 +204,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			}
 	        if ( errorOnNull && siteNode == null ) {
 	            
-	            log(LogLevel.ERROR, "Site node is null", HttpServletResponse.SC_BAD_REQUEST);
+	            log(Level.ERROR, "Site node is null", HttpServletResponse.SC_BAD_REQUEST);
 	        }
 		}
 		
@@ -290,23 +295,40 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                                                        Date dateTime, boolean findDeleted) {
         return NodeUtil.findScriptNodesBySysmlName( name, false, workspace, dateTime, services, findDeleted, false );
     }
-
-    protected void log(LogLevel level, String msg, int code) {
-		if (level.value >= logLevel.value || level.value == LogLevel.ERROR.value) {
-			log("[" + level.name() + "]: " + msg + "\n", code);
-			if (level.value >= LogLevel.WARNING.value) {
-				if (logger.isDebugEnabled()) logger.debug("[" + level.name() + "]: " + msg + "\n");
+    
+    // Updated log methods (still works with old log calls)
+    // String concatenation replaced with C formatting
+    protected void log (Level level, String msg, int code, String...params) {
+    	String msgStr = String.format (msg,params);
+    	log (level,msgStr,code);
+	}
+    
+    protected void log(Level level, String msg, int code) {
+		if (level.toInt() >= logger.getLevel().toInt()) {
+			// print to response stream if >= existing log level
+			String levelMessage = String.format("[%s]: %s\n",level.toString(),msg);
+			log(levelMessage, code);
+			// print to console if log level >= Warning (i.e. Error, Fatal, or Off)
+			if (level.toInt() >= Level.WARN.toInt()) {
+				if (logger.isDebugEnabled()) logger.debug(levelMessage);
 			}
 		}
 	}
 
-	protected void log(LogLevel level, String msg) {
-	    if (level.value >= logLevel.value) {
-	        log("[" + level.name() + "]: " + msg);
+	protected void log(Level level, String msg, String...params) {
+		String msgStr = String.format (msg,params);
+	    if (level.toInt() >= logger.getLevel().toInt()) {
+	    	String levelMessage = String.format("[%s]: %s\n",level.toString(),msgStr);
+	    	response.append(levelMessage);
 	    }
-        if (logger.isDebugEnabled()) logger.debug(msg);
+        if (logger.isDebugEnabled()) logger.debug(msgStr);
 	}
 
+	protected void log(String msg, int code, String...params) {
+		String msgStr = String.format (msg,params);
+		log (msg,code);
+	}
+	
 	protected void log(String msg, int code) {
 		response.append(msg);
 		responseStatus.setCode(code);
@@ -339,7 +361,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 */
 	protected boolean checkPermissions(NodeRef nodeRef, String permissions) {
 		if (services.getPermissionService().hasPermission(nodeRef, permissions) != AccessStatus.ALLOWED) {
-			log(LogLevel.WARNING, "No " + permissions + " priveleges to " + nodeRef.toString() + ".\n", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.WARN, "No " + permissions + " priveleges to " + nodeRef.toString() + ".\n", HttpServletResponse.SC_BAD_REQUEST);
 			return false;
 		}
 		return true;
@@ -491,7 +513,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
     protected boolean checkRequestContent(WebScriptRequest req) {
         if (req.getContent() == null) {
-            log(LogLevel.ERROR, "No content provided.\n", HttpServletResponse.SC_NO_CONTENT);
+            log(Level.ERROR, "No content provided.\n", HttpServletResponse.SC_NO_CONTENT);
             return false;
         }
         return true;
@@ -500,7 +522,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 	protected boolean checkRequestVariable(Object value, String type) {
 		if (value == null) {
-			log(LogLevel.ERROR, type + " not found.\n", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, type + " not found.\n", HttpServletResponse.SC_BAD_REQUEST);
 			return false;
 		}
 		return true;
@@ -603,8 +625,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return responseStatus;
     }
 
-    public void setLogLevel(LogLevel level) {
-        logLevel = level;
+    public void setLogLevel(Level level) {
+        maxLevel = level;
     }
 
     /**
@@ -618,17 +640,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
 
     protected void printFooter() {
-        if ( !Debug.isOn() ) return;
-        log( LogLevel.DEBUG, "*** completed " + ( new Date() ) + " "
+       //if ( !Debug.isOn() ) return;
+    	if ( logger.isDebugEnabled() == false) return;
+        log( Level.DEBUG, "*** completed " + ( new Date() ) + " "
                             + getClass().getSimpleName() );
     }
 
     protected void printHeader( WebScriptRequest req ) {
-        if ( !Debug.isOn() ) return;
-        log( LogLevel.DEBUG, "*** starting " + ( new Date() ) + " "
+    	//if ( !Debug.isOn() ) return;
+    	if ( logger.isDebugEnabled() == false) return;
+        log( Level.DEBUG, "*** starting " + ( new Date() ) + " "
                              + getClass().getSimpleName() );
         String reqStr = req.getURL();
-        log( LogLevel.DEBUG,
+        log( Level.DEBUG,
              "*** request = " + 
              ( reqStr.length() <= MAX_PRINT ? 
                reqStr : reqStr.substring( 0, MAX_PRINT ) + "..." ) );
@@ -721,7 +745,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 sitePackageNode = findScriptNodeById(sitePkgName,workspace, null, false );
                 
                 if (sitePackageNode == null) {
-                    log(LogLevel.ERROR, "Could not find site package node for site package name "+siteName, 
+                    log(Level.ERROR, "Could not find site package node for site package name "+siteName, 
                         HttpServletResponse.SC_NOT_FOUND);
                     return null;
                 }
@@ -733,7 +757,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             // Sanity check:
             NodeRef sitePackageSiteRef = (NodeRef) sitePackageNode.getProperty( Acm.ACM_SITE_SITE );
             if (sitePackageSiteRef != null && !sitePackageSiteRef.equals( initialSiteNode.getNodeRef() )) {
-                log(LogLevel.ERROR, "Mismatch between site/package for site package name "+siteName, 
+                log(Level.ERROR, "Mismatch between site/package for site package name "+siteName, 
                     HttpServletResponse.SC_NOT_FOUND);
                 return null;
             }
@@ -753,7 +777,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 siteNode = oldSiteParent;
             }
             else {
-                log(LogLevel.ERROR, "Could not find parent project site for site package name "+siteName, 
+                log(Level.ERROR, "Could not find parent project site for site package name "+siteName, 
                     HttpServletResponse.SC_NOT_FOUND);
                 return null;
             }
@@ -790,7 +814,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 pkgSiteParentNode = findScriptNodeById(NodeUtil.sitePkgPrefix+sysmlid, workspace, null, false);
             }
             else {
-                log(LogLevel.WARNING, "Parent package site does not have a sysmlid.  Node "+pkgNode);
+                log(Level.WARN, "Parent package site does not have a sysmlid.  Node "+pkgNode);
             }
         }
         

@@ -48,7 +48,7 @@ public class EmsSystemModelTest {
     @BeforeClass
     public static void initAppContext() {
         wasOn = Debug.isOn();
-        if ( !wasOn ) Debug.turnOn();
+        //if ( !wasOn ) Debug.turnOn();
 
         model = new EmsSystemModel( services );
         sysmlToAe = new SystemModelToAeExpression< EmsScriptNode, EmsScriptNode, String, Object, EmsSystemModel >( model );
