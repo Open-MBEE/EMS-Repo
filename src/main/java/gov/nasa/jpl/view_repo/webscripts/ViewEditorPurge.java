@@ -52,6 +52,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
+@Deprecated
 public class ViewEditorPurge extends AbstractJavaWebScript {
  	public ViewEditorPurge() {
  	    super();

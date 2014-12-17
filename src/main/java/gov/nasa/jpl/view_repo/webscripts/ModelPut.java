@@ -65,7 +65,12 @@ public class ModelPut extends ModelPost {
     }
 
     @Override
-    protected Map<String, Object> executeImpl(WebScriptRequest req,
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        ModelPut instance = new ModelPut(repository, services);
+        return instance.executeImplImpl(req,  status, cache);
+    }
+    
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req,
             Status status, Cache cache) {
         printHeader( req );
         

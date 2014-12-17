@@ -63,6 +63,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         MmsDiffGet mmsDiffGet = new MmsDiffGet();
         return mmsDiffGet.myExecuteImpl( req, status, cache );
     }
+    
     protected Map< String, Object > myExecuteImpl( WebScriptRequest req,
                                                    Status status, Cache cache ) {
         printHeader( req );
