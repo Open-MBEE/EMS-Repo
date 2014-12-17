@@ -4,9 +4,7 @@
 
         "301": "301",
 
-        "401": "401",
-
-        "elementInPkg": "elementInPkg"
+        "401": "401"
 
     },
 
@@ -18,37 +16,19 @@
 
         "300": ["301"],
 
-        "4000": ["401"],
-
-        "holding_bin_package_123456": ["elementInPkg"]
+        "4000": ["401"]
 
     },
 
-    "volume2volumes": {
+    "volume2volumes": {"123456": [
 
-        "123456": [
+        "4000",
 
-            "300",
+        "300"
 
-            "4000",
+    ]},
 
-            "package"
-
-        ],
-
-        "package": ["holding_bin_package_123456"]
-
-    },
-
-    "volumes": {
-
-        "123456": "JW_TEST",
-
-        "holding_bin_package_123456": "holding_bin",
-
-        "package": "package"
-
-    }
+    "volumes": {"123456": "JW_TEST"}
 
 }
 
