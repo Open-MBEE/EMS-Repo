@@ -44,6 +44,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -90,7 +91,7 @@ public class ViewGet extends AbstractJavaWebScript {
     
         EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime, false);
         if (view == null) {
-            log(LogLevel.ERROR, "View not found with id: " + viewId + " at " + dateTime + ".\n", HttpServletResponse.SC_NOT_FOUND);
+            log(Level.ERROR, "View not found with id: " + viewId + " at " + dateTime + ".\n", HttpServletResponse.SC_NOT_FOUND);
             return false;
         }
 
@@ -166,7 +167,7 @@ public class ViewGet extends AbstractJavaWebScript {
                 else model.put("res", json.toString()); 
             } catch (JSONException e) {
                 e.printStackTrace();
-                log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 model.put("res", response.toString());
                 e.printStackTrace();
             }
@@ -188,7 +189,7 @@ public class ViewGet extends AbstractJavaWebScript {
         EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime, false);
 
         if (view == null) {
-            log( LogLevel.ERROR, "View not found with ID: " + viewId,
+            log( Level.ERROR, "View not found with ID: " + viewId,
                  HttpServletResponse.SC_NOT_FOUND );
         }
 
@@ -223,7 +224,7 @@ public class ViewGet extends AbstractJavaWebScript {
                 }
                 EmsScriptNode.expressionStuff = false;
             } catch ( JSONException e ) {
-                log( LogLevel.ERROR, "Could not create views JSON array",
+                log( Level.ERROR, "Could not create views JSON array",
                      HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
                 e.printStackTrace();
             }

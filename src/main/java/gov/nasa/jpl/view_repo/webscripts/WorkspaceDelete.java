@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -53,7 +54,7 @@ public class WorkspaceDelete extends AbstractJavaWebScript {
                
                // can't delete master
                if (wsId.equals( "master") ) {
-                   log(LogLevel.ERROR, "Cannot delete master workspace", HttpServletResponse.SC_BAD_REQUEST);
+                   log(Level.ERROR, "Cannot delete master workspace", HttpServletResponse.SC_BAD_REQUEST);
                    status.setCode(HttpServletResponse.SC_BAD_REQUEST);
                } else {
                    WorkspaceNode target = WorkspaceNode.getWorkspaceFromId(wsId, getServices(), 
@@ -63,18 +64,18 @@ public class WorkspaceDelete extends AbstractJavaWebScript {
                        target.delete( true );
                        status.setCode(HttpServletResponse.SC_OK);
                    } else {
-                       log(LogLevel.WARNING, "Could not find workspace " + wsId, HttpServletResponse.SC_NOT_FOUND);
+                       log(Level.WARN, "Could not find workspace " + wsId, HttpServletResponse.SC_NOT_FOUND);
                        status.setCode(HttpServletResponse.SC_NOT_FOUND);
                    }
                }
            }
        } catch (JSONException e) {
            status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-           log(LogLevel.ERROR, "JSON object could not be created \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+           log(Level.ERROR, "JSON object could not be created \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
            e.printStackTrace();
        } catch (Exception e) {
            status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-           log(LogLevel.ERROR, "Internal stack trace error \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+           log(Level.ERROR, "Internal stack trace error \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
            e.printStackTrace();
        }
        

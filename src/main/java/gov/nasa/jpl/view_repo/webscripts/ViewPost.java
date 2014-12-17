@@ -38,6 +38,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -78,7 +79,7 @@ public class ViewPost extends AbstractJavaWebScript {
         try {
 			updateViews((JSONObject)req.parseContent(), workspace);
 		} catch (JSONException e) {
-			log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();
 		}
 		
@@ -118,13 +119,13 @@ public class ViewPost extends AbstractJavaWebScript {
 	private void updateView(JSONObject viewJson, WorkspaceNode workspace) throws JSONException {
 		String id = viewJson.getString(Acm.JSON_ID);
 		if (id == null) {
-			log(LogLevel.ERROR, "view id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, "view id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
 			return;
 		}
 		
 		EmsScriptNode view = findScriptNodeById(id, workspace, null, true);
 		if (view == null) {
-			log(LogLevel.ERROR, "could not find view with id: " + id, HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, "could not find view with id: " + id, HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
 			

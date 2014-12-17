@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -66,10 +67,10 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 model.put( "res", result.toString(2) );
             }
         } catch (JSONException e) {
-           log(LogLevel.ERROR, "Could not create JSON\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+           log(Level.ERROR, "Could not create JSON\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
            e.printStackTrace();
         } catch (Exception e) {
-           log(LogLevel.ERROR, "Internal server error\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+           log(Level.ERROR, "Internal server error\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
            e.printStackTrace();
         }
         if (result == null) {
@@ -101,7 +102,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             }
         }
         if ( !wsFound ) {
-            log( LogLevel.ERROR,
+            log( Level.ERROR,
                  "Could not find or create " + wsId + " workspace.\n",
                  Utils.isNullOrEmpty( wsId ) ? HttpServletResponse.SC_BAD_REQUEST
                                              : HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
@@ -124,7 +125,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             if (root != null && root.exists()) {
                 handleElementHierarchy( root, workspace, true );
             } else {
-                log( LogLevel.ERROR, "Could not find node " + elementId + " in workspace " + wsId + ",it is either deleted or not present.",
+                log( Level.ERROR, "Could not find node " + elementId + " in workspace " + wsId + ",it is either deleted or not present.",
                      HttpServletResponse.SC_NOT_FOUND);
                 return result;
             }
@@ -149,15 +150,15 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         } catch (Throwable e) {
             try {
                 if (e instanceof JSONException) {
-                        log(LogLevel.ERROR, "MmsModelDelete.handleRequest: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+                        log(Level.ERROR, "MmsModelDelete.handleRequest: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
                 } else {
-                        log(LogLevel.ERROR, "MmsModelDelete.handleRequest: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        log(Level.ERROR, "MmsModelDelete.handleRequest: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 }
                 trx.rollback();
-                log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                log(Level.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
                 e.printStackTrace();
             } catch (Throwable ee) {
-                log(LogLevel.ERROR, "\tMmsModelDelete.handleRequest: rollback failed: " + ee.getMessage());
+                log(Level.ERROR, "\tMmsModelDelete.handleRequest: rollback failed: " + ee.getMessage());
                 ee.printStackTrace();
                 e.printStackTrace();
             }
@@ -166,7 +167,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         if (wsDiff.isDiff()) {
             // Send deltas to all listeners
             if ( !CommitUtil.sendDeltas(result, wsId, projectId) ) {
-                log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
+                log(Level.WARN, "createOrUpdateModel deltas not posted properly");
             }
 
             CommitUtil.commit( result, workspace, "", false, services, response );
@@ -184,10 +185,10 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         if(workspaceDiff != null && wsDiff == null)
             wsDiff = workspaceDiff;
         if (!checkPermissions(node, PermissionService.WRITE)) {
-            log(LogLevel.ERROR, "no permissions", HttpServletResponse.SC_FORBIDDEN);
+            log(Level.ERROR, "no permissions", HttpServletResponse.SC_FORBIDDEN);
         } else {
             if ( node == null || !node.exists() ) {
-                log(LogLevel.ERROR, "Trying to delete a non-existent node! " + node);
+                log(Level.ERROR, "Trying to delete a non-existent node! " + node);
                 return;
             }
 

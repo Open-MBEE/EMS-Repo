@@ -42,6 +42,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -91,15 +92,15 @@ public class ViewModelPost extends ModelPost {
         } catch (Throwable e) {
             try {
                 if (e instanceof JSONException) {
-            			log(LogLevel.ERROR, "ViewModelPost: JSON malformed for: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+            			log(Level.ERROR, "ViewModelPost: JSON malformed for: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
                 } else {
-            			log(LogLevel.ERROR, "ViewModelPost: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            			log(Level.ERROR, "ViewModelPost: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 }
                 e.printStackTrace();
                 if (Debug.isOn()) System.out.println("\t####### ERROR: Needed to ViewModelPost rollback: " + e.getMessage());
                 trx.rollback();
             } catch (Throwable ee) {
-                log(LogLevel.ERROR, "\tViewModelPost: Rollback failed: " + ee.getMessage());
+                log(Level.ERROR, "\tViewModelPost: Rollback failed: " + ee.getMessage());
                 ee.printStackTrace();
             }
         }
@@ -111,10 +112,10 @@ public class ViewModelPost extends ModelPost {
                     instance.createOrUpdateModel(req, status);
             appendResponseStatusInfo(instance);
         } catch (JSONException e) {
-            log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
+            log(Level.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
             e.printStackTrace();
         } catch (Exception e) {
-            log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             e.printStackTrace();
         }
 
@@ -179,7 +180,7 @@ public class ViewModelPost extends ModelPost {
                     }
 
                     if (!parentFound) {
-                        log(LogLevel.WARNING, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
+                        log(Level.WARNING, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
                     }
                 }
             }
@@ -222,7 +223,7 @@ public class ViewModelPost extends ModelPost {
                     }
 
                     if (!parentFound) {
-                        log(LogLevel.WARNING, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
+                        log(Level.WARNING, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
                     }
                 }
             }

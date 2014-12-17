@@ -44,6 +44,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -97,7 +98,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	    }
 		
 		if (modelId == null) {
-			log(LogLevel.ERROR, "Element id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, "Element id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
 			return false;
 		}
 		
@@ -114,7 +115,7 @@ public class ModelGet extends AbstractJavaWebScript {
             if ( wsId != null && wsId.equalsIgnoreCase( "master" ) ) {
                 wsFound = true;
             } else {
-                log( LogLevel.ERROR,
+                log( Level.ERROR,
                      "Workspace with id, " + wsId
                      + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
                      HttpServletResponse.SC_NOT_FOUND );
@@ -127,7 +128,7 @@ public class ModelGet extends AbstractJavaWebScript {
         if ( wsFound ) modelRootNode = findScriptNodeById(modelId, workspace, dateTime, findDeleted);
         
 		if (modelRootNode == null || modelRootNode.isDeleted() ) {
-            log( LogLevel.ERROR,
+            log( Level.ERROR,
                  "Element with id, " + modelId
                  + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
                  HttpServletResponse.SC_NOT_FOUND );
@@ -178,7 +179,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		        if ( prettyPrint ) model.put("res", top.toString(4));
 		        else model.put("res", top.toString());
 		    } else {
-		        log(LogLevel.WARNING, "No elements found",
+		        log(Level.WARN, "No elements found",
 		            HttpServletResponse.SC_NOT_FOUND);
 		        model.put("res", response.toString());
 		    }
@@ -214,7 +215,7 @@ public class ModelGet extends AbstractJavaWebScript {
             }
             
             if (null == modelId) {
-                log(LogLevel.ERROR, "Could not find element " + modelId, HttpServletResponse.SC_NOT_FOUND );
+                log(Level.ERROR, "Could not find element " + modelId, HttpServletResponse.SC_NOT_FOUND );
                 return new JSONArray();
             }
             
@@ -232,7 +233,7 @@ public class ModelGet extends AbstractJavaWebScript {
             if (Debug.isOn()) System.out.println("modelRootNode = " + modelRootNode );
 
             if ( modelRootNode == null ) {
-                    log( LogLevel.ERROR,
+                    log( Level.ERROR,
                          "Element " + modelId
                          + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
                          HttpServletResponse.SC_NOT_FOUND );
@@ -279,7 +280,7 @@ public class ModelGet extends AbstractJavaWebScript {
                         elementsFound.put( id, childElement );
                     } // TODO -- REVIEW -- Warning if no permissions?
     				} else {
-                    log( LogLevel.WARNING,
+                    log( Level.WARN,
                          "Element " + id
                          + ( dateTime == null ? "" : " at " + dateTime )
                          + " not found",
@@ -300,7 +301,7 @@ public class ModelGet extends AbstractJavaWebScript {
 					                                 workspace, dateTime );
 					        } // TODO -- REVIEW -- Warning if no permissions?
 						} else {
-		                    log( LogLevel.WARNING,
+		                    log( Level.WARN,
 		                         "Element " + id
 		                         + ( dateTime == null ? "" : " at " + dateTime )
                                  + " not found",
@@ -360,7 +361,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			    NodeRef vChildRef = NodeUtil.getNodeRefAtTime( childRef, workspace, dateTime );
                 if ( vChildRef == null ) {
                     // this doesn't elicit a not found response
-                    log( LogLevel.WARNING,
+                    log( Level.WARN,
                          "Element " + childRef
                          + ( dateTime == null ? "" : " at " + dateTime ) + " not found");
 			        continue;

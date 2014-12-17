@@ -58,6 +58,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.admin.SysAdminParams;
 import org.alfresco.repo.model.Repository;
@@ -138,11 +139,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
         Date timestamp = getTimestamp(req);
 
         Map< String, Object > model = new HashMap< String, Object >();
-        log( LogLevel.INFO, "Starting snapshot creation or snapshot artifact generation..." );
+        log( Level.INFO, "Starting snapshot creation or snapshot artifact generation..." );
         try {
             JSONObject reqPostJson = (JSONObject)req.parseContent();
             if ( reqPostJson != null ) {
-                log( LogLevel.INFO, "Generating snapshot artifact..." );
+                log( Level.INFO, "Generating snapshot artifact..." );
                 SnapshotPost instance = new SnapshotPost( repository, services );
                 JSONObject result = instance.saveAndStartAction( req, status, workspace );
                 appendResponseStatusInfo( instance );
@@ -156,7 +157,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 printFooter();
                 return model;
             } else {
-                log( LogLevel.INFO, "Creating snapshot..." );
+                log( Level.INFO, "Creating snapshot..." );
                 String viewId = getViewId( req );
                 EmsScriptNode snapshotNode = null;
                 DateTime now = new DateTime();
@@ -166,7 +167,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 EmsScriptNode snapshotFolderNode =
                         getSnapshotFolderNode( topview );
                 if ( snapshotFolderNode == null ) {
-                    log( LogLevel.ERROR, "Cannot create folder for snapshot",
+                    log( Level.ERROR, "Cannot create folder for snapshot",
                          HttpServletResponse.SC_BAD_REQUEST );
                 } else {
                     this.snapshotName = viewId + "_" + now.getMillis();
@@ -182,7 +183,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 }
 
                 if ( snapshotNode == null ) {
-                    log( LogLevel.ERROR, "Error creating snapshot node",
+                    log( Level.ERROR, "Error creating snapshot node",
                          HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
                 } else {
                     try {
@@ -198,7 +199,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                         model.put( "res", snapshoturl.toString( 4 ) );
                     } catch ( JSONException e ) {
                         e.printStackTrace();
-                        log( LogLevel.ERROR,
+                        log( Level.ERROR,
                              "Error generating JSON for snapshot",
                              HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
                     }
@@ -210,7 +211,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             }
         } catch ( Exception ex ) {
         	status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            log( LogLevel.ERROR,
+            log( Level.ERROR,
                  "Failed to create snapshot or snapshot artifact! "
                          + ex.getMessage() );
             ex.printStackTrace();
@@ -297,7 +298,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	                            else sb.append( valObj );
 	                        } 
 	                        catch ( Exception ex ) {
-	                            log( LogLevel.WARNING,
+	                            log( Level.WARN,
 	                                 "Problem extracting node value from "
 	                                         + node.toJSON() );
 	                        }
@@ -388,12 +389,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                           String snapshotName, String contextPath,
                                           EmsScriptNode snapshotFolder,
                                           WorkspaceNode workspace, Date timestamp) throws Exception {
-        log( LogLevel.INFO, "\ncreating DocBook snapshot for view Id: "
+        log( Level.INFO, "\ncreating DocBook snapshot for view Id: "
                             + productId );
-        log( LogLevel.INFO, "\ncreating DocBook snapshotname: " + snapshotName );
+        log( Level.INFO, "\ncreating DocBook snapshotname: " + snapshotName );
 
         if ( product == null ) {
-            log( LogLevel.WARNING, "null [view] input parameter reference." );
+            log( Level.WARN, "null [view] input parameter reference." );
             return null;
         }
 
@@ -440,7 +441,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             docBookMgr.save();
         } 
         catch ( Exception ex ) {
-            log( LogLevel.ERROR,
+            log( Level.ERROR,
                  "\nFailed to create DBBook! " + ex.getStackTrace() );
             ex.printStackTrace();
             throw new Exception( "Failed to create DBBook!", ex );
@@ -535,7 +536,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 e = createDBText( obj, workspace, timestamp );
                 break;
             default:
-                log( LogLevel.WARNING, "Unexpected type: " + getType( obj ) );
+                log( Level.WARN, "Unexpected type: " + getType( obj ) );
                 break;
         }
         return e;
@@ -570,7 +571,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                                services );
                     saveImage( image, node );
                 } else {
-                    log( LogLevel.ERROR, fileName + " image file not found!" );
+                    log( Level.ERROR, fileName + " image file not found!" );
                 }
             } catch ( Exception ex ) {;}
 
@@ -589,7 +590,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         }
         EmsScriptNode snapshotFolder = getSnapshotFolderNode(viewNode);
         if(snapshotFolder == null){
-            log( LogLevel.ERROR, "Failed to get snapshot folder node!",
+            log( Level.ERROR, "Failed to get snapshot folder node!",
                  HttpServletResponse.SC_BAD_REQUEST );
         	return null;
         }
@@ -621,7 +622,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             ActionUtil.saveStringToFile( snapshotNode, "application/json", services, snapshotJson.toString( 4 ) );
             DocBookWrapper docBookWrapper = createDocBook( view, viewId, snapshotName, contextPath, snapshotNode, workspace, timestamp );
             if ( docBookWrapper == null ) {
-                log( LogLevel.ERROR, "Failed to generate DocBook!" );
+                log( Level.ERROR, "Failed to generate DocBook!" );
                 snapshotNode = null;
             } else {
                 docBookWrapper.save();
@@ -770,7 +771,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 jobName += "_" + s;
             }
         } catch ( JSONException ex ) {
-            log( LogLevel.ERROR, "Failed to gather job name!" );
+            log( Level.ERROR, "Failed to gather job name!" );
             ex.printStackTrace();
         }
         return jobName;
@@ -802,7 +803,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         DocBookWrapper docBookWrapper = new DocBookWrapper( this.snapshotName, snapshotNode );//need workspace and timestamp
 
         if ( !hasHtmlZip( snapshotNode ) ) {
-            log( LogLevel.INFO, "Generating HTML zip..." );
+            log( Level.INFO, "Generating HTML zip..." );
             docBookWrapper.saveHtmlZipToRepo( snapshotFolderNode, workspace, timestamp );
         }
         return snapshotNode;
@@ -834,7 +835,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         
         DocBookWrapper docBookWrapper = new DocBookWrapper( this.snapshotName, snapshotNode );
         if ( !hasPdf( snapshotNode ) ) {
-            log( LogLevel.INFO, "Generating PDF..." );
+            log( Level.INFO, "Generating PDF..." );
             docBookWrapper.savePdfToRepo( snapshotFolderNode, workspace, timestamp );
         }
         return snapshotNode;
@@ -1121,12 +1122,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
         EmsScriptNode jobNode = null;
 
         if ( !postJson.has( "id" ) ) {
-            log( LogLevel.ERROR, "Job name not specified",
+            log( Level.ERROR, "Job name not specified",
                  HttpServletResponse.SC_BAD_REQUEST );
             return null;
         }
         if ( !postJson.has( "formats" ) ) {
-            log( LogLevel.ERROR, "Snapshot formats not specified",
+            log( Level.ERROR, "Snapshot formats not specified",
                  HttpServletResponse.SC_BAD_REQUEST );
             return null;
         }
@@ -1138,7 +1139,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                                "cm:content", status,
                                                response );
             if ( jobNode == null ) {
-                log( LogLevel.ERROR, "Couldn't create snapshot job: "
+                log( Level.ERROR, "Couldn't create snapshot job: "
                                      + postJson.getString( "id" ),
                      HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
                 return null;
@@ -1146,7 +1147,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             startAction( jobNode, siteName, postJson, workspace );
             return postJson;
         } catch ( JSONException ex ) {
-            log( LogLevel.ERROR, "Failed to create snapshot job!" );
+            log( Level.ERROR, "Failed to create snapshot job!" );
             ex.printStackTrace();
         } finally {
             if ( jobNode != null ) {
@@ -1562,13 +1563,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    JSONObject jsonObject = null;
 	    String siteName = getSiteName(req);
 		if (siteName == null) {
-			log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
 			return null;
 		}
 
 		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
 		if (siteInfo == null) {
-			log(LogLevel.ERROR, "Could not find site: " + siteName, HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, "Could not find site: " + siteName, HttpServletResponse.SC_NOT_FOUND);
 			return null;
 		}
 		EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
@@ -1584,18 +1585,18 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		    }
 		    
 			if (!postJson.has( "formats" )) {
-				log(LogLevel.ERROR, "Missing snapshot formats!", HttpServletResponse.SC_BAD_REQUEST);
+				log(Level.ERROR, "Missing snapshot formats!", HttpServletResponse.SC_BAD_REQUEST);
 			} else {
 				try{
 					jsonObject = handleGenerateArtifacts(postJson, siteNode, status, workspace);
 				}
 				catch(JSONException ex){
-					log(LogLevel.ERROR, "Failed to generate snapshot artifact(s)!");
+					log(Level.ERROR, "Failed to generate snapshot artifact(s)!");
 					ex.printStackTrace();
 				}
 			}
 		} catch (JSONException e) {
-			log(LogLevel.ERROR, "Could not parse JSON", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, "Could not parse JSON", HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();
 			return null;
 		}
@@ -1611,14 +1612,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
         Path imgDirName = Paths.get( dbDirName.toString(), "images" );
 
         if ( !( new File( jobDirName.toString() ).mkdirs() ) ) {
-            log( LogLevel.ERROR,
+            log( Level.ERROR,
                  "Could not create snapshot job_id temporary directory." );
         }
         if ( !( new File( dbDirName.toString() ).mkdirs() ) ) {
-            log( LogLevel.ERROR, "Could not create Docbook temporary directory" );
+            log( Level.ERROR, "Could not create Docbook temporary directory" );
         }
         if ( !( new File( imgDirName.toString() ).mkdirs() ) ) {
-            log( LogLevel.ERROR, "Could not create image temporary directory." );
+            log( Level.ERROR, "Could not create image temporary directory." );
         }
         ContentService contentService =
                 imageEmsScriptNode.getServices().getContentService();

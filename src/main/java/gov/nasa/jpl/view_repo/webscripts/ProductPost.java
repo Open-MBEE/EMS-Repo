@@ -38,6 +38,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -78,7 +79,7 @@ public class ProductPost extends AbstractJavaWebScript {
 		try {
 			updateProducts((JSONObject)req.parseContent(), workspace);
 		} catch (JSONException e) {
-			log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();
 		}
 		
@@ -132,14 +133,14 @@ public class ProductPost extends AbstractJavaWebScript {
 	            // ignore
 	        }
 	        if (id == null) {
-			  log(LogLevel.ERROR, "product id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
+			  log(Level.ERROR, "product id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
 			  return;
 	        }
 		}
 		
 		EmsScriptNode product = findScriptNodeById(id, workspace, null, true);
 		if (product == null) {
-			log(LogLevel.ERROR, "could not find product with id: " + id, HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, "could not find product with id: " + id, HttpServletResponse.SC_NOT_FOUND);
 			return;
 		}
 			

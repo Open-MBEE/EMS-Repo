@@ -42,6 +42,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -103,7 +104,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 statusCode = responseStatus.getCode();
             }
         } catch (Exception e){
-            log(LogLevel.ERROR, "Internal stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, "Internal stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             e.printStackTrace();
         }
         if(json == null)
@@ -128,7 +129,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 jsonArray.put(ws.toJSONObject( null ));
             }
             else {
-                log(LogLevel.WARNING,"No permission to read: "+ ws.getSysmlId(),HttpServletResponse.SC_NOT_FOUND);
+                log(Level.WARN,"No permission to read: "+ ws.getSysmlId(),HttpServletResponse.SC_NOT_FOUND);
             }
         }
         json.put("workspaces", jsonArray);
@@ -140,7 +141,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
         status.setCode( HttpServletResponse.SC_OK );
 
         if(newWorkID.equals( "master" )){
-            log(LogLevel.WARNING, "Cannot change attributes of the master workspace.", HttpServletResponse.SC_BAD_REQUEST);
+            log(Level.WARN, "Cannot change attributes of the master workspace.", HttpServletResponse.SC_BAD_REQUEST);
             status.setCode( HttpServletResponse.SC_BAD_REQUEST );
             return null;
         }
@@ -151,10 +152,10 @@ public class WorkspacesPost extends AbstractJavaWebScript{
         if ( existingWs != null ) {
             if (existingWs.isDeleted()) {
                 existingWs.removeAspect( "ems:Deleted" );
-                log(LogLevel.INFO, "Workspace undeleted", HttpServletResponse.SC_OK);
+                log(Level.INFO, "Workspace undeleted", HttpServletResponse.SC_OK);
                 return existingWs;
             } else {
-                log(LogLevel.WARNING, "Workspace already exists.", HttpServletResponse.SC_BAD_REQUEST);
+                log(Level.WARN, "Workspace already exists.", HttpServletResponse.SC_BAD_REQUEST);
                 status.setCode( HttpServletResponse.SC_BAD_REQUEST );
                 return null;
             }
@@ -165,7 +166,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                                                       response, status, // false,
                                                       user );
             if (!"master".equals( sourceWorkId ) && srcWs == null) {
-                log(LogLevel.WARNING, "Source workspace not found.", HttpServletResponse.SC_NOT_FOUND);
+                log(Level.WARN, "Source workspace not found.", HttpServletResponse.SC_NOT_FOUND);
                 status.setCode( HttpServletResponse.SC_NOT_FOUND );
                 return null;
             } else {

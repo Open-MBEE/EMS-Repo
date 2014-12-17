@@ -39,6 +39,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -108,10 +109,10 @@ public class ProjectPost extends AbstractJavaWebScript {
 				statusCode = responseStatus.getCode();
 			}
         } catch (JSONException e) {
-            log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             e.printStackTrace();
         } catch (Exception e) {
-            log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             e.printStackTrace();
         }
 
@@ -127,7 +128,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		  EmsScriptNode projectNode = findScriptNodeById(projectId, workspace, null, true);
 		
 		  if (projectNode == null) {
-		      log(LogLevel.ERROR, "Could not find project\n", HttpServletResponse.SC_NOT_FOUND);
+		      log(Level.ERROR, "Could not find project\n", HttpServletResponse.SC_NOT_FOUND);
 		      return HttpServletResponse.SC_NOT_FOUND;
 		  }
 		
@@ -152,7 +153,7 @@ public class ProjectPost extends AbstractJavaWebScript {
             if (projectVersion != null) {
                 projectNode.createOrUpdateProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
             }
-            log(LogLevel.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
+            log(Level.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
         }
         
         return HttpServletResponse.SC_OK;
@@ -180,7 +181,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		        }
 		        siteNode = createSite( siteName, workspace );
 		    } else {
-		        log(LogLevel.ERROR, "Site not found for " + siteName + ".\n", HttpServletResponse.SC_NOT_FOUND);
+		        log(Level.ERROR, "Site not found for " + siteName + ".\n", HttpServletResponse.SC_NOT_FOUND);
 		        return HttpServletResponse.SC_NOT_FOUND;
 		    }
 		}
@@ -190,7 +191,7 @@ public class ProjectPost extends AbstractJavaWebScript {
                 siteNode.childByNamePath( MODEL_PATH_SEARCH, false, workspace, true );
 		if (modelContainerNode == null) {
 			modelContainerNode = siteNode.createFolder("Models");
-			log(LogLevel.INFO, "Model folder created.\n", HttpServletResponse.SC_OK);
+			log(Level.INFO, "Model folder created.\n", HttpServletResponse.SC_OK);
 		}
 
 		// create project if doesn't exist or update
@@ -224,11 +225,11 @@ public class ProjectPost extends AbstractJavaWebScript {
 			if (projectVersion != null) {
 			    projectNode.setProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
 			}
-			log(LogLevel.INFO, "Project created.\n", HttpServletResponse.SC_OK);
+			log(Level.INFO, "Project created.\n", HttpServletResponse.SC_OK);
 		} else {
 			if (delete) {
 				projectNode.remove();
-				log(LogLevel.INFO, "Project deleted.\n", HttpServletResponse.SC_OK);
+				log(Level.INFO, "Project deleted.\n", HttpServletResponse.SC_OK);
 			} else {
 				if (checkPermissions(projectNode, PermissionService.WRITE)){
 					projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
@@ -240,13 +241,13 @@ public class ProjectPost extends AbstractJavaWebScript {
 		            if (projectVersion != null) {
 		                projectNode.createOrUpdateProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
 		            }
-					log(LogLevel.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
+					log(Level.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
 
 					if (checkPermissions(projectNode.getParent(), PermissionService.WRITE)) {
 						// move sites if exists under different site
 						if (!projectNode.getParent().equals(modelContainerNode)) {
 							projectNode.move(modelContainerNode);
-							log(LogLevel.INFO, "Project moved to new site.\n", HttpServletResponse.SC_OK);
+							log(Level.INFO, "Project moved to new site.\n", HttpServletResponse.SC_OK);
 						}
 					}
 				}

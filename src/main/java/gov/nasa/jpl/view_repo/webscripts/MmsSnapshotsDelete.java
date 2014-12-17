@@ -10,6 +10,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -53,9 +54,9 @@ public class MmsSnapshotsDelete extends AbstractJavaWebScript {
         } catch (Exception e) {
             model.put("res", response.toString());
             if (e instanceof JSONException) {
-                log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } else {
-                log(LogLevel.ERROR, "Internal server error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, "Internal server error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
             e.printStackTrace();
         } 
@@ -69,7 +70,7 @@ public class MmsSnapshotsDelete extends AbstractJavaWebScript {
         NodeRef snapshotNodeRef = NodeUtil.findNodeRefByType( snapshotId, SearchType.CM_NAME, true, 
                                                            null, null, true, services, false );
         if (snapshotNodeRef == null) {
-            log(LogLevel.ERROR, "Could not find snapshot", HttpServletResponse.SC_NOT_FOUND);
+            log(Level.ERROR, "Could not find snapshot", HttpServletResponse.SC_NOT_FOUND);
         } else {
             EmsScriptNode snapshot = new EmsScriptNode(snapshotNodeRef, services, response);
             snapshot.delete();

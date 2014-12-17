@@ -13,6 +13,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -58,9 +59,9 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
         } catch (Exception e) {
             model.put("res", response.toString());
             if (e instanceof JSONException) {
-                log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } else {
-                log(LogLevel.ERROR, "Internal server error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, "Internal server error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
             e.printStackTrace();
         } 
@@ -79,14 +80,14 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
         String siteNameFromReq = getSiteName( req );
         if ( siteNode == null && !Utils.isNullOrEmpty( siteNameFromReq )
              && !siteNameFromReq.equals( NO_SITE_ID ) ) {
-            log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
+            log(Level.WARN, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
             return new JSONObject();
         }
         
         String configId = req.getServiceMatch().getTemplateVars().get( "configurationId" );
         NodeRef configNode = NodeUtil.getNodeRefFromNodeId( configId );
         if (configNode == null) {
-            log(LogLevel.WARNING, "Could not find configuration with id: " + configId, HttpServletResponse.SC_NOT_FOUND);
+            log(Level.WARN, "Could not find configuration with id: " + configId, HttpServletResponse.SC_NOT_FOUND);
             return new JSONObject();
         }
         EmsScriptNode config = new EmsScriptNode(configNode, services);

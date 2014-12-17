@@ -46,6 +46,7 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -137,7 +138,7 @@ public class ProductListGet extends AbstractJavaWebScript {
                 model.put("siteName", siteNode.getProperty(Acm.CM_NAME));
                 model.put("siteTitle", siteNode.getProperty(Acm.CM_TITLE));
             } catch (JSONException e) {
-                log(LogLevel.ERROR, "Could not create JSON Object", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, "Could not create JSON Object", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 model.put("res", response.toString());
                 model.put("title", "ERROR");
                 model.put("siteName", "");

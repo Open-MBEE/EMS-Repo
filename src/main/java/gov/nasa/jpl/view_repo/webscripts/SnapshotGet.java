@@ -41,6 +41,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
@@ -99,7 +100,7 @@ public class SnapshotGet extends AbstractJavaWebScript {
             model.put("siteName", snapshot.getSiteName());
             model.put("siteTitle", snapshot.getSiteTitle());
         } else {
-            log(LogLevel.ERROR, "Snapshot not found for id: " + id, HttpServletResponse.SC_NOT_FOUND);
+            log(Level.ERROR, "Snapshot not found for id: " + id, HttpServletResponse.SC_NOT_FOUND);
             model.put("res", response.toString());
             model.put("title", "ERROR no snapshot found");
             model.put("tag", "");

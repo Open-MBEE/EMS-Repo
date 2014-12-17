@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -43,13 +44,13 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         boolean wsFound2 = ( ws2 != null || ( workspaceId2 != null && workspaceId2.equalsIgnoreCase( "master" ) ) );
 
         if ( !wsFound1 ) {
-            log( LogLevel.ERROR,
+            log( Level.ERROR,
                  "Workspace 1 id , " + workspaceId1 + ", not found",
                  HttpServletResponse.SC_NOT_FOUND );
             return false;
         }
         if ( !wsFound2 ) {
-            log( LogLevel.ERROR,
+            log( Level.ERROR,
                  "Workspace 2 id, " + workspaceId2 + ", not found",
                  HttpServletResponse.SC_NOT_FOUND );
             return false;

@@ -73,6 +73,7 @@ import java.util.TreeSet;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -262,11 +263,11 @@ public class ModelPost extends AbstractJavaWebScript {
     		createOrUpdateModel2( Object content, Status status,
     							  WorkspaceNode targetWS, WorkspaceNode sourceWS ) throws Exception {
         Date now = new Date();
-        log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
+        log(Level.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
 
-        log( LogLevel.DEBUG, "****** NodeUtil.doSimpleCaching = " + NodeUtil.doSimpleCaching );
-        log( LogLevel.DEBUG, "****** NodeUtil.doFullCaching = " + NodeUtil.doFullCaching );
+        log( Level.DEBUG, "****** NodeUtil.doSimpleCaching = " + NodeUtil.doSimpleCaching );
+        log( Level.DEBUG, "****** NodeUtil.doFullCaching = " + NodeUtil.doFullCaching );
         
         if(sourceWS == null)
             setWsDiff( targetWS );
@@ -291,7 +292,7 @@ public class ModelPost extends AbstractJavaWebScript {
         if (buildElementMap(postJson.getJSONArray(ELEMENTS), targetWS)) {
             // start building up elements from the root elements
             for (String rootElement : rootElements) {
-                log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
+                log(Level.INFO, "ROOT ELEMENT FOUND: " + rootElement);
                 if (projectNode == null || !rootElement.equals(projectNode.getProperty(Acm.CM_NAME))) {
 
                     EmsScriptNode owner = null;
@@ -306,12 +307,12 @@ public class ModelPost extends AbstractJavaWebScript {
                     } catch (Throwable e) {
                         try {
                             trx.rollback();
-                            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
-                            log(LogLevel.ERROR, "\t####### when calling getOwner(" + rootElement + ", " + projectNode + ", true)");
+                            log(Level.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                            log(Level.ERROR, "\t####### when calling getOwner(" + rootElement + ", " + projectNode + ", true)");
                             e.printStackTrace();
                         } catch (Throwable ee) {
-                            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
-                            log(LogLevel.ERROR, "\tafter calling getOwner(" + rootElement + ", " + projectNode + ", true)");
+                            log(Level.ERROR, "\tRollback failed: " + ee.getMessage());
+                            log(Level.ERROR, "\tafter calling getOwner(" + rootElement + ", " + projectNode + ", true)");
                             ee.printStackTrace();
                         }
                     }
@@ -350,7 +351,7 @@ public class ModelPost extends AbstractJavaWebScript {
         now = new Date();
         end = System.currentTimeMillis();
         total = end - start;
-        log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
+        log(Level.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
 
         timerUpdateModel = Timer.startTimer(timerUpdateModel, timeEvents);
 
@@ -377,7 +378,7 @@ public class ModelPost extends AbstractJavaWebScript {
             elements.addAll( updateOrCreateElement( postJson, projectNode, workspace, true ) );
         }
         for (String rootElement : rootElements) {
-            log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
+            log(Level.INFO, "ROOT ELEMENT FOUND: " + rootElement);
             if (projectNode == null || !rootElement.equals(projectNode.getProperty(Acm.CM_NAME))) {
                 EmsScriptNode owner = getOwner( rootElement, workspace, false );
 
@@ -399,7 +400,7 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     protected void resurrectParent(EmsScriptNode owner, boolean ingest) {
         
-        log( LogLevel.WARNING, "Owner with name: "
+        log( Level.WARN, "Owner with name: "
              + owner.getSysmlId() + " was deleted.  Will resurrect it");
         
         ModStatus modStatus = new ModStatus();
@@ -437,7 +438,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                       boolean createOwnerPkgIfNotFound ) throws Exception {
         JSONObject element = elementMap.get(elementId);
         if ( element == null || element.equals( "null" ) ) {
-            log(LogLevel.ERROR, "Trying to get owner of null element!",
+            log(Level.ERROR, "Trying to get owner of null element!",
                 HttpServletResponse.SC_NOT_FOUND);
             return null;
         }
@@ -490,7 +491,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 
                 // If the owner was found, but deleted, then make a zombie node!
                 if (owner != null && owner.isDeleted()) {                   
-                    log( LogLevel.WARNING, "Owner with name: "
+                    log( Level.WARN, "Owner with name: "
                             + ownerName + " was deleted.  Will resurrect it, and put "+elementId
                             + " into it.");
                     
@@ -537,7 +538,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
                                        
                     // FIXME: Need to respond with warning that owner couldn't be found?
-                    log( LogLevel.WARNING, "Could not find owner with name: "
+                    log( Level.WARN, "Could not find owner with name: "
                                            + ownerName + " putting " + elementId
                                            + " into: " + nodeBinOwner);
                     
@@ -571,14 +572,14 @@ public class ModelPost extends AbstractJavaWebScript {
                                                                foundOwnerElement);
                     
                 } else {
-                    log( LogLevel.WARNING, "Could not find owner package: "
+                    log( Level.WARN, "Could not find owner package: "
                                            + ownerName,
                          HttpServletResponse.SC_NOT_FOUND );
                 }
             }
             owner = reifiedPkg;
         }
-//        log( LogLevel.INFO, "\tgetOwner(" + elementId + "): json element=("
+//        log( Level.INFO, "\tgetOwner(" + elementId + "): json element=("
 //                            + element + "), ownerName=" + ownerName
 //                            + ", reifiedPkg=(" + reifiedPkg + ", projectNode=("
 //                            + projectNode + "), returning owner=" + owner );
@@ -606,7 +607,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                                WorkspaceNode workspace)
             throws JSONException {
         long start = System.currentTimeMillis(), end;
-        log(LogLevel.INFO, "updateOrCreateRelationships" + key + ": ");
+        log(Level.INFO, "updateOrCreateRelationships" + key + ": ");
         if (runWithoutTransactions) {
             updateOrCreateTransactionableRelationships(jsonObject, key, workspace);
         } else {
@@ -614,31 +615,31 @@ public class ModelPost extends AbstractJavaWebScript {
             trx = services.getTransactionService().getNonPropagatingUserTransaction();
             try {
                 trx.begin();
-                log(LogLevel.INFO, "updateOrCreateRelationships: beginning transaction {");
+                log(Level.INFO, "updateOrCreateRelationships: beginning transaction {");
                 updateOrCreateTransactionableRelationships(jsonObject, key, workspace);
-                log(LogLevel.INFO, "} updateOrCreateRelationships committing: " + key);
+                log(Level.INFO, "} updateOrCreateRelationships committing: " + key);
                 timerCommit = Timer.startTimer(timerCommit, timeEvents);
                 trx.commit();
                 Timer.stopTimer(timerCommit, "!!!!! updateOrCreateRelationships(): commit time", timeEvents);
             } catch (Throwable e) {
                 try {
                     if (e instanceof JSONException) {
-	                		log(LogLevel.ERROR, "updateOrCreateRelationships: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+	                		log(Level.ERROR, "updateOrCreateRelationships: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
 	                } else {
-	                		log(LogLevel.ERROR, "updateOrCreateRelationships: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	                		log(Level.ERROR, "updateOrCreateRelationships: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	                }
                     trx.rollback();
-                    log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                    log(Level.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
                     e.printStackTrace();
                 } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tupdateOrCreateRelationships: rollback failed: " + ee.getMessage());
+                    log(Level.ERROR, "\tupdateOrCreateRelationships: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
                     e.printStackTrace();
                 }
             }
         }
         end = System.currentTimeMillis();
-        log(LogLevel.INFO, (end - start) + "ms");
+        log(Level.INFO, (end - start) + "ms");
     }
 
     protected void updateOrCreateTransactionableRelationships(JSONObject jsonObject, String key, WorkspaceNode workspace) throws JSONException {
@@ -722,11 +723,11 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         } else {
             if (property == null) {
-                log(LogLevel.ERROR, "could not find property node with id "
+                log(Level.ERROR, "could not find property node with id "
                         + id + "\n", HttpServletResponse.SC_BAD_REQUEST);
             }
             if (propertyType == null) {
-                log(LogLevel.ERROR,
+                log(Level.ERROR,
                         "could not find property type node with id " + typeId
                                 + "\n", HttpServletResponse.SC_BAD_REQUEST);
             }
@@ -761,15 +762,15 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         } else {
             if (relationship == null) {
-                log(LogLevel.ERROR, "could not find relationship node with id "
+                log(Level.ERROR, "could not find relationship node with id "
                         + id + "\n", HttpServletResponse.SC_BAD_REQUEST);
             }
             if (source == null) {
-                log(LogLevel.ERROR, "could not find source node with id "
+                log(Level.ERROR, "could not find source node with id "
                         + sourceId + "\n", HttpServletResponse.SC_BAD_REQUEST);
             }
             if (target == null) {
-                log(LogLevel.ERROR, "could not find target node with id "
+                log(Level.ERROR, "could not find target node with id "
                         + targetId + "\n", HttpServletResponse.SC_BAD_REQUEST);
             }
         }
@@ -797,24 +798,24 @@ public class ModelPost extends AbstractJavaWebScript {
             trx = services.getTransactionService().getNonPropagatingUserTransaction(true);
             try {
                 trx.begin();
-                log(LogLevel.INFO, "buildElementMap begin transaction {");
+                log(Level.INFO, "buildElementMap begin transaction {");
                 isValid = buildTransactionableElementMap(jsonArray, workspace);
-                log(LogLevel.INFO, "} buildElementMap committing");
+                log(Level.INFO, "} buildElementMap committing");
                 timerCommit = Timer.startTimer(timerCommit, timeEvents);
                 trx.commit();
                 Timer.stopTimer(timerCommit, "!!!!! buildElementMap(): commit time", timeEvents);
             } catch (Throwable e) {
                 try {
-                    log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                    log(Level.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
                     if (e instanceof JSONException) {
-	                		log(LogLevel.ERROR, "buildElementMap: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+	                		log(Level.ERROR, "buildElementMap: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
 	                } else {
-	                		log(LogLevel.ERROR, "buildElementMap: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	                		log(Level.ERROR, "buildElementMap: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	                }
                     trx.rollback();
                     e.printStackTrace();
                 } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tbuildElementMap: rollback failed: " + ee.getMessage());
+                    log(Level.ERROR, "\tbuildElementMap: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
                     e.printStackTrace();
                 }
@@ -846,7 +847,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             if ( sysmlId == null ) {
 
-                log( LogLevel.ERROR, "No id in element json!",
+                log( Level.ERROR, "No id in element json!",
                      HttpServletResponse.SC_NOT_FOUND );
                 continue;
             }
@@ -895,7 +896,7 @@ public class ModelPost extends AbstractJavaWebScript {
             if (!newElements.contains(elementId)) {
                 EmsScriptNode element = findScriptNodeById(elementId, workspace, null, true);
                 if (element == null) {
-                    log(LogLevel.ERROR, "Could not find node with id: " + elementId, HttpServletResponse.SC_BAD_REQUEST);
+                    log(Level.ERROR, "Could not find node with id: " + elementId, HttpServletResponse.SC_BAD_REQUEST);
                 } else if (!checkPermissions(element, PermissionService.WRITE)) {
                 		// do nothing, just log inside of checkPermissions
                 }
@@ -926,7 +927,7 @@ public class ModelPost extends AbstractJavaWebScript {
         		EmsScriptNode rootElement = findScriptNodeById(name, workspace, null, true);
         		if (rootElement != null) {
 	        		if (!checkPermissions(rootElement, PermissionService.WRITE)) {
-	        			log(LogLevel.WARNING, "\tskipping as root element since no write permissions", HttpServletResponse.SC_BAD_REQUEST);
+	        			log(Level.WARN, "\tskipping as root element since no write permissions", HttpServletResponse.SC_BAD_REQUEST);
 	        		}
         		}
         }
@@ -997,7 +998,7 @@ public class ModelPost extends AbstractJavaWebScript {
 			if (id == null) {
 				id = "not sysml type";
 			}
-			log(LogLevel.WARNING, "Node " + name + " is not of type folder, so cannot create children [id=" + id + "]");
+			log(Level.WARN, "Node " + name + " is not of type folder, so cannot create children [id=" + id + "]");
 			return elements;
 		}
 
@@ -1030,27 +1031,27 @@ public class ModelPost extends AbstractJavaWebScript {
                     return elements;
                 }
                
-                log(LogLevel.INFO, "updateOrCreateElement begin transaction {");
+                log(Level.INFO, "updateOrCreateElement begin transaction {");
                 reifiedNode =
                         updateOrCreateTransactionableElement( elementJson,
                                                               parent, children,
                                                               workspace,
                                                               ingest, false, modStatus, element );
-                log(LogLevel.INFO, "} updateOrCreateElement end transaction");
+                log(Level.INFO, "} updateOrCreateElement end transaction");
                 timerCommit = Timer.startTimer(timerCommit, timeEvents);
                 trx.commit();
                 Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): commit time", timeEvents);
             } catch (Throwable e) {
                 try {
                     if (e instanceof JSONException) {
-                    		log(LogLevel.ERROR, "updateOrCreateElement: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+                    		log(Level.ERROR, "updateOrCreateElement: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
                     } else {
-                    		log(LogLevel.ERROR, "updateOrCreateElement: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    		log(Level.ERROR, "updateOrCreateElement: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                     }
                     e.printStackTrace();
                     trx.rollback();
                 } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
+                    log(Level.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
                     e.printStackTrace();
                 }
@@ -1109,11 +1110,11 @@ public class ModelPost extends AbstractJavaWebScript {
                 Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): ws metadata time", timeEvents);
             } catch (Throwable e) {
                 try {
-                    log(LogLevel.ERROR, "updateOrCreateElement: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    log(Level.ERROR, "updateOrCreateElement: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                     e.printStackTrace();
                     trx.rollback();
                 } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
+                    log(Level.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
                     e.printStackTrace();
                 }
@@ -1273,7 +1274,7 @@ public class ModelPost extends AbstractJavaWebScript {
             if ( workspace == null ) {
                 workspace = node.getWorkspace();
             } else {
-                log( LogLevel.WARNING,
+                log( Level.WARN,
                      "Property owner's workspace ("
                              + node.getWorkspaceName()
                              + ") and specified workspace for property ("
@@ -1538,7 +1539,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         String id = elementJson.getString(Acm.JSON_ID);
         long start = System.currentTimeMillis(), end;
-        log(LogLevel.INFO, "updateOrCreateElement " + id);
+        log(Level.INFO, "updateOrCreateElement " + id);
 
         // TODO Need to permission check on new node creation
         String existingNodeType = null;
@@ -1595,7 +1596,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
     	if (existingNodeType != null && !jsonType.equals(existingNodeType)) {
-    		log(LogLevel.WARNING, "The type supplied "+jsonType+" is different than the stored type "+existingNodeType);
+    		log(Level.WARN, "The type supplied "+jsonType+" is different than the stored type "+existingNodeType);
     	}
 
         String acmSysmlType = null;
@@ -1608,7 +1609,7 @@ public class ModelPost extends AbstractJavaWebScript {
         //	Note:  Must also have a specialization in case they are posting just a Element, which
         //		   doesnt need a specialization key
         if (acmSysmlType == null && !nestedNode && elementJson.has(Acm.JSON_SPECIALIZATION)) {
-            	log(LogLevel.ERROR,"Type was not supplied and no existing node to query for the type",
+            	log(Level.ERROR,"Type was not supplied and no existing node to query for the type",
             		HttpServletResponse.SC_BAD_REQUEST);
             	return null;
         }
@@ -1626,7 +1627,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     if ( !id.equals( n.getSysmlId() ) &&
                          jsonType.equals( n.getTypeName() ) &&
                          parent.equals( n.getParent() ) ) {
-                        log(LogLevel.ERROR,"Found another element with the same sysml name: "
+                        log(Level.ERROR,"Found another element with the same sysml name: "
                                            +n.getSysmlName()+" type: "+n.getTypeName()
                                            +" parent: "+n.getParent()+" as the element trying to be posted",
                             HttpServletResponse.SC_BAD_REQUEST);
@@ -1669,7 +1670,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 if (Debug.isOn()) System.out.println( "PREFIX: type not found for " + jsonType );
                 return null;
             } else {
-                log( LogLevel.INFO, "\tcreating node" );
+                log( Level.INFO, "\tcreating node" );
                 try {
 //                    if ( parent != null && parent.exists() ) {
                         nodeToUpdate = parent.createSysmlNode( id, acmSysmlType, modStatus, workspace );
@@ -1689,7 +1690,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 }
             }
         } else {
-            log(LogLevel.INFO, "\tmodifying node");
+            log(Level.INFO, "\tmodifying node");
             // TODO -- Need to be able to handle changed type unless everything
             // is an element and only aspects are used for subclassing.
             try {
@@ -1715,7 +1716,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
                 }
             } catch (Exception e) {
-                log(LogLevel.WARNING, "could not find node information: " + id);
+                log(Level.WARN, "could not find node information: " + id);
                 e.printStackTrace();
             }
         }
@@ -1726,7 +1727,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // Note: Moved this before ingesting the json b/c we need the reifiedNode
         if (nodeExists && elementHierarchyJson.has(id)) {
-            log(LogLevel.INFO, "\tcreating reified package");
+            log(Level.INFO, "\tcreating reified package");
             reifiedPkgNode = getOrCreateReifiedPackageNode(nodeToUpdate, id, workspace, true); // TODO -- Is last argument correct?
 
             JSONArray array = elementHierarchyJson.getJSONArray(id);
@@ -1739,7 +1740,7 @@ public class ModelPost extends AbstractJavaWebScript {
         
         // update metadata
         if (ingest && nodeExists && checkPermissions(nodeToUpdate, PermissionService.WRITE)) {
-            log(LogLevel.INFO, "\tinserting metadata");
+            log(Level.INFO, "\tinserting metadata");
 
             // Special processing for elements with properties that are value specs:
             //	Note: this will modify elementJson
@@ -1764,7 +1765,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // add the relationships into our maps
         // REVIEW -- Should we skip this if the node or reified node does not exist?
         // REVIEW -- Should we throw an exception if the node or reified node does not exist?
-        log(LogLevel.INFO, "\tfiltering relationships");
+        log(Level.INFO, "\tfiltering relationships");
         JSONObject relations = EmsScriptNode.filterRelationsJSONObject(elementJson);
         String keys[] = {
                 "elementValues",
@@ -1786,7 +1787,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
 
-        end = System.currentTimeMillis(); log(LogLevel.INFO, "\tTotal: " + (end-start) + " ms");
+        end = System.currentTimeMillis(); log(Level.INFO, "\tTotal: " + (end-start) + " ms");
         
         return nestedNode ? nodeToUpdate : reifiedPkgNode;
     }
@@ -1874,7 +1875,7 @@ public class ModelPost extends AbstractJavaWebScript {
         EmsScriptNode reifiedPkgNodeAll = null;
 
         if ( node == null || !node.exists() ) {
-            log( LogLevel.ERROR,
+            log( Level.ERROR,
                  "Trying to create reified node for missing node! id = " + id );
             return null;
         }
@@ -1885,7 +1886,7 @@ public class ModelPost extends AbstractJavaWebScript {
             parent = node;
         }
         if ( parent == null || !parent.exists() ) {
-            log( LogLevel.ERROR,
+            log( Level.ERROR,
                  "Trying to create reified node folder in missing parent folder for node " + node );
             return null;
         }
@@ -1894,7 +1895,7 @@ public class ModelPost extends AbstractJavaWebScript {
             try {
                 parent = workspace.replicateWithParentFolders( parent );
             } catch ( Exception e ) {
-                log( LogLevel.ERROR,
+                log( Level.ERROR,
                      "\t failed to replicate folder, " + parent.getName()
                              + ", in workspace, "
                              + WorkspaceNode.getName( workspace ) );
@@ -1911,7 +1912,7 @@ public class ModelPost extends AbstractJavaWebScript {
             node = node.clone( parent );
             
             if ( node == null || !node.exists() ) {
-                log( LogLevel.ERROR,
+                log( Level.ERROR,
                      "Clone failed for node id = " + id );
                 return null;
             }
@@ -1927,7 +1928,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     reifiedPkgNode = parent.createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER,
                                                          reifiedPkgNodeAll != null ? reifiedPkgNodeAll.getNodeRef() : null);
                 } catch ( Throwable e ) {
-                    log( LogLevel.ERROR,
+                    log( Level.ERROR,
                          "\t failed to create reified node " + pkgName
                                  + " in parent, "
                                  + parent.getSysmlId() + " = "
@@ -1935,7 +1936,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     throw e; // pass it up the chain to roll back transaction
                 }
                 if (reifiedPkgNode == null || !reifiedPkgNode.exists()) {
-                    log( LogLevel.ERROR,
+                    log( Level.ERROR,
                          "\t failed to create reified node " + pkgName
                                  + " in parent, "
                                  + parent.getSysmlId() + " = "
@@ -1949,7 +1950,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     } else {
                         reifiedPkgNode.setProperty( Acm.ACM_NAME, pkgName.replaceAll( "_pkg$", "" ) );
                     }
-                    log(LogLevel.INFO, "\tcreating " + pkgName + " in " + parent.getSysmlId() + " : " + reifiedPkgNode.getNodeRef().toString());
+                    log(Level.INFO, "\tcreating " + pkgName + " in " + parent.getSysmlId() + " : " + reifiedPkgNode.getNodeRef().toString());
                 }
             }
             if (checkPermissions(reifiedPkgNode, PermissionService.WRITE)) {
@@ -2255,7 +2256,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
     protected void fix( Set< EmsScriptNode > elements ) {
 
-        log(LogLevel.INFO, "Constraint violations will be fixed if found!");
+        log(Level.INFO, "Constraint violations will be fixed if found!");
 
         SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >  solver =
                 new SystemModelSolver< EmsScriptNode, EmsScriptNode, EmsScriptNode, EmsScriptNode, String, String, Object, EmsScriptNode, String, String, EmsScriptNode >(getSystemModel(), new ConstraintLoopSolver() );
@@ -2321,10 +2322,10 @@ public class ModelPost extends AbstractJavaWebScript {
 	                Debug.turnOff();
 	            }
 	            if (!result) {
-	                log( LogLevel.ERROR, "Was not able to satisfy all of the constraints!" );
+	                log( Level.ERROR, "Was not able to satisfy all of the constraints!" );
 	            }
 	            else {
-	                log( LogLevel.INFO, "Satisfied all of the constraints!" );
+	                log( Level.INFO, "Satisfied all of the constraints!" );
 	                
 	                // Update the values of the nodes after solving the constraints:
 	                EmsScriptNode node;
@@ -2337,7 +2338,7 @@ public class ModelPost extends AbstractJavaWebScript {
 	                	systemModel.setValue(node, (Serializable)param.getValue());
 	                }
 	                
-	                log( LogLevel.INFO, "Updated all node values to satisfy the constraints!" );
+	                log( Level.INFO, "Updated all node values to satisfy the constraints!" );
 	                
 	            }
         	}
@@ -2383,7 +2384,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
         if ( !wsFound ) {
-            log( LogLevel.ERROR,
+            log( Level.ERROR,
                  "Could not find or create " + wsId + " workspace.\n",
                  Utils.isNullOrEmpty( wsId ) ? HttpServletResponse.SC_NOT_FOUND
                                              : HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
@@ -2408,11 +2409,11 @@ public class ModelPost extends AbstractJavaWebScript {
 //                        JSONObject exprJson0 = new JSONObject( exprJsonStr0 );
                         
                         JSONObject exprJson = new JSONObject(KExpParser.parseExpression(expressionString));
-                        log(LogLevel.DEBUG, "********************************************************************************");
-                        log(LogLevel.DEBUG, expressionString);
-                        log(LogLevel.DEBUG, exprJson.toString(4));
-//                        log(LogLevel.DEBUG, exprJson0.toString(4));
-                        log(LogLevel.DEBUG, "********************************************************************************");
+                        log(Level.DEBUG, "********************************************************************************");
+                        log(Level.DEBUG, expressionString);
+                        log(Level.DEBUG, exprJson.toString(4));
+//                        log(Level.DEBUG, exprJson0.toString(4));
+                        log(Level.DEBUG, "********************************************************************************");
                         JSONArray expJarr = exprJson.getJSONArray("elements");
                         for (int i=0; i<expJarr.length(); ++i) {
                             jarr.put(expJarr.get( i ) );
@@ -2424,11 +2425,11 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
                 }
             } catch (JSONException e) {
-                log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
+                log(Level.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
                 e.printStackTrace();
                 model.put("res", response.toString());
             } catch (Exception e) {
-                log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 e.printStackTrace();
                 model.put("res", response.toString());
             }
@@ -2548,7 +2549,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             
             if (mySiteNode == null || !mySiteNode.exists()) {
-                log(LogLevel.ERROR, "Site "+siteName+" could not be found in workspace "+workspace, 
+                log(Level.ERROR, "Site "+siteName+" could not be found in workspace "+workspace, 
                     HttpServletResponse.SC_NOT_FOUND);
                 return null;
             }
@@ -2585,7 +2586,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 projectId = projectIdNew != null ? projectIdNew : projectId;
                 
                 if (nodeList.size() > 1) {
-                    log(LogLevel.WARNING, "ProjectId not supplied and multiple projects found for site "+siteName+" using ProjectId "+projectId);
+                    log(Level.WARN, "ProjectId not supplied and multiple projects found for site "+siteName+" using ProjectId "+projectId);
                 }
             }
         }

@@ -37,6 +37,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.UserTransaction;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
@@ -79,7 +80,7 @@ public class ViewEditorPurge extends AbstractJavaWebScript {
 		if (siteInfo != null) {
 		    siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
 		} else {
-			log(LogLevel.ERROR, "Site not found: " + siteName + ".\n", HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, "Site not found: " + siteName + ".\n", HttpServletResponse.SC_NOT_FOUND);
 			return false;
 		}
 		
@@ -108,14 +109,14 @@ public class ViewEditorPurge extends AbstractJavaWebScript {
 	        		String projectid = req.getParameter("project");
 	        		if (projectid.startsWith("ViewEditor") || projectid.startsWith("Models")) {
 		        		veNode = siteNode.childByNamePath("/" + projectid);
-		        		log(LogLevel.INFO, "Attempting to delete dir " + projectid);
+		        		log(Level.INFO, "Attempting to delete dir " + projectid);
 	        		}
 	        }
 	        
 	        if (veNode != null) {
 	        		handleElementHierarchy(veNode, recurse);
 	        } else {
-	        		log(LogLevel.INFO, "could not find node to delete");
+	        		log(Level.INFO, "could not find node to delete");
 	        }
 		}
 		
@@ -139,16 +140,16 @@ public class ViewEditorPurge extends AbstractJavaWebScript {
         try {
             trx.begin();
             String key = (String)node.getProperty("cm:name");
-            log(LogLevel.INFO, "delete: beginning transaction {" + node.getNodeRef());
+            log(Level.INFO, "delete: beginning transaction {" + node.getNodeRef());
             services.getNodeService().deleteNode(node.getNodeRef());
-            log(LogLevel.INFO, "} delete ending transaction: " + key);
+            log(Level.INFO, "} delete ending transaction: " + key);
             trx.commit();
         } catch (Throwable e) {
             try {
-                log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                log(Level.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
                 trx.rollback();
             } catch (Throwable ee) {
-                log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                log(Level.ERROR, "\tRollback failed: " + ee.getMessage());
             }
         }
     }

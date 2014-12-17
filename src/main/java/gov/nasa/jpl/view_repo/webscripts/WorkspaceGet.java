@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -55,10 +56,10 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 				object = getWorkspace(workspace, wsID);
 			}
 		} catch (JSONException e) {
-			log(LogLevel.ERROR, "JSON object could not be created \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			log(Level.ERROR, "JSON object could not be created \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			e.printStackTrace();
 		} catch (Exception e) {
-			log(LogLevel.ERROR, "Internal error stack trace \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			log(Level.ERROR, "Internal error stack trace \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			e.printStackTrace();
 		}
 
@@ -92,13 +93,13 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		        WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, ws );
 		        jsonArray.put(interiorJson);
 		    } else {
-	            log(LogLevel.WARNING, "Workspace not found: " + (ws == null ? null : ws.getSysmlId()), HttpServletResponse.SC_NOT_FOUND);
+	            log(Level.WARN, "Workspace not found: " + (ws == null ? null : ws.getSysmlId()), HttpServletResponse.SC_NOT_FOUND);
 		    }
 		} else {
 		    if(checkPermissions(ws, PermissionService.READ))  {
 		        jsonArray.put(ws.toJSONObject(null));
 		    } else {
-                log(LogLevel.WARNING, "No read permissions for workspace: " + (ws == null ? null : ws.getSysmlId()), HttpServletResponse.SC_FORBIDDEN);
+                log(Level.WARN, "No read permissions for workspace: " + (ws == null ? null : ws.getSysmlId()), HttpServletResponse.SC_FORBIDDEN);
 		    }
 		}
 		json.put("workspace" , jsonArray);

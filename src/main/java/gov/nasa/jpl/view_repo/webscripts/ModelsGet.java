@@ -41,6 +41,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.json.JSONArray;
@@ -89,7 +90,7 @@ public class ModelsGet extends AbstractJavaWebScript {
             if ( wsId != null && wsId.equalsIgnoreCase( "master" ) ) {
                 wsFound = true;
             } else {
-                log( LogLevel.ERROR,
+                log( Level.ERROR,
                      "Workspace with id, " + wsId
                      + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
                      HttpServletResponse.SC_NOT_FOUND );
@@ -121,7 +122,7 @@ public class ModelsGet extends AbstractJavaWebScript {
             try {
                 elementsJson = handleRequest(req);
             } catch ( JSONException e ) {
-                log(LogLevel.ERROR, "Malformed JSON request", HttpServletResponse.SC_BAD_REQUEST);
+                log(Level.ERROR, "Malformed JSON request", HttpServletResponse.SC_BAD_REQUEST);
                 e.printStackTrace();
             }
         }
@@ -135,7 +136,7 @@ public class ModelsGet extends AbstractJavaWebScript {
                 if ( prettyPrint ) model.put("res", top.toString(4));
                 else model.put("res", top.toString());
             } else {
-                log(LogLevel.WARNING, "No elements found",
+                log(Level.WARNING, "No elements found",
                     HttpServletResponse.SC_NOT_FOUND);
                 model.put("res", response.toString());
             }
@@ -167,7 +168,7 @@ public class ModelsGet extends AbstractJavaWebScript {
                 try {
                     elementsFoundJson.put( node.toJSONObject( dateTime ) );
                 } catch (JSONException e) {
-                    log(LogLevel.ERROR, "Could not create JSON", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    log(Level.ERROR, "Could not create JSON", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                     e.printStackTrace();
                 }
             }

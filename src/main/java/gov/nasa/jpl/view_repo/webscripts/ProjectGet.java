@@ -41,6 +41,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -95,10 +96,10 @@ public class ProjectGet extends AbstractJavaWebScript {
                 if (json != null && !Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
             }
         } catch (JSONException e) {
-            log(LogLevel.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             e.printStackTrace();
         } catch (Exception e) {
-            log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             e.printStackTrace();
         }
         if (json == null) {
@@ -151,12 +152,12 @@ public class ProjectGet extends AbstractJavaWebScript {
             }
         }
         if (projectNode == null) {
-            log(LogLevel.ERROR, "Could not find project", HttpServletResponse.SC_NOT_FOUND);
+            log(Level.ERROR, "Could not find project", HttpServletResponse.SC_NOT_FOUND);
             return null;
         }
         
         if (checkPermissions(projectNode, PermissionService.READ)) {
-            log(LogLevel.INFO, "Found project", HttpServletResponse.SC_OK);
+            log(Level.INFO, "Found project", HttpServletResponse.SC_OK);
             json = new JSONObject();
             JSONArray elements = new JSONArray();
             JSONObject project = new JSONObject();
@@ -170,7 +171,7 @@ public class ProjectGet extends AbstractJavaWebScript {
             specialization.put(Acm.JSON_PROJECT_VERSION, projectNode.getProperty(Acm.ACM_PROJECT_VERSION));
             specialization.put(Acm.JSON_TYPE, projectNode.getProperty(Acm.ACM_TYPE));
         } else {
-            log(LogLevel.ERROR, "No permissions to read", HttpServletResponse.SC_UNAUTHORIZED);
+            log(Level.ERROR, "No permissions to read", HttpServletResponse.SC_UNAUTHORIZED);
         }
         
         return json;

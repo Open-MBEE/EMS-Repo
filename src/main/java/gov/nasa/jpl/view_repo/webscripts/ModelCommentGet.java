@@ -41,6 +41,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.json.JSONArray;
@@ -86,7 +87,7 @@ public class ModelCommentGet extends ModelGet {
         EmsScriptNode element = findScriptNodeById(elementId, workspace, dateTime, false);
 
         if (element == null) {
-            log(LogLevel.ERROR, "Could not find element", HttpServletResponse.SC_NOT_FOUND);
+            log(Level.ERROR, "Could not find element", HttpServletResponse.SC_NOT_FOUND);
             model.put("res", response);
         } else {
             JSONArray elementsJson =
@@ -99,7 +100,7 @@ public class ModelCommentGet extends ModelGet {
                     if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
                     model.put("res", top.toString(4));
                 } catch (JSONException e) {
-                    log(LogLevel.ERROR, "Could not create the JSON response", HttpServletResponse.SC_BAD_REQUEST);
+                    log(Level.ERROR, "Could not create the JSON response", HttpServletResponse.SC_BAD_REQUEST);
                     e.printStackTrace();
                 }
             }
@@ -134,7 +135,7 @@ public class ModelCommentGet extends ModelGet {
         
             return elements;
         } catch (JSONException e) {
-            log(LogLevel.ERROR, "Could not create the JSON response", HttpServletResponse.SC_BAD_REQUEST);
+            log(Level.ERROR, "Could not create the JSON response", HttpServletResponse.SC_BAD_REQUEST);
             e.printStackTrace();
         }
         

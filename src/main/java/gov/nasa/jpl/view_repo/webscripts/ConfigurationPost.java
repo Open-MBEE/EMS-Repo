@@ -46,6 +46,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
@@ -146,7 +147,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
                 siteName = siteNode.getName();
             }
             if ( context == null ) {
-                log( LogLevel.ERROR,
+                log( Level.ERROR,
                      "Couldn't find a place to create the configuration: "
                              + postJson.getString( "name" ),
                      HttpServletResponse.SC_BAD_REQUEST );
@@ -158,7 +159,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
     			}
             }
 		} catch (JSONException e) {
-			log(LogLevel.ERROR, "Could not parse JSON", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, "Could not parse JSON", HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();
 			return null;
 		}
@@ -216,11 +217,11 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	            
 				return configWs.getConfigJson( jobNode, workspace, null );
 			} else {
-				log(LogLevel.ERROR, "Couldn't create configuration job: " + postJson.getString("name"), HttpServletResponse.SC_BAD_REQUEST);
+				log(Level.ERROR, "Couldn't create configuration job: " + postJson.getString("name"), HttpServletResponse.SC_BAD_REQUEST);
 				return null;
 			}
 		} else {
-			log(LogLevel.ERROR, "Job name not specified", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, "Job name not specified", HttpServletResponse.SC_BAD_REQUEST);
 			return null;
 		}
 	}
@@ -243,7 +244,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		}
 
 		if (nodeId == null) {
-		    log(LogLevel.WARNING, "JSON malformed does not include Alfresco id for configuration", HttpServletResponse.SC_BAD_REQUEST);
+		    log(Level.WARNING, "JSON malformed does not include Alfresco id for configuration", HttpServletResponse.SC_BAD_REQUEST);
 		    return null;
 		}
 
@@ -267,7 +268,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
                                           workspace, null );
             return configWs.getConfigJson( configNode, workspace, null );
 		} else {
-		    log(LogLevel.WARNING, "Could not find configuration with id " + nodeId, HttpServletResponse.SC_NOT_FOUND);
+		    log(Level.WARNING, "Could not find configuration with id " + nodeId, HttpServletResponse.SC_NOT_FOUND);
 		    return null;
 		}
 	}

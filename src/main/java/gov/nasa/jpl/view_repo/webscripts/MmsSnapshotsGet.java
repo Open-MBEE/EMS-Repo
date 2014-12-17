@@ -13,6 +13,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -59,9 +60,9 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         } catch (Exception e) {
             model.put("res", response.toString());
             if (e instanceof JSONException) {
-                log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             } else {
-                log(LogLevel.ERROR, "Internal server error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, "Internal server error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
             e.printStackTrace();
         } 
@@ -88,7 +89,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         String siteNameFromReq = getSiteName( req );
         if ( siteNode == null && !Utils.isNullOrEmpty( siteNameFromReq )
              && !siteNameFromReq.equals( NO_SITE_ID ) ) {
-            log( LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND );
+            log( Level.WARN, "Could not find site", HttpServletResponse.SC_NOT_FOUND );
             return new JSONArray();
         }
         ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, response);
@@ -109,7 +110,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         EmsScriptNode product = findScriptNodeById( productId, workspace, timestamp, false);
         
         if (product == null) {
-            log(LogLevel.WARNING, "Could not find product", HttpServletResponse.SC_NOT_FOUND);
+            log(Level.WARN, "Could not find product", HttpServletResponse.SC_NOT_FOUND);
             return new JSONArray();
         }
 
