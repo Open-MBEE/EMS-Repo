@@ -329,10 +329,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     // only logging loglevel and a message (no code)
 	protected void log(Level level, String msg, String...params) {
 	    if (level.toInt() >= logger.getLevel().toInt()) {
-			String formattedMsg = formatter.format (msg,params).toString();
-	    	String levelMessage = String.format("[%s]: %s\n",level.toString(),formattedMsg);
-	    	response.append(levelMessage);
-	        log4JCall (level, levelMessage);
+        		String formattedMsg = formatter.format (msg,params).toString();
+        	    	response.append(formattedMsg);
+	        log4JCall (level, formattedMsg);
 	    }
 	}
 
@@ -359,11 +358,26 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 	
 	protected void log4JCall (Level level, String msg){
-		if (level.toInt() == Level.FATAL.toInt()) { logger.fatal(msg); }
-		else if (level.toInt() == Level.ERROR.toInt()) { logger.error(msg); }
-		else if (level.toInt() == Level.WARN.toInt()) { logger.info(msg); }
-		else if (level.toInt() == Level.INFO.toInt()) { logger.info(msg); }
-		else if (level.toInt() == Level.DEBUG.toInt()) { logger.debug(msg); }
+	    switch(level.toInt()) {
+	        case Level.FATAL_INT:
+	            logger.fatal(msg);
+	            break;
+	        case Level.ERROR_INT:
+	            logger.error( msg );
+	            break;
+	        case Level.WARN_INT:
+	            logger.warn( msg );
+	            break;
+	        case Level.INFO_INT:
+	            logger.info( msg );
+	            break;
+	        case Level.DEBUG_INT:
+	            logger.debug( msg );
+	            break;
+            default:
+                // TODO: investigate if this the correct thing to do
+	            logger.debug( msg );    
+	    }
 	}
 	
 	/**

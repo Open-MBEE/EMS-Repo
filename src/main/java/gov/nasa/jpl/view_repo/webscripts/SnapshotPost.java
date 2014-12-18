@@ -444,8 +444,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             docBookMgr.save();
         } 
         catch ( Exception ex ) {
-            log( Level.ERROR,
-                 "\nFailed to create DBBook! %s", ex.getStackTrace() );
+            log( Level.ERROR, "Failed to create DBBook!" );
             ex.printStackTrace();
             throw new Exception( "Failed to create DBBook!", ex );
         }
