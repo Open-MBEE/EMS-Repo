@@ -295,22 +295,6 @@ public class CommitUtil {
                                                                            services,
                                                                            response));
                             
-                            // May need the previous day commits also if the day folder for
-                            // the passed date has only commits after the date:
-                            if (day > 1) {
-                                EmsScriptNode prevDayFolder = getLatestFolderBeforeTime(monthFolder, 
-                                                                                        day-1);
-                                if (prevDayFolder != null && !prevDayFolder.equals( dayFolder )) {
-                                    commits.addAll(WebScriptUtil.getAllNodesInPath(prevDayFolder.getQnamePath(),
-                                                                                   "TYPE",
-                                                                                   "cm:content",
-                                                                                   workspace,
-                                                                                   null,
-                                                                                   services,
-                                                                                   response));
-                                }
-                            }
-
                             // Sort the commits so that the latest commit is first:
                             Collections.sort( commits, new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator() );
                         }
@@ -320,13 +304,24 @@ public class CommitUtil {
             
             // Now go through the list of commits to find the latest one 
             // before or equal to the desired date:
+            EmsScriptNode earliestCommit = null;
             for (EmsScriptNode commit : commits) {
+                earliestCommit = commit;
                 Date created = commit.getCreationDate();
                 if (!date.before( created )) {
                     return commit;
                 }
             }
-           
+            
+            // If we have not returned at this point, then the date must be earlier than any of the 
+            // commits during the day of the date, so must try the previous commit for the earliest
+            // commit found:
+            if (earliestCommit != null) {
+                earliestCommit = getPreviousCommit(earliestCommit);
+                if (earliestCommit != null && !date.before( earliestCommit.getCreationDate() )) {
+                    return earliestCommit;
+                }
+            }
 	    }
 	    
 	    return null;
@@ -683,31 +678,23 @@ public class CommitUtil {
 	                                          String type, String msg, String body,
 	                                          ServiceRegistry services, StringBuffer response,
 	                                          boolean twoSourceWorkspaces) {
+	    
+        // Get the most recent commit(s) before creating a new one
+	    // Note: must do this before getOrCreateCommitPkg() call in case the commit to be created is the
+	    //       first for the day, and so will create the day folder in the getOrCreateCommitPkg() call
+        EmsScriptNode prevCommit1 = dateTime1 != null ? getLatestCommitAtTime( dateTime1, srcWs1, services, response ) :
+                                                        getLastCommit( srcWs1, services, response );
+        EmsScriptNode prevCommit2 = null;
+        if (twoSourceWorkspaces) {
+            prevCommit2 = dateTime2 != null ? getLatestCommitAtTime( dateTime2, srcWs2, services, response ) :
+                                              getLastCommit( srcWs2, services, response );
+        }
+        
         EmsScriptNode commitPkg = getOrCreateCommitPkg( dstWs, services, response, true );
 
         if (commitPkg == null) {
             return null;
         } else {
-            // get the most recent commit before creating a new one
-            EmsScriptNode prevCommit1 = dateTime1 != null ? getLatestCommitAtTime( dateTime1, srcWs1, services, response ) :
-                                                            getLastCommit( srcWs1, services, response );
-            EmsScriptNode prevCommit2 = null;
-            if (twoSourceWorkspaces) {
-                EmsScriptNode lastCommit2 = getLastCommit( srcWs2, services, response );
-                prevCommit2 = dateTime2 != null ? getLatestCommitAtTime( dateTime2, srcWs2, services, response ) :
-                                                  lastCommit2;
-                
-                // Give error message if the latest commit based on the time is not the latest:
-                // TODO REVIEW do we always want to do this?  Will this be used for something else other
-                //             than a merge.  Also, the above code is not efficient, as getLastCommit()
-                //             and getLatestCommitAtTime() do similar operations
-                if (lastCommit2 != null && prevCommit2 != null &&
-                    !lastCommit2.equals( prevCommit2 ) ) {
-                    logger.error("Previous commit "+prevCommit2+" based on date "+dateTime2+" is not the same as the latest commit "+lastCommit2);
-                    // TODO REVIEW return null here?
-                }
-            }
-
             Date now = new Date();
             EmsScriptNode currCommit = commitPkg.createNode("commit_" + now.getTime(), "cm:content");
             currCommit.createOrUpdateAspect( "cm:titled");

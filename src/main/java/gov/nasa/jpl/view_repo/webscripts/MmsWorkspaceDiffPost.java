@@ -113,6 +113,33 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		        String targetWsId = targetJson.getString( "id" );
 	            WorkspaceNode targetWs = WorkspaceNode.getWorkspaceFromId( targetWsId, services, response, responseStatus, null );
 	            
+                String timestamp1 = req.getParameter( "timestamp1" );
+                Date dateTimeTarget = TimeUtils.dateFromTimestamp( timestamp1 );
+
+                String timestamp2 = req.getParameter( "timestamp2" );
+                Date dateTimeSrc = TimeUtils.dateFromTimestamp( timestamp2 );
+	                
+                // Verify that the target workspace timestamp is valid, ie it must use the latest
+                // commit:
+                if (dateTimeTarget != null) {
+                    // TODO REVIEW This is not efficient, as getLastCommit()
+                    //             and getLatestCommitAtTime() do similar operations
+                    EmsScriptNode lastCommit = CommitUtil.getLastCommit( targetWs, services, response );
+                    EmsScriptNode prevCommit = CommitUtil.getLatestCommitAtTime( dateTimeTarget, 
+                                                                                 targetWs, services, 
+                                                                                 response );
+    
+                    // Give error message if the latest commit based on the time is not the latest:
+                    if (lastCommit != null && prevCommit != null &&
+                        !lastCommit.equals( prevCommit ) ) {
+                        
+                        log(LogLevel.ERROR,
+                            "Previous commit "+prevCommit+" based on date "+dateTimeTarget+" is not the same as the latest commit "+lastCommit,
+                            HttpServletResponse.SC_CONFLICT);
+                        return;
+                    }
+                }
+                
 	            JSONObject top = new JSONObject();
 	            JSONArray elements = new JSONArray();
 	            
@@ -165,11 +192,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                     }
 	            }
 	            
-	            String timestamp1 = req.getParameter( "timestamp1" );
-	            Date dateTimeTarget = TimeUtils.dateFromTimestamp( timestamp1 );
 
-	            String timestamp2 = req.getParameter( "timestamp2" );
-	            Date dateTimeSrc = TimeUtils.dateFromTimestamp( timestamp2 );
 	            
 	            CommitUtil.merge( jsonDiff, srcWs, targetWs, dateTimeSrc, dateTimeTarget,
 	                              null, false, services, response );
