@@ -110,7 +110,7 @@ public class ViewEditorPurge extends AbstractJavaWebScript {
 	        		String projectid = req.getParameter("project");
 	        		if (projectid.startsWith("ViewEditor") || projectid.startsWith("Models")) {
 		        		veNode = siteNode.childByNamePath("/" + projectid);
-		        		log(Level.INFO, "Attempting to delete dir " + projectid);
+		        		log(Level.INFO, "Attempting to delete dir %s", projectid);
 	        		}
 	        }
 	        
@@ -141,16 +141,16 @@ public class ViewEditorPurge extends AbstractJavaWebScript {
         try {
             trx.begin();
             String key = (String)node.getProperty("cm:name");
-            log(Level.INFO, "delete: beginning transaction {" + node.getNodeRef());
+            log(Level.INFO, "delete: beginning transaction { %s", node.getNodeRef().toString());
             services.getNodeService().deleteNode(node.getNodeRef());
-            log(Level.INFO, "} delete ending transaction: " + key);
+            log(Level.INFO, "} delete ending transaction: %s", key);
             trx.commit();
         } catch (Throwable e) {
             try {
-                log(Level.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                log(Level.ERROR, "\t####### ERROR: Needed to rollback: %s", e.getMessage());
                 trx.rollback();
             } catch (Throwable ee) {
-                log(Level.ERROR, "\tRollback failed: " + ee.getMessage());
+                log(Level.ERROR, "\tRollback failed: %s", ee.getMessage());
             }
         }
     }

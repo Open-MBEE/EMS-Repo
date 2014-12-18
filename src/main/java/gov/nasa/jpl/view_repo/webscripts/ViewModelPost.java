@@ -104,7 +104,7 @@ public class ViewModelPost extends ModelPost {
                 if (Debug.isOn()) System.out.println("\t####### ERROR: Needed to ViewModelPost rollback: " + e.getMessage());
                 trx.rollback();
             } catch (Throwable ee) {
-                log(Level.ERROR, "\tViewModelPost: Rollback failed: " + ee.getMessage());
+                log(Level.ERROR, "\tViewModelPost: Rollback failed: %s", ee.getMessage());
                 ee.printStackTrace();
             }
         }

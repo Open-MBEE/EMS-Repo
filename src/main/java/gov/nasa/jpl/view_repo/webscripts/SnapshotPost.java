@@ -215,8 +215,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
         } catch ( Exception ex ) {
         	status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             log( Level.ERROR,
-                 "Failed to create snapshot or snapshot artifact! "
-                         + ex.getMessage() );
+                 "Failed to create snapshot or snapshot artifact! %s",
+                         ex.getMessage() );
             ex.printStackTrace();
         }
         return model;
@@ -302,8 +302,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	                        } 
 	                        catch ( Exception ex ) {
 	                            log( Level.WARN,
-	                                 "Problem extracting node value from "
-	                                         + node.toJSON() );
+	                                 "Problem extracting node value from %s",
+	                                         node.toJSON() );
 	                        }
 	                    }
 	                    sb.append(" ");
@@ -392,9 +392,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                           String snapshotName, String contextPath,
                                           EmsScriptNode snapshotFolder,
                                           WorkspaceNode workspace, Date timestamp) throws Exception {
-        log( Level.INFO, "\ncreating DocBook snapshot for view Id: "
-                            + productId );
-        log( Level.INFO, "\ncreating DocBook snapshotname: " + snapshotName );
+        log( Level.INFO, "\ncreating DocBook snapshot for view Id: %s",
+                            productId );
+        log( Level.INFO, "\ncreating DocBook snapshotname: %s", snapshotName );
 
         if ( product == null ) {
             log( Level.WARN, "null [view] input parameter reference." );
@@ -445,7 +445,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         } 
         catch ( Exception ex ) {
             log( Level.ERROR,
-                 "\nFailed to create DBBook! " + ex.getStackTrace() );
+                 "\nFailed to create DBBook! %s", ex.getStackTrace() );
             ex.printStackTrace();
             throw new Exception( "Failed to create DBBook!", ex );
         }
@@ -539,7 +539,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 e = createDBText( obj, workspace, timestamp );
                 break;
             default:
-                log( Level.WARN, "Unexpected type: " + getType( obj ) );
+                log( Level.WARN, "Unexpected type: %s", getType( obj ) );
                 break;
         }
         return e;
@@ -574,7 +574,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                                services );
                     saveImage( image, node );
                 } else {
-                    log( Level.ERROR, fileName + " image file not found!" );
+                    log( Level.ERROR,"%s image file not found!", fileName );
                 }
             } catch ( Exception ex ) {;}
 

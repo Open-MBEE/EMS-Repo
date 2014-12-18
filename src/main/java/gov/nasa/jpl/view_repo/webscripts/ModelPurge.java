@@ -140,7 +140,7 @@ public class ModelPurge extends AbstractJavaWebScript {
 	 */
 	private void delete(EmsScriptNode node, WorkspaceNode workspace) {
 	    if ( node == null || !node.exists() ) {
-	        log(Level.ERROR, "Trying to delete a non-existent node! " + node);
+	        log(Level.ERROR, "Trying to delete a non-existent node! %s", node.toString());
 	        return;
 	    }
 	    
@@ -164,14 +164,14 @@ public class ModelPurge extends AbstractJavaWebScript {
             String key = node.getSysmlId();
             log(Level.INFO, "delete: beginning transaction {" + node.getNodeRef());
             services.getNodeService().deleteNode(node.getNodeRef());
-            log(Level.INFO, "} delete ending transaction: " + key);
+            log(Level.INFO, "} delete ending transaction: %s",key);
             trx.commit();
         } catch (Throwable e) {
             try {
-                log(Level.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                log(Level.ERROR, "\t####### ERROR: Needed to rollback: %s", e.getMessage());
                 trx.rollback();
             } catch (Throwable ee) {
-                log(Level.ERROR, "\tRollback failed: " + ee.getMessage());
+                log(Level.ERROR, "\tRollback failed: %s", ee.getMessage());
             }
         }
     }

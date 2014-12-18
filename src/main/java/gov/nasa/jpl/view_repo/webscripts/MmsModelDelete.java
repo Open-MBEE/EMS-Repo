@@ -151,13 +151,13 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 if (e instanceof JSONException) {
                         log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "MmsModelDelete.handleRequest: JSON malformed: %s", e.getMessage());
                 } else {
-                        log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "MmsModelDelete.handleRequest: DB transaction failed: ", e.getMessage());
+                        log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "MmsModelDelete.handleRequest: DB transaction failed: %s", e.getMessage());
                 }
                 trx.rollback();
-                log(Level.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                log(Level.ERROR, "\t####### ERROR: Needed to rollback: %s", e.getMessage());
                 e.printStackTrace();
             } catch (Throwable ee) {
-                log(Level.ERROR, "\tMmsModelDelete.handleRequest: rollback failed: " + ee.getMessage());
+                log(Level.ERROR, "\tMmsModelDelete.handleRequest: rollback failed: %s", ee.getMessage());
                 ee.printStackTrace();
                 e.printStackTrace();
             }
@@ -187,7 +187,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             log(Level.ERROR, HttpServletResponse.SC_FORBIDDEN, "no permissions");
         } else {
             if ( node == null || !node.exists() ) {
-                log(Level.ERROR, "Trying to delete a non-existent node! " + node);
+                log(Level.ERROR, "Trying to delete a non-existent node! %s", node.toString());
                 return;
             }
 
