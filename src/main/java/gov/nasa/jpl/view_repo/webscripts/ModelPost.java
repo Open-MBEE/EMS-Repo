@@ -2448,7 +2448,7 @@ public class ModelPost extends AbstractJavaWebScript {
         return model;
     }
 
-    protected void handleUpdate(JSONObject postJson, Status status, WorkspaceNode workspace, 
+    protected Set< EmsScriptNode > handleUpdate(JSONObject postJson, Status status, WorkspaceNode workspace, 
                                 boolean fix, Map<String, Object> model,
                                 boolean createCommit) throws Exception {
         JSONObject top = new JSONObject();
@@ -2477,6 +2477,8 @@ public class ModelPost extends AbstractJavaWebScript {
                 model.put( "res", top.toString() );
             }
         }
+        
+        return elements;
     }
     
     public void addRelationshipsToProperties( Set< EmsScriptNode > elems ) {
