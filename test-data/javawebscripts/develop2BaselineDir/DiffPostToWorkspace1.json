@@ -6,13 +6,11 @@
 
     "editable": true,
 
-    "name": "300",
-
     "owner": "holding_bin_no_site_no_project",
 
-    "qualifiedId": "/no_project/holding_bin_no_site_no_project/x",
+    "qualifiedId": "/no_project/holding_bin_no_site_no_project/newElement",
 
-    "qualifiedName": "/no_project/holding_bin/300",
+    "qualifiedName": "/no_project/holding_bin/null",
 
     "specialization": {
 
@@ -24,7 +22,7 @@
 
         "value": [{
 
-            "string": "the x value",
+            "string": "the element added to ws1",
 
             "type": "LiteralString"
 
@@ -32,7 +30,7 @@
 
     },
 
-    "sysmlid": "x"
+    "sysmlid": "newElement"
 
 }]}
 
