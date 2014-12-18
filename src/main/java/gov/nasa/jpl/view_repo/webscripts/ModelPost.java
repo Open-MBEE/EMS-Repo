@@ -1378,9 +1378,13 @@ public class ModelPost extends AbstractJavaWebScript {
 
             // Ingest the JSON for the value to update properties
             timerIngest = Timer.startTimer(timerIngest, timeEvents);
-            if ( oldValNode.ingestJSON( newValJson ) ) {
-                changed = true;
-            }
+            processValue( node, id, reifiedPkgNode, parent, nodeWorkspace, newValJson, ingest, oldValNode );
+            changed = true;
+            //updateOrCreateTransactionableElement
+            //boolean didChange = processValueSpecProperty( type, nestedNode, elementJson, specializeJson, oldValNode, ingest, reifiedPkgNode, parent, id, nodeWorkspace );
+//            if ( oldValNode.ingestJSON( newValJson ) ) {
+//                changed = true;
+//            }
             Timer.stopTimer(timerIngest, "!!!!! processExpressionOrProperty(): ingestJSON time", timeEvents);
 
         }
@@ -1389,7 +1393,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
             EmsScriptNode newValNode =
                     processValue( node, id, reifiedPkgNode, parent,
-                                  nodeWorkspace, newVal, ingest );
+                                  nodeWorkspace, newVal, ingest, null );
             nodeNames.add(newValNode.getSysmlId());
             changed = true;
         }
@@ -1401,7 +1405,8 @@ public class ModelPost extends AbstractJavaWebScript {
                                        EmsScriptNode reifiedPkgNode,
                                        EmsScriptNode parent,
                                        WorkspaceNode workspace,
-                                       JSONObject newVal, boolean ingest ) throws Exception {
+                                       JSONObject newVal, boolean ingest,
+                                       EmsScriptNode nodeToUpdate ) throws Exception {
         //  The refiedNode will be null if the node is not in the elementHierachy, which
         //  will be the case if no other elements have it as a owner, so in that case
         //  we make a reifiedNode for it here.  If all of that fails, then use the parent
@@ -1420,7 +1425,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 updateOrCreateTransactionableElement( (JSONObject)newVal,
                                                       nestedParent, null,
                                                       workspace, ingest, true,
-                                                      modStatus, null );
+                                                      modStatus, nodeToUpdate );
         return newValNode;
     }
     
