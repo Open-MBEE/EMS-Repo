@@ -135,7 +135,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                     // Give error message if there are not commits found before or at the dateTimeTarget:
                     if (prevCommit == null) {
                         log(LogLevel.ERROR,
-                            "Previous commit could not be found based on date "+dateTimeTarget+"  Try a later date",
+                            "Try a later date.  Previous commit could not be found based on date "+dateTimeTarget,
                             HttpServletResponse.SC_BAD_REQUEST);
                         return;
                     }
