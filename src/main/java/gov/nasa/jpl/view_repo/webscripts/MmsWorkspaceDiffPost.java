@@ -168,7 +168,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	            }
 	            top.put( "elements", elements );
 	            
-	            handleUpdate( top, status, targetWs, false, model );
+	            handleUpdate( top, status, targetWs, false, model, false);
 	            
 	            // Delete the elements in the target workspace:
 	            if (srcJson.has( "deletedElements" )) {
@@ -192,7 +192,8 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                     }
 	            }
 	            
-
+	            // TODO: do we need to send deltas?  If so, need a projectId which we dont get
+	            //       from the command line
 	            
 	            CommitUtil.merge( jsonDiff, srcWs, targetWs, dateTimeSrc, dateTimeTarget,
 	                              null, false, services, response );

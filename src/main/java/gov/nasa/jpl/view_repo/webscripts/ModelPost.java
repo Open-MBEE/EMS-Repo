@@ -221,7 +221,8 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     public Set< EmsScriptNode >
             createOrUpdateModel( Object content, Status status,
-                                 WorkspaceNode targetWS, WorkspaceNode sourceWS ) throws Exception {
+                                 WorkspaceNode targetWS, WorkspaceNode sourceWS,
+                                 boolean createCommit) throws Exception {
         	JSONObject postJson = (JSONObject) content;
         	
         	JSONArray updatedArray = postJson.optJSONArray("updatedElements");
@@ -252,7 +253,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		for(JSONArray jsonArray : collections){
 			JSONObject object = new JSONObject();
 			object.put("elements", jsonArray);
-			elements.addAll(createOrUpdateModel2(object, status, targetWS, sourceWS));
+			elements.addAll(createOrUpdateModel2(object, status, targetWS, sourceWS, createCommit));
 		}
 		
 		return elements;
@@ -260,7 +261,8 @@ public class ModelPost extends AbstractJavaWebScript {
     
     public Set< EmsScriptNode >
     		createOrUpdateModel2( Object content, Status status,
-    							  WorkspaceNode targetWS, WorkspaceNode sourceWS ) throws Exception {
+    							  WorkspaceNode targetWS, WorkspaceNode sourceWS,
+    							  boolean createCommit) throws Exception {
         Date now = new Date();
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
@@ -355,7 +357,7 @@ public class ModelPost extends AbstractJavaWebScript {
         timerUpdateModel = Timer.startTimer(timerUpdateModel, timeEvents);
 
         // Send deltas to all listeners
-        if (wsDiff.isDiff()) {
+        if (createCommit && wsDiff.isDiff()) {
             // FIXME: Need to split elements by project Id - since they won't always be in same project
             CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), status );
         }
@@ -2420,7 +2422,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
                     getProjectNodeFromRequest( req, true );
                     if (projectNode != null) {
-                        handleUpdate( postJson, status, workspace, fix, model );
+                        handleUpdate( postJson, status, workspace, fix, model, true );
                     }
                 }
             } catch (JSONException e) {
@@ -2446,9 +2448,11 @@ public class ModelPost extends AbstractJavaWebScript {
         return model;
     }
 
-    protected void handleUpdate(JSONObject postJson, Status status, WorkspaceNode workspace, boolean fix, Map<String, Object> model) throws Exception {
+    protected void handleUpdate(JSONObject postJson, Status status, WorkspaceNode workspace, 
+                                boolean fix, Map<String, Object> model,
+                                boolean createCommit) throws Exception {
         JSONObject top = new JSONObject();
-        Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null );
+        Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null, createCommit );
 
         addRelationshipsToProperties( elements );
         if ( !Utils.isNullOrEmpty( elements ) ) {
