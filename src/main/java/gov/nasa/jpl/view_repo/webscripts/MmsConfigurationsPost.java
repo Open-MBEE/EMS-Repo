@@ -1,7 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -41,6 +40,11 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
 
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+		MmsConfigurationsPost instance = new MmsConfigurationsPost(repository, services);
+    	return instance.executeImplImpl(req, status, cache);
+    }
+    
+    protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
         
         clearCaches();

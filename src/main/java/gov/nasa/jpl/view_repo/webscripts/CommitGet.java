@@ -30,7 +30,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
-import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -71,6 +70,11 @@ public class CommitGet extends AbstractJavaWebScript {
 
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+    	CommitGet instance = new CommitGet(repository, services);
+    	return instance.executeImplImpl(req, status, cache);
+    }
+    
+    protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
 
         clearCaches();

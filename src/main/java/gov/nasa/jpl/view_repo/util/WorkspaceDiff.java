@@ -661,8 +661,14 @@ public class WorkspaceDiff implements Serializable {
                     ignoredPropIds.add( propName.toString() );
                 }
             }
-            List<String> prefixes = Utils.newList(
-//                                                  "cm:name",
+
+            List<String> prefixes = Utils.newList( "view2:snapshotProduct",
+                                                   "view2:productSnapshots",
+                                                   "view2:docbookNode",
+                                                   "view2:pdfNode",
+                                                   "view2:htmlZipNode",
+                                                   "view2:timestamp",
+                                   //                                                  "cm:name",
 //                                                  "cm:content",
 //                                                  "cm:modelName",
 //                                                  "cm:modelDescription",

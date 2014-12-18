@@ -29,7 +29,7 @@
                     "type": "string",
                     "description": "Human readable name of the project"
                 },
-                "sysmlVersion": {
+                "projectVersion": {
                     "type": "string",
                     "description": "MD project version last exported. TODO: may go away"
                 }

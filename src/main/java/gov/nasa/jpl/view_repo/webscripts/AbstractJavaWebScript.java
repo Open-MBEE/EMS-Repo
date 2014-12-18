@@ -667,22 +667,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
 
     protected void printFooter() {
-       //if ( !Debug.isOn() ) return;
-    	if ( logger.isDebugEnabled() == false) return;
-        log( Level.DEBUG, "*** completed " + ( new Date() ) + " "
-                            + getClass().getSimpleName() );
+        log( Level.INFO, "*** completed %s %s", ( new Date() ).toString(), getClass().getSimpleName());
     }
 
     protected void printHeader( WebScriptRequest req ) {
-    	//if ( !Debug.isOn() ) return;
-    	if ( logger.isDebugEnabled() == false) return;
-        log( Level.DEBUG, "*** starting " + ( new Date() ) + " "
-                             + getClass().getSimpleName() );
+        log( Level.INFO, "*** starting %s %s",( new Date() ).toString(),getClass().getSimpleName() );
         String reqStr = req.getURL();
-        log( Level.DEBUG,
-             "*** request = " + 
-             ( reqStr.length() <= MAX_PRINT ? 
-               reqStr : reqStr.substring( 0, MAX_PRINT ) + "..." ) );
+        log( Level.INFO, "*** request = %s ...", ( reqStr.length() <= MAX_PRINT ? reqStr : reqStr.substring( 0, MAX_PRINT ) ));
     }
 
     protected static String getIdFromRequest( WebScriptRequest req ) {

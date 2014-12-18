@@ -36,7 +36,6 @@ import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -71,6 +70,11 @@ public class ViewModelPost extends ModelPost {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        ViewModelPost instance = new ViewModelPost(repository, services);
+        return instance.executeImplImpl(req,  status, cache);
+    }
+	
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
         Map<String, Object> model = new HashMap<String, Object>();

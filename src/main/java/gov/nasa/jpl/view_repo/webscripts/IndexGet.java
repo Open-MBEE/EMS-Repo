@@ -62,6 +62,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
+@Deprecated
 public class IndexGet extends AbstractJavaWebScript {
     public IndexGet() {
        super(); 

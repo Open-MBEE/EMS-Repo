@@ -58,24 +58,46 @@ import org.springframework.extensions.webscripts.Status;
 
 public class NodeUtil {
 
-    public static boolean doFullCaching = false;
+    public enum SearchType {
+        DOCUMENTATION( "@sysml\\:documentation:\"" ),
+        NAME( "@sysml\\:name:\"" ),
+        CM_NAME( "@cm\\:name:\"" ),
+        ID( "@sysml\\:id:\"" ),
+        STRING( "@sysml\\:string:\"" ),
+        BODY( "@sysml\\:body:\"" ),
+        CHECKSUM( "@view\\:cs:\"" ),
+        WORKSPACE("@ems\\:workspace:\"" ),
+        WORKSPACE_NAME("@ems\\:workspace_name:\"" ),
+        OWNER("@ems\\:owner:\"" ),
+        ASPECT("ASPECT:\""),
+        TYPE("TYPE:\"");
+
+        public String prefix;
+
+        SearchType( String prefix ) {
+            this.prefix = prefix;
+        }
+    }
+    
+    /* static flags and constants */
+    
+    public static boolean doFullCaching = true;
     public static boolean doSimpleCaching = true;
-    public static boolean doHeisenCheck = false;
+    public static boolean doHeisenCheck = true;
     
     public static String sitePkgPrefix = "site_";
 
-    
     /**
      * A cache of alfresco nodes stored as a map from cm:name to node for the master branch only.
      */
-    public static HashMap< String, NodeRef > simpleCache =
-            new HashMap< String, NodeRef >();
+    public static Map< String, NodeRef > simpleCache =
+            Collections.synchronizedMap( new HashMap< String, NodeRef >() );
 
     /**
      * A cache of alfresco nodes stored as a map from sysml:id to a set of nodes
      */
-    public static HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > > 
-        elementCache = new HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > >();
+    public static Map< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > > 
+        elementCache = Collections.synchronizedMap( new HashMap< String, Map< String, Map< String, Map< Boolean, Map< Long, Map< Boolean, Map< Boolean, Map< Boolean, Map<String, ArrayList< NodeRef > > > > > > > > > >() );
     
     /**
      * A cache of the most nodeRefs, keyed by the nodes' alfresco ids. This is
@@ -83,6 +105,21 @@ public class NodeUtil {
      * sometimes tied to an old version.
      */
     protected static HashMap<String, NodeRef> heisenCache = new HashMap<String, NodeRef>();
+
+    // Set the flag to time events that occur during a model post using the timers
+    // below
+    public static boolean timeEvents = false;
+    private static Timer timer = null;
+    private static Timer timerByType = null;
+    private static Timer timerLucene = null;
+
+    public static final Comparator< ? super NodeRef > nodeRefComparator = GenericComparator.instance();
+
+    public static ServiceRegistry services = null;
+
+    // needed for Lucene search
+    public static StoreRef SEARCH_STORE = null;
+            //new StoreRef( StoreRef.PROTOCOL_WORKSPACE, "SpacesStore" );
 
     /**
      * clear or create the cache for correcting bad node refs (that refer to
@@ -109,42 +146,6 @@ public class NodeUtil {
     }
 
     
-    public enum SearchType {
-        DOCUMENTATION( "@sysml\\:documentation:\"" ),
-        NAME( "@sysml\\:name:\"" ),
-        CM_NAME( "@cm\\:name:\"" ),
-        ID( "@sysml\\:id:\"" ),
-        STRING( "@sysml\\:string:\"" ),
-        BODY( "@sysml\\:body:\"" ),
-        CHECKSUM( "@view\\:cs:\"" ),
-        WORKSPACE("@ems\\:workspace:\"" ),
-        WORKSPACE_NAME("@ems\\:workspace_name:\"" ),
-        OWNER("@ems\\:owner:\"" ),
-        ASPECT("ASPECT:\""),
-        TYPE("TYPE:\"");
-
-        public String prefix;
-
-        SearchType( String prefix ) {
-            this.prefix = prefix;
-        }
-    }
-    
-    // Set the flag to time events that occur during a model post using the timers
-    // below
-    public static boolean timeEvents = false;
-    private static Timer timer = null;
-    private static Timer timerByType = null;
-    private static Timer timerLucene = null;
-
-    public static final Comparator< ? super NodeRef > nodeRefComparator = GenericComparator.instance();
-
-    public static ServiceRegistry services = null;
-
-    // needed for Lucene search
-    public static StoreRef SEARCH_STORE = null;
-            //new StoreRef( StoreRef.PROTOCOL_WORKSPACE, "SpacesStore" );
-
     public static StoreRef getStoreRef() {
         if ( SEARCH_STORE == null ) {
             SEARCH_STORE =
@@ -319,6 +320,11 @@ public class NodeUtil {
                                    dateTime, justFirst, exactMatch, services,
                                    includeDeleted, siteName );
     }
+    protected static boolean isIdSearch(String prefix, boolean currentVal) {
+        return ( currentVal ||
+                 SearchType.ID.prefix.equals( prefix )||
+                 SearchType.CM_NAME.prefix.equals( prefix ) );
+    }
     public static ArrayList< NodeRef >
             findNodeRefsByType( String specifier, String prefix,
                                 boolean ignoreWorkspace,
@@ -328,8 +334,6 @@ public class NodeUtil {
                                 boolean justFirst, boolean exactMatch,
                                 ServiceRegistry services, boolean includeDeleted,
                                 String siteName) {
-        
-
 
         ArrayList<NodeRef> results = null;
     	
@@ -340,14 +344,42 @@ public class NodeUtil {
         
         // look in cache first
         boolean useSimpleCache = false;
+        boolean useFullCache = false;
         if ( doSimpleCaching || doFullCaching ) {
+            
+            boolean idSearch = false;
             // Only use the simple cache if in the master workspace, just getting a single node, not
             // looking for deleted nodes, and searching by cm:name or sysml:id.  Otherwise, we
             // may want multiple nodes in our results, or they could have changed since we added
             // them to the cache:
-            useSimpleCache = !ignoreWorkspace && !includeDeleted && workspace == null 
-                             && dateTime == null && justFirst && siteName == null &&
-                             (prefix.equals( SearchType.CM_NAME.prefix ) || prefix.equals( SearchType.ID.prefix ));
+            useSimpleCache = doSimpleCaching && !ignoreWorkspace && !includeDeleted
+                             && workspace == null && dateTime == null
+                             && justFirst && siteName == null
+                             && ( idSearch = isIdSearch( prefix, idSearch ) );
+
+            // Conditions under which the full cache can be used:
+            // 1. If dateTime != null and dateTime < now then the cache may be
+            //    used for all other argument combinations.
+            // 2. Otherwise, the cache may be used for finding nodes by cm:name
+            //    and sysml:id if ignoreWorkspace == false and either workspace
+            //    == null or onlyThisWorkspace == true.
+            //
+            // There are other things we can do to expand the applicability of
+            // the cache, but they require more code changes.
+            //
+            // One idea is to track a lastModified time for the database. In
+            // this case, we could store results for dateTime == null by
+            // inserting dateTime == now in the cache and if there are results
+            // for a dateTime after the lastModified time, then they are valid
+            // (I think). We need to be careful not to pollute the cache with
+            // entries for dateTime == null; a purge of these entries may be
+            // necessary.
+            useFullCache = doFullCaching && !useSimpleCache && 
+                           ( ( dateTime != null && dateTime.before( new Date() ) ) || 
+                             ( !ignoreWorkspace && 
+                               ( workspace == null || onlyThisWorkspace ) && 
+                               ( idSearch = isIdSearch(prefix, idSearch) ) ) );
+
             if ( useSimpleCache && doSimpleCaching ) {
                 NodeRef ref = simpleCache.get( specifier );
                 if (services.getPermissionService().hasPermission( ref, PermissionService.READ ) == AccessStatus.ALLOWED) {
@@ -355,9 +387,11 @@ public class NodeUtil {
                         results = Utils.newList( ref );
                     }
                 }
-            } else if ( doFullCaching ) {
-                results = getCachedElements( specifier, prefix, ignoreWorkspace, workspace, onlyThisWorkspace, dateTime, justFirst,
-                                             exactMatch, includeDeleted, siteName );
+            } else if ( doFullCaching && useFullCache ) {
+                results = getCachedElements( specifier, prefix, ignoreWorkspace,
+                                             workspace, onlyThisWorkspace,
+                                             dateTime, justFirst, exactMatch,
+                                             includeDeleted, siteName );
             }
         }
 
@@ -403,7 +437,7 @@ public class NodeUtil {
                 if ( useSimpleCache && doSimpleCaching ) {
                     NodeRef r = nodeRefs.get( 0 ); 
                     simpleCache.put( specifier, r );
-                } else if ( doFullCaching ){
+                } else if ( useFullCache && doFullCaching  ){
                     putInCache( specifier, prefix, ignoreWorkspace, workspace,
                                 onlyThisWorkspace, dateTime, justFirst,
                                 exactMatch, includeDeleted, siteName, nodeRefs );
@@ -441,6 +475,7 @@ public class NodeUtil {
         ArrayList<NodeRef> newNodeRefs = null;
         for ( NodeRef nr : nodeRefs ) {
             EmsScriptNode esn = new EmsScriptNode( nr, getServices() );
+            if ( !esn.scriptNodeExists() ) continue;
 //            if ( esn.getOrSetCachedVersion() ) {
             if ( !esn.checkNodeRefVersion2( null ) ) {
                 if ( newNodeRefs == null ) {
@@ -450,6 +485,7 @@ public class NodeUtil {
                     // Back up and copy nodes we already skipped
                     ArrayList<NodeRef> copy = (ArrayList<NodeRef>)nodeRefs.clone();
                     for ( NodeRef earlier : copy ) {
+                        if ( !scriptNodeExists( earlier ) ) continue;
                         if ( earlier.equals( nr ) ) {
                             break;
                         }
