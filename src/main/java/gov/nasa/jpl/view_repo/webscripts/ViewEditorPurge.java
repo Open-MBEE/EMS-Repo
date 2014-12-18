@@ -80,7 +80,7 @@ public class ViewEditorPurge extends AbstractJavaWebScript {
 		if (siteInfo != null) {
 		    siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
 		} else {
-			log(Level.ERROR, "Site not found: " + siteName + ".\n", HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Site not found: %s .\n", siteName);
 			return false;
 		}
 		

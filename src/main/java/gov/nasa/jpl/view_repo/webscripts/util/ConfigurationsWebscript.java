@@ -65,7 +65,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services);
             return configNode;
         } else {
-            log(Level.WARN, "Could not find configuration with id " + id, HttpServletResponse.SC_NOT_FOUND);
+            log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Could not find configuration with id %s", id);
             return null;
         }
     }
@@ -116,7 +116,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         String siteNameFromReq = getSiteName( req );
         if ( siteNode == null && !Utils.isNullOrEmpty( siteNameFromReq )
              && !siteNameFromReq.equals( NO_SITE_ID ) ) {
-            log(Level.WARN, "Could not find site " + siteNameFromReq, HttpServletResponse.SC_NOT_FOUND);
+            log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Could not find site %s", siteNameFromReq);
             return new JSONArray();
         }
         JSONArray configJsonArray = new JSONArray();

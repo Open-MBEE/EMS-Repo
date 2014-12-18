@@ -79,7 +79,7 @@ public class ViewPost extends AbstractJavaWebScript {
         try {
 			updateViews((JSONObject)req.parseContent(), workspace);
 		} catch (JSONException e) {
-			log(Level.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON parse exception: %s", e.getMessage());
 			e.printStackTrace();
 		}
 		
@@ -119,13 +119,13 @@ public class ViewPost extends AbstractJavaWebScript {
 	private void updateView(JSONObject viewJson, WorkspaceNode workspace) throws JSONException {
 		String id = viewJson.getString(Acm.JSON_ID);
 		if (id == null) {
-			log(Level.ERROR, "view id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "view id not specified.\n");
 			return;
 		}
 		
 		EmsScriptNode view = findScriptNodeById(id, workspace, null, true);
 		if (view == null) {
-			log(Level.ERROR, "could not find view with id: " + id, HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "could not find view with id: %s", id);
 			return;
 		}
 			

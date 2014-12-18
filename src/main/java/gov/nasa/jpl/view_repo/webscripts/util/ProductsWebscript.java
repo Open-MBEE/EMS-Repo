@@ -59,7 +59,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         String siteName = getSiteName(req);
         
         if (!NodeUtil.exists( mySiteNode )) {
-            log(Level.WARN, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
+            log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Could not find site");
             return productsJson;
         }
         
@@ -83,7 +83,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                 EmsScriptNode configNode = new EmsScriptNode(configNodeRef, services);
                 return handleConfigurationProducts(req, configNode);
             } else {
-                log(Level.WARN, "Could not find configuration with id " + configurationId, HttpServletResponse.SC_NOT_FOUND);
+                log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Could not find configuration with id %s", configurationId);
                 return productsJson;
             }
         }
@@ -196,8 +196,8 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         EmsScriptNode product = findScriptNodeById( productId, workspace, dateTime, false );
 
         if ( product == null ) {
-            log( Level.ERROR, "Product not found with ID: " + productId,
-                 HttpServletResponse.SC_NOT_FOUND );
+            log( Level.ERROR,
+                 HttpServletResponse.SC_NOT_FOUND, "Product not found with ID: %s", productId);
         }
 
         if ( checkPermissions( product, PermissionService.READ ) ) {
@@ -229,8 +229,8 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     productsJson.put( product.toJSONObject( dateTime ) );
                 }
             } catch ( JSONException e ) {
-                log( Level.ERROR, "Could not create JSON for product",
-                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                log( Level.ERROR,
+                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSON for product");
                 e.printStackTrace();
             }
         }

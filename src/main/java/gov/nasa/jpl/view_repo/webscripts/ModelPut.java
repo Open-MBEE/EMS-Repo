@@ -79,10 +79,10 @@ public class ModelPut extends ModelPost {
             instance.createOrUpdateModel(req, status);
             appendResponseStatusInfo(instance);
         } catch (JSONException e) {
-            log(Level.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
+            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON malformed\n");
             e.printStackTrace();
         } catch (Exception e) {
-            log(Level.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal error stack trace:\n %s \n", e.getLocalizedMessage() );
             e.printStackTrace();
         }
 
@@ -117,7 +117,7 @@ public class ModelPut extends ModelPost {
                     if (elementNode != null) {
                         elementNode.setProperty(Acm.ACM_ID, newId);
                     } else {
-                        log(Level.WARN, "Element not found with id: " + oldId, HttpServletResponse.SC_BAD_REQUEST);
+                        log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST,  "Element not found with id: %s", oldId);
                     }
                 }
             }

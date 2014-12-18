@@ -56,10 +56,10 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 				object = getWorkspace(workspace, wsID);
 			}
 		} catch (JSONException e) {
-			log(Level.ERROR, "JSON object could not be created \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON object could not be created \n");
 			e.printStackTrace();
 		} catch (Exception e) {
-			log(Level.ERROR, "Internal error stack trace \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal error stack trace \n");
 			e.printStackTrace();
 		}
 
@@ -93,13 +93,13 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		        WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, ws );
 		        jsonArray.put(interiorJson);
 		    } else {
-	            log(Level.WARN, "Workspace not found: " + (ws == null ? null : ws.getSysmlId()), HttpServletResponse.SC_NOT_FOUND);
+	            log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Workspace not found: %s", (ws == null ? null : ws.getSysmlId()));
 		    }
 		} else {
 		    if(checkPermissions(ws, PermissionService.READ))  {
 		        jsonArray.put(ws.toJSONObject(null));
 		    } else {
-                log(Level.WARN, "No read permissions for workspace: " + (ws == null ? null : ws.getSysmlId()), HttpServletResponse.SC_FORBIDDEN);
+                log(Level.WARN, HttpServletResponse.SC_FORBIDDEN, "No read permissions for workspace: %s", (ws == null ? null : ws.getSysmlId()));
 		    }
 		}
 		json.put("workspace" , jsonArray);

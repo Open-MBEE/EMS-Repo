@@ -159,10 +159,10 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				}
 			}
 		 } catch (JSONException e) {
-	           log(Level.ERROR, "Could not create JSON\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	           log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSON\n");
 	           e.printStackTrace();
 	        } catch (Exception e) {
-	           log(Level.ERROR, "Internal server error\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	           log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error\n");
 	           e.printStackTrace();
 	        }
 		if (result == null) {
@@ -196,8 +196,8 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				// After this step, my collection has an increased element
 				deleteInstance.handleElementHierarchy(pkgnode, workspace, true);
 			} else {
-				log( Level.ERROR, "Could not find node " + node.getSysmlId() + "in workspace" + wsId,
-						HttpServletResponse.SC_NOT_FOUND);
+				log( Level.ERROR,
+						HttpServletResponse.SC_NOT_FOUND, "Could not find node %s in workspace %s", node.getSysmlId(), wsId);
 				return result;
 			}
 		}
@@ -213,7 +213,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				node.createOrUpdateAspect( "ems:Deleted" );
 				}
 		} catch (JSONException e) {
-			log(Level.ERROR, "Malformed JSON Object", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Malformed JSON Object");
 			e.printStackTrace();
 		}
 		
@@ -244,14 +244,12 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 
         if ( !wsFound1 ) {
             log( Level.ERROR,
-                 "Workspace 1 id , " + targetId + ", not found",
-                 HttpServletResponse.SC_NOT_FOUND );
+                 HttpServletResponse.SC_NOT_FOUND, "Workspace 1 id , %s , not found", targetId);
             return false;
         }
         if ( !wsFound2 ) {
             log( Level.ERROR,
-                 "Workspace 2 id, " + sourceId + ", not found",
-                 HttpServletResponse.SC_NOT_FOUND );
+                 HttpServletResponse.SC_NOT_FOUND,  "Workspace 2 id, %s, not found", sourceId);
             return false;
         }
         return true;

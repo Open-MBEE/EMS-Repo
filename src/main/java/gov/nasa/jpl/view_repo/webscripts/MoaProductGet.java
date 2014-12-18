@@ -88,7 +88,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 
 		EmsScriptNode product = findScriptNodeById(productId, workspace, dateTime, false);
 		if (product == null) {
-			log(Level.ERROR, "Product not found with id: " + productId + ".\n", HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Product not found with id: %s.\n", productId);
 			return false;
 		}
 		
@@ -185,7 +185,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		JSONArray viewsJson = new JSONArray();
 		JSONArray elementsJson = new JSONArray();
 		if (product == null) {
-			log(Level.ERROR, "Product not found with ID: " + productId, HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Product not found with ID: %s", productId);
 		}
 
 		if (checkPermissions(product, PermissionService.READ)){

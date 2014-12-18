@@ -91,9 +91,9 @@ public class ModelsGet extends AbstractJavaWebScript {
                 wsFound = true;
             } else {
                 log( Level.ERROR,
-                     "Workspace with id, " + wsId
-                     + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
-                     HttpServletResponse.SC_NOT_FOUND );
+                     HttpServletResponse.SC_NOT_FOUND,
+                     "Workspace with id, %s not found", wsId
+                     + ( dateTime == null ? "" : " at " + dateTime ));
                 return false;
             }
         }
@@ -122,7 +122,7 @@ public class ModelsGet extends AbstractJavaWebScript {
             try {
                 elementsJson = handleRequest(req);
             } catch ( JSONException e ) {
-                log(Level.ERROR, "Malformed JSON request", HttpServletResponse.SC_BAD_REQUEST);
+                log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Malformed JSON request");
                 e.printStackTrace();
             }
         }
@@ -136,8 +136,8 @@ public class ModelsGet extends AbstractJavaWebScript {
                 if ( prettyPrint ) model.put("res", top.toString(4));
                 else model.put("res", top.toString());
             } else {
-                log(Level.WARN, "No elements found",
-                    HttpServletResponse.SC_NOT_FOUND);
+                log(Level.WARN,
+                    HttpServletResponse.SC_NOT_FOUND, "No elements found");
                 model.put("res", response.toString());
             }
         } catch (JSONException e) {
@@ -168,7 +168,7 @@ public class ModelsGet extends AbstractJavaWebScript {
                 try {
                     elementsFoundJson.put( node.toJSONObject( dateTime ) );
                 } catch (JSONException e) {
-                    log(Level.ERROR, "Could not create JSON", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create JSON");
                     e.printStackTrace();
                 }
             }

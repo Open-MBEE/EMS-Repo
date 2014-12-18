@@ -54,9 +54,9 @@ public class MmsSnapshotsDelete extends AbstractJavaWebScript {
         } catch (Exception e) {
             model.put("res", response.toString());
             if (e instanceof JSONException) {
-                log(Level.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON creation error");
             } else {
-                log(Level.ERROR, "Internal server error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error");
             }
             e.printStackTrace();
         } 
@@ -70,7 +70,7 @@ public class MmsSnapshotsDelete extends AbstractJavaWebScript {
         NodeRef snapshotNodeRef = NodeUtil.findNodeRefByType( snapshotId, SearchType.CM_NAME, true, 
                                                            null, null, true, services, false );
         if (snapshotNodeRef == null) {
-            log(Level.ERROR, "Could not find snapshot", HttpServletResponse.SC_NOT_FOUND);
+            log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find snapshot");
         } else {
             EmsScriptNode snapshot = new EmsScriptNode(snapshotNodeRef, services, response);
             snapshot.delete();

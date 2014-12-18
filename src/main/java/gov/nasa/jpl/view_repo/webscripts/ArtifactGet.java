@@ -170,31 +170,31 @@ public class ArtifactGet extends AbstractJavaWebScript {
 	    	    			String fileStr = "File "+filename;
 	    	    			String err = Utils.isNullOrEmpty(cs) ? fileStr+" not found!\n" : 
 	    	    												  (fileStr+" with cs="+cs+" not found!\n");
-						    log(Level.ERROR, err, HttpServletResponse.SC_BAD_REQUEST);
+						    log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST,err);
 						    model.put("res", response.toString());
 	    	    		}
 	    	        	
 	        		}
 	        		else {
-	        			  log(Level.ERROR, "Invalid artifactId!\n", HttpServletResponse.SC_BAD_REQUEST);
+	        			  log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Invalid artifactId!\n");
 	    		          model.put("res", response.toString());
 	    		    }
 	        		
 	        	}
 	        	else {
-	        		  log(Level.ERROR, "artifactId not supplied!\n", HttpServletResponse.SC_BAD_REQUEST);
+	        		  log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "artifactId not supplied!\n");
     		          model.put("res", response.toString());
     		    }
 	        	
         	}
 	        catch (JSONException e) {
-	            log(Level.ERROR, "Issues creating return JSON\n", HttpServletResponse.SC_BAD_REQUEST);
+	            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST,  "Issues creating return JSON\n");
 	            e.printStackTrace();
 	            model.put("res", response.toString());
 	        }
         }
         else {
-        	log(Level.ERROR, "Invalid request!\n", HttpServletResponse.SC_BAD_REQUEST);
+        	log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Invalid request!\n");
         	model.put("res", response.toString());
 	    }
         

@@ -167,8 +167,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 EmsScriptNode snapshotFolderNode =
                         getSnapshotFolderNode( topview );
                 if ( snapshotFolderNode == null ) {
-                    log( Level.ERROR, "Cannot create folder for snapshot",
-                         HttpServletResponse.SC_BAD_REQUEST );
+                    log( Level.ERROR,
+                         HttpServletResponse.SC_BAD_REQUEST, "Cannot create folder for snapshot" );
                 } else {
                     this.snapshotName = viewId + "_" + now.getMillis();
     
@@ -183,8 +183,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 }
 
                 if ( snapshotNode == null ) {
-                    log( Level.ERROR, "Error creating snapshot node",
-                         HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                    log( Level.ERROR,
+                         HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error creating snapshot node" );
                 } else {
                     try {
                         JSONObject snapshoturl = new JSONObject();
@@ -200,8 +200,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                     } catch ( JSONException e ) {
                         e.printStackTrace();
                         log( Level.ERROR,
-                             "Error generating JSON for snapshot",
-                             HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                             HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error generating JSON for snapshot");
                     }
                 }
                 status.setCode( responseStatus.getCode() );
@@ -590,8 +589,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
         }
         EmsScriptNode snapshotFolder = getSnapshotFolderNode(viewNode);
         if(snapshotFolder == null){
-            log( Level.ERROR, "Failed to get snapshot folder node!",
-                 HttpServletResponse.SC_BAD_REQUEST );
+            log( Level.ERROR,
+                 HttpServletResponse.SC_BAD_REQUEST, "Failed to get snapshot folder node!");
         	return null;
         }
         return createSnapshot(view, viewId, snapshotName, contextPath, snapshotFolder, workspace, timestamp);
@@ -1122,13 +1121,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
         EmsScriptNode jobNode = null;
 
         if ( !postJson.has( "id" ) ) {
-            log( Level.ERROR, "Job name not specified",
-                 HttpServletResponse.SC_BAD_REQUEST );
+            log( Level.ERROR,
+                 HttpServletResponse.SC_BAD_REQUEST, "Job name not specified");
             return null;
         }
         if ( !postJson.has( "formats" ) ) {
-            log( Level.ERROR, "Snapshot formats not specified",
-                 HttpServletResponse.SC_BAD_REQUEST );
+            log( Level.ERROR,
+                 HttpServletResponse.SC_BAD_REQUEST,"Snapshot formats not specified" );
             return null;
         }
 
@@ -1139,9 +1138,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                                "cm:content", status,
                                                response );
             if ( jobNode == null ) {
-                log( Level.ERROR, "Couldn't create snapshot job: "
-                                     + postJson.getString( "id" ),
-                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                log( Level.ERROR, 
+                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't create snapshot job: %s",
+                             postJson.getString( "id" ));
                 return null;
             }
             startAction( jobNode, siteName, postJson, workspace );
@@ -1563,13 +1562,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	    JSONObject jsonObject = null;
 	    String siteName = getSiteName(req);
 		if (siteName == null) {
-			log(Level.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "No sitename provided");
 			return null;
 		}
 
 		SiteInfo siteInfo = services.getSiteService().getSite(siteName);
 		if (siteInfo == null) {
-			log(Level.ERROR, "Could not find site: " + siteName, HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find site: %s", siteName);
 			return null;
 		}
 		EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
@@ -1585,7 +1584,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		    }
 		    
 			if (!postJson.has( "formats" )) {
-				log(Level.ERROR, "Missing snapshot formats!", HttpServletResponse.SC_BAD_REQUEST);
+				log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Missing snapshot formats!");
 			} else {
 				try{
 					jsonObject = handleGenerateArtifacts(postJson, siteNode, status, workspace);
@@ -1596,7 +1595,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 				}
 			}
 		} catch (JSONException e) {
-			log(Level.ERROR, "Could not parse JSON", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Could not parse JSON");
 			e.printStackTrace();
 			return null;
 		}

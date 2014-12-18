@@ -91,7 +91,7 @@ public class ViewGet extends AbstractJavaWebScript {
     
         EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime, false);
         if (view == null) {
-            log(Level.ERROR, "View not found with id: " + viewId + " at " + dateTime + ".\n", HttpServletResponse.SC_NOT_FOUND);
+            log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "View not found with id: %s at %s .\n", viewId, dateTime.toString());
             return false;
         }
 
@@ -167,7 +167,7 @@ public class ViewGet extends AbstractJavaWebScript {
                 else model.put("res", json.toString()); 
             } catch (JSONException e) {
                 e.printStackTrace();
-                log(Level.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON creation error");
                 model.put("res", response.toString());
                 e.printStackTrace();
             }
@@ -189,8 +189,8 @@ public class ViewGet extends AbstractJavaWebScript {
         EmsScriptNode view = findScriptNodeById(viewId, workspace, dateTime, false);
 
         if (view == null) {
-            log( Level.ERROR, "View not found with ID: " + viewId,
-                 HttpServletResponse.SC_NOT_FOUND );
+            log( Level.ERROR,
+                 HttpServletResponse.SC_NOT_FOUND, "View not found with ID: %s", viewId);
         }
 
         if (checkPermissions(view, PermissionService.READ)) {
@@ -224,8 +224,8 @@ public class ViewGet extends AbstractJavaWebScript {
                 }
                 EmsScriptNode.expressionStuff = false;
             } catch ( JSONException e ) {
-                log( Level.ERROR, "Could not create views JSON array",
-                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                log( Level.ERROR,
+                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not create views JSON array");
                 e.printStackTrace();
             }
         }

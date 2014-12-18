@@ -79,7 +79,7 @@ public class ProductPost extends AbstractJavaWebScript {
 		try {
 			updateProducts((JSONObject)req.parseContent(), workspace);
 		} catch (JSONException e) {
-			log(Level.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON parse exception: %s", e.getMessage());
 			e.printStackTrace();
 		}
 		
@@ -133,14 +133,14 @@ public class ProductPost extends AbstractJavaWebScript {
 	            // ignore
 	        }
 	        if (id == null) {
-			  log(Level.ERROR, "product id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
+			  log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "product id not specified.\n");
 			  return;
 	        }
 		}
 		
 		EmsScriptNode product = findScriptNodeById(id, workspace, null, true);
 		if (product == null) {
-			log(Level.ERROR, "could not find product with id: " + id, HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "could not find product with id: %s", id);
 			return;
 		}
 			

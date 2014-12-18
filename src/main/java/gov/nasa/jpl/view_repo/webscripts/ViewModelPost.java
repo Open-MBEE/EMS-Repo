@@ -92,9 +92,9 @@ public class ViewModelPost extends ModelPost {
         } catch (Throwable e) {
             try {
                 if (e instanceof JSONException) {
-            			log(Level.ERROR, "ViewModelPost: JSON malformed for: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+            			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "ViewModelPost: JSON malformed for: %s", e.getMessage());
                 } else {
-            			log(Level.ERROR, "ViewModelPost: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            			log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "ViewModelPost: DB transaction failed: %s", e.getMessage());
                 }
                 e.printStackTrace();
                 if (Debug.isOn()) System.out.println("\t####### ERROR: Needed to ViewModelPost rollback: " + e.getMessage());
@@ -112,10 +112,10 @@ public class ViewModelPost extends ModelPost {
                     instance.createOrUpdateModel(req, status);
             appendResponseStatusInfo(instance);
         } catch (JSONException e) {
-            log(Level.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
+            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON malformed\n");
             e.printStackTrace();
         } catch (Exception e) {
-            log(Level.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal error stack trace:\n %s \n",e.getLocalizedMessage());
             e.printStackTrace();
         }
 
@@ -180,7 +180,7 @@ public class ViewModelPost extends ModelPost {
                     }
 
                     if (!parentFound) {
-                        log(Level.WARN, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
+                        log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST, "Could not find parent for element with id: %s", id);
                     }
                 }
             }
@@ -223,7 +223,7 @@ public class ViewModelPost extends ModelPost {
                     }
 
                     if (!parentFound) {
-                        log(Level.WARN, "Could not find parent for element with id: " + id, HttpServletResponse.SC_BAD_REQUEST);
+                        log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST, "Could not find parent for element with id: %s", id);
                     }
                 }
             }

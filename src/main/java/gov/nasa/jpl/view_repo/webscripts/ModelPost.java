@@ -263,11 +263,11 @@ public class ModelPost extends AbstractJavaWebScript {
     		createOrUpdateModel2( Object content, Status status,
     							  WorkspaceNode targetWS, WorkspaceNode sourceWS ) throws Exception {
         Date now = new Date();
-        log(Level.INFO, "Starting createOrUpdateModel: " + now);
+        log(Level.INFO, "Starting createOrUpdateModel: %s", now.toString());
         long start = System.currentTimeMillis(), end, total = 0;
 
-        log( Level.DEBUG, "****** NodeUtil.doSimpleCaching = " + NodeUtil.doSimpleCaching );
-        log( Level.DEBUG, "****** NodeUtil.doFullCaching = " + NodeUtil.doFullCaching );
+        log( Level.DEBUG, "****** NodeUtil.doSimpleCaching = %s", String.valueOf(NodeUtil.doSimpleCaching) );
+        log( Level.DEBUG, "****** NodeUtil.doFullCaching = %s",  String.valueOf(NodeUtil.doFullCaching) );
         
         if(sourceWS == null)
             setWsDiff( targetWS );
@@ -438,8 +438,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                       boolean createOwnerPkgIfNotFound ) throws Exception {
         JSONObject element = elementMap.get(elementId);
         if ( element == null || element.equals( "null" ) ) {
-            log(Level.ERROR, "Trying to get owner of null element!",
-                HttpServletResponse.SC_NOT_FOUND);
+            log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Trying to get owner of null element!");
             return null;
         }
         String ownerName = null;
@@ -572,9 +571,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                                                foundOwnerElement);
                     
                 } else {
-                    log( Level.WARN, "Could not find owner package: "
-                                           + ownerName,
-                         HttpServletResponse.SC_NOT_FOUND );
+                    log( Level.WARN,  HttpServletResponse.SC_NOT_FOUND , "Could not find owner package: %s", ownerName);
                 }
             }
             owner = reifiedPkg;
@@ -624,9 +621,9 @@ public class ModelPost extends AbstractJavaWebScript {
             } catch (Throwable e) {
                 try {
                     if (e instanceof JSONException) {
-	                		log(Level.ERROR, "updateOrCreateRelationships: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+	                		log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "updateOrCreateRelationships: JSON malformed: %s", e.getMessage());
 	                } else {
-	                		log(Level.ERROR, "updateOrCreateRelationships: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	                		log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "updateOrCreateRelationships: DB transaction failed: %s", e.getMessage());
 	                }
                     trx.rollback();
                     log(Level.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
@@ -723,13 +720,10 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         } else {
             if (property == null) {
-                log(Level.ERROR, "could not find property node with id "
-                        + id + "\n", HttpServletResponse.SC_BAD_REQUEST);
+                log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "could not find property node with id %s \n", id);
             }
             if (propertyType == null) {
-                log(Level.ERROR,
-                        "could not find property type node with id " + typeId
-                                + "\n", HttpServletResponse.SC_BAD_REQUEST);
+                log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST,"could not find property type node with id %s \n", typeId);
             }
         }
     }
@@ -762,16 +756,13 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         } else {
             if (relationship == null) {
-                log(Level.ERROR, "could not find relationship node with id "
-                        + id + "\n", HttpServletResponse.SC_BAD_REQUEST);
+                log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "could not find relationship node with id %s \n", id);
             }
             if (source == null) {
-                log(Level.ERROR, "could not find source node with id "
-                        + sourceId + "\n", HttpServletResponse.SC_BAD_REQUEST);
+                log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "could not find source node with id %s \n", sourceId);
             }
             if (target == null) {
-                log(Level.ERROR, "could not find target node with id "
-                        + targetId + "\n", HttpServletResponse.SC_BAD_REQUEST);
+                log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "could not find target node with id %s \n", targetId );
             }
         }
     }
@@ -808,9 +799,9 @@ public class ModelPost extends AbstractJavaWebScript {
                 try {
                     log(Level.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
                     if (e instanceof JSONException) {
-	                		log(Level.ERROR, "buildElementMap: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+	                		log(Level.ERROR,  HttpServletResponse.SC_BAD_REQUEST, "buildElementMap: JSON malformed: %s", e.getMessage());
 	                } else {
-	                		log(Level.ERROR, "buildElementMap: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	                		log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "buildElementMap: DB transaction failed: %s", e.getMessage() );
 	                }
                     trx.rollback();
                     e.printStackTrace();
@@ -847,8 +838,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             if ( sysmlId == null ) {
 
-                log( Level.ERROR, "No id in element json!",
-                     HttpServletResponse.SC_NOT_FOUND );
+                log( Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "No id in element json!");
                 continue;
             }
             elementMap.put(sysmlId, elementJson);
@@ -896,7 +886,7 @@ public class ModelPost extends AbstractJavaWebScript {
             if (!newElements.contains(elementId)) {
                 EmsScriptNode element = findScriptNodeById(elementId, workspace, null, true);
                 if (element == null) {
-                    log(Level.ERROR, "Could not find node with id: " + elementId, HttpServletResponse.SC_BAD_REQUEST);
+                    log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Could not find node with id: " + elementId);
                 } else if (!checkPermissions(element, PermissionService.WRITE)) {
                 		// do nothing, just log inside of checkPermissions
                 }
@@ -927,7 +917,7 @@ public class ModelPost extends AbstractJavaWebScript {
         		EmsScriptNode rootElement = findScriptNodeById(name, workspace, null, true);
         		if (rootElement != null) {
 	        		if (!checkPermissions(rootElement, PermissionService.WRITE)) {
-	        			log(Level.WARN, "\tskipping as root element since no write permissions", HttpServletResponse.SC_BAD_REQUEST);
+	        			log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST, "\tskipping as root element since no write permissions" );
 	        		}
         		}
         }
@@ -1044,9 +1034,9 @@ public class ModelPost extends AbstractJavaWebScript {
             } catch (Throwable e) {
                 try {
                     if (e instanceof JSONException) {
-                    		log(Level.ERROR, "updateOrCreateElement: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+                    		log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "updateOrCreateElement: JSON malformed: %s", e.getMessage());
                     } else {
-                    		log(Level.ERROR, "updateOrCreateElement: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    		log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "updateOrCreateElement: DB transaction failed: %s", e.getMessage());
                     }
                     e.printStackTrace();
                     trx.rollback();
@@ -1110,7 +1100,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): ws metadata time", timeEvents);
             } catch (Throwable e) {
                 try {
-                    log(Level.ERROR, "updateOrCreateElement: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    log(Level.ERROR,HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "updateOrCreateElement: DB transaction failed: %s", e.getMessage());
                     e.printStackTrace();
                     trx.rollback();
                 } catch (Throwable ee) {
@@ -1609,8 +1599,8 @@ public class ModelPost extends AbstractJavaWebScript {
         //	Note:  Must also have a specialization in case they are posting just a Element, which
         //		   doesnt need a specialization key
         if (acmSysmlType == null && !nestedNode && elementJson.has(Acm.JSON_SPECIALIZATION)) {
-            	log(Level.ERROR,"Type was not supplied and no existing node to query for the type",
-            		HttpServletResponse.SC_BAD_REQUEST);
+            	log(Level.ERROR,
+            		HttpServletResponse.SC_BAD_REQUEST, "Type was not supplied and no existing node to query for the type");
             	return null;
         }
         
@@ -1627,10 +1617,8 @@ public class ModelPost extends AbstractJavaWebScript {
                     if ( !id.equals( n.getSysmlId() ) &&
                          jsonType.equals( n.getTypeName() ) &&
                          parent.equals( n.getParent() ) ) {
-                        log(Level.ERROR,"Found another element with the same sysml name: "
-                                           +n.getSysmlName()+" type: "+n.getTypeName()
-                                           +" parent: "+n.getParent()+" as the element trying to be posted",
-                            HttpServletResponse.SC_BAD_REQUEST);
+                        log(Level.ERROR,
+                            HttpServletResponse.SC_BAD_REQUEST, "Found another element with the same sysml name: %s type: %s parent: %s as the element trying to be posted",n.getSysmlName(), n.getTypeName(), n.getParent().toString());
                         return null;
                     }
                 }
@@ -2385,9 +2373,9 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         if ( !wsFound ) {
             log( Level.ERROR,
-                 "Could not find or create " + wsId + " workspace.\n",
                  Utils.isNullOrEmpty( wsId ) ? HttpServletResponse.SC_NOT_FOUND
-                                             : HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+                                             : HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                                             "Could not find or create %s workspace.\n", wsId);
         }
 
         String expressionString = req.getParameter( "expression" );
@@ -2425,11 +2413,11 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
                 }
             } catch (JSONException e) {
-                log(Level.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
+                log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON malformed\n");
                 e.printStackTrace();
                 model.put("res", response.toString());
             } catch (Exception e) {
-                log(Level.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,  "Internal error stack trace:\n %s \n", e.getLocalizedMessage());
                 e.printStackTrace();
                 model.put("res", response.toString());
             }
@@ -2549,8 +2537,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             
             if (mySiteNode == null || !mySiteNode.exists()) {
-                log(Level.ERROR, "Site "+siteName+" could not be found in workspace "+workspace, 
-                    HttpServletResponse.SC_NOT_FOUND);
+                log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Site %s could not be found in workspace %s", siteName, workspace.toString());
                 return null;
             }
         } 

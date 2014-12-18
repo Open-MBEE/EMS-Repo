@@ -100,7 +100,7 @@ public class IndexGet extends AbstractJavaWebScript {
         WorkspaceNode workspace = getWorkspace( req );
         
         if (siteInfo == null) {
-            log(Level.ERROR, "Could not find site: " + siteName, HttpServletResponse.SC_NOT_FOUND);
+            log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find site: %s", siteName);
         } else {
             //EmsScriptNode site = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
             EmsScriptNode site = getSiteNode( siteName, workspace, dateTime );
@@ -114,7 +114,7 @@ public class IndexGet extends AbstractJavaWebScript {
                 model.put("siteName", site.getProperty(Acm.CM_NAME));
                 model.put("siteTitle", site.getProperty(Acm.CM_TITLE));
             } catch (JSONException e) {
-                log(Level.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON creation error");
                 e.printStackTrace();
             }
         }

@@ -81,7 +81,7 @@ public class ModelPurge extends AbstractJavaWebScript {
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		modelId = req.getServiceMatch().getTemplateVars().get("id");
 		if (!checkRequestVariable(modelId, "id")) {
-			log(Level.ERROR, "Element id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Element id not specified.\n");
 			return false;
 		}
 		
@@ -89,7 +89,7 @@ public class ModelPurge extends AbstractJavaWebScript {
 		
 		modelRootNode = findScriptNodeById(modelId, workspace, null, false);
 		if (modelRootNode == null) {
-			log(Level.ERROR, "Element not found with id: " + modelId + ".\n", HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Element not found with id: %s .\n",  modelId);
 			return false;
 		}
 		

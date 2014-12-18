@@ -97,7 +97,7 @@ public class ModelSearch extends ModelGet {
 			if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
 			model.put("res", top.toString(4));
 		} catch (JSONException e) {
-			log(Level.ERROR, "Could not create the JSON response", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Could not create the JSON response");
 			model.put("res", response);
 			e.printStackTrace();
 		}

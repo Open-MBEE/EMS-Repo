@@ -54,7 +54,7 @@ public class WorkspaceDelete extends AbstractJavaWebScript {
                
                // can't delete master
                if (wsId.equals( "master") ) {
-                   log(Level.ERROR, "Cannot delete master workspace", HttpServletResponse.SC_BAD_REQUEST);
+                   log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Cannot delete master workspace");
                    status.setCode(HttpServletResponse.SC_BAD_REQUEST);
                } else {
                    WorkspaceNode target = WorkspaceNode.getWorkspaceFromId(wsId, getServices(), 
@@ -64,18 +64,18 @@ public class WorkspaceDelete extends AbstractJavaWebScript {
                        target.delete( true );
                        status.setCode(HttpServletResponse.SC_OK);
                    } else {
-                       log(Level.WARN, "Could not find workspace " + wsId, HttpServletResponse.SC_NOT_FOUND);
+                       log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Could not find workspace %s", wsId);
                        status.setCode(HttpServletResponse.SC_NOT_FOUND);
                    }
                }
            }
        } catch (JSONException e) {
            status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-           log(Level.ERROR, "JSON object could not be created \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+           log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON object could not be created \n");
            e.printStackTrace();
        } catch (Exception e) {
            status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-           log(Level.ERROR, "Internal stack trace error \n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+           log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal stack trace error \n");
            e.printStackTrace();
        }
        

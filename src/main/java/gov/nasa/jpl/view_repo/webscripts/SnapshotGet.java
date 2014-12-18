@@ -100,7 +100,7 @@ public class SnapshotGet extends AbstractJavaWebScript {
             model.put("siteName", snapshot.getSiteName());
             model.put("siteTitle", snapshot.getSiteTitle());
         } else {
-            log(Level.ERROR, "Snapshot not found for id: " + id, HttpServletResponse.SC_NOT_FOUND);
+            log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Snapshot not found for id: %s", id);
             model.put("res", response.toString());
             model.put("title", "ERROR no snapshot found");
             model.put("tag", "");

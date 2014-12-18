@@ -109,10 +109,10 @@ public class ProjectPost extends AbstractJavaWebScript {
 				statusCode = responseStatus.getCode();
 			}
         } catch (JSONException e) {
-            log(Level.ERROR, "JSON could not be created\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON could not be created\n");
             e.printStackTrace();
         } catch (Exception e) {
-            log(Level.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal error stack trace:\n %s \n", e.getLocalizedMessage());
             e.printStackTrace();
         }
 
@@ -128,7 +128,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		  EmsScriptNode projectNode = findScriptNodeById(projectId, workspace, null, true);
 		
 		  if (projectNode == null) {
-		      log(Level.ERROR, "Could not find project\n", HttpServletResponse.SC_NOT_FOUND);
+		      log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find project\n");
 		      return HttpServletResponse.SC_NOT_FOUND;
 		  }
 		
@@ -153,7 +153,7 @@ public class ProjectPost extends AbstractJavaWebScript {
             if (projectVersion != null) {
                 projectNode.createOrUpdateProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
             }
-            log(Level.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
+            log(Level.INFO, HttpServletResponse.SC_OK, "Project metadata updated.\n");
         }
         
         return HttpServletResponse.SC_OK;
@@ -181,7 +181,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		        }
 		        siteNode = createSite( siteName, workspace );
 		    } else {
-		        log(Level.ERROR, "Site not found for " + siteName + ".\n", HttpServletResponse.SC_NOT_FOUND);
+		        log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Site not found for %s .\n", siteName);
 		        return HttpServletResponse.SC_NOT_FOUND;
 		    }
 		}
@@ -191,7 +191,7 @@ public class ProjectPost extends AbstractJavaWebScript {
                 siteNode.childByNamePath( MODEL_PATH_SEARCH, false, workspace, true );
 		if (modelContainerNode == null) {
 			modelContainerNode = siteNode.createFolder("Models");
-			log(Level.INFO, "Model folder created.\n", HttpServletResponse.SC_OK);
+			log(Level.INFO, HttpServletResponse.SC_OK, "Model folder created.\n");
 		}
 
 		// create project if doesn't exist or update
@@ -225,11 +225,11 @@ public class ProjectPost extends AbstractJavaWebScript {
 			if (projectVersion != null) {
 			    projectNode.setProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
 			}
-			log(Level.INFO, "Project created.\n", HttpServletResponse.SC_OK);
+			log(Level.INFO, HttpServletResponse.SC_OK, "Project created.\n");
 		} else {
 			if (delete) {
 				projectNode.remove();
-				log(Level.INFO, "Project deleted.\n", HttpServletResponse.SC_OK);
+				log(Level.INFO, HttpServletResponse.SC_OK,"Project deleted.\n");
 			} else {
 				if (checkPermissions(projectNode, PermissionService.WRITE)){
 					projectNode.createOrUpdateProperty(Acm.ACM_ID, projectId);
@@ -241,13 +241,13 @@ public class ProjectPost extends AbstractJavaWebScript {
 		            if (projectVersion != null) {
 		                projectNode.createOrUpdateProperty(Acm.ACM_PROJECT_VERSION, projectVersion);
 		            }
-					log(Level.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
+					log(Level.INFO, HttpServletResponse.SC_OK, "Project metadata updated.\n");
 
 					if (checkPermissions(projectNode.getParent(), PermissionService.WRITE)) {
 						// move sites if exists under different site
 						if (!projectNode.getParent().equals(modelContainerNode)) {
 							projectNode.move(modelContainerNode);
-							log(Level.INFO, "Project moved to new site.\n", HttpServletResponse.SC_OK);
+							log(Level.INFO, HttpServletResponse.SC_OK, "Project moved to new site.\n");
 						}
 					}
 				}

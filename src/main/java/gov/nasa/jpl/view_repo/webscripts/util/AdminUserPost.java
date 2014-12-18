@@ -89,7 +89,7 @@ public class AdminUserPost extends AbstractJavaWebScript {
         if (handleRequest(req)) {
             model.put( "res", "success" );
         } else {
-            log(Level.ERROR, "Invalid request!\n", HttpServletResponse.SC_BAD_REQUEST);
+            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Invalid request!\n");
             model.put("res", response.toString());
         }
 
@@ -129,13 +129,13 @@ public class AdminUserPost extends AbstractJavaWebScript {
                     responseStatus.setCode( HttpServletResponse.SC_OK );
                     return true;
                 } catch ( JSONException e ) {
-                    log(Level.ERROR, "JSON malformed", HttpServletResponse.SC_BAD_REQUEST);
+                    log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON malformed");
                     return false;
                 }
             }
         }
         
-        log(Level.ERROR, "Please provide JSON body (perhaps -H Content-Type not specified?)", HttpServletResponse.SC_BAD_REQUEST);
+        log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Please provide JSON body (perhaps -H Content-Type not specified?)");
         return false;
     }
 }

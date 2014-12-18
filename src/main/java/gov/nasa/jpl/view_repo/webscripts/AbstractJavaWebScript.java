@@ -38,6 +38,7 @@ import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+import java.util.Formatter;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,6 +74,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
     public Level maxLevel = Level.WARN;
     
+    public Formatter formatter = new Formatter ();
     /*public enum LogLevel {
 		DEBUG(0), INFO(1), WARNING(2), ERROR(3);
 		private int value;
@@ -196,7 +198,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 		EmsScriptNode siteNode = null;
 		
 		if (siteName == null) {
-		    if ( errorOnNull ) log(Level.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
+		    if ( errorOnNull ) log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST,"No sitename provided" );
 		} else {
 			if (forWorkspace) {
 				siteNode = NodeUtil.getSiteNodeForWorkspace( siteName, false, workspace, dateTime,
@@ -208,7 +210,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			}
 	        if ( errorOnNull && siteNode == null ) {
 	            
-	            log(Level.ERROR, "Site node is null", HttpServletResponse.SC_BAD_REQUEST);
+	            log(Level.ERROR,  HttpServletResponse.SC_BAD_REQUEST, "Site node is null");
 	        }
 		}
 		
@@ -300,40 +302,52 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return NodeUtil.findScriptNodesBySysmlName( name, false, workspace, dateTime, services, findDeleted, false );
     }
     
+    
     // Updated log methods (still works with old log calls)
+    
     // String concatenation replaced with C formatting
-    protected void log (Level level, String msg, int code, String...params) {
-    	String msgStr = String.format (msg,params);
-    	log (level,msgStr,code);
+    protected void log (Level level, int code, String msg, String...params) {
+    	if (level.toInt() >= logger.getLevel().toInt()) {
+    		String formattedMsg = formatter.format (msg,params).toString();
+    		log (level,code,formattedMsg);
+    	}
 	}
     
-    protected void log(Level level, String msg, int code) {
+    // No need for string formatting: 
+    protected void log(Level level, int code, String msg) {
 		if (level.toInt() >= logger.getLevel().toInt()) {
 			// print to response stream if >= existing log level
 			String levelMessage = String.format("[%s]: %s\n",level.toString(),msg);
-			log(levelMessage, code);
+			log(code,levelMessage);
 			// print to console if log level >= Warning (i.e. Error, Fatal, or Off)
 			if (level.toInt() >= Level.WARN.toInt()) {
-				if (logger.isDebugEnabled()) logger.debug(levelMessage);
+				 log4JCall (level, msg);
 			}
 		}
 	}
 
+    // only logging loglevel and a message (no code)
 	protected void log(Level level, String msg, String...params) {
-		String msgStr = String.format (msg,params);
 	    if (level.toInt() >= logger.getLevel().toInt()) {
-	    	String levelMessage = String.format("[%s]: %s\n",level.toString(),msgStr);
+			String formattedMsg = formatter.format (msg,params).toString();
+	    	String levelMessage = String.format("[%s]: %s\n",level.toString(),formattedMsg);
 	    	response.append(levelMessage);
+	        log4JCall (level, levelMessage);
 	    }
-        if (logger.isDebugEnabled()) logger.debug(msgStr);
 	}
 
-	protected void log(String msg, int code, String...params) {
-		String msgStr = String.format (msg,params);
-		log (msg,code);
+	// only logging code and a message (no loglevel, and thus, no check for log level status)
+	protected void log(int code, String msg, String...params) {
+		String formattedMsg = formatter.format (msg,params).toString();
+		log (code,formattedMsg);
 	}
 	
-	protected void log(String msg, int code) {
+	protected void log(String msg, String...params) {
+		String formattedMsg = formatter.format (msg,params).toString();
+		log (formattedMsg);
+	}
+	
+	protected void log ( int code, String msg) {
 		response.append(msg);
 		responseStatus.setCode(code);
 		responseStatus.setMessage(msg);
@@ -343,6 +357,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	    response.append(msg + "\n");
 	}
 
+	
+	protected void log4JCall (Level level, String msg){
+		if (level.toInt() == Level.FATAL.toInt()) { logger.fatal(msg); }
+		else if (level.toInt() == Level.ERROR.toInt()) { logger.error(msg); }
+		else if (level.toInt() == Level.WARN.toInt()) { logger.info(msg); }
+		else if (level.toInt() == Level.INFO.toInt()) { logger.info(msg); }
+		else if (level.toInt() == Level.DEBUG.toInt()) { logger.debug(msg); }
+	}
+	
 	/**
 	 * Checks whether user has permissions to the node and logs results and status as appropriate
 	 * @param node         EmsScriptNode to check permissions on
@@ -365,7 +388,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 */
 	protected boolean checkPermissions(NodeRef nodeRef, String permissions) {
 		if (services.getPermissionService().hasPermission(nodeRef, permissions) != AccessStatus.ALLOWED) {
-			log(Level.WARN, "No " + permissions + " priveleges to " + nodeRef.toString() + ".\n", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.WARN, HttpServletResponse.SC_BAD_REQUEST, "No %s priveleges to %s.\n",permissions, nodeRef.toString());
 			return false;
 		}
 		return true;
@@ -517,7 +540,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
     protected boolean checkRequestContent(WebScriptRequest req) {
         if (req.getContent() == null) {
-            log(Level.ERROR, "No content provided.\n", HttpServletResponse.SC_NO_CONTENT);
+            log(Level.ERROR,  HttpServletResponse.SC_NO_CONTENT, "No content provided.\n");
             return false;
         }
         return true;
@@ -526,7 +549,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
 	protected boolean checkRequestVariable(Object value, String type) {
 		if (value == null) {
-			log(Level.ERROR, type + " not found.\n", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "%s not found.\n",type);
 			return false;
 		}
 		return true;
@@ -749,8 +772,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 sitePackageNode = findScriptNodeById(sitePkgName,workspace, null, false );
                 
                 if (sitePackageNode == null) {
-                    log(Level.ERROR, "Could not find site package node for site package name "+siteName, 
-                        HttpServletResponse.SC_NOT_FOUND);
+                    log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find site package node for site package name %s",siteName);
                     return null;
                 }
             }
@@ -761,8 +783,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             // Sanity check:
             NodeRef sitePackageSiteRef = (NodeRef) sitePackageNode.getProperty( Acm.ACM_SITE_SITE );
             if (sitePackageSiteRef != null && !sitePackageSiteRef.equals( initialSiteNode.getNodeRef() )) {
-                log(Level.ERROR, "Mismatch between site/package for site package name "+siteName, 
-                    HttpServletResponse.SC_NOT_FOUND);
+                log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Mismatch between site/package for site package name %s",siteName);
                 return null;
             }
             
@@ -781,8 +802,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 siteNode = oldSiteParent;
             }
             else {
-                log(Level.ERROR, "Could not find parent project site for site package name "+siteName, 
-                    HttpServletResponse.SC_NOT_FOUND);
+                log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find parent project site for site package name %s", siteName);
                 return null;
             }
             

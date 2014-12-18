@@ -98,7 +98,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	    }
 		
 		if (modelId == null) {
-			log(Level.ERROR, "Element id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Element id not specified.\n");
 			return false;
 		}
 		
@@ -115,10 +115,9 @@ public class ModelGet extends AbstractJavaWebScript {
             if ( wsId != null && wsId.equalsIgnoreCase( "master" ) ) {
                 wsFound = true;
             } else {
-                log( Level.ERROR,
-                     "Workspace with id, " + wsId
-                     + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
-                     HttpServletResponse.SC_NOT_FOUND );
+                log( Level.ERROR, HttpServletResponse.SC_NOT_FOUND, 
+                     "Workspace with id, %s not found", wsId
+                     + ( dateTime == null ? "" : " at " + dateTime ));
                 return false;
             }
         }
@@ -128,10 +127,9 @@ public class ModelGet extends AbstractJavaWebScript {
         if ( wsFound ) modelRootNode = findScriptNodeById(modelId, workspace, dateTime, findDeleted);
         
 		if (modelRootNode == null || modelRootNode.isDeleted() ) {
-            log( Level.ERROR,
-                 "Element with id, " + modelId
-                 + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
-                 HttpServletResponse.SC_NOT_FOUND );
+            log( Level.ERROR,  HttpServletResponse.SC_NOT_FOUND,
+                 "Element with id, %s not found", modelId
+                 + ( dateTime == null ? "" : " at " + dateTime ));
 			return false;
 		}
 		
@@ -179,8 +177,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		        if ( prettyPrint ) model.put("res", top.toString(4));
 		        else model.put("res", top.toString());
 		    } else {
-		        log(Level.WARN, "No elements found",
-		            HttpServletResponse.SC_NOT_FOUND);
+		        log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "No elements found");
 		        model.put("res", response.toString());
 		    }
 		} catch (JSONException e) {
@@ -215,7 +212,7 @@ public class ModelGet extends AbstractJavaWebScript {
             }
             
             if (null == modelId) {
-                log(Level.ERROR, "Could not find element " + modelId, HttpServletResponse.SC_NOT_FOUND );
+                log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find element %s", modelId);
                 return new JSONArray();
             }
             
@@ -233,10 +230,9 @@ public class ModelGet extends AbstractJavaWebScript {
             if (Debug.isOn()) System.out.println("modelRootNode = " + modelRootNode );
 
             if ( modelRootNode == null ) {
-                    log( Level.ERROR,
-                         "Element " + modelId
-                         + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
-                         HttpServletResponse.SC_NOT_FOUND );
+                    log( Level.ERROR, HttpServletResponse.SC_NOT_FOUND,
+                         "Element %s not found", modelId
+                         + ( dateTime == null ? "" : " at " + dateTime ));
                     return new JSONArray();
             }
             
@@ -280,11 +276,9 @@ public class ModelGet extends AbstractJavaWebScript {
                         elementsFound.put( id, childElement );
                     } // TODO -- REVIEW -- Warning if no permissions?
     				} else {
-                    log( Level.WARN,
-                         "Element " + id
-                         + ( dateTime == null ? "" : " at " + dateTime )
-                         + " not found",
-                         HttpServletResponse.SC_NOT_FOUND );
+                    log( Level.WARN, HttpServletResponse.SC_NOT_FOUND,
+                         "Element %s not found", id
+                         + ( dateTime == null ? "" : " at " + dateTime ));
     				}
 			}
 			if (recurse) {
@@ -301,11 +295,8 @@ public class ModelGet extends AbstractJavaWebScript {
 					                                 workspace, dateTime );
 					        } // TODO -- REVIEW -- Warning if no permissions?
 						} else {
-		                    log( Level.WARN,
-		                         "Element " + id
-		                         + ( dateTime == null ? "" : " at " + dateTime )
-                                 + " not found",
-                                 HttpServletResponse.SC_NOT_FOUND );
+		                    log( Level.WARN,  HttpServletResponse.SC_NOT_FOUND,
+		                         "Element %s not found", id + ( dateTime == null ? "" : " at " + dateTime ));
 						}
 					}
 				}

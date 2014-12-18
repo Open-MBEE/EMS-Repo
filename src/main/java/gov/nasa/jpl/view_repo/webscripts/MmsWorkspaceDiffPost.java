@@ -84,10 +84,10 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		try {
 			handleDiff((JSONObject)req.parseContent(), status, model);
 		} catch (JSONException e) {
-			log(Level.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "JSON parse exception: %s", e.getMessage());
 			e.printStackTrace();
 		} catch ( Exception e ) {
-            log(Level.ERROR, "Internal server error: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error: %s", e.getMessage());
             e.printStackTrace();
         }
 		

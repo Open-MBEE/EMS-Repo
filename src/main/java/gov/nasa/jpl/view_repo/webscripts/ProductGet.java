@@ -86,7 +86,7 @@ public class ProductGet extends AbstractJavaWebScript {
 
 		EmsScriptNode product = findScriptNodeById(productId, workspace, dateTime, false);
 		if (product == null) {
-			log(Level.ERROR, "Product not found with id: " + productId + ".\n", HttpServletResponse.SC_NOT_FOUND);
+			log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Product not found with id: %s .\n", productId);
 			return false;
 		}
 		
@@ -147,7 +147,7 @@ public class ProductGet extends AbstractJavaWebScript {
                 if ( prettyPrint ) model.put("res", json.toString(4));
                 else model.put("res", json.toString());
 			} catch (JSONException e) {
-				log(Level.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "JSON creation error");
 				model.put("res", response.toString());
                 e.printStackTrace();
 			}
