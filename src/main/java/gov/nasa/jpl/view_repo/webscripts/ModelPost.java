@@ -1333,7 +1333,8 @@ public class ModelPost extends AbstractJavaWebScript {
                                                  WorkspaceNode nodeWorkspace) throws Exception {
 
         boolean changed = false;
-        
+        ModStatus modStatus = new ModStatus();
+
         // Get the sysmlid of the old value if it exists:
         if (iter != null && iter.hasNext()) {
             EmsScriptNode oldValNode = iter.next();
@@ -1378,8 +1379,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
             // Ingest the JSON for the value to update properties
             timerIngest = Timer.startTimer(timerIngest, timeEvents);
-            processValue( node, id, reifiedPkgNode, parent, nodeWorkspace, newValJson, ingest, oldValNode );
-            changed = true;
+            processValue( node, id, reifiedPkgNode, parent, nodeWorkspace, newValJson, ingest, modStatus, oldValNode );
+            changed = (modStatus != null && modStatus.getState() != ModStatus.State.NONE );
             //updateOrCreateTransactionableElement
             //boolean didChange = processValueSpecProperty( type, nestedNode, elementJson, specializeJson, oldValNode, ingest, reifiedPkgNode, parent, id, nodeWorkspace );
 //            if ( oldValNode.ingestJSON( newValJson ) ) {
@@ -1393,7 +1394,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
             EmsScriptNode newValNode =
                     processValue( node, id, reifiedPkgNode, parent,
-                                  nodeWorkspace, newVal, ingest, null );
+                                  nodeWorkspace, newVal, ingest, modStatus, null );
+            if ( newValNode == null ) return false;
             nodeNames.add(newValNode.getSysmlId());
             changed = true;
         }
@@ -1406,6 +1408,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                        EmsScriptNode parent,
                                        WorkspaceNode workspace,
                                        JSONObject newVal, boolean ingest,
+                                       ModStatus modStatus,
                                        EmsScriptNode nodeToUpdate ) throws Exception {
         //  The refiedNode will be null if the node is not in the elementHierachy, which
         //  will be the case if no other elements have it as a owner, so in that case
@@ -1420,7 +1423,6 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         // TODO: Need to get the MODIFICATION STATUS out of here?!!
-        ModStatus modStatus = new ModStatus();
         EmsScriptNode newValNode =
                 updateOrCreateTransactionableElement( (JSONObject)newVal,
                                                       nestedParent, null,
