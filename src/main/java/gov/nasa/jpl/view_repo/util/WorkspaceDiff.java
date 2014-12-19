@@ -663,13 +663,14 @@ public class WorkspaceDiff implements Serializable {
                 }
             }
 
-            List<String> prefixes = Utils.newList( "view2:snapshotProduct",
+            List<String> prefixes = Utils.newList( "sysml:id",
+                                                   "view2:snapshotProduct",
                                                    "view2:productSnapshots",
                                                    "view2:docbookNode",
                                                    "view2:pdfNode",
                                                    "view2:htmlZipNode",
                                                    "view2:timestamp",
-                                   //                                                  "cm:name",
+                                                   "cm:name",
 //                                                  "cm:content",
 //                                                  "cm:modelName",
 //                                                  "cm:modelDescription",
