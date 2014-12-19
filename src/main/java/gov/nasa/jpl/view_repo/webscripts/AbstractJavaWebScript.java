@@ -279,9 +279,26 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	protected EmsScriptNode findScriptNodeById(String id,
 	                                           WorkspaceNode workspace,
 	                                           Date dateTime, boolean findDeleted) {
-	    return NodeUtil.findScriptNodeById( id, workspace, dateTime, findDeleted,
-	                                        services, response );
+	    return findScriptNodeById( id, workspace, dateTime, findDeleted, null );
 	}
+	
+	/**
+     * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
+     * This does caching of found elements so they don't need to be looked up with a different API each time.
+     *
+     * TODO extend so search context can be specified
+     * @param id    Node id to search for
+     * @param workspace
+     * @param dateTime
+     * @return      ScriptNode with name if found, null otherwise
+     */
+    protected EmsScriptNode findScriptNodeById(String id,
+                                               WorkspaceNode workspace,
+                                               Date dateTime, boolean findDeleted,
+                                               String siteName) {
+        return NodeUtil.findScriptNodeById( id, workspace, dateTime, findDeleted,
+                                            services, response, siteName );
+    }
 	
 	/**
      * Find nodes of specified sysml:name

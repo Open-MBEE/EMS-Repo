@@ -534,7 +534,6 @@ public class ModelPost extends AbstractJavaWebScript {
                         // Place the reified node in project reified package:
                         EmsScriptNode projectNodePkg = getOrCreateReifiedPackageNode(projectNode, projectNode.getSysmlId(),
                                                                                 workspace, true);
-                        
                         nodeBinOwner = projectNodePkg != null ? projectNodePkg : projectNode;
                     }
                                        
@@ -1924,6 +1923,11 @@ public class ModelPost extends AbstractJavaWebScript {
             reifiedPkgNodeAll = findScriptNodeById( pkgName, workspace, null, true );
             reifiedPkgNode = (reifiedPkgNodeAll != null && NodeUtil.workspacesEqual(reifiedPkgNodeAll.getWorkspace(),workspace)) ? 
                                                                                                          reifiedPkgNodeAll : null;
+            // Verify the reified pkg and node have the same site.
+            // This is needed b/c of CMED-531 as the same pkg can be in multiple sites:
+            reifiedPkgNode = (reifiedPkgNode != null && reifiedPkgNode.getSiteNode().equals( node.getSiteNode() )) ? 
+                                                                                              reifiedPkgNode : null;
+            
             if (reifiedPkgNode == null || !reifiedPkgNode.exists()) {
                 try {
                     reifiedPkgNode = parent.createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER,
@@ -2634,7 +2638,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 json.put( Acm.JSON_NAME, projectId );
                 pp.updateOrCreateProject( json, workspace, projectId, siteName,
                                           createIfNonexistent, false );
-                projectNode = findScriptNodeById( projectId, workspace, null, false );
+                projectNode = findScriptNodeById( projectId, workspace, null, false, siteName );
             } catch ( JSONException e ) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

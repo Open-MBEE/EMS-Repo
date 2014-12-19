@@ -201,7 +201,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		// create project if doesn't exist or update
 		// Note: Also checking if the workspace for the projectNode differs from the desired workspace, 
 		// which will occur if the project is in the master, but not in the workspace yet.
-		EmsScriptNode projectNodeAll = findScriptNodeById(projectId, workspace, null, true);
+		EmsScriptNode projectNodeAll = findScriptNodeById(projectId, workspace, null, true, siteName);
 		EmsScriptNode projectNode = (projectNodeAll != null && NodeUtil.workspacesEqual(projectNodeAll.getWorkspace(),workspace)) ? 
 		                                                                                                     projectNodeAll : null;
 		
@@ -247,13 +247,16 @@ public class ProjectPost extends AbstractJavaWebScript {
 		            }
 					log(LogLevel.INFO, "Project metadata updated.\n", HttpServletResponse.SC_OK);
 
-					if (checkPermissions(projectNode.getParent(), PermissionService.WRITE)) {
-						// move sites if exists under different site
-						if (!projectNode.getParent().equals(modelContainerNode)) {
-							projectNode.move(modelContainerNode);
-							log(LogLevel.INFO, "Project moved to new site.\n", HttpServletResponse.SC_OK);
-						}
-					}
+					// This move can cause issues if no site and no project was specified in the URL,
+					// but another site has the no_project already.  Then we mistakenly move that
+					// project and all its elements.  See CMED-531:
+//					if (checkPermissions(projectNode.getParent(), PermissionService.WRITE)) {
+//						// move sites if exists under different site
+//						if (!projectNode.getParent().equals(modelContainerNode)) {
+//							projectNode.move(modelContainerNode);
+//							log(LogLevel.INFO, "Project moved to new site.\n", HttpServletResponse.SC_OK);
+//						}
+//					}
 				}
 			}
 		}

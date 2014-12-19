@@ -2684,7 +2684,7 @@ public class EmsScriptNode extends ScriptNode implements
             findNodeRefByType( String name, String type,
                                WorkspaceNode workspace, Date dateTime, boolean findDeleted ) {
         return NodeUtil.findNodeRefByType( name, type, false, workspace, dateTime,
-                                           true, services, findDeleted );
+                                           true, services, findDeleted, null );
     }
 
     // protected static ResultSet findNodeRefsByType( String name, String type,
