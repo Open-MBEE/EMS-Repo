@@ -2151,10 +2151,20 @@ public class EmsScriptNode extends ScriptNode implements
                         parent.getName().equals( "Sites" ) ) {
                 sites = parent;
             } else if ( sites != null && parent.isWorkspaceTop() ) {
-                EmsScriptNode projectNode = projectPkg.getReifiedNode();
-                if ( Debug.isOn() ) Debug.outln( getName()
-                                                 + ".getProjectNode() = "
-                                                 + projectNode.getName() );
+                EmsScriptNode projectNode =  null;
+                // IMPORTANT!! DON'T TAKE THIS OUT
+                // EMS was pushed when all model data was in Project reified node, not in
+                // the Project reified project, so need to do both checks
+                if (projectPkg.isSubType( "sysml:Project" )) {
+                    projectNode = projectPkg;
+                } else {
+                    projectNode = projectPkg.getReifiedNode();
+                    if (projectNode != null) {
+                        if ( Debug.isOn() ) Debug.outln( getName()
+                                                     + ".getProjectNode() = "
+                                                     + projectNode.getName() );
+                    }
+                }
                 return projectNode;
             }
             seen.add(parent);
