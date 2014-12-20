@@ -1303,7 +1303,10 @@ public class EmsScriptNode extends ScriptNode implements
                if ( comp != 0 ) {
                    if ( comp < 0 ) {
                        // Cache is correct -- fix esn's nodeRef
-                       String msg = "Warning! Alfresco Heisenbug returning wrong current version of node, " + this + ".  Replacing node with unmodifiable versioned node, " + getId() + ".";
+                        String msg =
+                                "Warning! Alfresco Heisenbug returning wrong current version of node, "
+                                        + this + ".  Replacing node with unmodifiable versioned node, "
+                                        + getId() + ".";
                        logger.warn( msg );
                        if ( response != null ) {
                            response.append( msg + "\n");
@@ -1313,6 +1316,11 @@ public class EmsScriptNode extends ScriptNode implements
                    } else {
                        // Cache is incorrect -- update cache
                        NodeUtil.versionCache.put( id, thisEmsVersion );
+                        String msg =
+                                "info: updating version cache with new version of node, "
+                                        + this + " version: "
+                                        + thisEmsVersion.getLabel();
+                       logger.warn( msg );
                    }
 //                // This fixes the nodeRef in esn
 //                esn.checkNodeRefVersion( null );
