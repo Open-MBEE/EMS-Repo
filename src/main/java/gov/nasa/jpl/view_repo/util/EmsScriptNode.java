@@ -2378,10 +2378,20 @@ public class EmsScriptNode extends ScriptNode implements
                         parent.getName().equals( "Sites" ) ) {
                 sites = parent;
             } else if ( sites != null && parent.isWorkspaceTop() ) {
-                EmsScriptNode projectNode = projectPkg.getReifiedNode();
-                if ( Debug.isOn() ) Debug.outln( getName()
-                                                 + ".getProjectNode() = "
-                                                 + projectNode.getName() );
+                EmsScriptNode projectNode =  null;
+                // IMPORTANT!! DON'T TAKE THIS OUT
+                // EMS was pushed when all model data was in Project reified node, not in
+                // the Project reified project, so need to do both checks
+                if (projectPkg.isSubType( "sysml:Project" )) {
+                    projectNode = projectPkg;
+                } else {
+                    projectNode = projectPkg.getReifiedNode();
+                    if (projectNode != null) {
+                        if ( Debug.isOn() ) Debug.outln( getName()
+                                                     + ".getProjectNode() = "
+                                                     + projectNode.getName() );
+                    }
+                }
                 return projectNode;
             }
             seen.add(parent);
@@ -2911,7 +2921,7 @@ public class EmsScriptNode extends ScriptNode implements
             findNodeRefByType( String name, String type,
                                WorkspaceNode workspace, Date dateTime, boolean findDeleted ) {
         return NodeUtil.findNodeRefByType( name, type, false, workspace, dateTime,
-                                           true, services, findDeleted );
+                                           true, services, findDeleted, null );
     }
 
     // protected static ResultSet findNodeRefsByType( String name, String type,

@@ -221,7 +221,8 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     public Set< EmsScriptNode >
             createOrUpdateModel( Object content, Status status,
-                                 WorkspaceNode targetWS, WorkspaceNode sourceWS ) throws Exception {
+                                 WorkspaceNode targetWS, WorkspaceNode sourceWS,
+                                 boolean createCommit) throws Exception {
         	JSONObject postJson = (JSONObject) content;
 
         	JSONArray updatedArray = postJson.optJSONArray("updatedElements");
@@ -252,7 +253,7 @@ public class ModelPost extends AbstractJavaWebScript {
 		for(JSONArray jsonArray : collections){
 			JSONObject object = new JSONObject();
 			object.put("elements", jsonArray);
-			elements.addAll(createOrUpdateModel2(object, status, targetWS, sourceWS));
+			elements.addAll(createOrUpdateModel2(object, status, targetWS, sourceWS, createCommit));
 		}
 
 		return elements;
@@ -260,7 +261,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
     public Set< EmsScriptNode >
     		createOrUpdateModel2( Object content, Status status,
-    							  WorkspaceNode targetWS, WorkspaceNode sourceWS ) throws Exception {
+    							  WorkspaceNode targetWS, WorkspaceNode sourceWS,
+    							  boolean createCommit) throws Exception {
         Date now = new Date();
         log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
         long start = System.currentTimeMillis(), end, total = 0;
@@ -359,7 +361,7 @@ public class ModelPost extends AbstractJavaWebScript {
         timerUpdateModel = Timer.startTimer(timerUpdateModel, timeEvents);
 
         // Send deltas to all listeners
-        if (wsDiff.isDiff()) {
+        if (createCommit && wsDiff.isDiff()) {
             // FIXME: Need to split elements by project Id - since they won't always be in same project
             CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), status );
         }
@@ -536,7 +538,6 @@ public class ModelPost extends AbstractJavaWebScript {
                         // Place the reified node in project reified package:
                         EmsScriptNode projectNodePkg = getOrCreateReifiedPackageNode(projectNode, projectNode.getSysmlId(),
                                                                                 workspace, true);
-
                         nodeBinOwner = projectNodePkg != null ? projectNodePkg : projectNode;
                     }
 
@@ -1932,6 +1933,11 @@ public class ModelPost extends AbstractJavaWebScript {
             reifiedPkgNodeAll = findScriptNodeById( pkgName, workspace, null, true );
             reifiedPkgNode = (reifiedPkgNodeAll != null && NodeUtil.workspacesEqual(reifiedPkgNodeAll.getWorkspace(),workspace)) ?
                                                                                                          reifiedPkgNodeAll : null;
+            // Verify the reified pkg and node have the same site.
+            // This is needed b/c of CMED-531 as the same pkg can be in multiple sites:
+            reifiedPkgNode = (reifiedPkgNode != null && reifiedPkgNode.getSiteNode().equals( node.getSiteNode() )) ?
+                                                                                              reifiedPkgNode : null;
+
             if (reifiedPkgNode == null || !reifiedPkgNode.exists()) {
                 try {
                     reifiedPkgNode = parent.createFolder(pkgName, Acm.ACM_ELEMENT_FOLDER,
@@ -2431,7 +2437,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
                     getProjectNodeFromRequest( req, true );
                     if (projectNode != null) {
-                        handleUpdate( postJson, status, workspace, fix, model );
+                        handleUpdate( postJson, status, workspace, fix, model, true );
                     }
                 }
             } catch (JSONException e) {
@@ -2457,9 +2463,11 @@ public class ModelPost extends AbstractJavaWebScript {
         return model;
     }
 
-    protected void handleUpdate(JSONObject postJson, Status status, WorkspaceNode workspace, boolean fix, Map<String, Object> model) throws Exception {
+    protected Set< EmsScriptNode > handleUpdate(JSONObject postJson, Status status, WorkspaceNode workspace,
+                                boolean fix, Map<String, Object> model,
+                                boolean createCommit) throws Exception {
         JSONObject top = new JSONObject();
-        Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null );
+        Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null, createCommit );
 
         addRelationshipsToProperties( elements );
         if ( !Utils.isNullOrEmpty( elements ) ) {
@@ -2484,6 +2492,8 @@ public class ModelPost extends AbstractJavaWebScript {
                 model.put( "res", top.toString() );
             }
         }
+
+        return elements;
     }
 
     public void addRelationshipsToProperties( Set< EmsScriptNode > elems ) {
@@ -2639,7 +2649,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 json.put( Acm.JSON_NAME, projectId );
                 pp.updateOrCreateProject( json, workspace, projectId, siteName,
                                           createIfNonexistent, false );
-                projectNode = findScriptNodeById( projectId, workspace, null, false );
+                projectNode = findScriptNodeById( projectId, workspace, null, false, siteName );
             } catch ( JSONException e ) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

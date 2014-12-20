@@ -708,7 +708,7 @@ common_filters+['"timestamp"','"id"'],
 ],
         
 [
-54,
+154,
 "PostConfigAgain",
 "Post same configuration again",
 create_curl_cmd(type="POST",data="configuration.json",base_url=BASE_URL_WS,
@@ -719,7 +719,7 @@ common_filters+['"timestamp"','"id"'],
 ],
         
 [
-55,
+155,
 "GetConfigAgain",
 "Get configurations",
 create_curl_cmd(type="GET",data="sites/europa/configurations",base_url=BASE_URL_WS,
@@ -1195,7 +1195,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="",branch="ws1?sourceWorkspace=master"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop"]
 ], 
 
 [
@@ -1206,7 +1206,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="",branch="ws2?sourceWorkspace=master"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop"]
 ],
       
 [
@@ -1217,7 +1217,7 @@ create_curl_cmd(type="DELETE",data="elements/arg_ev_38307",base_url=BASE_URL_WS,
                 branch="ws1/"),
 True, 
 common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"'],
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop"]
 ], 
 
 [

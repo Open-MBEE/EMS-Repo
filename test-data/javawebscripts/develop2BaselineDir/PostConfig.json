@@ -1,12 +1,6 @@
-{
+[WARNING]: JSON malformed does not include Alfresco id for configuration
 
-  "description": "test",
 
-  "name": "DocWeb 1000",
 
-  "snapshots": [],
-
-}
-
-200
+400
 
