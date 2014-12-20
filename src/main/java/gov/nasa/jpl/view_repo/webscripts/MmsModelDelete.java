@@ -161,6 +161,10 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 ee.printStackTrace();
                 e.printStackTrace();
             }
+        } finally {
+            for (EmsScriptNode deletedNode: wsDiff.getDeletedElements().values()) {
+                deletedNode.getOrSetCachedVersion();
+            }
         }
 
         if (wsDiff.isDiff()) {

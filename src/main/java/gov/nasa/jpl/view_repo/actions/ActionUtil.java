@@ -1,40 +1,40 @@
 /*******************************************************************************
- * Copyright (c) <2013>, California Institute of Technology ("Caltech").  
+ * Copyright (c) <2013>, California Institute of Technology ("Caltech").
  * U.S. Government sponsorship acknowledged.
- * 
+ *
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification, are 
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
- * 
- *  - Redistributions of source code must retain the above copyright notice, this list of 
+ *
+ *  - Redistributions of source code must retain the above copyright notice, this list of
  *    conditions and the following disclaimer.
- *  - Redistributions in binary form must reproduce the above copyright notice, this list 
- *    of conditions and the following disclaimer in the documentation and/or other materials 
+ *  - Redistributions in binary form must reproduce the above copyright notice, this list
+ *    of conditions and the following disclaimer in the documentation and/or other materials
  *    provided with the distribution.
- *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory, 
- *    nor the names of its contributors may be used to endorse or promote products derived 
+ *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory,
+ *    nor the names of its contributors may be used to endorse or promote products derived
  *    from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
- * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER  
- * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
 package gov.nasa.jpl.view_repo.actions;
 
+import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
-import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -53,12 +53,12 @@ import org.springframework.extensions.webscripts.Status;
  */
 public class ActionUtil {
 	private static String hostname = null;
-	
+
     // defeat instantiation
     private ActionUtil() {
         // do nothing
     }
-    
+
     /**
      * Send off an email to the modifier of the node
      * @param node      Node whose modifier should be sent an email
@@ -71,10 +71,10 @@ public class ActionUtil {
         String username = (String)node.getProperty("cm:modifier");
         EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), services, response);
         String recipient = (String) user.getProperty("cm:email");
-        
+
         sendEmailTo("europaems@jpl.nasa.gov", recipient, msg, subject, services);
     }
-    
+
     /**
      * Send email to recipient
      * @param sender
@@ -95,18 +95,18 @@ public class ActionUtil {
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Saves log file for the specified node (creates the log file if necessary)
      * @param node      Node to save file to
      * @param mimeType  Mimetype of file
-     * @param services  
+     * @param services
      * @param data      Stringbuffer to save
      * @return  Log file
      */
     public static EmsScriptNode saveLogToFile(EmsScriptNode node, String mimeType, ServiceRegistry services, String data) {
         String logName = ((String) node.getProperty("cm:name")) + ".log";
-        
+
         // create logNode if necessary
         EmsScriptNode logNode = node.getParent().childByNamePath(logName);
         if (logNode == null) {
@@ -119,18 +119,22 @@ public class ActionUtil {
         }
 
         saveStringToFile(logNode, mimeType, services, data);
+
+        node.getOrSetCachedVersion();
+        if ( logNode != null ) logNode.getOrSetCachedVersion();
+
         return logNode;
     }
-    
+
     public static void saveStringToFile(EmsScriptNode node, String mimeType, ServiceRegistry services, String data) {
         ContentWriter writer = services.getContentService().getWriter(node.getNodeRef(), ContentModel.PROP_CONTENT, true);
         writer.putContent(data.toString());
         setContentDataMimeType(writer, node, mimeType, services);
     }
-    
+
     /**
      * Set the content mimetype so Alfresco knows how to deliver the HTTP response header correctly
-     * @param writer    
+     * @param writer
      * @param node
      * @param mimetype
      * @param sr
@@ -140,8 +144,8 @@ public class ActionUtil {
         contentData = ContentData.setMimetype(contentData, mimetype);
         sr.getNodeService().setProperty(node.getNodeRef(), ContentModel.PROP_CONTENT, contentData);
     }
-    
-    
+
+
     public static boolean jobExists( EmsScriptNode contextFolder, String jobName ) {
         EmsScriptNode jobPkgNode = contextFolder.childByNamePath("Jobs");
         if (jobPkgNode == null) return false;
@@ -150,7 +154,7 @@ public class ActionUtil {
         if ( !jobNode.exists() ) return false;
         return true;
     }
-    
+
     /**
      * Create a job inside a particular site
      * @return The created job node
@@ -161,16 +165,19 @@ public class ActionUtil {
         EmsScriptNode jobPkgNode = contextFolder.childByNamePath("Jobs");
         if (jobPkgNode == null) {
             jobPkgNode = contextFolder.createFolder("Jobs", "cm:folder");
+            contextFolder.getOrSetCachedVersion();
             WorkspaceNode ws = contextFolder.getWorkspace();
             if ( ws != null ) {
                 jobPkgNode.setWorkspace( ws );
             }
         }
-        
+
         EmsScriptNode jobNode = jobPkgNode.childByNamePath(jobName);
         if (jobNode == null) {
             jobNode = jobPkgNode.createNode(jobName, jobType);
             if ( jobNode == null ) {
+                status.setCode( HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                                "Could not create job, " + jobName + "." );
                 return null;
             }
             jobNode.createOrUpdateProperty("cm:isContentIndexed", false);
@@ -188,24 +195,28 @@ public class ActionUtil {
                 return null;
             }
         }
+
         jobNode.createOrUpdateProperty("ems:job_status", "Active");
+
+        jobNode.getOrSetCachedVersion();
+        jobPkgNode.getOrSetCachedVersion();
 
         return jobNode;
     }
-    
+
     public static EmsScriptNode getJob(EmsScriptNode siteNode, String jobName) {
         EmsScriptNode jobPkgNode = siteNode.childByNamePath("Jobs");
         if (jobPkgNode != null) {
             return jobPkgNode.childByNamePath( jobName );
         }
-        
+
         return null;
     }
-    
+
     public static void setJobStatus(EmsScriptNode jobNode, String value) {
         jobNode.createOrUpdateProperty("ems:job_status", value);
     }
-    
+
     public static String getHostName() {
     		if (hostname == null) {
 		    	Process tr;
