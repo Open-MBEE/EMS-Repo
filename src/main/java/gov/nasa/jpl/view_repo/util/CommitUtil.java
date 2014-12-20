@@ -150,19 +150,6 @@ public class CommitUtil {
 	 * @return
 	 */
 	private static EmsScriptNode getLatestFolder(EmsScriptNode context) {
-//<<<<<<< HEAD
-//
-//	      Set<EmsScriptNode> folders = context.getChildNodes();
-//          ArrayList<EmsScriptNode> foldersList = new ArrayList<EmsScriptNode>(folders);
-//          Collections.sort( foldersList,
-//                            new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator() );
-//
-//          if (foldersList.size() > 0) {
-//              return foldersList.get( 0 );
-//          }
-//
-//          return null;
-//=======
 
 	      return getLatestFolderBeforeTime(context, 0);
 	}
