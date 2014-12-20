@@ -1473,18 +1473,25 @@ public class EmsScriptNode extends ScriptNode implements
     public < T extends Serializable > void setProperty( String acmType, T value ) {
         setProperty( acmType, value, 0 );
     }
-    public < T extends Serializable > void setProperty( String acmType, T value,
+    public < T extends Serializable > boolean setProperty( String acmType, T value,
                                                         // count prevents inf loop
                                                         int count ) {
         log( "setProperty(acmType=" + acmType + ", value=" + value + ")" );
+        boolean success = true;
         if ( useFoundationalApi ) {
             try {
                 services.getNodeService().setProperty( nodeRef,
                                                        createQName( acmType ),
                                                        value );
             } catch ( Exception e ) {
+                success = false;
+                // If the node is a version, then we will catch an exception.
+                // Try again with the live node, but make sure it's the latest
+                // version.
                 NodeRef liveRef = nodeRef;
+                NodeRef oldRef = nodeRef;
                 if ( isAVersion() ) {
+                    success = true;
                     this.log( "Tried to set property of a version nodeRef in "
                             + "setProperty(acmType=" + acmType
                             + ", value=" + value
@@ -1492,12 +1499,40 @@ public class EmsScriptNode extends ScriptNode implements
                             + " calling NodeService.setProperty(nodeRef="
                             + nodeRef + ", " + acmType + ", "
                             + value + ")"  );
+                    if ( count > 0 ) {
+                        this.log( "ERROR! Potential infinite recursion!" );
+                        return false;
+                    }
                     liveRef = getLiveNodeRefFromVersion();
                     if ( !nodeRef.equals( liveRef ) ) {
-                        nodeRef = liveRef;
-                        if ( count > 0 ) {
+                        // make sure the version is equal or greater
+                        int comp = NodeUtil.compareVersions(nodeRef, liveRef );
+                        if ( comp > 0 ) {
+                            this.log( "ERROR! Live version " + liveRef + ""
+                                    + " is earlier than versioned ref "
+                                    + "when trying to set property of a version nodeRef in "
+                                    + "setProperty(acmType=" + acmType
+                                    + ", value=" + value
+                                    + ") for EmsScriptNode " + this
+                                    + " calling NodeService.setProperty(nodeRef="
+                                    + nodeRef + ", " + acmType + ", "
+                                    + value + ")"  );
+                            success = false;
+                        } else if ( comp < 0 ) {
+                            this.log( "WARNING! Versioned node ref is not most current "
+                                    + "when trying to set property of a version nodeRef in "
+                                    + "setProperty(acmType=" + acmType
+                                    + ", value=" + value
+                                    + ") for EmsScriptNode " + this
+                                    + " calling NodeService.setProperty(nodeRef="
+                                    + nodeRef + ", " + acmType + ", "
+                                    + value + ")" + ".\nWARNING! Setting property using live node ref " + liveRef + "last modified at " + NodeUtil.getLastModified( liveRef ) );
+                        }
+                        nodeRef = liveRef; // this is
+                        if ( comp <= 0 ) {
                             liveRef = null;
-                            setProperty( acmType, value, count+1 );
+                            success = setProperty( acmType, value, count+1 );
+                            success = true;
                         }
                     }
                 }
@@ -1519,6 +1554,7 @@ public class EmsScriptNode extends ScriptNode implements
             getProperties().put( acmType, value );
             save();
         }
+        return success;
     }
 
     public void setResponse( StringBuffer response ) {

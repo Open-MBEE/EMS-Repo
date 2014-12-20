@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.util;
 
 import gov.nasa.jpl.mbee.util.ClassUtils;
+import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.CompareUtils.GenericComparator;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.MethodCall;
@@ -1596,6 +1597,30 @@ public class NodeUtil {
 
     public static VersionLowerBoundComparator versionLowerBoundComparator =
             new VersionLowerBoundComparator();
+
+    public static int compareVersions( NodeRef ref1, NodeRef ref2 ) {
+        Date d1 = getLastModified( ref1 );
+        Date d2 = getLastModified( ref2 );
+        return CompareUtils.compare( d1, d2 );
+//        VersionService vs = getServices().getVersionService();
+//        if ( vs == null ) {
+//            //TODO -- BAD!
+//        }
+//        NodeService ns = getServices().getNodeService();
+//        ns.getProperty( ref1, QName.createQName( "cm:lastModified" ) );
+//        //vs.createVersion( nodeRef, versionProperties, versionChildren );
+    }
+
+    public static Date getLastModified( NodeRef ref ) {
+        try {
+        QName typeQName = createQName( Acm.ACM_LAST_MODIFIED );
+        Date date = (Date)services.getNodeService().getProperty( ref, typeQName );
+            return date;
+        } catch ( Throwable t ) {
+            t.printStackTrace();
+        }
+        return null;
+    }
 
     public static NodeRef getNodeRefAtTime( NodeRef nodeRef, WorkspaceNode workspace,
                                             Date dateTime ) {
