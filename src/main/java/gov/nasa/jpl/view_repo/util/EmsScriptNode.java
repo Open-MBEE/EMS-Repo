@@ -111,7 +111,7 @@ public class EmsScriptNode extends ScriptNode implements
 
     public static boolean optimisticAndFoolish = false;
 
-    public static boolean tryToFlushCache = true;
+    public static boolean tryToFlushCache = false;
 
     public static boolean versionCacheDebugPrint = false;
 
