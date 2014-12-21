@@ -113,6 +113,8 @@ public class EmsScriptNode extends ScriptNode implements
 
     public static boolean tryToFlushCache = true;
 
+    public static boolean versionCacheDebugPrint = false;
+
     /**
      * A set of content model property names that serve as workspace metadata
      * and whose changes are not recorded in a workspace.
@@ -1280,55 +1282,76 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
   public boolean getOrSetCachedVersion() {
-       if ( NodeUtil.doVersionCaching && !isAVersion() ) {
-           if ( checkedNodeVersion ) {
+       if (versionCacheDebugPrint) System.out.println("0: getOrSetCachedVersion(): " + this + " :: " + this.getId() );
+       if ( !NodeUtil.doVersionCaching || isAVersion() ) {
+           if (versionCacheDebugPrint) System.out.println("1: N/A " + this.getName());
+           return false;
+       }
+//       if ( checkedNodeVersion ) {
+//           System.out.println("2");
+//           return false;
+//       }
+//       checkedNodeVersion = true;
+       String id = getId();
+       EmsVersion cachedVersion = NodeUtil.versionCache.get(id);
+       Version thisVersion = getCurrentVersion();
+       EmsVersion thisEmsVersion = new EmsVersion( nodeRef, null, thisVersion );
+
+       if ( cachedVersion == null ) {
+           if ( thisVersion == null ) {
+               if (versionCacheDebugPrint) System.out.println("2: no version");
                return false;
            }
-           checkedNodeVersion = true;
-           String id = getId();
-           EmsVersion cachedVersion = NodeUtil.versionCache.get(id);
-           Version thisVersion = getCurrentVersion();
-           EmsVersion thisEmsVersion = new EmsVersion( nodeRef, null, thisVersion );
+           if ( optimisticAndFoolish ) {
+               NodeUtil.versionCache.put( id, thisEmsVersion );
+               if (versionCacheDebugPrint) System.out.println("9: optimisticAndFoolish");
+           } else {
+               cachedVersion = new EmsVersion( nodeRef, null, getHeadVersion() );
+               NodeUtil.versionCache.put( id, cachedVersion );
+               String msg =
+                       "3: initializing version cache with node, "
+                               + this + " version: "
+                               + cachedVersion.getLabel();
+              logger.warn( msg );
+              if (versionCacheDebugPrint) System.out.println(msg);
 
-           if ( cachedVersion == null ) {
-               if ( optimisticAndFoolish ) {
-                   NodeUtil.versionCache.put( id, thisEmsVersion );
-               } else {
-                   cachedVersion = new EmsVersion( nodeRef, null, getHeadVersion() );
-                   NodeUtil.versionCache.put( id, cachedVersion );
-               }
-           }
-           if ( cachedVersion != null ) {
-               int comp = thisEmsVersion.compareTo( cachedVersion );
-               if ( comp != 0 ) {
-                   if ( comp < 0 ) {
-                       // Cache is correct -- fix esn's nodeRef
-                        String msg =
-                                "Warning! Alfresco Heisenbug returning wrong current version of node, "
-                                        + this + ".  Replacing node with unmodifiable versioned node, "
-                                        + getId() + ".";
-                       logger.warn( msg );
-                       if ( response != null ) {
-                           response.append( msg + "\n");
-                       }
-                       nodeRef = cachedVersion.getFrozenNodeRef();
-                       if ( tryToFlushCache ) NodeUtil.clearAlfrescoNodeCache();
-                   } else {
-                       // Cache is incorrect -- update cache
-                       NodeUtil.versionCache.put( id, thisEmsVersion );
-                        String msg =
-                                "info: updating version cache with new version of node, "
-                                        + this + " version: "
-                                        + thisEmsVersion.getLabel();
-                       logger.warn( msg );
-                   }
-//                // This fixes the nodeRef in esn
-//                esn.checkNodeRefVersion( null );
-                   return true;
-               }
            }
        }
-       return false;
+       if ( cachedVersion == null ) {
+           return false;
+       }
+       int comp = thisEmsVersion.compareTo( cachedVersion );
+       if ( comp == 0 ) {
+           if (versionCacheDebugPrint) System.out.println("3: same version " + thisEmsVersion.getLabel() );
+           return false;
+       }
+       if ( comp < 0 ) {
+           // Cache is correct -- fix esn's nodeRef
+            String msg =
+                    "4: Warning! Alfresco Heisenbug returning wrong current version of node, "
+                            + this + " (" + thisEmsVersion.getLabel()
+                            + ").  Replacing node with unmodifiable versioned node, "
+                            + getId() + " (" + cachedVersion.getLabel()+ ").";
+           logger.warn( msg );
+           if (versionCacheDebugPrint) System.out.println(msg);
+           if ( response != null ) {
+               response.append( msg + "\n");
+           }
+           nodeRef = cachedVersion.getFrozenNodeRef();
+           if ( tryToFlushCache ) NodeUtil.clearAlfrescoNodeCache();
+       } else { // comp > 0
+           // Cache is incorrect -- update cache
+           NodeUtil.versionCache.put( id, thisEmsVersion );
+            String msg =
+                    "5: Updating version cache with new version of node, "
+                            + this + " version: "
+                            + thisEmsVersion.getLabel();
+           logger.warn( msg );
+           if (versionCacheDebugPrint) System.out.println(msg);
+       }
+//                // This fixes the nodeRef in esn
+//                esn.checkNodeRefVersion( null );
+       return true;
    }
 
     /**
