@@ -1330,10 +1330,10 @@ public class EmsScriptNode extends ScriptNode implements
             String msg =
                     "4: Warning! Alfresco Heisenbug returning wrong current version of node, "
                             + this + " (" + thisEmsVersion.getLabel()
-                            + ").  Replacing node with unmodifiable versioned node, "
+                            + ").  Replacing node with unmodifiable frozen node, "
                             + getId() + " (" + cachedVersion.getLabel()+ ").";
            logger.warn( msg );
-           if (versionCacheDebugPrint) System.out.println(msg);
+           System.out.println(msg);
            if ( response != null ) {
                response.append( msg + "\n");
            }
