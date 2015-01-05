@@ -2,12 +2,12 @@
     "elements": [{
         "creator": "admin",
         "editable": true,
-        "modified": "2014-12-01T13:58:11.600-0800",
+        "modified": "2014-12-10T14:58:22.402-0800",
         "name": "testName",
         "owner": "123456",
         "qualifiedId": "/123456/testCmed416",
         "qualifiedName": "/JW_TEST2/testName",
-        "read": "2014-12-01T13:58:12.279-0800",
+        "read": "2014-12-10T14:58:23.907-0800",
         "specialization": {
             "isDerived": false,
             "isSlot": false,

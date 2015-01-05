@@ -800,7 +800,7 @@
         },
         "Characterizes": {
             "properties": {
-                "type": { "enum": ["Characterizes"] },
+                "type": { "enum": ["Characterizes"] }
             },
             "allOf": [
                 {"$ref": "#/definitions/DirectedRelationship"}

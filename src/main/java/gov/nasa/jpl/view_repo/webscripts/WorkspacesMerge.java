@@ -35,7 +35,13 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 		super(repositoryHelper, registry);
 	}
 	
+	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache){
+	    WorkspacesMerge instance = new WorkspacesMerge(repository, services);
+	    return instance.executeImplImpl( req, status, cache );
+	}
+	
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache){
 		printHeader(req);
 		clearCaches();
 		Map<String, Object> model = new HashMap<String, Object>();
@@ -122,7 +128,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				    
 				    Set< EmsScriptNode > elements =
 	                        instance.createOrUpdateModel( top.getJSONObject("workspace2"), status,
-	                                                      targetWS, sourceWS );
+	                                                      targetWS, sourceWS, false );
                     // REVIEW -- TODO -- shouldn't this be called from instance?
                     instance.addRelationshipsToProperties( elements );
                     if ( !Utils.isNullOrEmpty( elements ) ) {
@@ -147,7 +153,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
     	            
     
     	            // keep history of the branch
-                    CommitUtil.merge( sourceWS, targetWS, null, "", false,
+                CommitUtil.merge( sourceWS, targetWS, "", false,
                                       services, response );
 				}
 			}
@@ -179,7 +185,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 		JSONObject result = null;
 		MmsModelDelete deleteInstance = new MmsModelDelete(repository, services);
 		long start = System.currentTimeMillis();
-		Collection <EmsScriptNode> tempCollection = new ArrayList();
+		Collection <EmsScriptNode> tempCollection = new ArrayList< EmsScriptNode >();
 		for( EmsScriptNode node : collection)
 		    tempCollection.add(node);
 		for( EmsScriptNode node : tempCollection){

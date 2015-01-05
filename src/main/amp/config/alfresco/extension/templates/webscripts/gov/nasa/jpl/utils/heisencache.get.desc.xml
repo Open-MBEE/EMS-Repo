@@ -1,0 +1,18 @@
+<webscript>
+  <shortname>Toggle heisenCache on or off</shortname>
+  <description>toggle heisenCache off</description>
+  <url>/heisenCache?on={on?}&amp;off={off?}</url>
+  <authentication>user</authentication>
+  <format default="html">argument</format>
+  <family>EMS Utils</family>
+  <args>
+    <arg>
+        <name>on</name>
+        <description>Optional, if specified will turn heisenCache on</description>
+    </arg>
+    <arg>
+        <name>off</name>
+        <description>Optional, if specified will turn heisenCache off</description>
+    </arg>
+  </args>
+</webscript>

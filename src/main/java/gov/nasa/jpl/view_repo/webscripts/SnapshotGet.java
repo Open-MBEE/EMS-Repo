@@ -54,6 +54,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
+@Deprecated
 public class SnapshotGet extends AbstractJavaWebScript {
     public SnapshotGet() {
         super();
@@ -75,6 +76,11 @@ public class SnapshotGet extends AbstractJavaWebScript {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        SnapshotGet instance = new SnapshotGet(repository, services);
+        return instance.executeImplImpl(req,  status, cache);
+    }
+	
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
         clearCaches();

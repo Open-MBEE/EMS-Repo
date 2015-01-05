@@ -17,7 +17,6 @@ import javax.transaction.UserTransaction;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONException;
@@ -115,7 +114,6 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         // Searching for deleted nodes also, in case they try to delete a element that has
         // already been deleted in the current workspace.
         EmsScriptNode root = findScriptNodeById(elementId, workspace, null, true);
-        String siteName = null;
         String projectId = null;
 
         UserTransaction trx;
@@ -130,7 +128,6 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                      HttpServletResponse.SC_NOT_FOUND);
                 return result;
             }
-            siteName = root.getSiteName();
 
             long end = System.currentTimeMillis();
 
@@ -164,15 +161,19 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 ee.printStackTrace();
                 e.printStackTrace();
             }
+        } finally {
+            for (EmsScriptNode deletedNode: wsDiff.getDeletedElements().values()) {
+                deletedNode.getOrSetCachedVersion();
+            }
         }
 
         if (wsDiff.isDiff()) {
             // Send deltas to all listeners
-            if ( !sendDeltas(result, wsId, projectId) ) {
+            if ( !CommitUtil.sendDeltas(result, wsId, projectId) ) {
                 log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
             }
 
-            CommitUtil.commit( result, workspace, siteName, "", false, services, response );
+            CommitUtil.commit( result, workspace, "", false, services, response );
         }
 
         return result;

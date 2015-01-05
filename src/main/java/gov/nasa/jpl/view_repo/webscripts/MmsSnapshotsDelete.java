@@ -38,6 +38,11 @@ public class MmsSnapshotsDelete extends AbstractJavaWebScript {
     
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+		MmsSnapshotsDelete instance = new MmsSnapshotsDelete(repository, services);
+    	return instance.executeImplImpl(req, status, cache);
+    }
+    
+    protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -66,7 +71,7 @@ public class MmsSnapshotsDelete extends AbstractJavaWebScript {
 
     private void handleRequest( WebScriptRequest req ) throws JSONException {
         String snapshotId = req.getServiceMatch().getTemplateVars().get("snapshotId");
-        NodeRef snapshotNodeRef = NodeUtil.findNodeRefByType( snapshotId, SearchType.CM_NAME, false, true, 
+        NodeRef snapshotNodeRef = NodeUtil.findNodeRefByType( snapshotId, SearchType.CM_NAME, true, 
                                                            null, null, true, services, false );
         if (snapshotNodeRef == null) {
             log(LogLevel.ERROR, "Could not find snapshot", HttpServletResponse.SC_NOT_FOUND);

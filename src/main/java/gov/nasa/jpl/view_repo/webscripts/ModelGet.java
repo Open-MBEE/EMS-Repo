@@ -337,7 +337,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		String rootName = sysmlId;
 		if (!elementsFound.containsKey(sysmlId)) {
 		    // dont add reified packages
-		    if (!rootName.contains("_pkg") &&
+		    if (!rootName.endsWith("_pkg") &&
 		        !root.isPropertyOwnedValueSpecification()) {
 		        elementsFound.put(sysmlId, root);
 		    }
@@ -370,7 +370,7 @@ public class ModelGet extends AbstractJavaWebScript {
                     if (child.exists() && !child.isPropertyOwnedValueSpecification()) {
                         
                         String value = child.getSysmlId();
-                        if ( value != null ) {
+                        if ( value != null && !value.endsWith( "_pkg" )) {
                             elementsFound.put( value, child );
                         }
                         
