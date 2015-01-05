@@ -10,16 +10,21 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Queue;
+import java.util.Stack;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.content.MimetypeMap;
@@ -31,9 +36,11 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.util.TempFileProvider;
 import org.alfresco.util.exec.RuntimeExec;
 import org.alfresco.util.exec.RuntimeExec.ExecutionResult;
+import org.apache.commons.lang.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 
 public class DocBookWrapper {
@@ -328,6 +335,7 @@ public class DocBookWrapper {
 	public void saveHtmlZipToRepo(EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp) throws Exception{
 		try{
 			this.transformToHTML(workspace, timestamp);
+			tableToCSV();
 			String zipPath = this.zipHtml();
 			if(zipPath == null || zipPath.isEmpty()) throw new Exception("Failed to zip HTML files and resources!");
 
@@ -394,7 +402,99 @@ public class DocBookWrapper {
 		this.htmlXslFileName = Paths.get(docgenDirName, "xsl/html", "chunk_custom.xsl");
 		this.docGenCssFileName = Paths.get(docgenDirName, "xsl", "docgen.css");
 	}
+	
+	private void tableToCSV() throws Exception{
+		File input = new File(this.dbFileName.toString());
+		try {
+			FileInputStream fileStream = new FileInputStream(input);
+			Document document = Jsoup.parse(fileStream, "UTF-8", "http://xml.org", Parser.xmlParser());
+			if(document == null) throw new Exception("Failed to convert tables to CSV! Unabled to load file: " + this.dbFileName.toString());
+			int tableIndex = 1;
+			int rowIndex = 1;
+			String filename = "";
+			int cols = 0;
+			for(Element table:document.select("table")){
+				Elements tgroups = table.select("tgroup");
+				if(tgroups==null || tgroups.size()==0) continue;
+				Element tgroup = tgroups.first();
+				cols = Integer.parseInt(tgroup.attr("cols"));
+				List<List<String>> csv = new ArrayList<List<String>>();
+				Queue<TableCell> rowQueue = new LinkedList<TableCell>();
+				for(Element row: table.select("row")){
+					//TO DO - handle multi rows and columns spanned cell
+					List<String> csvRow = new ArrayList<String>();
+					
+					for(int i=0; i < cols; i++){
+						if(i >= row.children().size()){
+							for(int k=cols; k > i; k--) csvRow.add("");
+							break;
+						}
+						Element entry = row.child(i);
+						if(entry != null && entry.text() != null && !entry.text().isEmpty()){ 
+							csvRow.add(entry.text());
+							
+							//***handling multi-rows***
+							String moreRows = entry.attr("morerows");
+							if(moreRows != null && !moreRows.isEmpty()){
+								int additionalRows = Integer.parseInt(moreRows);
+								if(additionalRows > 0){
+									for(int ar = 1; ar <= additionalRows; ar++){
+										TableCell tableCell = new TableCell(rowIndex+ar, i);
+										rowQueue.add(tableCell);
+									}
+								}
+							}
+							//***handling multi-rows***
+							
+							//***handling multi-columns***
+							String colStart = entry.attr("namest");
+							String colEnd = entry.attr("nameend");
+							if(colStart == null || colEnd == null || colStart.isEmpty() || colEnd.isEmpty()) continue;
+							
+							int icolStart = Integer.parseInt(colStart);
+							int icolEnd = Integer.parseInt(colEnd);
+							for(int j=icolEnd; j > icolStart; j--, i++){
+								csvRow.add("");
+							}
+							//***handling multi-columns***
+						}
+						else csvRow.add("");
+						
+						
+					}
+					csv.add(csvRow);
+					rowIndex++;
+				}
 
+				boolean hasTitle = false;
+				Elements title = table.select("title");
+				if(title != null && title.size() > 0){
+					String titleText = title.first().text();
+					if(titleText != null && !titleText.isEmpty()){
+						filename = title.first().text();
+						hasTitle = true;
+					}
+				}
+				
+				if(!hasTitle) filename = "Untitled"; 
+				filename = "table_" + tableIndex++ + "_" + filename;
+				
+				writeCSV(csv, filename, rowQueue, cols);
+			}
+			
+		} 
+		catch (IOException e) {
+			e.printStackTrace();
+			throw new Exception("IOException: unable to read/access file: " + this.dbFileName.toString());
+		}
+		catch(NumberFormatException ne){
+			ne.printStackTrace();
+			throw new Exception("One or more table row/column does not contain a parsable integer.");
+		}
+		
+		
+	}
+	
 	private void transformToHTML(WorkspaceNode workspace, Date timestamp) throws Exception{
 		if(!createDocBookDir()) return;
 		System.out.println("Retrieving DocBook...");
@@ -454,13 +554,59 @@ public class DocBookWrapper {
 				BufferedWriter writer = new BufferedWriter(new FileWriter(frame));
 				writer.write("<html><head><title>" + title + "</title></head><frameset cols='30%,*' frameborder='1' framespacing='0' border='1'><frame src='bk01-toc.html' name='list'><frame src='index.html' name='body'></frameset></html>");
 		        writer.close();
-		        Files.copy(Paths.get(this.getDocGenCssFileName()), Paths.get(this.getDBDirName(), "docgen.css"));
+		        Files.copy(Paths.get(this.getDocGenCssFileName()), Paths.get(this.getDBDirName(), "docgen.css"), StandardCopyOption.REPLACE_EXISTING);
 			}
 			catch(Exception ex){
 				throw new Exception("Failed to transform DocBook to HTML!", ex);
 			}
 		}
 	}
+	
+	private void writeCSV(List<List<String>> csv, String filename, Queue<TableCell> rowQueue, int cols) throws Exception{
+		String QUOTE = "\"";
+	    String ESCAPED_QUOTE = "\"\"";
+	    char[] CHARACTERS_THAT_MUST_BE_QUOTED = { ',', '"', '\n' };
+	    
+		File outputFile = new File(Paths.get(this.dbDirName.toString(), filename+".csv").toString());
+		try {
+			FileWriter fw = new FileWriter(outputFile);
+			BufferedWriter writer = new BufferedWriter(fw);
+			int rowIndex = 1;
+			boolean hasMoreRows;
+			for(List<String> row : csv){
+				for(int i=0; i < row.size() && i < cols; i++){
+					if(i >= cols) break;
+					hasMoreRows = false;
+					if(!rowQueue.isEmpty()){
+						TableCell tableCell = rowQueue.peek();
+						if(tableCell.getRow()==rowIndex && tableCell.getColumn()==i){
+							hasMoreRows = true;
+							rowQueue.remove();
+							if(i < cols-1) writer.write(",");
+						}
+					}
+					String s = row.get(i);
+					if(s.contains(QUOTE)){
+						s = s.replace(QUOTE, ESCAPED_QUOTE);
+					}
+					if(StringUtils.indexOfAny(s, CHARACTERS_THAT_MUST_BE_QUOTED) > -1){
+						s = QUOTE + s + QUOTE;
+					}
+				
+					writer.write(s);
+					if(!hasMoreRows) if(i < cols-1) writer.write(",");
+				}
+				writer.write(System.lineSeparator());
+				rowIndex++;
+			}
+			writer.close();
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new Exception("Failed to save table-CSV to file system!");
+		}
+	}
+	
 
 	private String transformToPDF(WorkspaceNode workspace, Date timestamp) throws Exception{
     	if(!createDocBookDir()){
