@@ -105,7 +105,6 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         return id.startsWith( "MMS_" );
     }
 
-    @Override
     public boolean sameOwnerOfProperty( Object p1, Object p2 ) {
         NodeRef n1 = objectToNodeRef( p1 );
         NodeRef n2 = objectToNodeRef( p2 );
@@ -134,7 +133,6 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         return getOwner( e );
     }
 
-    @Override
     public boolean sameOwner( NodeRef t1, NodeRef t2 ) {
         EmsScriptNode e1 = new EmsScriptNode( t1, getServices() );
         EmsScriptNode e2 = new EmsScriptNode( t2, getServices() );
