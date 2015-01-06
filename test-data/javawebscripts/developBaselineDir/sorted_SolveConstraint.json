@@ -15,33 +15,6 @@
             "creator": "admin",
             "documentation": "",
             "editable": true,
-            "name": "",
-            "owner": "e_32169",
-            "qualifiedId": "/123456/e_32169/expr_32165",
-            "qualifiedName": "/JW_TEST/e_32169/",
-            "specialization": {
-                "operand": [
-                    {
-                        "element": "arg_ev_33001",
-                        "type": "ElementValue"
-                    },
-                    {
-                        "element": "arg_ev_38307_1",
-                        "type": "ElementValue"
-                    },
-                    {
-                        "element": "op_ev_31835",
-                        "type": "ElementValue"
-                    }
-                ],
-                "type": "Expression"
-            },
-            "sysmlid": "expr_32165"
-        },
-        {
-            "creator": "admin",
-            "documentation": "",
-            "editable": true,
             "name": "GreaterEquals",
             "owner": "e_31828",
             "qualifiedId": "/123456/e_31828/op_ev_31835",

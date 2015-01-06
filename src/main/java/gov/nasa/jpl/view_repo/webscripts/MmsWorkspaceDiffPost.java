@@ -29,14 +29,19 @@
 
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Date;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -81,7 +86,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		Map<String, Object> model = new HashMap<String, Object>();
         
 		try {
-			handleDiff((JSONObject)req.parseContent(), status, model);
+			handleDiff(req, (JSONObject)req.parseContent(), status, model);
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();
@@ -99,7 +104,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	}
 	
     
-	private void handleDiff(JSONObject jsonDiff, Status status, Map<String, Object> model) throws Exception {
+	private void handleDiff(WebScriptRequest req, JSONObject jsonDiff, Status status, Map<String, Object> model) throws Exception {
 		if (jsonDiff.has( "workspace1" ) && jsonDiff.has("workspace2")) {
 		    JSONObject srcJson = jsonDiff.getJSONObject( "workspace2" );
 		    JSONObject targetJson = jsonDiff.getJSONObject( "workspace1" );
@@ -111,9 +116,45 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		        String targetWsId = targetJson.getString( "id" );
 	            WorkspaceNode targetWs = WorkspaceNode.getWorkspaceFromId( targetWsId, services, response, responseStatus, null );
 	            
+                String timestamp1 = req.getParameter( "timestamp1" );
+                Date dateTimeTarget = TimeUtils.dateFromTimestamp( timestamp1 );
+
+                String timestamp2 = req.getParameter( "timestamp2" );
+                Date dateTimeSrc = TimeUtils.dateFromTimestamp( timestamp2 );
+	                
+                // Verify that the target workspace timestamp is valid, ie it must use the latest
+                // commit:
+                if (dateTimeTarget != null) {
+                    // TODO REVIEW This is not efficient, as getLastCommit()
+                    //             and getLatestCommitAtTime() do similar operations
+                    EmsScriptNode lastCommit = CommitUtil.getLastCommit( targetWs, services, response );
+                    EmsScriptNode prevCommit = CommitUtil.getLatestCommitAtTime( dateTimeTarget, 
+                                                                                 targetWs, services, 
+                                                                                 response );
+                    
+                    // Give error message if there are not commits found before or at the dateTimeTarget:
+                    if (prevCommit == null) {
+                        log(LogLevel.ERROR,
+                            "Try a later date.  Previous commit could not be found based on date "+dateTimeTarget,
+                            HttpServletResponse.SC_BAD_REQUEST);
+                        return;
+                    }
+    
+                    // Give error message if the latest commit based on the time is not the latest:
+                    if (lastCommit != null && prevCommit != null && !lastCommit.equals( prevCommit ) ) {
+                        
+                        log(LogLevel.ERROR,
+                            "Previous commit "+prevCommit+" based on date "+dateTimeTarget+" is not the same as the latest commit "+lastCommit,
+                            HttpServletResponse.SC_CONFLICT);
+                        return;
+                    }
+                }
+                
 	            JSONObject top = new JSONObject();
 	            JSONArray elements = new JSONArray();
-	            
+                MmsModelDelete deleteService = new MmsModelDelete(repository, services);
+                WorkspaceDiff deleteWsDiff = null;
+                
 	            // Add/update the elements in the target workspace:
 	            // Must remove the modified time, as it is for the source workspace, not the target
 	            // workspace, so may get errors for trying to modify a element with a old modified time.
@@ -139,12 +180,12 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	            }
 	            top.put( "elements", elements );
 	            
-	            handleUpdate( top, status, targetWs, false, model );
+	            Set<EmsScriptNode> updatedElements = handleUpdate( top, status, targetWs, false, 
+	                                                               model, false);
 	            
 	            // Delete the elements in the target workspace:
 	            if (srcJson.has( "deletedElements" )) {
 	                JSONArray deleted = srcJson.getJSONArray( "deletedElements" );
-	                MmsModelDelete deleteService = new MmsModelDelete(repository, services);
 	                deleteService.setWsDiff( targetWs );
                     for (int ii = 0; ii < deleted.length(); ii++) {
                         String id = ((JSONObject)deleted.get(ii)).getString( "sysmlid" );
@@ -153,7 +194,8 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                     }
                     
                     // Update the needed aspects of the deleted nodes:
-                    for (EmsScriptNode deletedNode: deleteService.getWsDiff().getDeletedElements().values()) {
+                    deleteWsDiff = deleteService.getWsDiff();
+                    for (EmsScriptNode deletedNode: deleteWsDiff.getDeletedElements().values()) {
                         if (deletedNode.exists()) {
                             deletedNode.removeAspect( "ems:Added" );
                             deletedNode.removeAspect( "ems:Updated" );
@@ -163,7 +205,23 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                     }
 	            }
 	            
-	            CommitUtil.merge( jsonDiff, srcWs, targetWs, null, false, services, response );
+	            // Send deltas and make merge commit:
+	            // FIXME: Need to split elements by project Id - since they won't always be in same project
+	            String projectId = !updatedElements.isEmpty() ? 
+	                                           updatedElements.iterator().next().getProjectId() : 
+	                                           NO_PROJECT_ID;
+	            boolean modelPostDiff = wsDiff.isDiff();
+	            boolean modelDeleteDiff = deleteWsDiff != null && deleteWsDiff.isDiff();
+	            
+	            if (modelDeleteDiff || modelPostDiff) {
+	                if ( !CommitUtil.sendDeltas(jsonDiff, targetWsId, projectId) ) {
+                        log(LogLevel.WARNING, "MmsWorkspaceDiffPost deltas not posted properly");
+                    }
+	                
+	                CommitUtil.merge( jsonDiff, srcWs, targetWs, dateTimeSrc, dateTimeTarget,
+	                                  null, false, services, response );
+	            }
+	            
 		    }
 		}
 	}	

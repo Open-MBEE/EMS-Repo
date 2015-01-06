@@ -1,40 +1,82 @@
-{"elements": [{
+{"elements": [
 
-    "creator": "admin",
+    {
 
-    "documentation": "something",
+        "creator": "admin",
 
-    "editable": true,
+        "documentation": "something",
 
-    "name": "300",
+        "editable": true,
 
-    "owner": "123456",
+        "name": "300",
 
-    "qualifiedId": "/123456/300",
+        "owner": "123456",
 
-    "qualifiedName": "/JW_TEST2/300",
+        "qualifiedId": "/123456/300",
 
-    "specialization": {
+        "qualifiedName": "/JW_TEST/300",
 
-        "isDerived": false,
+        "specialization": {
 
-        "isSlot": false,
+            "isDerived": false,
 
-        "type": "Property",
+            "isSlot": false,
 
-        "value": [{
+            "type": "Property",
 
-            "string": "dlam_string",
+            "value": [{
 
-            "type": "LiteralString"
+                "string": "dlam_string",
 
-        }]
+                "type": "LiteralString"
+
+            }]
+
+        },
+
+        "sysmlid": "300"
 
     },
 
-    "sysmlid": "300"
+    {
 
-}]}
+        "creator": "admin",
+
+        "documentation": "something",
+
+        "editable": true,
+
+        "name": "300",
+
+        "owner": "holding_bin_no_site_no_project",
+
+        "qualifiedId": "/no_project/holding_bin_no_site_no_project/x",
+
+        "qualifiedName": "/no_project/holding_bin/300",
+
+        "specialization": {
+
+            "isDerived": false,
+
+            "isSlot": false,
+
+            "type": "Property",
+
+            "value": [{
+
+                "string": "dlam_string",
+
+                "type": "LiteralString"
+
+            }]
+
+        },
+
+        "sysmlid": "x"
+
+    }
+
+]}
 
 200
 

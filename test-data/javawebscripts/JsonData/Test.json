@@ -1,76 +1,15 @@
 {
-    "workspace1": {
-        "elements": [
-            {
-                "creator": "admin",
-                "editable": true,
-                "modified": "2014-12-10T16:42:15.921-0800",
-                "owner": "x",
-                "qualifiedId": "/no_project/holding_bin_no_site_no_project/x/MMS_1418258409991_41eedb93-818a-4c4c-9ed0-f7bfcf2dd6e1",
-                "qualifiedName": "/no_project/holding_bin/300/null",
-                "read": "2014-12-10T16:50:26.432-0800",
-                "specialization": {
-                    "string": "the x value",
-                    "type": "LiteralString"
-                },
-                "sysmlid": "MMS_1418258409991_41eedb93-818a-4c4c-9ed0-f7bfcf2dd6e1"
-            },
-            {
-                "creator": "admin",
-                "editable": true,
-                "modified": "2014-12-10T16:42:43.145-0800",
-                "name": "holding_bin",
-                "owner": "no_project",
-                "qualifiedId": "/no_project/holding_bin_no_site_no_project",
-                "qualifiedName": "/no_project/holding_bin",
-                "read": "2014-12-10T16:50:26.438-0800",
-                "specialization": {"type": "Package"},
-                "sysmlid": "holding_bin_no_site_no_project"
-            },
-            {
-                "creator": "admin",
-                "documentation": "x is x",
-                "editable": true,
-                "modified": "2014-12-10T16:42:16.060-0800",
-                "name": "300",
-                "owner": "holding_bin_no_site_no_project",
-                "qualifiedId": "/no_project/holding_bin_no_site_no_project/x",
-                "qualifiedName": "/no_project/holding_bin/300",
-                "read": "2014-12-10T16:50:26.442-0800",
-                "specialization": {
-                    "isDerived": false,
-                    "isSlot": false,
-                    "type": "Property",
-                    "value": [{
-                        "string": "the x value",
-                        "type": "LiteralString"
-                    }]
-                },
-                "sysmlid": "x"
-            }
-        ],
-        "id": "master",
-        "name": "master",
-        "qualifiedId": "master",
-        "qualifiedName": "master"
-    },
-    "workspace2": {
-        "addedElements": [],
-        "conflictedElements": [],
-        "deletedElements": [],
-        "id": "dd5756f6-f17f-4a8b-8267-d7aa48398372",
-        "movedElements": [],
-        "name": "wsB",
-        "qualifiedId": "master/b3b69e74-6b3f-47b2-9a77-33237160a1f3/dd5756f6-f17f-4a8b-8267-d7aa48398372",
-        "qualifiedName": "master/wsA/wsB",
-        "updatedElements": [{
-            "creator": "admin",
-            "modified": "2014-12-10T16:41:44.397-0800",
-            "specialization": {"value": [{
-                "string": "the x value",
-                "type": "LiteralString"
-            }]},
-            "sysmlid": "x"
-        }]
-    }
+    "elements": [{
+        "creator": "admin",
+        "documentation": "",
+        "editable": true,
+        "modified": "2014-12-18T21:51:02.345-0800",
+        "name": "jesus",
+        "owner": "holding_bin_fart_no_project",
+        "qualifiedId": "/no_project/holding_bin_fart_no_project/MMS_1418968148413_eec27232-e880-4d91-944c-bc8ceb5d7fc6",
+        "qualifiedName": "/no_project/holding_bin/jesus",
+        "read": "2014-12-18T21:51:02.863-0800",
+        "specialization": {"type": "Product"},
+        "sysmlid": "MMS_1418968148413_eec27232-e880-4d91-944c-bc8ceb5d7fc6"
+    }],
 }

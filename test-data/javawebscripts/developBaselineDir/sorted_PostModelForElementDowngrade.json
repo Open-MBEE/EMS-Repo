@@ -8,5 +8,5 @@
         "specialization": {"type": "Element"},
         "sysmlid": "54321"
     }],
-    "message": "[WARNING]: The type supplied Element is different than the stored type Product\n"
+    "message": "[WARNING]: The type supplied Element is different than the stored type View\n"
 }
