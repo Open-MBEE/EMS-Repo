@@ -4713,7 +4713,7 @@ public class EmsScriptNode extends ScriptNode implements
         }
         return false;
     }
-
+/*
     public boolean isProperty() {
         if ( hasOrInheritsAspect( "sysml:Property" ) ) return true;
         if ( getProperty(Acm.ACM_VALUE ) != null ) return true;
@@ -4741,4 +4741,74 @@ public class EmsScriptNode extends ScriptNode implements
         }
         return false;
     }
+
+    public boolean isExpression() {
+        if ( hasOrInheritsAspect( "sysml:Expression" ) ) return true;
+        if ( getProperty(Acm.ACM_OPERAND ) != null ) return true;
+        return false;
+    }
+
+    public EmsScriptNode getOwningExpression() {
+        if (Debug.isOn()) Debug.outln("getOwningExpression(" + this + ")");
+        EmsScriptNode parent = this;
+        while ( parent != null && !parent.isExpression() ) {
+            if (Debug.isOn()) Debug.outln("parent = " + parent );
+            parent = parent.getUnreifiedParent( null );  // TODO -- REVIEW -- need timestamp??!!
+        }
+        if (Debug.isOn()) Debug.outln("returning " + parent );
+        return parent;
+    }
+
+    public boolean isExpressionOwnedValueSpecification() {
+        if ( hasOrInheritsAspect( "sysml:ValueSpecification" ) ) {
+            EmsScriptNode parent = getOwningExpression();
+            return parent != null && parent.isExpression();
+        }
+        return false;
+    }
+*/
+
+    public boolean hasValueSpecProperty() {
+        for ( String acmType : Acm.TYPES_WITH_VALUESPEC.keySet() ) {
+            if ( hasOrInheritsAspect( acmType ) ) return true;
+            for ( String acmProp : Acm.TYPES_WITH_VALUESPEC.get(acmType) ) {
+                if ( getProperty( acmProp ) != null ) return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return the parent/owner (preferably not a ValueSpecification itself,
+     *         like Expression) with an aspect that has a property whose value
+     *         is a ValueSpecification.
+     */
+    public EmsScriptNode getValueSpecOwner() {// boolean valueSpecOwnerOk ) {
+        if (Debug.isOn()) Debug.outln("getValueSpecOwner(" + this + ")");
+        EmsScriptNode parent = this;
+        EmsScriptNode lastValueSpecParent = null;
+        EmsScriptNode lastParent = null;
+        while ( parent != null && ( !parent.hasValueSpecProperty() || hasOrInheritsAspect( "sysml:ValueSpecification" ) ) ) {
+            if (Debug.isOn()) Debug.outln("parent = " + parent );
+            lastParent = parent;
+            parent = parent.getUnreifiedParent( null );  // TODO -- REVIEW -- need timestamp??!!
+            if ( parent != null && !parent.hasOrInheritsAspect( "sysml:ValueSpecification" ) ) {
+                lastValueSpecParent = lastParent;
+            }
+        }
+        if ( parent == null ) parent = lastValueSpecParent;
+        if (Debug.isOn()) Debug.outln("returning " + parent );
+        return parent;
+    }
+
+    public boolean isOwnedValueSpec() {
+        if ( hasOrInheritsAspect( "sysml:ValueSpecification" ) ) {
+            EmsScriptNode parent = getValueSpecOwner();
+            return parent != null && parent.hasValueSpecProperty();
+        }
+        return false;
+    }
+
+
+
 }
