@@ -1341,12 +1341,18 @@ public class ModelPost extends AbstractJavaWebScript {
                                                  WorkspaceNode nodeWorkspace) throws Exception {
 
         boolean changed = false;
+        ModStatus modStatus = new ModStatus();
 
         // Get the sysmlid of the old value if it exists:
         if (iter != null && iter.hasNext()) {
             EmsScriptNode oldValNode = iter.next();
 
-            nodeNames.add(oldValNode.getSysmlId());
+            // Modified convertIdToEmsScriptNode() to check for alfresco id also, 
+            // so that we can use the alfresco id here instead.  This fixes a bug
+            // found where the lucene search for element based on sysmlid failed, and
+            // also improves performance.
+            nodeNames.add(oldValNode.getId());
+            //nodeNames.add(oldValNode.getSysmlId());
 
             if ( workspace != null && workspace.exists()
                  && !workspace.equals( oldValNode.getWorkspace() ) ) {
@@ -1386,9 +1392,13 @@ public class ModelPost extends AbstractJavaWebScript {
 
             // Ingest the JSON for the value to update properties
             timerIngest = Timer.startTimer(timerIngest, timeEvents);
-            if ( oldValNode.ingestJSON( newValJson ) ) {
-                changed = true;
-            }
+            processValue( node, id, reifiedPkgNode, parent, nodeWorkspace, newValJson, ingest, modStatus, oldValNode );
+            changed = (modStatus != null && modStatus.getState() != ModStatus.State.NONE );
+            //updateOrCreateTransactionableElement
+            //boolean didChange = processValueSpecProperty( type, nestedNode, elementJson, specializeJson, oldValNode, ingest, reifiedPkgNode, parent, id, nodeWorkspace );
+//            if ( oldValNode.ingestJSON( newValJson ) ) {
+//                changed = true;
+//            }
             Timer.stopTimer(timerIngest, "!!!!! processExpressionOrProperty(): ingestJSON time", timeEvents);
             oldValNode.getOrSetCachedVersion();
         }
@@ -1397,8 +1407,14 @@ public class ModelPost extends AbstractJavaWebScript {
 
             EmsScriptNode newValNode =
                     processValue( node, id, reifiedPkgNode, parent,
-                                  nodeWorkspace, newVal, ingest );
-            nodeNames.add(newValNode.getSysmlId());
+                                  nodeWorkspace, newVal, ingest, modStatus, null );
+            if ( newValNode == null ) return false;
+            // Modified convertIdToEmsScriptNode() to check for alfresco id also, 
+            // so that we can use the alfresco id here instead.  This fixes a bug
+            // found where the lucene search for element based on sysmlid failed, and
+            // also improves performance.
+            nodeNames.add(newValNode.getId());
+            //nodeNames.add(newValNode.getSysmlId());
             changed = true;
             newValNode.getOrSetCachedVersion();
         }
@@ -1410,7 +1426,9 @@ public class ModelPost extends AbstractJavaWebScript {
                                        EmsScriptNode reifiedPkgNode,
                                        EmsScriptNode parent,
                                        WorkspaceNode workspace,
-                                       JSONObject newVal, boolean ingest ) throws Exception {
+                                       JSONObject newVal, boolean ingest,
+                                       ModStatus modStatus,
+                                       EmsScriptNode nodeToUpdate ) throws Exception {
         //  The refiedNode will be null if the node is not in the elementHierachy, which
         //  will be the case if no other elements have it as a owner, so in that case
         //  we make a reifiedNode for it here.  If all of that fails, then use the parent
@@ -1422,14 +1440,13 @@ public class ModelPost extends AbstractJavaWebScript {
         else {
             nestedParent = reifiedPkgNode;
         }
-
+        
         // TODO: Need to get the MODIFICATION STATUS out of here?!!
-        ModStatus modStatus = new ModStatus();
         EmsScriptNode newValNode =
                 updateOrCreateTransactionableElement( newVal,
                                                       nestedParent, null,
                                                       workspace, ingest, true,
-                                                      modStatus, null );
+                                                      modStatus, nodeToUpdate );
         return newValNode;
     }
 
@@ -1541,8 +1558,16 @@ public class ModelPost extends AbstractJavaWebScript {
                                                   boolean nestedNode,
                                                   ModStatus modStatus,
                                                   EmsScriptNode nodeToUpdate) throws Exception {
+        
+        // Add the sysmlid to the newVal json if needed:
         if (!elementJson.has(Acm.JSON_ID)) {
-            elementJson.put( Acm.JSON_ID, NodeUtil.createId( services ) );
+            
+            if (nodeToUpdate != null) {
+                elementJson.put( Acm.JSON_ID, nodeToUpdate.getSysmlId() );
+            }
+            else {
+                elementJson.put( Acm.JSON_ID, NodeUtil.createId( services ) );
+            }
             //return null;
         }
         String id = elementJson.getString(Acm.JSON_ID);

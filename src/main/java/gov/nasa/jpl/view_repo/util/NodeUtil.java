@@ -89,7 +89,7 @@ public class NodeUtil {
     /* static flags and constants */
 
     public static boolean doFullCaching = true;
-    public static boolean doSimpleCaching = true;
+    public static boolean doSimpleCaching = true;    
     public static boolean doHeisenCheck = true;
     public static boolean doVersionCaching = true;
     public static boolean activeVersionCaching = true;
@@ -477,7 +477,7 @@ public class NodeUtil {
 
             // Update cache with results
             if ( ( doSimpleCaching || doFullCaching ) && caching
-                 && !Utils.isNullOrEmpty( nodeRefs ) ) {
+                 && !Utils.isNullOrEmpty( nodeRefs ) ) {                
                 if ( useSimpleCache && doSimpleCaching ) {
                     NodeRef r = nodeRefs.get( 0 );
                     simpleCache.put( specifier, r );
@@ -1598,11 +1598,18 @@ public class NodeUtil {
     }
 
     public static NodeRef findNodeRefByAlfrescoId(String id, boolean includeDeleted) {
+        return findNodeRefByAlfrescoId(id, includeDeleted, true);
+    }
+    
+    public static NodeRef findNodeRefByAlfrescoId(String id, boolean includeDeleted,
+                                                  boolean giveError) {
         if ( !id.contains( "://" ) ) {
             id = "workspace://SpacesStore/" + id;
         }
         if ( !NodeRef.isNodeRef( id ) ) {
-            Debug.error("Bad NodeRef id: " + id );
+            if (giveError) {
+                Debug.error("Bad NodeRef id: " + id );
+            }
             return null;
         }
         NodeRef n = new NodeRef(id);

@@ -278,6 +278,10 @@ public class EmsScriptNode extends ScriptNode implements
      */
     protected Object[] myVersions = null;
 
+    public boolean embeddingExpressionInConstraint = true;
+    public boolean embeddingExpressionInOperation = true;
+    public boolean embeddingExpressionInConnector = true;
+
     public static boolean fixOwnedChildren = false;
 
     // TODO add nodeService and other member variables when no longer
@@ -2463,18 +2467,30 @@ public class EmsScriptNode extends ScriptNode implements
                                       WorkspaceNode workspace,
                                       Date dateTime, ServiceRegistry services,
                                       StringBuffer response, Status status ) {
-        ArrayList< NodeRef > refs =
-                NodeUtil.findNodeRefsById( valueId, ignoreWorkspace,
-                                           workspace, dateTime,
-                                           services, false, false );
-
-        List< EmsScriptNode > nodeList =
-                toEmsScriptNodeList( refs, services, response, status );
-
-        EmsScriptNode value =
-                ( nodeList == null || nodeList.size() <= 0 ) ? null
-                                                            : nodeList.get( 0 );
-
+        
+        EmsScriptNode value = null;
+        
+        // REVIEW Is it safe to assume that a sysmlid of one element is equal to the alfresco id of another?
+        // First search by alfresco id:
+        NodeRef ref = NodeUtil.findNodeRefByAlfrescoId(valueId, false, false);
+        
+        if (ref != null) {
+            value = new EmsScriptNode(ref, services);
+        }
+        // If could not find it by alfresco id, then search by sysml id:
+        else {
+            ArrayList< NodeRef > refs =
+                    NodeUtil.findNodeRefsById( valueId, ignoreWorkspace,
+                                               workspace, dateTime,
+                                               services, false, false );
+    
+            List< EmsScriptNode > nodeList =
+                    toEmsScriptNodeList( refs, services, response, status );
+    
+            value = ( nodeList == null || nodeList.size() <= 0 ) ? null
+                                                                 : nodeList.get( 0 );
+        }
+        
         return value;
     }
 
@@ -2803,10 +2819,11 @@ public class EmsScriptNode extends ScriptNode implements
                 continue;
             } else {
                 QName qName = createQName( acmType );
-                if ( acmType.equals( Acm.ACM_VALUE ) ) {
-                    if ( Debug.isOn() ) System.out.println( "qName of "
-                                                            + acmType + " = "
-                                                            + qName.toString() );
+                if ( Debug.isOn() ) {
+                    if ( acmType.equals( Acm.ACM_VALUE ) ) {
+                        System.out.println( "qName of " + acmType + " = "
+                                            + qName.toString() );
+                    }
                 }
 
                 // If it is a specialization, then process the json object it
@@ -4511,10 +4528,17 @@ public class EmsScriptNode extends ScriptNode implements
             putInJson( json, "parameters", ids, filter );
         }
 
-        String id =
-                node.getSysmlIdOfProperty( "sysml:operationExpression" );
-        if ( id != null ) {
-            putInJson( json, "expression", id, filter );
+        if ( !embeddingExpressionInOperation  ) { 
+            String id = node.getSysmlIdOfProperty( "sysml:operationExpression" );
+            if ( id != null ) {
+              putInJson( json, "expression", id, filter );
+            }
+        } else {
+            Object property = node.getProperty( "sysml:operationExpression" );
+            if ( property != null ) {
+                putInJson( json, "expression", addInternalJSON( property, dateTime ),
+                           filter );
+            }
         }
     }
 
@@ -4534,11 +4558,19 @@ public class EmsScriptNode extends ScriptNode implements
             addConstraintJSON( JSONObject json, EmsScriptNode node,
                                Set< String > filter, Date dateTime )
                                                                     throws JSONException {
-        String specId =
-                node.getSysmlIdOfProperty( "sysml:constraintSpecification" );
-        if ( specId != null ) {
-            putInJson( json, "specification", specId, filter );
-        }
+        if ( !embeddingExpressionInConstraint  ) { 
+            String specId =
+                    node.getSysmlIdOfProperty( "sysml:constraintSpecification" );
+            if ( specId != null ) {
+                putInJson( json, "specification", specId, filter );
+            }
+        } else {
+            Object property = node.getProperty( "sysml:constraintSpecification" );
+            if ( property != null ) {
+              putInJson( json, "expression", addInternalJSON( property, dateTime ),
+                         filter );
+            }
+      }
     }
 
     protected
