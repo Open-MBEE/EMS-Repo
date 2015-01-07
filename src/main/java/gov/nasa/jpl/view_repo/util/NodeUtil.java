@@ -89,14 +89,7 @@ public class NodeUtil {
     /* static flags and constants */
 
     public static boolean doFullCaching = true;
-    public static boolean doSimpleCaching = true;
-    public static int simpleCacheHit = 0;
-    public static int simpleCacheMiss = 0;
-    public static int simpleCachePut = 0;
-    public static int fullCacheHit = 0;
-    public static int fullCacheMiss = 0;
-    public static int fullCachePut = 0;
-    
+    public static boolean doSimpleCaching = true;    
     public static boolean doHeisenCheck = true;
     public static boolean doVersionCaching = true;
     public static boolean activeVersionCaching = true;
@@ -453,7 +446,7 @@ public class NodeUtil {
                 wasCached = true; // doCaching must be true here
             } else {
                 results = findNodeRefsByType( specifier, prefix, services );
-                if ( (useSimpleCache || useFullCache) && !Utils.isNullOrEmpty( results ) ) {
+                if ( (doSimpleCaching || doFullCaching) && !Utils.isNullOrEmpty( results ) ) {
                     caching = true;
                 }
             }
@@ -483,7 +476,8 @@ public class NodeUtil {
 
 
             // Update cache with results
-            if ( caching && !Utils.isNullOrEmpty( nodeRefs ) ) {
+            if ( ( doSimpleCaching || doFullCaching ) && caching
+                 && !Utils.isNullOrEmpty( nodeRefs ) ) {                
                 if ( useSimpleCache && doSimpleCaching ) {
                     NodeRef r = nodeRefs.get( 0 );
                     simpleCache.put( specifier, r );
