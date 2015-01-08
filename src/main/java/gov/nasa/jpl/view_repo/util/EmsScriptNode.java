@@ -4788,7 +4788,7 @@ public class EmsScriptNode extends ScriptNode implements
         EmsScriptNode parent = this;
         EmsScriptNode lastValueSpecParent = null;
         EmsScriptNode lastParent = null;
-        while ( parent != null && ( !parent.hasValueSpecProperty() || hasOrInheritsAspect( "sysml:ValueSpecification" ) ) ) {
+        while ( parent != null && ( !parent.hasValueSpecProperty() || parent == this ) ) {
             if (Debug.isOn()) Debug.outln("parent = " + parent );
             lastParent = parent;
             parent = parent.getUnreifiedParent( null );  // TODO -- REVIEW -- need timestamp??!!
