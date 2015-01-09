@@ -153,15 +153,15 @@ public class ArtifactPost extends AbstractJavaWebScript {
 		    	        															 siteName,
 		    																		 path, workspace, null,
 		    																		 response, null, false);
-		    	        	
+
 		    	        	if (artifact == null) {
 		    	        		 log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Was not able to create the artifact!\n");
 			    		         model.put("res", response.toString());
 		    	        	}
 		    	        	else {
 		    	        		resultJson.put("upload", artifact);
+		    	        		artifact.getOrSetCachedVersion();
 		    	        	}
-
 	    	        	}
 	    	        	else {
 	    		            log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Invalid artifactId or no content!\n");

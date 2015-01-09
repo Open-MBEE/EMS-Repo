@@ -124,7 +124,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
             Status status = new Status();
             try {
                 Set<EmsScriptNode> elements = 
-                        modelService.createOrUpdateModel(content, status, workspace, null);
+                        modelService.createOrUpdateModel(content, status, workspace, null, true);
                 modelService.addRelationshipsToProperties( elements );
             } catch (Exception e) {
                 status.setCode(HttpServletResponse.SC_BAD_REQUEST);

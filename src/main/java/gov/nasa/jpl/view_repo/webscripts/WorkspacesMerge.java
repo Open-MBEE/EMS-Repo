@@ -129,7 +129,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				    
 				    Set< EmsScriptNode > elements =
 	                        instance.createOrUpdateModel( top.getJSONObject("workspace2"), status,
-	                                                      targetWS, sourceWS );
+	                                                      targetWS, sourceWS, false );
                     // REVIEW -- TODO -- shouldn't this be called from instance?
                     instance.addRelationshipsToProperties( elements );
                     if ( !Utils.isNullOrEmpty( elements ) ) {

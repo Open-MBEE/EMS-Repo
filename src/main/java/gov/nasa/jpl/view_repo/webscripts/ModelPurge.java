@@ -162,7 +162,7 @@ public class ModelPurge extends AbstractJavaWebScript {
         try {
             trx.begin();
             String key = node.getSysmlId();
-            log(Level.INFO, "delete: beginning transaction {" + node.getNodeRef());
+            log(Level.INFO, "delete: beginning transaction { %s", node.getNodeRef().toString());
             services.getNodeService().deleteNode(node.getNodeRef());
             log(Level.INFO, "} delete ending transaction: %s",key);
             trx.commit();

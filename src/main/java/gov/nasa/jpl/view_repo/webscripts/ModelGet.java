@@ -352,9 +352,8 @@ public class ModelGet extends AbstractJavaWebScript {
 			    NodeRef vChildRef = NodeUtil.getNodeRefAtTime( childRef, workspace, dateTime );
                 if ( vChildRef == null ) {
                     // this doesn't elicit a not found response
-                    log( Level.WARN,
-                         "Element " + childRef
-                         + ( dateTime == null ? "" : " at " + dateTime ) + " not found");
+                	// TODO: childRef.toString() and dateTime.toString() or just childRef and dateTime in following line (#356)
+                    log( Level.WARN, "Element %s not found", childRef.toString() + ( dateTime == null ? "" : " at " + dateTime ));
 			        continue;
 			    }
                 EmsScriptNode child = new EmsScriptNode( vChildRef, services, response );

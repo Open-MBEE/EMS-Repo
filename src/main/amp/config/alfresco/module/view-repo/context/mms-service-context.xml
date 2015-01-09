@@ -22,6 +22,14 @@
         class="gov.nasa.jpl.view_repo.webscripts.AlwaysTurnDebugOffGet"
         parent="webscript">
     </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.versioncache.get"
+        class="gov.nasa.jpl.view_repo.webscripts.VersionCacheGet"
+        parent="webscript">
+    </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.versioncachedebug.get"
+        class="gov.nasa.jpl.view_repo.webscripts.VersionCacheDebugGet"
+        parent="webscript">
+    </bean>
     <bean id="webscript.gov.nasa.jpl.utils.timeevents.get"
         class="gov.nasa.jpl.view_repo.webscripts.TimeEventsGet"
         parent="webscript">

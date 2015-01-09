@@ -162,7 +162,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * @return			true if request valid and parsed, false otherwise
 	 */
 	abstract protected boolean validateRequest(WebScriptRequest req, Status status);
-	
+
     /**
      * Get site by name, workspace, and time
      *
@@ -185,7 +185,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
     /**
      * Helper method for getSideNode* methods
-     * 
+     *
      * @param siteName
      * @param workspace
      * @param dateTime
@@ -194,9 +194,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      */
     private EmsScriptNode getSiteNodeImpl(String siteName, WorkspaceNode workspace,
             						 	   Date dateTime, boolean forWorkspace, boolean errorOnNull) {
-    	
+
 		EmsScriptNode siteNode = null;
-		
+
 		if (siteName == null) {
 		    if ( errorOnNull ) log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST,"No sitename provided" );
 		} else {
@@ -208,17 +208,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 				siteNode = NodeUtil.getSiteNode( siteName, false, workspace, dateTime,
 			                 					services, response );
 			}
-	        if ( errorOnNull && siteNode == null ) {
-	            
+	        if ( errorOnNull && siteNode == null ) {	            
 	            log(Level.ERROR,  HttpServletResponse.SC_BAD_REQUEST, "Site node is null");
 	        }
 		}
-		
+
 		return siteNode;
 	}
-    
+
     /**
-     * Get site by name, workspace, and time.  This also checks that the returned node is 
+     * Get site by name, workspace, and time.  This also checks that the returned node is
      * in the specified workspace, not just whether its in the workspace or any of its parents.
      *
      * @param siteName
@@ -235,7 +234,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
     protected EmsScriptNode getSiteNodeForWorkspace(String siteName, WorkspaceNode workspace,
                                         			Date dateTime, boolean errorOnNull) {
-    	
+
         return getSiteNodeImpl(siteName, workspace, dateTime, true, errorOnNull);
     }
 
@@ -256,7 +255,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
         return getSiteNode( siteName, workspace, dateTime, errorOnNull );
     }
-	
+
 	/**
 	 * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
 	 * This does caching of found elements so they don't need to be looked up with a different API each time.
@@ -288,9 +287,26 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	protected EmsScriptNode findScriptNodeById(String id,
 	                                           WorkspaceNode workspace,
 	                                           Date dateTime, boolean findDeleted) {
-	    return NodeUtil.findScriptNodeById( id, workspace, dateTime, findDeleted,
-	                                        services, response );
+	    return findScriptNodeById( id, workspace, dateTime, findDeleted, null );
 	}
+
+	/**
+     * Find node of specified name (returns first found) - so assume uniquely named ids - this checks sysml:id rather than cm:name
+     * This does caching of found elements so they don't need to be looked up with a different API each time.
+     *
+     * TODO extend so search context can be specified
+     * @param id    Node id to search for
+     * @param workspace
+     * @param dateTime
+     * @return      ScriptNode with name if found, null otherwise
+     */
+    protected EmsScriptNode findScriptNodeById(String id,
+                                               WorkspaceNode workspace,
+                                               Date dateTime, boolean findDeleted,
+                                               String siteName) {
+        return NodeUtil.findScriptNodeById( id, workspace, dateTime, findDeleted,
+                                            services, response, siteName );
+    }
 	
 	/**
      * Find nodes of specified sysml:name
@@ -303,8 +319,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
     
     
-    // Updated log methods (still works with old log calls)
-    
+    // Updated log methods with log4j methods (still works with old log calls)
     // String concatenation replaced with C formatting
     protected void log (Level level, int code, String msg, String...params) {
     	if (level.toInt() >= logger.getLevel().toInt()) {
@@ -313,7 +328,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     	}
 	}
     
-    // No need for string formatting: 
+    // If No need for string formatting: 
     protected void log(Level level, int code, String msg) {
 		if (level.toInt() >= logger.getLevel().toInt()) {
 			// print to response stream if >= existing log level
@@ -376,7 +391,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	            break;
             default:
                 // TODO: investigate if this the correct thing to do
-	            logger.debug( msg );    
+	            logger.debug( msg );
+	            break;
 	    }
 	}
 	
@@ -441,7 +457,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     public static EmsScriptNode getSitesFolder( WorkspaceNode workspace ) {
         EmsScriptNode sitesFolder = null;
         // check and see if the Sites folder already exists
-        NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, false, 
+        NodeRef sitesNodeRef = NodeUtil.findNodeRefByType( "Sites", SearchType.CM_NAME, false,
                                                            workspace, null, true, NodeUtil.getServices(), false );
         if ( sitesNodeRef != null ) {
             sitesFolder = new EmsScriptNode( sitesNodeRef, NodeUtil.getServices() );
@@ -463,37 +479,38 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 //        EmsScriptNode sf = NodeUtil.getCompanyHome( getServices() ).childByNamePath( "Sites" );
 //        return sf;
     }
-    
+
     public EmsScriptNode createSite( String siteName, WorkspaceNode workspace ) {
-    	
+
         EmsScriptNode siteNode = getSiteNode( siteName, workspace, null, false );
         boolean validWorkspace = workspace != null && workspace.exists();
         boolean invalidSiteNode = siteNode == null || !siteNode.exists();
 
         // Create a alfresco Site if creating the site on the master and if the site does not exists:
         if ( invalidSiteNode && !validWorkspace ) {
-          
+
             SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, SiteVisibility.PUBLIC );
             siteNode = new EmsScriptNode( foo.getNodeRef(), services );
             siteNode.createOrUpdateAspect( "cm:taggable" );
             siteNode.createOrUpdateAspect(Acm.ACM_SITE);
         }
-        
+
         // If this site is supposed to go into a non-master workspace, then create the site folders
         // there if needed:
-        if ( validWorkspace && 
+        if ( validWorkspace &&
         	( invalidSiteNode || (!invalidSiteNode && !workspace.equals(siteNode.getWorkspace())) ) ) {
-        	
+
 	        EmsScriptNode sitesFolder = getSitesFolder(workspace);
-	        
+
 	        // Now, create the site folder:
 	        if (sitesFolder == null ) {
 	            Debug.error("Could not create site " + siteName + "!");
 	        } else {
 	            siteNode = sitesFolder.createFolder( siteName, null, !invalidSiteNode ? siteNode.getNodeRef() : null );
+	            if ( siteNode != null ) siteNode.getOrSetCachedVersion();
 	        }
         }
-        
+
         return siteNode;
     }
 
@@ -512,7 +529,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         }
         return workspaceId;
     }
-    
+
     public static String getArtifactId( WebScriptRequest req ) {
         String artifactId = req.getServiceMatch().getTemplateVars().get(ARTIFACT_ID);
         if ( artifactId == null || artifactId.length() <= 0 ) {
@@ -541,7 +558,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                                               String userName ) {
         String nameOrId = getWorkspaceId( req );
         return WorkspaceNode.getWorkspaceFromId( nameOrId, services, response, responseStatus,
-                                   //createIfNotFound, 
+                                   //createIfNotFound,
                                    userName );
     }
 
@@ -580,14 +597,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	                                                       boolean ignoreWorkspace,
 	                                                       WorkspaceNode workspace,
 	                                                       Date dateTime) {
-		return this.searchForElements( type, pattern, ignoreWorkspace, 
+		return this.searchForElements( type, pattern, ignoreWorkspace,
 		                               workspace, dateTime, null );
 	}
-	
+
 	   /**
      * Perform Lucene search for the specified pattern and ACM type for the specified
      * siteName.
-     * 
+     *
      * TODO: Scope Lucene search by adding either parent or path context
      * @param type      escaped ACM type for lucene search: e.g. "@sysml\\:documentation:\""
      * @param pattern   Pattern to look for
@@ -598,7 +615,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                                                                   WorkspaceNode workspace,
                                                                   Date dateTime,
                                                                   String siteName) {
-        
+
         Map<String, EmsScriptNode> searchResults = new HashMap<String, EmsScriptNode>();
 
         searchResults.putAll( NodeUtil.searchForElements( type, pattern, ignoreWorkspace,
@@ -609,7 +626,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                                                           siteName) );
 
         return searchResults;
-        
+
     }
 
 	/**
@@ -630,10 +647,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         }
         return req.getParameter(name).equals(value);
     }
-    
+
     /**
      * Helper utility to get the value of a Boolean request parameter
-     * 
+     *
      * @param req
      *            WebScriptRequest with parameter to be checked
      * @param name
@@ -656,7 +673,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         if ( paramVal.equals( "false" ) ) return false;
         return defaultValue;
     }
-    
+
 
     public StringBuffer getResponse() {
         return response;
@@ -691,7 +708,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
 
     protected static String getIdFromRequest( WebScriptRequest req ) {
-        String[] ids = new String[] { "id", "modelid", "modelId", "productid", "productId", 
+        String[] ids = new String[] { "id", "modelid", "modelId", "productid", "productId",
         							  "viewid", "viewId", "workspaceid", "workspaceId",
                                       "elementid", "elementId" };
         String id = null;
@@ -738,30 +755,30 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return gotSuffix;
     }
 
-    
+
     public void setWsDiff(WorkspaceNode workspace) {
         wsDiff = new WorkspaceDiff(workspace, workspace);
     }
     public void setWsDiff(WorkspaceNode workspace1, WorkspaceNode workspace2, Date time1, Date time2) {
         wsDiff = new WorkspaceDiff(workspace1, workspace2, time1, time2);
     }
-    
+
     public WorkspaceDiff getWsDiff() {
         return wsDiff;
     }
 
     /**
      * Determines the project site for the passed site node.  Also, determines the
-     * site package node if applicable.  
-     * 
+     * site package node if applicable.
+     *
      */
-    public Pair<EmsScriptNode,EmsScriptNode> findProjectSite(WebScriptRequest req, String siteName, 
+    public Pair<EmsScriptNode,EmsScriptNode> findProjectSite(WebScriptRequest req, String siteName,
                                                              WorkspaceNode workspace,
                                                              EmsScriptNode initialSiteNode) {
-        
+
         EmsScriptNode sitePackageNode = null;
         EmsScriptNode siteNode = null;
-        
+
         // If it is a package site, get the corresponding package for the site:
         NodeRef sitePackageRef = (NodeRef) initialSiteNode.getProperty( Acm.ACM_SITE_PACKAGE );
         if (sitePackageRef != null) {
@@ -769,13 +786,13 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         }
         // Could find the package site using the property, try searching for it:
         else if (siteName != null && siteName.startsWith(NodeUtil.sitePkgPrefix)) {
-            
+
             String[] splitArry = siteName.split(NodeUtil.sitePkgPrefix);
             if (splitArry != null && splitArry.length > 0) {
                 String sitePkgName = splitArry[splitArry.length-1];
 
                 sitePackageNode = findScriptNodeById(sitePkgName,workspace, null, false );
-                
+
                 if (sitePackageNode == null) {
                     log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find site package node for site package name %s",siteName);
                     return null;
@@ -791,18 +808,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Mismatch between site/package for site package name %s",siteName);
                 return null;
             }
-            
+
             // Get the project site by tracing up the parents until the parent is null:
             NodeRef siteParentRef = (NodeRef) initialSiteNode.getProperty( Acm.ACM_SITE_PARENT );
             EmsScriptNode siteParent = siteParentRef != null ? new EmsScriptNode(siteParentRef, services, response) : null;
             EmsScriptNode oldSiteParent = null;
-            
+
             while (siteParent != null) {
                 oldSiteParent = siteParent;
                 siteParentRef = (NodeRef) siteParent.getProperty( Acm.ACM_SITE_PARENT );
                 siteParent = siteParentRef != null ? new EmsScriptNode(siteParentRef, services, response) : null;
             }
-            
+
             if (oldSiteParent != null && oldSiteParent.exists()) {
                 siteNode = oldSiteParent;
             }
@@ -810,28 +827,28 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find parent project site for site package name %s", siteName);
                 return null;
             }
-            
+
         }
         // Otherwise, assume it is a project site:
         else {
             siteNode = initialSiteNode;
         }
-        
+
         return new Pair<EmsScriptNode,EmsScriptNode>(sitePackageNode, siteNode);
     }
-    
+
     /**
      * Return the matching alfresco site for the Package, or null
-     * 
+     *
      * @param pkgNode
      * @param workspace
      * @return
      */
     public EmsScriptNode getSiteForPkgSite(EmsScriptNode pkgNode, WorkspaceNode workspace) {
-        
+
         NodeRef pkgSiteParentRef = (NodeRef)pkgNode.getProperty( Acm.ACM_SITE_SITE );
         EmsScriptNode pkgSiteParentNode = null;
-        
+
         if (pkgSiteParentRef != null) {
             pkgSiteParentNode = new EmsScriptNode(pkgSiteParentRef, services);
         }
@@ -843,17 +860,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 pkgSiteParentNode = findScriptNodeById(NodeUtil.sitePkgPrefix+sysmlid, workspace, null, false);
             }
             else {
-                log(Level.WARN, "Parent package site does not have a sysmlid.  Node "+pkgNode);
+            	//TODO NOTE: Not Sure if to invoke pkgNode.toString() or pkgNode.getName() below:
+                log(Level.WARN, "Parent package site does not have a sysmlid.  Node %s",pkgNode.toString());
             }
         }
-        
+
         return pkgSiteParentNode;
     }
-    
+
     /**
      * Returns the parent site of node, or the project site, or null.  The parent site of
      * the node is the alfresco site for the site package.
-     * 
+     *
      * @param node
      * @param siteNode
      * @param projectNode
@@ -862,25 +880,25 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      */
     public EmsScriptNode findParentPkgSite(EmsScriptNode node, EmsScriptNode siteNode,
                                            EmsScriptNode projectNode, WorkspaceNode workspace) {
-        
+
         EmsScriptNode pkgSiteParentNode = null;
         EmsScriptNode siteParent = node.getParent();
         EmsScriptNode siteParentReifNode;
         while (siteParent != null && siteParent.exists()) {
-            
+
             siteParentReifNode = siteParent.getReifiedNode();
-            
+
             // If the parent is a package and a site, then its the parent site node:
             if (siteParentReifNode != null && siteParentReifNode.hasAspect(Acm.ACM_PACKAGE) ) {
                 Boolean isSiteParent = (Boolean) siteParentReifNode.getProperty( Acm.ACM_IS_SITE );
                 if (isSiteParent != null && isSiteParent) {
-                    
+
                     // Get the alfresco Site for the site package node:
                     pkgSiteParentNode = getSiteForPkgSite(siteParentReifNode, workspace);
                     break;
                 }
             }
-            
+
             // If the parent is the project, then the site will be the project Site:
             if ((siteParentReifNode != null && siteParentReifNode.equals( projectNode )) ||
                 siteParent.equals(projectNode)) {
@@ -889,15 +907,15 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
                 }
                 break;  // break no matter what b/c we have reached the project node
             }
-            
+
             if (siteParent.isWorkspaceTop()) {
                 break;
             }
-            
+
             siteParent = siteParent.getParent();
         }
-        
+
         return pkgSiteParentNode;
     }
-    
+
 }

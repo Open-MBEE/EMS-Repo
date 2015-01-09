@@ -76,7 +76,7 @@ public class ProjectPost extends AbstractJavaWebScript {
         ProjectPost instance = new ProjectPost(repository, services);
         return instance.executeImplImpl(req,  status, cache);
     }
-	
+
 	protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
@@ -87,16 +87,16 @@ public class ProjectPost extends AbstractJavaWebScript {
 
 		try {
 			if (validateRequest(req, status)) {
-				
+
 				JSONObject json = (JSONObject)req.parseContent();
 				JSONArray elementsArray = json != null ? json.optJSONArray("elements") : null;
 				JSONObject projJson = elementsArray != null && elementsArray.length() > 0 ? elementsArray.getJSONObject(0) : new JSONObject();
 
 				// We are now getting the project id form the json object, but leaving the check from the request
 				// for backwards compatibility:
-			    String projectId = projJson.has(Acm.JSON_ID) ? projJson.getString(Acm.JSON_ID) : getProjectId( req );  
+			    String projectId = projJson.has(Acm.JSON_ID) ? projJson.getString(Acm.JSON_ID) : getProjectId( req );
 			    String siteName = getSiteName( req );
-			  
+
 		        boolean delete = getBooleanArg( req, "delete", false );
 		        boolean createSite = getBooleanArg(req, "createSite", false);
 
@@ -131,12 +131,12 @@ public class ProjectPost extends AbstractJavaWebScript {
 
 	public int updateOrCreateProject(JSONObject jsonObject, WorkspaceNode workspace, String projectId) throws JSONException {
 		  EmsScriptNode projectNode = findScriptNodeById(projectId, workspace, null, true);
-		
+
 		  if (projectNode == null) {
 		      log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find project\n");
 		      return HttpServletResponse.SC_NOT_FOUND;
 		  }
-		
+
 		String projectName = null;
         if (jsonObject.has(Acm.JSON_NAME)) {
             projectName = jsonObject.getString(Acm.JSON_NAME);
@@ -160,7 +160,7 @@ public class ProjectPost extends AbstractJavaWebScript {
             }
             log(Level.INFO, HttpServletResponse.SC_OK, "Project metadata updated.\n");
         }
-        
+
         return HttpServletResponse.SC_OK;
     }
 
@@ -196,16 +196,18 @@ public class ProjectPost extends AbstractJavaWebScript {
                 siteNode.childByNamePath( MODEL_PATH_SEARCH, false, workspace, true );
 		if (modelContainerNode == null) {
 			modelContainerNode = siteNode.createFolder("Models");
+			if ( modelContainerNode != null ) modelContainerNode.getOrSetCachedVersion();
+			siteNode.getOrSetCachedVersion();
 			log(Level.INFO, HttpServletResponse.SC_OK, "Model folder created.\n");
 		}
 
 		// create project if doesn't exist or update
-		// Note: Also checking if the workspace for the projectNode differs from the desired workspace, 
+		// Note: Also checking if the workspace for the projectNode differs from the desired workspace,
 		// which will occur if the project is in the master, but not in the workspace yet.
-		EmsScriptNode projectNodeAll = findScriptNodeById(projectId, workspace, null, true);
-		EmsScriptNode projectNode = (projectNodeAll != null && NodeUtil.workspacesEqual(projectNodeAll.getWorkspace(),workspace)) ? 
+		EmsScriptNode projectNodeAll = findScriptNodeById(projectId, workspace, null, true, siteName);
+		EmsScriptNode projectNode = (projectNodeAll != null && NodeUtil.workspacesEqual(projectNodeAll.getWorkspace(),workspace)) ?
 		                                                                                                     projectNodeAll : null;
-		
+
 		String projectName = null;
 		if (jsonObject.has(Acm.JSON_NAME)) {
 		    projectName = jsonObject.getString(Acm.JSON_NAME);
@@ -219,8 +221,9 @@ public class ProjectPost extends AbstractJavaWebScript {
 		}
 
 		if ( projectNode == null ) {
-			projectNode = modelContainerNode.createFolder(projectId, Acm.ACM_PROJECT, 
+			projectNode = modelContainerNode.createFolder(projectId, Acm.ACM_PROJECT,
 			                                              projectNodeAll != null ? projectNodeAll.getNodeRef() : null);
+			modelContainerNode.getOrSetCachedVersion();
 			projectNode.setProperty(Acm.ACM_ID, projectId);
 			projectNode.setProperty(Acm.ACM_TYPE, "Project");
             if (projectName != null) {
@@ -248,16 +251,21 @@ public class ProjectPost extends AbstractJavaWebScript {
 		            }
 					log(Level.INFO, HttpServletResponse.SC_OK, "Project metadata updated.\n");
 
-					if (checkPermissions(projectNode.getParent(), PermissionService.WRITE)) {
-						// move sites if exists under different site
-						if (!projectNode.getParent().equals(modelContainerNode)) {
-							projectNode.move(modelContainerNode);
-							log(Level.INFO, HttpServletResponse.SC_OK, "Project moved to new site.\n");
-						}
-					}
+
+					// This move can cause issues if no site and no project was specified in the URL,
+					// but another site has the no_project already.  Then we mistakenly move that
+					// project and all its elements.  See CMED-531:
+//					if (checkPermissions(projectNode.getParent(), PermissionService.WRITE)) {
+//						// move sites if exists under different site
+//						if (!projectNode.getParent().equals(modelContainerNode)) {
+//							projectNode.move(modelContainerNode);
+//							log(LogLevel.INFO, "Project moved to new site.\n", HttpServletResponse.SC_OK);
+//						}
+//					}
 				}
 			}
 		}
+		projectNode.getOrSetCachedVersion();
 		return HttpServletResponse.SC_OK;
 	}
 

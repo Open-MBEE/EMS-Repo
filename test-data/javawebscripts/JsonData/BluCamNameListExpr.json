@@ -32,11 +32,22 @@
         "name": "viewpoint_op",
         "documentation": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-    "specialization" : {
+      "specialization" : {
         "parameters": ["exposed_id"],
-        "expression":"vp_expression",
-        "type": "Operation"
-    }
+        "type": "Operation",
+        "expression":{
+          "operand":[{"type":"ElementValue",
+                      "element":"op_list"},
+                     {"type":"Expression",
+                      "operand":[{"type":"ElementValue",
+                                  "element":"op_map"},
+                                 {"type":"ElementValue",
+                                  "element":"exposed_id"},
+                                 {"type":"ElementValue",
+                                  "element":"op_name_arg"}]}],
+          "type": "Expression"
+        }
+      }
     },
     {
         "sysmlid": "exposed_id",
@@ -45,24 +56,6 @@
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
     "specialization" : {
         "type": "Parameter"
-    }
-    },
-    {
-        "sysmlid": "vp_expression",
-        "name": "",
-        "documentation": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-    "specialization" : {
-        "operand":[{"type":"ElementValue",
-                    "element":"op_list"},
-                   {"type":"Expression",
-                    "operand":[{"type":"ElementValue",
-                                "element":"op_map"},
-                               {"type":"ElementValue",
-                                "element":"exposed_id"},
-                               {"type":"ElementValue",
-                                "element":"op_name_arg"}]}],
-        "type": "Expression"
     }
     },
     {
