@@ -6,6 +6,38 @@
         class="gov.nasa.jpl.view_repo.webscripts.DebugGet"
         parent="webscript">
     </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.heisencache.get"
+        class="gov.nasa.jpl.view_repo.webscripts.HeisenCacheGet"
+        parent="webscript">
+    </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.simplecache.get"
+        class="gov.nasa.jpl.view_repo.webscripts.SimpleCacheGet"
+        parent="webscript">
+    </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.fullcache.get"
+        class="gov.nasa.jpl.view_repo.webscripts.FullCacheGet"
+        parent="webscript">
+    </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.alwaysturndebugoff.get"
+        class="gov.nasa.jpl.view_repo.webscripts.AlwaysTurnDebugOffGet"
+        parent="webscript">
+    </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.versioncache.get"
+        class="gov.nasa.jpl.view_repo.webscripts.VersionCacheGet"
+        parent="webscript">
+    </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.versioncachedebug.get"
+        class="gov.nasa.jpl.view_repo.webscripts.VersionCacheDebugGet"
+        parent="webscript">
+    </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.timeevents.get"
+        class="gov.nasa.jpl.view_repo.webscripts.TimeEventsGet"
+        parent="webscript">
+    </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.modelposttimeevents.get"
+        class="gov.nasa.jpl.view_repo.webscripts.ModelPostTimeEventsGet"
+        parent="webscript">
+    </bean>
 
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.elements.element.get"
         class="gov.nasa.jpl.view_repo.webscripts.ModelGet" parent="webscript"

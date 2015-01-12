@@ -2,7 +2,7 @@
 
   "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n",
 
-  "sequence": 0,
+  "sequence": 18,
 
   "workspace1": {
 
@@ -20,7 +20,7 @@
 
         "owner": "holding_bin_no_site_no_project",
 
-        "qualifiedName": "/holding_bin/6666_name",
+        "qualifiedName": "/no_project/holding_bin/6666_name",
 
         "specialization": {
 
@@ -60,7 +60,7 @@
 
         "owner": "6666",
 
-        "qualifiedName": "/holding_bin/6666_name/null",
+        "qualifiedName": "/no_project/holding_bin/6666_name/null",
 
         "specialization": {
 
@@ -80,7 +80,7 @@
 
         "owner": "6666",
 
-        "qualifiedName": "/holding_bin/6666_name/null",
+        "qualifiedName": "/no_project/holding_bin/6666_name/null",
 
         "specialization": {
 

@@ -18,6 +18,7 @@ import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+@Deprecated
 public class NodeUnlock extends DeclarativeWebScript {
     static Logger logger = Logger.getLogger( NodeUnlock.class );
     

@@ -377,6 +377,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
 //                propChanges = new LinkedHashMap< String, Pair<Object,Object> >();
 //                getPropertyChanges().put( owningPropNode.getSysmlId(), propChanges );
 //            }
+            // FIXME other properties beside value are issues, ie operand
             String valueName = NodeUtil.createQName( "sysml:value", getServices() ).toString();
             Pair< Object, Object > valueChange = propChanges.get( valueName );
             if ( valueChange == null ) {

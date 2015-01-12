@@ -399,7 +399,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
             else:
                 print_pass("Test number %s (%s) passed!  No differences in the filtered .json files (%s,%s)"%(test_num,test_name,baseline_json,result_json))
     else:
-        print_error("Curl command return a bad status and output doesnt start with json: %s, output: '%s'"%(status,output))
+        print_error("Test number %s (%s) failed!"%(test_num,test_name), "Curl command return a bad status and output doesnt start with json: %s, output: '%s'"%(status,output))
 
     thick_divider()
     
@@ -578,7 +578,7 @@ None,
 create_curl_cmd(type="GET",data="elements/123456?recurse=true",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
-common_filters,
+common_filters+['"MMS_','MMS_'],
 ["test","workspaces","develop"]
 ],
         
@@ -632,11 +632,11 @@ common_filters,
 110,
 "GetSearch",
 "Get search",
-create_curl_cmd(type="GET",data="element/search?keyword=some*",base_url=BASE_URL_WS,
+create_curl_cmd(type="GET",data="search?keyword=some*",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
 common_filters,
-["test","workspaces","develop", "develop2"],
+["test","workspaces","develop"],
 None,
 None,
 80
@@ -708,7 +708,7 @@ common_filters+['"timestamp"','"id"'],
 ],
         
 [
-54,
+154,
 "PostConfigAgain",
 "Post same configuration again",
 create_curl_cmd(type="POST",data="configuration.json",base_url=BASE_URL_WS,
@@ -719,7 +719,7 @@ common_filters+['"timestamp"','"id"'],
 ],
         
 [
-55,
+155,
 "GetConfigAgain",
 "Get configurations",
 create_curl_cmd(type="GET",data="sites/europa/configurations",base_url=BASE_URL_WS,
@@ -834,7 +834,10 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="snapshots"),
 True, 
 common_filters+['"created"','"id"','"url"'],
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop", "develop2"],
+None,
+None,
+3
 ],
 
 # EXPRESSIONS: ==========================    
@@ -916,7 +919,7 @@ True,
 common_filters,
 []
 ],
-        
+
 # NEW URLS: ==========================    
 
 [
@@ -1192,7 +1195,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="",branch="ws1?sourceWorkspace=master"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop"]
 ], 
 
 [
@@ -1203,7 +1206,7 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="",branch="ws2?sourceWorkspace=master"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop"]
 ],
       
 [
@@ -1214,7 +1217,7 @@ create_curl_cmd(type="DELETE",data="elements/arg_ev_38307",base_url=BASE_URL_WS,
                 branch="ws1/"),
 True, 
 common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"'],
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop"]
 ], 
 
 [

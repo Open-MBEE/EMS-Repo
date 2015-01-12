@@ -36,7 +36,6 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -113,7 +112,12 @@ public class ProductListGet extends AbstractJavaWebScript {
 	}
 
 	@Override
-	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+    protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
+        ProductListGet instance = new ProductListGet(repository, services);
+        return instance.executeImplImpl(req,  status, cache);
+    }
+	
+	protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
 		clearCaches();

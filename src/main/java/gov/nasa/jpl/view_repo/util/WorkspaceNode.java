@@ -117,7 +117,7 @@ public class WorkspaceNode extends EmsScriptNode {
         Date time = (Date)getProperty("ems:copyTime");
         return time;
     }
-    
+
 //    /**
 //     * Create a workspace folder within the specified folder or (if the folder
 //     * is null) within the specified user's home folder.
@@ -159,7 +159,7 @@ public class WorkspaceNode extends EmsScriptNode {
 //        }
 //
 //        String cmName = null;
-//        
+//
 //        WorkspaceNode ws = new WorkspaceNode( folder.createFolder( wsName ).getNodeRef(),
 //                                              services, response, status );
 //        ws.addAspect( "ems:Workspace" );
@@ -220,15 +220,15 @@ public class WorkspaceNode extends EmsScriptNode {
     				+ ", within which to create workspace, "
     				+ wsName );
     	}
-    	
-        WorkspaceNode parentWorkspace = 
+
+        WorkspaceNode parentWorkspace =
                 WorkspaceNode.getWorkspaceFromId( sourceNameOrId, services,
                                                   response, status, //false
                                                   userName );
     	String cmName = wsName + '_' + getName( parentWorkspace );
     	String cmTitle = cmName;
-    	
-    	// Make sure the workspace does not already exist in the target folder 
+
+    	// Make sure the workspace does not already exist in the target folder
     	EmsScriptNode child = folder.childByNamePath( "/" + cmName, true, null, false );
     	if ( child != null && child.exists() ) {
             String msg = "ERROR! Trying to create an workspace in the same folder with the same name, " + cmName + "!\n";
@@ -238,7 +238,7 @@ public class WorkspaceNode extends EmsScriptNode {
             }
             return null;
     	}
-    	
+
     	// Make sure the workspace does not already exist otherwise
     	// So workspaces can be named the same, we store the name as the title, then update the
     	// name to be unique with the nodeID as the name
@@ -252,10 +252,10 @@ public class WorkspaceNode extends EmsScriptNode {
         }
         return null;
     }
-        
+
     	WorkspaceNode ws = new WorkspaceNode( folder.createFolder( cmName ).getNodeRef(),
     	                                      services, response, status );
-    	
+
     ws.setProperty("cm:title", cmTitle);
     cmName = ws.getId() + "_" + getId( parentWorkspace );
     ws.setProperty( "cm:name", cmName );
@@ -269,13 +269,16 @@ public class WorkspaceNode extends EmsScriptNode {
     	if ( copyTime != null ) {
     	    ws.createOrUpdateProperty( "ems:copyTime", copyTime );
     	}
-    	
+
     	if ( Debug.isOn() ) Debug.outln( "parent workspace: " + parentWorkspace );
     	if(parentWorkspace != null) {
     		parentWorkspace.appendToPropertyNodeRefs( "ems:children", ws.getNodeRef() );
     		ws.setProperty( "ems:parent", parentWorkspace.getNodeRef() );
     	}
     	if ( Debug.isOn() ) Debug.outln( "created workspace " + ws + " in folder " + folder );
+
+
+    	ws.getOrSetCachedVersion();
 
     	return ws;
     }
@@ -291,9 +294,9 @@ public class WorkspaceNode extends EmsScriptNode {
 
         // FIXME -- REVIEW -- Is that enough?! What about the contents? Don't we
         // need to purge? Or is a "deleted" workspaceNode enough?
-        
+
         // Update parent/child workspace references
-        
+
         // Remove this workspace from parent's children
 //        WorkspaceNode source = getParentWorkspace();
 //        if ( Debug.isOn() ) Debug.outln( "deleted workspace " + this + " from source " + getName(source) );
@@ -314,7 +317,7 @@ public class WorkspaceNode extends EmsScriptNode {
 //                source.removeFromPropertyNodeRefs( "ems:children", getNodeRef() );
 //            }
 //        }
-        
+
         // Not bothering to remove this workspace's ems:parent or ems:children
 
         // Delete children if requested
@@ -331,7 +334,7 @@ public class WorkspaceNode extends EmsScriptNode {
                                                        getResponse(),
                                                        getStatus() );
             if ( !NodeUtil.exists( childWs ) ) {
-                log( "trying to delete non-existent child workspace " + 
+                log( "trying to delete non-existent child workspace " +
                      ( childWs == null ? "" : "," + childWs.getName() + ", " ) +
                      " from parent, " + getName() );
             } else {
@@ -339,7 +342,7 @@ public class WorkspaceNode extends EmsScriptNode {
             }
         }
     }
-    
+
     /**
      * Determine whether the given node is correct for this workspace, meaning
      * that it is either modified in this workspace or is contained by the
@@ -351,7 +354,7 @@ public class WorkspaceNode extends EmsScriptNode {
     public boolean contains( EmsScriptNode node  ) {
         WorkspaceNode nodeWs = node.getWorkspace();
         if ( this.equals( nodeWs ) ) return true;
-        
+
         WorkspaceNode parentWs = getParentWorkspace();
         if ( parentWs == null ) return ( nodeWs == null );
         return parentWs.contains( node );
@@ -363,7 +366,7 @@ public class WorkspaceNode extends EmsScriptNode {
      *
      * @param node
      * @return
-     * @throws Exception 
+     * @throws Exception
      */
     public EmsScriptNode replicateWithParentFolders( EmsScriptNode node ) {// throws Exception {
         if ( Debug.isOn() ) Debug.outln( "replicateFolderWithChain( " + node + " )" );
@@ -395,7 +398,7 @@ public class WorkspaceNode extends EmsScriptNode {
                     break;
                 }
             }
-            
+
             if ( !this.equals( parent.getWorkspace() ) ) {
                 parent = replicateWithParentFolders( parent );
             }
@@ -418,30 +421,32 @@ public class WorkspaceNode extends EmsScriptNode {
                 }
             }
             if ( nodeGuess == null) {
-                
+
                 // Clone the reified node if possible and not already in the workspace:
                 EmsScriptNode oldReifiedNode = node.getReifiedNode();
                 EmsScriptNode newReifiedNode = null;
                 if (oldReifiedNode != null) {
-                    
-                    EmsScriptNode foundReifiedNode = NodeUtil.findScriptNodeByIdForWorkspace( oldReifiedNode.getSysmlId(), 
-                                                                                              this, null, false, 
+
+                    EmsScriptNode foundReifiedNode = NodeUtil.findScriptNodeByIdForWorkspace( oldReifiedNode.getSysmlId(),
+                                                                                              this, null, false,
                                                                                               getServices(), getResponse());
 
-                   newReifiedNode = foundReifiedNode == null ? oldReifiedNode.clone(parent) : foundReifiedNode;    
+                   newReifiedNode = foundReifiedNode == null ? oldReifiedNode.clone(parent) : foundReifiedNode;
                 }
 
                 // Clone the node:
                 newFolder = node.clone(parent);
                 //newFolder.setWorkspace( this, node.getNodeRef() );  // now done in clone()
-                
+
                 if ( newReifiedNode != null && newFolder != null) {
                     newReifiedNode.createOrUpdateAspect( "ems:Reified" );
                     newReifiedNode.createOrUpdateProperty( "ems:reifiedPkg", newFolder.getNodeRef() );
                     newFolder.createOrUpdateAspect( "ems:Reified" );
                     newFolder.createOrUpdateProperty( "ems:reifiedNode", newReifiedNode.getNodeRef() );
                 }
-                
+                if ( newFolder != null) newFolder.getOrSetCachedVersion();
+                if ( parent != null ) parent.getOrSetCachedVersion();
+
             } else {
                 newFolder = nodeGuess;
             }
@@ -450,7 +455,7 @@ public class WorkspaceNode extends EmsScriptNode {
         if ( Debug.isOn() ) Debug.outln( "returning newFolder: " + newFolder );
         return newFolder;
     }
-    
+
 
     public static String getId( WorkspaceNode ws ) {
         if ( ws == null ) return "master";
@@ -461,25 +466,26 @@ public class WorkspaceNode extends EmsScriptNode {
         if ( ws == null ) return "master";
         return ws.getWorkspaceName();
     }
-    
+
     public static String getName( WorkspaceNode ws ) {
         if ( ws == null ) return "master";
         return ws.getName();
     }
-    
+
     // don't want to override getName() in case that causes problems for
     // alfresco's code
+    @Override
     public String getWorkspaceName() {
         return (String)getProperty("ems:workspace_name");
     }
-    
+
     public static String getQualifiedId( WorkspaceNode ws ) {
         return getQualifiedId( ws, null );
     }
     public static String getQualifiedId( WorkspaceNode ws,
                                          Seen<WorkspaceNode> seen ) {
         if ( ws == null ) {
-            return getId( ws ); 
+            return getId( ws );
         }
         Pair< Boolean, Seen< WorkspaceNode > > p = Utils.seen( ws, true, seen );
         if ( p.first ) return null;
@@ -493,7 +499,7 @@ public class WorkspaceNode extends EmsScriptNode {
     public static String getQualifiedName( WorkspaceNode ws,
                                            Seen<WorkspaceNode> seen ) {
         if ( ws == null ) {
-            return getWorkspaceName( ws ); 
+            return getWorkspaceName( ws );
         }
         Pair< Boolean, Seen< WorkspaceNode > > p = Utils.seen( ws, true, seen );
         if ( p.first ) return null;
@@ -560,12 +566,12 @@ public class WorkspaceNode extends EmsScriptNode {
         return changedElementIds;
     }
 
-    
+
 //    /**
 //     * Get the NodeRefs of this workspace that have changed with respect to
 //     * another workspace. This method need not check the actual changes to see
 //     * if they are different and may be a superset of those actually changed.
-//     * 
+//     *
 //     * @param other
 //     * @param dateTime
 //     * @param otherTime
@@ -576,13 +582,13 @@ public class WorkspaceNode extends EmsScriptNode {
 //                                                           Date otherTime ) {
 //        return getChangedNodeRefsWithRespectTo( this, other, dateTime, otherTime );
 //    }
-    
-    
+
+
     /**
      * Get the NodeRefs of this workspace that have changed with respect to
      * another workspace. This method need not check the actual changes to see
      * if they are different and may be a superset of those actually changed.
-     * 
+     *
      * @param thisWs
      * @param otherWs
      * @param dateTime
@@ -598,26 +604,26 @@ public class WorkspaceNode extends EmsScriptNode {
                                                                   Status status ) {
         //System.out.println( getName(thisWs) + ".getChangedNodeRefsWithRespectTo(" + getName(otherWs) + ", " + dateTime + ", " + otherTime +  ")" );
 
-        Set< NodeRef > changedNodeRefs = 
+        Set< NodeRef > changedNodeRefs =
                 new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);//getChangedNodeRefs());
         WorkspaceNode targetParent = getCommonParent( thisWs, otherWs );
         WorkspaceNode parent = thisWs;
         WorkspaceNode lastParent = parent;
-        
+
         // Get nodes in the workspace that have changed with respect to the
         // common parent. To avoid computation, these do not take time into
         // account except to rule out workspaces with changes only after
         // dateTime.
         while ( parent != null && !parent.equals( targetParent ) ) {
             Set< NodeRef > changes = parent.getChangedNodeRefs( dateTime );
-            
+
             //System.out.println( "nodes in " + getName(parent) + " = " + changes );
-            
+
             changedNodeRefs.addAll( changes );
             parent = parent.getParentWorkspace();
             if ( parent != null ) lastParent = parent;
         }
-        
+
         // Now gather nodes in the common parent chain after otherTime and
         // before dateTime. We need to get these from the transaction history
         // (or potentially the version history) to only include those that
@@ -648,7 +654,7 @@ public class WorkspaceNode extends EmsScriptNode {
                     String diffStr = (String)commit.getProperty( "ems:commit" );
                     try {
                         JSONObject diff = new JSONObject( diffStr );
-                        
+
                         Set< EmsScriptNode > elements =
                                 WorkspaceDiff.getAllChangedElementsInDiffJson( diff,
                                                                                services );
@@ -700,7 +706,7 @@ public class WorkspaceNode extends EmsScriptNode {
         json.put( "qualifiedName", getQualifiedName( ws ) );
         json.put( "qualifiedId", getQualifiedId( ws ) );
     }
-    
+
     @Override
     public JSONObject toJSONObject( Date dateTime ) throws JSONException {
         JSONObject json = new JSONObject();
@@ -733,7 +739,7 @@ public class WorkspaceNode extends EmsScriptNode {
      * Get the workspace by name, but since two workspaces can have the same
      * name as long as their parents are different, we need to check the results
      * and at least try to match to the user.
-     * 
+     *
      * @param workspaceName
      * @param services
      * @param response
@@ -748,7 +754,7 @@ public class WorkspaceNode extends EmsScriptNode {
                                                     //boolean createIfNotFound,
                                                     String userName ) {
         WorkspaceNode workspace = null;
-    
+
         // Get the workspace by name, but since two workspaces can have
         // the same name as long as their parents are different, we need
         // to check the results and at least try to match to the user.
@@ -780,7 +786,7 @@ public class WorkspaceNode extends EmsScriptNode {
             }
             ws = existingReadableWorkspaceFromNodeRef( nr, services,
                                                        response, responseStatus );
-            if ( ws != null ) { 
+            if ( ws != null ) {
                 if ( workspace == null ) {
                     workspace = ws;
                 } else if ( matches && !matchedUser ) {
@@ -796,7 +802,7 @@ public class WorkspaceNode extends EmsScriptNode {
                         + workspaceName + " but not in user home, " + userName;
             response.append( msg );
         }
-    
+
         return workspace;
     }
 
@@ -835,7 +841,7 @@ public class WorkspaceNode extends EmsScriptNode {
             return null;
         }
         WorkspaceNode workspace = null;
-    
+
         // Try to match the alfresco id
         NodeRef ref = NodeUtil.findNodeRefByAlfrescoId( nameOrId, true );
         if ( ref != null ) {
@@ -844,13 +850,13 @@ public class WorkspaceNode extends EmsScriptNode {
                                                               responseStatus );
             if ( workspace != null ) return workspace;
         }
-    
-        // Try to match the workspace name 
+
+        // Try to match the workspace name
         workspace = getWorkspaceFromName( nameOrId, services, response,
                                           responseStatus, userName );
-            
+
         if ( workspace != null ) return workspace;
-    
+
         // Try the cm:name
         ref = NodeUtil.findNodeRefById( nameOrId, true, null, null, services, false );
         if ( ref != null ) {
@@ -859,7 +865,7 @@ public class WorkspaceNode extends EmsScriptNode {
                                                               responseStatus );
             if ( workspace != null ) return workspace;
         }
-        
+
         if ( Debug.isOn() ) {
             Debug.outln( "workspace does not exist and is not to be created: "
                          + nameOrId );

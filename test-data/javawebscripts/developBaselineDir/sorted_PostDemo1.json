@@ -45,40 +45,6 @@
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
         "specialization": {
-            "operand": [
-                {
-                    "element": "op_list",
-                    "type": "ElementValue"
-                },
-                {
-                    "operand": [
-                        {
-                            "element": "exposed_id",
-                            "type": "ElementValue"
-                        },
-                        {
-                            "element": "op_map",
-                            "type": "ElementValue"
-                        },
-                        {
-                            "element": "op_name_arg",
-                            "type": "ElementValue"
-                        }
-                    ],
-                    "type": "Expression"
-                }
-            ],
-            "type": "Expression"
-        }
-    },
-    {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
-        "specialization": {
             "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
             "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
             "type": "Expose"
@@ -155,7 +121,32 @@
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
         "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/viewpoint_op",
         "specialization": {
-            "expression": "vp_expression",
+            "expression": {
+                "operand": [
+                    {
+                        "element": "op_list",
+                        "type": "ElementValue"
+                    },
+                    {
+                        "operand": [
+                            {
+                                "element": "exposed_id",
+                                "type": "ElementValue"
+                            },
+                            {
+                                "element": "op_map",
+                                "type": "ElementValue"
+                            },
+                            {
+                                "element": "op_name_arg",
+                                "type": "ElementValue"
+                            }
+                        ],
+                        "type": "Expression"
+                    }
+                ],
+                "type": "Expression"
+            },
             "parameters": ["exposed_id"],
             "type": "Operation"
         }
