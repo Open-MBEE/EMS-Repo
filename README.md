@@ -354,3 +354,6 @@ Note: Following shortcuts are mainly for Linux.
 	refresh view-share page
 	the final, integrated content model is displayed in view-share in your dashboard (under sites) and in Repository
 	
+# checksum on patched alfresco-repository-4.2.e.jar
+761054791893eee91a0871903139f5fb  /home/bclement/git/alfresco-view-repo/src/main/amp/web/WEB-INF/lib/alfresco-repository-4.2.e.jar
+

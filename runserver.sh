@@ -1,4 +1,7 @@
 #!/bin/bash
+
+./checksum.sh
+
 if [ -f runserver.log ]; then
   cp runserver.log runserver.last.log
 fi
