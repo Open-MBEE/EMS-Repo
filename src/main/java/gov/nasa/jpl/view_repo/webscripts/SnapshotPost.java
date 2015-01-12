@@ -738,8 +738,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 //}
                 if(cellContent != null){
                 	te.addElement(cellContent);
-                	rows.add( te );
                 }
+                rows.add( te );
 
             }
             list.add( rows );
