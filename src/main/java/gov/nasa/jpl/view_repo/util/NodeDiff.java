@@ -360,6 +360,179 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         return ownerRef != null ? getPropertyMap(ownerRef) : null;
     }
     
+    private Pair<NodeRef,String> filterPropValNodeRef(Object propVal, String propName,
+                                                      NodeRef t1, List<String> generated) {
+        
+        NodeRef hasSameOwner = null;
+        String hasSameOwnerId = null;
+        
+        // Try to find a correlated node:
+        if (t1.equals( propVal )) {
+            // Go through all of the generated ids and look for matches:
+            for ( String addedId : generated ) {
+                NodeRef t2 = get2( addedId );
+                
+                if ( same( t1, t2 ) ) {
+                    Map< String, Object > props2 = geOwnerPropertyMap(t2);
+                    
+                    for (Entry< String, Object > entry2 : props2.entrySet()) {
+                        // Same property name
+                        if (entry2.getKey().equals( propName )) {
+                            // This is a matching property for the value:
+                            if (t2.equals( entry2.getValue() )) {
+                                // REVIEW check anything else here? sysml name?
+                                hasSameOwner = t2;
+                                hasSameOwnerId = addedId;
+                            }
+                            break; // dont need to check any more properties
+                        }
+                    }
+                }
+                
+                // No need to look for multiple matches b/c it should not be
+                // possible as we are checking for the same owner, type, and
+                // property name and these are only single noderefs:
+                if (hasSameOwner != null) {
+                    break;
+                }
+            }
+        }
+        
+        return new Pair<NodeRef,String>(hasSameOwner, hasSameOwnerId);
+    }
+    
+    private Pair<NodeRef,String> filterPropValNodeRefs(Object propVal, String propName,
+                                                      NodeRef t1, List<String> generated) {
+        
+        NodeRef hasSameOwner = null;
+        String hasSameOwnerId = null;
+        List<NodeRef> propValList = (List<NodeRef>)propVal;
+        
+        // Loop through the property value noderef list and try to find
+        // correlated node:
+        for (int i = 0; i < propValList.size(); i++) {
+            NodeRef ref = propValList.get( i );
+            if (t1.equals( ref )) {
+                
+                // Go through all of the generated ids and look for matches:
+                for ( String addedId : generated ) {
+                    NodeRef t2 = get2( addedId );
+                    
+                    if ( same( t1, t2 ) ) {
+                        Map< String, Object > props2 = geOwnerPropertyMap(t2);
+                        
+                        for (Entry< String, Object > entry2 : props2.entrySet()) {
+                            // Same property name
+                            if (entry2.getKey().equals( propName )) {
+                                // This is a matching property for the value
+                                // in the list at the same index:
+                                List<NodeRef> propValList2 = (List<NodeRef>)entry2.getValue();
+                                if (propValList2.size() > i &&
+                                    t2.equals(propValList2.get( i ))) {
+                                    // REVIEW check anything else here? sysml name?
+                                    hasSameOwner = t2;
+                                    hasSameOwnerId = addedId;
+                                }
+                                break; // dont need to check any more properties
+                             }
+                        }
+                    }
+                    
+                    // No need to look for multiple matches b/c it should not be
+                    // possible as we are checking for the same owner, type, and
+                    // property name and the specific index in the node ref array:
+                    if (hasSameOwner != null) {
+                        break;
+                    }
+                }
+            }
+        }
+        
+        return new Pair<NodeRef,String>(hasSameOwner, hasSameOwnerId);
+    }
+    
+    private boolean filterPropVal(String id, NodeRef t1, List<String> generated, Set<String> addedIds, 
+                                  Set<String> updatedIds,
+                                  List<String> removeFromRemovedIds) {
+        
+        NodeRef hasSameOwner = null;
+        String hasSameOwnerId = null;
+        boolean addToRemoved = true;
+        Pair<NodeRef,String> res = new Pair<NodeRef,String>(null,null); 
+        Map< String, Object > props = geOwnerPropertyMap(t1);
+        
+        // Loop through each property of the owner of t1:
+        for (Entry< String, Object > entry : props.entrySet()) {
+            // TODO For now checking every property, but only need to check that properties
+            //      that map to value specs
+            String propName = entry.getKey();
+            Object propVal = entry.getValue();
+            
+            // If the property value is a node ref:
+            if (propVal instanceof NodeRef) {
+                res = filterPropValNodeRef(propVal,propName,t1,generated);
+            }
+            
+            // If the property value is a list of node refs:
+            else if (propVal instanceof List) {
+                res = filterPropValNodeRefs(propVal,propName,t1,generated);
+            }
+            
+            hasSameOwner = res.first;
+            hasSameOwnerId = res.second;
+            
+            // TODO We would need a more complicated diff map structure to accommodate
+            //      the same value spec symlid being used more than once by the owner;
+            //      however, this will currently never be the case b/c value spec sysmlids
+            //      are auto-generated.
+            // Once found, we dont need to look for multiple matches:
+            if (hasSameOwner != null) {
+                break;
+            }
+            
+        } // ends for (Entry< String, Object > entry : props.entrySet())
+        
+        // If found a matching node that is correlated, ie same owner, type, property type:
+        if ( hasSameOwner != null ) {
+            addToRemoved = false;
+            added.remove(hasSameOwner);
+            addedIds.remove( hasSameOwnerId );
+            // Note: dont want to directly alter "generated" b/c of nesting
+            removeFromRemovedIds.add( id );
+            updatedIds.add( id );
+            // Re-add the object to map2 using the key from map1, so
+            // that diffProperties() below will find both objects
+            // with the same id.
+            // REVIEW -- Does any of the code rely on the map key
+            // being the same as the sysml id?
+            getMap2().put( id, hasSameOwner );
+        }
+        
+        return addToRemoved;
+    }
+    
+    private void filterValuesImpl(String id, Set<String> addedIds, Set<String> updatedIds,
+                                  List<String> removeFromRemovedIds,
+                                  List<String> generated) {
+        
+        NodeRef t1 = get1( id );
+        if ( t1 == null ) {
+            Debug.error("NodeDiff: trying to add null entry for " + id + "!");
+        } 
+        else {
+            boolean addToRemoved = true;
+            if ( isValueSpec( t1 ) ) {
+
+                addToRemoved = filterPropVal(id, t1, generated, addedIds, updatedIds,
+                                             removeFromRemovedIds);     
+            } // ends if ( isValueSpec( t1 ) )
+    
+            if ( addToRemoved ) removed.add( t1 );
+
+        }  // ends else
+        
+    }
+    
     /**
      * Does the appropriate filtering for value specs, as they are embedded
      * in the owners, and have a unique sysmlid that is auto-generated.
@@ -375,9 +548,10 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         Set<String> removedIds = mapDiff.get( 1 );
         Set<String> updatedIds = mapDiff.get( 2 );
         List<String> generated = new ArrayList<String>();
-        List<String> removeFromGeneratedIds = new ArrayList< String >();
         List<String> removeFromRemovedIds = new ArrayList< String >();
         
+        // Create the generated list, which will be used to check for correlated
+        // nodes:
         for ( String id : addedIds ) {
             NodeRef t2 = get2( id );
             if ( t2 == null ) {
@@ -390,145 +564,19 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
             }
         }
 
+        /*
+         * Go through each value spec property of the owner of the value spec, 
+         * and check if the value of the property is the node of interest,
+         * or contains the node of interest in the case of a list of NodeRefs.
+         * Then for each generated id, check if it maps to the same property and
+         * location within the list (if needed), the same owner, and same type.
+         * If there is a match then remove the id from addedIds, removedIds, and
+         * add to the updatedIds and the id in map1 to map2.
+         */
         for ( String id : removedIds ) {
-            NodeRef t1 = get1( id );
-            if ( t1 == null ) {
-                Debug.error("NodeDiff: trying to add null entry for " + id + "!");
-            } 
-            else {
-                boolean addToRemoved = true;
-                if ( isValueSpec( t1 ) ) {
-                    NodeRef hasSameOwner = null;
-                    String hasSameOwnerId = null;
-                    
-                    /*
-                     * Go through each value spec property of the owner of the value spec, 
-                     * and check if the value of the property is the node of interest,
-                     * or contains the node of interest in the case of a list of NodeRefs.
-                     * Then for each generated id, check if it maps to the same property and
-                     * location within the list (if needed), the same owner, and same type.
-                     * If there is a match then remove the id from addedIds, removedIds, and
-                     * add to the updatedIds and the id in map1 to map2.
-                     */
-                    Map< String, Object > props = geOwnerPropertyMap(t1);
-                    for (Entry< String, Object > entry : props.entrySet()) {
-                        // TODO For now checking every property, but only need to check that properties
-                        //      that map to value specs
-                        String propName = entry.getKey();
-                        Object propVal = entry.getValue();
-                        
-                        // If the property value is a node ref:
-                        if (propVal instanceof NodeRef) {
-                            if (t1.equals( propVal )) {
-                              // Go through all of the generated ids and look for matches:
-                              for ( String addedId : generated ) {
-                                  NodeRef t2 = get2( addedId );
-                                  
-                                  if ( same( t1, t2 ) ) {
-                                      Map< String, Object > props2 = geOwnerPropertyMap(t2);
-                                      
-                                      for (Entry< String, Object > entry2 : props2.entrySet()) {
-                                          // Same property name
-                                          if (entry2.getKey().equals( propName )) {
-                                              // This is a matching property for the value:
-                                              if (t2.equals( entry2.getValue() )) {
-                                                  // REVIEW check anything else here? sysml name?
-                                                  hasSameOwner = t2;
-                                                  hasSameOwnerId = addedId;
-                                              }
-                                              break; // dont need to check any more properties
-                                          }
-                                      }
-                                  }
-                                  
-                                  // No need to look for multiple matches b/c it should not be
-                                  // possible as we are checking for the same owner, type, and
-                                  // property name and these are only single noderefs:
-                                  if (hasSameOwner != null) {
-                                      break;
-                                  }
-                              }
-                            }
-                        }
-                        
-                        // If the property value is a list of node refs:
-                        else if (propVal instanceof List) {
-                            List<NodeRef> propValList = (List<NodeRef>)propVal;
-                            for (int i = 0; i < propValList.size(); i++) {
-                                NodeRef ref = propValList.get( i );
-                                if (t1.equals( ref )) {
-                                    
-                                    // Go through all of the generated ids and look for matches:
-                                    for ( String addedId : generated ) {
-                                        NodeRef t2 = get2( addedId );
-                                        
-                                        if ( same( t1, t2 ) ) {
-                                            Map< String, Object > props2 = geOwnerPropertyMap(t2);
-                                            
-                                            for (Entry< String, Object > entry2 : props2.entrySet()) {
-                                                // Same property name
-                                                if (entry2.getKey().equals( propName )) {
-                                                    // This is a matching property for the value
-                                                    // in the list at the same index:
-                                                    List<NodeRef> propValList2 = (List<NodeRef>)entry2.getValue();
-                                                    if (propValList2.size() > i &&
-                                                        t2.equals(propValList2.get( i ))) {
-                                                        // REVIEW check anything else here? sysml name?
-                                                        hasSameOwner = t2;
-                                                        hasSameOwnerId = addedId;
-                                                    }
-                                                    break; // dont need to check any more properties
-                                                 }
-                                            }
-                                        }
-                                        
-                                        // No need to look for multiple matches b/c it should not be
-                                        // possible as we are checking for the same owner, type, and
-                                        // property name and the specific index in the node ref array:
-                                        if (hasSameOwner != null) {
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // TODO We would need a more complicated diff map structure to accommodate
-                        //      the same value spec symlid being used more than once by the owner;
-                        //      however, this will currently never be the case b/c value spec sysmlids
-                        //      are auto-generated.
-                        // Once found, we dont need to look for multiple matches:
-                        if (hasSameOwner != null) {
-                            break;
-                        }
-                        
-                    } // ends for (Entry< String, Object > entry : props.entrySet())
-                    
-                    if ( hasSameOwner != null ) {
-                        addToRemoved = false;
-                        added.remove(hasSameOwner);
-                        addedIds.remove( hasSameOwnerId );
-                        // Note: dont want to directly alter generated b/c of nesting
-                        removeFromGeneratedIds.add( hasSameOwnerId ); 
-                        removeFromRemovedIds.add( id );
-                        updatedIds.add( id );
-                        // Re-add the object to map2 using the key from map1, so
-                        // that diffProperties() below will find both objects
-                        // with the same id.
-                        // REVIEW -- Does any of the code rely on the map key
-                        // being the same as the sysml id?
-                        getMap2().put( id, hasSameOwner );
-                    }
-            
-                } // ends if ( isValueSpec( t1 ) )
-        
-                if ( addToRemoved ) removed.add( t1 );
+            filterValuesImpl(id, addedIds, updatedIds, removeFromRemovedIds, generated);           
+        }  
 
-            }  // ends else
-                    
-        }  // ends for ( String id : removedIds )
-
-        generated.removeAll( removeFromGeneratedIds );
         removedIds.removeAll( removeFromRemovedIds );
         
         return updatedIds;
