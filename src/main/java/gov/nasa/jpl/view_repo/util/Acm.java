@@ -728,7 +728,6 @@ public class Acm {
             add("sysml:StringExpression");
             add("sysml:TimeExpression");
             add("sysml:TimeInterval");
-            add("sysml:Operation");
         }
     };
 
@@ -781,6 +780,19 @@ public class Acm {
         }
     };
 
+    private static final Set<String> VIEW_VALUESPECS = new HashSet<String>() {
+        private static final long serialVersionUID = -3590674933293910026L;
+        {
+            add(ACM_CONTENTS);
+        }
+    };
+    private static final Set<String> PRODUCT_VALUESPECS = new HashSet<String>() {
+        private static final long serialVersionUID = -5889978723965174381L;
+        {
+            add(ACM_CONTENTS);
+        }
+    };
+
     /**
      * Maps types that have properties that point to ValueSpecs and a list of those
      * properties.
@@ -789,12 +801,14 @@ public class Acm {
 
         private static final long serialVersionUID = 2157925925273966466L;
         {
-            put(ACM_PROPERTY,PROPERTY_VALUESPECS);
-            put(ACM_EXPRESSION,EXPRESSION_VALUESPECS);
-            put(ACM_LITERAL_SET,ENUMERATION_VALUESPECS);
-            put(ACM_CONNECTOR,CONNECTOR_VALUESPECS);
-            put(ACM_OPERATION,OPERATION_VALUESPECS);
-            put(ACM_CONSTRAINT,CONSTRAINT_VALUESPECS);
+            put(ACM_PROPERTY, PROPERTY_VALUESPECS);
+            put(ACM_EXPRESSION, EXPRESSION_VALUESPECS);
+            put(ACM_LITERAL_SET, ENUMERATION_VALUESPECS);
+            put(ACM_CONNECTOR, CONNECTOR_VALUESPECS);
+            put(ACM_CONSTRAINT, CONSTRAINT_VALUESPECS);
+            put(ACM_OPERATION, OPERATION_VALUESPECS);
+            put(ACM_VIEW, VIEW_VALUESPECS);
+            put(ACM_PRODUCT, PRODUCT_VALUESPECS);
         }
     };
 }

@@ -375,6 +375,8 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         Set<String> removedIds = mapDiff.get( 1 );
         Set<String> updatedIds = mapDiff.get( 2 );
         List<String> generated = new ArrayList<String>();
+        List<String> removeFromGeneratedIds = new ArrayList< String >();
+        List<String> removeFromRemovedIds = new ArrayList< String >();
         
         for ( String id : addedIds ) {
             NodeRef t2 = get2( id );
@@ -388,8 +390,6 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
             }
         }
 
-        List<String> removeFromRemovedIds = new ArrayList< String >();
-        
         for ( String id : removedIds ) {
             NodeRef t1 = get1( id );
             if ( t1 == null ) {
@@ -508,7 +508,8 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
                         addToRemoved = false;
                         added.remove(hasSameOwner);
                         addedIds.remove( hasSameOwnerId );
-                        generated.remove( hasSameOwnerId );
+                        // Note: dont want to directly alter generated b/c of nesting
+                        removeFromGeneratedIds.add( hasSameOwnerId ); 
                         removeFromRemovedIds.add( id );
                         updatedIds.add( id );
                         // Re-add the object to map2 using the key from map1, so
@@ -527,6 +528,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
                     
         }  // ends for ( String id : removedIds )
 
+        generated.removeAll( removeFromGeneratedIds );
         removedIds.removeAll( removeFromRemovedIds );
         
         return updatedIds;

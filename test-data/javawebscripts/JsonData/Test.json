@@ -1,6 +1,7 @@
 {"elements":[
-    {"name":"dfdf","sysmlid":"_17_0_5_1_407019f_1421107867965_917348_17974",
-    "owner":"_17_0_5_1_407019f_1402422593316_200143_16117",
+    {"name":"dfdf",
+    "sysmlid":"_17_0_5_1_407019f_1421107867965_917348_17974",
+    "owner":"12345",
     "documentation":"",
     "specialization":{"specification":{"symbol":"",
                                        "operand":[{"string":"1_2","type":"LiteralString"},
@@ -9,4 +10,3 @@
                                        "type":"Expression"},
                       "type":"Constraint"}}
 ]}
-
