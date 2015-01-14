@@ -616,10 +616,11 @@ public class WorkspaceDiff implements Serializable {
                     }
                 }
             }
+            boolean includeQualified = true;
             if ( versions == null || versions.size() <= 0 ) {
-                array.put( node.toJSONObject( filter, dateTime ) );
+                array.put( node.toJSONObject( filter, dateTime, includeQualified ) );
             } else {
-                JSONObject jsonObject = node.toJSONObject( filter, dateTime );
+                JSONObject jsonObject = node.toJSONObject( filter, dateTime, includeQualified );
                 Version version = versions.get( node.getSysmlId() );
                 if ( version != null ) {
                     // TODO: perhaps add service and response in method call rather than using the nodes?

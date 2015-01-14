@@ -1722,7 +1722,11 @@ public class EmsScriptNode extends ScriptNode implements
      * @return JSONObject serialization of node
      */
     public JSONObject toJSONObject( Date dateTime ) throws JSONException {
-        return toJSONObject( null, dateTime );
+        return toJSONObject( null, dateTime, true );
+    }
+
+    public JSONObject toJSONObject( Date dateTime, boolean isIncludeQualified ) throws JSONException {
+        return toJSONObject( null, dateTime, isIncludeQualified );
     }
 
     /**
@@ -1734,8 +1738,8 @@ public class EmsScriptNode extends ScriptNode implements
      *            JSONObject
      * @return JSONObject serialization of node
      */
-    public JSONObject toJSONObject( Set< String > filter, Date dateTime ) throws JSONException {
-        return toJSONObject( filter, false, dateTime );
+    public JSONObject toJSONObject( Set< String > filter, Date dateTime, boolean isIncludeQualified ) throws JSONException {
+        return toJSONObject( filter, false, dateTime, isIncludeQualified );
     }
 
     public String nodeRefToSysmlId( NodeRef ref ) throws JSONException {
@@ -1794,7 +1798,7 @@ public class EmsScriptNode extends ScriptNode implements
 
     protected void
             addElementJSON( JSONObject elementJson, Set< String > filter,
-                            Date dateTime ) throws JSONException {
+                            Date dateTime, boolean isIncludeQualified ) throws JSONException {
         EmsScriptNode node = getNodeAtAtime( dateTime );
         // mandatory elements put in directly
         elementJson.put( Acm.JSON_ID, node.getProperty( Acm.ACM_ID ) );
@@ -1808,8 +1812,14 @@ public class EmsScriptNode extends ScriptNode implements
                    node.getProperty( Acm.ACM_NAME ), filter );
         putInJson( elementJson, Acm.JSON_DOCUMENTATION,
                    node.getProperty( Acm.ACM_DOCUMENTATION ), filter );
-        putInJson( elementJson, "qualifiedName", node.getSysmlQName(), filter );
-        putInJson( elementJson, "qualifiedId", node.getSysmlQId(), filter );
+        if (isIncludeQualified) {
+            if ( filter == null || filter.contains( "qualifiedName" ) ) {
+                putInJson( elementJson, "qualifiedName", node.getSysmlQName(), filter );
+            }
+            if ( filter == null || filter.contains( "qualifiedId" ) ) {
+                putInJson( elementJson, "qualifiedId", node.getSysmlQId(), filter );
+            }
+        }
         putInJson( elementJson, "editable",
                    node.hasPermission( PermissionService.WRITE ), filter );
 //        NodeRef ownerRef = (NodeRef)node.getProperty( "ems:owner" );
@@ -2078,7 +2088,7 @@ public class EmsScriptNode extends ScriptNode implements
      * @return JSONObject serialization of node
      */
     public JSONObject toJSONObject( Set< String > filter, boolean isExprOrProp,
-                                    Date dateTime ) throws JSONException {
+                                    Date dateTime, boolean isIncludeQualified ) throws JSONException {
         JSONObject element = new JSONObject();
         JSONObject specializationJSON = new JSONObject();
 
@@ -2090,7 +2100,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( isExprOrProp ) {
             addSpecializationJSON( element, filter, dateTime );
         } else {
-            addElementJSON( element, filter, dateTime );
+            addElementJSON( element, filter, dateTime, isIncludeQualified );
             addSpecializationJSON( specializationJSON, filter, dateTime );
             if ( specializationJSON.length() > 0 ) {
                 element.put( Acm.JSON_SPECIALIZATION, specializationJSON );
@@ -4068,7 +4078,7 @@ public class EmsScriptNode extends ScriptNode implements
             EmsScriptNode node =
                     new EmsScriptNode( versionedRef, services, response );
             if ( node != null && node.exists() ) {
-                jsonArray.put( node.toJSONObject( null, true, null ) );
+                jsonArray.put( node.toJSONObject( null, true, null, true ) );
             }
         } else {
             // TODO error handling
