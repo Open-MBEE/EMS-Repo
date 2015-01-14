@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.HashSet;
 
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.dictionary.DictionaryService;
@@ -197,8 +198,26 @@ public class WorkspaceDiff implements Serializable {
         computeConflicted();
 
         // Elements
-        Set< String > ids = new TreeSet< String >( nodeDiff.getMap1().keySet() );
-        ids.addAll( nodeDiff.getMap2().keySet() );
+        Set< String > ids = new TreeSet< String >( );
+        Set< NodeRef > removedUpdated = new HashSet< NodeRef >(nodeDiff.getRemoved());
+        removedUpdated.addAll( nodeDiff.getUpdated() );
+        // Add all of the removed and updated ids:
+        for (NodeRef ref : removedUpdated) {
+            if (ref != null) {
+                EmsScriptNode node = new EmsScriptNode(ref, getServices());
+                ids.add( node.getSysmlId() );
+            }
+        }
+        // Add all of the parents of the added ids:
+        for (NodeRef ref : nodeDiff.getAdded()) {
+            if (ref != null) {
+                EmsScriptNode node = new EmsScriptNode(ref, getServices());
+                EmsScriptNode parent = node.getOwningParent( null );
+                if (parent != null) {
+                    ids.add( parent.getSysmlId() );
+                }
+            }
+        }
         for ( String id : ids ) {
             NodeRef ref = NodeUtil.findNodeRefById( id, false, getWs1(), getTimestamp1(), getServices(), true );
             if ( ref != null ) {

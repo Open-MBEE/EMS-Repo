@@ -8,7 +8,26 @@
             "owner": "e_32169",
             "qualifiedId": "/123456/e_32169/constraint_32165",
             "qualifiedName": "/JW_TEST/e_32169/",
-            "specialization": {"type": "Constraint"},
+            "specialization": {
+                "specification": {
+                    "operand": [
+                        {
+                            "element": "arg_ev_33001",
+                            "type": "ElementValue"
+                        },
+                        {
+                            "element": "arg_ev_38307_1",
+                            "type": "ElementValue"
+                        },
+                        {
+                            "element": "op_ev_31835",
+                            "type": "ElementValue"
+                        }
+                    ],
+                    "type": "Expression"
+                },
+                "type": "Constraint"
+            },
             "sysmlid": "constraint_32165"
         },
         {

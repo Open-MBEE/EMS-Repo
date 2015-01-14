@@ -250,5 +250,25 @@
         "qualifiedId": "/123456",
         "qualifiedName": "/JW_TEST",
         "sysmlid": "123456"
+    },
+    {
+        "creator": "admin",
+        "editable": true,
+        "owner": "301",
+        "qualifiedName": "/JW_TEST/300/301/null",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString"
+        }
+    },
+    {
+        "creator": "admin",
+        "editable": true,
+        "owner": "401",
+        "qualifiedName": "/JW_TEST/400/401/null",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString"
+        }
     }
 ]}
