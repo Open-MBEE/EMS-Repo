@@ -354,7 +354,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         return props;
     }
     
-    public Map<String, Object> geOwnerPropertyMap( NodeRef ref ) {
+    public Map<String, Object> getOwnerPropertyMap( NodeRef ref ) {
         EmsScriptNode owner = getOwner(ref);
         NodeRef ownerRef = owner != null ? owner.getNodeRef() : null;
         return ownerRef != null ? getPropertyMap(ownerRef) : null;
@@ -373,7 +373,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
                 NodeRef t2 = get2( addedId );
                 
                 if ( same( t1, t2 ) ) {
-                    Map< String, Object > props2 = geOwnerPropertyMap(t2);
+                    Map< String, Object > props2 = getOwnerPropertyMap(t2);
                     
                     for (Entry< String, Object > entry2 : props2.entrySet()) {
                         // Same property name
@@ -419,7 +419,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
                     NodeRef t2 = get2( addedId );
                     
                     if ( same( t1, t2 ) ) {
-                        Map< String, Object > props2 = geOwnerPropertyMap(t2);
+                        Map< String, Object > props2 = getOwnerPropertyMap(t2);
                         
                         for (Entry< String, Object > entry2 : props2.entrySet()) {
                             // Same property name
@@ -459,7 +459,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         String hasSameOwnerId = null;
         boolean addToRemoved = true;
         Pair<NodeRef,String> res = new Pair<NodeRef,String>(null,null); 
-        Map< String, Object > props = geOwnerPropertyMap(t1);
+        Map< String, Object > props = getOwnerPropertyMap(t1);
         
         // Loop through each property of the owner of t1:
         for (Entry< String, Object > entry : props.entrySet()) {
