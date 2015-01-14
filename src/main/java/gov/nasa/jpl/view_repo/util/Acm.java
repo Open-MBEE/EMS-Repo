@@ -51,8 +51,6 @@ public class Acm {
     public static final String SPECIFICATION = "specification";
     public static final String PARAMETERS = "parameters";
     public static final String EXPRESSION = "expression";
-    public static final String MAX = "max";
-    public static final String MIN = "min";
     public static final String ELEMENT = "element";
     public static final String VERSION = "version";
     public static final String DIRECTION = "direction";
@@ -129,8 +127,8 @@ public class Acm {
     public static final String JSON_VALUE_EXPRESSION = "valueExpression";
     public static final String JSON_DURATION = "Duration";
     public static final String JSON_DURATION_INTERVAL = "DurationInterval";
-    public static final String JSON_DURATION_MAX = MAX; // Used to be "durationMax"
-    public static final String JSON_DURATION_MIN = MIN; // Used to be "durationMin"
+    public static final String JSON_DURATION_MAX = "durationMax";
+    public static final String JSON_DURATION_MIN = "durationMin";
     public static final String JSON_ELEMENT_VALUE = "ElementValue";
     public static final String JSON_ELEMENT_VALUE_ELEMENT = ELEMENT; // Used to be "elementValueOfElement"
     public static final String JSON_EXPRESSION = "Expression";
@@ -148,12 +146,12 @@ public class Acm {
     public static final String JSON_STRING_EXPRESSION = "StringExpression";
     public static final String JSON_TIME_EXPRESSION = "TimeExpression";
     public static final String JSON_TIME_INTERVAL = "TimeInterval";
-    public static final String JSON_TIME_INTERVAL_MAX = MAX; // Used to be "timeIntervalMax"
-    public static final String JSON_TIME_INTERVAL_MIN = MIN; // Used to be "timeIntervalMin"
+    public static final String JSON_TIME_INTERVAL_MAX = "timeIntervalMax";
+    public static final String JSON_TIME_INTERVAL_MIN = "timeIntervalMin";
     public static final String JSON_OPERATION = "Operation";
     public static final String JSON_OPERATION_PARAMETER = PARAMETERS; // Used to be "operationParameter"
     public static final String JSON_INSTANCE_SPECIFICATION = "InstanceSpecification";
-    public static final String JSON_INSTANCE_SPECIFICATION_SPECIFICATION = SPECIFICATION; // Used to be "instanceSpecificationSpecification"
+    public static final String JSON_INSTANCE_SPECIFICATION_SPECIFICATION = "instanceSpecificationSpecification"; 
     public static final String JSON_PARAMETER = "Parameter";
     public static final String JSON_PARAMETER_DIRECTION = DIRECTION; // Used to be "parameterDirection"
     public static final String JSON_PARAMETER_DEFAULT_VALUE = DEFAULT_VALUE; // Used to be "parameterDefaultValue"

@@ -80,37 +80,19 @@
 
         "creator": "admin",
 
-        "documentation": "4about",
-
         "editable": true,
 
-        "name": "404",
+        "owner": "401",
 
-        "owner": "403",
-
-        "qualifiedId": "/123456/4000/401/402/403/404",
-
-        "qualifiedName": "/JW_TEST/400/401/402/403/404",
+        "qualifiedName": "/JW_TEST/400/401/null",
 
         "specialization": {
 
-            "isDerived": false,
+            "string": "dlam_string",
 
-            "isSlot": false,
-
-            "type": "Property",
-
-            "value": [{
-
-                "string": "dlam_string",
-
-                "type": "LiteralString"
-
-            }]
+            "type": "LiteralString"
 
         },
-
-        "sysmlid": "404"
 
     },
 
@@ -270,6 +252,130 @@
 
         "creator": "admin",
 
+        "editable": true,
+
+        "name": "JW_TEST",
+
+        "owner": "null",
+
+        "qualifiedId": "/123456",
+
+        "qualifiedName": "/JW_TEST",
+
+        "sysmlid": "123456"
+
+    },
+
+    {
+
+        "creator": "admin",
+
+        "documentation": "4something",
+
+        "editable": true,
+
+        "name": "400",
+
+        "owner": "123456",
+
+        "qualifiedId": "/123456/4000",
+
+        "qualifiedName": "/JW_TEST/400",
+
+        "specialization": {
+
+            "isDerived": false,
+
+            "isSlot": false,
+
+            "type": "Property",
+
+            "value": [{
+
+                "string": "dlam_string",
+
+                "type": "LiteralString"
+
+            }]
+
+        },
+
+        "sysmlid": "4000"
+
+    },
+
+    {
+
+        "creator": "admin",
+
+        "documentation": "directed_relationship",
+
+        "editable": true,
+
+        "name": "500",
+
+        "owner": "300",
+
+        "qualifiedId": "/123456/300/500",
+
+        "qualifiedName": "/JW_TEST/300/500",
+
+        "specialization": {
+
+            "source": "302",
+
+            "target": "303",
+
+            "type": "DirectedRelationship"
+
+        },
+
+        "sysmlid": "500"
+
+    },
+
+    {
+
+        "creator": "admin",
+
+        "documentation": "4about",
+
+        "editable": true,
+
+        "name": "404",
+
+        "owner": "403",
+
+        "qualifiedId": "/123456/4000/401/402/403/404",
+
+        "qualifiedName": "/JW_TEST/400/401/402/403/404",
+
+        "specialization": {
+
+            "isDerived": false,
+
+            "isSlot": false,
+
+            "type": "Property",
+
+            "value": [{
+
+                "string": "dlam_string",
+
+                "type": "LiteralString"
+
+            }]
+
+        },
+
+        "sysmlid": "404"
+
+    },
+
+    {
+
+        "creator": "admin",
+
         "documentation": "4else",
 
         "editable": true,
@@ -384,24 +490,6 @@
 
         "creator": "admin",
 
-        "editable": true,
-
-        "name": "JW_TEST",
-
-        "owner": "null",
-
-        "qualifiedId": "/123456",
-
-        "qualifiedName": "/JW_TEST",
-
-        "sysmlid": "123456"
-
-    },
-
-    {
-
-        "creator": "admin",
-
         "documentation": "4to",
 
         "editable": true,
@@ -440,67 +528,19 @@
 
         "creator": "admin",
 
-        "documentation": "4something",
-
         "editable": true,
 
-        "name": "400",
+        "owner": "301",
 
-        "owner": "123456",
-
-        "qualifiedId": "/123456/4000",
-
-        "qualifiedName": "/JW_TEST/400",
+        "qualifiedName": "/JW_TEST/300/301/null",
 
         "specialization": {
 
-            "isDerived": false,
+            "string": "dlam_string",
 
-            "isSlot": false,
-
-            "type": "Property",
-
-            "value": [{
-
-                "string": "dlam_string",
-
-                "type": "LiteralString"
-
-            }]
+            "type": "LiteralString"
 
         },
-
-        "sysmlid": "4000"
-
-    },
-
-    {
-
-        "creator": "admin",
-
-        "documentation": "directed_relationship",
-
-        "editable": true,
-
-        "name": "500",
-
-        "owner": "300",
-
-        "qualifiedId": "/123456/300/500",
-
-        "qualifiedName": "/JW_TEST/300/500",
-
-        "specialization": {
-
-            "source": "302",
-
-            "target": "303",
-
-            "type": "DirectedRelationship"
-
-        },
-
-        "sysmlid": "500"
 
     }
 

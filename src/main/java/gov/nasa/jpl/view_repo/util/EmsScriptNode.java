@@ -4569,7 +4569,7 @@ public class EmsScriptNode extends ScriptNode implements
         } else {
             Object property = node.getProperty( "sysml:constraintSpecification" );
             if ( property != null ) {
-              putInJson( json, "expression", addInternalJSON( property, dateTime ),
+              putInJson( json, "specification", addInternalJSON( property, dateTime ),
                          filter );
             }
       }

@@ -201,10 +201,21 @@ public class WorkspaceDiff implements Serializable {
         Set< String > ids = new TreeSet< String >( );
         Set< NodeRef > removedUpdated = new HashSet< NodeRef >(nodeDiff.getRemoved());
         removedUpdated.addAll( nodeDiff.getUpdated() );
+        // Add all of the removed and updated ids:
         for (NodeRef ref : removedUpdated) {
             if (ref != null) {
                 EmsScriptNode node = new EmsScriptNode(ref, getServices());
                 ids.add( node.getSysmlId() );
+            }
+        }
+        // Add all of the parents of the added ids:
+        for (NodeRef ref : nodeDiff.getAdded()) {
+            if (ref != null) {
+                EmsScriptNode node = new EmsScriptNode(ref, getServices());
+                EmsScriptNode parent = node.getOwningParent( null );
+                if (parent != null) {
+                    ids.add( parent.getSysmlId() );
+                }
             }
         }
         for ( String id : ids ) {
