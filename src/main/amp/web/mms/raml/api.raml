@@ -55,6 +55,12 @@ traits:
         validate:
           description: If true, validates the constraint as scoped by the element (defaults false). If specified with fix, overrides fix
           type: boolean
+  - qualifiable:
+      description: Aspect for resources that can be that can exclude the qualified names/ids
+      queryParameters:
+        qualified:
+          description: If false, doesn't display qualified names
+          type: boolean
   - recursable:
       description: Aspect for resources that can be retrieved recursively
       queryParameters:
