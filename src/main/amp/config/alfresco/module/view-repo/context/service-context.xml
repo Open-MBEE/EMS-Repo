@@ -162,10 +162,28 @@
         <property name="arguments" ref="restConnection"/>
     </bean>
 
+   <bean id="mms-repo_bootstrapUserGroups" class="org.alfresco.repo.module.ImporterModuleComponent" parent="module.baseComponent">
+        <property name="moduleId" value="mms-repo-ent" />
+        <property name="name" value="mms-repo.bootstrapGroups" />
+        <property name="description" value="Initial data requirements" />
+        <property name="sinceVersion" value="0.0.1" />
+        <property name="appliesFromVersion" value="0.0.1" />
+        <property name="executeOnceOnly" value="true" />
+        <property name="importer" ref="userBootstrap"/>
+        <property name="bootstrapViews">
+            <list>
+                <props>
+                    <prop key="path">/${alfresco_user_store.system_container.childname}/sys:people</prop>
+                    <prop key="location">alfresco/bootstrap/authorities.xml</prop>
+                </props>
+				
+            </list>
+        </property>
+    </bean>   
     
     <!-- bootstrap users into the module -->
-<!--       <bean id="mms-repo_boostrapUsers" class="org.alfresco.repo.module.ImporterModuleComponent" parent="module.baseComponent">
-        <property name="moduleId" value="mms-repo" />
+    <bean id="mms-repo_boostrapUsers" class="org.alfresco.repo.module.ImporterModuleComponent" parent="module.baseComponent" depends-on="mms-repo_bootstrapUserGroups">
+        <property name="moduleId" value="mms-repo-ent" />
         <property name="name" value="mms-repo.bootstrapUsers" />
         <property name="description" value="Initial data requirements" />
         <property name="sinceVersion" value="0.0.1" />
@@ -175,29 +193,16 @@
         <property name="bootstrapViews">
             <list>
                 <props>
-                    <prop key="path">/sys:system/sys:people</prop>
+                    <prop key="path">/${alfresco_user_store.system_container.childname}/${alfresco_user_store.user_container.childname}</prop>
                     <prop key="location">alfresco/bootstrap/people.xml</prop>
                 </props>
+				<props>
+					<prop key="path">/${alfresco_user_store.system_container.childname}/${alfresco_user_store.user_container.childname}</prop>
+					<prop key="location">alfresco/bootstrap/userAuthorities.xml</prop>
+				</props> 
+				
             </list>
         </property>
     </bean>
-
-    <bean id="mms-repo_bootstrapUserGroups" class="org.alfresco.repo.module.ImporterModuleComponent" parent="module.baseComponent">
-        <property name="moduleId" value="mms-repo" />
-        <property name="name" value="mms-repo.bootstrapGroups" />
-        <property name="description" value="Initial data requirements" />
-        <property name="sinceVersion" value="0.0.1" />
-        <property name="appliesFromVersion" value="0.0.1" />
-        <property name="executeOnceOnly" value="false" />
-        <property name="importer" ref="userBootstrap"/>
-        <property name="bootstrapViews">
-            <list>
-                <props>
-                    <prop key="path">/sys:system/sys:people</prop>
-                    <prop key="location">alfresco/bootstrap/authorities.xml</prop>
-                </props>
-            </list>
-        </property>
-    </bean>       
- -->
-</beans>
+        
+ </beans>
