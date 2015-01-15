@@ -89,9 +89,9 @@ public class NodeUtil {
     /* static flags and constants */
 
     public static boolean doFullCaching = true;
-    public static boolean doSimpleCaching = true;    
-    public static boolean doHeisenCheck = true;
-    public static boolean doVersionCaching = true;
+    public static boolean doSimpleCaching = true;
+    public static boolean doHeisenCheck = false;
+    public static boolean doVersionCaching = false;
     public static boolean activeVersionCaching = true;
 
     public static String sitePkgPrefix = "site_";
@@ -477,7 +477,7 @@ public class NodeUtil {
 
             // Update cache with results
             if ( ( doSimpleCaching || doFullCaching ) && caching
-                 && !Utils.isNullOrEmpty( nodeRefs ) ) {                
+                 && !Utils.isNullOrEmpty( nodeRefs ) ) {
                 if ( useSimpleCache && doSimpleCaching ) {
                     NodeRef r = nodeRefs.get( 0 );
                     simpleCache.put( specifier, r );
@@ -1600,7 +1600,7 @@ public class NodeUtil {
     public static NodeRef findNodeRefByAlfrescoId(String id, boolean includeDeleted) {
         return findNodeRefByAlfrescoId(id, includeDeleted, true);
     }
-    
+
     public static NodeRef findNodeRefByAlfrescoId(String id, boolean includeDeleted,
                                                   boolean giveError) {
         if ( !id.contains( "://" ) ) {
