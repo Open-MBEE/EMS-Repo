@@ -112,6 +112,7 @@ public class ActionUtil {
         if (logNode == null) {
             logNode = node.getParent().createNode(logName, "cm:content");
             if (!logNode.hasAspect("cm:versionable")) {
+                logNode.makeSureNodeRefIsNotFrozen();
                 logNode.addAspect("cm:versionable");
             }
             // TODO: check if node for log is of type Job
@@ -142,6 +143,7 @@ public class ActionUtil {
     public static void setContentDataMimeType(ContentWriter writer, EmsScriptNode node, String mimetype, ServiceRegistry sr) {
         ContentData contentData = writer.getContentData();
         contentData = ContentData.setMimetype(contentData, mimetype);
+        node.makeSureNodeRefIsNotFrozen();
         sr.getNodeService().setProperty(node.getNodeRef(), ContentModel.PROP_CONTENT, contentData);
     }
 

@@ -2251,8 +2251,9 @@ public class NodeUtil {
 			return null;
 		}
 
+        artifactNode.makeSureNodeRefIsNotFrozen();
 		if (!artifactNode.hasAspect( "cm:versionable")) {
-			artifactNode.addAspect( "cm:versionable" );
+		    artifactNode.addAspect( "cm:versionable" );
 		}
 		if (!artifactNode.hasAspect( "cm:indexControl" )) {
 			artifactNode.addAspect( "cm:indexControl" );
@@ -2285,6 +2286,7 @@ public class NodeUtil {
 		if (base64content == null) {
 			contentData = ContentData.setEncoding( contentData, "UTF-8");
 		}
+        artifactNode.makeSureNodeRefIsNotFrozen();
 		services.getNodeService().setProperty( artifactNode.getNodeRef(),
 		            							ContentModel.PROP_CONTENT,contentData );
 
@@ -2294,6 +2296,7 @@ public class NodeUtil {
 		Object[] versionHistory = artifactNode.getEmsVersionHistory();
 
         if (versionHistory == null || versionHistory.length <= 1) {
+            artifactNode.makeSureNodeRefIsNotFrozen();
         	artifactNode.createVersion("creating the version history", false);
         }
 
