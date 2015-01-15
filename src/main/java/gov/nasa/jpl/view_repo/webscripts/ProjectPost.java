@@ -235,6 +235,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 			log(LogLevel.INFO, "Project created.\n", HttpServletResponse.SC_OK);
 		} else {
 			if (delete) {
+	            projectNode.makeSureNodeRefIsNotFrozen();
 				projectNode.remove();
 				log(LogLevel.INFO, "Project deleted.\n", HttpServletResponse.SC_OK);
 			} else {

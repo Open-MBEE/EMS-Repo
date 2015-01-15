@@ -290,6 +290,7 @@ public class WorkspaceNode extends EmsScriptNode {
         }
 
         // Add the delete aspect to mark as "deleted"
+        makeSureNodeRefIsNotFrozen();
         addAspect( "ems:Deleted" );
 
         // FIXME -- REVIEW -- Is that enough?! What about the contents? Don't we
