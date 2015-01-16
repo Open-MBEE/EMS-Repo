@@ -14,7 +14,10 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
+import org.apache.log4j.*;
 import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -122,11 +125,13 @@ public class ShareUtils {
 
             if (logger.isDebugEnabled()) {
                 logger.debug(callName + " returned status: " + status);
+            	//log(Level.DEBUG,"%s returned status: %s", callName, status);
             }
 
             if (status == expectedStatus) {
                 if (logger.isDebugEnabled()) {
                     logger.debug(callName + " with user " + username);
+                    //log(Level.DEBUG,"%s with user %s", callName, username);
                 }
                 success = true;
             } else {

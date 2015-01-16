@@ -212,7 +212,8 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             timestamp = (Date)timestampObject;
         } else {
             if ( timestampObject != null ) {
-                Debug.error( "timestamp is not a date! timestamp = " + timestampObject );
+                //Debug.error( "timestamp is not a date! timestamp = " + timestampObject );
+            	log(Level.ERROR,"timestamp is not a date! timestamp = %s", timestampObject.toString());
             }
             timestamp = new Date( System.currentTimeMillis() );
         }

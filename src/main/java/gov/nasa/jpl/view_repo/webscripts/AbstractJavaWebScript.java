@@ -72,7 +72,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     private static Logger logger = Logger.getLogger(AbstractJavaWebScript.class);
-    public Level maxLevel = Level.WARN;
+    public Level logLevel = Level.WARN;
     
     public Formatter formatter = new Formatter ();
     /*public enum LogLevel {
@@ -123,21 +123,21 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         this.setServices( services );
         this.response = response ;
         // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
-        logger.setLevel(maxLevel);
+        logger.setLevel(logLevel);
     }
 
     public AbstractJavaWebScript(Repository repositoryHelper, ServiceRegistry registry) {
         this.setRepositoryHelper(repositoryHelper);
         this.setServices(registry);
         // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
-        logger.setLevel(maxLevel);
+        logger.setLevel(logLevel);
     }
 
     public AbstractJavaWebScript() {
         // default constructor for spring
         super();
         // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
-        logger.setLevel(maxLevel);
+        logger.setLevel(logLevel);
     }
     
     /**
@@ -320,7 +320,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     
     
     // Updated log methods with log4j methods (still works with old log calls)
-    // String concatenation replaced with C formatting
+    // String concatenation replaced with C formatting; only for calls with parameters
     protected void log (Level level, int code, String msg, String...params) {
     	if (level.toInt() >= logger.getLevel().toInt()) {
     		String formattedMsg = formatter.format (msg,params).toString();
@@ -328,7 +328,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     	}
 	}
     
-    // If No need for string formatting: 
+    // If no need for string formatting (calls with no string concatenation)
     protected void log(Level level, int code, String msg) {
 		if (level.toInt() >= logger.getLevel().toInt()) {
 			// print to response stream if >= existing log level
@@ -336,17 +336,17 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 			log(code,levelMessage);
 			// print to console if log level >= Warning (i.e. Error, Fatal, or Off)
 			if (level.toInt() >= Level.WARN.toInt()) {
-				 log4JCall (level, msg);
+				 log (level, msg);
 			}
 		}
 	}
 
     // only logging loglevel and a message (no code)
-	protected void log(Level level, String msg, String...params) {
+	protected void log(Level level, String msg, Object...params) {
 	    if (level.toInt() >= logger.getLevel().toInt()) {
-        		String formattedMsg = formatter.format (msg,params).toString();
-        	    	response.append(formattedMsg);
-	        log4JCall (level, formattedMsg);
+        	String formattedMsg = formatter.format (msg,params).toString();
+        	response.append(formattedMsg);
+	        log (level, formattedMsg);
 	    }
 	}
 
@@ -372,7 +372,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	}
 
 	
-	protected void log4JCall (Level level, String msg){
+	protected void log (Level level, String msg){
 	    switch(level.toInt()) {
 	        case Level.FATAL_INT:
 	            logger.fatal(msg);
@@ -386,12 +386,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	        case Level.INFO_INT:
 	            logger.info( msg );
 	            break;
-	        case Level.DEBUG_INT:
-	            logger.debug( msg );
+	        case Level.DEBUG_INT:	
+	            if (Debug.isOn()){ logger.debug( msg );}
 	            break;
             default:
-                // TODO: investigate if this the correct thing to do
-	            logger.debug( msg );
+                // TODO: investigate if this the default thing to do
+            	if (Debug.isOn()){ logger.debug( msg ); }
 	            break;
 	    }
 	}
@@ -684,7 +684,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
 
     public void setLogLevel(Level level) {
-        maxLevel = level;
+        logLevel = level;
     }
 
     /**

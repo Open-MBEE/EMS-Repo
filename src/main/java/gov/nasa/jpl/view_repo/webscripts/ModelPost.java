@@ -977,12 +977,14 @@ public class ModelPost extends AbstractJavaWebScript {
 
 		// check that parent is of folder type
         if ( parent == null ) {
-            Debug.error("null parent for elementJson: " + elementJson );
-            return elements;
+            //Debug.error("null parent for elementJson: " + elementJson );
+            log (Level.ERROR,"null parent for elementJson: %s", elementJson);
+        	return elements;
         }
         if ( !parent.exists() ) {
-            Debug.error("non-existent parent (" + parent + ") for elementJson: " + elementJson );
-            return elements;
+            //Debug.error("non-existent parent (" + parent + ") for elementJson: " + elementJson );
+            log (Level.ERROR,"non-existent parent (%s) for elementJson: %s", parent, elementJson);
+        	return elements;
         }
         if ( !parent.isFolder() ) {
 			String name = (String) parent.getProperty(Acm.ACM_NAME);
@@ -1454,6 +1456,7 @@ public class ModelPost extends AbstractJavaWebScript {
         // Get the last modified time from the element:
         Date lastModified = element.getLastModified( null );
         if (Debug.isOn()) System.out.println( "%% %% %% lastModified = " + lastModified );
+        
         String lastModString = TimeUtils.toTimestamp( lastModified );
         String msg = null;
 

@@ -235,7 +235,8 @@ public class MoaProductGet extends AbstractJavaWebScript {
                 if ( snapshotV != null ) {
                     String msg = "Error! Snapshot " + snapshot + " did not exist at " + dateTime + ".\n";
                     if ( getResponse() == null || this.getResponseStatus() == null ) {
-                        Debug.error( msg );
+                        //Debug.error( msg );
+                    	log(Level.ERROR,msg);
                     } else {
                         getResponse().append( msg );
                         getResponseStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
