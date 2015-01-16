@@ -1,15 +1,12 @@
-{
-    "elements": [{
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "modified": "2014-12-18T21:51:02.345-0800",
-        "name": "jesus",
-        "owner": "holding_bin_fart_no_project",
-        "qualifiedId": "/no_project/holding_bin_fart_no_project/MMS_1418968148413_eec27232-e880-4d91-944c-bc8ceb5d7fc6",
-        "qualifiedName": "/no_project/holding_bin/jesus",
-        "read": "2014-12-18T21:51:02.863-0800",
-        "specialization": {"type": "Product"},
-        "sysmlid": "MMS_1418968148413_eec27232-e880-4d91-944c-bc8ceb5d7fc6"
-    }],
-}
+{"elements":[
+    {"name":"dfdf",
+    "sysmlid":"_17_0_5_1_407019f_1421107867965_917348_17974",
+    "owner":"12345",
+    "documentation":"",
+    "specialization":{"specification":{"symbol":"",
+                                       "operand":[{"string":"1_2","type":"LiteralString"},
+                                                  {"boolean":true,"type":"LiteralBoolean"},
+                                                  {"integer":3,"type":"LiteralInteger"}],
+                                       "type":"Expression"},
+                      "type":"Constraint"}}
+]}

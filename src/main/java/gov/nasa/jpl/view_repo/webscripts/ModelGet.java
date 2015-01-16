@@ -1,29 +1,29 @@
 /*******************************************************************************
- * Copyright (c) <2013>, California Institute of Technology ("Caltech").  
+ * Copyright (c) <2013>, California Institute of Technology ("Caltech").
  * U.S. Government sponsorship acknowledged.
- * 
+ *
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification, are 
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
- * 
- *  - Redistributions of source code must retain the above copyright notice, this list of 
+ *
+ *  - Redistributions of source code must retain the above copyright notice, this list of
  *    conditions and the following disclaimer.
- *  - Redistributions in binary form must reproduce the above copyright notice, this list 
- *    of conditions and the following disclaimer in the documentation and/or other materials 
+ *  - Redistributions in binary form must reproduce the above copyright notice, this list
+ *    of conditions and the following disclaimer in the documentation and/or other materials
  *    provided with the distribution.
- *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory, 
- *    nor the names of its contributors may be used to endorse or promote products derived 
+ *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory,
+ *    nor the names of its contributors may be used to endorse or promote products derived
  *    from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
- * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER  
- * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
@@ -65,19 +65,19 @@ public class ModelGet extends AbstractJavaWebScript {
     public ModelGet() {
         super();
     }
-    
+
     public ModelGet(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
 
     // injected via spring configuration
     protected boolean isViewRequest = false;
-    
+
 	protected JSONArray elements = new JSONArray();
 	protected Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
 
     protected boolean prettyPrint = true;
-	
+
     @Override
 	protected void clearCaches() {
 		super.clearCaches();
@@ -85,7 +85,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		elementsFound = new HashMap<String, EmsScriptNode>();
 	}
 
-	
+
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 	    String[] idKeys = {"modelid", "elementid", "elementId"};
@@ -96,18 +96,18 @@ public class ModelGet extends AbstractJavaWebScript {
 	            break;
 	        }
 	    }
-		
+
 		if (modelId == null) {
 			log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Element id not specified.\n");
 			return false;
 		}
-		
+
         // get timestamp if specified
         String timestamp = req.getParameter( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-        
+
         EmsScriptNode modelRootNode = null;
-        
+
         WorkspaceNode workspace = getWorkspace( req );
         boolean wsFound = workspace != null && workspace.exists();
         if ( !wsFound ) {
@@ -125,23 +125,23 @@ public class ModelGet extends AbstractJavaWebScript {
         // the node from parent workspace
         boolean findDeleted = true;
         if ( wsFound ) modelRootNode = findScriptNodeById(modelId, workspace, dateTime, findDeleted);
-        
+
 		if (modelRootNode == null || modelRootNode.isDeleted() ) {
             log( Level.ERROR,  HttpServletResponse.SC_NOT_FOUND,
                  "Element with id, %s not found", modelId
                  + ( dateTime == null ? "" : " at " + dateTime ));
 			return false;
 		}
-		
+
 		// TODO: need to check permissions on every node ref - though it looks like this might throw an error
 		if (!checkPermissions(modelRootNode, PermissionService.READ)) {
 			return false;
 		}
-		
+
 		return true;
 	}
 
-	
+
     /**
      * Entry point
      */
@@ -152,14 +152,14 @@ public class ModelGet extends AbstractJavaWebScript {
         instance.setServices( getServices() );
         return instance.executeImplImpl( req, status, cache );
     }
-    
+
 	protected Map<String, Object> executeImplImpl(WebScriptRequest req,
 			Status status, Cache cache) {
 	    Timer timer = new Timer();
 	    printHeader( req );
 
 		clearCaches();
-        
+
 		Map<String, Object> model = new HashMap<String, Object>();
 		// make sure to pass down view request flag to instance
 		setIsViewRequest(isViewRequest);
@@ -168,7 +168,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		if (validateRequest(req, status)) {
 		    elementsJson = handleRequest(req);
 		}
-		
+
 		JSONObject top = new JSONObject();
 		try {
 		    if (elementsJson.length() > 0) {
@@ -185,14 +185,14 @@ public class ModelGet extends AbstractJavaWebScript {
 		}
 
 		status.setCode(responseStatus.getCode());
-		
+
         printFooter();
-        
+
         System.out.println( "ModelGet: " + timer );
 
 		return model;
 	}
-	
+
 	/**
 	 * Wrapper for handling a request and getting the appropriate JSONArray of elements
 	 * @param req
@@ -210,16 +210,16 @@ public class ModelGet extends AbstractJavaWebScript {
                     break;
                 }
             }
-            
+
             if (null == modelId) {
                 log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find element %s", modelId);
                 return new JSONArray();
             }
-            
+
             // get timestamp if specified
             String timestamp = req.getParameter("timestamp");
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
-            
+
             WorkspaceNode workspace = getWorkspace( req );
 
             // see if prettyPrint default is overridden and change
@@ -235,21 +235,22 @@ public class ModelGet extends AbstractJavaWebScript {
                          + ( dateTime == null ? "" : " at " + dateTime ));
                     return new JSONArray();
             }
-            
+
             // recurse default is false
             boolean recurse = getBooleanArg(req, "recurse", false);
+            boolean includeQualified = getBooleanArg(req, "qualified", true);
             
             if (isViewRequest) {
                 handleViewHierarchy(modelRootNode, recurse, workspace, dateTime);
-            } else {                
+            } else {
                 handleElementHierarchy( modelRootNode, recurse, workspace, dateTime );
             }
-            
-            handleElements(dateTime);
+ 
+            handleElements(dateTime, includeQualified);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-	    
+
         return elements;
 	}
 
@@ -269,7 +270,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			for (int ii = 0; ii < childElementJson.length(); ii++) {
 				String id = childElementJson.getString(ii);
 				EmsScriptNode childElement = findScriptNodeById(id, workspace, dateTime, false);
-				
+
     				// TODO Need to report that allowedElements can't be found
     				if (childElement != null && childElement.exists()) {
                     if ( checkPermissions( childElement, PermissionService.READ ) ) {
@@ -303,11 +304,11 @@ public class ModelGet extends AbstractJavaWebScript {
 			}
 		}
 	}
-	
-	
+
+
     /**
      * Get all elements in tree from the specified root
-     * 
+     *
      * @param root
      *            Root node to get children for
      * @param workspace
@@ -317,20 +318,20 @@ public class ModelGet extends AbstractJavaWebScript {
 	protected void handleElementHierarchy( EmsScriptNode root, boolean recurse,
 	                                       WorkspaceNode workspace, Date dateTime )
 	                                              throws JSONException {
-	    		
+
 		// don't return any elements
 		if (!root.exists()) {
 		    return;
 		}
-	
-		// add root element to elementsFound if its not already there 
+
+		// add root element to elementsFound if its not already there
 		// (if it's there, it's probably because the root is a reified pkg node)
 		String sysmlId = root.getSysmlId();
 		String rootName = sysmlId;
 		if (!elementsFound.containsKey(sysmlId)) {
 		    // dont add reified packages
 		    if (!rootName.endsWith("_pkg") &&
-		        !root.isPropertyOwnedValueSpecification()) {
+		        !root.isOwnedValueSpec()) { //isPropertyOwnedValueSpecification()) {
 		        elementsFound.put(sysmlId, root);
 		    }
 		}
@@ -346,7 +347,7 @@ public class ModelGet extends AbstractJavaWebScript {
                     handleElementHierarchy( reifiedNode, recurse, workspace, dateTime );
 		        } // TODO -- REVIEW -- Warning or error?
 		    }
-		    
+
 		    // Handle all the children in this workspace:
 		    for ( NodeRef childRef : root.getOwnedChildren(false) ) {
 			    NodeRef vChildRef = NodeUtil.getNodeRefAtTime( childRef, workspace, dateTime );
@@ -358,37 +359,37 @@ public class ModelGet extends AbstractJavaWebScript {
 			    }
                 EmsScriptNode child = new EmsScriptNode( vChildRef, services, response );
                 if ( checkPermissions( child, PermissionService.READ ) ) {
-                    if (child.exists() && !child.isPropertyOwnedValueSpecification()) {
-                        
+                    if (child.exists() && !child.isOwnedValueSpec()) { //isPropertyOwnedValueSpecification()) {
+
                         String value = child.getSysmlId();
                         if ( value != null && !value.endsWith( "_pkg" )) {
                             elementsFound.put( value, child );
                         }
-                        
+
                         handleElementHierarchy( child, recurse, workspace, dateTime );
-                        
-                    } // ends if (child.exists() && !child.isPropertyOwnedValueSpecification())
-                } // ends if ( checkPermissions( child, PermissionService.READ ) ) 
+
+                    } // ends if (child.exists() && !child.isOwnedValueSpec())
+                } // ends if ( checkPermissions( child, PermissionService.READ ) )
 			}
-						
+
 		}  // ends if (recurse)
 	}
-	
+
 	/**
 	 * Build up the element JSONObject
 	 * @throws JSONException
 	 */
-	protected void handleElements(Date dateTime) throws JSONException {
+	protected void handleElements(Date dateTime, boolean includeQualified) throws JSONException {
 		for (String id: elementsFound.keySet()) {
 			EmsScriptNode node = elementsFound.get(id);
 
 			if (checkPermissions(node, PermissionService.READ)){ 
-                elements.put(node.toJSONObject(dateTime));
+                elements.put(node.toJSONObject(dateTime, includeQualified));
 			} // TODO -- REVIEW -- Warning if no permissions?
 		}
 	}
-		
-	
+
+
 	/**
 	 * Need to differentiate between View or Element request - specified during Spring configuration
 	 * @param flag

@@ -185,7 +185,8 @@
         <dependency>
             <groupId>${alfresco.groupId}</groupId>
             <artifactId>alfresco-repository</artifactId>
-            <version>${alfresco.version}</version>
+<!--            <version>4.2.e.1</version>
+ -->        <version>${alfresco.version}</version>
         </dependency>
         <!-- Test dependencies -->
         <dependency>

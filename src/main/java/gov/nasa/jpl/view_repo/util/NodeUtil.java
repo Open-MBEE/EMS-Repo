@@ -89,9 +89,9 @@ public class NodeUtil {
     /* static flags and constants */
 
     public static boolean doFullCaching = true;
-    public static boolean doSimpleCaching = true;    
-    public static boolean doHeisenCheck = true;
-    public static boolean doVersionCaching = true;
+    public static boolean doSimpleCaching = true;
+    public static boolean doHeisenCheck = false;
+    public static boolean doVersionCaching = false;
     public static boolean activeVersionCaching = true;
 
     public static String sitePkgPrefix = "site_";
@@ -477,7 +477,7 @@ public class NodeUtil {
 
             // Update cache with results
             if ( ( doSimpleCaching || doFullCaching ) && caching
-                 && !Utils.isNullOrEmpty( nodeRefs ) ) {                
+                 && !Utils.isNullOrEmpty( nodeRefs ) ) {
                 if ( useSimpleCache && doSimpleCaching ) {
                     NodeRef r = nodeRefs.get( 0 );
                     simpleCache.put( specifier, r );
@@ -1600,7 +1600,7 @@ public class NodeUtil {
     public static NodeRef findNodeRefByAlfrescoId(String id, boolean includeDeleted) {
         return findNodeRefByAlfrescoId(id, includeDeleted, true);
     }
-    
+
     public static NodeRef findNodeRefByAlfrescoId(String id, boolean includeDeleted,
                                                   boolean giveError) {
         if ( !id.contains( "://" ) ) {
@@ -2251,8 +2251,9 @@ public class NodeUtil {
 			return null;
 		}
 
+        artifactNode.makeSureNodeRefIsNotFrozen();
 		if (!artifactNode.hasAspect( "cm:versionable")) {
-			artifactNode.addAspect( "cm:versionable" );
+		    artifactNode.addAspect( "cm:versionable" );
 		}
 		if (!artifactNode.hasAspect( "cm:indexControl" )) {
 			artifactNode.addAspect( "cm:indexControl" );
@@ -2285,6 +2286,7 @@ public class NodeUtil {
 		if (base64content == null) {
 			contentData = ContentData.setEncoding( contentData, "UTF-8");
 		}
+        artifactNode.makeSureNodeRefIsNotFrozen();
 		services.getNodeService().setProperty( artifactNode.getNodeRef(),
 		            							ContentModel.PROP_CONTENT,contentData );
 
@@ -2294,6 +2296,7 @@ public class NodeUtil {
 		Object[] versionHistory = artifactNode.getEmsVersionHistory();
 
         if (versionHistory == null || versionHistory.length <= 1) {
+            artifactNode.makeSureNodeRefIsNotFrozen();
         	artifactNode.createVersion("creating the version history", false);
         }
 

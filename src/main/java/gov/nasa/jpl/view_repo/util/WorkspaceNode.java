@@ -204,7 +204,8 @@ public class WorkspaceNode extends EmsScriptNode {
                                                            EmsScriptNode folder,
                                                            ServiceRegistry services,
                                                            StringBuffer response,
-                                                           Status status ) {
+                                                           Status status,
+                                                           String description) {
     	if ( Utils.isNullOrEmpty( wsName ) ) {
     		wsName = NodeUtil.createId( services );
     	}
@@ -277,7 +278,10 @@ public class WorkspaceNode extends EmsScriptNode {
     	}
     	if ( Debug.isOn() ) Debug.outln( "created workspace " + ws + " in folder " + folder );
 
-
+        if (description != null) {
+            ws.setProperty("ems:description", description );
+        }
+        
     	ws.getOrSetCachedVersion();
 
     	return ws;
@@ -290,6 +294,7 @@ public class WorkspaceNode extends EmsScriptNode {
         }
 
         // Add the delete aspect to mark as "deleted"
+        makeSureNodeRefIsNotFrozen();
         addAspect( "ems:Deleted" );
 
         // FIXME -- REVIEW -- Is that enough?! What about the contents? Don't we
@@ -723,7 +728,10 @@ public class WorkspaceNode extends EmsScriptNode {
             json.put( "branched", TimeUtils.toTimestamp( copyTime ) );
         }
         json.put( "parent", getId(getParentWorkspace())); // this handles null as master
-
+        String desc = (String)getProperty("ems:description");
+        if (!Utils.isNullOrEmpty( desc )) {
+            json.put( "description", desc );
+        }
         // REVIEW -- Why is ems:lastTimeSyncParent called the "branched"
         // date? Shouldn't the branched date always be the same as the created
         // date? This is for future functionality when we track when the child pulls from the
@@ -851,11 +859,12 @@ public class WorkspaceNode extends EmsScriptNode {
             if ( workspace != null ) return workspace;
         }
 
-        // Try to match the workspace name
-        workspace = getWorkspaceFromName( nameOrId, services, response,
-                                          responseStatus, userName );
-
-        if ( workspace != null ) return workspace;
+        // We decided to remove this search:
+//        // Try to match the workspace name
+//        workspace = getWorkspaceFromName( nameOrId, services, response,
+//                                          responseStatus, userName );
+//
+//        if ( workspace != null ) return workspace;
 
         // Try the cm:name
         ref = NodeUtil.findNodeRefById( nameOrId, true, null, null, services, false );

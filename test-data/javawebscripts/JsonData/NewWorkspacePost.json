@@ -1,0 +1,5 @@
+{"workspaces": [{
+    "name": "newWorkspace",
+    "parent": "master",
+    "description": "new workspace description"
+}]}

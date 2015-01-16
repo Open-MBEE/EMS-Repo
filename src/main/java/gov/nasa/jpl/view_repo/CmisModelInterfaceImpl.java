@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package gov.nasa.jpl.view_repo;
 
@@ -44,7 +44,7 @@ import sysml.SystemModel;
  * An implementation of a generic model interface for querying CMIS servers
  * using Apache Chemistry OpenCMIS.
  */
-public class CmisModelInterfaceImpl 
+public class CmisModelInterfaceImpl
 		extends
 		AbstractSystemModel<CmisObject, OperationContext, ObjectType, Object, String, String, Object, Relationship, String, Object, CmisObject> {
 
@@ -305,7 +305,7 @@ public class CmisModelInterfaceImpl
         if ( context == null ) {
             context = session.createOperationContext();
         }
-		
+
 		// try as object id
 		object = getSession().getObject(identifier, context);
 
@@ -385,7 +385,7 @@ public class CmisModelInterfaceImpl
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see ModelInterface#getRelationships(java.lang.Object)
 	 */
 	//@Override
@@ -714,7 +714,7 @@ public class CmisModelInterfaceImpl
     }
 
     @Override
-    public Collection< String > getIdentifier( Object arg0 ) {
+    public String getIdentifier( Object arg0 ) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -1312,14 +1312,14 @@ public class CmisModelInterfaceImpl
     @Override
     public void addConstraint( CmisObject arg0, String arg1, Object arg2 ) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void addDomainConstraint( CmisObject arg0, String arg1,
                                      Set< Object > arg2, Object arg3 ) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -1330,7 +1330,7 @@ public class CmisModelInterfaceImpl
                                  gov.nasa.jpl.mbee.util.Pair< Object, Object > arg2,
                                  Object arg3 ) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -1377,7 +1377,7 @@ public class CmisModelInterfaceImpl
     public void relaxDomain( CmisObject arg0, String arg1, Set< Object > arg2,
                              Object arg3 ) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -1386,13 +1386,13 @@ public class CmisModelInterfaceImpl
                          gov.nasa.jpl.mbee.util.Pair< Object, Object > arg2,
                          Object arg3 ) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void setOptimizationFunction( Method arg0, Object... arg1 ) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -1410,9 +1410,9 @@ public class CmisModelInterfaceImpl
     // TODO remove this once we fix getType()
     @Override
     public String getTypeString( Object context, Object specifier ) {
-    
+
         return null;
-        
+
     }
 
     @Override

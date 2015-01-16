@@ -115,7 +115,7 @@
         "InstanceSpecification": {
             "properties": {
                 "type": { "enum": ["InstanceSpecification"] },
-                "specification": {
+                "instanceSpecificationSpecification": {
                     "type": "string",
                     "description": "ID of element that provides the instance specification"
                 }
@@ -391,11 +391,11 @@
         "DurationInterval": {
             "properties": {
                 "type": { "enum": ["DurationInterval"] },
-                "max": {
+                "durationMax": {
                     "type": "string",
                     "description": "ID of the SysML element representing the duration max"
                 },
-                "min": {
+                "durationMin": {
                     "type": "string",
                     "description": "ID of the SysML element representing the duration min"
                 }
@@ -621,11 +621,11 @@
         "TimeInterval": {
             "properties": {
                 "type": { "enum": ["TimeInterval"] },
-                "max": {
+                "timeIntervalMin": {
                     "type": "string",
                     "description": "ID of the SysML element representing the time interval max"
                 },
-                "min": {
+                "timeIntervalMin": {
                     "type": "string",
                     "description": "ID of the SysML element representing the time interval min"
                 }
