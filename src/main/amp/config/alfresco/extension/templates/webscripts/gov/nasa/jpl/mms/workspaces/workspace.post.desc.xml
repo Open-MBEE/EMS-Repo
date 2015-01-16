@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <webscript>
-	<shortname>post workspaces</shortname>
+	<shortname>post workspace</shortname>
 	<description>
-	post workspaces
+	post workspace
 	</description>
-	<url>/workspaces</url>
+	<url>/workspaces/{workspaceId}?sourceWorkspace={sourceWorkspace}</url>
 	<format default="json">argument</format>
 	<authentication>user</authentication>
 	<transaction>none</transaction>
