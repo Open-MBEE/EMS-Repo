@@ -1,6 +1,12 @@
 {"workspaces": [
     {
         "creator": "admin",
+        "description": "modified the workspace name and desc",
+        "name": "modifiedWorkspaceName",
+        "qualifiedName": "master/modifiedWorkspaceName"
+    },
+    {
+        "creator": "admin",
         "name": "wsA",
         "qualifiedName": "master/wsA"
     },

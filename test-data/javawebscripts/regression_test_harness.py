@@ -4,9 +4,6 @@
 #    -Fix run server if we use it
 #    -Get SOAP UI tests working
 #    -Add ability to run test functions instead of just curl string commands
-#
-# BUGS (filed defects for these on JIRA):
-#    -Test 14 returning 500 if doing more than once.  This is bug w/ the lock file.
 
 import os
 import commands
@@ -50,6 +47,7 @@ gv1 = None
 gv2 = None
 gv3 = None
 gv4 = None
+gv5 = None
 # These capture the curl output for any teardown functions
 orig_output = None
 filtered_output = None
@@ -68,12 +66,15 @@ def set_gv3( v ):
 def set_gv4( v ):
     global gv4
     gv4 = v
+def set_gv5( v ):
+    global gv5
+    gv5 = v
 
 import re
 
-def do20():
-    ''' Gets the "modified" date out of the json output and sets gv1 to it.'''
-    modDate = None
+def get_json_output_no_status():
+    '''Gets the output json and removes the status code from it for use in the next test'''
+
     json_output = ""
     #print 'orig_output=' + str(orig_output)
     if orig_output != None and len(str(orig_output)) > 5:
@@ -96,11 +97,72 @@ def do20():
 #         json_output = re.sub(r'^[2][0-9][0-9]', r'', orig_output, 1)
 #         #json_output = re.sub("^$", "", json_output)
         #print 'json_output=' + str(json_output)
+        
+    return json_output
+        
+def do20():
+    ''' Gets the "modified" date out of the json output and sets gv4 to it.'''
+    modDate = None
+    json_output = get_json_output_no_status()
+    if json_output:
         j = json.loads(json_output)
         #print "j=" + str(j)
         modDate = j['workspace2']['updatedElements'][0]['modified']
-    set_gv1(modDate)
-
+    set_gv4(modDate)
+    
+def set_json_output_to_gv1():
+    '''Sets the json output to gv1 variable'''
+    set_gv1(get_json_output_no_status().replace("\n",""))
+    
+def do176():
+    '''Get the json output, modifies the description and name keys,
+       and set to gv1'''
+    json_output = get_json_output_no_status()
+    j = json.loads(json_output)
+    
+    if j:
+        j["workspaces"][0]["description"] = "modified the workspace name and desc"
+        j["workspaces"][0]["name"] = "modifiedWorkspaceName"
+    
+    set_gv3(json.dumps(j))
+    
+def set_wsid_to_gv(gv):
+    '''Get the json output, and sets gv1 to the that workspace id'''
+    json_output = get_json_output_no_status()
+    j = json.loads(json_output)
+    
+    if j:
+        if gv == 1:
+            set_gv1(j["workspaces"][0]["id"])
+        elif gv == 2:
+            set_gv2(j["workspaces"][0]["id"])
+        elif gv == 3:
+            set_gv3(j["workspaces"][0]["id"])
+        elif gv == 4:
+            set_gv4(j["workspaces"][0]["id"])
+        elif gv == 5:
+            set_gv5(j["workspaces"][0]["id"])
+            
+def set_wsid_to_gv1():
+    '''Get the json output, and sets gv1 to the that workspace id'''
+    set_wsid_to_gv(1)
+    
+def set_wsid_to_gv2():
+    '''Get the json output, and sets gv2 to the that workspace id'''
+    set_wsid_to_gv(2)
+    
+def set_wsid_to_gv3():
+    '''Get the json output, and sets gv3 to the that workspace id'''
+    set_wsid_to_gv(3)
+    
+def set_wsid_to_gv4():
+    '''Get the json output, and sets gv4 to the that workspace id'''
+    set_wsid_to_gv(4)
+    
+def set_wsid_to_gv5():
+    '''Get the json output, and sets gv5 to the that workspace id'''
+    set_wsid_to_gv(5)
+    
 def create_command_line_options():
 
     '''Create all the command line options for this application
@@ -302,7 +364,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
     global filtered_output
     global orig_json
     global filtered_json
-    global gv1, gv2, gv3, gv4
+    global gv1, gv2, gv3, gv4, gv5
 
 #     result_json = "%s/test%d.json"%(result_dir,test_num)
 #     result_orig_json = "%s/test%d_orig.json"%(result_dir,test_num)
@@ -338,6 +400,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
     curl_cmd = str(curl_cmd).replace("$gv2", str(gv2))
     curl_cmd = str(curl_cmd).replace("$gv3", str(gv3))
     curl_cmd = str(curl_cmd).replace("$gv4", str(gv4))
+    curl_cmd = str(curl_cmd).replace("$gv5", str(gv5))
 
     print "Executing curl cmd: \n"+str(curl_cmd)
     
@@ -739,18 +802,47 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="",branch="wsA?sourceWorkspace=master"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop", "develop2"],
+None,
+set_wsid_to_gv1
 ],
-        
+  
+# This test case depends on the previous one and uses gv1 set by the previous test      
 [
 170,
 "CreateWorkspace2",
 "Create workspace test 2",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                post_type="",branch="wsB?sourceWorkspace=wsA"),
+                post_type="",branch="wsB?sourceWorkspace=$gv1"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"','"parent"'],
-["test","workspaces","develop", "develop2"]
+["test","workspaces","develop", "develop2"],
+None,
+set_wsid_to_gv2
+],
+        
+[
+175,
+"CreateWorkspaceWithJson",
+"Create a workspace using a json",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                post_type="",branch="",data="NewWorkspacePost.json"),
+True, 
+common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
+["test","workspaces","develop"],
+None,
+do176 
+],
+
+# This test case depends on the previous one and uses gv3 set by the previous test
+[
+176,
+"ModifyWorkspaceWithJson",
+"Modifies a workspace name/description",
+'''curl %s %s '$gv3' "%s"'''%(CURL_FLAGS,CURL_POST_FLAGS,BASE_URL_WS),
+True, 
+common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
+["test","workspaces","develop"],
 ],
         
 [
@@ -763,23 +855,25 @@ common_filters+['"branched"','"created"','"id"','"qualifiedId"','"parent"'],
 ["test","workspaces","develop", "develop2"]
 ],
 
+# This test case depends on test 160/170 thats sets gv1,gv2
 [
 190,
 "PostToWorkspace",
 "Post element to workspace",
 create_curl_cmd(type="POST",data="x.json",base_url=BASE_URL_WS,
-                post_type="elements",branch="wsB/"),
+                post_type="elements",branch="$gv2/"),
 True, 
 common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
 
+# This test case depends on test 170 thats sets gv2
 [
 200,
 "CompareWorkspaces",
 "Compare workspaces",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
-                branch="diff?workspace1=wsA&workspace2=wsB"),
+                branch="diff?workspace1=$gv1&workspace2=$gv2"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
 ["test","workspaces","develop", "develop2"],
@@ -787,16 +881,18 @@ None,
 do20 # lambda : set_gv1(json.loads(orig_json)['workspace2']['updatedElements'][0]['modified'] if (orig_json != None and len(str(orig_json)) > 0) else None)
 ],
 
-# This test case depends on the previous one and uses gv1 set by the previous test
+# This test case depends on the previous one and uses gv4 set by the previous test
 [
 210,
 "CreateWorkspaceWithBranchTime",
 "Create workspace with a branch time",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                post_type="",branch="wsT?sourceWorkspace=wsA&copyTime=$gv1"),
+                post_type="",branch="wsT?sourceWorkspace=$gv1&copyTime=$gv4"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"', '"parent"'],
 ["test","workspaces","develop", "develop2"],
+None,
+set_wsid_to_gv5
 ],
 
 # This test case depends on the previous one
@@ -805,7 +901,7 @@ common_filters+['"branched"','"created"','"id"','"qualifiedId"', '"parent"'],
 "PostToWorkspaceWithBranchTime",
 "Post element to workspace with a branch time",
 create_curl_cmd(type="POST",data="y.json",base_url=BASE_URL_WS,
-                post_type="elements",branch="wsT/"),
+                post_type="elements",branch="$gv5/"),
 True, 
 common_filters,
 ["test","workspaces","develop", "develop2"]
@@ -817,7 +913,7 @@ common_filters,
 "CompareWorkspacesWithBranchTime",
 "Compare workspaces",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
-                branch="diff?workspace1=wsA&workspace2=wsT"),
+                branch="diff?workspace1=$gv1&workspace2=$gv5"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
 ["test","workspaces","develop", "develop2"]
@@ -1015,26 +1111,30 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="",branch="AA?sourceWorkspace=master"),
 True,
 common_filters + ['"parent"','"id"','"qualifiedId"'],
-["develop"]
+["develop"],
+None,
+set_wsid_to_gv1
 ],
 
+# This test depends on the previous one for gv1
 [
 380,
 "CreateWorkspaceDelete2",
 "Create workspace to be deleted",
 create_curl_cmd(type="POST",base_url=BASE_URL_WS,
-                post_type="",branch="BB?sourceWorkspace=AA"),
+                post_type="",branch="BB?sourceWorkspace=$gv1"),
 True,
 common_filters + ['"parent"','"id"','"qualifiedId"'],
 ["develop"]
 ],
 
+# This test depends on 370 for gv1
 [
 390,
 "DeleteWorkspace",
 "Delete workspace and its children",
 create_curl_cmd(type="DELETE",base_url=BASE_URL_WS,
-                post_type="",branch="AA"),
+                post_type="",branch="$gv1"),
 True,
 common_filters + ['"parent"','"id"','"qualifiedId"'],
 ["develop"]
@@ -1195,7 +1295,9 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="",branch="ws1?sourceWorkspace=master"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
-["test","workspaces","develop"]
+["test","workspaces","develop"],
+None,
+set_wsid_to_gv1
 ], 
 
 [
@@ -1206,15 +1308,18 @@ create_curl_cmd(type="POST",base_url=BASE_URL_WS,
                 post_type="",branch="ws2?sourceWorkspace=master"),
 True, 
 common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
-["test","workspaces","develop"]
+["test","workspaces","develop"],
+None,
+set_wsid_to_gv2
 ],
       
+# This test is dependent on 530
 [
 550,
 "DiffDelete_arg_ev_38307",       # deletes element arg_ev_38307 from ws1
 "Diff Workspace Test - Delete element arg_ev_38307",
 create_curl_cmd(type="DELETE",data="elements/arg_ev_38307",base_url=BASE_URL_WS,
-                branch="ws1/"),
+                branch="$gv1/"),
 True, 
 common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"'],
 ["test","workspaces","develop"]
@@ -1225,7 +1330,7 @@ common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modi
 "DiffPostToWorkspace1",         # posts newElement to ws1
 "Diff Workspace Test - Post element to workspace",
 create_curl_cmd(type="POST",data="newElement.json",base_url=BASE_URL_WS,
-                post_type="elements",branch="ws1/"),
+                post_type="elements",branch="$gv1/"),
 True, 
 common_filters,
 ["test","workspaces","develop", "develop2"]
@@ -1236,7 +1341,7 @@ common_filters,
 "DiffUpdateElement402",         # changes element 402 documentation to "x is x" in branch ws1
 "Diff Workspace Test - Update element 402",
 create_curl_cmd(type="POST",data="update402.json",base_url=BASE_URL_WS,
-                post_type="elements",branch="ws1/"),
+                post_type="elements",branch="$gv1/"),
 True, 
 common_filters,
 ["test","workspaces","develop", "develop2"]
@@ -1247,7 +1352,7 @@ common_filters,
 "DiffCompareWorkspaces",
 "Diff Workspace Test - Compare workspaces",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
-                branch="diff?workspace1=ws2&workspace2=ws1"),
+                branch="diff?workspace1=$gv2&workspace2=$gv1"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
 ["test","workspaces","develop", "develop2"]

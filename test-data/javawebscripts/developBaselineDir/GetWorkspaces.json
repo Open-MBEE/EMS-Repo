@@ -26,6 +26,18 @@
 
         "qualifiedName": "master/wsA/wsB"
 
+    },
+
+    {
+
+        "creator": "admin",
+
+        "description": "modified the workspace name and desc",
+
+        "name": "modifiedWorkspaceName",
+
+        "qualifiedName": "master/modifiedWorkspaceName"
+
     }
 
 ]}
