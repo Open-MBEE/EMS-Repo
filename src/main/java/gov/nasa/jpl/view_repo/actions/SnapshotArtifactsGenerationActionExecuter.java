@@ -140,7 +140,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         catch(Exception ex){
         	System.out.println("Failed to complete snapshot artifact(s) generation!");
         	ex.printStackTrace();
-        	ActionUtil.sendEmailToModifier(jobNode, "An unexpected error occurred and your snapshot artifact generation failed.", "[EuropaEMS] Snapshot Generation Failed", services, response);
+        	ActionUtil.sendEmailToModifier(jobNode, "An unexpected error occurred and your snapshot artifact generation failed. " + ex.getMessage(), "[EuropaEMS] Snapshot Generation Failed", services, response);
         }
     }
 

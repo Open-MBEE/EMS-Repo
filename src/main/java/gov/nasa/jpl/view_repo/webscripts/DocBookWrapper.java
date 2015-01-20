@@ -285,7 +285,7 @@ public class DocBookWrapper {
 		}
 	}
 
-	public void saveDocBookToRepo(EmsScriptNode snapshotFolder, Date timestamp){
+	public void saveDocBookToRepo(EmsScriptNode snapshotFolder, Date timestamp) throws Exception{
 		ServiceRegistry services = this.snapshotNode.getServices();
 		try{
 			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_docbook", "cm:content");
@@ -299,8 +299,8 @@ public class DocBookWrapper {
 			if ( node != null ) node.getOrSetCachedVersion();
 		}
 		catch(Exception ex){
-			System.out.println("Failed to create docbook child node!");
 			ex.printStackTrace();
+			throw new Exception("Failed to create docbook child node!", ex);
 		}
 	}
 
@@ -343,9 +343,8 @@ public class DocBookWrapper {
 			if(node == null) throw new Exception("Failed to create HTML repository node!");
 
 			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_ZIP, zipPath)) throw new Exception("Failed to save HTML artifact to repository!");
-			if(this.snapshotNode.createOrUpdateAspect("view2:htmlZip")){
-				this.snapshotNode.createOrUpdateProperty("view2:htmlZipNode", node.getNodeRef());
-			}
+			this.snapshotNode.createOrUpdateAspect("view2:htmlZip");
+			this.snapshotNode.createOrUpdateProperty("view2:htmlZipNode", node.getNodeRef());
 
 			if ( node != null ) node.getOrSetCachedVersion();
 		}
@@ -356,16 +355,15 @@ public class DocBookWrapper {
 
 	public void savePdfToRepo(EmsScriptNode snapshotFolder, WorkspaceNode workspace, Date timestamp) throws Exception{
 		try{
-			String pdfPath = transformToPDF(workspace, timestamp);
-			if(pdfPath == null || pdfPath.isEmpty()) throw new Exception("Failed to transform from DocBook to PDF!");
-
 			EmsScriptNode node = snapshotFolder.createNode(this.snapshotName + "_PDF", "cm:content");
 			if(node == null) throw new Exception("Failed to create PDF repository node!");
 
+			String pdfPath = transformToPDF(workspace, timestamp);
+			if(pdfPath == null || pdfPath.isEmpty()) throw new Exception("Failed to transform from DocBook to PDF!");
+
 			if(!this.saveFileToRepo(node, MimetypeMap.MIMETYPE_PDF, pdfPath)) throw new Exception("Failed to save PDF artifact to repository!");
-			if(this.snapshotNode.createOrUpdateAspect("view2:pdf")){
-				this.snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef());
-			}
+			this.snapshotNode.createOrUpdateAspect("view2:pdf");
+			this.snapshotNode.createOrUpdateProperty("view2:pdfNode", node.getNodeRef());
 
 			if ( node != null ) node.getOrSetCachedVersion();
 		}
