@@ -90,7 +90,7 @@ public class DocBookWrapper {
 		RuntimeExec re = new RuntimeExec();
 		List<String> command = new ArrayList<String>();
 
-		System.out.println("srcFile: " + srcFile.getAbsolutePath());
+//		System.out.println("srcFile: " + srcFile.getAbsolutePath());
 		String source = srcFile.getAbsolutePath();
 		String target = source.subSequence(0, source.lastIndexOf(".")) + ".pdf";
 		command.add(this.getFobFileName());
@@ -102,8 +102,8 @@ public class DocBookWrapper {
 		command.add("-pdf");
 		command.add(target);
 
-		System.out.println("DO_TRANSFORM source: " + source);
-		System.out.println("DO_TRANSFORM target: " + target);
+//		System.out.println("DO_TRANSFORM source: " + source);
+//		System.out.println("DO_TRANSFORM target: " + target);
 		System.out.println("DO_TRANSFROM cmd: " + command);
 
 		re.setCommand(list2Array(command));
@@ -495,10 +495,10 @@ public class DocBookWrapper {
 	
 	private void transformToHTML(WorkspaceNode workspace, Date timestamp) throws Exception{
 		if(!createDocBookDir()) return;
-		System.out.println("Retrieving DocBook...");
+//		System.out.println("Retrieving DocBook...");
 		retrieveDocBook();
 		File srcFile = new File(this.getDBFileName());
-		System.out.println("Retrieving images...");
+//		System.out.println("Retrieving images...");
 		retrieveImages(srcFile, this.snapshotNode.getServices(), workspace, timestamp);
 		RuntimeExec re = new RuntimeExec();
 		List<String> command = new ArrayList<String>();
@@ -608,14 +608,13 @@ public class DocBookWrapper {
 
 	private String transformToPDF(WorkspaceNode workspace, Date timestamp) throws Exception{
     	if(!createDocBookDir()){
-    		System.out.println("Failed to create DocBook directory!");
-    		return null;
+    		throw new Exception("Failed to create DocBook directory!");
     	}
-    	System.out.println("Retrieving DocBook...");
+//    	System.out.println("Retrieving DocBook...");
     	retrieveDocBook();
 		//ContentService contentService = this.snapshotNode.getServices().getContentService();
     	File srcFile = new File(this.getDBFileName());
-    	System.out.println("Retrieving images...");
+//    	System.out.println("Retrieving images...");
     	retrieveImages(srcFile, this.snapshotNode.getServices(), workspace, timestamp);
 		// do transformation then put result into writer
 		String targetFilename = doPDFTransformation(srcFile);
@@ -626,7 +625,7 @@ public class DocBookWrapper {
 	public String zipHtml() throws IOException, InterruptedException {
 		ProcessBuilder processBuilder = new ProcessBuilder();
 		processBuilder.directory(new File(this.getJobDirName()));
-		System.out.println("zip working directory: " + processBuilder.directory());
+//		System.out.println("zip working directory: " + processBuilder.directory());
 		List<String> command = new ArrayList<String>();
 		String zipFile = this.snapshotName + ".zip";
 		command.add("zip");
