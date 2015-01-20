@@ -1770,7 +1770,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	if(node==null) return;
     	node.createOrUpdateAspect("view2:htmlZip");
 		node.createOrUpdateProperty("view2:htmlZipStatus", status);
-		System.out.println("set HTML status => " + status);
+//		System.out.println("set HTML status => " + status);
     }
     
     private void setPdfStatus(WorkspaceNode workspace, EmsScriptNode node, String status){
