@@ -12,6 +12,8 @@
 
         "creator": "admin",
 
+        "description": "",
+
         "name": "wsA",
 
         "qualifiedName": "master/wsA"
@@ -21,6 +23,8 @@
     {
 
         "creator": "admin",
+
+        "description": "",
 
         "name": "wsB",
 
