@@ -357,3 +357,6 @@ Note: Following shortcuts are mainly for Linux.
 # checksum on patched alfresco-repository-4.2.e.jar
 761054791893eee91a0871903139f5fb  /home/bclement/git/alfresco-view-repo/src/main/amp/web/WEB-INF/lib/alfresco-repository-4.2.e.jar
 
+# Running with a Tomcat with a different port on Maven
+
+So you don't clash with other users, run using something like -Dmaven.tomcat.port=9091.
