@@ -349,6 +349,10 @@ Note: Following shortcuts are mainly for Linux.
 	refresh view-share page
 	the final, integrated content model is displayed in view-share in your dashboard (under sites) and in Repository
 	
+### Running with a Tomcat with a different port on Maven
+
+So you don't clash with other users, run using something like -Dmaven.tomcat.port=9091.
+	
 ### Enterprise settings with Maven
 
 Need to update settings.xml to connect to the Alfresco private repository. Ask Ly or Cin-Young
