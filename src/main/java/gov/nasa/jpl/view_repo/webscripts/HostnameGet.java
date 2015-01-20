@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.alfresco.repo.admin.SysAdminParams;
+import org.alfresco.repo.model.Repository;
+import org.alfresco.service.ServiceRegistry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -51,5 +53,52 @@ public class HostnameGet extends AbstractJavaWebScript {
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	private String alfrescoContext;
+	public String getAlfrescoContext(){
+		return alfrescoContext;
+	}
+	
+	private String alfrescoHost;
+	public String getAlfrescoHost(){
+		return alfrescoHost;
+	}
+	
+	private int alfrescoPort;
+	public int getAlfrescoPort(){
+		return alfrescoPort;
+	}
+	
+	private String alfrescoProtocol;
+	public String getAlfrescoProtocol(){
+		return alfrescoProtocol;
+	}
+	
+	private String alfrescoUrl;
+	public String getAlfrescoUrl(){
+		if(alfrescoUrl==null || alfrescoUrl.isEmpty()){
+			if(this.alfrescoHost.compareToIgnoreCase("localhost")==0){
+				alfrescoUrl = this.alfrescoProtocol + "://" + this.alfrescoHost + ":" + alfrescoPort;
+			}
+			else{
+				alfrescoUrl = this.alfrescoProtocol + "://" + this.alfrescoHost;
+			}
+		}
+		return alfrescoUrl;
+	}
+	
+	public HostnameGet(){
+		super();
+		
+	}
+	
+	public HostnameGet(Repository repositoryHelper, ServiceRegistry registry) {
+		super(repositoryHelper, registry);
+		SysAdminParams sysAdminParams = this.services.getSysAdminParams();
+		this.alfrescoContext = sysAdminParams.getAlfrescoContext();
+		this.alfrescoHost = sysAdminParams.getAlfrescoHost();
+		this.alfrescoPort = sysAdminParams.getAlfrescoPort();
+		this.alfrescoProtocol = sysAdminParams.getAlfrescoProtocol();		
 	}
 }

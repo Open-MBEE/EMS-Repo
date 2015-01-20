@@ -2425,8 +2425,7 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     /**
-     * Retrieve the site folder containing this node. If this is a view, then it
-     * is the folder containing the Models folder. Otherwise, it is the parent
+     * Retrieve the site folder containing this node. It is the parent
      * folder contained by the Sites folder.
      *
      * @return the site folder containing this node
@@ -2444,8 +2443,7 @@ public class EmsScriptNode extends ScriptNode implements
 
         EmsScriptNode parent = owner != null ? owner : this;
         String parentName = parent.getName();
-        while ( !parentName.equals( "Models" )
-                || !parentName.equals( "ViewEditor" ) ) {
+        while ( !parentName.equals( "Models" )) {
             EmsScriptNode oldparent = parent;
             parent = oldparent.getParent();
             if ( parent == null ) return null; // site not found!

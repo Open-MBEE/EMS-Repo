@@ -9,6 +9,7 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
+import gov.nasa.jpl.view_repo.webscripts.HostnameGet;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
 
 import java.util.ArrayList;
@@ -282,21 +283,34 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         @SuppressWarnings( "rawtypes" )
         LinkedList<HashMap> list = new LinkedList<HashMap>();
         if(SnapshotPost.hasPdf(snapshot) || SnapshotPost.hasHtmlZip(snapshot)){
-        	String contextUrl = "https://" + ActionUtil.getHostName() + ".jpl.nasa.gov/alfresco";
+        	HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
+        	String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";
         	HashMap<String, String> transformMap;
             if(SnapshotPost.hasPdf(snapshot)){
-            	EmsScriptNode pdfNode = SnapshotPost.getPdfNode(snapshot);
-            	transformMap = new HashMap<String,String>();
-            	transformMap.put("type", "pdf");
-            	transformMap.put("url", contextUrl + pdfNode.getUrl());
-            	list.add(transformMap);
+            	String pdfStatus = SnapshotPost.getPdfStatus(snapshot);
+            	if(pdfStatus != null && !pdfStatus.isEmpty()){
+	            	EmsScriptNode pdfNode = SnapshotPost.getPdfNode(snapshot);
+	            	transformMap = new HashMap<String,String>();
+	            	transformMap.put("status", pdfStatus);
+	            	transformMap.put("type", "pdf");
+	            	if(pdfNode != null){ 
+	            		transformMap.put("url", contextUrl + pdfNode.getUrl());
+	            	}
+	            	list.add(transformMap);
+            	}
             }
             if(SnapshotPost.hasHtmlZip(snapshot)){
-            	EmsScriptNode htmlZipNode = SnapshotPost.getHtmlZipNode(snapshot);
-            	transformMap = new HashMap<String,String>();
-            	transformMap.put("type", "html");
-            	transformMap.put("url", contextUrl + htmlZipNode.getUrl());
-            	list.add(transformMap);
+            	String htmlZipStatus = SnapshotPost.getHtmlZipStatus(snapshot);
+            	if(htmlZipStatus != null && !htmlZipStatus.isEmpty()){
+	            	EmsScriptNode htmlZipNode = SnapshotPost.getHtmlZipNode(snapshot);
+	            	transformMap = new HashMap<String,String>();
+	            	transformMap.put("status", htmlZipStatus);
+	            	transformMap.put("type", "html");
+	            	if(htmlZipNode != null){
+	            		transformMap.put("url", contextUrl + htmlZipNode.getUrl());
+	            	}
+	            	list.add(transformMap);
+            	}
             }
         }
         snapshotJson.put("formats", list);

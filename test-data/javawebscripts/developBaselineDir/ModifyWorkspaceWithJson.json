@@ -1,0 +1,16 @@
+{"workspaces": [{
+
+    "creator": "admin",
+
+    "description": "modified the workspace name and desc",
+
+    "name": "modifiedWorkspaceName",
+
+    "parent": "master",
+
+    "qualifiedName": "master/modifiedWorkspaceName"
+
+}]}
+
+200
+

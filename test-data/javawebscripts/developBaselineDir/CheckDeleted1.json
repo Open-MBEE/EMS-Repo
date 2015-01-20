@@ -12,6 +12,18 @@
 
         "creator": "admin",
 
+        "description": "modified the workspace name and desc",
+
+        "name": "modifiedWorkspaceName",
+
+        "qualifiedName": "master/modifiedWorkspaceName"
+
+    },
+
+    {
+
+        "creator": "admin",
+
         "name": "wsB",
 
         "qualifiedName": "master/wsA/wsB"
@@ -22,9 +34,9 @@
 
         "creator": "admin",
 
-        "name": "wsA",
+        "name": "wsT",
 
-        "qualifiedName": "master/wsA"
+        "qualifiedName": "master/wsA/wsT"
 
     },
 
@@ -32,9 +44,9 @@
 
         "creator": "admin",
 
-        "name": "wsT",
+        "name": "wsA",
 
-        "qualifiedName": "master/wsA/wsT"
+        "qualifiedName": "master/wsA"
 
     }
 
