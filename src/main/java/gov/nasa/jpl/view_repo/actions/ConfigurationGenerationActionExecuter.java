@@ -35,12 +35,15 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
+import gov.nasa.jpl.view_repo.webscripts.HostnameGet;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
@@ -202,7 +205,8 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         if (!hostname.endsWith( ".jpl.nasa.gov" )) {
             hostname += ".jpl.nasa.gov";
         }
-        String contextUrl = "https://" + hostname + "/alfresco";
+        HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
+        String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";
         
         // Send off notification email
         String subject =
