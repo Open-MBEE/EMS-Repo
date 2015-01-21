@@ -1322,6 +1322,25 @@ public class ModelPost extends AbstractJavaWebScript {
             // before ingesting:
             jsonToCheck.put(jsonKey, nodeNames.get(0));
         }
+        
+        // If old values are no longer used, then delete them:
+        if (newVals != null && oldVals != null ) {
+            int newValsSize = newVals.length();
+            int oldValsSize = oldVals.size();
+            
+            if (newValsSize < oldValsSize) {
+                Iterator<EmsScriptNode> iterOld = oldVals.iterator();
+                int i = 0;
+                while (iterOld.hasNext()) {
+                    EmsScriptNode oldNode = iterOld.next();
+                    if (i >= newValsSize) {
+                        //deleteValueSpec(node, oldNode);  // TODO
+                    }
+                    i++;
+                }
+            }
+            
+        }
 
         return changed;
     }
