@@ -113,12 +113,15 @@ public class NodeUtil {
      * to get around the "Heisenbug" where alfresco's current version is
      * sometimes tied to an old version.
      */
-    protected static HashMap<String, NodeRef> heisenCache = new HashMap<String, NodeRef>();
+    protected static Map< String, NodeRef > heisenCache =
+            Collections.synchronizedMap( new HashMap<String, NodeRef>() );
 
 //  public static HashMap<String, String> versionLabelCache =
 //            new HashMap<String, String>();
-    public static HashMap<String, EmsVersion> versionCache =
-            new HashMap<String, EmsVersion>();
+    public static Map< String, EmsVersion > versionCache =
+            Collections.synchronizedMap( new HashMap<String, EmsVersion>() );
+    public static Map< NodeRef, NodeRef > frozenNodeCache =
+            Collections.synchronizedMap( new HashMap<NodeRef, NodeRef>() );
 
 
     // Set the flag to time events that occur during a model post using the timers
@@ -128,7 +131,8 @@ public class NodeUtil {
     private static Timer timerByType = null;
     private static Timer timerLucene = null;
 
-    public static final Comparator< ? super NodeRef > nodeRefComparator = GenericComparator.instance();
+    public static final Comparator< ? super NodeRef > nodeRefComparator =
+            GenericComparator.instance();
 
     public static ServiceRegistry services = null;
 
@@ -145,38 +149,33 @@ public class NodeUtil {
         // this common cache. It would be better to pass around a context or
         // something with a service identifier as a key to the cache. So, each
         // web service invocation would have its own cache.
-        synchronized ( heisenCache ) {
-            heisenCache.clear();
-        }
+        heisenCache.clear();
     }
     public static NodeRef heisenCachePut( String id, NodeRef nodeRef ) {
-        synchronized ( heisenCache ) {
-            return heisenCache.put( id, nodeRef );
-        }
+        return heisenCache.put( id, nodeRef );
     }
     public static NodeRef heisenCacheGet( String id ) {
-        synchronized ( heisenCache ) {
-            return heisenCache.get( id );
-        }
+        return heisenCache.get( id );
     }
 
-    public static void cacheNodeVersion( EmsScriptNode node ) {
-        if ( activeVersionCaching && NodeUtil.exists( node ) ) {
-            Version v = node.getCurrentVersion();
-            if ( doVersionCaching ) {
-                EmsVersion cachedVersion = versionCache.get( node.getId() );
-//                cachedV
-//                if ( cachedV != null ) {
-//
-//
-//                }
-            }
-            NodeUtil.heisenCachePut( node.getName(),
-                                     ( v != null && v.getFrozenStateNodeRef() != null )
-                                     ? v.getFrozenStateNodeRef()
-                                     : node.getNodeRef() );
-        }
+    public static NodeRef getCurrentNodeRefFromCache( NodeRef maybeFrozenNodeRef ) {
+        NodeRef ref = frozenNodeCache.get( maybeFrozenNodeRef );
+        if ( ref != null ) return ref;
+        //EmsScriptNode node = new EmsScriptNode( maybeFrozenNodeRef, getServices() );
+        return null;//node.getLiveNodeRefFromVersion();
     }
+//    public static void cacheNodeVersion( EmsScriptNode node ) {
+//        if ( activeVersionCaching && NodeUtil.exists( node ) ) {
+//            Version v = node.getCurrentVersion();
+//            if ( doVersionCaching ) {
+//                EmsVersion cachedVersion = versionCache.get( node.getId() );
+//            }
+//            NodeUtil.heisenCachePut( node.getName(),
+//                                     ( v != null && v.getFrozenStateNodeRef() != null )
+//                                     ? v.getFrozenStateNodeRef()
+//                                     : node.getNodeRef() );
+//        }
+//    }
 
 
     public static StoreRef getStoreRef() {

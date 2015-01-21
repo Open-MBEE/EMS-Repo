@@ -1227,9 +1227,30 @@ public class EmsScriptNode extends ScriptNode implements
         Version v = getCurrentVersion();
         if ( v != null ) {
             NodeRef liveRef = v.getVersionedNodeRef();
-            return liveRef;
+            if ( liveRef != null ) {
+                return liveRef;
+            }
         }
+        NodeRef ref = NodeUtil.getCurrentNodeRefFromCache( nodeRef );
+        if ( ref != null ) return ref;
+       // Logger.error("");
         return nodeRef;
+    }
+
+    protected boolean updateFrozenCache( Version currentVersion ) {
+        if ( currentVersion != null ) {
+            NodeRef frozenRef = currentVersion.getFrozenStateNodeRef();
+            if ( !this.isAVersion() ) {
+                NodeUtil.frozenNodeCache.put( frozenRef, nodeRef );
+                return true;
+            }
+            NodeRef versionedRef = currentVersion.getVersionedNodeRef();
+            if ( versionedRef != null ) {
+                NodeUtil.frozenNodeCache.put( frozenRef, versionedRef );
+                return true;
+            }
+        }
+        return false;
     }
 
     public Version getCurrentVersion() {
@@ -1239,12 +1260,15 @@ public class EmsScriptNode extends ScriptNode implements
         if (versionService != null) {
             try {
                 currentVersion = versionService.getCurrentVersion( nodeRef );
+                updateFrozenCache( currentVersion );
             } catch ( Throwable t1 ) {
                 try {
                     currentVersion = versionService.getCurrentVersion( nodeRef );
+                    updateFrozenCache( currentVersion );
                 } catch ( Throwable t2 ) {
                     logger.error( "Got exception in getCurrentVersion(): "
                                   + t2.getLocalizedMessage() );
+                    t2.printStackTrace();
                 }
             }
         }
