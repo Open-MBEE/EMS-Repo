@@ -90,8 +90,8 @@ public class NodeUtil {
 
     public static boolean doFullCaching = true;
     public static boolean doSimpleCaching = true;
-    public static boolean doHeisenCheck = false;
-    public static boolean doVersionCaching = false;
+    public static boolean doHeisenCheck = true;
+    public static boolean doVersionCaching = true;
     public static boolean activeVersionCaching = true;
 
     public static String sitePkgPrefix = "site_";
