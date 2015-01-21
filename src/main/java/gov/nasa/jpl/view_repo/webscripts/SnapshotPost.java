@@ -642,8 +642,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
             e1.printStackTrace();
         }
 
-
-        snapshotNode.getOrSetCachedVersion();
+        if (snapshotNode != null) {
+            snapshotNode.getOrSetCachedVersion();
+        }
         snapshotFolder.getOrSetCachedVersion();
 
         return snapshotNode;
