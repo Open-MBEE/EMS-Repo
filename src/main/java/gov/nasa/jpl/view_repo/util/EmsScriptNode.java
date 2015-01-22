@@ -1268,7 +1268,7 @@ public class EmsScriptNode extends ScriptNode implements
                 } catch ( Throwable t2 ) {
                     logger.error( "Got exception in getCurrentVersion(): "
                                   + t2.getLocalizedMessage() );
-                    t2.printStackTrace();
+//                    t2.printStackTrace();
                 }
             }
         }
