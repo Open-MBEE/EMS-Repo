@@ -76,6 +76,8 @@ import javax.transaction.UserTransaction;
 import kexpparser.KExpParser;
 //import k.frontend.Frontend;
 
+
+
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -297,28 +299,28 @@ public class ModelPost extends AbstractJavaWebScript {
                 if (projectNode == null || !rootElement.equals(projectNode.getProperty(Acm.CM_NAME))) {
 
                     EmsScriptNode owner = null;
-
-
-                    UserTransaction trx;
-                    trx = services.getTransactionService().getNonPropagatingUserTransaction();
-                    try {
-                        trx.begin();
+//
+//
+//                    UserTransaction trx;
+//                    trx = services.getTransactionService().getNonPropagatingUserTransaction();
+//                    try {
+//                        trx.begin();
                         owner = getOwner(rootElement,targetWS, true);
-                        trx.commit();
-                    } catch (Throwable e) {
-                        try {
-                            trx.rollback();
-                            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
-                            log(LogLevel.ERROR, "\t####### when calling getOwner(" + rootElement + ", " + projectNode + ", true)");
-                            e.printStackTrace();
-                        } catch (Throwable ee) {
-                            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
-                            log(LogLevel.ERROR, "\tafter calling getOwner(" + rootElement + ", " + projectNode + ", true)");
-                            ee.printStackTrace();
-                        }
-                    }
-
-
+//                        trx.commit();
+//                    } catch (Throwable e) {
+//                        try {
+//                            trx.rollback();
+//                            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+//                            log(LogLevel.ERROR, "\t####### when calling getOwner(" + rootElement + ", " + projectNode + ", true)");
+//                            e.printStackTrace();
+//                        } catch (Throwable ee) {
+//                            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+//                            log(LogLevel.ERROR, "\tafter calling getOwner(" + rootElement + ", " + projectNode + ", true)");
+//                            ee.printStackTrace();
+//                        }
+//                    }
+//
+//
 
                     // Create element, owner, and reified package folder as
                     // necessary and place element with owner; don't update
@@ -363,7 +365,22 @@ public class ModelPost extends AbstractJavaWebScript {
         // Send deltas to all listeners
         if (createCommit && wsDiff.isDiff()) {
             // FIXME: Need to split elements by project Id - since they won't always be in same project
-            CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), status );
+//            CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), status );
+            NodeRef commitRef = CommitUtil.commit(null, targetWS, "", true, services, new StringBuffer() );
+            String projectId = elements.first().getProjectId();
+            String wsId = "master";
+            if (targetWS != null) {
+                wsId = targetWS.getId();
+            }
+
+            JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
+
+            // FIXME: Need to split by projectId
+            if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId) ) {
+                //logger.warn("send deltas not posted properly");
+            }
+
+            CommitUtil.updateCommitNodeRef( commitRef, deltaJson.toString(), "", services, response );
         }
 
         Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): Deltas time", timeEvents);
@@ -618,32 +635,32 @@ public class ModelPost extends AbstractJavaWebScript {
         if (runWithoutTransactions) {
             updateOrCreateTransactionableRelationships(jsonObject, key, workspace);
         } else {
-            UserTransaction trx;
-            trx = services.getTransactionService().getNonPropagatingUserTransaction();
-            try {
-                trx.begin();
-                log(LogLevel.INFO, "updateOrCreateRelationships: beginning transaction {");
+//            UserTransaction trx;
+//            trx = services.getTransactionService().getNonPropagatingUserTransaction();
+//            try {
+//                trx.begin();
+//                log(LogLevel.INFO, "updateOrCreateRelationships: beginning transaction {");
                 updateOrCreateTransactionableRelationships(jsonObject, key, workspace);
-                log(LogLevel.INFO, "} updateOrCreateRelationships committing: " + key);
-                timerCommit = Timer.startTimer(timerCommit, timeEvents);
-                trx.commit();
-                Timer.stopTimer(timerCommit, "!!!!! updateOrCreateRelationships(): commit time", timeEvents);
-            } catch (Throwable e) {
-                try {
-                    if (e instanceof JSONException) {
-	                		log(LogLevel.ERROR, "updateOrCreateRelationships: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
-	                } else {
-	                		log(LogLevel.ERROR, "updateOrCreateRelationships: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	                }
-                    trx.rollback();
-                    log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
-                    e.printStackTrace();
-                } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tupdateOrCreateRelationships: rollback failed: " + ee.getMessage());
-                    ee.printStackTrace();
-                    e.printStackTrace();
-                }
-            }
+//                log(LogLevel.INFO, "} updateOrCreateRelationships committing: " + key);
+//                timerCommit = Timer.startTimer(timerCommit, timeEvents);
+//                trx.commit();
+//                Timer.stopTimer(timerCommit, "!!!!! updateOrCreateRelationships(): commit time", timeEvents);
+//            } catch (Throwable e) {
+//                try {
+//                    if (e instanceof JSONException) {
+//	                		log(LogLevel.ERROR, "updateOrCreateRelationships: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+//	                } else {
+//	                		log(LogLevel.ERROR, "updateOrCreateRelationships: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+//	                }
+//                    trx.rollback();
+//                    log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+//                    e.printStackTrace();
+//                } catch (Throwable ee) {
+//                    log(LogLevel.ERROR, "\tupdateOrCreateRelationships: rollback failed: " + ee.getMessage());
+//                    ee.printStackTrace();
+//                    e.printStackTrace();
+//                }
+//            }
         }
         end = System.currentTimeMillis();
         log(LogLevel.INFO, (end - start) + "ms");
@@ -800,34 +817,34 @@ public class ModelPost extends AbstractJavaWebScript {
         if (runWithoutTransactions) {
             isValid =  buildTransactionableElementMap(jsonArray, workspace);
         } else {
-            UserTransaction trx;
-            // building element map is a read-only transaction
-            trx = services.getTransactionService().getNonPropagatingUserTransaction(true);
-            try {
-                trx.begin();
-                log(LogLevel.INFO, "buildElementMap begin transaction {");
+//            UserTransaction trx;
+//            // building element map is a read-only transaction
+//            trx = services.getTransactionService().getNonPropagatingUserTransaction(true);
+//            try {
+//                trx.begin();
+//                log(LogLevel.INFO, "buildElementMap begin transaction {");
                 isValid = buildTransactionableElementMap(jsonArray, workspace);
-                log(LogLevel.INFO, "} buildElementMap committing");
-                timerCommit = Timer.startTimer(timerCommit, timeEvents);
-                trx.commit();
-                Timer.stopTimer(timerCommit, "!!!!! buildElementMap(): commit time", timeEvents);
-            } catch (Throwable e) {
-                try {
-                    log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
-                    if (e instanceof JSONException) {
-	                		log(LogLevel.ERROR, "buildElementMap: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
-	                } else {
-	                		log(LogLevel.ERROR, "buildElementMap: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	                }
-                    trx.rollback();
-                    e.printStackTrace();
-                } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tbuildElementMap: rollback failed: " + ee.getMessage());
-                    ee.printStackTrace();
-                    e.printStackTrace();
-                }
-                isValid = false;
-            }
+//                log(LogLevel.INFO, "} buildElementMap committing");
+//                timerCommit = Timer.startTimer(timerCommit, timeEvents);
+//                trx.commit();
+//                Timer.stopTimer(timerCommit, "!!!!! buildElementMap(): commit time", timeEvents);
+//            } catch (Throwable e) {
+//                try {
+//                    log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+//                    if (e instanceof JSONException) {
+//	                		log(LogLevel.ERROR, "buildElementMap: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+//	                } else {
+//	                		log(LogLevel.ERROR, "buildElementMap: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+//	                }
+//                    trx.rollback();
+//                    e.printStackTrace();
+//                } catch (Throwable ee) {
+//                    log(LogLevel.ERROR, "\tbuildElementMap: rollback failed: " + ee.getMessage());
+//                    ee.printStackTrace();
+//                    e.printStackTrace();
+//                }
+//                isValid = false;
+//            }
         }
 
         return isValid;
@@ -1027,42 +1044,42 @@ public class ModelPost extends AbstractJavaWebScript {
                                                           children, workspace, ingest, false, modStatus,
                                                           element);
         } else {
-            UserTransaction trx;
-            trx = services.getTransactionService().getNonPropagatingUserTransaction();
-            try {
-                trx.begin();
-
-                // Check to see if the element has been updated since last read/modified by the
-                // posting application.  Want this to be within the transaction
+//            UserTransaction trx;
+//            trx = services.getTransactionService().getNonPropagatingUserTransaction();
+//            try {
+//                trx.begin();
+//
+//                // Check to see if the element has been updated since last read/modified by the
+//                // posting application.  Want this to be within the transaction
                 if (inConflict(element, elementJson)) {
                     return elements;
                 }
 
-                log(LogLevel.INFO, "updateOrCreateElement begin transaction {");
+//                log(LogLevel.INFO, "updateOrCreateElement begin transaction {");
                 reifiedNode =
                         updateOrCreateTransactionableElement( elementJson,
                                                               parent, children,
                                                               workspace,
                                                               ingest, false, modStatus, element );
-                log(LogLevel.INFO, "} updateOrCreateElement end transaction");
-                timerCommit = Timer.startTimer(timerCommit, timeEvents);
-                trx.commit();
-                Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): commit time", timeEvents);
-            } catch (Throwable e) {
-                try {
-                    if (e instanceof JSONException) {
-                    		log(LogLevel.ERROR, "updateOrCreateElement: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
-                    } else {
-                    		log(LogLevel.ERROR, "updateOrCreateElement: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                    }
-                    e.printStackTrace();
-                    trx.rollback();
-                } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
-                    ee.printStackTrace();
-                    e.printStackTrace();
-                }
-            }
+//                log(LogLevel.INFO, "} updateOrCreateElement end transaction");
+//                timerCommit = Timer.startTimer(timerCommit, timeEvents);
+//                trx.commit();
+//                Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): commit time", timeEvents);
+//            } catch (Throwable e) {
+//                try {
+//                    if (e instanceof JSONException) {
+//                    		log(LogLevel.ERROR, "updateOrCreateElement: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+//                    } else {
+//                    		log(LogLevel.ERROR, "updateOrCreateElement: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+//                    }
+//                    e.printStackTrace();
+//                    trx.rollback();
+//                } catch (Throwable ee) {
+//                    log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
+//                    ee.printStackTrace();
+//                    e.printStackTrace();
+//                }
+//            }
         }
 
         // create the children elements
@@ -1107,25 +1124,25 @@ public class ModelPost extends AbstractJavaWebScript {
         if (runWithoutTransactions) {
             updateTransactionableWsStateImpl(element, jsonId, modStatus, ingest);
         } else {
-            UserTransaction trx;
-            trx = services.getTransactionService().getNonPropagatingUserTransaction();
-            try {
-                trx.begin();
-                timerCommit = Timer.startTimer(timerCommit, timeEvents);
+//            UserTransaction trx;
+//            trx = services.getTransactionService().getNonPropagatingUserTransaction();
+//            try {
+//                trx.begin();
+//                timerCommit = Timer.startTimer(timerCommit, timeEvents);
                 updateTransactionableWsStateImpl( element, jsonId, modStatus, ingest );
-                trx.commit();
-                Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): ws metadata time", timeEvents);
-            } catch (Throwable e) {
-                try {
-                    log(LogLevel.ERROR, "updateOrCreateElement: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                    e.printStackTrace();
-                    trx.rollback();
-                } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
-                    ee.printStackTrace();
-                    e.printStackTrace();
-                }
-            }
+//                trx.commit();
+//                Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): ws metadata time", timeEvents);
+//            } catch (Throwable e) {
+//                try {
+//                    log(LogLevel.ERROR, "updateOrCreateElement: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+//                    e.printStackTrace();
+//                    trx.rollback();
+//                } catch (Throwable ee) {
+//                    log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
+//                    ee.printStackTrace();
+//                    e.printStackTrace();
+//                }
+//            }
         }
     }
 
