@@ -168,7 +168,7 @@
         <property name="description" value="Initial data requirements" />
         <property name="sinceVersion" value="0.0.1" />
         <property name="appliesFromVersion" value="0.0.1" />
-        <property name="executeOnceOnly" value="true" />
+        <property name="executeOnceOnly" value="false" />
         <property name="importer" ref="userBootstrap"/>
         <property name="bootstrapViews">
             <list>
@@ -176,7 +176,6 @@
                     <prop key="path">/${alfresco_user_store.system_container.childname}/sys:people</prop>
                     <prop key="location">alfresco/bootstrap/authorities.xml</prop>
                 </props>
-				
             </list>
         </property>
     </bean>   

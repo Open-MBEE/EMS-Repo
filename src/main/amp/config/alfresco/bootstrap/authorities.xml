@@ -8,7 +8,8 @@
     </view:aspects>
         <view:properties>
             <usr:username>mmsadmin</usr:username>
-            <usr:password>209c6174da490caeb422f3fa5a7ae634</usr:password>
+            <!-- <usr:password>209c6174da490caeb422f3fa5a7ae634</usr:password> -->
+            <usr:password>becedb42ec3c5c7f965255338be4453c</usr:password>
             <usr:accountExpires>false</usr:accountExpires>
             <usr:credentialsExpire>false</usr:credentialsExpire>
             <usr:accountLocked>false</usr:accountLocked>
