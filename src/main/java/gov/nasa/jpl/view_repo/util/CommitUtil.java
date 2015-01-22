@@ -800,7 +800,7 @@ public class CommitUtil {
         commitAction.setParameterValue(CommitActionExecuter.PARAM_END, end);
 
         // create empty commit for now (executing action will fill it in later)
-        NodeRef commitRef = CommitUtil.commit(null, targetWS, "", true, services, new StringBuffer() );
+        NodeRef commitRef = CommitUtil.commit(null, targetWS, "", false, services, new StringBuffer() );
 
         services.getActionService().executeAction(commitAction , commitRef, true, true);
     }
