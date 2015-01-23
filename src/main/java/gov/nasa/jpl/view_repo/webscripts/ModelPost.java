@@ -2477,7 +2477,28 @@ public class ModelPost extends AbstractJavaWebScript {
                             jarr.put(expJarr.get( i ) );
                         }
                     }
-                    getProjectNodeFromRequest( req, true );
+                    
+                    // Get the project node from the request.  Must wrap it in a transaction b/c it can
+                    // create a site or project:
+                    UserTransaction trx;
+                    trx = services.getTransactionService().getNonPropagatingUserTransaction();
+                    try {
+                        trx.begin();
+                        getProjectNodeFromRequest( req, true );
+                        trx.commit();
+                    } catch (Throwable e) {
+                        try {
+                            trx.rollback();
+                            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                            log(LogLevel.ERROR, "\t####### when getProjectNodeFromRequest()");
+                            e.printStackTrace();
+                        } catch (Throwable ee) {
+                            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                            log(LogLevel.ERROR, "\tafter calling getProjectNodeFromRequest()");
+                            ee.printStackTrace();
+                        }
+                    }
+                    
                     if (projectNode != null) {
                         handleUpdate( postJson, status, workspace, fix, model, true );
                     }
