@@ -2431,7 +2431,7 @@ public class NodeUtil {
     }
 
     public static void transactionCheck( Log logger, EmsScriptNode node ) {
-        logger.error( "inTransaction = " + NodeUtil.isInsideTransactionNow() );
+        //logger.error( "inTransaction = " + NodeUtil.isInsideTransactionNow() );
         if ( NodeUtil.isInsideTransactionNow() ) {
             if ( NodeUtil.hasBeenOutsideTransaction() ) {
                 Exception e = new Exception();
@@ -2450,7 +2450,7 @@ public class NodeUtil {
     }
 
     public static void transactionCheck( Logger logger, EmsScriptNode node ) {
-        logger.error( "inTransaction = " + NodeUtil.isInsideTransactionNow() );
+        //logger.error( "inTransaction = " + NodeUtil.isInsideTransactionNow() );
         if ( NodeUtil.isInsideTransactionNow() ) {
             if ( NodeUtil.hasBeenOutsideTransaction() ) {
                 Exception e = new Exception();

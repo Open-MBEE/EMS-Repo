@@ -346,11 +346,13 @@ public class ModelPost extends AbstractJavaWebScript {
         Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): main loop time", timeEvents);
 
         boolean oldRunWithoutTransactions = runWithoutTransactions;
+        runWithoutTransactions = true;
 
         UserTransaction trx;
         trx = services.getTransactionService().getNonPropagatingUserTransaction();
         try {
             trx.begin();
+            NodeUtil.setInsideTransactionNow( true );
 
         // handle the relationships
         updateOrCreateAllRelationships(relationshipsJson, targetWS);
@@ -2542,7 +2544,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
 
                     if (projectNode != null) {
-                        handleUpdate( postJson, status, workspace, fix, model, true );
+                        handleUpdate( postJson, status, workspace, fix, model, false );
                     }
                 }
             } catch (JSONException e) {
