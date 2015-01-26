@@ -1,10 +1,13 @@
 package gov.nasa.jpl.view_repo.actions;
 
 import gov.nasa.jpl.view_repo.util.CommitUtil;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 
 import java.util.Date;
 import java.util.List;
+
+import javax.transaction.UserTransaction;
 
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
 import org.alfresco.service.ServiceRegistry;
@@ -41,7 +44,7 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
     public void setServices(ServiceRegistry sr) {
         services = sr;
     }
-    
+
     @Override
     protected void executeImpl(Action action, NodeRef nodeRef) {
         String projectId = (String) action.getParameterValue(PARAM_PROJECT_ID);
@@ -49,7 +52,7 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
         WorkspaceDiff wsDiff = (WorkspaceDiff) action.getParameterValue(PARAM_WS_DIFF);
         Long start = (Long) action.getParameterValue(PARAM_START);
         Long end = (Long) action.getParameterValue(PARAM_END);
-        
+
         try {
             JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
 
@@ -58,20 +61,50 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
                 logger.warn("send deltas not posted properly");
             }
 
-            CommitUtil.updateCommitNodeRef( nodeRef, deltaJson.toString(), "", services, response );
+            if ( !NodeUtil.haveBeenInTransaction || NodeUtil.inTransactionNow ) {
+                Exception e = new Exception();
+                logger.error( "BAD!!!!", e );
+                CommitUtil.updateCommitNodeRef( nodeRef, deltaJson.toString(),
+                                                "", services, response );
+            } else {
+                UserTransaction trx;
+                trx = services.getTransactionService().getNonPropagatingUserTransaction();
+                try {
+                    trx.begin();
+                    NodeUtil.inTransactionNow = true;
+                    CommitUtil.updateCommitNodeRef( nodeRef,
+                                                    deltaJson.toString(), "",
+                                                    services, response );
+                    trx.commit();
+                    NodeUtil.inTransactionNow = false;
+                } catch (Throwable e) {
+                    try {
+                        trx.rollback();
+                        NodeUtil.inTransactionNow = false;
+                        logger.error( "\t####### ERROR: Needed to rollback: "
+                                      + e.getMessage() );
+                        logger.error("\t####### when getProjectNodeFromRequest()");
+                        e.printStackTrace();
+                    } catch (Throwable ee) {
+                        logger.error("\tRollback failed: " + ee.getMessage());
+                        logger.error("\tafter calling getProjectNodeFromRequest()");
+                        ee.printStackTrace();
+                    }
+                }
+            }
         } catch ( JSONException e ) {
             // TODO Auto-generated catch block
             logger.error( "JSON creation error in when updating the difference" );
             e.printStackTrace();
         }
-        
+
     }
 
-    
+
     @Override
     protected void
             addParameterDefinitions( List< ParameterDefinition > paramList ) {
         // TODO Auto-generated method stub
-        
+
     }
 }

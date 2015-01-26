@@ -118,16 +118,25 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         this.setRepositoryHelper( repository );
         this.setServices( services );
         this.response = response ;
+        NodeUtil.haveBeenInTransaction = false;
+        NodeUtil.haveBeenOutsideTransaction = false;
+        NodeUtil.inTransactionNow = false;
     }
 
     public AbstractJavaWebScript(Repository repositoryHelper, ServiceRegistry registry) {
         this.setRepositoryHelper(repositoryHelper);
         this.setServices(registry);
+        NodeUtil.haveBeenInTransaction = false;
+        NodeUtil.haveBeenOutsideTransaction = false;
+        NodeUtil.inTransactionNow = false;
     }
 
     public AbstractJavaWebScript() {
         // default constructor for spring
         super();
+        NodeUtil.haveBeenInTransaction = false;
+        NodeUtil.haveBeenOutsideTransaction = false;
+        NodeUtil.inTransactionNow = false;
     }
 
 
@@ -136,6 +145,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * TODO: do we need to clear caches if Spring isn't making singleton instances
 	 */
 	protected void clearCaches() {
+        NodeUtil.haveBeenInTransaction = false;
+        NodeUtil.haveBeenOutsideTransaction = false;
+        NodeUtil.inTransactionNow = false;
+
 		foundElements = new HashMap<String, EmsScriptNode>();
 		response = new StringBuffer();
 		responseStatus.setCode(HttpServletResponse.SC_OK);
@@ -299,7 +312,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return NodeUtil.findScriptNodeById( id, workspace, dateTime, findDeleted,
                                             services, response, siteName );
     }
-	
+
 	/**
      * Find nodes of specified sysml:name
      *
@@ -428,7 +441,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
         // Create a alfresco Site if creating the site on the master and if the site does not exists:
         if ( invalidSiteNode && !validWorkspace ) {
-
+            NodeUtil.transactionCheck( logger, null );
             SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, SiteVisibility.PUBLIC );
             siteNode = new EmsScriptNode( foo.getNodeRef(), services );
             siteNode.createOrUpdateAspect( "cm:taggable" );

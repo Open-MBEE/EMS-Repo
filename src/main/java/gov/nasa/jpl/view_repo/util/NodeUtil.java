@@ -60,6 +60,8 @@ import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ApplicationContextHelper;
+import org.apache.commons.logging.Log;
+import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
 
@@ -87,6 +89,10 @@ public class NodeUtil {
     }
 
     /* static flags and constants */
+
+    public static boolean haveBeenInTransaction = false;
+    public static boolean haveBeenOutsideTransaction = false;
+    public static boolean inTransactionNow = false;
 
     public static boolean doFullCaching = true;
     public static boolean doSimpleCaching = true;
@@ -2286,6 +2292,7 @@ public class NodeUtil {
 			contentData = ContentData.setEncoding( contentData, "UTF-8");
 		}
         artifactNode.makeSureNodeRefIsNotFrozen();
+        artifactNode.transactionCheck();
 		services.getNodeService().setProperty( artifactNode.getNodeRef(),
 		            							ContentModel.PROP_CONTENT,contentData );
 
@@ -2384,6 +2391,44 @@ public class NodeUtil {
             mc.invoke( false );
         } catch ( Throwable e ) {
             e.printStackTrace();
+        }
+    }
+
+    public static void transactionCheck( Log logger, EmsScriptNode node ) {
+        logger.error( "inTransaction = " + NodeUtil.inTransactionNow );
+        if ( NodeUtil.inTransactionNow ) {
+            if ( NodeUtil.haveBeenOutsideTransaction ) {
+                Exception e = new Exception();
+                logger.error( "In transaction when have been outside! " + node,
+                              e );
+            }
+            NodeUtil.haveBeenInTransaction = true;
+        } else {
+            if ( NodeUtil.haveBeenInTransaction ) {
+                Exception e = new Exception();
+                logger.error( "Outside transaction when have been inside! "
+                              + node, e );
+            }
+            NodeUtil.haveBeenOutsideTransaction = true;
+        }
+    }
+
+    public static void transactionCheck( Logger logger, EmsScriptNode node ) {
+        logger.error( "inTransaction = " + NodeUtil.inTransactionNow );
+        if ( NodeUtil.inTransactionNow ) {
+            if ( NodeUtil.haveBeenOutsideTransaction ) {
+                Exception e = new Exception();
+                logger.error( "In transaction when have been outside! " + node,
+                              e );
+            }
+            NodeUtil.haveBeenInTransaction = true;
+        } else {
+            if ( NodeUtil.haveBeenInTransaction ) {
+                Exception e = new Exception();
+                logger.error( "Outside transaction when have been inside! "
+                              + node, e );
+            }
+            NodeUtil.haveBeenOutsideTransaction = true;
         }
     }
 

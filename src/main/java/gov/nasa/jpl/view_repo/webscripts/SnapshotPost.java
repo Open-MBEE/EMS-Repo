@@ -67,7 +67,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.model.ContentModel;
 import org.alfresco.repo.admin.SysAdminParams;
-import org.alfresco.repo.content.MimetypeMap;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -798,7 +797,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         if(status != null && !status.isEmpty() && status.compareToIgnoreCase("Completed")==0){
         	isGenerated = true;
         }
-        
+
         if(!isGenerated){
 //	        Thread.sleep(10000);
 	        try{
@@ -847,12 +846,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
         if(status != null && !status.isEmpty() && status.compareToIgnoreCase("Completed")==0){
         	isGenerated = true;
         }
-        
+
         if(!isGenerated){
 //	        Thread.sleep(10000);
 	        try{
 		    	snapshotNode = generatePDF(snapshotNode, workspace);
-		    	if(snapshotNode == null) throw new Exception("generatePDF() returned null."); 
+		    	if(snapshotNode == null) throw new Exception("generatePDF() returned null.");
 		    	else{
 		    		this.setPdfStatus(workspace, snapshotNode, "Completed");
 		    	}
@@ -882,7 +881,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
         Date timestamp = (Date)snapshotNode.getProperty("view2:timestamp");
         DocBookWrapper docBookWrapper = new DocBookWrapper( this.snapshotName, snapshotNode );
-        
+
         if ( !hasPdfNode( snapshotNode ) ) {
             log( LogLevel.INFO, "Generating PDF..." );
             docBookWrapper.savePdfToRepo(snapshotFolderNode, workspace, timestamp );
@@ -972,7 +971,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         if(node == null) return null;
         return new EmsScriptNode( node, snapshotNode.getServices() );
     }
-    
+
     public static String getHtmlZipStatus( EmsScriptNode snapshotNode ) {
         return (String)snapshotNode.getProperty( "view2:htmlZipStatus" );
     }
@@ -982,7 +981,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         if(node == null) return null;
         return new EmsScriptNode( node, snapshotNode.getServices() );
     }
-    
+
     public static String getPdfStatus( EmsScriptNode snapshotNode ) {
         return (String)snapshotNode.getProperty( "view2:pdfStatus" );
     }
@@ -1210,7 +1209,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             setArtifactsGenerationStatus(workspace, postJson);
             startAction( jobNode, siteName, postJson, workspace );
             return postJson;
-        } 
+        }
         catch ( JSONException ex ) {
             log( LogLevel.ERROR, "Failed to create snapshot job!" );
             ex.printStackTrace();
@@ -1267,7 +1266,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     public static boolean hasHtmlZip( EmsScriptNode snapshotNode ) {
         return snapshotNode.hasAspect( "view2:htmlZip" );
     }
-    
+
     /**
      *
      * @param snapshotNode
@@ -1285,7 +1284,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     public static boolean hasPdf( EmsScriptNode snapshotNode ) {
         return snapshotNode.hasAspect( "view2:pdf" );
     }
-    
+
     public static boolean hasPdfNode( EmsScriptNode snapshotNode ) {
     	boolean hasNode = false;
         if(snapshotNode.hasAspect( "view2:pdf" )){
@@ -1542,7 +1541,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         }
         return snapshoturl;
     }
-    
+
 
 
     private void removeHtmlTag(Element elem){
@@ -1577,7 +1576,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	}
     }
 
-    
+
     private void removeHtmlTags(Document doc){
     	/*
     	Elements elems = doc.getElementsByTag("A");
@@ -1727,6 +1726,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 (String)nodeService.getProperty( imgNodeRef,
                                                  ContentModel.PROP_NAME );
         Path filePath = Paths.get( imgDirName.toString(), imgFilename );
+        EmsScriptNode fNode = new EmsScriptNode( imgNodeRef, getServices() );
+        fNode.makeSureNodeRefIsNotFrozen();
+        fNode.transactionCheck();
         Files.write( filePath, binaryData );
         image.setFilePath( dbDirName.relativize( filePath ).toString() );
     }
@@ -1734,14 +1736,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
     private void setDocumentElementContent( DocumentElement elem, String s ) {
         if ( elem instanceof DBParagraph ) ( (DBParagraph)elem ).setText( s );
     }
-    
+
     private void setArtifactsGenerationStatus(WorkspaceNode workspace, JSONObject postJson) throws Exception{
     	try{
 	       	EmsScriptNode snapshotNode = findScriptNodeById(postJson.getString("id"), workspace, null, false);
-	        if(snapshotNode == null){ 
+	        if(snapshotNode == null){
 	        	throw new Exception("Failed to find snapshot with Id: " + postJson.getString("id"));
 	        }
-	        
+
 			ArrayList<String> formats = getSnapshotFormats(postJson);
 			for(String format:formats){
 				if(format.compareToIgnoreCase("pdf") == 0){
@@ -1765,7 +1767,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     		throw new Exception("Failed to set artifact generation status!");
     	}
     }
-    
+
 
     private void setHtmlZipStatus(EmsScriptNode node, String status){
     	if(node==null) return;
@@ -1773,7 +1775,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		node.createOrUpdateProperty("view2:htmlZipStatus", status);
 //		System.out.println("set HTML status => " + status);
     }
-    
+
     private void setPdfStatus(WorkspaceNode workspace, EmsScriptNode node, String status){
     	if(node==null) return;
     	node.createOrUpdateAspect("view2:pdf");
@@ -1781,7 +1783,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		node.getOrSetCachedVersion();
 //		System.out.println("set PDF status => " + status);
     }
-    
+
     /**
 	 * Kick off the actual action in the background
 	 * @param jobNode
@@ -1807,10 +1809,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_FORMAT_TYPE, formats);
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_USER_EMAIL, userEmail);
         snapshotAction.setParameterValue(SnapshotArtifactsGenerationActionExecuter.PARAM_WORKSPACE, workspace);
-		
+
        	services.getActionService().executeAction(snapshotAction, jobNode.getNodeRef(), true, true);
 	}
-	
+
 
     private void traverseElements( DBSection section, EmsScriptNode node, WorkspaceNode workspace, Date timestamp )
             throws Exception {

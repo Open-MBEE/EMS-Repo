@@ -392,12 +392,15 @@ public class CommitUtil {
                     .getNonPropagatingUserTransaction();
             try {
                 trx.begin();
+                NodeUtil.inTransactionNow = true;
                 commitRef = commitTransactionable(wsDiff, workspace, msg, services, response);
                 trx.commit();
+                NodeUtil.inTransactionNow = false;
             } catch (Throwable e) {
                 try {
                     e.printStackTrace();
                     trx.rollback();
+                    NodeUtil.inTransactionNow = false;
                 } catch (Throwable ee) {
                     ee.printStackTrace();
                 }
@@ -441,13 +444,16 @@ public class CommitUtil {
                     .getNonPropagatingUserTransaction();
             try {
                 trx.begin();
+                NodeUtil.inTransactionNow = true;
                 mergeRef = mergeTransactionable(wsDiff, source, target, target, dateTimeSrc, dateTimeTarget,
                                                 msg, services, response);
                 trx.commit();
+                NodeUtil.inTransactionNow = false;
             } catch (Throwable e) {
                 try {
                     e.printStackTrace();
                     trx.rollback();
+                    NodeUtil.inTransactionNow = false;
                 } catch (Throwable ee) {
                     ee.printStackTrace();
                 }
@@ -536,12 +542,15 @@ public class CommitUtil {
             trx = services.getTransactionService().getNonPropagatingUserTransaction();
             try {
                 trx.begin();
+                NodeUtil.inTransactionNow = true;
                 branchRef = branchTransactionable(srcWs, dstWs, msg, services, response);
                 trx.commit();
+                NodeUtil.inTransactionNow = false;
             } catch (Throwable e) {
                 try {
                     e.printStackTrace();
                     trx.rollback();
+                    NodeUtil.inTransactionNow = false;
                 } catch (Throwable ee) {
                     ee.printStackTrace();
                 }
@@ -579,12 +588,15 @@ public class CommitUtil {
                     .getNonPropagatingUserTransaction();
             try {
                 trx.begin();
+                NodeUtil.inTransactionNow = true;
                 mergeTransactionable(srcWs, dstWs, dstWs, msg, services, response);
                 trx.commit();
+                NodeUtil.inTransactionNow = false;
             } catch (Throwable e) {
                 try {
                     e.printStackTrace();
                     trx.rollback();
+                    NodeUtil.inTransactionNow = false;
                 } catch (Throwable ee) {
                     ee.printStackTrace();
                 }
