@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -90,9 +91,44 @@ public class NodeUtil {
 
     /* static flags and constants */
 
-    public static boolean haveBeenInTransaction = false;
-    public static boolean haveBeenOutsideTransaction = false;
-    public static boolean inTransactionNow = false;
+    protected static String txMutex = "";
+    protected static boolean beenInsideTransaction = false;
+    protected static Map< String, Boolean > beenInsideTransactionMap =
+            new LinkedHashMap< String, Boolean >();
+
+    public static synchronized boolean hasBeenInsideTransaction() {
+        Boolean b = beenInsideTransactionMap.get( "" + Thread.currentThread().getId());
+        if ( b != null ) return b;
+        return beenInsideTransaction;
+    }
+    public static synchronized void setBeenInsideTransaction( boolean b ) {
+        beenInsideTransaction = b;
+        beenInsideTransactionMap.put( "" + Thread.currentThread().getId(), b );
+    }
+    protected static boolean beenOutsideTransaction = false;
+    protected static Map< String, Boolean > beenOutsideTransactionMap =
+            new LinkedHashMap< String, Boolean >();
+    public static synchronized boolean hasBeenOutsideTransaction() {
+        Boolean b = beenOutsideTransactionMap.get( "" + Thread.currentThread().getId());
+        if ( b != null ) return b;
+        return beenOutsideTransaction;
+    }
+    public static synchronized void setBeenOutsideTransaction( boolean b ) {
+        beenOutsideTransaction = b;
+        beenOutsideTransactionMap.put( "" + Thread.currentThread().getId(), b );
+    }
+    protected static boolean insideTransactionNow = false;
+    protected static Map< String, Boolean > insideTransactionNowMap =
+            new LinkedHashMap< String, Boolean >();
+    public static synchronized boolean isInsideTransactionNow() {
+        Boolean b = insideTransactionNowMap.get( "" + Thread.currentThread().getId());
+        if ( b != null ) return b;
+        return insideTransactionNow;
+    }
+    public static synchronized void setInsideTransactionNow( boolean b ) {
+        insideTransactionNow = b;
+        insideTransactionNowMap.put( "" + Thread.currentThread().getId(), b );
+    }
 
     public static boolean doFullCaching = true;
     public static boolean doSimpleCaching = true;
@@ -2395,40 +2431,40 @@ public class NodeUtil {
     }
 
     public static void transactionCheck( Log logger, EmsScriptNode node ) {
-        logger.error( "inTransaction = " + NodeUtil.inTransactionNow );
-        if ( NodeUtil.inTransactionNow ) {
-            if ( NodeUtil.haveBeenOutsideTransaction ) {
+        logger.error( "inTransaction = " + NodeUtil.isInsideTransactionNow() );
+        if ( NodeUtil.isInsideTransactionNow() ) {
+            if ( NodeUtil.hasBeenOutsideTransaction() ) {
                 Exception e = new Exception();
                 logger.error( "In transaction when have been outside! " + node,
                               e );
             }
-            NodeUtil.haveBeenInTransaction = true;
+            NodeUtil.setBeenInsideTransaction( true );
         } else {
-            if ( NodeUtil.haveBeenInTransaction ) {
+            if ( NodeUtil.hasBeenInsideTransaction() ) {
                 Exception e = new Exception();
                 logger.error( "Outside transaction when have been inside! "
                               + node, e );
             }
-            NodeUtil.haveBeenOutsideTransaction = true;
+            NodeUtil.setBeenOutsideTransaction( true );
         }
     }
 
     public static void transactionCheck( Logger logger, EmsScriptNode node ) {
-        logger.error( "inTransaction = " + NodeUtil.inTransactionNow );
-        if ( NodeUtil.inTransactionNow ) {
-            if ( NodeUtil.haveBeenOutsideTransaction ) {
+        logger.error( "inTransaction = " + NodeUtil.isInsideTransactionNow() );
+        if ( NodeUtil.isInsideTransactionNow() ) {
+            if ( NodeUtil.hasBeenOutsideTransaction() ) {
                 Exception e = new Exception();
                 logger.error( "In transaction when have been outside! " + node,
                               e );
             }
-            NodeUtil.haveBeenInTransaction = true;
+            NodeUtil.setBeenInsideTransaction( true );
         } else {
-            if ( NodeUtil.haveBeenInTransaction ) {
+            if ( NodeUtil.hasBeenInsideTransaction() ) {
                 Exception e = new Exception();
                 logger.error( "Outside transaction when have been inside! "
                               + node, e );
             }
-            NodeUtil.haveBeenOutsideTransaction = true;
+            NodeUtil.setBeenOutsideTransaction( true );
         }
     }
 

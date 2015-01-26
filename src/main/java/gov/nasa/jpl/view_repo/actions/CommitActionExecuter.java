@@ -31,6 +31,7 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
     public static final String PARAM_WS_DIFF = "wsDiff";
     public static final String PARAM_START = "start";
     public static final String PARAM_END = "end";
+    public static final String TRANSACTION = "transaction";
 
     /**
      * Injected variables from Spring configuration
@@ -52,18 +53,20 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
         WorkspaceDiff wsDiff = (WorkspaceDiff) action.getParameterValue(PARAM_WS_DIFF);
         Long start = (Long) action.getParameterValue(PARAM_START);
         Long end = (Long) action.getParameterValue(PARAM_END);
+        Boolean doTransaction = (Boolean)action.getParameterValue(TRANSACTION);
 
         try {
-            JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
-
-            // FIXME: Need to split by projectId
-            if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId) ) {
-                logger.warn("send deltas not posted properly");
-            }
-
-            if ( !NodeUtil.haveBeenInTransaction || NodeUtil.inTransactionNow ) {
+            if ( !doTransaction ) {
                 Exception e = new Exception();
                 logger.error( "BAD!!!!", e );
+                JSONObject deltaJson =
+                        wsDiff.toJSONObject( new Date(start), new Date(end) );
+
+                // FIXME: Need to split by projectId
+                if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId) ) {
+                    logger.warn("send deltas not posted properly");
+                }
+
                 CommitUtil.updateCommitNodeRef( nodeRef, deltaJson.toString(),
                                                 "", services, response );
             } else {
@@ -71,16 +74,23 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
                 trx = services.getTransactionService().getNonPropagatingUserTransaction();
                 try {
                     trx.begin();
-                    NodeUtil.inTransactionNow = true;
+                    NodeUtil.setInsideTransactionNow( true );
+                    JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
+
+                    // FIXME: Need to split by projectId
+                    if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId) ) {
+                        logger.warn("send deltas not posted properly");
+                    }
+
                     CommitUtil.updateCommitNodeRef( nodeRef,
                                                     deltaJson.toString(), "",
                                                     services, response );
                     trx.commit();
-                    NodeUtil.inTransactionNow = false;
+                    NodeUtil.setInsideTransactionNow( false );
                 } catch (Throwable e) {
                     try {
                         trx.rollback();
-                        NodeUtil.inTransactionNow = false;
+                        NodeUtil.setInsideTransactionNow( false );
                         logger.error( "\t####### ERROR: Needed to rollback: "
                                       + e.getMessage() );
                         logger.error("\t####### when getProjectNodeFromRequest()");

@@ -1420,9 +1420,9 @@ public class EmsScriptNode extends ScriptNode implements
            return false;
        }
        if ( comp < 0 ) {
-           logger.error( "inTransaction = " + NodeUtil.inTransactionNow );
-           logger.error( "haveBeenInTransaction = " + NodeUtil.haveBeenInTransaction );
-           logger.error( "haveBeenOutsideTransaction = " + NodeUtil.haveBeenOutsideTransaction );
+           logger.error( "inTransaction = " + NodeUtil.isInsideTransactionNow() );
+           logger.error( "haveBeenInTransaction = " + NodeUtil.isInsideTransactionNow() );
+           logger.error( "haveBeenOutsideTransaction = " + NodeUtil.isInsideTransactionNow() );
            // Cache is correct -- fix esn's nodeRef
             String msg =
                     "4: Warning! Alfresco Heisenbug returning wrong current version of node, "

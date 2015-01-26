@@ -193,17 +193,17 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 trx = services.getTransactionService().getNonPropagatingUserTransaction();
                 try {
                     trx.begin();
-                    NodeUtil.inTransactionNow = true;
+                    NodeUtil.setInsideTransactionNow( true );
                     dstWs = WorkspaceNode.createWorkspaceFromSource(workspaceName, user, sourceWorkspaceId,
                                                                     copyTime, folder, getServices(),
                                                                     getResponse(), status, desc);
                     trx.commit();
-                    NodeUtil.inTransactionNow = false;
+                    NodeUtil.setInsideTransactionNow( false );
                 } catch (Throwable e) {
                     try {
                         e.printStackTrace();
                         trx.rollback();
-                        NodeUtil.inTransactionNow = false;
+                        NodeUtil.setInsideTransactionNow( false );
                     } catch (Throwable ee) {
                         ee.printStackTrace();
                     }

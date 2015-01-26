@@ -139,18 +139,18 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
                         trx = services.getTransactionService().getNonPropagatingUserTransaction();
                         try {
                             trx.begin();
-                            NodeUtil.inTransactionNow = true;
+                            NodeUtil.setInsideTransactionNow( true );
                         // Create JSON object of the elements to return:
                         JSONArray elementsJson = new JSONArray();
                         for ( EmsScriptNode element : elements ) {
                             elementsJson.put( element.toJSONObject(null) );
                         }
                         trx.commit();
-                        NodeUtil.inTransactionNow = false;
+                        NodeUtil.setInsideTransactionNow( false );
                     } catch (Throwable e) {
                         try {
                             trx.rollback();
-                            NodeUtil.inTransactionNow = false;
+                            NodeUtil.setInsideTransactionNow( false );
                             log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
                             log(LogLevel.ERROR, "\t####### when calling toJson()");
                             e.printStackTrace();

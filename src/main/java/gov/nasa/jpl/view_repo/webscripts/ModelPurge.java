@@ -161,7 +161,7 @@ public class ModelPurge extends AbstractJavaWebScript {
         trx = services.getTransactionService().getNonPropagatingUserTransaction();
         try {
             trx.begin();
-            NodeUtil.inTransactionNow = true;
+            NodeUtil.setInsideTransactionNow( true );
             String key = node.getSysmlId();
             log(LogLevel.INFO, "delete: beginning transaction {" + node.getNodeRef());
             node.makeSureNodeRefIsNotFrozen();
@@ -169,12 +169,12 @@ public class ModelPurge extends AbstractJavaWebScript {
             services.getNodeService().deleteNode(node.getNodeRef());
             log(LogLevel.INFO, "} delete ending transaction: " + key);
             trx.commit();
-            NodeUtil.inTransactionNow = false;
+            NodeUtil.setInsideTransactionNow( false );
         } catch (Throwable e) {
             try {
                 log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
                 trx.rollback();
-                NodeUtil.inTransactionNow = false;
+                NodeUtil.setInsideTransactionNow( false );
             } catch (Throwable ee) {
                 log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
             }

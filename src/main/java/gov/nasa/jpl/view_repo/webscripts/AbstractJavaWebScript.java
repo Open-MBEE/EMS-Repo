@@ -118,25 +118,25 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         this.setRepositoryHelper( repository );
         this.setServices( services );
         this.response = response ;
-        NodeUtil.haveBeenInTransaction = false;
-        NodeUtil.haveBeenOutsideTransaction = false;
-        NodeUtil.inTransactionNow = false;
+        NodeUtil.setBeenInsideTransaction( false );
+        NodeUtil.setBeenOutsideTransaction( false );
+        NodeUtil.setInsideTransactionNow( false );
     }
 
     public AbstractJavaWebScript(Repository repositoryHelper, ServiceRegistry registry) {
         this.setRepositoryHelper(repositoryHelper);
         this.setServices(registry);
-        NodeUtil.haveBeenInTransaction = false;
-        NodeUtil.haveBeenOutsideTransaction = false;
-        NodeUtil.inTransactionNow = false;
+        NodeUtil.setBeenInsideTransaction( false );
+        NodeUtil.setBeenOutsideTransaction( false );
+        NodeUtil.setInsideTransactionNow( false );
     }
 
     public AbstractJavaWebScript() {
         // default constructor for spring
         super();
-        NodeUtil.haveBeenInTransaction = false;
-        NodeUtil.haveBeenOutsideTransaction = false;
-        NodeUtil.inTransactionNow = false;
+        NodeUtil.setBeenInsideTransaction( false );
+        NodeUtil.setBeenOutsideTransaction( false );
+        NodeUtil.setInsideTransactionNow( false );
     }
 
 
@@ -145,9 +145,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * TODO: do we need to clear caches if Spring isn't making singleton instances
 	 */
 	protected void clearCaches() {
-        NodeUtil.haveBeenInTransaction = false;
-        NodeUtil.haveBeenOutsideTransaction = false;
-        NodeUtil.inTransactionNow = false;
+        NodeUtil.setBeenInsideTransaction( false );
+        NodeUtil.setBeenOutsideTransaction( false );
+        NodeUtil.setInsideTransactionNow( false );
 
 		foundElements = new HashMap<String, EmsScriptNode>();
 		response = new StringBuffer();

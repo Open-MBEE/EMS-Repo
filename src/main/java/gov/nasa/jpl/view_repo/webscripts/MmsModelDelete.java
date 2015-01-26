@@ -121,7 +121,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         trx = services.getTransactionService().getNonPropagatingUserTransaction();
         try {
             trx.begin();
-            NodeUtil.inTransactionNow = true;
+            NodeUtil.setInsideTransactionNow( true );
 
             if (root != null && root.exists()) {
                 handleElementHierarchy( root, workspace, true );
@@ -148,7 +148,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             }
 
             trx.commit();
-            NodeUtil.inTransactionNow = false;
+            NodeUtil.setInsideTransactionNow( false );
         } catch (Throwable e) {
             try {
                 if (e instanceof JSONException) {
@@ -157,7 +157,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                         log(LogLevel.ERROR, "MmsModelDelete.handleRequest: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 }
                 trx.rollback();
-                NodeUtil.inTransactionNow = false;
+                NodeUtil.setInsideTransactionNow( false );
                 log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
                 e.printStackTrace();
             } catch (Throwable ee) {
