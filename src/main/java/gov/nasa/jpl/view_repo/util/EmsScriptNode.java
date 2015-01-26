@@ -3650,7 +3650,10 @@ public class EmsScriptNode extends ScriptNode implements
 
         EmsScriptNode oldParentPkg =
                 new EmsScriptNode( getParent().getNodeRef(), services, response );
-        boolean status = super.move( destination );
+        makeSureNodeRefIsNotFrozen();
+        EmsScriptNode dest = new EmsScriptNode(destination.getNodeRef(), services, response);
+        dest.makeSureNodeRefIsNotFrozen();
+        boolean status = super.move( dest );
 
         if ( status ) {
             // keep track of owners and children
