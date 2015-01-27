@@ -5,7 +5,7 @@
   </description>
   <url>/javawebscripts/elements/{id}</url>
   <format default="json">argument</format> 
-  <authentication>user</authentication> 
-  <transaction>none</transaction>
+  <authentication>user</authentication>
+  <transaction allow="readwrite">required</transaction>
   <family>EMS Java Webscripts</family>
 </webscript>

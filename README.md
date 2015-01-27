@@ -155,6 +155,19 @@ For JUnit tests in a single Java class, for example, in MyJavaJUnitTestClass.jav
 To update the target/mms-repo-war manually
 
 	mvn package -Pamp-to-war
+
+## Managing Enterprise and Community Builds 
+	
+The default pom.xml builds the community version. To build the enterprise version, use the pom.xml.enterprise, e.g.
+
+    mvn -f pom.enterprise.xml [goal]
+    
+PLEASE keep pom.xml and pom.xml.enterprise in sync!!!
+
+*NOTE:* Since Enterprise and Community need a different set of files, each pom has a
+copy-resource plugin that copies the files in /resources/[community|enterprise] into the
+appropriate /src directory as part of the validation. Make changes to the appropriate files
+in the /resources/[community|enterprise] directory.
 	
 # Debug
 To attach an eclipse debugger, there's a view-repo.launch, you can use it to debug at the 10000 port, or change the debug config port if you didn't use 10000 in the maven opts
@@ -229,18 +242,13 @@ Get a directory of available services including the REST API
 
 Sometimes, eclipse will lock the GUI with a popup saying that the user operation is waiting on other tasks, typically a rebuild.
 If this is annoying because the rebuild takes a long time, you can create a ram disk to store the target directory and create a soft link to it.
-This should speed up the rebuild significantly:
+This should speed up the rebuild significantly.
 
-     mkdir ~/myramdisk
-     sudo mount -t tmpfs -o size=1g tmpfs ~/myramdisk
+     sudo mkdir /mnt/ramdisk
+     sudo mount -t tmpfs -o size=1024m tmpfs /mnt/ramdisk
      cd ~/git/alfresco-view-repo
-     mv target ~/myramdisk 
-     ln -s ~/myramdisk/target .
- 
-You may also benefit from putting the database on the ramdisk, too, but you will probably want to have a bigger sized ramdisk; 1g is not enough.
- 
-     mv alf_data ~/myramdisk
-     ln -s ~/myramdisk/alf_data .
+     mv target /mnt/ramdisk
+     ln -s /mnt/ramdisk/target .
 
 For an mvn purge on the ramdisk, running this command may be helpful:
      mvn clean -Ppurge; mkdir /mnt/ramdisk/target; mkdir /mnt/ramdisk/alf_data; ./runserver.sh
@@ -354,9 +362,35 @@ Note: Following shortcuts are mainly for Linux.
 	refresh view-share page
 	the final, integrated content model is displayed in view-share in your dashboard (under sites) and in Repository
 	
-# checksum on patched alfresco-repository-4.2.e.jar
-761054791893eee91a0871903139f5fb  /home/bclement/git/alfresco-view-repo/src/main/amp/web/WEB-INF/lib/alfresco-repository-4.2.e.jar
-
-# Running with a Tomcat with a different port on Maven
+### Running with a Tomcat with a different port on Maven
 
 So you don't clash with other users, run using something like -Dmaven.tomcat.port=9091.
+	
+### Enterprise settings with Maven
+
+Need to update settings.xml to connect to the Alfresco private repository. Ask Ly or Cin-Young
+for username and password.
+
+'''
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <localRepository/>
+  <interactiveMode/>
+  <usePluginRegistry/>
+  <offline/>
+  <pluginGroups/>
+  <servers>
+        <server>
+                <id>alfresco-private-repository</id>
+                <username>username</username>
+                <password>password</password>
+        </server>
+  </servers>
+  <mirrors/>
+  <proxies/>
+  <profiles/>
+  <activeProfiles/>
+</settings>
+'''
