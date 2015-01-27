@@ -175,7 +175,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
             }
 
-            CommitUtil.commit( result, workspace, "", false, services, response );
+            CommitUtil.commit( result, workspace, "", true, services, response );
         }
 
         return result;
