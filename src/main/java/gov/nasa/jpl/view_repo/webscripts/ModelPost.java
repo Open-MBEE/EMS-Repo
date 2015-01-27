@@ -1170,31 +1170,56 @@ public class ModelPost extends AbstractJavaWebScript {
         updateTransactionableWsState(element, jsonId, modStatus, ingest);
         elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
 
-        fixReadTimeForConflict(element, elementJson);
+        fixReadTimeForConflictTransaction(element, elementJson, runWithoutTransactions);
         return elements;
     }
 
     /**
-     * Update the read/modified time in the json, so that we do not get any conflicts on the second pass, as we may modify the node on the first pass.  Make sure this is after any modifications to the node.
+     * Update the read/modified time in the json, so that we do not get any
+     * conflicts on the second pass, as we may modify the node on the first
+     * pass. Make sure this is after any modifications to the node.
+     *
+     * @param element
      * @param elementJson
      */
-    protected void fixReadTimeForConflict( EmsScriptNode element, JSONObject elementJson ) {
+    protected void fixReadTimeForConflict( EmsScriptNode element, JSONObject elementJson  ) {
+        Date modTime = element.getLastModified( null );
+
+        if ( modTime == null ) {
+            log( LogLevel.ERROR,
+                 "\tfixReadTimeForConflict() could not get lastModified time for "
+                         + element );
+            modTime = new Date( System.currentTimeMillis() );
+        }
+        String currentTime = EmsScriptNode.getIsoTime( modTime );
+        elementJson.put( Acm.JSON_READ, currentTime );
+        elementJson.put( Acm.JSON_LAST_MODIFIED, currentTime );
+    }
+
+    /**
+     * Update the read/modified time in the json, so that we do not get any
+     * conflicts on the second pass, as we may modify the node on the first
+     * pass. Make sure this is after any modifications to the node.
+     *
+     * @param element
+     * @param elementJson
+     * @param withoutTransactions
+     */
+    protected void fixReadTimeForConflictTransaction( EmsScriptNode element,
+                                                      JSONObject elementJson,
+                                                      boolean withoutTransactions ) {
+        if ( withoutTransactions ) {
+            fixReadTimeForConflict( element, elementJson );
+            return;
+        }
         UserTransaction trx;
         trx = services.getTransactionService().getNonPropagatingUserTransaction();
         try {
             trx.begin();
             NodeUtil.setInsideTransactionNow( true );
-            Date modTime = element.getLastModified( null );
 
-            if ( modTime == null ) {
-                log( LogLevel.ERROR,
-                     "\tfixReadTimeForConflict() could not get lastModified time for "
-                             + element );
-                modTime = new Date( System.currentTimeMillis() );
-            }
-            String currentTime = EmsScriptNode.getIsoTime( modTime );
-            elementJson.put( Acm.JSON_READ, currentTime );
-            elementJson.put( Acm.JSON_LAST_MODIFIED, currentTime );
+            fixReadTimeForConflict( element, elementJson );
+
             timerCommit = Timer.startTimer( timerCommit, timeEvents );
             trx.commit();
             NodeUtil.setInsideTransactionNow( false );
@@ -1214,8 +1239,8 @@ public class ModelPost extends AbstractJavaWebScript {
                 e.printStackTrace();
             }
         }
-
     }
+
 
     private void updateTransactionableWsState(EmsScriptNode element, String jsonId, ModStatus modStatus, boolean ingest) {
 
@@ -1595,9 +1620,12 @@ public class ModelPost extends AbstractJavaWebScript {
 
             msg = "Error! Tried to post concurrent edit to element, "
                             + element + ".\n";
-            System.out.println(msg + "  --> lastModified = " + lastModified +
-                               "  --> lastModString = " + lastModString +
-                               "  --> elementJson = " + elementJson );
+            if ( Debug.isOn() ) System.out.println( msg + "  --> lastModified = "
+                                                    + lastModified
+                                                    + "  --> lastModString = "
+                                                    + lastModString
+                                                    + "  --> elementJson = "
+                                                    + elementJson );
         }
 
         // Compare last modified to last modified time:
@@ -1605,9 +1633,12 @@ public class ModelPost extends AbstractJavaWebScript {
 
             msg = "Error! Tried to post overwrite to element, "
                             + element + ".\n";
-            System.out.println(msg + "  --> lastModified = " + lastModified +
-                               "  --> lastModString = " + lastModString +
-                               "  --> elementJson = " + elementJson );
+            if ( Debug.isOn() ) System.out.println( msg + "  --> lastModified = "
+                                                    + lastModified
+                                                    + "  --> lastModString = "
+                                                    + lastModString
+                                                    + "  --> elementJson = "
+                                                    + elementJson );
         }
 
         // If there was one of the conflicts then return true:
