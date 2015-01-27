@@ -129,6 +129,7 @@ public class ActionUtil {
 
     public static void saveStringToFile(EmsScriptNode node, String mimeType, ServiceRegistry services, String data) {
         ContentWriter writer = services.getContentService().getWriter(node.getNodeRef(), ContentModel.PROP_CONTENT, true);
+        node.transactionCheck();
         writer.putContent(data.toString());
         setContentDataMimeType(writer, node, mimeType, services);
     }
@@ -144,6 +145,7 @@ public class ActionUtil {
         ContentData contentData = writer.getContentData();
         contentData = ContentData.setMimetype(contentData, mimetype);
         node.makeSureNodeRefIsNotFrozen();
+        node.transactionCheck();
         sr.getNodeService().setProperty(node.getNodeRef(), ContentModel.PROP_CONTENT, contentData);
     }
 

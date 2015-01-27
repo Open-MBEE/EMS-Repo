@@ -3,6 +3,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.transaction.UserTransaction;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
@@ -30,17 +32,17 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 	public WorkspacesMerge(){
 		super();
 	}
-	
+
 	public WorkspacesMerge(Repository repositoryHelper, ServiceRegistry registry){
 		super(repositoryHelper, registry);
 	}
-	
+
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache){
 	    WorkspacesMerge instance = new WorkspacesMerge(repository, services);
 	    return instance.executeImplImpl( req, status, cache );
 	}
-	
+
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache){
 		printHeader(req);
 		clearCaches();
@@ -56,7 +58,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
                                                                   status,
                                                                   //false,
                                                                   null );
-				
+
 				String sourceId = req.getParameter("source");
                 WorkspaceNode sourceWS =
                         WorkspaceNode.getWorkspaceFromId( sourceId,
@@ -65,7 +67,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
                                                                   status,
                                                                   //false,
                                                                   null );
-				
+
 				wsDiff = new WorkspaceDiff(targetWS, sourceWS, null /*time*/, null /*time*/);
 		/*		// Gotta merge here
 				Map<String, EmsScriptNode> elements = workspaceDiff.getElements();
@@ -73,15 +75,15 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				Map<String, EmsScriptNode> updatedElements = workspaceDiff.getUpdatedElements();
 				Map<String, EmsScriptNode> movedElements = workspaceDiff.getMovedElements();
 				Map<String, EmsScriptNode> deletedElements = workspaceDiff.getDeletedElements();
-				
+
 				//Convert Maps into Sets of just values (EmsScriptNodes).
-				
+
 				Collection <EmsScriptNode> elementCollection = elements.values();
 				Collection <EmsScriptNode> addedCollection = addedElements.values();
 				Collection <EmsScriptNode> updatedCollection = updatedElements.values();
 				Collection <EmsScriptNode> movedCollection = movedElements.values();
 
-				
+
 				// Add the collection into a collection of collections.
 				Collection< Collection<EmsScriptNode> > collections = new ArrayList();
 				collections.add(elementCollection);
@@ -89,17 +91,17 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				collections.add(updatedCollection);
 				collections.add(movedCollection);
 				//Convert the collection of collections to a collection of nodes.
-				
+
 				Collection<EmsScriptNode> postingNodes = setsToCollection(collections);
-				
+
 				//Post em
-				
+
 				*/
 				//For the nodes here, we delete them from the source
 				Map<String, EmsScriptNode> deletedElements = wsDiff.getDeletedElements();
 				Collection <EmsScriptNode> deletedCollection = deletedElements.values();
-				
-				
+
+
 				// Prints out the differences after merging.
 				JSONObject top = wsDiff.toJSONObject(null, null /*time*/, false);
 		        Iterator< ? > iter = top.keys();
@@ -118,31 +120,51 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 				        }
 				    }
 				}
-				
+
 				// Retrieving the arrays for all the added elements
 				ModelPost instance = new ModelPost(repository, services);
-				
+
 				// Error here, projectNode isn't 123456, but rather no_project.
 				EmsScriptNode projectNode = instance.getProjectNodeFromRequest(req, true);
 				if (projectNode != null) {
-				    
+
 				    Set< EmsScriptNode > elements =
 	                        instance.createOrUpdateModel( top.getJSONObject("workspace2"), status,
-	                                                      targetWS, sourceWS, false );
+	                                                      targetWS, sourceWS, true );
                     // REVIEW -- TODO -- shouldn't this be called from instance?
                     instance.addRelationshipsToProperties( elements );
                     if ( !Utils.isNullOrEmpty( elements ) ) {
 
+                        UserTransaction trx;
+                        trx = services.getTransactionService().getNonPropagatingUserTransaction();
+                        try {
+                            trx.begin();
+                            NodeUtil.setInsideTransactionNow( true );
                         // Create JSON object of the elements to return:
                         JSONArray elementsJson = new JSONArray();
                         for ( EmsScriptNode element : elements ) {
                             elementsJson.put( element.toJSONObject(null) );
                         }
+                        trx.commit();
+                        NodeUtil.setInsideTransactionNow( false );
+                    } catch (Throwable e) {
+                        try {
+                            trx.rollback();
+                            NodeUtil.setInsideTransactionNow( false );
+                            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                            log(LogLevel.ERROR, "\t####### when calling toJson()");
+                            e.printStackTrace();
+                        } catch (Throwable ee) {
+                            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                            log(LogLevel.ERROR, "\tafter calling toJson()");
+                            ee.printStackTrace();
+                        }
+                    }
                        //top.put( "elements", elementsJson );
                         //model.put( "res", top.toString( 4 ) );
 	                    }
-    	            result = handleDelete(deletedCollection, targetWS, targetId, null /*time*/, wsDiff); 
-    	            
+    	            result = handleDelete(deletedCollection, targetWS, targetId, null /*time*/, wsDiff);
+
                     // FIXME!! We can't just leave the changes on the merged
                     // branch! If an element is changed in the parent, it could
                     // result in a conflict! But we can't mark them deleted since
@@ -150,8 +172,8 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
                     // purge???!!! Do we need another aspect, ems:Purged? Do we
                     // check to see if the last commit in the history is before the
                     // lastTimeSync?
-    	            
-    
+
+
     	            // keep history of the branch
                 CommitUtil.merge( sourceWS, targetWS, "", false,
                                       services, response );
@@ -178,9 +200,9 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 		status.setCode(responseStatus.getCode());
 		return model;
 	}
-	
+
 	// Essentially the same executeImpl code from MmsModelDelete
-	
+
 	protected JSONObject handleDelete(Collection <EmsScriptNode> collection, WorkspaceNode workspace, String wsId, Date time, WorkspaceDiff workspaceDiff) {
 		JSONObject result = null;
 		MmsModelDelete deleteInstance = new MmsModelDelete(repository, services);
@@ -203,7 +225,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 		//String siteName = node.getSiteName();
 		long end = System.currentTimeMillis();
 		try{
-			result = workspaceDiff.toJSONObject(new Date(start),new Date(end), false);	
+			result = workspaceDiff.toJSONObject(new Date(start),new Date(end), false);
 			for( EmsScriptNode node: collection) {
 				// editting the JSON
 				node.removeAspect( "ems:Added" );
@@ -215,10 +237,10 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 			log(LogLevel.ERROR, "Malformed JSON Object", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			e.printStackTrace();
 		}
-		
+
 		return result;
 	}
-	
+
 	protected Collection<EmsScriptNode> setsToCollection(Collection< Collection <EmsScriptNode> > sets){
 		Collection <EmsScriptNode> collection = new ArrayList<EmsScriptNode>();
 		for(Collection <EmsScriptNode> set : sets){
@@ -226,7 +248,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 			}
 		return collection;
 	}
-	
+
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		// TODO Auto-generated method stub
