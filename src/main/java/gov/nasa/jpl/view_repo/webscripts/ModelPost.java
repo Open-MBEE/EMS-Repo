@@ -1018,14 +1018,13 @@ public class ModelPost extends AbstractJavaWebScript {
 
     /**
      * Update or create element with specified metadata
-     * @param workspace
-     *
-     * @param jsonObject
+     * @param elementJson
      *            Metadata to be added to element
-     * @param key
-     *            ID of element
-     * @return the created elements
-     * @throws JSONException
+     * @param parent
+     * @param workspace
+     * @param ingest
+     * @return
+     * @throws Exception
      */
     protected Set< EmsScriptNode > updateOrCreateElement( JSONObject elementJson,
                                                           EmsScriptNode parent,
@@ -1171,6 +1170,8 @@ public class ModelPost extends AbstractJavaWebScript {
         elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
 
         fixReadTimeForConflictTransaction(element, elementJson, runWithoutTransactions);
+        //System.out.println("3. fixReadTimeForConflict(" + elementJson + ")");
+
         return elements;
     }
 
@@ -1183,17 +1184,20 @@ public class ModelPost extends AbstractJavaWebScript {
      * @param elementJson
      */
     protected void fixReadTimeForConflict( EmsScriptNode element, JSONObject elementJson  ) {
-        Date modTime = element.getLastModified( null );
 
-        if ( modTime == null ) {
-            log( LogLevel.ERROR,
-                 "\tfixReadTimeForConflict() could not get lastModified time for "
-                         + element );
-            modTime = new Date( System.currentTimeMillis() );
+        Date modTime = ( element == null ? null : element.getLastModified( null ) );
+
+        Date now = new Date();
+        if ( modTime == null || now.after( modTime ) ) {
+            modTime = now;
         }
         String currentTime = EmsScriptNode.getIsoTime( modTime );
-        elementJson.put( Acm.JSON_READ, currentTime );
-        elementJson.put( Acm.JSON_LAST_MODIFIED, currentTime );
+        if ( elementJson.has( Acm.JSON_READ) ) {
+            elementJson.put( Acm.JSON_READ, currentTime );
+        }
+        if ( elementJson.has( Acm.JSON_LAST_MODIFIED ) ) {
+            elementJson.put( Acm.JSON_LAST_MODIFIED, currentTime );
+        }
     }
 
     /**
@@ -1208,6 +1212,7 @@ public class ModelPost extends AbstractJavaWebScript {
     protected void fixReadTimeForConflictTransaction( EmsScriptNode element,
                                                       JSONObject elementJson,
                                                       boolean withoutTransactions ) {
+        if ( element == null || element.exists( false ) )
         if ( withoutTransactions ) {
             fixReadTimeForConflict( element, elementJson );
             return;
@@ -1620,7 +1625,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
             msg = "Error! Tried to post concurrent edit to element, "
                             + element + ".\n";
-            if ( Debug.isOn() ) System.out.println( msg + "  --> lastModified = "
+            System.out.println( msg + "  --> lastModified = "
                                                     + lastModified
                                                     + "  --> lastModString = "
                                                     + lastModString
@@ -1701,7 +1706,7 @@ public class ModelPost extends AbstractJavaWebScript {
                      + ", date = " + readDate + ", elementJson="
                      + elementJson );
 
-        return readTime.compareTo( lastModString ) > 0;
+        return readTime.compareTo( lastModString ) > 0;  // FIXME?  This sign should be reversed, right?
     }
 
     protected EmsScriptNode
