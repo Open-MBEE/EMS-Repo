@@ -3,7 +3,6 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -13,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -117,11 +115,11 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         EmsScriptNode root = findScriptNodeById(elementId, workspace, null, true);
         String projectId = null;
 
-        UserTransaction trx;
-        trx = services.getTransactionService().getNonPropagatingUserTransaction();
+//        UserTransaction trx;
+//        trx = services.getTransactionService().getNonPropagatingUserTransaction();
         try {
-            trx.begin();
-            NodeUtil.setInsideTransactionNow( true );
+//            trx.begin();
+//            NodeUtil.setInsideTransactionNow( true );
 
             if (root != null && root.exists()) {
                 handleElementHierarchy( root, workspace, true );
@@ -147,8 +145,8 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 }
             }
 
-            trx.commit();
-            NodeUtil.setInsideTransactionNow( false );
+//            trx.commit();
+//            NodeUtil.setInsideTransactionNow( false );
         } catch (Throwable e) {
             try {
                 if (e instanceof JSONException) {
@@ -156,9 +154,9 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 } else {
                         log(LogLevel.ERROR, "MmsModelDelete.handleRequest: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 }
-                trx.rollback();
-                NodeUtil.setInsideTransactionNow( false );
-                log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+//                trx.rollback();
+//                NodeUtil.setInsideTransactionNow( false );
+//                log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
                 e.printStackTrace();
             } catch (Throwable ee) {
                 log(LogLevel.ERROR, "\tMmsModelDelete.handleRequest: rollback failed: " + ee.getMessage());

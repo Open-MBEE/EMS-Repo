@@ -133,11 +133,11 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 	                                                      targetWS, sourceWS, true );
                     // REVIEW -- TODO -- shouldn't this be called from instance?
                     instance.addRelationshipsToProperties( elements );
+                    UserTransaction trx;
+                    trx = services.getTransactionService().getNonPropagatingUserTransaction();
+                    try {
                     if ( !Utils.isNullOrEmpty( elements ) ) {
 
-                        UserTransaction trx;
-                        trx = services.getTransactionService().getNonPropagatingUserTransaction();
-                        try {
                             trx.begin();
                             NodeUtil.setInsideTransactionNow( true );
                         // Create JSON object of the elements to return:
@@ -145,26 +145,26 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
                         for ( EmsScriptNode element : elements ) {
                             elementsJson.put( element.toJSONObject(null) );
                         }
-                        trx.commit();
-                        NodeUtil.setInsideTransactionNow( false );
-                    } catch (Throwable e) {
-                        try {
-                            trx.rollback();
-                            NodeUtil.setInsideTransactionNow( false );
-                            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
-                            log(LogLevel.ERROR, "\t####### when calling toJson()");
-                            e.printStackTrace();
-                        } catch (Throwable ee) {
-                            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
-                            log(LogLevel.ERROR, "\tafter calling toJson()");
-                            ee.printStackTrace();
-                        }
-                    }
                        //top.put( "elements", elementsJson );
                         //model.put( "res", top.toString( 4 ) );
 	                    }
     	            result = handleDelete(deletedCollection, targetWS, targetId, null /*time*/, wsDiff);
 
+                    trx.commit();
+                    NodeUtil.setInsideTransactionNow( false );
+                } catch (Throwable e) {
+                    try {
+                        trx.rollback();
+                        NodeUtil.setInsideTransactionNow( false );
+                        log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                        log(LogLevel.ERROR, "\t####### when calling toJson()");
+                        e.printStackTrace();
+                    } catch (Throwable ee) {
+                        log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                        log(LogLevel.ERROR, "\tafter calling toJson()");
+                        ee.printStackTrace();
+                    }
+                }
                     // FIXME!! We can't just leave the changes on the merged
                     // branch! If an element is changed in the parent, it could
                     // result in a conflict! But we can't mark them deleted since
