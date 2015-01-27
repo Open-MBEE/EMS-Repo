@@ -1170,14 +1170,51 @@ public class ModelPost extends AbstractJavaWebScript {
         updateTransactionableWsState(element, jsonId, modStatus, ingest);
         elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
 
-        // Update the read/modified time in the json, so that we do not get any conflicts on the second pass, as
-        // we may modify the node on the first pass.  Make sure this is after any modifications to the
-        // node.
-        String currentTime = EmsScriptNode.getIsoTime( new Date(System.currentTimeMillis()));
-        elementJson.put( Acm.JSON_READ, currentTime);
-        elementJson.put( Acm.JSON_LAST_MODIFIED, currentTime);
-
+        fixReadTimeForConflict(element, elementJson);
         return elements;
+    }
+
+    /**
+     * Update the read/modified time in the json, so that we do not get any conflicts on the second pass, as we may modify the node on the first pass.  Make sure this is after any modifications to the node.
+     * @param elementJson
+     */
+    protected void fixReadTimeForConflict( EmsScriptNode element, JSONObject elementJson ) {
+        UserTransaction trx;
+        trx = services.getTransactionService().getNonPropagatingUserTransaction();
+        try {
+            trx.begin();
+            NodeUtil.setInsideTransactionNow( true );
+            Date modTime = element.getLastModified( null );
+
+            if ( modTime == null ) {
+                log( LogLevel.ERROR,
+                     "\tfixReadTimeForConflict() could not get lastModified time for "
+                             + element );
+                modTime = new Date( System.currentTimeMillis() );
+            }
+            String currentTime = EmsScriptNode.getIsoTime( modTime );
+            elementJson.put( Acm.JSON_READ, currentTime );
+            elementJson.put( Acm.JSON_LAST_MODIFIED, currentTime );
+            timerCommit = Timer.startTimer( timerCommit, timeEvents );
+            trx.commit();
+            NodeUtil.setInsideTransactionNow( false );
+            Timer.stopTimer( timerCommit,
+                             "!!!!! fixReadTimeForConflict(): commit time",
+                             timeEvents );
+        } catch ( Throwable e ) {
+            try {
+                e.printStackTrace();
+                trx.rollback();
+                NodeUtil.setInsideTransactionNow( false );
+            } catch ( Throwable ee ) {
+                log( LogLevel.ERROR,
+                     "\fixReadTimeForConflict(): rollback failed: "
+                             + ee.getMessage() );
+                ee.printStackTrace();
+                e.printStackTrace();
+            }
+        }
+
     }
 
     private void updateTransactionableWsState(EmsScriptNode element, String jsonId, ModStatus modStatus, boolean ingest) {
@@ -1558,6 +1595,9 @@ public class ModelPost extends AbstractJavaWebScript {
 
             msg = "Error! Tried to post concurrent edit to element, "
                             + element + ".\n";
+            System.out.println(msg + "  --> lastModified = " + lastModified +
+                               "  --> lastModString = " + lastModString +
+                               "  --> elementJson = " + elementJson );
         }
 
         // Compare last modified to last modified time:
@@ -1565,6 +1605,9 @@ public class ModelPost extends AbstractJavaWebScript {
 
             msg = "Error! Tried to post overwrite to element, "
                             + element + ".\n";
+            System.out.println(msg + "  --> lastModified = " + lastModified +
+                               "  --> lastModString = " + lastModString +
+                               "  --> elementJson = " + elementJson );
         }
 
         // If there was one of the conflicts then return true:
