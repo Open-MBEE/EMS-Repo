@@ -30,13 +30,11 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
@@ -136,28 +134,28 @@ public class ViewEditorPurge extends AbstractJavaWebScript {
 	 * @param node
 	 */
 	private void delete(EmsScriptNode node) {
-        UserTransaction trx;
-        trx = services.getTransactionService().getNonPropagatingUserTransaction();
-        try {
-            trx.begin();
-            NodeUtil.setInsideTransactionNow( true );
+//        UserTransaction trx;
+//        trx = services.getTransactionService().getNonPropagatingUserTransaction();
+//        try {
+//            trx.begin();
+//            NodeUtil.setInsideTransactionNow( true );
             String key = (String)node.getProperty("cm:name");
             log(LogLevel.INFO, "delete: beginning transaction {" + node.getNodeRef());
             node.makeSureNodeRefIsNotFrozen();
             node.transactionCheck();
             services.getNodeService().deleteNode(node.getNodeRef());
             log(LogLevel.INFO, "} delete ending transaction: " + key);
-            trx.commit();
-            NodeUtil.setInsideTransactionNow( false );
-        } catch (Throwable e) {
-            try {
-                log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
-                trx.rollback();
-                NodeUtil.setInsideTransactionNow( false );
-            } catch (Throwable ee) {
-                log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
-            }
-        }
+//            trx.commit();
+//            NodeUtil.setInsideTransactionNow( false );
+//        } catch (Throwable e) {
+//            try {
+//                log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+//                trx.rollback();
+//                NodeUtil.setInsideTransactionNow( false );
+//            } catch (Throwable ee) {
+//                log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+//            }
+//        }
     }
 
 

@@ -33,7 +33,6 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
@@ -41,7 +40,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -189,29 +187,29 @@ public class WorkspacesPost extends AbstractJavaWebScript{
             } else {
                 EmsScriptNode folder = null;
                 WorkspaceNode dstWs = null;
-                UserTransaction trx;
-                trx = services.getTransactionService().getNonPropagatingUserTransaction();
-                try {
-                    trx.begin();
-                    NodeUtil.setInsideTransactionNow( true );
+//                UserTransaction trx;
+//                trx = services.getTransactionService().getNonPropagatingUserTransaction();
+//                try {
+//                    trx.begin();
+//                    NodeUtil.setInsideTransactionNow( true );
                     dstWs = WorkspaceNode.createWorkspaceFromSource(workspaceName, user, sourceWorkspaceId,
                                                                     copyTime, folder, getServices(),
                                                                     getResponse(), status, desc);
-                    trx.commit();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable e) {
-                    try {
-                        e.printStackTrace();
-                        trx.rollback();
-                        NodeUtil.setInsideTransactionNow( false );
-                    } catch (Throwable ee) {
-                        ee.printStackTrace();
-                    }
-                }
+//                    trx.commit();
+//                    NodeUtil.setInsideTransactionNow( false );
+//                } catch (Throwable e) {
+//                    try {
+//                        e.printStackTrace();
+//                        trx.rollback();
+//                        NodeUtil.setInsideTransactionNow( false );
+//                    } catch (Throwable ee) {
+//                        ee.printStackTrace();
+//                    }
+//                }
 
                 if (dstWs != null) {
                     // keep history of the branch
-                    CommitUtil.branch( srcWs, dstWs,"", false, services, response );
+                    CommitUtil.branch( srcWs, dstWs,"", true, services, response );
                     return dstWs;
                 }
                 return null;
