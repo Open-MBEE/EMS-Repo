@@ -35,7 +35,7 @@ import java.util.Map;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletResponse;
 
-import org.alfresco.web.app.Application;
+//import org.alfresco.web.app.Application;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
@@ -90,8 +90,8 @@ public class LogoutWebScript extends AbstractWebScript {
 	    } else {
 	        // logging out for WebClient
             FacesContext fc = FacesContext.getCurrentInstance();
-            Application.logOut(fc);
-            status.setCode(HttpServletResponse.SC_TEMPORARY_REDIRECT);
+            //Application.logOut(fc);
+            //status.setCode(HttpServletResponse.SC_TEMPORARY_REDIRECT);
 	    }
 	}
 	

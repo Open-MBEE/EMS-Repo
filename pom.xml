@@ -178,6 +178,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
     <!-- Following dependencies are needed for compiling Java code in src/main/java; 
 		<scope>provided</scope> is inherited for each of the following; for more 
 		info, please refer to alfresco-platform-distribution POM -->
@@ -185,8 +186,7 @@
         <dependency>
             <groupId>${alfresco.groupId}</groupId>
             <artifactId>alfresco-repository</artifactId>
-<!--            <version>4.2.e.1</version>
- -->        <version>${alfresco.version}</version>
+            <version>${alfresco.version}</version>
         </dependency>
         <!-- Test dependencies -->
         <dependency>
@@ -206,7 +206,7 @@
 			<version>1.8.4</version>
 			<scope>test</scope>
 		</dependency>
-         <dependency>
+        <dependency>
             <groupId>${alfresco.groupId}</groupId>
             <artifactId>alfresco-web-framework-commons</artifactId>
             <version>${alfresco.version}</version>
@@ -215,12 +215,6 @@
             <groupId>${alfresco.groupId}</groupId>
             <artifactId>alfresco-remote-api</artifactId>
             <version>${alfresco.version}</version>
-        </dependency>
-        <dependency>
-	        	<groupId>${alfresco.groupId}</groupId>
-	        	<artifactId>alfresco-web-client</artifactId>
-	        	<scope>system</scope>
-	        	<systemPath>${project.basedir}/lib/alfresco-web-client-${alfresco.version}.jar</systemPath>
         </dependency>
         <!--  required for mapping slf4j to log4j -->
         <dependency>
@@ -320,9 +314,6 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<version>1.8</version>
-				<!-- <executions> <execution> <phase>gather-sources</phase> <goals><goal>add-source</goal></goals> 
-					<configuration> <sources> <source>/CS/src/gov/nasa/jpl/ae</source> <source>/CS/src/thirdParty</source> 
-					</sources> </configuration> </execution> </executions> -->
 			</plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -374,22 +365,6 @@
 				<artifactId>maven-resources-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>copy-font-resources</id>
-						<phase>compile</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<overwrite>true</overwrite>
-							<outputDirectory>${project.build.directory}/${project.build.finalName}/web</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${basedir}/src/main/amp/web</directory>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-					<execution>
                         <!-- Alfresco Maven plugin corrupts libraries too - so make sure to copy them over -->
 						<id>copy-lib-resources</id>
 						<phase>compile</phase>
@@ -402,6 +377,23 @@
 							<resources>
 								<resource>
 									<directory>${basedir}/src/main/amp/lib</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+                        <!-- Alfresco Maven plugin corrupts libraries too - so make sure to copy them over -->
+						<id>copy-web-lib-resources</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<overwrite>true</overwrite>
+							<outputDirectory>${project.build.directory}/${project.build.finalName}/web/WEB-INF/lib</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/src/main/amp/web/WEB-INF/lib</directory>
 								</resource>
 							</resources>
 						</configuration>
@@ -419,6 +411,23 @@
                             <resources>
                                 <resource>
                                     <directory>${basedir}/api/html</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+		            <!-- Copy community specific configurations  -->
+                    <execution>
+                        <id>copy-community-resources</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <overwrite>true</overwrite>
+                            <outputDirectory>${basedir}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/resources/community</directory>
                                 </resource>
                             </resources>
                         </configuration>

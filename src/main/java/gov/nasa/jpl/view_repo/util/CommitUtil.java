@@ -392,12 +392,15 @@ public class CommitUtil {
                     .getNonPropagatingUserTransaction();
             try {
                 trx.begin();
+                NodeUtil.setInsideTransactionNow( true );
                 commitRef = commitTransactionable(wsDiff, workspace, msg, services, response);
                 trx.commit();
+                NodeUtil.setInsideTransactionNow( false );
             } catch (Throwable e) {
                 try {
                     e.printStackTrace();
                     trx.rollback();
+                    NodeUtil.setInsideTransactionNow( false );
                 } catch (Throwable ee) {
                     ee.printStackTrace();
                 }
@@ -441,13 +444,16 @@ public class CommitUtil {
                     .getNonPropagatingUserTransaction();
             try {
                 trx.begin();
+                NodeUtil.setInsideTransactionNow( true );
                 mergeRef = mergeTransactionable(wsDiff, source, target, target, dateTimeSrc, dateTimeTarget,
                                                 msg, services, response);
                 trx.commit();
+                NodeUtil.setInsideTransactionNow( false );
             } catch (Throwable e) {
                 try {
                     e.printStackTrace();
                     trx.rollback();
+                    NodeUtil.setInsideTransactionNow( false );
                 } catch (Throwable ee) {
                     ee.printStackTrace();
                 }
@@ -536,12 +542,15 @@ public class CommitUtil {
             trx = services.getTransactionService().getNonPropagatingUserTransaction();
             try {
                 trx.begin();
+                NodeUtil.setInsideTransactionNow( true );
                 branchRef = branchTransactionable(srcWs, dstWs, msg, services, response);
                 trx.commit();
+                NodeUtil.setInsideTransactionNow( false );
             } catch (Throwable e) {
                 try {
                     e.printStackTrace();
                     trx.rollback();
+                    NodeUtil.setInsideTransactionNow( false );
                 } catch (Throwable ee) {
                     ee.printStackTrace();
                 }
@@ -579,12 +588,15 @@ public class CommitUtil {
                     .getNonPropagatingUserTransaction();
             try {
                 trx.begin();
+                NodeUtil.setInsideTransactionNow( true );
                 mergeTransactionable(srcWs, dstWs, dstWs, msg, services, response);
                 trx.commit();
+                NodeUtil.setInsideTransactionNow( false );
             } catch (Throwable e) {
                 try {
                     e.printStackTrace();
                     trx.rollback();
+                    NodeUtil.setInsideTransactionNow( false );
                 } catch (Throwable ee) {
                     ee.printStackTrace();
                 }
@@ -780,7 +792,8 @@ public class CommitUtil {
                                              WorkspaceDiff wsDiff,
                                              long start, long end,
                                              String projectId,
-                                             Status status ) throws Exception {
+                                             Status status,
+                                             boolean useTransactions ) throws Exception {
         if (false == wsDiff.isDiff()) {
             return;
         }
@@ -798,6 +811,7 @@ public class CommitUtil {
         commitAction.setParameterValue(CommitActionExecuter.PARAM_WS_DIFF, wsDiff);
         commitAction.setParameterValue(CommitActionExecuter.PARAM_START, start);
         commitAction.setParameterValue(CommitActionExecuter.PARAM_END, end);
+        commitAction.setParameterValue( CommitActionExecuter.TRANSACTION, useTransactions );
 
         // create empty commit for now (executing action will fill it in later)
         NodeRef commitRef = CommitUtil.commit(null, targetWS, "", true, services, new StringBuffer() );
