@@ -394,22 +394,45 @@ public class ModelPost extends AbstractJavaWebScript {
         // Send deltas to all listeners
         if (createCommit && wsDiff.isDiff()) {
             // FIXME: Need to split elements by project Id - since they won't always be in same project
-            CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), status, true );
-//            NodeRef commitRef = CommitUtil.commit(null, targetWS, "", true, services, new StringBuffer() );
-//            String projectId = elements.first().getProjectId();
-//            String wsId = "master";
-//            if (targetWS != null) {
-//                wsId = targetWS.getId();
-//            }
-//
-//            JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
-//
-//            // FIXME: Need to split by projectId
-//            if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId) ) {
-//                //logger.warn("send deltas not posted properly");
-//            }
-//
-//            CommitUtil.updateCommitNodeRef( commitRef, deltaJson.toString(), "", services, response );
+//            CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), status, true );
+            trx = services.getTransactionService().getNonPropagatingUserTransaction();
+            try {
+                trx.begin();
+
+                NodeUtil.setInsideTransactionNow( true );
+                NodeRef commitRef = CommitUtil.commit(null, targetWS, "", true, services, new StringBuffer() );
+                String projectId = elements.first().getProjectId();
+                String wsId = "master";
+                if (targetWS != null) {
+                    wsId = targetWS.getId();
+                }
+
+                JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
+
+                // FIXME: Need to split by projectId
+                if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId) ) {
+                    //logger.warn("send deltas not posted properly");
+                }
+
+                CommitUtil.updateCommitNodeRef( commitRef, deltaJson.toString(), "", services, response );
+
+                timerCommit = Timer.startTimer(timerCommit, timeEvents);
+                trx.commit();
+                NodeUtil.setInsideTransactionNow( false );
+                Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): ws metadata time", timeEvents);
+            } catch (Throwable e) {
+                try {
+                    log(LogLevel.ERROR, "updateOrCreateElement: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    e.printStackTrace();
+                    trx.rollback();
+                    NodeUtil.setInsideTransactionNow( false );
+                } catch (Throwable ee) {
+                    log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
+                    ee.printStackTrace();
+                    e.printStackTrace();
+                }
+            }
+
         }
 
         Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): Deltas time", timeEvents);
@@ -2544,7 +2567,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
 
                     if (projectNode != null) {
-                        handleUpdate( postJson, status, workspace, fix, model, false );
+                        handleUpdate( postJson, status, workspace, fix, model, true );
                     }
                 }
             } catch (JSONException e) {
