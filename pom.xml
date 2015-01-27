@@ -418,7 +418,7 @@
 		            <!-- Copy community specific configurations  -->
                     <execution>
                         <id>copy-community-resources</id>
-                        <phase>validate</phase>
+                        <phase>compile</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>

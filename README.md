@@ -168,6 +168,35 @@ PLEASE keep pom.xml and pom.xml.enterprise in sync!!!
 copy-resource plugin that copies the files in /resources/[community|enterprise] into the
 appropriate /src directory as part of the validation. Make changes to the appropriate files
 in the /resources/[community|enterprise] directory.
+
+### Enterprise settings with Maven
+
+Need to update settings.xml to connect to the Alfresco private repository. Ask Ly or Cin-Young
+for username and password.
+
+'''
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <localRepository/>
+  <interactiveMode/>
+  <usePluginRegistry/>
+  <offline/>
+  <pluginGroups/>
+  <servers>
+        <server>
+                <id>alfresco-private-repository</id>
+                <username>username</username>
+                <password>password</password>
+        </server>
+  </servers>
+  <mirrors/>
+  <proxies/>
+  <profiles/>
+  <activeProfiles/>
+</settings>
+'''
 	
 # Debug
 To attach an eclipse debugger, there's a view-repo.launch, you can use it to debug at the 10000 port, or change the debug config port if you didn't use 10000 in the maven opts
@@ -366,31 +395,3 @@ Note: Following shortcuts are mainly for Linux.
 
 So you don't clash with other users, run using something like -Dmaven.tomcat.port=9091.
 	
-### Enterprise settings with Maven
-
-Need to update settings.xml to connect to the Alfresco private repository. Ask Ly or Cin-Young
-for username and password.
-
-'''
-<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
-                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
-  <localRepository/>
-  <interactiveMode/>
-  <usePluginRegistry/>
-  <offline/>
-  <pluginGroups/>
-  <servers>
-        <server>
-                <id>alfresco-private-repository</id>
-                <username>username</username>
-                <password>password</password>
-        </server>
-  </servers>
-  <mirrors/>
-  <proxies/>
-  <profiles/>
-  <activeProfiles/>
-</settings>
-'''
