@@ -47,6 +47,7 @@ import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.actions.ModelLoadActionExecuter;
+import gov.nasa.jpl.view_repo.connections.JmsConnection;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -76,6 +77,7 @@ import javax.transaction.UserTransaction;
 import kexpparser.KExpParser;
 //import k.frontend.Frontend;
 
+
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -85,6 +87,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.version.Version;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -106,6 +109,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ModelPost extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger(ModelPost.class);
 
     public ModelPost() {
         super();
@@ -2496,6 +2500,12 @@ public class ModelPost extends AbstractJavaWebScript {
 
         String user = AuthenticationUtil.getRunAsUser();
         String wsId = null;
+
+        if (logger.isDebugEnabled()) {
+            logger.debug( user + " " + req.getURL() );
+            logger.debug( req.parseContent() );
+        }
+
         WorkspaceNode workspace = getWorkspace( req, //true, // not creating ws!
                                                 user );
         boolean wsFound = workspace != null;
