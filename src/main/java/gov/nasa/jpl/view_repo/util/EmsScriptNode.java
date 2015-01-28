@@ -1057,10 +1057,19 @@ public class EmsScriptNode extends ScriptNode implements
         if ( liveNodeRef != null && !liveNodeRef.equals( nodeRef ) ) {
             EmsScriptNode liveNode = new EmsScriptNode( liveNodeRef, getServices() );
             if ( isAVersion() ) {
-                logger.error( "Trying to create a node under a frozen node ref (" + nodeRef + ", v " + getVersionLabel() + ")! Replacing nodeRef with (v "+ liveNode.getVersionLabel() + ") live node ref (" + liveNodeRef + "), which may not point to the right version! " + this );
+                logger.error( "Trying to create a node under a frozen node ref ("
+                              + nodeRef + ", v " + getVersionLabel()
+                              + ")! Replacing nodeRef with (v "
+                              + liveNode.getVersionLabel() + ") live node ref ("
+                              + liveNodeRef
+                              + "), which may not point to the right version! "
+                              + this );
+                Debug.error( true, "Stacktrace for frozen node replacement:" );
                 nodeRef = liveNodeRef;
             } else {
-                logger.error( "Live node " + liveNode.getVersionLabel() + " is different from current " + getVersionLabel() + " node ref!" + this );
+                logger.error( "Live node " + liveNode.getVersionLabel()
+                              + " is different from current "
+                              + getVersionLabel() + " node ref!" + this );
             }
         }
     }

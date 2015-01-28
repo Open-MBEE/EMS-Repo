@@ -82,10 +82,11 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	@Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		ConfigurationPost instance = new ConfigurationPost(repository, services);
-    	return instance.executeImplImpl(req, status, cache);
+    	return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
     }
-    
-	protected Map<String, Object> executeImplImpl(WebScriptRequest req,
+
+	@Override
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req,
 			Status status, Cache cache) {
 		Map<String, Object> model = new HashMap<String, Object>();
 
@@ -196,9 +197,9 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		    if ( ActionUtil.jobExists( context, name) ) {
 		        return handleUpdate( postJson, siteName, context, workspace, status );
 		    }
-		    
+
 		    Date date = new Date();
-            jobNode = ActionUtil.getOrCreateJob( context, name, 
+            jobNode = ActionUtil.getOrCreateJob( context, name,
                                                  "ems:ConfigurationSet",
                                                  status, response );
 
@@ -210,14 +211,14 @@ public class ConfigurationPost extends AbstractJavaWebScript {
                                               workspace, date );
 
 	            HashSet<String> productList = getProductList(postJson);
-	            
+
 	            Date datetime = null;
 	            if ( postJson.has( "timestamp" ) ) {
 	                String timestamp = postJson.getString("timestamp");
 	                datetime = TimeUtils.dateFromTimestamp(timestamp);
 	            }
             	startAction(jobNode, siteName, productList, workspace, datetime);
-	            
+
 				return configWs.getConfigJson( jobNode, workspace, null );
 			} else {
 				log(LogLevel.ERROR, "Couldn't create configuration job: " + postJson.getString("name"), HttpServletResponse.SC_BAD_REQUEST);
@@ -264,7 +265,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
                 configNode = workspace.replicateWithParentFolders( node );
             }
         }
-		
+
 		if ( NodeUtil.exists( configNodeRef ) ) {
 	        ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
             configWs.updateConfiguration( configNode, postJson, context,
@@ -282,7 +283,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	 * @param jobNode
 	 * @param siteName
 	 * @param productList
-	 * @param workspace 
+	 * @param workspace
 	 */
 	public void startAction(EmsScriptNode jobNode, String siteName,
 	                        HashSet<String> productList, WorkspaceNode workspace,

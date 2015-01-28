@@ -127,9 +127,6 @@ public class ModelPost extends AbstractJavaWebScript {
     private Timer timerUpdateModel = null;
     private Timer timerToJson = null;
 
-    // when run in background as an action, this needs to be false
-    private boolean runWithoutTransactions = false;
-
     private final String ELEMENTS = "elements";
 
     /**
@@ -2567,6 +2564,7 @@ public class ModelPost extends AbstractJavaWebScript {
         return instance.executeImplImpl(req,  status, cache);
     }
 
+    @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req,
                                               Status status, Cache cache) {
         Timer timer = new Timer();
