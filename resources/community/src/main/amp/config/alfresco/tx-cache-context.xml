@@ -18,8 +18,7 @@
       <property name="disableSharedCache" value="${system.cache.disableMutableSharedCaches}" />
       <property name="tenantAware" value="false" />
    </bean>
-
-
+   
    <!-- The transactional cache for Property Unique Contexts -->
    
    <bean name="propertyUniqueContextCache" class="org.alfresco.repo.cache.TransactionalCache">
@@ -200,9 +199,7 @@
       <property name="name">
          <value>org.alfresco.authenticationTransactionalCache</value>
       </property>
-      <property name="maxCacheSize">
-         <value>1000</value>
-      </property>
+      <property name="maxCacheSize" value="1000" />
    </bean>
    
    
@@ -236,6 +233,7 @@
       <property name="allowEqualsChecks" value="true" />
       <property name="disableSharedCache" value="${system.cache.disableMutableSharedCaches}" />
    </bean>
+
 
 
    <!-- The transactional cache for authority containers -->
