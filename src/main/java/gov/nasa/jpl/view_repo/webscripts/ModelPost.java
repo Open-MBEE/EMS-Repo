@@ -337,6 +337,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
                     log(LogLevel.ERROR, "\tafter calling getOwner(" + rootElement + ", " + projectNode + ", true)");
                     ee.printStackTrace();
+                    NodeUtil.setInsideTransactionNow( false );
                 }
             }
             } // end for (String rootElement: rootElements) {
@@ -379,6 +380,7 @@ public class ModelPost extends AbstractJavaWebScript {
         } catch (Throwable ee) {
             log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
             ee.printStackTrace();
+            NodeUtil.setInsideTransactionNow( false );
         }
     }
 
@@ -429,6 +431,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 } catch (Throwable ee) {
                     log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
+                    NodeUtil.setInsideTransactionNow( false );
                 }
             }
 
@@ -712,7 +715,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 } catch (Throwable ee) {
                     log(LogLevel.ERROR, "\tupdateOrCreateRelationships: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
-                    e.printStackTrace();
+                    NodeUtil.setInsideTransactionNow( false );
                 }
             }
         }
@@ -898,7 +901,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 } catch (Throwable ee) {
                     log(LogLevel.ERROR, "\tbuildElementMap: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
-                    e.printStackTrace();
+                    NodeUtil.setInsideTransactionNow( false );
                 }
                 isValid = false;
             }
@@ -1136,6 +1139,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 } catch (Throwable ee) {
                     log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
+                    NodeUtil.setInsideTransactionNow( false );
                 }
             }
         }
@@ -1239,6 +1243,7 @@ public class ModelPost extends AbstractJavaWebScript {
                      "\fixReadTimeForConflict(): rollback failed: "
                              + ee.getMessage() );
                 ee.printStackTrace();
+                NodeUtil.setInsideTransactionNow( false );
             }
         }
     }
@@ -1268,6 +1273,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 } catch (Throwable ee) {
                     log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
+                    NodeUtil.setInsideTransactionNow( false );
                 }
             }
         }
@@ -2638,6 +2644,7 @@ public class ModelPost extends AbstractJavaWebScript {
                             log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
                             log(LogLevel.ERROR, "\tafter calling getProjectNodeFromRequest()");
                             ee.printStackTrace();
+                            NodeUtil.setInsideTransactionNow( false );
                         }
                     }
 
@@ -2698,6 +2705,7 @@ public class ModelPost extends AbstractJavaWebScript {
                         log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
                         log(LogLevel.ERROR, "\tafter calling fix()");
                         ee.printStackTrace();
+                        NodeUtil.setInsideTransactionNow( false );
                     }
                 }
             }
@@ -2734,6 +2742,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
                 log(LogLevel.ERROR, "\tafter toJson()");
                 ee.printStackTrace();
+                NodeUtil.setInsideTransactionNow( false );
             }
         }
         }
@@ -2762,6 +2771,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
                     log(LogLevel.ERROR, "\tafter calling addRelationshipsToProperties()");
                     ee.printStackTrace();
+                    NodeUtil.setInsideTransactionNow( false );
                 }
             }
         }
