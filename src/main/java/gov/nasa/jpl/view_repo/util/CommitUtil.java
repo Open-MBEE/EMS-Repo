@@ -775,6 +775,8 @@ public class CommitUtil {
             }
         }
 
+        System.out.println(deltaJson);
+
         return jmsStatus && restStatus;
     }
 
