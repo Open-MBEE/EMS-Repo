@@ -424,10 +424,10 @@
                         </goals>
                         <configuration>
                             <overwrite>true</overwrite>
-                            <outputDirectory>${basedir}</outputDirectory>
+                            <outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${basedir}/resources/community</directory>
+                                    <directory>${basedir}/resources/community/src/main/amp</directory>
                                 </resource>
                             </resources>
                         </configuration>
