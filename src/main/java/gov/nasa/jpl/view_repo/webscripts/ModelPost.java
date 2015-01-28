@@ -1709,7 +1709,7 @@ public class ModelPost extends AbstractJavaWebScript {
             jsonType = ( existingNodeType == null ? "Element" : existingNodeType );
         }
 
-    	if (existingNodeType != null && !jsonType.equals(existingNodeType)) {
+    	if (ingest && existingNodeType != null && !jsonType.equals(existingNodeType)) {
     		log(LogLevel.WARNING, "The type supplied "+jsonType+" is different than the stored type "+existingNodeType);
     	}
 
@@ -1824,7 +1824,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     // which will remove all of the needed aspects.
                     if ( (!type.equals( acmSysmlType ) && NodeUtil.isAspect( acmSysmlType )) ||
                          acmSysmlType.equals(Acm.ACM_ELEMENT)) {
-                        if (nodeToUpdate.createOrUpdateAspect( acmSysmlType )) {
+                        if (ingest && nodeToUpdate.createOrUpdateAspect( acmSysmlType )) {
                             modStatus.setState( ModStatus.State.UPDATED  );
                         }
                     }
@@ -1863,6 +1863,9 @@ public class ModelPost extends AbstractJavaWebScript {
                 modStatus.setState( ModStatus.State.UPDATED );
             }
 
+            if ( elementJson != null && elementJson.has( Acm.JSON_LAST_MODIFIED ) ) {
+                elementJson.remove( Acm.JSON_LAST_MODIFIED );
+            }
             timerIngest = Timer.startTimer(timerIngest, timeEvents);
             if ( nodeToUpdate.ingestJSON(elementJson) ) {
                 Timer.stopTimer(timerIngest, "!!!!! updateOrCreateTransactionableElement(): ingestJSON", timeEvents);
