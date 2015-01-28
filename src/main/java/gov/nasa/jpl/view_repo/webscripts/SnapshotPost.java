@@ -258,24 +258,22 @@ public class SnapshotPost extends AbstractJavaWebScript {
         if (srcType != null && srcType.compareTo( "reference" ) == 0 ) {
             EmsScriptNode node = findScriptNodeById( src, workspace, null, false );
             if(node == null){
-            	System.out.println("Failed to create DBParagraph! Failed to find EmsScriptNode with Id: " + src);
-            	//return null;
+            	System.out.println("[WARNING]: Failed to create DBParagraph! Failed to find EmsScriptNode with Id: " + src);
             }
             else{
 	            if (srcProp != null && srcProp.compareTo( "value" ) == 0 ) {
 	                List< NodeRef > nodeRefs = (List< NodeRef >)node.getProperty( Acm.SYSML + srcProp );
 	                if(nodeRefs == null){
-	                	System.out.println("Failed to create DBParagraph! Failed to find values node references.");
+	                	System.out.println("[WARNING]: Failed to create DBParagraph! Failed to find values node references.");
 	                	return null;
 	                }
 
 	                StringBuffer sb = new StringBuffer();
 	                int size = nodeRefs.size();
-	                //if ( size > 0 ) sb.append( "<literallayout>" );
 	                for ( int i = 0; i < size; i++ ) {
 	                    NodeRef nodeRef = nodeRefs.get( i );
 	                    if(nodeRef == null){
-	                    	System.out.println("Failed to get value node ref at index: " + i);
+	                    	System.out.println("[WARNING]: Failed to get value node ref at index: " + i);
 	                    	continue;
 	                    }
 
@@ -283,16 +281,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
 	                    String valueProp = (String)node.getProperty( Acm.SYSML + "name" );
 	                    if ( valueProp != null && !valueProp.isEmpty() ) {
-	                        Object value =
-	                                valueNode.getProperty( Acm.SYSML
-	                                                       + valueProp );
-	                        if ( value == null
-	                             || ( value != null && value.toString()
-	                                                        .isEmpty() ) ) {
+	                        Object value = valueNode.getProperty( Acm.SYSML + valueProp );
+	                        if ( value == null || ( value != null && value.toString().isEmpty() ) ) {
 	                            value = extractNodeValue( valueNode );
-	                            if ( value == null
-	                                 || ( value != null && value.toString()
-	                                                            .isEmpty() ) ) continue;
+	                            if ( value == null || ( value != null && value.toString().isEmpty() ) ) continue;
 	                        }
 
 	                        if ( value instanceof String ) sb.append( HtmlSanitize( (String)value ) );
@@ -305,14 +297,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	                            else sb.append( valObj );
 	                        }
 	                        catch ( Exception ex ) {
-	                            log( LogLevel.WARNING,
-	                                 "Problem extracting node value from "
-	                                         + node.toJSON() );
+	                            log( LogLevel.WARNING, "Problem extracting node value from " + node.toJSON() );
 	                        }
 	                    }
 	                    sb.append(" ");
 	                }
-	                //if ( size > 0 ) sb.append( "</literallayout>" );
 	                p.setText( sb.toString() );
 	            }
 	            else {
@@ -321,9 +310,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	                s = handleEmbeddedImage(src, s, section);
 	                s = HtmlSanitize( s );
 	                if(s != null && !s.isEmpty()) p.setText(s);
-	                //if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
-	                //                                            + s
-	                //                                            + "</literallayout>" );
 	            }
             }
         }
@@ -334,9 +320,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 s = handleEmbeddedImage(src, s, section);
                 s = HtmlSanitize( s );
                 if(s != null && !s.isEmpty()) p.setText(s);
-                //if ( s != null && !s.isEmpty() ) p.setText( "<literallayout>"
-                  //                                          + s
-                    //                                        + "</literallayout>" );
             }
             else p.setText( HtmlSanitize( (String)obj.opt( "text" ) ) );
         }
@@ -396,9 +379,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                           String snapshotName, String contextPath,
                                           EmsScriptNode snapshotFolder,
                                           WorkspaceNode workspace, Date timestamp) throws Exception {
-        log( LogLevel.INFO, "\ncreating DocBook snapshot for view Id: "
-                            + productId );
-        log( LogLevel.INFO, "\ncreating DocBook snapshotname: " + snapshotName );
+//        log( LogLevel.INFO, "\ncreating DocBook snapshot for view Id: " + productId );
+//        log( LogLevel.INFO, "\ncreating DocBook snapshotname: " + snapshotName );
 
         if ( product == null ) {
             log( LogLevel.WARNING, "null [view] input parameter reference." );
@@ -448,10 +430,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
             docBookMgr.save();
         }
         catch ( Exception ex ) {
-            log( LogLevel.ERROR,
-                 "\nFailed to create DBBook! " + ex.getStackTrace() );
+            log( LogLevel.ERROR, "\nUnable to create DBBook! Failed to parse document.\n" + ex.getStackTrace() );
             ex.printStackTrace();
-            throw new Exception( "Failed to create DBBook!", ex );
+            throw new Exception( "Unable to create DBBook! Failed to parse document.\n", ex );
         }
         return docBookMgr;
     }
@@ -589,18 +570,23 @@ public class SnapshotPost extends AbstractJavaWebScript {
     public EmsScriptNode createSnapshot( EmsScriptNode view, String viewId,
                                          WorkspaceNode workspace, Date timestamp ) {
         this.snapshotName = viewId + "_" + System.currentTimeMillis();
+        log(LogLevel.INFO, "Begin creating snapshot: \t" + this.snapshotName);
+        
         String contextPath = "alfresco/service/";
         EmsScriptNode viewNode = findScriptNodeById(viewId, workspace, timestamp, true);
         if(viewNode == null){
-        	System.out.println("Failed to find script node with Id: " + viewId);
+        	log(LogLevel.ERROR, "Failed to find script node with Id: " + viewId);
+        	log(LogLevel.INFO, "End creating snapshot: \t\t" + this.snapshotName);
         	return null;
         }
         EmsScriptNode snapshotFolder = getSnapshotFolderNode(viewNode);
         if(snapshotFolder == null){
             log( LogLevel.ERROR, "Failed to get snapshot folder node!",
                  HttpServletResponse.SC_BAD_REQUEST );
+            log(LogLevel.INFO, "End creating snapshot: \t\t" + this.snapshotName);
         	return null;
         }
+        log(LogLevel.INFO, "End creating snapshot: \t\t" + this.snapshotName);
         return createSnapshot(view, viewId, snapshotName, contextPath, snapshotFolder, workspace, timestamp);
     }
 
@@ -611,7 +597,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                          WorkspaceNode workspace, Date timestamp) {
         EmsScriptNode snapshotNode = snapshotFolder.createNode( snapshotName, "view2:Snapshot" );
         if (snapshotNode == null) {
-            	System.out.println("Failed to create view2:Snapshot!");
+            	log(LogLevel.ERROR, "Failed to create view2:Snapshot!");
             	return null;
         }
         snapshotNode.createOrUpdateProperty( "cm:isIndexed", true );
@@ -1169,7 +1155,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 	//http://localhost:8081/share/proxy/alfresco/api/node/content/workspace/SpacesStore/74cd8a96-8a21-47e5-9b3b-a1b3e296787d/graph.JPG
                 }
                 catch(Exception ex){
-                	System.out.println("Failed to retrieve embedded image.");
+                	System.out.println("[WARNING]: Failed to retrieve embedded image.");
                 	ex.printStackTrace();
                 }
     		}
@@ -1252,7 +1238,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         }
         list = cirRefList.get( index );
         if(list == null){
-        	System.out.println("Failed to retrieve circular reference list at index: " + index);
+        	System.out.println("[WARNING]: Failed to retrieve circular reference list at index: " + index);
         	return inputString;
         }
         list.add( id + transclusionType );
@@ -1320,7 +1306,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
 		Document document = Jsoup.parseBodyFragment(inputString);
 		if(document == null || document.body()==null){
-			System.out.println("Failed to parse HTML fragment: " + inputString);
+			System.out.println("[WARNING]: Failed to parse HTML fragment: " + inputString);
 			return inputString;
 		}
 
@@ -1330,7 +1316,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		for(Element element:elements){
 			String id = element.attr("data-mms-eid");
 			if(id == null || id.isEmpty()){
-				System.out.println("Failed to parse transclusion doc Id!");
+				System.out.println("[WARNING]: Failed to parse transclusion doc Id!");
 				System.out.println(element.html());
 				element.before("[cannot parse Id for " + element.text() + "]");
 				element.remove();
@@ -1338,7 +1324,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 
 			if(isCircularReference(id, "documentation", cirRefList, index)){
-				System.out.println("Circular reference!");
+				System.out.println("[WARNING]: Circular reference!");
 				element.before("[Circular reference!]");
 				element.remove();
 				continue;
@@ -1347,7 +1333,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
 			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); //snapshot => ok to get the latest from 'master'
 			if(nameNode == null){
-				System.out.println("Failed to find EmsScriptNode Id " + id);
+				System.out.println("[WARNING]: Failed to find EmsScriptNode Id " + id);
 				element.before(transcluded);
 				element.remove();
 			}
@@ -1355,7 +1341,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 				try {
 					JSONObject jsObj = nameNode.toJSONObject(null);
 					if(jsObj == null){
-						System.out.println("JSONObject is null");
+						System.out.println("[WARNING]: JSONObject is null");
 						element.before(transcluded);
 						element.remove();
 					}
@@ -1376,7 +1362,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 					}
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
-					System.out.println("Failed to transclude doc for Id: " + id);
+					System.out.println("[WARNING]: Failed to transclude doc for Id: " + id);
 					System.out.println(element.html());
 					e.printStackTrace();
 				}
@@ -1389,7 +1375,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		if(inputString == null || inputString.isEmpty()) return inputString;
 		Document document = Jsoup.parseBodyFragment(inputString);
 		if(document == null || document.body() == null){
-			System.out.println("Failed to parse HTML fragment: " + inputString);
+			System.out.println("[WARNING]: Failed to parse HTML fragment: " + inputString);
 			return inputString;
 		}
 
@@ -1399,7 +1385,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		for(Element element:elements){
 			String id = element.attr("data-mms-eid");
 			if(id == null || id.isEmpty()){
-				System.out.println("Failed to parse transclusion name Id!");
+				System.out.println("[WARNING]: Failed to parse transclusion name Id!");
 				System.out.println(element.html());
 				element.before("[cannot parse Id for " + element.text() + "]");
 				element.remove();
@@ -1407,7 +1393,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 
 			if(isCircularReference(id, "name", cirRefList, index)){
-				System.out.println("Circular reference!");
+				System.out.println("[WARNING]: Circular reference!");
 				element.before("[Circular reference!]");
 				element.remove();
 				continue;
@@ -1416,7 +1402,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
 			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); // snapshot => ok to get latest
 			if(nameNode == null){
-				System.out.println("Failed to find EmsScriptNode Id: " + id);
+				System.out.println("[WARNING]: Failed to find EmsScriptNode Id: " + id);
 				element.before(transcluded);
 				element.remove();
 				continue;
@@ -1425,7 +1411,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			try {
 				JSONObject jsObj = nameNode.toJSONObject(null);
 				if(jsObj == null){
-					System.out.println("JSONObject is null");
+					System.out.println("[WARNING]: JSONObject is null");
 					element.before(transcluded);
 					element.remove();
 				}
@@ -1444,7 +1430,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 					element.remove();
 				}
 			} catch (JSONException e) {
-				System.out.println("Failed to transclude name for Id: " + id);
+				System.out.println("[WARNING]: Failed to transclude name for Id: " + id);
 				System.out.println(element.html());
 				e.printStackTrace();
 			}
@@ -1457,7 +1443,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
 		Document document = Jsoup.parseBodyFragment(inputString);
 		if(document == null || document.body() == null){
-			System.out.println("Failed to parse HTML fragment: " + inputString);
+			System.out.println("[WARNING]: Failed to parse HTML fragment: " + inputString);
 			return inputString;
 		}
 
@@ -1467,7 +1453,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		for(Element element:elements){
 			String id = element.attr("data-mms-eid");
 			if(id == null || id.isEmpty()){
-				System.out.println("Failed to parse transclusion value Id!");
+				System.out.println("[WARNING]: Failed to parse transclusion value Id!");
 				System.out.println(element.html());
 				element.before("[cannot parse Id for " + element.text() + "]");
 				element.remove();
@@ -1475,7 +1461,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 
 			if(isCircularReference(id, "value", cirRefList, index)){
-				System.out.println("Circular reference!");
+				System.out.println("[WARNING]: Circular reference!");
 				element.before("[Circular reference!]");
 				element.remove();
 				continue;
@@ -1484,7 +1470,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
 			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); // snapshot => ok to get latest
 			if(nameNode == null){
-				System.out.println("Failed to find EmsScriptNode Id " + id);
+				System.out.println("[WARNING]: Failed to find EmsScriptNode Id " + id);
 				element.before(transcluded);
 				element.remove();
 				continue;
@@ -1505,7 +1491,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 					}
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
-					System.out.println("Failed to transclude Id: " + id);
+					System.out.println("[WARNING]: Failed to transclude Id: " + id);
 					e.printStackTrace();
 				}
 			}
@@ -1543,7 +1529,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
 
-
+    /**
+     * replaces HTML tags to end up with only the HTML text.
+     * @param elem: JSoup Element
+     */
     private void removeHtmlTag(Element elem){
     	if(elem == null) return;
     	String tagName = elem.tagName().toUpperCase();
@@ -1564,15 +1553,15 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			elem.before(elem.text() + " (" + elem.attr("href") + ") ");
     		elem.remove();
     		break;
-    		default:
+		default:
     			//System.out.println("replacing elem with its text...");
-    			elem.before(elem.text());
-    			for(Element child:elem.children()){
-    				//System.out.println("removing Html tags...");
-    				removeHtmlTag(child);
-    			}
-    			//System.out.println("removing element...");
-    			elem.remove();
+			elem.before(elem.text());
+			for(Element child:elem.children()){
+				//System.out.println("removing Html tags...");
+				removeHtmlTag(child);
+			}
+			//System.out.println("removing element...");
+			elem.remove();
     	}
     }
 
@@ -1834,7 +1823,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
         	EmsScriptNode childNode = findScriptNodeById(childId, workspace, timestamp, false);
         	DBSection subSection = emsScriptNodeToDBSection(childNode, false, workspace, timestamp);
         	section.addElement(subSection);
-        	//traverseElements(subSection, childNode);
         }
     }
 
