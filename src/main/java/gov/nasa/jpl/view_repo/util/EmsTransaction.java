@@ -1,0 +1,87 @@
+package gov.nasa.jpl.view_repo.util;
+
+import gov.nasa.jpl.mbee.util.Timer;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.transaction.UserTransaction;
+
+import org.alfresco.service.ServiceRegistry;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.springframework.extensions.webscripts.Status;
+
+public abstract class EmsTransaction {
+    public static boolean timeEvents = false;
+    static Logger logger = Logger.getLogger(EmsTransaction.class);
+    // injected members
+    protected ServiceRegistry services;     // get any of the Alfresco services
+    // response to HTTP request, made as class variable so all methods can update
+    protected StringBuffer response = new StringBuffer();
+    protected Status responseStatus = new Status();
+
+    public EmsTransaction(ServiceRegistry services, StringBuffer response, Status responseStatus ) {
+        this.response = response;
+        this.responseStatus = responseStatus;
+        this.services = services;
+        Timer timerCommit = null;
+        UserTransaction trx;
+        trx = services.getTransactionService().getNonPropagatingUserTransaction();
+        try {
+            trx.begin();
+            NodeUtil.setInsideTransactionNow( true );
+
+            run();
+
+            timerCommit = Timer.startTimer(timerCommit, timeEvents);
+            trx.commit();
+            NodeUtil.setInsideTransactionNow( false );
+            Timer.stopTimer(timerCommit, "!!!!! EmsTransaction commit time", timeEvents);
+        } catch (Throwable e) {
+            tryRollback( trx, e, "DB transaction failed" );
+        }
+
+    }
+
+    abstract public void run();
+
+
+    protected void tryRollback( UserTransaction trx, Throwable e, String msg ) {
+        if ( msg == null || msg.length() <= 0 ) {
+            msg = "DB transaction failed";
+        }
+        try {
+            log( Level.ERROR,
+                 msg + "\n\t####### ERROR: Need to rollback: " + e.getMessage(),
+                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
+            e.printStackTrace();
+            trx.rollback();
+            NodeUtil.setInsideTransactionNow( false );
+        } catch ( Throwable ee ) {
+            log( Level.ERROR,
+                 "\tMmsModelDelete.handleRequest: rollback failed: "
+                         + ee.getMessage() );
+            ee.printStackTrace();
+        }
+    }
+
+    protected void log(Level level, String msg, int code) {
+        logger.log( level, msg );
+        log("[" + level + "]: " + msg + "\n", code);
+    }
+
+    protected void log(Level level, String msg) {
+        log("[" + level + "]: " + msg);
+    }
+
+    protected void log(String msg, int code) {
+        response.append(msg);
+        responseStatus.setCode(code);
+        responseStatus.setMessage(msg);
+    }
+
+    protected void log(String msg) {
+        response.append(msg + "\n");
+    }
+
+
+}
