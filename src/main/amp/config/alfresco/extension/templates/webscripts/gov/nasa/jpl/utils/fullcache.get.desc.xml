@@ -5,6 +5,7 @@
   <authentication>user</authentication>
   <format default="html">argument</format>
   <family>EMS Utils</family>
+  <transaction>none</transaction>
   <args>
     <arg>
         <name>on</name>

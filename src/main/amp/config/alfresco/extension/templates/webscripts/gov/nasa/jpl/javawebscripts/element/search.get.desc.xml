@@ -6,7 +6,7 @@
   <url>/javawebscripts/element/search?keyword={keyword}</url>
   <format default="json">argument</format> 
   <authentication>user</authentication> 
-  <transaction allow="readonly">required</transaction>
+  <transaction>none</transaction>
   <family>EMS Java Webscripts</family>
   <lifecycle>deprecated</lifecycle>
   <args>
