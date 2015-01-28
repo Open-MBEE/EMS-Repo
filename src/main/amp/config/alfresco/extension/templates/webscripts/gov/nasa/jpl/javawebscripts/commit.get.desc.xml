@@ -16,7 +16,7 @@
 		<url>/javawebscripts/sites/{siteName}/commits</url>
 		<format default="json">argument</format>
 		<authentication>user</authentication>
-		<transaction allow="readonly">required</transaction>
+		<transaction>none</transaction>
 		<family>EMS Java Read Webscripts</family>
 		<args>
 			<arg>
