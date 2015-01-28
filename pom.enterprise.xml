@@ -421,16 +421,16 @@
                     <execution>
                         <!-- Copy enterprise specific configurations  -->
                         <id>copy-enterprise-resources</id>
-                        <phase>validate</phase>
+                        <phase>compile</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
                             <overwrite>true</overwrite>
-                            <outputDirectory>${basedir}</outputDirectory>
+                            <outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${basedir}/resources/enterprise</directory>
+                                    <directory>${basedir}/resources/enterprise/src/main/amp</directory>
                                 </resource>
                             </resources>
                         </configuration>

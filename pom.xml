@@ -418,16 +418,16 @@
 		            <!-- Copy community specific configurations  -->
                     <execution>
                         <id>copy-community-resources</id>
-                        <phase>validate</phase>
+                        <phase>compile</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
                             <overwrite>true</overwrite>
-                            <outputDirectory>${basedir}</outputDirectory>
+                            <outputDirectory>${project.build.directory}/${project.build.finalName}</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${basedir}/resources/community</directory>
+                                    <directory>${basedir}/resources/community/src/main/amp</directory>
                                 </resource>
                             </resources>
                         </configuration>
