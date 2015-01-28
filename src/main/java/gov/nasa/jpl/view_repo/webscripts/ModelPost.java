@@ -328,15 +328,16 @@ public class ModelPost extends AbstractJavaWebScript {
                 NodeUtil.setInsideTransactionNow( false );
             } catch (Throwable e) {
                 try {
-                    trx.rollback();
-                    NodeUtil.setInsideTransactionNow( false );
-                    log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                    log(LogLevel.ERROR, "\t####### ERROR: Need to rollback: " + e.getMessage());
                     log(LogLevel.ERROR, "\t####### when calling getOwner(" + rootElement + ", " + projectNode + ", true)");
                     e.printStackTrace();
+                    trx.rollback();
+                    NodeUtil.setInsideTransactionNow( false );
                 } catch (Throwable ee) {
                     log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
                     log(LogLevel.ERROR, "\tafter calling getOwner(" + rootElement + ", " + projectNode + ", true)");
                     ee.printStackTrace();
+                    NodeUtil.setInsideTransactionNow( false );
                 }
             }
             } // end for (String rootElement: rootElements) {
@@ -372,13 +373,14 @@ public class ModelPost extends AbstractJavaWebScript {
         NodeUtil.setInsideTransactionNow( false );
     } catch (Throwable e) {
         try {
+            log(LogLevel.ERROR, "\t####### ERROR: Need to rollback: " + e.getMessage());
+            e.printStackTrace();
             trx.rollback();
             NodeUtil.setInsideTransactionNow( false );
-            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
-            e.printStackTrace();
         } catch (Throwable ee) {
             log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
             ee.printStackTrace();
+            NodeUtil.setInsideTransactionNow( false );
         }
     }
 
@@ -429,7 +431,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 } catch (Throwable ee) {
                     log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
-                    e.printStackTrace();
+                    NodeUtil.setInsideTransactionNow( false );
                 }
             }
 
@@ -706,14 +708,14 @@ public class ModelPost extends AbstractJavaWebScript {
 	                } else {
 	                		log(LogLevel.ERROR, "updateOrCreateRelationships: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	                }
+                    log(LogLevel.ERROR, "\t####### ERROR: Need to rollback: " + e.getMessage());
+                    e.printStackTrace();
                     trx.rollback();
                     NodeUtil.setInsideTransactionNow( false );
-                    log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
-                    e.printStackTrace();
                 } catch (Throwable ee) {
                     log(LogLevel.ERROR, "\tupdateOrCreateRelationships: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
-                    e.printStackTrace();
+                    NodeUtil.setInsideTransactionNow( false );
                 }
             }
         }
@@ -887,19 +889,19 @@ public class ModelPost extends AbstractJavaWebScript {
                 Timer.stopTimer(timerCommit, "!!!!! buildElementMap(): commit time", timeEvents);
             } catch (Throwable e) {
                 try {
-                    log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                    log(LogLevel.ERROR, "\t####### ERROR: Need to rollback: " + e.getMessage());
                     if (e instanceof JSONException) {
 	                		log(LogLevel.ERROR, "buildElementMap: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
 	                } else {
 	                		log(LogLevel.ERROR, "buildElementMap: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	                }
+                    e.printStackTrace();
                     trx.rollback();
                     NodeUtil.setInsideTransactionNow( false );
-                    e.printStackTrace();
                 } catch (Throwable ee) {
                     log(LogLevel.ERROR, "\tbuildElementMap: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
-                    e.printStackTrace();
+                    NodeUtil.setInsideTransactionNow( false );
                 }
                 isValid = false;
             }
@@ -1018,14 +1020,13 @@ public class ModelPost extends AbstractJavaWebScript {
 
     /**
      * Update or create element with specified metadata
-     * @param workspace
-     *
-     * @param jsonObject
+     * @param elementJson
      *            Metadata to be added to element
-     * @param key
-     *            ID of element
-     * @return the created elements
-     * @throws JSONException
+     * @param parent
+     * @param workspace
+     * @param ingest
+     * @return
+     * @throws Exception
      */
     protected Set< EmsScriptNode > updateOrCreateElement( JSONObject elementJson,
                                                           EmsScriptNode parent,
@@ -1138,7 +1139,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 } catch (Throwable ee) {
                     log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
-                    e.printStackTrace();
+                    NodeUtil.setInsideTransactionNow( false );
                 }
             }
         }
@@ -1170,15 +1171,83 @@ public class ModelPost extends AbstractJavaWebScript {
         updateTransactionableWsState(element, jsonId, modStatus, ingest);
         elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
 
-        // Update the read/modified time in the json, so that we do not get any conflicts on the second pass, as
-        // we may modify the node on the first pass.  Make sure this is after any modifications to the
-        // node.
-        String currentTime = EmsScriptNode.getIsoTime( new Date(System.currentTimeMillis()));
-        elementJson.put( Acm.JSON_READ, currentTime);
-        elementJson.put( Acm.JSON_LAST_MODIFIED, currentTime);
+        fixReadTimeForConflictTransaction(element, elementJson, runWithoutTransactions);
+        //System.out.println("3. fixReadTimeForConflict(" + elementJson + ")");
 
         return elements;
     }
+
+    /**
+     * Update the read/modified time in the json, so that we do not get any
+     * conflicts on the second pass, as we may modify the node on the first
+     * pass. Make sure this is after any modifications to the node.
+     *
+     * @param element
+     * @param elementJson
+     */
+    protected void fixReadTimeForConflict( EmsScriptNode element, JSONObject elementJson  ) {
+
+        Date modTime = ( element == null ? null : element.getLastModified( null ) );
+
+        Date now = new Date();
+        if ( modTime == null || now.after( modTime ) ) {
+            modTime = now;
+        }
+        String currentTime = EmsScriptNode.getIsoTime( modTime );
+        if ( elementJson.has( Acm.JSON_READ) ) {
+            elementJson.put( Acm.JSON_READ, currentTime );
+        }
+        if ( elementJson.has( Acm.JSON_LAST_MODIFIED ) ) {
+            elementJson.put( Acm.JSON_LAST_MODIFIED, currentTime );
+        }
+    }
+
+    /**
+     * Update the read/modified time in the json, so that we do not get any
+     * conflicts on the second pass, as we may modify the node on the first
+     * pass. Make sure this is after any modifications to the node.
+     *
+     * @param element
+     * @param elementJson
+     * @param withoutTransactions
+     */
+    protected void fixReadTimeForConflictTransaction( EmsScriptNode element,
+                                                      JSONObject elementJson,
+                                                      boolean withoutTransactions ) {
+        if ( element == null || element.exists( false ) )
+        if ( withoutTransactions ) {
+            fixReadTimeForConflict( element, elementJson );
+            return;
+        }
+        UserTransaction trx;
+        trx = services.getTransactionService().getNonPropagatingUserTransaction();
+        try {
+            trx.begin();
+            NodeUtil.setInsideTransactionNow( true );
+
+            fixReadTimeForConflict( element, elementJson );
+
+            timerCommit = Timer.startTimer( timerCommit, timeEvents );
+            trx.commit();
+            NodeUtil.setInsideTransactionNow( false );
+            Timer.stopTimer( timerCommit,
+                             "!!!!! fixReadTimeForConflict(): commit time",
+                             timeEvents );
+        } catch ( Throwable e ) {
+            try {
+                e.printStackTrace();
+                trx.rollback();
+                NodeUtil.setInsideTransactionNow( false );
+            } catch ( Throwable ee ) {
+                log( LogLevel.ERROR,
+                     "\fixReadTimeForConflict(): rollback failed: "
+                             + ee.getMessage() );
+                ee.printStackTrace();
+                NodeUtil.setInsideTransactionNow( false );
+            }
+        }
+    }
+
 
     private void updateTransactionableWsState(EmsScriptNode element, String jsonId, ModStatus modStatus, boolean ingest) {
 
@@ -1204,7 +1273,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 } catch (Throwable ee) {
                     log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
                     ee.printStackTrace();
-                    e.printStackTrace();
+                    NodeUtil.setInsideTransactionNow( false );
                 }
             }
         }
@@ -1558,6 +1627,10 @@ public class ModelPost extends AbstractJavaWebScript {
 
             msg = "Error! Tried to post concurrent edit to element, "
                             + element + ".\n";
+            log( LogLevel.WARNING,
+                 msg + "  --> lastModified = " + lastModified
+                 + "  --> lastModString = " + lastModString
+                 + "  --> elementJson = " + elementJson );
         }
 
         // Compare last modified to last modified time:
@@ -1565,6 +1638,10 @@ public class ModelPost extends AbstractJavaWebScript {
 
             msg = "Error! Tried to post overwrite to element, "
                             + element + ".\n";
+            log( LogLevel.WARNING,
+                 msg + "  --> lastModified = " + lastModified
+                 + "  --> lastModString = " + lastModString
+                 + "  --> elementJson = " + elementJson );
         }
 
         // If there was one of the conflicts then return true:
@@ -1627,7 +1704,7 @@ public class ModelPost extends AbstractJavaWebScript {
                      + ", date = " + readDate + ", elementJson="
                      + elementJson );
 
-        return readTime.compareTo( lastModString ) > 0;
+        return readTime.compareTo( lastModString ) > 0;  // FIXME?  This sign should be reversed, right?
     }
 
     protected EmsScriptNode
@@ -1863,6 +1940,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 modStatus.setState( ModStatus.State.UPDATED );
             }
 
+            // Don't modify modified time--let alfresco do that.
             if ( elementJson != null && elementJson.has( Acm.JSON_LAST_MODIFIED ) ) {
                 elementJson.remove( Acm.JSON_LAST_MODIFIED );
             }
@@ -2557,15 +2635,16 @@ public class ModelPost extends AbstractJavaWebScript {
                         NodeUtil.setInsideTransactionNow( false );
                     } catch (Throwable e) {
                         try {
-                            trx.rollback();
-                            NodeUtil.setInsideTransactionNow( false );
-                            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                            log(LogLevel.ERROR, "\t####### ERROR: Need to rollback: " + e.getMessage());
                             log(LogLevel.ERROR, "\t####### when getProjectNodeFromRequest()");
                             e.printStackTrace();
+                            trx.rollback();
+                            NodeUtil.setInsideTransactionNow( false );
                         } catch (Throwable ee) {
                             log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
                             log(LogLevel.ERROR, "\tafter calling getProjectNodeFromRequest()");
                             ee.printStackTrace();
+                            NodeUtil.setInsideTransactionNow( false );
                         }
                     }
 
@@ -2591,7 +2670,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         printFooter();
 
-        System.out.println( "ModelPost: " + timer );
+        log( LogLevel.INFO, "ModelPost: " + timer );
 
         return model;
     }
@@ -2617,15 +2696,16 @@ public class ModelPost extends AbstractJavaWebScript {
                     NodeUtil.setInsideTransactionNow( false );
                 } catch (Throwable e) {
                     try {
-                        trx.rollback();
-                        NodeUtil.setInsideTransactionNow( false );
-                        log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                        log(LogLevel.ERROR, "\t####### ERROR: Need to rollback: " + e.getMessage());
                         log(LogLevel.ERROR, "\t####### when fix()");
                         e.printStackTrace();
+                        trx.rollback();
+                        NodeUtil.setInsideTransactionNow( false );
                     } catch (Throwable ee) {
                         log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
                         log(LogLevel.ERROR, "\tafter calling fix()");
                         ee.printStackTrace();
+                        NodeUtil.setInsideTransactionNow( false );
                     }
                 }
             }
@@ -2653,15 +2733,16 @@ public class ModelPost extends AbstractJavaWebScript {
             NodeUtil.setInsideTransactionNow( false );
         } catch (Throwable e) {
             try {
-                trx.rollback();
-                NodeUtil.setInsideTransactionNow( false );
-                log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                log(LogLevel.ERROR, "\t####### ERROR: Need to rollback: " + e.getMessage());
                 log(LogLevel.ERROR, "\t####### when toJson()");
                 e.printStackTrace();
+                trx.rollback();
+                NodeUtil.setInsideTransactionNow( false );
             } catch (Throwable ee) {
                 log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
                 log(LogLevel.ERROR, "\tafter toJson()");
                 ee.printStackTrace();
+                NodeUtil.setInsideTransactionNow( false );
             }
         }
         }
@@ -2681,15 +2762,16 @@ public class ModelPost extends AbstractJavaWebScript {
                 NodeUtil.setInsideTransactionNow( false );
             } catch (Throwable e) {
                 try {
-                    trx.rollback();
-                    NodeUtil.setInsideTransactionNow( false );
-                    log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                    log(LogLevel.ERROR, "\t####### ERROR: Need to rollback: " + e.getMessage());
                     log(LogLevel.ERROR, "\t####### when calling addRelationshipToPropertiesOfParticipants()");
                     e.printStackTrace();
+                    trx.rollback();
+                    NodeUtil.setInsideTransactionNow( false );
                 } catch (Throwable ee) {
                     log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
                     log(LogLevel.ERROR, "\tafter calling addRelationshipsToProperties()");
                     ee.printStackTrace();
+                    NodeUtil.setInsideTransactionNow( false );
                 }
             }
         }
