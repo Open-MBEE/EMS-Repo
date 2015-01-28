@@ -177,17 +177,17 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
                         snapshotService.createSnapshot( product,
                                                         product.getSysmlId(),
                                                         workspace, dateTime );
-	            if (snapshot == null || status.getCode() != HttpServletResponse.SC_OK) {
+                response.append(snapshotService.getResponse().toString());
+                if (snapshot == null || status.getCode() != HttpServletResponse.SC_OK) {
 	                jobStatus = "Failed";
-	                response.append("[ERROR]: could not make snapshot for " + product.getProperty(Acm.ACM_NAME));
+	                response.append("[ERROR]: could not make snapshot for \t" + product.getProperty(Acm.ACM_NAME) + "\n");
 	            } 
 	            else {
-	                response.append("[INFO]: Successfully created snapshot: " + snapshot.getProperty(Acm.CM_NAME));
+	                response.append("[INFO]: Successfully created snapshot: \t" + snapshot.getProperty(Acm.CM_NAME) + "\n");
 	            }
 	            if (snapshot != null) {
 	                snapshots.add(snapshot);
 	            }
-	            response.append(snapshotService.getResponse().toString());
     		}
         }
         // make relationships between configuration node and all the snapshots
