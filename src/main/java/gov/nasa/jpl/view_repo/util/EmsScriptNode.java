@@ -1277,9 +1277,12 @@ public class EmsScriptNode extends ScriptNode implements
                     currentVersion = versionService.getCurrentVersion( nodeRef );
                     updateFrozenCache( currentVersion );
                 } catch ( Throwable t2 ) {
-                    logger.error( "Got exception in getCurrentVersion(): "
+                    logger.error( "1. Got exception in getCurrentVersion(): "
+                            + t1.getLocalizedMessage() );
+                    t1.printStackTrace();
+                    logger.error( "2. Tried again and got another exception in getCurrentVersion(): "
                                   + t2.getLocalizedMessage() );
-//                    t2.printStackTrace();
+                    t2.printStackTrace();
                 }
             }
         }
@@ -1407,6 +1410,7 @@ public class EmsScriptNode extends ScriptNode implements
                            + cachedVersion.getLabel() + ".";
           logger.warn( msg );
           System.out.println(msg);
+          Debug.error( true, msg );
           if ( response != null ) {
               response.append( msg + "\n");
           }
@@ -1431,6 +1435,7 @@ public class EmsScriptNode extends ScriptNode implements
                             + getId() + " (" + cachedVersion.getLabel()+ ").";
            logger.warn( msg );
            System.out.println(msg);
+           Debug.error( true, msg );
            if ( response != null ) {
                response.append( msg + "\n");
            }
