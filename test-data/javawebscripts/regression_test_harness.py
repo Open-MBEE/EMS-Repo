@@ -107,7 +107,9 @@ def do20():
     if json_output:
         j = json.loads(json_output)
         #print "j=" + str(j)
-        modDate = j['workspace2']['updatedElements'][0]['modified']
+        if j and j['workspace2'] and j['workspace2']['updatedElements'] and \
+        len(j['workspace2']['updatedElements']) > 0:
+            modDate = j['workspace2']['updatedElements'][0]['modified']
     set_gv4(modDate)
     
 def set_json_output_to_gv1():
