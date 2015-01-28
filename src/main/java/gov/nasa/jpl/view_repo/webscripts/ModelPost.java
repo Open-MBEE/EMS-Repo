@@ -1842,9 +1842,12 @@ public class ModelPost extends AbstractJavaWebScript {
         if ( workspace != null && workspace.exists() ) {
             if ( nodeToUpdate == null || !nodeToUpdate.exists() ) {
                 parent = workspace.replicateWithParentFolders( parent );
-            } else if ( nodeToUpdate != null && nodeToUpdate.exists()
+            } else if ( (nodeToUpdate != null && nodeToUpdate.exists()
                         && !nodeToUpdate.isWorkspace()
-                        && !workspace.equals( nodeToUpdate.getWorkspace() ) ) {
+                        && !workspace.equals( nodeToUpdate.getWorkspace() )) ||
+                        (parent != null && parent.exists()
+                        && !parent.isWorkspace()
+                        && !workspace.equals( parent.getWorkspace() )) ) {
 
                 // If its owner is changing, need to bring in the old parent
                 // into the new workspace and remove the old child.  Not bringing
