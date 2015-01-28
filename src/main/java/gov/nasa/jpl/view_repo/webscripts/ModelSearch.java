@@ -32,7 +32,6 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
@@ -44,7 +43,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,12 +60,12 @@ public class ModelSearch extends ModelGet {
 	    super();
 	}
 
-	
+
     public ModelSearch(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
 
-    
+
     protected final String[] searchTypes = {
 	        "@sysml\\:documentation:\"",
 	        "@sysml\\:name:\"",
@@ -76,25 +74,23 @@ public class ModelSearch extends ModelGet {
 	        "@sysml\\:body:\""
     };
 
-    
+
 	@Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-        ModelSearch instance = new ModelSearch(repository, services);
-        return instance.executeImplImpl(req,  status, cache);
+        ModelSearch instance = new ModelSearch(repository, getServices());
+        return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
     }
-	
-	protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
+
+	@Override
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
 		clearCaches();
 
 		Map<String, Object> model = new HashMap<String, Object>();
 
-		ModelSearch instance = new ModelSearch(repository, services);
-
 		try {
-	        JSONArray elementsJson = instance.executeSearchRequest(req);
-	        appendResponseStatusInfo(instance);
+	        JSONArray elementsJson = executeSearchRequest(req);
 
 	        JSONObject top = new JSONObject();
 			top.put("elements", elementsJson);
@@ -113,7 +109,7 @@ public class ModelSearch extends ModelGet {
 		return model;
 	}
 
-	
+
 	private JSONArray executeSearchRequest(WebScriptRequest req) throws JSONException {
         String keyword = req.getParameter("keyword");
         if (keyword != null) {
@@ -122,17 +118,17 @@ public class ModelSearch extends ModelGet {
             Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
             Map<String, EmsScriptNode> rawResults = new HashMap<String, EmsScriptNode>();
-            
+
             WorkspaceNode workspace = getWorkspace( req );
-            
+
             for (String searchType: searchTypes) {
                 rawResults.putAll( searchForElements( searchType, keyword, false,
                                                          workspace, dateTime ) );
             }
-            
+
             // need to filter out _pkgs:
             for (Entry< String, EmsScriptNode > element: rawResults.entrySet()) {
-                 
+
                 if (!element.getValue().getSysmlId().endsWith( "_pkg" )) {
                     elementsFound.put( element.getKey(), element.getValue() );
                 }

@@ -3,7 +3,6 @@ package gov.nasa.jpl.view_repo.webscripts.util;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
@@ -20,6 +19,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +30,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
@@ -293,7 +294,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
 	            	transformMap = new HashMap<String,String>();
 	            	transformMap.put("status", pdfStatus);
 	            	transformMap.put("type", "pdf");
-	            	if(pdfNode != null){ 
+	            	if(pdfNode != null){
 	            		transformMap.put("url", contextUrl + pdfNode.getUrl());
 	            	}
 	            	list.add(transformMap);
@@ -469,5 +470,12 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             configNode.makeSureNodeRefIsNotFrozen();
             configNode.addAspect( "ems:Deleted" );
         }
+    }
+
+    @Override
+    protected Map< String, Object >
+            executeImplImpl( WebScriptRequest req, Status status, Cache cache ) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

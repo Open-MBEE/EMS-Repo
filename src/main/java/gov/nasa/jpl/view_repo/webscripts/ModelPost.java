@@ -2561,7 +2561,8 @@ public class ModelPost extends AbstractJavaWebScript {
 
         ModelPost instance = new ModelPost(repository, services);
         instance.setServices( getServices() );
-        return instance.executeImplImpl(req,  status, cache);
+        // Run without transactions since ModePost breaks them up itself.
+        return instance.executeImplImpl(req,  status, cache, true);
     }
 
     @Override

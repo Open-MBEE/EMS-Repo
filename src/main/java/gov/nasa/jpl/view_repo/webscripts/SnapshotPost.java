@@ -132,10 +132,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
      */
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-        SnapshotPost instance = new SnapshotPost(repository, services);
-        return instance.executeImplImpl(req,  status, cache);
+        SnapshotPost instance = new SnapshotPost(repository, getServices());
+        return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
     }
 
+    @Override
     protected Map< String, Object > executeImplImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
         printHeader( req );

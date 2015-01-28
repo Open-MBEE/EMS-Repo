@@ -69,10 +69,11 @@ public class ViewModelPost extends ModelPost {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-        ViewModelPost instance = new ViewModelPost(repository, services);
-        return instance.executeImplImpl(req,  status, cache);
+        ViewModelPost instance = new ViewModelPost(repository, getServices());
+        return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
     }
-	
+
+    @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 

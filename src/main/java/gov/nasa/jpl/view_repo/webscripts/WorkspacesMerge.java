@@ -39,10 +39,11 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache){
-	    WorkspacesMerge instance = new WorkspacesMerge(repository, services);
-	    return instance.executeImplImpl( req, status, cache );
+	    WorkspacesMerge instance = new WorkspacesMerge(repository, getServices());
+	    return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
 	}
 
+    @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache){
 		printHeader(req);
 		clearCaches();

@@ -106,7 +106,6 @@ public class MoaProductGet extends AbstractJavaWebScript {
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 	    MoaProductGet instance = new MoaProductGet( repository, getServices() );
-        instance.setServices( getServices() );
         return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
     }
 
