@@ -1,29 +1,29 @@
 /*******************************************************************************
- * Copyright (c) <2013>, California Institute of Technology ("Caltech").  
+ * Copyright (c) <2013>, California Institute of Technology ("Caltech").
  * U.S. Government sponsorship acknowledged.
- * 
+ *
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification, are 
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
- * 
- *  - Redistributions of source code must retain the above copyright notice, this list of 
+ *
+ *  - Redistributions of source code must retain the above copyright notice, this list of
  *    conditions and the following disclaimer.
- *  - Redistributions in binary form must reproduce the above copyright notice, this list 
- *    of conditions and the following disclaimer in the documentation and/or other materials 
+ *  - Redistributions in binary form must reproduce the above copyright notice, this list
+ *    of conditions and the following disclaimer in the documentation and/or other materials
  *    provided with the distribution.
- *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory, 
- *    nor the names of its contributors may be used to endorse or promote products derived 
+ *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory,
+ *    nor the names of its contributors may be used to endorse or promote products derived
  *    from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
- * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER  
- * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
@@ -36,11 +36,10 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Date;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -58,33 +57,34 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	public MmsWorkspaceDiffPost() {
 	    super();
 	}
-    
+
     public MmsWorkspaceDiffPost(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
 
-	
+
     @Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		// do nothing
 		return false;
 	}
-	
-	
+
+
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-	    MmsWorkspaceDiffPost instance = new MmsWorkspaceDiffPost(repository, services);
-	    return instance.executeImplImpl( req, status, cache );
+	    MmsWorkspaceDiffPost instance = new MmsWorkspaceDiffPost(repository, getServices());
+	    return instance.executeImplImpl( req, status, cache, runWithoutTransactions);
 	}
-	
-	
+
+
+    @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
 		clearCaches();
-		
+
 		Map<String, Object> model = new HashMap<String, Object>();
-        
+
 		try {
 			handleDiff(req, (JSONObject)req.parseContent(), status, model);
 		} catch (JSONException e) {
@@ -94,7 +94,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
             log(LogLevel.ERROR, "Internal server error: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             e.printStackTrace();
         }
-		
+
         status.setCode(responseStatus.getCode());
 		model.put("res", response.toString());
 
@@ -102,36 +102,36 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 
 		return model;
 	}
-	
-    
+
+
 	private void handleDiff(WebScriptRequest req, JSONObject jsonDiff, Status status, Map<String, Object> model) throws Exception {
 		if (jsonDiff.has( "workspace1" ) && jsonDiff.has("workspace2")) {
 		    JSONObject srcJson = jsonDiff.getJSONObject( "workspace2" );
 		    JSONObject targetJson = jsonDiff.getJSONObject( "workspace1" );
-		    
+
 		    if (srcJson.has( "id" ) && targetJson.has("id")) {
                 String srcWsId = srcJson.getString( "id" );
                 WorkspaceNode srcWs = WorkspaceNode.getWorkspaceFromId( srcWsId, services, response, responseStatus, null );
-                
+
 		        String targetWsId = targetJson.getString( "id" );
 	            WorkspaceNode targetWs = WorkspaceNode.getWorkspaceFromId( targetWsId, services, response, responseStatus, null );
-	            
+
                 String timestamp1 = req.getParameter( "timestamp1" );
                 Date dateTimeTarget = TimeUtils.dateFromTimestamp( timestamp1 );
 
                 String timestamp2 = req.getParameter( "timestamp2" );
                 Date dateTimeSrc = TimeUtils.dateFromTimestamp( timestamp2 );
-	                
+
                 // Verify that the target workspace timestamp is valid, ie it must use the latest
                 // commit:
                 if (dateTimeTarget != null) {
                     // TODO REVIEW This is not efficient, as getLastCommit()
                     //             and getLatestCommitAtTime() do similar operations
                     EmsScriptNode lastCommit = CommitUtil.getLastCommit( targetWs, services, response );
-                    EmsScriptNode prevCommit = CommitUtil.getLatestCommitAtTime( dateTimeTarget, 
-                                                                                 targetWs, services, 
+                    EmsScriptNode prevCommit = CommitUtil.getLatestCommitAtTime( dateTimeTarget,
+                                                                                 targetWs, services,
                                                                                  response );
-                    
+
                     // Give error message if there are not commits found before or at the dateTimeTarget:
                     if (prevCommit == null) {
                         log(LogLevel.ERROR,
@@ -139,22 +139,22 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                             HttpServletResponse.SC_BAD_REQUEST);
                         return;
                     }
-    
+
                     // Give error message if the latest commit based on the time is not the latest:
                     if (lastCommit != null && prevCommit != null && !lastCommit.equals( prevCommit ) ) {
-                        
+
                         log(LogLevel.ERROR,
                             "Previous commit "+prevCommit+" based on date "+dateTimeTarget+" is not the same as the latest commit "+lastCommit,
                             HttpServletResponse.SC_CONFLICT);
                         return;
                     }
                 }
-                
+
 	            JSONObject top = new JSONObject();
 	            JSONArray elements = new JSONArray();
                 MmsModelDelete deleteService = new MmsModelDelete(repository, services);
                 WorkspaceDiff deleteWsDiff = null;
-                
+
 	            // Add/update the elements in the target workspace:
 	            // Must remove the modified time, as it is for the source workspace, not the target
 	            // workspace, so may get errors for trying to modify a element with a old modified time.
@@ -179,10 +179,10 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                     }
 	            }
 	            top.put( "elements", elements );
-	            
-	            Set<EmsScriptNode> updatedElements = handleUpdate( top, status, targetWs, false, 
+
+	            Set<EmsScriptNode> updatedElements = handleUpdate( top, status, targetWs, false,
 	                                                               model, false);
-	            
+
 	            // Delete the elements in the target workspace:
 	            if (srcJson.has( "deletedElements" )) {
 	                JSONArray deleted = srcJson.getJSONArray( "deletedElements" );
@@ -192,7 +192,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                         EmsScriptNode root = NodeUtil.findScriptNodeById( id, targetWs, null, false, services, response );
                         deleteService.handleElementHierarchy( root, targetWs, false );
                     }
-                    
+
                     // Update the needed aspects of the deleted nodes:
                     deleteWsDiff = deleteService.getWsDiff();
                     for (EmsScriptNode deletedNode: deleteWsDiff.getDeletedElements().values()) {
@@ -204,25 +204,25 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                         }
                     }
 	            }
-	            
+
 	            // Send deltas and make merge commit:
 	            // FIXME: Need to split elements by project Id - since they won't always be in same project
-	            String projectId = !updatedElements.isEmpty() ? 
-	                                           updatedElements.iterator().next().getProjectId() : 
+	            String projectId = !updatedElements.isEmpty() ?
+	                                           updatedElements.iterator().next().getProjectId() :
 	                                           NO_PROJECT_ID;
 	            boolean modelPostDiff = wsDiff.isDiff();
 	            boolean modelDeleteDiff = deleteWsDiff != null && deleteWsDiff.isDiff();
-	            
+
 	            if (modelDeleteDiff || modelPostDiff) {
 	                if ( !CommitUtil.sendDeltas(jsonDiff, targetWsId, projectId) ) {
                         log(LogLevel.WARNING, "MmsWorkspaceDiffPost deltas not posted properly");
                     }
-	                
+
 	                CommitUtil.merge( jsonDiff, srcWs, targetWs, dateTimeSrc, dateTimeTarget,
 	                                  null, false, services, response );
 	            }
-	            
+
 		    }
 		}
-	}	
+	}
 }
