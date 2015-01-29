@@ -51,6 +51,7 @@ import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.EmsSystemModel;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -64,6 +65,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -71,7 +73,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
 
 import kexpparser.KExpParser;
 //import k.frontend.Frontend;
@@ -145,6 +146,7 @@ public class ModelPost extends AbstractJavaWebScript {
     private EmsScriptNode projectNode = null;
     private EmsScriptNode siteNode = null;
     private EmsScriptNode sitePackageNode = null;
+    private boolean internalRunWithoutTransactions = false;
 
     /**
      * JSONObject of the relationships
@@ -257,103 +259,65 @@ public class ModelPost extends AbstractJavaWebScript {
 
         return elements;
     }
+    
+    private void processRootElement(String rootElement, WorkspaceNode targetWS,
+                                    TreeMap<String, EmsScriptNode> nodeMap,
+                                    TreeSet<EmsScriptNode> elements) throws Exception {
+        
+        if (projectNode == null ||
+            !rootElement.equals(projectNode.getProperty(Acm.CM_NAME))) {
 
-    public Set< EmsScriptNode >
-            createOrUpdateModel2( Object content, Status status,
-                                  WorkspaceNode targetWS, WorkspaceNode sourceWS,
-                                  boolean createCommit) throws Exception {
-        Date now = new Date();
-        log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
-        long start = System.currentTimeMillis(), end, total = 0;
+            EmsScriptNode owner = getOwner(rootElement,targetWS, true);
 
-        log( LogLevel.DEBUG, "****** NodeUtil.doSimpleCaching = " + NodeUtil.doSimpleCaching );
-        log( LogLevel.DEBUG, "****** NodeUtil.doFullCaching = " + NodeUtil.doFullCaching );
-
-        if(sourceWS == null)
-            setWsDiff( targetWS );
-        else
-            setWsDiff(targetWS, sourceWS, null, null);
-
-
-        clearCaches();
-
-        JSONObject postJson = (JSONObject) content;
-
-        boolean singleElement = !postJson.has(ELEMENTS);
-
-        TreeSet<EmsScriptNode> elements =
-                new TreeSet<EmsScriptNode>();
-        TreeMap<String, EmsScriptNode> nodeMap =
-                new TreeMap< String, EmsScriptNode >();
-
-        timerUpdateModel= Timer.startTimer(timerUpdateModel, timeEvents);
-
-        // create the element map and hierarchies
-        if (buildElementMap(postJson.getJSONArray(ELEMENTS), targetWS)) {
-            boolean oldRunWithoutTransactions = runWithoutTransactions;
-            runWithoutTransactions = true;
-            // start building up elements from the root elements
-            for (String rootElement : rootElements) {
-                log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
-                UserTransaction trx;
-                trx = services.getTransactionService().getNonPropagatingUserTransaction();
-                try {
-                    trx.begin();
-                    NodeUtil.setInsideTransactionNow( true );
-                if (projectNode == null ||
-                        !rootElement.equals(projectNode.getProperty(Acm.CM_NAME))) {
-
-                    EmsScriptNode owner = null;
-
-
-                        owner = getOwner(rootElement,targetWS, true);
-
-
-
-                    // Create element, owner, and reified package folder as
-                    // necessary and place element with owner; don't update
-                    // properties on this first pass.
-                    if (owner != null && owner.exists()) {
-                        Set< EmsScriptNode > updatedElements =
-                                updateOrCreateElement( elementMap.get( rootElement ),
-                                                       owner, targetWS, false );
-                        for ( EmsScriptNode node : updatedElements ) {
-                            nodeMap.put(node.getName(), node);
-                        }
-                        elements.addAll( updatedElements );
-                    }
+            // Create element, owner, and reified package folder as
+            // necessary and place element with owner; don't update
+            // properties on this first pass.
+            if (owner != null && owner.exists()) {
+                Set< EmsScriptNode > updatedElements =
+                        updateOrCreateElement( elementMap.get( rootElement ),
+                                               owner, targetWS, false );
+                for ( EmsScriptNode node : updatedElements ) {
+                    nodeMap.put(node.getName(), node);
                 }
-                trx.commit();
-                NodeUtil.setInsideTransactionNow( false );
-            } catch (Throwable e) {
-                try {
-                    log(LogLevel.ERROR, "\t####### ERROR: Need to rollback: " + e.getMessage());
-                    log(LogLevel.ERROR, "\t####### when calling getOwner(" + rootElement + ", " + projectNode + ", true)");
-                    e.printStackTrace();
-                    trx.rollback();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
-                    log(LogLevel.ERROR, "\tafter calling getOwner(" + rootElement + ", " + projectNode + ", true)");
-                    ee.printStackTrace();
-                    NodeUtil.setInsideTransactionNow( false );
-                }
+                elements.addAll( updatedElements );
             }
-            } // end for (String rootElement: rootElements) {
-            runWithoutTransactions = oldRunWithoutTransactions;
-        } // end if (buildElementMap(postJson.getJSONArray(ELEMENTS))) {
+        }
+        
+    }
+    
+    private void sendDeltasAndCommit(WorkspaceNode targetWS,  TreeSet<EmsScriptNode> elements,
+                                     long start, long end) throws JSONException {
+        
+        // FIXME: Need to split elements by project Id - since they won't always be in same project
+        //      CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), status, true );
+        
+        NodeRef commitRef = CommitUtil.commit(null, targetWS, "", true, services, new StringBuffer() );
+        String projectId = elements.first().getProjectId();
+        String wsId = "master";
+        if (targetWS != null) {
+            wsId = targetWS.getId();
+        }
 
-        Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): main loop time", timeEvents);
+        JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
 
-        boolean oldRunWithoutTransactions = runWithoutTransactions;
-        runWithoutTransactions = true;
+        // FIXME: Need to split by projectId
+        if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId) ) {
+            //logger.warn("send deltas not posted properly");
+        }
 
-        UserTransaction trx;
-        trx = services.getTransactionService().getNonPropagatingUserTransaction();
-        try {
-            trx.begin();
-            NodeUtil.setInsideTransactionNow( true );
+        CommitUtil.updateCommitNodeRef( commitRef, deltaJson.toString(), "", services, response );
 
+        timerCommit = Timer.startTimer(timerCommit, timeEvents);
+        
+        Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): ws metadata time", timeEvents);
+    }
+    
+    private void handleRelationships(WorkspaceNode targetWS,
+                                     TreeMap<String, EmsScriptNode> nodeMap,
+                                     TreeSet<EmsScriptNode> elements,
+                                     boolean singleElement,
+                                     JSONObject postJson) throws Exception {
+        
         // handle the relationships
         updateOrCreateAllRelationships(relationshipsJson, targetWS);
 
@@ -368,78 +332,102 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
         elements.addAll( updatedElements );
-        trx.commit();
-        NodeUtil.setInsideTransactionNow( false );
-    } catch (Throwable e) {
-        try {
-            log(LogLevel.ERROR, "\t####### ERROR: Need to rollback: " + e.getMessage());
-            e.printStackTrace();
-            trx.rollback();
-            NodeUtil.setInsideTransactionNow( false );
-        } catch (Throwable ee) {
-            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
-            ee.printStackTrace();
-            NodeUtil.setInsideTransactionNow( false );
-        }
     }
+    
+    public Set< EmsScriptNode >
+            createOrUpdateModel2( Object content, Status status,
+                                  final WorkspaceNode targetWS, WorkspaceNode sourceWS,
+                                  boolean createCommit) throws Exception {
+        Date now = new Date();
+        log(LogLevel.INFO, "Starting createOrUpdateModel: " + now);
+        final long start = System.currentTimeMillis();
 
-        runWithoutTransactions = oldRunWithoutTransactions;
+        log( LogLevel.DEBUG, "****** NodeUtil.doSimpleCaching = " + NodeUtil.doSimpleCaching );
+        log( LogLevel.DEBUG, "****** NodeUtil.doFullCaching = " + NodeUtil.doFullCaching );
+
+        if(sourceWS == null)
+            setWsDiff( targetWS );
+        else
+            setWsDiff(targetWS, sourceWS, null, null);
+
+
+        clearCaches();
+
+        final JSONObject postJson = (JSONObject) content;
+
+        final boolean singleElement = !postJson.has(ELEMENTS);
+
+        final TreeSet<EmsScriptNode> elements =
+                new TreeSet<EmsScriptNode>();
+        final TreeMap<String, EmsScriptNode> nodeMap =
+                new TreeMap< String, EmsScriptNode >();
+
+        timerUpdateModel= Timer.startTimer(timerUpdateModel, timeEvents);
+
+        boolean oldRunWithoutTransactions = internalRunWithoutTransactions;
+        internalRunWithoutTransactions = true;
+
+        // create the element map and hierarchies
+        if (buildElementMap(postJson.getJSONArray(ELEMENTS), targetWS)) {
+            // start building up elements from the root elements
+            for (final String rootElement : rootElements) {
+                log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
+                
+                if (runWithoutTransactions) {
+                    processRootElement( rootElement, targetWS, nodeMap, elements );
+                }
+                else {
+                    new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+                        @Override
+                        public void run() throws Exception {
+                            processRootElement( rootElement, targetWS, nodeMap, elements );
+                        }
+                    };
+                }
+                
+            } // end for (String rootElement: rootElements) {
+        } // end if (buildElementMap(postJson.getJSONArray(ELEMENTS))) {
+
+        Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): main loop time", timeEvents);
+
+        if (runWithoutTransactions) {
+            handleRelationships( targetWS, nodeMap, elements, singleElement, postJson );
+        }
+        else {
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+                @Override
+                public void run() throws Exception {
+                    handleRelationships( targetWS, nodeMap, elements, singleElement, postJson );
+                }
+            };
+        }
+
+        internalRunWithoutTransactions = oldRunWithoutTransactions;
 
         now = new Date();
-        end = System.currentTimeMillis();
-        total = end - start;
-        log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  total + "ms\n");
+        final long end = System.currentTimeMillis();
+        log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  (end - start) + "ms\n");
 
         timerUpdateModel = Timer.startTimer(timerUpdateModel, timeEvents);
 
         // Send deltas to all listeners
         if (createCommit && wsDiff.isDiff()) {
-            // FIXME: Need to split elements by project Id - since they won't always be in same project
-//            CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), status, true );
-            trx = services.getTransactionService().getNonPropagatingUserTransaction();
-            try {
-                trx.begin();
-
-                NodeUtil.setInsideTransactionNow( true );
-                NodeRef commitRef = CommitUtil.commit(null, targetWS, "", true, services, new StringBuffer() );
-                String projectId = elements.first().getProjectId();
-                String wsId = "master";
-                if (targetWS != null) {
-                    wsId = targetWS.getId();
-                }
-
-                JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
-
-                // FIXME: Need to split by projectId
-                if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId) ) {
-                    //logger.warn("send deltas not posted properly");
-                }
-
-                CommitUtil.updateCommitNodeRef( commitRef, deltaJson.toString(), "", services, response );
-
-                timerCommit = Timer.startTimer(timerCommit, timeEvents);
-                trx.commit();
-                NodeUtil.setInsideTransactionNow( false );
-                Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): ws metadata time", timeEvents);
-            } catch (Throwable e) {
-                try {
-                    log(LogLevel.ERROR, "updateOrCreateElement: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                    e.printStackTrace();
-                    trx.rollback();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
-                    ee.printStackTrace();
-                    NodeUtil.setInsideTransactionNow( false );
-                }
+            if (runWithoutTransactions) {
+                sendDeltasAndCommit( targetWS, elements, start, end );
             }
-
+            else {
+                new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+                    @Override
+                    public void run() throws Exception {
+                        sendDeltasAndCommit( targetWS, elements, start, end );
+                    }
+                };
+            }
         }
 
         Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): Deltas time", timeEvents);
 
-        elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
-        return elements;
+        return new TreeSet< EmsScriptNode >( nodeMap.values() );
     }
 
 
@@ -680,43 +668,24 @@ public class ModelPost extends AbstractJavaWebScript {
      *            projectTypes, or elementValues)
      * @throws JSONException
      */
-    protected void updateOrCreateRelationships(JSONObject jsonObject, String key,
-                                               WorkspaceNode workspace)
-            throws JSONException {
+    protected void updateOrCreateRelationships(final JSONObject jsonObject, final String key,
+                                               final WorkspaceNode workspace) throws JSONException {
+        
         long start = System.currentTimeMillis(), end;
         log(LogLevel.INFO, "updateOrCreateRelationships" + key + ": ");
-        if (runWithoutTransactions) {
+        
+        if (runWithoutTransactions || internalRunWithoutTransactions) {
             updateOrCreateTransactionableRelationships(jsonObject, key, workspace);
-        } else {
-            UserTransaction trx;
-            trx = services.getTransactionService().getNonPropagatingUserTransaction();
-            try {
-                trx.begin();
-                NodeUtil.setInsideTransactionNow( true );
-                log(LogLevel.INFO, "updateOrCreateRelationships: beginning transaction {");
-                updateOrCreateTransactionableRelationships(jsonObject, key, workspace);
-                log(LogLevel.INFO, "} updateOrCreateRelationships committing: " + key);
-                timerCommit = Timer.startTimer(timerCommit, timeEvents);
-                trx.commit();
-                NodeUtil.setInsideTransactionNow( false );
-                Timer.stopTimer(timerCommit, "!!!!! updateOrCreateRelationships(): commit time", timeEvents);
-            } catch (Throwable e) {
-                try {
-                    if (e instanceof JSONException) {
-	                		log(LogLevel.ERROR, "updateOrCreateRelationships: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
-	                } else {
-	                		log(LogLevel.ERROR, "updateOrCreateRelationships: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	                }
-                    log(LogLevel.ERROR, "\t####### ERROR: Need to rollback: " + e.getMessage());
-                    e.printStackTrace();
-                    trx.rollback();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tupdateOrCreateRelationships: rollback failed: " + ee.getMessage());
-                    ee.printStackTrace();
-                    NodeUtil.setInsideTransactionNow( false );
+        }
+        else {
+            log(LogLevel.INFO, "updateOrCreateRelationships: beginning transaction {");
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+                @Override
+                public void run() throws Exception {
+                    updateOrCreateTransactionableRelationships(jsonObject, key, workspace);
                 }
-            }
+            };
+            log(LogLevel.INFO, "} updateOrCreateRelationships committing: " + key);
         }
         end = System.currentTimeMillis();
         log(LogLevel.INFO, (end - start) + "ms");
@@ -867,45 +836,27 @@ public class ModelPost extends AbstractJavaWebScript {
      * @param jsonArray         Takes in the elements JSONArray
      * @return                  True if all elements and owners can be found with write permissions, false otherwise
      */
-    protected boolean buildElementMap(JSONArray jsonArray, WorkspaceNode workspace) throws JSONException {
+    protected boolean buildElementMap(final JSONArray jsonArray, 
+                                      final WorkspaceNode workspace) throws JSONException {
         boolean isValid = true;
-
-        if (runWithoutTransactions) {
+        final List<Boolean> validList = new ArrayList<Boolean>();
+        
+        if (runWithoutTransactions || internalRunWithoutTransactions) {
             isValid =  buildTransactionableElementMap(jsonArray, workspace);
-        } else {
-            UserTransaction trx;
-            // building element map is a read-only transaction
-            trx = services.getTransactionService().getNonPropagatingUserTransaction(true);
-            try {
-                trx.begin();
-                NodeUtil.setInsideTransactionNow( true );
-                log(LogLevel.INFO, "buildElementMap begin transaction {");
-                isValid = buildTransactionableElementMap(jsonArray, workspace);
-                log(LogLevel.INFO, "} buildElementMap committing");
-                timerCommit = Timer.startTimer(timerCommit, timeEvents);
-                trx.commit();
-                NodeUtil.setInsideTransactionNow( false );
-                Timer.stopTimer(timerCommit, "!!!!! buildElementMap(): commit time", timeEvents);
-            } catch (Throwable e) {
-                try {
-                    log(LogLevel.ERROR, "\t####### ERROR: Need to rollback: " + e.getMessage());
-                    if (e instanceof JSONException) {
-	                		log(LogLevel.ERROR, "buildElementMap: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
-	                } else {
-	                		log(LogLevel.ERROR, "buildElementMap: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	                }
-                    e.printStackTrace();
-                    trx.rollback();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tbuildElementMap: rollback failed: " + ee.getMessage());
-                    ee.printStackTrace();
-                    NodeUtil.setInsideTransactionNow( false );
-                }
-                isValid = false;
-            }
         }
-
+        else {
+            log(LogLevel.INFO, "buildElementMap begin transaction {");
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+                @Override
+                public void run() throws Exception {
+                    boolean valid = buildTransactionableElementMap(jsonArray, workspace);
+                    validList.add( valid);
+                }
+            };
+            isValid = validList.get( 0 );
+            log(LogLevel.INFO, "} buildElementMap committing");
+        }
+        
         return isValid;
     }
 
@@ -1027,22 +978,20 @@ public class ModelPost extends AbstractJavaWebScript {
      * @return
      * @throws Exception
      */
-    protected Set< EmsScriptNode > updateOrCreateElement( JSONObject elementJson,
-                                                          EmsScriptNode parent,
-                                                          WorkspaceNode workspace,
-                                                          boolean ingest)
+    protected Set< EmsScriptNode > updateOrCreateElement( final JSONObject elementJson,
+                                                          final EmsScriptNode parent,
+                                                          final WorkspaceNode workspace,
+                                                          final boolean ingest)
                                                                   throws Exception {
-        TreeSet<EmsScriptNode> elements = new TreeSet<EmsScriptNode>();
+        final TreeSet<EmsScriptNode> elements = new TreeSet<EmsScriptNode>();
         TreeMap<String, EmsScriptNode> nodeMap =
                 new TreeMap< String, EmsScriptNode >();
-
-        EmsScriptNode element = null;
 
         if ( !elementJson.has( Acm.JSON_ID ) ) {
             return elements;
         }
         String jsonId = elementJson.getString( Acm.JSON_ID );
-        element = findScriptNodeById( jsonId, workspace, null, true );
+        final EmsScriptNode element = findScriptNodeById( jsonId, workspace, null, true );
         if ( element != null ) {
 
             // Make sure we have the most recent version of the element's node ref.  This is needed for conflict
@@ -1084,13 +1033,13 @@ public class ModelPost extends AbstractJavaWebScript {
             return elements;
         }
 
-        JSONArray children = new JSONArray();
+        final JSONArray children = new JSONArray();
 
         EmsScriptNode reifiedNode = null;
-        ModStatus modStatus = new ModStatus();
+        final ModStatus modStatus = new ModStatus();
+        final Pair<Boolean,EmsScriptNode> returnPair = new Pair<Boolean,EmsScriptNode>(false,null);
 
-        if (runWithoutTransactions) {
-
+        if (runWithoutTransactions || internalRunWithoutTransactions) {
             // Check to see if the element has been updated since last read/modified by the
             // posting application.
             if (inConflict(element, elementJson)) {
@@ -1101,48 +1050,35 @@ public class ModelPost extends AbstractJavaWebScript {
                     updateOrCreateTransactionableElement( elementJson, parent,
                                                           children, workspace, ingest, false, modStatus,
                                                           element);
-        } else {
-            UserTransaction trx;
-            trx = services.getTransactionService().getNonPropagatingUserTransaction();
-            try {
-                trx.begin();
-                NodeUtil.setInsideTransactionNow( true );
-
-                // Check to see if the element has been updated since last read/modified by the
-                // posting application.  Want this to be within the transaction
-                if (inConflict(element, elementJson)) {
-                    return elements;
-                }
-
-                log(LogLevel.INFO, "updateOrCreateElement begin transaction {");
-                reifiedNode =
-                        updateOrCreateTransactionableElement( elementJson,
-                                                              parent, children,
-                                                              workspace,
-                                                              ingest, false, modStatus, element );
-                log(LogLevel.INFO, "} updateOrCreateElement end transaction");
-                timerCommit = Timer.startTimer(timerCommit, timeEvents);
-                trx.commit();
-                NodeUtil.setInsideTransactionNow( false );
-                Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): commit time", timeEvents);
-            } catch (Throwable e) {
-                try {
-                    if (e instanceof JSONException) {
-                            log(LogLevel.ERROR, "updateOrCreateElement: JSON malformed: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
-                    } else {
-                            log(LogLevel.ERROR, "updateOrCreateElement: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                    }
-                    e.printStackTrace();
-                    trx.rollback();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
-                    ee.printStackTrace();
-                    NodeUtil.setInsideTransactionNow( false );
-                }
-            }
         }
-
+        else {
+            log(LogLevel.INFO, "updateOrCreateElement begin transaction {");
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+                @Override
+                public void run() throws Exception {
+                    // Check to see if the element has been updated since last read/modified by the
+                    // posting application.  Want this to be within the transaction
+                    boolean conflict = inConflict(element, elementJson);
+                    returnPair.first = conflict;
+                    
+                    if (!conflict) {
+                        returnPair.second =
+                                updateOrCreateTransactionableElement( elementJson,
+                                                                      parent, children,
+                                                                      workspace,
+                                                                      ingest, false, modStatus, 
+                                                                      element );
+                    }
+                }
+            };
+            log(LogLevel.INFO, "} updateOrCreateElement end transaction");
+            
+            if (returnPair.first) {
+                return elements;
+            }
+            reifiedNode = returnPair.second;
+        }
+        
         // create the children elements
         if (reifiedNode != null && reifiedNode.exists()) {
             //elements.add( reifiedNode );
@@ -1158,22 +1094,14 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         // Only need to search again for the element, if it was created again for the first time:
-        if (element == null) {
-            element = findScriptNodeById( jsonId, workspace, null, true );
+        EmsScriptNode finalElement = element == null ? 
+                                     findScriptNodeById( jsonId, workspace, null, true ) : 
+                                     element;
+        updateTransactionableWsState(finalElement, jsonId, modStatus, ingest);
 
-            // Make sure we have the most recent version of the element's node ref.  This is needed
-            // to make sure we get the most recent properties of the element.
-            // This is only needed b/c of an alfresco bug, where it intermittently does not give the most
-            // recent node ref.  This does have a performance hit, so commenting out for now:
-            //if (element != null) element.checkNodeRefVersion( null );
-        }
-        updateTransactionableWsState(element, jsonId, modStatus, ingest);
-        elements = new TreeSet< EmsScriptNode >( nodeMap.values() );
+        fixReadTimeForConflictTransaction(finalElement, elementJson);
 
-        fixReadTimeForConflictTransaction(element, elementJson, runWithoutTransactions);
-        //System.out.println("3. fixReadTimeForConflict(" + elementJson + ")");
-
-        return elements;
+        return new TreeSet< EmsScriptNode >( nodeMap.values() );
     }
 
     /**
@@ -1212,74 +1140,40 @@ public class ModelPost extends AbstractJavaWebScript {
      * @param elementJson
      * @param withoutTransactions
      */
-    protected void fixReadTimeForConflictTransaction( EmsScriptNode element,
-                                                      JSONObject elementJson,
-                                                      boolean withoutTransactions ) {
-        if ( withoutTransactions ) {
+    protected void fixReadTimeForConflictTransaction( final EmsScriptNode element,
+                                                      final JSONObject elementJson ) {
+        
+        if (runWithoutTransactions || internalRunWithoutTransactions) {
             try {
                 fixReadTimeForConflict( element, elementJson );
             } catch ( JSONException e ) {
                 e.printStackTrace();
             }
-            return;
         }
-        UserTransaction trx;
-        trx = services.getTransactionService().getNonPropagatingUserTransaction();
-        try {
-            trx.begin();
-            NodeUtil.setInsideTransactionNow( true );
-
-            fixReadTimeForConflict( element, elementJson );
-
-            timerCommit = Timer.startTimer( timerCommit, timeEvents );
-            trx.commit();
-            NodeUtil.setInsideTransactionNow( false );
-            Timer.stopTimer( timerCommit,
-                             "!!!!! fixReadTimeForConflict(): commit time",
-                             timeEvents );
-        } catch ( Throwable e ) {
-            try {
-                e.printStackTrace();
-                trx.rollback();
-                NodeUtil.setInsideTransactionNow( false );
-            } catch ( Throwable ee ) {
-                log( LogLevel.ERROR,
-                     "\fixReadTimeForConflict(): rollback failed: "
-                             + ee.getMessage() );
-                ee.printStackTrace();
-                NodeUtil.setInsideTransactionNow( false );
-            }
+        else {
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+                @Override
+                public void run() throws Exception {
+                    fixReadTimeForConflict( element, elementJson );
+                }
+            };
         }
+        
     }
 
 
-    private void updateTransactionableWsState(EmsScriptNode element, String jsonId, ModStatus modStatus, boolean ingest) {
+    private void updateTransactionableWsState(final EmsScriptNode element, final String jsonId, 
+                                              final ModStatus modStatus, final boolean ingest) {
 
-        if (runWithoutTransactions) {
+        if (runWithoutTransactions || internalRunWithoutTransactions) {
             updateTransactionableWsStateImpl(element, jsonId, modStatus, ingest);
         } else {
-            UserTransaction trx;
-            trx = services.getTransactionService().getNonPropagatingUserTransaction();
-            try {
-                trx.begin();
-                NodeUtil.setInsideTransactionNow( true );
-                timerCommit = Timer.startTimer(timerCommit, timeEvents);
-                updateTransactionableWsStateImpl( element, jsonId, modStatus, ingest );
-                trx.commit();
-                NodeUtil.setInsideTransactionNow( false );
-                Timer.stopTimer(timerCommit, "!!!!! updateOrCreateElement(): ws metadata time", timeEvents);
-            } catch (Throwable e) {
-                try {
-                    log(LogLevel.ERROR, "updateOrCreateElement: DB transaction failed: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                    e.printStackTrace();
-                    trx.rollback();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tupdateOrCreateElement: rollback failed: " + ee.getMessage());
-                    ee.printStackTrace();
-                    NodeUtil.setInsideTransactionNow( false );
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+                @Override
+                public void run() throws Exception {
+                    updateTransactionableWsStateImpl(element, jsonId, modStatus, ingest);
                 }
-            }
+            };
         }
     }
 
@@ -2566,8 +2460,8 @@ public class ModelPost extends AbstractJavaWebScript {
     }
 
     @Override
-    protected Map<String, Object> executeImplImpl(WebScriptRequest req,
-                                              Status status, Cache cache) {
+    protected Map<String, Object> executeImplImpl(final WebScriptRequest req,
+                                                  Status status, Cache cache) {
         Timer timer = new Timer();
 
         printHeader( req );
@@ -2620,9 +2514,6 @@ public class ModelPost extends AbstractJavaWebScript {
 
                     if ( !Utils.isNullOrEmpty( expressionString ) ) {
 
-//                        String exprJsonStr0 = Frontend.exp2Json( expressionString );
-//                        JSONObject exprJson0 = new JSONObject( exprJsonStr0 );
-
                         JSONObject exprJson = new JSONObject(KExpParser.parseExpression(expressionString));
                         log(LogLevel.DEBUG, "********************************************************************************");
                         log(LogLevel.DEBUG, expressionString);
@@ -2635,29 +2526,17 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                     }
 
-                    // Get the project node from the request.  Must wrap it in a transaction b/c it can
-                    // create a site or project:
-                    UserTransaction trx;
-                    trx = services.getTransactionService().getNonPropagatingUserTransaction();
-                    try {
-                        trx.begin();
-                        NodeUtil.setInsideTransactionNow( true );
+                    // Get the project node from the request:
+                    if (runWithoutTransactions || internalRunWithoutTransactions) {
                         getProjectNodeFromRequest( req, true );
-                        trx.commit();
-                        NodeUtil.setInsideTransactionNow( false );
-                    } catch (Throwable e) {
-                        try {
-                            log(LogLevel.ERROR, "\t####### ERROR: Need to rollback: " + e.getMessage());
-                            log(LogLevel.ERROR, "\t####### when getProjectNodeFromRequest()");
-                            e.printStackTrace();
-                            trx.rollback();
-                            NodeUtil.setInsideTransactionNow( false );
-                        } catch (Throwable ee) {
-                            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
-                            log(LogLevel.ERROR, "\tafter calling getProjectNodeFromRequest()");
-                            ee.printStackTrace();
-                            NodeUtil.setInsideTransactionNow( false );
-                        }
+                    }
+                    else {
+                        new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+                            @Override
+                            public void run() throws Exception {
+                                getProjectNodeFromRequest( req, true );
+                            }
+                        };
                     }
 
                     if (projectNode != null) {
@@ -2687,53 +2566,50 @@ public class ModelPost extends AbstractJavaWebScript {
         return model;
     }
 
-    protected Set< EmsScriptNode > handleUpdate(JSONObject postJson, Status status, WorkspaceNode workspace,
-                                boolean fix, Map<String, Object> model,
-                                boolean createCommit) throws Exception {
+    protected Set< EmsScriptNode > handleUpdate(JSONObject postJson, Status status, 
+                                                WorkspaceNode workspace,
+                                                boolean fix, Map<String, Object> model,
+                                                boolean createCommit) throws Exception {
         JSONObject top = new JSONObject();
-        Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null, createCommit );
+        final Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null, createCommit );
 
         addRelationshipsToProperties( elements );
         if ( !Utils.isNullOrEmpty( elements ) ) {
 
             // Fix constraints if desired:
-            if (fix) {
-                UserTransaction trx;
-                trx = services.getTransactionService().getNonPropagatingUserTransaction();
-                try {
-                    trx.begin();
-                    NodeUtil.setInsideTransactionNow( true );
+            if (fix) {               
+                if (runWithoutTransactions || internalRunWithoutTransactions) {
                     fix(elements);
-                    trx.commit();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable e) {
-                    try {
-                        log(LogLevel.ERROR, "\t####### ERROR: Need to rollback: " + e.getMessage());
-                        log(LogLevel.ERROR, "\t####### when fix()");
-                        e.printStackTrace();
-                        trx.rollback();
-                        NodeUtil.setInsideTransactionNow( false );
-                    } catch (Throwable ee) {
-                        log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
-                        log(LogLevel.ERROR, "\tafter calling fix()");
-                        ee.printStackTrace();
-                        NodeUtil.setInsideTransactionNow( false );
-                    }
+                }
+                else {
+                    new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+                        @Override
+                        public void run() throws Exception {
+                            fix(elements);
+                        }
+                    };
                 }
             }
 
             // Create JSON object of the elements to return:
-            JSONArray elementsJson = new JSONArray();
-            timerToJson = Timer.startTimer(timerToJson, timeEvents);
-            UserTransaction trx;
-            trx = services.getTransactionService().getNonPropagatingUserTransaction();
-            try {
-                trx.begin();
-                NodeUtil.setInsideTransactionNow( true );
-            for ( EmsScriptNode element : elements ) {
-                elementsJson.put( element.toJSONObject(null) );
+            final JSONArray elementsJson = new JSONArray();
+          
+            if (runWithoutTransactions || internalRunWithoutTransactions) {
+                for ( EmsScriptNode element : elements ) {
+                    elementsJson.put( element.toJSONObject(null) );
+                }            
             }
-            Timer.stopTimer(timerToJson, "!!!!! executeImpl(): toJSON time", timeEvents);
+            else {
+                new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+                    @Override
+                    public void run() throws Exception {
+                        for ( EmsScriptNode element : elements ) {
+                            elementsJson.put( element.toJSONObject(null) );
+                        }
+                    }
+                };
+            }
+            
             top.put( "elements", elementsJson );
             if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
             if ( prettyPrint ) {
@@ -2741,50 +2617,24 @@ public class ModelPost extends AbstractJavaWebScript {
             } else {
                 model.put( "res", top.toString() );
             }
-            trx.commit();
-            NodeUtil.setInsideTransactionNow( false );
-        } catch (Throwable e) {
-            try {
-                log(LogLevel.ERROR, "\t####### ERROR: Need to rollback: " + e.getMessage());
-                log(LogLevel.ERROR, "\t####### when toJson()");
-                e.printStackTrace();
-                trx.rollback();
-                NodeUtil.setInsideTransactionNow( false );
-            } catch (Throwable ee) {
-                log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
-                log(LogLevel.ERROR, "\tafter toJson()");
-                ee.printStackTrace();
-                NodeUtil.setInsideTransactionNow( false );
-            }
-        }
         }
 
         return elements;
     }
 
     public void addRelationshipsToProperties( Set< EmsScriptNode > elems ) {
-        for ( EmsScriptNode element : elems ) {
-            UserTransaction trx;
-            trx = services.getTransactionService().getNonPropagatingUserTransaction();
-            try {
-                trx.begin();
-                NodeUtil.setInsideTransactionNow( true );
+        
+        for ( final EmsScriptNode element : elems ) {
+            if (runWithoutTransactions || internalRunWithoutTransactions) {
                 element.addRelationshipToPropertiesOfParticipants();
-                trx.commit();
-                NodeUtil.setInsideTransactionNow( false );
-            } catch (Throwable e) {
-                try {
-                    log(LogLevel.ERROR, "\t####### ERROR: Need to rollback: " + e.getMessage());
-                    log(LogLevel.ERROR, "\t####### when calling addRelationshipToPropertiesOfParticipants()");
-                    e.printStackTrace();
-                    trx.rollback();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable ee) {
-                    log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
-                    log(LogLevel.ERROR, "\tafter calling addRelationshipsToProperties()");
-                    ee.printStackTrace();
-                    NodeUtil.setInsideTransactionNow( false );
-                }
+            }
+            else {
+                new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+                    @Override
+                    public void run() throws Exception {
+                        element.addRelationshipToPropertiesOfParticipants();
+                    }
+                };
             }
         }
     }

@@ -175,7 +175,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         final Map< String, Object > model = new HashMap<String, Object>();
         new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
             @Override
-            public void run() {
+            public void run() throws Exception {
                 Map< String, Object > m = executeImplImpl( req, status, cache );
                 if ( m != null ) {
                     model.putAll( m );

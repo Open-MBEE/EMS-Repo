@@ -19,7 +19,7 @@ public abstract class EmsTransaction {
     protected StringBuffer response = new StringBuffer();
     protected Status responseStatus = new Status();
 
-    public EmsTransaction(ServiceRegistry services, StringBuffer response, Status responseStatus ) {
+    public EmsTransaction(ServiceRegistry services, StringBuffer response, Status responseStatus) {
         this.response = response;
         this.responseStatus = responseStatus;
         this.services = services;
@@ -29,20 +29,21 @@ public abstract class EmsTransaction {
         try {
             trx.begin();
             NodeUtil.setInsideTransactionNow( true );
-
+            
             run();
-
+            
             timerCommit = Timer.startTimer(timerCommit, timeEvents);
             trx.commit();
-            NodeUtil.setInsideTransactionNow( false );
             Timer.stopTimer(timerCommit, "!!!!! EmsTransaction commit time", timeEvents);
         } catch (Throwable e) {
             tryRollback( trx, e, "DB transaction failed" );
+        } finally {
+            NodeUtil.setInsideTransactionNow( false );
         }
-
+        
     }
-
-    abstract public void run();
+    
+    abstract public void run() throws Exception;
 
 
     protected void tryRollback( UserTransaction trx, Throwable e, String msg ) {
@@ -55,7 +56,6 @@ public abstract class EmsTransaction {
                  HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
             e.printStackTrace();
             trx.rollback();
-            NodeUtil.setInsideTransactionNow( false );
         } catch ( Throwable ee ) {
             log( Level.ERROR,
                  "\tryRollback(): rollback failed: "
