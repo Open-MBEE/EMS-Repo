@@ -70,7 +70,9 @@ public class ViewModelPost extends ModelPost {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
         ViewModelPost instance = new ViewModelPost(repository, getServices());
-        return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
+        // Run without transactions since ViewModePost breaks them up itself, and calls
+        // ModelPost methods which also have transactions:
+        return instance.executeImplImpl(req,  status, cache, true);
     }
 
     @Override

@@ -58,7 +58,7 @@ public abstract class EmsTransaction {
             NodeUtil.setInsideTransactionNow( false );
         } catch ( Throwable ee ) {
             log( Level.ERROR,
-                 "\tMmsModelDelete.handleRequest: rollback failed: "
+                 "\tryRollback(): rollback failed: "
                          + ee.getMessage() );
             ee.printStackTrace();
         }

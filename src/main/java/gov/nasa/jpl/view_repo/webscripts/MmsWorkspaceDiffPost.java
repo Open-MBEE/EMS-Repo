@@ -219,7 +219,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                     }
 
 	                CommitUtil.merge( jsonDiff, srcWs, targetWs, dateTimeSrc, dateTimeTarget,
-	                                  null, runWithoutTransactions, services, response );
+	                                  null, true, services, response );
 	            }
 
 		    }
