@@ -40,7 +40,7 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		MmsConfigurationsPost instance = new MmsConfigurationsPost(repository, getServices());
-    	return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
+    	    return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
     }
 
     @Override

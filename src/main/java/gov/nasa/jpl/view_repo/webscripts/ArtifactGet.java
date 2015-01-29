@@ -83,66 +83,10 @@ public class ArtifactGet extends AbstractJavaWebScript {
      */
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-
-    	ArtifactGet instance = new ArtifactGet(repository, getServices());
+        ArtifactGet instance = new ArtifactGet(repository, getServices());
         return instance.executeImplImpl(req,  status, cache, runWithoutTransactions );
     }
 
-//    protected Map< String, Object > executeImplImpl( final WebScriptRequest req,
-//                                                     final Status status, final Cache cache,
-//                                                     boolean withoutTransactions ) {
-//        if ( withoutTransactions ) {
-//            return executeImplImpl( req, status, cache );
-//        }
-//        final Map< String, Object > model = new HashMap<String, Object>();
-//        new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
-//            @Override
-//            public void run() {
-//                Map< String, Object > m = executeImplImpl( req, status, cache );
-//                if ( m != null ) {
-//                    model.putAll( m );
-//                }
-//            }
-//        };
-////            UserTransaction trx;
-////            trx = services.getTransactionService().getNonPropagatingUserTransaction();
-////            try {
-////                trx.begin();
-////                NodeUtil.setInsideTransactionNow( true );
-////            } catch ( Throwable e ) {
-////                String msg = null;
-////                tryRollback( trx, e, msg );
-////            }
-//        //Map<String, Object> model = new HashMap<String, Object>();
-//        if ( response != null && response.toString().length() > 0 ) {
-//            model.put( "res", response.toString() );
-//        }
-//        return model;
-//    }
-
-
-//    private void tryRollback( UserTransaction trx , Throwable e, String msg ) {
-//        if ( msg == null || msg.length() <= 0 ) {
-//            msg = "DB transaction failed";
-//        }
-//        try {
-//            log( LogLevel.ERROR,
-//                 msg + "\n\t####### ERROR: Need to rollback:" + e.getMessage(),
-//                 HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
-//            log( LogLevel.ERROR,
-//                 " "
-//                         + e.getMessage() );
-//            trx.rollback();
-//            NodeUtil.setInsideTransactionNow( false );
-//            e.printStackTrace();
-//        } catch ( Throwable ee ) {
-//            log( LogLevel.ERROR,
-//                 "\tMmsModelDelete.handleRequest: rollback failed: "
-//                         + ee.getMessage() );
-//            ee.printStackTrace();
-//            e.printStackTrace();
-//        }
-//    }
 
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {

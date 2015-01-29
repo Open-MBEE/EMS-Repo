@@ -39,7 +39,7 @@ public class MmsSnapshotsDelete extends AbstractJavaWebScript {
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		MmsSnapshotsDelete instance = new MmsSnapshotsDelete(repository, getServices());
-    	return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
+    	    return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
     }
 
     @Override

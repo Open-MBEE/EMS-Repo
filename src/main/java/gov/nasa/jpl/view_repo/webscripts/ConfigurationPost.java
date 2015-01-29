@@ -82,7 +82,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	@Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		ConfigurationPost instance = new ConfigurationPost(repository, services);
-    	return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
+		return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
     }
 
 	@Override

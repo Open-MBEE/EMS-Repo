@@ -47,6 +47,9 @@ import gov.nasa.jpl.mbee.util.Debug;
 public class DebugGet extends FlagSet {
 
     @Override
+    /**
+     * This is called by FlagSet executeImpl
+     */
     protected void set( boolean val ) {
         if ( val ) {
             Debug.turnOn();
@@ -66,32 +69,5 @@ public class DebugGet extends FlagSet {
     protected String flagName() {
         return "debug";
     }
-	
-    
-    
-//	protected Map<String, Object> executeImpl(WebScriptRequest req,
-//			Status status, Cache cache) {
-//        Map< String, Object > model = new HashMap< String, Object >();
-//
-//        String turnOnStr = req.getParameter( "on" );
-//        String turnOffStr = req.getParameter( "off" );
-//
-//        boolean turnOn = !( turnOnStr == null ||
-//                            turnOnStr.trim().equalsIgnoreCase( "false" ) ||
-//                            ( turnOffStr != null &&
-//                              turnOffStr.trim().equalsIgnoreCase( "true" ) ) );
-//        turnOnStr = turnOn ? "on" : "off";
-//        if ( turnOn == Debug.isOn() ) {
-//            System.out.println( ( new Date() ) + ": debug is already "
-//                                + turnOnStr );
-//        } else {
-//            if ( turnOn ) Debug.turnOn();
-//            else Debug.turnOff();
-//            System.out.println( ( new Date() ) + ": debug turned " + turnOnStr );
-//        }
-//        model.put( "res", "debug " + turnOnStr );
-//
-//        return model;
-//	}
 
 }

@@ -60,6 +60,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
+@Deprecated
 public class ProductListGet extends AbstractJavaWebScript {
 	public ProductListGet() {
 	    super();

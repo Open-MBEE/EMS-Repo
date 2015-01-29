@@ -104,15 +104,6 @@ public class ProductPost extends AbstractJavaWebScript {
 			for (int ii = 0; ii < productsJson.length(); ii++) {
 			    updateProduct(productsJson, ii, workspace);
 			}
-
-//			jwsUtil.splitTransactions(new JwsFunctor() {
-//				@Override
-//				public Object execute(JSONArray jsonArray, int index,
-//						Boolean... flags) throws JSONException {
-//					updateProduct(jsonArray, index);
-//					return null;
-//				}
-//			}, productsJson);
 		}
 	}
 

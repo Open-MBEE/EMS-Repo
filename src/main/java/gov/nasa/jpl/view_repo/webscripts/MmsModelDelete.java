@@ -44,7 +44,6 @@ public class MmsModelDelete extends AbstractJavaWebScript {
      */
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-
         MmsModelDelete instance = new MmsModelDelete(repository, getServices());
         return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
     }

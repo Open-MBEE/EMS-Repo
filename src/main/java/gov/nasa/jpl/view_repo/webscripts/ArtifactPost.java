@@ -80,8 +80,7 @@ public class ArtifactPost extends AbstractJavaWebScript {
      */
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-
-    	ArtifactPost instance = new ArtifactPost(repository, getServices());
+    	    ArtifactPost instance = new ArtifactPost(repository, getServices());
         return instance.executeImplImpl(req,  status, cache, runWithoutTransactions );
     }
 
@@ -97,7 +96,7 @@ public class ArtifactPost extends AbstractJavaWebScript {
         printHeader( req );
 		clearCaches();
 
-        String cs = req.getParameter("cs"); // Ignoring this b/c we calculate it from the data
+//        String cs = req.getParameter("cs"); // Ignoring this b/c we calculate it from the data
         String extension = req.getParameter("extension") != null ? req.getParameter("extension") : ".svg";
 
         if (!extension.startsWith(".")) {
