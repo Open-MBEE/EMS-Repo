@@ -140,4 +140,10 @@ public class JavaQueryPost extends AbstractJavaWebScript {
         }
         return true;
     }
+
+    @Override
+    protected Map< String, Object >
+            executeImplImpl( WebScriptRequest req, Status status, Cache cache ) {
+        return executeImplImpl( req, status, cache, runWithoutTransactions );
+    }
 }
