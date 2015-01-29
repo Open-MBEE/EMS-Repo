@@ -192,7 +192,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 //                tryRollback( trx, e, msg );
 //            }
         //Map<String, Object> model = new HashMap<String, Object>();
-        if ( response != null && response.toString().length() > 0 ) {
+        if ( !model.containsKey( "res" ) && response != null && response.toString().length() > 0 ) {
             model.put( "res", response.toString() );
         }
         return model;
