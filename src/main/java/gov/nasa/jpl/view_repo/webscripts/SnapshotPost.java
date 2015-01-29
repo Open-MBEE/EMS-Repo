@@ -535,31 +535,31 @@ public class SnapshotPost extends AbstractJavaWebScript {
         image.setId( getSymlId( obj ) );
 
         String id = (String)obj.opt( Acm.SYSMLID );
-        EmsScriptNode imgNode = findScriptNodeById( id, null, null, false );  //snapshot => ok to get the latest from 'master'
+        EmsScriptNode imgNode = findScriptNodeById( id, workspace, timestamp, false );  //snapshot => ok to get the latest from 'master'
         if ( imgNode == null ) {
             // TODO error handling
             return image;
         } else {
             try {
                 image.setTitle( (String)imgNode.getProperty( Acm.ACM_NAME ) );
-                NodeRef nodeRef = imgNode.getNodeRef();
-                ServiceRegistry services = imgNode.getServices();
-                NodeService nodeService =
-                        imgNode.getServices().getNodeService();
+//                NodeRef nodeRef = imgNode.getNodeRef();
+//                ServiceRegistry services = imgNode.getServices();
+//                NodeService nodeService =
+//                        imgNode.getServices().getNodeService();
 
-                String fileName =
-                        (String)nodeService.getProperty( nodeRef,
-                                                         ContentModel.PROP_NAME );
-                fileName += ".svg";
+                String fileName = id + ".svg"; 
+//                fileName += ".svg";
                 ResultSet resultSet =
                         NodeUtil.luceneSearch( "@name:" + fileName );
+                System.out.println("looking for filename: " + fileName);
+                System.out.println("\t@name:" + fileName);
                 if ( resultSet != null && resultSet.length() > 0 ) {
                     EmsScriptNode node =
                             new EmsScriptNode( resultSet.getNodeRef( 0 ),
                                                services );
                     saveImage( image, node );
                 } else {
-                    log( LogLevel.ERROR, fileName + " image file not found!" );
+                    log( LogLevel.WARNING, fileName + " image file not found!" );
                 }
             } catch ( Exception ex ) {;}
 
