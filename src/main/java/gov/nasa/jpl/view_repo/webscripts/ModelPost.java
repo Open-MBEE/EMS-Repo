@@ -1382,7 +1382,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 while (iterOld.hasNext()) {
                     EmsScriptNode oldNode = iterOld.next();
                     if (i >= newValsSize) {
-                        //deleteValueSpec(node, oldNode);  // TODO
+                        deleteValueSpec(node, oldNode);
                     }
                     i++;
                 }
@@ -1391,6 +1391,20 @@ public class ModelPost extends AbstractJavaWebScript {
         }
 
         return changed;
+    }
+    
+    /**
+     * Delete the valueSpec node, remove from the ownedChildren of the parent reified
+     * node, update the diff and mod status
+     * 
+     * @param parent
+     * @param valueSpec
+     */
+    private void deleteValueSpec(EmsScriptNode parent, EmsScriptNode valueSpec) {
+        
+        // TODO implement this
+        
+        
     }
 
     private boolean processValueSpecPropertyImplImpl(JSONObject jsonToCheck,
@@ -1460,7 +1474,7 @@ public class ModelPost extends AbstractJavaWebScript {
             // Ingest the JSON for the value to update properties
             timerIngest = Timer.startTimer(timerIngest, timeEvents);
             processValue( node, id, reifiedPkgNode, parent, nodeWorkspace, newValJson, ingest, modStatus, oldValNode );
-            changed = (modStatus != null && modStatus.getState() != ModStatus.State.NONE );
+            changed = changed || (modStatus != null && modStatus.getState() != ModStatus.State.NONE );
             //updateOrCreateTransactionableElement
             //boolean didChange = processValueSpecProperty( type, nestedNode, elementJson, specializeJson, oldValNode, ingest, reifiedPkgNode, parent, id, nodeWorkspace );
 //            if ( oldValNode.ingestJSON( newValJson ) ) {
