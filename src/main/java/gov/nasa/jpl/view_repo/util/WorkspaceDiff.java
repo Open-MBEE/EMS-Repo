@@ -185,7 +185,7 @@ public class WorkspaceDiff implements Serializable {
             Map< String, Pair< Object, Object >> changes =
                     nodeDiff.getPropertyChanges( e.getKey() );
             if ( changes != null ) {
-                Pair< Object, Object > ownerChange = changes.get( "ems:owner" );
+                Pair< Object, Object > ownerChange = changes.get( NodeUtil.createQName("ems:owner").toString() );
                 if ( ownerChange != null && ownerChange.first != null
                      && ownerChange.second != null
                      && !ownerChange.first.equals( ownerChange.second ) ) {
@@ -737,6 +737,9 @@ public class WorkspaceDiff implements Serializable {
                     ignoredPropIds.add( propName.toString() );
                 }
             }
+            
+            // Dont want to ignore the owner for moved elements:
+            ignoredPropIds.remove( NodeUtil.createQName( "ems:owner" ).toString());
 
             List<String> prefixes = Utils.newList( "sysml:id",
                                                    "view2:snapshotProduct",
