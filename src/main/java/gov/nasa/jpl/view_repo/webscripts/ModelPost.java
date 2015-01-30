@@ -1840,14 +1840,15 @@ public class ModelPost extends AbstractJavaWebScript {
         // Move the node to the specified workspace if the node is not a
         // workspace itself.
         if ( workspace != null && workspace.exists() ) {
+            boolean nodeWorkspaceWrong = (nodeToUpdate != null && nodeToUpdate.exists()
+                                          && !nodeToUpdate.isWorkspace()
+                                          && !workspace.equals( nodeToUpdate.getWorkspace() ));
+            boolean parentWorkspaceWrong =  (parent != null && parent.exists()
+                                             && !parent.isWorkspace()
+                                             && !workspace.equals( parent.getWorkspace() ));
             if ( nodeToUpdate == null || !nodeToUpdate.exists() ) {
                 parent = workspace.replicateWithParentFolders( parent );
-            } else if ( (nodeToUpdate != null && nodeToUpdate.exists()
-                        && !nodeToUpdate.isWorkspace()
-                        && !workspace.equals( nodeToUpdate.getWorkspace() )) ||
-                        (parent != null && parent.exists()
-                        && !parent.isWorkspace()
-                        && !workspace.equals( parent.getWorkspace() )) ) {
+            } else if ( nodeWorkspaceWrong || parentWorkspaceWrong ) {
 
                 // If its owner is changing, need to bring in the old parent
                 // into the new workspace and remove the old child.  Not bringing
@@ -1860,9 +1861,13 @@ public class ModelPost extends AbstractJavaWebScript {
 
                 // Now create in the new, new parent.
                 parent = workspace.replicateWithParentFolders( parent ); // This gets the new, new parent.
-                EmsScriptNode oldNode = nodeToUpdate;
-                nodeToUpdate = nodeToUpdate.clone(parent);
-                nodeToUpdate.setWorkspace( workspace, oldNode.getNodeRef() );
+                
+                // Dont want to clone the node if only the parent workspace was wrong
+                if ( nodeWorkspaceWrong) {
+                    EmsScriptNode oldNode = nodeToUpdate;
+                    nodeToUpdate = nodeToUpdate.clone(parent);
+                    nodeToUpdate.setWorkspace( workspace, oldNode.getNodeRef() );
+                }
             }
         }
 
