@@ -21,15 +21,13 @@
 	<!-- This is filtered by Maven at build time, so that module name is single sourced. -->
     <import resource="classpath:alfresco/module/view-repo/context/service-context.xml" />
 
-    <bean id="mms-folder.bootstrap" class="org.alfresco.repo.module.ImporterModuleComponent" parent="module.baseComponent">
-        <!-- Module Details -->
+<!--     <bean id="mms-folder.bootstrap" class="org.alfresco.repo.module.ImporterModuleComponent" parent="module.baseComponent">
         <property name="moduleId" value="mms-repo-ent" />
         <property name="name" value="mms-folder.bootstrap" />
         <property name="description" value="MMS initial data requirements" />
         <property name="sinceVersion" value="1.0" />
         <property name="appliesFromVersion" value="1.0" />
         
-        <!-- Data properties -->
         <property name="importer" ref="spacesBootstrap" />
         <property name="bootstrapViews">
             <list>
@@ -44,4 +42,5 @@
             </list>
         </property>
     </bean>
-</beans>
+ -->
+ </beans>
