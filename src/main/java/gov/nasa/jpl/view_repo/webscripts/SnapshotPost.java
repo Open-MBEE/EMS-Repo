@@ -367,7 +367,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         String title = (String)product.getProperty( Acm.ACM_NAME );
         DBBook docBook = new DBBook();
         // need to make sure that all text is properly escaped for XML inclusion, e.g., & => &amp;
-        docBook.setTitle( title );
+        docBook.setTitle( replaceXmlEntities(title) );
         docBook.setTitlePageLegalNotice( "This Document has not been reviewed for export control. Not for distribution to or access by foreign persons." );
         docBook.setFooterLegalNotice( "Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release." );
         String author =
@@ -544,17 +544,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         } else {
             try {
                 image.setTitle( (String)imgNode.getProperty( Acm.ACM_NAME ) );
-//                NodeRef nodeRef = imgNode.getNodeRef();
-//                ServiceRegistry services = imgNode.getServices();
-//                NodeService nodeService =
-//                        imgNode.getServices().getNodeService();
 
                 String fileName = id + ".svg"; 
-//                fileName += ".svg";
                 ResultSet resultSet =
                         NodeUtil.luceneSearch( "@name:" + fileName );
-                System.out.println("looking for filename: " + fileName);
-                System.out.println("\t@name:" + fileName);
                 if ( resultSet != null && resultSet.length() > 0 ) {
                     EmsScriptNode node =
                             new EmsScriptNode( resultSet.getNodeRef( 0 ),
