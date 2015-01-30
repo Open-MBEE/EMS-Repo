@@ -333,7 +333,7 @@
                     <nohelp>true</nohelp>
                 </configuration>
             </plugin>
-			<plugin>
+		<!-- 	<plugin>
 				<groupId>org.zeroturnaround</groupId>
 				<artifactId>jrebel-maven-plugin</artifactId>
 				<version>1.1.5</version>
@@ -368,7 +368,7 @@
 						</resources>
 					</web>
 				</configuration>
-			</plugin>
+			</plugin> -->
 			<!--  make sure fonts are copied correctly : alfresco munges woff files maybe because of UTF-8 encoding? -->
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>

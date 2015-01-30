@@ -321,7 +321,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     
     // Updated log methods with log4j methods (still works with old log calls)
     // String concatenation replaced with C formatting; only for calls with parameters
-    protected void log (Level level, int code, String msg, String...params) {
+    protected void log (Level level, int code, String msg, Object...params) {
     	if (level.toInt() >= logger.getLevel().toInt()) {
     		String formattedMsg = formatter.format (msg,params).toString();
     		log (level,code,formattedMsg);
@@ -351,12 +351,12 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	}
 
 	// only logging code and a message (no loglevel, and thus, no check for log level status)
-	protected void log(int code, String msg, String...params) {
+	protected void log(int code, String msg, Object...params) {
 		String formattedMsg = formatter.format (msg,params).toString();
 		log (code,formattedMsg);
 	}
 	
-	protected void log(String msg, String...params) {
+	protected void log(String msg, Object...params) {
 		String formattedMsg = formatter.format (msg,params).toString();
 		log (formattedMsg);
 	}

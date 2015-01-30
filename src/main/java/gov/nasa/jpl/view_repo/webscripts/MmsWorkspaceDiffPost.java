@@ -36,7 +36,7 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
+//import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 import org.apache.log4j.*;
 
 
@@ -138,18 +138,17 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                     
                     // Give error message if there are not commits found before or at the dateTimeTarget:
                     if (prevCommit == null) {
-                        log(LogLevel.ERROR,
-                            "Try a later date.  Previous commit could not be found based on date "+dateTimeTarget,
-                            HttpServletResponse.SC_BAD_REQUEST);
+                        log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST,
+                            "Try a later date.  Previous commit could not be found based on date %s",dateTimeTarget);
                         return;
                     }
     
                     // Give error message if the latest commit based on the time is not the latest:
                     if (lastCommit != null && prevCommit != null && !lastCommit.equals( prevCommit ) ) {
                         
-                        log(LogLevel.ERROR,
-                            "Previous commit "+prevCommit+" based on date "+dateTimeTarget+" is not the same as the latest commit "+lastCommit,
-                            HttpServletResponse.SC_CONFLICT);
+                        log(Level.ERROR,HttpServletResponse.SC_CONFLICT,
+                            "Previous commit %s based on date %s is not the same as the latest commit %s",
+                            prevCommit, dateTimeTarget, lastCommit);
                         return;
                     }
                 }
@@ -219,7 +218,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	            
 	            if (modelDeleteDiff || modelPostDiff) {
 	                if ( !CommitUtil.sendDeltas(jsonDiff, targetWsId, projectId) ) {
-                        log(LogLevel.WARNING, "MmsWorkspaceDiffPost deltas not posted properly");
+                        log(Level.WARN, "MmsWorkspaceDiffPost deltas not posted properly");
                     }
 	                
 	                CommitUtil.merge( jsonDiff, srcWs, targetWs, dateTimeSrc, dateTimeTarget,
