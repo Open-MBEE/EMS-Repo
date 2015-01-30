@@ -94,7 +94,14 @@ public class ViewEditorPurge extends AbstractJavaWebScript {
 	@Override
 	protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
 			Status status, Cache cache) {
-        printHeader( req );
+	    ViewEditorPurge instance = new ViewEditorPurge( repository, getServices() );
+	    return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
+    }
+
+    @Override
+    protected Map< String, Object > executeImplImpl( WebScriptRequest req,
+                                                 Status status, Cache cache ) {
+         printHeader( req );
 
 		clearCaches();
 

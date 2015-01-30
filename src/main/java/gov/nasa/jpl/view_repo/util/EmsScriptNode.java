@@ -38,6 +38,7 @@ import gov.nasa.jpl.mbee.util.Diff;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
@@ -1057,10 +1058,19 @@ public class EmsScriptNode extends ScriptNode implements
         if ( liveNodeRef != null && !liveNodeRef.equals( nodeRef ) ) {
             EmsScriptNode liveNode = new EmsScriptNode( liveNodeRef, getServices() );
             if ( isAVersion() ) {
-                logger.error( "Trying to create a node under a frozen node ref (" + nodeRef + ", v " + getVersionLabel() + ")! Replacing nodeRef with (v "+ liveNode.getVersionLabel() + ") live node ref (" + liveNodeRef + "), which may not point to the right version! " + this );
+                logger.error( "Trying to create a node under a frozen node ref ("
+                              + nodeRef + ", v " + getVersionLabel()
+                              + ")! Replacing nodeRef with (v "
+                              + liveNode.getVersionLabel() + ") live node ref ("
+                              + liveNodeRef
+                              + "), which may not point to the right version! "
+                              + this );
+                Debug.error( true, "Stacktrace for frozen node replacement:" );
                 nodeRef = liveNodeRef;
             } else {
-                logger.error( "Live node " + liveNode.getVersionLabel() + " is different from current " + getVersionLabel() + " node ref!" + this );
+                logger.error( "Live node " + liveNode.getVersionLabel()
+                              + " is different from current "
+                              + getVersionLabel() + " node ref!" + this );
             }
         }
     }
@@ -1411,6 +1421,7 @@ public class EmsScriptNode extends ScriptNode implements
           logger.warn( msg );
           System.out.println(msg);
           Debug.error( true, msg );
+          sendNotificationEvent( "Heisenbug Occurence!", "" );
           if ( response != null ) {
               response.append( msg + "\n");
           }
@@ -1436,6 +1447,7 @@ public class EmsScriptNode extends ScriptNode implements
            logger.warn( msg );
            System.out.println(msg);
            Debug.error( true, msg );
+           sendNotificationEvent( "Heisenbug Occurrence!", "" );
            if ( response != null ) {
                response.append( msg + "\n");
            }
@@ -4998,5 +5010,25 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
 
-
+    /**
+     * FIXME Recipients and senders shouldn't be hardcoded - need to have these spring injected
+     * @param subject
+     * @param msg
+     */
+    protected void sendNotificationEvent(String subject, String msg) {
+        if (!NodeUtil.heisenbugSeen) {
+            String hostname = services.getSysAdminParams().getAlfrescoHost();
+            
+            String sender = hostname + "@jpl.nasa.gov";
+            String recipient;
+            
+            if (hostname.toLowerCase().contains( "europa" )) {
+                recipient = "kerzhner@jpl.nasa.gov";
+                ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
+            }
+            recipient = "mbee-dev-admin@jpl.nasa.gov";
+            ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
+            NodeUtil.heisenbugSeen = true;
+        }
+    }
 }

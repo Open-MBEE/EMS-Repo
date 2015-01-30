@@ -101,7 +101,15 @@ public class ModelPurge extends AbstractJavaWebScript {
 	 */
 	@Override
 	protected synchronized Map<String, Object> executeImpl(WebScriptRequest req,
-			Status status, Cache cache) {
+	                                                       Status status, Cache cache) {
+	    ModelPurge instance = new ModelPurge( repository, getServices() );
+        instance.setServices( getServices() );
+        return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
+    }
+
+    @Override
+    protected Map< String, Object > executeImplImpl( WebScriptRequest req,
+                                                 Status status, Cache cache ) {
         printHeader( req );
 
 		clearCaches();

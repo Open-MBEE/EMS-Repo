@@ -149,12 +149,12 @@ public class ModelGet extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req,
             Status status, Cache cache) {
-        ModelGet instance = new ModelGet(repository, services);
-        instance.setServices( getServices() );
-        return instance.executeImplImpl( req, status, cache );
+        ModelGet instance = new ModelGet(repository, getServices());
+        return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
     }
 
-	protected Map<String, Object> executeImplImpl(WebScriptRequest req,
+	@Override
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req,
 			Status status, Cache cache) {
 	    Timer timer = new Timer();
 	    printHeader( req );

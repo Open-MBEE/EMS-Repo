@@ -21,21 +21,21 @@ public class MmsConfigurationsGet extends AbstractJavaWebScript {
         SINGLE,
         MULTIPLE
     }
-    
+
     private Type type;
-    
+
     public void setType(Type type) {
         this.type = type;
     }
-    
+
     public Type getType() {
         return type;
     }
-    
+
     public MmsConfigurationsGet() {
         super();
     }
-    
+
     public MmsConfigurationsGet( Repository repository, ServiceRegistry services ) {
         this.repository = repository;
         this.services = services;
@@ -46,27 +46,28 @@ public class MmsConfigurationsGet extends AbstractJavaWebScript {
         // TODO Auto-generated method stub
         return false;
     }
-    
+
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-		MmsConfigurationsGet instance = new MmsConfigurationsGet(repository, services);
+		MmsConfigurationsGet instance = new MmsConfigurationsGet(repository, getServices());
 		instance.setType( type );
-    	    return instance.executeImplImpl(req, status, cache);
+    	    return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
     }
-    
+
+    @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
-        
+
         clearCaches();
-        
+
         Map<String, Object> model = new HashMap<String, Object>();
-        
-        MmsConfigurationsGet instance = new MmsConfigurationsGet(repository, services);
-        
+
+        MmsConfigurationsGet instance = new MmsConfigurationsGet(repository, getServices());
+
         JSONObject jsonObject = new JSONObject();
 
         try {
-            ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, instance.response);
+            ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, getServices(), instance.response);
             switch(type) {
                 case SINGLE:
                     jsonObject.put("configurations", configWs.handleConfiguration(req, true));
@@ -89,12 +90,12 @@ public class MmsConfigurationsGet extends AbstractJavaWebScript {
                 log(LogLevel.ERROR, "Internal server error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
             e.printStackTrace();
-        } 
-    
+        }
+
         status.setCode(responseStatus.getCode());
-    
+
         printFooter();
-        
+
         return model;
     }
 

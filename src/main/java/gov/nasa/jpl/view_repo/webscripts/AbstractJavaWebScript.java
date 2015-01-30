@@ -34,6 +34,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
@@ -55,6 +56,7 @@ import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
 import org.apache.log4j.Logger;
+import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -79,6 +81,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	}
 
     public static final int MAX_PRINT = 200;
+    public static boolean defaultRunWithoutTransactions = false;
 
     // injected members
 	protected ServiceRegistry services;		// get any of the Alfresco services
@@ -86,6 +89,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	protected LogLevel logLevel = LogLevel.WARNING;
 
 	// internal members
+    // when run in background as an action, this needs to be false
+    public boolean runWithoutTransactions = defaultRunWithoutTransactions;
 	protected ScriptNode companyhome;
 	protected Map<String, EmsScriptNode> foundElements = new HashMap<String, EmsScriptNode>();
 
@@ -157,6 +162,42 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             Debug.turnOff();
         }
 	}
+
+    abstract protected Map< String, Object > executeImplImpl( final WebScriptRequest req,
+                                                              final Status status,
+                                                              final Cache cache );
+    protected Map< String, Object > executeImplImpl( final WebScriptRequest req,
+                                                     final Status status, final Cache cache,
+                                                     boolean withoutTransactions ) {
+        if ( withoutTransactions ) {
+            return executeImplImpl( req, status, cache );
+        }
+        final Map< String, Object > model = new HashMap<String, Object>();
+        new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+            @Override
+            public void run() throws Exception {
+                Map< String, Object > m = executeImplImpl( req, status, cache );
+                if ( m != null ) {
+                    model.putAll( m );
+                }
+            }
+        };
+//            UserTransaction trx;
+//            trx = services.getTransactionService().getNonPropagatingUserTransaction();
+//            try {
+//                trx.begin();
+//                NodeUtil.setInsideTransactionNow( true );
+//            } catch ( Throwable e ) {
+//                String msg = null;
+//                tryRollback( trx, e, msg );
+//            }
+        //Map<String, Object> model = new HashMap<String, Object>();
+        if ( !model.containsKey( "res" ) && response != null && response.toString().length() > 0 ) {
+            model.put( "res", response.toString() );
+        }
+        return model;
+    }
+
 
 	/**
 	 * Parse the request and do validation checks on request

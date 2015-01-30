@@ -60,6 +60,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * @author cinyoung
  *
  */
+@Deprecated
 public class ProductListGet extends AbstractJavaWebScript {
 	public ProductListGet() {
 	    super();
@@ -113,18 +114,18 @@ public class ProductListGet extends AbstractJavaWebScript {
 
 	@Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-        ProductListGet instance = new ProductListGet(repository, services);
-        return instance.executeImplImpl(req,  status, cache);
+        ProductListGet instance = new ProductListGet(repository, getServices());
+        return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
     }
-	
-	protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
+
+	@Override
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
 		clearCaches();
 
 		Map<String, Object> model = new HashMap<String, Object>();
 
-		ProductListGet instance = new ProductListGet(repository, services);
 
 		if (validateRequest(req, status)) {
         		try {
@@ -133,8 +134,7 @@ public class ProductListGet extends AbstractJavaWebScript {
         	        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         	    WorkspaceNode workspace = getWorkspace( req );
                 JSONObject jsonObject =
-                        instance.handleProductList( siteNode, workspace, dateTime );
-                appendResponseStatusInfo(instance);
+                        handleProductList( siteNode, workspace, dateTime );
                 if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
                 model.put("res", jsonObject.toString(4));
                 model.put("title", siteNode.getProperty(Acm.CM_TITLE));
@@ -168,14 +168,14 @@ public class ProductListGet extends AbstractJavaWebScript {
 //                                                 Acm.ACM_PRODUCT, workspace,
 //                                                 dateTime,
 //                                                 services, response );
-        Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix, 
+        Map< String, EmsScriptNode > nodeList = searchForElements(NodeUtil.SearchType.ASPECT.prefix,
                                                                    Acm.ACM_PRODUCT, false,
-                                                                   workspace, dateTime, 
+                                                                   workspace, dateTime,
                                                                    siteNode.getName());
         if (nodeList != null) {
             productSet.addAll(nodeList.values());
         }
-        
+
         return productSet;
 	}
 
@@ -234,15 +234,15 @@ public class ProductListGet extends AbstractJavaWebScript {
 	protected void handleParents(EmsScriptNode node) throws JSONException {
         String id = node.getSysmlId();
         String sysmlName = (String)node.getProperty(Acm.ACM_NAME);
-        
+
         if (id != null) {
             id = id.replace("_pkg", "");
-            
+
             if (!documents.has(id) && sysmlName != null) {
                 volumes.put(id, sysmlName);
             }
         }
-        
+
         EmsScriptNode parent = node.getParent();
         if (parent != null && checkPermissions(parent, PermissionService.READ)) {
             // This parentId cannot use getSysmlId() b/c it depends on it being
@@ -256,7 +256,7 @@ public class ProductListGet extends AbstractJavaWebScript {
                 if (parentId.contains("_pkg")) {
                     parentId = parentId.replace("_pkg", "");
                 }
-                
+
                 if (!volume2volumes.has(parentId)) {
                     volume2volumes.put(parentId, new JSONArray());
                 }

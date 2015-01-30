@@ -6,6 +6,6 @@
   <url>/javawebscripts/vieweditor/{id}?project={projectid?}</url>
   <format default="json">argument</format> 
   <authentication>user</authentication> 
-  <transaction allow="readwrite">required</transaction>
+  <transaction>none</transaction>
   <family>EMS Java Webscripts</family>
 </webscript>

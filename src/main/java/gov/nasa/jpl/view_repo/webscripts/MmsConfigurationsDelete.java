@@ -16,11 +16,11 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
-public class MmsConfigurationsDelete extends AbstractJavaWebScript {    
+public class MmsConfigurationsDelete extends AbstractJavaWebScript {
     public MmsConfigurationsDelete() {
         super();
     }
-    
+
     public MmsConfigurationsDelete( Repository repository, ServiceRegistry services ) {
         this.repository = repository;
         this.services = services;
@@ -31,26 +31,27 @@ public class MmsConfigurationsDelete extends AbstractJavaWebScript {
         // TODO Auto-generated method stub
         return false;
     }
-    
+
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-		MmsConfigurationsDelete instance = new MmsConfigurationsDelete(repository, services);
-    	return instance.executeImplImpl(req, status, cache);
+		MmsConfigurationsDelete instance = new MmsConfigurationsDelete(repository, getServices());
+    	    return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
     }
-    
+
+    @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
-        
+
         clearCaches();
-        
+
         Map<String, Object> model = new HashMap<String, Object>();
-        
-        MmsConfigurationsDelete instance = new MmsConfigurationsDelete(repository, services);
-        
+
+        MmsConfigurationsDelete instance = new MmsConfigurationsDelete(repository, getServices());
+
         JSONObject jsonObject = new JSONObject();
 
         try {
-            ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, instance.response);
+            ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, getServices(), instance.response);
             configWs.handleDeleteConfiguration(req);
             appendResponseStatusInfo( instance );
             if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
@@ -63,12 +64,12 @@ public class MmsConfigurationsDelete extends AbstractJavaWebScript {
                 log(LogLevel.ERROR, "Internal server error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
             e.printStackTrace();
-        } 
-    
+        }
+
         status.setCode(responseStatus.getCode());
-    
+
         printFooter();
-        
+
         return model;
     }
 

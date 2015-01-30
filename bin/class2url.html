@@ -30,8 +30,6 @@
 <tr><td>/javawebscripts/products/{id}</td><td>javawebscripts/product.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ProductGet</td></tr>
 <tr><td>/javawebscripts/projects</td><td>javawebscripts/projectonly.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ProjectPost</td></tr>
 <tr><td>/javawebscripts/projects/{projectId}</td><td>javawebscripts/projectonly.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ProjectGet</td></tr>
-<tr><td>/javawebscripts/sites/{siteName}/commits</td><td>javawebscripts/commit.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.CommitGet</td></tr>
-<tr><td>/javawebscripts/sites/{siteName}/commits/{commitId}</td><td>javawebscripts/commit.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.CommitPost</td></tr>
 <tr><td>/javawebscripts/sites/{siteName}/projects/{projectId}</td><td>javawebscripts/project.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ProjectGet</td></tr>
 <tr><td>/javawebscripts/sites/{siteName}/projects/{projectId}/elements?background={background?}&amp;fix={fix?}&amp;expression={expression?}&amp;evaluate={evaluate?}</td><td>javawebscripts/model.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ModelPost</td></tr>
 <tr><td>/javawebscripts/sites/{siteName}/projects?delete={delete?}</td><td>javawebscripts/project.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.ProjectPost</td></tr>
@@ -56,6 +54,7 @@
 <tr><td>/rest/views/{viewid}/hierarchy</td><td>viewhierarchy.post.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/viewhierarchy.post.json.js</td></tr>
 <tr><td>/rest/views/{viewid}?force={force?}&amp;recurse={recurse?}&amp;doc={doc?}&amp;product={product?}&amp;user={user}</td><td>view.post.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/view.post.json.js</td></tr>
 <tr><td>/rest/views/{viewid}?recurse={recurse?}</td><td>view.get.desc.xml</td><td>../src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/view.get.js</td></tr>
+<tr><td>/runWithTransactions?on={on?}&amp;off={off?}</td><td>utils/runwithtransactions.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.RunWithTransactionsGet</td></tr>
 <tr><td>/simpleCache?on={on?}&amp;off={off?}</td><td>utils/simplecache.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.SimpleCacheGet</td></tr>
 <tr><td>/sites/permissions</td><td>mms/utils/site_perm_sync.post.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.util.SitePermSync</td></tr>
 <tr><td>/timeEvents?on={on?}&amp;off={off?}</td><td>utils/timeevents.get.desc.xml</td><td>gov.nasa.jpl.view_repo.webscripts.TimeEventsGet</td></tr>

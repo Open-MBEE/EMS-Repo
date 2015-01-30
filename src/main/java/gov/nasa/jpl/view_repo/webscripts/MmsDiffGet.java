@@ -35,7 +35,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     protected boolean validateRequest( WebScriptRequest req, Status status ) {
         workspaceId1 = req.getParameter( "workspace1" );
         workspaceId2 = req.getParameter( "workspace2" );
-        ws1 = WorkspaceNode.getWorkspaceFromId( workspaceId1, getServices(), response, status, //false, 
+        ws1 = WorkspaceNode.getWorkspaceFromId( workspaceId1, getServices(), response, status, //false,
                                   null );
         ws2 = WorkspaceNode.getWorkspaceFromId( workspaceId2, getServices(), response, status, //false,
                                   null );
@@ -61,13 +61,14 @@ public class MmsDiffGet extends AbstractJavaWebScript {
     protected Map< String, Object > executeImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
         MmsDiffGet mmsDiffGet = new MmsDiffGet();
-        return mmsDiffGet.myExecuteImpl( req, status, cache );
+        return mmsDiffGet.executeImplImpl( req, status, cache, runWithoutTransactions );
     }
-    
-    protected Map< String, Object > myExecuteImpl( WebScriptRequest req,
+
+    @Override
+    protected Map< String, Object > executeImplImpl( WebScriptRequest req,
                                                    Status status, Cache cache ) {
         printHeader( req );
-        
+
         Map<String, Object> results = new HashMap<String, Object>();
 
         if (!validateRequest(req, status)) {
@@ -81,7 +82,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         String workspace2 = req.getParameter( "workspace2" );
         ws1 = WorkspaceNode.getWorkspaceFromId( workspace1, services, response, status, //false,
                                   null );
-        ws2 = WorkspaceNode.getWorkspaceFromId( workspace2, services, response, status, //false, 
+        ws2 = WorkspaceNode.getWorkspaceFromId( workspace2, services, response, status, //false,
                                   null );
 
         String timestamp1 = req.getParameter( "timestamp1" );

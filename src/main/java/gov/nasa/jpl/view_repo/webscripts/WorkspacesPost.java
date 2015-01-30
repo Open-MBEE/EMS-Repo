@@ -76,11 +76,11 @@ public class WorkspacesPost extends AbstractJavaWebScript{
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 
-        WorkspacesPost instance = new WorkspacesPost(repository, services);
-        instance.setServices( getServices() );
-        return instance.executeImplImpl( req, status, cache );
+        WorkspacesPost instance = new WorkspacesPost(repository, getServices());
+        return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
     }
 
+    @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache){
         printHeader( req );
         clearCaches();

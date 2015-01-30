@@ -80,10 +80,10 @@ public class SitePermSync extends AbstractJavaWebScript{
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache){
-        SitePermSync instance = new SitePermSync(repository, services);
-        return instance.executeImplImpl(req, status, cache);
+        SitePermSync instance = new SitePermSync(repository, getServices());
+        return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
     }
-    
+
     /**
      * Wrapped executeImpl so this can run in its own scopes.
      * @param req
@@ -91,13 +91,14 @@ public class SitePermSync extends AbstractJavaWebScript{
      * @param cache
      * @return
      */
-    private Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
+    @Override
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
-        
+
         List<SiteInfo> sites = services.getSiteService().listSites(null);
-        
+
         JSONArray msgs = new JSONArray();
-        
+
         for (SiteInfo siteInfo : sites ) {
             EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
             NodeRef sitePkgNR = (NodeRef) siteNode.getProperty(Acm.ACM_SITE_PACKAGE);
@@ -108,7 +109,7 @@ public class SitePermSync extends AbstractJavaWebScript{
                 updatePermissions(siteInfo, sitePkg);
             }
         }
-        
+
         JSONObject json = new JSONObject();
         try {
             json.put( "msgs", msgs );
@@ -118,11 +119,11 @@ public class SitePermSync extends AbstractJavaWebScript{
             model.put("res", "Error creating JSON output");
             status.setCode( HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
         }
-        
+
         return model;
     }
 
-    
+
     /**
      * Update permissions based on the provided site and site package
      * @param siteInfo  Site who's permissions should be copied onto the site package
@@ -134,7 +135,7 @@ public class SitePermSync extends AbstractJavaWebScript{
         // remove any previous permissions then override
         services.getPermissionService().setInheritParentPermissions( nr, false );
         services.getPermissionService().deletePermissions( nr );
-        
+
         List<SiteMemberInfo> members = services.getSiteService().listMembersInfo( siteInfo.getShortName(), null, null, 0, true );
         for ( SiteMemberInfo authorityObj : members ) {
             sitePkg.setPermission( authorityObj.getMemberRole(), authorityObj.getMemberName() );
@@ -143,7 +144,7 @@ public class SitePermSync extends AbstractJavaWebScript{
                 reifiedSitePkg.setPermission( authorityObj.getMemberRole(), authorityObj.getMemberName() );
             }
         }
-    }    
+    }
 }
 
 

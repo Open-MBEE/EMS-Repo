@@ -6,7 +6,7 @@
   <url>/ve/products/{id}</url>
   <format default="html">argument</format> 
   <authentication>user</authentication> 
-  <transaction allow="readonly">required</transaction>
+  <transaction>none</transaction>
   <family>EMS Java Read Webscripts</family>
   <args>
   	<arg>

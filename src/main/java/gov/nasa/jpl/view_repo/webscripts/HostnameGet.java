@@ -18,25 +18,32 @@ public class HostnameGet extends AbstractJavaWebScript {
     protected Map< String, Object > executeImpl( WebScriptRequest req, Status status, Cache cache ) {
 		printHeader( req );
 	    clearCaches();
+	    HostnameGet instance = new HostnameGet(repository, getServices());
+        return instance.executeImplImpl(req,  status, cache, runWithoutTransactions );
+	}
+	
+    @Override
+    protected Map< String, Object > executeImplImpl( WebScriptRequest req,
+                                                     Status status, Cache cache ) {
 
 		Map< String, Object > model = new HashMap< String, Object >();
 		JSONObject jsonObj = new JSONObject();
 		SysAdminParams sysAdminParams = this.services.getSysAdminParams();
-		
+
 		JSONObject alfrescoJson = new JSONObject();
 		try{
 			alfrescoJson.put("protocol", sysAdminParams.getAlfrescoProtocol());
 			alfrescoJson.put("host", sysAdminParams.getAlfrescoHost());
 			alfrescoJson.put("port", sysAdminParams.getAlfrescoPort());
-			
+
 			JSONObject shareJson = new JSONObject();
 			shareJson.put("protocol", sysAdminParams.getShareProtocol());
 			shareJson.put("host", sysAdminParams.getShareHost());
 			shareJson.put("port", sysAdminParams.getSharePort());
-			
+
 			jsonObj.put("alfresco", alfrescoJson);
 			jsonObj.put("share", shareJson);
-			
+
 			model.put( "res", jsonObj.toString(4) );
 		}
 		catch(JSONException js)
@@ -54,27 +61,27 @@ public class HostnameGet extends AbstractJavaWebScript {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
+
 	private String alfrescoContext;
 	public String getAlfrescoContext(){
 		return alfrescoContext;
 	}
-	
+
 	private String alfrescoHost;
 	public String getAlfrescoHost(){
 		return alfrescoHost;
 	}
-	
+
 	private int alfrescoPort;
 	public int getAlfrescoPort(){
 		return alfrescoPort;
 	}
-	
+
 	private String alfrescoProtocol;
 	public String getAlfrescoProtocol(){
 		return alfrescoProtocol;
 	}
-	
+
 	private String alfrescoUrl;
 	public String getAlfrescoUrl(){
 		if(alfrescoUrl==null || alfrescoUrl.isEmpty()){
@@ -87,18 +94,19 @@ public class HostnameGet extends AbstractJavaWebScript {
 		}
 		return alfrescoUrl;
 	}
-	
+
 	public HostnameGet(){
 		super();
-		
+
 	}
-	
+
 	public HostnameGet(Repository repositoryHelper, ServiceRegistry registry) {
 		super(repositoryHelper, registry);
 		SysAdminParams sysAdminParams = this.services.getSysAdminParams();
 		this.alfrescoContext = sysAdminParams.getAlfrescoContext();
 		this.alfrescoHost = sysAdminParams.getAlfrescoHost();
 		this.alfrescoPort = sysAdminParams.getAlfrescoPort();
-		this.alfrescoProtocol = sysAdminParams.getAlfrescoProtocol();		
+		this.alfrescoProtocol = sysAdminParams.getAlfrescoProtocol();
 	}
+
 }
