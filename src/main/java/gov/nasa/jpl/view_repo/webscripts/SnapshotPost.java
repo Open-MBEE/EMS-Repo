@@ -366,12 +366,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
     private DBBook createDocBook( EmsScriptNode product ) {
         String title = (String)product.getProperty( Acm.ACM_NAME );
         DBBook docBook = new DBBook();
+        // need to make sure that all text is properly escaped for XML inclusion, e.g., & => &amp;
         docBook.setTitle( title );
         docBook.setTitlePageLegalNotice( "This Document has not been reviewed for export control. Not for distribution to or access by foreign persons." );
         docBook.setFooterLegalNotice( "Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release." );
         String author =
-                getUserProfile( product,
-                                (String)product.getProperty( Acm.ACM_AUTHOR ) );
+                replaceXmlEntities( getUserProfile( product,
+                                (String)product.getProperty( Acm.ACM_AUTHOR ) ) );
         docBook.setAuthor( Arrays.asList( author ) );
         return docBook;
     }
@@ -837,16 +838,16 @@ public class SnapshotPost extends AbstractJavaWebScript {
         if(!isGenerated){
 //	        Thread.sleep(10000);
 	        try{
-		    	snapshotNode = generatePDF(snapshotNode, workspace);
-		    	if(snapshotNode == null) throw new Exception("generatePDF() returned null.");
-		    	else{
-		    		this.setPdfStatus(workspace, snapshotNode, "Completed");
-		    	}
+        		    	snapshotNode = generatePDF(snapshotNode, workspace);
+        		    	if(snapshotNode == null) throw new Exception("generatePDF() returned null.");
+        		    	else{
+        		    		this.setPdfStatus(workspace, snapshotNode, "Completed");
+        		    	}
 	        }
 	        catch(Exception ex){
-	        	ex.printStackTrace();
-	        	this.setPdfStatus(workspace, snapshotNode, "Error");
-	    		throw new Exception("Failed to generate PDF artifact!");
+        	        	ex.printStackTrace();
+        	        	this.setPdfStatus(workspace, snapshotNode, "Error");
+        	    		throw new Exception("Failed to generate PDF artifact!");
 	        }
         }
     	return populateSnapshotProperties(snapshotNode);
@@ -1858,4 +1859,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
     protected boolean validateRequest(WebScriptRequest req, Status status) {
         return false;
     }
+    
+    protected String replaceXmlEntities(String s) {
+        // this was cribbed from HtmlToDocbook.fixString, but that was keying off <html>
+        // tags, so we recreated it here
+        return s.replaceAll( "&(?![A-Za-z#0-9]+;)", "&amp;" )
+                .replaceAll( "<([>=\\s])","&lt;$1" )
+                .replaceAll( "<<", "&lt;&lt;" )
+                .replaceAll( "<(?![^>]+>)", "&lt;" );
+    }
+    
 }
