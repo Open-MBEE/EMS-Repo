@@ -10,6 +10,10 @@
         class="gov.nasa.jpl.view_repo.webscripts.HeisenCacheGet"
         parent="webscript">
     </bean>
+    <bean id="webscript.gov.nasa.jpl.utils.runwithtransactions.get"
+        class="gov.nasa.jpl.view_repo.webscripts.RunWithTransactionsGet"
+        parent="webscript">
+    </bean>
     <bean id="webscript.gov.nasa.jpl.utils.simplecache.get"
         class="gov.nasa.jpl.view_repo.webscripts.SimpleCacheGet"
         parent="webscript">

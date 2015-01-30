@@ -27,6 +27,7 @@ import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
+@Deprecated
 public class WorkspacesMerge extends AbstractJavaWebScript{
 
 	public WorkspacesMerge(){
@@ -39,10 +40,12 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache){
-	    WorkspacesMerge instance = new WorkspacesMerge(repository, services);
-	    return instance.executeImplImpl( req, status, cache );
+	    WorkspacesMerge instance = new WorkspacesMerge(repository, getServices());
+        // Run without transactions since WorkspacesMerge breaks them up itself.
+	    return instance.executeImplImpl( req, status, cache, true );
 	}
 
+    @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache){
 		printHeader(req);
 		clearCaches();
@@ -136,35 +139,35 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
                     UserTransaction trx;
                     trx = services.getTransactionService().getNonPropagatingUserTransaction();
                     try {
-                    if ( !Utils.isNullOrEmpty( elements ) ) {
-
-                            trx.begin();
-                            NodeUtil.setInsideTransactionNow( true );
-                        // Create JSON object of the elements to return:
-                        JSONArray elementsJson = new JSONArray();
-                        for ( EmsScriptNode element : elements ) {
-                            elementsJson.put( element.toJSONObject(null) );
-                        }
-                       //top.put( "elements", elementsJson );
-                        //model.put( "res", top.toString( 4 ) );
-	                    }
-    	            result = handleDelete(deletedCollection, targetWS, targetId, null /*time*/, wsDiff);
-
-                    trx.commit();
-                    NodeUtil.setInsideTransactionNow( false );
-                } catch (Throwable e) {
-                    try {
-                        trx.rollback();
+                        if ( !Utils.isNullOrEmpty( elements ) ) {
+    
+                                trx.begin();
+                                NodeUtil.setInsideTransactionNow( true );
+                            // Create JSON object of the elements to return:
+                            JSONArray elementsJson = new JSONArray();
+                            for ( EmsScriptNode element : elements ) {
+                                elementsJson.put( element.toJSONObject(null) );
+                            }
+                           //top.put( "elements", elementsJson );
+                            //model.put( "res", top.toString( 4 ) );
+    	                    }
+        	                result = handleDelete(deletedCollection, targetWS, targetId, null /*time*/, wsDiff);
+    
+                        trx.commit();
                         NodeUtil.setInsideTransactionNow( false );
-                        log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
-                        log(LogLevel.ERROR, "\t####### when calling toJson()");
-                        e.printStackTrace();
-                    } catch (Throwable ee) {
-                        log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
-                        log(LogLevel.ERROR, "\tafter calling toJson()");
-                        ee.printStackTrace();
+                    } catch (Throwable e) {
+                        try {
+                            trx.rollback();
+                            NodeUtil.setInsideTransactionNow( false );
+                            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
+                            log(LogLevel.ERROR, "\t####### when calling toJson()");
+                            e.printStackTrace();
+                        } catch (Throwable ee) {
+                            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
+                            log(LogLevel.ERROR, "\tafter calling toJson()");
+                            ee.printStackTrace();
+                        }
                     }
-                }
                     // FIXME!! We can't just leave the changes on the merged
                     // branch! If an element is changed in the parent, it could
                     // result in a conflict! But we can't mark them deleted since

@@ -6,6 +6,6 @@
   	<url>/workspaces/{workspaceId}/sites/{siteId}/products/{productId}/snapshots</url>
   	<format default="json">argument</format>
   	<authentication>user</authentication>
-  	<transaction allow="readonly">required</transaction>
+  	<transaction>none</transaction>
   	<family>MMS REST API</family>
  </webscript>

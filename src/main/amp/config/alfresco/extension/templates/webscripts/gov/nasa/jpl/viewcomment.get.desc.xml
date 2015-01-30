@@ -21,7 +21,7 @@
   <url>/rest/views/{viewid}/comments?recurse={recurse?}</url> 
   <format default="json">argument</format> 
   <authentication>user</authentication> 
-  <transaction allow="readonly">required</transaction>
+  <transaction>none</transaction>
   <family>View Editor</family>
   <args>
 

@@ -135,6 +135,9 @@ public class NodeUtil {
     public static boolean doHeisenCheck = true;
     public static boolean doVersionCaching = true;
     public static boolean activeVersionCaching = true;
+    
+    // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
+    public static boolean heisenbugSeen = false;
 
     public static String sitePkgPrefix = "site_";
 

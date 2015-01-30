@@ -72,7 +72,8 @@ public class ActionUtil {
         EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), services, response);
         String recipient = (String) user.getProperty("cm:email");
 
-        sendEmailTo("europaems@jpl.nasa.gov", recipient, msg, subject, services);
+        String sender = services.getSysAdminParams().getAlfrescoHost() + "@jpl.nasa.gov";
+        sendEmailTo(sender, recipient, msg, subject, services);
     }
 
     /**
