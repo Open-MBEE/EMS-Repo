@@ -38,6 +38,7 @@ import gov.nasa.jpl.mbee.util.Diff;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
@@ -382,6 +383,7 @@ public class EmsScriptNode extends ScriptNode implements
     {
     	this.myVersions = null;
         //makeSureNodeRefIsNotFrozen();
+        transactionCheck();
     	return super.createVersion(history, majorVersion);
     }
 
@@ -399,6 +401,7 @@ public class EmsScriptNode extends ScriptNode implements
     public ScriptNode checkin(String history, boolean majorVersion)
     {
     	this.myVersions = null;
+        transactionCheck();
         return super.checkin(history, majorVersion);
     }
 
@@ -424,6 +427,7 @@ public class EmsScriptNode extends ScriptNode implements
     @Override
     public EmsScriptNode createFile( String name ) {
         makeSureNodeRefIsNotFrozen();
+        transactionCheck();
         EmsScriptNode fileNode =
                 new EmsScriptNode( super.createFile( name ).getNodeRef(),
                                    services, response, status );
@@ -472,6 +476,7 @@ public class EmsScriptNode extends ScriptNode implements
 
         makeSureNodeRefIsNotFrozen();
         NodeRef folderRef = super.createFolder( name, type ).getNodeRef();
+        transactionCheck();
         EmsScriptNode folder = new EmsScriptNode(folderRef,services, response, status );
         WorkspaceNode ws = getWorkspace();
 
@@ -497,6 +502,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( Acm.getJSON2ACM().keySet().contains( type ) ) {
             type = Acm.getJSON2ACM().get( type );
         }
+        transactionCheck();
 
         return changeAspect( type );
     }
@@ -521,6 +527,7 @@ public class EmsScriptNode extends ScriptNode implements
                                               boolean isMultiple ) {
         QName typeQName = createQName( type );
         makeSureNodeRefIsNotFrozen();
+        transactionCheck();
         List< AssociationRef > refs =
                 services.getNodeService()
                         .getTargetAssocs( nodeRef, RegexQNamePattern.MATCH_ALL );
@@ -541,6 +548,7 @@ public class EmsScriptNode extends ScriptNode implements
                     if ( !isMultiple ) {
                         // association doesn't match, no way to modify a ref, so
                         // need to remove then create
+                        //transactionCheck();
                         services.getNodeService()
                                 .removeAssociation( nodeRef,
                                                     target.getNodeRef(),
@@ -560,6 +568,7 @@ public class EmsScriptNode extends ScriptNode implements
     public void removeAssociations( String type ) {
         QName typeQName = createQName( type );
         makeSureNodeRefIsNotFrozen();
+        transactionCheck();
         List< AssociationRef > refs =
                 services.getNodeService()
                         .getTargetAssocs( nodeRef, RegexQNamePattern.MATCH_ALL );
@@ -598,6 +607,7 @@ public class EmsScriptNode extends ScriptNode implements
         QName typeQName = createQName( type );
 
         makeSureNodeRefIsNotFrozen();
+        transactionCheck();
 
         if ( refs != null ) {
             // check all associations to see if there's a matching association
@@ -984,6 +994,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( !useFoundationalApi ) {
             makeSureNodeRefIsNotFrozen();
             ScriptNode scriptNode = super.createNode( name, type );
+            transactionCheck();
             result = new EmsScriptNode( scriptNode.getNodeRef(), services,
                                         response );
         } else {
@@ -996,6 +1007,7 @@ public class EmsScriptNode extends ScriptNode implements
             if ( typeQName != null ) {
                 try {
                     makeSureNodeRefIsNotFrozen();
+                    transactionCheck();
                     ChildAssociationRef assoc =
                             services.getNodeService()
                                     .createNode( nodeRef,
@@ -1046,10 +1058,19 @@ public class EmsScriptNode extends ScriptNode implements
         if ( liveNodeRef != null && !liveNodeRef.equals( nodeRef ) ) {
             EmsScriptNode liveNode = new EmsScriptNode( liveNodeRef, getServices() );
             if ( isAVersion() ) {
-                logger.error( "Trying to create a node under a frozen node ref (" + nodeRef + ", v " + getVersionLabel() + ")! Replacing nodeRef with (v "+ liveNode.getVersionLabel() + ") live node ref (" + liveNodeRef + "), which may not point to the right version! " + this );
+                logger.error( "Trying to create a node under a frozen node ref ("
+                              + nodeRef + ", v " + getVersionLabel()
+                              + ")! Replacing nodeRef with (v "
+                              + liveNode.getVersionLabel() + ") live node ref ("
+                              + liveNodeRef
+                              + "), which may not point to the right version! "
+                              + this );
+                Debug.error( true, "Stacktrace for frozen node replacement:" );
                 nodeRef = liveNodeRef;
             } else {
-                logger.error( "Live node " + liveNode.getVersionLabel() + " is different from current " + getVersionLabel() + " node ref!" + this );
+                logger.error( "Live node " + liveNode.getVersionLabel()
+                              + " is different from current "
+                              + getVersionLabel() + " node ref!" + this );
             }
         }
     }
@@ -1227,9 +1248,30 @@ public class EmsScriptNode extends ScriptNode implements
         Version v = getCurrentVersion();
         if ( v != null ) {
             NodeRef liveRef = v.getVersionedNodeRef();
-            return liveRef;
+            if ( liveRef != null ) {
+                return liveRef;
+            }
         }
+        NodeRef ref = NodeUtil.getCurrentNodeRefFromCache( nodeRef );
+        if ( ref != null ) return ref;
+       // Logger.error("");
         return nodeRef;
+    }
+
+    protected boolean updateFrozenCache( Version currentVersion ) {
+        if ( currentVersion != null ) {
+            NodeRef frozenRef = currentVersion.getFrozenStateNodeRef();
+            if ( !this.isAVersion() ) {
+                NodeUtil.frozenNodeCache.put( frozenRef, nodeRef );
+                return true;
+            }
+            NodeRef versionedRef = currentVersion.getVersionedNodeRef();
+            if ( versionedRef != null ) {
+                NodeUtil.frozenNodeCache.put( frozenRef, versionedRef );
+                return true;
+            }
+        }
+        return false;
     }
 
     public Version getCurrentVersion() {
@@ -1239,12 +1281,18 @@ public class EmsScriptNode extends ScriptNode implements
         if (versionService != null) {
             try {
                 currentVersion = versionService.getCurrentVersion( nodeRef );
+                updateFrozenCache( currentVersion );
             } catch ( Throwable t1 ) {
                 try {
                     currentVersion = versionService.getCurrentVersion( nodeRef );
+                    updateFrozenCache( currentVersion );
                 } catch ( Throwable t2 ) {
-                    logger.error( "Got exception in getCurrentVersion(): "
+                    logger.error( "1. Got exception in getCurrentVersion(): "
+                            + t1.getLocalizedMessage() );
+                    t1.printStackTrace();
+                    logger.error( "2. Tried again and got another exception in getCurrentVersion(): "
                                   + t2.getLocalizedMessage() );
+                    t2.printStackTrace();
                 }
             }
         }
@@ -1318,7 +1366,12 @@ public class EmsScriptNode extends ScriptNode implements
         return false;
     }
 
+    public void transactionCheck() {
+        NodeUtil.transactionCheck( logger, this );
+    }
+
   public boolean getOrSetCachedVersion() {
+       //transactionCheck();
        if (versionCacheDebugPrint) System.out.println("0: getOrSetCachedVersion(): " + this + " :: " + this.getId() );
        if ( !NodeUtil.doVersionCaching || isAVersion() ) {
            if (versionCacheDebugPrint) System.out.println("1: N/A " + this.getName());
@@ -1367,6 +1420,8 @@ public class EmsScriptNode extends ScriptNode implements
                            + cachedVersion.getLabel() + ".";
           logger.warn( msg );
           System.out.println(msg);
+          Debug.error( true, msg );
+          sendNotificationEvent( "Heisenbug Occurence!", "" );
           if ( response != null ) {
               response.append( msg + "\n");
           }
@@ -1380,6 +1435,9 @@ public class EmsScriptNode extends ScriptNode implements
            return false;
        }
        if ( comp < 0 ) {
+           logger.error( "inTransaction = " + NodeUtil.isInsideTransactionNow() );
+           logger.error( "haveBeenInTransaction = " + NodeUtil.isInsideTransactionNow() );
+           logger.error( "haveBeenOutsideTransaction = " + NodeUtil.isInsideTransactionNow() );
            // Cache is correct -- fix esn's nodeRef
             String msg =
                     "4: Warning! Alfresco Heisenbug returning wrong current version of node, "
@@ -1388,6 +1446,8 @@ public class EmsScriptNode extends ScriptNode implements
                             + getId() + " (" + cachedVersion.getLabel()+ ").";
            logger.warn( msg );
            System.out.println(msg);
+           Debug.error( true, msg );
+           sendNotificationEvent( "Heisenbug Occurrence!", "" );
            if ( response != null ) {
                response.append( msg + "\n");
            }
@@ -1566,6 +1626,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( useFoundationalApi ) {
             try {
                 makeSureNodeRefIsNotFrozen();
+                transactionCheck();
                 services.getNodeService().setProperty( nodeRef,
                                                        createQName( acmType ),
                                                        value );
@@ -1639,6 +1700,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
         } else {
             makeSureNodeRefIsNotFrozen();
+            transactionCheck();
             getProperties().put( acmType, value );
             save();
         }
@@ -3441,6 +3503,7 @@ public class EmsScriptNode extends ScriptNode implements
             properties.remove( createQName( "sys:undeletable" ) );
         }
         makeSureNodeRefIsNotFrozen();
+        transactionCheck();
         nodeService.setProperties( node.getNodeRef(), properties );
 
         // THIS MUST BE CALLED AFTER setProperties()!
@@ -3515,6 +3578,7 @@ public class EmsScriptNode extends ScriptNode implements
 
 
         makeSureNodeRefIsNotFrozen();
+        transactionCheck();
         for ( String aspect : diff.getRemovedAspects(getSysmlId()) ) {
             NodeService ns = getServices().getNodeService();
             if ( hasAspect( aspect ) ) {
@@ -3626,7 +3690,12 @@ public class EmsScriptNode extends ScriptNode implements
 
         EmsScriptNode oldParentPkg =
                 new EmsScriptNode( getParent().getNodeRef(), services, response );
-        boolean status = super.move( destination );
+        // in a move we need to track the parent, the current node, and the destination, just in case
+        getParent().makeSureNodeRefIsNotFrozen();
+        makeSureNodeRefIsNotFrozen();
+        EmsScriptNode dest = new EmsScriptNode(destination.getNodeRef(), services, response);
+        dest.makeSureNodeRefIsNotFrozen();
+        boolean status = super.move( dest );
 
         if ( status ) {
             // keep track of owners and children
@@ -4799,6 +4868,7 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean removeAspect(String type) {
         if (hasAspect(type)) {
             makeSureNodeRefIsNotFrozen();
+            transactionCheck();
             return super.removeAspect( type );
         }
         return true;
@@ -4940,5 +5010,25 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
 
-
+    /**
+     * FIXME Recipients and senders shouldn't be hardcoded - need to have these spring injected
+     * @param subject
+     * @param msg
+     */
+    protected void sendNotificationEvent(String subject, String msg) {
+        if (!NodeUtil.heisenbugSeen) {
+            String hostname = services.getSysAdminParams().getAlfrescoHost();
+            
+            String sender = hostname + "@jpl.nasa.gov";
+            String recipient;
+            
+            if (hostname.toLowerCase().contains( "europa" )) {
+                recipient = "kerzhner@jpl.nasa.gov";
+                ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
+            }
+            recipient = "mbee-dev-admin@jpl.nasa.gov";
+            ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
+            NodeUtil.heisenbugSeen = true;
+        }
+    }
 }

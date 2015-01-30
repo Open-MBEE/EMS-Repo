@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,8 @@ import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ApplicationContextHelper;
+import org.apache.commons.logging.Log;
+import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
 
@@ -88,11 +91,53 @@ public class NodeUtil {
 
     /* static flags and constants */
 
+    protected static String txMutex = "";
+    protected static boolean beenInsideTransaction = false;
+    protected static Map< String, Boolean > beenInsideTransactionMap =
+            new LinkedHashMap< String, Boolean >();
+
+    public static synchronized boolean hasBeenInsideTransaction() {
+        Boolean b = beenInsideTransactionMap.get( "" + Thread.currentThread().getId());
+        if ( b != null ) return b;
+        return beenInsideTransaction;
+    }
+    public static synchronized void setBeenInsideTransaction( boolean b ) {
+        beenInsideTransaction = b;
+        beenInsideTransactionMap.put( "" + Thread.currentThread().getId(), b );
+    }
+    protected static boolean beenOutsideTransaction = false;
+    protected static Map< String, Boolean > beenOutsideTransactionMap =
+            new LinkedHashMap< String, Boolean >();
+    public static synchronized boolean hasBeenOutsideTransaction() {
+        Boolean b = beenOutsideTransactionMap.get( "" + Thread.currentThread().getId());
+        if ( b != null ) return b;
+        return beenOutsideTransaction;
+    }
+    public static synchronized void setBeenOutsideTransaction( boolean b ) {
+        beenOutsideTransaction = b;
+        beenOutsideTransactionMap.put( "" + Thread.currentThread().getId(), b );
+    }
+    protected static boolean insideTransactionNow = false;
+    protected static Map< String, Boolean > insideTransactionNowMap =
+            new LinkedHashMap< String, Boolean >();
+    public static synchronized boolean isInsideTransactionNow() {
+        Boolean b = insideTransactionNowMap.get( "" + Thread.currentThread().getId());
+        if ( b != null ) return b;
+        return insideTransactionNow;
+    }
+    public static synchronized void setInsideTransactionNow( boolean b ) {
+        insideTransactionNow = b;
+        insideTransactionNowMap.put( "" + Thread.currentThread().getId(), b );
+    }
+
     public static boolean doFullCaching = true;
     public static boolean doSimpleCaching = true;
-    public static boolean doHeisenCheck = false;
-    public static boolean doVersionCaching = false;
+    public static boolean doHeisenCheck = true;
+    public static boolean doVersionCaching = true;
     public static boolean activeVersionCaching = true;
+    
+    // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
+    public static boolean heisenbugSeen = false;
 
     public static String sitePkgPrefix = "site_";
 
@@ -113,12 +158,15 @@ public class NodeUtil {
      * to get around the "Heisenbug" where alfresco's current version is
      * sometimes tied to an old version.
      */
-    protected static HashMap<String, NodeRef> heisenCache = new HashMap<String, NodeRef>();
+    protected static Map< String, NodeRef > heisenCache =
+            Collections.synchronizedMap( new HashMap<String, NodeRef>() );
 
 //  public static HashMap<String, String> versionLabelCache =
 //            new HashMap<String, String>();
-    public static HashMap<String, EmsVersion> versionCache =
-            new HashMap<String, EmsVersion>();
+    public static Map< String, EmsVersion > versionCache =
+            Collections.synchronizedMap( new HashMap<String, EmsVersion>() );
+    public static Map< NodeRef, NodeRef > frozenNodeCache =
+            Collections.synchronizedMap( new HashMap<NodeRef, NodeRef>() );
 
 
     // Set the flag to time events that occur during a model post using the timers
@@ -128,7 +176,8 @@ public class NodeUtil {
     private static Timer timerByType = null;
     private static Timer timerLucene = null;
 
-    public static final Comparator< ? super NodeRef > nodeRefComparator = GenericComparator.instance();
+    public static final Comparator< ? super NodeRef > nodeRefComparator =
+            GenericComparator.instance();
 
     public static ServiceRegistry services = null;
 
@@ -145,38 +194,33 @@ public class NodeUtil {
         // this common cache. It would be better to pass around a context or
         // something with a service identifier as a key to the cache. So, each
         // web service invocation would have its own cache.
-        synchronized ( heisenCache ) {
-            heisenCache.clear();
-        }
+        heisenCache.clear();
     }
     public static NodeRef heisenCachePut( String id, NodeRef nodeRef ) {
-        synchronized ( heisenCache ) {
-            return heisenCache.put( id, nodeRef );
-        }
+        return heisenCache.put( id, nodeRef );
     }
     public static NodeRef heisenCacheGet( String id ) {
-        synchronized ( heisenCache ) {
-            return heisenCache.get( id );
-        }
+        return heisenCache.get( id );
     }
 
-    public static void cacheNodeVersion( EmsScriptNode node ) {
-        if ( activeVersionCaching && NodeUtil.exists( node ) ) {
-            Version v = node.getCurrentVersion();
-            if ( doVersionCaching ) {
-                EmsVersion cachedVersion = versionCache.get( node.getId() );
-//                cachedV
-//                if ( cachedV != null ) {
-//
-//
-//                }
-            }
-            NodeUtil.heisenCachePut( node.getName(),
-                                     ( v != null && v.getFrozenStateNodeRef() != null )
-                                     ? v.getFrozenStateNodeRef()
-                                     : node.getNodeRef() );
-        }
+    public static NodeRef getCurrentNodeRefFromCache( NodeRef maybeFrozenNodeRef ) {
+        NodeRef ref = frozenNodeCache.get( maybeFrozenNodeRef );
+        if ( ref != null ) return ref;
+        //EmsScriptNode node = new EmsScriptNode( maybeFrozenNodeRef, getServices() );
+        return null;//node.getLiveNodeRefFromVersion();
     }
+//    public static void cacheNodeVersion( EmsScriptNode node ) {
+//        if ( activeVersionCaching && NodeUtil.exists( node ) ) {
+//            Version v = node.getCurrentVersion();
+//            if ( doVersionCaching ) {
+//                EmsVersion cachedVersion = versionCache.get( node.getId() );
+//            }
+//            NodeUtil.heisenCachePut( node.getName(),
+//                                     ( v != null && v.getFrozenStateNodeRef() != null )
+//                                     ? v.getFrozenStateNodeRef()
+//                                     : node.getNodeRef() );
+//        }
+//    }
 
 
     public static StoreRef getStoreRef() {
@@ -2287,6 +2331,7 @@ public class NodeUtil {
 			contentData = ContentData.setEncoding( contentData, "UTF-8");
 		}
         artifactNode.makeSureNodeRefIsNotFrozen();
+        artifactNode.transactionCheck();
 		services.getNodeService().setProperty( artifactNode.getNodeRef(),
 		            							ContentModel.PROP_CONTENT,contentData );
 
@@ -2385,6 +2430,44 @@ public class NodeUtil {
             mc.invoke( false );
         } catch ( Throwable e ) {
             e.printStackTrace();
+        }
+    }
+
+    public static void transactionCheck( Log logger, EmsScriptNode node ) {
+        //logger.error( "inTransaction = " + NodeUtil.isInsideTransactionNow() );
+        if ( NodeUtil.isInsideTransactionNow() ) {
+            if ( NodeUtil.hasBeenOutsideTransaction() ) {
+                Exception e = new Exception();
+                logger.error( "In transaction when have been outside! " + node,
+                              e );
+            }
+            NodeUtil.setBeenInsideTransaction( true );
+        } else {
+            if ( NodeUtil.hasBeenInsideTransaction() ) {
+                Exception e = new Exception();
+                logger.error( "Outside transaction when have been inside! "
+                              + node, e );
+            }
+            NodeUtil.setBeenOutsideTransaction( true );
+        }
+    }
+
+    public static void transactionCheck( Logger logger, EmsScriptNode node ) {
+        //logger.error( "inTransaction = " + NodeUtil.isInsideTransactionNow() );
+        if ( NodeUtil.isInsideTransactionNow() ) {
+            if ( NodeUtil.hasBeenOutsideTransaction() ) {
+                Exception e = new Exception();
+                logger.error( "In transaction when have been outside! " + node,
+                              e );
+            }
+            NodeUtil.setBeenInsideTransaction( true );
+        } else {
+            if ( NodeUtil.hasBeenInsideTransaction() ) {
+                Exception e = new Exception();
+                logger.error( "Outside transaction when have been inside! "
+                              + node, e );
+            }
+            NodeUtil.setBeenOutsideTransaction( true );
         }
     }
 

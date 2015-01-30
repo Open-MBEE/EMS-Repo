@@ -107,7 +107,9 @@ def do20():
     if json_output:
         j = json.loads(json_output)
         #print "j=" + str(j)
-        modDate = j['workspace2']['updatedElements'][0]['modified']
+        if j and j['workspace2'] and j['workspace2']['updatedElements'] and \
+        len(j['workspace2']['updatedElements']) > 0:
+            modDate = j['workspace2']['updatedElements'][0]['modified']
     set_gv4(modDate)
     
 def set_json_output_to_gv1():
@@ -450,7 +452,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
         else:
             # Perform diff:
             if use_json_diff:
-                cp = ".:%s:../../target/mms-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes"%mbee_util_jar_path()
+                cp = ".:%s:../../target/mms-repo-ent-war/WEB-INF/lib/json-20140107.jar:../../target/mms-repo-war/WEB-INF/lib/json-20090211.jar:../../target/classes"%mbee_util_jar_path()
                 diff_cmd = "java -cp %s gov.nasa.jpl.view_repo.util.JsonDiff"%cp
             else:
                 diff_cmd = "diff"
@@ -699,7 +701,7 @@ create_curl_cmd(type="GET",data="search?keyword=some*",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
 common_filters,
-["test","workspaces","develop"],
+["test","workspaces"],
 None,
 None,
 80

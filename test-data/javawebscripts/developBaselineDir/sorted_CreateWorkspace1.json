@@ -1,5 +1,6 @@
 {"workspaces": [{
     "creator": "admin",
+    "description": "",
     "name": "wsA",
     "parent": "master",
     "qualifiedName": "master/wsA"

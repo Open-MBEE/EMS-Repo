@@ -1,18 +1,27 @@
 {"workspaces": [
     {
         "creator": "admin",
+        "description": "",
         "name": "wsA",
         "qualifiedName": "master/wsA"
     },
     {
         "creator": "admin",
+        "description": "",
         "name": "wsB",
         "qualifiedName": "master/wsA/wsB"
     },
     {
         "creator": "admin",
+        "description": "",
         "name": "wsT",
         "qualifiedName": "master/wsA/wsT"
+    },
+    {
+        "creator": "admin",
+        "description": "modified the workspace name and desc",
+        "name": "modifiedWorkspaceName",
+        "qualifiedName": "master/modifiedWorkspaceName"
     },
     {
         "name": "master",

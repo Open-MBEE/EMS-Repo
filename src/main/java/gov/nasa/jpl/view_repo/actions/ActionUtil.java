@@ -72,7 +72,8 @@ public class ActionUtil {
         EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), services, response);
         String recipient = (String) user.getProperty("cm:email");
 
-        sendEmailTo("europaems@jpl.nasa.gov", recipient, msg, subject, services);
+        String sender = services.getSysAdminParams().getAlfrescoHost() + "@jpl.nasa.gov";
+        sendEmailTo(sender, recipient, msg, subject, services);
     }
 
     /**
@@ -129,6 +130,7 @@ public class ActionUtil {
 
     public static void saveStringToFile(EmsScriptNode node, String mimeType, ServiceRegistry services, String data) {
         ContentWriter writer = services.getContentService().getWriter(node.getNodeRef(), ContentModel.PROP_CONTENT, true);
+        node.transactionCheck();
         writer.putContent(data.toString());
         setContentDataMimeType(writer, node, mimeType, services);
     }
@@ -144,6 +146,7 @@ public class ActionUtil {
         ContentData contentData = writer.getContentData();
         contentData = ContentData.setMimetype(contentData, mimetype);
         node.makeSureNodeRefIsNotFrozen();
+        node.transactionCheck();
         sr.getNodeService().setProperty(node.getNodeRef(), ContentModel.PROP_CONTENT, contentData);
     }
 

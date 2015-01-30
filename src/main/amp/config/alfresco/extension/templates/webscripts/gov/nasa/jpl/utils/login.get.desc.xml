@@ -5,4 +5,5 @@
   <authentication>user</authentication>
   <format default="json">argument</format>
   <family>EMS Utils</family>
+  <transaction>none</transaction>
 </webscript>

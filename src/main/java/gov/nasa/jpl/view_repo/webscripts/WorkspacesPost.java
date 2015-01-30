@@ -34,14 +34,12 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
@@ -74,15 +72,15 @@ public class WorkspacesPost extends AbstractJavaWebScript{
     protected boolean validateRequest(WebScriptRequest req, Status status) {
         return checkRequestContent ( req );
     }
-    
+
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-        
-        WorkspacesPost instance = new WorkspacesPost(repository, services);
-        instance.setServices( getServices() );
-        return instance.executeImplImpl( req, status, cache );
+
+        WorkspacesPost instance = new WorkspacesPost(repository, getServices());
+        return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
     }
 
+    @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache){
         printHeader( req );
         clearCaches();
@@ -141,17 +139,17 @@ public class WorkspacesPost extends AbstractJavaWebScript{
     public WorkspaceNode createWorkSpace(String sourceWorkId, String newWorkName, Date cpyTime,
                                JSONObject jsonObject, String user, Status status) throws JSONException {
         status.setCode( HttpServletResponse.SC_OK );
-        
+
         String sourceWorkspaceId = null;
         String newWorkspaceId = null;
         String workspaceName = null;
         String desc = null;
         Date copyTime = null;
-        
+
         // If the workspace is supplied in the json object then get all parameters from there
         // and ignore any URL parameters:
         if (jsonObject != null) {
-            
+
             JSONArray jarr = jsonObject.getJSONArray("workspaces");
             JSONObject wsJson = jarr.getJSONObject( 0 );  // Will only post/update one workspace
             sourceWorkspaceId = wsJson.optString( "parent", null );
@@ -166,17 +164,17 @@ public class WorkspacesPost extends AbstractJavaWebScript{
             workspaceName = newWorkName;   // The name is given on the URL typically, not the ID
             copyTime = cpyTime;
         }
-        
+
         if( (newWorkspaceId != null && newWorkspaceId.equals( "master" )) ||
             (workspaceName != null && workspaceName.equals( "master" )) ) {
             log(LogLevel.WARNING, "Cannot change attributes of the master workspace.", HttpServletResponse.SC_BAD_REQUEST);
             status.setCode( HttpServletResponse.SC_BAD_REQUEST );
             return null;
         }
-        
+
         // Only create the workspace if the workspace id was not supplied:
         if (newWorkspaceId == null) {
-            
+
             WorkspaceNode srcWs =
                     WorkspaceNode.getWorkspaceFromId( sourceWorkspaceId,
                                                       services,
@@ -189,26 +187,29 @@ public class WorkspacesPost extends AbstractJavaWebScript{
             } else {
                 EmsScriptNode folder = null;
                 WorkspaceNode dstWs = null;
-                UserTransaction trx;
-                trx = services.getTransactionService().getNonPropagatingUserTransaction();
-                try {
-                    trx.begin();
-                    dstWs = WorkspaceNode.createWorkspaceFromSource(workspaceName, user, sourceWorkspaceId, 
-                                                                    copyTime, folder, getServices(), 
+//                UserTransaction trx;
+//                trx = services.getTransactionService().getNonPropagatingUserTransaction();
+//                try {
+//                    trx.begin();
+//                    NodeUtil.setInsideTransactionNow( true );
+                    dstWs = WorkspaceNode.createWorkspaceFromSource(workspaceName, user, sourceWorkspaceId,
+                                                                    copyTime, folder, getServices(),
                                                                     getResponse(), status, desc);
-                    trx.commit();
-                } catch (Throwable e) {
-                    try {
-                        e.printStackTrace();
-                        trx.rollback();
-                    } catch (Throwable ee) {
-                        ee.printStackTrace();
-                    }
-                }
+//                    trx.commit();
+//                    NodeUtil.setInsideTransactionNow( false );
+//                } catch (Throwable e) {
+//                    try {
+//                        e.printStackTrace();
+//                        trx.rollback();
+//                        NodeUtil.setInsideTransactionNow( false );
+//                    } catch (Throwable ee) {
+//                        ee.printStackTrace();
+//                    }
+//                }
 
                 if (dstWs != null) {
                     // keep history of the branch
-                    CommitUtil.branch( srcWs, dstWs,"", false, services, response );
+                    CommitUtil.branch( srcWs, dstWs,"", true, services, response );
                     return dstWs;
                 }
                 return null;
@@ -216,23 +217,23 @@ public class WorkspacesPost extends AbstractJavaWebScript{
         }
         // Otherwise, update the workspace:
         else {
-            
+
             // First try and find the workspace by id:
-            WorkspaceNode existingWs = 
+            WorkspaceNode existingWs =
                     WorkspaceNode.getWorkspaceFromId( newWorkspaceId, services,
                                                       response, status, // false,
-                                                      user );   
-            
+                                                      user );
+
             // Workspace was found, so update it:
             if ( existingWs != null ) {
-                            
+
                 if (existingWs.isDeleted()) {
-                    existingWs.removeAspect( "ems:Deleted" ); 
+                    existingWs.removeAspect( "ems:Deleted" );
                     log(LogLevel.INFO, "Workspace undeleted and modified", HttpServletResponse.SC_OK);
                 } else {
                     log(LogLevel.INFO, "Workspace is modified", HttpServletResponse.SC_OK);
                 }
-                
+
                 // Update the name/description:
                 // Note: allowing duplicate workspace names, so no need to check for other
                 //       workspaces with the same name
@@ -252,6 +253,6 @@ public class WorkspacesPost extends AbstractJavaWebScript{
         }
 
     }
-    
+
 }
 

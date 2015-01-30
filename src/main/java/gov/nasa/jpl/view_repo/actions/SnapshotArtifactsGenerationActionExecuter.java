@@ -140,7 +140,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         catch(Exception ex){
         	System.out.println("Failed to complete snapshot artifact(s) generation!");
         	ex.printStackTrace();
-        	ActionUtil.sendEmailToModifier(jobNode, "An unexpected error occurred and your snapshot artifact generation failed.", "[EuropaEMS] Snapshot Generation Failed", services, response);
+        	ActionUtil.sendEmailToModifier(jobNode, "An unexpected error occurred and your snapshot artifact generation failed. " + ex.getMessage(), "[EuropaEMS] Snapshot Generation Failed", services, response);
         }
     }
 
@@ -152,11 +152,11 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     private String buildEmailMessage(JSONObject snapshot) throws Exception{
     	StringBuffer buf = new StringBuffer();
     	try{
-    		String hostname = ActionUtil.getHostName();
-            if (!hostname.endsWith( ".jpl.nasa.gov" )) {
-                hostname += ".jpl.nasa.gov";
-            }
-            String contextUrl = "https://" + hostname + "/alfresco";
+    		//String hostname = ActionUtil.getHostName();
+            //if (!hostname.endsWith( ".jpl.nasa.gov" )) {
+            //    hostname += ".jpl.nasa.gov";
+            //}
+            //String contextUrl = "https://" + hostname + "/alfresco";
 	    	JSONArray formats = (JSONArray)snapshot.getJSONArray("formats");
 	    	for(int i=0; i < formats.length(); i++){
 				JSONObject format = formats.getJSONObject(i);
@@ -165,7 +165,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 				buf.append("Snapshot ");
 				buf.append(formatType.toUpperCase());
 				buf.append(": ");
-				buf.append(contextUrl);
+//				buf.append(contextUrl);
 				buf.append(formatUrl);
 				buf.append(System.lineSeparator());
 				buf.append(System.lineSeparator());
