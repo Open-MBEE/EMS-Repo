@@ -2383,9 +2383,9 @@ public class NodeUtil {
                         path = path.substring( 1 );
                     }
                 }
-                path = path.replace( childPath, "" );
+                path = path.replaceFirst( childPath, "" );
                 if (!path.isEmpty()) {
-                    return getOrCreatePath(child, path.replace(childPath, ""));
+                    return getOrCreatePath(child, path);
                 } else {
                     return child;
                 }
