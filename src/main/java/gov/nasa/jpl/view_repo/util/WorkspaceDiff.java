@@ -362,7 +362,7 @@ public class WorkspaceDiff implements Serializable {
             // Go up the parent tree of the other workspace until you find the workspace
             // that is branched off the common parent:
             WorkspaceNode otherWsParent = getChildOfCommonParent(otherWs, parentWs);
-            Date creationDate = otherWsParent != null ? otherWsParent.getCreationDate() : null;
+            Date creationDate = otherWsParent != null ? otherWsParent.getCopyOrCreationTime() : null;
                     
             return lastModified != null && creationDate != null && lastModified.after( creationDate );
         }
@@ -380,8 +380,8 @@ public class WorkspaceDiff implements Serializable {
             WorkspaceNode wsParent1 = getChildOfCommonParent(ws1, parentWs);
             WorkspaceNode wsParent2 = getChildOfCommonParent(ws2, parentWs);
 
-            Date creationDate1 = wsParent1 != null ? wsParent1.getCreationDate() : null;
-            Date creationDate2 = wsParent2 != null ? wsParent2.getCreationDate() : null;
+            Date creationDate1 = wsParent1 != null ? wsParent1.getCopyOrCreationTime() : null;
+            Date creationDate2 = wsParent2 != null ? wsParent2.getCopyOrCreationTime(): null;
             
             // Find the minimum of the creation time:
             if (creationDate1 != null && creationDate2 != null && lastModified1 != null &&
