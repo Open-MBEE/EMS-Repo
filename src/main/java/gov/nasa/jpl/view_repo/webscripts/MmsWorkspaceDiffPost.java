@@ -173,13 +173,18 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		        JSONArray elements = new JSONArray();
 		        final MmsModelDelete deleteService = new MmsModelDelete(repository, services);
 		    	
-		    	new EmsTransaction(getServices(), getResponse(), getResponseStatus()) {
-					
-					@Override
-					public void run() throws Exception {
-						succ = foo(req);
-					}
+		        if (runWithoutTransactions) {
+                    succ = foo(req);
+		        }
+		        else {
+    		    	new EmsTransaction(getServices(), getResponse(), getResponseStatus()) {
+    					
+    					@Override
+    					public void run() throws Exception {
+    						succ = foo(req);
+    					}
 				};
+		        }
 				if ( !succ ) return;
 				
 		        // Add/update the elements in the target workspace:
@@ -211,40 +216,61 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	            Set<EmsScriptNode> updatedElements = handleUpdate( top, status, targetWs, false,
 	                                                               model, false );
 
-
 	            // Delete the elements in the target workspace:
 		        WorkspaceDiff deleteWsDiff = null;
 	            if (srcJson.has( "deletedElements" )) {
 	                final JSONArray deleted = srcJson.getJSONArray( "deletedElements" );
 	                deleteService.setWsDiff( targetWs );
 
-	                new EmsTransaction(getServices(), getResponse(), getResponseStatus()) {
-			    		@Override
-			    		public void run() throws Exception {
-		                    for (int ii = 0; ii < deleted.length(); ii++) {
-		                        String id = ((JSONObject)deleted.get(ii)).getString( "sysmlid" );
-		                        EmsScriptNode root = NodeUtil.findScriptNodeById( id, targetWs, null, false, services, response );
-		                        deleteService.handleElementHierarchy( root, targetWs, false );
-		                    }
-						}
-					};
+	                if (runWithoutTransactions) {
+                        for (int ii = 0; ii < deleted.length(); ii++) {
+                            String id = ((JSONObject)deleted.get(ii)).getString( "sysmlid" );
+                            EmsScriptNode root = NodeUtil.findScriptNodeById( id, targetWs, null, false, services, response );
+                            deleteService.handleElementHierarchy( root, targetWs, false );
+                        }
+	                }
+	                else {
+    	                new EmsTransaction(getServices(), getResponse(), getResponseStatus()) {
+    			    		@Override
+    			    		public void run() throws Exception {
+    		                    for (int ii = 0; ii < deleted.length(); ii++) {
+    		                        String id = ((JSONObject)deleted.get(ii)).getString( "sysmlid" );
+    		                        EmsScriptNode root = NodeUtil.findScriptNodeById( id, targetWs, null, false, services, response );
+    		                        deleteService.handleElementHierarchy( root, targetWs, false );
+    		                    }
+    						}
+    					};
+	                }
 
                     // Update the needed aspects of the deleted nodes:
 			        final WorkspaceDiff delWsDiff = deleteService.getWsDiff();
 			        deleteWsDiff = delWsDiff;
-	                new EmsTransaction(getServices(), getResponse(), getResponseStatus()) {
-			    		@Override
-			    		public void run() throws Exception {
-		                    for (EmsScriptNode deletedNode: delWsDiff.getDeletedElements().values()) {
-		                        if (deletedNode.exists()) {
-		                            deletedNode.removeAspect( "ems:Added" );
-		                            deletedNode.removeAspect( "ems:Updated" );
-		                            deletedNode.removeAspect( "ems:Moved" );
-		                            deletedNode.createOrUpdateAspect( "ems:Deleted" );
-		                        }
-		                    }
-						}
-					};
+			        
+	                if (runWithoutTransactions) {
+                        for (EmsScriptNode deletedNode: delWsDiff.getDeletedElements().values()) {
+                            if (deletedNode.exists()) {
+                                deletedNode.removeAspect( "ems:Added" );
+                                deletedNode.removeAspect( "ems:Updated" );
+                                deletedNode.removeAspect( "ems:Moved" );
+                                deletedNode.createOrUpdateAspect( "ems:Deleted" );
+                            }
+                        }
+	                }
+	                else {
+    	                new EmsTransaction(getServices(), getResponse(), getResponseStatus()) {
+    			    		@Override
+    			    		public void run() throws Exception {
+    		                    for (EmsScriptNode deletedNode: delWsDiff.getDeletedElements().values()) {
+    		                        if (deletedNode.exists()) {
+    		                            deletedNode.removeAspect( "ems:Added" );
+    		                            deletedNode.removeAspect( "ems:Updated" );
+    		                            deletedNode.removeAspect( "ems:Moved" );
+    		                            deletedNode.createOrUpdateAspect( "ems:Deleted" );
+    		                        }
+    		                    }
+    						}
+    					};
+	                }
 	            }
 
 	            // Send deltas and make merge commit:
