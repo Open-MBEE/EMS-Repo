@@ -160,6 +160,7 @@ public class WorkspaceDiff implements Serializable {
         conflictedElements.clear();
         elements.clear();
         elementsVersions.clear(); // ??? REVIEW
+        Set< String > ids = new TreeSet< String >( );
 
         if ( nodeDiff == null ) {
             Debug.error("Trying WorkspaceDiff.populateMembers() when nodeDiff == null!");
@@ -189,7 +190,15 @@ public class WorkspaceDiff implements Serializable {
                 if ( ownerChange != null && ownerChange.first != null
                      && ownerChange.second != null
                      && !ownerChange.first.equals( ownerChange.second ) ) {
-                    movedElements.put( e.getKey(), e.getValue() );
+                    EmsScriptNode node = e.getValue();
+                    movedElements.put( e.getKey(), node);
+                    
+                    // Add this new owner to element ids, so it can be added to elements:
+                    EmsScriptNode newOwner = node != null ? node.getOwningParent( null ) : null;
+                    if (newOwner != null) {
+                        ids.add( newOwner.getSysmlId() );
+                    }
+                    
                 }
             }
         }
@@ -198,7 +207,6 @@ public class WorkspaceDiff implements Serializable {
         computeConflicted();
 
         // Elements
-        Set< String > ids = new TreeSet< String >( );
         Set< NodeRef > removedUpdated = new HashSet< NodeRef >(nodeDiff.getRemoved());
         removedUpdated.addAll( nodeDiff.getUpdated() );
         // Add all of the removed and updated ids:
