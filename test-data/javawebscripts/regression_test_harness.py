@@ -1127,7 +1127,7 @@ set_read_to_gv4
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff?workspace1=$gv1&workspace2=$gv2&timestamp1=$gv3&timestamp2=$gv4"),
 True, 
-common_filters+['"id"','"qualifiedId"'],
+common_filters+['"id"','"qualifiedId"','"timestamp"'],
 ["test","workspaces","develop", "develop2"]
 ],
 

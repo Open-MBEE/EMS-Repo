@@ -210,8 +210,6 @@
 
         "qualifiedName": "master/wsG1",
 
-        "timestamp": "2015-02-03T10:25:03.490-0800"
-
     },
 
     "workspace2": {
@@ -298,13 +296,19 @@
 
         "qualifiedName": "master/wsG2",
 
-        "timestamp": "2015-02-03T10:25:08.602-0800",
-
         "updatedElements": [{
 
             "creator": "admin",
 
             "documentation": "something",
+
+            "specialization": {"value": [{
+
+                "string": "dlam_string",
+
+                "type": "LiteralString"
+
+            }]},
 
             "sysmlid": "x"
 

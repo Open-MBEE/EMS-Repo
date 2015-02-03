@@ -26,6 +26,30 @@
 
         "description": "",
 
+        "name": "wsG1",
+
+        "qualifiedName": "master/wsG1"
+
+    },
+
+    {
+
+        "creator": "admin",
+
+        "description": "",
+
+        "name": "wsG2",
+
+        "qualifiedName": "master/wsG2"
+
+    },
+
+    {
+
+        "creator": "admin",
+
+        "description": "",
+
         "name": "wsB",
 
         "qualifiedName": "master/wsA/wsB"

@@ -178,9 +178,6 @@ public class WorkspaceDiff implements Serializable {
         refs = nodeDiff.getUpdated();
         addDiffs( refs );
 
-        // Fix nested elements (value specifications, Expressions, ???)
-        //nodeDiff.fixValueSpecifications(this);
-
         // Moved
         for ( Entry< String, EmsScriptNode > e : updatedElements.entrySet() ) {
             Map< String, Pair< Object, Object >> changes =
