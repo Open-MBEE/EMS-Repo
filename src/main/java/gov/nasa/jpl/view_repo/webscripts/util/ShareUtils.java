@@ -51,7 +51,8 @@ public class ShareUtils {
             String host = "127.0.0.1";
 
             REPO_URL = String.format("%s://%s:%s/alfresco", protocol, host, repoPort);
-            SHARE_URL = String.format("%s://%s:%s/share", protocol, host, sharePort);
+//            SHARE_URL = String.format("%s://%s:%s/share", protocol, host, sharePort);
+            SHARE_URL = String.format("http://localhost:%s/share", sharePort);
             LOGIN_URL = SHARE_URL + "/page/dologin";
             CREATE_SITE_URL = SHARE_URL + "/page/modules/create-site";
             UPDATE_GROUP_URL = REPO_URL + "/service/api/groups";
@@ -101,7 +102,7 @@ public class ShareUtils {
         }
         
         // make calling user Site manger
-        // need additional site, because short name is prepended with site_
+        // NOTE: need additional site_, because short name is prepended with site_
         String role = String.format("site_%s_SiteManager", siteId);
         String currentUsername = services.getAuthenticationService().getCurrentUserName();
         String groupUrl = String.format("%s/%s/children/%s", UPDATE_GROUP_URL, role, currentUsername);
