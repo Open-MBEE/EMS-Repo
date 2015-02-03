@@ -14,6 +14,7 @@ import sys
 import optparse
 import glob
 import json
+import datetime
 
 CURL_STATUS = '-w "\\n%{http_code}\\n"'
 CURL_POST_FLAGS_NO_DATA = "-X POST"
@@ -48,6 +49,8 @@ gv2 = None
 gv3 = None
 gv4 = None
 gv5 = None
+gv6 = None
+
 # These capture the curl output for any teardown functions
 orig_output = None
 filtered_output = None
@@ -69,6 +72,9 @@ def set_gv4( v ):
 def set_gv5( v ):
     global gv5
     gv5 = v
+def set_gv6( v ):
+    global gv6
+    gv6 = v
 
 import re
 
@@ -144,6 +150,8 @@ def set_wsid_to_gv(gv):
             set_gv4(j["workspaces"][0]["id"])
         elif gv == 5:
             set_gv5(j["workspaces"][0]["id"])
+        elif gv == 6:
+            set_gv6(j["workspaces"][0]["id"])
             
 def set_wsid_to_gv1():
     '''Get the json output, and sets gv1 to the that workspace id'''
@@ -164,6 +172,15 @@ def set_wsid_to_gv4():
 def set_wsid_to_gv5():
     '''Get the json output, and sets gv5 to the that workspace id'''
     set_wsid_to_gv(5)
+    
+def set_wsid_to_gv6():
+    '''Get the json output, and sets gv6 to the that workspace id'''
+    set_wsid_to_gv(6)
+    
+def get_current_time(delay=3):
+    '''Gets the current time and adds delay mins b/c it lags behind'''
+    a = datetime.datetime.now() + datetime.timedelta(minutes=delay)
+    return a.strftime("%Y-%m-%dT%H:%M:%X.000")
     
 def create_command_line_options():
 
@@ -366,7 +383,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
     global filtered_output
     global orig_json
     global filtered_json
-    global gv1, gv2, gv3, gv4, gv5
+    global gv1, gv2, gv3, gv4, gv5, gv6
 
 #     result_json = "%s/test%d.json"%(result_dir,test_num)
 #     result_orig_json = "%s/test%d_orig.json"%(result_dir,test_num)
@@ -403,6 +420,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
     curl_cmd = str(curl_cmd).replace("$gv3", str(gv3))
     curl_cmd = str(curl_cmd).replace("$gv4", str(gv4))
     curl_cmd = str(curl_cmd).replace("$gv5", str(gv5))
+    curl_cmd = str(curl_cmd).replace("$gv6", str(gv6))
 
     print "Executing curl cmd: \n"+str(curl_cmd)
     
@@ -944,7 +962,7 @@ True,
 common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
-
+        
 # This test case depends on the previous two
 [
 230,
@@ -952,6 +970,44 @@ common_filters,
 "Compare workspaces",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff?workspace1=$gv1&workspace2=$gv5"),
+True, 
+common_filters+['"id"','"qualifiedId"'],
+["test","workspaces","develop", "develop2"]
+],
+        
+# This test case depends on previous ones
+[
+231,
+"PostToWorkspace3",
+"Post element z to workspace",
+create_curl_cmd(type="POST",data="z.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="$gv1/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+# This test case depends on previous ones
+[
+232,
+"CreateWorkspaceWithBranchTime2",
+"Create workspace with a branch time using the current time for the branch time",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                post_type="",branch="wsT2?sourceWorkspace=$gv1&copyTime="+get_current_time()),
+True, 
+common_filters+['"branched"','"created"','"id"','"qualifiedId"', '"parent"'],
+["test","workspaces","develop", "develop2"],
+None,
+set_wsid_to_gv6
+],
+        
+# This test case depends on the previous ones
+[
+233,
+"CompareWorkspacesWithBranchTimes",
+"Compare workspaces both which have a branch time and with a modified element on the common parent",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff?workspace1=$gv5&workspace2=$gv6"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
 ["test","workspaces","develop", "develop2"]
