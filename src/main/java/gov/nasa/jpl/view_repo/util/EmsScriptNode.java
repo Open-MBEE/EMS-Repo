@@ -3175,7 +3175,7 @@ public class EmsScriptNode extends ScriptNode implements
      */
     @Override
     public boolean equals( Object obj ) {
-        return equals( obj, false );
+        return equals( obj, true );
     }
 
     /**
