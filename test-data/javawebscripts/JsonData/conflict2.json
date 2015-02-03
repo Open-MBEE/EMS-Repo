@@ -1,0 +1,7 @@
+{"elements":[
+    {"name":"conflict",
+    "sysmlid":"conflict",
+    "owner":"123456",
+    "documentation":"this will create a conflict!",
+    "specialization":{"type":"Element"}}
+]}

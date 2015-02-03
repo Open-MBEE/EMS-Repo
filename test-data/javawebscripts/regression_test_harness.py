@@ -908,6 +908,42 @@ True,
 common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
+        
+# This test case depends on test 160 thats sets gv1
+[
+221,
+"PostToWorkspaceForConflict1",
+"Post element to workspace1 so that we get a conflict",
+create_curl_cmd(type="POST",data="conflict1.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="$gv1/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+# This test case depends on test 220 thats sets gv5
+[
+222,
+"PostToWorkspaceForConflict2",
+"Post element to workspace with a branch time so that we get a conflict",
+create_curl_cmd(type="POST",data="conflict2.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="$gv5/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+# This test case depends on test 220 thats sets gv5
+[
+223,
+"PostToWorkspaceForMoved",
+"Post element to workspace with a branch time so that we get a moved element",
+create_curl_cmd(type="POST",data="moved.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="$gv5/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
 
 # This test case depends on the previous two
 [
