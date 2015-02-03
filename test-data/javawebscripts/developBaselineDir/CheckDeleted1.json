@@ -38,9 +38,9 @@
 
         "description": "",
 
-        "name": "wsA",
+        "name": "wsT",
 
-        "qualifiedName": "master/wsA"
+        "qualifiedName": "master/wsA/wsT"
 
     },
 
@@ -50,9 +50,21 @@
 
         "description": "",
 
-        "name": "wsT",
+        "name": "wsT2",
 
-        "qualifiedName": "master/wsA/wsT"
+        "qualifiedName": "master/wsA/wsT2"
+
+    },
+
+    {
+
+        "creator": "admin",
+
+        "description": "",
+
+        "name": "wsA",
+
+        "qualifiedName": "master/wsA"
 
     }
 
