@@ -4748,6 +4748,12 @@ public class EmsScriptNode extends ScriptNode implements
         if ( kind != null ) {
             putInJson( json, Acm.JSON_CONNECTOR_KIND, kind, filter );
         }
+        
+        NodeRef connectorType = (NodeRef) node.getProperty( Acm.ACM_CONNECTOR_TYPE);
+        if ( connectorType != null ) {
+            EmsScriptNode connectorTypeNode = new EmsScriptNode(connectorType, services, response);
+            putInJson( json, Acm.JSON_CONNECTOR_TYPE, connectorTypeNode.getSysmlId(), filter);
+        }
 
         putInJson( json, Acm.JSON_CONNECTOR_VALUE,
                    addInternalJSON( node.getProperty(Acm.ACM_CONNECTOR_VALUE), dateTime ),

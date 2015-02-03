@@ -769,6 +769,10 @@
                         { "$ref": "#/definitions/TimeExpression"},
                         { "$ref": "#/definitions/TimeInterval"}
                     ]
+                },
+                "connectorType": {
+                    "type": "string",
+                    "description": "ID for the connector type element"
                 }
             },
             "allOf": [
