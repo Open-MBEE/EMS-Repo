@@ -256,6 +256,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
         DBParagraph p = new DBParagraph();
         p.setId( src );
+    	String s;
         if (srcType != null && srcType.compareTo( "reference" ) == 0 ) {
             EmsScriptNode node = findScriptNodeById( src, workspace, null, false );
             if(node == null){
@@ -306,7 +307,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	                p.setText( sb.toString() );
 	            }
 	            else {
-	                String s = (String)node.getProperty( Acm.SYSML + srcProp );
+	                s = (String)node.getProperty( Acm.SYSML + srcProp );
 	                s = handleTransclusion( src, srcProp, s, null, 0 );
 	                s = handleEmbeddedImage(src, s, section);
 	                s = HtmlSanitize( s );
@@ -315,14 +316,21 @@ public class SnapshotPost extends AbstractJavaWebScript {
             }
         }
         else {
+        	//p.setText( HtmlSanitize( (String)obj.opt( "text" ) ) );
+            
             if ( srcProp != null && !srcProp.isEmpty() ) {
-                String s = (String)obj.opt( Acm.SYSML + srcProp );
+                s = (String)obj.opt( Acm.SYSML + srcProp );
                 s = handleTransclusion( src, srcProp, s, null, 0 );
-                s = handleEmbeddedImage(src, s, section);
-                s = HtmlSanitize( s );
-                if(s != null && !s.isEmpty()) p.setText(s);
             }
-            else p.setText( HtmlSanitize( (String)obj.opt( "text" ) ) );
+            else{ 
+            	s = obj.optString("text");
+            	s = handleTransclusion( src, "text", s, null, 0 );
+            }
+        	
+            s = handleEmbeddedImage(src, s, section);
+            s = HtmlSanitize( s );
+            if(s != null && !s.isEmpty()) p.setText(s);
+
         }
         if ( p.getText() == null || p.getText().toString().isEmpty() ) return null;
 
@@ -381,9 +389,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                           String snapshotName, String contextPath,
                                           EmsScriptNode snapshotFolder,
                                           WorkspaceNode workspace, Date timestamp) throws Exception {
-//        log( LogLevel.INFO, "\ncreating DocBook snapshot for view Id: " + productId );
-//        log( LogLevel.INFO, "\ncreating DocBook snapshotname: " + snapshotName );
-
         if ( product == null ) {
             log( LogLevel.WARNING, "null [view] input parameter reference." );
             return null;
@@ -432,7 +437,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             docBookMgr.save();
         }
         catch ( Exception ex ) {
-            log( LogLevel.ERROR, "\nUnable to create DBBook! Failed to parse document.\n" + ex.getStackTrace() );
+            log( LogLevel.ERROR, "\nUnable to create DBBook! Failed to parse document.\n" + ex.getMessage() );
             ex.printStackTrace();
             throw new Exception( "Unable to create DBBook! Failed to parse document.\n", ex );
         }
