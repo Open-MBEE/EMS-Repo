@@ -1,0 +1,318 @@
+{
+
+    "workspace1": {
+
+        "elements": [
+
+            {
+
+                "creator": "admin",
+
+                "documentation": "something",
+
+                "editable": true,
+
+                "name": "300",
+
+                "owner": "123456",
+
+                "qualifiedName": "/JW_TEST/300",
+
+                "specialization": {
+
+                    "isDerived": false,
+
+                    "isSlot": false,
+
+                    "type": "Property",
+
+                    "value": [{
+
+                        "string": "dlam_string",
+
+                        "type": "LiteralString"
+
+                    }]
+
+                },
+
+                "sysmlid": "300"
+
+            },
+
+            {
+
+                "creator": "admin",
+
+                "documentation": "else",
+
+                "editable": true,
+
+                "name": "301",
+
+                "owner": "300",
+
+                "qualifiedName": "/JW_TEST/300/301",
+
+                "specialization": {
+
+                    "allowedElements": [
+
+                        "301",
+
+                        "302",
+
+                        "303"
+
+                    ],
+
+                    "childrenViews": ["304"],
+
+                    "contains": [{
+
+                        "source": "301",
+
+                        "sourceProperty": "documentation",
+
+                        "sourceType": "reference",
+
+                        "type": "Paragraph"
+
+                    }],
+
+                    "displayedElements": [
+
+                        "301",
+
+                        "302",
+
+                        "303"
+
+                    ],
+
+                    "noSections": ["302"],
+
+                    "type": "Product",
+
+                    "view2view": [{
+
+                        "childrenViews": [
+
+                            "301",
+
+                            "302"
+
+                        ],
+
+                        "sysmlid": "301"
+
+                    }]
+
+                },
+
+                "sysmlid": "301"
+
+            },
+
+            {
+
+                "creator": "admin",
+
+                "documentation": "to",
+
+                "editable": true,
+
+                "name": "302",
+
+                "owner": "301",
+
+                "qualifiedName": "/JW_TEST/300/301/302",
+
+                "specialization": {
+
+                    "isDerived": false,
+
+                    "isSlot": false,
+
+                    "type": "Property",
+
+                    "value": [{
+
+                        "string": "dlam_string",
+
+                        "type": "LiteralString"
+
+                    }]
+
+                },
+
+                "sysmlid": "302"
+
+            },
+
+            {
+
+                "creator": "admin",
+
+                "editable": true,
+
+                "name": "holding_bin",
+
+                "owner": "no_project",
+
+                "qualifiedName": "/no_project/holding_bin",
+
+                "specialization": {"type": "Package"},
+
+                "sysmlid": "holding_bin_no_site_no_project"
+
+            },
+
+            {
+
+                "creator": "admin",
+
+                "documentation": "x is x",
+
+                "editable": true,
+
+                "name": "300",
+
+                "owner": "holding_bin_no_site_no_project",
+
+                "qualifiedName": "/no_project/holding_bin/300",
+
+                "specialization": {
+
+                    "isDerived": false,
+
+                    "isSlot": false,
+
+                    "type": "Property",
+
+                    "value": [{
+
+                        "string": "the x value",
+
+                        "type": "LiteralString"
+
+                    }]
+
+                },
+
+                "sysmlid": "x"
+
+            }
+
+        ],
+
+        "name": "wsG1",
+
+        "qualifiedName": "master/wsG1",
+
+        "timestamp": "2015-02-03T10:25:03.490-0800"
+
+    },
+
+    "workspace2": {
+
+        "addedElements": [
+
+            {
+
+                "creator": "admin",
+
+                "documentation": "y is y",
+
+                "editable": true,
+
+                "owner": "302",
+
+                "qualifiedName": "/JW_TEST/300/301/302/null",
+
+                "specialization": {
+
+                    "isDerived": false,
+
+                    "isSlot": false,
+
+                    "type": "Property",
+
+                    "value": [{
+
+                        "string": "the y value",
+
+                        "type": "LiteralString"
+
+                    }]
+
+                },
+
+                "sysmlid": "y"
+
+            },
+
+            {
+
+                "creator": "admin",
+
+                "documentation": "z is z",
+
+                "editable": true,
+
+                "owner": "302",
+
+                "qualifiedName": "/JW_TEST/300/301/302/null",
+
+                "specialization": {
+
+                    "isDerived": false,
+
+                    "isSlot": false,
+
+                    "type": "Property",
+
+                    "value": [{
+
+                        "string": "the z value",
+
+                        "type": "LiteralString"
+
+                    }]
+
+                },
+
+                "sysmlid": "z"
+
+            }
+
+        ],
+
+        "conflictedElements": [],
+
+        "deletedElements": [],
+
+        "movedElements": [],
+
+        "name": "wsG2",
+
+        "qualifiedName": "master/wsG2",
+
+        "timestamp": "2015-02-03T10:25:08.602-0800",
+
+        "updatedElements": [{
+
+            "creator": "admin",
+
+            "documentation": "something",
+
+            "sysmlid": "x"
+
+        }]
+
+    }
+
+}
+
+200
+

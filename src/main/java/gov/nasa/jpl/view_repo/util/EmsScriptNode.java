@@ -4952,11 +4952,16 @@ public class EmsScriptNode extends ScriptNode implements
                         Object propValFnd = getProperty( acmProp );
                         if (propValFnd instanceof NodeRef) {
                             EmsScriptNode node = new EmsScriptNode((NodeRef)propValFnd, services);
-                            if ( node.equals( propVal ) ) return true;
+                            if ( node.equals( propVal, true ) ) return true;
                         }
                         else if (propValFnd instanceof List) {
                             List<NodeRef> nrList = (ArrayList<NodeRef>) propValFnd;
-                            if ( nrList.contains( propVal.getNodeRef() ) ) return true;
+                            for (NodeRef ref : nrList) {
+                                if (ref != null) {
+                                    EmsScriptNode node = new EmsScriptNode(ref, services);
+                                    if (node.equals( propVal, true)) return true;
+                                }
+                            }
                         }
                     }
                     else {

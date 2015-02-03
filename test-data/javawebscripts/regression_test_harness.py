@@ -135,7 +135,7 @@ def do176():
     set_gv3(json.dumps(j))
     
 def set_wsid_to_gv(gv):
-    '''Get the json output, and sets gv1 to the that workspace id'''
+    '''Get the json output, and sets gvi to the that workspace id'''
     json_output = get_json_output_no_status()
     j = json.loads(json_output)
     
@@ -176,6 +176,49 @@ def set_wsid_to_gv5():
 def set_wsid_to_gv6():
     '''Get the json output, and sets gv6 to the that workspace id'''
     set_wsid_to_gv(6)
+    
+def set_read_to_gv(gv):
+    '''Get the json output, and sets gvi to the read time'''
+    json_output = get_json_output_no_status()
+    j = json.loads(json_output)
+    
+    if j:
+        if gv == 1:
+            set_gv1(j["elements"][0]["read"])
+        elif gv == 2:
+            set_gv2(j["elements"][0]["read"])
+        elif gv == 3:
+            set_gv3(j["elements"][0]["read"])
+        elif gv == 4:
+            set_gv4(j["elements"][0]["read"])
+        elif gv == 5:
+            set_gv5(j["elements"][0]["read"])
+        elif gv == 6:
+            set_gv6(j["elements"][0]["read"])
+            
+def set_read_to_gv1():
+    '''Get the json output, and sets gv1 to the read time'''
+    set_read_to_gv(1)
+    
+def set_read_to_gv2():
+    '''Get the json output, and sets gv2 to the read time'''
+    set_read_to_gv(2)
+    
+def set_read_to_gv3():
+    '''Get the json output, and sets gv3 to the read time'''
+    set_read_to_gv(3)
+    
+def set_read_to_gv4():
+    '''Get the json output, and sets gv4 to the read time'''
+    set_read_to_gv(4)
+    
+def set_read_to_gv5():
+    '''Get the json output, and sets gv5 to the read time'''
+    set_read_to_gv(5)
+    
+def set_read_to_gv6():
+    '''Get the json output, and sets gv6 to the read time'''
+    set_read_to_gv(6)
     
 def get_current_time(delay=3):
     '''Gets the current time and adds delay mins b/c it lags behind'''
@@ -385,10 +428,6 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
     global filtered_json
     global gv1, gv2, gv3, gv4, gv5, gv6
 
-#     result_json = "%s/test%d.json"%(result_dir,test_num)
-#     result_orig_json = "%s/test%d_orig.json"%(result_dir,test_num)
-#     baseline_json = "%s/test%d.json"%(baseline_dir,test_num)
-#     baseline_orig_json = "%s/test%d_orig.json"%(baseline_dir,test_num)
     result_json = "%s/%s.json"%(result_dir,test_name)
     result_orig_json = "%s/%s_orig.json"%(result_dir,test_name)
     baseline_json = "%s/%s.json"%(baseline_dir,test_name)
@@ -593,6 +632,8 @@ tests =[\
 # Use JsonDiff, 
 # Output Filters (ie lines in the .json output with these strings will be filtered out)
 # Branch Names that will run this test by default
+# Set up function (Optional)
+# Tear down function (Optional)
 # Delay in seconds before running the test (Optional)
 # ]
 
@@ -1008,6 +1049,83 @@ set_wsid_to_gv6
 "Compare workspaces both which have a branch time and with a modified element on the common parent",
 create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff?workspace1=$gv5&workspace2=$gv6"),
+True, 
+common_filters+['"id"','"qualifiedId"'],
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+234,
+"CreateWorkspaceAgain1",
+"Create workspace for another diff test",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                post_type="",branch="wsG1?sourceWorkspace=master"),
+True, 
+common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
+["test","workspaces","develop", "develop2"],
+None,
+set_wsid_to_gv1
+],
+        
+[
+235,
+"CreateWorkspaceAgain2",
+"Create workspace for another diff test",
+create_curl_cmd(type="POST",base_url=BASE_URL_WS,
+                post_type="",branch="wsG2?sourceWorkspace=master"),
+True, 
+common_filters+['"branched"','"created"','"id"','"qualifiedId"'],
+["test","workspaces","develop", "develop2"],
+None,
+set_wsid_to_gv2
+],
+        
+# This test case depends on test 234
+[
+236,
+"PostToWorkspaceG1",
+"Post element to workspace wsG1",
+create_curl_cmd(type="POST",data="x.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="$gv1/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"],
+None,
+set_read_to_gv3
+],
+
+[
+237,
+"PostToMaster",
+"Post element to master for a later diff",
+create_curl_cmd(type="POST",data="y.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+# This test case depends on test 235
+[
+238,
+"PostToWorkspaceG2",
+"Post element to workspace wsG2",
+create_curl_cmd(type="POST",data="z.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="$gv2/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"],
+None,
+set_read_to_gv4
+],
+        
+# This test case depends on test 234 and 235
+[
+239,
+"CompareWorkspacesG1G2",
+"Compare workspaces wsG1 and wsG2 with timestamps",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff?workspace1=$gv1&workspace2=$gv2&timestamp1=$gv3&timestamp2=$gv4"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
 ["test","workspaces","develop", "develop2"]
@@ -1547,6 +1665,4 @@ if __name__ == '__main__':
             print "\n"
     
     sys.exit(failed_tests)
-    
-    
     
