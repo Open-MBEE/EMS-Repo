@@ -1,0 +1,38 @@
+{"elements": [{
+
+    "creator": "admin",
+
+    "documentation": "z is z",
+
+    "editable": true,
+
+    "owner": "302",
+
+    "qualifiedId": "/123456/300/301/302/z",
+
+    "qualifiedName": "/JW_TEST/300/301/302/null",
+
+    "specialization": {
+
+        "isDerived": false,
+
+        "isSlot": false,
+
+        "type": "Property",
+
+        "value": [{
+
+            "string": "the z value",
+
+            "type": "LiteralString"
+
+        }]
+
+    },
+
+    "sysmlid": "z"
+
+}]}
+
+200
+

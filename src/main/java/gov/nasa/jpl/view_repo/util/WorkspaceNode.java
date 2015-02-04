@@ -9,6 +9,7 @@ import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
+import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -116,6 +117,11 @@ public class WorkspaceNode extends EmsScriptNode {
     public Date getCopyTime() {
         Date time = (Date)getProperty("ems:copyTime");
         return time;
+    }
+    
+    public Date getCopyOrCreationTime() {
+        Date copyTime = getCopyTime();
+        return copyTime != null ? copyTime : getCreationDate();
     }
 
 //    /**
@@ -229,15 +235,29 @@ public class WorkspaceNode extends EmsScriptNode {
     	String cmName = wsName + '_' + getName( parentWorkspace );
     	String cmTitle = cmName;
 
-    	// Make sure the workspace does not already exist in the target folder
-    	EmsScriptNode child = folder.childByNamePath( "/" + cmName, true, null, false );
-    	if ( child != null && child.exists() ) {
-            String msg = "ERROR! Trying to create an workspace in the same folder with the same name, " + cmName + "!\n";
-            response.append( msg );
-            if ( status != null ) {
-                status.setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
+    	// Make sure the workspace does not already exist in the target folder with the same
+    	// parent workspace:
+    	Set<EmsScriptNode> childs = WebScriptUtil.getAllNodesInPath(folder.getQnamePath(),
+    	                                                            "TYPE",
+    	                                                            "cm:folder",
+    	                                                            null,null,
+    	                                                            services,response);
+    	for (EmsScriptNode child : childs) {
+    	    if ( child != null && child.exists() ) {
+    	        String childWsName = (String)child.getProperty("ems:workspace_name");
+    	        NodeRef childWsParentRef = (NodeRef)child.getProperty("ems:parent");
+    	        EmsScriptNode childWsParent = childWsParentRef != null ? new EmsScriptNode(childWsParentRef, services) : null;
+    	        String childWsParentName = childWsParent != null ? childWsParent.getId() : null;
+    	        if (childWsName != null && childWsName.equals( wsName ) && 
+    	            ((childWsParentName == null && sourceNameOrId.equals( "master" )) || (childWsParentName != null && childWsParentName.equals( sourceNameOrId )))) {
+                    String msg = "ERROR! Trying to create an workspace with the same user: "+folder.getName()+", the same name: "+wsName+", and same parent workspace: "+sourceNameOrId+"\n";
+                    response.append( msg );
+                    if ( status != null ) {
+                        status.setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
+                    }
+                    return null;
+    	        }
             }
-            return null;
     	}
 
     	// Make sure the workspace does not already exist otherwise
@@ -543,7 +563,7 @@ public class WorkspaceNode extends EmsScriptNode {
 
     public Set< NodeRef > getChangedNodeRefs( Date dateTime ) {
         Set< NodeRef > changedNodeRefs = new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);
-        if ( dateTime != null && dateTime.before( getCreationDate() ) ) {
+        if ( dateTime != null && dateTime.before( getCopyOrCreationTime() ) ) {
             return changedNodeRefs;
         }
         ArrayList< NodeRef > refs =
@@ -607,14 +627,31 @@ public class WorkspaceNode extends EmsScriptNode {
                                                                   ServiceRegistry services,
                                                                   StringBuffer response,
                                                                   Status status ) {
-        //System.out.println( getName(thisWs) + ".getChangedNodeRefsWithRespectTo(" + getName(otherWs) + ", " + dateTime + ", " + otherTime +  ")" );
-
+        
         Set< NodeRef > changedNodeRefs =
                 new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);//getChangedNodeRefs());
         WorkspaceNode targetParent = getCommonParent( thisWs, otherWs );
         WorkspaceNode parent = thisWs;
         WorkspaceNode lastParent = parent;
-
+        Date thisCopyDate = thisWs != null ? thisWs.getCopyTime() : null;
+        Date otherCopyDate = otherWs != null ? otherWs.getCopyTime() : null;
+        Date thisCopyOrCreateDate = thisWs != null ? thisWs.getCopyOrCreationTime() : null;
+        
+        // Error if the timestamp is before the copy/creation time of the workspace:
+        if ( dateTime != null && thisCopyOrCreateDate != null && 
+             dateTime.before( thisCopyOrCreateDate ) ) {
+            String msg = "ERROR! Timestamp given: "+dateTime+" is before the branch/creation time of the workspace: "+thisCopyOrCreateDate;
+            if ( response != null ) {
+                response.append( msg + "\n" );
+                if ( status != null ) {
+                    status.setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                    msg );
+                }
+            }
+            Debug.error( false, msg );
+            return null;
+        }
+        
         // Get nodes in the workspace that have changed with respect to the
         // common parent. To avoid computation, these do not take time into
         // account except to rule out workspaces with changes only after
@@ -628,19 +665,44 @@ public class WorkspaceNode extends EmsScriptNode {
             parent = parent.getParentWorkspace();
             if ( parent != null ) lastParent = parent;
         }
+                
+        // Determine the min/max times to search for commits for.  We must
+        // accommodate both copyTime and following branches.
+        // When looking for commits on the common branch, 
+        // for "following" branches want look over the time range of 
+        // [max(T1,T2),min(T1,T2)], and [max(C1,C2),min(C1,C2)] for
+        // copyTime branches.
+        // Where Ti is the timestamp and Ci is the copy time of the workspace
 
-        // Now gather nodes in the common parent chain after otherTime and
-        // before dateTime. We need to get these from the transaction history
+        // If it is a copy time branch then look at the copy time, otherwise
+        // look at the time stamp:
+        Date thisCompareTime = thisCopyDate != null ? thisCopyDate : dateTime;
+        Date otherCompareTime = otherCopyDate != null ? otherCopyDate : otherTime;
+        
+        // If one of the times is null, then interpret it as now:
+        if (thisCompareTime == null && otherCompareTime != null) {
+            thisCompareTime = new Date();
+        }
+        else if (thisCompareTime != null && otherCompareTime == null) {
+            otherCompareTime = new Date();
+        }
+        
+        // If both times are null then dont need to get commits on common parent
+                        
+        // Now gather nodes in the common parent chain after otherCompareTime and
+        // before thisCompareTime. We need to get these from the transaction history
         // (or potentially the version history) to only include those that
         // changed within a timeframe. Otherwise, we would have to include the
         // entire workspace, which could be master, and that would be too big.
-        if ( otherTime != null && dateTime != null && dateTime.after( otherTime ) ) {
+        if ( otherCompareTime != null && thisCompareTime != null && 
+             thisCompareTime.after( otherCompareTime ) ) {
             ArrayList< EmsScriptNode > commits =
-                    CommitUtil.getCommitsInDateTimeRange( otherTime,
-                                                          dateTime,
+                    CommitUtil.getCommitsInDateTimeRange( otherCompareTime,
+                                                          thisCompareTime,
                                                           lastParent,
                                                           services,
                                                           response);
+            
             // TODO -- REVIEW -- The created time of the commit is after the
             // modified times of the items in the diff (right?). Thus, it is
             // unclear whether any commits after the later time point can be

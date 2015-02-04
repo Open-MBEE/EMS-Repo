@@ -33,6 +33,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
@@ -73,7 +74,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	@Override
 	protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 	    MmsWorkspaceDiffPost instance = new MmsWorkspaceDiffPost(repository, getServices());
-	    return instance.executeImplImpl( req, status, cache, runWithoutTransactions);
+	    return instance.executeImplImpl( req, status, cache, true);
 	}
 
 
@@ -103,106 +104,173 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		return model;
 	}
 
+    JSONObject srcJson = null;
+    JSONObject targetJson = null;
+    WorkspaceNode targetWs = null;
+    String targetWsId = null;
+    String srcWsId = null;
+    WorkspaceNode srcWs = null;
+    String timestamp1 = null;
+    Date dateTimeTarget = null;
+    String timestamp2 = null;
+    Date dateTimeSrc = null;
+    
+    protected boolean foo(WebScriptRequest req) throws JSONException {
+        srcWsId = srcJson.getString( "id" );
+        srcWs = WorkspaceNode.getWorkspaceFromId( srcWsId, services, response, responseStatus, null );
 
-	private void handleDiff(WebScriptRequest req, JSONObject jsonDiff, Status status, Map<String, Object> model) throws Exception {
+        targetWsId = targetJson.getString( "id" );
+        targetWs = WorkspaceNode.getWorkspaceFromId( targetWsId, services, response, responseStatus, null );
+
+        timestamp1 = req.getParameter( "timestamp1" );
+        dateTimeTarget = TimeUtils.dateFromTimestamp( timestamp1 );
+
+        timestamp2 = req.getParameter( "timestamp2" );
+        dateTimeSrc = TimeUtils.dateFromTimestamp( timestamp2 );
+
+        // Verify that the target workspace timestamp is valid, ie it must use the latest
+        // commit:
+        if (dateTimeTarget != null) {
+            // TODO REVIEW This is not efficient, as getLastCommit()
+            //             and getLatestCommitAtTime() do similar operations
+            EmsScriptNode lastCommit = CommitUtil.getLastCommit( targetWs, services, response );
+            EmsScriptNode prevCommit = CommitUtil.getLatestCommitAtTime( dateTimeTarget,
+                                                                         targetWs, services,
+                                                                         response );
+
+            // Give error message if there are not commits found before or at the dateTimeTarget:
+            if (prevCommit == null) {
+                log(LogLevel.ERROR,
+                    "Try a later date.  Previous commit could not be found based on date "+dateTimeTarget,
+                    HttpServletResponse.SC_BAD_REQUEST);
+                return false;
+            }
+
+            // Give error message if the latest commit based on the time is not the latest:
+            if (lastCommit != null && prevCommit != null && !lastCommit.equals( prevCommit ) ) {
+
+                log(LogLevel.ERROR,
+                    "Previous commit "+prevCommit+" based on date "+dateTimeTarget+" is not the same as the latest commit "+lastCommit,
+                    HttpServletResponse.SC_CONFLICT);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    boolean succ = true;
+
+    private void handleDiff(final WebScriptRequest req, final JSONObject jsonDiff, final Status status, final Map<String, Object> model) throws Exception {
 		if (jsonDiff.has( "workspace1" ) && jsonDiff.has("workspace2")) {
-		    JSONObject srcJson = jsonDiff.getJSONObject( "workspace2" );
-		    JSONObject targetJson = jsonDiff.getJSONObject( "workspace1" );
+		    srcJson = jsonDiff.getJSONObject( "workspace2" );
+		    targetJson = jsonDiff.getJSONObject( "workspace1" );
 
 		    if (srcJson.has( "id" ) && targetJson.has("id")) {
-                String srcWsId = srcJson.getString( "id" );
-                WorkspaceNode srcWs = WorkspaceNode.getWorkspaceFromId( srcWsId, services, response, responseStatus, null );
-
-		        String targetWsId = targetJson.getString( "id" );
-	            WorkspaceNode targetWs = WorkspaceNode.getWorkspaceFromId( targetWsId, services, response, responseStatus, null );
-
-                String timestamp1 = req.getParameter( "timestamp1" );
-                Date dateTimeTarget = TimeUtils.dateFromTimestamp( timestamp1 );
-
-                String timestamp2 = req.getParameter( "timestamp2" );
-                Date dateTimeSrc = TimeUtils.dateFromTimestamp( timestamp2 );
-
-                // Verify that the target workspace timestamp is valid, ie it must use the latest
-                // commit:
-                if (dateTimeTarget != null) {
-                    // TODO REVIEW This is not efficient, as getLastCommit()
-                    //             and getLatestCommitAtTime() do similar operations
-                    EmsScriptNode lastCommit = CommitUtil.getLastCommit( targetWs, services, response );
-                    EmsScriptNode prevCommit = CommitUtil.getLatestCommitAtTime( dateTimeTarget,
-                                                                                 targetWs, services,
-                                                                                 response );
-
-                    // Give error message if there are not commits found before or at the dateTimeTarget:
-                    if (prevCommit == null) {
-                        log(LogLevel.ERROR,
-                            "Try a later date.  Previous commit could not be found based on date "+dateTimeTarget,
-                            HttpServletResponse.SC_BAD_REQUEST);
-                        return;
-                    }
-
-                    // Give error message if the latest commit based on the time is not the latest:
-                    if (lastCommit != null && prevCommit != null && !lastCommit.equals( prevCommit ) ) {
-
-                        log(LogLevel.ERROR,
-                            "Previous commit "+prevCommit+" based on date "+dateTimeTarget+" is not the same as the latest commit "+lastCommit,
-                            HttpServletResponse.SC_CONFLICT);
-                        return;
-                    }
-                }
-
-	            JSONObject top = new JSONObject();
-	            JSONArray elements = new JSONArray();
-                MmsModelDelete deleteService = new MmsModelDelete(repository, services);
-                WorkspaceDiff deleteWsDiff = null;
-
-	            // Add/update the elements in the target workspace:
-	            // Must remove the modified time, as it is for the source workspace, not the target
-	            // workspace, so may get errors for trying to modify a element with a old modified time.
-	            if (srcJson.has( "addedElements" )) {
-	                JSONArray added = srcJson.getJSONArray("addedElements");
-	                for (int ii = 0; ii < added.length(); ii++) {
-	                    JSONObject obj = added.getJSONObject( ii );
-	                    if (obj.has( Acm.JSON_LAST_MODIFIED )) {
-	                        obj.remove( Acm.JSON_LAST_MODIFIED );
-	                    }
-	                    elements.put( obj );
-	                }
-	            }
-	            if (srcJson.has( "updatedElements" )) {
-                    JSONArray updated = srcJson.getJSONArray("updatedElements");
-                    for (int ii = 0; ii < updated.length(); ii++) {
-                        JSONObject obj = updated.getJSONObject( ii );
-                        if (obj.has( Acm.JSON_LAST_MODIFIED )) {
-                            obj.remove( Acm.JSON_LAST_MODIFIED );
-                        }
-                        elements.put( obj );
-                    }
-	            }
+		    	
+		    	//WorkspaceNode targetWs = null;
+		        JSONObject top = new JSONObject();
+		        JSONArray elements = new JSONArray();
+		        final MmsModelDelete deleteService = new MmsModelDelete(repository, services);
+		    	
+		        if (runWithoutTransactions) {
+                    succ = foo(req);
+		        }
+		        else {
+    		    	new EmsTransaction(getServices(), getResponse(), getResponseStatus()) {
+    					
+    					@Override
+    					public void run() throws Exception {
+    						succ = foo(req);
+    					}
+				};
+		        }
+				if ( !succ ) return;
+				
+		        // Add/update the elements in the target workspace:
+		        // Must remove the modified time, as it is for the source workspace, not the target
+		        // workspace, so may get errors for trying to modify a element with a old modified time.
+		        if (srcJson.has( "addedElements" )) {
+		            JSONArray added = srcJson.getJSONArray("addedElements");
+		            for (int ii = 0; ii < added.length(); ii++) {
+		                JSONObject obj = added.getJSONObject( ii );
+		                if (obj.has( Acm.JSON_LAST_MODIFIED )) {
+		                    obj.remove( Acm.JSON_LAST_MODIFIED );
+		                }
+		                elements.put( obj );
+		            }
+		        }
+		        if (srcJson.has( "updatedElements" )) {
+		            JSONArray updated = srcJson.getJSONArray("updatedElements");
+		            for (int ii = 0; ii < updated.length(); ii++) {
+		                JSONObject obj = updated.getJSONObject( ii );
+		                if (obj.has( Acm.JSON_LAST_MODIFIED )) {
+		                    obj.remove( Acm.JSON_LAST_MODIFIED );
+		                }
+		                elements.put( obj );
+		            }
+		        }
+		        
 	            top.put( "elements", elements );
 
 	            Set<EmsScriptNode> updatedElements = handleUpdate( top, status, targetWs, false,
-	                                                               model, false);
+	                                                               model, false );
 
 	            // Delete the elements in the target workspace:
+		        WorkspaceDiff deleteWsDiff = null;
 	            if (srcJson.has( "deletedElements" )) {
-	                JSONArray deleted = srcJson.getJSONArray( "deletedElements" );
+	                final JSONArray deleted = srcJson.getJSONArray( "deletedElements" );
 	                deleteService.setWsDiff( targetWs );
-                    for (int ii = 0; ii < deleted.length(); ii++) {
-                        String id = ((JSONObject)deleted.get(ii)).getString( "sysmlid" );
-                        EmsScriptNode root = NodeUtil.findScriptNodeById( id, targetWs, null, false, services, response );
-                        deleteService.handleElementHierarchy( root, targetWs, false );
-                    }
+
+	                if (runWithoutTransactions) {
+                        for (int ii = 0; ii < deleted.length(); ii++) {
+                            String id = ((JSONObject)deleted.get(ii)).getString( "sysmlid" );
+                            EmsScriptNode root = NodeUtil.findScriptNodeById( id, targetWs, null, false, services, response );
+                            deleteService.handleElementHierarchy( root, targetWs, false );
+                        }
+	                }
+	                else {
+    	                new EmsTransaction(getServices(), getResponse(), getResponseStatus()) {
+    			    		@Override
+    			    		public void run() throws Exception {
+    		                    for (int ii = 0; ii < deleted.length(); ii++) {
+    		                        String id = ((JSONObject)deleted.get(ii)).getString( "sysmlid" );
+    		                        EmsScriptNode root = NodeUtil.findScriptNodeById( id, targetWs, null, false, services, response );
+    		                        deleteService.handleElementHierarchy( root, targetWs, false );
+    		                    }
+    						}
+    					};
+	                }
 
                     // Update the needed aspects of the deleted nodes:
-                    deleteWsDiff = deleteService.getWsDiff();
-                    for (EmsScriptNode deletedNode: deleteWsDiff.getDeletedElements().values()) {
-                        if (deletedNode.exists()) {
-                            deletedNode.removeAspect( "ems:Added" );
-                            deletedNode.removeAspect( "ems:Updated" );
-                            deletedNode.removeAspect( "ems:Moved" );
-                            deletedNode.createOrUpdateAspect( "ems:Deleted" );
+			        final WorkspaceDiff delWsDiff = deleteService.getWsDiff();
+			        deleteWsDiff = delWsDiff;
+			        
+	                if (runWithoutTransactions) {
+                        for (EmsScriptNode deletedNode: delWsDiff.getDeletedElements().values()) {
+                            if (deletedNode.exists()) {
+                                deletedNode.removeAspect( "ems:Added" );
+                                deletedNode.removeAspect( "ems:Updated" );
+                                deletedNode.removeAspect( "ems:Moved" );
+                                deletedNode.createOrUpdateAspect( "ems:Deleted" );
+                            }
                         }
-                    }
+	                }
+	                else {
+    	                new EmsTransaction(getServices(), getResponse(), getResponseStatus()) {
+    			    		@Override
+    			    		public void run() throws Exception {
+    		                    for (EmsScriptNode deletedNode: delWsDiff.getDeletedElements().values()) {
+    		                        if (deletedNode.exists()) {
+    		                            deletedNode.removeAspect( "ems:Added" );
+    		                            deletedNode.removeAspect( "ems:Updated" );
+    		                            deletedNode.removeAspect( "ems:Moved" );
+    		                            deletedNode.createOrUpdateAspect( "ems:Deleted" );
+    		                        }
+    		                    }
+    						}
+    					};
+	                }
 	            }
 
 	            // Send deltas and make merge commit:
@@ -219,7 +287,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                     }
 
 	                CommitUtil.merge( jsonDiff, srcWs, targetWs, dateTimeSrc, dateTimeTarget,
-	                                  null, true, services, response );
+	                                  null, runWithoutTransactions, services, response );
 	            }
 
 		    }

@@ -256,6 +256,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
         DBParagraph p = new DBParagraph();
         p.setId( src );
+    	String s;
         if (srcType != null && srcType.compareTo( "reference" ) == 0 ) {
             EmsScriptNode node = findScriptNodeById( src, workspace, null, false );
             if(node == null){
@@ -306,7 +307,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	                p.setText( sb.toString() );
 	            }
 	            else {
-	                String s = (String)node.getProperty( Acm.SYSML + srcProp );
+	                s = (String)node.getProperty( Acm.SYSML + srcProp );
 	                s = handleTransclusion( src, srcProp, s, null, 0 );
 	                s = handleEmbeddedImage(src, s, section);
 	                s = HtmlSanitize( s );
@@ -315,14 +316,21 @@ public class SnapshotPost extends AbstractJavaWebScript {
             }
         }
         else {
+        	//p.setText( HtmlSanitize( (String)obj.opt( "text" ) ) );
+            
             if ( srcProp != null && !srcProp.isEmpty() ) {
-                String s = (String)obj.opt( Acm.SYSML + srcProp );
+                s = (String)obj.opt( Acm.SYSML + srcProp );
                 s = handleTransclusion( src, srcProp, s, null, 0 );
-                s = handleEmbeddedImage(src, s, section);
-                s = HtmlSanitize( s );
-                if(s != null && !s.isEmpty()) p.setText(s);
             }
-            else p.setText( HtmlSanitize( (String)obj.opt( "text" ) ) );
+            else{ 
+            	s = obj.optString("text");
+            	s = handleTransclusion( src, "text", s, null, 0 );
+            }
+        	
+            s = handleEmbeddedImage(src, s, section);
+            s = HtmlSanitize( s );
+            if(s != null && !s.isEmpty()) p.setText(s);
+
         }
         if ( p.getText() == null || p.getText().toString().isEmpty() ) return null;
 
@@ -366,12 +374,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
     private DBBook createDocBook( EmsScriptNode product ) {
         String title = (String)product.getProperty( Acm.ACM_NAME );
         DBBook docBook = new DBBook();
-        docBook.setTitle( title );
+        // need to make sure that all text is properly escaped for XML inclusion, e.g., & => &amp;
+        docBook.setTitle( replaceXmlEntities(title) );
         docBook.setTitlePageLegalNotice( "This Document has not been reviewed for export control. Not for distribution to or access by foreign persons." );
         docBook.setFooterLegalNotice( "Paper copies of this document may not be current and should not be relied on for official purposes. JPL/Caltech proprietary. Not for public release." );
         String author =
-                getUserProfile( product,
-                                (String)product.getProperty( Acm.ACM_AUTHOR ) );
+                replaceXmlEntities( getUserProfile( product,
+                                (String)product.getProperty( Acm.ACM_AUTHOR ) ) );
         docBook.setAuthor( Arrays.asList( author ) );
         return docBook;
     }
@@ -380,9 +389,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
                                           String snapshotName, String contextPath,
                                           EmsScriptNode snapshotFolder,
                                           WorkspaceNode workspace, Date timestamp) throws Exception {
-//        log( LogLevel.INFO, "\ncreating DocBook snapshot for view Id: " + productId );
-//        log( LogLevel.INFO, "\ncreating DocBook snapshotname: " + snapshotName );
-
         if ( product == null ) {
             log( LogLevel.WARNING, "null [view] input parameter reference." );
             return null;
@@ -431,7 +437,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             docBookMgr.save();
         }
         catch ( Exception ex ) {
-            log( LogLevel.ERROR, "\nUnable to create DBBook! Failed to parse document.\n" + ex.getStackTrace() );
+            log( LogLevel.ERROR, "\nUnable to create DBBook! Failed to parse document.\n" + ex.getMessage() );
             ex.printStackTrace();
             throw new Exception( "Unable to create DBBook! Failed to parse document.\n", ex );
         }
@@ -543,17 +549,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         } else {
             try {
                 image.setTitle( (String)imgNode.getProperty( Acm.ACM_NAME ) );
-//                NodeRef nodeRef = imgNode.getNodeRef();
-//                ServiceRegistry services = imgNode.getServices();
-//                NodeService nodeService =
-//                        imgNode.getServices().getNodeService();
 
                 String fileName = id + ".svg"; 
-//                fileName += ".svg";
                 ResultSet resultSet =
                         NodeUtil.luceneSearch( "@name:" + fileName );
-                System.out.println("looking for filename: " + fileName);
-                System.out.println("\t@name:" + fileName);
                 if ( resultSet != null && resultSet.length() > 0 ) {
                     EmsScriptNode node =
                             new EmsScriptNode( resultSet.getNodeRef( 0 ),
@@ -837,16 +836,16 @@ public class SnapshotPost extends AbstractJavaWebScript {
         if(!isGenerated){
 //	        Thread.sleep(10000);
 	        try{
-		    	snapshotNode = generatePDF(snapshotNode, workspace);
-		    	if(snapshotNode == null) throw new Exception("generatePDF() returned null.");
-		    	else{
-		    		this.setPdfStatus(workspace, snapshotNode, "Completed");
-		    	}
+        		    	snapshotNode = generatePDF(snapshotNode, workspace);
+        		    	if(snapshotNode == null) throw new Exception("generatePDF() returned null.");
+        		    	else{
+        		    		this.setPdfStatus(workspace, snapshotNode, "Completed");
+        		    	}
 	        }
 	        catch(Exception ex){
-	        	ex.printStackTrace();
-	        	this.setPdfStatus(workspace, snapshotNode, "Error");
-	    		throw new Exception("Failed to generate PDF artifact!");
+        	        	ex.printStackTrace();
+        	        	this.setPdfStatus(workspace, snapshotNode, "Error");
+        	    		throw new Exception("Failed to generate PDF artifact!");
 	        }
         }
     	return populateSnapshotProperties(snapshotNode);
@@ -1858,4 +1857,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
     protected boolean validateRequest(WebScriptRequest req, Status status) {
         return false;
     }
+    
+    protected String replaceXmlEntities(String s) {
+        // this was cribbed from HtmlToDocbook.fixString, but that was keying off <html>
+        // tags, so we recreated it here
+        return s.replaceAll( "&(?![A-Za-z#0-9]+;)", "&amp;" )
+                .replaceAll( "<([>=\\s])","&lt;$1" )
+                .replaceAll( "<<", "&lt;&lt;" )
+                .replaceAll( "<(?![^>]+>)", "&lt;" );
+    }
+    
 }

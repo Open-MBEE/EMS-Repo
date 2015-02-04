@@ -148,6 +148,98 @@
 
                 "sysmlid": "302"
 
+            },
+
+            {
+
+                "creator": "admin",
+
+                "documentation": "talk",
+
+                "editable": true,
+
+                "name": "303",
+
+                "owner": "302",
+
+                "qualifiedName": "/JW_TEST/300/301/302/303",
+
+                "specialization": {
+
+                    "isDerived": false,
+
+                    "isSlot": false,
+
+                    "type": "Property",
+
+                    "value": [{
+
+                        "string": "dlam_string",
+
+                        "type": "LiteralString"
+
+                    }]
+
+                },
+
+                "sysmlid": "303"
+
+            },
+
+            {
+
+                "creator": "admin",
+
+                "documentation": "about",
+
+                "editable": true,
+
+                "name": "304",
+
+                "owner": "303",
+
+                "qualifiedName": "/JW_TEST/300/301/302/303/304",
+
+                "specialization": {
+
+                    "isDerived": false,
+
+                    "isSlot": false,
+
+                    "type": "Property",
+
+                    "value": [{
+
+                        "string": "dlam_string",
+
+                        "type": "LiteralString"
+
+                    }]
+
+                },
+
+                "sysmlid": "304"
+
+            },
+
+            {
+
+                "creator": "admin",
+
+                "documentation": "",
+
+                "editable": true,
+
+                "name": "conflict",
+
+                "owner": "123456",
+
+                "qualifiedName": "/JW_TEST/conflict",
+
+                "specialization": {"type": "Element"},
+
+                "sysmlid": "conflict"
+
             }
 
         ],
@@ -194,17 +286,61 @@
 
         }],
 
-        "conflictedElements": [],
+        "conflictedElements": [{
+
+            "creator": "admin",
+
+            "documentation": "this will create a conflict!",
+
+            "sysmlid": "conflict"
+
+        }],
 
         "deletedElements": [],
 
-        "movedElements": [],
+        "movedElements": [{
+
+            "creator": "admin",
+
+            "documentation": "this will create a moved element",
+
+            "owner": "123456",
+
+            "sysmlid": "304"
+
+        }],
 
         "name": "wsT",
 
         "qualifiedName": "master/wsA/wsT",
 
-        "updatedElements": []
+        "updatedElements": [
+
+            {
+
+                "creator": "admin",
+
+                "documentation": "this will create a moved element",
+
+                "owner": "123456",
+
+                "sysmlid": "304"
+
+            },
+
+            {
+
+                "creator": "admin",
+
+                "documentation": "this will create a conflict!",
+
+                "owner": "123456",
+
+                "sysmlid": "conflict"
+
+            }
+
+        ]
 
     }
 
