@@ -38,7 +38,6 @@ import gov.nasa.jpl.mbee.util.Diff;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
@@ -1421,7 +1420,7 @@ public class EmsScriptNode extends ScriptNode implements
           logger.warn( msg );
           System.out.println(msg);
           Debug.error( true, msg );
-          sendNotificationEvent( "Heisenbug Occurence!", "" );
+//          sendNotificationEvent( "Heisenbug Occurence!", "" );
           if ( response != null ) {
               response.append( msg + "\n");
           }
@@ -1447,7 +1446,7 @@ public class EmsScriptNode extends ScriptNode implements
            logger.warn( msg );
            System.out.println(msg);
            Debug.error( true, msg );
-           sendNotificationEvent( "Heisenbug Occurrence!", "" );
+           //NodeUtil.sendNotificationEvent( "Heisenbug Occurrence!", "" );
            if ( response != null ) {
                response.append( msg + "\n");
            }
@@ -1854,7 +1853,7 @@ public class EmsScriptNode extends ScriptNode implements
      * @return JSONObject serialization of node
      */
     public JSONObject toJSONObject( Set< String > filter, Date dateTime, boolean isIncludeQualified ) throws JSONException {
-        return toJSONObject( filter, false, dateTime, isIncludeQualified );
+        return toJSONObject( filter, false, dateTime, isIncludeQualified, false );
     }
 
     public String nodeRefToSysmlId( NodeRef ref ) throws JSONException {
@@ -2203,12 +2202,25 @@ public class EmsScriptNode extends ScriptNode implements
      * @return JSONObject serialization of node
      */
     public JSONObject toJSONObject( Set< String > filter, boolean isExprOrProp,
-                                    Date dateTime, boolean isIncludeQualified ) throws JSONException {
+                                    Date dateTime, boolean isIncludeQualified,
+                                    boolean forceCacheUpdate ) throws JSONException {
         JSONObject element = new JSONObject();
-        JSONObject specializationJSON = new JSONObject();
-
         if ( !exists() ) return element;
 
+    	// check cache
+        JSONObject cachedJson = null;
+        Long millis = 0L;
+    	if ( NodeUtil.doJsonCaching ) {
+    	    if ( filter == null ) filter = new TreeSet< String >();
+    	    if ( dateTime != null ) millis = dateTime.getTime();
+    	    if ( !forceCacheUpdate ) {
+    	        cachedJson = Utils.get( NodeUtil.jsonCache, getId(), millis, isExprOrProp, isIncludeQualified, filter );
+    	        if ( cachedJson != null && cachedJson.length() > 0 ) return cachedJson;
+    	    }
+    	}
+    		
+        JSONObject specializationJSON = new JSONObject();
+    	
         Long readTime = null;
 
         if ( readTime == null ) readTime = System.currentTimeMillis();
@@ -2232,6 +2244,12 @@ public class EmsScriptNode extends ScriptNode implements
         String elementString = element.toString();
         elementString = fixArtifactUrls( elementString, true );
         element = new JSONObject( elementString );
+        
+        if ( NodeUtil.doJsonCaching
+             && ( forceCacheUpdate || cachedJson == null || cachedJson.length() == 0 ) ) {
+            //NodeUtil.jsonCache.put( getId(), element );
+            Utils.put( NodeUtil.jsonCache, getId(), millis, isExprOrProp, isIncludeQualified, filter, element );
+        }
 
         return element;
     }
@@ -4204,7 +4222,7 @@ public class EmsScriptNode extends ScriptNode implements
             EmsScriptNode node =
                     new EmsScriptNode( versionedRef, services, response );
             if ( node != null && node.exists() ) {
-                jsonArray.put( node.toJSONObject( null, true, null, true ) );
+                jsonArray.put( node.toJSONObject( null, true, null, true, false ) );
             }
         } else {
             // TODO error handling
@@ -5007,28 +5025,5 @@ public class EmsScriptNode extends ScriptNode implements
             return parentOwnsValueSpec();
         }
         return false;
-    }
-
-
-    /**
-     * FIXME Recipients and senders shouldn't be hardcoded - need to have these spring injected
-     * @param subject
-     * @param msg
-     */
-    protected void sendNotificationEvent(String subject, String msg) {
-        if (!NodeUtil.heisenbugSeen) {
-            String hostname = services.getSysAdminParams().getAlfrescoHost();
-            
-            String sender = hostname + "@jpl.nasa.gov";
-            String recipient;
-            
-            if (hostname.toLowerCase().contains( "europa" )) {
-                recipient = "kerzhner@jpl.nasa.gov";
-                ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
-            }
-            recipient = "mbee-dev-admin@jpl.nasa.gov";
-            ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
-            NodeUtil.heisenbugSeen = true;
-        }
     }
 }

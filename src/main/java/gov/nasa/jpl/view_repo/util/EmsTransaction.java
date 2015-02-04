@@ -56,11 +56,11 @@ public abstract class EmsTransaction {
                  HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
             e.printStackTrace();
             trx.rollback();
+            log( Level.ERROR, "### Rollback succeeded!" );
         } catch ( Throwable ee ) {
-            log( Level.ERROR,
-                 "\tryRollback(): rollback failed: "
-                         + ee.getMessage() );
+            log( Level.ERROR, "\tryRollback(): rollback failed: " + ee.getMessage() );
             ee.printStackTrace();
+            NodeUtil.sendNotificationEvent( "Heisenbug Occurence!", "", services );
         }
     }
 

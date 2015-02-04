@@ -52,6 +52,8 @@ public class WorkspaceDiff implements Serializable {
 
     public boolean onlyModelElements = true;
 
+    public boolean forceJsonCacheUpdate = true;
+
     private WorkspaceNode ws1;
     private WorkspaceNode ws2;
 
@@ -692,9 +694,13 @@ public class WorkspaceDiff implements Serializable {
             }
             boolean includeQualified = true;
             if ( versions == null || versions.size() <= 0 ) {
-                array.put( node.toJSONObject( filter, dateTime, includeQualified ) );
+                array.put( node.toJSONObject( filter, false, dateTime,
+                                              includeQualified,
+                                              forceJsonCacheUpdate ) );
             } else {
-                JSONObject jsonObject = node.toJSONObject( filter, dateTime, includeQualified );
+                JSONObject jsonObject =
+                    node.toJSONObject( filter, false, dateTime,
+                                       includeQualified, forceJsonCacheUpdate );
                 Version version = versions.get( node.getSysmlId() );
                 if ( version != null ) {
                     // TODO: perhaps add service and response in method call rather than using the nodes?
