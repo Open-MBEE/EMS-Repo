@@ -385,7 +385,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return docBook;
     }
 
-    private DocBookWrapper createDocBook( EmsScriptNode product, String productId,
+    public DocBookWrapper createDocBook( EmsScriptNode product, String productId,
                                           String snapshotName, String contextPath,
                                           EmsScriptNode snapshotFolder,
                                           WorkspaceNode workspace, Date timestamp) throws Exception {
@@ -394,7 +394,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             return null;
         }
 
-        docBookMgr = new DocBookWrapper( this.snapshotName, snapshotFolder );
+        docBookMgr = new DocBookWrapper( snapshotName, snapshotFolder );
         try {
             DBBook docBook = createDocBook( product );
             docBook.setRemoveBlankPages( true );
@@ -567,24 +567,26 @@ public class SnapshotPost extends AbstractJavaWebScript {
         }
     }
 
+    /**
+     * 
+     * @param view      Needs to be a spaces store reference
+     * @param viewId
+     * @param workspace
+     * @param timestamp
+     * @return
+     */
     public EmsScriptNode createSnapshot( EmsScriptNode view, String viewId,
                                          WorkspaceNode workspace, Date timestamp ) {
         this.snapshotName = viewId + "_" + System.currentTimeMillis();
         log(LogLevel.INFO, "Begin creating snapshot: \t" + this.snapshotName);
         
         String contextPath = "alfresco/service/";
-        EmsScriptNode viewNode = findScriptNodeById(viewId, workspace, timestamp, true);
-        if(viewNode == null){
-        	log(LogLevel.ERROR, "Failed to find script node with Id: " + viewId);
-        	log(LogLevel.INFO, "End creating snapshot: \t\t" + this.snapshotName);
-        	return null;
-        }
-        EmsScriptNode snapshotFolder = getSnapshotFolderNode(viewNode);
+        EmsScriptNode snapshotFolder = getSnapshotFolderNode(view);
         if(snapshotFolder == null){
             log( LogLevel.ERROR, "Failed to get snapshot folder node!",
                  HttpServletResponse.SC_BAD_REQUEST );
             log(LogLevel.INFO, "End creating snapshot: \t\t" + this.snapshotName);
-        	return null;
+            return null;
         }
         log(LogLevel.INFO, "End creating snapshot: \t\t" + this.snapshotName);
         return createSnapshot(view, viewId, snapshotName, contextPath, snapshotFolder, workspace, timestamp);
@@ -606,6 +608,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
         snapshotNode.createOrUpdateAspect( "view2:Snapshotable" );
         snapshotNode.createOrUpdateProperty( "view2:snapshotProduct", view.getNodeRef() );
+        snapshotNode.createOrUpdateProperty( "view2:timestamp", timestamp );
         view.createOrUpdateAspect( "view2:Snapshotable" );
         view.appendToPropertyNodeRefs( "view2:productSnapshots", snapshotNode.getNodeRef() );
 
@@ -613,14 +616,16 @@ public class SnapshotPost extends AbstractJavaWebScript {
         try {
             snapshotJson.put( "snapshot", true );
             ActionUtil.saveStringToFile( snapshotNode, "application/json", services, snapshotJson.toString( 4 ) );
-            DocBookWrapper docBookWrapper = createDocBook( view, viewId, snapshotName, contextPath, snapshotNode, workspace, timestamp );
-            if ( docBookWrapper == null ) {
-                log( LogLevel.ERROR, "Failed to generate DocBook!" );
-                snapshotNode = null;
-            } else {
-                docBookWrapper.save();
-                docBookWrapper.saveDocBookToRepo( snapshotFolder, timestamp );
-            }
+            // Docbook is generated on demand now rather than ahead of time...
+            // see SnapshotArtifactActionExecuter 
+//            DocBookWrapper docBookWrapper = createDocBook( view, viewId, snapshotName, contextPath, snapshotNode, workspace, timestamp );
+//            if ( docBookWrapper == null ) {
+//                log( LogLevel.ERROR, "Failed to generate DocBook!" );
+//                snapshotNode = null;
+//            } else {
+//                docBookWrapper.save();
+//                docBookWrapper.saveDocBookToRepo( snapshotFolder, timestamp );
+//            }
         }
         catch ( Exception e1 ) {
             snapshotNode = null;

@@ -67,9 +67,9 @@ public class ActionUtil {
      * @param services
      * @param response
      */
-    public static void sendEmailToModifier(EmsScriptNode node, String msg, String subject, ServiceRegistry services, StringBuffer response) {
+    public static void sendEmailToModifier(EmsScriptNode node, String msg, String subject, ServiceRegistry services) {
         String username = (String)node.getProperty("cm:modifier");
-        EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), services, response);
+        EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), services, new StringBuffer());
         String recipient = (String) user.getProperty("cm:email");
 
         String sender = services.getSysAdminParams().getAlfrescoHost() + "@jpl.nasa.gov";

@@ -5,6 +5,7 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
+import gov.nasa.jpl.view_repo.webscripts.DocBookWrapper;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +32,8 @@ import org.springframework.extensions.webscripts.connector.User;
 import org.springframework.web.context.request.WebRequest;
 
 public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAbstractBase {
+    static Logger logger = Logger.getLogger(SnapshotArtifactsGenerationActionExecuter.class);
+    
     /**
      * Injected variables from Spring configuration
      */
@@ -70,10 +74,12 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         EmsScriptNode jobNode = new EmsScriptNode(nodeRef, services, response);
         // clear out any existing associated snapshots
         String siteName = (String) action.getParameterValue(PARAM_SITE_NAME);
-        System.out.println("SnapshotArtifactsGenerationActionExecuter started execution of " + siteName);
+        if (logger.isDebugEnabled()) {
+            logger.debug("SnapshotArtifactsGenerationActionExecuter started execution of " + siteName);   
+        };
         SiteInfo siteInfo = services.getSiteService().getSite(siteName);
         if (siteInfo == null) {
-        		System.out.println("[ERROR]: could not find site: " + siteName);
+            logger.error("could not find site: " + siteName);
             return;
         }
         NodeRef siteRef = siteInfo.getNodeRef();
@@ -98,49 +104,73 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         Status status = new Status();
         JSONObject snapshot = null;
         try{
-        	WorkspaceNode workspace = (WorkspaceNode)action.getParameterValue(PARAM_WORKSPACE);
+        	    WorkspaceNode workspace = (WorkspaceNode)action.getParameterValue(PARAM_WORKSPACE);
+        	    
+        	    // lets check whether or not docbook has been generated
+        	    StringBuffer response = new StringBuffer();
+        	    EmsScriptNode snapshotNode = NodeUtil.findScriptNodeById(snapshotId, workspace, null, false, services, response);
+        	    if ( !snapshotNode.hasAspect( "view2:docbook" )) {
+                String snapshotName = snapshotNode.getSysmlId();
+                Date timestamp = (Date)snapshotNode.getProperty("view2:timestamp");
+
+                NodeRef viewRef = (NodeRef)snapshotNode.getProperty( "view2:snapshotProduct" );
+        	        if (viewRef == null) {
+        	            
+        	        }
+        	        EmsScriptNode viewNode = new EmsScriptNode(viewRef, services, response);
+        	        String viewId = viewNode.getSysmlId();
+        	        EmsScriptNode snapshotFolder = SnapshotPost.getSnapshotFolderNode(viewNode);
+        	        String contextPath = "alfresco/service";
+        	        
+                DocBookWrapper docBookWrapper = snapshotService.createDocBook( viewNode, viewId, snapshotName, contextPath, snapshotNode, workspace, timestamp );
+                if ( docBookWrapper == null ) {
+                    logger.error("Failed to generate DocBook!" );
+                    snapshotNode = null;
+                } else {
+                    docBookWrapper.save();
+                    docBookWrapper.saveDocBookToRepo( snapshotFolder, timestamp );
+                }
+
+        	    }
+        	    
 	        for(String format:formats){
-	        	if(format.compareToIgnoreCase("pdf") == 0){
-	        		try{
-	        			snapshot = snapshotService.generatePDF(snapshotId, workspace);
-	        		}
-	        		catch(JSONException ex){
-	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	        			System.out.println("Failed to generate PDF for snapshot Id: " + snapshotId);
-	        		}
-	        	}
-	        	else if(format.compareToIgnoreCase("html") == 0){
-	        		try{
-	        			snapshot = snapshotService.generateHTML(snapshotId, workspace);
-	        		}
-	        		catch(JSONException ex){
-	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	        			System.out.println("Failed to generate HTML zip for snapshot Id: " + snapshotId);
-	        		}
-	        	}
-	        	
-	        	if (status.getCode() != HttpServletResponse.SC_OK) {
-	            	jobStatus = "Failed";
-	            	response.append("[ERROR]: could not make snapshot for " + snapshotId);
-	        	} else {
-	            	response.append("[INFO]: Successfully generated artifact for snapshot: " + snapshotId);
-	        	}
-	        	response.append(snapshot.toString());
+        	        	if(format.compareToIgnoreCase("pdf") == 0){
+        	        		try{
+        	        			snapshot = snapshotService.generatePDF(snapshotId, workspace);
+        	        		}
+        	        		catch(JSONException ex){
+        	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        	        			logger.error("Failed to generate PDF for snapshot Id: " + snapshotId);
+        	        		}
+        	        	}
+        	        	else if(format.compareToIgnoreCase("html") == 0){
+        	        		try{
+        	        			snapshot = snapshotService.generateHTML(snapshotId, workspace);
+        	        		}
+        	        		catch(JSONException ex){
+        	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        	        			logger.error("Failed to generate HTML zip for snapshot Id: " + snapshotId);
+        	        		}
+        	        	}
+        	        	
+        	        	if (status.getCode() != HttpServletResponse.SC_OK) {
+        	            	jobStatus = "Failed";
+        	            	response.append("[ERROR]: could not make snapshot for " + snapshotId);
+        	        	} else {
+        	            	response.append("[INFO]: Successfully generated artifact for snapshot: " + snapshotId);
+        	        	}
+        	        	response.append(snapshot.toString());
 	        }
 	        // Send off notification email
-	        String subject = "[EuropaEMS] Snapshot Generation " + jobStatus;
+	        String subject = "Snapshot Generation " + jobStatus;
 	        String msg = buildEmailMessage(snapshot);
-	        String userEmail = (String)action.getParameterValue(PARAM_USER_EMAIL);
-	        if(userEmail == null || userEmail.isEmpty())
-	        	System.out.println("Failed to retrieve user email parameter!");
-	        else
-	        	ActionUtil.sendEmailTo("europaems@jpl.nasa.gov", userEmail, msg, subject, services);
-	        System.out.println("Completed snapshot artifact(s) generation.");
+        	    ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
+        	    if (logger.isDebugEnabled()) logger.debug("Completed snapshot artifact(s) generation.");
         }
         catch(Exception ex){
-        	System.out.println("Failed to complete snapshot artifact(s) generation!");
-        	ex.printStackTrace();
-        	ActionUtil.sendEmailToModifier(jobNode, "An unexpected error occurred and your snapshot artifact generation failed. " + ex.getMessage(), "[EuropaEMS] Snapshot Generation Failed", services, response);
+            	logger.error("Failed to complete snapshot artifact(s) generation!");
+            	ex.printStackTrace();
+            	ActionUtil.sendEmailToModifier(jobNode, "An unexpected error occurred and your snapshot artifact generation failed. " + ex.getMessage(), "Snapshot Generation Failed", services);
         }
     }
 
@@ -150,31 +180,31 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     }
     
     private String buildEmailMessage(JSONObject snapshot) throws Exception{
-    	StringBuffer buf = new StringBuffer();
-    	try{
-    		//String hostname = ActionUtil.getHostName();
-            //if (!hostname.endsWith( ".jpl.nasa.gov" )) {
-            //    hostname += ".jpl.nasa.gov";
-            //}
-            //String contextUrl = "https://" + hostname + "/alfresco";
-	    	JSONArray formats = (JSONArray)snapshot.getJSONArray("formats");
-	    	for(int i=0; i < formats.length(); i++){
-				JSONObject format = formats.getJSONObject(i);
-				String formatType = format.getString("type");
-				String formatUrl = format.getString("url");
-				buf.append("Snapshot ");
-				buf.append(formatType.toUpperCase());
-				buf.append(": ");
-//				buf.append(contextUrl);
-				buf.append(formatUrl);
-				buf.append(System.lineSeparator());
-				buf.append(System.lineSeparator());
-			}
-    	}
-    	catch(JSONException ex){
-    		throw new Exception("Failed to build email message!", ex);
-    	}
-    	return buf.toString();
+        	StringBuffer buf = new StringBuffer();
+        	try{
+        		//String hostname = ActionUtil.getHostName();
+                //if (!hostname.endsWith( ".jpl.nasa.gov" )) {
+                //    hostname += ".jpl.nasa.gov";
+                //}
+                //String contextUrl = "https://" + hostname + "/alfresco";
+    	    	JSONArray formats = (JSONArray)snapshot.getJSONArray("formats");
+    	    	for(int i=0; i < formats.length(); i++){
+    				JSONObject format = formats.getJSONObject(i);
+    				String formatType = format.getString("type");
+    				String formatUrl = format.getString("url");
+    				buf.append("Snapshot ");
+    				buf.append(formatType.toUpperCase());
+    				buf.append(": ");
+    //				buf.append(contextUrl);
+    				buf.append(formatUrl);
+    				buf.append(System.lineSeparator());
+    				buf.append(System.lineSeparator());
+    			}
+        	}
+        	catch(JSONException ex){
+        		throw new Exception("Failed to build email message!", ex);
+        	}
+        	return buf.toString();
     }	
     	
     protected void clearCache() {
