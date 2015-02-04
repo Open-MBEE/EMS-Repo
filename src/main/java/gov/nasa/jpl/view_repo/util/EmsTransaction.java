@@ -36,6 +36,8 @@ public abstract class EmsTransaction {
             Timer.stopTimer(timerCommit, "!!!!! EmsTransaction commit time", NodeUtil.timeEvents);
         } catch (Throwable e) {
             tryRollback( trx, e, "DB transaction failed" );
+            responseStatus.setCode( HttpServletResponse.SC_BAD_REQUEST );
+            response.append( "Could not complete DB transaction, see Alfresco logs for details" );
         } finally {
             NodeUtil.setInsideTransactionNow( false );
         }
