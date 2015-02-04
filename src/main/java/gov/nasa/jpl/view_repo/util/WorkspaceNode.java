@@ -9,6 +9,7 @@ import gov.nasa.jpl.mbee.util.Seen;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
+import gov.nasa.jpl.view_repo.webscripts.WebScriptUtil;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -234,15 +235,29 @@ public class WorkspaceNode extends EmsScriptNode {
     	String cmName = wsName + '_' + getName( parentWorkspace );
     	String cmTitle = cmName;
 
-    	// Make sure the workspace does not already exist in the target folder
-    	EmsScriptNode child = folder.childByNamePath( "/" + cmName, true, null, false );
-    	if ( child != null && child.exists() ) {
-            String msg = "ERROR! Trying to create an workspace in the same folder with the same name, " + cmName + "!\n";
-            response.append( msg );
-            if ( status != null ) {
-                status.setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
+    	// Make sure the workspace does not already exist in the target folder with the same
+    	// parent workspace:
+    	Set<EmsScriptNode> childs = WebScriptUtil.getAllNodesInPath(folder.getQnamePath(),
+    	                                                            "TYPE",
+    	                                                            "cm:folder",
+    	                                                            null,null,
+    	                                                            services,response);
+    	for (EmsScriptNode child : childs) {
+    	    if ( child != null && child.exists() ) {
+    	        String childWsName = (String)child.getProperty("ems:workspace_name");
+    	        NodeRef childWsParentRef = (NodeRef)child.getProperty("ems:parent");
+    	        EmsScriptNode childWsParent = childWsParentRef != null ? new EmsScriptNode(childWsParentRef, services) : null;
+    	        String childWsParentName = childWsParent != null ? childWsParent.getId() : null;
+    	        if (childWsName != null && childWsName.equals( wsName ) && 
+    	            ((childWsParentName == null && sourceNameOrId.equals( "master" )) || (childWsParentName != null && childWsParentName.equals( sourceNameOrId )))) {
+                    String msg = "ERROR! Trying to create an workspace with the same user: "+folder.getName()+", the same name: "+wsName+", and same parent workspace: "+sourceNameOrId+"\n";
+                    response.append( msg );
+                    if ( status != null ) {
+                        status.setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
+                    }
+                    return null;
+    	        }
             }
-            return null;
     	}
 
     	// Make sure the workspace does not already exist otherwise
