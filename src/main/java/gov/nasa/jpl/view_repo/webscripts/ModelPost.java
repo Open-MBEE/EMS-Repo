@@ -2569,7 +2569,9 @@ public class ModelPost extends AbstractJavaWebScript {
 
         printFooter();
 
-        log( LogLevel.INFO, "ModelPost: " + timer );
+        if (logger.isInfoEnabled()) {
+            logger.info( "ModelPost: " + timer );
+        }
 
         return model;
     }
