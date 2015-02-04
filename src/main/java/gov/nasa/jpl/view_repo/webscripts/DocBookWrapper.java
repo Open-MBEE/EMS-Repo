@@ -208,20 +208,20 @@ public class DocBookWrapper {
 
 	private void retrieveImages(File srcFile, ServiceRegistry services, WorkspaceNode workspace, Date timestamp){
 		DocBookContentTransformer dbTransf = new DocBookContentTransformer();
-		System.out.println("getting images...");
+		//System.out.println("getting images...");
 		for (String img: dbTransf.findImages(srcFile))
 		{
 			String imgFilename = this.getDBDirImage() + File.separator + img;
 			File imgFile = new File(imgFilename);
 			if (!imgFile.exists())
 			{
-				System.out.println("finding image: " + imgFilename);
+				//System.out.println("finding image: " + imgFilename);
 				NodeRef nr = NodeUtil.findNodeRefById(img, false, workspace, timestamp, services, false);
 
 				ContentReader imgReader;
-				System.out.println("retrieving image file...");
+				//System.out.println("retrieving image file...");
 				imgReader = services.getContentService().getReader(nr, ContentModel.PROP_CONTENT);
-				System.out.println("saving image file...");
+				//System.out.println("saving image file...");
 				if(!Files.exists(this.imageDirName)){
 					if(!new File(this.imageDirName.toString()).mkdirs()){
 						System.out.println("Failed to create directory for " + this.imageDirName);
