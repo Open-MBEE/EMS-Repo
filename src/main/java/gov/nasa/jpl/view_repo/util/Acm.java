@@ -187,6 +187,7 @@ public class Acm {
     public static final String JSON_TARGET_UPPER = "targetUpper";
     public static final String JSON_SOURCE_LOWER = "sourceLower";
     public static final String JSON_SOURCE_UPPER = "sourceUpper";
+    public static final String JSON_CONNECTOR_TYPE = "connectorType";
 
     // Site packages additions:
     public static final String JSON_IS_SITE = "isSite";
@@ -356,7 +357,8 @@ public class Acm {
     public static final String ACM_TARGET_UPPER = SYSML + JSON_TARGET_UPPER;
     public static final String ACM_SOURCE_LOWER = SYSML + JSON_SOURCE_LOWER;
     public static final String ACM_SOURCE_UPPER = SYSML + JSON_SOURCE_UPPER;
-
+    public static final String ACM_CONNECTOR_TYPE = SYSML + JSON_CONNECTOR_TYPE;
+    
     // Site packages additions:
     public static final String ACM_SITE = EMS + "Site";
     public static final String ACM_SITE_PARENT = EMS + "siteParent";

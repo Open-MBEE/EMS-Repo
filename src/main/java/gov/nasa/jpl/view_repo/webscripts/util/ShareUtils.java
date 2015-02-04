@@ -39,15 +39,23 @@ public class ShareUtils {
      * Initialize the URLs based on the Alfresco system settings.
      */
     private static void initializeUrls() {
+        // note this handling is due to the way apache serves as https proxy for
+        // tomcat
         if (SHARE_URL == null) {
             SysAdminParams adminParams = services.getSysAdminParams();
             int repoPort = adminParams.getAlfrescoPort();
             int sharePort = repoPort;
             if (8080 == repoPort) {
+                // this means we're running using maven, so share is on different port
                 sharePort = 8081;
+            } else {
+                // production machine, use local ports to access
+                repoPort = 8080;  
+                sharePort = 8080;
             }
             
-            String protocol = adminParams.getAlfrescoProtocol();
+            // use loopback, secure internally
+            String protocol = "http"; 
             String host = "127.0.0.1";
 
             REPO_URL = String.format("%s://%s:%s/alfresco", protocol, host, repoPort);
@@ -55,6 +63,13 @@ public class ShareUtils {
             LOGIN_URL = SHARE_URL + "/page/dologin";
             CREATE_SITE_URL = SHARE_URL + "/page/modules/create-site";
             UPDATE_GROUP_URL = REPO_URL + "/service/api/groups";
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info( String.format("Repo URL: %s", REPO_URL ) );
+            logger.info( String.format("Share URL: %s", SHARE_URL ) );
+            logger.info( String.format("Login URL: %s", LOGIN_URL ) );
+            logger.info( String.format("Create Site URL: %s", CREATE_SITE_URL ) );
+            logger.info( String.format("Update Group URL: %s", UPDATE_GROUP_URL ) );
         }
     }
     
@@ -101,7 +116,7 @@ public class ShareUtils {
         }
         
         // make calling user Site manger
-        // need additional site, because short name is prepended with site_
+        // NOTE: need additional site_, because short name is prepended with site_
         String role = String.format("site_%s_SiteManager", siteId);
         String currentUsername = services.getAuthenticationService().getCurrentUserName();
         String groupUrl = String.format("%s/%s/children/%s", UPDATE_GROUP_URL, role, currentUsername);

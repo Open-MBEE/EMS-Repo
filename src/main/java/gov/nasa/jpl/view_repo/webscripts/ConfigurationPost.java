@@ -82,7 +82,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	@Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		ConfigurationPost instance = new ConfigurationPost(repository, services);
-		return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
+        return instance.executeImplImpl(req, status, cache, runWithoutTransactions);		    
     }
 
 	@Override
@@ -156,17 +156,17 @@ public class ConfigurationPost extends AbstractJavaWebScript {
                              + postJson.getString( "name" ),
                      HttpServletResponse.SC_BAD_REQUEST );
             } else {
-    			if (postJson.has("nodeid") || postJson.has( "id" )) {
-    				jsonObject = handleUpdate(postJson, siteName, context, workspace, status);
-    			} else {
-    				jsonObject = handleCreate(postJson, siteName, context, workspace, status);
-    			}
+        			if (postJson.has("nodeid") || postJson.has( "id" )) {
+        				jsonObject = handleUpdate(postJson, siteName, context, workspace, status);
+        			} else {
+        				jsonObject = handleCreate(postJson, siteName, context, workspace, status);
+        			}
             }
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "Could not parse JSON", HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();
 			return null;
-		}
+		} 
 
 		return jsonObject;
 	}
@@ -190,7 +190,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	                                EmsScriptNode context,
                                     WorkspaceNode workspace, Status status)
                                             throws JSONException {
-		EmsScriptNode jobNode = null;
+	    EmsScriptNode jobNode = null;
 
 		if (postJson.has("name")) {
 		    String name = postJson.getString( "name" );
@@ -213,11 +213,29 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	            HashSet<String> productList = getProductList(postJson);
 
 	            Date datetime = null;
-	            if ( postJson.has( "timestamp" ) ) {
+	            if ( !postJson.has( "timestamp" ) ) {
+	                datetime = new Date();
+	            } else {
 	                String timestamp = postJson.getString("timestamp");
 	                datetime = TimeUtils.dateFromTimestamp(timestamp);
+	                
+	                if (datetime != null) {
+        	                // Check that the timestamp is before the workspace was branched/created
+        	                // or in the future:
+        	                Date now = new Date();
+        	                if (datetime.after( now )) {
+        	                    log(LogLevel.ERROR, "Timestamp provided in json: "+datetime+" is in the future.  Current time: "+now, 
+        	                        HttpServletResponse.SC_BAD_REQUEST);
+        	                    return null;
+        	                }
+        	                else if (workspace != null && datetime.before( workspace.getCopyOrCreationTime() )) {
+        	                    log(LogLevel.ERROR, "Timestamp provided in json: "+datetime+" is before the workspace branch/creation time: "+workspace.getCopyOrCreationTime(), 
+                                    HttpServletResponse.SC_BAD_REQUEST);
+        	                    return null;
+        	                }
+	                }
 	            }
-            	startAction(jobNode, siteName, productList, workspace, datetime);
+	            startAction(jobNode, siteName, productList, workspace, datetime);
 
 				return configWs.getConfigJson( jobNode, workspace, null );
 			} else {

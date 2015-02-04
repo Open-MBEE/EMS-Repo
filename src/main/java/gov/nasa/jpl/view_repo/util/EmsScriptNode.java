@@ -3193,7 +3193,7 @@ public class EmsScriptNode extends ScriptNode implements
      */
     @Override
     public boolean equals( Object obj ) {
-        return equals( obj, false );
+        return equals( obj, true );
     }
 
     /**
@@ -4766,6 +4766,12 @@ public class EmsScriptNode extends ScriptNode implements
         if ( kind != null ) {
             putInJson( json, Acm.JSON_CONNECTOR_KIND, kind, filter );
         }
+        
+        NodeRef connectorType = (NodeRef) node.getProperty( Acm.ACM_CONNECTOR_TYPE);
+        if ( connectorType != null ) {
+            EmsScriptNode connectorTypeNode = new EmsScriptNode(connectorType, services, response);
+            putInJson( json, Acm.JSON_CONNECTOR_TYPE, connectorTypeNode.getSysmlId(), filter);
+        }
 
         putInJson( json, Acm.JSON_CONNECTOR_VALUE,
                    addInternalJSON( node.getProperty(Acm.ACM_CONNECTOR_VALUE), dateTime ),
@@ -4970,11 +4976,16 @@ public class EmsScriptNode extends ScriptNode implements
                         Object propValFnd = getProperty( acmProp );
                         if (propValFnd instanceof NodeRef) {
                             EmsScriptNode node = new EmsScriptNode((NodeRef)propValFnd, services);
-                            if ( node.equals( propVal ) ) return true;
+                            if ( node.equals( propVal, true ) ) return true;
                         }
                         else if (propValFnd instanceof List) {
                             List<NodeRef> nrList = (ArrayList<NodeRef>) propValFnd;
-                            if ( nrList.contains( propVal.getNodeRef() ) ) return true;
+                            for (NodeRef ref : nrList) {
+                                if (ref != null) {
+                                    EmsScriptNode node = new EmsScriptNode(ref, services);
+                                    if (node.equals( propVal, true)) return true;
+                                }
+                            }
                         }
                     }
                     else {

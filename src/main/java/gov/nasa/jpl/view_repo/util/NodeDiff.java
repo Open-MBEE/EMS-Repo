@@ -689,7 +689,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
                             if (propVal instanceof List) {
                                 for (NodeRef ref : (List<NodeRef>) propVal) {
                                     EmsScriptNode propValNode = new EmsScriptNode(ref, services);
-                                    if (propValNode.equals(valueNode)) {
+                                    if (propValNode.equals(valueNode, true)) {
                                         valueName = NodeUtil.createQName( acmProp, getServices() ).toString();
                                         break;
                                     }
@@ -698,7 +698,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
                             // Single noderef:
                             else if (propVal instanceof NodeRef) {
                                 EmsScriptNode propValNode = new EmsScriptNode((NodeRef) propVal, services);
-                                if (propValNode.equals(valueNode)) {
+                                if (propValNode.equals(valueNode, true)) {
                                     valueName = NodeUtil.createQName( acmProp, getServices() ).toString();
                                     break;
                                 }

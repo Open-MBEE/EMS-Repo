@@ -11,7 +11,6 @@ import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.Status;
 
 public abstract class EmsTransaction {
-    public static boolean timeEvents = false;
     static Logger logger = Logger.getLogger(EmsTransaction.class);
     // injected members
     protected ServiceRegistry services;     // get any of the Alfresco services
@@ -32,11 +31,13 @@ public abstract class EmsTransaction {
             
             run();
             
-            timerCommit = Timer.startTimer(timerCommit, timeEvents);
+            timerCommit = Timer.startTimer(timerCommit, NodeUtil.timeEvents);
             trx.commit();
-            Timer.stopTimer(timerCommit, "!!!!! EmsTransaction commit time", timeEvents);
+            Timer.stopTimer(timerCommit, "!!!!! EmsTransaction commit time", NodeUtil.timeEvents);
         } catch (Throwable e) {
             tryRollback( trx, e, "DB transaction failed" );
+            responseStatus.setCode( HttpServletResponse.SC_BAD_REQUEST );
+            response.append( "Could not complete DB transaction, see Alfresco logs for details" );
         } finally {
             NodeUtil.setInsideTransactionNow( false );
         }

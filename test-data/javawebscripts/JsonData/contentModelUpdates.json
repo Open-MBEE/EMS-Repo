@@ -54,6 +54,7 @@
                         "sourcePath":["connectorSource"],
                         "targetPath":["connectorTarget"],
                         "connectorKind":"BINDING",
+                        "connectorType":"association",
                         "connectorValue":{"type":"LiteralString",
                                            "string":"Ninja Attack!"}}
     },
