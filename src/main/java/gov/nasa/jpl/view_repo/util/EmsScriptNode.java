@@ -38,7 +38,6 @@ import gov.nasa.jpl.mbee.util.Diff;
 import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 
@@ -282,6 +281,8 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean embeddingExpressionInConstraint = true;
     public boolean embeddingExpressionInOperation = true;
     public boolean embeddingExpressionInConnector = true;
+
+    private boolean forceCacheUpdate = false;
 
     public static boolean fixOwnedChildren = false;
 
@@ -1405,7 +1406,7 @@ public class EmsScriptNode extends ScriptNode implements
                        "3: initializing version cache with node, "
                                + this + " version: "
                                + cachedVersion.getLabel();
-              logger.warn( msg );
+              logger.error( msg );
               if (versionCacheDebugPrint) System.out.println(msg);
 
            }
@@ -1418,10 +1419,9 @@ public class EmsScriptNode extends ScriptNode implements
                    "6: Warning! Alfresco Heisenbug failing to return current version of node "
                            + this.getNodeRef() + ".  Replacing node with unmodifiable frozen node, "
                            + cachedVersion.getLabel() + ".";
-          logger.warn( msg );
-          System.out.println(msg);
+          logger.error( msg );
           Debug.error( true, msg );
-          sendNotificationEvent( "Heisenbug Occurence!", "" );
+//          sendNotificationEvent( "Heisenbug Occurence!", "" );
           if ( response != null ) {
               response.append( msg + "\n");
           }
@@ -1444,10 +1444,10 @@ public class EmsScriptNode extends ScriptNode implements
                             + this + " (" + thisEmsVersion.getLabel()
                             + ").  Replacing node with unmodifiable frozen node, "
                             + getId() + " (" + cachedVersion.getLabel()+ ").";
-           logger.warn( msg );
+           logger.error( msg );
            System.out.println(msg);
            Debug.error( true, msg );
-           sendNotificationEvent( "Heisenbug Occurrence!", "" );
+           //NodeUtil.sendNotificationEvent( "Heisenbug Occurrence!", "" );
            if ( response != null ) {
                response.append( msg + "\n");
            }
@@ -1456,11 +1456,11 @@ public class EmsScriptNode extends ScriptNode implements
        } else { // comp > 0
            // Cache is incorrect -- update cache
            NodeUtil.versionCache.put( id, thisEmsVersion );
-            String msg =
-                    "5: Updating version cache with new version of node, "
+           String msg =
+                   "5: Updating version cache with new version of node, "
                             + this + " version: "
                             + thisEmsVersion.getLabel();
-           logger.warn( msg );
+           logger.error( msg );
            if (versionCacheDebugPrint) System.out.println(msg);
        }
 //                // This fixes the nodeRef in esn
@@ -1621,7 +1621,7 @@ public class EmsScriptNode extends ScriptNode implements
     public < T extends Serializable > boolean setProperty( String acmType, T value,
                                                         // count prevents inf loop
                                                         int count ) {
-        log( "setProperty(acmType=" + acmType + ", value=" + value + ")" );
+        logger.debug( "setProperty(acmType=" + acmType + ", value=" + value + ")" );
         boolean success = true;
         if ( useFoundationalApi ) {
             try {
@@ -1640,7 +1640,7 @@ public class EmsScriptNode extends ScriptNode implements
                 NodeRef oldRef = nodeRef;
                 if ( isAVersion() ) {
                     success = true;
-                    this.log( "Tried to set property of a version nodeRef in "
+                    logger.error( "Tried to set property of a version nodeRef in "
                             + "setProperty(acmType=" + acmType
                             + ", value=" + value
                             + ") for EmsScriptNode " + this
@@ -1656,7 +1656,7 @@ public class EmsScriptNode extends ScriptNode implements
                         // make sure the version is equal or greater
                         int comp = NodeUtil.compareVersions(nodeRef, liveRef );
                         if ( comp > 0 ) {
-                            this.log( "ERROR! Live version " + liveRef + ""
+                            logger.error( "ERROR! Live version " + liveRef + ""
                                     + " is earlier than versioned ref "
                                     + "when trying to set property of a version nodeRef in "
                                     + "setProperty(acmType=" + acmType
@@ -1667,7 +1667,7 @@ public class EmsScriptNode extends ScriptNode implements
                                     + value + ")"  );
                             success = false;
                         } else if ( comp < 0 ) {
-                            this.log( "WARNING! Versioned node ref is not most current "
+                            logger.error( "WARNING! Versioned node ref is not most current "
                                     + "when trying to set property of a version nodeRef in "
                                     + "setProperty(acmType=" + acmType
                                     + ", value=" + value
@@ -1685,7 +1685,7 @@ public class EmsScriptNode extends ScriptNode implements
                     }
                 }
                 if ( nodeRef.equals( liveRef ) ) {
-                    System.out.println( "Got exception in "
+                    logger.error( "Got exception in "
                                         + "setProperty(acmType=" + acmType
                                         + ", value=" + value
                                         + ") for EmsScriptNode " + this
@@ -1854,7 +1854,7 @@ public class EmsScriptNode extends ScriptNode implements
      * @return JSONObject serialization of node
      */
     public JSONObject toJSONObject( Set< String > filter, Date dateTime, boolean isIncludeQualified ) throws JSONException {
-        return toJSONObject( filter, false, dateTime, isIncludeQualified );
+        return toJSONObject( filter, false, dateTime, isIncludeQualified, false );
     }
 
     public String nodeRefToSysmlId( NodeRef ref ) throws JSONException {
@@ -2203,12 +2203,25 @@ public class EmsScriptNode extends ScriptNode implements
      * @return JSONObject serialization of node
      */
     public JSONObject toJSONObject( Set< String > filter, boolean isExprOrProp,
-                                    Date dateTime, boolean isIncludeQualified ) throws JSONException {
+                                    Date dateTime, boolean isIncludeQualified,
+                                    boolean forceCacheUpdate ) throws JSONException {
         JSONObject element = new JSONObject();
-        JSONObject specializationJSON = new JSONObject();
-
         if ( !exists() ) return element;
 
+    	// check cache
+        JSONObject cachedJson = null;
+        Long millis = 0L;
+    	if ( NodeUtil.doJsonCaching ) {
+    	    if ( filter == null ) filter = new TreeSet< String >();
+    	    if ( dateTime != null ) millis = dateTime.getTime();
+    	    if ( !forceCacheUpdate ) {
+    	        cachedJson = Utils.get( NodeUtil.jsonCache, getId(), millis, isExprOrProp, isIncludeQualified, filter );
+    	        if ( cachedJson != null && cachedJson.length() > 0 ) return cachedJson;
+    	    }
+    	}
+    		
+        JSONObject specializationJSON = new JSONObject();
+    	
         Long readTime = null;
 
         if ( readTime == null ) readTime = System.currentTimeMillis();
@@ -2232,6 +2245,12 @@ public class EmsScriptNode extends ScriptNode implements
         String elementString = element.toString();
         elementString = fixArtifactUrls( elementString, true );
         element = new JSONObject( elementString );
+        
+        if ( NodeUtil.doJsonCaching
+             && ( forceCacheUpdate || cachedJson == null || cachedJson.length() == 0 ) ) {
+            //NodeUtil.jsonCache.put( getId(), element );
+            Utils.put( NodeUtil.jsonCache, getId(), millis, isExprOrProp, isIncludeQualified, filter, element );
+        }
 
         return element;
     }
@@ -4204,7 +4223,7 @@ public class EmsScriptNode extends ScriptNode implements
             EmsScriptNode node =
                     new EmsScriptNode( versionedRef, services, response );
             if ( node != null && node.exists() ) {
-                jsonArray.put( node.toJSONObject( null, true, null, true ) );
+                jsonArray.put( node.toJSONObject( null, true, null, true, forceCacheUpdate ) );
             }
         } else {
             // TODO error handling
@@ -5018,28 +5037,5 @@ public class EmsScriptNode extends ScriptNode implements
             return parentOwnsValueSpec();
         }
         return false;
-    }
-
-
-    /**
-     * FIXME Recipients and senders shouldn't be hardcoded - need to have these spring injected
-     * @param subject
-     * @param msg
-     */
-    protected void sendNotificationEvent(String subject, String msg) {
-        if (!NodeUtil.heisenbugSeen) {
-            String hostname = services.getSysAdminParams().getAlfrescoHost();
-            
-            String sender = hostname + "@jpl.nasa.gov";
-            String recipient;
-            
-            if (hostname.toLowerCase().contains( "europa" )) {
-                recipient = "kerzhner@jpl.nasa.gov";
-                ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
-            }
-            recipient = "mbee-dev-admin@jpl.nasa.gov";
-            ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
-            NodeUtil.heisenbugSeen = true;
-        }
     }
 }

@@ -1,5 +1,8 @@
 package gov.nasa.jpl.view_repo.util;
 
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
+
 import gov.nasa.jpl.mbee.util.Timer;
 
 import javax.servlet.http.HttpServletResponse;
@@ -57,11 +60,18 @@ public abstract class EmsTransaction {
                  HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
             e.printStackTrace();
             trx.rollback();
+            log( Level.ERROR, "### Rollback succeeded!" );
         } catch ( Throwable ee ) {
-            log( Level.ERROR,
-                 "\tryRollback(): rollback failed: "
-                         + ee.getMessage() );
+            log( Level.ERROR, "\tryRollback(): rollback failed: " + ee.getMessage() );
             ee.printStackTrace();
+            String addr = null;
+            try {
+                addr = Inet4Address.getLocalHost().getHostAddress();
+            } catch ( UnknownHostException e1 ) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
+            NodeUtil.sendNotificationEvent( "Heisenbug Occurence!", "rollback failed on " + addr , services );
         }
     }
 
