@@ -439,7 +439,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
         orig_json = baseline_orig_json
         filtered_json = baseline_json
     else:
-        print "TEST %s (%s)"%(test_num, test_name)
+        print "TEST %s (%s) %s"%(test_num, test_name, datetime.datetime.now())
         orig_json = result_orig_json
         filtered_json = result_json
         
