@@ -282,6 +282,8 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean embeddingExpressionInOperation = true;
     public boolean embeddingExpressionInConnector = true;
 
+    private boolean forceCacheUpdate = false;
+
     public static boolean fixOwnedChildren = false;
 
     // TODO add nodeService and other member variables when no longer
@@ -1404,7 +1406,7 @@ public class EmsScriptNode extends ScriptNode implements
                        "3: initializing version cache with node, "
                                + this + " version: "
                                + cachedVersion.getLabel();
-              logger.warn( msg );
+              logger.error( msg );
               if (versionCacheDebugPrint) System.out.println(msg);
 
            }
@@ -1417,8 +1419,7 @@ public class EmsScriptNode extends ScriptNode implements
                    "6: Warning! Alfresco Heisenbug failing to return current version of node "
                            + this.getNodeRef() + ".  Replacing node with unmodifiable frozen node, "
                            + cachedVersion.getLabel() + ".";
-          logger.warn( msg );
-          System.out.println(msg);
+          logger.error( msg );
           Debug.error( true, msg );
 //          sendNotificationEvent( "Heisenbug Occurence!", "" );
           if ( response != null ) {
@@ -1443,7 +1444,7 @@ public class EmsScriptNode extends ScriptNode implements
                             + this + " (" + thisEmsVersion.getLabel()
                             + ").  Replacing node with unmodifiable frozen node, "
                             + getId() + " (" + cachedVersion.getLabel()+ ").";
-           logger.warn( msg );
+           logger.error( msg );
            System.out.println(msg);
            Debug.error( true, msg );
            //NodeUtil.sendNotificationEvent( "Heisenbug Occurrence!", "" );
@@ -1455,11 +1456,11 @@ public class EmsScriptNode extends ScriptNode implements
        } else { // comp > 0
            // Cache is incorrect -- update cache
            NodeUtil.versionCache.put( id, thisEmsVersion );
-            String msg =
-                    "5: Updating version cache with new version of node, "
+           String msg =
+                   "5: Updating version cache with new version of node, "
                             + this + " version: "
                             + thisEmsVersion.getLabel();
-           logger.warn( msg );
+           logger.error( msg );
            if (versionCacheDebugPrint) System.out.println(msg);
        }
 //                // This fixes the nodeRef in esn
@@ -1620,7 +1621,7 @@ public class EmsScriptNode extends ScriptNode implements
     public < T extends Serializable > boolean setProperty( String acmType, T value,
                                                         // count prevents inf loop
                                                         int count ) {
-        log( "setProperty(acmType=" + acmType + ", value=" + value + ")" );
+        logger.debug( "setProperty(acmType=" + acmType + ", value=" + value + ")" );
         boolean success = true;
         if ( useFoundationalApi ) {
             try {
@@ -1639,7 +1640,7 @@ public class EmsScriptNode extends ScriptNode implements
                 NodeRef oldRef = nodeRef;
                 if ( isAVersion() ) {
                     success = true;
-                    this.log( "Tried to set property of a version nodeRef in "
+                    logger.error( "Tried to set property of a version nodeRef in "
                             + "setProperty(acmType=" + acmType
                             + ", value=" + value
                             + ") for EmsScriptNode " + this
@@ -1655,7 +1656,7 @@ public class EmsScriptNode extends ScriptNode implements
                         // make sure the version is equal or greater
                         int comp = NodeUtil.compareVersions(nodeRef, liveRef );
                         if ( comp > 0 ) {
-                            this.log( "ERROR! Live version " + liveRef + ""
+                            logger.error( "ERROR! Live version " + liveRef + ""
                                     + " is earlier than versioned ref "
                                     + "when trying to set property of a version nodeRef in "
                                     + "setProperty(acmType=" + acmType
@@ -1666,7 +1667,7 @@ public class EmsScriptNode extends ScriptNode implements
                                     + value + ")"  );
                             success = false;
                         } else if ( comp < 0 ) {
-                            this.log( "WARNING! Versioned node ref is not most current "
+                            logger.error( "WARNING! Versioned node ref is not most current "
                                     + "when trying to set property of a version nodeRef in "
                                     + "setProperty(acmType=" + acmType
                                     + ", value=" + value
@@ -1684,7 +1685,7 @@ public class EmsScriptNode extends ScriptNode implements
                     }
                 }
                 if ( nodeRef.equals( liveRef ) ) {
-                    System.out.println( "Got exception in "
+                    logger.error( "Got exception in "
                                         + "setProperty(acmType=" + acmType
                                         + ", value=" + value
                                         + ") for EmsScriptNode " + this
@@ -4222,7 +4223,7 @@ public class EmsScriptNode extends ScriptNode implements
             EmsScriptNode node =
                     new EmsScriptNode( versionedRef, services, response );
             if ( node != null && node.exists() ) {
-                jsonArray.put( node.toJSONObject( null, true, null, true, false ) );
+                jsonArray.put( node.toJSONObject( null, true, null, true, forceCacheUpdate ) );
             }
         } else {
             // TODO error handling
