@@ -385,7 +385,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return docBook;
     }
 
-    private DocBookWrapper createDocBook( EmsScriptNode product, String productId,
+    public DocBookWrapper createDocBook( EmsScriptNode product, String productId,
                                           String snapshotName, String contextPath,
                                           EmsScriptNode snapshotFolder,
                                           WorkspaceNode workspace, Date timestamp) throws Exception {
@@ -394,40 +394,41 @@ public class SnapshotPost extends AbstractJavaWebScript {
             return null;
         }
 
-        docBookMgr = new DocBookWrapper( this.snapshotName, snapshotFolder );
+        this.snapshotName = snapshotName;
+        docBookMgr = new DocBookWrapper( snapshotName, snapshotFolder );
         try {
             DBBook docBook = createDocBook( product );
             docBook.setRemoveBlankPages( true );
 
             View productView = product.getView();
-            if(productView == null) throw new Exception("Failed to get product's view!");
+            if(productView == null) throw new Exception("Missing document's structure; expected to find product's view but it's not found.");
 
             JSONArray contains = productView.getContainsJson();
-            if(contains == null || contains.length()==0){ throw new Exception("Failed to retrieve 'contains' JSONArray."); }
+            if(contains == null || contains.length()==0){ throw new Exception("Missing document's structure; expected to find document's 'contains' JSONArray but it's not found."); }
 
             for(int i=0; i < contains.length(); i++){
 	            JSONObject contain = contains.getJSONObject(0);
-	            if(contain == null) throw new Exception("Failed to get contain JSONObject at index: " + i);
+	            if(contain == null) throw new Exception(String.format("Missing document's structure; expected to find contain JSONObject at index: %d but it's not found.", i));
 
 	            String sourceType = (String)contain.opt("sourceType");
 	            String source = (String)contain.opt("source");
-	            if(source == null || source.isEmpty()) throw new Exception("Failed to get contain source property!");
+	            if(source == null || source.isEmpty()) throw new Exception("Missing document's structure; expected to find contain source property but it's not found.");
 
 	            this.view2view = productView.getViewToViewPropertyJson();
-	            if(view2view == null || view2view.length()==0) throw new Exception ("Failed to retrieve 'view2view' JSONArray.");
+	            if(view2view == null || view2view.length()==0) throw new Exception ("Missing document's structure; expected to find document's 'view2view' JSONArray but it's not found.");
 
 	            JSONObject v2vChildNode = getChildrenViews(source);
-	            if(v2vChildNode == null) throw new Exception("Failed to retrieve 'view2view' children view for: " + source);
+	            if(v2vChildNode == null) throw new Exception(String.format("Missing document's structure; expected to find 'view2view' childnode for: %s but it's not found.", source));
 
 	            JSONArray childrenViews = v2vChildNode.getJSONArray("childrenViews");
-	            if(childrenViews == null) throw new Exception("Failed to retrieve 'childrenViews'.");
+	            if(childrenViews == null) throw new Exception("Missing document's structure; expected to find 'view2view' childnode's 'childrenViews' but it's not found.");
 
 	            for(int k=0; k< childrenViews.length(); k++){
 	            	String childId = childrenViews.getString(k);
-	            	if(childId == null || childId.isEmpty()) throw new Exception("Failed to get 'childrenViews'[" + k + "] Id!");
+	            	if(childId == null || childId.isEmpty()) throw new Exception(String.format("Missing document's structure; expected to find childrenViews[%d] Id but it's not found.", k));
 
 	            	EmsScriptNode childNode = findScriptNodeById(childId, workspace, timestamp, false);
-	            	if(childNode == null) throw new Exception("Failed to find EmsScriptNode with Id: " + childId);
+	            	if(childNode == null) throw new Exception(String.format("Failed to find EmsScriptNode with Id: %s", childId));
 	            	//creating chapters
 	            	DocumentElement section = emsScriptNodeToDBSection(childNode, true, workspace, timestamp);
 	            	if(section != null) docBook.addElement(section);
@@ -567,24 +568,26 @@ public class SnapshotPost extends AbstractJavaWebScript {
         }
     }
 
+    /**
+     * 
+     * @param view      Needs to be a spaces store reference
+     * @param viewId
+     * @param workspace
+     * @param timestamp
+     * @return
+     */
     public EmsScriptNode createSnapshot( EmsScriptNode view, String viewId,
                                          WorkspaceNode workspace, Date timestamp ) {
         this.snapshotName = viewId + "_" + System.currentTimeMillis();
         log(LogLevel.INFO, "Begin creating snapshot: \t" + this.snapshotName);
         
         String contextPath = "alfresco/service/";
-        EmsScriptNode viewNode = findScriptNodeById(viewId, workspace, timestamp, true);
-        if(viewNode == null){
-        	log(LogLevel.ERROR, "Failed to find script node with Id: " + viewId);
-        	log(LogLevel.INFO, "End creating snapshot: \t\t" + this.snapshotName);
-        	return null;
-        }
-        EmsScriptNode snapshotFolder = getSnapshotFolderNode(viewNode);
+        EmsScriptNode snapshotFolder = getSnapshotFolderNode(view);
         if(snapshotFolder == null){
             log( LogLevel.ERROR, "Failed to get snapshot folder node!",
                  HttpServletResponse.SC_BAD_REQUEST );
             log(LogLevel.INFO, "End creating snapshot: \t\t" + this.snapshotName);
-        	return null;
+            return null;
         }
         log(LogLevel.INFO, "End creating snapshot: \t\t" + this.snapshotName);
         return createSnapshot(view, viewId, snapshotName, contextPath, snapshotFolder, workspace, timestamp);
@@ -606,6 +609,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
         snapshotNode.createOrUpdateAspect( "view2:Snapshotable" );
         snapshotNode.createOrUpdateProperty( "view2:snapshotProduct", view.getNodeRef() );
+        snapshotNode.createOrUpdateProperty( "view2:timestamp", timestamp );
         view.createOrUpdateAspect( "view2:Snapshotable" );
         view.appendToPropertyNodeRefs( "view2:productSnapshots", snapshotNode.getNodeRef() );
 
@@ -613,14 +617,16 @@ public class SnapshotPost extends AbstractJavaWebScript {
         try {
             snapshotJson.put( "snapshot", true );
             ActionUtil.saveStringToFile( snapshotNode, "application/json", services, snapshotJson.toString( 4 ) );
-            DocBookWrapper docBookWrapper = createDocBook( view, viewId, snapshotName, contextPath, snapshotNode, workspace, timestamp );
-            if ( docBookWrapper == null ) {
-                log( LogLevel.ERROR, "Failed to generate DocBook!" );
-                snapshotNode = null;
-            } else {
-                docBookWrapper.save();
-                docBookWrapper.saveDocBookToRepo( snapshotFolder, timestamp );
-            }
+            // Docbook is generated on demand now rather than ahead of time...
+            // see SnapshotArtifactActionExecuter 
+//            DocBookWrapper docBookWrapper = createDocBook( view, viewId, snapshotName, contextPath, snapshotNode, workspace, timestamp );
+//            if ( docBookWrapper == null ) {
+//                log( LogLevel.ERROR, "Failed to generate DocBook!" );
+//                snapshotNode = null;
+//            } else {
+//                docBookWrapper.save();
+//                docBookWrapper.saveDocBookToRepo( snapshotFolder, timestamp );
+//            }
         }
         catch ( Exception e1 ) {
             snapshotNode = null;
@@ -1152,12 +1158,19 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 			//image.attr("src", imgFilename);
                 		//}
                 	}
-                	//http://localhost:8081/share/proxy/alfresco/api/node/content/workspace/SpacesStore/74cd8a96-8a21-47e5-9b3b-a1b3e296787d/graph.JPG
+                	else{
+                		image.before(String.format("<link xl:href=\"%s\" /> ", src));
+                		image.remove();
+                	}
                 }
                 catch(Exception ex){
                 	System.out.println("[WARNING]: Failed to retrieve embedded image.");
                 	ex.printStackTrace();
                 }
+    		}
+    		else{
+    			image.before(String.format("<link xl:href=\"%s\" /> ", src));
+    			image.remove();
     		}
     	}
     	return document.body().html().toString();
@@ -1536,31 +1549,27 @@ public class SnapshotPost extends AbstractJavaWebScript {
     private void removeHtmlTag(Element elem){
     	if(elem == null) return;
     	String tagName = elem.tagName().toUpperCase();
-    	//System.out.println("tag name: " + tagName);
     	switch(tagName){
     	case "P":
     	case "DIV":
     	case "BODY":
+    	case "LINK":
     	case "INLINEMEDIAOBJECT":
     	case "IMAGEOBJECT":
     		for(Element child:elem.children()){
-    			//System.out.println("removing Html tags...");
     			removeHtmlTag(child);
     		}
     		break;
     	case "A":
-    		//System.out.println("Anchor tag...");
-			elem.before(elem.text() + " (" + elem.attr("href") + ") ");
+    		String link = String.format("<link xl:href=\"%s\">%s</link> ", elem.attr("href"), elem.text());
+    		elem.before(link);
     		elem.remove();
     		break;
 		default:
-    			//System.out.println("replacing elem with its text...");
 			elem.before(elem.text());
 			for(Element child:elem.children()){
-				//System.out.println("removing Html tags...");
 				removeHtmlTag(child);
 			}
-			//System.out.println("removing element...");
 			elem.remove();
     	}
     }
@@ -1842,7 +1851,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     	if(elm.children() != null && elm.children().size() > 0){
     		for(Element e: elm.children()){
-    			if(e.tagName().compareToIgnoreCase("inlinemediaobject") == 0){
+    			if(e.tagName().compareToIgnoreCase("inlinemediaobject") == 0 ||
+				   e.tagName().compareToIgnoreCase("link")==0){
     				sb.append(e.outerHtml());
     				continue;
     			}

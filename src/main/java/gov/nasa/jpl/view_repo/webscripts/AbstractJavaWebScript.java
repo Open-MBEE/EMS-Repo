@@ -166,6 +166,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     abstract protected Map< String, Object > executeImplImpl( final WebScriptRequest req,
                                                               final Status status,
                                                               final Cache cache );
+    
     protected Map< String, Object > executeImplImpl( final WebScriptRequest req,
                                                      final Status status, final Cache cache,
                                                      boolean withoutTransactions ) {
@@ -194,6 +195,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         //Map<String, Object> model = new HashMap<String, Object>();
         if ( !model.containsKey( "res" ) && response != null && response.toString().length() > 0 ) {
             model.put( "res", response.toString() );
+        }
+        // need to check if the transaction resulted in rollback, if so change the status code
+        // TODO: figure out how to get the response message in (response is always empty)
+        if (getResponseStatus().getCode() != HttpServletResponse.SC_ACCEPTED) {
+            status.setCode( getResponseStatus().getCode() );
         }
         return model;
     }

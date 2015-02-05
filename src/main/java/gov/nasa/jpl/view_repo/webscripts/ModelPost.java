@@ -61,6 +61,7 @@ import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,6 +78,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import kexpparser.KExpParser;
 //import k.frontend.Frontend;
+
 
 
 
@@ -2712,7 +2714,9 @@ public class ModelPost extends AbstractJavaWebScript {
 
         printFooter();
 
-        log( LogLevel.INFO, "ModelPost: " + timer );
+        if (logger.isInfoEnabled()) {
+            logger.info( "ModelPost: " + timer );
+        }
 
         return model;
     }
@@ -2747,7 +2751,9 @@ public class ModelPost extends AbstractJavaWebScript {
           
             if (runWithoutTransactions || internalRunWithoutTransactions) {
                 for ( EmsScriptNode element : elements ) {
-                    elementsJson.put( element.toJSONObject(null) );
+                	JSONObject json = element.toJSONObject(null);
+//                	NodeUtil.jsonCache.put(element.getName(), json);
+                    elementsJson.put( json );
                 }            
             }
             else {
