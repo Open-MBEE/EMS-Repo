@@ -2,7 +2,7 @@
 
   "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n",
 
-  "sequence": 1,
+  "sequence": 20,
 
   "workspace1": {
 
@@ -18,7 +18,7 @@
 
       "owner": "e_38304",
 
-      "qualifiedName": "/JW_TEST/e_38304/duration",
+      "qualifiedName": "/JW_TEST2/e_38304/duration",
 
       "specialization": {
 
