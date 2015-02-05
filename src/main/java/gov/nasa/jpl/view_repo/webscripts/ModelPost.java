@@ -54,6 +54,7 @@ import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
@@ -77,15 +78,25 @@ import javax.servlet.http.HttpServletResponse;
 import kexpparser.KExpParser;
 //import k.frontend.Frontend;
 
+
+
+
+
+
+
+
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
+import org.alfresco.service.cmr.dictionary.AspectDefinition;
+import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.version.Version;
+import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -1236,6 +1247,17 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                     }
                     break;
+                case DELETED:
+                    if (ingest && !wsDiff.getDeletedElements().containsKey( jsonId )) {
+                        wsDiff.getDeletedElements().put( jsonId,  element );
+                        if (element.exists()) {
+                            element.removeAspect( "ems:Added" );
+                            element.removeAspect( "ems:Updated" );
+                            element.removeAspect( "ems:Moved" );
+                            element.createOrUpdateAspect( "ems:Deleted" );
+                        }
+                    }
+                    break;
                 default:
                     // do nothing
             }
@@ -1382,7 +1404,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 while (iterOld.hasNext()) {
                     EmsScriptNode oldNode = iterOld.next();
                     if (i >= newValsSize) {
-                        deleteValueSpec(node, oldNode);
+                        deleteValueSpec(oldNode, ingest, workspace);
                     }
                     i++;
                 }
@@ -1394,16 +1416,101 @@ public class ModelPost extends AbstractJavaWebScript {
     }
     
     /**
-     * Delete the valueSpec node, remove from the ownedChildren of the parent reified
-     * node, update the diff and mod status
-     * 
-     * @param parent
-     * @param valueSpec
+     * See if any of the properties of the passed node point to a value spec
+     * and will be lost when changing to aspectName.  In that case, delete
+     * the value specs.
+     *
+     * Note: make sure what calls this is wrapped in a transaction!
      */
-    private void deleteValueSpec(EmsScriptNode parent, EmsScriptNode valueSpec) {
+    private void checkForObsoleteValueSpecs(String aspectName, EmsScriptNode node,
+                                            WorkspaceNode workspace, boolean ingest) {
         
-        // TODO implement this
+        if (aspectName == null || node == null) {
+            return;
+        }
         
+        // If it is a type that has value specs, and at least one of those properties
+        // has a value spec mapped to it:
+        if (node.hasValueSpecProperty()) {
+            
+            Set<QName> aspectProps = new HashSet<QName>();
+            
+            if (!aspectName.equals(Acm.ACM_ELEMENT)) {
+                QName qName = NodeUtil.createQName( aspectName );
+                DictionaryService dServ = services.getDictionaryService();
+                AspectDefinition aspectDef = dServ.getAspect(qName);
+                aspectProps.addAll( aspectDef.getProperties().keySet() );
+            }
+            
+            Map<String,Object> oldProps = node.getProperties();
+            
+            // Loop through all the old properties and delete the value
+            // specs that are no longer being used:
+            String propName;
+            QName propQName;
+            Object propVal;
+            for (Entry<String,Object> entry : oldProps.entrySet()) {
+                propName = entry.getKey();
+                propQName = NodeUtil.createQName(propName);
+                propVal = entry.getValue();
+                
+                // If it is a property that maps to a value spec, and the aspect
+                // we are changing to no longer has that property:
+                if (EmsScriptNode.isValueSpecProperty( NodeUtil.getShortQName( propQName ) ) &&
+                    !aspectProps.contains(propQName)) {
+                    
+                    if (propVal instanceof NodeRef){
+                        EmsScriptNode propValNode = new EmsScriptNode((NodeRef)propVal, services);
+                        deleteValueSpec(propValNode, ingest, workspace);
+                    }
+                    else if (propVal instanceof List){
+                        List<NodeRef> nrList = (ArrayList<NodeRef>) propVal;
+                        for (NodeRef ref : nrList) {
+                            if (ref != null) {
+                                EmsScriptNode propValNode = new EmsScriptNode(ref, services);
+                                deleteValueSpec(propValNode, ingest, workspace);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Delete the valueSpec node, remove from the ownedChildren of the parent reified
+     * node, update the diff
+     * 
+     */
+    private void deleteValueSpec(final EmsScriptNode valueSpec,
+                                 final boolean ingest, final WorkspaceNode workspace) {
+                
+        // Delete the element and any its children, and remove the element from its
+        // owner's ownedChildren set:
+        final MmsModelDelete deleteService = new MmsModelDelete(repository, services);
+        deleteService.setWsDiff( workspace );
+
+        if (runWithoutTransactions || internalRunWithoutTransactions) {
+            deleteService.handleElementHierarchy( valueSpec, workspace, true );
+        }
+        else {
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus()) {
+                @Override
+                public void run() throws Exception {
+                    deleteService.handleElementHierarchy( valueSpec, workspace, true );
+                }
+            };
+        }
+        
+        // Update the needed aspects of the deleted nodes:
+        WorkspaceDiff delWsDiff = deleteService.getWsDiff();
+        if (delWsDiff != null) {
+            for (EmsScriptNode deletedNode: delWsDiff.getDeletedElements().values()) {
+                ModStatus modStatus = new ModStatus();
+                modStatus.setState( ModStatus.State.DELETED );
+                updateTransactionableWsState(deletedNode, deletedNode.getSysmlId(), modStatus, ingest);
+            }
+         }
         
     }
 
@@ -1838,9 +1945,12 @@ public class ModelPost extends AbstractJavaWebScript {
                     // Update the aspect if the type has changed and its a aspect, or if it is
                     // being changed to an Element.  Need to call this for Elements for downgrading,
                     // which will remove all of the needed aspects.
-                    if ( (!type.equals( acmSysmlType ) && NodeUtil.isAspect( acmSysmlType )) ||
-                         acmSysmlType.equals(Acm.ACM_ELEMENT)) {
-                        if (ingest && nodeToUpdate.createOrUpdateAspect( acmSysmlType )) {
+                    if ( ingest && ( (!type.equals( acmSysmlType ) && NodeUtil.isAspect( acmSysmlType )) || 
+                                      acmSysmlType.equals(Acm.ACM_ELEMENT) ) ) {
+                        
+                        checkForObsoleteValueSpecs(acmSysmlType, nodeToUpdate, workspace, ingest);
+                        
+                        if (nodeToUpdate.createOrUpdateAspect( acmSysmlType )) {
                             modStatus.setState( ModStatus.State.UPDATED  );
                         }
                     }

@@ -254,7 +254,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         if (root.exists()) {
             delete(root, workspace, null);
         }
-
+        
         // TODO: REVIEW may not need this b/c addToWsDiff() does not add in reified packages
         //       Also, code in ModelPost assumes we never delete reified packages
 //        // Delete the reified pkg if it exists also:
@@ -279,6 +279,14 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 wsDiff.getElements().put( sysmlId, node );
             if(wsDiff.getDeletedElements() != null)
                 wsDiff.getDeletedElements().put( sysmlId, node );
+            
+            // Remove from the ownedChildren of the owner:
+            // Note: added this for when we are deleting embedded value specs that are no longer be used
+            EmsScriptNode parent = node.getOwningParent( null );
+            if (parent != null && parent.exists()) {
+                parent.removeFromPropertyNodeRefs("ems:ownedChildren", node.getNodeRef() );
+            }
+
         }
     }
 }
