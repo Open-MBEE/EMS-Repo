@@ -4997,6 +4997,21 @@ public class EmsScriptNode extends ScriptNode implements
         }
         return false;
     }
+    
+    /**
+     * Returns true if the passed property name maps to a value spec
+     * 
+     * @param propName
+     * @return
+     */
+    public static boolean isValueSpecProperty(String propName) {
+        for (Set<String> valueSpecSet : Acm.TYPES_WITH_VALUESPEC.values()) {
+            if (valueSpecSet.contains( propName )) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Returns true if the direct parent of this node has a value spec property that
