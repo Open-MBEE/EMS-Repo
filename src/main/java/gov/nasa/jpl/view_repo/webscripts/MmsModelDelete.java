@@ -88,7 +88,10 @@ public class MmsModelDelete extends AbstractJavaWebScript {
     protected JSONObject handleRequest(WebScriptRequest req) throws JSONException {
         JSONObject result = null;
 
-        Long start = System.currentTimeMillis();
+        //Long start = System.currentTimeMillis();  // TODO ask CY why implemented this in this way, as it
+                                                    //      introduces a bug when the node is replicated
+                                                    //      below, as the creation time will then be after
+                                                    //      this time
         String user = AuthenticationUtil.getRunAsUser();
         String wsId = null;
         WorkspaceNode workspace = getWorkspace( req, //true, // not creating ws!
@@ -150,7 +153,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 wsDiff.getElements().remove( id );
             }
             
-            result = wsDiff.toJSONObject( new Date(start), new Date(end), showAll );
+            result = wsDiff.toJSONObject( new Date(end), new Date(end), showAll );
 
             // apply aspects after JSON has been created (otherwise it won't be output)
             Set<EmsScriptNode> nodesToDelete = new HashSet<EmsScriptNode>();
