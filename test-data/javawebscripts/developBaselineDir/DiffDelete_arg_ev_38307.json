@@ -20,23 +20,13 @@
 
     "conflictedElements": [],
 
-    "deletedElements": [
+    "deletedElements": [{
 
-      {
+      "creator": "admin",
 
-        "creator": "admin",
+      "sysmlid": "arg_ev_38307"
 
-      },
-
-      {
-
-        "creator": "admin",
-
-        "sysmlid": "arg_ev_38307"
-
-      }
-
-    ],
+    }],
 
     "movedElements": [],
 
