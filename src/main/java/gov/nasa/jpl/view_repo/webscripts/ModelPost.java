@@ -489,8 +489,10 @@ public class ModelPost extends AbstractJavaWebScript {
      * Resurrect the parents of the node from the dead if needed
      *
      */
-    protected void resurrectParents(EmsScriptNode nodeToUpdate, boolean ingest) {
+    protected void resurrectParents(EmsScriptNode nodeToUpdate, boolean ingest,
+                                    WorkspaceNode workspace) {
 
+        EmsScriptNode lastNode = nodeToUpdate;
         EmsScriptNode nodeParent = nodeToUpdate.getParent();
         EmsScriptNode reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true) : null;
         while (nodeParent != null  && nodeParent.scriptNodeExists()) {
@@ -499,10 +501,15 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             if (reifiedNodeParent != null && reifiedNodeParent.isDeleted()) {
                 resurrectParent(reifiedNodeParent, ingest);
+                // Now deleted nodes are removed from ownedChildren, so must add them back:
+                if (lastNode != null) {
+                    lastNode.setOwnerToReifiedNode( reifiedNodeParent, workspace );
+                }
             }
             if (nodeParent.isWorkspaceTop()) {
                 break;
             }
+            lastNode = reifiedNodeParent;
             nodeParent = nodeParent.getParent();
             reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true) : null;
         }
@@ -1786,6 +1793,13 @@ public class ModelPost extends AbstractJavaWebScript {
                  NodeUtil.workspacesEqual( nodeToUpdate.getWorkspace(), workspace ) ) {
                 nodeToUpdate.removeAspect( "ems:Deleted" );
                 modStatus.setState( ModStatus.State.ADDED );
+                
+                // Update the ownedChildren of the parent, if the parent is in the correct
+                // workspace.  This is needed b/c we now remove the child from this set
+                // when deleting it:
+                if (parent != null && NodeUtil.workspacesEqual( parent.getWorkspace(), workspace )) {
+                    nodeToUpdate.setOwnerToReifiedNode( parent, workspace );
+                }
             }
         }
         EmsScriptNode reifiedPkgNode = null;
@@ -1875,10 +1889,10 @@ public class ModelPost extends AbstractJavaWebScript {
         if ( workspace != null && workspace.exists() ) {
             boolean nodeWorkspaceWrong = (nodeToUpdate != null && nodeToUpdate.exists()
                                           && !nodeToUpdate.isWorkspace()
-                                          && !workspace.equals( nodeToUpdate.getWorkspace() ));
+                                          && !NodeUtil.workspacesEqual( workspace, nodeToUpdate.getWorkspace()) );
             boolean parentWorkspaceWrong =  (parent != null && parent.exists()
                                              && !parent.isWorkspace()
-                                             && !workspace.equals( parent.getWorkspace() ));
+                                             && !NodeUtil.workspacesEqual( workspace, parent.getWorkspace()) );
             if ( nodeToUpdate == null || !nodeToUpdate.exists() ) {
                 parent = workspace.replicateWithParentFolders( parent );
             } else if ( nodeWorkspaceWrong || parentWorkspaceWrong ) {
@@ -1942,7 +1956,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
 
                     // Resurrect any parent nodes if needed:
-                    resurrectParents(nodeToUpdate, ingest);
+                    resurrectParents(nodeToUpdate, ingest, workspace);
 
                     // Update the aspect if the type has changed and its a aspect, or if it is
                     // being changed to an Element.  Need to call this for Elements for downgrading,

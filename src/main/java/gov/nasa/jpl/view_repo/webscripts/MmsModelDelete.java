@@ -9,7 +9,11 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -127,10 +131,32 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             long end = System.currentTimeMillis();
 
             boolean showAll = false;
+            
+            Set< EmsScriptNode > valueSpecs = new LinkedHashSet<EmsScriptNode>();
+            Set< String> idsToRemove = new HashSet<String>();
+            for (Entry< String, EmsScriptNode > entry: wsDiff.getDeletedElements().entrySet()) {
+                EmsScriptNode node = entry.getValue();
+                String id = entry.getKey();
+                if ( node.isOwnedValueSpec() ) {
+                    valueSpecs.add( node );
+                    idsToRemove.add( id );
+                }
+            }
+            
+            // Remove value specs from elements, elementsVersions and deletedElements:
+            for (String id : idsToRemove) {
+                wsDiff.getDeletedElements().remove( id );
+                wsDiff.getElementsVersions().remove( id );
+                wsDiff.getElements().remove( id );
+            }
+            
             result = wsDiff.toJSONObject( new Date(start), new Date(end), showAll );
 
             // apply aspects after JSON has been created (otherwise it won't be output)
-            for (EmsScriptNode deletedNode: wsDiff.getDeletedElements().values()) {
+            Set<EmsScriptNode> nodesToDelete = new HashSet<EmsScriptNode>();
+            nodesToDelete.addAll( wsDiff.getDeletedElements().values() );
+            nodesToDelete.addAll( valueSpecs );
+            for (EmsScriptNode deletedNode: nodesToDelete) {
                 if (deletedNode.exists()) {
                     deletedNode.removeAspect( "ems:Added" );
                     deletedNode.removeAspect( "ems:Updated" );
@@ -139,7 +165,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                     projectId = deletedNode.getProjectId();
                 }
             }
-
+            
         } catch (Throwable e) {
             try {
                 if (e instanceof JSONException) {
