@@ -91,9 +91,13 @@ def convertBeanId2DescFile(id):
 	tokens = id.split('.')
 
 	filename = DESC_PATH
+        ii = None
 	for ii in range(len(tokens)-1):
 		filename += tokens[ii] + '/'
-	filename = filename[:-1] + '.' + tokens[ii+1] + '.desc.xml'
+        if ii == None: 
+	        print "couldn't parse", id
+        else:
+	        filename = filename[:-1] + '.' + tokens[ii+1] + '.desc.xml'
 
 	return filename
 

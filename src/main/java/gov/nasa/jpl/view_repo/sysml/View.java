@@ -528,11 +528,18 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
             if ( contains != null ) {
                 if ( contains instanceof JSONArray ) return (JSONArray)contains;
 
-                try {
-                    JSONArray jarr = new JSONArray( "" + contains );
-                    viewablesJson = jarr;
-                } catch ( JSONException e ) {
-                    e.printStackTrace();
+                String containsString = "" + contains;
+                if ( containsString.length() > 1 ) {
+                    try {
+                        JSONArray jarr = new JSONArray( "" + contains );
+                        viewablesJson = jarr;
+                    } catch ( JSONException e ) {
+                        System.out.println( "Tried to parse \"" + contains
+                                            + "\" in element "
+                                            + getElement().getSysmlName() + "("
+                                            + getElement().getSysmlId() + ")" );
+                        e.printStackTrace();
+                    }
                 }
             }
         }

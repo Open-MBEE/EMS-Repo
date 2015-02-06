@@ -1,29 +1,29 @@
 /*******************************************************************************
- * Copyright (c) <2013>, California Institute of Technology ("Caltech").  
+ * Copyright (c) <2013>, California Institute of Technology ("Caltech").
  * U.S. Government sponsorship acknowledged.
- * 
+ *
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification, are 
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
- * 
- *  - Redistributions of source code must retain the above copyright notice, this list of 
+ *
+ *  - Redistributions of source code must retain the above copyright notice, this list of
  *    conditions and the following disclaimer.
- *  - Redistributions in binary form must reproduce the above copyright notice, this list 
- *    of conditions and the following disclaimer in the documentation and/or other materials 
+ *  - Redistributions in binary form must reproduce the above copyright notice, this list
+ *    of conditions and the following disclaimer in the documentation and/or other materials
  *    provided with the distribution.
- *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory, 
- *    nor the names of its contributors may be used to endorse or promote products derived 
+ *  - Neither the name of Caltech nor its operating division, the Jet Propulsion Laboratory,
+ *    nor the names of its contributors may be used to endorse or promote products derived
  *    from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS 
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
- * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER  
- * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON 
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+ * OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 
@@ -45,9 +45,9 @@ import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONArray;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -55,15 +55,15 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
 /**
  * Descriptor at
  * /view-repo/src/main/amp/config/alfresco/extension/templates/webscripts/gov/nasa/jpl/javawebscripts/project.get.desc.xml
- * 
+ *
  * @author cinyoung
- * 
+ *
  */
 public class ProjectGet extends AbstractJavaWebScript {
     public ProjectGet() {
         super();
     }
-    
+
     public ProjectGet(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
     }
@@ -73,10 +73,11 @@ public class ProjectGet extends AbstractJavaWebScript {
      */
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-        ProjectGet instance = new ProjectGet(repository, services);
-        return instance.executeImplImpl(req,  status, cache);
+        ProjectGet instance = new ProjectGet(repository, getServices());
+        return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
     }
-	
+
+    @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
 //    	String userName = AuthenticationUtil.getRunAsUser();
         printHeader( req );
@@ -94,9 +95,9 @@ public class ProjectGet extends AbstractJavaWebScript {
                 // get timestamp if specified
                 String timestamp = req.getParameter("timestamp");
                 Date dateTime = TimeUtils.dateFromTimestamp(timestamp);
-                
+
                 WorkspaceNode workspace = getWorkspace( req );
-                
+
                 json = handleProject(projectId, siteName, workspace, dateTime);
                 if (json != null && !Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
             }
@@ -121,20 +122,20 @@ public class ProjectGet extends AbstractJavaWebScript {
 
     /**
      * Get the project specified by the JSONObject
-     * 
+     *
      * @param projectId
      *            Project ID
      * @param siteName
      *            Site project should reside in
      * @return HttpStatusResponse code for success of the POST request
-     * @throws JSONException 
+     * @throws JSONException
      */
     private JSONObject handleProject( String projectId, String siteName,
                                       WorkspaceNode workspace, Date dateTime )
                                               throws JSONException {
         EmsScriptNode projectNode = null;
         JSONObject json = null;
-                
+
         EmsScriptNode siteNode = getSiteNodeForWorkspace( siteName, workspace, dateTime );
 
         if (siteNode == null) {
@@ -142,14 +143,14 @@ public class ProjectGet extends AbstractJavaWebScript {
         } else {
             projectNode = siteNode.childByNamePath("/Models/" + projectId);
             if (projectNode == null) {
-            	
+
             	// If the projectNode is not found, then try just looking for the project if the siteName
             	// was no_site.  This handles the situation that site was not specified, and a no_site
             	// is valid for the workspace:
             	if (siteName.equals(NO_SITE_ID)) {
             		projectNode = findScriptNodeByIdForWorkspace(projectId, workspace, dateTime, false);
             	}
-            	
+
             	// for backwards compatibility
             	if (projectNode == null) {
             		projectNode = siteNode.childByNamePath("/ViewEditor/" + projectId);
@@ -160,14 +161,14 @@ public class ProjectGet extends AbstractJavaWebScript {
             log(Level.ERROR, HttpServletResponse.SC_NOT_FOUND, "Could not find project");
             return null;
         }
-        
+
         if (checkPermissions(projectNode, PermissionService.READ)) {
             log(Level.INFO, HttpServletResponse.SC_OK, "Found project");
             json = new JSONObject();
             JSONArray elements = new JSONArray();
             JSONObject project = new JSONObject();
             JSONObject specialization = new JSONObject();
-            
+
             json.put("elements", elements);
             elements.put(project);
             project.put(Acm.JSON_ID, projectId);
@@ -178,7 +179,7 @@ public class ProjectGet extends AbstractJavaWebScript {
         } else {
             log(Level.ERROR, HttpServletResponse.SC_UNAUTHORIZED, "No permissions to read");
         }
-        
+
         return json;
     }
 

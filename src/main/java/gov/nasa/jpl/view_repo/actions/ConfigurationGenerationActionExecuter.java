@@ -35,12 +35,15 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import org.apache.log4j.*;
+import gov.nasa.jpl.view_repo.webscripts.HostnameGet;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
@@ -174,17 +177,17 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
                         snapshotService.createSnapshot( product,
                                                         product.getSysmlId(),
                                                         workspace, dateTime );
-	            if (snapshot == null || status.getCode() != HttpServletResponse.SC_OK) {
+                response.append(snapshotService.getResponse().toString());
+                if (snapshot == null || status.getCode() != HttpServletResponse.SC_OK) {
 	                jobStatus = "Failed";
-	                response.append("[ERROR]: could not make snapshot for " + product.getProperty(Acm.ACM_NAME));
+	                response.append("[ERROR]: could not make snapshot for \t" + product.getProperty(Acm.ACM_NAME) + "\n");
 	            } 
 	            else {
-	                response.append("[INFO]: Successfully created snapshot: " + snapshot.getProperty(Acm.CM_NAME));
+	                response.append("[INFO]: Successfully created snapshot: \t" + snapshot.getProperty(Acm.CM_NAME) + "\n");
 	            }
 	            if (snapshot != null) {
 	                snapshots.add(snapshot);
 	            }
-	            response.append(snapshotService.getResponse().toString());
     		}
         }
         // make relationships between configuration node and all the snapshots
@@ -202,7 +205,8 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         if (!hostname.endsWith( ".jpl.nasa.gov" )) {
             hostname += ".jpl.nasa.gov";
         }
-        String contextUrl = "https://" + hostname + "/alfresco";
+        HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
+        String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";
         
         // Send off notification email
         String subject =

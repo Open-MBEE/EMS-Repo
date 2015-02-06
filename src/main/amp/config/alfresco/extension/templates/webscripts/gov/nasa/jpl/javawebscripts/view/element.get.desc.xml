@@ -10,7 +10,7 @@
   <url>/javawebscripts/views/{modelid}/elements?recurse={recurse?}</url>
   <format default="json">argument</format> 
   <authentication>user</authentication> 
-  <transaction allow="readonly">required</transaction>
+  <transaction>none</transaction>
   <family>EMS Java Webscripts</family>
   <args>
   	<arg>

@@ -26,7 +26,7 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
     public MmsConfigurationsPost() {
         super();
     }
-    
+
     public MmsConfigurationsPost( Repository repository, ServiceRegistry services ) {
         this.repository = repository;
         this.services = services;
@@ -40,19 +40,20 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
 
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-		MmsConfigurationsPost instance = new MmsConfigurationsPost(repository, services);
-    	return instance.executeImplImpl(req, status, cache);
+		MmsConfigurationsPost instance = new MmsConfigurationsPost(repository, getServices());
+    	    return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
     }
-    
+
+    @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
-        
+
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
-        
-        MmsConfigurationsPost instance = new MmsConfigurationsPost(repository, services);
-        
+
+        MmsConfigurationsPost instance = new MmsConfigurationsPost(repository, getServices());
+
         JSONObject jsonObject = new JSONObject();
 
         try {
@@ -68,15 +69,15 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
                 log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error");
             }
             e.printStackTrace();
-        } 
-    
+        }
+
         status.setCode(responseStatus.getCode());
-        
+
         printFooter();
-    
+
         return model;
     }
-    
+
     private JSONObject handleUpdate(WebScriptRequest req) throws JSONException {
         WorkspaceNode workspace = getWorkspace( req );
 
@@ -87,7 +88,7 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
             log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Could not find site");
             return new JSONObject();
         }
-        
+
         String configId = req.getServiceMatch().getTemplateVars().get( "configurationId" );
         NodeRef configNode = NodeUtil.getNodeRefFromNodeId( configId );
         if (configNode == null) {
@@ -95,13 +96,13 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
             return new JSONObject();
         }
         EmsScriptNode config = new EmsScriptNode(configNode, services);
-        
+
         ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
         HashSet<String> productSet = configWs.updateConfiguration( config, (JSONObject)req.parseContent(), siteNode, workspace, null );
         ConfigurationPost configPost = new ConfigurationPost( repository, services );
         String siteName = siteNode == null ? null : siteNode.getName();
         configPost.startAction( config, siteName, productSet, workspace, null );
-        
+
         return configWs.getConfigJson( config, workspace, null );
     }
 }

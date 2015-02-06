@@ -48,7 +48,7 @@ public class WorkspaceDiff implements Serializable {
      * first. If conflictMustBeChangeToSameProperty is true, the second
      * definition is used, else the first.
      */
-    public boolean conflictMustBeChangeToSameProperty;
+    public boolean conflictMustBeChangeToSameProperty = true;
 
     public boolean onlyModelElements = true;
 
@@ -185,7 +185,7 @@ public class WorkspaceDiff implements Serializable {
             Map< String, Pair< Object, Object >> changes =
                     nodeDiff.getPropertyChanges( e.getKey() );
             if ( changes != null ) {
-                Pair< Object, Object > ownerChange = changes.get( "ems:owner" );
+                Pair< Object, Object > ownerChange = changes.get( NodeUtil.createQName("ems:owner").toString() );
                 if ( ownerChange != null && ownerChange.first != null
                      && ownerChange.second != null
                      && !ownerChange.first.equals( ownerChange.second ) ) {
@@ -246,6 +246,13 @@ public class WorkspaceDiff implements Serializable {
      * conflictMustBeChangeToSameProperty == true, then properties changes must
      * be compared to the property values in the common parent to see whether
      * they are actually changed in each workspace.
+     * 
+     * On 1/16/15 we defined conflict as the following:
+     * Given a branch Bi, creation time of that branch off the common parent PCi, 
+     * we define a conflict as a change to a element for all Bi after min(PCi), where
+     * a change to a element on a branch includes all parent branch changes also.
+     * If one of the branches is the common parent, then it does not have a PCi,
+     * and if all branches are the same, then a conflict is not possible.
      */
     protected void computeConflicted() {
         // Get intersection.
@@ -285,6 +292,26 @@ public class WorkspaceDiff implements Serializable {
             }
         }
     }
+    
+    /**
+     * Returns the child of the commonParent that is a parent of workspace.
+     * 
+     * @param workspace
+     * @param commonParent
+     * @return
+     */
+    private WorkspaceNode getChildOfCommonParent(WorkspaceNode workspace,
+                                                 WorkspaceNode commonParent) {
+        
+        WorkspaceNode parent = workspace;
+        WorkspaceNode parentLast = workspace;
+        while (parent != null && !parent.equals( commonParent )) {
+            if (parent != null) parentLast = parent;
+            parent = parent.getParentWorkspace();
+        }
+        
+        return parentLast;
+    }
 
     /**
      * Check to see if there is a property that was changed in both workspaces
@@ -298,45 +325,73 @@ public class WorkspaceDiff implements Serializable {
      *         changed in the respective workspaces to different values.
      */
     protected boolean samePropertyChanged( NodeRef ref1, NodeRef ref2 ) {
+        
+        // Note: assuming that any node passed to this method, or part of the nodeDiff
+        //       already are contained within the desired timestamps
+        
         String elementName = NodeUtil.getSysmlId( ref1 );
         Map< String, Pair< Object, Object > > changes =
                 new LinkedHashMap< String, Pair<Object,Object> >( nodeDiff.getPropertyChanges( elementName ) );
         Utils.removeAll( changes, WorkspaceNode.workspaceMetaProperties );
         if ( Utils.isNullOrEmpty( changes ) ) return false;
+        
+        WorkspaceNode ws1 = getWs1();
+        WorkspaceNode ws2 = getWs2();
+
         WorkspaceNode parentWs =
-                WorkspaceNode.getCommonParent( getWs1(), getWs2() );
-        NodeRef pRef1 = NodeUtil.findNodeRefById( elementName, false, parentWs,
-                                                 getTimestamp1(),
-                                                 getServices(),
-                                                 false );
-        NodeDiff nodeDiff1 = new NodeDiff( pRef1, ref1 );
+                WorkspaceNode.getCommonParent( ws1, ws2 );
+        
+        boolean ws1Equal = NodeUtil.workspacesEqual(ws1,parentWs);
+        boolean ws2Equal = NodeUtil.workspacesEqual(ws2,parentWs);
+        
+        // If both workspaces are the same (possible b/c of different timepoints) then 
+        // a conflict is not possible:
+        if (NodeUtil.workspacesEqual(ws1,ws2)) {
+            return false;
+        }
+        // If either of the workspaces are the common parent, then just need to verify that
+        // node was modified in the common parent after the other workspaces parent off the 
+        // common parent was created:
+        else if (ws1Equal || ws2Equal) {
+            
+            WorkspaceNode otherWs = ws1Equal ? ws2 : ws1;
+            NodeRef thisRef = ws1Equal ? ref1 : ref2;
+            EmsScriptNode n = new EmsScriptNode(thisRef, getServices());
+            Date lastModified = n.getLastModified(null);
+            
+            // Go up the parent tree of the other workspace until you find the workspace
+            // that is branched off the common parent:
+            WorkspaceNode otherWsParent = getChildOfCommonParent(otherWs, parentWs);
+            Date creationDate = otherWsParent != null ? otherWsParent.getCreationDate() : null;
+                    
+            return lastModified != null && creationDate != null && lastModified.after( creationDate );
+        }
+        // Neither workspace is the common parent, so must verify each node was modified
+        // after minimum of the branch time off the common parent:
+        else {
+            
+            EmsScriptNode n1 = new EmsScriptNode(ref1, getServices());
+            EmsScriptNode n2 = new EmsScriptNode(ref2, getServices());
+            Date lastModified1 = n1.getLastModified(null);
+            Date lastModified2 = n2.getLastModified(null);
+            
+            // Go up the parent tree of the workspaces until you find the workspace
+            // that is branched off the common parent:
+            WorkspaceNode wsParent1 = getChildOfCommonParent(ws1, parentWs);
+            WorkspaceNode wsParent2 = getChildOfCommonParent(ws2, parentWs);
 
-        Map< String, Pair< Object, Object >> changes1 =
-                nodeDiff1.getPropertyChanges( elementName );
-        if ( Utils.isNullOrEmpty( changes1 ) ) return false;
-
-        NodeRef pRef2 =
-                NodeUtil.findNodeRefById( elementName, false, parentWs,
-                                          getTimestamp2(),
-                                          getServices(),
-                                          false );
-        NodeDiff nodeDiff2 = new NodeDiff( pRef2, ref2 );
-        Map< String, Pair< Object, Object >> changes2 =
-                nodeDiff2.getPropertyChanges( elementName );
-        if ( Utils.isNullOrEmpty( changes2 ) ) return false;
-        Set< String > propIds1 =
-                new LinkedHashSet< String >( changes1.keySet() );
-        Set< String > propIds2 = changes2.keySet();
-        if ( !Utils.intersect( propIds1, propIds2 ) ) return false;
-        for ( String propName : propIds1 ) {
-            Pair< Object, Object > propVals =
-                    changes.get( propName );
-            if ( propVals.first == propVals.second
-                 || ( propVals.first != null
-                      && propVals.first.equals( propVals.second ) ) ) {
-                return true;
+            Date creationDate1 = wsParent1 != null ? wsParent1.getCreationDate() : null;
+            Date creationDate2 = wsParent2 != null ? wsParent2.getCreationDate() : null;
+            
+            // Find the minimum of the creation time:
+            if (creationDate1 != null && creationDate2 != null && lastModified1 != null &&
+                lastModified2 != null) {
+                Date minCreationDate = creationDate1.before( creationDate2 ) ? creationDate1 : creationDate2;
+            
+                return lastModified1.after(minCreationDate) && lastModified2.after(minCreationDate);
             }
         }
+        
         return false;
     }
 
@@ -682,6 +737,9 @@ public class WorkspaceDiff implements Serializable {
                     ignoredPropIds.add( propName.toString() );
                 }
             }
+            
+            // Dont want to ignore the owner for moved elements:
+            ignoredPropIds.remove( NodeUtil.createQName( "ems:owner" ).toString());
 
             List<String> prefixes = Utils.newList( "sysml:id",
                                                    "view2:snapshotProduct",

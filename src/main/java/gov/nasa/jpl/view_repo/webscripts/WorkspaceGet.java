@@ -32,10 +32,11 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 
 	@Override
     protected Map<String, Object> executeImpl (WebScriptRequest req, Status status, Cache cache) {
-	    WorkspaceGet instance = new WorkspaceGet(repository, services);
-	    return instance.executeImplImpl( req, status, cache );
+	    WorkspaceGet instance = new WorkspaceGet(repository, getServices());
+	    return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
 	}
-	
+
+    @Override
     protected Map<String, Object> executeImplImpl (WebScriptRequest req, Status status, Cache cache) {
 		printHeader(req);
 		clearCaches();
@@ -105,7 +106,7 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		json.put("workspace" , jsonArray);
 		return json;
 	}
-	
+
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
 		// TODO Auto-generated method stub

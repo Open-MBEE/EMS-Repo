@@ -21,7 +21,7 @@ public class MmsProductsGet extends AbstractJavaWebScript {
     public MmsProductsGet() {
         super();
     }
-    
+
     public MmsProductsGet( Repository repository, ServiceRegistry services ) {
         this.repository = repository;
         this.services = services;
@@ -35,23 +35,24 @@ public class MmsProductsGet extends AbstractJavaWebScript {
 
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-		MmsProductsGet instance = new MmsProductsGet(repository, services);
-    	return instance.executeImplImpl(req, status, cache);
+		MmsProductsGet instance = new MmsProductsGet(repository, getServices());
+		return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
     }
-    
+
+    @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
-        
+
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
-        
-        MmsProductsGet instance = new MmsProductsGet(repository, services);
-        
+
+        MmsProductsGet instance = new MmsProductsGet(repository, getServices());
+
         JSONObject jsonObject = new JSONObject();
 
         try {
-            ProductsWebscript productWs = new ProductsWebscript(repository, services, instance.response);
+            ProductsWebscript productWs = new ProductsWebscript(repository, getServices(), instance.response);
             jsonObject.put("products", productWs.handleProducts(req));
             appendResponseStatusInfo( instance );
             if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
@@ -64,12 +65,12 @@ public class MmsProductsGet extends AbstractJavaWebScript {
                 log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error" );
             }
             e.printStackTrace();
-        } 
-    
+        }
+
         status.setCode(responseStatus.getCode());
-    
+
         printFooter();
-        
+
         return model;
     }
 }

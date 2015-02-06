@@ -148,12 +148,12 @@ public class ModelGet extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req,
             Status status, Cache cache) {
-        ModelGet instance = new ModelGet(repository, services);
-        instance.setServices( getServices() );
-        return instance.executeImplImpl( req, status, cache );
+        ModelGet instance = new ModelGet(repository, getServices());
+        return instance.executeImplImpl( req, status, cache, runWithoutTransactions );
     }
 
-	protected Map<String, Object> executeImplImpl(WebScriptRequest req,
+	@Override
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req,
 			Status status, Cache cache) {
 	    Timer timer = new Timer();
 	    printHeader( req );
@@ -188,7 +188,7 @@ public class ModelGet extends AbstractJavaWebScript {
 
         printFooter();
 
-        System.out.println( "ModelGet: " + timer );
+        log( LogLevel.INFO, "ModelGet: " + timer );
 
 		return model;
 	}
@@ -239,13 +239,13 @@ public class ModelGet extends AbstractJavaWebScript {
             // recurse default is false
             boolean recurse = getBooleanArg(req, "recurse", false);
             boolean includeQualified = getBooleanArg(req, "qualified", true);
-            
+
             if (isViewRequest) {
                 handleViewHierarchy(modelRootNode, recurse, workspace, dateTime);
             } else {
                 handleElementHierarchy( modelRootNode, recurse, workspace, dateTime );
             }
- 
+
             handleElements(dateTime, includeQualified);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -383,7 +383,7 @@ public class ModelGet extends AbstractJavaWebScript {
 		for (String id: elementsFound.keySet()) {
 			EmsScriptNode node = elementsFound.get(id);
 
-			if (checkPermissions(node, PermissionService.READ)){ 
+			if (checkPermissions(node, PermissionService.READ)){
                 elements.put(node.toJSONObject(dateTime, includeQualified));
 			} // TODO -- REVIEW -- Warning if no permissions?
 		}

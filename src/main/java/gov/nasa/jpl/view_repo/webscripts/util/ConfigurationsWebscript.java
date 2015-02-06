@@ -3,12 +3,12 @@ package gov.nasa.jpl.view_repo.webscripts.util;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
-import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
+import gov.nasa.jpl.view_repo.webscripts.HostnameGet;
 import gov.nasa.jpl.view_repo.webscripts.SnapshotPost;
 
 import java.util.ArrayList;
@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
@@ -30,6 +31,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
@@ -284,21 +286,34 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         @SuppressWarnings( "rawtypes" )
         LinkedList<HashMap> list = new LinkedList<HashMap>();
         if(SnapshotPost.hasPdf(snapshot) || SnapshotPost.hasHtmlZip(snapshot)){
-        	String contextUrl = "https://" + ActionUtil.getHostName() + ".jpl.nasa.gov/alfresco";
+        	HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
+        	String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";
         	HashMap<String, String> transformMap;
             if(SnapshotPost.hasPdf(snapshot)){
-            	EmsScriptNode pdfNode = SnapshotPost.getPdfNode(snapshot);
-            	transformMap = new HashMap<String,String>();
-            	transformMap.put("type", "pdf");
-            	transformMap.put("url", contextUrl + pdfNode.getUrl());
-            	list.add(transformMap);
+            	String pdfStatus = SnapshotPost.getPdfStatus(snapshot);
+            	if(pdfStatus != null && !pdfStatus.isEmpty()){
+	            	EmsScriptNode pdfNode = SnapshotPost.getPdfNode(snapshot);
+	            	transformMap = new HashMap<String,String>();
+	            	transformMap.put("status", pdfStatus);
+	            	transformMap.put("type", "pdf");
+	            	if(pdfNode != null){
+	            		transformMap.put("url", contextUrl + pdfNode.getUrl());
+	            	}
+	            	list.add(transformMap);
+            	}
             }
             if(SnapshotPost.hasHtmlZip(snapshot)){
-            	EmsScriptNode htmlZipNode = SnapshotPost.getHtmlZipNode(snapshot);
-            	transformMap = new HashMap<String,String>();
-            	transformMap.put("type", "html");
-            	transformMap.put("url", contextUrl + htmlZipNode.getUrl());
-            	list.add(transformMap);
+            	String htmlZipStatus = SnapshotPost.getHtmlZipStatus(snapshot);
+            	if(htmlZipStatus != null && !htmlZipStatus.isEmpty()){
+	            	EmsScriptNode htmlZipNode = SnapshotPost.getHtmlZipNode(snapshot);
+	            	transformMap = new HashMap<String,String>();
+	            	transformMap.put("status", htmlZipStatus);
+	            	transformMap.put("type", "html");
+	            	if(htmlZipNode != null){
+	            		transformMap.put("url", contextUrl + htmlZipNode.getUrl());
+	            	}
+	            	list.add(transformMap);
+            	}
             }
         }
         snapshotJson.put("formats", list);
@@ -457,5 +472,12 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             configNode.makeSureNodeRefIsNotFrozen();
             configNode.addAspect( "ems:Deleted" );
         }
+    }
+
+    @Override
+    protected Map< String, Object >
+            executeImplImpl( WebScriptRequest req, Status status, Cache cache ) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

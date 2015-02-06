@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.transaction.UserTransaction;
 
 import org.apache.log4j.*;
 import org.alfresco.repo.model.Repository;
@@ -46,16 +45,15 @@ public class MmsModelDelete extends AbstractJavaWebScript {
      */
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-        
-        MmsModelDelete instance = new MmsModelDelete(repository, services);
-        instance.setServices( getServices() );
-        return instance.executeImplImpl(req,  status, cache);
+        MmsModelDelete instance = new MmsModelDelete(repository, getServices());
+        return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
     }
-    
+
+    @Override
     protected Map< String, Object > executeImplImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
         printHeader( req );
-        
+
         Map<String, Object> model = new HashMap<String, Object>();
 
         JSONObject result = null;
@@ -63,7 +61,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         try {
             result = handleRequest( req );
             if (result != null) {
-                if (!Utils.isNullOrEmpty(response.toString())) result.put("message", response.toString()); 
+                if (!Utils.isNullOrEmpty(response.toString())) result.put("message", response.toString());
                 model.put( "res", result.toString(2) );
             }
         } catch (JSONException e) {
@@ -80,7 +78,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         status.setCode(responseStatus.getCode());
 
         printFooter();
-        
+
         return model;
     }
 
@@ -117,10 +115,11 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         EmsScriptNode root = findScriptNodeById(elementId, workspace, null, true);
         String projectId = null;
 
-        UserTransaction trx;
-        trx = services.getTransactionService().getNonPropagatingUserTransaction();
+//        UserTransaction trx;
+//        trx = services.getTransactionService().getNonPropagatingUserTransaction();
         try {
-            trx.begin();
+//            trx.begin();
+//            NodeUtil.setInsideTransactionNow( true );
 
             if (root != null && root.exists()) {
                 handleElementHierarchy( root, workspace, true );
@@ -145,7 +144,8 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 }
             }
 
-            trx.commit();
+//            trx.commit();
+//            NodeUtil.setInsideTransactionNow( false );
         } catch (Throwable e) {
             try {
                 if (e instanceof JSONException) {
@@ -153,8 +153,10 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 } else {
                         log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "MmsModelDelete.handleRequest: DB transaction failed: %s", e.getMessage());
                 }
-                trx.rollback();
-                log(Level.ERROR, "\t####### ERROR: Needed to rollback: %s", e.getMessage());
+                
+//                trx.rollback();
+//                NodeUtil.setInsideTransactionNow( false );
+//				  log(Level.ERROR, "\t####### ERROR: Needed to rollback: %s", e.getMessage());
                 e.printStackTrace();
             } catch (Throwable ee) {
                 log(Level.ERROR, "\tMmsModelDelete.handleRequest: rollback failed: %s", ee.getMessage());
@@ -173,7 +175,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 log(Level.WARN, "createOrUpdateModel deltas not posted properly");
             }
 
-            CommitUtil.commit( result, workspace, "", false, services, response );
+            CommitUtil.commit( result, workspace, "", true, services, response );
         }
 
         return result;
@@ -257,18 +259,18 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 handleElementHierarchy(child, workspace, recurse);
             }
         }
-        
+
         // Delete the node:
         if (root.exists()) {
             delete(root, workspace, null);
         }
-        
+
         // TODO: REVIEW may not need this b/c addToWsDiff() does not add in reified packages
         //       Also, code in ModelPost assumes we never delete reified packages
 //        // Delete the reified pkg if it exists also:
-//        EmsScriptNode pkgNode = findScriptNodeById(root.getSysmlId() + "_pkg", 
+//        EmsScriptNode pkgNode = findScriptNodeById(root.getSysmlId() + "_pkg",
 //                                                   workspace, null, false);
-//        
+//
 //        if (pkgNode != null) {
 //            delete(pkgNode, workspace, null);
 //        }

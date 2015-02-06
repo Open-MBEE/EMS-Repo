@@ -34,6 +34,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.NodeUtil.SearchType;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
@@ -44,6 +45,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.*;
+import java.util.Arrays;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -55,8 +58,10 @@ import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
-import org.apache.log4j.Level;
+//import org.apache.log4j.Level;
 import org.apache.log4j.*;
+//import org.apache.log4j.Logger;
+import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -84,12 +89,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	}*/
 
     public static final int MAX_PRINT = 200;
-    
+
+    public static boolean defaultRunWithoutTransactions = false;
+
     // injected members
 	protected ServiceRegistry services;		// get any of the Alfresco services
 	protected Repository repository;		// used for lucene search
 
 	// internal members
+    // when run in background as an action, this needs to be false
+    public boolean runWithoutTransactions = defaultRunWithoutTransactions;
 	protected ScriptNode companyhome;
 	protected Map<String, EmsScriptNode> foundElements = new HashMap<String, EmsScriptNode>();
 
@@ -124,20 +133,36 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         this.response = response ;
         // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
         logger.setLevel(logLevel);
+        
+        NodeUtil.setBeenInsideTransaction( false );
+        NodeUtil.setBeenOutsideTransaction( false );
+        NodeUtil.setInsideTransactionNow( false );
     }
 
     public AbstractJavaWebScript(Repository repositoryHelper, ServiceRegistry registry) {
         this.setRepositoryHelper(repositoryHelper);
         this.setServices(registry);
+        
         // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
         logger.setLevel(logLevel);
+        
+        NodeUtil.setBeenInsideTransaction( false );
+        NodeUtil.setBeenOutsideTransaction( false );
+        NodeUtil.setInsideTransactionNow( false );
+        
     }
 
     public AbstractJavaWebScript() {
         // default constructor for spring
         super();
+
         // TODO -- set maximum log level; Overrides that specified in log4j.properties (I THINK)
         logger.setLevel(logLevel);
+
+        NodeUtil.setBeenInsideTransaction( false );
+        NodeUtil.setBeenOutsideTransaction( false );
+        NodeUtil.setInsideTransactionNow( false );
+
     }
     
     /**
@@ -145,6 +170,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * TODO: do we need to clear caches if Spring isn't making singleton instances
 	 */
 	protected void clearCaches() {
+        NodeUtil.setBeenInsideTransaction( false );
+        NodeUtil.setBeenOutsideTransaction( false );
+        NodeUtil.setInsideTransactionNow( false );
+
 		foundElements = new HashMap<String, EmsScriptNode>();
 		response = new StringBuffer();
 		responseStatus.setCode(HttpServletResponse.SC_OK);
@@ -153,6 +182,42 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             Debug.turnOff();
         }
 	}
+
+    abstract protected Map< String, Object > executeImplImpl( final WebScriptRequest req,
+                                                              final Status status,
+                                                              final Cache cache );
+    protected Map< String, Object > executeImplImpl( final WebScriptRequest req,
+                                                     final Status status, final Cache cache,
+                                                     boolean withoutTransactions ) {
+        if ( withoutTransactions ) {
+            return executeImplImpl( req, status, cache );
+        }
+        final Map< String, Object > model = new HashMap<String, Object>();
+        new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+            @Override
+            public void run() throws Exception {
+                Map< String, Object > m = executeImplImpl( req, status, cache );
+                if ( m != null ) {
+                    model.putAll( m );
+                }
+            }
+        };
+//            UserTransaction trx;
+//            trx = services.getTransactionService().getNonPropagatingUserTransaction();
+//            try {
+//                trx.begin();
+//                NodeUtil.setInsideTransactionNow( true );
+//            } catch ( Throwable e ) {
+//                String msg = null;
+//                tryRollback( trx, e, msg );
+//            }
+        //Map<String, Object> model = new HashMap<String, Object>();
+        if ( !model.containsKey( "res" ) && response != null && response.toString().length() > 0 ) {
+            model.put( "res", response.toString() );
+        }
+        return model;
+    }
+
 
 	/**
 	 * Parse the request and do validation checks on request
@@ -307,7 +372,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return NodeUtil.findScriptNodeById( id, workspace, dateTime, findDeleted,
                                             services, response, siteName );
     }
-	
+
 	/**
      * Find nodes of specified sysml:name
      *
@@ -323,7 +388,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     // String concatenation replaced with C formatting; only for calls with parameters
     protected void log (Level level, int code, String msg, Object...params) {
     	if (level.toInt() >= logger.getLevel().toInt()) {
-    		String formattedMsg = formatter.format (msg,params).toString();
+    		String formattedMsg = formatMessage(msg,params);
+    		//String formattedMsg = formatter.format (msg,params).toString();
     		log (level,code,formattedMsg);
     	}
 	}
@@ -371,7 +437,6 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	    response.append(msg + "\n");
 	}
 
-	
 	protected void log (Level level, String msg){
 	    switch(level.toInt()) {
 	        case Level.FATAL_INT:
@@ -394,6 +459,34 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             	if (Debug.isOn()){ logger.debug( msg ); }
 	            break;
 	    }
+	}
+	
+	// formatMessage function is used to catch certain objects that must be dealt with individually
+	// formatter.format() is avoided because it applies toString() directly to objects which provide unreadable outputs
+	protected String formatMessage (String initMsg,Object...params){
+		String formattedMsg = initMsg;
+		Pattern p = Pattern.compile("(%s)");
+		Matcher m = p.matcher(formattedMsg);
+		
+		for (Object obj: params){
+			if (obj.getClass().isArray()){
+				String arrString = "";
+				if (obj instanceof int []) { arrString = Arrays.toString((int [])obj);}
+				else if (obj instanceof double []) { arrString = Arrays.toString((double [])obj);}
+				else if (obj instanceof float []) { arrString = Arrays.toString((float [])obj);}
+				else if (obj instanceof boolean []) { arrString = Arrays.toString((boolean [])obj);}
+				else if (obj instanceof char []) { arrString = Arrays.toString((char [])obj);}
+				else {arrString = Arrays.toString((Object[])obj);}
+				formattedMsg = m.replaceFirst(arrString);
+			}
+			m = p.matcher(formattedMsg);
+//			if (obj.getClass().isArray()){
+//				Arrays.toString(obj);
+//				String formattedString = m.replaceFirst(o)
+//			}
+			
+		}
+		return formattedMsg;
 	}
 	
 	/**
@@ -488,7 +581,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 
         // Create a alfresco Site if creating the site on the master and if the site does not exists:
         if ( invalidSiteNode && !validWorkspace ) {
-
+            NodeUtil.transactionCheck( logger, null );
             SiteInfo foo = services.getSiteService().createSite( siteName, siteName, siteName, siteName, SiteVisibility.PUBLIC );
             siteNode = new EmsScriptNode( foo.getNodeRef(), services );
             siteNode.createOrUpdateAspect( "cm:taggable" );

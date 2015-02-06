@@ -73,11 +73,12 @@ public class ProjectPost extends AbstractJavaWebScript {
 	 */
 	@Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-        ProjectPost instance = new ProjectPost(repository, services);
-        return instance.executeImplImpl(req,  status, cache);
+        ProjectPost instance = new ProjectPost(repository, getServices());
+        return instance.executeImplImpl(req,  status, cache, runWithoutTransactions);
     }
 
-	protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
+	@Override
+    protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
 		clearCaches();

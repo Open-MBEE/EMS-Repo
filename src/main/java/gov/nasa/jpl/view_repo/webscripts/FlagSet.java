@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.DeclarativeWebScript;
 import org.springframework.extensions.webscripts.Status;
@@ -13,6 +14,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  * Allows heisenCache to be turned on/off
  */
 public abstract class FlagSet extends DeclarativeWebScript {
+    static Logger logger = Logger.getLogger(FlagSet.class);
    
     protected abstract void set( boolean val ); 
     protected abstract boolean get();
@@ -47,12 +49,16 @@ public abstract class FlagSet extends DeclarativeWebScript {
                               turnOffStr.trim().equalsIgnoreCase( "true" ) ) );
         turnOnStr = turnOn ? "on" : "off";
         if ( turnOn == get() ) {
-            System.out.println( ( new Date() ) + ": " + flagName()
+            if (logger.isInfoEnabled()) {
+                logger.info( ( new Date() ) + ": " + flagName()
                                 + " is already " + turnOnStr );
+            }
         } else {
             set( turnOn );
-            System.out.println( ( new Date() ) + ": " + flagName() + " turned "
+            if (logger.isInfoEnabled()) {
+                logger.info( ( new Date() ) + ": " + flagName() + " turned "
                                 + turnOnStr );
+            }
         }
         model.put( "res", flagName() + " " + turnOnStr );
 

@@ -2,6 +2,8 @@
 
     "creator": "admin",
 
+    "description": "",
+
     "name": "ws1",
 
     "parent": "master",

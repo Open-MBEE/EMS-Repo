@@ -29,7 +29,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
     public MmsSnapshotsGet() {
         super();
     }
-    
+
     public MmsSnapshotsGet( Repository repository, ServiceRegistry services ) {
         this.repository = repository;
         this.services = services;
@@ -40,22 +40,23 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         // TODO Auto-generated method stub
         return false;
     }
-    
+
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-		MmsSnapshotsGet instance = new MmsSnapshotsGet(repository, services);
-    	return instance.executeImplImpl(req, status, cache);
+		MmsSnapshotsGet instance = new MmsSnapshotsGet(repository, getServices());
+    	    return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
     }
-    
+
+    @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
-        
+
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
 
-        MmsSnapshotsGet instance = new MmsSnapshotsGet(repository, services);
-        
+        MmsSnapshotsGet instance = new MmsSnapshotsGet(repository, getServices());
+
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("snapshots", instance.handleRequest(req));
@@ -70,12 +71,12 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
                 log(Level.ERROR, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal server error");
             }
             e.printStackTrace();
-        } 
-    
+        }
+
         status.setCode(responseStatus.getCode());
-        
+
         printFooter();
-        
+
         return model;
     }
 
@@ -98,14 +99,14 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
             return new JSONArray();
         }
         ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, response);
-        
+
         WorkspaceNode workspace = getWorkspace( req );
 
         EmsScriptNode config = configWs.getConfiguration( configurationId );
         if (config == null) {
             return new JSONArray();
         }
-        
+
         return configWs.getSnapshots( config, workspace );
     }
 
@@ -113,16 +114,16 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         Date timestamp = TimeUtils.dateFromTimestamp(req.getParameter("timestamp"));
         WorkspaceNode workspace = getWorkspace( req );
         EmsScriptNode product = findScriptNodeById( productId, workspace, timestamp, false);
-        
+
         if (product == null) {
             log(Level.WARN, HttpServletResponse.SC_NOT_FOUND, "Could not find product");
             return new JSONArray();
         }
 
         ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, response);
-        
+
         JSONArray snapshotsJson = new JSONArray();
-        
+
         // for backwards compatibility, keep deprecated targetAssocsNodesByType
         List< EmsScriptNode > snapshots =
                 product.getTargetAssocsNodesByType( "view2:snapshots",
@@ -133,7 +134,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
                                                              workspace ) );
             }
         }
-        
+
         List< NodeRef > productSnapshots = product.getPropertyNodeRefs( "view2:productSnapshots" );
         for (NodeRef productSnapshotNodeRef: productSnapshots) {
             EmsScriptNode productSnapshot = new EmsScriptNode(productSnapshotNodeRef, services, response);
@@ -141,7 +142,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
                 snapshotsJson.put( configWs.getSnapshotJson( productSnapshot, product, workspace ) );
             }
         }
-        
+
         return snapshotsJson;
     }
 

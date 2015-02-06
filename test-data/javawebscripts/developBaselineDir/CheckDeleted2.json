@@ -4,6 +4,8 @@
 
         "creator": "admin",
 
+        "description": "",
+
         "name": "AA",
 
         "qualifiedName": "master/AA"
@@ -13,6 +15,8 @@
     {
 
         "creator": "admin",
+
+        "description": "",
 
         "name": "BB",
 
