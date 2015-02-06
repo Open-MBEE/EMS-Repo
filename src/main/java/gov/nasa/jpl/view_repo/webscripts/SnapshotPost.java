@@ -1117,11 +1117,11 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     private String handleEmbeddedImage( String id, String inputString, DBSection section)
     {
-    	if(id == null || id.isEmpty()) return "";
+    	if(id == null || id.isEmpty()) return inputString;
     	if(inputString == null || inputString.isEmpty()) return "";
 
     	Document document = Jsoup.parseBodyFragment(inputString);
-    	if(document == null) return "";
+    	if(document == null) return inputString;
 
     	Elements images = document.getElementsByTag("img");
 
