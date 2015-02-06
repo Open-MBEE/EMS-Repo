@@ -3498,6 +3498,7 @@ public class EmsScriptNode extends ScriptNode implements
             type = "cm:folder";
         }
 
+        parent.makeSureNodeRefIsNotFrozen(); // GG Added this
         EmsScriptNode node = parent.createNode( getName(), type );
         // EmsScriptNode node =  parent.createSysmlNode( getName(), type, modStatus, workspace );
 
@@ -3521,7 +3522,7 @@ public class EmsScriptNode extends ScriptNode implements
             properties.remove( createQName( "st:sitePreset" ) );
             properties.remove( createQName( "sys:undeletable" ) );
         }
-        makeSureNodeRefIsNotFrozen();
+        //makeSureNodeRefIsNotFrozen();  // Doesnt make sense to always call this on "this"
         transactionCheck();
         nodeService.setProperties( node.getNodeRef(), properties );
 
