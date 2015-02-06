@@ -158,7 +158,7 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
                 "Workspace " + workspaceId + " Project "
                         + projectName + " load completed";
         String msg = "Log URL: " + contextUrl + logNode.getUrl();
-        ActionUtil.sendEmailToModifier(jsonNode, msg, subject, services, response);
+        ActionUtil.sendEmailToModifier(jsonNode, msg, subject, services);
 
         if (logger.isDebugEnabled()) logger.debug("Email notification sent for " + workspaceId + " - "+ projectName + " [id: " + projectId + "]:\n" + msg);
         if (logger.isDebugEnabled()) logger.debug( "ModelLoadActionExecuter: " + timer );

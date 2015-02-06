@@ -54,12 +54,14 @@ import gov.nasa.jpl.view_repo.util.EmsSystemModel;
 import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.ModStatus;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
+import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -80,15 +82,26 @@ import org.apache.log4j.*;
 import kexpparser.KExpParser;
 //import k.frontend.Frontend;
 
+
+
+
+
+
+
+
+
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
+import org.alfresco.service.cmr.dictionary.AspectDefinition;
+import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.version.Version;
+import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -480,8 +493,10 @@ public class ModelPost extends AbstractJavaWebScript {
      * Resurrect the parents of the node from the dead if needed
      *
      */
-    protected void resurrectParents(EmsScriptNode nodeToUpdate, boolean ingest) {
+    protected void resurrectParents(EmsScriptNode nodeToUpdate, boolean ingest,
+                                    WorkspaceNode workspace) {
 
+        EmsScriptNode lastNode = nodeToUpdate;
         EmsScriptNode nodeParent = nodeToUpdate.getParent();
         EmsScriptNode reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true) : null;
         while (nodeParent != null  && nodeParent.scriptNodeExists()) {
@@ -490,10 +505,15 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             if (reifiedNodeParent != null && reifiedNodeParent.isDeleted()) {
                 resurrectParent(reifiedNodeParent, ingest);
+                // Now deleted nodes are removed from ownedChildren, so must add them back:
+                if (lastNode != null) {
+                    lastNode.setOwnerToReifiedNode( reifiedNodeParent, workspace );
+                }
             }
             if (nodeParent.isWorkspaceTop()) {
                 break;
             }
+            lastNode = reifiedNodeParent;
             nodeParent = nodeParent.getParent();
             reifiedNodeParent = nodeParent != null ? nodeParent.getReifiedNode(true) : null;
         }
@@ -603,7 +623,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
                     // FIXME: Need to respond with warning that owner couldn't be found?
                     log( Level.WARN, "Could not find owner with name: %s putting %s into: %s", 
-                    		ownerName, elementId, nodeBinOwner.toString());
+                    		ownerName, elementId, nodeBinOwner);
 
                     // Finally, create the reified node for the owner:
                     EmsScriptNode nodeBin = nodeBinOwner.createSysmlNode(ownerName, type,
@@ -1241,6 +1261,17 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                     }
                     break;
+                case DELETED:
+                    if (ingest && !wsDiff.getDeletedElements().containsKey( jsonId )) {
+                        wsDiff.getDeletedElements().put( jsonId,  element );
+                        if (element.exists()) {
+                            element.removeAspect( "ems:Added" );
+                            element.removeAspect( "ems:Updated" );
+                            element.removeAspect( "ems:Moved" );
+                            element.createOrUpdateAspect( "ems:Deleted" );
+                        }
+                    }
+                    break;
                 default:
                     // do nothing
             }
@@ -1372,8 +1403,126 @@ public class ModelPost extends AbstractJavaWebScript {
             // before ingesting:
             jsonToCheck.put(jsonKey, nodeNames.get(0));
         }
+        
+        // If old values are no longer used, then delete them:
+        if (newVals != null && oldVals != null ) {
+            int newValsSize = newVals.length();
+            int oldValsSize = oldVals.size();
+            
+            if (newValsSize < oldValsSize) {
+                Iterator<EmsScriptNode> iterOld = oldVals.iterator();
+                int i = 0;
+                while (iterOld.hasNext()) {
+                    EmsScriptNode oldNode = iterOld.next();
+                    if (i >= newValsSize) {
+                        deleteValueSpec(oldNode, ingest, workspace);
+                    }
+                    i++;
+                }
+            }
+            
+        }
 
         return changed;
+    }
+    
+    /**
+     * See if any of the properties of the passed node point to a value spec
+     * and will be lost when changing to aspectName.  In that case, delete
+     * the value specs.
+     *
+     * Note: make sure what calls this is wrapped in a transaction!
+     */
+    private void checkForObsoleteValueSpecs(String aspectName, EmsScriptNode node,
+                                            WorkspaceNode workspace, boolean ingest) {
+        
+        if (aspectName == null || node == null) {
+            return;
+        }
+        
+        // If it is a type that has value specs, and at least one of those properties
+        // has a value spec mapped to it:
+        if (node.hasValueSpecProperty()) {
+            
+            Set<QName> aspectProps = new HashSet<QName>();
+            
+            if (!aspectName.equals(Acm.ACM_ELEMENT)) {
+                QName qName = NodeUtil.createQName( aspectName );
+                DictionaryService dServ = services.getDictionaryService();
+                AspectDefinition aspectDef = dServ.getAspect(qName);
+                aspectProps.addAll( aspectDef.getProperties().keySet() );
+            }
+            
+            Map<String,Object> oldProps = node.getProperties();
+            
+            // Loop through all the old properties and delete the value
+            // specs that are no longer being used:
+            String propName;
+            QName propQName;
+            Object propVal;
+            for (Entry<String,Object> entry : oldProps.entrySet()) {
+                propName = entry.getKey();
+                propQName = NodeUtil.createQName(propName);
+                propVal = entry.getValue();
+                
+                // If it is a property that maps to a value spec, and the aspect
+                // we are changing to no longer has that property:
+                if (EmsScriptNode.isValueSpecProperty( NodeUtil.getShortQName( propQName ) ) &&
+                    !aspectProps.contains(propQName)) {
+                    
+                    if (propVal instanceof NodeRef){
+                        EmsScriptNode propValNode = new EmsScriptNode((NodeRef)propVal, services);
+                        deleteValueSpec(propValNode, ingest, workspace);
+                    }
+                    else if (propVal instanceof List){
+                        List<NodeRef> nrList = (ArrayList<NodeRef>) propVal;
+                        for (NodeRef ref : nrList) {
+                            if (ref != null) {
+                                EmsScriptNode propValNode = new EmsScriptNode(ref, services);
+                                deleteValueSpec(propValNode, ingest, workspace);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Delete the valueSpec node, remove from the ownedChildren of the parent reified
+     * node, update the diff
+     * 
+     */
+    private void deleteValueSpec(final EmsScriptNode valueSpec,
+                                 final boolean ingest, final WorkspaceNode workspace) {
+                
+        // Delete the element and any its children, and remove the element from its
+        // owner's ownedChildren set:
+        final MmsModelDelete deleteService = new MmsModelDelete(repository, services);
+        deleteService.setWsDiff( workspace );
+
+        if (runWithoutTransactions || internalRunWithoutTransactions) {
+            deleteService.handleElementHierarchy( valueSpec, workspace, true );
+        }
+        else {
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus()) {
+                @Override
+                public void run() throws Exception {
+                    deleteService.handleElementHierarchy( valueSpec, workspace, true );
+                }
+            };
+        }
+        
+        // Update the needed aspects of the deleted nodes:
+        WorkspaceDiff delWsDiff = deleteService.getWsDiff();
+        if (delWsDiff != null) {
+            for (EmsScriptNode deletedNode: delWsDiff.getDeletedElements().values()) {
+                ModStatus modStatus = new ModStatus();
+                modStatus.setState( ModStatus.State.DELETED );
+                updateTransactionableWsState(deletedNode, deletedNode.getSysmlId(), modStatus, ingest);
+            }
+         }
+        
     }
 
     private boolean processValueSpecPropertyImplImpl(JSONObject jsonToCheck,
@@ -1443,7 +1592,7 @@ public class ModelPost extends AbstractJavaWebScript {
             // Ingest the JSON for the value to update properties
             timerIngest = Timer.startTimer(timerIngest, timeEvents);
             processValue( node, id, reifiedPkgNode, parent, nodeWorkspace, newValJson, ingest, modStatus, oldValNode );
-            changed = (modStatus != null && modStatus.getState() != ModStatus.State.NONE );
+            changed = changed || (modStatus != null && modStatus.getState() != ModStatus.State.NONE );
             //updateOrCreateTransactionableElement
             //boolean didChange = processValueSpecProperty( type, nestedNode, elementJson, specializeJson, oldValNode, ingest, reifiedPkgNode, parent, id, nodeWorkspace );
 //            if ( oldValNode.ingestJSON( newValJson ) ) {
@@ -1653,6 +1802,13 @@ public class ModelPost extends AbstractJavaWebScript {
                  NodeUtil.workspacesEqual( nodeToUpdate.getWorkspace(), workspace ) ) {
                 nodeToUpdate.removeAspect( "ems:Deleted" );
                 modStatus.setState( ModStatus.State.ADDED );
+                
+                // Update the ownedChildren of the parent, if the parent is in the correct
+                // workspace.  This is needed b/c we now remove the child from this set
+                // when deleting it:
+                if (parent != null && NodeUtil.workspacesEqual( parent.getWorkspace(), workspace )) {
+                    nodeToUpdate.setOwnerToReifiedNode( parent, workspace );
+                }
             }
         }
         EmsScriptNode reifiedPkgNode = null;
@@ -1743,10 +1899,10 @@ public class ModelPost extends AbstractJavaWebScript {
         if ( workspace != null && workspace.exists() ) {
             boolean nodeWorkspaceWrong = (nodeToUpdate != null && nodeToUpdate.exists()
                                           && !nodeToUpdate.isWorkspace()
-                                          && !workspace.equals( nodeToUpdate.getWorkspace() ));
+                                          && !NodeUtil.workspacesEqual( workspace, nodeToUpdate.getWorkspace()) );
             boolean parentWorkspaceWrong =  (parent != null && parent.exists()
                                              && !parent.isWorkspace()
-                                             && !workspace.equals( parent.getWorkspace() ));
+                                             && !NodeUtil.workspacesEqual( workspace, parent.getWorkspace()) );
             if ( nodeToUpdate == null || !nodeToUpdate.exists() ) {
                 parent = workspace.replicateWithParentFolders( parent );
             } else if ( nodeWorkspaceWrong || parentWorkspaceWrong ) {
@@ -1810,14 +1966,17 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
 
                     // Resurrect any parent nodes if needed:
-                    resurrectParents(nodeToUpdate, ingest);
+                    resurrectParents(nodeToUpdate, ingest, workspace);
 
                     // Update the aspect if the type has changed and its a aspect, or if it is
                     // being changed to an Element.  Need to call this for Elements for downgrading,
                     // which will remove all of the needed aspects.
-                    if ( (!type.equals( acmSysmlType ) && NodeUtil.isAspect( acmSysmlType )) ||
-                         acmSysmlType.equals(Acm.ACM_ELEMENT)) {
-                        if (ingest && nodeToUpdate.createOrUpdateAspect( acmSysmlType )) {
+                    if ( ingest && ( (!type.equals( acmSysmlType ) && NodeUtil.isAspect( acmSysmlType )) || 
+                                      acmSysmlType.equals(Acm.ACM_ELEMENT) ) ) {
+                        
+                        checkForObsoleteValueSpecs(acmSysmlType, nodeToUpdate, workspace, ingest);
+                        
+                        if (nodeToUpdate.createOrUpdateAspect( acmSysmlType )) {
                             modStatus.setState( ModStatus.State.UPDATED  );
                         }
                     }
@@ -1898,7 +2057,7 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
 
-        end = System.currentTimeMillis(); log(Level.INFO, "\tTotal: %s ms", String.valueOf(end-start));
+        end = System.currentTimeMillis(); log(Level.INFO, "\tTotal: %s ms",end-start);
 
         if ( nodeToUpdate != null ) nodeToUpdate.getOrSetCachedVersion();
 
@@ -2000,7 +2159,7 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         if ( parent == null || !parent.exists() ) {
             log( Level.ERROR,
-                 "Trying to create reified node folder in missing parent folder for node %s",node.toString() );
+                 "Trying to create reified node folder in missing parent folder for node %s",node);
             return null;
         }
 
@@ -2047,13 +2206,13 @@ public class ModelPost extends AbstractJavaWebScript {
                 } catch ( Throwable e ) {
                     log( Level.ERROR,
                          "\t failed to create reified node %s in parent, %s = %s because of exception.", 
-                         pkgName, parent.getSysmlId(), parent.toString() );
+                         pkgName, parent.getSysmlId(), parent);
                     throw e; // pass it up the chain to roll back transaction
                 }
                 if (reifiedPkgNode == null || !reifiedPkgNode.exists()) {
                     log( Level.ERROR,
                          "\t failed to create reified node %s in parent, %s = %s",
-                         pkgName, parent.getSysmlId(),parent.toString());
+                         pkgName, parent.getSysmlId(),parent);
                     return null;
                 } else {
                     reifiedPkgNode.setProperty(Acm.ACM_ID, pkgName);
@@ -2575,7 +2734,9 @@ public class ModelPost extends AbstractJavaWebScript {
 
         printFooter();
 
-        log( Level.INFO, "ModelPost: %s", timer );
+        if (logger.isInfoEnabled()) {
+            logger.info( "ModelPost: " + timer );
+        }
 
         return model;
     }
@@ -2610,7 +2771,9 @@ public class ModelPost extends AbstractJavaWebScript {
           
             if (runWithoutTransactions || internalRunWithoutTransactions) {
                 for ( EmsScriptNode element : elements ) {
-                    elementsJson.put( element.toJSONObject(null) );
+                	JSONObject json = element.toJSONObject(null);
+//                	NodeUtil.jsonCache.put(element.getName(), json);
+                    elementsJson.put( json );
                 }            
             }
             else {

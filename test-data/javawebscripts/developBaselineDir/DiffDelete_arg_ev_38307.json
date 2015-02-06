@@ -2,11 +2,45 @@
 
   "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n",
 
-  "sequence": 13,
+  "sequence": 20,
 
   "workspace1": {
 
-    "elements": [],
+    "elements": [{
+
+      "creator": "admin",
+
+      "documentation": "",
+
+      "editable": true,
+
+      "name": "duration",
+
+      "owner": "e_38304",
+
+      "qualifiedName": "/JW_TEST2/e_38304/duration",
+
+      "specialization": {
+
+        "isDerived": false,
+
+        "isSlot": false,
+
+        "type": "Property",
+
+        "value": [{
+
+          "integer": 22,
+
+          "type": "LiteralInteger"
+
+        }]
+
+      },
+
+      "sysmlid": "arg_ev_38307"
+
+    }],
 
     "name": "ws1",
 
@@ -20,23 +54,13 @@
 
     "conflictedElements": [],
 
-    "deletedElements": [
+    "deletedElements": [{
 
-      {
+      "creator": "admin",
 
-        "creator": "admin",
+      "sysmlid": "arg_ev_38307"
 
-      },
-
-      {
-
-        "creator": "admin",
-
-        "sysmlid": "arg_ev_38307"
-
-      }
-
-    ],
+    }],
 
     "movedElements": [],
 

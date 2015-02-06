@@ -188,26 +188,9 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 return null;
             } else {
                 EmsScriptNode folder = null;
-                WorkspaceNode dstWs = null;
-//                UserTransaction trx;
-//                trx = services.getTransactionService().getNonPropagatingUserTransaction();
-//                try {
-//                    trx.begin();
-//                    NodeUtil.setInsideTransactionNow( true );
-                    dstWs = WorkspaceNode.createWorkspaceFromSource(workspaceName, user, sourceWorkspaceId,
-                                                                    copyTime, folder, getServices(),
-                                                                    getResponse(), status, desc);
-//                    trx.commit();
-//                    NodeUtil.setInsideTransactionNow( false );
-//                } catch (Throwable e) {
-//                    try {
-//                        e.printStackTrace();
-//                        trx.rollback();
-//                        NodeUtil.setInsideTransactionNow( false );
-//                    } catch (Throwable ee) {
-//                        ee.printStackTrace();
-//                    }
-//                }
+                WorkspaceNode dstWs = WorkspaceNode.createWorkspaceFromSource(workspaceName, user, sourceWorkspaceId,
+                                                                              copyTime, folder, getServices(),
+                                                                              getResponse(), status, desc);
 
                 if (dstWs != null) {
                     // keep history of the branch

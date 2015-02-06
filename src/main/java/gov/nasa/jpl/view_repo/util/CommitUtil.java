@@ -333,7 +333,7 @@ public class CommitUtil {
 	    // skip over too new workspaces
 	    while ( workspace != null ) {
 	        Date created = workspace.getCreationDate();
-	        if ( created.after( toDateTime ) ) {
+	        if ( toDateTime != null && created.after( toDateTime ) ) {
 	            workspace = workspace.getParentWorkspace();
 	        } else {
 	            break;
@@ -345,8 +345,8 @@ public class CommitUtil {
             EmsScriptNode commit = getLastCommit( workspace, services, response );
             while ( commit != null ) {
                 Date created = commit.getCreationDate();
-                if ( created.before( fromDateTime ) ) break;
-                if ( !created.after( toDateTime ) ) {
+                if ( fromDateTime != null && created.before( fromDateTime ) ) break;
+                if ( toDateTime == null || !created.after( toDateTime ) ) {
                     commits.add( commit );
                 }
                 commit = getPreviousCommit(commit);

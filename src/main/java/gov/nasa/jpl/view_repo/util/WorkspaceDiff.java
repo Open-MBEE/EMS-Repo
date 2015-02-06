@@ -52,6 +52,8 @@ public class WorkspaceDiff implements Serializable {
 
     public boolean onlyModelElements = true;
 
+    public boolean forceJsonCacheUpdate = true;
+
     private WorkspaceNode ws1;
     private WorkspaceNode ws2;
 
@@ -160,6 +162,7 @@ public class WorkspaceDiff implements Serializable {
         conflictedElements.clear();
         elements.clear();
         elementsVersions.clear(); // ??? REVIEW
+        Set< String > ids = new TreeSet< String >( );
 
         if ( nodeDiff == null ) {
             Debug.error("Trying WorkspaceDiff.populateMembers() when nodeDiff == null!");
@@ -177,9 +180,6 @@ public class WorkspaceDiff implements Serializable {
         refs = nodeDiff.getUpdated();
         addDiffs( refs );
 
-        // Fix nested elements (value specifications, Expressions, ???)
-        //nodeDiff.fixValueSpecifications(this);
-
         // Moved
         for ( Entry< String, EmsScriptNode > e : updatedElements.entrySet() ) {
             Map< String, Pair< Object, Object >> changes =
@@ -189,7 +189,15 @@ public class WorkspaceDiff implements Serializable {
                 if ( ownerChange != null && ownerChange.first != null
                      && ownerChange.second != null
                      && !ownerChange.first.equals( ownerChange.second ) ) {
-                    movedElements.put( e.getKey(), e.getValue() );
+                    EmsScriptNode node = e.getValue();
+                    movedElements.put( e.getKey(), node);
+                    
+                    // Add this new owner to element ids, so it can be added to elements:
+                    EmsScriptNode newOwner = node != null ? node.getOwningParent( null ) : null;
+                    if (newOwner != null) {
+                        ids.add( newOwner.getSysmlId() );
+                    }
+                    
                 }
             }
         }
@@ -198,7 +206,6 @@ public class WorkspaceDiff implements Serializable {
         computeConflicted();
 
         // Elements
-        Set< String > ids = new TreeSet< String >( );
         Set< NodeRef > removedUpdated = new HashSet< NodeRef >(nodeDiff.getRemoved());
         removedUpdated.addAll( nodeDiff.getUpdated() );
         // Add all of the removed and updated ids:
@@ -362,7 +369,7 @@ public class WorkspaceDiff implements Serializable {
             // Go up the parent tree of the other workspace until you find the workspace
             // that is branched off the common parent:
             WorkspaceNode otherWsParent = getChildOfCommonParent(otherWs, parentWs);
-            Date creationDate = otherWsParent != null ? otherWsParent.getCreationDate() : null;
+            Date creationDate = otherWsParent != null ? otherWsParent.getCopyOrCreationTime() : null;
                     
             return lastModified != null && creationDate != null && lastModified.after( creationDate );
         }
@@ -380,8 +387,8 @@ public class WorkspaceDiff implements Serializable {
             WorkspaceNode wsParent1 = getChildOfCommonParent(ws1, parentWs);
             WorkspaceNode wsParent2 = getChildOfCommonParent(ws2, parentWs);
 
-            Date creationDate1 = wsParent1 != null ? wsParent1.getCreationDate() : null;
-            Date creationDate2 = wsParent2 != null ? wsParent2.getCreationDate() : null;
+            Date creationDate1 = wsParent1 != null ? wsParent1.getCopyOrCreationTime() : null;
+            Date creationDate2 = wsParent2 != null ? wsParent2.getCopyOrCreationTime(): null;
             
             // Find the minimum of the creation time:
             if (creationDate1 != null && creationDate2 != null && lastModified1 != null &&
@@ -691,10 +698,13 @@ public class WorkspaceDiff implements Serializable {
                 }
             }
             boolean includeQualified = true;
-            if ( versions == null || versions.size() <= 0 ) {
-                array.put( node.toJSONObject( filter, dateTime, includeQualified ) );
-            } else {
-                JSONObject jsonObject = node.toJSONObject( filter, dateTime, includeQualified );
+            
+            JSONObject jsonObject =
+                    node.toJSONObject( filter, false, dateTime,
+                                       includeQualified, forceJsonCacheUpdate );
+            array.put( jsonObject );
+            
+            if (!Utils.isNullOrEmpty( versions ) ) {
                 Version version = versions.get( node.getSysmlId() );
                 if ( version != null ) {
                     // TODO: perhaps add service and response in method call rather than using the nodes?
@@ -703,7 +713,6 @@ public class WorkspaceDiff implements Serializable {
                     // for reverting need to keep track of noderef and versionLabel
                     jsonObject.put( "id", changedNode.getId() );
                     jsonObject.put( "version", version.getVersionLabel() );
-                    array.put( jsonObject );
                 }
             }
         }

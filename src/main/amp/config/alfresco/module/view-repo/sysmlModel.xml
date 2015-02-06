@@ -882,6 +882,16 @@
                         <tokenised>false</tokenised>
                     </index>
                 </property>
+                <property name="sysml:connectorType">
+                    <type>d:noderef</type>
+                    <mandatory>false</mandatory>
+                    <multiple>false</multiple>
+                    <index enabled="true">
+                        <atomic>false</atomic>
+                        <stored>false</stored>
+                        <tokenised>false</tokenised>
+                    </index>
+                </property>
 			</properties>
 		</aspect>
         <aspect name="sysml:Association">

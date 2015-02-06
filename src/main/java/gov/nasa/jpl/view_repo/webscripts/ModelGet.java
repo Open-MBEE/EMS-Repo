@@ -49,6 +49,7 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,6 +63,8 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  *
  */
 public class ModelGet extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger(ModelGet.class);
+
     public ModelGet() {
         super();
     }
@@ -188,7 +191,9 @@ public class ModelGet extends AbstractJavaWebScript {
 
         printFooter();
 
-        log( LogLevel.INFO, "ModelGet: " + timer );
+        if (logger.isInfoEnabled()) {
+            log( LogLevel.INFO, "ModelGet: " + timer );
+        }
 
 		return model;
 	}

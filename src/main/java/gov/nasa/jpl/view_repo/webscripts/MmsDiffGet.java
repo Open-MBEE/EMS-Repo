@@ -91,6 +91,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
         workspaceDiff = new WorkspaceDiff(ws1, ws2, dateTime1, dateTime2);
 
         try {
+            workspaceDiff.forceJsonCacheUpdate = false;
             JSONObject top = workspaceDiff.toJSONObject( dateTime1, dateTime2, false );
             if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
             results.put("res", top.toString(4));

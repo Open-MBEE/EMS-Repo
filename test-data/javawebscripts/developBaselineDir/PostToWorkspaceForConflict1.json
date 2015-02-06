@@ -1,0 +1,24 @@
+{"elements": [{
+
+    "creator": "admin",
+
+    "documentation": "",
+
+    "editable": true,
+
+    "name": "conflict",
+
+    "owner": "123456",
+
+    "qualifiedId": "/123456/conflict",
+
+    "qualifiedName": "/JW_TEST/conflict",
+
+    "specialization": {"type": "Element"},
+
+    "sysmlid": "conflict"
+
+}]}
+
+200
+

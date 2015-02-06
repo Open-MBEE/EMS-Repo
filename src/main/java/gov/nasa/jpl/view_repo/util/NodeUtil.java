@@ -8,6 +8,7 @@ import gov.nasa.jpl.mbee.util.MethodCall;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
 
 import java.io.ByteArrayInputStream;
@@ -63,6 +64,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ApplicationContextHelper;
 import org.apache.commons.logging.Log;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
 
@@ -135,6 +137,7 @@ public class NodeUtil {
     public static boolean doHeisenCheck = true;
     public static boolean doVersionCaching = true;
     public static boolean activeVersionCaching = true;
+    public static boolean doJsonCaching = false;
     
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
     public static boolean heisenbugSeen = false;
@@ -168,7 +171,12 @@ public class NodeUtil {
     public static Map< NodeRef, NodeRef > frozenNodeCache =
             Collections.synchronizedMap( new HashMap<NodeRef, NodeRef>() );
 
-
+//    public static Map<String, JSONObject> jsonCache = 
+//    		Collections.synchronizedMap(new HashMap<String, JSONObject>());
+    // Set< String > filter, boolean isExprOrProp,Date dateTime, boolean isIncludeQualified
+    public static Map< String, Map< Long, Map< Boolean, Map< Boolean, Map< Set< String >, JSONObject > > > > > jsonCache =
+        Collections.synchronizedMap( new HashMap< String, Map< Long, Map< Boolean, Map< Boolean, Map< Set< String >, JSONObject > > > > >() );
+    
     // Set the flag to time events that occur during a model post using the timers
     // below
     public static boolean timeEvents = false;
@@ -2383,9 +2391,9 @@ public class NodeUtil {
                         path = path.substring( 1 );
                     }
                 }
-                path = path.replace( childPath, "" );
+                path = path.replaceFirst( childPath, "" );
                 if (!path.isEmpty()) {
-                    return getOrCreatePath(child, path.replace(childPath, ""));
+                    return getOrCreatePath(child, path);
                 } else {
                     return child;
                 }
@@ -2468,6 +2476,28 @@ public class NodeUtil {
                               + node, e );
             }
             NodeUtil.setBeenOutsideTransaction( true );
+        }
+    }
+    /**
+     * FIXME Recipients and senders shouldn't be hardcoded - need to have these spring injected
+     * @param subject
+     * @param msg
+     */
+    public static void sendNotificationEvent( String subject, String msg,
+                                              ServiceRegistry services ) {
+        if (!heisenbugSeen) {
+            String hostname = services.getSysAdminParams().getAlfrescoHost();
+            
+            String sender = hostname + "@jpl.nasa.gov";
+            String recipient;
+            
+            if (hostname.toLowerCase().contains( "europa" )) {
+                recipient = "kerzhner@jpl.nasa.gov";
+                ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
+            }
+            recipient = "mbee-dev-admin@jpl.nasa.gov";
+            ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
+            heisenbugSeen = true;
         }
     }
 

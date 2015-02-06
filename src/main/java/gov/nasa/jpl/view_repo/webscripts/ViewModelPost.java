@@ -80,6 +80,9 @@ public class ViewModelPost extends ModelPost {
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
+        // TODO FIXME this does not handle removing obsolete value specs when changing from another
+        //            aspect to this one.  See ModelPost.checkForObsoleteValueSpecs()
+        
         Map<String, Object> model = new HashMap<String, Object>();
         clearCaches();
 

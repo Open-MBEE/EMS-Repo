@@ -9,7 +9,11 @@ import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -85,7 +89,10 @@ public class MmsModelDelete extends AbstractJavaWebScript {
     protected JSONObject handleRequest(WebScriptRequest req) throws JSONException {
         JSONObject result = null;
 
-        Long start = System.currentTimeMillis();
+        //Long start = System.currentTimeMillis();  // TODO ask CY why implemented this in this way, as it
+                                                    //      introduces a bug when the node is replicated
+                                                    //      below, as the creation time will then be after
+                                                    //      this time
         String user = AuthenticationUtil.getRunAsUser();
         String wsId = null;
         WorkspaceNode workspace = getWorkspace( req, //true, // not creating ws!
@@ -115,11 +122,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         EmsScriptNode root = findScriptNodeById(elementId, workspace, null, true);
         String projectId = null;
 
-//        UserTransaction trx;
-//        trx = services.getTransactionService().getNonPropagatingUserTransaction();
         try {
-//            trx.begin();
-//            NodeUtil.setInsideTransactionNow( true );
 
             if (root != null && root.exists()) {
                 handleElementHierarchy( root, workspace, true );
@@ -131,10 +134,32 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             long end = System.currentTimeMillis();
 
             boolean showAll = false;
-            result = wsDiff.toJSONObject( new Date(start), new Date(end), showAll );
+            
+            Set< EmsScriptNode > valueSpecs = new LinkedHashSet<EmsScriptNode>();
+            Set< String> idsToRemove = new HashSet<String>();
+            for (Entry< String, EmsScriptNode > entry: wsDiff.getDeletedElements().entrySet()) {
+                EmsScriptNode node = entry.getValue();
+                String id = entry.getKey();
+                if ( node.isOwnedValueSpec() ) {
+                    valueSpecs.add( node );
+                    idsToRemove.add( id );
+                }
+            }
+            
+            // Remove value specs from elements, elementsVersions and deletedElements:
+            for (String id : idsToRemove) {
+                wsDiff.getDeletedElements().remove( id );
+                wsDiff.getElementsVersions().remove( id );
+                wsDiff.getElements().remove( id );
+            }
+            
+            result = wsDiff.toJSONObject( new Date(end), new Date(end), showAll );
 
             // apply aspects after JSON has been created (otherwise it won't be output)
-            for (EmsScriptNode deletedNode: wsDiff.getDeletedElements().values()) {
+            Set<EmsScriptNode> nodesToDelete = new HashSet<EmsScriptNode>();
+            nodesToDelete.addAll( wsDiff.getDeletedElements().values() );
+            nodesToDelete.addAll( valueSpecs );
+            for (EmsScriptNode deletedNode: nodesToDelete) {
                 if (deletedNode.exists()) {
                     deletedNode.removeAspect( "ems:Added" );
                     deletedNode.removeAspect( "ems:Updated" );
@@ -143,9 +168,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                     projectId = deletedNode.getProjectId();
                 }
             }
-
-//            trx.commit();
-//            NodeUtil.setInsideTransactionNow( false );
+            
         } catch (Throwable e) {
             try {
                 if (e instanceof JSONException) {
@@ -264,7 +287,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         if (root.exists()) {
             delete(root, workspace, null);
         }
-
+        
         // TODO: REVIEW may not need this b/c addToWsDiff() does not add in reified packages
         //       Also, code in ModelPost assumes we never delete reified packages
 //        // Delete the reified pkg if it exists also:
@@ -289,6 +312,14 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 wsDiff.getElements().put( sysmlId, node );
             if(wsDiff.getDeletedElements() != null)
                 wsDiff.getDeletedElements().put( sysmlId, node );
+            
+            // Remove from the ownedChildren of the owner:
+            // Note: added this for when we are deleting embedded value specs that are no longer be used
+            EmsScriptNode parent = node.getOwningParent( null );
+            if (parent != null && parent.exists()) {
+                parent.removeFromPropertyNodeRefs("ems:ownedChildren", node.getNodeRef() );
+            }
+
         }
     }
 }

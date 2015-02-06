@@ -153,9 +153,10 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
 //                                                 Acm.ACM_PRODUCT, workspace,
 //                                                 dateTime, services, response );
         Set<EmsScriptNode> productSet = new HashSet<EmsScriptNode>();
+        // search for products against the latest time so we can put in the snapshot references
         Map< String, EmsScriptNode > nodeList = NodeUtil.searchForElements(NodeUtil.SearchType.ASPECT.prefix, 
                                                                           Acm.ACM_PRODUCT, false,
-                                                                          workspace, dateTime, services, response,
+                                                                          workspace, null, services, response,
                                                                           responseStatus, fndSiteName);
         if (nodeList != null) {
             productSet.addAll( nodeList.values() );
@@ -216,7 +217,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
                         + ": status = " + jobStatus;
         String msg = "Log URL: " + contextUrl + logNode.getUrl();
         // TODO: NOTE!!! The following needs to be commented out for local testing....
-        ActionUtil.sendEmailToModifier(jobNode, msg, subject, services, response);
+        ActionUtil.sendEmailToModifier(jobNode, msg, subject, services);
         
         if (Debug.isOn()) System.out.println("Completed configuration set");
     }
