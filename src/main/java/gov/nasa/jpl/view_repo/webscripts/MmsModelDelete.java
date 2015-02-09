@@ -190,7 +190,8 @@ public class MmsModelDelete extends AbstractJavaWebScript {
 
         if (wsDiff.isDiff()) {
             // Send deltas to all listeners
-            if ( !CommitUtil.sendDeltas(result, wsId, projectId) ) {
+            // FIXME: need to add in the source - this should be in the JSON in the future
+            if ( !CommitUtil.sendDeltas(result, wsId, projectId, source) ) {
                 log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
             }
 

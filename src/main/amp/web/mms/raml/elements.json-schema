@@ -3,6 +3,10 @@
     "type": "object",
     "description": "Element specification",
     "properties": {
+        "source": {
+            "type": "string",
+            "description": "The source of the change (e.g., from which client). This is optional."
+        },
         "elements": {
             "type": "array",
             "items": {
