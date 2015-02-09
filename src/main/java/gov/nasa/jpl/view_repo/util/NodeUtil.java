@@ -137,7 +137,7 @@ public class NodeUtil {
     public static boolean doHeisenCheck = true;
     public static boolean doVersionCaching = true;
     public static boolean activeVersionCaching = true;
-    public static boolean doJsonCaching = false;
+    public static boolean doJsonCaching = true;
     
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
     public static boolean heisenbugSeen = false;
@@ -174,8 +174,12 @@ public class NodeUtil {
 //    public static Map<String, JSONObject> jsonCache = 
 //    		Collections.synchronizedMap(new HashMap<String, JSONObject>());
     // Set< String > filter, boolean isExprOrProp,Date dateTime, boolean isIncludeQualified
-    public static Map< String, Map< Long, Map< Boolean, Map< Boolean, Map< Set< String >, JSONObject > > > > > jsonCache =
-        Collections.synchronizedMap( new HashMap< String, Map< Long, Map< Boolean, Map< Boolean, Map< Set< String >, JSONObject > > > > >() );
+    public static Map< String, Map< Long, JSONObject > > jsonCache =
+        Collections.synchronizedMap( new HashMap< String, Map< Long, JSONObject > >() );
+    // REVIEW -- TODO -- Should we try and cache the toString() output of the json, too?    
+    // REVIEW -- TODO -- This would mean we'd have to concatenate the json
+    // REVIEW -- TODO -- strings ourselves instead of just one big toString() 
+    // REVIEW -- TODO -- on the collection as done currently.
     
     // Set the flag to time events that occur during a model post using the timers
     // below
