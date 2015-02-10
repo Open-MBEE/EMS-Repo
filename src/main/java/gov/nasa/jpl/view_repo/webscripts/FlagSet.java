@@ -43,10 +43,10 @@ public abstract class FlagSet extends DeclarativeWebScript {
         String turnOnStr = req.getParameter( "on" );
         String turnOffStr = req.getParameter( "off" );
 
-        boolean turnOn = !( turnOnStr == null ||
-                            turnOnStr.trim().equalsIgnoreCase( "false" ) ||
+        boolean turnOn = !( ( turnOnStr != null &&
+                              turnOnStr.trim().equalsIgnoreCase( "false" ) ) ||
                             ( turnOffStr != null &&
-                              turnOffStr.trim().equalsIgnoreCase( "true" ) ) );
+                              !turnOffStr.trim().equalsIgnoreCase( "false" ) ) );
         turnOnStr = turnOn ? "on" : "off";
         if ( turnOn == get() ) {
             if (logger.isInfoEnabled()) {
