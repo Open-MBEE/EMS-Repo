@@ -357,8 +357,12 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
         snapshotJson.put("sysmlid", view.getSysmlId());
         snapshotJson.put("sysmlname", view.getProperty(Acm.ACM_NAME));
         snapshotJson.put("id", snapshot.getProperty(Acm.CM_NAME));
-//        snapshotJson.put( "created",  EmsScriptNode.getIsoTime( (Date)snapshot.getProperty( "cm:created" )));
-        snapshotJson.put( "created",  EmsScriptNode.getIsoTime( (Date)snapshot.getProperty( "view2:timestamp" )));
+        Date timestamp = (Date) snapshot.getProperty("view2:timestamp");
+        if (timestamp != null) {
+            snapshotJson.put( "created",  EmsScriptNode.getIsoTime( (Date)snapshot.getProperty( "view2:timestamp" )));
+        } else {
+            snapshotJson.put( "created",  EmsScriptNode.getIsoTime( (Date)snapshot.getProperty( "cm:created" )));
+        }
         snapshotJson.put( "creator", snapshot.getProperty( "cm:modifier" ) );
 
         @SuppressWarnings( "rawtypes" )
