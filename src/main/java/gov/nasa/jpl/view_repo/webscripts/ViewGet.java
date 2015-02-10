@@ -48,6 +48,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -56,6 +57,8 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ViewGet extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger(ViewGet.class);
+
     protected boolean gettingDisplayedElements = false;
     protected boolean gettingContainedViews = false;
 
@@ -181,7 +184,9 @@ public class ViewGet extends AbstractJavaWebScript {
 
         printFooter();
 
-        System.out.println( "ViewGet: " + timer );
+        if (logger.isInfoEnabled()) {
+            logger.info( "ViewGet: " + timer );
+        }
 
         return model;
     }
