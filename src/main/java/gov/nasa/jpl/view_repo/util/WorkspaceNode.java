@@ -717,7 +717,7 @@ public class WorkspaceNode extends EmsScriptNode {
             // others'.
             for ( EmsScriptNode commit : commits ) {
                 String type = (String)commit.getProperty( "ems:commitType" );
-                if ( "COMMIT".equals( type ) ) {
+                if ( "COMMIT".equals( type ) || "MERGE".equals( type )) {
                     String diffStr = (String)commit.getProperty( "ems:commit" );
                     try {
                         JSONObject diff = new JSONObject( diffStr );

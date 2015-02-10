@@ -51,8 +51,10 @@ import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.LimitBy;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
+import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -294,9 +296,10 @@ public class NodeUtil {
         }
         ResultSet results = null;
         if ( searchService != null ) {
-            results = searchService.query( getStoreRef(),
-                                           SearchService.LANGUAGE_LUCENE,
-                                           queryPattern );
+//            results = searchService.query( getStoreRef(),
+//                                           SearchService.LANGUAGE_LUCENE,
+//                                           queryPattern );
+            results = searchService.query( getSearchParameters(queryPattern) );
         }
         if ( Debug.isOn() ) {
             Debug.outln( "luceneSearch(" + queryPattern + "): returned "
@@ -306,6 +309,19 @@ public class NodeUtil {
      	Timer.stopTimer(timerLucene, "***** luceneSearch(): time", timeEvents);
 
         return results;
+    }
+    
+    public static SearchParameters getSearchParameters(String queryPattern) {
+        final SearchParameters params = new SearchParameters();
+        params.addStore(getStoreRef());
+        params.setLanguage(SearchService.LANGUAGE_LUCENE);
+        params.setQuery(queryPattern);
+        params.setLimitBy(LimitBy.UNLIMITED);
+        params.setLimit(0);
+        params.setMaxPermissionChecks(100000);
+        params.setMaxPermissionCheckTimeMillis(100000);
+        params.setMaxItems(-1);
+        return params;
     }
 
     public static List<EmsScriptNode> resultSetToList( ResultSet results ) {
