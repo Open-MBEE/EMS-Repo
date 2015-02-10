@@ -34,6 +34,7 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
     public static final String PARAM_START = "start";
     public static final String PARAM_END = "end";
     public static final String TRANSACTION = "transaction";
+    public static final String PARAM_SOURCE = "source";
 
     /**
      * Injected variables from Spring configuration
@@ -58,6 +59,7 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
         final Long start = (Long) action.getParameterValue(PARAM_START);
         final Long end = (Long) action.getParameterValue(PARAM_END);
         Boolean doTransaction = (Boolean)action.getParameterValue(TRANSACTION);
+        final String source = (String)action.getParameterValue(PARAM_SOURCE);
 
         try {
             if ( !doTransaction ) {
@@ -67,7 +69,7 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
                         wsDiff.toJSONObject( new Date(start), new Date(end) );
 
                 // FIXME: Need to split by projectId
-                if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId) ) {
+                if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId, source) ) {
                     logger.warn("send deltas not posted properly");
                 }
 
@@ -81,7 +83,7 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
                         JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
 
                         // FIXME: Need to split by projectId
-                        if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId) ) {
+                        if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId, source) ) {
                             logger.warn("send deltas not posted properly");
                         }
 

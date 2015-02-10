@@ -1020,8 +1020,7 @@ public class EmsScriptNode extends ScriptNode implements
                             new EmsScriptNode( assoc.getChildRef(), services,
                                                response );
                 } catch ( Exception e ) {
-                    if ( Debug.isOn() )
-                        System.out.println( "Got exception in "
+                    logger.error( "Got exception in "
                                             + "createNode(name="
                                             + name + ", type=" + type
                                             + ") for EmsScriptNode(" + this
@@ -1406,7 +1405,7 @@ public class EmsScriptNode extends ScriptNode implements
                        "3: initializing version cache with node, "
                                + this + " version: "
                                + cachedVersion.getLabel();
-              logger.error( msg );
+              if (logger.isInfoEnabled()) logger.info( msg );
               if (versionCacheDebugPrint) System.out.println(msg);
 
            }
@@ -1445,7 +1444,6 @@ public class EmsScriptNode extends ScriptNode implements
                             + ").  Replacing node with unmodifiable frozen node, "
                             + getId() + " (" + cachedVersion.getLabel()+ ").";
            logger.error( msg );
-           System.out.println(msg);
            Debug.error( true, msg );
            //NodeUtil.sendNotificationEvent( "Heisenbug Occurrence!", "" );
            if ( response != null ) {
@@ -1460,7 +1458,7 @@ public class EmsScriptNode extends ScriptNode implements
                    "5: Updating version cache with new version of node, "
                             + this + " version: "
                             + thisEmsVersion.getLabel();
-           logger.error( msg );
+           if (logger.isInfoEnabled()) logger.info( msg );
            if (versionCacheDebugPrint) System.out.println(msg);
        }
 //                // This fixes the nodeRef in esn
@@ -2679,7 +2677,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
         if ( values == null ) {
-            if ( Debug.isOn() ) System.out.println( "null property values for "
+            if ( logger.isDebugEnabled()) logger.debug( "null property values for "
                                                     + acmProperty );
         }
 
@@ -2774,7 +2772,7 @@ public class EmsScriptNode extends ScriptNode implements
         getPropertyValuesFromJson( PropertyType type, JSONArray jsonArray,
                                    WorkspaceNode workspace, Date dateTime )
                                            throws JSONException {
-        if ( Debug.isOn() ) System.out.println( "getPropertyValuesFromJson("
+        if ( logger.isDebugEnabled()) logger.debug( "getPropertyValuesFromJson("
                                                 + type + ", " + jsonArray
                                                 + ", " + dateTime + ")" );
 
@@ -2945,7 +2943,7 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean ingestJSON( JSONObject jsonObject ) throws JSONException {
         boolean changed = false;
         // fill in all the properties
-        if ( Debug.isOn() ) System.out.println( "ingestJSON(" + jsonObject
+        if ( logger.isDebugEnabled()) logger.debug( "ingestJSON(" + jsonObject
                                                 + ")" );
 
         DictionaryService dServ = services.getDictionaryService();
@@ -2961,9 +2959,9 @@ public class EmsScriptNode extends ScriptNode implements
                 continue;
             } else {
                 QName qName = createQName( acmType );
-                if ( Debug.isOn() ) {
+                if ( logger.isDebugEnabled() ) {
                     if ( acmType.equals( Acm.ACM_VALUE ) ) {
-                        System.out.println( "qName of " + acmType + " = "
+                        logger.debug( "qName of " + acmType + " = "
                                             + qName.toString() );
                     }
                 }
@@ -2976,8 +2974,7 @@ public class EmsScriptNode extends ScriptNode implements
                             jsonObject.getJSONObject( Acm.JSON_SPECIALIZATION );
 
                     if ( specializeJson != null ) {
-                        if ( Debug.isOn() ) System.out.println( "processing "
-                                                                + acmType );
+                        if (logger.isDebugEnabled()) logger.debug( "processing " + acmType );
                         if ( ingestJSON( specializeJson ) ) {
                             changed = true;
                         }
@@ -2985,7 +2982,7 @@ public class EmsScriptNode extends ScriptNode implements
                 } else {
                     PropertyDefinition propDef = dServ.getProperty( qName );
                     if ( propDef == null ) {
-                        if ( Debug.isOn() ) System.out.println( "null PropertyDefinition for "
+                        if (logger.isDebugEnabled()) logger.debug( "null PropertyDefinition for "
                                                                 + acmType );
                         continue; // skips type
                     }
@@ -3268,7 +3265,7 @@ public class EmsScriptNode extends ScriptNode implements
         try {
             services.getNodeService().getType( this.getNodeRef() );
         } catch ( Throwable e ) {
-            if ( Debug.isOn() ) System.out.println( "Call to services.getNodeService().getType(nodeRef="
+            logger.warn( "Call to services.getNodeService().getType(nodeRef="
                                                     + this.getNodeRef()
                                                     + ") for this = "
                                                     + this
@@ -3279,8 +3276,7 @@ public class EmsScriptNode extends ScriptNode implements
             if ( isSubType( "cm:folder" ) ) return true;
             return false;
         } catch ( Throwable e ) {
-            if ( Debug.isOn() ) System.out.println( "Call to isSubType() on this = "
-                                                    + this + " failed!" );
+            logger.warn( "Call to isSubType() on this = " + this + " failed!" );
             e.printStackTrace();
         }
         try {
@@ -3293,8 +3289,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
             return false;
         } catch ( Throwable e ) {
-            if ( Debug.isOn() ) System.out.println( "Trying to call getQNameType() on parent = "
-                                                    + parent + "." );
+            logger.warn( "Trying to call getQNameType() on parent = " + parent + "." );
             e.printStackTrace();
         }
         try {
@@ -3304,8 +3299,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
             return false;
         } catch ( Throwable e ) {
-            if ( Debug.isOn() ) System.out.println( "Trying to call getQNameType() on parent = "
-                                                    + parent + "." );
+            logger.warn( "Trying to call getQNameType() on parent = " + parent + "." );
             e.printStackTrace();
         }
 

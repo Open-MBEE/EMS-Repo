@@ -166,6 +166,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
     boolean succ = true;
 
     private void handleDiff(final WebScriptRequest req, final JSONObject jsonDiff, final Status status, final Map<String, Object> model) throws Exception {
+        populateSourceFromJson( jsonDiff );
 		if (jsonDiff.has( "workspace1" ) && jsonDiff.has("workspace2")) {
 		    srcJson = jsonDiff.getJSONObject( "workspace2" );
 		    targetJson = jsonDiff.getJSONObject( "workspace1" );
@@ -286,7 +287,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	            boolean modelDeleteDiff = deleteWsDiff != null && deleteWsDiff.isDiff();
 
 	            if (modelDeleteDiff || modelPostDiff) {
-	                if ( !CommitUtil.sendDeltas(jsonDiff, targetWsId, projectId) ) {
+	                if ( !CommitUtil.sendDeltas(jsonDiff, targetWsId, projectId, source) ) {
                         log(LogLevel.WARNING, "MmsWorkspaceDiffPost deltas not posted properly");
                     }
 

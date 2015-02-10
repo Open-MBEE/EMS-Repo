@@ -122,7 +122,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ModelPost extends AbstractJavaWebScript {
     static Logger logger = Logger.getLogger(ModelPost.class);
-
+    
     public ModelPost() {
         super();
     }
@@ -237,9 +237,10 @@ public class ModelPost extends AbstractJavaWebScript {
             createOrUpdateModel( Object content, Status status,
                                  WorkspaceNode targetWS, WorkspaceNode sourceWS,
                                  boolean createCommit) throws Exception {
-            JSONObject postJson = (JSONObject) content;
-
-            JSONArray updatedArray = postJson.optJSONArray("updatedElements");
+        JSONObject postJson = (JSONObject) content;
+        populateSourceFromJson( postJson );
+        
+        JSONArray updatedArray = postJson.optJSONArray("updatedElements");
         JSONArray movedArray = postJson.optJSONArray("movedElements");
         JSONArray addedArray = postJson.optJSONArray("addedElements");
         JSONArray elementsArray = postJson.optJSONArray("elements");
@@ -314,8 +315,8 @@ public class ModelPost extends AbstractJavaWebScript {
         JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
 
         // FIXME: Need to split by projectId
-        if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId) ) {
-            //logger.warn("send deltas not posted properly");
+        if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId, source) ) {
+            if (logger.isInfoEnabled()) logger.info("send deltas not posted properly");
         }
 
         CommitUtil.updateCommitNodeRef( commitRef, deltaJson.toString(), "", services, response );
