@@ -5,6 +5,7 @@ import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
+import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript.ConfigurationType;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -134,6 +135,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
             }
         }
 
+        // for backwards compatibility, keep noderefs
         List< NodeRef > productSnapshots = product.getPropertyNodeRefs( "view2:productSnapshots" );
         for (NodeRef productSnapshotNodeRef: productSnapshots) {
             EmsScriptNode productSnapshot = new EmsScriptNode(productSnapshotNodeRef, services, response);
@@ -141,7 +143,14 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
                 snapshotsJson.put( configWs.getSnapshotJson( productSnapshot, product, workspace ) );
             }
         }
-
+        
+        // all we really need to do is grab all the configurations and place them in as snapshots
+        ConfigurationsWebscript configService = new ConfigurationsWebscript( repository, services, response );
+        JSONArray configSnapshots = configService.handleConfigurations( req, ConfigurationType.CONFIG_SNAPSHOT );
+        for (int ii = 0; ii < configSnapshots.length(); ii++) {
+            snapshotsJson.put( configSnapshots.get( ii ) );
+        }
+        
         return snapshotsJson;
     }
 
