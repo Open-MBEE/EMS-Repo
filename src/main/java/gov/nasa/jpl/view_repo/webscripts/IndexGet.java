@@ -47,7 +47,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -110,7 +110,7 @@ public class IndexGet extends AbstractJavaWebScript {
         } else {
             //EmsScriptNode site = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
             EmsScriptNode site = getSiteNode( siteName, workspace, dateTime );
-            JSONObject json;
+            JsonObject json;
             try {
                 json = getIndexJson(site, workspace, dateTime);
                 //appendResponseStatusInfo(instance);
@@ -139,20 +139,20 @@ public class IndexGet extends AbstractJavaWebScript {
     }
 
     /**
-     * Retrieve the index.json file if it exists and parse into JSONObject
+     * Retrieve the index.json file if it exists and parse into JsonObject
      * @param site
      * @param workspace
      * @return
      * @throws JSONException
      */
-    private JSONObject getIndexJson(EmsScriptNode site, WorkspaceNode workspace, Date dateTime) throws JSONException {
+    private JsonObject getIndexJson(EmsScriptNode site, WorkspaceNode workspace, Date dateTime) throws JSONException {
         EmsScriptNode index = site.childByNamePath("index.json");
         if (index == null) {
             ProductListGet productListService = new ProductListGet(repository, services);
             return productListService.handleProductList(site, workspace, dateTime);
         } else {
             ContentReader reader = services.getContentService().getReader(index.getNodeRef(), ContentModel.PROP_CONTENT);
-            return new JSONObject(reader.getContentString());
+            return new JsonObject(reader.getContentString());
         }
     }
 }

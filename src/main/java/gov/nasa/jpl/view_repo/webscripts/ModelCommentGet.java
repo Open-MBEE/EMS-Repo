@@ -43,9 +43,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.json.JSONArray;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -96,11 +96,11 @@ public class ModelCommentGet extends ModelGet {
             log(LogLevel.ERROR, "Could not find element", HttpServletResponse.SC_NOT_FOUND);
             model.put("res", response);
         } else {
-            JSONArray elementsJson =
+            JsonArray elementsJson =
                     instance.getCommentElements( element, workspace, dateTime );
             appendResponseStatusInfo(instance);
             if (elementsJson != null) {
-                JSONObject top = new JSONObject();
+                JsonObject top = new JsonObject();
                 try {
                     top.put("elements",  elementsJson);
                     if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
@@ -120,15 +120,15 @@ public class ModelCommentGet extends ModelGet {
     }
 
     /**
-     * Encapsulate getting the JSONArray of comments annotating the specified element
+     * Encapsulate getting the JsonArray of comments annotating the specified element
      * @param element
      * @return
      */
-    private JSONArray getCommentElements( EmsScriptNode element,
+    private JsonArray getCommentElements( EmsScriptNode element,
                                           WorkspaceNode workspace,
                                           Date dateTime ) {
         try {
-            JSONArray commentIds = element.getSourceAssocsIdsByType(Acm.ACM_ANNOTATED_ELEMENTS);
+            JsonArray commentIds = element.getSourceAssocsIdsByType(Acm.ACM_ANNOTATED_ELEMENTS);
             for (int ii = 0; ii < commentIds.length(); ii++) {
                 String commentId = commentIds.getString(ii);
                 EmsScriptNode comment = findScriptNodeById(commentId, workspace, dateTime, false);

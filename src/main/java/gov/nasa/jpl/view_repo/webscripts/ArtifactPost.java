@@ -44,7 +44,7 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -89,7 +89,7 @@ public class ArtifactPost extends AbstractJavaWebScript {
 
 		String path = null;
 		String content = null;
-		JSONObject resultJson = null;
+		JsonObject resultJson = null;
 		String filename = null;
 		Map<String, Object> model = new HashMap<String, Object>();
 
@@ -136,7 +136,7 @@ public class ArtifactPost extends AbstractJavaWebScript {
 	        			filename = extension != null ? artifactId + extension : artifactId;
 
 	    	        	// Create return json:
-	    	        	resultJson = new JSONObject();
+	    	        	resultJson = new JsonObject();
 	    	        	resultJson.put("filename", filename);
 	    	        	// TODO: want full path here w/ path to site also, but Dorris doesnt use it,
 	    	        	//		 so leaving it as is.

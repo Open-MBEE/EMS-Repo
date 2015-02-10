@@ -41,9 +41,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.json.JSONArray;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -82,7 +82,7 @@ public class ProductPost extends AbstractJavaWebScript {
         WorkspaceNode workspace = getWorkspace( req );
 
 		try {
-			updateProducts((JSONObject)req.parseContent(), workspace);
+			updateProducts((JsonObject)req.parseContent(), workspace);
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();
@@ -96,10 +96,10 @@ public class ProductPost extends AbstractJavaWebScript {
 		return model;
 	}
 
-	private void updateProducts(JSONObject jsonObject, WorkspaceNode workspace)
+	private void updateProducts(JsonObject jsonObject, WorkspaceNode workspace)
 	        throws JSONException {
 		if (jsonObject.has("products")) {
-			JSONArray productsJson = jsonObject.getJSONArray("products");
+			JsonArray productsJson = jsonObject.getJSONArray("products");
 
 			for (int ii = 0; ii < productsJson.length(); ii++) {
 			    updateProduct(productsJson, ii, workspace);
@@ -108,13 +108,13 @@ public class ProductPost extends AbstractJavaWebScript {
 	}
 
 
-	private void updateProduct(JSONArray productsJson, int index,
+	private void updateProduct(JsonArray productsJson, int index,
 	                           WorkspaceNode workspace) throws JSONException {
-		JSONObject productJson = productsJson.getJSONObject(index);
+		JsonObject productJson = productsJson.getJSONObject(index);
 		updateProduct(productJson, workspace);
 	}
 
-	private void updateProduct(JSONObject productJson, WorkspaceNode workspace) throws JSONException {
+	private void updateProduct(JsonObject productJson, WorkspaceNode workspace) throws JSONException {
 
 		String id = null;
 		try {

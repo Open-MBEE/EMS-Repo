@@ -16,9 +16,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.json.JSONArray;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -56,7 +56,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
 
         MmsSnapshotsGet instance = new MmsSnapshotsGet(repository, getServices());
 
-        JSONObject jsonObject = new JSONObject();
+        JsonObject jsonObject = new JsonObject();
         try {
             jsonObject.put("snapshots", instance.handleRequest(req));
             appendResponseStatusInfo( instance );
@@ -79,7 +79,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         return model;
     }
 
-    private JSONArray handleRequest( WebScriptRequest req ) throws JSONException {
+    private JsonArray handleRequest( WebScriptRequest req ) throws JSONException {
         String configurationId = req.getServiceMatch().getTemplateVars().get( "configurationId" );
         if (configurationId != null) {
             return handleConfigurationSnapshot(req, configurationId);
@@ -89,13 +89,13 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         }
     }
 
-    private JSONArray handleConfigurationSnapshot( WebScriptRequest req, String configurationId ) throws JSONException {
+    private JsonArray handleConfigurationSnapshot( WebScriptRequest req, String configurationId ) throws JSONException {
         EmsScriptNode siteNode = getSiteNodeFromRequest( req, false );
         String siteNameFromReq = getSiteName( req );
         if ( siteNode == null && !Utils.isNullOrEmpty( siteNameFromReq )
              && !siteNameFromReq.equals( NO_SITE_ID ) ) {
             log( LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND );
-            return new JSONArray();
+            return new JsonArray();
         }
         ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, response);
 
@@ -103,25 +103,25 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
 
         EmsScriptNode config = configWs.getConfiguration( configurationId );
         if (config == null) {
-            return new JSONArray();
+            return new JsonArray();
         }
 
         return configWs.getSnapshots( config, workspace );
     }
 
-    private JSONArray handleProductSnapshot( WebScriptRequest req, String productId ) throws JSONException {
+    private JsonArray handleProductSnapshot( WebScriptRequest req, String productId ) throws JSONException {
         Date timestamp = TimeUtils.dateFromTimestamp(req.getParameter("timestamp"));
         WorkspaceNode workspace = getWorkspace( req );
         EmsScriptNode product = findScriptNodeById( productId, workspace, timestamp, false);
 
         if (product == null) {
             log(LogLevel.WARNING, "Could not find product", HttpServletResponse.SC_NOT_FOUND);
-            return new JSONArray();
+            return new JsonArray();
         }
 
         ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, response);
 
-        JSONArray snapshotsJson = new JSONArray();
+        JsonArray snapshotsJson = new JsonArray();
 
         // for backwards compatibility, keep deprecated targetAssocsNodesByType
         List< EmsScriptNode > snapshots =

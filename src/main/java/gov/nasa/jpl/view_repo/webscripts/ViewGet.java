@@ -47,9 +47,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.json.JSONArray;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -134,7 +134,7 @@ public class ViewGet extends AbstractJavaWebScript {
         // default generate=true
         boolean generate = getBooleanArg( req, "generate", true );
 
-        JSONArray viewsJson = new JSONArray();
+        JsonArray viewsJson = new JsonArray();
         if (validateRequest(req, status)) {
             String viewId = getIdFromRequest( req );
             gettingDisplayedElements = isDisplayedElementRequest( req );
@@ -159,7 +159,7 @@ public class ViewGet extends AbstractJavaWebScript {
 
         if (responseStatus.getCode() == HttpServletResponse.SC_OK) {
             try {
-                JSONObject json = new JSONObject();
+                JsonObject json = new JsonObject();
                 json.put(gettingDisplayedElements ? "elements" : "views", viewsJson);
                 if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
                 if ( prettyPrint ) model.put("res", json.toString(4));
@@ -181,7 +181,7 @@ public class ViewGet extends AbstractJavaWebScript {
         return model;
     }
 
-    private void handleView( String viewId, JSONArray viewsJson,
+    private void handleView( String viewId, JsonArray viewsJson,
                              boolean generate, boolean recurse,
                              WorkspaceNode workspace, Date dateTime )
                                      throws JSONException {
@@ -206,7 +206,7 @@ public class ViewGet extends AbstractJavaWebScript {
                                                     generate, recurse, null );
                     elems = NodeUtil.getVersionAtTime( elems, dateTime );
                     for ( EmsScriptNode n : elems ) {
-                        viewsJson.put( n.toJSONObject( dateTime ) );
+                        viewsJson.put( n.toJsonObject( dateTime ) );
                     }
                 } else if ( gettingContainedViews ) {
                     if (Debug.isOn()) System.out.println("+ + + + + gettingContainedViews");
@@ -215,11 +215,11 @@ public class ViewGet extends AbstractJavaWebScript {
                                                  null );
                     elems.add( view );
                     for ( EmsScriptNode n : elems ) {
-                        viewsJson.put( n.toJSONObject( dateTime ) );
+                        viewsJson.put( n.toJsonObject( dateTime ) );
                     }
                 } else {
                     if (Debug.isOn()) System.out.println("+ + + + + just the view");
-                    viewsJson.put( view.toJSONObject(  dateTime ) );
+                    viewsJson.put( view.toJsonObject(  dateTime ) );
                 }
                 EmsScriptNode.expressionStuff = false;
             } catch ( JSONException e ) {

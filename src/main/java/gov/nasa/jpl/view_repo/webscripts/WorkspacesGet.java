@@ -15,9 +15,9 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.json.JSONArray;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -59,7 +59,7 @@ public class WorkspacesGet extends AbstractJavaWebScript{
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
-        JSONObject json = null;
+        JsonObject json = null;
 
         try {
             if (validateRequest(req, status)) {
@@ -91,12 +91,12 @@ public class WorkspacesGet extends AbstractJavaWebScript{
         return model;
     }
 
-	protected JSONObject handleWorkspace (EmsScriptNode homeFolder, Status status, String user, boolean findDeleted) throws JSONException{
-		JSONObject json = new JSONObject ();
-		JSONArray jArray = new JSONArray ();
+	protected JsonObject handleWorkspace (EmsScriptNode homeFolder, Status status, String user, boolean findDeleted) throws JSONException{
+		JsonObject json = new JsonObject ();
+		JsonArray jArray = new JsonArray ();
         if (!findDeleted) {
             //This is for the master workspace (not located in the user home folder).
-            JSONObject interiorJson = new JSONObject();
+            JsonObject interiorJson = new JsonObject();
             WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, null );
             jArray.put(interiorJson);
         }
@@ -107,11 +107,11 @@ public class WorkspacesGet extends AbstractJavaWebScript{
             	    WorkspaceNode wsNode = new WorkspaceNode(workspaceNode.getNodeRef(), services, response);
             	    if (findDeleted) {
             	        if (wsNode.isDeleted()) {
-            	            jArray.put(wsNode.toJSONObject( null ));
+            	            jArray.put(wsNode.toJsonObject( null ));
             	        }
             	    } else {
             	        if (wsNode.exists()) {
-            	            jArray.put(wsNode.toJSONObject( null ));
+            	            jArray.put(wsNode.toJsonObject( null ));
             	        }
             	    }
             }

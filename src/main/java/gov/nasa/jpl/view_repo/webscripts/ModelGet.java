@@ -48,9 +48,9 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.json.JSONArray;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -72,7 +72,7 @@ public class ModelGet extends AbstractJavaWebScript {
     // injected via spring configuration
     protected boolean isViewRequest = false;
 
-	protected JSONArray elements = new JSONArray();
+	protected JsonArray elements = new JsonArray();
 	protected Map<String, EmsScriptNode> elementsFound = new HashMap<String, EmsScriptNode>();
 
     protected boolean prettyPrint = true;
@@ -80,7 +80,7 @@ public class ModelGet extends AbstractJavaWebScript {
     @Override
 	protected void clearCaches() {
 		super.clearCaches();
-		elements = new JSONArray();
+		elements = new JsonArray();
 		elementsFound = new HashMap<String, EmsScriptNode>();
 	}
 
@@ -165,12 +165,12 @@ public class ModelGet extends AbstractJavaWebScript {
 		// make sure to pass down view request flag to instance
 		setIsViewRequest(isViewRequest);
 
-		JSONArray elementsJson = new JSONArray();
+		JsonArray elementsJson = new JsonArray();
 		if (validateRequest(req, status)) {
 		    elementsJson = handleRequest(req);
 		}
 
-		JSONObject top = new JSONObject();
+		JsonObject top = new JsonObject();
 		try {
 		    if (elementsJson.length() > 0) {
 		        top.put("elements", elementsJson);
@@ -190,17 +190,17 @@ public class ModelGet extends AbstractJavaWebScript {
 
         printFooter();
 
-        log( LogLevel.INFO, "ModelGet: " + timer );
+        System.out.println( "ModelGet: " + timer );
 
 		return model;
 	}
 
 	/**
-	 * Wrapper for handling a request and getting the appropriate JSONArray of elements
+	 * Wrapper for handling a request and getting the appropriate JsonArray of elements
 	 * @param req
 	 * @return
 	 */
-	private JSONArray handleRequest(WebScriptRequest req) {
+	private JsonArray handleRequest(WebScriptRequest req) {
         // REVIEW -- Why check for errors here if validate has already been
         // called?  Is the error checking code different?  Why?
         try {
@@ -215,7 +215,7 @@ public class ModelGet extends AbstractJavaWebScript {
 
             if (null == modelId) {
                 log(LogLevel.ERROR, "Could not find element " + modelId, HttpServletResponse.SC_NOT_FOUND );
-                return new JSONArray();
+                return new JsonArray();
             }
 
             // get timestamp if specified
@@ -236,7 +236,7 @@ public class ModelGet extends AbstractJavaWebScript {
                          "Element " + modelId
                          + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
                          HttpServletResponse.SC_NOT_FOUND );
-                    return new JSONArray();
+                    return new JsonArray();
             }
 
             // recurse default is false
@@ -269,7 +269,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	                                           throws JSONException {
 		Object allowedElements = root.getProperty(Acm.ACM_ALLOWED_ELEMENTS);
 		if (allowedElements != null) {
-			JSONArray childElementJson = new JSONArray(allowedElements.toString());
+			JsonArray childElementJson = new JsonArray(allowedElements.toString());
 			for (int ii = 0; ii < childElementJson.length(); ii++) {
 				String id = childElementJson.getString(ii);
 				EmsScriptNode childElement = findScriptNodeById(id, workspace, dateTime, false);
@@ -290,7 +290,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			if (recurse) {
 				Object childrenViews = root.getProperty(Acm.ACM_CHILDREN_VIEWS);
 				if (childrenViews != null) {
-					JSONArray childViewJson = new JSONArray(childrenViews.toString());
+					JsonArray childViewJson = new JsonArray(childrenViews.toString());
 					for (int ii = 0; ii < childViewJson.length(); ii++) {
 						String id = childViewJson.getString(ii);
                         EmsScriptNode childView =
@@ -385,7 +385,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	}
 
 	/**
-	 * Build up the element JSONObject
+	 * Build up the element JsonObject
 	 * @throws JSONException
 	 */
 	protected void handleElements(Date dateTime, boolean includeQualified) throws JSONException {
@@ -393,7 +393,7 @@ public class ModelGet extends AbstractJavaWebScript {
 			EmsScriptNode node = elementsFound.get(id);
 
 			if (checkPermissions(node, PermissionService.READ)){
-                elements.put(node.toJSONObject(dateTime, includeQualified));
+                elements.put(node.toJsonObject(dateTime, includeQualified));
 			} // TODO -- REVIEW -- Warning if no permissions?
 		}
 	}

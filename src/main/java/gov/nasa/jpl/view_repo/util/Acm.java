@@ -430,7 +430,7 @@ public class Acm {
     }
 
     /**
-     * Properties that are JSONArrays rather than primitive types, so parsing is different
+     * Properties that are JsonArrays rather than primitive types, so parsing is different
      */
     protected static final Set<String> JSON_ARRAYS = new HashSet<String>() {
          private static final long serialVersionUID = -2080928480362524333L;

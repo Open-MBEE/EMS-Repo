@@ -13,20 +13,20 @@ import java.util.TreeMap;
 import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.FileUtils;
 
-import org.json.JSONArray;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 
 
 public class JsonDiff {
 
     private static Object sort( Object o ) throws JSONException {
-        if ( o instanceof JSONArray ) return sort((JSONArray)o);
-        if ( o instanceof JSONObject ) return sort((JSONObject)o);
+        if ( o instanceof JsonArray ) return sort((JsonArray)o);
+        if ( o instanceof JsonObject ) return sort((JsonObject)o);
         return o;
     }
     
-    private static JSONArray sort( JSONArray o ) throws JSONException {
+    private static JsonArray sort( JsonArray o ) throws JSONException {
         ArrayList<Object> list = new ArrayList<Object>( o.length() );
         for ( int i = 0; i < o.length(); ++i ) {
             Object v = o.get( i );
@@ -34,11 +34,11 @@ public class JsonDiff {
             list.add( v );
         }
         Collections.sort( list, CompareUtils.GenericComparator.instance() );
-        JSONArray sorted = new JSONArray( list );
+        JsonArray sorted = new JsonArray( list );
         return sorted;
     }
 
-    private static JSONObject sort( JSONObject o ) {
+    private static JsonObject sort( JsonObject o ) {
         TreeMap<String, Object> map = new TreeMap<String, Object>();
         Iterator<?> i = o.keys();
         while ( i.hasNext() ) {
@@ -53,7 +53,7 @@ public class JsonDiff {
                 }
             }
         }
-        return new JSONObject( map );
+        return new JsonObject( map );
     }
     
     
@@ -105,7 +105,7 @@ public class JsonDiff {
     }
     
     public static void main( String[] args ) {
-        JSONObject o1=null, o2=null;
+        JsonObject o1=null, o2=null;
         String usage = "Usage: JsonDiff file1.json file2.json";
         if ( args.length < 2 ) {
             System.err.println(usage);
@@ -118,16 +118,16 @@ public class JsonDiff {
             file2 = new File(args[1]);
             String jstr1 = FileUtils.fileToString( file1 );
             String jstr2 = FileUtils.fileToString( file2 );
-            o1 = new JSONObject( jstr1 );
-            o2 = new JSONObject( jstr2 );
+            o1 = new JsonObject( jstr1 );
+            o2 = new JsonObject( jstr2 );
         } catch ( Throwable e ) {
             //System.err.println("Error! " + e.getLocalizedMessage() );
             e.printStackTrace();
             return;
         }
         try {
-            JSONObject so1 = sort( o1 );
-            JSONObject so2 = sort( o2 );
+            JsonObject so1 = sort( o1 );
+            JsonObject so2 = sort( o2 );
             String fName1 = file1.getParent() + File.separator + "sorted_"
                             + file1.getName();
             String fName2 = file2.getParent() + File.separator + "sorted_"

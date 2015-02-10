@@ -25,9 +25,9 @@ import org.alfresco.service.cmr.dictionary.DictionaryService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.namespace.QName;
-import org.json.JSONArray;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 
 /**
  * Class for keeping track of differences between two workspaces. WS1 always has the original
@@ -498,13 +498,13 @@ public class WorkspaceDiff implements Serializable {
         if ( ws1 != null && ws2 != null ) diff();
     }
 
-    public static Set< EmsScriptNode > getAllChangedElementsInDiffJson( JSONArray diffJson,
+    public static Set< EmsScriptNode > getAllChangedElementsInDiffJson( JsonArray diffJson,
                                                                         WorkspaceNode ws,
                                                                         ServiceRegistry services )
                                                                                 throws JSONException {
         Set< EmsScriptNode > nodes = new LinkedHashSet< EmsScriptNode >();
         for ( int i = 0; i < diffJson.length(); ++i ) {
-            JSONObject element = diffJson.getJSONObject( i );
+            JsonObject element = diffJson.getJSONObject( i );
             if ( element.has( "sysmlid" ) ) {
                 String sysmlid = element.getString( "sysmlid" );
                 NodeRef ref = NodeUtil.findNodeRefById( sysmlid, false, ws, null,
@@ -521,12 +521,12 @@ public class WorkspaceDiff implements Serializable {
         return nodes;
     }
 
-    public static Set< EmsScriptNode > getAllChangedElementsInDiffJson( JSONObject diffJson,
+    public static Set< EmsScriptNode > getAllChangedElementsInDiffJson( JsonObject diffJson,
                                                                         ServiceRegistry services )
                                                                                 throws JSONException {
         LinkedHashSet< EmsScriptNode > nodes = new LinkedHashSet< EmsScriptNode >();
-        JSONObject jsonObj = diffJson;
-        JSONArray jsonArr = null;
+        JsonObject jsonObj = diffJson;
+        JsonArray jsonArr = null;
         
         WorkspaceNode ws = null;
         
@@ -563,34 +563,34 @@ public class WorkspaceDiff implements Serializable {
      * Dumps the JSON delta based.
      * @param   time1   Timestamp to dump ws1
      * @param   time2   Timestamp to dump ws2
-     * @return  JSONObject of the delta
+     * @return  JsonObject of the delta
      * @throws JSONException
      */
-    public JSONObject toJSONObject(Date time1, Date time2) throws JSONException {
-            return toJSONObject( time1, time2, true );
+    public JsonObject toJsonObject(Date time1, Date time2) throws JSONException {
+            return toJsonObject( time1, time2, true );
     }
 
     /**
      * Dumps the JSON delta based.
      * @param   time1   Timestamp to dump ws1
      * @param   time2   Timestamp to dump ws2
-     * @param   showAll If true, shows all keys in JSONObject, if false, only shows ids
-     * @return  JSONObject of the delta
+     * @param   showAll If true, shows all keys in JsonObject, if false, only shows ids
+     * @return  JsonObject of the delta
      * @throws JSONException
      */
-    public JSONObject toJSONObject(Date time1, Date time2, boolean showAll) throws JSONException {
-        JSONObject deltaJson = new JSONObject();
-        JSONObject ws1Json = new JSONObject();
-        JSONObject ws2Json = new JSONObject();
+    public JsonObject toJsonObject(Date time1, Date time2, boolean showAll) throws JSONException {
+        JsonObject deltaJson = new JsonObject();
+        JsonObject ws1Json = new JsonObject();
+        JsonObject ws2Json = new JsonObject();
 
-        addJSONArray(ws1Json, "elements", elements, elementsVersions, time1, true);
+        addJsonArray(ws1Json, "elements", elements, elementsVersions, time1, true);
         addWorkspaceMetadata( ws1Json, ws1, time1 );
 
-        addJSONArray(ws2Json, "addedElements", addedElements, time2, true);
-        addJSONArray(ws2Json, "movedElements", movedElements, time2, showAll);
-        addJSONArray(ws2Json, "deletedElements", deletedElements, time2, showAll);
-        addJSONArray(ws2Json, "updatedElements", updatedElements, time2, showAll);
-        addJSONArray(ws2Json, "conflictedElements", conflictedElements, time2, showAll);
+        addJsonArray(ws2Json, "addedElements", addedElements, time2, true);
+        addJsonArray(ws2Json, "movedElements", movedElements, time2, showAll);
+        addJsonArray(ws2Json, "deletedElements", deletedElements, time2, showAll);
+        addJsonArray(ws2Json, "updatedElements", updatedElements, time2, showAll);
+        addJsonArray(ws2Json, "conflictedElements", conflictedElements, time2, showAll);
         addWorkspaceMetadata( ws2Json, ws2, time2);
 
         deltaJson.put( "workspace1", ws1Json );
@@ -600,31 +600,31 @@ public class WorkspaceDiff implements Serializable {
     }
 
     /**
-     * Add the workspace metadata onto the provided JSONObject
+     * Add the workspace metadata onto the provided JsonObject
      * @param jsonObject
      * @param ws
      * @param dateTime
      * @throws JSONException
      */
-    private void addWorkspaceMetadata(JSONObject jsonObject, WorkspaceNode ws, Date dateTime) throws JSONException {
+    private void addWorkspaceMetadata(JsonObject jsonObject, WorkspaceNode ws, Date dateTime) throws JSONException {
         WorkspaceNode.addWorkspaceNamesAndIds( jsonObject, ws );
         if (dateTime != null) {
             jsonObject.put( "timestamp", TimeUtils.toTimestamp( dateTime ) );
         }
     }
 
-    private boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, Date dateTime, boolean showAll) throws JSONException {
-            return addJSONArray(jsonObject, key, map, null, dateTime, showAll);
+    private boolean addJsonArray(JsonObject jsonObject, String key, Map< String, EmsScriptNode > map, Date dateTime, boolean showAll) throws JSONException {
+            return addJsonArray(jsonObject, key, map, null, dateTime, showAll);
     }
 
-    private boolean addJSONArray(JSONObject jsonObject, String key, Map< String, EmsScriptNode > map, Map< String, Version> versions, Date dateTime, boolean showAll) throws JSONException {
+    private boolean addJsonArray(JsonObject jsonObject, String key, Map< String, EmsScriptNode > map, Map< String, Version> versions, Date dateTime, boolean showAll) throws JSONException {
         boolean emptyArray = true;
         if (map != null && map.size() > 0) {
-            jsonObject.put( key, convertMapToJSONArray( map, versions, dateTime, showAll ) );
+            jsonObject.put( key, convertMapToJsonArray( map, versions, dateTime, showAll ) );
             emptyArray = false;
         } else {
             // add in the empty array
-            jsonObject.put( key, new JSONArray() );
+            jsonObject.put( key, new JsonArray() );
         }
         return !emptyArray;
     }
@@ -670,7 +670,7 @@ public class WorkspaceDiff implements Serializable {
     }
 
 
-    private JSONArray convertMapToJSONArray(Map<String, EmsScriptNode> set, Map<String, Version> versions, Date dateTime, boolean showAll) throws JSONException {
+    private JsonArray convertMapToJsonArray(Map<String, EmsScriptNode> set, Map<String, Version> versions, Date dateTime, boolean showAll) throws JSONException {
         Set<String> filter = null;
         if (!showAll) {
             filter = getFilter();
@@ -678,7 +678,7 @@ public class WorkspaceDiff implements Serializable {
 //            filter.add("id");
         }
 
-        JSONArray array = new JSONArray();
+        JsonArray array = new JsonArray();
         for (EmsScriptNode node: set.values()) {
             // allow the possibility that nodeDiff isn't being used to make the diff call
             if ( nodeDiff != null ) {
@@ -699,12 +699,12 @@ public class WorkspaceDiff implements Serializable {
             }
             boolean includeQualified = true;
             if ( versions == null || versions.size() <= 0 ) {
-                array.put( node.toJSONObject( filter, false, dateTime,
+                array.put( node.toJsonObject( filter, false, dateTime,
                                               includeQualified,
                                               forceJsonCacheUpdate ) );
             } else {
-                JSONObject jsonObject =
-                    node.toJSONObject( filter, false, dateTime,
+                JsonObject jsonObject =
+                    node.toJsonObject( filter, false, dateTime,
                                        includeQualified, forceJsonCacheUpdate );
                 Version version = versions.get( node.getSysmlId() );
                 if ( version != null ) {
@@ -959,7 +959,7 @@ public class WorkspaceDiff implements Serializable {
         populateMembers();
     }
 
-    public boolean ingestJSON(JSONObject json) {
+    public boolean ingestJSON(JsonObject json) {
         Debug.error("ingestJson() not implemented!");
         // TODO??
         return true;
@@ -974,9 +974,9 @@ public class WorkspaceDiff implements Serializable {
     
     
 //    public String toSimpleString() {
-//        JSONObject top = new JSONObject();
-//        JSONObject ws1 = new JSONObject();
-//        JSONObject ws2 = new JSONObject();
+//        JsonObject top = new JsonObject();
+//        JsonObject ws1 = new JsonObject();
+//        JsonObject ws2 = new JsonObject();
 //        
 //        ws1.put( "workspace", arg1 )
 //        

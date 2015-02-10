@@ -28,11 +28,11 @@
  ******************************************************************************/
 package gov.nasa.jpl.view_repo.webscripts;
 
-import org.json.JSONArray;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
 
 /**
- * Function pointer for handling transactions based on JSONArray inputs
+ * Function pointer for handling transactions based on JsonArray inputs
  * 
  * @author cinyoung
  *
@@ -47,6 +47,6 @@ public interface JwsFunctor {
 	 * @return				Optional return of what is created
 	 * @throws JSONException
 	 */
-	public Object execute(JSONArray jsonArray, int index, Boolean... flags) throws JSONException;
+	public Object execute(JsonArray jsonArray, int index, Boolean... flags) throws JSONException;
 
 }

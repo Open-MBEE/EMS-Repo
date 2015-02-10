@@ -1,5 +1,6 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 /**
@@ -10,6 +11,7 @@ public class JsonCacheGet extends FlagSet {
     @Override
     protected void set( boolean val ) {
         NodeUtil.doJsonCaching = val;
+        JsonObject.doCaching = val;
     }
 
     @Override

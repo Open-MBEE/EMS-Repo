@@ -8,7 +8,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.log4j.Logger;
 
@@ -36,7 +36,7 @@ public class JmsConnection extends AbstractConnection {
         }
     }
     
-    public boolean publish(JSONObject json, String topic) {
+    public boolean publish(JsonObject json, String topic) {
         boolean result = false;
         try {
             json.put( "sequence", sequenceId++ );

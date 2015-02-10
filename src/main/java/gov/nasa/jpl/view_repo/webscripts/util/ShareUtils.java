@@ -16,7 +16,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 
 public class ShareUtils {
     static Logger logger = Logger.getLogger(ShareUtils.class);
@@ -96,7 +96,7 @@ public class ShareUtils {
             success = false;
         }
         
-        JSONObject json = new JSONObject();
+        JsonObject json = new JsonObject();
         try {
             json.put("shortName", siteId);
             json.put( "sitePreset", sitePreset );

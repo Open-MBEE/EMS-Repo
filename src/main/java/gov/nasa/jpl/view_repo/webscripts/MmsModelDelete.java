@@ -19,7 +19,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -55,7 +55,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
 
         Map<String, Object> model = new HashMap<String, Object>();
 
-        JSONObject result = null;
+        JsonObject result = null;
 
         try {
             result = handleRequest( req );
@@ -81,8 +81,8 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         return model;
     }
 
-    protected JSONObject handleRequest(WebScriptRequest req) throws JSONException {
-        JSONObject result = null;
+    protected JsonObject handleRequest(WebScriptRequest req) throws JSONException {
+        JsonObject result = null;
 
         Long start = System.currentTimeMillis();
         String user = AuthenticationUtil.getRunAsUser();
@@ -127,7 +127,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             long end = System.currentTimeMillis();
 
             boolean showAll = false;
-            result = wsDiff.toJSONObject( new Date(start), new Date(end), showAll );
+            result = wsDiff.toJsonObject( new Date(start), new Date(end), showAll );
 
             // apply aspects after JSON has been created (otherwise it won't be output)
             for (EmsScriptNode deletedNode: wsDiff.getDeletedElements().values()) {

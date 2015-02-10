@@ -14,7 +14,7 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -50,7 +50,7 @@ public class MmsSnapshotsDelete extends AbstractJavaWebScript {
 
         MmsSnapshotsDelete instance = new MmsSnapshotsDelete(repository, getServices());
 
-        JSONObject jsonObject = new JSONObject();
+        JsonObject jsonObject = new JsonObject();
         try {
             instance.handleRequest(req);
             appendResponseStatusInfo( instance );

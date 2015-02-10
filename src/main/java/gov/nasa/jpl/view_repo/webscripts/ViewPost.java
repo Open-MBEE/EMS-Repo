@@ -41,9 +41,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.json.JSONArray;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -82,7 +82,7 @@ public class ViewPost extends AbstractJavaWebScript {
         WorkspaceNode workspace = getWorkspace( req );
 
         try {
-			updateViews((JSONObject)req.parseContent(), workspace);
+			updateViews((JsonObject)req.parseContent(), workspace);
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();
@@ -95,9 +95,9 @@ public class ViewPost extends AbstractJavaWebScript {
 		return model;
 	}
 
-	private void updateViews(JSONObject jsonObject, WorkspaceNode workspace) throws JSONException {
+	private void updateViews(JsonObject jsonObject, WorkspaceNode workspace) throws JSONException {
 		if (jsonObject.has("views")) {
-			JSONArray viewsJson = jsonObject.getJSONArray("views");
+			JsonArray viewsJson = jsonObject.getJSONArray("views");
 
 			for (int ii = 0; ii < viewsJson.length(); ii++) {
 			    updateView(viewsJson, ii, workspace);
@@ -105,7 +105,7 @@ public class ViewPost extends AbstractJavaWebScript {
 
 //			jwsUtil.splitTransactions(new JwsFunctor() {
 //				@Override
-//				public Object execute(JSONArray jsonArray, int index,
+//				public Object execute(JsonArray jsonArray, int index,
 //						Boolean... flags) throws JSONException {
 //					updateView(jsonArray, index);
 //					return null;
@@ -115,13 +115,13 @@ public class ViewPost extends AbstractJavaWebScript {
 	}
 
 
-	private void updateView(JSONArray viewsJson, int index,
+	private void updateView(JsonArray viewsJson, int index,
 	                        WorkspaceNode workspace) throws JSONException {
-		JSONObject viewJson = viewsJson.getJSONObject(index);
+		JsonObject viewJson = viewsJson.getJSONObject(index);
 		updateView(viewJson, workspace);
 	}
 
-	private void updateView(JSONObject viewJson, WorkspaceNode workspace) throws JSONException {
+	private void updateView(JsonObject viewJson, WorkspaceNode workspace) throws JSONException {
 		String id = viewJson.getString(Acm.JSON_ID);
 		if (id == null) {
 			log(LogLevel.ERROR, "view id not specified.\n", HttpServletResponse.SC_BAD_REQUEST);

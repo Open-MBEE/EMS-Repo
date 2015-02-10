@@ -333,7 +333,7 @@ public class JavaQuery extends AbstractModuleComponent {
     
     public static List<QueryResult> cmisQuery( String query ) {
         Map<String, String> parameter = new HashMap<String,String>();
-        org.json.JSONObject hello = null;
+        gov.nasa.jpl.view_repo.util.JsonObject hello = null;
 
         // Set the user credentials
         parameter.put(SessionParameter.USER, "admin");

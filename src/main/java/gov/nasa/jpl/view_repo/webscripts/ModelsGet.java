@@ -43,9 +43,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.json.JSONArray;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -116,7 +116,7 @@ public class ModelsGet extends AbstractJavaWebScript {
                                                   Status status, Cache cache) {
         Map<String, Object> model = new HashMap<String, Object>();
 
-        JSONArray elementsJson = new JSONArray();
+        JsonArray elementsJson = new JsonArray();
         if (validateRequest(req, status)) {
             try {
                 elementsJson = handleRequest(req);
@@ -127,7 +127,7 @@ public class ModelsGet extends AbstractJavaWebScript {
         }
 
 
-        JSONObject top = new JSONObject();
+        JsonObject top = new JsonObject();
         try {
             if (elementsJson.length() > 0) {
                 top.put("elements", elementsJson);
@@ -149,15 +149,15 @@ public class ModelsGet extends AbstractJavaWebScript {
     }
 
     /**
-     * Wrapper for handling a request and getting the appropriate JSONArray of elements
+     * Wrapper for handling a request and getting the appropriate JsonArray of elements
      * @param req
      * @return
      */
-    private JSONArray handleRequest(WebScriptRequest req) throws JSONException {
-        JSONObject requestJson = (JSONObject)req.parseContent();
-        JSONArray elementsFoundJson = new JSONArray();
+    private JsonArray handleRequest(WebScriptRequest req) throws JSONException {
+        JsonObject requestJson = (JsonObject)req.parseContent();
+        JsonArray elementsFoundJson = new JsonArray();
 
-        JSONArray elementsToFindJson;
+        JsonArray elementsToFindJson;
         elementsToFindJson = requestJson.getJSONArray( "elements" );
 
         for (int ii = 0; ii < elementsToFindJson.length(); ii++) {
@@ -165,7 +165,7 @@ public class ModelsGet extends AbstractJavaWebScript {
             EmsScriptNode node = NodeUtil.findScriptNodeById( id, workspace, dateTime, false, services, response );
             if (node != null) {
                 try {
-                    elementsFoundJson.put( node.toJSONObject( dateTime ) );
+                    elementsFoundJson.put( node.toJsonObject( dateTime ) );
                 } catch (JSONException e) {
                     log(LogLevel.ERROR, "Could not create JSON", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                     e.printStackTrace();

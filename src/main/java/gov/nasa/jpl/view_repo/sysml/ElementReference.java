@@ -6,7 +6,7 @@ import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import java.util.Collection;
 
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 
 import sysml.view.Viewable;
 
@@ -66,11 +66,11 @@ public class ElementReference implements Viewable<EmsScriptNode> {
 	 * @see sysml.Viewable#toViewJson()
 	 */
 	@Override
-	public JSONObject toViewJson() {
+	public JsonObject toViewJson() {
 		
 		if (element == null) return null;
 		
-        JSONObject json = new JSONObject();
+        JsonObject json = new JsonObject();
 
         try {
             json.put("type", "Paragraph");

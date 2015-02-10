@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts.util;
 
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
 import java.util.HashMap;
@@ -39,14 +40,15 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.activiti.engine.impl.util.json.JSONArray;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteMemberInfo;
 import org.json.JSONException;
-import org.json.JSONObject;
+
+import gov.nasa.jpl.view_repo.util.JsonObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -97,7 +99,7 @@ public class SitePermSync extends AbstractJavaWebScript{
 
         List<SiteInfo> sites = services.getSiteService().listSites(null);
 
-        JSONArray msgs = new JSONArray();
+        JsonArray msgs = new JsonArray();
 
         for (SiteInfo siteInfo : sites ) {
             EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
@@ -110,7 +112,7 @@ public class SitePermSync extends AbstractJavaWebScript{
             }
         }
 
-        JSONObject json = new JSONObject();
+        JsonObject json = new JsonObject();
         try {
             json.put( "msgs", msgs );
             model.put( "res", json.toString() );

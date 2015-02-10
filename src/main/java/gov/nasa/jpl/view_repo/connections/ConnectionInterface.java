@@ -1,6 +1,6 @@
 package gov.nasa.jpl.view_repo.connections;
 
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 
 public interface ConnectionInterface {
     public void setUri(String uri);
@@ -16,5 +16,5 @@ public interface ConnectionInterface {
      * @param destination
      * @return
      */
-    public boolean publish(JSONObject jsonObject, String destination);
+    public boolean publish(JsonObject jsonObject, String destination);
 }

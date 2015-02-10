@@ -44,7 +44,7 @@
 //import org.alfresco.service.cmr.site.SiteService;
 //import org.alfresco.util.ApplicationContextHelper;
 //import org.json.JSONException;
-//import org.json.JSONObject;
+//import gov.nasa.jpl.view_repo.util.JsonObject;
 //import org.junit.After;
 //import org.junit.AfterClass;
 //import org.junit.Before;
@@ -98,7 +98,7 @@
 //		templateVars.put("siteName", SITE_NAME);
 //		templateVars.put("projectId", "123456");
 //		
-//		JSONObject json = new JSONObject();
+//		JsonObject json = new JsonObject();
 //		json.append("name", "Clipper");
 //		
 //		Map<String, String> parameters = new HashMap<String, String>();
@@ -136,12 +136,12 @@
 //		assertEquals("Project already created", HttpServletResponse.SC_FOUND, status.getCode());
 //		
 //		// call web service with bad JSON
-//		json = new JSONObject();
+//		json = new JsonObject();
 //		model = projectPostComponent.executeImpl(request, status, new Cache());
 //		assertEquals("Bad JSON supplied", HttpServletResponse.SC_BAD_REQUEST, status.getCode());
 //	}
 //
-//	protected WebScriptRequest mockRequestAndStubs(Map<String, String> templateVars, Map<String, String> parameters, JSONObject json) {
+//	protected WebScriptRequest mockRequestAndStubs(Map<String, String> templateVars, Map<String, String> parameters, JsonObject json) {
 //		WebScriptRequest request = mock(WebScriptServletRequest.class);
 //		
 //		Match match = new Match("", templateVars, "");

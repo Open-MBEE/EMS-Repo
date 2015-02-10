@@ -12,7 +12,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -95,7 +95,7 @@ public class MmsDiffGet extends AbstractJavaWebScript {
 
         try {
             workspaceDiff.forceJsonCacheUpdate = false;
-            JSONObject top = workspaceDiff.toJSONObject( dateTime1, dateTime2, false );
+            JsonObject top = workspaceDiff.toJsonObject( dateTime1, dateTime2, false );
             if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
             results.put("res", top.toString(4));
         } catch (JSONException e) {

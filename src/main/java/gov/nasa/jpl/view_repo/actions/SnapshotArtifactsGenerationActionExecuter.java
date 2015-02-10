@@ -22,9 +22,9 @@ import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.apache.log4j.Logger;
-import org.json.JSONArray;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.surf.RequestContext;
 import org.springframework.extensions.surf.support.ThreadLocalRequestContext;
 import org.springframework.extensions.webscripts.Status;
@@ -102,7 +102,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         snapshotService.setServices(services);
         snapshotService.setLogLevel(LogLevel.DEBUG);
         Status status = new Status();
-        JSONObject snapshot = null;
+        JsonObject snapshot = null;
         try{
         	    WorkspaceNode workspace = (WorkspaceNode)action.getParameterValue(PARAM_WORKSPACE);
         	    
@@ -179,7 +179,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         // TODO Auto-generated method stub
     }
     
-    private String buildEmailMessage(JSONObject snapshot) throws Exception{
+    private String buildEmailMessage(JsonObject snapshot) throws Exception{
         	StringBuffer buf = new StringBuffer();
         	try{
         		//String hostname = ActionUtil.getHostName();
@@ -187,9 +187,9 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
                 //    hostname += ".jpl.nasa.gov";
                 //}
                 //String contextUrl = "https://" + hostname + "/alfresco";
-    	    	JSONArray formats = (JSONArray)snapshot.getJSONArray("formats");
+    	    	JsonArray formats = snapshot.getJSONArray("formats");
     	    	for(int i=0; i < formats.length(); i++){
-    				JSONObject format = formats.getJSONObject(i);
+    				JsonObject format = formats.getJSONObject(i);
     				String formatType = format.getString("type");
     				String formatUrl = format.getString("url");
     				buf.append("Snapshot ");

@@ -41,7 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -80,7 +80,7 @@ public class ConfigurationGet extends AbstractJavaWebScript {
 
         clearCaches();
 
-        JSONObject jsonObject = new JSONObject();
+        JsonObject jsonObject = new JsonObject();
 
         try {
             ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, getServices(), response );

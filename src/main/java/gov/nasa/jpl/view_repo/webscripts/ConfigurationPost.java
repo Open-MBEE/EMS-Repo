@@ -50,9 +50,9 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.json.JSONArray;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -96,7 +96,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
 		ConfigurationPost instance = new ConfigurationPost(repository, services);
 
-		JSONObject result = instance.saveAndStartAction(req, status);
+		JsonObject result = instance.saveAndStartAction(req, status);
 		appendResponseStatusInfo(instance);
 
 		status.setCode(responseStatus.getCode());
@@ -123,19 +123,19 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	 * @param req
 	 * @param status
 	 */
-	private JSONObject saveAndStartAction(WebScriptRequest req, Status status) {
-	    JSONObject jsonObject = null;
+	private JsonObject saveAndStartAction(WebScriptRequest req, Status status) {
+	    JsonObject jsonObject = null;
 
         WorkspaceNode workspace = getWorkspace( req );
 
         EmsScriptNode siteNode = getSiteNodeFromRequest( req, false );
 
-		JSONObject reqPostJson = (JSONObject) req.parseContent();
-		JSONObject postJson;
+		JsonObject reqPostJson = (JsonObject) req.parseContent();
+		JsonObject postJson;
 		try {
 		    // for backwards compatibility
 		    if (reqPostJson.has( "configurations" )) {
-		        JSONArray configsJson = reqPostJson.getJSONArray( "configurations" );
+		        JsonArray configsJson = reqPostJson.getJSONArray( "configurations" );
 		        postJson = configsJson.getJSONObject( 0 );
 		    } else {
 		        postJson = reqPostJson;
@@ -172,12 +172,12 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	}
 
 
-	private HashSet<String> getProductList(JSONObject postJson) throws JSONException {
+	private HashSet<String> getProductList(JsonObject postJson) throws JSONException {
 		HashSet<String> productList = new HashSet<String>();
 		String keys[] = {"products", "snapshots"};
 		for (String key: keys) {
 			if (postJson.has(key)) {
-				JSONArray documents = postJson.getJSONArray(key);
+				JsonArray documents = postJson.getJSONArray(key);
 				for (int ii = 0; ii < documents.length(); ii++) {
 					productList.add(documents.getString(ii));
 				}
@@ -186,7 +186,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		return productList;
 	}
 
-	private JSONObject handleCreate(JSONObject postJson, String siteName,
+	private JsonObject handleCreate(JsonObject postJson, String siteName,
 	                                EmsScriptNode context,
                                     WorkspaceNode workspace, Status status)
                                             throws JSONException {
@@ -249,7 +249,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 	}
 
 
-	private JSONObject handleUpdate(JSONObject postJson,
+	private JsonObject handleUpdate(JsonObject postJson,
 	                                String siteName,
 	                                EmsScriptNode context,
 	                                WorkspaceNode workspace, Status status)

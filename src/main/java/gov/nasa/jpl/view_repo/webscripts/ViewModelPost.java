@@ -45,9 +45,9 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.json.JSONArray;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -127,10 +127,10 @@ public class ViewModelPost extends ModelPost {
 
         // UNCOMMENT THIS
         // Create JSON object of the elements to return:
-//        JSONObject top = new JSONObject();
-//        JSONArray elementsJson = new JSONArray();
+//        JsonObject top = new JsonObject();
+//        JsonArray elementsJson = new JsonArray();
 //        for ( EmsScriptNode element : elements ) {
-//            elementsJson.put( element.toJSONObject(null) );
+//            elementsJson.put( element.toJsonObject(null) );
 //        }
 //        top.put( "elements", elementsJson );
 //        model.put( "res", top.toString( 4 ) );
@@ -146,13 +146,13 @@ public class ViewModelPost extends ModelPost {
     protected void createOrUpdateModel(WebScriptRequest req, Status status) throws Exception {
         clearCaches();
 
-        JSONObject postJson = (JSONObject) req.parseContent();
-        JSONArray array = postJson.getJSONArray("elements");
+        JsonObject postJson = (JsonObject) req.parseContent();
+        JsonArray array = postJson.getJSONArray("elements");
 
         WorkspaceNode workspace = getWorkspace( req );
 
         for (int ii = 0; ii < array.length(); ii++) {
-            JSONObject elementJson = array.getJSONObject(ii);
+            JsonObject elementJson = array.getJSONObject(ii);
 
             // If element does not have a ID, then create one for it using the alfresco id (cm:id):
             if (!elementJson.has(Acm.JSON_ID)) {
@@ -169,7 +169,7 @@ public class ViewModelPost extends ModelPost {
 
                 // for now only support new comments
                 if (elementJson.has(Acm.JSON_ANNOTATED_ELEMENTS)) {
-                    JSONArray annotatedJson = elementJson.getJSONArray(Acm.JSON_ANNOTATED_ELEMENTS);
+                    JsonArray annotatedJson = elementJson.getJSONArray(Acm.JSON_ANNOTATED_ELEMENTS);
                     // lets make parent first annotated element
                     if (annotatedJson.length() <= 0) {
                         parentFound = false;
@@ -197,11 +197,11 @@ public class ViewModelPost extends ModelPost {
         updateNodeReferencesForView( array, workspace );
     }
 
-    protected void updateNodeReferencesForView( JSONArray array,
+    protected void updateNodeReferencesForView( JsonArray array,
                                                 WorkspaceNode workspace )
                                                         throws Exception {
         for (int ii = 0; ii < array.length(); ii++) {
-            JSONObject elementJson = array.getJSONObject(ii);
+            JsonObject elementJson = array.getJSONObject(ii);
 
             String id = elementJson.getString(Acm.JSON_ID);
             EmsScriptNode elementNode = findScriptNodeById(id, workspace, null, true);
@@ -213,7 +213,7 @@ public class ViewModelPost extends ModelPost {
 
                 // for now only support new comments
                 if (elementJson.has(Acm.JSON_ANNOTATED_ELEMENTS)) {
-                    JSONArray annotatedJson = elementJson.getJSONArray(Acm.JSON_ANNOTATED_ELEMENTS);
+                    JsonArray annotatedJson = elementJson.getJSONArray(Acm.JSON_ANNOTATED_ELEMENTS);
                     // lets make parent first annotated element
                     if (annotatedJson.length() <= 0) {
                         parentFound = false;

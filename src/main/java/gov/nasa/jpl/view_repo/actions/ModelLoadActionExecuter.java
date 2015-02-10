@@ -50,7 +50,7 @@ import org.alfresco.service.cmr.repository.ContentReader;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Status;
         
 /**
@@ -102,9 +102,9 @@ public class ModelLoadActionExecuter extends ActionExecuterAbstractBase {
         // Parse the stored file for loading
         EmsScriptNode jsonNode = new EmsScriptNode(nodeRef, services, response);
         ContentReader reader = services.getContentService().getReader(nodeRef, ContentModel.PROP_CONTENT);
-        JSONObject content = null;
+        JsonObject content = null;
         try {
-            content = new JSONObject(reader.getContentString());
+            content = new JsonObject(reader.getContentString());
         } catch (ContentIOException e) {
             e.printStackTrace();
         } catch (JSONException e) {

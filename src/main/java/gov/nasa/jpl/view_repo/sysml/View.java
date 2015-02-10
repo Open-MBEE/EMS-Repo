@@ -22,9 +22,9 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.json.JSONArray;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 
 import sysml.view.Viewable;
 /**
@@ -182,19 +182,19 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         Collection< EmsScriptNode > childViews =
                 getElementsForJson( o, workspace, dateTime );
 
-//        JSONArray jarr = null;
+//        JsonArray jarr = null;
 //        if ( o instanceof String ) {
 //            String s = (String)o;
 //            if ( s.length() > 0 && s.charAt( 0 ) == '[' ) {
 //                try {
-//                    jarr = new JSONArray( s );
+//                    jarr = new JsonArray( s );
 //                } catch ( JSONException e ) {
 //                    // TODO Auto-generated catch block
 //                    e.printStackTrace();
 //                }
 //            }
-//        } else if ( o instanceof JSONArray ) {
-//            jarr = (JSONArray)o;
+//        } else if ( o instanceof JsonArray ) {
+//            jarr = (JsonArray)o;
 //        }
 //        if ( jarr != null ) {
 //            for ( int i = 0; i < jarr.length(); ++i ) {
@@ -445,7 +445,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
      * @see gov.nasa.jpl.view_repo.sysml.List#toViewJson()
      */
     @Override
-    public JSONObject toViewJson() {
+    public JsonObject toViewJson() {
         return toViewJson( getWorkspace(), generate, recurse );
     }
 
@@ -456,7 +456,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         return null;
     }
 
-    public JSONObject toViewJson( WorkspaceNode workspace,
+    public JsonObject toViewJson( WorkspaceNode workspace,
                                   boolean doGenerate, boolean doRecurse ) {
 
         if ( viewNode == null ) {
@@ -472,27 +472,27 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         // Generate the JSON for the view now that the View is populated with
         // Viewables.
 
-        JSONObject json = new JSONObject();
-        JSONObject viewProperties = new JSONObject();
-        JSONArray jsonArray = new JSONArray();
+        JsonObject json = new JsonObject();
+        JsonObject viewProperties = new JsonObject();
+        JsonArray jsonArray = new JsonArray();
         try {
             json.put("views", jsonArray);
             jsonArray.put( viewProperties );
             viewProperties.put("id", viewNode.getSysmlId() );
 
-            JSONArray elements = new JSONArray();
+            JsonArray elements = new JsonArray();
             viewProperties.put("displayedElements", elements );
             for ( EmsScriptNode elem : getDisplayedElements( workspace, null, doGenerate, doRecurse, null ) ) {
                 elements.put( elem.getSysmlId() );
             }
 
-            elements = new JSONArray();
+            elements = new JsonArray();
             viewProperties.put("allowedElements", elements );
             for ( EmsScriptNode elem : getAllowedElements() ) {
                 elements.put( elem.getSysmlId() );
             }
 
-            elements = new JSONArray();
+            elements = new JsonArray();
             viewProperties.put("childrenViews", elements );
             for ( sysml.view.View<EmsScriptNode> view : getChildViews() ) {
                 if ( view instanceof View ) {
@@ -500,7 +500,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
                 }
             }
 
-            JSONArray viewables = getContainsJson( doGenerate );
+            JsonArray viewables = getContainsJson( doGenerate );
             viewProperties.put("contains", viewables );
 
         } catch ( JSONException e ) {
@@ -510,11 +510,11 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         return json;
     }
 
-    public JSONArray getContainsJson() {
+    public JsonArray getContainsJson() {
         return getContainsJson( generate );
     }
-    public JSONArray getContainsJson( boolean doGenerate ) {
-        JSONArray viewablesJson = new JSONArray();
+    public JsonArray getContainsJson( boolean doGenerate ) {
+        JsonArray viewablesJson = new JsonArray();
 
         if ( doGenerate && isEmpty() ) generateViewables();
 
@@ -526,12 +526,12 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
         if ( viewablesJson.length() == 0 && getElement() != null ) {
             Object contains = getElement().getProperty( Acm.ACM_CONTAINS );
             if ( contains != null ) {
-                if ( contains instanceof JSONArray ) return (JSONArray)contains;
+                if ( contains instanceof JsonArray ) return (JsonArray)contains;
 
                 String containsString = "" + contains;
                 if ( containsString.length() > 1 ) {
                     try {
-                        JSONArray jarr = new JSONArray( "" + contains );
+                        JsonArray jarr = new JsonArray( "" + contains );
                         viewablesJson = jarr;
                     } catch ( JSONException e ) {
                         System.out.println( "Tried to parse \"" + contains
@@ -634,21 +634,21 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
                                 Date dateTime ) {
         if ( obj == null ) return Utils.getEmptyList();
         LinkedHashSet<EmsScriptNode> nodes = new LinkedHashSet<EmsScriptNode>();
-        if ( obj instanceof JSONArray ) {
-            return getElementsForJson( (JSONArray)obj, workspace, dateTime );
+        if ( obj instanceof JsonArray ) {
+            return getElementsForJson( (JsonArray)obj, workspace, dateTime );
         }
-        if ( obj instanceof JSONObject ) {
-            return getElementsForJson( (JSONObject)obj, workspace, dateTime );
+        if ( obj instanceof JsonObject ) {
+            return getElementsForJson( (JsonObject)obj, workspace, dateTime );
         }
         String idString = "" + obj;
         if ( idString.length() <= 0 ) return Utils.getEmptyList();
         try {
             if ( idString.trim().charAt( 0 ) == '[' ) {
-                JSONArray jArray = new JSONArray( idString );
+                JsonArray jArray = new JsonArray( idString );
                 return getElementsForJson( jArray, workspace, dateTime );
             }
             if ( idString.trim().charAt( 0 ) == '{' ) {
-                JSONObject jsonObject =  new JSONObject( idString );
+                JsonObject jsonObject =  new JsonObject( idString );
                 return getElementsForJson( jsonObject, workspace, dateTime );
             }
         } catch ( JSONException e ) {
@@ -668,7 +668,7 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     }
 
     public Collection< EmsScriptNode >
-            getElementsForJson( JSONArray jsonArray, WorkspaceNode workspace,
+            getElementsForJson( JsonArray jsonArray, WorkspaceNode workspace,
                                 Date dateTime ) {
         if ( jsonArray == null ) return Utils.getEmptyList();
         LinkedHashSet<EmsScriptNode> nodes = new LinkedHashSet<EmsScriptNode>();
@@ -686,11 +686,11 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
     }
 
     public Collection< EmsScriptNode >
-            getElementsForJson( JSONObject o, WorkspaceNode workspace,
+            getElementsForJson( JsonObject o, WorkspaceNode workspace,
                                 Date dateTime ) {
         if ( o == null ) return Utils.getEmptyList();
         LinkedHashSet<EmsScriptNode> nodes = new LinkedHashSet<EmsScriptNode>();
-        String[] names = JSONObject.getNames( o );
+        String[] names = JsonObject.getNames( o );
         if ( names == null ) return nodes;
         for ( String name : names ) {
             try {
@@ -706,22 +706,22 @@ public class View extends List implements sysml.view.View< EmsScriptNode >, Comp
 
     public Collection< EmsScriptNode >
             getViewToViewPropertyViews( WorkspaceNode workspace, Date dateTime ) {
-        JSONArray jarr = getViewToViewPropertyJson();
+        JsonArray jarr = getViewToViewPropertyJson();
         Collection< EmsScriptNode > coll =
                 getElementsForJson( jarr, workspace, dateTime );
         coll.remove( this );
         return coll;
     }
 
-    public JSONArray getViewToViewPropertyJson() {
+    public JsonArray getViewToViewPropertyJson() {
         if ( getElement() == null ) return null;
         Object v2vObj = getElement().getProperty( Acm.ACM_VIEW_2_VIEW );
         if ( v2vObj == null ) return null;
-        if ( v2vObj instanceof JSONArray ) return (JSONArray)v2vObj;
+        if ( v2vObj instanceof JsonArray ) return (JsonArray)v2vObj;
         String v2vStr = "" + v2vObj;
-        JSONArray json = null;
+        JsonArray json = null;
         try {
-            json = new JSONArray( v2vStr );
+            json = new JsonArray( v2vStr );
         } catch ( JSONException e ) {
             // TODO Auto-generated catch block
             e.printStackTrace();

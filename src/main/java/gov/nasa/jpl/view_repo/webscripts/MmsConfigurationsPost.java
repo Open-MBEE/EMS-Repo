@@ -16,7 +16,7 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -53,7 +53,7 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
 
         MmsConfigurationsPost instance = new MmsConfigurationsPost(repository, getServices());
 
-        JSONObject jsonObject = new JSONObject();
+        JsonObject jsonObject = new JsonObject();
 
         try {
             jsonObject = instance.handleUpdate( req );
@@ -77,7 +77,7 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
         return model;
     }
 
-    private JSONObject handleUpdate(WebScriptRequest req) throws JSONException {
+    private JsonObject handleUpdate(WebScriptRequest req) throws JSONException {
         WorkspaceNode workspace = getWorkspace( req );
 
         EmsScriptNode siteNode = getSiteNodeFromRequest(req, false);
@@ -85,19 +85,19 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
         if ( siteNode == null && !Utils.isNullOrEmpty( siteNameFromReq )
              && !siteNameFromReq.equals( NO_SITE_ID ) ) {
             log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
-            return new JSONObject();
+            return new JsonObject();
         }
 
         String configId = req.getServiceMatch().getTemplateVars().get( "configurationId" );
         NodeRef configNode = NodeUtil.getNodeRefFromNodeId( configId );
         if (configNode == null) {
             log(LogLevel.WARNING, "Could not find configuration with id: " + configId, HttpServletResponse.SC_NOT_FOUND);
-            return new JSONObject();
+            return new JsonObject();
         }
         EmsScriptNode config = new EmsScriptNode(configNode, services);
 
         ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
-        HashSet<String> productSet = configWs.updateConfiguration( config, (JSONObject)req.parseContent(), siteNode, workspace, null );
+        HashSet<String> productSet = configWs.updateConfiguration( config, (JsonObject)req.parseContent(), siteNode, workspace, null );
         ConfigurationPost configPost = new ConfigurationPost( repository, services );
         String siteName = siteNode == null ? null : siteNode.getName();
         configPost.startAction( config, siteName, productSet, workspace, null );

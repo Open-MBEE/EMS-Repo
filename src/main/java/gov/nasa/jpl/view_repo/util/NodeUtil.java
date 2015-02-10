@@ -64,7 +64,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ApplicationContextHelper;
 import org.apache.commons.logging.Log;
 import org.apache.log4j.Logger;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
 
@@ -171,11 +171,14 @@ public class NodeUtil {
     public static Map< NodeRef, NodeRef > frozenNodeCache =
             Collections.synchronizedMap( new HashMap<NodeRef, NodeRef>() );
 
-//    public static Map<String, JSONObject> jsonCache = 
-//    		Collections.synchronizedMap(new HashMap<String, JSONObject>());
     // Set< String > filter, boolean isExprOrProp,Date dateTime, boolean isIncludeQualified
-    public static Map< String, Map< Long, JSONObject > > jsonCache =
-        Collections.synchronizedMap( new HashMap< String, Map< Long, JSONObject > >() );
+    public static Map< String, Map< Long, Map< Boolean, Map< Set<String>, JsonObject > > > > jsonDeepCache =
+            Collections.synchronizedMap( new HashMap< String, Map< Long, Map< Boolean, Map< Set<String>, JsonObject > > > >() );
+    public static Map< String, Map< Long, JsonObject > > jsonCache =
+        Collections.synchronizedMap( new HashMap< String, Map< Long, JsonObject > >() );
+    public static long jsonCacheHits = 0;
+    public static long jsonCacheMisses = 0;
+
     // REVIEW -- TODO -- Should we try and cache the toString() output of the json, too?    
     // REVIEW -- TODO -- This would mean we'd have to concatenate the json
     // REVIEW -- TODO -- strings ourselves instead of just one big toString() 

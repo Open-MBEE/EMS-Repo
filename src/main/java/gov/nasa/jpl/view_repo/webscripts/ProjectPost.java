@@ -42,9 +42,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.json.JSONArray;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -88,9 +88,9 @@ public class ProjectPost extends AbstractJavaWebScript {
 		try {
 			if (validateRequest(req, status)) {
 
-				JSONObject json = (JSONObject)req.parseContent();
-				JSONArray elementsArray = json != null ? json.optJSONArray("elements") : null;
-				JSONObject projJson = elementsArray != null && elementsArray.length() > 0 ? elementsArray.getJSONObject(0) : new JSONObject();
+				JsonObject json = (JsonObject)req.parseContent();
+				JsonArray elementsArray = json != null ? json.optJSONArray("elements") : null;
+				JsonObject projJson = elementsArray != null && elementsArray.length() > 0 ? elementsArray.getJSONObject(0) : new JsonObject();
 
 				// We are now getting the project id form the json object, but leaving the check from the request
 				// for backwards compatibility:
@@ -129,7 +129,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		return model;
 	}
 
-	public int updateOrCreateProject(JSONObject jsonObject, WorkspaceNode workspace, String projectId) throws JSONException {
+	public int updateOrCreateProject(JsonObject jsonObject, WorkspaceNode workspace, String projectId) throws JSONException {
 		  EmsScriptNode projectNode = findScriptNodeById(projectId, workspace, null, true);
 
 		  if (projectNode == null) {
@@ -143,7 +143,7 @@ public class ProjectPost extends AbstractJavaWebScript {
         }
         String projectVersion = null;
 		if (jsonObject.has(Acm.JSON_SPECIALIZATION)) {
-			JSONObject specialization = jsonObject.getJSONObject(Acm.JSON_SPECIALIZATION);
+			JsonObject specialization = jsonObject.getJSONObject(Acm.JSON_SPECIALIZATION);
 			if (specialization != null && specialization.has(Acm.JSON_PROJECT_VERSION)) {
 				projectVersion = specialization.getString(Acm.JSON_PROJECT_VERSION);
 			}
@@ -165,14 +165,14 @@ public class ProjectPost extends AbstractJavaWebScript {
     }
 
     /**
-	 * Update or create the project specified by the JSONObject
-	 * @param jsonObject	JSONObject that has the name of the project
+	 * Update or create the project specified by the JsonObject
+	 * @param jsonObject	JsonObject that has the name of the project
 	 * @param projectId		Project ID
 	 * @param siteName		Site project should reside in
 	 * @return				HttpStatusResponse code for success of the POST request
 	 * @throws JSONException
 	 */
-    public int updateOrCreateProject(JSONObject jsonObject, WorkspaceNode workspace,
+    public int updateOrCreateProject(JsonObject jsonObject, WorkspaceNode workspace,
                                      String projectId, String siteName,
                                      boolean createSite,
                                      boolean delete) throws JSONException {
@@ -214,7 +214,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		}
 		String projectVersion = null;
 		if (jsonObject.has(Acm.JSON_SPECIALIZATION)) {
-			JSONObject specialization = jsonObject.getJSONObject(Acm.JSON_SPECIALIZATION);
+			JsonObject specialization = jsonObject.getJSONObject(Acm.JSON_SPECIALIZATION);
 			if (specialization != null && specialization.has(Acm.JSON_PROJECT_VERSION)) {
 				projectVersion = specialization.getString(Acm.JSON_PROJECT_VERSION);
 			}

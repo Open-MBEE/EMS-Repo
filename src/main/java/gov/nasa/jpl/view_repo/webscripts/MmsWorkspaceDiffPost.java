@@ -47,9 +47,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import org.json.JSONArray;
+import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+import gov.nasa.jpl.view_repo.util.JsonObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -87,7 +87,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		Map<String, Object> model = new HashMap<String, Object>();
 
 		try {
-			handleDiff(req, (JSONObject)req.parseContent(), status, model);
+			handleDiff(req, (JsonObject)req.parseContent(), status, model);
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();
@@ -104,8 +104,8 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		return model;
 	}
 
-    JSONObject srcJson = null;
-    JSONObject targetJson = null;
+    JsonObject srcJson = null;
+    JsonObject targetJson = null;
     WorkspaceNode targetWs = null;
     String targetWsId = null;
     String srcWsId = null;
@@ -161,7 +161,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 
     boolean succ = true;
 
-    private void handleDiff(final WebScriptRequest req, final JSONObject jsonDiff, final Status status, final Map<String, Object> model) throws Exception {
+    private void handleDiff(final WebScriptRequest req, final JsonObject jsonDiff, final Status status, final Map<String, Object> model) throws Exception {
 		if (jsonDiff.has( "workspace1" ) && jsonDiff.has("workspace2")) {
 		    srcJson = jsonDiff.getJSONObject( "workspace2" );
 		    targetJson = jsonDiff.getJSONObject( "workspace1" );
@@ -169,8 +169,8 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		    if (srcJson.has( "id" ) && targetJson.has("id")) {
 		    	
 		    	//WorkspaceNode targetWs = null;
-		        JSONObject top = new JSONObject();
-		        JSONArray elements = new JSONArray();
+		        JsonObject top = new JsonObject();
+		        JsonArray elements = new JsonArray();
 		        final MmsModelDelete deleteService = new MmsModelDelete(repository, services);
 		    	
 		        if (runWithoutTransactions) {
@@ -191,9 +191,9 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		        // Must remove the modified time, as it is for the source workspace, not the target
 		        // workspace, so may get errors for trying to modify a element with a old modified time.
 		        if (srcJson.has( "addedElements" )) {
-		            JSONArray added = srcJson.getJSONArray("addedElements");
+		            JsonArray added = srcJson.getJSONArray("addedElements");
 		            for (int ii = 0; ii < added.length(); ii++) {
-		                JSONObject obj = added.getJSONObject( ii );
+		                JsonObject obj = added.getJSONObject( ii );
 		                if (obj.has( Acm.JSON_LAST_MODIFIED )) {
 		                    obj.remove( Acm.JSON_LAST_MODIFIED );
 		                }
@@ -201,9 +201,9 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		            }
 		        }
 		        if (srcJson.has( "updatedElements" )) {
-		            JSONArray updated = srcJson.getJSONArray("updatedElements");
+		            JsonArray updated = srcJson.getJSONArray("updatedElements");
 		            for (int ii = 0; ii < updated.length(); ii++) {
-		                JSONObject obj = updated.getJSONObject( ii );
+		                JsonObject obj = updated.getJSONObject( ii );
 		                if (obj.has( Acm.JSON_LAST_MODIFIED )) {
 		                    obj.remove( Acm.JSON_LAST_MODIFIED );
 		                }
@@ -219,12 +219,12 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	            // Delete the elements in the target workspace:
 		        WorkspaceDiff deleteWsDiff = null;
 	            if (srcJson.has( "deletedElements" )) {
-	                final JSONArray deleted = srcJson.getJSONArray( "deletedElements" );
+	                final JsonArray deleted = srcJson.getJSONArray( "deletedElements" );
 	                deleteService.setWsDiff( targetWs );
 
 	                if (runWithoutTransactions) {
                         for (int ii = 0; ii < deleted.length(); ii++) {
-                            String id = ((JSONObject)deleted.get(ii)).getString( "sysmlid" );
+                            String id = ((JsonObject)deleted.get(ii)).getString( "sysmlid" );
                             EmsScriptNode root = NodeUtil.findScriptNodeById( id, targetWs, null, false, services, response );
                             deleteService.handleElementHierarchy( root, targetWs, false );
                         }
@@ -234,7 +234,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
     			    		@Override
     			    		public void run() throws Exception {
     		                    for (int ii = 0; ii < deleted.length(); ii++) {
-    		                        String id = ((JSONObject)deleted.get(ii)).getString( "sysmlid" );
+    		                        String id = ((JsonObject)deleted.get(ii)).getString( "sysmlid" );
     		                        EmsScriptNode root = NodeUtil.findScriptNodeById( id, targetWs, null, false, services, response );
     		                        deleteService.handleElementHierarchy( root, targetWs, false );
     		                    }
