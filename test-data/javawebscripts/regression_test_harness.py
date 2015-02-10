@@ -128,7 +128,7 @@ def do176():
     json_output = get_json_output_no_status()
     j = json.loads(json_output)
     
-    if j:
+    if j and j['workspaces'] and j['workspaces'][0]:
         j["workspaces"][0]["description"] = "modified the workspace name and desc"
         j["workspaces"][0]["name"] = "modifiedWorkspaceName"
     
@@ -139,7 +139,7 @@ def set_wsid_to_gv(gv):
     json_output = get_json_output_no_status()
     j = json.loads(json_output)
     
-    if j:
+    if j and 'workspaces' in j and len(j['workspaces']) > 0: # and j['workspaces'][0]['id']:
         if gv == 1:
             set_gv1(j["workspaces"][0]["id"])
         elif gv == 2:
