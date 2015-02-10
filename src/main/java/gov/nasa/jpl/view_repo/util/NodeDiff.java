@@ -124,6 +124,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         boolean isSame = false;
         List< EmsScriptNode > n1 = objectToEmsScriptNodes( p1 );
         List< EmsScriptNode > n2 = objectToEmsScriptNodes( p2 );
+        // FIXME: May want to do a sort to increase performance here
         if ( n1 != null && n2 != null && n1.size() == n2.size()) {
             isSame = true;
             boolean fndSame = false;
