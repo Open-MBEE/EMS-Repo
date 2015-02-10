@@ -130,9 +130,11 @@ public class CommitUtil {
 	    EmsScriptNode commitPkg = getCommitPkg(workspace, services, response);
 
 	    if (commitPkg != null) {
+	        // TODO FIXME the lucene search from getAllNodesInPath() limits to 1000, but
+	        //            we will have more commits then that!
             commits.addAll(WebScriptUtil.getAllNodesInPath(commitPkg.getQnamePath(),
-                                                           "TYPE",
-                                                           "cm:content",
+                                                           "ASPECT",
+                                                           "ems:Committable",
                                                            workspace,
                                                            null,
                                                            services,
@@ -222,14 +224,8 @@ public class CommitUtil {
                 if (monthFolder != null) {
                     dayFolder = getLatestFolder(monthFolder);
                     if (dayFolder != null) {
-                        commits.addAll(WebScriptUtil.getAllNodesInPath(dayFolder.getQnamePath(),
-                                                                       "TYPE",
-                                                                       "cm:content",
-                                                                       ws,
-                                                                       null,
-                                                                       services,
-                                                                       response));
-
+                        commits.addAll( dayFolder.getChildNodes() );
+                        
                         // Sort the commits so that the latest commit is first:
                         Collections.sort( commits, new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator() );
                     }
@@ -281,13 +277,7 @@ public class CommitUtil {
                     if (monthFolder != null) {
                         dayFolder = getLatestFolderBeforeTime(monthFolder, day);
                         if (dayFolder != null) {
-                            commits.addAll(WebScriptUtil.getAllNodesInPath(dayFolder.getQnamePath(),
-                                                                           "TYPE",
-                                                                           "cm:content",
-                                                                           workspace,
-                                                                           null,
-                                                                           services,
-                                                                           response));
+                            commits.addAll( dayFolder.getChildNodes() );
 
                             // Sort the commits so that the latest commit is first:
                             Collections.sort( commits, new ConfigurationsWebscript.EmsScriptNodeCreatedAscendingComparator() );
