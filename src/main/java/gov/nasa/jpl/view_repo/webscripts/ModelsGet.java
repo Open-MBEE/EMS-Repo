@@ -43,9 +43,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
+
 import gov.nasa.jpl.view_repo.util.JsonArray;
+
 import org.json.JSONException;
+import org.json.JSONObject;
+
 import gov.nasa.jpl.view_repo.util.JsonObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -154,7 +159,7 @@ public class ModelsGet extends AbstractJavaWebScript {
      * @return
      */
     private JsonArray handleRequest(WebScriptRequest req) throws JSONException {
-        JsonObject requestJson = (JsonObject)req.parseContent();
+        JsonObject requestJson = JsonObject.make( (JSONObject)req.parseContent() );
         JsonArray elementsFoundJson = new JsonArray();
 
         JsonArray elementsToFindJson;

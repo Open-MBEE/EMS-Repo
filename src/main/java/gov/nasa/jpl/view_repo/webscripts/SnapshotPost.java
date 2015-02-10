@@ -85,9 +85,14 @@ import org.alfresco.util.TempFileProvider;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+
 import gov.nasa.jpl.view_repo.util.JsonArray;
+
 import org.json.JSONException;
+import org.json.JSONObject;
+
 import gov.nasa.jpl.view_repo.util.JsonObject;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -148,7 +153,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         Map< String, Object > model = new HashMap< String, Object >();
         log( LogLevel.INFO, "Starting snapshot creation or snapshot artifact generation..." );
         try {
-            JsonObject reqPostJson = (JsonObject)req.parseContent();
+            JsonObject reqPostJson = JsonObject.make( (JSONObject)req.parseContent() );
             if ( reqPostJson != null ) {
                 log( LogLevel.INFO, "Generating snapshot artifact..." );
                 //SnapshotPost instance = new SnapshotPost( repository, services );
@@ -1652,7 +1657,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		}
 		EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
 
-		JsonObject reqPostJson = (JsonObject) req.parseContent();
+        JsonObject reqPostJson = JsonObject.make( (JSONObject)req.parseContent() );
 		JsonObject postJson;
 		try {
 		    if (reqPostJson.has( "snapshots" )) {

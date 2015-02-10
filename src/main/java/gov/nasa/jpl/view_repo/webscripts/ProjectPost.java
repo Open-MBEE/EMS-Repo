@@ -42,9 +42,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
+
 import gov.nasa.jpl.view_repo.util.JsonArray;
+
 import org.json.JSONException;
+import org.json.JSONObject;
+
 import gov.nasa.jpl.view_repo.util.JsonObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -88,7 +93,7 @@ public class ProjectPost extends AbstractJavaWebScript {
 		try {
 			if (validateRequest(req, status)) {
 
-				JsonObject json = (JsonObject)req.parseContent();
+				JsonObject json = JsonObject.make( (JSONObject)req.parseContent() );
 				JsonArray elementsArray = json != null ? json.optJSONArray("elements") : null;
 				JsonObject projJson = elementsArray != null && elementsArray.length() > 0 ? elementsArray.getJSONObject(0) : new JsonObject();
 

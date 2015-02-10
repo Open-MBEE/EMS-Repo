@@ -45,9 +45,14 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
+
 import gov.nasa.jpl.view_repo.util.JsonArray;
+
 import org.json.JSONException;
+import org.json.JSONObject;
+
 import gov.nasa.jpl.view_repo.util.JsonObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -94,7 +99,8 @@ public class WorkspacesPost extends AbstractJavaWebScript{
                 String newName = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
                 String copyTime = req.getParameter("copyTime");
                 Date copyDateTime = TimeUtils.dateFromTimestamp( copyTime );
-                WorkspaceNode ws = createWorkSpace(sourceWorkspaceParam, newName, copyDateTime, (JsonObject)req.parseContent(), user, status);
+                JsonObject reqJson = JsonObject.make( (JSONObject)req.parseContent() );
+                WorkspaceNode ws = createWorkSpace(sourceWorkspaceParam, newName, copyDateTime, reqJson, user, status);
                 statusCode = status.getCode();
                 json = printObject(ws);
             } else {

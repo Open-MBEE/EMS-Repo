@@ -50,9 +50,14 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
+
 import gov.nasa.jpl.view_repo.util.JsonArray;
+
 import org.json.JSONException;
+import org.json.JSONObject;
+
 import gov.nasa.jpl.view_repo.util.JsonObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -130,7 +135,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
         EmsScriptNode siteNode = getSiteNodeFromRequest( req, false );
 
-		JsonObject reqPostJson = (JsonObject) req.parseContent();
+        JsonObject reqPostJson = JsonObject.make( (JSONObject)req.parseContent() );
 		JsonObject postJson;
 		try {
 		    // for backwards compatibility

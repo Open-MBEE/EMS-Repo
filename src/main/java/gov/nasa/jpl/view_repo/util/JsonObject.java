@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.json.JSONArray;
@@ -33,9 +34,23 @@ public class JsonObject extends org.json.JSONObject {
     }
 
     public JsonObject( JSONObject arg0 ) {
-        this(arg0, toArray(arg0.keys()));
+        super( toMap( arg0 ) );
+        //this(arg0, arg0 == null ? null : toArray(arg0.keys()));
     }
     
+    public static Map<String,Object> toMap( JSONObject arg0 ) {
+        Map< String, Object > m = new LinkedHashMap< String, Object >();
+        String[] names = arg0.getNames( arg0 );
+        try {
+            for ( String name : names ) {
+                m.put( name, arg0.get(name) );
+            }
+        } catch ( JSONException e ) {
+            e.printStackTrace();
+        }
+        return m;
+    }
+
     public static JsonObject make( JSONObject arg0 ) {
         if ( arg0 instanceof JsonObject ) return (JsonObject)arg0;
         return new JsonObject( arg0 );
@@ -52,17 +67,17 @@ public class JsonObject extends org.json.JSONObject {
         return keyArray;
     }
 
-    public JsonObject( Map arg0, boolean arg1 ) {
-        super( arg0, arg1 );
-    }
+//    public JsonObject( Map arg0, boolean arg1 ) {
+//        super( arg0, arg1 );
+//    }
 
     public JsonObject( Map arg0 ) {
         super( arg0 );
     }
 
-    public JsonObject( Object arg0, boolean arg1 ) {
-        super( arg0, arg1 );
-    }
+//    public JsonObject( Object arg0, boolean arg1 ) {
+//        super( arg0, arg1 );
+//    }
 
     public JsonObject( Object arg0, String[] arg1 ) {
         super( arg0, arg1 );
@@ -142,11 +157,11 @@ public class JsonObject extends org.json.JSONObject {
                 }
             }
         }
-        if ( numSpacesToIndent == 0 ) {
-            result = super.toString();
-        } else {
+//        if ( numSpacesToIndent == 0 ) {
+//            result = super.toString();
+//        } else {
             result = super.toString(numSpacesToIndent);
-        }
+//        }
         if ( mod == null ) {
             // cache not applicable
         } else {

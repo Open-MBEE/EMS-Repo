@@ -45,9 +45,14 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
+
 import gov.nasa.jpl.view_repo.util.JsonArray;
+
 import org.json.JSONException;
+import org.json.JSONObject;
+
 import gov.nasa.jpl.view_repo.util.JsonObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -146,7 +151,7 @@ public class ViewModelPost extends ModelPost {
     protected void createOrUpdateModel(WebScriptRequest req, Status status) throws Exception {
         clearCaches();
 
-        JsonObject postJson = (JsonObject) req.parseContent();
+        JsonObject postJson = JsonObject.make( (JSONObject)req.parseContent() );
         JsonArray array = postJson.getJSONArray("elements");
 
         WorkspaceNode workspace = getWorkspace( req );

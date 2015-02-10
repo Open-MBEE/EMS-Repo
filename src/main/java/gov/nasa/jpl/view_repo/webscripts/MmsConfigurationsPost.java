@@ -16,7 +16,10 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONException;
+import org.json.JSONObject;
+
 import gov.nasa.jpl.view_repo.util.JsonObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -97,7 +100,8 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
         EmsScriptNode config = new EmsScriptNode(configNode, services);
 
         ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
-        HashSet<String> productSet = configWs.updateConfiguration( config, (JsonObject)req.parseContent(), siteNode, workspace, null );
+        JsonObject requestJson = JsonObject.make( (JSONObject)req.parseContent() );
+        HashSet<String> productSet = configWs.updateConfiguration( config, requestJson, siteNode, workspace, null );
         ConfigurationPost configPost = new ConfigurationPost( repository, services );
         String siteName = siteNode == null ? null : siteNode.getName();
         configPost.startAction( config, siteName, productSet, workspace, null );

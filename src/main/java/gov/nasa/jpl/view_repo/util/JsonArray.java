@@ -28,6 +28,7 @@ public class JsonArray extends JSONArray {
 
     public JsonArray( JSONArray arg0 ) throws JSONException {
         this();
+        if ( arg0 == null ) return;
         for ( int i=0; i<arg0.length(); ++i ) {
             this.put( arg0.get( i ) );
         }
@@ -42,14 +43,14 @@ public class JsonArray extends JSONArray {
         super( arg0 );
     }
 
-    public JsonArray( Collection arg0, boolean arg1 ) {
-        super( arg0, arg1 );
-    }
-
-    public JsonArray( Object arg0, boolean arg1 ) throws JSONException {
-        super( arg0, arg1 );
-    }
-
+//    public JsonArray( Collection arg0, boolean arg1 ) {
+//        super( arg0, arg1 );
+//    }
+//
+//    public JsonArray( Object arg0, boolean arg1 ) throws JSONException {
+//        super( arg0, arg1 );
+//    }
+//
     @Override
     public JsonArray getJSONArray( int arg0 ) throws JSONException {
         return make(super.getJSONArray( arg0 ));

@@ -2288,7 +2288,11 @@ public class EmsScriptNode extends ScriptNode implements
         
         // Check the cache unless forcing an update.
         if ( !forceCacheUpdate ) {
-            cachedJson = Utils.get( NodeUtil.jsonDeepCache, getId(), millis, isIncludeQualified, jsonFilter );
+            cachedJson =
+                Utils.get( NodeUtil.jsonDeepCache, getId(), millis,
+                           isIncludeQualified,
+                           jsonFilter == null ? new TreeSet< String >()
+                                             : jsonFilter );
             if ( cachedJson != null && cachedJson.length() > 0 ) {
                 deepMatch = true;
             } else {
@@ -2376,8 +2380,9 @@ public class EmsScriptNode extends ScriptNode implements
 //            putInJson( newJson, Acm.JSON_READ, getIsoTime( new Date( readTime ) ), null );
 //        }
         
-        Utils.put( NodeUtil.jsonDeepCache, getId(), millis,
-                   isIncludeQualified, jsonFilter, json );
+        Utils.put( NodeUtil.jsonDeepCache, getId(), millis, isIncludeQualified,
+                   jsonFilter == null ? new TreeSet< String >() : jsonFilter,
+                   json );
         
         if ( Debug.isOn() )
             Debug.outln("return newJson " + (json==null?"null":json.toString( 4 )));
@@ -3010,6 +3015,7 @@ public class EmsScriptNode extends ScriptNode implements
                     }
                     break;
                 case NODE_REF:
+                    System.out.println("jsonArray[" + i + "] = " + jsonArray.get( i ));
                     String sysmlId = jsonArray.getString( i );
                     EmsScriptNode node =
                             convertIdToEmsScriptNode( sysmlId, false, workspace,

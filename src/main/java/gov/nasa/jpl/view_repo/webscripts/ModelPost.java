@@ -79,6 +79,7 @@ import kexpparser.KExpParser;
 //import k.frontend.Frontend;
 
 
+
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -89,9 +90,14 @@ import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.version.Version;
 import org.apache.log4j.Logger;
+
 import gov.nasa.jpl.view_repo.util.JsonArray;
+
 import org.json.JSONException;
+import org.json.JSONObject;
+
 import gov.nasa.jpl.view_repo.util.JsonObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -2520,7 +2526,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     response.append("You will be notified via email when the model load has finished.\n");
                 }
                 else {
-                    JsonObject postJson = (JsonObject)req.parseContent();
+                    JsonObject postJson = JsonObject.make( (JSONObject)req.parseContent() );
                     JsonArray jarr = postJson.getJSONArray("elements");
 
                     if ( !Utils.isNullOrEmpty( expressionString ) ) {
@@ -2666,7 +2672,8 @@ public class ModelPost extends AbstractJavaWebScript {
             EmsScriptNode jobNode = ActionUtil.getOrCreateJob(siteNode, jobName, "ems:Job", status, response);
 
             // write out the json
-            ActionUtil.saveStringToFile(jobNode, "application/json", services, ((JsonObject)req.parseContent()).toString(4));
+            JsonObject json = JsonObject.make( (JSONObject)req.parseContent() );
+            ActionUtil.saveStringToFile(jobNode, "application/json", services, json.toString(4));
 
             // kick off the action
             ActionService actionService = services.getActionService();
@@ -2778,7 +2785,7 @@ public class ModelPost extends AbstractJavaWebScript {
                 if ( projectNode == null ) {
                     // projectNode should be the owner..., which should exist
                     try {
-                        JsonObject postJson = (JsonObject)req.parseContent();
+                        JsonObject postJson = JsonObject.make( (JSONObject)req.parseContent() );
                         JsonObject elementsJson =
                                 postJson.getJSONObject( "elements" );
                         JsonObject elementJson =
