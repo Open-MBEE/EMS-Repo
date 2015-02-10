@@ -126,8 +126,19 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
         List< EmsScriptNode > n2 = objectToEmsScriptNodes( p2 );
         if ( n1 != null && n2 != null && n1.size() == n2.size()) {
             isSame = true;
+            boolean fndSame = false;
+            // Unfortunately, the ordering in the array may not be the
+            // same even if they contain the same nodes.  So must check
+            // each entry against all others:
             for (int i = 0; i < n1.size(); i++) {
-                if (!same(n1.get( i ),n2.get( i ))) {
+                fndSame = false;
+                for (int j = 0; j < n2.size(); j++) {
+                    if (same(n1.get( i ),n2.get( j ))) {
+                        fndSame = true;
+                        break;
+                    }
+                }
+                if (!fndSame) {
                     isSame = false;
                     break;
                 }
