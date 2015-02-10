@@ -1581,8 +1581,60 @@ create_curl_cmd(type="POST",data="operation.json",base_url=BASE_URL_WS,
 True, 
 common_filters+['MMS_'],
 ["test","workspaces","develop", "develop2"]
+],
+
+[
+610,
+"Create Collaborator",
+"Create Collaborator user for europa",
+create_curl_cmd(type="POST",
+                data='\'{"userName": "Collaborator", "firstName": "Collaborator", "lastName": "user", "email": "Collaborator@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteCollaborator"]}\'',
+                base_url=SERVICE_URL,
+                post_type="",branch="api/people",project_post=True),
+True, 
+common_filters+['MMS_'],
+["test","workspaces","develop", "develop2"]
+],
+
+[
+611,
+"Create Contributor",
+"Create Contributor user for europa",
+create_curl_cmd(type="POST",
+                data='\'{"userName": "Contributor", "firstName": "Contributor", "lastName": "user", "email": "Contributor@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteContributor"]}\'',
+                base_url=SERVICE_URL,
+                post_type="",branch="api/people",project_post=True),
+True, 
+common_filters+['MMS_'],
+["test","workspaces","develop", "develop2"]
+],
+
+[
+612,
+"Create Consumer",
+"Create Consumer user for europa",
+create_curl_cmd(type="POST",
+                data='\'{"userName": "Consumer", "firstName": "Consumer", "lastName": "user", "email": "Consumer@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteConsumer"]}\'',
+                base_url=SERVICE_URL,
+                post_type="",branch="api/people",project_post=True),
+True, 
+common_filters+['MMS_'],
+["test","workspaces","develop", "develop2"]
+],
+
+[
+613,
+"Create Manager",
+"Create Manager user for europa",
+create_curl_cmd(type="POST",
+                data='\'{"userName": "Manager", "firstName": "Manager", "lastName": "user", "email": "Manager@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteManager"]}\'',
+                base_url=SERVICE_URL,
+                post_type="",branch="api/people",project_post=True),
+True, 
+common_filters+['MMS_'],
+["test","workspaces","develop", "develop2"]
 ]
-        
+
 ]
 
 ##########################################################################################    
