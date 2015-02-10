@@ -631,6 +631,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     if (nodeBin != null) {
                         nodeBin.setProperty( Acm.ACM_NAME, acmName );
                         owner = nodeBin;
+                        nodeBin.removeChildrenFromJsonCache();
                     }
                     else {
                         foundOwnerElement = false;
@@ -2569,6 +2570,7 @@ public class ModelPost extends AbstractJavaWebScript {
             ClassData cd = getSystemModelAe().getClassData();
 
             //loop x times for now
+            Random.reset();
             for(int i=0; i<10; i++)
             {
                 // Loop through all the listeners:
@@ -2582,13 +2584,11 @@ public class ModelPost extends AbstractJavaWebScript {
                 // Solve!!!!
                 boolean result = false;
                 try {
-                    Debug.turnOn();
-                    Random.reset();
+                    //Debug.turnOn();
                     result = solver.solve(constraints);
-                    // loop to check thru all constraints
 
                 } finally {
-                    Debug.turnOff();
+                    //Debug.turnOff();
                 }
                 if (!result) {
                     log( LogLevel.ERROR, "Was not able to satisfy all of the constraints!" );

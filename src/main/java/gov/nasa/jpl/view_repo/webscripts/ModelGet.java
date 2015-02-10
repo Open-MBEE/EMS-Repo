@@ -194,7 +194,7 @@ public class ModelGet extends AbstractJavaWebScript {
         printFooter();
 
         if (logger.isInfoEnabled()) {
-            log( LogLevel.INFO, "ModelGet: " + timer );
+            logger.info( "ModelGet: " + timer );
         }
 
 		return model;
