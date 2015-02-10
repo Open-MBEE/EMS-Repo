@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -124,6 +125,8 @@ public class ViewGet extends AbstractJavaWebScript {
         return instance.executeImplImpl( req, status, cache );
     }
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
+        Timer timer = new Timer();
+
         printHeader( req );
 
         clearCaches();
@@ -177,6 +180,8 @@ public class ViewGet extends AbstractJavaWebScript {
         status.setCode(responseStatus.getCode());
 
         printFooter();
+
+        System.out.println( "ViewGet: " + timer );
 
         return model;
     }

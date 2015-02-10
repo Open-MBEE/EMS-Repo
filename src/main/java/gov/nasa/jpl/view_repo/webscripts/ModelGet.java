@@ -190,7 +190,7 @@ public class ModelGet extends AbstractJavaWebScript {
 
         printFooter();
 
-        log( LogLevel.INFO, "ModelGet: " + timer );
+        System.out.println( "ModelGet: " + timer );
 
 		return model;
 	}
