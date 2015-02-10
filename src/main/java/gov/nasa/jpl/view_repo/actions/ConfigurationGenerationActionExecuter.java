@@ -102,10 +102,6 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         // Do not get an older version of the node based on the timestamp since
         // new snapshots should be associated with a new configuration. The
         // timestamp refers to the products, not the snapshots themselves.
-        //        if ( dateTime != null ) {
-//            NodeRef vRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
-//            if ( vRef != null ) nodeRef = vRef; 
-//        }
         EmsScriptNode jobNode = new EmsScriptNode(nodeRef, services, response);
         // clear out any existing associated snapshots
         jobNode.removeAssociations("ems:configuredSnapshots");
@@ -116,19 +112,6 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         dateTime = (Date)action.getParameterValue(PARAM_TIME_STAMP);
         
         WorkspaceNode workspace = null;
-//        if ( action instanceof WebScriptRequest) {
-//            response.append( "\n********* IS A REQ *********\n\n");
-//            WebScriptRequest req = (WebScriptRequest)action;
-//            String timestamp = req.getParameter("timestamp");
-//            workspace = AbstractJavaWebScript.getWorkspace( req, services,
-//                                                            response,
-//                                                            responseStatus, //false
-//                                                            null );
-//            if(dateTime == null) dateTime = TimeUtils.dateFromTimestamp( timestamp );
-//        } else {
-//            response.append("\n******** IS NOT A REQ *********\n\n");
-//        }
-//        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
         workspace = (WorkspaceNode)action.getParameterValue(PARAM_WORKSPACE);
 
         @SuppressWarnings("unchecked")
@@ -159,10 +142,6 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
            fndSiteName = site.getSiteName();
         }       
        
-//        Set< EmsScriptNode > productSet =
-//                WebScriptUtil.getAllNodesInPath( site.getQnamePath(), "ASPECT",
-//                                                 Acm.ACM_PRODUCT, workspace,
-//                                                 dateTime, services, response );
         Set<EmsScriptNode> productSet = new HashSet<EmsScriptNode>();
         // search for products against the latest time so we can put in the snapshot references
         Map< String, EmsScriptNode > nodeList = NodeUtil.searchForElements(NodeUtil.SearchType.ASPECT.prefix, 
@@ -178,29 +157,29 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         String jobStatus = "Succeeded";
         Set<EmsScriptNode> snapshots = new HashSet<EmsScriptNode>();
         for (EmsScriptNode product: productSet) {
-            // only create the filtered list of documents
-            if (productList.isEmpty() || productList.contains(product.getSysmlId())) {
-                SnapshotPost snapshotService = new SnapshotPost(repository, services);
-                snapshotService.setRepositoryHelper(repository);
-                snapshotService.setServices(services);
-                snapshotService.setLogLevel(LogLevel.DEBUG);
-                Status status = new Status();
+        		// only create the filtered list of documents
+        		if (productList.isEmpty() || productList.contains(product.getSysmlId())) {
+	            SnapshotPost snapshotService = new SnapshotPost(repository, services);
+	            snapshotService.setRepositoryHelper(repository);
+	            snapshotService.setServices(services);
+	            snapshotService.setLogLevel(LogLevel.DEBUG);
+	            Status status = new Status();
                 EmsScriptNode snapshot =
                         snapshotService.createSnapshot( product,
                                                         product.getSysmlId(),
                                                         workspace, dateTime );
                 response.append(snapshotService.getResponse().toString());
                 if (snapshot == null || status.getCode() != HttpServletResponse.SC_OK) {
-                    jobStatus = "Failed";
-                    response.append("[ERROR]: could not make snapshot for \t" + product.getProperty(Acm.ACM_NAME) + "\n");
-                } 
-                else {
-                    response.append("[INFO]: Successfully created snapshot: \t" + snapshot.getProperty(Acm.CM_NAME) + "\n");
-                }
-                if (snapshot != null) {
-                    snapshots.add(snapshot);
-                }
-            }
+	                jobStatus = "Failed";
+	                response.append("[ERROR]: could not make snapshot for \t" + product.getProperty(Acm.ACM_NAME) + "\n");
+	            } 
+	            else {
+	                response.append("[INFO]: Successfully created snapshot: \t" + snapshot.getProperty(Acm.CM_NAME) + "\n");
+	            }
+	            if (snapshot != null) {
+	                snapshots.add(snapshot);
+	            }
+        		}
         }
         // make relationships between configuration node and all the snapshots
         for (EmsScriptNode snapshot: snapshots) {

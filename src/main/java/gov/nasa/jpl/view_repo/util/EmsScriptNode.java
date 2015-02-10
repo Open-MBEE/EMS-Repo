@@ -560,10 +560,14 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
 
-        services.getNodeService().createAssociation( nodeRef,
+        AssociationRef ar = services.getNodeService().createAssociation( nodeRef,
                                                      target.getNodeRef(),
                                                      typeQName );
-        return true;
+        if (ar == null) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public void removeAssociations( String type ) {
@@ -2408,8 +2412,7 @@ public class EmsScriptNode extends ScriptNode implements
                 if ( targetRef == null ) continue;
                 if ( dateTime != null || workspace != null ) {
                     targetRef =
-                            NodeUtil.getNodeRefAtTime( targetRef, workspace,
-                                                       dateTime );
+                            NodeUtil.getNodeRefAtTime( targetRef, workspace, dateTime, true, false );
                 }
                 if ( targetRef == null ) {
                     String msg =
@@ -2418,7 +2421,7 @@ public class EmsScriptNode extends ScriptNode implements
                                     + WorkspaceNode.getName(workspace) + " at "
                                     + dateTime + ".\n";
                     if ( getResponse() == null || getStatus() == null ) {
-                        Debug.error( false, msg );
+                        logger.error( msg );
                     } else {
                         getResponse().append( msg );
                         getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
