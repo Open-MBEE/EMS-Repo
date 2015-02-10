@@ -631,7 +631,6 @@ public class ModelPost extends AbstractJavaWebScript {
                     if (nodeBin != null) {
                         nodeBin.setProperty( Acm.ACM_NAME, acmName );
                         owner = nodeBin;
-                        nodeBin.removeChildrenFromJsonCache();
                     }
                     else {
                         foundOwnerElement = false;
