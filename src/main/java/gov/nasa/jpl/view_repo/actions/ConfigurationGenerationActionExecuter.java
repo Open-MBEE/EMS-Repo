@@ -32,6 +32,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
@@ -85,9 +86,19 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
     }
     
     @Override
-    protected void executeImpl(Action action, NodeRef nodeRef) {
+    protected void executeImpl(final Action action, final NodeRef nodeRef) {
         clearCache();
 
+        new EmsTransaction(services, response, responseStatus) {
+            @Override
+            public void run() throws Exception {
+                executeImplImpl(action, nodeRef);
+            }
+        };
+    }
+    
+    private void executeImplImpl(Action action, NodeRef nodeRef) {
+        
         // Do not get an older version of the node based on the timestamp since
         // new snapshots should be associated with a new configuration. The
         // timestamp refers to the products, not the snapshots themselves.
@@ -104,7 +115,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         workspace = (WorkspaceNode)action.getParameterValue(PARAM_WORKSPACE);
 
         @SuppressWarnings("unchecked")
-		HashSet<String> productList = (HashSet<String>) action.getParameterValue(PARAM_PRODUCT_LIST);
+        HashSet<String> productList = (HashSet<String>) action.getParameterValue(PARAM_PRODUCT_LIST);
         
         String siteName = (String) action.getParameterValue(PARAM_SITE_NAME);
         String fndSiteName = null;
@@ -114,7 +125,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
             if (Debug.isOn()) System.out.println("ConfigurationGenerationActionExecuter started execution of " + siteName);
             SiteInfo siteInfo = services.getSiteService().getSite(siteName);
             if (siteInfo == null) {
-            		if (Debug.isOn()) System.out.println("[ERROR]: could not find site: " + siteName);
+                    if (Debug.isOn()) System.out.println("[ERROR]: could not find site: " + siteName);
                 return;
             }
             NodeRef siteRef = siteInfo.getNodeRef();
@@ -203,6 +214,10 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
 
     protected void clearCache() {
         response = new StringBuffer();
+        responseStatus = new Status();
+        NodeUtil.setBeenInsideTransaction( false );
+        NodeUtil.setBeenOutsideTransaction( false );
+        NodeUtil.setInsideTransactionNow( false );
     }
 
     @Override

@@ -2627,11 +2627,13 @@ public class ModelPost extends AbstractJavaWebScript {
         return instance.executeImplImpl(req,  status, cache, true);
     }
 
+    WorkspaceNode myWorkspace = null;
+    
     @Override
     protected Map<String, Object> executeImplImpl(final WebScriptRequest req,
-                                                  Status status, Cache cache) {
+                                                  final Status status, Cache cache) {
         Timer timer = new Timer();
-
+        
         printHeader( req );
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -2643,17 +2645,27 @@ public class ModelPost extends AbstractJavaWebScript {
         // see if prettyPrint default is overridden and change
         prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
 
-        String user = AuthenticationUtil.getRunAsUser();
+        final String user = AuthenticationUtil.getRunAsUser();
         String wsId = null;
-
+        
         if (logger.isDebugEnabled()) {
             logger.debug( user + " " + req.getURL() );
             logger.debug( req.parseContent() );
         }
+        
+        if (runWithoutTransactions || internalRunWithoutTransactions) {
+            myWorkspace = getWorkspace( req, user );
+        }
+        else {
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+                @Override
+                public void run() throws Exception {
+                    myWorkspace = getWorkspace( req, user );
+                }
+            };
+        }
 
-        WorkspaceNode workspace = getWorkspace( req, //true, // not creating ws!
-                                                user );
-        boolean wsFound = workspace != null;
+        boolean wsFound = myWorkspace != null;
         if ( !wsFound ) {
             wsId = getWorkspaceId( req );
             if ( wsId != null && wsId.equalsIgnoreCase( "master" ) ) {
@@ -2672,9 +2684,21 @@ public class ModelPost extends AbstractJavaWebScript {
         if (wsFound && validateRequest(req, status)) {
             try {
                 if (runInBackground) {
-                    saveAndStartAction(req, workspace, status);
+                    // Get the project node from the request:
+                    if (runWithoutTransactions || internalRunWithoutTransactions) {
+                        saveAndStartAction(req, myWorkspace, status);
+                    }
+                    else {
+                        new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+                            @Override
+                            public void run() throws Exception {
+                                saveAndStartAction(req, myWorkspace, status);
+
+                            }
+                        };
+                    }
                     response.append("JSON uploaded, model load being processed in background.\n");
-                    response.append("You will be notified via email when the model load has finished.\n");
+                    response.append("You will be notified via email when the model load has finished.\n"); 
                 }
                 else {
                     JSONObject postJson = (JSONObject)req.parseContent();
@@ -2708,7 +2732,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
 
                     if (projectNode != null) {
-                        handleUpdate( postJson, status, workspace, fix, model, true );
+                        handleUpdate( postJson, status, myWorkspace, fix, model, true );
                     }
                 }
             } catch (JSONException e) {
