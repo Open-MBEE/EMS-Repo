@@ -88,7 +88,6 @@ import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.log4j.Logger;
-import org.apache.log4j.spi.Filter;
 import gov.nasa.jpl.view_repo.util.JsonArray;
 import org.json.JSONException;
 import gov.nasa.jpl.view_repo.util.JsonObject;
@@ -561,10 +560,14 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
 
-        services.getNodeService().createAssociation( nodeRef,
+        AssociationRef ar = services.getNodeService().createAssociation( nodeRef,
                                                      target.getNodeRef(),
                                                      typeQName );
-        return true;
+        if (ar == null) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public void removeAssociations( String type ) {
@@ -669,8 +672,12 @@ public class EmsScriptNode extends ScriptNode implements
         } else {
             log( getName() + ": " + acmType + " property created with value = "
                  + value );
-            setProperty( acmType, value );
+            boolean changed = setProperty( acmType, value );
+            logger.warn( "Failed to set property for new value in createOrUpdateProperty("
+                         + acmType + ", " + value + ")" );
+            return changed;
         }
+        
         return false;
     }
 
@@ -1021,8 +1028,7 @@ public class EmsScriptNode extends ScriptNode implements
                             new EmsScriptNode( assoc.getChildRef(), services,
                                                response );
                 } catch ( Exception e ) {
-                    if ( Debug.isOn() )
-                        System.out.println( "Got exception in "
+                    logger.error( "Got exception in "
                                             + "createNode(name="
                                             + name + ", type=" + type
                                             + ") for EmsScriptNode(" + this
@@ -1407,7 +1413,7 @@ public class EmsScriptNode extends ScriptNode implements
                        "3: initializing version cache with node, "
                                + this + " version: "
                                + cachedVersion.getLabel();
-              logger.debug( msg );
+              if (logger.isInfoEnabled()) logger.info( msg );
               if (versionCacheDebugPrint) System.out.println(msg);
 
            }
@@ -1446,7 +1452,6 @@ public class EmsScriptNode extends ScriptNode implements
                             + ").  Replacing node with unmodifiable frozen node, "
                             + getId() + " (" + cachedVersion.getLabel()+ ").";
            logger.error( msg );
-           System.out.println(msg);
            Debug.error( true, msg );
            //NodeUtil.sendNotificationEvent( "Heisenbug Occurrence!", "" );
            if ( response != null ) {
@@ -1461,7 +1466,7 @@ public class EmsScriptNode extends ScriptNode implements
                    "5: Updating version cache with new version of node, "
                             + this + " version: "
                             + thisEmsVersion.getLabel();
-           logger.debug( msg );
+           if (logger.isInfoEnabled()) logger.info( msg );
            if (versionCacheDebugPrint) System.out.println(msg);
        }
 //                // This fixes the nodeRef in esn
@@ -1616,8 +1621,8 @@ public class EmsScriptNode extends ScriptNode implements
      * @param value
      *            Value to set property to
      */
-    public < T extends Serializable > void setProperty( String acmType, T value ) {
-        setProperty( acmType, value, 0 );
+    public < T extends Serializable > boolean setProperty( String acmType, T value ) {
+        return setProperty( acmType, value, 0 );
     }
     public < T extends Serializable > boolean setProperty( String acmType, T value,
                                                         // count prevents inf loop
@@ -2621,8 +2626,7 @@ public class EmsScriptNode extends ScriptNode implements
                 if ( targetRef == null ) continue;
                 if ( dateTime != null || workspace != null ) {
                     targetRef =
-                            NodeUtil.getNodeRefAtTime( targetRef, workspace,
-                                                       dateTime );
+                            NodeUtil.getNodeRefAtTime( targetRef, workspace, dateTime, true, false );
                 }
                 if ( targetRef == null ) {
                     String msg =
@@ -2631,7 +2635,7 @@ public class EmsScriptNode extends ScriptNode implements
                                     + WorkspaceNode.getName(workspace) + " at "
                                     + dateTime + ".\n";
                     if ( getResponse() == null || getStatus() == null ) {
-                        Debug.error( false, msg );
+                        logger.error( msg );
                     } else {
                         getResponse().append( msg );
                         getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
@@ -2890,7 +2894,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
         }
         if ( values == null ) {
-            if ( Debug.isOn() ) System.out.println( "null property values for "
+            if ( logger.isDebugEnabled()) logger.debug( "null property values for "
                                                     + acmProperty );
         }
 
@@ -2985,13 +2989,14 @@ public class EmsScriptNode extends ScriptNode implements
         getPropertyValuesFromJson( PropertyType type, JsonArray jsonArray,
                                    WorkspaceNode workspace, Date dateTime )
                                            throws JSONException {
-        if ( Debug.isOn() ) System.out.println( "getPropertyValuesFromJson("
+        if ( logger.isDebugEnabled()) logger.debug( "getPropertyValuesFromJson("
                                                 + type + ", " + jsonArray
                                                 + ", " + dateTime + ")" );
 
         ArrayList< Serializable > properties = new ArrayList< Serializable >();
 
         Serializable property = null;
+        System.out.println("jsonArray = " + jsonArray);
         for ( int i = 0; i < jsonArray.length(); ++i ) {
             switch ( type ) {
                 case INT:
@@ -3157,7 +3162,7 @@ public class EmsScriptNode extends ScriptNode implements
     public boolean ingestJSON( JsonObject jsonObject ) throws JSONException {
         boolean changed = false;
         // fill in all the properties
-        if ( Debug.isOn() ) System.out.println( "ingestJSON(" + jsonObject
+        if ( logger.isDebugEnabled()) logger.debug( "ingestJSON(" + jsonObject
                                                 + ")" );
 
         DictionaryService dServ = services.getDictionaryService();
@@ -3173,9 +3178,9 @@ public class EmsScriptNode extends ScriptNode implements
                 continue;
             } else {
                 QName qName = createQName( acmType );
-                if ( Debug.isOn() ) {
+                if ( logger.isDebugEnabled() ) {
                     if ( acmType.equals( Acm.ACM_VALUE ) ) {
-                        System.out.println( "qName of " + acmType + " = "
+                        logger.debug( "qName of " + acmType + " = "
                                             + qName.toString() );
                     }
                 }
@@ -3188,8 +3193,7 @@ public class EmsScriptNode extends ScriptNode implements
                             jsonObject.getJSONObject( Acm.JSON_SPECIALIZATION );
 
                     if ( specializeJson != null ) {
-                        if ( Debug.isOn() ) System.out.println( "processing "
-                                                                + acmType );
+                        if (logger.isDebugEnabled()) logger.debug( "processing " + acmType );
                         if ( ingestJSON( specializeJson ) ) {
                             changed = true;
                         }
@@ -3197,7 +3201,7 @@ public class EmsScriptNode extends ScriptNode implements
                 } else {
                     PropertyDefinition propDef = dServ.getProperty( qName );
                     if ( propDef == null ) {
-                        if ( Debug.isOn() ) System.out.println( "null PropertyDefinition for "
+                        if (logger.isDebugEnabled()) logger.debug( "null PropertyDefinition for "
                                                                 + acmType );
                         continue; // skips type
                     }
@@ -3480,7 +3484,7 @@ public class EmsScriptNode extends ScriptNode implements
         try {
             services.getNodeService().getType( this.getNodeRef() );
         } catch ( Throwable e ) {
-            if ( Debug.isOn() ) System.out.println( "Call to services.getNodeService().getType(nodeRef="
+            logger.warn( "Call to services.getNodeService().getType(nodeRef="
                                                     + this.getNodeRef()
                                                     + ") for this = "
                                                     + this
@@ -3491,8 +3495,7 @@ public class EmsScriptNode extends ScriptNode implements
             if ( isSubType( "cm:folder" ) ) return true;
             return false;
         } catch ( Throwable e ) {
-            if ( Debug.isOn() ) System.out.println( "Call to isSubType() on this = "
-                                                    + this + " failed!" );
+            logger.warn( "Call to isSubType() on this = " + this + " failed!" );
             e.printStackTrace();
         }
         try {
@@ -3505,8 +3508,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
             return false;
         } catch ( Throwable e ) {
-            if ( Debug.isOn() ) System.out.println( "Trying to call getQNameType() on parent = "
-                                                    + parent + "." );
+            logger.warn( "Trying to call getQNameType() on parent = " + parent + "." );
             e.printStackTrace();
         }
         try {
@@ -3516,8 +3518,7 @@ public class EmsScriptNode extends ScriptNode implements
             }
             return false;
         } catch ( Throwable e ) {
-            if ( Debug.isOn() ) System.out.println( "Trying to call getQNameType() on parent = "
-                                                    + parent + "." );
+            logger.warn( "Trying to call getQNameType() on parent = " + parent + "." );
             e.printStackTrace();
         }
 
@@ -3710,6 +3711,7 @@ public class EmsScriptNode extends ScriptNode implements
             type = "cm:folder";
         }
 
+        parent.makeSureNodeRefIsNotFrozen(); // GG Added this
         EmsScriptNode node = parent.createNode( getName(), type );
         // EmsScriptNode node =  parent.createSysmlNode( getName(), type, modStatus, workspace );
 
@@ -3733,7 +3735,7 @@ public class EmsScriptNode extends ScriptNode implements
             properties.remove( createQName( "st:sitePreset" ) );
             properties.remove( createQName( "sys:undeletable" ) );
         }
-        makeSureNodeRefIsNotFrozen();
+        //makeSureNodeRefIsNotFrozen();  // Doesnt make sense to always call this on "this"
         transactionCheck();
         nodeService.setProperties( node.getNodeRef(), properties );
 
@@ -5217,6 +5219,21 @@ public class EmsScriptNode extends ScriptNode implements
                         if ( getProperty( acmProp ) != null ) return true;
                     }
                 }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Returns true if the passed property name maps to a value spec
+     * 
+     * @param propName
+     * @return
+     */
+    public static boolean isValueSpecProperty(String propName) {
+        for (Set<String> valueSpecSet : Acm.TYPES_WITH_VALUESPEC.values()) {
+            if (valueSpecSet.contains( propName )) {
+                return true;
             }
         }
         return false;

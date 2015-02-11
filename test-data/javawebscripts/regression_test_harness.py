@@ -128,7 +128,7 @@ def do176():
     json_output = get_json_output_no_status()
     j = json.loads(json_output)
     
-    if j:
+    if j and j['workspaces'] and j['workspaces'][0]:
         j["workspaces"][0]["description"] = "modified the workspace name and desc"
         j["workspaces"][0]["name"] = "modifiedWorkspaceName"
     
@@ -139,7 +139,7 @@ def set_wsid_to_gv(gv):
     json_output = get_json_output_no_status()
     j = json.loads(json_output)
     
-    if j:
+    if j and 'workspaces' in j and len(j['workspaces']) > 0: # and j['workspaces'][0]['id']:
         if gv == 1:
             set_gv1(j["workspaces"][0]["id"])
         elif gv == 2:
@@ -278,13 +278,15 @@ def create_command_line_options():
                       help='''Supply this option if you want to create the baseline files for the tests (Optional)''')
     parser.add_option("-g","--gitBranch",action="callback",type="string",metavar="GITBRANCH",callback=parse_git_branch,
                       help='''Specify the branch to use, otherwise uses the value of $GIT_BRANCH, and if that env variable is not defined uses 'test'. (Optional)''')
+    parser.add_option("-v","--evaluate",action="store_true",dest="evaluate_only",
+                      help='''Do not execute the tests. Just evaluate the existing output. (Optional)''')
         
     return parser
 
 def parse_command_line():
     '''Parse the command line options given to this application'''
 
-    global test_nums, create_baselines, cmd_git_branch, test_names
+    global test_nums, create_baselines, evaluate_only, cmd_git_branch, test_names
     
     parser = create_command_line_options()
     
@@ -297,6 +299,7 @@ def parse_command_line():
     test_nums = parser.test_nums
     test_names = parser.test_names
     create_baselines = _options.create_baselines
+    evaluate_only = _options.evaluate_only
     cmd_git_branch = parser.cmd_git_branch
     
     if test_nums and test_names:
@@ -434,7 +437,7 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
     baseline_orig_json = "%s/%s_orig.json"%(baseline_dir,test_name)
 
     thick_divider()
-    if create_baselines:
+    if create_baselines and not evaluate_only:
         print "CREATING BASELINE FOR TEST %s (%s)"%(test_num, test_name)
         orig_json = baseline_orig_json
         filtered_json = baseline_json
@@ -443,13 +446,13 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
         orig_json = result_orig_json
         filtered_json = result_json
         
-    if delay:
+    if delay and not evaluate_only:
         print "Delaying %s seconds before running the test"%delay
         time.sleep(delay)
         
     print "TEST DESCRIPTION: "+test_desc
     
-    if setupFcn:
+    if setupFcn and not evaluate_only:
         print "calling setup function"
         setupFcn()
 
@@ -461,9 +464,14 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
     curl_cmd = str(curl_cmd).replace("$gv5", str(gv5))
     curl_cmd = str(curl_cmd).replace("$gv6", str(gv6))
 
-    print "Executing curl cmd: \n"+str(curl_cmd)
+    foo=""
+    if (evaluate_only):
+        foo="Not "
+    print foo + "Executing curl cmd: \n"+str(curl_cmd) 
     
-    (status,output) = commands.getstatusoutput(curl_cmd+"> "+orig_json)
+    status = 0
+    if (not evaluate_only):
+        (status,output) = commands.getstatusoutput(curl_cmd+"> "+orig_json)
         
     if status == 0:
                 
@@ -498,11 +506,11 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
         file.close()
         file_orig.close()
      
-        if teardownFcn:
+        if teardownFcn and not evaluate_only:
             print "calling teardown function"
             teardownFcn()
         
-        if create_baselines:
+        if create_baselines and not evaluate_only:
             
             print "Filtered output of curl command:\n"+filter_output
             

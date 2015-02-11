@@ -78,6 +78,10 @@ public class ProductPost extends AbstractJavaWebScript {
 
 	@Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
+	    
+        // TODO FIXME this does not handle removing obsolete value specs when changing from another
+        //            aspect to this one.  See ModelPost.checkForObsoleteValueSpecs()
+	    
         printHeader( req );
 
 		clearCaches();

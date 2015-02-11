@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONTokener;
 
 public class JsonArray extends JSONArray {
@@ -30,7 +31,13 @@ public class JsonArray extends JSONArray {
         this();
         if ( arg0 == null ) return;
         for ( int i=0; i<arg0.length(); ++i ) {
-            this.put( arg0.get( i ) );
+            Object val = arg0.get(i);
+            if ( val instanceof JSONObject ) {
+                val = JsonObject.make((JSONObject)val);
+            } else if ( val instanceof JSONArray ) {
+                val = JsonArray.make( (JSONArray)val );
+            }
+            this.put( val );
         }
     }
     

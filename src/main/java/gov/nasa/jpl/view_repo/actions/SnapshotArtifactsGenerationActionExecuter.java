@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.actions;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
@@ -59,8 +60,19 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     }
     
     @Override
-    protected void executeImpl(Action action, NodeRef nodeRef) {
+    protected void executeImpl(final Action action, final NodeRef nodeRef) {
         clearCache();
+        
+        new EmsTransaction(services, response, new Status()) {
+            @Override
+            public void run() throws Exception {
+                executeImplImpl(action, nodeRef);
+            }
+        };
+        
+    }
+    
+    private void executeImplImpl(Action action, NodeRef nodeRef) {
 
         // Get timestamp if specified. This is for the products, not the
         // snapshots or configuration.
@@ -209,6 +221,9 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     	
     protected void clearCache() {
         response = new StringBuffer();
+        NodeUtil.setBeenInsideTransaction( false );
+        NodeUtil.setBeenOutsideTransaction( false );
+        NodeUtil.setInsideTransactionNow( false );
     }
 
 }

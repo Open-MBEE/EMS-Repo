@@ -698,14 +698,13 @@ public class WorkspaceDiff implements Serializable {
                 }
             }
             boolean includeQualified = true;
-            if ( versions == null || versions.size() <= 0 ) {
-                array.put( node.toJsonObject( filter, false, dateTime,
-                                              includeQualified,
-                                              forceJsonCacheUpdate ) );
-            } else {
-                JsonObject jsonObject =
+            
+            JsonObject jsonObject =
                     node.toJsonObject( filter, false, dateTime,
                                        includeQualified, forceJsonCacheUpdate );
+            array.put( jsonObject );
+            
+            if (!Utils.isNullOrEmpty( versions ) ) {
                 Version version = versions.get( node.getSysmlId() );
                 if ( version != null ) {
                     // TODO: perhaps add service and response in method call rather than using the nodes?
@@ -714,7 +713,6 @@ public class WorkspaceDiff implements Serializable {
                     // for reverting need to keep track of noderef and versionLabel
                     jsonObject.put( "id", changedNode.getId() );
                     jsonObject.put( "version", version.getVersionLabel() );
-                    array.put( jsonObject );
                 }
             }
         }

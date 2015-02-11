@@ -30,6 +30,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -90,20 +91,23 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		clearCaches();
 
 		Map<String, Object> model = new HashMap<String, Object>();
+        JSONObject top = new JSONObject();
 
 		try {
 	        JsonObject json = JsonObject.make( (JSONObject)req.parseContent() );
 			handleDiff(req, json, status, model);
+	        if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();
+            model.put("res", response.toString());
 		} catch ( Exception e ) {
             log(LogLevel.ERROR, "Internal server error: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             e.printStackTrace();
+            model.put("res", response.toString());
         }
 
         status.setCode(responseStatus.getCode());
-		model.put("res", response.toString());
 
 		printFooter();
 
@@ -168,6 +172,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
     boolean succ = true;
 
     private void handleDiff(final WebScriptRequest req, final JsonObject jsonDiff, final Status status, final Map<String, Object> model) throws Exception {
+        populateSourceFromJson( jsonDiff );
 		if (jsonDiff.has( "workspace1" ) && jsonDiff.has("workspace2")) {
 		    srcJson = jsonDiff.getJSONObject( "workspace2" );
 		    targetJson = jsonDiff.getJSONObject( "workspace1" );
@@ -288,7 +293,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	            boolean modelDeleteDiff = deleteWsDiff != null && deleteWsDiff.isDiff();
 
 	            if (modelDeleteDiff || modelPostDiff) {
-	                if ( !CommitUtil.sendDeltas(jsonDiff, targetWsId, projectId) ) {
+	                if ( !CommitUtil.sendDeltas(jsonDiff, targetWsId, projectId, source) ) {
                         log(LogLevel.WARNING, "MmsWorkspaceDiffPost deltas not posted properly");
                     }
 

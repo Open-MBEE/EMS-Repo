@@ -47,6 +47,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.alfresco.repo.jscript.ScriptNode;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
@@ -104,6 +106,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     protected WorkspaceDiff wsDiff;
 
     public static boolean alwaysTurnOffDebugOut = true;
+
+    // keeps track of who made the call to the service
+    protected String source = null;
 
     protected void initMemberVariables(String siteName) {
 		companyhome = new ScriptNode(repository.getCompanyHome(), services);
@@ -925,4 +930,18 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         return pkgSiteParentNode;
     }
 
+    
+    /**
+     * This needs to be called with the incoming JSON request to populate the local source
+     * variable that is used in the sendDeltas call.
+     * @param postJson
+     * @throws JSONException
+     */
+    protected void populateSourceFromJson(JSONObject postJson) throws JSONException {
+        if (postJson.has( "source" )) {
+            source = postJson.getString( "source" );
+        } else {
+            source = null;
+        }
+    }
 }

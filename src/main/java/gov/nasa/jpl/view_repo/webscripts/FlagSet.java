@@ -53,10 +53,11 @@ public abstract class FlagSet extends DeclarativeWebScript {
             justAsking = isOnStr != null;
         }
         
-        boolean turnOn = !justAsking && !( turnOnStr == null ||
-                            turnOnStr.trim().equalsIgnoreCase( "false" ) ||
+        boolean turnOn = !justAsking && 
+                         !( ( turnOnStr != null &&
+                              turnOnStr.trim().equalsIgnoreCase( "false" ) ) ||
                             ( turnOffStr != null &&
-                              turnOffStr.trim().equalsIgnoreCase( "true" ) ) );
+                              !turnOffStr.trim().equalsIgnoreCase( "false" ) ) );
         turnOnStr = turnOn ? "on" : "off";
         String msg = null;
         if ( justAsking ) {

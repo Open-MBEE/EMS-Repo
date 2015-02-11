@@ -1,78 +1,78 @@
 {"views": [
     {
-        "creator": "admin",
-        "documentation": "about",
-        "editable": true,
-        "name": "304",
-        "owner": "303",
-        "qualifiedId": "/123456/300/301/302/303/304",
-        "qualifiedName": "/JW_TEST/300/301/302/303/304",
-        "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "type": "Property",
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }]
-        },
-        "sysmlid": "304"
-    },
-    {
-        "creator": "admin",
-        "documentation": "else",
-        "editable": true,
-        "name": "301",
-        "owner": "300",
         "qualifiedId": "/123456/300/301",
         "qualifiedName": "/JW_TEST/300/301",
+        "name": "301",
+        "sysmlid": "301",
+        "owner": "300",
+        "documentation": "else",
         "specialization": {
-            "allowedElements": [
-                "301",
-                "302",
-                "303"
-            ],
-            "childrenViews": ["304"],
-            "contains": [{
-                "source": "301",
-                "sourceProperty": "documentation",
-                "sourceType": "reference",
-                "type": "Paragraph"
-            }],
-            "displayedElements": [
-                "301",
-                "302",
-                "303"
-            ],
-            "noSections": ["302"],
-            "type": "Product",
             "view2view": [{
                 "childrenViews": [
                     "301",
                     "302"
                 ],
                 "sysmlid": "301"
-            }]
+            }],
+            "displayedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "childrenViews": ["304"],
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "noSections": ["302"],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "301",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "type": "Product"
         },
-        "sysmlid": "301"
+        "editable": true,
+        "creator": "admin"
     },
     {
-        "creator": "admin",
-        "documentation": "to",
-        "editable": true,
-        "name": "302",
-        "owner": "301",
         "qualifiedId": "/123456/300/301/302",
         "qualifiedName": "/JW_TEST/300/301/302",
+        "name": "302",
+        "sysmlid": "302",
+        "owner": "301",
+        "documentation": "to",
         "specialization": {
-            "isDerived": false,
             "isSlot": false,
-            "type": "Property",
+            "isDerived": false,
             "value": [{
                 "string": "dlam_string",
                 "type": "LiteralString"
-            }]
+            }],
+            "type": "Property"
         },
-        "sysmlid": "302"
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedId": "/123456/300/301/302/303/304",
+        "qualifiedName": "/JW_TEST/300/301/302/303/304",
+        "name": "304",
+        "sysmlid": "304",
+        "owner": "303",
+        "documentation": "about",
+        "specialization": {
+            "isSlot": false,
+            "isDerived": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin"
     }
 ]}

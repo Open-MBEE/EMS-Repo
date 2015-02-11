@@ -1,24 +1,24 @@
 {"workspaces": [
     {
-        "creator": "admin",
         "description": "",
+        "qualifiedName": "master/wsA",
         "name": "wsA",
-        "qualifiedName": "master/wsA"
+        "creator": "admin"
     },
     {
-        "creator": "admin",
         "description": "",
+        "qualifiedName": "master/wsA/wsB",
         "name": "wsB",
-        "qualifiedName": "master/wsA/wsB"
+        "creator": "admin"
     },
     {
-        "creator": "admin",
         "description": "modified the workspace name and desc",
+        "qualifiedName": "master/modifiedWorkspaceName",
         "name": "modifiedWorkspaceName",
-        "qualifiedName": "master/modifiedWorkspaceName"
+        "creator": "admin"
     },
     {
-        "name": "master",
-        "qualifiedName": "master"
+        "qualifiedName": "master",
+        "name": "master"
     }
 ]}

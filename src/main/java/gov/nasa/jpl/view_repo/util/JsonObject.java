@@ -19,7 +19,7 @@ import org.json.JSONTokener;
 
 public class JsonObject extends org.json.JSONObject {
 
-    public static boolean doCaching = true;
+    public static boolean doCaching = false;
     public static Map<JsonObject, Map< Integer, Pair< Date, String > > > stringCache =
             Collections.synchronizedMap( new HashMap< JsonObject, Map< Integer, Pair< Date, String > > >() );
     public static long cacheHits = 0;
@@ -40,10 +40,19 @@ public class JsonObject extends org.json.JSONObject {
     
     public static Map<String,Object> toMap( JSONObject arg0 ) {
         Map< String, Object > m = new LinkedHashMap< String, Object >();
-        String[] names = arg0.getNames( arg0 );
+        //String[] names = arg0.getNames( arg0 );
+        Iterator i = arg0.keys();
         try {
-            for ( String name : names ) {
-                m.put( name, arg0.get(name) );
+            while ( i.hasNext() ) {
+            //for ( String name : names ) {
+                String name = (String)i.next();
+                Object val = arg0.get(name);
+                if ( val instanceof JSONObject ) {
+                    val = make((JSONObject)val);
+                } else if ( val instanceof JSONArray ) {
+                    val = JsonArray.make( (JSONArray)val );
+                }
+                m.put( name, val );
             }
         } catch ( JSONException e ) {
             e.printStackTrace();

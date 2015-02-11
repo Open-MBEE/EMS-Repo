@@ -11,7 +11,7 @@ public class JsonCacheGet extends FlagSet {
     @Override
     protected void set( boolean val ) {
         NodeUtil.doJsonCaching = val;
-        JsonObject.doCaching = val;
+        //JsonObject.doCaching = val;
     }
 
     @Override
