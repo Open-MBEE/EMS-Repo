@@ -2,6 +2,7 @@ package gov.nasa.jpl.view_repo.actions;
 
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
@@ -60,8 +61,19 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     }
     
     @Override
-    protected void executeImpl(Action action, NodeRef nodeRef) {
+    protected void executeImpl(final Action action, final NodeRef nodeRef) {
         clearCache();
+        
+        new EmsTransaction(services, response, new Status()) {
+            @Override
+            public void run() throws Exception {
+                executeImplImpl(action, nodeRef);
+            }
+        };
+        
+    }
+    
+    private void executeImplImpl(Action action, NodeRef nodeRef) {
 
         // Get timestamp if specified. This is for the products, not the
         // snapshots or configuration.
@@ -109,7 +121,12 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         try{
     	    // lets check whether or not docbook has been generated
     	    StringBuffer response = new StringBuffer();
-    	    snapshotNode = NodeUtil.findScriptNodeById(snapshotId, workspace, null, false, services, response);
+			// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
+			ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@cm\\:name:\"", services );
+			if (nodeRefs == null || nodeRefs.size() != 1) {
+				throw new Exception("Failed to find snapshot with Id: " + snapshotId);
+			}
+			snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
     	    if ( !snapshotNode.hasAspect( "view2:docbook" )) {
     	    	response.append("[INFO]: Creating docbook.xml...\n");
 	            String snapshotName = snapshotNode.getSysmlId();
@@ -235,6 +252,9 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
     	
     protected void clearCache() {
         response = new StringBuffer();
+        NodeUtil.setBeenInsideTransaction( false );
+        NodeUtil.setBeenOutsideTransaction( false );
+        NodeUtil.setInsideTransactionNow( false );
     }
 
 }

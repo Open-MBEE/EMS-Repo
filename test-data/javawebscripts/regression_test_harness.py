@@ -128,7 +128,7 @@ def do176():
     json_output = get_json_output_no_status()
     j = json.loads(json_output)
     
-    if j:
+    if j and j['workspaces'] and j['workspaces'][0]:
         j["workspaces"][0]["description"] = "modified the workspace name and desc"
         j["workspaces"][0]["name"] = "modifiedWorkspaceName"
     
@@ -139,7 +139,7 @@ def set_wsid_to_gv(gv):
     json_output = get_json_output_no_status()
     j = json.loads(json_output)
     
-    if j:
+    if j and 'workspaces' in j and len(j['workspaces']) > 0: # and j['workspaces'][0]['id']:
         if gv == 1:
             set_gv1(j["workspaces"][0]["id"])
         elif gv == 2:
@@ -697,15 +697,70 @@ None,
         
 [
 60,
-"GetElements",
-"Get elements",
+"GetElementsRecursively",
+"Get all elements recursively",
 create_curl_cmd(type="GET",data="elements/123456?recurse=true",base_url=BASE_URL_WS,
                 branch="master/"),
 True, 
 common_filters+['"MMS_','MMS_'],
 ["test","workspaces","develop"]
 ],
-        
+
+[
+61,
+"GetElementsDepth0",
+"Get elements recursively depth 0",
+create_curl_cmd(type="GET",data="elements/123456?depth=0",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop"]
+],
+
+[
+62,
+"GetElementsDepth1",
+"Get elements recursively depth 1",
+create_curl_cmd(type="GET",data="elements/123456?depth=1",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop"]
+],
+
+[
+63,
+"GetElementsDepth2",
+"Get elements recursively depth 2",
+create_curl_cmd(type="GET",data="elements/123456?depth=2",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop"]
+],
+
+[
+64,
+"GetElementsDepthAll",
+"Get elements recursively depth -1",
+create_curl_cmd(type="GET",data="elements/123456?depth=-1",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop"]
+],
+
+[
+65,
+"GetElementsDepthInvalid",
+"Get elements recursively depth invalid",
+create_curl_cmd(type="GET",data="elements/123456?depth=invalid",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"MMS_','MMS_'],
+["test","workspaces","develop"]
+],
+
 [
 70,
 "GetViews",

@@ -14,8 +14,26 @@
     {
         "creator": "admin",
         "description": "",
+        "name": "wsG1",
+        "qualifiedName": "master/wsG1"
+    },
+    {
+        "creator": "admin",
+        "description": "",
+        "name": "wsG2",
+        "qualifiedName": "master/wsG2"
+    },
+    {
+        "creator": "admin",
+        "description": "",
         "name": "wsT",
         "qualifiedName": "master/wsA/wsT"
+    },
+    {
+        "creator": "admin",
+        "description": "",
+        "name": "wsT2",
+        "qualifiedName": "master/wsA/wsT2"
     },
     {
         "creator": "admin",

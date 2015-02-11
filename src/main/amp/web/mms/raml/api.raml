@@ -65,11 +65,13 @@ traits:
       description: Aspect for resources that can be retrieved recursively
       queryParameters:
         recurse:
-          description: If true, finds all elements recursively based on containment hierarchy
+          description: If true, finds all elements recursively based on containment hierarchy.
+                       This overrides depth so it is -1 regardless if depth is specified. 
           type: boolean
-        recurseDepth:
-          description: Recurse depth. 0 specifies infinite recursion (e.g., until all leaf
-                       nodes are found).
+        depth:
+          description: Recurse depth. -1 specifies infinite recursion (e.g., until all leaf
+                       nodes are found). 0 is the same as specifying no depth. 1 finds
+                       everything 1 level deep, so on and so forth.
           type: integer
   - searchable:
       description: Aspect for resources that can be searched for any resource type

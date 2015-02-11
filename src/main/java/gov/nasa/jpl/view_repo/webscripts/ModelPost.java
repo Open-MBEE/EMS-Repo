@@ -122,7 +122,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class ModelPost extends AbstractJavaWebScript {
     static Logger logger = Logger.getLogger(ModelPost.class);
-
+    
     public ModelPost() {
         super();
     }
@@ -237,9 +237,10 @@ public class ModelPost extends AbstractJavaWebScript {
             createOrUpdateModel( Object content, Status status,
                                  WorkspaceNode targetWS, WorkspaceNode sourceWS,
                                  boolean createCommit) throws Exception {
-            JSONObject postJson = (JSONObject) content;
-
-            JSONArray updatedArray = postJson.optJSONArray("updatedElements");
+        JSONObject postJson = (JSONObject) content;
+        populateSourceFromJson( postJson );
+        
+        JSONArray updatedArray = postJson.optJSONArray("updatedElements");
         JSONArray movedArray = postJson.optJSONArray("movedElements");
         JSONArray addedArray = postJson.optJSONArray("addedElements");
         JSONArray elementsArray = postJson.optJSONArray("elements");
@@ -314,8 +315,8 @@ public class ModelPost extends AbstractJavaWebScript {
         JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
 
         // FIXME: Need to split by projectId
-        if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId) ) {
-            //logger.warn("send deltas not posted properly");
+        if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId, source) ) {
+            if (logger.isInfoEnabled()) logger.info("send deltas not posted properly");
         }
 
         CommitUtil.updateCommitNodeRef( commitRef, deltaJson.toString(), "", services, response );
@@ -2568,6 +2569,7 @@ public class ModelPost extends AbstractJavaWebScript {
             ClassData cd = getSystemModelAe().getClassData();
 
             //loop x times for now
+            Random.reset();
             for(int i=0; i<10; i++)
             {
                 // Loop through all the listeners:
@@ -2581,13 +2583,11 @@ public class ModelPost extends AbstractJavaWebScript {
                 // Solve!!!!
                 boolean result = false;
                 try {
-                    Debug.turnOn();
-                    Random.reset();
+                    //Debug.turnOn();
                     result = solver.solve(constraints);
-                    // loop to check thru all constraints
 
                 } finally {
-                    Debug.turnOff();
+                    //Debug.turnOff();
                 }
                 if (!result) {
                     log( LogLevel.ERROR, "Was not able to satisfy all of the constraints!" );
@@ -2626,11 +2626,13 @@ public class ModelPost extends AbstractJavaWebScript {
         return instance.executeImplImpl(req,  status, cache, true);
     }
 
+    WorkspaceNode myWorkspace = null;
+    
     @Override
     protected Map<String, Object> executeImplImpl(final WebScriptRequest req,
-                                                  Status status, Cache cache) {
+                                                  final Status status, Cache cache) {
         Timer timer = new Timer();
-
+        
         printHeader( req );
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -2642,17 +2644,27 @@ public class ModelPost extends AbstractJavaWebScript {
         // see if prettyPrint default is overridden and change
         prettyPrint = getBooleanArg(req, "pretty", prettyPrint );
 
-        String user = AuthenticationUtil.getRunAsUser();
+        final String user = AuthenticationUtil.getRunAsUser();
         String wsId = null;
-
+        
         if (logger.isDebugEnabled()) {
             logger.debug( user + " " + req.getURL() );
             logger.debug( req.parseContent() );
         }
+        
+        if (runWithoutTransactions || internalRunWithoutTransactions) {
+            myWorkspace = getWorkspace( req, user );
+        }
+        else {
+            new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+                @Override
+                public void run() throws Exception {
+                    myWorkspace = getWorkspace( req, user );
+                }
+            };
+        }
 
-        WorkspaceNode workspace = getWorkspace( req, //true, // not creating ws!
-                                                user );
-        boolean wsFound = workspace != null;
+        boolean wsFound = myWorkspace != null;
         if ( !wsFound ) {
             wsId = getWorkspaceId( req );
             if ( wsId != null && wsId.equalsIgnoreCase( "master" ) ) {
@@ -2671,9 +2683,21 @@ public class ModelPost extends AbstractJavaWebScript {
         if (wsFound && validateRequest(req, status)) {
             try {
                 if (runInBackground) {
-                    saveAndStartAction(req, workspace, status);
+                    // Get the project node from the request:
+                    if (runWithoutTransactions || internalRunWithoutTransactions) {
+                        saveAndStartAction(req, myWorkspace, status);
+                    }
+                    else {
+                        new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+                            @Override
+                            public void run() throws Exception {
+                                saveAndStartAction(req, myWorkspace, status);
+
+                            }
+                        };
+                    }
                     response.append("JSON uploaded, model load being processed in background.\n");
-                    response.append("You will be notified via email when the model load has finished.\n");
+                    response.append("You will be notified via email when the model load has finished.\n"); 
                 }
                 else {
                     JSONObject postJson = (JSONObject)req.parseContent();
@@ -2707,7 +2731,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
 
                     if (projectNode != null) {
-                        handleUpdate( postJson, status, workspace, fix, model, true );
+                        handleUpdate( postJson, status, myWorkspace, fix, model, true );
                     }
                 }
             } catch (JSONException e) {

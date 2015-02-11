@@ -32,6 +32,7 @@ import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.EmsTransaction;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
@@ -85,16 +86,22 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
     }
     
     @Override
-    protected void executeImpl(Action action, NodeRef nodeRef) {
+    protected void executeImpl(final Action action, final NodeRef nodeRef) {
         clearCache();
 
+        new EmsTransaction(services, response, responseStatus) {
+            @Override
+            public void run() throws Exception {
+                executeImplImpl(action, nodeRef);
+            }
+        };
+    }
+    
+    private void executeImplImpl(Action action, NodeRef nodeRef) {
+        
         // Do not get an older version of the node based on the timestamp since
         // new snapshots should be associated with a new configuration. The
         // timestamp refers to the products, not the snapshots themselves.
-        //        if ( dateTime != null ) {
-//            NodeRef vRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
-//            if ( vRef != null ) nodeRef = vRef; 
-//        }
         EmsScriptNode jobNode = new EmsScriptNode(nodeRef, services, response);
         // clear out any existing associated snapshots
         jobNode.removeAssociations("ems:configuredSnapshots");
@@ -105,23 +112,10 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         dateTime = (Date)action.getParameterValue(PARAM_TIME_STAMP);
         
         WorkspaceNode workspace = null;
-//        if ( action instanceof WebScriptRequest) {
-//            response.append( "\n********* IS A REQ *********\n\n");
-//            WebScriptRequest req = (WebScriptRequest)action;
-//            String timestamp = req.getParameter("timestamp");
-//            workspace = AbstractJavaWebScript.getWorkspace( req, services,
-//                                                            response,
-//                                                            responseStatus, //false
-//                                                            null );
-//            if(dateTime == null) dateTime = TimeUtils.dateFromTimestamp( timestamp );
-//        } else {
-//            response.append("\n******** IS NOT A REQ *********\n\n");
-//        }
-//        EmsScriptNode logNode = ActionUtil.saveLogToFile(jobNode, "text/plain", services, response.toString());
         workspace = (WorkspaceNode)action.getParameterValue(PARAM_WORKSPACE);
 
         @SuppressWarnings("unchecked")
-		HashSet<String> productList = (HashSet<String>) action.getParameterValue(PARAM_PRODUCT_LIST);
+        HashSet<String> productList = (HashSet<String>) action.getParameterValue(PARAM_PRODUCT_LIST);
         
         String siteName = (String) action.getParameterValue(PARAM_SITE_NAME);
         String fndSiteName = null;
@@ -131,7 +125,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
             if (Debug.isOn()) System.out.println("ConfigurationGenerationActionExecuter started execution of " + siteName);
             SiteInfo siteInfo = services.getSiteService().getSite(siteName);
             if (siteInfo == null) {
-            		if (Debug.isOn()) System.out.println("[ERROR]: could not find site: " + siteName);
+                    if (Debug.isOn()) System.out.println("[ERROR]: could not find site: " + siteName);
                 return;
             }
             NodeRef siteRef = siteInfo.getNodeRef();
@@ -148,10 +142,6 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
            fndSiteName = site.getSiteName();
         }       
        
-//        Set< EmsScriptNode > productSet =
-//                WebScriptUtil.getAllNodesInPath( site.getQnamePath(), "ASPECT",
-//                                                 Acm.ACM_PRODUCT, workspace,
-//                                                 dateTime, services, response );
         Set<EmsScriptNode> productSet = new HashSet<EmsScriptNode>();
         // search for products against the latest time so we can put in the snapshot references
         Map< String, EmsScriptNode > nodeList = NodeUtil.searchForElements(NodeUtil.SearchType.ASPECT.prefix, 
@@ -167,8 +157,8 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
         String jobStatus = "Succeeded";
         Set<EmsScriptNode> snapshots = new HashSet<EmsScriptNode>();
         for (EmsScriptNode product: productSet) {
-    		// only create the filtered list of documents
-    		if (productList.isEmpty() || productList.contains(product.getSysmlId())) {
+        		// only create the filtered list of documents
+        		if (productList.isEmpty() || productList.contains(product.getSysmlId())) {
 	            SnapshotPost snapshotService = new SnapshotPost(repository, services);
 	            snapshotService.setRepositoryHelper(repository);
 	            snapshotService.setServices(services);
@@ -189,7 +179,7 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
 	            if (snapshot != null) {
 	                snapshots.add(snapshot);
 	            }
-    		}
+        		}
         }
         // make relationships between configuration node and all the snapshots
         for (EmsScriptNode snapshot: snapshots) {
@@ -224,6 +214,10 @@ public class ConfigurationGenerationActionExecuter extends ActionExecuterAbstrac
 
     protected void clearCache() {
         response = new StringBuffer();
+        responseStatus = new Status();
+        NodeUtil.setBeenInsideTransaction( false );
+        NodeUtil.setBeenOutsideTransaction( false );
+        NodeUtil.setInsideTransactionNow( false );
     }
 
     @Override

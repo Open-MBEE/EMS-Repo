@@ -51,8 +51,10 @@ import org.alfresco.service.cmr.repository.InvalidNodeRefException;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
+import org.alfresco.service.cmr.search.LimitBy;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
+import org.alfresco.service.cmr.search.SearchParameters;
 import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -137,7 +139,7 @@ public class NodeUtil {
     public static boolean doHeisenCheck = true;
     public static boolean doVersionCaching = true;
     public static boolean activeVersionCaching = true;
-    public static boolean doJsonCaching = false;
+    public static boolean doJsonCaching = true;
     
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
     public static boolean heisenbugSeen = false;
@@ -174,8 +176,12 @@ public class NodeUtil {
 //    public static Map<String, JSONObject> jsonCache = 
 //    		Collections.synchronizedMap(new HashMap<String, JSONObject>());
     // Set< String > filter, boolean isExprOrProp,Date dateTime, boolean isIncludeQualified
-    public static Map< String, Map< Long, Map< Boolean, Map< Boolean, Map< Set< String >, JSONObject > > > > > jsonCache =
-        Collections.synchronizedMap( new HashMap< String, Map< Long, Map< Boolean, Map< Boolean, Map< Set< String >, JSONObject > > > > >() );
+    public static Map< String, Map< Long, JSONObject > > jsonCache =
+        Collections.synchronizedMap( new HashMap< String, Map< Long, JSONObject > >() );
+    // REVIEW -- TODO -- Should we try and cache the toString() output of the json, too?    
+    // REVIEW -- TODO -- This would mean we'd have to concatenate the json
+    // REVIEW -- TODO -- strings ourselves instead of just one big toString() 
+    // REVIEW -- TODO -- on the collection as done currently.
     
     // Set the flag to time events that occur during a model post using the timers
     // below
@@ -290,9 +296,10 @@ public class NodeUtil {
         }
         ResultSet results = null;
         if ( searchService != null ) {
-            results = searchService.query( getStoreRef(),
-                                           SearchService.LANGUAGE_LUCENE,
-                                           queryPattern );
+//            results = searchService.query( getStoreRef(),
+//                                           SearchService.LANGUAGE_LUCENE,
+//                                           queryPattern );
+            results = searchService.query( getSearchParameters(queryPattern) );
         }
         if ( Debug.isOn() ) {
             Debug.outln( "luceneSearch(" + queryPattern + "): returned "
@@ -302,6 +309,19 @@ public class NodeUtil {
      	Timer.stopTimer(timerLucene, "***** luceneSearch(): time", timeEvents);
 
         return results;
+    }
+    
+    public static SearchParameters getSearchParameters(String queryPattern) {
+        final SearchParameters params = new SearchParameters();
+        params.addStore(getStoreRef());
+        params.setLanguage(SearchService.LANGUAGE_LUCENE);
+        params.setQuery(queryPattern);
+        params.setLimitBy(LimitBy.UNLIMITED);
+        params.setLimit(0);
+        params.setMaxPermissionChecks(100000);
+        params.setMaxPermissionCheckTimeMillis(100000);
+        params.setMaxItems(-1);
+        return params;
     }
 
     public static List<EmsScriptNode> resultSetToList( ResultSet results ) {

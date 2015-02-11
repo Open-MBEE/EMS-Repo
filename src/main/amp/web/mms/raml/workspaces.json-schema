@@ -4,6 +4,10 @@
 	"description": "List of workspaces user has access to",
 	"properties": 
 	{
+	    "source": {
+	       "type": "string",
+	       "description": "The client source that originated the delta if provided"
+	    },
 		"workspaces": 
 		{
 			"type": "array",

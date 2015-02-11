@@ -618,8 +618,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
         snapshotNode.createOrUpdateAspect( "view2:Snapshotable" );
         snapshotNode.createOrUpdateProperty( "view2:snapshotProduct", view.getNodeRef() );
         snapshotNode.createOrUpdateProperty( "view2:timestamp", timestamp );
-        view.createOrUpdateAspect( "view2:Snapshotable" );
-        view.appendToPropertyNodeRefs( "view2:productSnapshots", snapshotNode.getNodeRef() );
+        // can't update the view since it may be frozen since it can be in parent branch
+//        view.createOrUpdateAspect( "view2:Snapshotable" );
+//        view.appendToPropertyNodeRefs( "view2:productSnapshots", snapshotNode.getNodeRef() );
 
         JSONObject snapshotJson = new JSONObject();
         try {
@@ -1730,28 +1731,36 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     private void setArtifactsGenerationStatus(WorkspaceNode workspace, JSONObject postJson) throws Exception{
     	try{
-	       	EmsScriptNode snapshotNode = findScriptNodeById(postJson.getString("id"), workspace, null, false);
-	        if(snapshotNode == null){
-	        	throw new Exception("Failed to find snapshot with Id: " + postJson.getString("id"));
-	        }
+    	    if (!postJson.has( "id" )) {
+    	        throw new Exception("No id found");
+    	    }
 
-			ArrayList<String> formats = getSnapshotFormats(postJson);
-			for(String format:formats){
-				if(format.compareToIgnoreCase("pdf") == 0){
-					if(SnapshotPost.getPdfNode(snapshotNode)==null){
-	    				snapshotNode.createOrUpdateAspect("view2:pdf");
-	    	            snapshotNode.createOrUpdateProperty("view2:pdfStatus", "Generating");
+    	    String id = postJson.getString("id");
+    	    
+        // do simple lucene search, since snapshotNode ID is unique
+    	    ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( id, "@cm\\:name:\"", services );
+    	    if (nodeRefs == null || nodeRefs.size() != 1) {
+            throw new Exception("Failed to find snapshot with Id: " + postJson.getString("id"));
+    	    }
+    	    EmsScriptNode snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
+
+		ArrayList<String> formats = getSnapshotFormats(postJson);
+		for(String format:formats){
+			if(format.compareToIgnoreCase("pdf") == 0){
+				if(SnapshotPost.getPdfNode(snapshotNode)==null){
+        				snapshotNode.createOrUpdateAspect("view2:pdf");
+        	            snapshotNode.createOrUpdateProperty("view2:pdfStatus", "Generating");
 //	    	    		System.out.println("set PDF status => " + "Generating...");
-	    	    		}
-	        	}
-	        	else if(format.compareToIgnoreCase("html") == 0){
-	        		if(SnapshotPost.getHtmlZipNode(snapshotNode)==null){
-		        		snapshotNode.createOrUpdateAspect("view2:htmlZip");
-		                snapshotNode.createOrUpdateProperty("view2:htmlZipStatus", "Generating");
+				}
+        	    }
+        	    else if(format.compareToIgnoreCase("html") == 0){
+        	        if(SnapshotPost.getHtmlZipNode(snapshotNode)==null){
+        	            snapshotNode.createOrUpdateAspect("view2:htmlZip");
+	                snapshotNode.createOrUpdateProperty("view2:htmlZipStatus", "Generating");
 //		        		System.out.println("set HTML status => " + "Generating...");
-	        		}
-	        	}
-			}
+        	        }
+        	    }
+		}
     	}
     	catch(Exception ex){
     		ex.printStackTrace();
