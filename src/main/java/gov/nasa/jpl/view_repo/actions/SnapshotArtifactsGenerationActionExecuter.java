@@ -120,7 +120,12 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         	    
         	    // lets check whether or not docbook has been generated
         	    StringBuffer response = new StringBuffer();
-        	    EmsScriptNode snapshotNode = NodeUtil.findScriptNodeById(snapshotId, workspace, null, false, services, response);
+        	    // lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
+            ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@cm\\:name:\"", services );
+            if (nodeRefs == null || nodeRefs.size() != 1) {
+                throw new Exception("Failed to find snapshot with Id: " + snapshotId);
+            }
+            EmsScriptNode snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
         	    if ( !snapshotNode.hasAspect( "view2:docbook" )) {
                 String snapshotName = snapshotNode.getSysmlId();
                 Date timestamp = (Date)snapshotNode.getProperty("view2:timestamp");

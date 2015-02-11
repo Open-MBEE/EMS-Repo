@@ -1,85 +1,85 @@
 {"views": [
     {
-        "creator": "admin",
-        "documentation": "to",
-        "editable": true,
-        "modified": "2014-12-10T14:54:46.387-0800",
+        "qualifiedId": "/europa/123456/300/301/302",
         "name": "302",
+        "qualifiedName": "/europa/JW_TEST/300/301/302",
+        "sysmlid": "302",
+        "documentation": "to",
         "owner": "301",
-        "qualifiedId": "/123456/300/301/302",
-        "qualifiedName": "/JW_TEST/300/301/302",
-        "read": "2014-12-10T14:57:50.957-0800",
+        "read": "2015-02-11T14:19:04.136-0800",
         "specialization": {
             "isDerived": false,
             "isSlot": false,
-            "type": "Property",
             "value": [{
                 "string": "dlam_string",
                 "type": "LiteralString"
-            }]
-        },
-        "sysmlid": "302"
-    },
-    {
-        "creator": "admin",
-        "documentation": "about",
-        "editable": true,
-        "modified": "2014-12-10T14:56:20.929-0800",
-        "name": "304",
-        "owner": "303",
-        "qualifiedId": "/123456/300/301/302/303/304",
-        "qualifiedName": "/JW_TEST/300/301/302/303/304",
-        "read": "2014-12-10T14:57:50.970-0800",
-        "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "type": "Property",
-            "value": [{
-                "string": "dlam_string",
-                "type": "LiteralString"
-            }]
-        },
-        "sysmlid": "304"
-    },
-    {
-        "creator": "admin",
-        "documentation": "else",
-        "editable": true,
-        "modified": "2014-12-10T14:56:53.093-0800",
-        "name": "301",
-        "owner": "300",
-        "qualifiedId": "/123456/300/301",
-        "qualifiedName": "/JW_TEST/300/301",
-        "read": "2014-12-10T14:57:50.987-0800",
-        "specialization": {
-            "allowedElements": [
-                "301",
-                "302",
-                "303"
-            ],
-            "childrenViews": ["304"],
-            "contains": [{
-                "source": "301",
-                "sourceProperty": "documentation",
-                "sourceType": "reference",
-                "type": "Paragraph"
             }],
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2015-02-11T14:18:29.438-0800"
+    },
+    {
+        "qualifiedId": "/europa/123456/300/301/302/303/304",
+        "name": "304",
+        "qualifiedName": "/europa/JW_TEST/300/301/302/303/304",
+        "sysmlid": "304",
+        "documentation": "about",
+        "owner": "303",
+        "read": "2015-02-11T14:18:20.936-0800",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "value": [{
+                "string": "dlam_string",
+                "type": "LiteralString"
+            }],
+            "type": "Property"
+        },
+        "editable": true,
+        "creator": "admin",
+        "modified": "2015-02-11T14:18:03.490-0800"
+    },
+    {
+        "qualifiedId": "/europa/123456/300/301",
+        "name": "301",
+        "qualifiedName": "/europa/JW_TEST/300/301",
+        "sysmlid": "301",
+        "documentation": "else",
+        "owner": "300",
+        "read": "2015-02-11T14:17:58.192-0800",
+        "specialization": {
             "displayedElements": [
                 "301",
                 "302",
                 "303"
             ],
-            "noSections": ["302"],
-            "type": "Product",
+            "childrenViews": ["304"],
             "view2view": [{
                 "childrenViews": [
                     "301",
                     "302"
                 ],
                 "sysmlid": "301"
-            }]
+            }],
+            "allowedElements": [
+                "301",
+                "302",
+                "303"
+            ],
+            "contains": [{
+                "sourceType": "reference",
+                "source": "301",
+                "sourceProperty": "documentation",
+                "type": "Paragraph"
+            }],
+            "noSections": ["302"],
+            "type": "Product"
         },
-        "sysmlid": "301"
+        "editable": true,
+        "creator": "admin",
+        "modified": "2015-02-11T14:17:57.634-0800"
     }
 ]}
 200

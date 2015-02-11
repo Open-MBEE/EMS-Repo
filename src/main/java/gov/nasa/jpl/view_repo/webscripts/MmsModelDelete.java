@@ -11,12 +11,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONArray;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
@@ -29,6 +31,8 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class MmsModelDelete extends AbstractJavaWebScript {
+    Set< EmsScriptNode > valueSpecs = new LinkedHashSet<EmsScriptNode>();
+
     @Override
     protected boolean validateRequest( WebScriptRequest req, Status status ) {
         // TODO Auto-generated method stub
@@ -71,7 +75,11 @@ public class MmsModelDelete extends AbstractJavaWebScript {
            log(LogLevel.ERROR, "Could not create JSON\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
            e.printStackTrace();
         } catch (Exception e) {
-           log(LogLevel.ERROR, "Internal server error\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+           if (e.getCause() instanceof JSONException) {
+               log(LogLevel.WARNING, "Bad JSON body provided\n", HttpServletResponse.SC_BAD_REQUEST); 
+           } else {
+               log(LogLevel.ERROR, "Internal server error\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+           }
            e.printStackTrace();
         }
         if (result == null) {
@@ -114,28 +122,110 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         }
         setWsDiff(workspace);   // need to initialize the workspace diff
 
-        String elementId = req.getServiceMatch().getTemplateVars().get("elementId");
+        String projectId = null;
 
-        // Searching for deleted nodes also, in case they try to delete a element that has
-        // already been deleted in the current workspace.
-        EmsScriptNode root = findScriptNodeById(elementId, workspace, null, true);
+        // parse based off of URL or content body
+        String elementId = req.getServiceMatch().getTemplateVars().get("elementId");
+        List<String> ids = new ArrayList<String>();
+        if (null != elementId) {
+            ids.add( elementId );
+        } else {
+            JSONObject requestJson = (JSONObject) req.parseContent();
+            if (requestJson != null) {
+                populateSourceFromJson( requestJson );
+                if (requestJson.has("elements")) {
+                    JSONArray elementsJson = requestJson.getJSONArray( "elements" );
+                    if (elementsJson != null) {
+                        for (int ii = 0; ii < elementsJson.length(); ii++) {
+                            String id = elementsJson.getJSONObject( ii ).getString( "sysmlid" );
+                            ids.add(id);
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (ids.size() <= 0) {
+            log(LogLevel.WARNING, "no elements specified for deletion", HttpServletResponse.SC_BAD_REQUEST);
+        } else {
+            try {
+                projectId = deleteNodes(ids, workspace);
+                Date end = new Date();
+        
+                boolean showAll = false;
+                result = wsDiff.toJSONObject( end, end, showAll );
+        
+                if (wsDiff.isDiff()) {
+                    // Send deltas to all listeners
+                    if ( !CommitUtil.sendDeltas(result, wsId, projectId, source) ) {
+                        log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
+                    }
+        
+                    CommitUtil.commit( result, workspace, "", true, services, response );
+                }                
+
+                // apply aspects after wsDiff JSON has been created since the wsDiff 
+                // toJSONObject skips deleted objects
+                Set<EmsScriptNode> nodesToDelete = new HashSet<EmsScriptNode>();
+                nodesToDelete.addAll( wsDiff.getDeletedElements().values() );
+                nodesToDelete.addAll( valueSpecs );
+                for (EmsScriptNode deletedNode: nodesToDelete) {
+                    if (deletedNode.exists()) {
+                        deletedNode.removeAspect( "ems:Added" );
+                        deletedNode.removeAspect( "ems:Updated" );
+                        deletedNode.removeAspect( "ems:Moved" );
+                        deletedNode.createOrUpdateAspect( "ems:Deleted" );
+                        projectId = deletedNode.getProjectId();
+                    }
+                }
+            } catch (Exception e) {
+                // do nothing, just a 404 not found
+            }
+        }
+
+        return result;
+    }
+
+
+    protected String deleteNodes(List<String> ids, WorkspaceNode workspace) throws Exception {
+        String projectId = null;
+        
+        List<EmsScriptNode> nodes = new ArrayList<EmsScriptNode>();
+
+        for (String id: ids) {
+            // Searching for deleted nodes also, in case they try to delete a element that has
+            // already been deleted in the current workspace.
+            EmsScriptNode node = findScriptNodeById(id, workspace, null, true);
+            if (node != null && node.exists()) {
+                String tmpProjectId = deleteNodeRecursively(node, workspace);
+                if ( null != tmpProjectId && null == projectId ) {
+                    projectId = tmpProjectId;
+                }
+                nodes.add( node );
+            } else {
+                if (ids.size() == 1) {
+                    String workspaceName = "master";
+                    String msg = "Node already deleted.";
+                    if (node == null) msg = "Node does not exist.";
+                    if (workspace != null) workspaceName = workspace.getSysmlName();
+                    log( LogLevel.ERROR, 
+                         String.format( "Could not find node %s in workspace %s. %s",
+                                        id, workspaceName, msg), 
+                        HttpServletResponse.SC_NOT_FOUND);
+                    throw new Exception();
+                }
+            }
+        }
+        
+        return projectId;
+    }
+    
+    protected String deleteNodeRecursively(EmsScriptNode root, WorkspaceNode workspace) {
         String projectId = null;
 
         try {
+            handleElementHierarchy( root, workspace, true );
 
-            if (root != null && root.exists()) {
-                handleElementHierarchy( root, workspace, true );
-            } else {
-                log( LogLevel.ERROR, "Could not find node " + elementId + " in workspace " + wsId + ",it is either deleted or not present.",
-                     HttpServletResponse.SC_NOT_FOUND);
-                return result;
-            }
-
-            long end = System.currentTimeMillis();
-
-            boolean showAll = false;
-            
-            Set< EmsScriptNode > valueSpecs = new LinkedHashSet<EmsScriptNode>();
             Set< String> idsToRemove = new HashSet<String>();
             for (Entry< String, EmsScriptNode > entry: wsDiff.getDeletedElements().entrySet()) {
                 EmsScriptNode node = entry.getValue();
@@ -151,22 +241,6 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 wsDiff.getDeletedElements().remove( id );
                 wsDiff.getElementsVersions().remove( id );
                 wsDiff.getElements().remove( id );
-            }
-            
-            result = wsDiff.toJSONObject( new Date(end), new Date(end), showAll );
-
-            // apply aspects after JSON has been created (otherwise it won't be output)
-            Set<EmsScriptNode> nodesToDelete = new HashSet<EmsScriptNode>();
-            nodesToDelete.addAll( wsDiff.getDeletedElements().values() );
-            nodesToDelete.addAll( valueSpecs );
-            for (EmsScriptNode deletedNode: nodesToDelete) {
-                if (deletedNode.exists()) {
-                    deletedNode.removeAspect( "ems:Added" );
-                    deletedNode.removeAspect( "ems:Updated" );
-                    deletedNode.removeAspect( "ems:Moved" );
-                    deletedNode.createOrUpdateAspect( "ems:Deleted" );
-                    projectId = deletedNode.getProjectId();
-                }
             }
             
         } catch (Throwable e) {
@@ -187,22 +261,13 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 deletedNode.getOrSetCachedVersion();
             }
         }
-
-        if (wsDiff.isDiff()) {
-            // Send deltas to all listeners
-            // FIXME: need to add in the source - this should be in the JSON in the future
-            if ( !CommitUtil.sendDeltas(result, wsId, projectId, source) ) {
-                log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
-            }
-
-            CommitUtil.commit( result, workspace, "", true, services, response );
-        }
-
-        return result;
+        
+        return projectId;
     }
-
+    
+    
     /**
-     * Deletes a node by adding the ems:Deleted aspect
+     * Builds up the list of deleted elements
      * @param node
      * @param workspace
      */

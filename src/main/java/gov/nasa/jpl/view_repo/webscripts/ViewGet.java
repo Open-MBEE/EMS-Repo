@@ -31,6 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.TimeUtils;
+import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.sysml.View;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
@@ -47,6 +48,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,6 +57,8 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 public class ViewGet extends AbstractJavaWebScript {
+    static Logger logger = Logger.getLogger(ViewGet.class);
+
     protected boolean gettingDisplayedElements = false;
     protected boolean gettingContainedViews = false;
 
@@ -124,6 +128,8 @@ public class ViewGet extends AbstractJavaWebScript {
         return instance.executeImplImpl( req, status, cache );
     }
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
+        Timer timer = new Timer();
+
         printHeader( req );
 
         clearCaches();
@@ -177,6 +183,10 @@ public class ViewGet extends AbstractJavaWebScript {
         status.setCode(responseStatus.getCode());
 
         printFooter();
+
+        if (logger.isInfoEnabled()) {
+            logger.info( "ViewGet: " + timer );
+        }
 
         return model;
     }
