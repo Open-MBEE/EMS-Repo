@@ -75,7 +75,11 @@ public class MmsModelDelete extends AbstractJavaWebScript {
            log(LogLevel.ERROR, "Could not create JSON\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
            e.printStackTrace();
         } catch (Exception e) {
-           log(LogLevel.ERROR, "Internal server error\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+           if (e.getCause() instanceof JSONException) {
+               log(LogLevel.WARNING, "Bad JSON body provided\n", HttpServletResponse.SC_BAD_REQUEST); 
+           } else {
+               log(LogLevel.ERROR, "Internal server error\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+           }
            e.printStackTrace();
         }
         if (result == null) {
@@ -139,44 +143,44 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                     }
                 }
             }
+        }
         
-            if (ids.size() <= 0) {
-                log(LogLevel.WARNING, "no elements specified for deletion", HttpServletResponse.SC_BAD_REQUEST);
-            } else {
-                try {
-                    projectId = deleteNodes(ids, workspace);
-                    Date end = new Date();
-            
-                    boolean showAll = false;
-                    result = wsDiff.toJSONObject( end, end, showAll );
-            
-                    if (wsDiff.isDiff()) {
-                        // Send deltas to all listeners
-                        if ( !CommitUtil.sendDeltas(result, wsId, projectId, source) ) {
-                            log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
-                        }
-            
-                        CommitUtil.commit( result, workspace, "", true, services, response );
+        if (ids.size() <= 0) {
+            log(LogLevel.WARNING, "no elements specified for deletion", HttpServletResponse.SC_BAD_REQUEST);
+        } else {
+            try {
+                projectId = deleteNodes(ids, workspace);
+                Date end = new Date();
+        
+                boolean showAll = false;
+                result = wsDiff.toJSONObject( end, end, showAll );
+        
+                if (wsDiff.isDiff()) {
+                    // Send deltas to all listeners
+                    if ( !CommitUtil.sendDeltas(result, wsId, projectId, source) ) {
+                        log(LogLevel.WARNING, "createOrUpdateModel deltas not posted properly");
                     }
-                    
-    
-                    // apply aspects after JSON has been created since the too JSON doesn't show
-                    // deleted elements
-                    Set<EmsScriptNode> nodesToDelete = new HashSet<EmsScriptNode>();
-                    nodesToDelete.addAll( wsDiff.getDeletedElements().values() );
-                    nodesToDelete.addAll( valueSpecs );
-                    for (EmsScriptNode deletedNode: nodesToDelete) {
-                        if (deletedNode.exists()) {
-                            deletedNode.removeAspect( "ems:Added" );
-                            deletedNode.removeAspect( "ems:Updated" );
-                            deletedNode.removeAspect( "ems:Moved" );
-                            deletedNode.createOrUpdateAspect( "ems:Deleted" );
-                            projectId = deletedNode.getProjectId();
-                        }
-                    }
-                } catch (Exception e) {
-                    // do nothing, just a 404 not found
+        
+                    CommitUtil.commit( result, workspace, "", true, services, response );
                 }
+                
+
+                // apply aspects after JSON has been created since the too JSON doesn't show
+                // deleted elements
+                Set<EmsScriptNode> nodesToDelete = new HashSet<EmsScriptNode>();
+                nodesToDelete.addAll( wsDiff.getDeletedElements().values() );
+                nodesToDelete.addAll( valueSpecs );
+                for (EmsScriptNode deletedNode: nodesToDelete) {
+                    if (deletedNode.exists()) {
+                        deletedNode.removeAspect( "ems:Added" );
+                        deletedNode.removeAspect( "ems:Updated" );
+                        deletedNode.removeAspect( "ems:Moved" );
+                        deletedNode.createOrUpdateAspect( "ems:Deleted" );
+                        projectId = deletedNode.getProjectId();
+                    }
+                }
+            } catch (Exception e) {
+                // do nothing, just a 404 not found
             }
         }
 
