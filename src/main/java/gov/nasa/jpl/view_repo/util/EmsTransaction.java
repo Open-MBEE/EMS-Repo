@@ -71,7 +71,7 @@ public abstract class EmsTransaction {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
-            NodeUtil.sendNotificationEvent( "Heisenbug Occurence!", "rollback failed on " + addr , services );
+            NodeUtil.sendNotificationEvent( "Transaction did not roll back properly!", "rollback failed on " + addr , services );
         }
     }
 
