@@ -162,11 +162,10 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                     }
         
                     CommitUtil.commit( result, workspace, "", true, services, response );
-                }
-                
+                }                
 
-                // apply aspects after JSON has been created since the too JSON doesn't show
-                // deleted elements
+                // apply aspects after wsDiff JSON has been created since the wsDiff 
+                // toJSONObject skips deleted objects
                 Set<EmsScriptNode> nodesToDelete = new HashSet<EmsScriptNode>();
                 nodesToDelete.addAll( wsDiff.getDeletedElements().values() );
                 nodesToDelete.addAll( valueSpecs );
