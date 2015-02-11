@@ -1,0 +1,26 @@
+{
+
+    "message": "[WARNING]: Bad depth specified, returning depth 0\n",
+
+    "elements": [{
+
+        "qualifiedId": "/123456",
+
+        "name": "JW_TEST",
+
+        "qualifiedName": "/JW_TEST",
+
+        "sysmlid": "123456",
+
+        "owner": "null",
+
+        "editable": true,
+
+        "creator": "admin",
+
+    }]
+
+}
+
+400
+

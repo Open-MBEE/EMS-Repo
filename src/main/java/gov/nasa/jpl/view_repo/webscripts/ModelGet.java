@@ -251,6 +251,8 @@ public class ModelGet extends AbstractJavaWebScript {
                     depth = Long.parseLong( req.getParameter("depth") );
                 } catch (NumberFormatException nfe) {
                     // don't do any recursion, ignore the depth
+                    log(LogLevel.WARNING, "Bad depth specified, returning depth 0",
+                        HttpServletResponse.SC_BAD_REQUEST);
                 }
             }
             // recurse default is false
