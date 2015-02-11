@@ -1138,50 +1138,57 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	for(Element image : images){
     		String src = image.attr("src");
     		if(src == null) continue;
-    		if(src.toLowerCase().startsWith("http")){
-    			String hostname = getHostname();
-
-                try{
-                	URL url = new URL(src);
-                	String embedHostname = String.format("%s://%s", url.getProtocol(), url.getHost());
-                	if(embedHostname.compareToIgnoreCase(hostname)==0){
-                		String alfrescoContext = "workspace/SpacesStore/";	//this.services.getSysAdminParams().getAlfrescoContext();
-                		String filePath = url.getFile();
-                		if(filePath == null || filePath.isEmpty()) return "";
-
-                		String nodeId = null;
-                		if(filePath.contains(alfrescoContext)){
-                			//filePath = "alfresco/d/d/" + filePath.substring(filePath.indexOf(alfrescoContext));
-                			nodeId = filePath.substring(filePath.indexOf(alfrescoContext) + alfrescoContext.length());
-                			nodeId = nodeId.substring(0, nodeId.indexOf("/"));
-                		}
-                		if(nodeId == null || nodeId.isEmpty()) return "";
-
-                		String filename = filePath.substring(filePath.lastIndexOf("/") + 1);
-                		DBImage dbImage = retrieveEmbeddedImage(nodeId, filename, null, null);
-                		String inlineImageTag = buildInlineImageTag(nodeId, "images/" + filename);
-                		//section.addElement(dbImage);
-                		image.before(inlineImageTag);
-                		image.remove();
-
-                		//if(imgFilename != null && !imgFilename.isEmpty()){
-                			//image.attr("src", imgFilename);
-                		//}
-                	}
-                	else{
-                		image.before(String.format("<link xl:href=\"%s\" /> ", src));
-                		image.remove();
-                	}
-                }
-                catch(Exception ex){
-                	log(LogLevel.WARNING, String.format("Failed to retrieve embedded image at %s. %s", src, ex.getMessage()));
-                	ex.printStackTrace();
-                }
+    		try{
+            	URL url = new URL(src);
+	    		if(src.toLowerCase().startsWith("http")){
+	    			String hostname = getHostname();
+	
+	                try{
+	//                	URL url = new URL(src);
+	                	String embedHostname = String.format("%s://%s", url.getProtocol(), url.getHost());
+	                	if(embedHostname.compareToIgnoreCase(hostname)==0){
+	                		String alfrescoContext = "workspace/SpacesStore/";	//this.services.getSysAdminParams().getAlfrescoContext();
+	                		String filePath = url.getFile();
+	                		if(filePath == null || filePath.isEmpty()) return "";
+	
+	                		String nodeId = null;
+	                		if(filePath.contains(alfrescoContext)){
+	                			//filePath = "alfresco/d/d/" + filePath.substring(filePath.indexOf(alfrescoContext));
+	                			nodeId = filePath.substring(filePath.indexOf(alfrescoContext) + alfrescoContext.length());
+	                			nodeId = nodeId.substring(0, nodeId.indexOf("/"));
+	                		}
+	                		if(nodeId == null || nodeId.isEmpty()) return "";
+	
+	                		String filename = filePath.substring(filePath.lastIndexOf("/") + 1);
+	                		DBImage dbImage = retrieveEmbeddedImage(nodeId, filename, null, null);
+	                		String inlineImageTag = buildInlineImageTag(nodeId, "images/" + filename);
+	                		//section.addElement(dbImage);
+	                		image.before(inlineImageTag);
+	                		image.remove();
+	
+	                		//if(imgFilename != null && !imgFilename.isEmpty()){
+	                			//image.attr("src", imgFilename);
+	                		//}
+	                	}
+	                	else{
+	                		image.before(String.format(" <ulink xl:href=\"%s\">%s</ulink> ", src, url.getFile()));
+	                		image.remove();
+	                	}
+	                }
+	                catch(Exception ex){
+	                	log(LogLevel.WARNING, String.format("Failed to retrieve embedded image at %s. %s", src, ex.getMessage()));
+	                	ex.printStackTrace();
+	                }
+	    		}
+	    		else{
+	    			image.before(String.format(" <ulink xl:href=\"%s\">%s</ulink> ", src, url.getFile()));
+	    			image.remove();
+	    		}
     		}
-    		else{
-    			image.before(String.format("<link xl:href=\"%s\" /> ", src));
-    			image.remove();
-    		}
+            catch(Exception ex){
+            	log(LogLevel.WARNING, String.format("Failed to process embedded image at %s. %s", src, ex.getMessage()));
+            	ex.printStackTrace();
+            }
     	}
     	return document.body().html().toString();
     }
