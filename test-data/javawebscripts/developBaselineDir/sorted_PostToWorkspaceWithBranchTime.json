@@ -1,18 +1,18 @@
 {"elements": [{
-    "creator": "admin",
-    "documentation": "y is y",
-    "editable": true,
+    "qualifiedId": "/europa/123456/300/301/302/y",
+    "qualifiedName": "/europa/JW_TEST/300/301/302/null",
+    "sysmlid": "y",
     "owner": "302",
-    "qualifiedId": "/123456/300/301/302/y",
-    "qualifiedName": "/JW_TEST/300/301/302/null",
+    "documentation": "y is y",
     "specialization": {
-        "isDerived": false,
         "isSlot": false,
-        "type": "Property",
+        "isDerived": false,
         "value": [{
             "string": "the y value",
             "type": "LiteralString"
-        }]
+        }],
+        "type": "Property"
     },
-    "sysmlid": "y"
+    "editable": true,
+    "creator": "admin"
 }]}

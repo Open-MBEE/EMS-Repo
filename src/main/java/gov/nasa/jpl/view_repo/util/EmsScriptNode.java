@@ -114,6 +114,9 @@ public class EmsScriptNode extends ScriptNode implements
     public static boolean tryToFlushCache = false;
 
     public static boolean versionCacheDebugPrint = false;
+    
+    private String qualifiedName = null;
+    private String qualifiedId = null;
 
     /**
      * A set of content model property names that serve as workspace metadata
@@ -1731,10 +1734,16 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public String getSysmlQName() {
+        if (qualifiedName != null) {
+            return qualifiedName;
+        }
         return getSysmlQPath( true );
     }
 
     public String getSysmlQId() {
+        if (qualifiedId != null) {
+            return qualifiedId;
+        }
         return getSysmlQPath( false );
     }
 
@@ -1748,41 +1757,46 @@ public class EmsScriptNode extends ScriptNode implements
      * @return SysML qualified name (e.g., sysml:name qualified)
      */
     public String getSysmlQPath( boolean isName ) {
-        String qname = "";
-        String pkgSuffix = "_pkg";
-
         // TODO REVIEW
         // This is currently not called on reified packages, so as long as the ems:owner always points
         // to reified nodes, as it should, then we dont need to replace pkgSuffix in the qname.
 
-        if ( isName ) {
-            qname = "/" + getProperty( "sysml:name" );
-        } else {
-            qname =  "/" + getProperty( "sysml:id" );
-            //qname = qname.endsWith(pkgSuffix) ? qname.replace(pkgSuffix, "" ) : qname;
-        }
+        qualifiedName = "/" + getProperty( "sysml:name" );
+        qualifiedId =  "/" + getProperty( "sysml:id" );
 
         NodeRef ownerRef = (NodeRef)this.getProperty( "ems:owner" );
+        EmsScriptNode owner = null;
         // Need to look up based on owners...
         while ( ownerRef != null ) {
-            EmsScriptNode owner =
-                    new EmsScriptNode( ownerRef, services, response );
-            String nameProp = null;
-            if ( isName ) {
-                nameProp = (String)owner.getProperty( "sysml:name" );
-            } else {
-                nameProp = (String)owner.getProperty( "sysml:id" );
-            }
+            owner = new EmsScriptNode( ownerRef, services, response );
+            String nameProp = (String)owner.getProperty( "sysml:name" );
+            String idProp = (String)owner.getProperty( "sysml:id" );
             if ( nameProp == null ) {
                 break;
             }
             //nameProp = nameProp.endsWith(pkgSuffix) ? nameProp.replace(pkgSuffix, "" ) : nameProp;
-            qname = "/" + nameProp + qname;
+            qualifiedName = "/" + nameProp + qualifiedName;
+            qualifiedId = "/" + idProp + qualifiedId;
 
             ownerRef = (NodeRef)owner.getProperty( "ems:owner" );
         }
+        
+        // get the site, which is two up from the project
+        if ( owner != null ) {
+            EmsScriptNode modelNode = owner.getParent();
+            EmsScriptNode siteNode = modelNode.getParent();
+//            EmsScriptNode siteNode = owner.getSiteNode();
+            if (siteNode != null) {
+                qualifiedName = "/" + siteNode.getName() + qualifiedName;
+                qualifiedId = "/" + siteNode.getName() + qualifiedId;
+            }
+        }
 
-        return qname;
+        if (isName) {
+            return qualifiedName;
+        } else {
+            return qualifiedId;
+        }
     }
 
     /**

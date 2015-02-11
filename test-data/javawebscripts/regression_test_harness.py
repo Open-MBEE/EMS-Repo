@@ -483,10 +483,10 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
                     
                 # Add line if it does not contain the filter:
                 if not filterFnd:
-                    filter_output += (line+"\n")
+                    filter_output += (line)
                     
                 # Always add lines to orig_output
-                orig_output += (line+"\n")
+                orig_output += (line)
         else:
             stuffRead = file_orig.read()
             filter_output = stuffRead

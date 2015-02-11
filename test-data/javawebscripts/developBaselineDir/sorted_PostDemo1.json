@@ -1,25 +1,33 @@
 {"elements": [
     {
-        "creator": "admin",
+        "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394140430311_23731_27741/BLUCam CubeSat A",
+        "name": "BLUCam CubeSat A",
+        "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
         "documentation": "",
+        "specialization": {"type": "Package"},
         "editable": true,
-        "name": "",
-        "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
-        "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components/",
-        "specialization": {
-            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-            "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
-            "type": "Conform"
-        }
+        "creator": "admin"
     },
     {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
+        "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
         "name": "",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+        "documentation": "",
         "specialization": {
+            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+            "type": "Expose"
+        },
+        "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+        "name": "",
+        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+        "documentation": "",
+        "specialization": {
+            "type": "Expression",
             "operand": [
                 {
                     "element": "exposed_id",
@@ -33,101 +41,93 @@
                     "element": "op_name_arg",
                     "type": "ElementValue"
                 }
-            ],
-            "type": "Expression"
-        }
+            ]
+        },
+        "editable": true,
+        "creator": "admin"
     },
     {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "",
-        "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
-        "specialization": {
-            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-            "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-            "type": "Expose"
-        }
-    },
-    {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
-        "name": "BLUCam CubeSat A",
-        "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
-        "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394140430311_23731_27741/BLUCam CubeSat A",
-        "specialization": {"type": "Package"}
-    },
-    {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
+        "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/ComponentViewPoint",
         "name": "ComponentViewPoint",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/ComponentViewPoint",
-        "specialization": {"type": "Viewpoint"}
+        "documentation": "",
+        "specialization": {"type": "Viewpoint"},
+        "editable": true,
+        "creator": "admin"
     },
     {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
+        "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components",
         "name": "Components",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components",
-        "specialization": {"type": "View"}
+        "documentation": "",
+        "specialization": {"type": "View"},
+        "editable": true,
+        "creator": "admin"
     },
     {
-        "creator": "admin",
+        "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components/",
+        "name": "",
+        "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
         "documentation": "",
+        "specialization": {
+            "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
+            "type": "Conform"
+        },
         "editable": true,
+        "creator": "admin"
+    },
+    {
+        "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/List",
         "name": "List",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/List",
-        "specialization": {"type": "Operation"}
+        "documentation": "",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "creator": "admin"
     },
     {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
+        "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Name",
         "name": "Name",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Name",
-        "specialization": {"type": "Operation"}
+        "documentation": "",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "creator": "admin"
     },
     {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
+        "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/exposed",
         "name": "exposed",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/exposed",
-        "specialization": {"type": "Parameter"}
+        "documentation": "",
+        "specialization": {"type": "Parameter"},
+        "editable": true,
+        "creator": "admin"
     },
     {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
+        "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/map",
         "name": "map",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/map",
-        "specialization": {"type": "Operation"}
+        "documentation": "",
+        "specialization": {"type": "Operation"},
+        "editable": true,
+        "creator": "admin"
     },
     {
-        "creator": "admin",
-        "documentation": "",
-        "editable": true,
+        "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/viewpoint_op",
         "name": "viewpoint_op",
         "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-        "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/viewpoint_op",
+        "documentation": "",
         "specialization": {
             "expression": {
+                "type": "Expression",
                 "operand": [
                     {
                         "element": "op_list",
                         "type": "ElementValue"
                     },
                     {
+                        "type": "Expression",
                         "operand": [
                             {
                                 "element": "exposed_id",
@@ -141,14 +141,14 @@
                                 "element": "op_name_arg",
                                 "type": "ElementValue"
                             }
-                        ],
-                        "type": "Expression"
+                        ]
                     }
-                ],
-                "type": "Expression"
+                ]
             },
             "parameters": ["exposed_id"],
             "type": "Operation"
-        }
+        },
+        "editable": true,
+        "creator": "admin"
     }
 ]}
