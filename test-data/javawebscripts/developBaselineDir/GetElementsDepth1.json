@@ -1,100 +1,50 @@
 {"elements": [
-
     {
-
-        "qualifiedId": "/123456/300",
-
+        "qualifiedId": "/europa/123456/300",
         "name": "300",
-
-        "qualifiedName": "/JW_TEST/300",
-
+        "qualifiedName": "/europa/JW_TEST/300",
         "sysmlid": "300",
-
         "documentation": "something",
-
         "owner": "123456",
-
         "specialization": {
-
             "isDerived": false,
-
             "isSlot": false,
-
             "value": [{
-
                 "string": "dlam_string",
-
                 "type": "LiteralString"
-
             }],
-
             "type": "Property"
-
         },
-
         "editable": true,
-
         "creator": "admin",
-
     },
-
     {
-
         "qualifiedId": "/123456",
-
         "name": "JW_TEST",
-
         "qualifiedName": "/JW_TEST",
-
         "sysmlid": "123456",
-
         "owner": "null",
-
         "editable": true,
-
         "creator": "admin",
-
     },
-
     {
-
-        "qualifiedId": "/123456/4000",
-
+        "qualifiedId": "/europa/123456/4000",
         "name": "400",
-
-        "qualifiedName": "/JW_TEST/400",
-
+        "qualifiedName": "/europa/JW_TEST/400",
         "sysmlid": "4000",
-
         "documentation": "4something",
-
         "owner": "123456",
-
         "specialization": {
-
             "isDerived": false,
-
             "isSlot": false,
-
             "value": [{
-
                 "string": "dlam_string",
-
                 "type": "LiteralString"
-
             }],
-
             "type": "Property"
-
         },
-
         "editable": true,
-
         "creator": "admin",
-
     }
-
 ]}
-
 200
-

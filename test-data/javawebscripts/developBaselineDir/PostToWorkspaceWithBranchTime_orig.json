@@ -1,24 +1,21 @@
-{
-    "elements": [{
-        "creator": "admin",
-        "documentation": "y is y",
-        "editable": true,
-        "modified": "2014-12-10T14:56:42.868-0800",
-        "owner": "302",
-        "qualifiedId": "/123456/300/301/302/y",
-        "qualifiedName": "/JW_TEST/300/301/302/null",
-        "read": "2014-12-10T14:56:50.842-0800",
-        "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "type": "Property",
-            "value": [{
-                "string": "the y value",
-                "type": "LiteralString"
-            }]
-        },
-        "sysmlid": "y"
-    }],
-    "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n"
-}
+{"elements": [{
+    "qualifiedId": "/europa/123456/300/301/302/y",
+    "qualifiedName": "/europa/JW_TEST/300/301/302/null",
+    "sysmlid": "y",
+    "documentation": "y is y",
+    "owner": "302",
+    "read": "2015-02-11T14:18:14.603-0800",
+    "specialization": {
+        "isDerived": false,
+        "isSlot": false,
+        "value": [{
+            "string": "the y value",
+            "type": "LiteralString"
+        }],
+        "type": "Property"
+    },
+    "editable": true,
+    "creator": "admin",
+    "modified": "2015-02-11T14:18:12.519-0800"
+}]}
 200

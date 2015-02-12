@@ -252,7 +252,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	return sb.toString();
     }
 
-    private DBParagraph createDBParagraph( JSONObject obj, DBSection section, WorkspaceNode workspace, Date timestamp, StringBuffer response  ) {
+    private DBParagraph createDBParagraph( JSONObject obj, DBSection section, WorkspaceNode workspace, Date timestamp  ) {
     	if(obj == null) return null;
         String srcType = (String)obj.opt( "sourceType" );
         String src = (String)obj.opt( "source" );
@@ -309,7 +309,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	                    sb.append(" ");
 	                }
 	                s = sb.toString();
-//	                p.setText( sb.toString() );
+	                //p.setText( sb.toString() );
 	            }
 	            else {
 	                s = (String)node.getProperty( Acm.SYSML + srcProp );
@@ -333,8 +333,6 @@ public class SnapshotPost extends AbstractJavaWebScript {
         s = handleEmbeddedImage(s);
         s = HtmlSanitize( s );
         if(s != null && !s.isEmpty()){ 
-//        	s = s.replaceAll("<ulink", "<link");
-//			s = s.replaceAll("</ulink", "</link");
         	p.setText(s);
         }
         if ( p.getText() == null || p.getText().toString().isEmpty() ) return null;
@@ -342,16 +340,16 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return p;
     }
 
-    private DocumentElement createDBSection( JSONObject obj, WorkspaceNode workspace, Date timestamp, StringBuffer response ) throws JSONException {
+    private DocumentElement createDBSection( JSONObject obj, WorkspaceNode workspace, Date timestamp ) throws JSONException {
         DBSection section = new DBSection();
         section.setTitle( (String)obj.opt( "name" ) );
-        createDBSectionContainment( section, obj.getJSONArray( "contains" ), workspace, timestamp, response );
+        createDBSectionContainment( section, obj.getJSONArray( "contains" ), workspace, timestamp );
         return section;
     }
 
     private void createDBSectionContainment(DBSection section,
                                             JSONArray jsonContains,
-                                            WorkspaceNode workspace, Date timestamp, StringBuffer response) throws JSONException{
+                                            WorkspaceNode workspace, Date timestamp) throws JSONException{
         for ( int i = 0; i < jsonContains.length(); i++ ) {
             JSONObject obj = jsonContains.getJSONObject( i );
             DocumentElement e = createElement( obj, section, workspace, timestamp );
@@ -526,7 +524,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         DocumentElement e = null;
         switch ( getType( obj ) ) {
             case "Paragraph":
-                e = createDBParagraph( obj, section, workspace, timestamp, response );
+                e = createDBParagraph( obj, section, workspace, timestamp );
                 break;
             case "List":
                 e = createList( obj, section, workspace, timestamp );
@@ -538,7 +536,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 e = createImage( obj, workspace, timestamp );
                 break;
             case "Section":
-                e = createDBSection( obj, workspace, timestamp, response );
+                e = createDBSection( obj, workspace, timestamp );
                 break;
             case "Element":
                 e = createDBText( obj, workspace, timestamp );
@@ -1836,7 +1834,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	if(node == null) return;
     	//1st process the node
     	JSONArray contains = node.getView().getContainsJson();
-        createDBSectionContainment( section, contains, workspace, timestamp, response );
+        createDBSectionContainment( section, contains, workspace, timestamp );
 
         //then process it's contains:children if any
     	String nodeId = node.getSysmlId();

@@ -1478,7 +1478,11 @@ public class NodeUtil {
     {
         if ( s == null ) return null;
         if ( Acm.getJSON2ACM().keySet().contains( s ) ) {
-            s = Acm.getACM2JSON().get( s );
+            String possibleString = Acm.getACM2JSON().get( s );
+            // Bad mapping, ie type, just use the original string:
+            if (possibleString != null) {
+                s = possibleString;
+            }
         }
         QName qname;
         if (s.indexOf("{") != -1)

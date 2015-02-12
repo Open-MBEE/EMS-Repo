@@ -1,16 +1,8 @@
 {"workspaces": [{
-
-    "creator": "admin",
-
     "description": "",
-
+    "qualifiedName": "master/ws2",
     "name": "ws2",
-
     "parent": "master",
-
-    "qualifiedName": "master/ws2"
-
+    "creator": "admin"
 }]}
-
 200
-

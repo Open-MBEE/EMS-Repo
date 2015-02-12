@@ -483,10 +483,10 @@ def run_curl_test(test_num, test_name, test_desc, curl_cmd, use_json_diff=False,
                     
                 # Add line if it does not contain the filter:
                 if not filterFnd:
-                    filter_output += (line+"\n")
+                    filter_output += (line)
                     
                 # Always add lines to orig_output
-                orig_output += (line+"\n")
+                orig_output += (line)
         else:
             stuffRead = file_orig.read()
             filter_output = stuffRead
@@ -1636,8 +1636,115 @@ create_curl_cmd(type="POST",data="operation.json",base_url=BASE_URL_WS,
 True, 
 common_filters+['MMS_'],
 ["test","workspaces","develop", "develop2"]
-]
-        
+],
+
+# Creating users for user testing
+# [
+# 610,
+# "Create Collaborator",
+# "Create Collaborator user for europa",
+# create_curl_cmd(type="POST",
+#                 data='\'{"userName": "Collaborator", "firstName": "Collaborator", "lastName": "user", "email": "Collaborator@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteCollaborator"]}\'',
+#                 base_url=SERVICE_URL,
+#                 post_type="",branch="api/people",project_post=True),
+# False, 
+# common_filters+['MMS_'],
+# ["test","workspaces","develop", "develop2"]
+# ],
+# 
+# [
+# 611,
+# "Create Contributor",
+# "Create Contributor user for europa",
+# create_curl_cmd(type="POST",
+#                 data='\'{"userName": "Contributor", "firstName": "Contributor", "lastName": "user", "email": "Contributor@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteContributor"]}\'',
+#                 base_url=SERVICE_URL,
+#                 post_type="",branch="api/people",project_post=True),
+# False, 
+# common_filters+['MMS_'],
+# ["test","workspaces","develop", "develop2"]
+# ],
+# 
+# [
+# 612,
+# "Create Consumer",
+# "Create Consumer user for europa",
+# create_curl_cmd(type="POST",
+#                 data='\'{"userName": "Consumer", "firstName": "Consumer", "lastName": "user", "email": "Consumer@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteConsumer"]}\'',
+#                 base_url=SERVICE_URL,
+#                 post_type="",branch="api/people",project_post=True),
+# False, 
+# common_filters+['MMS_'],
+# ["test","workspaces","develop", "develop2"]
+# ],
+# 
+# [
+# 613,
+# "Create Manager",
+# "Create Manager user for europa",
+# create_curl_cmd(type="POST",
+#                 data='\'{"userName": "Manager", "firstName": "Manager", "lastName": "user", "email": "Manager@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteManager"]}\'',
+#                 base_url=SERVICE_URL,
+#                 post_type="",branch="api/people",project_post=True),
+# False, 
+# common_filters+['MMS_'],
+# ["test","workspaces","develop", "develop2"]
+# ],
+#         
+# [
+# 614,
+# "Create None",
+# "Create user with no europa priveleges",
+# create_curl_cmd(type="POST",
+#                 data='\'{"userName": "None", "firstName": "None", "lastName": "user", "email": "None@jpl.nasa.gov"}\'',
+#                 base_url=SERVICE_URL,
+#                 post_type="",branch="api/people",project_post=True),
+# False, 
+# common_filters+['MMS_'],
+# ["test","workspaces","develop", "develop2"]
+# ]
+#
+# lets do the None permissions
+# [
+# 620,
+# "NoneRead",
+# "Read element with user None",
+# "curl -w '\n%{http_code}\n' -u None:password -X GET http://localhost:8080/alfresco/service/workspaces/master/elements/y",
+# True,
+# comon_filters,
+# ["develop"]
+# ],
+# 
+# [
+# 621,
+# "NoneDelete",
+# "Delete element with user None",
+# "curl -w '\n%{http_code}\n' -u None:password -X DELETE http://localhost:8080/alfresco/service/workspaces/master/elements/y",
+# True,
+# comon_filters,
+# ["develop"]
+# ],
+# 
+# [
+# 622,
+# "NoneUpdate",
+# "Update element with user None",
+# "curl -w '\n%{http_code}\n' -u None:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by None\"}]}'",
+# True,
+# comon_filters,
+# ["develop"]
+# ],
+# 
+# [
+# 623,
+# "NoneCreate",
+# "Create element with user None",
+# "curl -w '\n%{http_code}\n' -u None:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"ychild\",\"documentation\":\"y child\",\"owner\":\"y\"}]}'",
+# True,
+# comon_filters,
+# ["develop"]
+# ],
+
 ]
 
 ##########################################################################################    
