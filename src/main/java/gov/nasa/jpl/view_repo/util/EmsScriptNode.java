@@ -3340,15 +3340,20 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public boolean checkPermissions( String permissions, StringBuffer response,
                                      Status status ) {
-        if ( !hasPermission( permissions ) && response != null ) {
-            Object property = getProperty( Acm.CM_NAME );
-            if ( property != null ) {
-                String msg =
-                        "Warning! No " + permissions + " priveleges to "
-                                + property.toString() + ".\n";
-                response.append( msg );
-                if ( status != null ) {
-                    status.setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
+        if ( !hasPermission( permissions ) ) {
+            if (response != null) {
+                Object property = getProperty( Acm.ACM_NAME );
+                if (property == null) {
+                    property = getProperty( Acm.CM_NAME );
+                }
+                if ( property != null ) {
+                    String msg =
+                            "Warning! No " + permissions.toUpperCase() + " priveleges to "
+                                    + property.toString() + ".  ";
+                    response.append( msg );
+                    if ( status != null ) {
+                        status.setCode( HttpServletResponse.SC_FORBIDDEN, msg );
+                    }
                 }
             }
             return false;

@@ -287,13 +287,19 @@ public class ModelPost extends AbstractJavaWebScript {
             // necessary and place element with owner; don't update
             // properties on this first pass.
             if (owner != null && owner.exists()) {
-                Set< EmsScriptNode > updatedElements =
-                        updateOrCreateElement( elementMap.get( rootElement ),
-                                               owner, targetWS, false );
-                for ( EmsScriptNode node : updatedElements ) {
-                    nodeMap.put(node.getName(), node);
+                if (checkPermissions(owner, "Write")) {
+                    Set< EmsScriptNode > updatedElements =
+                            updateOrCreateElement( elementMap.get( rootElement ),
+                                                   owner, targetWS, false );
+                    for ( EmsScriptNode node : updatedElements ) {
+                        nodeMap.put(node.getName(), node);
+                    }
+                    elements.addAll( updatedElements );
+                } else {
+                    // remove the rootElement fomr consideration in any updates or creates
+                    elementMap.remove( rootElement );
+                    rootElements.remove( rootElement );
                 }
-                elements.addAll( updatedElements );
             }
         }
         
@@ -946,18 +952,6 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
 
-        // lets iterate through elements
-       for (String elementId: elementMap.keySet()) {
-            if (!newElements.contains(elementId)) {
-                EmsScriptNode element = findScriptNodeById(elementId, workspace, null, true);
-                if (element == null) {
-                    log(LogLevel.ERROR, "Could not find node with id: " + elementId, HttpServletResponse.SC_BAD_REQUEST);
-                } else if (!checkPermissions(element, PermissionService.WRITE)) {
-                        // do nothing, just log inside of checkPermissions
-                }
-            }
-        }
-
         if (isValid) {
                 isValid = fillRootElements(workspace);
         }
@@ -978,14 +972,6 @@ public class ModelPost extends AbstractJavaWebScript {
             }
         }
 
-        for (String name: rootElements) {
-                EmsScriptNode rootElement = findScriptNodeById(name, workspace, null, true);
-                if (rootElement != null) {
-                    if (!checkPermissions(rootElement, PermissionService.WRITE)) {
-                        log(LogLevel.WARNING, "\tskipping as root element since no write permissions", HttpServletResponse.SC_BAD_REQUEST);
-                    }
-                }
-        }
         return true;
     }
 
@@ -2768,7 +2754,6 @@ public class ModelPost extends AbstractJavaWebScript {
 
         addRelationshipsToProperties( elements );
         if ( !Utils.isNullOrEmpty( elements ) ) {
-
             // Fix constraints if desired:
             if (fix) {               
                 if (runWithoutTransactions || internalRunWithoutTransactions) {
@@ -2806,12 +2791,12 @@ public class ModelPost extends AbstractJavaWebScript {
             }
             
             top.put( "elements", elementsJson );
-            if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-            if ( prettyPrint ) {
-                model.put( "res", top.toString( 4 ) );
-            } else {
-                model.put( "res", top.toString() );
-            }
+        }
+        if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
+        if ( prettyPrint ) {
+            model.put( "res", top.toString( 4 ) );
+        } else {
+            model.put( "res", top.toString() );
         }
 
         return elements;

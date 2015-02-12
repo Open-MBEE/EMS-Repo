@@ -1638,6 +1638,7 @@ common_filters+['MMS_'],
 ["test","workspaces","develop", "develop2"]
 ],
 
+# Creating users for user testing
 [
 610,
 "Create Collaborator",
@@ -1646,7 +1647,7 @@ create_curl_cmd(type="POST",
                 data='\'{"userName": "Collaborator", "firstName": "Collaborator", "lastName": "user", "email": "Collaborator@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteCollaborator"]}\'',
                 base_url=SERVICE_URL,
                 post_type="",branch="api/people",project_post=True),
-True, 
+False, 
 common_filters+['MMS_'],
 ["test","workspaces","develop", "develop2"]
 ],
@@ -1659,7 +1660,7 @@ create_curl_cmd(type="POST",
                 data='\'{"userName": "Contributor", "firstName": "Contributor", "lastName": "user", "email": "Contributor@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteContributor"]}\'',
                 base_url=SERVICE_URL,
                 post_type="",branch="api/people",project_post=True),
-True, 
+False, 
 common_filters+['MMS_'],
 ["test","workspaces","develop", "develop2"]
 ],
@@ -1672,7 +1673,7 @@ create_curl_cmd(type="POST",
                 data='\'{"userName": "Consumer", "firstName": "Consumer", "lastName": "user", "email": "Consumer@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteConsumer"]}\'',
                 base_url=SERVICE_URL,
                 post_type="",branch="api/people",project_post=True),
-True, 
+False, 
 common_filters+['MMS_'],
 ["test","workspaces","develop", "develop2"]
 ],
@@ -1685,10 +1686,24 @@ create_curl_cmd(type="POST",
                 data='\'{"userName": "Manager", "firstName": "Manager", "lastName": "user", "email": "Manager@jpl.nasa.gov", "groups": ["GROUP_site_europa_SiteManager"]}\'',
                 base_url=SERVICE_URL,
                 post_type="",branch="api/people",project_post=True),
-True, 
+False, 
+common_filters+['MMS_'],
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+614,
+"Create None",
+"Create user with no europa priveleges",
+create_curl_cmd(type="POST",
+                data='\'{"userName": "None", "firstName": "None", "lastName": "user", "email": "None@jpl.nasa.gov"}\'',
+                base_url=SERVICE_URL,
+                post_type="",branch="api/people",project_post=True),
+False, 
 common_filters+['MMS_'],
 ["test","workspaces","develop", "develop2"]
 ]
+
 
 ]
 
