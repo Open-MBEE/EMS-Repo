@@ -88,9 +88,14 @@ import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.namespace.RegexQNamePattern;
 import org.apache.log4j.Logger;
+
 import gov.nasa.jpl.view_repo.util.JsonArray;
+
 import org.json.JSONException;
+import org.json.JSONObject;
+
 import gov.nasa.jpl.view_repo.util.JsonObject;
+
 import org.mozilla.javascript.Scriptable;
 import org.springframework.extensions.webscripts.Status;
 
@@ -2293,7 +2298,7 @@ public class EmsScriptNode extends ScriptNode implements
         
         // Check the cache unless forcing an update.
         if ( !forceCacheUpdate ) {
-            cachedJson =
+            cachedJson = !NodeUtil.doJsonDeepCaching ? null : 
                 Utils.get( NodeUtil.jsonDeepCache, getId(), millis,
                            isIncludeQualified,
                            jsonFilter == null ? new TreeSet< String >()
@@ -2369,13 +2374,6 @@ public class EmsScriptNode extends ScriptNode implements
                     if ( hasName ) json.remove( "qualifiedName" );
                 }
             }
-
-//            Utils.put( NodeUtil.jsonDeepCache, getId(), millis,
-//                       isIncludeQualified, jsonFilter, json );
-//            
-//            if ( Debug.isOn() )
-//                Debug.outln("returning json = " + (json==null?"null":json.toString( 4 )));
-//            return json;
         }
 
         
@@ -2384,13 +2382,15 @@ public class EmsScriptNode extends ScriptNode implements
 //            System.out.println("put read in newJson");
 //            putInJson( newJson, Acm.JSON_READ, getIsoTime( new Date( readTime ) ), null );
 //        }
-        
-        Utils.put( NodeUtil.jsonDeepCache, getId(), millis, isIncludeQualified,
-                   jsonFilter == null ? new TreeSet< String >() : jsonFilter,
-                   json );
+
+        if ( NodeUtil.doJsonDeepCaching ) {
+            Utils.put( NodeUtil.jsonDeepCache, getId(), millis, isIncludeQualified,
+                       jsonFilter == null ? new TreeSet< String >() : jsonFilter,
+                       clone(json) );
+        }
         
         if ( Debug.isOn() )
-            Debug.outln("return newJson " + (json==null?"null":json.toString( 4 )));
+            Debug.outln("return json " + (json==null?"null":json.toString( 4 )));
         return json;
     }
 
@@ -2403,7 +2403,10 @@ public class EmsScriptNode extends ScriptNode implements
            String key = (String)keys.next();
            if ( jsonFilter.contains( key ) || dontFilterOut.contains( key ) ) {
                Object value = json.get( key );
-               if ( key.equals( Acm.JSON_SPECIALIZATION ) && value instanceof JsonObject ) {
+               if ( key.equals( Acm.JSON_SPECIALIZATION ) && value instanceof JSONObject ) {
+                   if ( !( value instanceof JsonObject ) ) {
+                       value = JsonObject.make( (JSONObject)value );
+                   }
                    JsonObject newSpec = filterJson( (JsonObject)value, jsonFilter, isIncludeQualified );
                    if ( newSpec != null && newSpec.length() > 0 ) {
                        newJson.put( key, newSpec );

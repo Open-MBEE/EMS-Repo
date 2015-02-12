@@ -39,6 +39,7 @@ public class JsonObject extends org.json.JSONObject {
     }
     
     public static Map<String,Object> toMap( JSONObject arg0 ) {
+        if ( arg0 == null ) return null;
         Map< String, Object > m = new LinkedHashMap< String, Object >();
         //String[] names = arg0.getNames( arg0 );
         Iterator i = arg0.keys();
@@ -61,6 +62,7 @@ public class JsonObject extends org.json.JSONObject {
     }
 
     public static JsonObject make( JSONObject arg0 ) {
+        if ( arg0 == null ) return null;
         if ( arg0 instanceof JsonObject ) return (JsonObject)arg0;
         return new JsonObject( arg0 );
     }

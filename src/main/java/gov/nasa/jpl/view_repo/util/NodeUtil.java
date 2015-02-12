@@ -137,7 +137,8 @@ public class NodeUtil {
     public static boolean doHeisenCheck = true;
     public static boolean doVersionCaching = true;
     public static boolean activeVersionCaching = true;
-    public static boolean doJsonCaching = true;
+    public static boolean doJsonCaching = false;
+    public static boolean doJsonDeepCaching = false;
     
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
     public static boolean heisenbugSeen = false;
