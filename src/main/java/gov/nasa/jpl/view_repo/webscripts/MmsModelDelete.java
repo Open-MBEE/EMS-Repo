@@ -96,10 +96,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
     protected JSONObject handleRequest(WebScriptRequest req) throws JSONException {
         JSONObject result = null;
 
-        //Long start = System.currentTimeMillis();  // TODO ask CY why implemented this in this way, as it
-                                                    //      introduces a bug when the node is replicated
-                                                    //      below, as the creation time will then be after
-                                                    //      this time
+        Date start = new Date(); 
         String user = AuthenticationUtil.getRunAsUser();
         String wsId = null;
         WorkspaceNode workspace = getWorkspace( req, //true, // not creating ws!
@@ -153,7 +150,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 Date end = new Date();
         
                 boolean showAll = false;
-                result = wsDiff.toJSONObject( end, end, showAll );
+                result = wsDiff.toJSONObject( start, end, showAll );
         
                 if (wsDiff.isDiff()) {
                     // Send deltas to all listeners
@@ -274,9 +271,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
     public void delete(EmsScriptNode node, WorkspaceNode workspace, WorkspaceDiff workspaceDiff) {
         if(workspaceDiff != null && wsDiff == null)
             wsDiff = workspaceDiff;
-        if (!checkPermissions(node, PermissionService.WRITE)) {
-            log(LogLevel.ERROR, "no permissions", HttpServletResponse.SC_FORBIDDEN);
-        } else {
+        if (checkPermissions(node, PermissionService.WRITE)) {
             if ( node == null || !node.exists() ) {
                 log(LogLevel.ERROR, "Trying to delete a non-existent node! " + node);
                 return;
