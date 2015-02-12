@@ -163,24 +163,29 @@ public class MmsModelDelete extends AbstractJavaWebScript {
 
                 // apply aspects after wsDiff JSON has been created since the wsDiff 
                 // toJSONObject skips deleted objects
-                Set<EmsScriptNode> nodesToDelete = new HashSet<EmsScriptNode>();
-                nodesToDelete.addAll( wsDiff.getDeletedElements().values() );
-                nodesToDelete.addAll( valueSpecs );
-                for (EmsScriptNode deletedNode: nodesToDelete) {
-                    if (deletedNode.exists()) {
-                        deletedNode.removeAspect( "ems:Added" );
-                        deletedNode.removeAspect( "ems:Updated" );
-                        deletedNode.removeAspect( "ems:Moved" );
-                        deletedNode.createOrUpdateAspect( "ems:Deleted" );
-                        projectId = deletedNode.getProjectId();
-                    }
-                }
+                applyAspects();
+                
             } catch (Exception e) {
                 // do nothing, just a 404 not found
             }
         }
 
         return result;
+    }
+    
+    protected void applyAspects() {
+        
+        Set<EmsScriptNode> nodesToDelete = new HashSet<EmsScriptNode>();
+        nodesToDelete.addAll( wsDiff.getDeletedElements().values() );
+        nodesToDelete.addAll( valueSpecs );
+        for (EmsScriptNode deletedNode: nodesToDelete) {
+            if (deletedNode.exists()) {
+                deletedNode.removeAspect( "ems:Added" );
+                deletedNode.removeAspect( "ems:Updated" );
+                deletedNode.removeAspect( "ems:Moved" );
+                deletedNode.createOrUpdateAspect( "ems:Deleted" );
+            }
+        }
     }
 
 

@@ -244,7 +244,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                         for (int ii = 0; ii < deleted.length(); ii++) {
                             String id = ((JSONObject)deleted.get(ii)).getString( "sysmlid" );
                             EmsScriptNode root = NodeUtil.findScriptNodeById( id, targetWs, null, false, services, response );
-                            deleteService.handleElementHierarchy( root, targetWs, false );
+                            deleteService.deleteNodeRecursively( root, targetWs);
                         }
 	                }
 	                else {
@@ -254,7 +254,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
     		                    for (int ii = 0; ii < deleted.length(); ii++) {
     		                        String id = ((JSONObject)deleted.get(ii)).getString( "sysmlid" );
     		                        EmsScriptNode root = NodeUtil.findScriptNodeById( id, targetWs, null, false, services, response );
-    		                        deleteService.handleElementHierarchy( root, targetWs, false );
+    		                        deleteService.deleteNodeRecursively( root, targetWs);
     		                    }
     						}
     					};
@@ -301,36 +301,22 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	                // This has to be done before adding deleted aspects
 	                finalJsonDiff = wsDiff.toJSONObject( new Date(start), new Date(end) ); 
 	                
+	                // Apply the deleted aspects if needed to the deleted nodes:
 	                if (modelDeleteDiff) {
-	                    
-	                    final WorkspaceDiff delWsDiff = deleteWsDiff;
-	                    
+	                    	                    
 	                    if (runWithoutTransactions) {
-	                        for (EmsScriptNode deletedNode: delWsDiff.getDeletedElements().values()) {
-	                            if (deletedNode.exists()) {
-	                                deletedNode.removeAspect( "ems:Added" );
-	                                deletedNode.removeAspect( "ems:Updated" );
-	                                deletedNode.removeAspect( "ems:Moved" );
-	                                deletedNode.createOrUpdateAspect( "ems:Deleted" );
-	                            }
-	                        }
+	                        deleteService.applyAspects();
 	                    }
 	                    else {
 	                        new EmsTransaction(getServices(), getResponse(), getResponseStatus()) {
 	                            @Override
 	                            public void run() throws Exception {
-	                                for (EmsScriptNode deletedNode: delWsDiff.getDeletedElements().values()) {
-	                                    if (deletedNode.exists()) {
-	                                        deletedNode.removeAspect( "ems:Added" );
-	                                        deletedNode.removeAspect( "ems:Updated" );
-	                                        deletedNode.removeAspect( "ems:Moved" );
-	                                        deletedNode.createOrUpdateAspect( "ems:Deleted" );
-	                                    }
-	                                }
+	                                deleteService.applyAspects();
 	                            }
 	                        };
 	                    }
 	                }
+	                
 	                if ( !CommitUtil.sendDeltas(finalJsonDiff, targetWsId, projectId, source) ) {
                         log(LogLevel.WARNING, "MmsWorkspaceDiffPost deltas not posted properly");
                     }
