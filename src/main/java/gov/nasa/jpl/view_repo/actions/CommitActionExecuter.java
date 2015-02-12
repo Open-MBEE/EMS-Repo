@@ -74,7 +74,7 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
                     logger.warn("send deltas not posted properly");
                 }
 
-                CommitUtil.updateCommitNodeRef( nodeRef, deltaJson.toString(),
+                CommitUtil.updateCommitNodeRef( nodeRef, NodeUtil.jsonToString( deltaJson ),
                                                 "", services, response );
             } else {
 
@@ -90,7 +90,7 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
                         }
 
                         CommitUtil.updateCommitNodeRef( nodeRef,
-                                                        deltaJson.toString(), "",
+                                                        NodeUtil.jsonToString( deltaJson ), "",
                                                         services, response );
                     }
                 };

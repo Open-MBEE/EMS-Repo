@@ -31,7 +31,10 @@ package gov.nasa.jpl.view_repo.webscripts.util;
 
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
+
 import org.json.JSONArray;
+
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
 import java.util.HashMap;
@@ -46,9 +49,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteMemberInfo;
 import org.json.JSONException;
-
 import org.json.JSONObject;
-
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -115,7 +116,7 @@ public class SitePermSync extends AbstractJavaWebScript{
         JSONObject json = new JSONObject();
         try {
             json.put( "msgs", msgs );
-            model.put( "res", json.toString() );
+            model.put( "res", NodeUtil.jsonToString( json ) );
             status.setCode( HttpServletResponse.SC_ACCEPTED );
         } catch ( JSONException e ) {
             model.put("res", "Error creating JSON output");

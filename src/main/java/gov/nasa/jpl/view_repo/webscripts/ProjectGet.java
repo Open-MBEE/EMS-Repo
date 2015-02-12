@@ -33,6 +33,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
@@ -110,7 +111,7 @@ public class ProjectGet extends AbstractJavaWebScript {
         if (json == null) {
             model.put("res", response.toString());
         } else {
-            model.put("res", json.toString());
+            model.put("res", NodeUtil.jsonToString( json ));
         }
         status.setCode(responseStatus.getCode());
 

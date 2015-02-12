@@ -136,8 +136,8 @@ public class JsonDiff {
                             + file1.getName();
             String fName2 = file2.getParent() + File.separator + "sorted_"
                             + file2.getName();
-            FileUtils.stringToFile( so1.toString(4), fName1 );
-            FileUtils.stringToFile( so2.toString(4), fName2 );
+            FileUtils.stringToFile( NodeUtil.jsonToString( so1, 4 ), fName1 );
+            FileUtils.stringToFile( NodeUtil.jsonToString( so2, 4 ), fName2 );
             runCommand( "diff -b " + fName1 + " " + fName2 );
         } catch ( Throwable e ) {
             e.printStackTrace();

@@ -168,8 +168,8 @@ public class ViewGet extends AbstractJavaWebScript {
                 JSONObject json = new JSONObject();
                 json.put(gettingDisplayedElements ? "elements" : "views", viewsJson);
                 if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
-                if ( prettyPrint ) model.put("res", json.toString(4));
-                else model.put("res", json.toString()); 
+                if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( json, 4 ));
+                else model.put("res", NodeUtil.jsonToString( json )); 
             } catch (JSONException e) {
                 e.printStackTrace();
                 log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

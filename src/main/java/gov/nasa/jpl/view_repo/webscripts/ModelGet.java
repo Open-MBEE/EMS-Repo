@@ -178,8 +178,8 @@ public class ModelGet extends AbstractJavaWebScript {
 		    if (elementsJson.length() > 0) {
 		        top.put("elements", elementsJson);
 		        if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-		        if ( prettyPrint ) model.put("res", top.toString(4));
-		        else model.put("res", top.toString());
+		        if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( top, 4 ));
+		        else model.put("res", NodeUtil.jsonToString( top ));
 		    } else {
 		        log(LogLevel.WARNING, "No elements found",
 		            HttpServletResponse.SC_NOT_FOUND);

@@ -4,6 +4,7 @@ import gov.nasa.jpl.ae.event.Expression;
 import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -147,7 +148,7 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
     @Override
     public String toString() {
         JSONObject jo = toViewJson();
-        if ( jo != null ) return jo.toString();
+        if ( jo != null ) return NodeUtil.jsonToString( jo );
         return super.toString();
     }
 }

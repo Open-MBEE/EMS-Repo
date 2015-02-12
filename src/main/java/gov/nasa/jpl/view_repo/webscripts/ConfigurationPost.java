@@ -109,7 +109,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		} else {
 		    try {
 		    	if (!Utils.isNullOrEmpty(response.toString())) result.put("message", response.toString());
-                model.put("res", result.toString(2));
+                model.put("res", NodeUtil.jsonToString( result, 2 ));
             } catch ( JSONException e ) {
                 e.printStackTrace();
             }

@@ -1,5 +1,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
+import gov.nasa.jpl.view_repo.util.NodeUtil;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +46,7 @@ public class HostnameGet extends AbstractJavaWebScript {
 			jsonObj.put("alfresco", alfrescoJson);
 			jsonObj.put("share", shareJson);
 
-			model.put( "res", jsonObj.toString(4) );
+			model.put( "res", NodeUtil.jsonToString( jsonObj, 4 ) );
 		}
 		catch(JSONException js)
 		{

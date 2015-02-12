@@ -324,7 +324,7 @@ public class ModelPost extends AbstractJavaWebScript {
             if (logger.isInfoEnabled()) logger.info("send deltas not posted properly");
         }
 
-        CommitUtil.updateCommitNodeRef( commitRef, deltaJson.toString(), "", services, response );
+        CommitUtil.updateCommitNodeRef( commitRef, NodeUtil.jsonToString( deltaJson ), "", services, response );
 
         timerCommit = Timer.startTimer(timerCommit, timeEvents);
         
@@ -2714,8 +2714,8 @@ public class ModelPost extends AbstractJavaWebScript {
                         JSONObject exprJson = new JSONObject(KExpParser.parseExpression(expressionString));
                         log(LogLevel.DEBUG, "********************************************************************************");
                         log(LogLevel.DEBUG, expressionString);
-                        log(LogLevel.DEBUG, exprJson.toString(4));
-//                        log(LogLevel.DEBUG, exprJson0.toString(4));
+                        log(LogLevel.DEBUG, NodeUtil.jsonToString( exprJson, 4 ));
+//                        log(LogLevel.DEBUG, NodeUtil.jsonToString( exprJson0, 4 ));
                         log(LogLevel.DEBUG, "********************************************************************************");
                         JSONArray expJarr = exprJson.getJSONArray("elements");
                         for (int i=0; i<expJarr.length(); ++i) {
@@ -2814,9 +2814,9 @@ public class ModelPost extends AbstractJavaWebScript {
             top.put( "elements", elementsJson );
             if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
             if ( prettyPrint ) {
-                model.put( "res", top.toString( 4 ) );
+                model.put( "res", NodeUtil.jsonToString( top, 4 ) );
             } else {
-                model.put( "res", top.toString() );
+                model.put( "res", NodeUtil.jsonToString( top ) );
             }
         }
 
@@ -2856,7 +2856,8 @@ public class ModelPost extends AbstractJavaWebScript {
             // write out the json
             JSONObject json = //JSONObject.make( 
                     (JSONObject)req.parseContent();// );
-            ActionUtil.saveStringToFile(jobNode, "application/json", services, json.toString(4));
+            ActionUtil.saveStringToFile(jobNode, "application/json", services,
+                                        NodeUtil.jsonToString( json, 4 ));
 
             // kick off the action
             ActionService actionService = services.getActionService();

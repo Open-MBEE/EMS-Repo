@@ -62,7 +62,7 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
             jsonObject = instance.handleUpdate( req );
             appendResponseStatusInfo( instance );
             if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
-            model.put("res", jsonObject.toString(2));
+            model.put("res", NodeUtil.jsonToString( jsonObject, 2 ));
         } catch (Exception e) {
             model.put("res", response.toString());
             if (e instanceof JSONException) {

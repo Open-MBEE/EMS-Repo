@@ -20,10 +20,10 @@ import org.json.JSONTokener;
 public class JSONObject extends org.json.JSONObject {
 
     public static boolean doCaching = false;
-    public static Map<JSONObject, Map< Integer, Pair< Date, String > > > stringCache =
+    public static Map<JSONObject, Map< Integer, Pair< Date, String > > > jsonStringCache =
             Collections.synchronizedMap( new HashMap< JSONObject, Map< Integer, Pair< Date, String > > >() );
-    public static long cacheHits = 0;
-    public static long cacheMisses = 0;
+    public static long jsonStringCacheHits = 0;
+    public static long jsonStringCacheMisses = 0;
 
     public JSONObject( org.json.JSONObject arg0, String[] arg1 ) throws JSONException {
         super( arg0, arg1 );
@@ -156,13 +156,13 @@ public class JSONObject extends org.json.JSONObject {
         // it.
         if ( modString != null ) {
             mod = TimeUtils.dateFromTimestamp( modString );
-            if ( mod != null && stringCache.containsKey( this ) ) {
-                Pair< Date, String > p = Utils.get( stringCache, this, numSpacesToIndent );//stringCache.get( this );
+            if ( mod != null && jsonStringCache.containsKey( this ) ) {
+                Pair< Date, String > p = Utils.get( jsonStringCache, this, numSpacesToIndent );//stringCache.get( this );
                 if ( p != null ) {
                     if ( p.first != null && !mod.after( p.first ) ) {
                         result = p.second;
                         // cache hit
-                        ++cacheHits;
+                        ++jsonStringCacheHits;
                         return result;
                     }
                 }
@@ -177,8 +177,8 @@ public class JSONObject extends org.json.JSONObject {
             // cache not applicable
         } else {
             // cache miss; add to cache
-            ++cacheMisses;
-            Utils.put(stringCache, this, numSpacesToIndent,
+            ++jsonStringCacheMisses;
+            Utils.put(jsonStringCache, this, numSpacesToIndent,
                       new Pair< Date, String >( mod, result ) );
         }
         return result;

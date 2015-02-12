@@ -149,7 +149,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
                                 elementsJson.put( element.toJSONObject(null) );
                             }
                            //top.put( "elements", elementsJson );
-                            //model.put( "res", top.toString( 4 ) );
+                            //model.put( "res", NodeUtil.jsonToString( top, 4 ) );
     	                    }
         	                result = handleDelete(deletedCollection, targetWS, targetId, null /*time*/, wsDiff);
     
@@ -194,7 +194,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
          } else {
              try {
                  result.put("message", response.toString());
-                 model.put("res",  result.toString(2));
+                 model.put("res",  NodeUtil.jsonToString( result, 2 ));
              } catch (JSONException e) {
                  // TODO Auto-generated catch block
                  e.printStackTrace();

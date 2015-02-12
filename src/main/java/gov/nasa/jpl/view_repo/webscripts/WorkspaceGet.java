@@ -1,6 +1,7 @@
 package gov.nasa.jpl.view_repo.webscripts;
 
 import gov.nasa.jpl.mbee.util.Utils;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.HashMap;
@@ -68,7 +69,7 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		} else {
 			try{
 				if (!Utils.isNullOrEmpty(response.toString())) object.put("message", response.toString());
-				model.put("res", object.toString(4));
+				model.put("res", NodeUtil.jsonToString( object, 4 ));
 			} catch (JSONException e){
 				e.printStackTrace();
 			}

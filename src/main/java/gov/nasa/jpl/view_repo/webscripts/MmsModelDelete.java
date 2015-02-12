@@ -3,6 +3,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -65,7 +66,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             result = handleRequest( req );
             if (result != null) {
                 if (!Utils.isNullOrEmpty(response.toString())) result.put("message", response.toString());
-                model.put( "res", result.toString(2) );
+                model.put( "res", NodeUtil.jsonToString( result, 2 ) );
             }
         } catch (JSONException e) {
            log(LogLevel.ERROR, "Could not create JSON\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
