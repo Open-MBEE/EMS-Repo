@@ -1549,26 +1549,7 @@ public class EmsScriptNode extends ScriptNode implements
 //        }
         return lastModifiedDate;
     }
-
-    // @Override
-    // public Map<String, Object> getProperties()
-    // {
-    //
-    // Map<QName, Serializable> props =
-    // services.getNodeService().getProperties(nodeRef);
-    // // TODO replace w/ this.properties after no longer subclassing, maybe use
-    // QNameMap also
-    // Map<String, Object> finalProps = new HashMap<String, Object>();
-    //
-    // // Create map of string representation of QName to the value of the
-    // property:
-    // for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
-    // finalProps.put(entry.getKey().toString(), entry.getValue());
-    // }
-    //
-    // return finalProps;
-    // }
-
+    
     /**
      * Get the properties of this node
      *
@@ -1579,13 +1560,22 @@ public class EmsScriptNode extends ScriptNode implements
     @Override
     public Map< String, Object > getProperties() {
 
-        // Taking this out for now b/c of performance hit:
-        //checkNodeRefVersion(null);
-
         if ( useFoundationalApi ) {
             return Utils.toMap( services.getNodeService()
                                         .getProperties( nodeRef ),
                                 String.class, Object.class );
+            
+//            Map<String, Object> returnMap = new HashMap<String, Object>();
+//            Map< QName, Serializable > map =  services.getNodeService().getProperties( nodeRef );
+//            
+//            // Need to potentially replace each property with the correct property value for
+//            // the workspace.  Remember, that property that points to a node ref may point to
+//            // one in a parent workspace, so we must do a search by id to get the correct one:
+//            for (Entry< QName, Serializable> entry : map.entrySet()) {
+//                String keyShort = NodeUtil.getShortQName( entry.getKey() );
+//                returnMap.put( entry.getKey().toString(), getProperty(keyShort) );
+//            }
+//            return returnMap;
         } else {
             return super.getProperties();
         }
@@ -2079,8 +2069,8 @@ public class EmsScriptNode extends ScriptNode implements
             return;
         }
 
-        if ( filter == null || filter.isEmpty() || filter.contains("type") ) {
-            json.put( "type", typeName );
+        if ( filter == null || filter.isEmpty() || filter.contains(Acm.JSON_TYPE) ) {
+            json.put( Acm.JSON_TYPE, typeName );
         }
 
         if ( justTheType ) return;

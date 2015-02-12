@@ -497,12 +497,56 @@ public class WorkspaceDiff implements Serializable {
         this.timestamp2 = timestamp2;
         if ( ws1 != null && ws2 != null ) diff();
     }
+    
+    /**
+     * Adds embedded values specs in node if present to the nodes set.
+     * 
+     * @param node Node to check for embedded value spec
+     * @param nodes Adds found value spec nodes to this set
+     * @param services
+     */
+    private static void addEmbeddedValueSpecs(NodeRef ref,  Set< NodeRef > nodes,
+                                              ServiceRegistry services) {
+        
+        Object propVal;
+        EmsScriptNode node = new EmsScriptNode(ref, services);
+        
+        for ( String acmType : Acm.TYPES_WITH_VALUESPEC.keySet() ) {
+            // It has a apsect that has properties that map to value specs:
+            if ( node.hasOrInheritsAspect( acmType ) ) {
+                
+                for ( String acmProp : Acm.TYPES_WITH_VALUESPEC.get(acmType) ) {
+                    propVal = node.getProperty(acmProp);
+                    
+                    if (propVal != null) {
+                        // Note: We want to include deleted nodes also, so no need to check for that
+                        if (propVal instanceof NodeRef){
+                            NodeRef propValRef = (NodeRef)propVal;
+                            if (NodeUtil.scriptNodeExists( propValRef )) {
+                                nodes.add( propValRef );
+                            }
+                        }
+                        else if (propVal instanceof List){
+                            List<NodeRef> nrList = (ArrayList<NodeRef>) propVal;
+                            for (NodeRef propValRef : nrList) {
+                                if (propValRef != null && NodeUtil.scriptNodeExists( propValRef )) {
+                                    nodes.add( propValRef );
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        
+    }
 
-    public static Set< EmsScriptNode > getAllChangedElementsInDiffJson( JSONArray diffJson,
+    public static Set< NodeRef > getAllChangedElementsInDiffJson( JSONArray diffJson,
                                                                         WorkspaceNode ws,
                                                                         ServiceRegistry services )
                                                                                 throws JSONException {
-        Set< EmsScriptNode > nodes = new LinkedHashSet< EmsScriptNode >();
+        Set< NodeRef > nodes = new LinkedHashSet< NodeRef >();
         for ( int i = 0; i < diffJson.length(); ++i ) {
             JSONObject element = diffJson.getJSONObject( i );
             if ( element.has( "sysmlid" ) ) {
@@ -513,18 +557,17 @@ public class WorkspaceDiff implements Serializable {
                         NodeUtil.findNodeRefById( sysmlid, true, null, null,
                                                   services, true );
                 if ( ref != null ) {
-                    EmsScriptNode node = new EmsScriptNode( ref, services );
-                    nodes.add( node );
-                }
+                    nodes.add( ref );                    
+                }  
             }
         }
         return nodes;
     }
 
-    public static Set< EmsScriptNode > getAllChangedElementsInDiffJson( JSONObject diffJson,
+    public static Set< NodeRef > getAllChangedElementsInDiffJson( JSONObject diffJson,
                                                                         ServiceRegistry services )
                                                                                 throws JSONException {
-        LinkedHashSet< EmsScriptNode > nodes = new LinkedHashSet< EmsScriptNode >();
+        LinkedHashSet< NodeRef > nodes = new LinkedHashSet< NodeRef >();
         JSONObject jsonObj = diffJson;
         JSONArray jsonArr = null;
         
@@ -539,7 +582,7 @@ public class WorkspaceDiff implements Serializable {
                                                                null );
             }
         }
-        Set< EmsScriptNode > elements = null;
+        Set< NodeRef > elements = null;
         if ( jsonObj.has( "addedElements" ) ) {
             jsonArr = jsonObj.getJSONArray( "addedElements" );
             elements = getAllChangedElementsInDiffJson( jsonArr, ws, services );
@@ -644,11 +687,13 @@ public class WorkspaceDiff implements Serializable {
              Acm.getACM2JSON().containsKey( possiblePrefixString ) ) {
             return Acm.getACM2JSON().get( possiblePrefixString );
         } else {
-            if ( possiblePrefixString.startsWith( "sysml:" ) ) {
+            if ( possiblePrefixString.startsWith( "sysml:" ) && possiblePrefixString.length() >= 6) {
                 possiblePrefixString = possiblePrefixString.substring( 6 );
-            } else if ( possiblePrefixString.startsWith( "ems:" ) ) {
+            } else if ( possiblePrefixString.startsWith( "ems:" ) && possiblePrefixString.length() >= 4 ) {
                 possiblePrefixString = possiblePrefixString.substring( 4 );
-            }// else possiblePrefixString = null;
+            } else if ( possiblePrefixString.startsWith( ":" ) && possiblePrefixString.length() >= 1 ) {
+                possiblePrefixString = possiblePrefixString.substring( 1 );
+            }
         }
         return possiblePrefixString;
     }
@@ -928,7 +973,9 @@ public class WorkspaceDiff implements Serializable {
             NodeRef ref =
                     NodeUtil.findNodeRefById( sysmlId, false, node, timestamp2,
                                               getServices(), false );
-            if ( ref != null ) s2.add( ref );
+            if ( ref != null ) {
+                s2.add( ref );
+            }
             if ( NodeUtil.isDeleted(n)) {
             	deletedFromS1.add(n);
             }
@@ -938,18 +985,49 @@ public class WorkspaceDiff implements Serializable {
             NodeRef ref =
                     NodeUtil.findNodeRefById( sysmlId, false, ws1, timestamp1,
                                               getServices(), false );
-            if ( ref != null ) s1.add( ref );
+            if ( ref != null ) {
+                s1.add( ref );
+            }
             if ( NodeUtil.isDeleted(n)) {
             	deletedFromS2.add(n);
             }
         }
-        
-        // delete the nodes from s1 and s2  
+                
+        // Remove the deleted nodes from s1 and s2  
         for ( NodeRef n : deletedFromS1 ) {
         	s1.remove(n);
         }
         for ( NodeRef n : deletedFromS2 ) {
         	s2.remove(n);
+        }
+        
+        // Add owned value specs if needed, as we need them to be separated out for
+        // the diff to work correctly:
+        Set<NodeRef> tempSet1 = new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);
+        Set<NodeRef> tempSet2 = new TreeSet< NodeRef >(NodeUtil.nodeRefComparator);
+        tempSet1.addAll( s1 );
+        tempSet2.addAll( s2 );
+        for ( NodeRef n : tempSet1 ) {
+            String sysmlId = NodeUtil.getSysmlId( n );
+            NodeRef ref =
+                    NodeUtil.findNodeRefById( sysmlId, false, ws1, timestamp1,
+                                              getServices(), false );
+            if ( ref != null ) {                
+                // Add owned value specs if needed, as we need them to be separated out for
+                // the diff to work correctly.  
+                addEmbeddedValueSpecs(ref, s1, getServices());
+            }
+        }
+        for ( NodeRef n : tempSet2 ) {
+            String sysmlId = NodeUtil.getSysmlId( n );
+            NodeRef ref =
+                    NodeUtil.findNodeRefById( sysmlId, false, node, timestamp2,
+                                              getServices(), false );
+            if ( ref != null ) {                
+                // Add owned value specs if needed, as we need them to be separated out for
+                // the diff to work correctly.  
+                addEmbeddedValueSpecs(ref, s2, getServices());
+            }
         }
 
         nodeDiff = new NodeDiff( s1, s2 );

@@ -654,9 +654,6 @@ public class WorkspaceNode extends EmsScriptNode {
         // dateTime.
         while ( parent != null && !parent.equals( targetParent ) ) {
             Set< NodeRef > changes = parent.getChangedNodeRefs( dateTime );
-
-            //System.out.println( "nodes in " + getName(parent) + " = " + changes );
-
             changedNodeRefs.addAll( changes );
             parent = parent.getParentWorkspace();
             if ( parent != null ) lastParent = parent;
@@ -718,11 +715,11 @@ public class WorkspaceNode extends EmsScriptNode {
                     try {
                         JSONObject diff = new JSONObject( diffStr );
 
-                        Set< EmsScriptNode > elements =
+                        Set< NodeRef > elements =
                                 WorkspaceDiff.getAllChangedElementsInDiffJson( diff,
                                                                                services );
                         if ( elements != null )
-                            changedNodeRefs.addAll( NodeUtil.getNodeRefs( elements ) );
+                            changedNodeRefs.addAll( elements );
                     } catch ( JSONException e ) {
                         String msg = "ERROR! Could not parse json from CommitUtil: \"" + diffStr + "\"";
                         if ( response != null ) {
