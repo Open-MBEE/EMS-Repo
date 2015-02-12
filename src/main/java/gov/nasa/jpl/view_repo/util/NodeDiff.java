@@ -354,14 +354,17 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
     @Override
     public Object getProperty( NodeRef ref, String id ) {
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
-        return node.getProperty( id );
+        
+        // Special case for type b/c it is not a property, and actual based on the
+        // aspect applied to the node:
+        return id.equals( Acm.JSON_TYPE ) ? node.getTypeName() : node.getProperty( id );
     }
 
     @Override
     public Map<String, Object> getPropertyMap( NodeRef ref ) {
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
         Map< String, Object > props = node.getProperties();
-        props.put( "type", node.getTypeName() );
+        props.put( Acm.JSON_TYPE, node.getTypeName() );
         Utils.removeAll( props, getPropertyIdsToIgnore() );
         return props;
     }
