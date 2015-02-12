@@ -102,11 +102,11 @@ public class MmsWorkspaceDiffPost extends ModelPost {
                 }
                 model.put("res", top.toString(4));
             } catch ( JSONException e ) {
-                log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
-                e.printStackTrace();
+                log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 if (!model.containsKey( "res" )) {
-                    model.put( "res", response.toString() );
+                    model.put( "res", String.format("{'message':'%s'}", response.toString()) );
                 }
+                e.printStackTrace();
             }
         }
 

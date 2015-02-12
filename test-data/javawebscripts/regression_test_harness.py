@@ -118,9 +118,32 @@ def do20():
             modDate = j['workspace2']['updatedElements'][0]['modified']
     set_gv4(modDate)
     
+def set_json_output_to_gv(gv):
+    '''Sets the json output to gv variable'''
+    if gv == 1:
+        set_gv1(get_json_output_no_status().replace("\n",""))
+    elif gv == 2:
+        set_gv2(get_json_output_no_status().replace("\n",""))
+    elif gv == 3:
+        set_gv3(get_json_output_no_status().replace("\n",""))
+    elif gv == 4:
+        set_gv4(get_json_output_no_status().replace("\n",""))
+    elif gv == 5:
+        set_gv5(get_json_output_no_status().replace("\n",""))
+    elif gv == 6:
+        set_gv6(get_json_output_no_status().replace("\n",""))
+    
 def set_json_output_to_gv1():
     '''Sets the json output to gv1 variable'''
-    set_gv1(get_json_output_no_status().replace("\n",""))
+    set_json_output_to_gv(1)
+    
+def set_json_output_to_gv2():
+    '''Sets the json output to gv2 variable'''
+    set_json_output_to_gv(2)
+
+def set_json_output_to_gv3():
+    '''Sets the json output to gv3 variable'''
+    set_json_output_to_gv(3)
     
 def do176():
     '''Get the json output, modifies the description and name keys,
@@ -1059,6 +1082,18 @@ common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
         
+# This test case depends on test 220 thats sets gv5
+[
+224,
+"PostToWorkspaceForTypeChange",
+"Post element to workspace with a branch time so that we get a type change",
+create_curl_cmd(type="POST",data="typeChange.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="$gv5/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
 # This test case depends on the previous two
 [
 230,
@@ -1552,7 +1587,7 @@ common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
         
-# CMED-471 Tests: ==================    
+# DiffPost (Merge) (CMED-471) Tests: ==================    
 
 [
 530,
@@ -1622,10 +1657,34 @@ create_curl_cmd(type="GET",base_url=SERVICE_URL,
                 branch="diff?workspace1=$gv2&workspace2=$gv1"),
 True, 
 common_filters+['"id"','"qualifiedId"'],
-["test","workspaces","develop", "develop2"]
-],     
+["test","workspaces","develop", "develop2"],
+None,
+set_json_output_to_gv3
+], 
         
-# EXPRESSION PARSING
+[
+581,
+"PostDiff",
+"Post a diff to merge workspaces",
+'curl %s %s \'$gv3\' "%sdiff"'%(CURL_FLAGS, CURL_POST_FLAGS, SERVICE_URL),
+True, 
+common_filters+['"id"','"qualifiedId"','"timestamp"'],
+["test","workspaces","develop", "develop2"],
+],         
+       
+# Diff again should be empty.  This test depends on the previous one.
+[
+582,
+"DiffCompareWorkspacesAgain",
+"Diff Workspace Test - Compare workspaces again and make sure the diff is empty now after merging.",
+create_curl_cmd(type="GET",base_url=SERVICE_URL,
+                branch="diff?workspace1=$gv2&workspace2=$gv1"),
+True, 
+common_filters+['"id"','"qualifiedId"'],
+["test","workspaces","develop", "develop2"],
+], 
+ 
+# EXPRESSION PARSING =====================================================
 
 [
 600,
@@ -1637,6 +1696,8 @@ True,
 common_filters+['MMS_'],
 ["test","workspaces","develop", "develop2"]
 ],
+
+# PERMISSION TESTING =====================================================
 
 # Creating users for user testing
 # [
