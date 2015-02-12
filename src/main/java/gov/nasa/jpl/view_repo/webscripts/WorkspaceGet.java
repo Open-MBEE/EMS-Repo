@@ -12,9 +12,9 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-import gov.nasa.jpl.view_repo.util.JsonArray;
+import org.json.JSONArray;
 import org.json.JSONException;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -40,7 +40,7 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		printHeader(req);
 		clearCaches();
 		Map<String, Object> model = new HashMap<String, Object>();
-		JsonObject object = null;
+		JSONObject object = null;
 
 		try{
 			if(validateRequest(req, status)){
@@ -84,10 +84,10 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		return object;
 	}
 
-	protected JsonObject getWorkspace(WorkspaceNode ws, String wsID) throws JSONException {
-		JsonObject json = new JsonObject();
-		JsonArray jsonArray = new JsonArray();
-		JsonObject interiorJson = new JsonObject();
+	protected JSONObject getWorkspace(WorkspaceNode ws, String wsID) throws JSONException {
+		JSONObject json = new JSONObject();
+		JSONArray jsonArray = new JSONArray();
+		JSONObject interiorJson = new JSONObject();
 		if(ws == null){
 		    if (wsID.equals("master")) {
 		        WorkspaceNode.addWorkspaceNamesAndIds(interiorJson, ws );
@@ -97,7 +97,7 @@ public class WorkspaceGet extends AbstractJavaWebScript{
 		    }
 		} else {
 		    if(checkPermissions(ws, PermissionService.READ))  {
-		        jsonArray.put(ws.toJsonObject(null));
+		        jsonArray.put(ws.toJSONObject(null));
 		    } else {
                 log(LogLevel.WARNING, "No read permissions for workspace: " + (ws == null ? null : ws.getSysmlId()), HttpServletResponse.SC_FORBIDDEN);
 		    }

@@ -46,9 +46,9 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.site.SiteInfo;
-import gov.nasa.jpl.view_repo.util.JsonArray;
+import org.json.JSONArray;
 import org.json.JSONException;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -84,7 +84,7 @@ public class SiteGet extends AbstractJavaWebScript {
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
-        JsonObject json = null;
+        JSONObject json = null;
 
         try {
             if (validateRequest(req, status)) {
@@ -93,8 +93,8 @@ public class SiteGet extends AbstractJavaWebScript {
                 String timestamp = req.getParameter( "timestamp" );
                 Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
-                JsonArray jsonArray = handleSite(workspace, dateTime);
-                json = new JsonObject();
+                JSONArray jsonArray = handleSite(workspace, dateTime);
+                json = new JSONObject();
                 json.put("sites", jsonArray);
             }
         } catch (JSONException e) {
@@ -125,9 +125,9 @@ public class SiteGet extends AbstractJavaWebScript {
      * @return json to return
      * @throws JSONException
      */
-    private JsonArray handleSite(WorkspaceNode workspace, Date dateTime) throws JSONException {
+    private JSONArray handleSite(WorkspaceNode workspace, Date dateTime) throws JSONException {
 
-        JsonArray json = new JsonArray();
+        JSONArray json = new JSONArray();
         EmsScriptNode emsNode;
         String name;
         NodeRef parentRef;
@@ -160,7 +160,7 @@ public class SiteGet extends AbstractJavaWebScript {
                 	if (!name.equals("no_site") &&
                 		(workspace == null || (workspace != null && workspace.contains(emsNode))) ) {
 
-                		JsonObject siteJson = new JsonObject();
+                		JSONObject siteJson = new JSONObject();
                 		siteJson.put("sysmlid", name);
                 		siteJson.put("name", siteInfo.getTitle());
                 		siteJson.put("parent", parentId );

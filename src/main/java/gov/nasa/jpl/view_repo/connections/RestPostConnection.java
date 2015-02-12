@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -30,7 +30,7 @@ public class RestPostConnection extends AbstractConnection {
         RestPostConnection.uri = uri;
     }
     
-    public boolean publish(JsonObject jsonObject, String dst) {
+    public boolean publish(JSONObject jsonObject, String dst) {
         boolean status = true;
         Client client = Client.create();
         String msg = jsonObject.toString( );

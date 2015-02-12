@@ -23,7 +23,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONException;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
 
 
@@ -720,7 +720,7 @@ public class WorkspaceNode extends EmsScriptNode {
                 if ( "COMMIT".equals( type ) ) {
                     String diffStr = (String)commit.getProperty( "ems:commit" );
                     try {
-                        JsonObject diff = new JsonObject( diffStr );
+                        JSONObject diff = new JSONObject( diffStr );
 
                         Set< EmsScriptNode > elements =
                                 WorkspaceDiff.getAllChangedElementsInDiffJson( diff,
@@ -761,13 +761,13 @@ public class WorkspaceNode extends EmsScriptNode {
     }
 
     /**
-     * Add the workspace name and id metadata onto the provided JsonObject
+     * Add the workspace name and id metadata onto the provided JSONObject
      * @param jsonObject
      * @param ws
      * @throws JSONException
      */
     public static void
-            addWorkspaceNamesAndIds( JsonObject json, WorkspaceNode ws ) throws JSONException {
+            addWorkspaceNamesAndIds( JSONObject json, WorkspaceNode ws ) throws JSONException {
         json.put( "name",  getWorkspaceName(ws) );
         json.put( "id", getId(ws) );
         json.put( "qualifiedName", getQualifiedName( ws ) );
@@ -775,8 +775,8 @@ public class WorkspaceNode extends EmsScriptNode {
     }
 
     @Override
-    public JsonObject toJsonObject( Date dateTime ) throws JSONException {
-        JsonObject json = new JsonObject();
+    public JSONObject toJSONObject( Date dateTime ) throws JSONException {
+        JSONObject json = new JSONObject();
 
         addWorkspaceNamesAndIds(json, this );
         json.put( "creator", getProperty( "cm:modifier" ) );

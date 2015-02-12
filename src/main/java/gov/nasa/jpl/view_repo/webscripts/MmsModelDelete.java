@@ -23,7 +23,7 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.json.JSONException;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -59,7 +59,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
 
         Map<String, Object> model = new HashMap<String, Object>();
 
-        JsonObject result = null;
+        JSONObject result = null;
 
         try {
             result = handleRequest( req );
@@ -85,8 +85,8 @@ public class MmsModelDelete extends AbstractJavaWebScript {
         return model;
     }
 
-    protected JsonObject handleRequest(WebScriptRequest req) throws JSONException {
-        JsonObject result = null;
+    protected JSONObject handleRequest(WebScriptRequest req) throws JSONException {
+        JSONObject result = null;
 
         //Long start = System.currentTimeMillis();  // TODO ask CY why implemented this in this way, as it
                                                     //      introduces a bug when the node is replicated
@@ -153,7 +153,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 wsDiff.getElements().remove( id );
             }
             
-            result = wsDiff.toJsonObject( new Date(end), new Date(end), showAll );
+            result = wsDiff.toJSONObject( new Date(end), new Date(end), showAll );
 
             // apply aspects after JSON has been created (otherwise it won't be output)
             Set<EmsScriptNode> nodesToDelete = new HashSet<EmsScriptNode>();

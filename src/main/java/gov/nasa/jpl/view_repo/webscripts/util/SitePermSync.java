@@ -31,7 +31,7 @@ package gov.nasa.jpl.view_repo.webscripts.util;
 
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
-import gov.nasa.jpl.view_repo.util.JsonArray;
+import org.json.JSONArray;
 import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript;
 
 import java.util.HashMap;
@@ -47,7 +47,7 @@ import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteMemberInfo;
 import org.json.JSONException;
 
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
@@ -99,7 +99,7 @@ public class SitePermSync extends AbstractJavaWebScript{
 
         List<SiteInfo> sites = services.getSiteService().listSites(null);
 
-        JsonArray msgs = new JsonArray();
+        JSONArray msgs = new JSONArray();
 
         for (SiteInfo siteInfo : sites ) {
             EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
@@ -112,7 +112,7 @@ public class SitePermSync extends AbstractJavaWebScript{
             }
         }
 
-        JsonObject json = new JsonObject();
+        JSONObject json = new JSONObject();
         try {
             json.put( "msgs", msgs );
             model.put( "res", json.toString() );

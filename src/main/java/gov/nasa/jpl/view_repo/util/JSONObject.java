@@ -12,33 +12,33 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.json.JSONArray;
+//import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
+//import org.json.JSONObject;
 import org.json.JSONTokener;
 
-public class JsonObject extends org.json.JSONObject {
+public class JSONObject extends org.json.JSONObject {
 
     public static boolean doCaching = false;
-    public static Map<JsonObject, Map< Integer, Pair< Date, String > > > stringCache =
-            Collections.synchronizedMap( new HashMap< JsonObject, Map< Integer, Pair< Date, String > > >() );
+    public static Map<JSONObject, Map< Integer, Pair< Date, String > > > stringCache =
+            Collections.synchronizedMap( new HashMap< JSONObject, Map< Integer, Pair< Date, String > > >() );
     public static long cacheHits = 0;
     public static long cacheMisses = 0;
 
-    public JsonObject( JsonObject arg0, String[] arg1 ) throws JSONException {
+    public JSONObject( org.json.JSONObject arg0, String[] arg1 ) throws JSONException {
         super( arg0, arg1 );
     }
 
-    public JsonObject( JSONTokener arg0 ) throws JSONException {
+    public JSONObject( JSONTokener arg0 ) throws JSONException {
         super( arg0 );
     }
 
-    public JsonObject( JSONObject arg0 ) {
+    public JSONObject( org.json.JSONObject arg0 ) {
         super( toMap( arg0 ) );
         //this(arg0, arg0 == null ? null : toArray(arg0.keys()));
     }
     
-    public static Map<String,Object> toMap( JSONObject arg0 ) {
+    public static Map<String,Object> toMap( org.json.JSONObject arg0 ) {
         if ( arg0 == null ) return null;
         Map< String, Object > m = new LinkedHashMap< String, Object >();
         //String[] names = arg0.getNames( arg0 );
@@ -48,10 +48,10 @@ public class JsonObject extends org.json.JSONObject {
             //for ( String name : names ) {
                 String name = (String)i.next();
                 Object val = arg0.get(name);
-                if ( val instanceof JSONObject ) {
-                    val = make((JSONObject)val);
-                } else if ( val instanceof JSONArray ) {
-                    val = JsonArray.make( (JSONArray)val );
+                if ( val instanceof org.json.JSONObject ) {
+                    val = make((org.json.JSONObject)val);
+                } else if ( val instanceof org.json.JSONArray ) {
+                    val = JSONArray.make( (org.json.JSONArray)val );
                 }
                 m.put( name, val );
             }
@@ -61,10 +61,10 @@ public class JsonObject extends org.json.JSONObject {
         return m;
     }
 
-    public static JsonObject make( JSONObject arg0 ) {
+    public static JSONObject make( org.json.JSONObject arg0 ) {
         if ( arg0 == null ) return null;
-        if ( arg0 instanceof JsonObject ) return (JsonObject)arg0;
-        return new JsonObject( arg0 );
+        if ( arg0 instanceof JSONObject ) return (JSONObject)arg0;
+        return new JSONObject( arg0 );
     }
 
     // TODO -- move this to Utils
@@ -78,60 +78,60 @@ public class JsonObject extends org.json.JSONObject {
         return keyArray;
     }
 
-//    public JsonObject( Map arg0, boolean arg1 ) {
+//    public JSONObject( Map arg0, boolean arg1 ) {
 //        super( arg0, arg1 );
 //    }
 
-    public JsonObject( Map arg0 ) {
+    public JSONObject( Map arg0 ) {
         super( arg0 );
     }
 
-//    public JsonObject( Object arg0, boolean arg1 ) {
+//    public JSONObject( Object arg0, boolean arg1 ) {
 //        super( arg0, arg1 );
 //    }
 
-    public JsonObject( Object arg0, String[] arg1 ) {
+    public JSONObject( Object arg0, String[] arg1 ) {
         super( arg0, arg1 );
     }
 
-    public JsonObject( Object arg0 ) {
+    public JSONObject( Object arg0 ) {
         super( arg0 );
     }
 
-    public JsonObject( String arg0 ) throws JSONException {
+    public JSONObject( String arg0 ) throws JSONException {
         super( arg0 );
     }
 
-    public JsonObject() {
+    public JSONObject() {
         super();
     }
 
     @Override
-    public JsonArray toJSONArray( JSONArray arg0 ) throws JSONException {
-        return JsonArray.make( super.toJSONArray( arg0 ) );
+    public JSONArray toJSONArray( org.json.JSONArray arg0 ) throws JSONException {
+        return JSONArray.make( super.toJSONArray( arg0 ) );
     }
 
     @Override
-    public JsonArray getJSONArray( String arg0 ) throws JSONException {
-        return JsonArray.make( super.getJSONArray( arg0 ) );
+    public JSONArray getJSONArray( String arg0 ) throws JSONException {
+        return JSONArray.make( super.getJSONArray( arg0 ) );
     }
 
     @Override
-    public JsonObject getJSONObject( String arg0 ) throws JSONException {
+    public JSONObject getJSONObject( String arg0 ) throws JSONException {
         return make( super.getJSONObject( arg0 ) );
     }
 
     @Override
-    public JsonArray optJSONArray( String arg0 ) {
+    public JSONArray optJSONArray( String arg0 ) {
         try {
-            return JsonArray.make( super.optJSONArray( arg0 ) );
+            return JSONArray.make( super.optJSONArray( arg0 ) );
         } catch ( JSONException e ) {
         }
         return null;
     }
 
     @Override
-    public JsonObject optJSONObject( String arg0 ) {
+    public JSONObject optJSONObject( String arg0 ) {
         return make( super.optJSONObject( arg0 ) );
     }
     

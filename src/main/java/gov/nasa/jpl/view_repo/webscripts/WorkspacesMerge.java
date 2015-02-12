@@ -20,9 +20,9 @@ import javax.transaction.UserTransaction;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import gov.nasa.jpl.view_repo.util.JsonArray;
+import org.json.JSONArray;
 import org.json.JSONException;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -50,7 +50,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 		printHeader(req);
 		clearCaches();
 		Map<String, Object> model = new HashMap<String, Object>();
-		JsonObject result = new JsonObject();
+		JSONObject result = new JSONObject();
 		try{
 			if(validateRequest(req, status)){
 				String targetId = req.getParameter("target");
@@ -106,18 +106,18 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 
 
 				// Prints out the differences after merging.
-				JsonObject top = wsDiff.toJsonObject(null, null /*time*/, false);
+				JSONObject top = wsDiff.toJSONObject(null, null /*time*/, false);
 		        Iterator< ? > iter = top.keys();
 		        while ( iter.hasNext() ) {
 		            String key = "" + iter.next();
-				    JsonObject object = top.optJSONObject(key);
+				    JSONObject object = top.optJSONObject(key);
 				    Iterator< ? > iter2 = object.keys();
 				    while(iter2.hasNext() ) {
 				        String key2 = "" + iter2.next();
-				        JsonArray jArray = object.optJSONArray( key2 );
+				        JSONArray jArray = object.optJSONArray( key2 );
 				        if(jArray != null) {
 				            for(int i = 0; i < jArray.length(); i++) {
-				                JsonObject obj = jArray.getJSONObject(i);
+				                JSONObject obj = jArray.getJSONObject(i);
 				                if(obj.has("read")) obj.remove( "read" );
 				            }
 				        }
@@ -144,9 +144,9 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
                                 trx.begin();
                                 NodeUtil.setInsideTransactionNow( true );
                             // Create JSON object of the elements to return:
-                            JsonArray elementsJson = new JsonArray();
+                            JSONArray elementsJson = new JSONArray();
                             for ( EmsScriptNode element : elements ) {
-                                elementsJson.put( element.toJsonObject(null) );
+                                elementsJson.put( element.toJSONObject(null) );
                             }
                            //top.put( "elements", elementsJson );
                             //model.put( "res", top.toString( 4 ) );
@@ -206,8 +206,8 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 
 	// Essentially the same executeImpl code from MmsModelDelete
 
-	protected JsonObject handleDelete(Collection <EmsScriptNode> collection, WorkspaceNode workspace, String wsId, Date time, WorkspaceDiff workspaceDiff) {
-		JsonObject result = null;
+	protected JSONObject handleDelete(Collection <EmsScriptNode> collection, WorkspaceNode workspace, String wsId, Date time, WorkspaceDiff workspaceDiff) {
+		JSONObject result = null;
 		MmsModelDelete deleteInstance = new MmsModelDelete(repository, services);
 		long start = System.currentTimeMillis();
 		Collection <EmsScriptNode> tempCollection = new ArrayList< EmsScriptNode >();
@@ -228,7 +228,7 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
 		//String siteName = node.getSiteName();
 		long end = System.currentTimeMillis();
 		try{
-			result = workspaceDiff.toJsonObject(new Date(start),new Date(end), false);
+			result = workspaceDiff.toJSONObject(new Date(start),new Date(end), false);
 			for( EmsScriptNode node: collection) {
 				// editting the JSON
 				node.removeAspect( "ems:Added" );

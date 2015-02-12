@@ -24,9 +24,9 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
-import gov.nasa.jpl.view_repo.util.JsonArray;
+import org.json.JSONArray;
 import org.json.JSONException;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -49,9 +49,9 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         super( repository, services, response );
     }
 
-    public JsonArray handleProducts( WebScriptRequest req )
+    public JSONArray handleProducts( WebScriptRequest req )
                                                            throws JSONException {
-        JsonArray productsJson = new JsonArray();
+        JSONArray productsJson = new JSONArray();
 
         EmsScriptNode siteNode = null;
         EmsScriptNode mySiteNode = getSiteNodeFromRequest( req, false );
@@ -90,7 +90,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
     }
 
 
-    public JsonArray handleConfigurationProducts( WebScriptRequest req, EmsScriptNode config) throws JSONException {
+    public JSONArray handleConfigurationProducts( WebScriptRequest req, EmsScriptNode config) throws JSONException {
         String timestamp = req.getParameter( "timestamp" );
         Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
 
@@ -100,8 +100,8 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         return configWs.getProducts( config, workspace, dateTime );
     }
 
-    public JsonArray handleContextProducts( WebScriptRequest req, EmsScriptNode siteNode) throws JSONException {
-        JsonArray productsJson = new JsonArray();
+    public JSONArray handleContextProducts( WebScriptRequest req, EmsScriptNode siteNode) throws JSONException {
+        JSONArray productsJson = new JSONArray();
 
         // get timestamp if specified
         String timestamp = req.getParameter( "timestamp" );
@@ -127,11 +127,11 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     if (checkSitePkg) {
                         if (pkgSite != null &&
                             pkgSite.equals(findParentPkgSite(node, siteNode, null, workspace))) {
-                            productsJson.put( node.toJsonObject( null ) );
+                            productsJson.put( node.toJSONObject( null ) );
                         }
                     }
                     else {
-                        productsJson.put( node.toJsonObject( null ) );
+                        productsJson.put( node.toJSONObject( null ) );
                     }
                 }
             }
@@ -140,13 +140,13 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         return productsJson;
     }
 
-    public JsonArray
+    public JSONArray
             getProductSnapshots( String productId, String contextPath,
                                  WorkspaceNode workspace, Date dateTime ) throws JSONException {
         EmsScriptNode product = findScriptNodeById( productId, workspace,
                                                     dateTime, false );
 
-        JsonArray snapshotsJson = new JsonArray();
+        JSONArray snapshotsJson = new JSONArray();
         List< EmsScriptNode > snapshotsList =
                 product.getTargetAssocsNodesByType( "view2:snapshots",
                                                     workspace, null );
@@ -164,7 +164,7 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                 String id = snapshot.getSysmlId();
                 Date date = snapshot.getLastModified( dateTime );
 
-                JsonObject jsonObject = new JsonObject();
+                JSONObject jsonObject = new JSONObject();
                 jsonObject.put( "id", id );
                 jsonObject.put( "created", EmsScriptNode.getIsoTime( date ) );
                 jsonObject.put( "creator",
@@ -187,12 +187,12 @@ public class ProductsWebscript extends AbstractJavaWebScript {
         return false;
     }
 
-    public JsonArray handleProduct( String productId, boolean recurse,
+    public JSONArray handleProduct( String productId, boolean recurse,
                                     WorkspaceNode workspace,
                                     Date dateTime,
                                     boolean gettingDisplayedElements,
                                     boolean gettingContainedViews ) {
-        JsonArray productsJson = new JsonArray();
+        JSONArray productsJson = new JSONArray();
         EmsScriptNode product = findScriptNodeById( productId, workspace, dateTime, false );
 
         if ( product == null ) {
@@ -209,9 +209,9 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     elems = NodeUtil.getVersionAtTime( elems, dateTime );
                     for ( EmsScriptNode n : elems ) {
                         if ( simpleJson ) {
-                            productsJson.put( n.toSimpleJsonObject( dateTime ) );
+                            productsJson.put( n.toSimpleJSONObject( dateTime ) );
                         } else {
-                            productsJson.put( n.toJsonObject( dateTime ) );
+                            productsJson.put( n.toJSONObject( dateTime ) );
                         }
                     }
                 } else if ( gettingContainedViews ) {
@@ -220,13 +220,13 @@ public class ProductsWebscript extends AbstractJavaWebScript {
                     elems.add( product );
                     for ( EmsScriptNode n : elems ) {
                         if ( simpleJson ) {
-                            productsJson.put( n.toSimpleJsonObject( dateTime ) );
+                            productsJson.put( n.toSimpleJSONObject( dateTime ) );
                         } else {
-                            productsJson.put( n.toJsonObject( dateTime ) );
+                            productsJson.put( n.toJSONObject( dateTime ) );
                         }
                     }
                 } else {
-                    productsJson.put( product.toJsonObject( dateTime ) );
+                    productsJson.put( product.toJSONObject( dateTime ) );
                 }
             } catch ( JSONException e ) {
                 log( LogLevel.ERROR, "Could not create JSON for product",

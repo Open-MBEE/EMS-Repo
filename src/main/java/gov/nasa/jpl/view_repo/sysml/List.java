@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.TreeSet;
 
-import gov.nasa.jpl.view_repo.util.JsonArray;
+import org.json.JSONArray;
 import org.json.JSONException;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 
 import sysml.view.Viewable;
 
@@ -97,10 +97,10 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
      * @see sysml.Viewable#toViewJson()
      */
     @Override
-    public JsonObject toViewJson() {
+    public JSONObject toViewJson() {
 
-        JsonObject json = new JsonObject();
-        JsonArray jsonArray = new JsonArray();
+        JSONObject json = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
 
         try {
         	
@@ -146,7 +146,7 @@ public class List extends ArrayList< Viewable< EmsScriptNode > > implements sysm
      */
     @Override
     public String toString() {
-        JsonObject jo = toViewJson();
+        JSONObject jo = toViewJson();
         if ( jo != null ) return jo.toString();
         return super.toString();
     }

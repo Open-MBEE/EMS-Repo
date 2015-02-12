@@ -18,7 +18,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
@@ -56,7 +56,7 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
 
         MmsConfigurationsPost instance = new MmsConfigurationsPost(repository, getServices());
 
-        JsonObject jsonObject = new JsonObject();
+        JSONObject jsonObject = new JSONObject();
 
         try {
             jsonObject = instance.handleUpdate( req );
@@ -80,7 +80,7 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
         return model;
     }
 
-    private JsonObject handleUpdate(WebScriptRequest req) throws JSONException {
+    private JSONObject handleUpdate(WebScriptRequest req) throws JSONException {
         WorkspaceNode workspace = getWorkspace( req );
 
         EmsScriptNode siteNode = getSiteNodeFromRequest(req, false);
@@ -88,19 +88,20 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
         if ( siteNode == null && !Utils.isNullOrEmpty( siteNameFromReq )
              && !siteNameFromReq.equals( NO_SITE_ID ) ) {
             log(LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND);
-            return new JsonObject();
+            return new JSONObject();
         }
 
         String configId = req.getServiceMatch().getTemplateVars().get( "configurationId" );
         NodeRef configNode = NodeUtil.getNodeRefFromNodeId( configId );
         if (configNode == null) {
             log(LogLevel.WARNING, "Could not find configuration with id: " + configId, HttpServletResponse.SC_NOT_FOUND);
-            return new JsonObject();
+            return new JSONObject();
         }
         EmsScriptNode config = new EmsScriptNode(configNode, services);
 
         ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
-        JsonObject requestJson = JsonObject.make( (JSONObject)req.parseContent() );
+        JSONObject requestJson = //JSONObject.make( 
+                                                  (JSONObject)req.parseContent(); //);
         HashSet<String> productSet = configWs.updateConfiguration( config, requestJson, siteNode, workspace, null );
         ConfigurationPost configPost = new ConfigurationPost( repository, services );
         String siteName = siteNode == null ? null : siteNode.getName();

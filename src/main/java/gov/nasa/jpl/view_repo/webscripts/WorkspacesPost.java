@@ -46,12 +46,12 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
 
-import gov.nasa.jpl.view_repo.util.JsonArray;
+import org.json.JSONArray;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
@@ -92,14 +92,15 @@ public class WorkspacesPost extends AbstractJavaWebScript{
         Map<String, Object> model = new HashMap<String, Object>();
         int statusCode = HttpServletResponse.SC_OK;
         String user = AuthenticationUtil.getRunAsUser();
-        JsonObject json = null;
+        JSONObject json = null;
         try{
             if(validateRequest(req, status)){
                 String sourceWorkspaceParam = req.getParameter("sourceWorkspace");
                 String newName = req.getServiceMatch().getTemplateVars().get(WORKSPACE_ID);
                 String copyTime = req.getParameter("copyTime");
                 Date copyDateTime = TimeUtils.dateFromTimestamp( copyTime );
-                JsonObject reqJson = JsonObject.make( (JSONObject)req.parseContent() );
+                JSONObject reqJson = //JSONObject.make( 
+                        (JSONObject)req.parseContent();// );
                 WorkspaceNode ws = createWorkSpace(sourceWorkspaceParam, newName, copyDateTime, reqJson, user, status);
                 statusCode = status.getCode();
                 json = printObject(ws);
@@ -127,12 +128,12 @@ public class WorkspacesPost extends AbstractJavaWebScript{
         printFooter();
         return model;
     }
-    protected JsonObject printObject(WorkspaceNode ws) throws JSONException{
-        JsonObject json = new JsonObject();
-        JsonArray jsonArray = new JsonArray();
+    protected JSONObject printObject(WorkspaceNode ws) throws JSONException{
+        JSONObject json = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
         if (ws != null) {
             if(checkPermissions(ws, PermissionService.READ)) {
-                jsonArray.put(ws.toJsonObject( null ));
+                jsonArray.put(ws.toJSONObject( null ));
             }
             else {
                 log(LogLevel.WARNING,"No permission to read: "+ ws.getSysmlId(),HttpServletResponse.SC_NOT_FOUND);
@@ -143,7 +144,7 @@ public class WorkspacesPost extends AbstractJavaWebScript{
     }
 
     public WorkspaceNode createWorkSpace(String sourceWorkId, String newWorkName, Date cpyTime,
-                               JsonObject jsonObject, String user, Status status) throws JSONException {
+                               JSONObject jsonObject, String user, Status status) throws JSONException {
         status.setCode( HttpServletResponse.SC_OK );
 
         String sourceWorkspaceId = null;
@@ -156,8 +157,8 @@ public class WorkspacesPost extends AbstractJavaWebScript{
         // and ignore any URL parameters:
         if (jsonObject != null) {
 
-            JsonArray jarr = jsonObject.getJSONArray("workspaces");
-            JsonObject wsJson = jarr.getJSONObject( 0 );  // Will only post/update one workspace
+            JSONArray jarr = jsonObject.getJSONArray("workspaces");
+            JSONObject wsJson = jarr.getJSONObject( 0 );  // Will only post/update one workspace
             sourceWorkspaceId = wsJson.optString( "parent", null );
             newWorkspaceId = wsJson.optString( "id", null ); // alfresco id of workspace node
             workspaceName = wsJson.optString( "name", null ); // user or auto-generated name, ems:workspace_name

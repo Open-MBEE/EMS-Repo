@@ -44,9 +44,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-import gov.nasa.jpl.view_repo.util.JsonArray;
+import org.json.JSONArray;
 import org.json.JSONException;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -84,7 +84,7 @@ public class ProjectGet extends AbstractJavaWebScript {
         clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
-        JsonObject json = null;
+        JSONObject json = null;
 
         try {
             if (validateRequest(req, status)) {
@@ -120,7 +120,7 @@ public class ProjectGet extends AbstractJavaWebScript {
     }
 
     /**
-     * Get the project specified by the JsonObject
+     * Get the project specified by the JSONObject
      *
      * @param projectId
      *            Project ID
@@ -129,11 +129,11 @@ public class ProjectGet extends AbstractJavaWebScript {
      * @return HttpStatusResponse code for success of the POST request
      * @throws JSONException
      */
-    private JsonObject handleProject( String projectId, String siteName,
+    private JSONObject handleProject( String projectId, String siteName,
                                       WorkspaceNode workspace, Date dateTime )
                                               throws JSONException {
         EmsScriptNode projectNode = null;
-        JsonObject json = null;
+        JSONObject json = null;
 
         EmsScriptNode siteNode = getSiteNodeForWorkspace( siteName, workspace, dateTime );
 
@@ -163,10 +163,10 @@ public class ProjectGet extends AbstractJavaWebScript {
 
         if (checkPermissions(projectNode, PermissionService.READ)) {
             log(LogLevel.INFO, "Found project", HttpServletResponse.SC_OK);
-            json = new JsonObject();
-            JsonArray elements = new JsonArray();
-            JsonObject project = new JsonObject();
-            JsonObject specialization = new JsonObject();
+            json = new JSONObject();
+            JSONArray elements = new JSONArray();
+            JSONObject project = new JSONObject();
+            JSONObject specialization = new JSONObject();
 
             json.put("elements", elements);
             elements.put(project);

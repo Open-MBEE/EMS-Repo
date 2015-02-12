@@ -22,7 +22,7 @@ import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
 
 
@@ -363,7 +363,7 @@ public class CommitUtil {
         return parentRefs;
     }
 
-    public static NodeRef commit(JsonObject wsDiff,
+    public static NodeRef commit(JSONObject wsDiff,
                        WorkspaceNode workspace,
                        String msg,
                        boolean runWithoutTransactions,
@@ -400,7 +400,7 @@ public class CommitUtil {
 	}
 
 
-	private static NodeRef commitTransactionable( JsonObject wsDiff,
+	private static NodeRef commitTransactionable( JSONObject wsDiff,
 	                                           WorkspaceNode workspace,
 	                                           String msg,
 	                                           ServiceRegistry services,
@@ -415,7 +415,7 @@ public class CommitUtil {
     }
 
 
-    public static NodeRef merge(JsonObject wsDiff,
+    public static NodeRef merge(JSONObject wsDiff,
                              WorkspaceNode source,
                              WorkspaceNode target,
                              Date dateTimeSrc,
@@ -452,7 +452,7 @@ public class CommitUtil {
         return mergeRef;
     }
 
-	private static NodeRef mergeTransactionable( JsonObject wsDiff,
+	private static NodeRef mergeTransactionable( JSONObject wsDiff,
                                               WorkspaceNode source1,
                                               WorkspaceNode source2,
                                               WorkspaceNode target,
@@ -477,11 +477,11 @@ public class CommitUtil {
 		// TODO: revert moves.... this may not be easy
 		// TODO: revert adds (e.g., make them deleted)
 //		try {
-//			JsonObject changeJson = new JsonObject(content);
+//			JSONObject changeJson = new JSONObject(content);
 //
-//			JsonArray changeArray = changeJson.getJSONArray(COMMIT_KEY);
+//			JSONArray changeArray = changeJson.getJSONArray(COMMIT_KEY);
 //			for (int ii = 0; ii < changeArray.length(); ii++) {
-//				JsonObject json = changeArray.getJSONObject(ii);
+//				JSONObject json = changeArray.getJSONObject(ii);
 //				EmsScriptNode node = getScriptNodeByNodeRefId(json.getString(ID_KEY), services);
 //				if (node != null) {
 //					String versionKey = json.getString(VERSION_KEY);
@@ -743,13 +743,13 @@ public class CommitUtil {
 
     /**
      * Send off the deltas to various endpoints
-     * @param deltas    JsonObject of the deltas to be published
+     * @param deltas    JSONObject of the deltas to be published
      * @param projectId String of the project Id to post to
      * @param source    Source of the delta (e.g., MD, EVM, whatever, only necessary for MD so it can ignore)
      * @return          true if publish completed
      * @throws JSONException
      */
-    public static boolean sendDeltas(JsonObject deltaJson, String workspaceId, String projectId, String source) throws JSONException {
+    public static boolean sendDeltas(JSONObject deltaJson, String workspaceId, String projectId, String source) throws JSONException {
         boolean jmsStatus = false;
         boolean restStatus = false;
 

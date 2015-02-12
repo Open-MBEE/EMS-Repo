@@ -45,7 +45,7 @@ import org.alfresco.service.namespace.QName;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
@@ -101,7 +101,8 @@ public class AdminUserPost extends AbstractJavaWebScript {
     }
 
     private boolean handleRequest(WebScriptRequest req) {
-        JsonObject jsonObject = JsonObject.make( (JSONObject)req.parseContent() );
+        JSONObject jsonObject = //JSONObject.make( 
+                (JSONObject)req.parseContent();// );
         if (jsonObject != null) {
             if (jsonObject.has( "username" ) && jsonObject.has( "password" ) && jsonObject.has( "email" )) {
                 try {

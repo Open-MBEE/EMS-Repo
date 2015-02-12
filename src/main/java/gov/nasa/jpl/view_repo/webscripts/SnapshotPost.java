@@ -86,12 +86,12 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
-import gov.nasa.jpl.view_repo.util.JsonArray;
+import org.json.JSONArray;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -108,7 +108,7 @@ import org.springframework.extensions.webscripts.WebScriptRequest;
  */
 public class SnapshotPost extends AbstractJavaWebScript {
 	protected String snapshotName;
-	private JsonArray view2view;
+	private JSONArray view2view;
 	private DocBookWrapper docBookMgr;
 	protected NodeService nodeService;
 	protected PersonService personService;
@@ -153,11 +153,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
         Map< String, Object > model = new HashMap< String, Object >();
         log( LogLevel.INFO, "Starting snapshot creation or snapshot artifact generation..." );
         try {
-            JsonObject reqPostJson = JsonObject.make( (JSONObject)req.parseContent() );
+            JSONObject reqPostJson = //JSONObject.make( 
+                    (JSONObject)req.parseContent();// );
             if ( reqPostJson != null ) {
                 log( LogLevel.INFO, "Generating snapshot artifact..." );
                 //SnapshotPost instance = new SnapshotPost( repository, services );
-                JsonObject result = //instance.
+                JSONObject result = //instance.
                         saveAndStartAction( req, status, workspace );
                 //appendResponseStatusInfo( instance );
 
@@ -200,7 +201,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                          HttpServletResponse.SC_INTERNAL_SERVER_ERROR );
                 } else {
                     try {
-                        JsonObject snapshoturl = new JsonObject();
+                        JSONObject snapshoturl = new JSONObject();
                         if (!Utils.isNullOrEmpty(response.toString())) snapshoturl.put("message", response.toString());
                         snapshoturl.put( "id", snapshotName );
                         snapshoturl.put( "creator",
@@ -253,7 +254,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	return sb.toString();
     }
 
-    private DBParagraph createDBParagraph( JsonObject obj, DBSection section, WorkspaceNode workspace, Date timestamp  ) {
+    private DBParagraph createDBParagraph( JSONObject obj, DBSection section, WorkspaceNode workspace, Date timestamp  ) {
     	if(obj == null) return null;
         String srcType = (String)obj.opt( "sourceType" );
         String src = (String)obj.opt( "source" );
@@ -342,7 +343,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return p;
     }
 
-    private DocumentElement createDBSection( JsonObject obj, WorkspaceNode workspace, Date timestamp ) throws JSONException {
+    private DocumentElement createDBSection( JSONObject obj, WorkspaceNode workspace, Date timestamp ) throws JSONException {
         DBSection section = new DBSection();
         section.setTitle( (String)obj.opt( "name" ) );
         createDBSectionContainment( section, obj.getJSONArray( "contains" ), workspace, timestamp );
@@ -350,10 +351,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     private void createDBSectionContainment(DBSection section,
-                                            JsonArray jsonContains,
+                                            JSONArray jsonContains,
                                             WorkspaceNode workspace, Date timestamp) throws JSONException{
         for ( int i = 0; i < jsonContains.length(); i++ ) {
-            JsonObject obj = jsonContains.getJSONObject( i );
+            JSONObject obj = jsonContains.getJSONObject( i );
             DocumentElement e = createElement( obj, section, workspace, timestamp );
             if ( e != null ) section.addElement( e );
 
@@ -361,7 +362,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         }
 	}
 
-    private DocumentElement createDBText( JsonObject obj, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
+    private DocumentElement createDBText( JSONObject obj, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
         DBText text = new DBText();
         String value = null;
         String sourceType = obj.optString("sourceType");
@@ -408,12 +409,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
             View productView = product.getView();
             if(productView == null) throw new Exception("Missing document's structure; expected to find product's view but it's not found.");
 
-            JsonArray contains = productView.getContainsJson();
+            JSONArray contains = productView.getContainsJson();
             if(contains == null || contains.length()==0){ throw new Exception("Missing document's structure; expected to find document's 'contains' JSONArray but it's not found."); }
 
             for(int i=0; i < contains.length(); i++){
-	            JsonObject contain = contains.getJSONObject(0);
-	            if(contain == null) throw new Exception(String.format("Missing document's structure; expected to find contain JsonObject at index: %d but it's not found.", i));
+	            JSONObject contain = contains.getJSONObject(0);
+	            if(contain == null) throw new Exception(String.format("Missing document's structure; expected to find contain JSONObject at index: %d but it's not found.", i));
 
 	            String sourceType = (String)contain.opt("sourceType");
 	            String source = (String)contain.opt("source");
@@ -422,10 +423,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	            this.view2view = productView.getViewToViewPropertyJson();
 	            if(view2view == null || view2view.length()==0) throw new Exception ("Missing document's structure; expected to find document's 'view2view' JSONArray but it's not found.");
 
-	            JsonObject v2vChildNode = getChildrenViews(source);
+	            JSONObject v2vChildNode = getChildrenViews(source);
 	            if(v2vChildNode == null) throw new Exception(String.format("Missing document's structure; expected to find 'view2view' childnode for: %s but it's not found.", source));
 
-	            JsonArray childrenViews = v2vChildNode.getJSONArray("childrenViews");
+	            JSONArray childrenViews = v2vChildNode.getJSONArray("childrenViews");
 	            if(childrenViews == null) throw new Exception("Missing document's structure; expected to find 'view2view' childnode's 'childrenViews' but it's not found.");
 
 	            for(int k=0; k< childrenViews.length(); k++){
@@ -450,18 +451,18 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return docBookMgr;
     }
 
-    private DocBookTable createDocBookTable(JsonObject tblJson){
+    private DocBookTable createDocBookTable(JSONObject tblJson){
     	DocBookTable dbTable = new DocBookTable();
        	int maxColCount = 0;
     	try{
     		int colCount = 0;
-    		JsonArray header = tblJson.getJSONArray( "header" ) ;
+    		JSONArray header = tblJson.getJSONArray( "header" ) ;
     		dbTable.setHeaderRowCount(header.length());
     		for(int i=0; i < header.length(); i++){
-    			JsonArray headerRows = header.getJSONArray(i);
+    			JSONArray headerRows = header.getJSONArray(i);
     			colCount = 0;
     			for(int j=0; j < headerRows.length(); j++){
-    				JsonObject contents = headerRows.getJSONObject(j);
+    				JSONObject contents = headerRows.getJSONObject(j);
 					String colspan = contents.optString("colspan");
 					int col = 0;
 					if(colspan != null && !colspan.isEmpty()) col = Integer.parseInt(colspan);
@@ -470,13 +471,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
     			}
     		}
 
-    		JsonArray body = tblJson.getJSONArray( "body" );
+    		JSONArray body = tblJson.getJSONArray( "body" );
     		dbTable.setBodyRowCount(body.length());
     		for(int i=0; i < body.length(); i++){
-    			JsonArray headerRows = body.getJSONArray(i);
+    			JSONArray headerRows = body.getJSONArray(i);
     			colCount = 0;
     			for(int j=0; j < headerRows.length(); j++){
-    				JsonObject contents = headerRows.getJSONObject(j);
+    				JSONObject contents = headerRows.getJSONObject(j);
 					String colspan = contents.optString("colspan");
 					int col = 0;
 					if(colspan != null && !colspan.isEmpty()) col = Integer.parseInt(colspan);
@@ -493,17 +494,17 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	return dbTable;
     }
 
-    private DocumentElement createList( JsonObject obj, DBSection section, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
+    private DocumentElement createList( JSONObject obj, DBSection section, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
         Boolean isOrdered = (Boolean)obj.opt( "ordered" );
 
         DBList list = new DBList();
         list.setOrdered( isOrdered );
-        JsonArray listItemWrapper = obj.getJSONArray( "list" );
+        JSONArray listItemWrapper = obj.getJSONArray( "list" );
         for ( int i = 0; i < listItemWrapper.length(); i++ ) {
-            JsonArray listItems = listItemWrapper.getJSONArray( i );
+            JSONArray listItems = listItemWrapper.getJSONArray( i );
             DocumentElement docElem = null;
             for ( int j = 0; j < listItems.length(); j++ ) {
-                JsonObject jsObj = listItems.getJSONObject( j );
+                JSONObject jsObj = listItems.getJSONObject( j );
                 DocumentElement e = createElement( jsObj, section, workspace, timestamp );
                 if ( j > 0 ) {
                     appendElement( docElem, e );
@@ -515,7 +516,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return list;
     }
 
-    private DocumentElement createElement( JsonObject obj, DBSection section, WorkspaceNode workspace, Date timestamp ) throws JSONException {
+    private DocumentElement createElement( JSONObject obj, DBSection section, WorkspaceNode workspace, Date timestamp ) throws JSONException {
         DocumentElement e = null;
         switch ( getType( obj ) ) {
             case "Paragraph":
@@ -543,7 +544,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return e;
     }
 
-    private DocumentElement createImage( JsonObject obj, WorkspaceNode workspace, Date timestamp  ) {
+    private DocumentElement createImage( JSONObject obj, WorkspaceNode workspace, Date timestamp  ) {
         DBImage image = new DBImage();
         image.setId( getSymlId( obj ) );
 
@@ -619,7 +620,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 //        view.createOrUpdateAspect( "view2:Snapshotable" );
 //        view.appendToPropertyNodeRefs( "view2:productSnapshots", snapshotNode.getNodeRef() );
 
-        JsonObject snapshotJson = new JsonObject();
+        JSONObject snapshotJson = new JSONObject();
         try {
             snapshotJson.put( "snapshot", true );
             ActionUtil.saveStringToFile( snapshotNode, "application/json", services, snapshotJson.toString( 4 ) );
@@ -647,7 +648,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshotNode;
     }
 
-    private DocumentElement createTable( JsonObject obj, DBSection section, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
+    private DocumentElement createTable( JSONObject obj, DBSection section, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
         DBTable table = new DBTable();
         String title = (String)obj.opt( "title" );
         String style = (String)obj.opt( "sytle" );
@@ -675,24 +676,24 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	return colspecs;
     }
 
-    private List< List< DocumentElement >> createTableBody( JsonObject obj, DBSection section, DocBookTable dbTable, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
+    private List< List< DocumentElement >> createTableBody( JSONObject obj, DBSection section, DocBookTable dbTable, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
         return createTableRows( obj.getJSONArray( "body" ), section, dbTable, false, workspace, timestamp );
     }
 
-    private List< List< DocumentElement >> createTableHeader( JsonObject obj, DBSection section, DocBookTable dbTable, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
+    private List< List< DocumentElement >> createTableHeader( JSONObject obj, DBSection section, DocBookTable dbTable, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
         return createTableRows( obj.getJSONArray( "header" ), section, dbTable, true, workspace, timestamp );
     }
 
-    private List< List< DocumentElement >> createTableRows( JsonArray jsonRows, DBSection section, DocBookTable dbTable, boolean isHeader, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
+    private List< List< DocumentElement >> createTableRows( JSONArray jsonRows, DBSection section, DocBookTable dbTable, boolean isHeader, WorkspaceNode workspace, Date timestamp  ) throws JSONException {
         List< List< DocumentElement >> list =
                 new ArrayList< List< DocumentElement >>();
         for ( int i = 0; i < jsonRows.length(); i++ ) {
-            JsonArray headerRows = jsonRows.getJSONArray( i );
+            JSONArray headerRows = jsonRows.getJSONArray( i );
             List< DocumentElement > rows = new ArrayList< DocumentElement >();
             int startCol = 1;
             for ( int j = 0; j < headerRows.length(); j++ ) {
-                JsonObject contents = headerRows.getJSONObject( j );
-                JsonArray headerCols = contents.getJSONArray( "content" );
+                JSONObject contents = headerRows.getJSONObject( j );
+                JSONArray headerCols = contents.getJSONArray( "content" );
                 //create DBTableEntry at this scope level
                 String colspan = contents.optString( "colspan" );
                 String rowspan = contents.optString( "rowspan" );
@@ -706,7 +707,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
                 for ( int l = 0; l < headerCols.length(); l++ ) {
                 	//gather table cells content
-                    JsonObject content = headerCols.getJSONObject( l );
+                    JSONObject content = headerCols.getJSONObject( l );
                     DocumentElement cell = null;
                     cell = createElement(content, section, workspace, timestamp);
                     if(l > 0)
@@ -772,7 +773,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return valObj;
     }
 
-    private String gatherJobName( JsonObject postJson ) {
+    private String gatherJobName( JSONObject postJson ) {
         String jobName = "";
         try {
             jobName += postJson.getString( "id" );
@@ -787,7 +788,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return jobName;
     }
 
-    public JsonObject generateHTML( String snapshotId, WorkspaceNode workspace ) throws Exception {
+    public JSONObject generateHTML( String snapshotId, WorkspaceNode workspace ) throws Exception {
         EmsScriptNode snapshotNode = findScriptNodeById( snapshotId, workspace, null, false );
         if(snapshotNode == null) throw new Exception("Failed to find snapshot with Id: " + snapshotId);
         String status = getHtmlZipStatus(snapshotNode);
@@ -836,7 +837,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshotNode;
     }
 
-    public JsonObject generatePDF(String snapshotId, WorkspaceNode workspace) throws Exception{
+    public JSONObject generatePDF(String snapshotId, WorkspaceNode workspace) throws Exception{
         EmsScriptNode snapshotNode = findScriptNodeById(snapshotId, workspace, null, false);
         if(snapshotNode == null) throw new Exception("Failed to find snapshot with Id: " + snapshotId);
         String status = getPdfStatus(snapshotNode);
@@ -887,10 +888,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return snapshotNode;
     }
 
-    private JsonObject getChildrenViews(String nodeId){
-    	JsonObject childNode = null;
+    private JSONObject getChildrenViews(String nodeId){
+    	JSONObject childNode = null;
     	for(int j=0; j < view2view.length(); j++){
-        	JsonObject tmpJson;
+        	JSONObject tmpJson;
 			try {
 				tmpJson = this.view2view.getJSONObject(j);
 				String tmpId = (String)tmpJson.opt("id");
@@ -985,18 +986,18 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     private ArrayList< String >
-            getSnapshotFormats( JsonObject postJson ) throws JSONException {
+            getSnapshotFormats( JSONObject postJson ) throws JSONException {
         ArrayList< String > list = new ArrayList< String >();
-        JsonArray formats = postJson.getJSONArray( "formats" );
+        JSONArray formats = postJson.getJSONArray( "formats" );
         for ( int i = 0; i < formats.length(); i++ ) {
-            JsonObject jsonType = formats.getJSONObject( i );
+            JSONObject jsonType = formats.getJSONObject( i );
             String formatType = jsonType.getString( "type" );
             list.add( formatType );
         }
         return list;
     }
 
-    private String getSymlId( JsonObject jsonObj ) {
+    private String getSymlId( JSONObject jsonObj ) {
         return (String)jsonObj.opt( Acm.SYSMLID );
     }
 
@@ -1014,12 +1015,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
      *            : "documentation", "name", or "value"
      * @return
      */
-    private String getTranscludedContent( JsonObject jsonObj,
+    private String getTranscludedContent( JSONObject jsonObj,
                                           String transcludedType ) {
         String content = (String)jsonObj.opt( transcludedType );
         if ( content != null && !content.isEmpty() ) return content;
         try {
-            JsonObject spec = (JsonObject)jsonObj.get( "specialization" );
+            JSONObject spec = (JSONObject)jsonObj.get( "specialization" );
             if(spec != null){
 	            content = (String)spec.opt( transcludedType );
 	            if ( content != null && !content.isEmpty() ) return content;
@@ -1027,21 +1028,21 @@ public class SnapshotPost extends AbstractJavaWebScript {
         } catch ( JSONException ex ) {
             System.out.println( "Failed to retrieve transcluded content!" );
         }
-        System.out.println( "Unable to find transclude content for JsonObject:" );
+        System.out.println( "Unable to find transclude content for JSONObject:" );
         System.out.println( jsonObj.toString() );
         return "";
     }
 
-    private String getTranscludedVal( JsonObject jsonObj ) {
+    private String getTranscludedVal( JSONObject jsonObj ) {
         String val = (String)jsonObj.opt( "value" );
         if ( val != null && !val.isEmpty() ) return val;
         try {
-            JsonObject spec = (JsonObject)jsonObj.get( "specialization" );
-            JsonArray values = spec.getJSONArray( "value" );
+            JSONObject spec = (JSONObject)jsonObj.get( "specialization" );
+            JSONArray values = spec.getJSONArray( "value" );
             StringBuffer sb = new StringBuffer();
             Object obj = null;
             for ( int i = 0; i < values.length(); i++ ) {
-                JsonObject value = values.getJSONObject( i );
+                JSONObject value = values.getJSONObject( i );
                 String type = (String)value.opt( "type" );
                 switch ( type ) {
                     case "LiteralInteger":
@@ -1063,16 +1064,16 @@ public class SnapshotPost extends AbstractJavaWebScript {
         } catch ( JSONException ex ) {
             System.out.println( "Failed to retrieve transcluded value!" );
         }
-        System.out.println( "Unable to find transcluded val for JsonObject:" );
+        System.out.println( "Unable to find transcluded val for JSONObject:" );
         System.out.println( jsonObj.toString() );
         return "";
     }
 
-    private String getType( JsonObject jsonObj ) {
+    private String getType( JSONObject jsonObj ) {
         String type = (String)jsonObj.opt( "type" );
         if ( type != null && !type.isEmpty() ) return type;
         try {
-            JsonObject spec = (JsonObject)jsonObj.get( "specialization" );
+            JSONObject spec = (JSONObject)jsonObj.get( "specialization" );
             type = (String)spec.opt( "type" );
             if ( type != null && !type.isEmpty() ) return type;
 
@@ -1182,7 +1183,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     	return document.body().html().toString();
     }
 
-    private JsonObject handleGenerateArtifacts( JsonObject postJson,
+    private JSONObject handleGenerateArtifacts( JSONObject postJson,
                                      EmsScriptNode siteNode, Status status, WorkspaceNode workspace ) throws JSONException {
         String siteName = (String)siteNode.getProperty( Acm.CM_NAME );
         EmsScriptNode jobNode = null;
@@ -1358,9 +1359,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 			else{
 				try {
-					JsonObject jsObj = nameNode.toJsonObject(null);
+					JSONObject jsObj = nameNode.toJSONObject(null);
 					if(jsObj == null){
-						System.out.println("[WARNING]: JsonObject is null");
+						System.out.println("[WARNING]: JSONObject is null");
 						element.before(transcluded);
 						element.remove();
 					}
@@ -1428,9 +1429,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 
 			try {
-				JsonObject jsObj = nameNode.toJsonObject(null);
+				JSONObject jsObj = nameNode.toJSONObject(null);
 				if(jsObj == null){
-					System.out.println("[WARNING]: JsonObject is null");
+					System.out.println("[WARNING]: JSONObject is null");
 					element.before(transcluded);
 					element.remove();
 				}
@@ -1496,9 +1497,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 			else{
 				try {
-					JsonObject jsObj = nameNode.toJsonObject(null);
+					JSONObject jsObj = nameNode.toJSONObject(null);
 					if(jsObj == null){
-						System.out.println("JsonObject is null");
+						System.out.println("JSONObject is null");
 						element.before(transcluded);
 						element.remove();
 						continue;
@@ -1518,16 +1519,16 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		return document.body().html();
 	}
 
-    private JsonObject populateSnapshotProperties( EmsScriptNode snapshotNode )
+    private JSONObject populateSnapshotProperties( EmsScriptNode snapshotNode )
             throws JSONException {
-        JsonObject snapshoturl = snapshotNode.toJsonObject( null );
+        JSONObject snapshoturl = snapshotNode.toJSONObject( null );
         if ( hasPdf( snapshotNode ) || hasHtmlZip( snapshotNode ) ) {
         	HostnameGet hostnameGet = new HostnameGet(this.repository, this.services);
         	String contextUrl = hostnameGet.getAlfrescoUrl() + "/alfresco";
-        	JsonArray formats = new JsonArray();
+        	JSONArray formats = new JSONArray();
             if ( hasPdfNode( snapshotNode ) ) {
                 EmsScriptNode pdfNode = getPdfNode( snapshotNode );
-                JsonObject pdfJson = new JsonObject();
+                JSONObject pdfJson = new JSONObject();
                 pdfJson.put("status", "Completed");
                 pdfJson.put("type", "pdf");
                 pdfJson.put("url", contextUrl + pdfNode.getUrl());
@@ -1535,7 +1536,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             }
             if ( hasHtmlZipNode( snapshotNode ) ) {
                 EmsScriptNode htmlZipNode = getHtmlZipNode( snapshotNode );
-                JsonObject htmlJson = new JsonObject();
+                JSONObject htmlJson = new JSONObject();
                 htmlJson.put("status", "Completed");
                 htmlJson.put("type","html");
                 htmlJson.put("url", contextUrl + htmlZipNode.getUrl());
@@ -1647,8 +1648,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     //nodeUtil.getNodeRefById(id)	//need to get the correct version as well. and workspace
 
-    private JsonObject saveAndStartAction(WebScriptRequest req, Status status, WorkspaceNode workspace) {
-	    JsonObject jsonObject = null;
+    private JSONObject saveAndStartAction(WebScriptRequest req, Status status, WorkspaceNode workspace) {
+	    JSONObject jsonObject = null;
 	    String siteName = getSiteName(req);
 		if (siteName == null) {
 			log(LogLevel.ERROR, "No sitename provided", HttpServletResponse.SC_BAD_REQUEST);
@@ -1662,11 +1663,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		}
 		EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
 
-        JsonObject reqPostJson = JsonObject.make( (JSONObject)req.parseContent() );
-		JsonObject postJson;
+        JSONObject reqPostJson = //JSONObject.make( 
+                (JSONObject)req.parseContent();// );
+		JSONObject postJson;
 		try {
 		    if (reqPostJson.has( "snapshots" )) {
-		        JsonArray configsJson = reqPostJson.getJSONArray( "snapshots" );
+		        JSONArray configsJson = reqPostJson.getJSONArray( "snapshots" );
 		        postJson = configsJson.getJSONObject( 0 );
 		    } else {
 		        postJson = reqPostJson;
@@ -1741,7 +1743,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         if ( elem instanceof DBParagraph ) ( (DBParagraph)elem ).setText( s );
     }
 
-    private void setArtifactsGenerationStatus(WorkspaceNode workspace, JsonObject postJson) throws Exception{
+    private void setArtifactsGenerationStatus(WorkspaceNode workspace, JSONObject postJson) throws Exception{
     	try{
 	       	EmsScriptNode snapshotNode = findScriptNodeById(postJson.getString("id"), workspace, null, false);
 	        if(snapshotNode == null){
@@ -1795,7 +1797,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	 * @param snapshot Id
 	 * @param snapshot format types
 	 */
-	public void startAction(EmsScriptNode jobNode, String siteName, JsonObject postJson, WorkspaceNode workspace) throws JSONException {
+	public void startAction(EmsScriptNode jobNode, String siteName, JSONObject postJson, WorkspaceNode workspace) throws JSONException {
 		String userEmail = null;
 		String userName = AuthenticationUtil.getFullyAuthenticatedUser();
 		if(userName == null || userName.isEmpty())
@@ -1822,15 +1824,15 @@ public class SnapshotPost extends AbstractJavaWebScript {
             throws Exception {
     	if(node == null) return;
     	//1st process the node
-    	JsonArray contains = node.getView().getContainsJson();
+    	JSONArray contains = node.getView().getContainsJson();
         createDBSectionContainment( section, contains, workspace, timestamp );
 
         //then process it's contains:children if any
     	String nodeId = node.getSysmlId();
-    	JsonObject viewJson = getChildrenViews(nodeId);
+    	JSONObject viewJson = getChildrenViews(nodeId);
     	if(viewJson == null) return;
 
-    	JsonArray childrenViews = viewJson.getJSONArray("childrenViews");
+    	JSONArray childrenViews = viewJson.getJSONArray("childrenViews");
         if(childrenViews == null) throw new Exception("Failed to retrieve 'childrenViews'.");
         for(int k=0; k< childrenViews.length(); k++){
         	String childId = childrenViews.getString(k);

@@ -47,9 +47,9 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
-import gov.nasa.jpl.view_repo.util.JsonArray;
+import org.json.JSONArray;
 import org.json.JSONException;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -91,7 +91,7 @@ public class ArtifactGet extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
 
-		JsonObject resultJson = null;
+		JSONObject resultJson = null;
 		Map<String, Object> model = new HashMap<String, Object>();
 
         printHeader( req );
@@ -154,9 +154,9 @@ public class ArtifactGet extends AbstractJavaWebScript {
 	    	    		// Create return json if matching node found:
 	    	    		if (matchingNode != null) {
 
-		    	        	resultJson = new JsonObject();
-		    	        	JsonArray jsonArray = new JsonArray();
-		    	        	JsonObject jsonArtifact = new JsonObject();
+		    	        	resultJson = new JSONObject();
+		    	        	JSONArray jsonArray = new JSONArray();
+		    	        	JSONObject jsonArtifact = new JSONObject();
 		    	        	resultJson.put("artifacts",jsonArray);
 		    	        	jsonArtifact.put("id", matchingNode.getSysmlId());
 		    	        	String url = matchingNode.getUrl();

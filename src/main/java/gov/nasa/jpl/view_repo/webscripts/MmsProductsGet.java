@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.json.JSONException;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -48,7 +48,7 @@ public class MmsProductsGet extends AbstractJavaWebScript {
 
         MmsProductsGet instance = new MmsProductsGet(repository, getServices());
 
-        JsonObject jsonObject = new JsonObject();
+        JSONObject jsonObject = new JSONObject();
 
         try {
             ProductsWebscript productWs = new ProductsWebscript(repository, getServices(), instance.response);

@@ -45,9 +45,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-import gov.nasa.jpl.view_repo.util.JsonArray;
+import org.json.JSONArray;
 import org.json.JSONException;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -110,7 +110,7 @@ public class ProductGet extends AbstractJavaWebScript {
 
 		Map<String, Object> model = new HashMap<String, Object>();
 
-		JsonArray productsJson = null;
+		JSONArray productsJson = null;
 		if (validateRequest(req, status)) {
 			String productId = getIdFromRequest( req );
 			gettingDisplayedElements = isDisplayedElementRequest( req );
@@ -143,7 +143,7 @@ public class ProductGet extends AbstractJavaWebScript {
 
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK && productsJson != null) {
 			try {
-			    JsonObject json = new JsonObject();
+			    JSONObject json = new JSONObject();
                 json.put( gettingDisplayedElements ? "elements"
                                                   : ( gettingContainedViews
                                                       ? "views" : "products" ),

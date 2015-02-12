@@ -43,15 +43,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
-import gov.nasa.jpl.view_repo.util.JsonArray;
+import org.json.JSONArray;
 import org.json.JSONException;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
- * Model search service that returns a JsonArray of elements
+ * Model search service that returns a JSONArray of elements
  * @author cinyoung
  *
  */
@@ -90,9 +90,9 @@ public class ModelSearch extends ModelGet {
 		Map<String, Object> model = new HashMap<String, Object>();
 
 		try {
-	        JsonArray elementsJson = executeSearchRequest(req);
+	        JSONArray elementsJson = executeSearchRequest(req);
 
-	        JsonObject top = new JsonObject();
+	        JSONObject top = new JSONObject();
 			top.put("elements", elementsJson);
 			if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
 			model.put("res", top.toString(4));
@@ -110,7 +110,7 @@ public class ModelSearch extends ModelGet {
 	}
 
 
-	private JsonArray executeSearchRequest(WebScriptRequest req) throws JSONException {
+	private JSONArray executeSearchRequest(WebScriptRequest req) throws JSONException {
         String keyword = req.getParameter("keyword");
         if (keyword != null) {
             // get timestamp if specified

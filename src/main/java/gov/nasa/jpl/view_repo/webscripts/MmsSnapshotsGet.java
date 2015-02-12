@@ -17,9 +17,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
-import gov.nasa.jpl.view_repo.util.JsonArray;
+import org.json.JSONArray;
 import org.json.JSONException;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -57,7 +57,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
 
         MmsSnapshotsGet instance = new MmsSnapshotsGet(repository, getServices());
 
-        JsonObject jsonObject = new JsonObject();
+        JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("snapshots", instance.handleRequest(req));
             appendResponseStatusInfo( instance );
@@ -80,7 +80,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         return model;
     }
 
-    private JsonArray handleRequest( WebScriptRequest req ) throws JSONException {
+    private JSONArray handleRequest( WebScriptRequest req ) throws JSONException {
         String configurationId = req.getServiceMatch().getTemplateVars().get( "configurationId" );
         if (configurationId != null) {
             return handleConfigurationSnapshot(req, configurationId);
@@ -90,13 +90,13 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         }
     }
 
-    private JsonArray handleConfigurationSnapshot( WebScriptRequest req, String configurationId ) throws JSONException {
+    private JSONArray handleConfigurationSnapshot( WebScriptRequest req, String configurationId ) throws JSONException {
         EmsScriptNode siteNode = getSiteNodeFromRequest( req, false );
         String siteNameFromReq = getSiteName( req );
         if ( siteNode == null && !Utils.isNullOrEmpty( siteNameFromReq )
              && !siteNameFromReq.equals( NO_SITE_ID ) ) {
             log( LogLevel.WARNING, "Could not find site", HttpServletResponse.SC_NOT_FOUND );
-            return new JsonArray();
+            return new JSONArray();
         }
         ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, response);
 
@@ -104,25 +104,25 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
 
         EmsScriptNode config = configWs.getConfiguration( configurationId );
         if (config == null) {
-            return new JsonArray();
+            return new JSONArray();
         }
 
         return configWs.getSnapshots( config, workspace );
     }
 
-    private JsonArray handleProductSnapshot( WebScriptRequest req, String productId ) throws JSONException {
+    private JSONArray handleProductSnapshot( WebScriptRequest req, String productId ) throws JSONException {
         Date timestamp = TimeUtils.dateFromTimestamp(req.getParameter("timestamp"));
         WorkspaceNode workspace = getWorkspace( req );
         EmsScriptNode product = findScriptNodeById( productId, workspace, timestamp, false);
 
         if (product == null) {
             log(LogLevel.WARNING, "Could not find product", HttpServletResponse.SC_NOT_FOUND);
-            return new JsonArray();
+            return new JSONArray();
         }
 
         ConfigurationsWebscript configWs = new ConfigurationsWebscript(repository, services, response);
 
-        JsonArray snapshotsJson = new JsonArray();
+        JSONArray snapshotsJson = new JSONArray();
 
         // for backwards compatibility, keep deprecated targetAssocsNodesByType
         List< EmsScriptNode > snapshots =
@@ -146,7 +146,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
         
         // all we really need to do is grab all the configurations and place them in as snapshots
         ConfigurationsWebscript configService = new ConfigurationsWebscript( repository, services, response );
-        JsonArray configSnapshots = configService.handleConfigurations( req, ConfigurationType.CONFIG_SNAPSHOT );
+        JSONArray configSnapshots = configService.handleConfigurations( req, ConfigurationType.CONFIG_SNAPSHOT );
         for (int ii = 0; ii < configSnapshots.length(); ii++) {
             snapshotsJson.put( configSnapshots.get( ii ) );
         }

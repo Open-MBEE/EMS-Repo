@@ -48,9 +48,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-import gov.nasa.jpl.view_repo.util.JsonArray;
+import org.json.JSONArray;
 import org.json.JSONException;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -70,14 +70,14 @@ public class ProductListGet extends AbstractJavaWebScript {
         super(repositoryHelper, registry);
     }
 
-    private JsonObject productJson;
+    private JSONObject productJson;
 	private Set<EmsScriptNode> productSet;
 	private EmsScriptNode siteNode;
-    JsonObject volumes;
-    JsonObject volume2volumes;
-    JsonObject documents;
-    JsonObject volume2documents;
-    JsonArray projectVolumes;
+    JSONObject volumes;
+    JSONObject volume2volumes;
+    JSONObject documents;
+    JSONObject volume2documents;
+    JSONArray projectVolumes;
 
 	@Override
 	protected boolean validateRequest(WebScriptRequest req, Status status) {
@@ -103,13 +103,13 @@ public class ProductListGet extends AbstractJavaWebScript {
 	}
 
 	protected void initDataStructs() {
-        productJson = new JsonObject();
+        productJson = new JSONObject();
         productSet = new HashSet<EmsScriptNode>();
-        volumes = new JsonObject();
-        volume2volumes = new JsonObject();
-        documents = new JsonObject();
-        volume2documents = new JsonObject();
-        projectVolumes = new JsonArray();
+        volumes = new JSONObject();
+        volume2volumes = new JSONObject();
+        documents = new JSONObject();
+        volume2documents = new JSONObject();
+        projectVolumes = new JSONArray();
 	}
 
 	@Override
@@ -133,7 +133,7 @@ public class ProductListGet extends AbstractJavaWebScript {
         	        String timestamp = req.getParameter("timestamp");
         	        Date dateTime = TimeUtils.dateFromTimestamp( timestamp );
         	    WorkspaceNode workspace = getWorkspace( req );
-                JsonObject jsonObject =
+                JSONObject jsonObject =
                         handleProductList( siteNode, workspace, dateTime );
                 if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
                 model.put("res", jsonObject.toString(4));
@@ -179,7 +179,7 @@ public class ProductListGet extends AbstractJavaWebScript {
         return productSet;
 	}
 
-	public JsonObject handleProductList(EmsScriptNode siteNode,
+	public JSONObject handleProductList(EmsScriptNode siteNode,
 	                                    WorkspaceNode workspace,
 	                                    Date dateTime) throws JSONException {
 	    initDataStructs();
@@ -197,9 +197,9 @@ public class ProductListGet extends AbstractJavaWebScript {
                     parentId = parentId.replace("_pkg", "");
                 }
                 if (!volume2documents.has(parentId)) {
-                    volume2documents.put(parentId, new JsonArray());
+                    volume2documents.put(parentId, new JSONArray());
                 }
-                ((JsonArray)volume2documents.get(parentId)).put(id);
+                ((JSONArray)volume2documents.get(parentId)).put(id);
                 handleParents(node);
             }
         }
@@ -258,10 +258,10 @@ public class ProductListGet extends AbstractJavaWebScript {
                 }
 
                 if (!volume2volumes.has(parentId)) {
-                    volume2volumes.put(parentId, new JsonArray());
+                    volume2volumes.put(parentId, new JSONArray());
                 }
                 if (id != null && !documents.has(id)) {
-                    JsonArray array = (JsonArray)volume2volumes.get(parentId);
+                    JSONArray array = (JSONArray)volume2volumes.get(parentId);
                     if (array != null && !array.toString().contains(id)) {
                         array.put(id);
                     }

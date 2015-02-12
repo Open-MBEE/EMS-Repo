@@ -40,8 +40,8 @@ import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.alfresco.service.transaction.TransactionService;
-import gov.nasa.jpl.view_repo.util.JsonArray;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 
 /**
@@ -231,8 +231,8 @@ public class JwsUtil {
 				if (length > 0) {
 					int max = start + range > length ? length : start + range;
 					
-					if (object instanceof JsonArray) {
-					    JsonArray jsonArray = (JsonArray) object;
+					if (object instanceof JSONArray) {
+					    JSONArray jsonArray = (JSONArray) object;
 						for (int ii = start; ii < max; ii++) {
 							functor.execute(jsonArray, ii, flags);
 						}
@@ -267,10 +267,10 @@ public class JwsUtil {
 	 * @return	length of JSON thing, -1 if not JSON thing
 	 */
 	public int getJSONLength(Object object) {
-		if (object instanceof JsonObject) {
-			return ((JsonObject)object).length();
-		} else if (object instanceof JsonArray) {
-			return ((JsonArray)object).length();
+		if (object instanceof JSONObject) {
+			return ((JSONObject)object).length();
+		} else if (object instanceof JSONArray) {
+			return ((JSONArray)object).length();
 		}
 		return -1;
 	}

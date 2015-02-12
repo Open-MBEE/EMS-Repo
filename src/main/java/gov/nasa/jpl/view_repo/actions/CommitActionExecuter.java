@@ -17,7 +17,7 @@ import org.alfresco.service.cmr.action.ParameterDefinition;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
-import gov.nasa.jpl.view_repo.util.JsonObject;
+import org.json.JSONObject;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
 
@@ -66,8 +66,8 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
             if ( !doTransaction ) {
                 Exception e = new Exception();
                 logger.error( "BAD!!!!", e );
-                JsonObject deltaJson =
-                        wsDiff.toJsonObject( new Date(start), new Date(end) );
+                JSONObject deltaJson =
+                        wsDiff.toJSONObject( new Date(start), new Date(end) );
 
                 // FIXME: Need to split by projectId
                 if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId, source) ) {
@@ -82,7 +82,7 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
                 new EmsTransaction(services, response, new Status()) {
                     @Override
                     public void run() throws Exception {
-                        JsonObject deltaJson = wsDiff.toJsonObject( new Date(start), new Date(end) );
+                        JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
                 
                         // FIXME: Need to split by projectId
                         if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId, source) ) {
