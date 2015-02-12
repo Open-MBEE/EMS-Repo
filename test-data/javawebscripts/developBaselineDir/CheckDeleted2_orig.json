@@ -1,23 +1,25 @@
 {"workspaces": [
     {
-        "created": "2014-12-10T14:57:55.784-0800",
-        "creator": "admin",
-        "id": "b7795360-870a-43a6-987c-ba9d6b78970d",
-        "modified": "2014-12-10T14:57:58.679-0800",
+        "qualifiedId": "master/249e192c-1e22-41f8-ad9e-83311029c3c0",
+        "id": "249e192c-1e22-41f8-ad9e-83311029c3c0",
+        "created": "2015-02-11T14:19:07.112-0800",
+        "description": "",
+        "qualifiedName": "master/AA",
         "name": "AA",
         "parent": "master",
-        "qualifiedId": "master/b7795360-870a-43a6-987c-ba9d6b78970d",
-        "qualifiedName": "master/AA"
+        "modified": "2015-02-11T14:19:07.917-0800",
+        "creator": "admin"
     },
     {
-        "created": "2014-12-10T14:57:56.749-0800",
-        "creator": "admin",
-        "id": "02e2c112-8f23-4746-a803-c399b1493b68",
-        "modified": "2014-12-10T14:57:58.682-0800",
+        "qualifiedId": "master/249e192c-1e22-41f8-ad9e-83311029c3c0/47461a1c-4b21-4069-a2f0-17ca808dd7e7",
+        "id": "47461a1c-4b21-4069-a2f0-17ca808dd7e7",
+        "created": "2015-02-11T14:19:07.476-0800",
+        "description": "",
+        "qualifiedName": "master/AA/BB",
         "name": "BB",
-        "parent": "b7795360-870a-43a6-987c-ba9d6b78970d",
-        "qualifiedId": "master/b7795360-870a-43a6-987c-ba9d6b78970d/02e2c112-8f23-4746-a803-c399b1493b68",
-        "qualifiedName": "master/AA/BB"
+        "parent": "249e192c-1e22-41f8-ad9e-83311029c3c0",
+        "modified": "2015-02-11T14:19:07.919-0800",
+        "creator": "admin"
     }
 ]}
 200

@@ -237,11 +237,7 @@ public class WorkspaceNode extends EmsScriptNode {
 
     	// Make sure the workspace does not already exist in the target folder with the same
     	// parent workspace:
-    	Set<EmsScriptNode> childs = WebScriptUtil.getAllNodesInPath(folder.getQnamePath(),
-    	                                                            "TYPE",
-    	                                                            "cm:folder",
-    	                                                            null,null,
-    	                                                            services,response);
+    	Set<EmsScriptNode> childs = folder.getChildNodes(); 
     	for (EmsScriptNode child : childs) {
     	    if ( child != null && child.exists() ) {
     	        String childWsName = (String)child.getProperty("ems:workspace_name");
