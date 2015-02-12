@@ -63,6 +63,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -314,7 +315,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	                s = (String)node.getProperty( Acm.SYSML + srcProp );
 	            }
 
-	            s = handleTransclusion( src, srcProp, s, null, 0 );
+	            s = handleTransclusion( src, srcProp, s, null, 0, workspace, timestamp );
             }
         }
         else {
@@ -322,14 +323,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
             
             if ( srcProp != null && !srcProp.isEmpty() ) {
                 s = (String)obj.opt( Acm.SYSML + srcProp );
-                s = handleTransclusion( src, srcProp, s, null, 0 );
+                s = handleTransclusion( src, srcProp, s, null, 0, workspace, timestamp );
             }
             else{ 
             	s = obj.optString("text");
-            	s = handleTransclusion( src, "text", s, null, 0 );
+            	s = handleTransclusion( src, "text", s, null, 0, workspace, timestamp );
             }
         }
-        s = handleEmbeddedImage(src, s, section);
+        s = handleEmbeddedImage(s);
         s = HtmlSanitize( s );
         if(s != null && !s.isEmpty()){ 
 //        	s = s.replaceAll("<ulink", "<link");
@@ -371,7 +372,10 @@ public class SnapshotPost extends AbstractJavaWebScript {
         else{
         	value = obj.optString( "name" );
         }
-        text.setText(HtmlSanitize(value));
+        value = handleTransclusion( UUID.randomUUID().toString(), "text", value, null, 0, workspace, timestamp );
+        value = handleEmbeddedImage(value);
+        value = HtmlSanitize(value);
+        text.setText(value);
         return text;
     }
 
@@ -391,7 +395,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     public DocBookWrapper createDocBook( EmsScriptNode product, String productId,
                                           String snapshotName, String contextPath,
-                                          EmsScriptNode snapshotFolder,
+                                          EmsScriptNode snapshotNode,
                                           WorkspaceNode workspace, Date timestamp, StringBuffer response) throws Exception {
         if ( product == null ) {
             log( LogLevel.WARNING, "null [view] input parameter reference." );
@@ -399,7 +403,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         }
 
         this.snapshotName = snapshotName;
-        docBookMgr = new DocBookWrapper( snapshotName, snapshotFolder );
+        docBookMgr = new DocBookWrapper( snapshotName, snapshotNode );
         try {
             DBBook docBook = createDocBook( product );
             //docBook.setRemoveBlankPages( true );
@@ -444,6 +448,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         catch ( Exception ex ) {
             log( LogLevel.ERROR, "\nUnable to create DBBook! Failed to parse document.\n" + ex.getMessage() );
             ex.printStackTrace();
+//            setArtifactsGenerationStatus(snapshotNode);
             throw new Exception( "Unable to create DBBook! Failed to parse document.\n", ex );
         }
         finally{
@@ -792,7 +797,13 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     public JSONObject generateHTML( String snapshotId, WorkspaceNode workspace ) throws Exception {
     	clearCaches();
-        EmsScriptNode snapshotNode = findScriptNodeById( snapshotId, workspace, null, false );
+        //EmsScriptNode snapshotNode = findScriptNodeById( snapshotId, workspace, null, false );
+    	// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
+		ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@cm\\:name:\"", services );
+		if (nodeRefs == null || nodeRefs.size() != 1) {
+			throw new Exception("Failed to find snapshot with Id: " + snapshotId);
+		}
+		EmsScriptNode snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
         if(snapshotNode == null) throw new Exception("Failed to find snapshot with Id: " + snapshotId);
         String status = getHtmlZipStatus(snapshotNode);
         boolean isGenerated = false;
@@ -842,8 +853,14 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
     public JSONObject generatePDF(String snapshotId, WorkspaceNode workspace) throws Exception{
     	clearCaches();
-        EmsScriptNode snapshotNode = findScriptNodeById(snapshotId, workspace, null, false);
-        if(snapshotNode == null) throw new Exception("Failed to find snapshot with Id: " + snapshotId);
+        //EmsScriptNode snapshotNode = findScriptNodeById(snapshotId, workspace, null, false);
+    	// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
+		ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@cm\\:name:\"", services );
+		if (nodeRefs == null || nodeRefs.size() != 1) {
+			throw new Exception("Failed to find snapshot with Id: " + snapshotId);
+		}
+		EmsScriptNode snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
+		if(snapshotNode == null) throw new Exception("Failed to find snapshot with Id: " + snapshotId);
         String status = getPdfStatus(snapshotNode);
         boolean isGenerated = false;
         if(status != null && !status.isEmpty() && status.compareToIgnoreCase("Completed")==0){
@@ -856,12 +873,12 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		    	snapshotNode = generatePDF(snapshotNode, workspace);
 		    	if(snapshotNode == null) throw new Exception("generatePDF() returned null.");
 		    	else{
-		    		this.setPdfStatus(workspace, snapshotNode, "Completed");
+		    		this.setPdfStatus(snapshotNode, "Completed");
 		    	}
 	        }
 	        catch(Exception ex){
 	        	ex.printStackTrace();
-	        	this.setPdfStatus(workspace, snapshotNode, "Error");
+	        	this.setPdfStatus(snapshotNode, "Error");
 	    		throw new Exception("Failed to generate PDF artifact!", ex);
 	        }
         }
@@ -996,7 +1013,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         for ( int i = 0; i < formats.length(); i++ ) {
             JSONObject jsonType = formats.getJSONObject( i );
             String formatType = jsonType.getString( "type" );
-            list.add( formatType );
+            if(!list.contains(formatType)) list.add( formatType );
         }
         return list;
     }
@@ -1126,9 +1143,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
         return viewId;
     }
 
-    private String handleEmbeddedImage( String id, String inputString, DBSection section)
+    private String handleEmbeddedImage( String inputString)
     {
-    	if(id == null || id.isEmpty()) return inputString;
     	if(inputString == null || inputString.isEmpty()) return "";
 
     	Document document = Jsoup.parseBodyFragment(inputString);
@@ -1223,7 +1239,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                 return null;
             }
 
-            setArtifactsGenerationStatus(workspace, postJson);
+            setArtifactsGenerationStatus(postJson);
             startAction( jobNode, siteName, postJson, workspace );
             return postJson;
         }
@@ -1255,7 +1271,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     private String handleTransclusion( String id, String transclusionType,
                                        String inputString,
                                        List< List< String >> cirRefList,
-                                       int index ) {
+                                       int index, WorkspaceNode workspace, Date timestamp ) {
         if ( cirRefList == null ) {
             cirRefList = new ArrayList< List< String >>();
         }
@@ -1274,9 +1290,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
         }
         list.add( id + transclusionType );
         index++;
-        String result = parseTransclusionName( cirRefList, index, inputString );
-        result = parseTransclusionDoc( cirRefList, index, result );
-        result = parseTransclusionVal( cirRefList, index, result );
+        String result = parseTransclusionName( cirRefList, index, inputString, workspace, timestamp );
+        result = parseTransclusionDoc( cirRefList, index, result, workspace, timestamp );
+        result = parseTransclusionVal( cirRefList, index, result, workspace, timestamp );
         return result;
     }
 
@@ -1332,7 +1348,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
     
 	private String parseTransclusionDoc(List<List<String>> cirRefList, int index,
-	                                    String inputString){
+	                                    String inputString, WorkspaceNode workspace, Date timestamp){
 		if(inputString == null || inputString.isEmpty()) return inputString;
 
 		Document document = Jsoup.parseBodyFragment(inputString);
@@ -1361,7 +1377,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 
 			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
-			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); //snapshot => ok to get the latest from 'master'
+			EmsScriptNode nameNode = findScriptNodeById(id, workspace, timestamp, false);
 			if(nameNode == null){
 				log(LogLevel.WARNING, String.format("Failed to find EmsScriptNode Id: %s.", id));
 				element.before(transcluded);
@@ -1381,7 +1397,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 							transcluded = doc;
 							while(true){
 								transcluded = handleTransclusion(id, "doc", transcluded,
-								                                 cirRefList, index);
+								                                 cirRefList, index, workspace, timestamp);
 								if(transcluded.compareToIgnoreCase(doc) == 0) break;
 								doc = transcluded;
 							}
@@ -1400,7 +1416,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		return document.body().html();
 	}
 
-	private String parseTransclusionName(List<List<String>> cirRefList, int index, String inputString){
+	private String parseTransclusionName(List<List<String>> cirRefList, int index, String inputString, WorkspaceNode workspace, Date timestamp){
 		if(inputString == null || inputString.isEmpty()) return inputString;
 		Document document = Jsoup.parseBodyFragment(inputString);
 		if(document == null || document.body() == null){
@@ -1428,7 +1444,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 
 			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
-			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); // snapshot => ok to get latest
+			EmsScriptNode nameNode = findScriptNodeById(id, workspace, timestamp, false);
 			if(nameNode == null){
 				log(LogLevel.WARNING, String.format("Failed to find EmsScriptNode Id: %s", id));
 				element.before(transcluded);
@@ -1448,7 +1464,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 					if(name != null && !name.isEmpty()){
 						transcluded = name;
 						while(true){
-							transcluded = handleTransclusion(id, "name", transcluded, cirRefList, index);
+							transcluded = handleTransclusion(id, "name", transcluded, cirRefList, index, workspace, timestamp);
 							if(transcluded.compareToIgnoreCase(name) == 0) break;
 							name = transcluded;
 						}
@@ -1465,7 +1481,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		return document.body().html();
 	}
 
-	private String parseTransclusionVal(List<List<String>> cirRefList, int index, String inputString){
+	private String parseTransclusionVal(List<List<String>> cirRefList, int index, String inputString, WorkspaceNode workspace, Date timestamp){
 		if(inputString == null || inputString.isEmpty()) return inputString;
 
 		Document document = Jsoup.parseBodyFragment(inputString);
@@ -1494,7 +1510,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 			}
 
 			String transcluded = "[cannot find " + element.text() + " with Id: " + id + "]";
-			EmsScriptNode nameNode = findScriptNodeById(id, null, null, false); // snapshot => ok to get latest
+			EmsScriptNode nameNode = findScriptNodeById(id, workspace, timestamp, false);
 			if(nameNode == null){
 				log(LogLevel.WARNING, String.format("Failed to find EmsScriptNode Id: %s", id));
 				element.before(transcluded);
@@ -1728,60 +1744,61 @@ public class SnapshotPost extends AbstractJavaWebScript {
     private void setDocumentElementContent( DocumentElement elem, String s ) {
         if ( elem instanceof DBParagraph ) ( (DBParagraph)elem ).setText( s );
     }
-
-    private void setArtifactsGenerationStatus(WorkspaceNode workspace, JSONObject postJson) throws Exception{
+    
+    /**
+     * @param workspace
+     * @param postJson
+     * @throws Exception
+     * sets artifacts generation status to "Generating" when firing off the process
+     */
+    private void setArtifactsGenerationStatus(JSONObject postJson) throws Exception{
     	try{
     	    if (!postJson.has( "id" )) {
     	        throw new Exception("No id found");
     	    }
 
     	    String id = postJson.getString("id");
-    	    
-        // do simple lucene search, since snapshotNode ID is unique
+    	    // do simple lucene search, since snapshotNode ID is unique
     	    ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( id, "@cm\\:name:\"", services );
     	    if (nodeRefs == null || nodeRefs.size() != 1) {
-            throw new Exception("Failed to find snapshot with Id: " + postJson.getString("id"));
+    	    	throw new Exception("Failed to find snapshot with Id: " + postJson.getString("id"));
     	    }
     	    EmsScriptNode snapshotNode = new EmsScriptNode(nodeRefs.get( 0 ), services, response);
 
-		ArrayList<String> formats = getSnapshotFormats(postJson);
-		for(String format:formats){
-			if(format.compareToIgnoreCase("pdf") == 0){
-				if(SnapshotPost.getPdfNode(snapshotNode)==null){
+			ArrayList<String> formats = getSnapshotFormats(postJson);
+			for(String format:formats){
+				if(format.compareToIgnoreCase("pdf") == 0){
+					if(SnapshotPost.getPdfNode(snapshotNode)==null){
         				snapshotNode.createOrUpdateAspect("view2:pdf");
         	            snapshotNode.createOrUpdateProperty("view2:pdfStatus", "Generating");
-//	    	    		System.out.println("set PDF status => " + "Generating...");
-				}
+					}
         	    }
         	    else if(format.compareToIgnoreCase("html") == 0){
         	        if(SnapshotPost.getHtmlZipNode(snapshotNode)==null){
         	            snapshotNode.createOrUpdateAspect("view2:htmlZip");
-	                snapshotNode.createOrUpdateProperty("view2:htmlZipStatus", "Generating");
-//		        		System.out.println("set HTML status => " + "Generating...");
+        	            snapshotNode.createOrUpdateProperty("view2:htmlZipStatus", "Generating");
         	        }
         	    }
-		}
+			}
     	}
     	catch(Exception ex){
     		ex.printStackTrace();
-    		throw new Exception("Failed to set artifact generation status!");
+    		log(LogLevel.ERROR, "Failed to set artifact generation status!");
     	}
     }
 
 
-    private void setHtmlZipStatus(EmsScriptNode node, String status){
+    public void setHtmlZipStatus(EmsScriptNode node, String status){
     	if(node==null) return;
     	node.createOrUpdateAspect("view2:htmlZip");
 		node.createOrUpdateProperty("view2:htmlZipStatus", status);
-//		System.out.println("set HTML status => " + status);
     }
 
-    private void setPdfStatus(WorkspaceNode workspace, EmsScriptNode node, String status){
+    public void setPdfStatus(EmsScriptNode node, String status){
     	if(node==null) return;
     	node.createOrUpdateAspect("view2:pdf");
 		node.createOrUpdateProperty("view2:pdfStatus", status);
 		node.getOrSetCachedVersion();
-//		System.out.println("set PDF status => " + status);
     }
 
     /**

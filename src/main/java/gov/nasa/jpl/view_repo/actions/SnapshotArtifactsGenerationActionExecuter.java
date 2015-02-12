@@ -202,6 +202,12 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         		sb.append(throwable.getMessage());
         		throwable = throwable.getCause();
         	}
+        	for(String format:formats){
+        		if(format.compareToIgnoreCase("pdf") == 0) 
+        			if(SnapshotPost.getPdfNode(snapshotNode) == null) snapshotService.setPdfStatus(snapshotNode, "Error");
+        		else if(format.compareToIgnoreCase("html") == 0) 
+        			if(SnapshotPost.getHtmlZipNode(snapshotNode)==null) snapshotService.setHtmlZipStatus(snapshotNode, "Error");
+        	}
         	
         	logger.error("Failed to complete snapshot artifact(s) generation!");
         	logger.error(sb.toString());
