@@ -104,6 +104,9 @@ public class MmsWorkspaceDiffPost extends ModelPost {
             } catch ( JSONException e ) {
                 log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
                 e.printStackTrace();
+                if (!model.containsKey( "res" )) {
+                    model.put( "res", response.toString() );
+                }
             }
         }
 
