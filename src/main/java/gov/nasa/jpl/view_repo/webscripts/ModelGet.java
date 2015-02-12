@@ -130,7 +130,7 @@ public class ModelGet extends AbstractJavaWebScript {
         if ( wsFound ) modelRootNode = findScriptNodeById(modelId, workspace, dateTime, findDeleted);
 
 		if (modelRootNode == null || modelRootNode.isDeleted() ) {
-            log( LogLevel.ERROR,
+            log( LogLevel.WARNING,
                  "Element with id, " + modelId
                  + ( dateTime == null ? "" : " at " + dateTime ) + " not found",
                  HttpServletResponse.SC_NOT_FOUND );
@@ -177,15 +177,16 @@ public class ModelGet extends AbstractJavaWebScript {
 		try {
 		    if (elementsJson.length() > 0) {
 		        top.put("elements", elementsJson);
-		        if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-		        if ( prettyPrint ) model.put("res", top.toString(4));
-		        else model.put("res", top.toString());
 		    } else {
 		        log(LogLevel.WARNING, "No elements found",
 		            HttpServletResponse.SC_NOT_FOUND);
-		        model.put("res", response.toString());
 		    }
+	        if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
+	        if ( prettyPrint ) model.put("res", top.toString(4));
+	        else model.put("res", top.toString());
 		} catch (JSONException e) {
+            log(LogLevel.ERROR, "Could not create JSONObject", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            model.put( "res", top.toString() );
 			e.printStackTrace();
 		}
 
