@@ -276,7 +276,8 @@ public class ModelPost extends AbstractJavaWebScript {
     
     private void processRootElement(String rootElement, WorkspaceNode targetWS,
                                     TreeMap<String, EmsScriptNode> nodeMap,
-                                    TreeSet<EmsScriptNode> elements) throws Exception {
+                                    TreeSet<EmsScriptNode> elements,
+                                    Set<String> elementsToRemove) throws Exception {
         
         if (projectNode == null ||
             !rootElement.equals(projectNode.getProperty(Acm.CM_NAME))) {
@@ -296,9 +297,11 @@ public class ModelPost extends AbstractJavaWebScript {
                     }
                     elements.addAll( updatedElements );
                 } else {
-                    // remove the rootElement fomr consideration in any updates or creates
-                    elementMap.remove( rootElement );
-                    rootElements.remove( rootElement );
+                    if (elementsToRemove != null) {
+                        elementsToRemove.add( rootElement );
+                    } else {
+                        logger.warn( "could not remove elements due to permissions" );
+                    }
                 }
             }
         }
@@ -389,23 +392,31 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // create the element map and hierarchies
         if (buildElementMap(postJson.getJSONArray(ELEMENTS), targetWS)) {
+            final Set<String> elementsWithoutPermissions = new HashSet<String>();
+            
             // start building up elements from the root elements
             for (final String rootElement : rootElements) {
                 log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
                 
                 if (runWithoutTransactions) {
-                    processRootElement( rootElement, targetWS, nodeMap, elements );
+                    processRootElement( rootElement, targetWS, nodeMap, elements, elementsWithoutPermissions );
                 }
                 else {
                     new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
                         @Override
                         public void run() throws Exception {
-                            processRootElement( rootElement, targetWS, nodeMap, elements );
+                            processRootElement( rootElement, targetWS, nodeMap, elements, elementsWithoutPermissions );
                         }
                     };
                 }
-                
             } // end for (String rootElement: rootElements) {
+
+            // remove the elementsWithoutPermissions from further processing
+            for (String elementId: elementsWithoutPermissions) {
+                elementMap.remove( elementId );
+                rootElements.remove( elementId );
+            }
+
         } // end if (buildElementMap(postJson.getJSONArray(ELEMENTS))) {
 
         Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): main loop time", timeEvents);
