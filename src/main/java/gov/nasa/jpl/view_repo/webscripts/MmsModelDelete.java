@@ -271,9 +271,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
     public void delete(EmsScriptNode node, WorkspaceNode workspace, WorkspaceDiff workspaceDiff) {
         if(workspaceDiff != null && wsDiff == null)
             wsDiff = workspaceDiff;
-        if (!checkPermissions(node, PermissionService.WRITE)) {
-            log(LogLevel.ERROR, "no permissions", HttpServletResponse.SC_FORBIDDEN);
-        } else {
+        if (checkPermissions(node, PermissionService.WRITE)) {
             if ( node == null || !node.exists() ) {
                 log(LogLevel.ERROR, "Trying to delete a non-existent node! " + node);
                 return;
