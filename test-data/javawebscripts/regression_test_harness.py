@@ -1704,6 +1704,46 @@ common_filters+['MMS_'],
 ["test","workspaces","develop", "develop2"]
 ]
 
+# lets do the None permissions
+[
+620,
+"NoneRead",
+"Read element with user None",
+"curl -w '\n%{http_code}\n' -u None:password -X GET http://localhost:8080/alfresco/service/workspaces/master/elements/y",
+True,
+comon_filters,
+["develop"]
+],
+
+[
+621,
+"NoneDelete",
+"Delete element with user None",
+"curl -w '\n%{http_code}\n' -u None:password -X DELETE http://localhost:8080/alfresco/service/workspaces/master/elements/y",
+True,
+comon_filters,
+["develop"]
+],
+
+[
+622,
+"NoneUpdate",
+"Update element with user None",
+"curl -w '\n%{http_code}\n' -u None:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by None\"}]}'",
+True,
+comon_filters,
+["develop"]
+],
+
+[
+623,
+"NoneCreate",
+"Create element with user None",
+"curl -w '\n%{http_code}\n' -u None:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"ychild\",\"documentation\":\"y child\",\"owner\":\"y\"}]}'",
+True,
+comon_filters,
+["develop"]
+],
 
 ]
 
