@@ -26,8 +26,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -146,7 +146,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             siteNode = null;
         }
         
-        JSONArray configJsonArray = new JSONArray();
+        JSONArray configJSONArray = new JSONArray();
 
         // get timestamp if specified
         String timestamp = req.getParameter("timestamp");
@@ -162,15 +162,15 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             if (!config.isDeleted()) {
                 switch(configType) {
                     case CONFIG_MMS:
-                        configJsonArray.put( getMmsConfigJson( config,
+                        configJSONArray.put( getMmsConfigJson( config,
                                                                workspace, dateTime ) );
                         break;
                     case CONFIG_NO_MMS:
-                        configJsonArray.put( getConfigJson( config,
+                        configJSONArray.put( getConfigJson( config,
                                                         workspace, dateTime ) );
                         break;
                     case CONFIG_SNAPSHOT:
-                        configJsonArray.put( getConfigSnapshotJson(config,
+                        configJSONArray.put( getConfigSnapshotJson(config,
                                                                    workspace, dateTime) );
                         break;
                     default:
@@ -179,7 +179,7 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
             }
         }
 
-        return configJsonArray;
+        return configJSONArray;
     }
 
     
@@ -193,11 +193,11 @@ public class ConfigurationsWebscript extends AbstractJavaWebScript {
     public JSONArray handleConfiguration(WebScriptRequest req, boolean isMms) throws JSONException {
         String configId = req.getServiceMatch().getTemplateVars().get("configurationId");
 
-        JSONArray configsJsonArray = handleConfigurations(req, isMms);
+        JSONArray configsJSONArray = handleConfigurations(req, isMms);
         JSONArray result = new JSONArray();
 
-        for (int ii = 0; ii < configsJsonArray.length(); ii++) {
-            JSONObject configJson = configsJsonArray.getJSONObject( ii );
+        for (int ii = 0; ii < configsJSONArray.length(); ii++) {
+            JSONObject configJson = configsJSONArray.getJSONObject( ii );
             if (configJson.getString( "id" ).equals(configId)) {
                 result.put( configJson );
                 break;

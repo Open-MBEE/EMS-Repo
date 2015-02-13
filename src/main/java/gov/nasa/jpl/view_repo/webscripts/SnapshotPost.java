@@ -87,9 +87,14 @@ import org.alfresco.util.TempFileProvider;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+
 import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import org.json.JSONObject;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -152,7 +157,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
         Map< String, Object > model = new HashMap< String, Object >();
         log( LogLevel.INFO, "Starting snapshot creation or snapshot artifact generation..." );
         try {
-            JSONObject reqPostJson = (JSONObject)req.parseContent();
+            JSONObject reqPostJson = //JSONObject.make( 
+                    (JSONObject)req.parseContent();// );
             if ( reqPostJson != null ) {
                 log( LogLevel.INFO, "Generating snapshot artifact..." );
                 //SnapshotPost instance = new SnapshotPost( repository, services );
@@ -208,7 +214,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
                         snapshoturl.put( "url", req.getContextPath()
                                                 + "/service/snapshots/"
                                                 + snapshotName );
-                        model.put( "res", snapshoturl.toString( 4 ) );
+                        model.put( "res", NodeUtil.jsonToString( snapshoturl, 4 ) );
                     } catch ( JSONException e ) {
                         e.printStackTrace();
                         log( LogLevel.ERROR,
@@ -628,7 +634,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         JSONObject snapshotJson = new JSONObject();
         try {
             snapshotJson.put( "snapshot", true );
-            ActionUtil.saveStringToFile( snapshotNode, "application/json", services, snapshotJson.toString( 4 ) );
+            ActionUtil.saveStringToFile( snapshotNode, "application/json", services, NodeUtil.jsonToString( snapshotJson, 4 ) );
             // Docbook is generated on demand now rather than ahead of time...
             // see SnapshotArtifactActionExecuter 
 //            DocBookWrapper docBookWrapper = createDocBook( view, viewId, snapshotName, contextPath, snapshotNode, workspace, timestamp );
@@ -1048,7 +1054,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             System.out.println( "Failed to retrieve transcluded content!" );
         }
         System.out.println( "Unable to find transclude content for JSONObject:" );
-        System.out.println( jsonObj.toString() );
+        System.out.println( NodeUtil.jsonToString( jsonObj ) );
         return "";
     }
 
@@ -1084,7 +1090,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             System.out.println( "Failed to retrieve transcluded value!" );
         }
         System.out.println( "Unable to find transcluded val for JSONObject:" );
-        System.out.println( jsonObj.toString() );
+        System.out.println( NodeUtil.jsonToString( jsonObj ) );
         return "";
     }
 
@@ -1664,7 +1670,8 @@ public class SnapshotPost extends AbstractJavaWebScript {
 		}
 		EmsScriptNode siteNode = new EmsScriptNode(siteInfo.getNodeRef(), services, response);
 
-		JSONObject reqPostJson = (JSONObject) req.parseContent();
+        JSONObject reqPostJson = //JSONObject.make( 
+                (JSONObject)req.parseContent();// );
 		JSONObject postJson;
 		try {
 		    if (reqPostJson.has( "snapshots" )) {

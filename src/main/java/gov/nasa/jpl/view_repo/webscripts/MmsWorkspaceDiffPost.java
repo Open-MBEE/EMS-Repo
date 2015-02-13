@@ -51,8 +51,12 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.version.Version;
 import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import org.json.JSONObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -91,7 +95,9 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 		JSONObject top = new JSONObject();
 		
 		try {
-		    top = handleDiff(req, (JSONObject)req.parseContent(), status);
+		    JSONObject json = //JSONObject.make( 
+		            (JSONObject)req.parseContent(); //);
+		    top = handleDiff(req, json, status);
 		} catch ( Exception e ) {
             log(LogLevel.ERROR, "Internal server error: " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             e.printStackTrace();
@@ -299,7 +305,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 	                }
 	                
 	                // This has to be done before adding deleted aspects
-	                finalJsonDiff = wsDiff.toJSONObject( new Date(end), new Date(end) ); 
+	                finalJsonDiff = wsDiff.toJSONObject( new Date(start), new Date(end) ); 
 	                
 	                // Apply the deleted aspects if needed to the deleted nodes:
 	                if (modelDeleteDiff) {

@@ -41,9 +41,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
+
 import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import org.json.JSONObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -82,7 +87,9 @@ public class ViewPost extends AbstractJavaWebScript {
         WorkspaceNode workspace = getWorkspace( req );
 
         try {
-			updateViews((JSONObject)req.parseContent(), workspace);
+            JSONObject json = //JSONObject.make( 
+                    (JSONObject)req.parseContent();// );
+			updateViews(json, workspace);
 		} catch (JSONException e) {
 			log(LogLevel.ERROR, "JSON parse exception: " + e.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
 			e.printStackTrace();

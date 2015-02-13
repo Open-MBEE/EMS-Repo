@@ -34,6 +34,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Collections;
@@ -134,7 +135,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 		if (responseStatus.getCode() == HttpServletResponse.SC_OK && json != null) {
 	        EmsScriptNode product = findScriptNodeById(productId, workspace, dateTime, false);
 
-		    String jsonString = json.toString();
+		    String jsonString = NodeUtil.jsonToString( json );
             model.put("res", jsonString);
             if (productId != null) {
                 model.put("title", product.getProperty(Acm.ACM_NAME));

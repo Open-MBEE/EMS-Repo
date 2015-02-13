@@ -1,5 +1,4 @@
 {"elements": [{"specialization": {
-    "type": "Expression",
     "operand": [
         {
             "element": "Plus",
@@ -13,5 +12,6 @@
             "integer": 1,
             "type": "LiteralInteger"
         }
-    ]
+    ],
+    "type": "Expression"
 }}]}

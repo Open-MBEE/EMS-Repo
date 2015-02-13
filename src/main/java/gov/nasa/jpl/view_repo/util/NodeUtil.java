@@ -5,6 +5,7 @@ import gov.nasa.jpl.mbee.util.CompareUtils;
 import gov.nasa.jpl.mbee.util.CompareUtils.GenericComparator;
 import gov.nasa.jpl.mbee.util.Debug;
 import gov.nasa.jpl.mbee.util.MethodCall;
+import gov.nasa.jpl.mbee.util.Pair;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Timer;
 import gov.nasa.jpl.mbee.util.Utils;
@@ -66,6 +67,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ApplicationContextHelper;
 import org.apache.commons.logging.Log;
 import org.apache.log4j.Logger;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
@@ -140,6 +142,8 @@ public class NodeUtil {
     public static boolean doVersionCaching = true;
     public static boolean activeVersionCaching = true;
     public static boolean doJsonCaching = true;
+    public static boolean doJsonDeepCaching = true;
+    public static boolean doJsonStringCaching = false;
     
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
     public static boolean heisenbugSeen = false;
@@ -173,11 +177,20 @@ public class NodeUtil {
     public static Map< NodeRef, NodeRef > frozenNodeCache =
             Collections.synchronizedMap( new HashMap<NodeRef, NodeRef>() );
 
-//    public static Map<String, JSONObject> jsonCache = 
-//    		Collections.synchronizedMap(new HashMap<String, JSONObject>());
     // Set< String > filter, boolean isExprOrProp,Date dateTime, boolean isIncludeQualified
+    public static Map< String, Map< Long, Map< Boolean, Map< Set<String>, JSONObject > > > > jsonDeepCache =
+            Collections.synchronizedMap( new HashMap< String, Map< Long, Map< Boolean, Map< Set<String>, JSONObject > > > >() );
     public static Map< String, Map< Long, JSONObject > > jsonCache =
         Collections.synchronizedMap( new HashMap< String, Map< Long, JSONObject > >() );
+    public static long jsonCacheHits = 0;
+    public static long jsonCacheMisses = 0;
+
+    public static Map<JSONObject, Map< Integer, Pair< Date, String > > > jsonStringCache =
+            Collections.synchronizedMap( new HashMap< JSONObject, Map< Integer, Pair< Date, String > > >() );
+    public static long jsonStringCacheHits = 0;
+    public static long jsonStringCacheMisses = 0;
+
+    
     // REVIEW -- TODO -- Should we try and cache the toString() output of the json, too?    
     // REVIEW -- TODO -- This would mean we'd have to concatenate the json
     // REVIEW -- TODO -- strings ourselves instead of just one big toString() 
@@ -236,6 +249,54 @@ public class NodeUtil {
 //        }
 //    }
 
+    public static String jsonToString( JSONObject json ) {
+        if ( !doJsonStringCaching ) return json.toString();
+        try {
+            return jsonToString( json, -1 );
+        } catch ( JSONException e ) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String jsonToString( JSONObject json, int numSpacesToIndent ) throws JSONException {
+        if ( !doJsonStringCaching ) return json.toString( numSpacesToIndent );
+        String result = null;
+        String modString = json.optString("modified");
+        Date mod = null;
+        // Only cache json with a modified date so that we know when to update
+        // it.
+        if ( modString != null ) {
+            mod = TimeUtils.dateFromTimestamp( modString );
+            if ( mod != null && jsonStringCache.containsKey( json ) ) {
+                Pair< Date, String > p = Utils.get( jsonStringCache, json, numSpacesToIndent );//stringCache.get( this );
+                if ( p != null ) {
+                    if ( p.first != null && !mod.after( p.first ) ) {
+                        result = p.second;
+                        // cache hit
+                        ++jsonStringCacheHits;
+                        //System.out.println("string cache hit : " + result );
+                        return result;
+                    }
+                }
+            }
+        }
+        if ( numSpacesToIndent < 0 ) {
+            result = json.toString();
+        } else {
+            result = json.toString(numSpacesToIndent);
+        }
+        if ( mod == null ) {
+            // cache not applicable
+        } else {
+            // cache miss; add to cache
+            ++jsonStringCacheMisses;
+            Utils.put(jsonStringCache, json, numSpacesToIndent,
+                      new Pair< Date, String >( mod, result ) );
+        }
+        return result;
+    }
+    
 
     public static StoreRef getStoreRef() {
         if ( SEARCH_STORE == null ) {

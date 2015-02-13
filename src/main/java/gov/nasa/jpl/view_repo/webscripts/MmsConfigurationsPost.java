@@ -17,6 +17,9 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import org.json.JSONObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -59,7 +62,7 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
             jsonObject = instance.handleUpdate( req );
             appendResponseStatusInfo( instance );
             if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
-            model.put("res", jsonObject.toString(2));
+            model.put("res", NodeUtil.jsonToString( jsonObject, 2 ));
         } catch (Exception e) {
             model.put("res", response.toString());
             if (e instanceof JSONException) {
@@ -97,7 +100,9 @@ public class MmsConfigurationsPost extends AbstractJavaWebScript {
         EmsScriptNode config = new EmsScriptNode(configNode, services);
 
         ConfigurationsWebscript configWs = new ConfigurationsWebscript( repository, services, response );
-        HashSet<String> productSet = configWs.updateConfiguration( config, (JSONObject)req.parseContent(), siteNode, workspace, null );
+        JSONObject requestJson = //JSONObject.make( 
+                                                  (JSONObject)req.parseContent(); //);
+        HashSet<String> productSet = configWs.updateConfiguration( config, requestJson, siteNode, workspace, null );
         ConfigurationPost configPost = new ConfigurationPost( repository, services );
         String siteName = siteNode == null ? null : siteNode.getName();
         configPost.startAction( config, siteName, productSet, workspace, null );
