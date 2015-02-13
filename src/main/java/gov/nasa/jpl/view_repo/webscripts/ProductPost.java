@@ -84,7 +84,7 @@ public class ProductPost extends AbstractJavaWebScript {
 	    
         printHeader( req );
 
-		clearCaches();
+		//clearCaches();
 
 		Map<String, Object> model = new HashMap<String, Object>();
 

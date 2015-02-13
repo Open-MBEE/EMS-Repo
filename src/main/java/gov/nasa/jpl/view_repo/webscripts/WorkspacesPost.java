@@ -85,7 +85,6 @@ public class WorkspacesPost extends AbstractJavaWebScript{
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache){
         printHeader( req );
-        clearCaches();
         Map<String, Object> model = new HashMap<String, Object>();
         int statusCode = HttpServletResponse.SC_OK;
         String user = AuthenticationUtil.getRunAsUser();

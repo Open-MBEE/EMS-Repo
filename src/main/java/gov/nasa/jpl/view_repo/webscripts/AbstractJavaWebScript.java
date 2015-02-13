@@ -128,25 +128,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         this.setRepositoryHelper( repository );
         this.setServices( services );
         this.response = response ;
-        NodeUtil.setBeenInsideTransaction( false );
-        NodeUtil.setBeenOutsideTransaction( false );
-        NodeUtil.setInsideTransactionNow( false );
     }
 
     public AbstractJavaWebScript(Repository repositoryHelper, ServiceRegistry registry) {
         this.setRepositoryHelper(repositoryHelper);
         this.setServices(registry);
-        NodeUtil.setBeenInsideTransaction( false );
-        NodeUtil.setBeenOutsideTransaction( false );
-        NodeUtil.setInsideTransactionNow( false );
     }
 
     public AbstractJavaWebScript() {
         // default constructor for spring
         super();
-        NodeUtil.setBeenInsideTransaction( false );
-        NodeUtil.setBeenOutsideTransaction( false );
-        NodeUtil.setInsideTransactionNow( false );
     }
 
 
@@ -154,11 +145,16 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	 * Utility for clearing out caches
 	 * TODO: do we need to clear caches if Spring isn't making singleton instances
 	 */
-	protected void clearCaches() {
-        NodeUtil.setBeenInsideTransaction( false );
-        NodeUtil.setBeenOutsideTransaction( false );
-        NodeUtil.setInsideTransactionNow( false );
-
+    protected void clearCaches() {
+        clearCaches( true );
+    }
+	protected void clearCaches( boolean resetTransactionState ) {
+	    if ( resetTransactionState ) {
+            NodeUtil.setBeenInsideTransaction( false );
+            NodeUtil.setBeenOutsideTransaction( false );
+            NodeUtil.setInsideTransactionNow( false );
+	    }
+	    
 		foundElements = new HashMap<String, EmsScriptNode>();
 		response = new StringBuffer();
 		responseStatus.setCode(HttpServletResponse.SC_OK);
@@ -175,11 +171,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     protected Map< String, Object > executeImplImpl( final WebScriptRequest req,
                                                      final Status status, final Cache cache,
                                                      boolean withoutTransactions ) {
+        clearCaches( true );
+        clearCaches(); // calling twice for those redefine clearCaches() to
+                       // always call clearCaches( false )
         if ( withoutTransactions ) {
             return executeImplImpl( req, status, cache );
         }
         final Map< String, Object > model = new HashMap<String, Object>();
-        new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+        new EmsTransaction( getServices(), getResponse(), getResponseStatus() ) {
             @Override
             public void run() throws Exception {
                 Map< String, Object > m = executeImplImpl( req, status, cache );

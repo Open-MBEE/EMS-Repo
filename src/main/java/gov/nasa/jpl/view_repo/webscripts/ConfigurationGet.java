@@ -79,7 +79,7 @@ public class ConfigurationGet extends AbstractJavaWebScript {
 
         printHeader( req );
 
-        clearCaches();
+        //clearCaches();
 
         JSONObject jsonObject = new JSONObject();
 

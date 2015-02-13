@@ -1062,53 +1062,43 @@ public class ModelPost extends AbstractJavaWebScript {
         final ModStatus modStatus = new ModStatus();
         final Pair<Boolean,EmsScriptNode> returnPair = new Pair<Boolean,EmsScriptNode>(false,null);
 
-        if (runWithoutTransactions || internalRunWithoutTransactions) {
-            // Check to see if the element has been updated since last read/modified by the
-            // posting application.
-            if (inConflict(element, elementJson)) {
-                return elements;
-            }
-
-            reifiedNode =
-                    updateOrCreateTransactionableElement( elementJson, parent,
-                                                          children, workspace, ingest, false, modStatus,
-                                                          element);
-        }
-        else {
+        if ( !runWithoutTransactions && !internalRunWithoutTransactions ) {
             log(LogLevel.INFO, "updateOrCreateElement begin transaction {");
-            new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
-                @Override
-                public void run() throws Exception {
-                    // Check to see if the element has been updated since last read/modified by the
-                    // posting application.  Want this to be within the transaction
-                    boolean conflict = inConflict(element, elementJson);
-                    returnPair.first = conflict;
-                    
-                    if (!conflict) {
-                        returnPair.second =
-                                updateOrCreateTransactionableElement( elementJson,
-                                                                      parent, children,
-                                                                      workspace,
-                                                                      ingest, false, modStatus, 
-                                                                      element );
-                    }
-                }
-            };
-            log(LogLevel.INFO, "} updateOrCreateElement end transaction");
-            
-            if (returnPair.first) {
-                return elements;
-            }
-            reifiedNode = returnPair.second;
         }
+        new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
+                           runWithoutTransactions || internalRunWithoutTransactions ) {
+            @Override
+            public void run() throws Exception {
+                // Check to see if the element has been updated since last read/modified by the
+                // posting application.  Want this to be within the transaction
+                boolean conflict = inConflict(element, elementJson);
+                returnPair.first = conflict;
+                
+                if (!conflict) {
+                    returnPair.second =
+                            updateOrCreateTransactionableElement( elementJson,
+                                                                  parent, children,
+                                                                  workspace,
+                                                                  ingest, false, modStatus, 
+                                                                  element );
+                }
+            }
+        };
+        if ( !runWithoutTransactions && !internalRunWithoutTransactions ) {
+            log(LogLevel.INFO, "} updateOrCreateElement end transaction");
+        }            
+        if (returnPair.first) {
+            return elements;
+        }
+        reifiedNode = returnPair.second;
         
         // create the children elements
         if (reifiedNode != null && reifiedNode.exists()) {
             //elements.add( reifiedNode );
             for (int ii = 0; ii < children.length(); ii++) {
-                Set< EmsScriptNode > childElements =
-                        updateOrCreateElement(elementMap.get(children.getString(ii)),
-                                                       reifiedNode, workspace, ingest);
+                Set< EmsScriptNode > childElements = null;
+                childElements = updateOrCreateElement(elementMap.get(children.getString(ii)),
+                                                      reifiedNode, workspace, ingest);
                 // Elements in new workspace replace originals.
                 for ( EmsScriptNode node : childElements ) {
                     nodeMap.put( node.getName(), node );
@@ -2638,7 +2628,7 @@ public class ModelPost extends AbstractJavaWebScript {
         printHeader( req );
 
         Map<String, Object> model = new HashMap<String, Object>();
-        clearCaches();
+        //clearCaches();
 
         boolean runInBackground = getBooleanArg(req, "background", false);
         boolean fix = getBooleanArg(req, "fix", false);
@@ -3028,7 +3018,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
     @Override
     protected void clearCaches() {
-        super.clearCaches();
+        super.clearCaches( false );
         elementHierarchyJson = new JSONObject();
         relationshipsJson = new JSONObject();
         rootElements = new HashSet<String>();

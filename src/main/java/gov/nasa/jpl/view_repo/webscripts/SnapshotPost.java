@@ -48,8 +48,6 @@ import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
 import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
-import gov.nasa.jpl.view_repo.webscripts.AbstractJavaWebScript.LogLevel;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -93,13 +91,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import org.json.JSONObject;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
-import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
@@ -149,7 +143,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     protected Map< String, Object > executeImplImpl( WebScriptRequest req,
                                                  Status status, Cache cache ) {
         printHeader( req );
-        clearCaches();
+        //clearCaches();
 
         WorkspaceNode workspace = getWorkspace( req );
         Date timestamp = getTimestamp(req);
@@ -800,7 +794,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     public JSONObject generateHTML( String snapshotId, WorkspaceNode workspace ) throws Exception {
-    	clearCaches();
+    	clearCaches( false );
         //EmsScriptNode snapshotNode = findScriptNodeById( snapshotId, workspace, null, false );
     	// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
 		ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@cm\\:name:\"", services );
@@ -856,7 +850,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
     }
 
     public JSONObject generatePDF(String snapshotId, WorkspaceNode workspace) throws Exception{
-    	clearCaches();
+    	clearCaches( false );
         //EmsScriptNode snapshotNode = findScriptNodeById(snapshotId, workspace, null, false);
     	// lookup snapshotNode using standard lucene as snapshotId is unique across all workspaces
 		ArrayList<NodeRef> nodeRefs = NodeUtil.findNodeRefsByType( snapshotId, "@cm\\:name:\"", services );
