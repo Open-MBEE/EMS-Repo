@@ -19,7 +19,7 @@ public class HostnameGet extends AbstractJavaWebScript {
 	@Override
     protected Map< String, Object > executeImpl( WebScriptRequest req, Status status, Cache cache ) {
 		printHeader( req );
-	    clearCaches();
+	    //clearCaches();
 	    HostnameGet instance = new HostnameGet(repository, getServices());
         return instance.executeImplImpl(req,  status, cache, runWithoutTransactions );
 	}

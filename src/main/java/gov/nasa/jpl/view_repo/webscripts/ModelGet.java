@@ -162,7 +162,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	    Timer timer = new Timer();
 	    printHeader( req );
 
-		clearCaches();
+		//clearCaches();
 
 		Map<String, Object> model = new HashMap<String, Object>();
 		// make sure to pass down view request flag to instance

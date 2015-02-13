@@ -96,7 +96,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
         printHeader( req );
 
-        clearCaches();
+        //clearCaches();
 
 		ConfigurationPost instance = new ConfigurationPost(repository, services);
 

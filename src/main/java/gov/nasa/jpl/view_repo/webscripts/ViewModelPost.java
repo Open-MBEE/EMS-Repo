@@ -88,7 +88,7 @@ public class ViewModelPost extends ModelPost {
         //            aspect to this one.  See ModelPost.checkForObsoleteValueSpecs()
         
         Map<String, Object> model = new HashMap<String, Object>();
-        clearCaches();
+        //clearCaches();
 
         String[] idKeys = {"modelid", "elementId"};
         String viewid = null;

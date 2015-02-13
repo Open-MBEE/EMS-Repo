@@ -45,7 +45,7 @@ public class WorkspaceDelete extends AbstractJavaWebScript {
     @Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
        printHeader(req);
-       clearCaches();
+       //clearCaches();
        Map<String, Object> model = new HashMap<String, Object>();
        String user = AuthenticationUtil.getRunAsUser();
        JSONObject result = null;

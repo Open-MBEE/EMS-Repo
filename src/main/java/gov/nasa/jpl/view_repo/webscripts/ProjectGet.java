@@ -82,7 +82,7 @@ public class ProjectGet extends AbstractJavaWebScript {
 //    	String userName = AuthenticationUtil.getRunAsUser();
         printHeader( req );
 
-        clearCaches();
+        //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
         JSONObject json = null;

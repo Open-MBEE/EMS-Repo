@@ -89,7 +89,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
-		clearCaches();
+		//clearCaches();
 
 		Map<String, Object> model = new HashMap<String, Object>();
 		JSONObject top = new JSONObject();
