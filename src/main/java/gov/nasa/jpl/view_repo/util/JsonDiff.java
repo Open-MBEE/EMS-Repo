@@ -16,10 +16,8 @@ import gov.nasa.jpl.mbee.util.FileUtils;
 
 
 import org.json.JSONArray;
-//import gov.nasa.jpl.view_repo.util.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-//import gov.nasa.jpl.view_repo.util.JSONObject;
 
 
 public class JsonDiff {
@@ -136,8 +134,8 @@ public class JsonDiff {
                             + file1.getName();
             String fName2 = file2.getParent() + File.separator + "sorted_"
                             + file2.getName();
-            FileUtils.stringToFile( NodeUtil.jsonToString( so1, 4 ), fName1 );
-            FileUtils.stringToFile( NodeUtil.jsonToString( so2, 4 ), fName2 );
+            FileUtils.stringToFile( so1.toString( 4 ), fName1 );
+            FileUtils.stringToFile( so2.toString( 4 ), fName2 );
             runCommand( "diff -b " + fName1 + " " + fName2 );
         } catch ( Throwable e ) {
             e.printStackTrace();

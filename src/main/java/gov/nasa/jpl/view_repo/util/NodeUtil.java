@@ -141,7 +141,7 @@ public class NodeUtil {
     public static boolean activeVersionCaching = true;
     public static boolean doJsonCaching = true;
     public static boolean doJsonDeepCaching = true;
-    public static boolean doJsonStringCaching = false;
+    public static boolean doJsonStringCaching = true;
     
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
     public static boolean heisenbugSeen = false;
@@ -250,7 +250,7 @@ public class NodeUtil {
     public static String jsonToString( JSONObject json ) {
         if ( !doJsonStringCaching ) return json.toString();
         try {
-            return json.toString( 0 );
+            return jsonToString( json, -1 );
         } catch ( JSONException e ) {
             e.printStackTrace();
         }
@@ -273,16 +273,17 @@ public class NodeUtil {
                         result = p.second;
                         // cache hit
                         ++jsonStringCacheHits;
+                        //System.out.println("string cache hit : " + result );
                         return result;
                     }
                 }
             }
         }
-//        if ( numSpacesToIndent == 0 ) {
-//            result = super.toString();
-//        } else {
+        if ( numSpacesToIndent < 0 ) {
+            result = json.toString();
+        } else {
             result = json.toString(numSpacesToIndent);
-//        }
+        }
         if ( mod == null ) {
             // cache not applicable
         } else {
