@@ -498,6 +498,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             siteNode = new EmsScriptNode( foo.getNodeRef(), services );
             siteNode.createOrUpdateAspect( "cm:taggable" );
             siteNode.createOrUpdateAspect(Acm.ACM_SITE);
+            if (workspace == null) {
+                // remove read permissions
+                siteNode.removePermission( "SiteConsumer", "GROUP_EVERYONE" );
+            }
         }
 
         // If this site is supposed to go into a non-master workspace, then create the site folders
