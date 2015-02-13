@@ -485,8 +485,11 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 				else {arrString = Arrays.toString((Object[])obj);}
 				formattedMsg = m.replaceFirst(arrString);
 			}
+			else {
+				formattedMsg = m.replaceFirst(obj.toString());
+			}
 			m = p.matcher(formattedMsg);
-//			if (obj.getClass().isArray()){
+//			if (obj.getClass().isArray()){	
 //				Arrays.toString(obj);
 //				String formattedString = m.replaceFirst(o)
 //			}

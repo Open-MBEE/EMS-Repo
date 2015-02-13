@@ -224,13 +224,13 @@ public class ConfigurationPost extends AbstractJavaWebScript {
         	                // or in the future:
         	                Date now = new Date();
         	                if (datetime.after( now )) {
-        	                    log(LogLevel.ERROR, "Timestamp provided in json: "+datetime+" is in the future.  Current time: "+now, 
-        	                        HttpServletResponse.SC_BAD_REQUEST);
+        	                    log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Timestamp provided in json: %s is in the future.  Current time: %s", 
+        	                       datetime,now);
         	                    return null;
         	                }
         	                else if (workspace != null && datetime.before( workspace.getCopyOrCreationTime() )) {
-        	                    log(LogLevel.ERROR, "Timestamp provided in json: "+datetime+" is before the workspace branch/creation time: "+workspace.getCopyOrCreationTime(), 
-                                    HttpServletResponse.SC_BAD_REQUEST);
+        	                    log(Level.ERROR, HttpServletResponse.SC_BAD_REQUEST, "Timestamp provided in json: %s is before the workspace branch/creation time: %s", 
+                                    datetime,workspace.getCopyOrCreationTime());
         	                    return null;
         	                }
 	                }

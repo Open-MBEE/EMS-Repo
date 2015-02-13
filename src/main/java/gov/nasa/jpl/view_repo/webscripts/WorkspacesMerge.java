@@ -160,12 +160,12 @@ public class WorkspacesMerge extends AbstractJavaWebScript{
                         try {
                             trx.rollback();
                             NodeUtil.setInsideTransactionNow( false );
-                            log(LogLevel.ERROR, "\t####### ERROR: Needed to rollback: " + e.getMessage());
-                            log(LogLevel.ERROR, "\t####### when calling toJson()");
+                            log(Level.ERROR, "\t####### ERROR: Needed to rollback: %s", e.getMessage());
+                            log(Level.ERROR, "\t####### when calling toJson()");
                             e.printStackTrace();
                         } catch (Throwable ee) {
-                            log(LogLevel.ERROR, "\tRollback failed: " + ee.getMessage());
-                            log(LogLevel.ERROR, "\tafter calling toJson()");
+                            log(Level.ERROR, "\tRollback failed: %s", ee.getMessage());
+                            log(Level.ERROR, "\tafter calling toJson()");
                             ee.printStackTrace();
                         }
                     }

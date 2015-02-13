@@ -192,7 +192,7 @@ public class ModelGet extends AbstractJavaWebScript {
         printFooter();
 
         if (logger.isInfoEnabled()) {
-            log( LogLevel.INFO, "ModelGet: " + timer );
+            log( Level.INFO, "ModelGet: %s", timer );
         }
 
 		return model;
