@@ -665,7 +665,10 @@ public class EmsScriptNode extends ScriptNode implements
         // a parent workspace, and this wont detect it; however, all the getProperty() will look
         // for the correct workspace node, so perhaps this is overkill:
         T oldValue = (T)getProperty( acmType, true, null, false, true );
-        if ( oldValue != null ) {
+        if (oldValue == null && value == null) {
+            return false;
+        }
+        if ( oldValue != null && value != null) {
             if ( !value.equals( oldValue ) ) {
                 setProperty( acmType, value );
                 log( getName() + ": " + acmType
@@ -868,7 +871,12 @@ public class EmsScriptNode extends ScriptNode implements
             return false;
         }
         for ( int ii = 0; ii < x.size(); ii++ ) {
-            if ( !x.get( ii ).equals( y.get( ii ) ) ) {
+            T xVal = x.get(ii);
+            T yVal = y.get(ii);
+            if ( xVal != null && !xVal.equals( yVal ) ) {
+                return false;
+            }
+            if ( yVal != null && !yVal.equals( xVal ) ) {
                 return false;
             }
         }
@@ -1635,7 +1643,6 @@ public class EmsScriptNode extends ScriptNode implements
                 // Try again with the live node, but make sure it's the latest
                 // version.
                 NodeRef liveRef = nodeRef;
-                NodeRef oldRef = nodeRef;
                 if ( isAVersion() ) {
                     success = true;
                     logger.error( "Tried to set property of a version nodeRef in "
@@ -1911,7 +1918,8 @@ public class EmsScriptNode extends ScriptNode implements
 
     private void putInJson( JSONObject jsonObject, String key, Object value,
                             Set< String > filter ) throws JSONException {
-        if ( key == null || value == null ) return;
+        //if ( key == null || value == null ) return;
+        if ( key == null ) return;  // Per CMED-461, we are allowing value to be null
         if ( filter == null || filter.size() == 0 || filter.contains( key ) ) {
             jsonObject.put( key, value );
         }
@@ -2988,33 +2996,38 @@ public class EmsScriptNode extends ScriptNode implements
                     try {
                         property = jsonArray.getString( i );
                     } catch ( JSONException e ) {
-                        property = "" + jsonArray.get( i );
+                        Object val = jsonArray.get( i );
+                        property = val != null ? "" + val : null;
                     }
                     break;
                 case NODE_REF:
-                    String sysmlId = jsonArray.getString( i );
-                    EmsScriptNode node =
-                            convertIdToEmsScriptNode( sysmlId, false, workspace,
-                                                      dateTime );
-                    if ( node != null ) {
-                        property = node.getNodeRef();
-                    } else {
-                        // String jsonStr = "{ \"id\" : \"\", " //"\"owner\" : "
-                        // + + ", " +
-                        // + "\"type\" : \"Element\" }";
-                        // JSONObject json = new JSONObject( jsonStr ) ;
-                        // updateOrCreateElement(json, null, true);
-                        String msg =
-                                "Error! No element found for " + sysmlId
-                                        + ".\n";
-                        if ( getResponse() == null || getStatus() == null ) {
-                            Debug.error( msg );
+                    String sysmlId = null;
+                    try {
+                        sysmlId = jsonArray.getString( i );
+                    } catch ( JSONException e ) {
+                        Object val = jsonArray.get( i );
+                        sysmlId = val != null ? "" + val : null;
+                    }
+                    
+                    if (!Utils.isNullOrEmpty( sysmlId )) {
+                        EmsScriptNode node =
+                                convertIdToEmsScriptNode( sysmlId, false, workspace,
+                                                          dateTime );
+                        if ( node != null ) {
+                            property = node.getNodeRef();
                         } else {
-                            getResponse().append( msg );
-                            getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
-                                                 msg );
+                            String msg =
+                                    "Error! No element found for " + sysmlId
+                                            + ".\n";
+                            if ( getResponse() == null || getStatus() == null ) {
+                                Debug.error( msg );
+                            } else {
+                                getResponse().append( msg );
+                                getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                                     msg );
+                            }
+                            return null; // REVIEW this may be overkill, can still proceed
                         }
-                        return null;
                     }
                     break;
                 case UNKNOWN:
@@ -3082,23 +3095,28 @@ public class EmsScriptNode extends ScriptNode implements
                 try {
                     sysmlId = jsonObject.getString( jsonKey );
                 } catch ( JSONException e ) {
-                    sysmlId = "" + jsonObject.get( jsonKey );
+                    Object val = jsonObject.get( jsonKey );
+                    sysmlId = val != null ? "" + val : null;
                 }
-                EmsScriptNode node =
-                        convertIdToEmsScriptNode( sysmlId, false, workspace,
-                                                  dateTime );
-                if ( node != null ) {
-                    property = node.getNodeRef();
-                } else if ( !Utils.isNullOrEmpty( sysmlId ) ) {
-                    String msg =
-                            "Error! Could not find element for sysml id = "
-                                    + sysmlId + ".\n";
-                    if ( getResponse() == null || getStatus() == null ) {
-                        Debug.error( false, msg );
-                    } else {
-                        getResponse().append( msg );
-                        getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
-                                             msg );
+                
+                if (!Utils.isNullOrEmpty( sysmlId )) {
+                    EmsScriptNode node =
+                            convertIdToEmsScriptNode( sysmlId, false, workspace,
+                                                      dateTime );
+                    if ( node != null ) {
+                        property = node.getNodeRef();
+                    } 
+                    else {
+                        String msg =
+                                "Error! Could not find element for sysml id = "
+                                        + sysmlId + ".\n";
+                        if ( getResponse() == null || getStatus() == null ) {
+                            Debug.error( false, msg );
+                        } else {
+                            getResponse().append( msg );
+                            getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST,
+                                                 msg );
+                        }
                     }
                 }
             } else {
@@ -3108,17 +3126,18 @@ public class EmsScriptNode extends ScriptNode implements
             property = jsonObject.getString( jsonKey );
         }
 
-        if ( property == null ) {
-            String msg =
-                    "Error! Couldn't get property " + propDef + "=" + property
-                            + ".\n";
-            if ( getResponse() == null || getStatus() == null ) {
-                Debug.error( false, msg );
-            } else {
-                getResponse().append( msg );
-                getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
-            }
-        }
+        // Per CMED-461, we are allowing properties to be set to null
+//        if ( property == null ) {
+//            String msg =
+//                    "Error! Couldn't get property " + propDef + "=" + property
+//                            + ".\n";
+//            if ( getResponse() == null || getStatus() == null ) {
+//                Debug.error( false, msg );
+//            } else {
+//                getResponse().append( msg );
+//                getStatus().setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
+//            }
+//        }
         return property;
     }
 
@@ -4558,6 +4577,9 @@ public class EmsScriptNode extends ScriptNode implements
         if ( propertyType != null ) {
             EmsScriptNode propertyTypeNode = new EmsScriptNode(propertyType, services, response);
             putInJson( json, "propertyType", propertyTypeNode.getSysmlId(), filter);
+        }
+        else {
+            putInJson( json, "propertyType", null, filter);
         }
 
         putInJson( json, Acm.JSON_LOWER,
