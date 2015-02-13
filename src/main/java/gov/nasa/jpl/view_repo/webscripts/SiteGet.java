@@ -107,7 +107,7 @@ public class SiteGet extends AbstractJavaWebScript {
         if (json == null) {
             model.put("res", response.toString());
         } else {
-            model.put("res", json.toString());
+            model.put("res", NodeUtil.jsonToString( json ));
         }
         status.setCode(responseStatus.getCode());
 

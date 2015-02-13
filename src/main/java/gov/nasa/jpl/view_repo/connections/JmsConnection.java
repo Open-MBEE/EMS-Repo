@@ -1,5 +1,7 @@
 package gov.nasa.jpl.view_repo.connections;
 
+import gov.nasa.jpl.view_repo.util.NodeUtil;
+
 import javax.jms.Connection;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
@@ -41,7 +43,7 @@ public class JmsConnection extends AbstractConnection {
         try {
             json.put( "sequence", sequenceId++ );
             // FIXME: topic is always the same since we're using metadata now
-            result = publishTopic(json.toString( 2 ), "master");
+            result = publishTopic(NodeUtil.jsonToString( json, 2 ), "master");
         } catch ( JSONException e ) {
             e.printStackTrace();
         }

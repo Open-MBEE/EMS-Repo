@@ -33,6 +33,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
@@ -115,7 +116,7 @@ public class IndexGet extends AbstractJavaWebScript {
                 json = getIndexJson(site, workspace, dateTime);
                 //appendResponseStatusInfo(instance);
                 if (!Utils.isNullOrEmpty(response.toString())) json.put("message",response.toString());
-                model.put("res", json.toString());
+                model.put("res", NodeUtil.jsonToString( json ));
                 model.put("title", siteName);
                 model.put("siteName", site.getProperty(Acm.CM_NAME));
                 model.put("siteTitle", site.getProperty(Acm.CM_TITLE));

@@ -185,7 +185,7 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	            	response.append(String.format("[INFO]: Successfully generated artifact for snapshot: %s.\n", snapshotId));
 	        	}
 	        	response.append("Snapshot JSON:\n");
-	        	response.append(snapshot.toString());
+	        	response.append(NodeUtil.jsonToString( snapshot ));
 	        	response.append("\n\n");
 	        }
 	        // Send off notification email
