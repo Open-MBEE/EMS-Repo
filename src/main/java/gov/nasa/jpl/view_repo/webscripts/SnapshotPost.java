@@ -939,12 +939,9 @@ public class SnapshotPost extends AbstractJavaWebScript {
 
         if (snapshotNode == null) {
             snapshotNode = sitesFolder.createFolder("snapshots");
+            snapshotNode.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
             if (snapshotNode != null) snapshotNode.getOrSetCachedVersion();
             sitesFolder.getOrSetCachedVersion();
-        }
-
-        if ( snapshotNode == null ) {
-            return null;
         }
 
         EmsScriptNode snapshotDateFolder = NodeUtil.getOrCreateDateFolder(snapshotNode);

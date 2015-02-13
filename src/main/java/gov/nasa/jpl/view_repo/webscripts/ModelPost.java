@@ -130,8 +130,6 @@ public class ModelPost extends AbstractJavaWebScript {
         super(repositoryHelper, registry);
      }
 
-//    private static boolean activeVersionCaching = true;
-
     // Set the flag to time events that occur during a model post using the timers
     // below
     public static boolean timeEvents = false;
@@ -314,7 +312,11 @@ public class ModelPost extends AbstractJavaWebScript {
         //      CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), status, true );
         
         NodeRef commitRef = CommitUtil.commit(null, targetWS, "", true, services, new StringBuffer() );
-        String projectId = elements.first().getProjectId();
+        
+        String projectId = "";
+        if (elements.size() > 0) {
+            projectId = elements.first().getProjectId();
+        }
         String wsId = "master";
         if (targetWS != null) {
             wsId = targetWS.getId();
@@ -2725,23 +2727,24 @@ public class ModelPost extends AbstractJavaWebScript {
                             }
                         };
                     }
-
-                    if (projectNode != null) {
+                    // if DB rolled back, it's because the no_site node couldn't be created
+                    // this is indicative of no permissions (inside the DB transaction)
+                    if (getResponseStatus().getCode() == HttpServletResponse.SC_BAD_REQUEST) {
+                        log(LogLevel.WARNING, "No write priveleges", HttpServletResponse.SC_FORBIDDEN);
+                    } else if (projectNode != null) {
                         handleUpdate( postJson, status, myWorkspace, fix, model, true );
                     }
                 }
             } catch (JSONException e) {
                 log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
                 e.printStackTrace();
-                model.put("res", response.toString());
             } catch (Exception e) {
                 log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 e.printStackTrace();
-                model.put("res", response.toString());
             }
         }
         if ( !model.containsKey( "res" ) ) {
-            model.put( "res", response.toString() );
+            model.put( "res", String.format("{'message':'%s'}", response.toString()) );
         }
 
         status.setCode(responseStatus.getCode());

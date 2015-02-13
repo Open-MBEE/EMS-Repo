@@ -54,7 +54,6 @@ import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.StoreRef;
-import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.site.SiteVisibility;
 import org.apache.log4j.Logger;
@@ -498,8 +497,8 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             siteNode = new EmsScriptNode( foo.getNodeRef(), services );
             siteNode.createOrUpdateAspect( "cm:taggable" );
             siteNode.createOrUpdateAspect(Acm.ACM_SITE);
-            if (workspace == null) {
-                // remove read permissions
+            if (workspace == null) { // && !siteNode.getName().equals(NO_SITE_ID)) {
+                // default creation adds GROUP_EVERYONE as SiteConsumer, so remove
                 siteNode.removePermission( "SiteConsumer", "GROUP_EVERYONE" );
             }
         }

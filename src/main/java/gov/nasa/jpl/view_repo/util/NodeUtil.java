@@ -703,10 +703,9 @@ public class NodeUtil {
 
             // Make sure we didn't just get a near match.
             try {
-//                This isn't necessary, lucene already filters based on read permissions
-//                if ( !esn.checkPermissions( PermissionService.READ ) ) {
-//                    continue;
-//                }
+                if ( !esn.checkPermissions( PermissionService.READ ) ) {
+                    continue;
+                }
                 boolean match = true;
                 if ( exactMatch ) {
                     String acmType =

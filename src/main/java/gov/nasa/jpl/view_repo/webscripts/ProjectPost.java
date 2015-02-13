@@ -194,6 +194,9 @@ public class ProjectPost extends AbstractJavaWebScript {
 		// make sure Model package under site exists
         EmsScriptNode modelContainerNode =
                 siteNode.childByNamePath( MODEL_PATH_SEARCH, false, workspace, true );
+        if (!checkPermissions(siteNode, "Write")) {
+            return HttpServletResponse.SC_FORBIDDEN;
+        }
 		if (modelContainerNode == null) {
 			modelContainerNode = siteNode.createFolder("Models");
 			if ( modelContainerNode != null ) modelContainerNode.getOrSetCachedVersion();
