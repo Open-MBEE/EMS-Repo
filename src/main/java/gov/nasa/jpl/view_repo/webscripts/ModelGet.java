@@ -45,6 +45,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
+import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
@@ -159,6 +160,10 @@ public class ModelGet extends AbstractJavaWebScript {
 	@Override
     protected Map<String, Object> executeImplImpl(WebScriptRequest req,
 			Status status, Cache cache) {
+        if (logger.isInfoEnabled()) {
+            String user = AuthenticationUtil.getRunAsUser();
+            logger.info( user + " " + req.getURL() );
+        }
 	    Timer timer = new Timer();
 	    printHeader( req );
 
