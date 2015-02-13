@@ -703,10 +703,10 @@ public class NodeUtil {
 
             // Make sure we didn't just get a near match.
             try {
-                if ( !esn.checkPermissions( PermissionService.READ ) ) {
-
-                    continue;
-                }
+//                This isn't necessary, lucene already filters based on read permissions
+//                if ( !esn.checkPermissions( PermissionService.READ ) ) {
+//                    continue;
+//                }
                 boolean match = true;
                 if ( exactMatch ) {
                     String acmType =
@@ -2509,6 +2509,7 @@ public class NodeUtil {
      */
     public static void sendNotificationEvent( String subject, String msg,
                                               ServiceRegistry services ) {
+        // FIXME: need to base the single send on the same subject
         if (!heisenbugSeen) {
             String hostname = services.getSysAdminParams().getAlfrescoHost();
             
