@@ -1,40 +1,20 @@
 {"elements": [{
-
-    "creator": "admin",
-
-    "documentation": "this will create a moved element",
-
-    "editable": true,
-
+    "qualifiedId": "/europa/123456/304",
     "name": "304",
-
+    "qualifiedName": "/europa/JW_TEST/304",
+    "sysmlid": "304",
+    "documentation": "this will create a moved element",
     "owner": "123456",
-
-    "qualifiedId": "/123456/304",
-
-    "qualifiedName": "/JW_TEST/304",
-
     "specialization": {
-
         "isDerived": false,
-
         "isSlot": false,
-
-        "type": "Property",
-
         "value": [{
-
             "string": "dlam_string",
-
             "type": "LiteralString"
-
-        }]
-
+        }],
+        "type": "Property"
     },
-
-    "sysmlid": "304"
-
+    "editable": true,
+    "creator": "admin",
 }]}
-
 200
-

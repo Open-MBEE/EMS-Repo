@@ -354,14 +354,17 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
     @Override
     public Object getProperty( NodeRef ref, String id ) {
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
-        return node.getProperty( id );
+        
+        // Special case for type b/c it is not a property, and actual based on the
+        // aspect applied to the node:
+        return id.equals( Acm.JSON_TYPE ) ? node.getTypeName() : node.getProperty( id );
     }
 
     @Override
     public Map<String, Object> getPropertyMap( NodeRef ref ) {
         EmsScriptNode node = new EmsScriptNode( ref, getServices() );
         Map< String, Object > props = node.getProperties();
-        props.put( "type", node.getTypeName() );
+        props.put( Acm.JSON_TYPE, node.getTypeName() );
         Utils.removeAll( props, getPropertyIdsToIgnore() );
         return props;
     }
@@ -583,7 +586,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
          * Then for each generated id, check if it maps to the same property and
          * location within the list (if needed), the same owner, and same type.
          * If there is a match then remove the id from addedIds, removedIds, and
-         * add to the updatedIds and the id in map1 to map2.
+         * add to the updatedIds and the id in map1 to map2. 
          */
         for ( String id : removedIds ) {
             filterValuesImpl(id, addedIds, updatedIds, removeFromRemovedIds, generated);           

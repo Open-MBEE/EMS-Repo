@@ -415,19 +415,19 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
 	    }
 	}
 
-	/**
-	 * Checks whether user has permissions to the nodeRef and logs results and status as appropriate
-	 * @param nodeRef      NodeRef to check permissions againts
-	 * @param permissions  Permissions to check
-	 * @return             true if user has specified permissions to node, false otherwise
-	 */
-	protected boolean checkPermissions(NodeRef nodeRef, String permissions) {
-		if (services.getPermissionService().hasPermission(nodeRef, permissions) != AccessStatus.ALLOWED) {
-			log(LogLevel.WARNING, "No " + permissions + " priveleges to " + nodeRef.toString() + ".\n", HttpServletResponse.SC_BAD_REQUEST);
-			return false;
-		}
-		return true;
-	}
+//	/**
+//	 * Checks whether user has permissions to the nodeRef and logs results and status as appropriate
+//	 * @param nodeRef      NodeRef to check permissions againts
+//	 * @param permissions  Permissions to check
+//	 * @return             true if user has specified permissions to node, false otherwise
+//	 */
+//	protected boolean checkPermissions(NodeRef nodeRef, String permissions) {
+//		if (services.getPermissionService().hasPermission(nodeRef, permissions) != AccessStatus.ALLOWED) {
+//			log(LogLevel.WARNING, "No " + permissions + " priveleges to " + nodeRef.toString() + ".\n", HttpServletResponse.SC_BAD_REQUEST);
+//			return false;
+//		}
+//		return true;
+//	}
 
 
     protected static final String WORKSPACE_ID = "workspaceId";

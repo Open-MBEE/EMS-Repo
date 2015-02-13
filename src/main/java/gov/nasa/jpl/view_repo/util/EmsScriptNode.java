@@ -115,6 +115,9 @@ public class EmsScriptNode extends ScriptNode implements
     public static boolean tryToFlushCache = false;
 
     public static boolean versionCacheDebugPrint = false;
+    
+    private String qualifiedName = null;
+    private String qualifiedId = null;
 
     /**
      * A set of content model property names that serve as workspace metadata
@@ -1551,26 +1554,7 @@ public class EmsScriptNode extends ScriptNode implements
 //        }
         return lastModifiedDate;
     }
-
-    // @Override
-    // public Map<String, Object> getProperties()
-    // {
-    //
-    // Map<QName, Serializable> props =
-    // services.getNodeService().getProperties(nodeRef);
-    // // TODO replace w/ this.properties after no longer subclassing, maybe use
-    // QNameMap also
-    // Map<String, Object> finalProps = new HashMap<String, Object>();
-    //
-    // // Create map of string representation of QName to the value of the
-    // property:
-    // for (Map.Entry<QName, Serializable> entry : props.entrySet()) {
-    // finalProps.put(entry.getKey().toString(), entry.getValue());
-    // }
-    //
-    // return finalProps;
-    // }
-
+    
     /**
      * Get the properties of this node
      *
@@ -1581,13 +1565,22 @@ public class EmsScriptNode extends ScriptNode implements
     @Override
     public Map< String, Object > getProperties() {
 
-        // Taking this out for now b/c of performance hit:
-        //checkNodeRefVersion(null);
-
         if ( useFoundationalApi ) {
             return Utils.toMap( services.getNodeService()
                                         .getProperties( nodeRef ),
                                 String.class, Object.class );
+            
+//            Map<String, Object> returnMap = new HashMap<String, Object>();
+//            Map< QName, Serializable > map =  services.getNodeService().getProperties( nodeRef );
+//            
+//            // Need to potentially replace each property with the correct property value for
+//            // the workspace.  Remember, that property that points to a node ref may point to
+//            // one in a parent workspace, so we must do a search by id to get the correct one:
+//            for (Entry< QName, Serializable> entry : map.entrySet()) {
+//                String keyShort = NodeUtil.getShortQName( entry.getKey() );
+//                returnMap.put( entry.getKey().toString(), getProperty(keyShort) );
+//            }
+//            return returnMap;
         } else {
             return super.getProperties();
         }
@@ -1736,10 +1729,16 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public String getSysmlQName() {
+        if (qualifiedName != null) {
+            return qualifiedName;
+        }
         return getSysmlQPath( true );
     }
 
     public String getSysmlQId() {
+        if (qualifiedId != null) {
+            return qualifiedId;
+        }
         return getSysmlQPath( false );
     }
 
@@ -1753,41 +1752,46 @@ public class EmsScriptNode extends ScriptNode implements
      * @return SysML qualified name (e.g., sysml:name qualified)
      */
     public String getSysmlQPath( boolean isName ) {
-        String qname = "";
-        String pkgSuffix = "_pkg";
-
         // TODO REVIEW
         // This is currently not called on reified packages, so as long as the ems:owner always points
         // to reified nodes, as it should, then we dont need to replace pkgSuffix in the qname.
 
-        if ( isName ) {
-            qname = "/" + getProperty( "sysml:name" );
-        } else {
-            qname =  "/" + getProperty( "sysml:id" );
-            //qname = qname.endsWith(pkgSuffix) ? qname.replace(pkgSuffix, "" ) : qname;
-        }
+        qualifiedName = "/" + getProperty( "sysml:name" );
+        qualifiedId =  "/" + getProperty( "sysml:id" );
 
         NodeRef ownerRef = (NodeRef)this.getProperty( "ems:owner" );
+        EmsScriptNode owner = null;
         // Need to look up based on owners...
         while ( ownerRef != null ) {
-            EmsScriptNode owner =
-                    new EmsScriptNode( ownerRef, services, response );
-            String nameProp = null;
-            if ( isName ) {
-                nameProp = (String)owner.getProperty( "sysml:name" );
-            } else {
-                nameProp = (String)owner.getProperty( "sysml:id" );
-            }
+            owner = new EmsScriptNode( ownerRef, services, response );
+            String nameProp = (String)owner.getProperty( "sysml:name" );
+            String idProp = (String)owner.getProperty( "sysml:id" );
             if ( nameProp == null ) {
                 break;
             }
             //nameProp = nameProp.endsWith(pkgSuffix) ? nameProp.replace(pkgSuffix, "" ) : nameProp;
-            qname = "/" + nameProp + qname;
+            qualifiedName = "/" + nameProp + qualifiedName;
+            qualifiedId = "/" + idProp + qualifiedId;
 
             ownerRef = (NodeRef)owner.getProperty( "ems:owner" );
         }
+        
+        // get the site, which is two up from the project
+        if ( owner != null ) {
+            EmsScriptNode modelNode = owner.getParent();
+            EmsScriptNode siteNode = modelNode.getParent();
+//            EmsScriptNode siteNode = owner.getSiteNode();
+            if (siteNode != null) {
+                qualifiedName = "/" + siteNode.getName() + qualifiedName;
+                qualifiedId = "/" + siteNode.getName() + qualifiedId;
+            }
+        }
 
-        return qname;
+        if (isName) {
+            return qualifiedName;
+        } else {
+            return qualifiedId;
+        }
     }
 
     /**
@@ -2069,8 +2073,8 @@ public class EmsScriptNode extends ScriptNode implements
             return;
         }
 
-        if ( filter == null || filter.isEmpty() || filter.contains("type") ) {
-            json.put( "type", typeName );
+        if ( filter == null || filter.isEmpty() || filter.contains(Acm.JSON_TYPE) ) {
+            json.put( Acm.JSON_TYPE, typeName );
         }
 
         if ( justTheType ) return;
@@ -3352,15 +3356,20 @@ public class EmsScriptNode extends ScriptNode implements
      */
     public boolean checkPermissions( String permissions, StringBuffer response,
                                      Status status ) {
-        if ( !hasPermission( permissions ) && response != null ) {
-            Object property = getProperty( Acm.CM_NAME );
-            if ( property != null ) {
-                String msg =
-                        "Warning! No " + permissions + " priveleges to "
-                                + property.toString() + ".\n";
-                response.append( msg );
-                if ( status != null ) {
-                    status.setCode( HttpServletResponse.SC_BAD_REQUEST, msg );
+        if ( !hasPermission( permissions ) ) {
+            if (response != null) {
+                Object property = getProperty( Acm.ACM_NAME );
+                if (property == null) {
+                    property = getProperty( Acm.CM_NAME );
+                }
+                if ( property != null ) {
+                    String msg =
+                            "Warning! No " + permissions.toUpperCase() + " priveleges to "
+                                    + property.toString() + ".  ";
+                    response.append( msg );
+                    if ( status != null ) {
+                        status.setCode( HttpServletResponse.SC_FORBIDDEN, msg );
+                    }
                 }
             }
             return false;

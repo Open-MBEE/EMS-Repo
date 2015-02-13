@@ -130,8 +130,6 @@ public class CommitUtil {
 	    EmsScriptNode commitPkg = getCommitPkg(workspace, services, response);
 
 	    if (commitPkg != null) {
-	        // TODO FIXME the lucene search from getAllNodesInPath() limits to 1000, but
-	        //            we will have more commits then that!
             commits.addAll(WebScriptUtil.getAllNodesInPath(commitPkg.getQnamePath(),
                                                            "ASPECT",
                                                            "ems:Committable",

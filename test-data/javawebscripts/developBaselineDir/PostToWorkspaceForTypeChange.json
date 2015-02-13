@@ -1,0 +1,15 @@
+{
+    "elements": [{
+        "creator": "admin",
+        "documentation": "4about",
+        "editable": true,
+        "name": "404",
+        "owner": "403",
+        "qualifiedId": "/europa/123456/4000/401/402/403/404",
+        "qualifiedName": "/europa/JW_TEST/400/401/402/403/404",
+        "specialization": {"type": "Package"},
+        "sysmlid": "404"
+    }],
+    "message": "[WARNING]: The type supplied Package is different than the stored type Property\n"
+}
+200

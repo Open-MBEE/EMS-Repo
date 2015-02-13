@@ -1,59 +1,16 @@
 {
+    "message": "[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting MMS_1423693128498_52f2c7f8-e4fa-4a08-80ce-7b737ecbc153 into: {type=null, id=123456_pkg, cm_name=123456_pkg, sysml_name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394140430311_23731_27741 putting _17_0_2_4_f3a0363_1394142290412_487571_28478 into: {type=null, id=123456_pkg, cm_name=123456_pkg, sysml_name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n",
     "elements": [
         {
-            "creator": "admin",
-            "documentation": "",
-            "editable": true,
-            "modified": "2014-12-18T09:16:25.420-0800",
+            "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_map_arg",
             "name": "",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+            "sysmlid": "op_map_arg",
+            "documentation": "",
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/MMS_1418922981127_106f4c1f-02cd-4029-8e6e-a497fc1319e0",
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
-            "read": "2014-12-18T09:16:26.062-0800",
+            "read": "2015-02-11T14:18:53.781-0800",
             "specialization": {
-                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-                "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
-                "type": "Expose"
-            },
-            "sysmlid": "MMS_1418922981127_106f4c1f-02cd-4029-8e6e-a497fc1319e0"
-        },
-        {
-            "creator": "admin",
-            "documentation": "",
-            "editable": true,
-            "modified": "2014-12-18T09:16:23.483-0800",
-            "name": "List",
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_list",
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/List",
-            "read": "2014-12-18T09:16:26.145-0800",
-            "specialization": {"type": "Operation"},
-            "sysmlid": "op_list"
-        },
-        {
-            "creator": "admin",
-            "documentation": "",
-            "editable": true,
-            "modified": "2014-12-18T09:16:23.677-0800",
-            "name": "Name",
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_name_arg",
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Name",
-            "read": "2014-12-18T09:16:26.211-0800",
-            "specialization": {"type": "Operation"},
-            "sysmlid": "op_name_arg"
-        },
-        {
-            "creator": "admin",
-            "documentation": "",
-            "editable": true,
-            "modified": "2014-12-18T09:16:25.111-0800",
-            "name": "",
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_map_arg",
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
-            "read": "2014-12-18T09:16:26.275-0800",
-            "specialization": {
+                "type": "Expression",
                 "operand": [
                     {
                         "element": "op_map",
@@ -67,73 +24,145 @@
                         "element": "op_name_arg",
                         "type": "ElementValue"
                     }
-                ],
-                "type": "Expression"
+                ]
             },
-            "sysmlid": "op_map_arg"
+            "editable": true,
+            "creator": "admin",
+            "modified": "2015-02-11T14:18:50.726-0800"
         },
         {
-            "creator": "admin",
+            "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_list",
+            "name": "List",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/List",
+            "sysmlid": "op_list",
             "documentation": "",
-            "editable": true,
-            "modified": "2014-12-18T09:16:25.038-0800",
-            "name": "map",
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_map",
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/map",
-            "read": "2014-12-18T09:16:26.439-0800",
+            "read": "2015-02-11T14:18:53.807-0800",
             "specialization": {"type": "Operation"},
-            "sysmlid": "op_map"
+            "editable": true,
+            "creator": "admin",
+            "modified": "2015-02-11T14:18:49.975-0800"
         },
         {
-            "creator": "admin",
+            "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/MMS_1423693128498_52f2c7f8-e4fa-4a08-80ce-7b737ecbc153",
+            "name": "",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/",
+            "sysmlid": "MMS_1423693128498_52f2c7f8-e4fa-4a08-80ce-7b737ecbc153",
             "documentation": "",
-            "editable": true,
-            "modified": "2014-12-18T09:16:23.580-0800",
-            "name": "exposed",
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/exposed_id",
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/exposed",
-            "read": "2014-12-18T09:16:26.500-0800",
-            "specialization": {"type": "Parameter"},
-            "sysmlid": "exposed_id"
+            "read": "2015-02-11T14:18:53.818-0800",
+            "specialization": {
+                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+                "target": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+                "type": "Expose"
+            },
+            "editable": true,
+            "creator": "admin",
+            "modified": "2015-02-11T14:18:50.930-0800"
         },
         {
-            "creator": "admin",
-            "documentation": "",
-            "editable": true,
-            "modified": "2014-12-18T09:16:25.924-0800",
-            "name": "Components",
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148311476_17302_29388",
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components",
-            "read": "2014-12-18T09:16:26.564-0800",
-            "specialization": {"type": "View"},
-            "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388"
-        },
-        {
-            "creator": "admin",
-            "documentation": "",
-            "editable": true,
-            "modified": "2014-12-18T09:16:25.836-0800",
+            "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394140430311_23731_27741/_17_0_2_4_f3a0363_1394142290412_487571_28478",
             "name": "BLUCam CubeSat A",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394140430311_23731_27741/BLUCam CubeSat A",
+            "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478",
+            "documentation": "",
             "owner": "_17_0_2_4_f3a0363_1394140430311_23731_27741",
-            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394140430311_23731_27741/_17_0_2_4_f3a0363_1394142290412_487571_28478",
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394140430311_23731_27741/BLUCam CubeSat A",
-            "read": "2014-12-18T09:16:26.631-0800",
+            "read": "2015-02-11T14:18:53.840-0800",
             "specialization": {"type": "Package"},
-            "sysmlid": "_17_0_2_4_f3a0363_1394142290412_487571_28478"
+            "editable": true,
+            "creator": "admin",
+            "modified": "2015-02-11T14:18:53.643-0800"
         },
         {
-            "creator": "admin",
+            "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_map",
+            "name": "map",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/map",
+            "sysmlid": "op_map",
             "documentation": "",
-            "editable": true,
-            "modified": "2014-12-18T09:16:23.798-0800",
-            "name": "viewpoint_op",
             "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/name_list",
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/viewpoint_op",
-            "read": "2014-12-18T09:16:26.695-0800",
+            "read": "2015-02-11T14:18:53.850-0800",
+            "specialization": {"type": "Operation"},
+            "editable": true,
+            "creator": "admin",
+            "modified": "2015-02-11T14:18:50.682-0800"
+        },
+        {
+            "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/exposed_id",
+            "name": "exposed",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/exposed",
+            "sysmlid": "exposed_id",
+            "documentation": "",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "read": "2015-02-11T14:18:53.859-0800",
+            "specialization": {"type": "Parameter"},
+            "editable": true,
+            "creator": "admin",
+            "modified": "2015-02-11T14:18:49.999-0800"
+        },
+        {
+            "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/op_name_arg",
+            "name": "Name",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Name",
+            "sysmlid": "op_name_arg",
+            "documentation": "",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "read": "2015-02-11T14:18:53.868-0800",
+            "specialization": {"type": "Operation"},
+            "editable": true,
+            "creator": "admin",
+            "modified": "2015-02-11T14:18:50.023-0800"
+        },
+        {
+            "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148311476_17302_29388",
+            "name": "Components",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components",
+            "sysmlid": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "documentation": "",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "read": "2015-02-11T14:18:53.877-0800",
+            "specialization": {"type": "View"},
+            "editable": true,
+            "creator": "admin",
+            "modified": "2015-02-11T14:18:53.716-0800"
+        },
+        {
+            "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148311476_17302_29388/_17_0_2_3_e610336_1394148464681_90735_29608",
+            "name": "",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components/",
+            "sysmlid": "_17_0_2_3_e610336_1394148464681_90735_29608",
+            "documentation": "",
+            "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
+            "read": "2015-02-11T14:18:53.886-0800",
+            "specialization": {
+                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
+                "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
+                "type": "Conform"
+            },
+            "editable": true,
+            "creator": "admin",
+            "modified": "2015-02-11T14:18:50.566-0800"
+        },
+        {
+            "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148449252_91190_29556",
+            "name": "ComponentViewPoint",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/ComponentViewPoint",
+            "sysmlid": "_17_0_2_3_e610336_1394148449252_91190_29556",
+            "documentation": "",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "read": "2015-02-11T14:18:53.907-0800",
+            "specialization": {"type": "Viewpoint"},
+            "editable": true,
+            "creator": "admin",
+            "modified": "2015-02-11T14:18:53.718-0800"
+        },
+        {
+            "qualifiedId": "/europa/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/name_list",
+            "name": "viewpoint_op",
+            "qualifiedName": "/europa/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/viewpoint_op",
+            "sysmlid": "name_list",
+            "documentation": "",
+            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
+            "read": "2015-02-11T14:18:53.916-0800",
             "specialization": {
                 "expression": {
                     "operand": [
@@ -142,6 +171,7 @@
                             "type": "ElementValue"
                         },
                         {
+                            "type": "Expression",
                             "operand": [
                                 {
                                     "element": "op_map",
@@ -155,8 +185,7 @@
                                     "element": "op_name_arg",
                                     "type": "ElementValue"
                                 }
-                            ],
-                            "type": "Expression"
+                            ]
                         }
                     ],
                     "type": "Expression"
@@ -164,39 +193,10 @@
                 "parameters": ["exposed_id"],
                 "type": "Operation"
             },
-            "sysmlid": "name_list"
-        },
-        {
-            "creator": "admin",
-            "documentation": "",
             "editable": true,
-            "modified": "2014-12-18T09:16:24.824-0800",
-            "name": "",
-            "owner": "_17_0_2_3_e610336_1394148311476_17302_29388",
-            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148311476_17302_29388/_17_0_2_3_e610336_1394148464681_90735_29608",
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/Components/",
-            "read": "2014-12-18T09:16:26.900-0800",
-            "specialization": {
-                "source": "_17_0_2_3_e610336_1394148311476_17302_29388",
-                "target": "_17_0_2_3_e610336_1394148449252_91190_29556",
-                "type": "Conform"
-            },
-            "sysmlid": "_17_0_2_3_e610336_1394148464681_90735_29608"
-        },
-        {
             "creator": "admin",
-            "documentation": "",
-            "editable": true,
-            "modified": "2014-12-18T09:16:26.005-0800",
-            "name": "ComponentViewPoint",
-            "owner": "_17_0_2_4_f3a0363_1394146455624_407543_30441",
-            "qualifiedId": "/123456/_17_0_2_4_f3a0363_1394146455624_407543_30441/_17_0_2_3_e610336_1394148449252_91190_29556",
-            "qualifiedName": "/JW_TEST/_17_0_2_4_f3a0363_1394146455624_407543_30441/ComponentViewPoint",
-            "read": "2014-12-18T09:16:27.096-0800",
-            "specialization": {"type": "Viewpoint"},
-            "sysmlid": "_17_0_2_3_e610336_1394148449252_91190_29556"
+            "modified": "2015-02-11T14:18:50.064-0800"
         }
-    ],
-    "message": "[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394146455624_407543_30441 putting op_list into: {type=null, id=123456_pkg, cm_name=123456_pkg, sysml_name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n[WARNING]: Could not find owner with name: _17_0_2_4_f3a0363_1394140430311_23731_27741 putting _17_0_2_4_f3a0363_1394142290412_487571_28478 into: {type=null, id=123456_pkg, cm_name=123456_pkg, sysml_name=JW_TEST, qualified name=/JW_TEST, workspace=null}\n"
+    ]
 }
 200
