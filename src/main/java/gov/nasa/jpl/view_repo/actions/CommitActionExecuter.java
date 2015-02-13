@@ -8,8 +8,6 @@ import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import java.util.Date;
 import java.util.List;
 
-import javax.transaction.UserTransaction;
-
 import org.alfresco.repo.action.executer.ActionExecuterAbstractBase;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
