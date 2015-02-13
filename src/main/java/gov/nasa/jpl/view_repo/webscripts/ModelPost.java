@@ -61,7 +61,6 @@ import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -325,7 +324,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // FIXME: Need to split by projectId
         if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId, source) ) {
-            if (logger.isInfoEnabled()) logger.info("send deltas not posted properly");
+            logger.warn("send deltas not posted properly");
         }
 
         CommitUtil.updateCommitNodeRef( commitRef, deltaJson.toString(), "", services, response );

@@ -288,7 +288,7 @@ public class MmsWorkspaceDiffPost extends ModelPost {
 
 	            if (modelDeleteDiff || modelPostDiff) {
 	                if ( !CommitUtil.sendDeltas(jsonDiff, targetWsId, projectId, source) ) {
-                        log(LogLevel.WARNING, "MmsWorkspaceDiffPost deltas not posted properly");
+                        logger.warn( "MmmsWorkspaceDiffPost deltas not posted properly" );
                     }
 
 	                CommitUtil.merge( jsonDiff, srcWs, targetWs, dateTimeSrc, dateTimeTarget,
