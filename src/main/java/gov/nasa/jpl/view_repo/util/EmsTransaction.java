@@ -22,10 +22,21 @@ public abstract class EmsTransaction {
     protected Status responseStatus = new Status();
 
     public EmsTransaction(ServiceRegistry services, StringBuffer response, Status responseStatus) {
+        this( services, response, responseStatus, false );
+    }
+    public EmsTransaction(ServiceRegistry services, StringBuffer response, Status responseStatus, boolean noTransaction ) {
         this.response = response;
         this.responseStatus = responseStatus;
         this.services = services;
         Timer timerCommit = null;
+        if ( noTransaction ) {
+            try {
+                run();
+            } catch ( Throwable e ) {
+                e.printStackTrace();
+            }
+            return;
+        }
         UserTransaction trx;
         trx = services.getTransactionService().getNonPropagatingUserTransaction();
         try {

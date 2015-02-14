@@ -132,7 +132,7 @@ public class ViewGet extends AbstractJavaWebScript {
 
         printHeader( req );
 
-        clearCaches();
+        //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
         // default recurse=false but recurse only applies to displayed elements and contained views

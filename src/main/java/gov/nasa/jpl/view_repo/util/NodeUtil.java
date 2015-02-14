@@ -135,6 +135,24 @@ public class NodeUtil {
         insideTransactionNow = b;
         insideTransactionNowMap.put( "" + Thread.currentThread().getId(), b );
     }
+    protected static Map< String, StackTraceElement[] > insideTransactionStrackTrace =
+            new LinkedHashMap< String, StackTraceElement[] >();
+    protected static Map< String, StackTraceElement[] > outsideTransactionStrackTrace =
+            new LinkedHashMap< String, StackTraceElement[] >();
+    public static void setInsideTransactionStackTrace() {
+        insideTransactionStrackTrace.put( "" + Thread.currentThread().getId(),
+                                          Thread.currentThread().getStackTrace() );
+    }
+    public static void setOutsideTransactionStackTrace() {
+        outsideTransactionStrackTrace.put( "" + Thread.currentThread().getId(),
+                                           Thread.currentThread().getStackTrace() );
+    }
+    public static StackTraceElement[] getInsideTransactionStackTrace() {
+        return insideTransactionStrackTrace.get( "" + Thread.currentThread().getId() );
+    }
+    public static StackTraceElement[] getOutsideTransactionStackTrace() {
+        return outsideTransactionStrackTrace.get( "" + Thread.currentThread().getId() );
+    }
 
     public static boolean doFullCaching = true;
     public static boolean doSimpleCaching = true;
@@ -185,6 +203,8 @@ public class NodeUtil {
     public static long jsonCacheHits = 0;
     public static long jsonCacheMisses = 0;
 
+    // The json string cache maps JSONObjects to an integer (date in millis) to
+    // a string rendering of itself paired with the date.
     public static Map<JSONObject, Map< Integer, Pair< Date, String > > > jsonStringCache =
             Collections.synchronizedMap( new HashMap< JSONObject, Map< Integer, Pair< Date, String > > >() );
     public static long jsonStringCacheHits = 0;
@@ -2533,18 +2553,25 @@ public class NodeUtil {
                 Exception e = new Exception();
                 logger.error( "In transaction when have been outside! " + node,
                               e );
+                logger.error( "Stack trace when last outside transaction:\n"
+                              + Utils.toString( getOutsideTransactionStackTrace() ) );
             }
             NodeUtil.setBeenInsideTransaction( true );
+            setInsideTransactionStackTrace();
         } else {
             if ( NodeUtil.hasBeenInsideTransaction() ) {
                 Exception e = new Exception();
                 logger.error( "Outside transaction when have been inside! "
                               + node, e );
+                logger.error( "Stack trace when last inside transaction:\n"
+                        + Utils.toString( getInsideTransactionStackTrace() ) );
             }
             NodeUtil.setBeenOutsideTransaction( true );
+            setOutsideTransactionStackTrace();
         }
     }
 
+    
     public static void transactionCheck( Logger logger, EmsScriptNode node ) {
         //logger.error( "inTransaction = " + NodeUtil.isInsideTransactionNow() );
         if ( NodeUtil.isInsideTransactionNow() ) {
@@ -2552,17 +2579,23 @@ public class NodeUtil {
                 Exception e = new Exception();
                 logger.error( "In transaction when have been outside! " + node,
                               e );
+                logger.error( "Stack trace when last outside transaction:\n"
+                              + Utils.toString( getOutsideTransactionStackTrace() ) );
             }
             NodeUtil.setBeenInsideTransaction( true );
+            setInsideTransactionStackTrace();
         } else {
             if ( NodeUtil.hasBeenInsideTransaction() ) {
                 Exception e = new Exception();
                 logger.error( "Outside transaction when have been inside! "
                               + node, e );
+                logger.error( "Stack trace when last inside transaction:\n"
+                        + Utils.toString( getInsideTransactionStackTrace() ) );
             }
             NodeUtil.setBeenOutsideTransaction( true );
+            setOutsideTransactionStackTrace();
         }
-    }
+      }
     /**
      * FIXME Recipients and senders shouldn't be hardcoded - need to have these spring injected
      * @param subject

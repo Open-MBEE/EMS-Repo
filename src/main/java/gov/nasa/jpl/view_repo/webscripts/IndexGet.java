@@ -85,7 +85,7 @@ public class IndexGet extends AbstractJavaWebScript {
 
     @Override
     protected Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
-        clearCaches();
+        //clearCaches();
 
         IndexGet instance = new IndexGet(repository, services);
         return instance.executeImplImpl(req,  status, cache, runWithoutTransactions );

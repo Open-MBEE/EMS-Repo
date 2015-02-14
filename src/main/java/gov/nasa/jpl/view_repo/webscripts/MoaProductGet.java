@@ -101,7 +101,7 @@ public class MoaProductGet extends AbstractJavaWebScript {
 
 	@Override
 	protected void clearCaches() {
-		super.clearCaches();
+		super.clearCaches( false );
 	}
 
 	@Override
