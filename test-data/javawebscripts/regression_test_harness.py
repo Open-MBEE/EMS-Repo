@@ -1814,6 +1814,19 @@ common_filters+['MMS_'],
 # ["develop"]
 # ],
 
+# NULL PROPERTIES =====================================================
+
+[
+640,
+"PostNullElements",
+"Post elements to the master branch with null properties",
+create_curl_cmd(type="POST",data="nullElements.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+
 ]
 
 ##########################################################################################    

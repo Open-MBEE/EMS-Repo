@@ -2,38 +2,40 @@
   "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n",
   "sequence": 21,
   "workspace1": {
-    "qualifiedName": "master/ws1",
-    "name": "ws1",
     "elements": [{
-      "name": "duration",
-      "qualifiedName": "/europa/JW_TEST2/e_38304/duration",
-      "sysmlid": "arg_ev_38307",
+      "creator": "admin",
       "documentation": "",
+      "editable": true,
+      "name": "duration",
       "owner": "e_38304",
+      "qualifiedName": "/europa/JW_TEST2/e_38304/duration",
       "specialization": {
         "isDerived": false,
         "isSlot": false,
+        "propertyType": null,
+        "type": "Property",
         "value": [{
           "integer": 22,
-          "type": "LiteralInteger"
-        }],
-        "type": "Property"
+          "type": "LiteralInteger",
+          "valueExpression": null
+        }]
       },
-      "editable": true,
-      "creator": "admin",
-    }]
+      "sysmlid": "arg_ev_38307"
+    }],
+    "name": "ws1",
+    "qualifiedName": "master/ws1",
   },
   "workspace2": {
-    "deletedElements": [{
-      "sysmlid": "arg_ev_38307",
-      "creator": "admin"
-    }],
     "addedElements": [],
     "conflictedElements": [],
-    "updatedElements": [],
-    "qualifiedName": "master/ws1",
+    "deletedElements": [{
+      "creator": "admin",
+      "sysmlid": "arg_ev_38307"
+    }],
+    "movedElements": [],
     "name": "ws1",
-    "movedElements": []
+    "qualifiedName": "master/ws1",
+    "updatedElements": []
   }
 }
 200

@@ -1,19 +1,21 @@
 {"elements": [{
+    "creator": "admin",
+    "documentation": "z is z",
+    "editable": true,
+    "owner": "302",
     "qualifiedId": "/europa/123456/300/301/302/z",
     "qualifiedName": "/europa/JW_TEST/300/301/302/null",
-    "sysmlid": "z",
-    "documentation": "z is z",
-    "owner": "302",
     "specialization": {
         "isDerived": false,
         "isSlot": false,
+        "propertyType": null,
+        "type": "Property",
         "value": [{
             "string": "the z value",
-            "type": "LiteralString"
-        }],
-        "type": "Property"
+            "type": "LiteralString",
+            "valueExpression": null
+        }]
     },
-    "editable": true,
-    "creator": "admin",
+    "sysmlid": "z"
 }]}
 200

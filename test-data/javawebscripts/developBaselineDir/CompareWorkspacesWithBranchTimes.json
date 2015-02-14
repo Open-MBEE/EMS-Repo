@@ -11,10 +11,12 @@
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
+                    "propertyType": null,
                     "type": "Property",
                     "value": [{
                         "string": "dlam_string",
-                        "type": "LiteralString"
+                        "type": "LiteralString",
+                        "valueExpression": null
                     }]
                 },
                 "sysmlid": "300"
@@ -39,6 +41,7 @@
                         "sourceType": "reference",
                         "type": "Paragraph"
                     }],
+                    "contents": null,
                     "displayedElements": [
                         "301",
                         "302",
@@ -66,10 +69,12 @@
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
+                    "propertyType": null,
                     "type": "Property",
                     "value": [{
                         "string": "dlam_string",
-                        "type": "LiteralString"
+                        "type": "LiteralString",
+                        "valueExpression": null
                     }]
                 },
                 "sysmlid": "302"
@@ -84,10 +89,12 @@
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
+                    "propertyType": null,
                     "type": "Property",
                     "value": [{
                         "string": "dlam_string",
-                        "type": "LiteralString"
+                        "type": "LiteralString",
+                        "valueExpression": null
                     }]
                 },
                 "sysmlid": "303"
@@ -102,10 +109,12 @@
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
+                    "propertyType": null,
                     "type": "Property",
                     "value": [{
                         "string": "dlam_string",
-                        "type": "LiteralString"
+                        "type": "LiteralString",
+                        "valueExpression": null
                     }]
                 },
                 "sysmlid": "304"
@@ -120,10 +129,12 @@
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
+                    "propertyType": null,
                     "type": "Property",
                     "value": [{
                         "string": "dlam_string",
-                        "type": "LiteralString"
+                        "type": "LiteralString",
+                        "valueExpression": null
                     }]
                 },
                 "sysmlid": "4000"
@@ -148,6 +159,7 @@
                         "sourceType": "reference",
                         "type": "Paragraph"
                     }],
+                    "contents": null,
                     "displayedElements": [
                         "401",
                         "402",
@@ -175,10 +187,12 @@
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
+                    "propertyType": null,
                     "type": "Property",
                     "value": [{
                         "string": "dlam_string",
-                        "type": "LiteralString"
+                        "type": "LiteralString",
+                        "valueExpression": null
                     }]
                 },
                 "sysmlid": "402"
@@ -193,10 +207,12 @@
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
+                    "propertyType": null,
                     "type": "Property",
                     "value": [{
                         "string": "dlam_string",
-                        "type": "LiteralString"
+                        "type": "LiteralString",
+                        "valueExpression": null
                     }]
                 },
                 "sysmlid": "403"
@@ -230,10 +246,12 @@
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
+                    "propertyType": null,
                     "type": "Property",
                     "value": [{
                         "string": "the y value",
-                        "type": "LiteralString"
+                        "type": "LiteralString",
+                        "valueExpression": null
                     }]
                 },
                 "sysmlid": "y"
@@ -252,10 +270,12 @@
             "specialization": {
                 "isDerived": false,
                 "isSlot": false,
+                "propertyType": null,
                 "type": "Property",
                 "value": [{
                     "string": "the z value",
-                    "type": "LiteralString"
+                    "type": "LiteralString",
+                    "valueExpression": null
                 }]
             },
             "sysmlid": "z"
@@ -269,7 +289,8 @@
             "creator": "admin",
             "specialization": {"value": [{
                 "string": "the y value",
-                "type": "LiteralString"
+                "type": "LiteralString",
+                "valueExpression": null
             }]},
             "sysmlid": "y"
         }],
@@ -298,7 +319,8 @@
                     "type": "Property",
                     "value": [{
                         "string": "dlam_string",
-                        "type": "LiteralString"
+                        "type": "LiteralString",
+                        "valueExpression": null
                     }]
                 },
                 "sysmlid": "404"
