@@ -280,6 +280,30 @@ public class NodeUtil {
     }
 
     public static String jsonToString( JSONObject json, int numSpacesToIndent ) throws JSONException {
+        if ( json == null ) return null;
+        if ( !doJsonStringCaching || !json.has( "cacheKey" ) ) {
+            if ( numSpacesToIndent < 0 ) return json.toString();
+            return json.toString( numSpacesToIndent );
+        }
+        if ( numSpacesToIndent < 0 ) {
+            if ( json.has( "jsonString" ) ) {
+                return json.getString( "jsonString" );
+            }
+            // TODO -- Warning! shouldn't get here!
+            return json.toString();
+        }
+        if ( json.has( "jsonString4" ) ) {
+            String jsonString4 = json.getString( "jsonString4" );
+            if ( numSpacesToIndent == 4 ) {
+                return jsonString4;
+            }
+            return jsonString4.replaceAll("    ", Utils.repeat( " ", numSpacesToIndent ) );
+        }
+        // TODO -- Warning! shouldn't get here!
+        return json.toString( numSpacesToIndent );
+    }
+
+    public static String oldJsonToString( JSONObject json, int numSpacesToIndent ) throws JSONException {
         if ( !doJsonStringCaching ) return json.toString( numSpacesToIndent );
         String result = null;
         String modString = json.optString("modified");

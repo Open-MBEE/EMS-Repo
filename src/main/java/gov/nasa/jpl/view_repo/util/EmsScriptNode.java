@@ -2273,7 +2273,7 @@ public class EmsScriptNode extends ScriptNode implements
         // If not caching, generate and return the json for this element.
         JSONObject cachedJson = null;
         JSONObject json = null;
-        Long millis = 0L;
+        long millis = 0L;
         boolean tryCache = NodeUtil.doJsonCaching && !isExprOrProp;
         if ( !tryCache ) {
             json = toJSONObject2( jsonFilter, isExprOrProp, dateTime,
@@ -2284,7 +2284,7 @@ public class EmsScriptNode extends ScriptNode implements
             return json;
         }
         
-        Long readTime = System.currentTimeMillis();
+        long readTime = System.currentTimeMillis();
         
         if ( dateTime != null ) millis = dateTime.getTime();
         
@@ -2292,11 +2292,15 @@ public class EmsScriptNode extends ScriptNode implements
         
         // Check the cache unless forcing an update.
         if ( !forceCacheUpdate ) {
-            cachedJson = !NodeUtil.doJsonDeepCaching ? null : 
-                Utils.get( NodeUtil.jsonDeepCache, getId(), millis,
-                           isIncludeQualified,
-                           jsonFilter == null ? new TreeSet< String >()
-                                             : jsonFilter );
+            cachedJson = !NodeUtil.doJsonDeepCaching ? null :
+                jsonDeepCacheGet( getId(), millis,
+                                  isIncludeQualified,
+                                  jsonFilter == null ? new TreeSet< String >()
+                                                    : jsonFilter );
+//                Utils.get( NodeUtil.jsonDeepCache, getId(), millis,
+//                           isIncludeQualified,
+//                           jsonFilter == null ? new TreeSet< String >()
+//                                             : jsonFilter );
             if ( cachedJson != null && cachedJson.length() > 0 ) {
                 deepMatch = true;
             } else {
@@ -2313,7 +2317,8 @@ public class EmsScriptNode extends ScriptNode implements
         }
         
         // Look at last modified time in json and compare with actual last modified.
-        // Force an update if the json is old.
+        // Force an update if the json is old.  Otherwise, if a deep match was found,
+        // then the json is already filtered, so go ahead and return.
         if ( cachedJson != null && cachedJson.has( "modified" ) ) {
             String cachedModifiedStr = cachedJson.getString( "modified" );
             Date cachedModified = TimeUtils.dateFromTimestamp( cachedModifiedStr );
@@ -2332,7 +2337,7 @@ public class EmsScriptNode extends ScriptNode implements
         if ( json != null ) {
             ++NodeUtil.jsonCacheHits;
         } else {
-            //json = toJSONObject2( jsonFilter, isExprOrProp, dateTime, isIncludeQualified, forceCacheUpdate );
+            // get full json without filtering
             json = toJSONObject2( null, isExprOrProp, dateTime, true );
             if ( Debug.isOn() )
                 Debug.outln("json = " + (json==null?"null":json.toString( 4 )));
@@ -2341,8 +2346,8 @@ public class EmsScriptNode extends ScriptNode implements
                    cachedJson.length() == 0 ) &&
                  json != null && json.length() > 0 ) {
                 ++NodeUtil.jsonCacheMisses;
-                Utils.put( NodeUtil.jsonCache, getId(), millis, json );
-                NodeUtil.jsonStringCache.remove( json );
+                jsonCachePut( json, getId(), millis );
+//                NodeUtil.jsonStringCache.remove( json );
                 if ( Debug.isOn() )
                     Debug.outln("put json = " + (json==null?"null":json.toString( 4 )));
             }
@@ -2352,6 +2357,7 @@ public class EmsScriptNode extends ScriptNode implements
             return element;
         }
 
+        // Filter full json
         if ( jsonFilter != null && !jsonFilter.isEmpty() ) {
             // If using a filter, only include json with keys in the filter.
             JSONObject newJson = filterJson( json, jsonFilter, isIncludeQualified );
@@ -2379,10 +2385,11 @@ public class EmsScriptNode extends ScriptNode implements
 //        }
 
         if ( NodeUtil.doJsonDeepCaching ) {
-            Utils.put( NodeUtil.jsonDeepCache, getId(), millis, isIncludeQualified,
-                       jsonFilter == null ? new TreeSet< String >() : jsonFilter,
-                       clone(json) );
-            NodeUtil.jsonStringCache.remove( json );
+            json = jsonDeepCachePut( json, getId(), millis, isIncludeQualified, jsonFilter );
+//            Utils.put( NodeUtil.jsonDeepCache, getId(), millis, isIncludeQualified,
+//                       jsonFilter == null ? new TreeSet< String >() : jsonFilter,
+//                       clone(json) );
+//            NodeUtil.jsonStringCache.remove( json );
         }
         
         if ( Debug.isOn() )
@@ -2390,8 +2397,76 @@ public class EmsScriptNode extends ScriptNode implements
         return json;
     }
 
-   protected JSONObject filterJson( JSONObject json, Set< String > jsonFilter,
-                                    boolean isIncludeQualified) throws JSONException {
+   protected static JSONObject jsonCacheGet( String id,
+                                                 long millis ) {
+       JSONObject json = Utils.get( NodeUtil.jsonCache, id, millis );
+       return json;
+   }
+   protected static JSONObject jsonCachePut( JSONObject json, String id,
+                                             long millis ) {
+       json = clone(json);
+       json = addJsonMetadata( json, id, millis, true, null );
+       Utils.put( NodeUtil.jsonCache, id, millis, json );
+       return json;
+   }
+
+   protected static JSONObject jsonDeepCacheGet( String id,
+                                                 long millis,
+                                                 boolean isIncludeQualified,
+                                                 Set< String > jsonFilter ) {
+       jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
+       JSONObject json = Utils.get( NodeUtil.jsonDeepCache, id, millis,
+                                    isIncludeQualified, jsonFilter );
+       return json;
+   }
+
+    protected static JSONObject jsonDeepCachePut( JSONObject json, String id,
+                                                  long millis,
+                                                  boolean isIncludeQualified,
+                                                  Set< String > jsonFilter ) {
+        json = clone(json);
+        jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
+        json = addJsonMetadata( json, id, millis, isIncludeQualified, jsonFilter );
+        Utils.put( NodeUtil.jsonDeepCache, id, millis, isIncludeQualified,
+                   jsonFilter, json );
+        return json;
+    }
+    
+    protected static JSONObject addJsonMetadata( JSONObject json, String id,
+                                                 long millis,
+                                                 boolean isIncludeQualified,
+                                                 Set< String > jsonFilter ) {
+        if ( json == null ) return null;
+        if ( !NodeUtil.doJsonStringCaching ) return json;
+        
+        jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
+        String jsonString4 = null;
+
+        try {
+            jsonString4 = json.toString(4);
+        } catch ( JSONException e1 ) {
+            e1.printStackTrace();
+            return null;
+        }
+        String jsonString = jsonString4.replaceAll( "(    |\n)", " " ); 
+        JSONArray keyJson = new JSONArray();
+        keyJson.put( id );
+        keyJson.put( millis );
+        keyJson.put( isIncludeQualified );
+        keyJson.put( jsonFilter );
+        try {
+            json.put( "cacheKey", keyJson );
+            json.put( "jsonString", jsonString );
+            json.put( "jsonString4", jsonString4 );
+        } catch ( JSONException e ) {
+            e.printStackTrace();
+            return null;
+        }
+        return json;
+    }
+
+   protected static JSONObject filterJson( JSONObject json, Set< String > jsonFilter,
+                                           boolean isIncludeQualified) throws JSONException {
 
        JSONObject newJson = new JSONObject();
        Iterator keys = json.keys();
