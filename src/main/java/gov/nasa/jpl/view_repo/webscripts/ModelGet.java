@@ -49,8 +49,8 @@ import org.alfresco.repo.security.authentication.AuthenticationUtil;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -167,7 +167,7 @@ public class ModelGet extends AbstractJavaWebScript {
 	    Timer timer = new Timer();
 	    printHeader( req );
 
-		clearCaches();
+		//clearCaches();
 
 		Map<String, Object> model = new HashMap<String, Object>();
 		// make sure to pass down view request flag to instance
@@ -187,8 +187,8 @@ public class ModelGet extends AbstractJavaWebScript {
 		            HttpServletResponse.SC_NOT_FOUND);
 		    }
 	        if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-	        if ( prettyPrint ) model.put("res", top.toString(4));
-	        else model.put("res", top.toString());
+	        if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( top, 4 ));
+	        else model.put("res", NodeUtil.jsonToString( top ));
 		} catch (JSONException e) {
             log(LogLevel.ERROR, "Could not create JSONObject", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             model.put( "res", String.format("{'message':'%s'}", response.toString()) );

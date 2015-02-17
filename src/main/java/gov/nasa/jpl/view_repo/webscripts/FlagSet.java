@@ -43,24 +43,35 @@ public abstract class FlagSet extends DeclarativeWebScript {
         String turnOnStr = req.getParameter( "on" );
         String turnOffStr = req.getParameter( "off" );
 
-        boolean turnOn = !( ( turnOnStr != null &&
+        String isOnStr = null;
+        boolean justAsking = false;
+        if ( turnOnStr == null && turnOffStr == null ) {
+            isOnStr = req.getParameter( "ison" );
+            if ( isOnStr == null ) {
+                isOnStr = req.getParameter( "isOn" );
+            }
+            justAsking = isOnStr != null;
+        }
+        
+        boolean turnOn = !justAsking && 
+                         !( ( turnOnStr != null &&
                               turnOnStr.trim().equalsIgnoreCase( "false" ) ) ||
                             ( turnOffStr != null &&
                               !turnOffStr.trim().equalsIgnoreCase( "false" ) ) );
         turnOnStr = turnOn ? "on" : "off";
-        if ( turnOn == get() ) {
-            if (logger.isInfoEnabled()) {
-                logger.info( ( new Date() ) + ": " + flagName()
-                                + " is already " + turnOnStr );
-            }
+        String msg = null;
+        if ( justAsking ) {
+            msg = flagName() + " is " + ( get() ? "on" : "off" );
+        } else if ( turnOn == get() ) {
+            msg = flagName() + " is already " + turnOnStr;
         } else {
             set( turnOn );
-            if (logger.isInfoEnabled()) {
-                logger.info( ( new Date() ) + ": " + flagName() + " turned "
-                                + turnOnStr );
-            }
+            msg = flagName() + " turned " + turnOnStr;
         }
-        model.put( "res", flagName() + " " + turnOnStr );
+        if (logger.isInfoEnabled()) {
+            logger.info( ( new Date() ) + ": " + msg );
+        }
+        model.put( "res", msg );
 
         return model;
     }

@@ -586,7 +586,7 @@ public class NodeDiff extends AbstractDiff<NodeRef, Object, String> {
          * Then for each generated id, check if it maps to the same property and
          * location within the list (if needed), the same owner, and same type.
          * If there is a match then remove the id from addedIds, removedIds, and
-         * add to the updatedIds and the id in map1 to map2.
+         * add to the updatedIds and the id in map1 to map2. 
          */
         for ( String id : removedIds ) {
             filterValuesImpl(id, addedIds, updatedIds, removeFromRemovedIds, generated);           

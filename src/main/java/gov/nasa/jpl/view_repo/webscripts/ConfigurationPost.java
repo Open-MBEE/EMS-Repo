@@ -49,9 +49,14 @@ import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.action.Action;
 import org.alfresco.service.cmr.action.ActionService;
 import org.alfresco.service.cmr.repository.NodeRef;
+
 import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import org.json.JSONObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -91,7 +96,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
         printHeader( req );
 
-        clearCaches();
+        //clearCaches();
 
 		ConfigurationPost instance = new ConfigurationPost(repository, services);
 
@@ -104,7 +109,7 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 		} else {
 		    try {
 		    	if (!Utils.isNullOrEmpty(response.toString())) result.put("message", response.toString());
-                model.put("res", result.toString(2));
+                model.put("res", NodeUtil.jsonToString( result, 2 ));
             } catch ( JSONException e ) {
                 e.printStackTrace();
             }
@@ -129,7 +134,8 @@ public class ConfigurationPost extends AbstractJavaWebScript {
 
         EmsScriptNode siteNode = getSiteNodeFromRequest( req, false );
 
-		JSONObject reqPostJson = (JSONObject) req.parseContent();
+        JSONObject reqPostJson = //JSONObject.make( 
+                (JSONObject)req.parseContent();// );
 		JSONObject postJson;
 		try {
 		    // for backwards compatibility

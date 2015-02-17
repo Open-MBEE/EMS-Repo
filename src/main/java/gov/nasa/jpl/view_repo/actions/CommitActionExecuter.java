@@ -16,6 +16,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Status;
 
 
@@ -71,22 +72,23 @@ public class CommitActionExecuter extends ActionExecuterAbstractBase {
                     logger.warn("send deltas not posted properly");
                 }
 
-                CommitUtil.updateCommitNodeRef( nodeRef, deltaJson.toString(),
+                CommitUtil.updateCommitNodeRef( nodeRef, NodeUtil.jsonToString( deltaJson ),
                                                 "", services, response );
             } else {
+
                 
                 new EmsTransaction(services, response, new Status()) {
                     @Override
                     public void run() throws Exception {
                         JSONObject deltaJson = wsDiff.toJSONObject( new Date(start), new Date(end) );
-
+                
                         // FIXME: Need to split by projectId
                         if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId, source) ) {
                             logger.warn("send deltas not posted properly");
                         }
 
                         CommitUtil.updateCommitNodeRef( nodeRef,
-                                                        deltaJson.toString(), "",
+                                                        NodeUtil.jsonToString( deltaJson ), "",
                                                         services, response );
                     }
                 };

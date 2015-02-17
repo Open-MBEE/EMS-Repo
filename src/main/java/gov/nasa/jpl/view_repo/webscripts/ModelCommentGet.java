@@ -33,6 +33,7 @@ import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.Acm;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
 import java.util.Date;
@@ -104,7 +105,7 @@ public class ModelCommentGet extends ModelGet {
                 try {
                     top.put("elements",  elementsJson);
                     if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-                    model.put("res", top.toString(4));
+                    model.put("res", NodeUtil.jsonToString( top, 4 ));
                 } catch (JSONException e) {
                     log(LogLevel.ERROR, "Could not create the JSON response", HttpServletResponse.SC_BAD_REQUEST);
                     e.printStackTrace();

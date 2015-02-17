@@ -3,6 +3,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.TimeUtils;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript;
 import gov.nasa.jpl.view_repo.webscripts.util.ConfigurationsWebscript.ConfigurationType;
@@ -44,14 +45,14 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
     @Override
     protected  Map<String, Object> executeImpl(WebScriptRequest req, Status status, Cache cache) {
 		MmsSnapshotsGet instance = new MmsSnapshotsGet(repository, getServices());
-    	    return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
+		return instance.executeImplImpl(req, status, cache, runWithoutTransactions);
     }
 
     @Override
     protected  Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
-        clearCaches();
+        //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
 
@@ -62,7 +63,7 @@ public class MmsSnapshotsGet extends AbstractJavaWebScript {
             jsonObject.put("snapshots", instance.handleRequest(req));
             appendResponseStatusInfo( instance );
             if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
-            model.put("res", jsonObject.toString(2));
+            model.put("res", NodeUtil.jsonToString( jsonObject, 2 ));
         } catch (Exception e) {
             model.put("res", response.toString());
             if (e instanceof JSONException) {

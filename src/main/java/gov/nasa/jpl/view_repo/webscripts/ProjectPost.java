@@ -42,9 +42,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
+
 import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import org.json.JSONObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -80,7 +85,7 @@ public class ProjectPost extends AbstractJavaWebScript {
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
-		clearCaches();
+		//clearCaches();
 
 		Map<String, Object> model = new HashMap<String, Object>();
 		int statusCode = HttpServletResponse.SC_OK;
@@ -88,7 +93,8 @@ public class ProjectPost extends AbstractJavaWebScript {
 		try {
 			if (validateRequest(req, status)) {
 
-				JSONObject json = (JSONObject)req.parseContent();
+				JSONObject json = //JSONObject.make( 
+				        (JSONObject)req.parseContent();// );
 				JSONArray elementsArray = json != null ? json.optJSONArray("elements") : null;
 				JSONObject projJson = elementsArray != null && elementsArray.length() > 0 ? elementsArray.getJSONObject(0) : new JSONObject();
 

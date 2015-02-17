@@ -43,9 +43,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
+
 import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import org.json.JSONObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -132,8 +137,8 @@ public class ModelsGet extends AbstractJavaWebScript {
             if (elementsJson.length() > 0) {
                 top.put("elements", elementsJson);
                 if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
-                if ( prettyPrint ) model.put("res", top.toString(4));
-                else model.put("res", top.toString());
+                if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( top, 4 ));
+                else model.put("res", NodeUtil.jsonToString( top ));
             } else {
                 log(LogLevel.WARNING, "No elements found",
                     HttpServletResponse.SC_NOT_FOUND);
@@ -154,7 +159,8 @@ public class ModelsGet extends AbstractJavaWebScript {
      * @return
      */
     private JSONArray handleRequest(WebScriptRequest req) throws JSONException {
-        JSONObject requestJson = (JSONObject)req.parseContent();
+        JSONObject requestJson = //JSONObject.make( 
+                (JSONObject)req.parseContent();// );
         JSONArray elementsFoundJson = new JSONArray();
 
         JSONArray elementsToFindJson;

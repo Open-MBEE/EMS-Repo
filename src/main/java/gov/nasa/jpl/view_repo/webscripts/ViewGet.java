@@ -48,8 +48,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.alfresco.repo.model.Repository;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.security.PermissionService;
-import org.apache.log4j.Logger;
 import org.json.JSONArray;
+import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.extensions.webscripts.Cache;
@@ -132,7 +132,7 @@ public class ViewGet extends AbstractJavaWebScript {
 
         printHeader( req );
 
-        clearCaches();
+        //clearCaches();
 
         Map<String, Object> model = new HashMap<String, Object>();
         // default recurse=false but recurse only applies to displayed elements and contained views
@@ -168,8 +168,8 @@ public class ViewGet extends AbstractJavaWebScript {
                 JSONObject json = new JSONObject();
                 json.put(gettingDisplayedElements ? "elements" : "views", viewsJson);
                 if (!Utils.isNullOrEmpty(response.toString())) json.put("message", response.toString());
-                if ( prettyPrint ) model.put("res", json.toString(4));
-                else model.put("res", json.toString()); 
+                if ( prettyPrint ) model.put("res", NodeUtil.jsonToString( json, 4 ));
+                else model.put("res", NodeUtil.jsonToString( json )); 
             } catch (JSONException e) {
                 e.printStackTrace();
                 log(LogLevel.ERROR, "JSON creation error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

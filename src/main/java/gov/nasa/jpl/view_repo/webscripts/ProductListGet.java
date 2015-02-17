@@ -122,7 +122,7 @@ public class ProductListGet extends AbstractJavaWebScript {
     protected Map<String, Object> executeImplImpl(WebScriptRequest req, Status status, Cache cache) {
         printHeader( req );
 
-		clearCaches();
+		//clearCaches();
 
 		Map<String, Object> model = new HashMap<String, Object>();
 
@@ -136,7 +136,7 @@ public class ProductListGet extends AbstractJavaWebScript {
                 JSONObject jsonObject =
                         handleProductList( siteNode, workspace, dateTime );
                 if (!Utils.isNullOrEmpty(response.toString())) jsonObject.put("message", response.toString());
-                model.put("res", jsonObject.toString(4));
+                model.put("res", NodeUtil.jsonToString( jsonObject, 4 ));
                 model.put("title", siteNode.getProperty(Acm.CM_TITLE));
                 model.put("siteName", siteNode.getProperty(Acm.CM_NAME));
                 model.put("siteTitle", siteNode.getProperty(Acm.CM_TITLE));

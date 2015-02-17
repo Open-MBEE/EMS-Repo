@@ -99,9 +99,14 @@ import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
+
 import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import org.json.JSONObject;
+
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -236,7 +241,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                  boolean createCommit) throws Exception {
         JSONObject postJson = (JSONObject) content;
         populateSourceFromJson( postJson );
-        
+
         JSONArray updatedArray = postJson.optJSONArray("updatedElements");
         JSONArray movedArray = postJson.optJSONArray("movedElements");
         JSONArray addedArray = postJson.optJSONArray("addedElements");
@@ -329,7 +334,7 @@ public class ModelPost extends AbstractJavaWebScript {
             logger.warn("send deltas not posted properly");
         }
 
-        CommitUtil.updateCommitNodeRef( commitRef, deltaJson.toString(), "", services, response );
+        CommitUtil.updateCommitNodeRef( commitRef, NodeUtil.jsonToString( deltaJson ), "", services, response );
 
         timerCommit = Timer.startTimer(timerCommit, timeEvents);
         
@@ -1058,53 +1063,43 @@ public class ModelPost extends AbstractJavaWebScript {
         final ModStatus modStatus = new ModStatus();
         final Pair<Boolean,EmsScriptNode> returnPair = new Pair<Boolean,EmsScriptNode>(false,null);
 
-        if (runWithoutTransactions || internalRunWithoutTransactions) {
-            // Check to see if the element has been updated since last read/modified by the
-            // posting application.
-            if (inConflict(element, elementJson)) {
-                return elements;
-            }
-
-            reifiedNode =
-                    updateOrCreateTransactionableElement( elementJson, parent,
-                                                          children, workspace, ingest, false, modStatus,
-                                                          element);
-        }
-        else {
+        if ( !runWithoutTransactions && !internalRunWithoutTransactions ) {
             log(LogLevel.INFO, "updateOrCreateElement begin transaction {");
-            new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
-                @Override
-                public void run() throws Exception {
-                    // Check to see if the element has been updated since last read/modified by the
-                    // posting application.  Want this to be within the transaction
-                    boolean conflict = inConflict(element, elementJson);
-                    returnPair.first = conflict;
-                    
-                    if (!conflict) {
-                        returnPair.second =
-                                updateOrCreateTransactionableElement( elementJson,
-                                                                      parent, children,
-                                                                      workspace,
-                                                                      ingest, false, modStatus, 
-                                                                      element );
-                    }
-                }
-            };
-            log(LogLevel.INFO, "} updateOrCreateElement end transaction");
-            
-            if (returnPair.first) {
-                return elements;
-            }
-            reifiedNode = returnPair.second;
         }
+        new EmsTransaction(getServices(), getResponse(), getResponseStatus(),
+                           runWithoutTransactions || internalRunWithoutTransactions ) {
+            @Override
+            public void run() throws Exception {
+                // Check to see if the element has been updated since last read/modified by the
+                // posting application.  Want this to be within the transaction
+                boolean conflict = inConflict(element, elementJson);
+                returnPair.first = conflict;
+                
+                if (!conflict) {
+                    returnPair.second =
+                            updateOrCreateTransactionableElement( elementJson,
+                                                                  parent, children,
+                                                                  workspace,
+                                                                  ingest, false, modStatus, 
+                                                                  element );
+                }
+            }
+        };
+        if ( !runWithoutTransactions && !internalRunWithoutTransactions ) {
+            log(LogLevel.INFO, "} updateOrCreateElement end transaction");
+        }            
+        if (returnPair.first) {
+            return elements;
+        }
+        reifiedNode = returnPair.second;
         
         // create the children elements
         if (reifiedNode != null && reifiedNode.exists()) {
             //elements.add( reifiedNode );
             for (int ii = 0; ii < children.length(); ii++) {
-                Set< EmsScriptNode > childElements =
-                        updateOrCreateElement(elementMap.get(children.getString(ii)),
-                                                       reifiedNode, workspace, ingest);
+                Set< EmsScriptNode > childElements = null;
+                childElements = updateOrCreateElement(elementMap.get(children.getString(ii)),
+                                                      reifiedNode, workspace, ingest);
                 // Elements in new workspace replace originals.
                 for ( EmsScriptNode node : childElements ) {
                     nodeMap.put( node.getName(), node );
@@ -2634,7 +2629,7 @@ public class ModelPost extends AbstractJavaWebScript {
         printHeader( req );
 
         Map<String, Object> model = new HashMap<String, Object>();
-        clearCaches();
+        //clearCaches();
 
         boolean runInBackground = getBooleanArg(req, "background", false);
         boolean fix = getBooleanArg(req, "fix", false);
@@ -2698,7 +2693,8 @@ public class ModelPost extends AbstractJavaWebScript {
                     response.append("You will be notified via email when the model load has finished.\n"); 
                 }
                 else {
-                    JSONObject postJson = (JSONObject)req.parseContent();
+                    JSONObject postJson = //JSONObject.make( 
+                            (JSONObject)req.parseContent();// );
                     JSONArray jarr = postJson.getJSONArray("elements");
 
                     if ( !Utils.isNullOrEmpty( expressionString ) ) {
@@ -2706,8 +2702,8 @@ public class ModelPost extends AbstractJavaWebScript {
                         JSONObject exprJson = new JSONObject(KExpParser.parseExpression(expressionString));
                         log(LogLevel.DEBUG, "********************************************************************************");
                         log(LogLevel.DEBUG, expressionString);
-                        log(LogLevel.DEBUG, exprJson.toString(4));
-//                        log(LogLevel.DEBUG, exprJson0.toString(4));
+                        log(LogLevel.DEBUG, NodeUtil.jsonToString( exprJson, 4 ));
+//                        log(LogLevel.DEBUG, NodeUtil.jsonToString( exprJson0, 4 ));
                         log(LogLevel.DEBUG, "********************************************************************************");
                         JSONArray expJarr = exprJson.getJSONArray("elements");
                         for (int i=0; i<expJarr.length(); ++i) {
@@ -2807,9 +2803,9 @@ public class ModelPost extends AbstractJavaWebScript {
         }
         if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
         if ( prettyPrint ) {
-            model.put( "res", top.toString( 4 ) );
+            model.put( "res", NodeUtil.jsonToString( top, 4 ) );
         } else {
-            model.put( "res", top.toString() );
+            model.put( "res", NodeUtil.jsonToString( top ) );
         }
 
         return elements;
@@ -2846,7 +2842,10 @@ public class ModelPost extends AbstractJavaWebScript {
             EmsScriptNode jobNode = ActionUtil.getOrCreateJob(siteNode, jobName, "ems:Job", status, response);
 
             // write out the json
-            ActionUtil.saveStringToFile(jobNode, "application/json", services, ((JSONObject)req.parseContent()).toString(4));
+            JSONObject json = //JSONObject.make( 
+                    (JSONObject)req.parseContent();// );
+            ActionUtil.saveStringToFile(jobNode, "application/json", services,
+                                        NodeUtil.jsonToString( json, 4 ));
 
             // kick off the action
             ActionService actionService = services.getActionService();
@@ -2958,7 +2957,8 @@ public class ModelPost extends AbstractJavaWebScript {
                 if ( projectNode == null ) {
                     // projectNode should be the owner..., which should exist
                     try {
-                        JSONObject postJson = (JSONObject)req.parseContent();
+                        JSONObject postJson = //JSONObject.make( 
+                                (JSONObject)req.parseContent();// );
                         JSONObject elementsJson =
                                 postJson.getJSONObject( "elements" );
                         JSONObject elementJson =
@@ -3020,7 +3020,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
     @Override
     protected void clearCaches() {
-        super.clearCaches();
+        super.clearCaches( false );
         elementHierarchyJson = new JSONObject();
         relationshipsJson = new JSONObject();
         rootElements = new HashSet<String>();

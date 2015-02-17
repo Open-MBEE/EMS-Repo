@@ -136,6 +136,8 @@ public class DocBookWrapper {
 		if(this.content == null || this.content.isEmpty()){
 			this.dbSerializeVisitor.visit(dbBook);
 			String rawContent = this.dbSerializeVisitor.getOut();
+			rawContent = rawContent.replaceAll("<ulink", "<link");
+			rawContent = rawContent.replaceAll("</ulink", "</link");
 			//this.content = formatContent(rawContent);
 			this.content = rawContent;
 		}

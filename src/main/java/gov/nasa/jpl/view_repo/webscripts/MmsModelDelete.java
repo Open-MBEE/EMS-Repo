@@ -3,6 +3,7 @@ package gov.nasa.jpl.view_repo.webscripts;
 import gov.nasa.jpl.mbee.util.Utils;
 import gov.nasa.jpl.view_repo.util.CommitUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode;
+import gov.nasa.jpl.view_repo.util.NodeUtil;
 import gov.nasa.jpl.view_repo.util.WorkspaceDiff;
 import gov.nasa.jpl.view_repo.util.WorkspaceNode;
 
@@ -72,7 +73,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
             result = handleRequest( req );
             if (result != null) {
                 if (!Utils.isNullOrEmpty(response.toString())) result.put("message", response.toString());
-                model.put( "res", result.toString(2) );
+                model.put( "res", NodeUtil.jsonToString( result, 2 ) );
             }
         } catch (JSONException e) {
            log(LogLevel.ERROR, "Could not create JSON\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -99,10 +100,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
     protected JSONObject handleRequest(WebScriptRequest req) throws JSONException {
         JSONObject result = null;
 
-        //Long start = System.currentTimeMillis();  // TODO ask CY why implemented this in this way, as it
-                                                    //      introduces a bug when the node is replicated
-                                                    //      below, as the creation time will then be after
-                                                    //      this time
+        Date start = new Date(); 
         String user = AuthenticationUtil.getRunAsUser();
         String wsId = null;
         WorkspaceNode workspace = getWorkspace( req, //true, // not creating ws!
@@ -156,7 +154,7 @@ public class MmsModelDelete extends AbstractJavaWebScript {
                 Date end = new Date();
         
                 boolean showAll = false;
-                result = wsDiff.toJSONObject( end, end, showAll );
+                result = wsDiff.toJSONObject( start, end, showAll );
         
                 if (wsDiff.isDiff()) {
                     // Send deltas to all listeners
@@ -169,24 +167,29 @@ public class MmsModelDelete extends AbstractJavaWebScript {
 
                 // apply aspects after wsDiff JSON has been created since the wsDiff 
                 // toJSONObject skips deleted objects
-                Set<EmsScriptNode> nodesToDelete = new HashSet<EmsScriptNode>();
-                nodesToDelete.addAll( wsDiff.getDeletedElements().values() );
-                nodesToDelete.addAll( valueSpecs );
-                for (EmsScriptNode deletedNode: nodesToDelete) {
-                    if (deletedNode.exists()) {
-                        deletedNode.removeAspect( "ems:Added" );
-                        deletedNode.removeAspect( "ems:Updated" );
-                        deletedNode.removeAspect( "ems:Moved" );
-                        deletedNode.createOrUpdateAspect( "ems:Deleted" );
-                        projectId = deletedNode.getProjectId();
-                    }
-                }
+                applyAspects();
+                
             } catch (Exception e) {
                 // do nothing, just a 404 not found
             }
         }
 
         return result;
+    }
+    
+    protected void applyAspects() {
+        
+        Set<EmsScriptNode> nodesToDelete = new HashSet<EmsScriptNode>();
+        nodesToDelete.addAll( wsDiff.getDeletedElements().values() );
+        nodesToDelete.addAll( valueSpecs );
+        for (EmsScriptNode deletedNode: nodesToDelete) {
+            if (deletedNode.exists()) {
+                deletedNode.removeAspect( "ems:Added" );
+                deletedNode.removeAspect( "ems:Updated" );
+                deletedNode.removeAspect( "ems:Moved" );
+                deletedNode.createOrUpdateAspect( "ems:Deleted" );
+            }
+        }
     }
 
 

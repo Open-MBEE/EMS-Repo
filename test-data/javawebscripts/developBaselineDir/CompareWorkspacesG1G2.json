@@ -1,161 +1,173 @@
 {
     "workspace1": {
-        "qualifiedName": "master/wsG1",
-        "name": "wsG1",
         "elements": [
             {
-                "name": "300",
-                "qualifiedName": "/europa/JW_TEST/300",
-                "sysmlid": "300",
+                "creator": "admin",
                 "documentation": "something",
+                "editable": true,
+                "name": "300",
                 "owner": "123456",
+                "qualifiedName": "/europa/JW_TEST/300",
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
+                    "propertyType": null,
+                    "type": "Property",
                     "value": [{
                         "string": "dlam_string",
-                        "type": "LiteralString"
-                    }],
-                    "type": "Property"
+                        "type": "LiteralString",
+                        "valueExpression": null
+                    }]
                 },
-                "editable": true,
-                "creator": "admin",
+                "sysmlid": "300"
             },
             {
-                "name": "301",
-                "qualifiedName": "/europa/JW_TEST/300/301",
-                "sysmlid": "301",
+                "creator": "admin",
                 "documentation": "else",
+                "editable": true,
+                "name": "301",
                 "owner": "300",
+                "qualifiedName": "/europa/JW_TEST/300/301",
                 "specialization": {
-                    "displayedElements": [
+                    "allowedElements": [
                         "301",
                         "302",
                         "303"
                     ],
                     "childrenViews": ["304"],
+                    "contains": [{
+                        "source": "301",
+                        "sourceProperty": "documentation",
+                        "sourceType": "reference",
+                        "type": "Paragraph"
+                    }],
+                    "contents": null,
+                    "displayedElements": [
+                        "301",
+                        "302",
+                        "303"
+                    ],
+                    "noSections": ["302"],
+                    "type": "Product",
                     "view2view": [{
                         "childrenViews": [
                             "301",
                             "302"
                         ],
                         "sysmlid": "301"
-                    }],
-                    "allowedElements": [
-                        "301",
-                        "302",
-                        "303"
-                    ],
-                    "contains": [{
-                        "sourceType": "reference",
-                        "source": "301",
-                        "sourceProperty": "documentation",
-                        "type": "Paragraph"
-                    }],
-                    "noSections": ["302"],
-                    "type": "Product"
+                    }]
                 },
-                "editable": true,
-                "creator": "admin",
+                "sysmlid": "301"
             },
             {
-                "name": "302",
-                "qualifiedName": "/europa/JW_TEST/300/301/302",
-                "sysmlid": "302",
+                "creator": "admin",
                 "documentation": "to",
+                "editable": true,
+                "name": "302",
                 "owner": "301",
+                "qualifiedName": "/europa/JW_TEST/300/301/302",
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
+                    "propertyType": null,
+                    "type": "Property",
                     "value": [{
                         "string": "dlam_string",
-                        "type": "LiteralString"
-                    }],
-                    "type": "Property"
+                        "type": "LiteralString",
+                        "valueExpression": null
+                    }]
                 },
-                "editable": true,
-                "creator": "admin",
+                "sysmlid": "302"
             },
             {
+                "creator": "admin",
+                "editable": true,
                 "name": "holding_bin",
-                "qualifiedName": "/no_site/no_project/holding_bin",
-                "sysmlid": "holding_bin_no_site_no_project",
                 "owner": "no_project",
+                "qualifiedName": "/no_site/no_project/holding_bin",
                 "specialization": {"type": "Package"},
-                "editable": true,
-                "creator": "admin",
+                "sysmlid": "holding_bin_no_site_no_project"
             },
             {
-                "name": "300",
-                "qualifiedName": "/no_site/no_project/holding_bin/300",
-                "sysmlid": "x",
+                "creator": "admin",
                 "documentation": "x is x",
+                "editable": true,
+                "name": "300",
                 "owner": "holding_bin_no_site_no_project",
+                "qualifiedName": "/no_site/no_project/holding_bin/300",
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
+                    "propertyType": null,
+                    "type": "Property",
                     "value": [{
                         "string": "the x value",
-                        "type": "LiteralString"
-                    }],
-                    "type": "Property"
+                        "type": "LiteralString",
+                        "valueExpression": null
+                    }]
                 },
-                "editable": true,
-                "creator": "admin",
+                "sysmlid": "x"
             }
-        ]
+        ],
+        "name": "wsG1",
+        "qualifiedName": "master/wsG1",
     },
     "workspace2": {
-        "deletedElements": [],
         "addedElements": [
             {
-                "qualifiedName": "/europa/JW_TEST/300/301/302/null",
-                "sysmlid": "y",
+                "creator": "admin",
                 "documentation": "y is y",
+                "editable": true,
                 "owner": "302",
+                "qualifiedName": "/europa/JW_TEST/300/301/302/null",
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
+                    "propertyType": null,
+                    "type": "Property",
                     "value": [{
                         "string": "the y value",
-                        "type": "LiteralString"
-                    }],
-                    "type": "Property"
+                        "type": "LiteralString",
+                        "valueExpression": null
+                    }]
                 },
-                "editable": true,
-                "creator": "admin",
+                "sysmlid": "y"
             },
             {
-                "qualifiedName": "/europa/JW_TEST/300/301/302/null",
-                "sysmlid": "z",
+                "creator": "admin",
                 "documentation": "z is z",
+                "editable": true,
                 "owner": "302",
+                "qualifiedName": "/europa/JW_TEST/300/301/302/null",
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
+                    "propertyType": null,
+                    "type": "Property",
                     "value": [{
                         "string": "the z value",
-                        "type": "LiteralString"
-                    }],
-                    "type": "Property"
+                        "type": "LiteralString",
+                        "valueExpression": null
+                    }]
                 },
-                "editable": true,
-                "creator": "admin",
+                "sysmlid": "z"
             }
         ],
         "conflictedElements": [],
+        "deletedElements": [],
+        "movedElements": [],
+        "name": "wsG2",
+        "qualifiedName": "master/wsG2",
         "updatedElements": [{
+            "creator": "admin",
             "documentation": "something",
-            "sysmlid": "x",
             "specialization": {"value": [{
                 "string": "dlam_string",
-                "type": "LiteralString"
+                "type": "LiteralString",
+                "valueExpression": null
             }]},
-            "creator": "admin"
-        }],
-        "qualifiedName": "master/wsG2",
-        "name": "wsG2",
-        "movedElements": []
+            "sysmlid": "x"
+        }]
     }
 }
 200

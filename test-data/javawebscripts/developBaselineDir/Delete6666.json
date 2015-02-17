@@ -2,42 +2,45 @@
   "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n",
   "sequence": 1,
   "workspace1": {
-    "qualifiedName": "master",
-    "name": "master",
     "elements": [{
-      "qualifiedName": "/no_site/no_project/holding_bin/6666_name",
-      "sysmlid": "6666",
-      "editable": true,
       "creator": "admin",
+      "documentation": "",
+      "editable": true,
       "name": "6666_name",
       "owner": "holding_bin_no_site_no_project",
-      "documentation": "",
+      "qualifiedName": "/no_site/no_project/holding_bin/6666_name",
       "specialization": {
-        "type": "Expression",
         "operand": [
           {
             "element": "300",
-            "type": "ElementValue"
+            "type": "ElementValue",
+            "valueExpression": null
           },
           {
             "element": "302",
-            "type": "ElementValue"
+            "type": "ElementValue",
+            "valueExpression": null
           }
-        ]
-      }
-    }]
+        ],
+        "type": "Expression",
+        "valueExpression": null
+      },
+      "sysmlid": "6666",
+    }],
+    "name": "master",
+    "qualifiedName": "master",
   },
   "workspace2": {
-    "deletedElements": [{
-      "sysmlid": "6666",
-      "creator": "admin",
-    }],
     "addedElements": [],
     "conflictedElements": [],
-    "updatedElements": [],
-    "qualifiedName": "master",
+    "deletedElements": [{
+      "creator": "admin",
+      "sysmlid": "6666"
+    }],
+    "movedElements": [],
     "name": "master",
-    "movedElements": []
+    "qualifiedName": "master",
+    "updatedElements": []
   }
 }
 200

@@ -121,7 +121,7 @@
     
     {"documentation" : "element values", 
      "sysmlid":"600",
-     "owner":"null",
+     "owner":null,
      "name":"600", 
      "specialization": {"type":"Property",
                         "value":[{"type":"ElementValue",
@@ -132,7 +132,7 @@
      
     {"documentation" : "", 
      "sysmlid":"6666",
-     "owner":"null",
+     "owner":null,
      "name":"6666_name", 
      "specialization": {"type":"Expression",
                         "operand":[{"type":"ElementValue",

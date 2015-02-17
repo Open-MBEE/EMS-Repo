@@ -1,15 +1,16 @@
 {"elements": [{
-    "qualifiedId": "/europa/123456/testCmed416",
+    "creator": "admin",
+    "editable": true,
     "name": "testName",
-    "qualifiedName": "/europa/JW_TEST2/testName",
-    "sysmlid": "testCmed416",
     "owner": "123456",
+    "qualifiedId": "/europa/123456/testCmed416",
+    "qualifiedName": "/europa/JW_TEST2/testName",
     "specialization": {
         "isDerived": false,
         "isSlot": false,
+        "propertyType": null,
         "type": "Property"
     },
-    "editable": true,
-    "creator": "admin",
+    "sysmlid": "testCmed416"
 }]}
 200

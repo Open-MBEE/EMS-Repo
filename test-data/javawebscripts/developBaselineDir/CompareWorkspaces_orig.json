@@ -1,65 +1,68 @@
 {
     "workspace1": {
-        "qualifiedId": "master/5610c06d-cfdc-419b-89be-53b4c1b17b29",
-        "id": "5610c06d-cfdc-419b-89be-53b4c1b17b29",
-        "qualifiedName": "master/wsA",
-        "name": "wsA",
         "elements": [
             {
-                "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project",
-                "name": "holding_bin",
-                "qualifiedName": "/no_site/no_project/holding_bin",
-                "sysmlid": "holding_bin_no_site_no_project",
-                "owner": "no_project",
-                "read": "2015-02-11T14:18:10.612-0800",
-                "specialization": {"type": "Package"},
-                "editable": true,
                 "creator": "admin",
-                "modified": "2015-02-11T14:18:00.273-0800"
+                "editable": true,
+                "modified": "2015-02-13T17:18:08.977-0800",
+                "name": "holding_bin",
+                "owner": "no_project",
+                "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project",
+                "qualifiedName": "/no_site/no_project/holding_bin",
+                "read": "2015-02-13T17:18:17.708-0800",
+                "specialization": {"type": "Package"},
+                "sysmlid": "holding_bin_no_site_no_project"
             },
             {
-                "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/x",
-                "name": "300",
-                "qualifiedName": "/no_site/no_project/holding_bin/300",
-                "sysmlid": "x",
+                "creator": "admin",
                 "documentation": "something",
+                "editable": true,
+                "modified": "2015-02-13T17:17:59.721-0800",
+                "name": "300",
                 "owner": "holding_bin_no_site_no_project",
-                "read": "2015-02-11T14:17:57.009-0800",
+                "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/x",
+                "qualifiedName": "/no_site/no_project/holding_bin/300",
+                "read": "2015-02-13T17:18:04.719-0800",
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
+                    "propertyType": null,
+                    "type": "Property",
                     "value": [{
                         "string": "dlam_string",
-                        "type": "LiteralString"
-                    }],
-                    "type": "Property"
+                        "type": "LiteralString",
+                        "valueExpression": null
+                    }]
                 },
-                "editable": true,
-                "creator": "admin",
-                "modified": "2015-02-11T14:17:52.989-0800"
+                "sysmlid": "x"
             }
-        ]
+        ],
+        "id": "f9209d20-5ace-43fa-8391-ce94667315a1",
+        "name": "wsA",
+        "qualifiedId": "master/f9209d20-5ace-43fa-8391-ce94667315a1",
+        "qualifiedName": "master/wsA"
     },
     "workspace2": {
-        "qualifiedId": "master/5610c06d-cfdc-419b-89be-53b4c1b17b29/2005755d-cecb-462a-bfd5-cc6f3e04eb05",
-        "id": "2005755d-cecb-462a-bfd5-cc6f3e04eb05",
-        "deletedElements": [],
         "addedElements": [],
         "conflictedElements": [],
+        "deletedElements": [],
+        "id": "e8847c77-db56-446f-806e-641fe0440353",
+        "movedElements": [],
+        "name": "wsB",
+        "qualifiedId": "master/f9209d20-5ace-43fa-8391-ce94667315a1/e8847c77-db56-446f-806e-641fe0440353",
+        "qualifiedName": "master/wsA/wsB",
         "updatedElements": [{
+            "creator": "admin",
             "documentation": "x is x",
-            "sysmlid": "x",
-            "read": "2015-02-11T14:18:08.709-0800",
+            "modified": "2015-02-13T17:18:14.858-0800",
+            "read": "2015-02-13T17:18:17.359-0800",
             "specialization": {"value": [{
                 "string": "the x value",
-                "type": "LiteralString"
+                "type": "LiteralString",
+                "valueExpression": null
             }]},
-            "modified": "2015-02-11T14:18:07.159-0800",
-            "creator": "admin"
-        }],
-        "qualifiedName": "master/wsA/wsB",
-        "name": "wsB",
-        "movedElements": []
+            "sysmlid": "x"
+        }]
     }
 }
 200
