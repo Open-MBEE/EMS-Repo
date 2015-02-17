@@ -727,6 +727,17 @@ None,
 ],
         
 [
+51,
+"GetProjects",
+"Get all projects for master",
+create_curl_cmd(type="GET",data="projects",base_url=BASE_URL_WS,
+                branch="master/"),
+False, 
+None,
+["test","workspaces","develop", "develop2"]
+],
+        
+[
 60,
 "GetElementsRecursively",
 "Get all elements recursively",
