@@ -498,50 +498,6 @@ public class WorkspaceDiff implements Serializable {
         if ( ws1 != null && ws2 != null ) diff();
     }
     
-    /**
-     * Adds embedded values specs in node if present to the nodes set.
-     * 
-     * @param node Node to check for embedded value spec
-     * @param nodes Adds found value spec nodes to this set
-     * @param services
-     */
-    private static void addEmbeddedValueSpecs(NodeRef ref,  Set< NodeRef > nodes,
-                                              ServiceRegistry services) {
-        
-        Object propVal;
-        EmsScriptNode node = new EmsScriptNode(ref, services);
-        
-        for ( String acmType : Acm.TYPES_WITH_VALUESPEC.keySet() ) {
-            // It has a apsect that has properties that map to value specs:
-            if ( node.hasOrInheritsAspect( acmType ) ) {
-                
-                for ( String acmProp : Acm.TYPES_WITH_VALUESPEC.get(acmType) ) {
-                    propVal = node.getProperty(acmProp);
-                    
-                    if (propVal != null) {
-                        // Note: We want to include deleted nodes also, so no need to check for that
-                        if (propVal instanceof NodeRef){
-                            NodeRef propValRef = (NodeRef)propVal;
-                            if (NodeUtil.scriptNodeExists( propValRef )) {
-                                nodes.add( propValRef );
-                            }
-                        }
-                        else if (propVal instanceof List){
-                            List<NodeRef> nrList = (ArrayList<NodeRef>) propVal;
-                            for (NodeRef propValRef : nrList) {
-                                if (propValRef != null && NodeUtil.scriptNodeExists( propValRef )) {
-                                    nodes.add( propValRef );
-                                }
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-        
-    }
-
     public static Set< NodeRef > getAllChangedElementsInDiffJson( JSONArray diffJson,
                                                                         WorkspaceNode ws,
                                                                         ServiceRegistry services )
@@ -1015,7 +971,7 @@ public class WorkspaceDiff implements Serializable {
             if ( ref != null ) {                
                 // Add owned value specs if needed, as we need them to be separated out for
                 // the diff to work correctly.  
-                addEmbeddedValueSpecs(ref, s1, getServices());
+                NodeUtil.addEmbeddedValueSpecs(ref, s1, getServices());
             }
         }
         for ( NodeRef n : tempSet2 ) {
@@ -1026,7 +982,7 @@ public class WorkspaceDiff implements Serializable {
             if ( ref != null ) {                
                 // Add owned value specs if needed, as we need them to be separated out for
                 // the diff to work correctly.  
-                addEmbeddedValueSpecs(ref, s2, getServices());
+                NodeUtil.addEmbeddedValueSpecs(ref, s2, getServices());
             }
         }
 

@@ -1544,27 +1544,23 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public Date getLastModified( Date dateTime ) {
+        Set< NodeRef > dependentNodes = new HashSet< NodeRef >();
+
         Date lastModifiedDate = (Date)getProperty( Acm.ACM_LAST_MODIFIED );
 
-        // We no longer need to check this, as values specs are always embedded within
-        // the nodes that use them, ie Property, so the modified time will always be updated
-        // when modifying the value spec
-//        Object value = getProperty( Acm.ACM_VALUE );
-//        ArrayList< NodeRef > dependentNodes = new ArrayList< NodeRef >();
-//        if ( value instanceof Collection ) {
-//            Collection< ? > c = (Collection< ? >)value;
-//            dependentNodes.addAll( Utils.asList( c, NodeRef.class ) );
-//        }
-//        for ( NodeRef nodeRef : dependentNodes ) {
-//            nodeRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
-//            if ( nodeRef == null ) continue;
-//            EmsScriptNode oNode = new EmsScriptNode( nodeRef, services );
-//            if ( !oNode.exists() ) continue;
-//            Date modified = oNode.getLastModified( dateTime );
-//            if ( modified.after( lastModifiedDate ) ) {
-//                lastModifiedDate = modified;
-//            }
-//        }
+        // Check to see if any embedded value specs have been modified after
+        // the modified time of this node:
+        NodeUtil.addEmbeddedValueSpecs( getNodeRef(), dependentNodes, services );
+        for ( NodeRef nodeRef : dependentNodes ) {
+            nodeRef = NodeUtil.getNodeRefAtTime( nodeRef, dateTime );
+            if ( nodeRef == null ) continue;
+            EmsScriptNode oNode = new EmsScriptNode( nodeRef, services );
+            if ( !oNode.exists() ) continue;
+            Date modified = oNode.getLastModified( dateTime );
+            if ( modified.after( lastModifiedDate ) ) {
+                lastModifiedDate = modified;
+            }
+        }
         return lastModifiedDate;
     }
     
