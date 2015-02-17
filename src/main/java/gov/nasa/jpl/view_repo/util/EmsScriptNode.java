@@ -4539,7 +4539,9 @@ public class EmsScriptNode extends ScriptNode implements
         if ( nodeRefs instanceof Collection ) {
             Collection< NodeRef > nodeRefColl = (Collection< NodeRef >)nodeRefs;
             for ( NodeRef nRef : nodeRefColl ) {
-                addVersionToArray( nRef, dateTime, jsonArray );
+                if (nRef != null) {
+                    addVersionToArray( nRef, dateTime, jsonArray );
+                }
             }
         } else if ( nodeRefs instanceof NodeRef ) {
             addVersionToArray( (NodeRef)nodeRefs, dateTime, jsonArray );
