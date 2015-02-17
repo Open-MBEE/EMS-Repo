@@ -105,8 +105,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import org.json.JSONObject;
-
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -554,7 +552,10 @@ public class ModelPost extends AbstractJavaWebScript {
             try{
                 ownerName = element.getString(Acm.JSON_OWNER);
             } catch ( JSONException e ) {
-                e.printStackTrace();
+                // possible that element owner is actually null, so this is expected
+                // leave as null
+                logger.info( "owner was most likely null, but definitely not string" );
+//                e.printStackTrace();
             }
         }
 
