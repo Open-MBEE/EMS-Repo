@@ -1771,7 +1771,7 @@ create_curl_cmd(type="POST",
 False, 
 common_filters+['MMS_'],
 ["test","workspaces","develop", "develop2"]
-]
+],
 
 # lets do the None permissions
 # [

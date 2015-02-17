@@ -91,7 +91,6 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONObject;
 import org.mozilla.javascript.Scriptable;
 import org.springframework.extensions.webscripts.Status;
 
@@ -478,6 +477,9 @@ public class EmsScriptNode extends ScriptNode implements
     }
 
     public EmsScriptNode createFolder( String name, String type, NodeRef sourceFolder ) {
+        if (logger.isInfoEnabled()) {
+            logger.info( "creating " + name + " in " + sourceFolder );
+        }
 
         makeSureNodeRefIsNotFrozen();
         NodeRef folderRef = super.createFolder( name, type ).getNodeRef();
@@ -487,10 +489,6 @@ public class EmsScriptNode extends ScriptNode implements
 
         if ( ws != null && !folder.isWorkspace() ) {
             folder.setWorkspace( ws, sourceFolder );
-        }
-
-        if ( Debug.isOn() ) {
-            Debug.outln( "createFolder(" + name + "): returning " + folder );
         }
 
         return folder;
