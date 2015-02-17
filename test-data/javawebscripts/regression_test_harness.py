@@ -1826,7 +1826,55 @@ True,
 common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
+        
+# JSON CACHE TESTING =====================================================
 
+# These test post the same element with updates to the embedded value spec.
+# This tests that the json cache doesnt return a outdated embedded value spec
+[
+650,
+"TestJsonCache1",
+"Post elements for json cache testing.",
+create_curl_cmd(type="POST",data="jsonCache1.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+ 
+[
+651,
+"TestJsonCache2",
+"Post elements for json cache testing.",
+create_curl_cmd(type="POST",data="jsonCache2.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+         
+[
+652,
+"TestJsonCache3",
+"Post elements for json cache testing.",
+create_curl_cmd(type="POST",data="jsonCache3.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+         
+[
+653,
+"TestJsonCache4",
+"Post elements for json cache testing.",
+create_curl_cmd(type="POST",data="jsonCache4.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
 ]
 
 ##########################################################################################    
