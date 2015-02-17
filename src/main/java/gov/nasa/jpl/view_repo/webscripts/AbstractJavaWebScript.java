@@ -500,6 +500,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             if (workspace == null) { // && !siteNode.getName().equals(NO_SITE_ID)) {
                 // default creation adds GROUP_EVERYONE as SiteConsumer, so remove
                 siteNode.removePermission( "SiteConsumer", "GROUP_EVERYONE" );
+                if ( siteNode.getName().equals(NO_SITE_ID)) {
+                    siteNode.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
+                }
             }
         }
 
