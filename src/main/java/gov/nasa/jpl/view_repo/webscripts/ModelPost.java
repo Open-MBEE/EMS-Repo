@@ -937,7 +937,11 @@ public class ModelPost extends AbstractJavaWebScript {
 
             // create the hierarchy
             if (elementJson.has(Acm.JSON_OWNER)) {
-                String ownerId = elementJson.getString(Acm.JSON_OWNER);
+                Object ownerJson = elementJson.get( Acm.JSON_OWNER );
+                String ownerId = null;
+                if ( !ownerJson.equals(JSONObject.NULL) ) {
+                    ownerId = elementJson.getString(Acm.JSON_OWNER);
+                }
                 // if owner is null, leave at project root level
                 if (ownerId == null || ownerId.equals("null")) {
                     if ( projectNode != null ) {
