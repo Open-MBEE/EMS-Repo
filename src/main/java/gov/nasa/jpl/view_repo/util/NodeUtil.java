@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -67,6 +68,7 @@ import org.alfresco.service.namespace.QName;
 import org.alfresco.util.ApplicationContextHelper;
 import org.apache.commons.logging.Log;
 import org.apache.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
@@ -161,7 +163,7 @@ public class NodeUtil {
     public static boolean activeVersionCaching = true;
     public static boolean doJsonCaching = true;
     public static boolean doJsonDeepCaching = true;
-    public static boolean doJsonStringCaching = false;
+    public static boolean doJsonStringCaching = true;
     
     // global flag that is enabled once heisenbug is seen, so it will email admins the first time heisenbug is seen
     public static boolean heisenbugSeen = false;
@@ -269,6 +271,122 @@ public class NodeUtil {
 //        }
 //    }
 
+    public static JSONObject jsonCacheGet( String id,
+                                              long millis,
+                                              boolean noMetadata ) {
+           JSONObject json = Utils.get( jsonCache, id, millis );
+           return json;
+       }
+    public static JSONObject jsonCachePut( JSONObject json, String id,
+                                                 long millis ) {
+           json = clone(json);
+           if ( doJsonStringCaching ) {
+               json = addJsonMetadata( json, id, millis, true, null );
+           }
+           Utils.put( jsonCache, id, millis, json );
+           return json;
+       }
+    public static JSONObject jsonDeepCacheGet( String id,
+                                                     long millis,
+                                                     boolean isIncludeQualified,
+                                                     Set< String > jsonFilter,
+                                                     boolean noMetadata ) {
+           jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
+           JSONObject json = Utils.get( jsonDeepCache, id, millis,
+                                        isIncludeQualified, jsonFilter );
+           if ( doJsonStringCaching && noMetadata ) {
+               json = clone( json );
+               //stripJsonMetadata( json );
+           }
+           return json;
+       }
+    public static JSONObject jsonDeepCachePut( JSONObject json, String id,
+                                               long millis,
+                                               boolean isIncludeQualified,
+                                               Set< String > jsonFilter ) {
+        json = clone(json);
+        jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
+        json = addJsonMetadata( json, id, millis, isIncludeQualified, jsonFilter );
+        Utils.put( jsonDeepCache, id, millis, isIncludeQualified,
+                   jsonFilter, json );
+        return json;
+    }
+    public static JSONObject stripJsonMetadata( JSONObject json ) {
+        json.remove( "cacheKey" );
+        json.remove( "jsonString" );
+        json.remove( "jsonString4" );
+        return json;
+    }
+    
+    /**
+     * Put json.toString() in the json.
+     * @param json
+     * @param id
+     * @param millis
+     * @param isIncludeQualified
+     * @param jsonFilter
+     * @return
+     */
+    public static JSONObject addJsonMetadata( JSONObject json, String id,
+                                              long millis,
+                                              boolean isIncludeQualified,
+                                              Set< String > jsonFilter ) {
+        if ( json == null ) return null;
+        if ( !doJsonStringCaching ) return json;
+        
+        jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
+        String jsonString4 = null;
+    
+        try {
+            jsonString4 = json.toString(4);
+        } catch ( JSONException e1 ) {
+            e1.printStackTrace();
+            return null;
+        }
+        String jsonString = jsonString4.replaceAll( "(    |\n)", " " ); 
+        JSONArray keyJson = new JSONArray();
+        keyJson.put( id );
+        keyJson.put( millis );
+        keyJson.put( isIncludeQualified );
+        keyJson.put( jsonFilter );
+        try {
+            //json.put( "cacheKey", keyJson );
+            json.put( "jsonString", jsonString );
+            json.put( "jsonString4", jsonString4 );
+        } catch ( JSONException e ) {
+            e.printStackTrace();
+            return null;
+        }
+        return json;
+    }
+    protected static JSONObject filterJson( JSONObject json, Set< String > jsonFilter,
+                                            boolean isIncludeQualified) throws JSONException {
+    
+           JSONObject newJson = new JSONObject();
+           Iterator keys = json.keys();
+           while ( keys.hasNext() ) {
+               String key = (String)keys.next();
+               if ( jsonFilter.contains( key ) || EmsScriptNode.dontFilterOut.contains( key ) ) {
+                   Object value = json.get( key );
+                   if ( key.equals( Acm.JSON_SPECIALIZATION ) && value instanceof JSONObject ) {
+    //                   if ( !( value instanceof JSONObject ) ) {
+    //                       value = JSONObject.make( (JSONObject)value );
+    //                   }
+                       JSONObject newSpec = filterJson( (JSONObject)value, jsonFilter, isIncludeQualified );
+                       if ( newSpec != null && newSpec.length() > 0 ) {
+                           newJson.put( key, newSpec );
+                       }
+                   } else
+                   if ( isIncludeQualified || ( !key.equals( "qualifiedId" ) &&
+                                                !key.equals( "qualifiedName" ) ) ) {
+                       if ( Debug.isOn() )
+                           Debug.outln("add to newJson = " + key + ":" + value);
+                       newJson.put( key, value );
+                   }
+               }
+           }
+           return newJson;
+       }
     public static String jsonToString( JSONObject json ) {
         if ( !doJsonStringCaching ) return json.toString();
         try {
@@ -278,10 +396,11 @@ public class NodeUtil {
         }
         return null;
     }
-
+    
     public static String jsonToString( JSONObject json, int numSpacesToIndent ) throws JSONException {
         if ( json == null ) return null;
-        if ( !doJsonStringCaching || !json.has( "cacheKey" ) ) {
+        if ( !doJsonStringCaching || !json.has( "jsonString4" ) ) {
+            stripJsonMetadata( json );
             if ( numSpacesToIndent < 0 ) return json.toString();
             return json.toString( numSpacesToIndent );
         }
@@ -290,6 +409,7 @@ public class NodeUtil {
                 return json.getString( "jsonString" );
             }
             // TODO -- Warning! shouldn't get here!
+            json = stripJsonMetadata( clone( json ) );
             return json.toString();
         }
         if ( json.has( "jsonString4" ) ) {
@@ -300,6 +420,7 @@ public class NodeUtil {
             return jsonString4.replaceAll("    ", Utils.repeat( " ", numSpacesToIndent ) );
         }
         // TODO -- Warning! shouldn't get here!
+        json = stripJsonMetadata( clone( json ) );
         return json.toString( numSpacesToIndent );
     }
 
@@ -341,6 +462,78 @@ public class NodeUtil {
         return result;
     }
     
+    public static JSONObject newJsonObject(String s) throws JSONException {
+        JSONObject newJson = new JSONObject(s) {
+            @Override
+            public String toString() {
+              try {
+                if ( has( "jsonString" ) ) return getString( "jsonString" );
+                return super.toString();
+              } catch ( JSONException e ) {
+                e.printStackTrace();
+              }
+              return null;
+            }
+            @Override
+            public String toString( int n ) {
+              try {
+                if ( has( "jsonString4" ) ) return jsonToString( this, n );
+                return super.toString( n );
+              } catch ( JSONException e ) {
+                e.printStackTrace();
+              }
+              return null;
+            }
+        };
+        return newJson;
+    }
+    
+    public static JSONObject newJsonObject() {
+        JSONObject newJson = new JSONObject() {
+            @Override
+            public String toString() {
+              try {
+                if ( has( "jsonString" ) ) return getString( "jsonString" );
+                return super.toString();
+              } catch ( JSONException e ) {
+                e.printStackTrace();
+              }
+              return null;
+            }
+            @Override
+            public String toString( int n ) {
+              try {
+                if ( has( "jsonString4" ) ) return jsonToString( this, n );
+                return super.toString( n );
+              } catch ( JSONException e ) {
+                e.printStackTrace();
+              }
+              return null;
+            }
+        };
+        return newJson;
+    }
+    
+    public static JSONObject clone( JSONObject json ) {
+        if ( json == null ) return null;
+        JSONObject newJson = newJsonObject();
+        
+        Iterator keys = json.keys();
+        while ( keys.hasNext() ) {
+            String key = (String)keys.next();
+            Object value;
+            try {
+                value = json.get( key );
+                if ( key.equals( Acm.JSON_SPECIALIZATION ) && value instanceof JSONObject ) {
+                    value = clone( (JSONObject)value );
+                }
+                newJson.put( key, value );
+            } catch ( JSONException e ) {
+                e.printStackTrace();
+            }
+        }
+        return newJson;
+    }
 
     public static StoreRef getStoreRef() {
         if ( SEARCH_STORE == null ) {
