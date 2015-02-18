@@ -70,7 +70,6 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
                 executeImplImpl(action, nodeRef);
             }
         };
-        
     }
     
     private void executeImplImpl(Action action, NodeRef nodeRef) {
@@ -174,15 +173,15 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
 	        		}
 	        		catch(JSONException ex){
 	        			status.setCode(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	        			logger.error("Failed to generate HTML zip for snapshot Id: " + snapshotId);
-	        			response.append(String.format("[ERROR]: Failed to generate HTML zip for snapshot Id: %s.\n%s\n%s\n", snapshotId, ex.getMessage(), ex.getStackTrace()));
+	        			logger.error("Failed to generate zip artifact for snapshot Id: " + snapshotId);
+	        			response.append(String.format("[ERROR]: Failed to generate zip artifact for snapshot Id: %s.\n%s\n%s\n", snapshotId, ex.getMessage(), ex.getStackTrace()));
 	        		}
 	        	}
 	        	if (status.getCode() != HttpServletResponse.SC_OK) {
 	            	jobStatus = "Failed";
 	            	response.append(String.format("[ERROR]: could not make snapshot for %s.\n", snapshotId));
 	        	} else {
-	            	response.append(String.format("[INFO]: Successfully generated artifact for snapshot: %s.\n", snapshotId));
+	            	response.append(String.format("[INFO]: Successfully generated artifact(s) for snapshot: %s.\n", snapshotId));
 	        	}
 	        	response.append("Snapshot JSON:\n");
 	        	response.append(NodeUtil.jsonToString( snapshot ));
@@ -214,12 +213,12 @@ public class SnapshotArtifactsGenerationActionExecuter  extends ActionExecuterAb
         	ex.printStackTrace();
         	ActionUtil.sendEmailToModifier(jobNode, String.format("An unexpected error occurred and your snapshot artifact generation failed.\n%s%s", ex.getMessage(), sb.toString()), "Snapshot Generation Failed", services);
         	ActionUtil.sendEmailTo("mbee-dev-admin@jpl.nasa.gov", "mbee-dev-admin@jpl.nasa.gov", 
-        			String.format("Server: %s\nSite: %s\nWorkspace: %s\nSnapshot Id: %s\nError: %s%s", 
+        			String.format("Server: %s\nSite: %s\nWorkspace: %s\nSnapshot Id: %s\nError: %s%s%s", 
         					new HostnameGet(this.repository, this.services).getAlfrescoUrl(),
         					siteName,
         					workspace,
         					snapshotId,
-        					ex.getMessage(), sb.toString()), 
+        					ex.getMessage(), sb.toString(), response.toString()), 
 					"Snapshot Generation Failed", services);
         }
     }
