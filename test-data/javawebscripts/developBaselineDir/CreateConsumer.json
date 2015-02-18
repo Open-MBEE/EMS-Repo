@@ -1,5 +1,5 @@
 {
-	"url": "\/alfresco\/service\/api\/people\/Consumer",
+	"url": "\/alfresco\/service\/api\/person\/Consumer",
 	"userName": "Consumer",
 	"enabled": true,
 	"firstName": "Consumer",

@@ -1774,7 +1774,7 @@ public class EmsScriptNode extends ScriptNode implements
             owner = new EmsScriptNode( ownerRef, services, response );
             String nameProp = (String)owner.getProperty( "sysml:name" );
             String idProp = (String)owner.getProperty( "sysml:id" );
-            if ( nameProp == null ) {
+            if ( idProp == null ) {
                 break;
             }
             //nameProp = nameProp.endsWith(pkgSuffix) ? nameProp.replace(pkgSuffix, "" ) : nameProp;
