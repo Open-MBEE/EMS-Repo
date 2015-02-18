@@ -1300,6 +1300,42 @@ common_filters,
 ["test","workspaces","develop", "develop2"]
 ],
         
+# RESURRECTION TESTING (CMED-430): ==========================    
+
+[
+660,
+"TestResurrection1",
+"Post elements for resurrection of parents testing.  Has two parents that will be resurrected.",
+create_curl_cmd(type="POST",data="resurrectParents.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+# This test depends on the previous one:
+[
+661,
+"DeleteParents",
+"Delete parents",
+create_curl_cmd(type="DELETE",data="elements/parentToDelete1",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"'],
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+662,
+"TestResurrection2",
+"Post elements for resurrection of parents testing.  Has two parents that will be resurrected.",
+create_curl_cmd(type="POST",data="resurrectParentsChild.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
 ]
 
 ##########################################################################################    

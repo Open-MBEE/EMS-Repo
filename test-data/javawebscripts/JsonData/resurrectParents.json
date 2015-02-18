@@ -1,0 +1,34 @@
+{ "elements" : [
+
+
+    {"documentation" : "Parent 1",
+     "sysmlid":"parentToDelete1",
+     "name":"parentToDelete1",
+     "owner":"123456",
+     "specialization": {"type":"Property",
+                        "isDerived":false,
+                        "value":[{"type":"LiteralString",
+                                  "string":"gg_string"}]}
+    },
+    
+    {"documentation" : "Parent 2",
+     "sysmlid":"parentToDelete2",
+     "name":"parentToDelete2",
+     "owner":"parentToDelete1",
+     "specialization": {"type":"Property",
+                        "isDerived":false,
+                        "value":[{"type":"LiteralString",
+                                  "string":"gg_string2"}]}
+    },
+    
+    {"documentation" : "Child",
+     "sysmlid":"childOfParentToDelete2",
+     "name":"childOfParentToDelete2",
+     "owner":"parentToDelete2",
+     "specialization": {"type":"Property",
+                        "isDerived":false,
+                        "value":[{"type":"LiteralString",
+                                  "string":"gg_string3"}]}
+    },
+    
+]}
