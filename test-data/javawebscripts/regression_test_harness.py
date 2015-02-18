@@ -1101,7 +1101,7 @@ create_curl_cmd(type="POST",
                 base_url=SERVICE_URL,
                 post_type="",branch="api/people",project_post=True),
 False, 
-common_filters+['MMS_'],
+common_filters+['MMS_', '"url"'],
 ["test","workspaces","develop", "develop2"]
 ],
  
@@ -1114,7 +1114,7 @@ create_curl_cmd(type="POST",
                 base_url=SERVICE_URL,
                 post_type="",branch="api/people",project_post=True),
 False, 
-common_filters+['MMS_'],
+common_filters+['MMS_', '"url"'],
 ["test","workspaces","develop", "develop2"]
 ],
  
@@ -1127,7 +1127,7 @@ create_curl_cmd(type="POST",
                 base_url=SERVICE_URL,
                 post_type="",branch="api/people",project_post=True),
 False, 
-common_filters+['MMS_'],
+common_filters+['MMS_', '"url"'],
 ["test","workspaces","develop", "develop2"]
 ],
  
@@ -1140,7 +1140,7 @@ create_curl_cmd(type="POST",
                 base_url=SERVICE_URL,
                 post_type="",branch="api/people",project_post=True),
 False, 
-common_filters+['MMS_'],
+common_filters+['MMS_', '"url"'],
 ["test","workspaces","develop", "develop2"]
 ],
          
@@ -1153,7 +1153,7 @@ create_curl_cmd(type="POST",
                 base_url=SERVICE_URL,
                 post_type="",branch="api/people",project_post=True),
 False, 
-common_filters+['MMS_'],
+common_filters+['MMS_', '"url"'],
 ["test","workspaces","develop", "develop2"]
 ],
 
@@ -1167,7 +1167,7 @@ common_filters+['MMS_'],
 # common_filters,
 # ["test","workspaces","develop", "develop2"]
 # ],
-#   
+#    
 # [
 # 621,
 # "NoneDelete",
@@ -1177,7 +1177,7 @@ common_filters+['MMS_'],
 # common_filters+['"timestamp"', '"id"'],
 # ["test","workspaces","develop", "develop2"]
 # ],
-#   
+#    
 # [
 # 622,
 # "NoneUpdate",
@@ -1187,7 +1187,7 @@ common_filters+['MMS_'],
 # common_filters,
 # ["test","workspaces","develop", "develop2"]
 # ],
-#   
+#    
 # [
 # 623,
 # "NoneCreate",
@@ -1197,46 +1197,46 @@ common_filters+['MMS_'],
 # common_filters,
 # ["test","workspaces","develop", "develop2"]
 # ],
-# 
-# [
-# 624,
-# "CollaboratorRead",
-# "Read element with user Collaborator",
-# "curl -w '\\n%{http_code}\\n' -u Collaborator:password -X GET http://localhost:8080/alfresco/service/workspaces/master/elements/y",
-# True,
-# common_filters,
-# ["test","workspaces","develop", "develop2"]
-# ],
-#   
-# [
-# 625,
-# "CollaboratorUpdate",
-# "Update element with user Collaborator",
-# "curl -w '\\n%{http_code}\\n' -u Collaborator:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by Collaborator\"}]}'",
-# True,
-# common_filters,
-# ["test","workspaces","develop", "develop2"]
-# ],
-#   
-# [
-# 626,
-# "CollaboratorCreate",
-# "Create element with user Collaborator",
-# "curl -w '\\n%{http_code}\\n' -u Collaborator:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"ychild\",\"documentation\":\"y child\",\"owner\":\"y\"}]}'",
-# True,
-# common_filters,
-# ["test","workspaces","develop", "develop2"]
-# ],
-# 
-# [
-# 627,
-# "CollaboratorDelete",
-# "Delete element with user Collaborator",
-# "curl -w '\\n%{http_code}\\n' -u Collaborator:password -X DELETE http://localhost:8080/alfresco/service/workspaces/master/elements/y",
-# True,
-# common_filters+['"timestamp"', '"id"'],
-# ["test","workspaces","develop", "develop2"]
-# ],
+ 
+[
+624,
+"CollaboratorRead",
+"Read element with user Collaborator",
+"curl -w '\\n%{http_code}\\n' -u Collaborator:password -X GET http://localhost:8080/alfresco/service/workspaces/master/elements/y",
+True,
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+   
+[
+625,
+"CollaboratorUpdate",
+"Update element with user Collaborator",
+"curl -w '\\n%{http_code}\\n' -u Collaborator:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by Collaborator\"}]}'",
+True,
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+   
+[
+626,
+"CollaboratorCreate",
+"Create element with user Collaborator",
+"curl -w '\\n%{http_code}\\n' -u Collaborator:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"ychild\",\"documentation\":\"y child\",\"owner\":\"y\"}]}'",
+True,
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+ 
+[
+627,
+"CollaboratorDelete",
+"Delete element with user Collaborator",
+"curl -w '\\n%{http_code}\\n' -u Collaborator:password -X DELETE http://localhost:8080/alfresco/service/workspaces/master/elements/y",
+True,
+common_filters+['"timestamp"', '"id"'],
+["test","workspaces","develop", "develop2"]
+],
   
 
 # NULL PROPERTIES =====================================================

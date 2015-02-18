@@ -1,18 +1,17 @@
 {
-  "message": "[WARNING]: createOrUpdateModel deltas not posted properly\n",
   "sequence": 1,
   "workspace1": {
     "elements": [{
       "creator": "admin",
       "documentation": "",
       "editable": true,
-      "id": "88e62095-d9ac-4e81-b2c9-5101c34b31d1",
-      "modified": "2015-02-13T17:17:58.887-0800",
+      "id": "694ea1b6-5c90-4c2c-ad4f-fb0c3588c432",
+      "modified": "2015-02-18T14:07:07.041-0800",
       "name": "6666_name",
       "owner": "holding_bin_no_site_no_project",
       "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/6666",
       "qualifiedName": "/no_site/no_project/holding_bin/6666_name",
-      "read": "2015-02-13T17:18:08.992-0800",
+      "read": "2015-02-18T14:08:37.163-0800",
       "specialization": {
         "operand": [
           {
@@ -36,15 +35,15 @@
     "name": "master",
     "qualifiedId": "master",
     "qualifiedName": "master",
-    "timestamp": "2015-02-13T17:18:08.949-0800"
+    "timestamp": "2015-02-18T14:08:37.110-0800"
   },
   "workspace2": {
     "addedElements": [],
     "conflictedElements": [],
     "deletedElements": [{
       "creator": "admin",
-      "modified": "2015-02-13T17:17:58.887-0800",
-      "read": "2015-02-13T17:18:09.074-0800",
+      "modified": "2015-02-18T14:07:07.041-0800",
+      "read": "2015-02-18T14:08:46.039-0800",
       "sysmlid": "6666"
     }],
     "id": "master",
@@ -52,7 +51,7 @@
     "name": "master",
     "qualifiedId": "master",
     "qualifiedName": "master",
-    "timestamp": "2015-02-13T17:18:08.992-0800",
+    "timestamp": "2015-02-18T14:08:37.163-0800",
     "updatedElements": []
   }
 }

@@ -1,15 +1,15 @@
 {
-    "message": "[WARNING]: The type supplied Element is different than the stored type View\n",
     "elements": [{
+        "creator": "admin",
+        "editable": true,
+        "modified": "2015-02-18T14:10:52.341-0800",
+        "owner": "holding_bin_no_site_no_project",
         "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/54321",
         "qualifiedName": "/no_site/no_project/holding_bin/null",
-        "sysmlid": "54321",
-        "owner": "holding_bin_no_site_no_project",
-        "read": "2015-02-11T14:19:21.419-0800",
+        "read": "2015-02-18T14:10:52.716-0800",
         "specialization": {"type": "Element"},
-        "editable": true,
-        "creator": "admin",
-        "modified": "2015-02-11T14:19:19.195-0800"
-    }]
+        "sysmlid": "54321"
+    }],
+    "message": "[WARNING]: The type supplied Element is different than the stored type View\n"
 }
 200
