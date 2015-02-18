@@ -950,4 +950,9 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             source = null;
         }
     }
+    
+    protected void sendProgress( String msg ) {
+        
+    }
+    
 }
