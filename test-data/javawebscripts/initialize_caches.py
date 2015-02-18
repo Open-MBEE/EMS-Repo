@@ -15,12 +15,18 @@ from regression_lib import *
 #
 ##########################################################################################    
 if __name__ == '__main__':
+            
+    thick_divider()
+
+    # Run with "-redeploy" if running this from the redeploy script:
+    if len(sys.argv) > 1 and sys.argv[1] == "-redeploy":
+        print "Running from redeploy script....\n"
+        set_curl_user(" -u mmsAdmin:letmein")
     
     #     1.) Get all the workspaces
     #     2.) For each workspace get all the projects
     #     3.) For each workspace get all the elements using the project as the root
     
-    thick_divider()
     print "Getting all workspaces \n"
     
     output_file_wsget = "initialize_cache_wsget"
@@ -38,7 +44,7 @@ if __name__ == '__main__':
         if output:
             j = json.loads(output)
     
-            if j and j['workspaces']:
+            if j and 'workspaces' in j and j['workspaces']:
                 wsJson = j['workspaces']
                 for ws in wsJson:
                     if ws['id']:
@@ -69,7 +75,7 @@ if __name__ == '__main__':
             if output:
                 j = json.loads(output)
         
-                if j and j['elements']:
+                if j and 'elements' in j and j['elements']:
                     projectJson = j['elements']
                     for project in projectJson:
                         if project['sysmlid']:

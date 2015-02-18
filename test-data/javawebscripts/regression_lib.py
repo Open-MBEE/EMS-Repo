@@ -646,6 +646,12 @@ def startup_server():
         kill_server()
         sys.exit(1)
         
+def set_curl_user(user):
+    
+    global CURL_USER, CURL_FLAGS
+    CURL_USER = user
+    CURL_FLAGS = CURL_STATUS+CURL_USER
+    
 def run(tests):
     '''
     Main function to run the regression harness
