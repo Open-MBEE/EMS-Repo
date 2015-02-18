@@ -53,6 +53,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.LimitBy;
+import org.alfresco.service.cmr.search.PermissionEvaluationMode;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchParameters;
@@ -60,7 +61,6 @@ import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
-import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
@@ -785,7 +785,6 @@ public class NodeUtil {
             // Make sure we didn't just get a near match.
             try {
                 if ( !esn.checkPermissions( PermissionService.READ ) ) {
-
                     continue;
                 }
                 boolean match = true;
@@ -1669,35 +1668,16 @@ public class NodeUtil {
                                              StringBuffer response ) {
         if ( Utils.isNullOrEmpty( siteName ) ) return null;
 
-        // Try to find the site in the workspace first.
-        ArrayList< NodeRef > refs =
-                findNodeRefsByType( siteName, SearchType.CM_NAME.prefix,
-                                    ignoreWorkspace, workspace, dateTime, true,
-                                    true, getServices(), false );
-        for ( NodeRef ref : refs ) {
-            EmsScriptNode siteNode = new EmsScriptNode(ref, services, response);
-            if ( siteNode.isSite() ) {
-                return siteNode;
-            }
+        // Don't need to lookup sites using findNodeRefs, since we know where they are
+        EmsScriptNode context = null;
+        if (workspace == null) {
+            context = NodeUtil.getCompanyHome( services );
+        } else {
+            context = workspace;
         }
-
-        // Get the site from SiteService.
-        SiteInfo siteInfo = services.getSiteService().getSite(siteName);
-        if (siteInfo != null) {
-            NodeRef siteRef = siteInfo.getNodeRef();
-            if ( dateTime != null ) {
-                siteRef = getNodeRefAtTime( siteRef, dateTime );
-            }
-
-            if (siteRef != null) {
-                EmsScriptNode siteNode = new EmsScriptNode(siteRef, services, response);
-                if ( siteNode != null
-                     && ( workspace == null || workspace.contains( siteNode ) ) ) {
-                    return siteNode;
-                }
-            }
-        }
-        return null;
+        
+        EmsScriptNode siteNode = context.childByNamePath( "Sites/" + siteName );
+        return siteNode;
     }
 
     /**
@@ -2603,6 +2583,7 @@ public class NodeUtil {
      */
     public static void sendNotificationEvent( String subject, String msg,
                                               ServiceRegistry services ) {
+        // FIXME: need to base the single send on the same subject
         if (!heisenbugSeen) {
             String hostname = services.getSysAdminParams().getAlfrescoHost();
             
