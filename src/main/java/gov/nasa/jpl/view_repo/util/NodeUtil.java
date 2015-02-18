@@ -53,6 +53,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.repository.StoreRef;
 import org.alfresco.service.cmr.search.LimitBy;
+import org.alfresco.service.cmr.search.PermissionEvaluationMode;
 import org.alfresco.service.cmr.search.ResultSet;
 import org.alfresco.service.cmr.search.ResultSetRow;
 import org.alfresco.service.cmr.search.SearchParameters;
@@ -60,7 +61,6 @@ import org.alfresco.service.cmr.search.SearchService;
 import org.alfresco.service.cmr.security.AccessStatus;
 import org.alfresco.service.cmr.security.PermissionService;
 import org.alfresco.service.cmr.security.PersonService;
-import org.alfresco.service.cmr.site.SiteInfo;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.namespace.QName;
@@ -1668,14 +1668,15 @@ public class NodeUtil {
                                              StringBuffer response ) {
         if ( Utils.isNullOrEmpty( siteName ) ) return null;
 
-        EmsScriptNode wsParent = null;
+        // Don't need to lookup sites using findNodeRefs, since we know where they are
+        EmsScriptNode context = null;
         if (workspace == null) {
-            wsParent = NodeUtil.getCompanyHome( services );
+            context = NodeUtil.getCompanyHome( services );
         } else {
-            wsParent = workspace;
+            context = workspace;
         }
         
-        EmsScriptNode siteNode = wsParent.childByNamePath( "Sites/" + siteName );
+        EmsScriptNode siteNode = context.childByNamePath( "Sites/" + siteName );
         return siteNode;
     }
 

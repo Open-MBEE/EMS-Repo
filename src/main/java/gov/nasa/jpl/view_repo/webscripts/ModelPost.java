@@ -944,7 +944,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     ownerId = elementJson.getString(Acm.JSON_OWNER);
                 }
                 // if owner is null, leave at project root level
-                if (ownerId == null || ownerId.equals("null")) {
+                if (ownerId == null) { // || ownerId.equals("null")) {
                     if ( projectNode != null ) {
                         ownerId = projectNode.getSysmlId();
                     } else {
@@ -2728,6 +2728,7 @@ public class ModelPost extends AbstractJavaWebScript {
                             }
                         };
                     }
+                    // FIXME: this is a hack to get the right site permissions
                     // if DB rolled back, it's because the no_site node couldn't be created
                     // this is indicative of no permissions (inside the DB transaction)
                     if (getResponseStatus().getCode() == HttpServletResponse.SC_BAD_REQUEST) {

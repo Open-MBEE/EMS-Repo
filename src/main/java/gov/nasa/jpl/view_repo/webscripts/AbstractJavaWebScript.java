@@ -496,13 +496,14 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
             siteNode = new EmsScriptNode( foo.getNodeRef(), services );
             siteNode.createOrUpdateAspect( "cm:taggable" );
             siteNode.createOrUpdateAspect(Acm.ACM_SITE);
-            if (workspace == null) { // && !siteNode.getName().equals(NO_SITE_ID)) {
+            // this should always be in master so no need to check workspace
+//            if (workspace == null) { // && !siteNode.getName().equals(NO_SITE_ID)) {
                 // default creation adds GROUP_EVERYONE as SiteConsumer, so remove
                 siteNode.removePermission( "SiteConsumer", "GROUP_EVERYONE" );
                 if ( siteNode.getName().equals(NO_SITE_ID)) {
                     siteNode.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
                 }
-            }
+//            }
         }
 
         // If this site is supposed to go into a non-master workspace, then create the site folders
