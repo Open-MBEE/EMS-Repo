@@ -1,49 +1,49 @@
 {"workspaces": [
     {
-        "qualifiedName": "master",
-        "name": "master"
+        "name": "master",
+        "qualifiedName": "master"
     },
     {
+        "creator": "admin",
         "description": "modified the workspace name and desc",
-        "qualifiedName": "master/modifiedWorkspaceName",
         "name": "modifiedWorkspaceName",
-        "creator": "admin"
+        "qualifiedName": "master/modifiedWorkspaceName"
     },
     {
+        "creator": "admin",
         "description": "",
-        "qualifiedName": "master/wsA/wsB",
         "name": "wsB",
-        "creator": "admin"
+        "qualifiedName": "master/wsA/wsB"
     },
     {
+        "creator": "admin",
         "description": "",
-        "qualifiedName": "master/wsA/wsT",
         "name": "wsT",
-        "creator": "admin"
+        "qualifiedName": "master/wsA/wsT"
     },
     {
+        "creator": "admin",
         "description": "",
-        "qualifiedName": "master/wsA",
         "name": "wsA",
-        "creator": "admin"
+        "qualifiedName": "master/wsA"
     },
     {
+        "creator": "admin",
         "description": "",
-        "qualifiedName": "master/wsA/wsT2",
         "name": "wsT2",
-        "creator": "admin"
+        "qualifiedName": "master/wsA/wsT2"
     },
     {
+        "creator": "admin",
         "description": "",
-        "qualifiedName": "master/wsG1",
         "name": "wsG1",
-        "creator": "admin"
+        "qualifiedName": "master/wsG1"
     },
     {
+        "creator": "admin",
         "description": "",
-        "qualifiedName": "master/wsG2",
         "name": "wsG2",
-        "creator": "admin"
+        "qualifiedName": "master/wsG2"
     }
 ]}
 200

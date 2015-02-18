@@ -55,6 +55,17 @@ common_filters,
 ],
         
 [
+21,
+"PostElementsBadOwners",
+"Post elements to the master branch that have owners that cant be found",
+create_curl_cmd(type="POST",data="badOwners.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+[
 30,
 "PostViews",
 "Post views",

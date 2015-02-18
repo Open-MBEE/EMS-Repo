@@ -19,8 +19,8 @@ CURL_POST_FLAGS = '-X POST -H "Content-Type:application/json" --data'
 CURL_PUT_FLAGS = "-X PUT"
 CURL_GET_FLAGS = "-X GET"
 CURL_DELETE_FLAGS = "-X DELETE"
-CURL_USER = " -u admin:admin"
-CURL_FLAGS = CURL_STATUS+CURL_USER
+CURL_USER = " -u admin:admin"  # Can be modified using set_curl_user()
+CURL_FLAGS = CURL_STATUS+CURL_USER  # Can be modified using set_curl_user()
 HOST = "localhost:8080" 
 SERVICE_URL = "http://%s/alfresco/service/"%HOST
 BASE_URL_WS_NOBS = SERVICE_URL+"workspaces"
@@ -649,7 +649,8 @@ def startup_server():
 def set_curl_user(user):
     
     global CURL_USER, CURL_FLAGS
-    CURL_USER = user
+    print "Using the user/password: %s\n"%user
+    CURL_USER = " "+user
     CURL_FLAGS = CURL_STATUS+CURL_USER
     
 def run(tests):

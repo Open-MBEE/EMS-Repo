@@ -160,7 +160,8 @@ public class ModelPost extends AbstractJavaWebScript {
     private EmsScriptNode siteNode = null;
     private EmsScriptNode sitePackageNode = null;
     private boolean internalRunWithoutTransactions = false;
-
+    private Set<String> ownersNotFound = null;
+    
     /**
      * JSONObject of the relationships
      * "relationshipElements": {
@@ -421,46 +422,46 @@ public class ModelPost extends AbstractJavaWebScript {
                 rootElements.remove( elementId );
             }
 
-        } // end if (buildElementMap(postJson.getJSONArray(ELEMENTS))) {
+            Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): main loop time", timeEvents);
 
-        Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): main loop time", timeEvents);
-
-        if (runWithoutTransactions) {
-            handleRelationships( targetWS, nodeMap, elements, singleElement, postJson );
-        }
-        else {
-            new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
-                @Override
-                public void run() throws Exception {
-                    handleRelationships( targetWS, nodeMap, elements, singleElement, postJson );
-                }
-            };
-        }
-
-        internalRunWithoutTransactions = oldRunWithoutTransactions;
-
-        now = new Date();
-        final long end = System.currentTimeMillis();
-        log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  (end - start) + "ms\n");
-
-        timerUpdateModel = Timer.startTimer(timerUpdateModel, timeEvents);
-
-        // Send deltas to all listeners
-        if (createCommit && wsDiff.isDiff()) {
             if (runWithoutTransactions) {
-                sendDeltasAndCommit( targetWS, elements, start, end );
+                handleRelationships( targetWS, nodeMap, elements, singleElement, postJson );
             }
             else {
                 new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
                     @Override
                     public void run() throws Exception {
-                        sendDeltasAndCommit( targetWS, elements, start, end );
+                        handleRelationships( targetWS, nodeMap, elements, singleElement, postJson );
                     }
                 };
             }
-        }
 
-        Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): Deltas time", timeEvents);
+            internalRunWithoutTransactions = oldRunWithoutTransactions;
+
+            now = new Date();
+            final long end = System.currentTimeMillis();
+            log(LogLevel.INFO, "createOrUpdateModel completed" + now + " : " +  (end - start) + "ms\n");
+
+            timerUpdateModel = Timer.startTimer(timerUpdateModel, timeEvents);
+
+            // Send deltas to all listeners
+            if (createCommit && wsDiff.isDiff()) {
+                if (runWithoutTransactions) {
+                    sendDeltasAndCommit( targetWS, elements, start, end );
+                }
+                else {
+                    new EmsTransaction(getServices(), getResponse(), getResponseStatus() ) {
+                        @Override
+                        public void run() throws Exception {
+                            sendDeltasAndCommit( targetWS, elements, start, end );
+                        }
+                    };
+                }
+            }
+
+            Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): Deltas time", timeEvents);
+            
+        } // end if (buildElementMap(postJson.getJSONArray(ELEMENTS))) {
 
         return new TreeSet< EmsScriptNode >( nodeMap.values() );
     }
@@ -481,8 +482,10 @@ public class ModelPost extends AbstractJavaWebScript {
                 EmsScriptNode owner = getOwner( rootElement, workspace, false );
 
                 try {
-                    elements.addAll( updateOrCreateElement( elementMap.get( rootElement ),
-                                                            owner, workspace, true ) );
+                    if (owner != null) {
+                        elements.addAll( updateOrCreateElement( elementMap.get( rootElement ),
+                                                                owner, workspace, true ) );
+                    }
                 } catch ( JSONException e ) {
                     e.printStackTrace();
                 }
@@ -593,12 +596,27 @@ public class ModelPost extends AbstractJavaWebScript {
 
         if (!Utils.isNullOrEmpty(ownerName)) {
             boolean foundOwnerElement = true;
+            
+            // Dont bother with trying to search or giving an error 
+            // if we already know its not found:
+            if (ownersNotFound.contains( ownerName )) {
+                return null;
+            }
+            
             owner = findScriptNodeById(ownerName, workspace, null, true);
             
             // Owner not found, so store this owner name to return to the user and bail:
+            // Note: We are doing this because alfresco does not return in lucene searches
+            // elements that the user does not have read permissions for.  
+            // This can lead to duplicate node name exceptions.
+            //
+            // We should never get here because buildElementMap() will check to see if we
+            // can find all the owners that aren't being posted for the first time, but
+            // leaving this check in just in case
             if (owner == null  && !createdHoldingBin) {
-                // TODO
                 
+                ownersNotFound.add( ownerName );
+                log(LogLevel.ERROR, "Owner was not found: "+ownerName, HttpServletResponse.SC_NOT_FOUND);
                 return null;
             }
             
@@ -984,6 +1002,19 @@ public class ModelPost extends AbstractJavaWebScript {
 
         if (isValid) {
                 isValid = fillRootElements(workspace);
+        }
+        
+        // Check if all the owners that are not being added by this post can be found.
+        // If they cant be found then give a error message, store to display to user, and
+        // do not continue with the post:
+        Iterator keys = elementHierarchyJson.keys();
+        while (keys.hasNext()) {
+            String id = (String) keys.next();
+            if (!newElements.contains( id ) && findScriptNodeById(id, workspace, null, true) == null) {
+                ownersNotFound.add( id );
+                log(LogLevel.ERROR, "Owner was not found: "+id, HttpServletResponse.SC_NOT_FOUND);
+                isValid = false;
+            }
         }
 
         return isValid;
@@ -2775,8 +2806,9 @@ public class ModelPost extends AbstractJavaWebScript {
         JSONObject top = new JSONObject();
         final Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null, createCommit );
 
-        addRelationshipsToProperties( elements );
         if ( !Utils.isNullOrEmpty( elements ) ) {
+            addRelationshipsToProperties( elements );
+
             // Fix constraints if desired:
             if (fix) {               
                 if (runWithoutTransactions || internalRunWithoutTransactions) {
@@ -2815,10 +2847,27 @@ public class ModelPost extends AbstractJavaWebScript {
             
             top.put( "elements", elementsJson );
         }
-        if (!Utils.isNullOrEmpty(response.toString())) top.put("message", response.toString());
+        
+        if (!Utils.isNullOrEmpty(response.toString())) {
+            top.put("message", response.toString());
+        }
+        
+        if (!Utils.isNullOrEmpty(ownersNotFound)) {
+            
+            JSONArray ownerArray = new JSONArray();
+            top.put("ownersNotFound", ownerArray);
+
+            for (String ownerId : ownersNotFound) {
+                JSONObject element = new JSONObject();
+                ownerArray.put( element );
+                element.put( Acm.JSON_ID, ownerId );
+            }
+        }
+        
         if ( prettyPrint ) {
             model.put( "res", NodeUtil.jsonToString( top, 4 ) );
-        } else {
+        } 
+        else {
             model.put( "res", NodeUtil.jsonToString( top ) );
         }
 
@@ -3040,5 +3089,6 @@ public class ModelPost extends AbstractJavaWebScript {
         rootElements = new HashSet<String>();
         elementMap = new HashMap<String, JSONObject>();
         newElements = new HashSet<String>();
+        ownersNotFound = new HashSet<String>();
     }
 }

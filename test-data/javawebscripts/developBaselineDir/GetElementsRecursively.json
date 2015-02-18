@@ -133,25 +133,14 @@
     },
     {
         "creator": "admin",
+        "documentation": "to make compatible with value specs (this is just a Element)",
         "editable": true,
-        "owner": "401",
-        "qualifiedName": "/europa/JW_TEST/400/401/null",
-        "specialization": {
-            "string": "dlam_string",
-            "type": "LiteralString",
-            "valueExpression": null
-        },
-    },
-    {
-        "creator": "admin",
-        "editable": true,
-        "owner": "301",
-        "qualifiedName": "/europa/JW_TEST/300/301/null",
-        "specialization": {
-            "string": "dlam_string",
-            "type": "LiteralString",
-            "valueExpression": null
-        },
+        "name": "dlam",
+        "owner": "123456",
+        "qualifiedId": "/europa/123456/dlam",
+        "qualifiedName": "/europa/JW_TEST/dlam",
+        "specialization": {"type": "Element"},
+        "sysmlid": "dlam"
     },
     {
         "creator": "admin",
@@ -173,6 +162,17 @@
             }]
         },
         "sysmlid": "4000"
+    },
+    {
+        "creator": "admin",
+        "editable": true,
+        "owner": "401",
+        "qualifiedName": "/europa/JW_TEST/400/401/null",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString",
+            "valueExpression": null
+        },
     },
     {
         "creator": "admin",
@@ -209,6 +209,17 @@
             }]
         },
         "sysmlid": "404"
+    },
+    {
+        "creator": "admin",
+        "editable": true,
+        "owner": "301",
+        "qualifiedName": "/europa/JW_TEST/300/301/null",
+        "specialization": {
+            "string": "dlam_string",
+            "type": "LiteralString",
+            "valueExpression": null
+        },
     },
     {
         "creator": "admin",
