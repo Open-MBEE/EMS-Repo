@@ -61,7 +61,6 @@ import gov.nasa.jpl.view_repo.webscripts.util.ShareUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -106,8 +105,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import org.json.JSONObject;
-
 import org.springframework.extensions.webscripts.Cache;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptRequest;
@@ -135,8 +132,6 @@ public class ModelPost extends AbstractJavaWebScript {
     public ModelPost(Repository repositoryHelper, ServiceRegistry registry) {
         super(repositoryHelper, registry);
      }
-
-//    private static boolean activeVersionCaching = true;
 
     // Set the flag to time events that occur during a model post using the timers
     // below
@@ -320,7 +315,11 @@ public class ModelPost extends AbstractJavaWebScript {
         //      CommitUtil.commitAndStartAction( targetWS, wsDiff, start, end, elements.first().getProjectId(), status, true );
         
         NodeRef commitRef = CommitUtil.commit(null, targetWS, "", true, services, new StringBuffer() );
-        String projectId = elements.first().getProjectId();
+        
+        String projectId = "";
+        if (elements.size() > 0) {
+            projectId = elements.first().getProjectId();
+        }
         String wsId = "master";
         if (targetWS != null) {
             wsId = targetWS.getId();
@@ -330,7 +329,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // FIXME: Need to split by projectId
         if ( !CommitUtil.sendDeltas(deltaJson, wsId, projectId, source) ) {
-            if (logger.isInfoEnabled()) logger.info("send deltas not posted properly");
+            logger.warn("send deltas not posted properly");
         }
 
         CommitUtil.updateCommitNodeRef( commitRef, NodeUtil.jsonToString( deltaJson ), "", services, response );
@@ -553,7 +552,10 @@ public class ModelPost extends AbstractJavaWebScript {
             try{
                 ownerName = element.getString(Acm.JSON_OWNER);
             } catch ( JSONException e ) {
-                e.printStackTrace();
+                // possible that element owner is actually null, so this is expected
+                // leave as null
+                logger.info( "owner was most likely null, but definitely not string" );
+//                e.printStackTrace();
             }
         }
 
@@ -944,9 +946,13 @@ public class ModelPost extends AbstractJavaWebScript {
 
             // create the hierarchy
             if (elementJson.has(Acm.JSON_OWNER)) {
-                String ownerId = elementJson.getString(Acm.JSON_OWNER);
+                Object ownerJson = elementJson.get( Acm.JSON_OWNER );
+                String ownerId = null;
+                if ( !ownerJson.equals(JSONObject.NULL) ) {
+                    ownerId = elementJson.getString(Acm.JSON_OWNER);
+                }
                 // if owner is null, leave at project root level
-                if (ownerId == null || ownerId.equals("null")) {
+                if (ownerId == null) { // || ownerId.equals("null")) {
                     if ( projectNode != null ) {
                         ownerId = projectNode.getSysmlId();
                     } else {
@@ -2730,23 +2736,25 @@ public class ModelPost extends AbstractJavaWebScript {
                             }
                         };
                     }
-
-                    if (projectNode != null) {
+                    // FIXME: this is a hack to get the right site permissions
+                    // if DB rolled back, it's because the no_site node couldn't be created
+                    // this is indicative of no permissions (inside the DB transaction)
+                    if (getResponseStatus().getCode() == HttpServletResponse.SC_BAD_REQUEST) {
+                        log(LogLevel.WARNING, "No write priveleges", HttpServletResponse.SC_FORBIDDEN);
+                    } else if (projectNode != null) {
                         handleUpdate( postJson, status, myWorkspace, fix, model, true );
                     }
                 }
             } catch (JSONException e) {
                 log(LogLevel.ERROR, "JSON malformed\n", HttpServletResponse.SC_BAD_REQUEST);
                 e.printStackTrace();
-                model.put("res", response.toString());
             } catch (Exception e) {
                 log(LogLevel.ERROR, "Internal error stack trace:\n" + e.getLocalizedMessage() + "\n", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 e.printStackTrace();
-                model.put("res", response.toString());
             }
         }
         if ( !model.containsKey( "res" ) ) {
-            model.put( "res", response.toString() );
+            model.put( "res", String.format("{'message':'%s'}", response.toString()) );
         }
 
         status.setCode(responseStatus.getCode());

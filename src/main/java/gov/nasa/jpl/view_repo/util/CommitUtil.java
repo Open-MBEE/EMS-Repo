@@ -84,6 +84,8 @@ public class CommitUtil {
 
         if (commitPkg == null && create) {
             commitPkg = context.createFolder( "commits" );
+            // everyone should be able to create commits
+            commitPkg.setPermission( "SiteCollaborator", "GROUP_EVERYONE" );
         }
 
         // Create the date folders if needed.  Want to return the "commit" folder
