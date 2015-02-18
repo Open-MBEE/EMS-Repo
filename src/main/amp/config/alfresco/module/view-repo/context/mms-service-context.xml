@@ -110,6 +110,13 @@
         <property name="services" ref="ServiceRegistry" />
     </bean>
     
+    <bean id="webscript.gov.nasa.jpl.mms.workspaces.projects.get"
+        class="gov.nasa.jpl.view_repo.webscripts.ProjectsGet" parent="webscript"
+        singleton="false">
+        <property name="repositoryHelper" ref="repositoryHelper" />
+        <property name="services" ref="ServiceRegistry" />
+    </bean>
+    
     <bean id="webscript.gov.nasa.jpl.mms.workspaces.projectonly.post"
         class="gov.nasa.jpl.view_repo.webscripts.ProjectPost" parent="webscript"
         singleton="false">
