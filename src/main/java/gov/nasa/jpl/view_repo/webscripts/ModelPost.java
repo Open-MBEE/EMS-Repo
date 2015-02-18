@@ -592,7 +592,15 @@ public class ModelPost extends AbstractJavaWebScript {
         if (!Utils.isNullOrEmpty(ownerName)) {
             boolean foundOwnerElement = true;
             owner = findScriptNodeById(ownerName, workspace, null, true);
-
+            
+            // Owner not found, so store this owner name to return to the user and bail:
+            if (owner == null  && !createdHoldingBin) {
+                // TODO
+                
+                return null;
+            }
+            
+            // If creating the holding bin for the first time, or the owner was found but doesnt exists:
             if (owner == null || !owner.exists()) {
 
                 // If the owner was found, but deleted, then make a zombie node!
@@ -603,7 +611,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
                     resurrectParent(owner, false);
                 }
-                // Otherwise, owner wasnt found, or found but doesnt exists:
+                // Otherwise, owner found but doesnt exists, or creating the holding bin:
                 else {
 
                     // FIXME: HERE! ATTENTION BRAD!  add to elements, so it is returned, and remind Doris
