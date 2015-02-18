@@ -1,0 +1,62 @@
+{
+  "sequence": 28,
+  "workspace1": {
+    "elements": [
+      {
+        "creator": "Collaborator",
+        "documentation": "y is modified by Collaborator",
+        "editable": true,
+        "owner": "302",
+        "qualifiedId": "/europa/123456/300/301/302/y",
+        "qualifiedName": "/europa/JW_TEST2/300/301/302/null",
+        "specialization": {
+          "isDerived": false,
+          "isSlot": false,
+          "propertyType": null,
+          "type": "Property",
+          "value": [{
+            "string": "the y value",
+            "type": "LiteralString",
+            "valueExpression": null
+          }]
+        },
+        "sysmlid": "y",
+        "version": "1.3"
+      },
+      {
+        "creator": "Collaborator",
+        "documentation": "y child",
+        "editable": true,
+        "owner": "y",
+        "qualifiedId": "/europa/123456/300/301/302/y/ychild",
+        "qualifiedName": "/europa/JW_TEST2/300/301/302/null/null",
+        "specialization": {"type": "Element"},
+        "sysmlid": "ychild",
+        "version": "1.1"
+      }
+    ],
+    "name": "master",
+    "qualifiedId": "master",
+    "qualifiedName": "master",
+  },
+  "workspace2": {
+    "addedElements": [],
+    "conflictedElements": [],
+    "deletedElements": [
+      {
+        "creator": "Collaborator",
+        "sysmlid": "y"
+      },
+      {
+        "creator": "Collaborator",
+        "sysmlid": "ychild"
+      }
+    ],
+    "movedElements": [],
+    "name": "master",
+    "qualifiedId": "master",
+    "qualifiedName": "master",
+    "updatedElements": []
+  }
+}
+200
