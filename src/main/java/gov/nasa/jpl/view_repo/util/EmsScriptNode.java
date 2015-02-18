@@ -2244,7 +2244,7 @@ public class EmsScriptNode extends ScriptNode implements
         //this.forceCacheUpdate = true;
         
         // Return empty json if this element does not exist.
-        JSONObject element = new JSONObject();
+        JSONObject element = NodeUtil.newJsonObject();
         if ( !exists() ) {
             if ( Debug.isOn() )
                 Debug.outln("node doesn't exist; returning  " + element);

@@ -271,50 +271,64 @@ public class NodeUtil {
 //        }
 //    }
 
-    public static JSONObject jsonCacheGet( String id,
-                                              long millis,
-                                              boolean noMetadata ) {
-           JSONObject json = Utils.get( jsonCache, id, millis );
-           return json;
-       }
+    public static JSONObject jsonCacheGet( String id, long millis,
+                                           boolean noMetadata ) {
+        JSONObject json = Utils.get( jsonCache, id, millis );
+        System.out.println( "jsonCacheGet(" + id + ", " + millis + ", "
+                            + noMetadata + ") = " + json );
+        return json;
+    }
+
     public static JSONObject jsonCachePut( JSONObject json, String id,
-                                                 long millis ) {
-           json = clone(json);
-           if ( doJsonStringCaching ) {
-               json = addJsonMetadata( json, id, millis, true, null );
-           }
-           Utils.put( jsonCache, id, millis, json );
-           return json;
-       }
-    public static JSONObject jsonDeepCacheGet( String id,
-                                                     long millis,
-                                                     boolean isIncludeQualified,
-                                                     Set< String > jsonFilter,
-                                                     boolean noMetadata ) {
-           jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
-           JSONObject json = Utils.get( jsonDeepCache, id, millis,
-                                        isIncludeQualified, jsonFilter );
-           if ( doJsonStringCaching && noMetadata ) {
-               json = clone( json );
-               //stripJsonMetadata( json );
-           }
-           return json;
-       }
+                                           long millis ) {
+        json = clone( json );
+        if ( doJsonStringCaching ) {
+            json = addJsonMetadata( json, id, millis, true, null );
+        }
+        System.out.println( "jsonCachePut(" + id + ", " + millis + ", " + json
+                            + ")" );
+        Utils.put( jsonCache, id, millis, json );
+        return json;
+    }
+
+    public static JSONObject jsonDeepCacheGet( String id, long millis,
+                                               boolean isIncludeQualified,
+                                               Set< String > jsonFilter,
+                                               boolean noMetadata ) {
+        jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
+        JSONObject json = Utils.get( jsonDeepCache, id, millis,
+                                     isIncludeQualified, jsonFilter );
+        if ( doJsonStringCaching && noMetadata ) {
+            json = clone( json );
+            stripJsonMetadata( json );
+        }
+        System.out.println( "jsonDeepCacheGet(" + id + ", " + millis + ", "
+                            + isIncludeQualified + ", " + jsonFilter + ", "
+                            + noMetadata + ") = " + json );
+        return json;
+    }
+
     public static JSONObject jsonDeepCachePut( JSONObject json, String id,
                                                long millis,
                                                boolean isIncludeQualified,
                                                Set< String > jsonFilter ) {
-        json = clone(json);
+        json = clone( json );
         jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
         json = addJsonMetadata( json, id, millis, isIncludeQualified, jsonFilter );
-        Utils.put( jsonDeepCache, id, millis, isIncludeQualified,
-                   jsonFilter, json );
+        System.out.println( "jsonDeepCachePut(" + id + ", " + millis + ", "
+                            + isIncludeQualified + ", " + jsonFilter + ", "
+                            + json + ")" );
+        Utils.put( jsonDeepCache, id, millis, isIncludeQualified, jsonFilter,
+                   json );
         return json;
     }
+
     public static JSONObject stripJsonMetadata( JSONObject json ) {
+        System.out.println("stripJsonMetadata -> " + json );
         json.remove( "cacheKey" );
         json.remove( "jsonString" );
         json.remove( "jsonString4" );
+        System.out.println("stripJsonMetadata -> " + json );
         return json;
     }
     
@@ -333,6 +347,8 @@ public class NodeUtil {
                                               Set< String > jsonFilter ) {
         if ( json == null ) return null;
         if ( !doJsonStringCaching ) return json;
+        
+        if ( json.has( "jsonString4" ) ) return json;
         
         jsonFilter = jsonFilter == null ? new TreeSet< String >() : jsonFilter;
         String jsonString4 = null;
@@ -357,40 +373,49 @@ public class NodeUtil {
             e.printStackTrace();
             return null;
         }
+        System.out.println( "addJsonMetadata(" + id + ", " + millis + ", "
+                            + isIncludeQualified + ", " + jsonFilter + ") -> "
+                            + json );
         return json;
     }
-    protected static JSONObject filterJson( JSONObject json, Set< String > jsonFilter,
-                                            boolean isIncludeQualified) throws JSONException {
-    
-           JSONObject newJson = new JSONObject();
-           Iterator keys = json.keys();
-           while ( keys.hasNext() ) {
-               String key = (String)keys.next();
-               if ( jsonFilter.contains( key ) || EmsScriptNode.dontFilterOut.contains( key ) ) {
-                   Object value = json.get( key );
-                   if ( key.equals( Acm.JSON_SPECIALIZATION ) && value instanceof JSONObject ) {
-    //                   if ( !( value instanceof JSONObject ) ) {
-    //                       value = JSONObject.make( (JSONObject)value );
-    //                   }
-                       JSONObject newSpec = filterJson( (JSONObject)value, jsonFilter, isIncludeQualified );
-                       if ( newSpec != null && newSpec.length() > 0 ) {
-                           newJson.put( key, newSpec );
-                       }
-                   } else
-                   if ( isIncludeQualified || ( !key.equals( "qualifiedId" ) &&
-                                                !key.equals( "qualifiedName" ) ) ) {
-                       if ( Debug.isOn() )
-                           Debug.outln("add to newJson = " + key + ":" + value);
-                       newJson.put( key, value );
-                   }
-               }
-           }
-           return newJson;
-       }
+
+    protected static JSONObject filterJson( JSONObject json, 
+                                            Set< String > jsonFilter,
+                                            boolean isIncludeQualified ) throws JSONException {
+        JSONObject newJson = new JSONObject();
+        Iterator keys = json.keys();
+        while ( keys.hasNext() ) {
+            String key = (String)keys.next();
+            if ( jsonFilter.contains( key )
+                 || EmsScriptNode.dontFilterOut.contains( key ) ) {
+                Object value = json.get( key );
+                if ( key.equals( Acm.JSON_SPECIALIZATION )
+                     && value instanceof JSONObject ) {
+                    // if ( !( value instanceof JSONObject ) ) {
+                    // value = JSONObject.make( (JSONObject)value );
+                    // }
+                    JSONObject newSpec = filterJson( (JSONObject)value, 
+                                                     jsonFilter, isIncludeQualified );
+                    if ( newSpec != null && newSpec.length() > 0 ) {
+                        newJson.put( key, newSpec );
+                    }
+                } else if ( isIncludeQualified ||
+                            ( !key.equals( "qualifiedId" ) && !key.equals( "qualifiedName" ) ) ) {
+                    if ( Debug.isOn() ) Debug.outln( "add to newJson = " + key
+                                                     + ":" + value );
+                    newJson.put( key, value );
+                }
+            }
+        }
+        return newJson;
+    }
+
     public static String jsonToString( JSONObject json ) {
         if ( !doJsonStringCaching ) return json.toString();
         try {
-            return jsonToString( json, -1 );
+            String s = jsonToString( json, -1 );
+            
+            return s;
         } catch ( JSONException e ) {
             e.printStackTrace();
         }
@@ -399,29 +424,45 @@ public class NodeUtil {
     
     public static String jsonToString( JSONObject json, int numSpacesToIndent ) throws JSONException {
         if ( json == null ) return null;
+        String s = null;
         if ( !doJsonStringCaching || !json.has( "jsonString4" ) ) {
             stripJsonMetadata( json );
-            if ( numSpacesToIndent < 0 ) return json.toString();
-            return json.toString( numSpacesToIndent );
+            if ( numSpacesToIndent < 0 ) {
+                s = json.toString();
+                System.out.println( "jsonToString( json, " + numSpacesToIndent + " ) = json.toString() = " + s );
+                return s;
+            }
+            s = json.toString( numSpacesToIndent );
+            System.out.println( "jsonToString( json, " + numSpacesToIndent + " ) = json.toString( " + numSpacesToIndent + " ) = " + s );
+            return s;
         }
         if ( numSpacesToIndent < 0 ) {
             if ( json.has( "jsonString" ) ) {
-                return json.getString( "jsonString" );
+                s = json.getString( "jsonString" );
+                System.out.println( "jsonToString( json, " + numSpacesToIndent + " ) = json.getSString( \"jsonString\" ) = " + s );
+                return s;
             }
             // TODO -- Warning! shouldn't get here!
             json = stripJsonMetadata( clone( json ) );
-            return json.toString();
+            s = json.toString();
+            System.out.println( "BAD! jsonToString( json, " + numSpacesToIndent + " ) = json.toString() = " + s );
+            return s;
         }
         if ( json.has( "jsonString4" ) ) {
             String jsonString4 = json.getString( "jsonString4" );
             if ( numSpacesToIndent == 4 ) {
+                System.out.println( "jsonToString( json, " + numSpacesToIndent + " ) = jsonString4 = " + jsonString4 );
                 return jsonString4;
             }
-            return jsonString4.replaceAll("    ", Utils.repeat( " ", numSpacesToIndent ) );
+            s = jsonString4.replaceAll("    ", Utils.repeat( " ", numSpacesToIndent ) );
+            System.out.println( "jsonToString( json, " + numSpacesToIndent + " ) = jsonString4.replaceAll(\"    \", Utils.repeat( \" \", " + numSpacesToIndent + " ) ) = " + s );
+            return s;
         }
         // TODO -- Warning! shouldn't get here!
         json = stripJsonMetadata( clone( json ) );
-        return json.toString( numSpacesToIndent );
+        s = json.toString( numSpacesToIndent );
+        System.out.println( "BAD! jsonToString( json, " + numSpacesToIndent + " ) = json.toString( " + numSpacesToIndent + " ) = " + s );
+        return s;
     }
 
     public static String oldJsonToString( JSONObject json, int numSpacesToIndent ) throws JSONException {
@@ -467,7 +508,11 @@ public class NodeUtil {
             @Override
             public String toString() {
               try {
-                if ( has( "jsonString" ) ) return getString( "jsonString" );
+                if ( has( "jsonString" ) ) {
+                    System.out.println("has jsonString: " + getString( "jsonString" ));
+                    return getString( "jsonString" );
+                }
+                System.out.println("no jsonString: " + super.toString());
                 return super.toString();
               } catch ( JSONException e ) {
                 e.printStackTrace();
@@ -477,7 +522,11 @@ public class NodeUtil {
             @Override
             public String toString( int n ) {
               try {
-                if ( has( "jsonString4" ) ) return jsonToString( this, n );
+                if ( has( "jsonString4" ) ) {
+                    System.out.println("has jsonString4: " + jsonToString( this, n ));
+                    return jsonToString( this, n );
+                }
+                System.out.println("no jsonString4: " + super.toString(n));
                 return super.toString( n );
               } catch ( JSONException e ) {
                 e.printStackTrace();
@@ -493,7 +542,11 @@ public class NodeUtil {
             @Override
             public String toString() {
               try {
-                if ( has( "jsonString" ) ) return getString( "jsonString" );
+                if ( has( "jsonString" ) ) {
+                    System.out.println("has jsonString: " + getString( "jsonString" ));
+                    return getString( "jsonString" );
+                }
+                System.out.println("no jsonString: " + super.toString());
                 return super.toString();
               } catch ( JSONException e ) {
                 e.printStackTrace();
@@ -503,7 +556,11 @@ public class NodeUtil {
             @Override
             public String toString( int n ) {
               try {
-                if ( has( "jsonString4" ) ) return jsonToString( this, n );
+                if ( has( "jsonString4" ) ) {
+                    System.out.println("has jsonString4: " + jsonToString( this, n ));
+                    return jsonToString( this, n );
+                }
+                System.out.println("no jsonString4: " + super.toString(n));
                 return super.toString( n );
               } catch ( JSONException e ) {
                 e.printStackTrace();
