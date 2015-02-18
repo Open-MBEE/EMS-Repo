@@ -2207,12 +2207,6 @@ public class EmsScriptNode extends ScriptNode implements
         }
     }
 
-    protected static List< String > dontFilterList =
-        Utils.newList( "read", Acm.JSON_ID, "id", "creator", Acm.JSON_LAST_MODIFIED,
-                       Acm.JSON_SPECIALIZATION );
-    protected static Set< String > dontFilterOut =
-        Collections.synchronizedSet( new HashSet< String >( dontFilterList ) );
-    
     /**
      * Convert node into our custom JSONObject. This calls
      * {@link #toJSONObject2(Set, boolean, Date, boolean)}.

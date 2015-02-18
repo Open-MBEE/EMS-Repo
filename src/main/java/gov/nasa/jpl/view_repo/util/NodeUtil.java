@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -379,6 +380,12 @@ public class NodeUtil {
         return json;
     }
 
+    protected static List< String > dontFilterList =
+            Utils.newList( "read", Acm.JSON_ID, "id", "creator", Acm.JSON_LAST_MODIFIED,
+                           Acm.JSON_SPECIALIZATION );
+        protected static Set< String > dontFilterOut =
+            Collections.synchronizedSet( new HashSet< String >( dontFilterList ) );
+        
     protected static JSONObject filterJson( JSONObject json, 
                                             Set< String > jsonFilter,
                                             boolean isIncludeQualified ) throws JSONException {
@@ -387,7 +394,7 @@ public class NodeUtil {
         while ( keys.hasNext() ) {
             String key = (String)keys.next();
             if ( jsonFilter.contains( key )
-                 || EmsScriptNode.dontFilterOut.contains( key ) ) {
+                 || dontFilterOut.contains( key ) ) {
                 Object value = json.get( key );
                 if ( key.equals( Acm.JSON_SPECIALIZATION )
                      && value instanceof JSONObject ) {
@@ -425,6 +432,8 @@ public class NodeUtil {
     public static String jsonToString( JSONObject json, int numSpacesToIndent ) throws JSONException {
         if ( json == null ) return null;
         String s = null;
+        // If we aren't string caching, or if the string(s) are not cached in
+        // the json, then call toString() the old-fashioned way.
         if ( !doJsonStringCaching || !json.has( "jsonString4" ) ) {
             stripJsonMetadata( json );
             if ( numSpacesToIndent < 0 ) {
@@ -503,71 +512,50 @@ public class NodeUtil {
         return result;
     }
     
+    public static class CachedJsonObject extends JSONObject {
+        public CachedJsonObject() {
+            super();
+        }
+        public CachedJsonObject( String s ) {
+            super();
+        }
+        @Override
+        public String toString() {
+          try {
+            if ( has( "jsonString" ) ) {
+                System.out.println("has jsonString: " + getString( "jsonString" ));
+                return getString( "jsonString" );
+            }
+            System.out.println("no jsonString: " + super.toString());
+            return super.toString();
+          } catch ( JSONException e ) {
+            e.printStackTrace();
+          }
+          return null;
+        }
+        @Override
+        public String toString( int n ) {
+          try {
+            if ( has( "jsonString4" ) ) {
+                System.out.println("has jsonString4: " + jsonToString( this, n ));
+                return jsonToString( this, n );
+            }
+            System.out.println("no jsonString4: " + super.toString(n));
+            return super.toString( n );
+          } catch ( JSONException e ) {
+            e.printStackTrace();
+          }
+          return null;
+        }
+    }
+    
     public static JSONObject newJsonObject(String s) throws JSONException {
-        JSONObject newJson = new JSONObject(s) {
-            @Override
-            public String toString() {
-              try {
-                if ( has( "jsonString" ) ) {
-                    System.out.println("has jsonString: " + getString( "jsonString" ));
-                    return getString( "jsonString" );
-                }
-                System.out.println("no jsonString: " + super.toString());
-                return super.toString();
-              } catch ( JSONException e ) {
-                e.printStackTrace();
-              }
-              return null;
-            }
-            @Override
-            public String toString( int n ) {
-              try {
-                if ( has( "jsonString4" ) ) {
-                    System.out.println("has jsonString4: " + jsonToString( this, n ));
-                    return jsonToString( this, n );
-                }
-                System.out.println("no jsonString4: " + super.toString(n));
-                return super.toString( n );
-              } catch ( JSONException e ) {
-                e.printStackTrace();
-              }
-              return null;
-            }
-        };
+        JSONObject newJson = new CachedJsonObject( s );
         return newJson;
     }
     
     public static JSONObject newJsonObject() {
-        JSONObject newJson = new JSONObject() {
-            @Override
-            public String toString() {
-              try {
-                if ( has( "jsonString" ) ) {
-                    System.out.println("has jsonString: " + getString( "jsonString" ));
-                    return getString( "jsonString" );
-                }
-                System.out.println("no jsonString: " + super.toString());
-                return super.toString();
-              } catch ( JSONException e ) {
-                e.printStackTrace();
-              }
-              return null;
-            }
-            @Override
-            public String toString( int n ) {
-              try {
-                if ( has( "jsonString4" ) ) {
-                    System.out.println("has jsonString4: " + jsonToString( this, n ));
-                    return jsonToString( this, n );
-                }
-                System.out.println("no jsonString4: " + super.toString(n));
-                return super.toString( n );
-              } catch ( JSONException e ) {
-                e.printStackTrace();
-              }
-              return null;
-            }
-        };
+        JSONObject newJson = new CachedJsonObject();
         return newJson;
     }
     
