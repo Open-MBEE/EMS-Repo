@@ -18,10 +18,9 @@ if __name__ == '__main__':
             
     thick_divider()
 
-    # Run with "-redeploy" if running this from the redeploy script:
-    if len(sys.argv) > 1 and sys.argv[1] == "-redeploy":
-        print "Running from redeploy script....\n"
-        set_curl_user(" -u mmsAdmin:letmein")
+    # Changing curl user/password, ie "-u admin:admin":
+    if len(sys.argv) > 2 and sys.argv[1] == "-user":
+        set_curl_user(sys.argv[2])
     
     #     1.) Get all the workspaces
     #     2.) For each workspace get all the projects
