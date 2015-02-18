@@ -784,6 +784,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
             jobName += postJson.getString( "id" );
             List< String > formats = getSnapshotFormats( postJson );
             for ( String s : formats ) {
+            	if(s.compareToIgnoreCase("html")==0) s = "zip";
                 jobName += "_" + s;
             }
         } catch ( JSONException ex ) {
@@ -807,7 +808,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         boolean isGenerated = false;
         if(status != null && !status.isEmpty() && status.compareToIgnoreCase("Completed")==0){
         	isGenerated = true;
-        	log(LogLevel.INFO, "HTML artifacts were already generated.");
+        	log(LogLevel.INFO, "Zip artifacts were already generated.");
         }
 
         if(!isGenerated){
@@ -821,7 +822,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
 	        catch(Exception ex){
 	        	ex.printStackTrace();
 	        	this.setHtmlZipStatus(snapshotNode, "Error");
-	        	throw new Exception("Failed to generate HTML artifact!", ex);
+	        	throw new Exception("Failed to generate zip artifact!", ex);
 	        }
         }
         return populateSnapshotProperties( snapshotNode );
@@ -843,7 +844,7 @@ public class SnapshotPost extends AbstractJavaWebScript {
         DocBookWrapper docBookWrapper = new DocBookWrapper( this.snapshotName, snapshotNode );//need workspace and timestamp
 
         if ( !hasHtmlZipNode( snapshotNode ) ) {
-            log( LogLevel.INFO, "Generating HTML zip..." );
+            log( LogLevel.INFO, "Generating zip artifact..." );
             docBookWrapper.saveHtmlZipToRepo( snapshotFolderNode, workspace, timestamp );
         }
         return snapshotNode;
