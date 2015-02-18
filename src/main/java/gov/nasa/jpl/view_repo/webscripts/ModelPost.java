@@ -2756,7 +2756,7 @@ public class ModelPost extends AbstractJavaWebScript {
                                                 WorkspaceNode workspace,
                                                 boolean fix, Map<String, Object> model,
                                                 boolean createCommit) throws Exception {
-        JSONObject top = new JSONObject();
+        JSONObject top = NodeUtil.newJsonObject();
         final Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null, createCommit );
 
         addRelationshipsToProperties( elements );

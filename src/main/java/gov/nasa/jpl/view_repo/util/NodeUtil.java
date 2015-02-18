@@ -13,7 +13,9 @@ import gov.nasa.jpl.view_repo.actions.ActionUtil;
 import gov.nasa.jpl.view_repo.util.EmsScriptNode.EmsVersion;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -74,6 +76,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.context.ApplicationContext;
 import org.springframework.extensions.webscripts.Status;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class NodeUtil {
 
@@ -512,12 +518,323 @@ public class NodeUtil {
         return result;
     }
     
+    
+    public static class GsonJsonObject extends CachedJsonObject {//JSONObject {
+        @Override
+        public JSONObject
+                accumulate( String key, Object value ) throws JSONException {
+            return super.accumulate( key, value );
+            // TODO Auto-generated method stub
+            //return gson.accumulate( key, value );
+        }
+        @Override
+        public JSONObject
+                append( String key, Object value ) throws JSONException {
+            if ( value instanceof JsonElement ) {
+                gson.add( key, (JsonElement)value );
+            } else if ( value instanceof String ) {
+                gson.addProperty( key, (String)value );
+            } else if ( value instanceof Boolean ) {
+                gson.addProperty( key, (Boolean)value );
+            } else if ( value instanceof Number ) {
+                gson.addProperty( key, (Number)value );
+            } else if ( value instanceof Character ) {
+                gson.addProperty( key, (Character)value );
+            } else {
+                super.append( key, value );
+            }
+            return this;
+        }
+        @Override
+        public Object get( String key ) throws JSONException {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.get( key );
+        }
+        @Override
+        public boolean getBoolean( String key ) throws JSONException {
+            try {
+                return gson.get( key ).getAsBoolean();
+            } catch ( Throwable e ) {
+                throw new JSONException( e );
+            }
+        }
+        @Override
+        public double getDouble( String key ) throws JSONException {
+            try {
+                return gson.get( key ).getAsDouble();
+            } catch ( Throwable e ) {
+                throw new JSONException( e );
+            }
+            //return gson.getDouble( key );
+        }
+        @Override
+        public int getInt( String key ) throws JSONException {
+            try {
+                return gson.get( key ).getAsInt();
+            } catch ( Throwable e ) {
+                throw new JSONException( e );
+            }
+        }
+        @Override
+        public JSONArray getJSONArray( String key ) throws JSONException {
+            throw new JSONException( "not supported" );
+//            try {
+//                return gson.get( key ).getAsJsonArray();
+//            } catch ( Throwable e ) {
+//                throw new JSONException( e );
+//            }
+//            // TODO Auto-generated method stub
+//            return gson.getJSONArray( key );
+        }
+        @Override
+        public JSONObject getJSONObject( String key ) throws JSONException {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.getJSONObject( key );
+        }
+        @Override
+        public long getLong( String key ) throws JSONException {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.getLong( key );
+        }
+        @Override
+        public String getString( String key ) throws JSONException {
+            try {
+                return gson.get( key ).getAsString();
+            } catch ( Throwable e ) {
+                throw new JSONException( e );
+            }
+        }
+        @Override
+        public boolean has( String key ) {
+            // TODO Auto-generated method stub
+            return gson.has( key );
+        }
+        @Override
+        public JSONObject increment( String key ) throws JSONException {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.increment( key );
+        }
+        @Override
+        public boolean isNull( String key ) {
+            try {
+                return gson.get( key ).isJsonNull();
+            } catch ( Throwable e ) {
+                throw new JSONException( e );
+            }
+        }
+        @Override
+        public Iterator keys() {
+            throw new JSONException( "not supported" );
+            // TODO Auto-generated method stub
+//            return gson.keys();
+        }
+        @Override
+        public Set keySet() {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.keySet();
+        }
+        @Override
+        public int length() {
+            // TODO Auto-generated method stub
+            return gson.entrySet().size();
+        }
+        @Override
+        public JSONArray names() {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.names();
+        }
+        @Override
+        public Object opt( String key ) {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            
+//            return gson.opt( key );
+        }
+        @Override
+        public boolean optBoolean( String key ) {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.optBoolean( key );
+        }
+        @Override
+        public boolean optBoolean( String key, boolean defaultValue ) {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.optBoolean( key, defaultValue );
+        }
+        @Override
+        public double optDouble( String key ) {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.optDouble( key );
+        }
+        @Override
+        public double optDouble( String key, double defaultValue ) {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.optDouble( key, defaultValue );
+        }
+        @Override
+        public int optInt( String key ) {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.optInt( key );
+        }
+        @Override
+        public int optInt( String key, int defaultValue ) {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.optInt( key, defaultValue );
+        }
+        @Override
+        public JSONArray optJSONArray( String key ) {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.optJSONArray( key );
+        }
+        @Override
+        public JSONObject optJSONObject( String key ) {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.optJSONObject( key );
+        }
+        @Override
+        public long optLong( String key ) {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.optLong( key );
+        }
+        @Override
+        public long optLong( String key, long defaultValue ) {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.optLong( key, defaultValue );
+        }
+        @Override
+        public String optString( String key ) {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.optString( key );
+        }
+        @Override
+        public String optString( String key, String defaultValue ) {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.optString( key, defaultValue );
+        }
+        @Override
+        public JSONObject put( String key, boolean value ) throws JSONException {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.put( key, value );
+        }
+        @Override
+        public JSONObject
+                put( String key, Collection value ) throws JSONException {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.put( key, value );
+        }
+        @Override
+        public JSONObject put( String key, double value ) throws JSONException {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.put( key, value );
+        }
+        @Override
+        public JSONObject put( String key, int value ) throws JSONException {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.put( key, value );
+        }
+        @Override
+        public JSONObject put( String key, long value ) throws JSONException {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.put( key, value );
+        }
+        @Override
+        public JSONObject put( String key, Map value ) throws JSONException {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.put( key, value );
+        }
+        @Override
+        public JSONObject put( String key, Object value ) throws JSONException {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.put( key, value );
+        }
+        @Override
+        public JSONObject
+                putOnce( String key, Object value ) throws JSONException {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.putOnce( key, value );
+        }
+        @Override
+        public JSONObject
+                putOpt( String key, Object value ) throws JSONException {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.putOpt( key, value );
+        }
+        @Override
+        public Object remove( String key ) {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.remove( key );
+        }
+        @Override
+        public JSONArray toJSONArray( JSONArray names ) throws JSONException {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.toJSONArray( names );
+        }
+//        @Override
+//        public String toString() {
+//            // TODO Auto-generated method stub
+//            return gson.toString();
+//        }
+//        @Override
+//        public String toString( int indentFactor ) throws JSONException {
+//            // TODO Auto-generated method stub
+//            return gson.toString( indentFactor );
+//        }
+        @Override
+        public Writer write( Writer writer ) throws JSONException {
+            throw new JSONException( "not supported" );
+//            // TODO Auto-generated method stub
+//            return gson.write( writer );
+        }
+        JsonObject gson;
+        public GsonJsonObject() {
+            //super();
+            gson = new JsonObject();
+        }
+        public GsonJsonObject( String s ) throws JSONException {
+            //super(s);
+            JsonElement jelement = new JsonParser().parse(s);
+            JsonObject gson = jelement.getAsJsonObject();
+            gson = new JsonObject();
+        }
+    }
+    
     public static class CachedJsonObject extends JSONObject {
+        //JsonObject gson;
         public CachedJsonObject() {
             super();
+            //gson = new JsonObject();
         }
-        public CachedJsonObject( String s ) {
-            super();
+        public CachedJsonObject( String s ) throws JSONException {
+            //gson = new JsonObject();
+            super(s);
         }
         @Override
         public String toString() {
@@ -547,15 +864,39 @@ public class NodeUtil {
           }
           return null;
         }
+        @Override
+        public Writer write( Writer writer ) throws JSONException {
+//            if ( true ) {
+//                return super.write( writer );
+//            }
+
+//            String s = toString();
+//            try {
+//                writer.append( s );
+//            } catch ( IOException e ) {
+//                e.printStackTrace();
+//            }
+            Exception f = new Exception();
+            f.printStackTrace();
+            if ( has( "jsonString" ) ) {
+                try {
+                    writer.write( getString( "jsonString" ) );
+                } catch ( IOException e ) {
+                    e.printStackTrace();
+                }
+                return writer;
+            }
+            return super.write( writer );
+        }
     }
     
     public static JSONObject newJsonObject(String s) throws JSONException {
-        JSONObject newJson = new CachedJsonObject( s );
+        JSONObject newJson = new GsonJsonObject( s );
         return newJson;
     }
     
     public static JSONObject newJsonObject() {
-        JSONObject newJson = new CachedJsonObject();
+        JSONObject newJson = new GsonJsonObject();
         return newJson;
     }
     
