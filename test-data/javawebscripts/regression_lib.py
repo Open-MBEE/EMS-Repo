@@ -75,29 +75,32 @@ def set_gv6( v ):
 
 import re
 
-def get_json_output_no_status():
+def get_json_output_no_status(output=None):
     '''Gets the output json and removes the status code from it for use in the next test'''
 
     json_output = ""
     #print 'orig_output=' + str(orig_output)
-    if orig_output != None and len(str(orig_output)) > 5:
+    output_good = output != None and len(str(output)) > 5
+    original_good = orig_output != None and len(str(orig_output)) > 5
+    if output_good or original_good:
+        my_output = output if output_good else orig_output
         # find the status code at the end of the string and remove it
         # comput i as the index to the start of the status code
         # walk backwards over whitespace 
-        i=len(orig_output)-1
+        i=len(my_output)-1
         while i >= 0:
-            if not (orig_output[i] in [' ', '\n', '\t' ]):
+            if not (my_output[i] in [' ', '\n', '\t' ]):
                 break
             i = i - 1
         # walk backwards over digits
         while i >= 0:
-            if not (orig_output[i] >= '0' and orig_output[i] <= '9'):
+            if not (my_output[i] >= '0' and my_output[i] <= '9'):
                 break
             i = i - 1
-        # set json_output to orig_output without the ststus code
+        # set json_output to my_output without the ststus code
         if i > 0:
-            json_output = orig_output[0:i]
-#         json_output = re.sub(r'^[2][0-9][0-9]', r'', orig_output, 1)
+            json_output = my_output[0:i]
+#         json_output = re.sub(r'^[2][0-9][0-9]', r'', my_output, 1)
 #         #json_output = re.sub("^$", "", json_output)
         #print 'json_output=' + str(json_output)
         
