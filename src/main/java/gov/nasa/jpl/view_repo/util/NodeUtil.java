@@ -767,9 +767,22 @@ public class NodeUtil {
         }
         @Override
         public JSONObject put( String key, Object value ) throws JSONException {
-            throw new JSONException( "not supported" );
-//            // TODO Auto-generated method stub
-//            return gson.put( key, value );
+            if ( value instanceof JsonElement ) {
+                gson.add( key, (JsonElement)value );
+            } else if ( value instanceof String ) {
+                gson.addProperty( key, (String)value );
+            } else if ( value instanceof Boolean ) {
+                gson.addProperty( key, (Boolean)value );
+            } else if ( value instanceof Number ) {
+                gson.addProperty( key, (Number)value );
+            } else if ( value instanceof Character ) {
+                gson.addProperty( key, (Character)value );
+            } else {
+                if ( value == null ) System.out.println("value = null" );
+                else System.out.println("value = " + value + "; type = " + value.getClass().getCanonicalName());
+                throw new JSONException( "not supported" );
+            }
+            return this;
         }
         @Override
         public JSONObject
