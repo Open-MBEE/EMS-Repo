@@ -952,7 +952,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
     }
     
     public void sendProgress( String msg, String projectSysmlId ) {
-        
+        System.out.println("Project: "+projectSysmlId+" msg: "+msg+"\n");
     }
     
 }

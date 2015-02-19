@@ -360,6 +360,18 @@ public class ModelPost extends AbstractJavaWebScript {
         elements.addAll( updatedElements );
     }
     
+    private void givePercentProgress(double rootElemNum, boolean isRelationship) {
+        
+        int numRootElems = rootElements.size();
+        double percent = 0;
+        String relString = isRelationship ? " relationships" : "";
+
+        if ((rootElemNum%10) == 0) {
+            percent = (rootElemNum/numRootElems)*100;
+            sendProgress(String.format("Processed %.1f%% of root elements %s",percent,relString), projectId);
+        }
+    }
+    
     public Set< EmsScriptNode >
             createOrUpdateModel2( Object content, Status status,
                                   final WorkspaceNode targetWS, WorkspaceNode sourceWS,
@@ -395,8 +407,11 @@ public class ModelPost extends AbstractJavaWebScript {
 
         // create the element map and hierarchies
         if (buildElementMap(postJson.getJSONArray(ELEMENTS), targetWS)) {
+
             final Set<String> elementsWithoutPermissions = new HashSet<String>();
-            
+            double rootElemNum = 1;
+            sendProgress("Processing "+rootElements.size()+" root elements", projectId);
+
             // start building up elements from the root elements
             for (final String rootElement : rootElements) {
                 log(LogLevel.INFO, "ROOT ELEMENT FOUND: " + rootElement);
@@ -412,6 +427,9 @@ public class ModelPost extends AbstractJavaWebScript {
                         }
                     };
                 }
+                
+                givePercentProgress(rootElemNum++, false);
+                
             } // end for (String rootElement: rootElements) {
 
             // remove the elementsWithoutPermissions from further processing
@@ -422,6 +440,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
             Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): main loop time", timeEvents);
 
+            sendProgress("Handling relationships", projectId);
             if (runWithoutTransactions) {
                 handleRelationships( targetWS, nodeMap, elements, singleElement, postJson );
             }
@@ -444,6 +463,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
             // Send deltas to all listeners
             if (createCommit && wsDiff.isDiff()) {
+                sendProgress("Sending deltas and creating commit node", projectId);
                 if (runWithoutTransactions) {
                     sendDeltasAndCommit( targetWS, elements, start, end );
                 }
@@ -470,6 +490,8 @@ public class ModelPost extends AbstractJavaWebScript {
                                                       WorkspaceNode workspace) throws Exception {
         TreeSet<EmsScriptNode> elements =
                 new TreeSet<EmsScriptNode>();
+        double rootElemNum = 1;
+        sendProgress("Processing "+rootElements.size()+" root element relationships", projectId);
 
         if ( singleElement ) {
             elements.addAll( updateOrCreateElement( postJson, projectNode, workspace, true ) );
@@ -487,6 +509,8 @@ public class ModelPost extends AbstractJavaWebScript {
                 } catch ( JSONException e ) {
                     e.printStackTrace();
                 }
+                
+                givePercentProgress(rootElemNum++, true);
             }
         } // end for (String rootElement: rootElements) {
         return elements;
@@ -2769,10 +2793,7 @@ public class ModelPost extends AbstractJavaWebScript {
                     if (getResponseStatus().getCode() == HttpServletResponse.SC_BAD_REQUEST) {
                         log(LogLevel.WARNING, "No write priveleges", HttpServletResponse.SC_FORBIDDEN);
                     } else if (projectNode != null) {
-                        String projectSysmlId =
-                                NodeUtil.getSysmlId( projectNode == null ? null
-                                                                         : projectNode.getNodeRef() );
-                        sendProgress( "Got request - starting", projectSysmlId );
+                        sendProgress( "Got request - starting", projectId );
                         handleUpdate( postJson, status, myWorkspace, fix, model, true );
                     }
                 }
@@ -2790,10 +2811,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         status.setCode(responseStatus.getCode());
 
-        String projectName =
-                NodeUtil.getSysmlId( projectNode == null ? null
-                                                         : projectNode.getNodeRef() );
-        sendProgress( "Load/sync/update request is finished processing.", projectName );
+        sendProgress( "Load/sync/update request is finished processing.", projectId );
 
         printFooter();
 
@@ -2812,10 +2830,12 @@ public class ModelPost extends AbstractJavaWebScript {
         final Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null, createCommit );
 
         if ( !Utils.isNullOrEmpty( elements ) ) {
+            sendProgress("Adding relationships to properties", projectId);
             addRelationshipsToProperties( elements );
 
             // Fix constraints if desired:
-            if (fix) {               
+            if (fix) {        
+                sendProgress("Fixing constraints", projectId);
                 new EmsTransaction( getServices(), getResponse(), getResponseStatus(),
                                     runWithoutTransactions || internalRunWithoutTransactions ) {
                     @Override
