@@ -31,6 +31,17 @@
     },
     {
         "creator": "admin",
+        "documentation": "to make compatible with value specs (this is just a Element)",
+        "editable": true,
+        "name": "dlam",
+        "owner": "123456",
+        "qualifiedId": "/europa/123456/dlam",
+        "qualifiedName": "/europa/JW_TEST/dlam",
+        "specialization": {"type": "Element"},
+        "sysmlid": "dlam"
+    },
+    {
+        "creator": "admin",
         "documentation": "4something",
         "editable": true,
         "name": "400",

@@ -37,6 +37,48 @@
     },
     {
         "creator": "admin",
+        "documentation": "Connector source",
+        "editable": true,
+        "name": "connectorSource",
+        "owner": "123456",
+        "qualifiedId": "/europa/123456/connectorSource",
+        "qualifiedName": "/europa/JW_TEST2/connectorSource",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "lower": {
+                "string": "lower!",
+                "type": "LiteralString",
+                "valueExpression": null
+            },
+            "propertyType": null,
+            "type": "Property",
+            "upper": {
+                "string": "lower!",
+                "type": "LiteralString",
+                "valueExpression": null
+            }
+        },
+        "sysmlid": "connectorSource"
+    },
+    {
+        "creator": "admin",
+        "documentation": "Connector target",
+        "editable": true,
+        "name": "connectorTarget",
+        "owner": "123456",
+        "qualifiedId": "/europa/123456/connectorTarget",
+        "qualifiedName": "/europa/JW_TEST2/connectorTarget",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "propertyType": null,
+            "type": "Property"
+        },
+        "sysmlid": "connectorTarget"
+    },
+    {
+        "creator": "admin",
         "documentation": "association",
         "editable": true,
         "name": "association",
@@ -52,6 +94,22 @@
             "type": "Association"
         },
         "sysmlid": "association"
+    },
+    {
+        "creator": "admin",
+        "documentation": "target",
+        "editable": true,
+        "name": "targetId",
+        "owner": "123456",
+        "qualifiedId": "/europa/123456/targetId",
+        "qualifiedName": "/europa/JW_TEST2/targetId",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "propertyType": null,
+            "type": "Property"
+        },
+        "sysmlid": "targetId"
     },
     {
         "creator": "admin",
@@ -86,6 +144,34 @@
     },
     {
         "creator": "admin",
+        "documentation": "View content",
+        "editable": true,
+        "name": "viewContents",
+        "owner": "123456",
+        "qualifiedId": "/europa/123456/viewContents",
+        "qualifiedName": "/europa/JW_TEST2/viewContents",
+        "specialization": {
+            "type": "Expression",
+            "valueExpression": null
+        },
+        "sysmlid": "viewContents"
+    },
+    {
+        "creator": "admin",
+        "documentation": "Magic Draw Meta-Data",
+        "editable": true,
+        "name": "md",
+        "owner": "123456",
+        "qualifiedId": "/europa/123456/md",
+        "qualifiedName": "/europa/JW_TEST2/md",
+        "specialization": {
+            "mdData": "A blob of meta-data",
+            "type": "MagicDrawData"
+        },
+        "sysmlid": "md"
+    },
+    {
+        "creator": "admin",
         "documentation": "source",
         "editable": true,
         "name": "sourceId",
@@ -99,38 +185,6 @@
             "type": "Property"
         },
         "sysmlid": "sourceId"
-    },
-    {
-        "creator": "admin",
-        "documentation": "target",
-        "editable": true,
-        "name": "targetId",
-        "owner": "123456",
-        "qualifiedId": "/europa/123456/targetId",
-        "qualifiedName": "/europa/JW_TEST2/targetId",
-        "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "propertyType": null,
-            "type": "Property"
-        },
-        "sysmlid": "targetId"
-    },
-    {
-        "creator": "admin",
-        "documentation": "Connector target",
-        "editable": true,
-        "name": "connectorTarget",
-        "owner": "123456",
-        "qualifiedId": "/europa/123456/connectorTarget",
-        "qualifiedName": "/europa/JW_TEST2/connectorTarget",
-        "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "propertyType": null,
-            "type": "Property"
-        },
-        "sysmlid": "connectorTarget"
     },
     {
         "creator": "admin",
@@ -178,34 +232,6 @@
     },
     {
         "creator": "admin",
-        "documentation": "Magic Draw Meta-Data",
-        "editable": true,
-        "name": "md",
-        "owner": "123456",
-        "qualifiedId": "/europa/123456/md",
-        "qualifiedName": "/europa/JW_TEST2/md",
-        "specialization": {
-            "mdData": "A blob of meta-data",
-            "type": "MagicDrawData"
-        },
-        "sysmlid": "md"
-    },
-    {
-        "creator": "admin",
-        "documentation": "View content",
-        "editable": true,
-        "name": "viewContents",
-        "owner": "123456",
-        "qualifiedId": "/europa/123456/viewContents",
-        "qualifiedName": "/europa/JW_TEST2/viewContents",
-        "specialization": {
-            "type": "Expression",
-            "valueExpression": null
-        },
-        "sysmlid": "viewContents"
-    },
-    {
-        "creator": "admin",
         "documentation": "View updates",
         "editable": true,
         "name": "viewWithContents",
@@ -217,32 +243,6 @@
             "type": "View"
         },
         "sysmlid": "viewWithContents"
-    },
-    {
-        "creator": "admin",
-        "documentation": "Connector source",
-        "editable": true,
-        "name": "connectorSource",
-        "owner": "123456",
-        "qualifiedId": "/europa/123456/connectorSource",
-        "qualifiedName": "/europa/JW_TEST2/connectorSource",
-        "specialization": {
-            "isDerived": false,
-            "isSlot": false,
-            "lower": {
-                "string": "lower!",
-                "type": "LiteralString",
-                "valueExpression": null
-            },
-            "propertyType": null,
-            "type": "Property",
-            "upper": {
-                "string": "lower!",
-                "type": "LiteralString",
-                "valueExpression": null
-            }
-        },
-        "sysmlid": "connectorSource"
     }
 ]}
 200

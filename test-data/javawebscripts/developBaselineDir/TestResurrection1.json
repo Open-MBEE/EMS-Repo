@@ -1,0 +1,66 @@
+{"elements": [
+    {
+        "creator": "admin",
+        "documentation": "Parent 1",
+        "editable": true,
+        "name": "parentToDelete1",
+        "owner": "123456",
+        "qualifiedId": "/europa/123456/parentToDelete1",
+        "qualifiedName": "/europa/JW_TEST2/parentToDelete1",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "propertyType": null,
+            "type": "Property",
+            "value": [{
+                "string": "gg_string",
+                "type": "LiteralString",
+                "valueExpression": null
+            }]
+        },
+        "sysmlid": "parentToDelete1"
+    },
+    {
+        "creator": "admin",
+        "documentation": "Child",
+        "editable": true,
+        "name": "childOfParentToDelete2",
+        "owner": "parentToDelete2",
+        "qualifiedId": "/europa/123456/parentToDelete1/parentToDelete2/childOfParentToDelete2",
+        "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2/childOfParentToDelete2",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "propertyType": null,
+            "type": "Property",
+            "value": [{
+                "string": "gg_string3",
+                "type": "LiteralString",
+                "valueExpression": null
+            }]
+        },
+        "sysmlid": "childOfParentToDelete2"
+    },
+    {
+        "creator": "admin",
+        "documentation": "Parent 2",
+        "editable": true,
+        "name": "parentToDelete2",
+        "owner": "parentToDelete1",
+        "qualifiedId": "/europa/123456/parentToDelete1/parentToDelete2",
+        "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "propertyType": null,
+            "type": "Property",
+            "value": [{
+                "string": "gg_string2",
+                "type": "LiteralString",
+                "valueExpression": null
+            }]
+        },
+        "sysmlid": "parentToDelete2"
+    }
+]}
+200
