@@ -13,14 +13,15 @@ import glob
 import json
 import datetime
 
+#CURL_STATUS = '-w "\\n%{http_code}\\ntime_total:%{time_total}\\n"'
 CURL_STATUS = '-w "\\n%{http_code}\\n"'
 CURL_POST_FLAGS_NO_DATA = "-X POST"
 CURL_POST_FLAGS = '-X POST -H "Content-Type:application/json" --data'
 CURL_PUT_FLAGS = "-X PUT"
 CURL_GET_FLAGS = "-X GET"
 CURL_DELETE_FLAGS = "-X DELETE"
-CURL_USER = " -u admin:admin"  # Can be modified using set_curl_user()
-CURL_FLAGS = CURL_STATUS+CURL_USER  # Can be modified using set_curl_user()
+CURL_USER = " -u admin:admin"
+CURL_FLAGS = CURL_STATUS+CURL_USER
 HOST = "localhost:8080" 
 SERVICE_URL = "http://%s/alfresco/service/"%HOST
 BASE_URL_WS_NOBS = SERVICE_URL+"workspaces"
@@ -37,7 +38,7 @@ test_dir_path = "test-data/javawebscripts"
 test_nums = []
 test_names = []
 create_baselines = False
-common_filters = ['"created"','"read"','"lastModified"','"modified"']
+common_filters = ['"created"','"read"','"lastModified"','"modified"','time_total']
 cmd_git_branch = None
 
 # Some global variables for lambda functions in tests
@@ -89,12 +90,8 @@ def get_json_output_no_status(output=None):
         # walk backwards over whitespace 
         i=len(my_output)-1
         while i >= 0:
-            if not (my_output[i] in [' ', '\n', '\t' ]):
-                break
-            i = i - 1
-        # walk backwards over digits
-        while i >= 0:
-            if not (my_output[i] >= '0' and my_output[i] <= '9'):
+            if (my_output[i] == '}'):
+                i = i + 1
                 break
             i = i - 1
         # set json_output to my_output without the ststus code
@@ -656,10 +653,10 @@ def wait_on_server(filename="runserver.log", lineToCheck="Starting ProtocolHandl
 def set_curl_user(user):
     
     global CURL_USER, CURL_FLAGS
-    print "Using the user/password: %s\n"%user
-    CURL_USER = " "+user
+    CURL_USER = " -u " + user
     CURL_FLAGS = CURL_STATUS+CURL_USER
     
+
 def run(tests):
     '''
     Main function to run the regression harness
@@ -740,4 +737,5 @@ def run(tests):
             print "\n"
      
     sys.exit(failed_tests)
+        
         

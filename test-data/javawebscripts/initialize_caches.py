@@ -18,7 +18,7 @@ if __name__ == '__main__':
             
     thick_divider()
 
-    # Changing curl user/password, ie "-u admin:admin":
+    # Changing curl user/password, ie "admin:admin":
     if len(sys.argv) > 2 and sys.argv[1] == "-user":
         set_curl_user(sys.argv[2])
     
@@ -53,9 +53,11 @@ if __name__ == '__main__':
                         
     print "Found workspaces: %s\n"%wsIds
     
+    wsidCount = 0
     for wsid in wsIds:
         thin_divider()
-        print "= Getting projects for workspace: %s\n"%wsid
+        wsidCount += 1
+        print "= Getting projects for workspace: %s (%d of %d)\n" % (wsid, wsidCount, len(wsIds))
         
         output_file_projectsget_base = "initialize_cache_projectsget"
         output_file_projectsget = output_file_projectsget_base+"_"+wsid
@@ -82,8 +84,10 @@ if __name__ == '__main__':
               
                     print "Found projects: %s\n"%projectIds
 
+                    projectidCount = 0
                     for projectid in projectIds:
-                        print "=== Getting all elements for workspace: %s, project: %s\n"%(wsid,projectid)
+                        projectidCount += 1
+                        print "=== Getting all elements for workspace: %s (%d of %d), project: %s (%d of %d)\n"%(wsid,wsidCount,len(wsIds), projectid,projectidCount,len(projectIds))
                         
                         curl_cmd = create_curl_cmd(type="GET",data="elements/%s?recurse=true"%projectid,
                                                    base_url=BASE_URL_WS,branch="%s/"%wsid)
