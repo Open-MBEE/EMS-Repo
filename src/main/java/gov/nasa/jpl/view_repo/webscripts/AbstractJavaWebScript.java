@@ -951,7 +951,7 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         }
     }
     
-    protected void sendProgress( String msg, String projectSysmlId ) {
+    public void sendProgress( String msg, String projectSysmlId ) {
         
     }
     
