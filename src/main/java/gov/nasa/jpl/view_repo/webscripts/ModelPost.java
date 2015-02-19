@@ -261,7 +261,7 @@ public class ModelPost extends AbstractJavaWebScript {
         
         // Note: Cannot have any sendProgress methods before setting numElementsToPost
         numElementsToPost = elementsArray.length();
-        sendProgress( "Got request - starting", projectId);
+        sendProgress( "Got request - starting", projectId, true);
 
         for(JSONArray jsonArray : collections){
             JSONObject object = new JSONObject();
@@ -368,7 +368,7 @@ public class ModelPost extends AbstractJavaWebScript {
         if ((rootElemNum%minElementsForProgress) == 0) {
             percent = (rootElemNum/numRootElems)*100;
             sendProgress(String.format("Processed %.1f%% of root elements %s",percent,relString), 
-                         projectId);
+                         projectId, false);
         }
     }
     
@@ -378,10 +378,13 @@ public class ModelPost extends AbstractJavaWebScript {
      * 
      * @param msg  The message
      * @param projectSysmlId  The project sysml id
+     * @param sendEmail Set to true to send a email also
+     * 
      */
-    private void sendProgress( String msg, String projectSysmlId) {
+    private void sendProgress( String msg, String projectSysmlId, boolean sendEmail) {
         if (numElementsToPost >= minElementsForProgress) {
-            sendProgress( msg, projectSysmlId, WorkspaceNode.getWorkspaceName(myWorkspace) );
+            sendProgress( msg, projectSysmlId, WorkspaceNode.getWorkspaceName(myWorkspace),
+                          sendEmail);
         }
     }
     
@@ -423,7 +426,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
             final Set<String> elementsWithoutPermissions = new HashSet<String>();
             double rootElemNum = 1;
-            sendProgress("Processing "+rootElements.size()+" root elements", projectId);
+            sendProgress("Processing "+rootElements.size()+" root elements", projectId, true);
 
             // start building up elements from the root elements
             for (final String rootElement : rootElements) {
@@ -453,7 +456,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
             Timer.stopTimer(timerUpdateModel, "!!!!! createOrUpdateModel(): main loop time", timeEvents);
 
-            sendProgress("Handling relationships", projectId);
+            sendProgress("Handling relationships", projectId, true);
             if (runWithoutTransactions) {
                 handleRelationships( targetWS, nodeMap, elements, singleElement, postJson );
             }
@@ -476,7 +479,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
             // Send deltas to all listeners
             if (createCommit && wsDiff.isDiff()) {
-                sendProgress("Sending deltas and creating commit node", projectId);
+                sendProgress("Sending deltas and creating commit node", projectId, false);
                 if (runWithoutTransactions) {
                     sendDeltasAndCommit( targetWS, elements, start, end );
                 }
@@ -504,7 +507,7 @@ public class ModelPost extends AbstractJavaWebScript {
         TreeSet<EmsScriptNode> elements =
                 new TreeSet<EmsScriptNode>();
         double rootElemNum = 1;
-        sendProgress("Processing "+rootElements.size()+" root element relationships", projectId);
+        sendProgress("Processing "+rootElements.size()+" root element relationships", projectId, true);
 
         if ( singleElement ) {
             elements.addAll( updateOrCreateElement( postJson, projectNode, workspace, true ) );
@@ -944,7 +947,7 @@ public class ModelPost extends AbstractJavaWebScript {
      */
     protected boolean buildElementMap(final JSONArray jsonArray, 
                                       final WorkspaceNode workspace) throws JSONException {
-        sendProgress( "Starting to build element map", projectId);
+        sendProgress( "Starting to build element map", projectId, true);
         boolean isValid = true;
         final List<Boolean> validList = new ArrayList<Boolean>();
         
@@ -1179,7 +1182,7 @@ public class ModelPost extends AbstractJavaWebScript {
             int numChildren = children.length();
             if (numChildren > 0) {
                 sendProgress("Processing "+numChildren+" children of node "+reifiedNode.getSysmlId(), 
-                             projectId);
+                             projectId, false);
             }
             for (int ii = 0; ii < numChildren; ii++) {
                 Set< EmsScriptNode > childElements = null;
@@ -2828,7 +2831,7 @@ public class ModelPost extends AbstractJavaWebScript {
 
         status.setCode(responseStatus.getCode());
 
-        sendProgress( "Load/sync/update request is finished processing.", projectId);
+        sendProgress( "Load/sync/update request is finished processing.", projectId, true);
 
         printFooter();
 
@@ -2847,12 +2850,12 @@ public class ModelPost extends AbstractJavaWebScript {
         final Set< EmsScriptNode > elements = createOrUpdateModel( postJson, status, workspace, null, createCommit );
 
         if ( !Utils.isNullOrEmpty( elements ) ) {
-            sendProgress("Adding relationships to properties", projectId);
+            sendProgress("Adding relationships to properties", projectId, true);
             addRelationshipsToProperties( elements );
 
             // Fix constraints if desired:
             if (fix) {        
-                sendProgress("Fixing constraints", projectId);
+                sendProgress("Fixing constraints", projectId, true);
                 new EmsTransaction( getServices(), getResponse(), getResponseStatus(),
                                     runWithoutTransactions || internalRunWithoutTransactions ) {
                     @Override

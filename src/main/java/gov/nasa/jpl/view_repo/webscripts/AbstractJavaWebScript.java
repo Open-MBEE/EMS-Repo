@@ -959,8 +959,10 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
      * @param msg  The message
      * @param projectSysmlId  The project sysml id
      * @param workspaceName  The workspace name
+     * @param sendEmail Set to true to send a email also
      */
-    public void sendProgress( String msg, String projectSysmlId, String workspaceName ) {
+    public void sendProgress( String msg, String projectSysmlId, String workspaceName,
+                              boolean sendEmail) {
         
         String projectId = Utils.isNullOrEmpty(projectSysmlId) ? "unknown_project" : projectSysmlId;
         String workspaceId = Utils.isNullOrEmpty(workspaceName) ? "unknown_workspace" : workspaceName;        
@@ -972,18 +974,20 @@ public abstract class AbstractJavaWebScript extends DeclarativeWebScript {
         // Send the progress over JMS:
         CommitUtil.sendProgress(msg, workspaceId, projectId);
         
-        // Email the progress:
-        String hostname = services.getSysAdminParams().getAlfrescoHost();
-        if (!Utils.isNullOrEmpty( hostname )) {
-            String sender = hostname + "@jpl.nasa.gov";
-            String username = NodeUtil.getUserName();
-            if (!Utils.isNullOrEmpty( username )) {
-                EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), 
-                                                       services);
-                if (user != null) {
-                    String recipient = (String) user.getProperty("cm:email");
-                    if (!Utils.isNullOrEmpty( recipient )) {
-                        ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
+        // Email the progress (this takes a long time, so only do it for critical events):
+        if (sendEmail) {
+            String hostname = services.getSysAdminParams().getAlfrescoHost();
+            if (!Utils.isNullOrEmpty( hostname )) {
+                String sender = hostname + "@jpl.nasa.gov";
+                String username = NodeUtil.getUserName();
+                if (!Utils.isNullOrEmpty( username )) {
+                    EmsScriptNode user = new EmsScriptNode(services.getPersonService().getPerson(username), 
+                                                           services);
+                    if (user != null) {
+                        String recipient = (String) user.getProperty("cm:email");
+                        if (!Utils.isNullOrEmpty( recipient )) {
+                            ActionUtil.sendEmailTo( sender, recipient, msg, subject, services );
+                        }
                     }
                 }
             }
