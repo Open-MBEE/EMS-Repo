@@ -84,8 +84,8 @@
                 "documentation": "",
                 "editable": true,
                 "name": "duration",
-                "owner": "e_38304",
-                "qualifiedName": "/europa/JW_TEST2/e_38304/duration",
+                "owner": "123456",
+                "qualifiedName": "/europa/JW_TEST2/duration",
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
@@ -98,15 +98,6 @@
                     }]
                 },
                 "sysmlid": "arg_ev_38307"
-            },
-            {
-                "creator": "admin",
-                "editable": true,
-                "name": "e_38304",
-                "owner": "123456",
-                "qualifiedName": "/europa/JW_TEST2/e_38304",
-                "specialization": {"type": "Element"},
-                "sysmlid": "e_38304"
             },
             {
                 "creator": "admin",

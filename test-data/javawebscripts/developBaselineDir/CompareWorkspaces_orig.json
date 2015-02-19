@@ -4,12 +4,12 @@
             {
                 "creator": "admin",
                 "editable": true,
-                "modified": "2015-02-13T17:18:08.977-0800",
+                "modified": "2015-02-18T14:08:37.146-0800",
                 "name": "holding_bin",
                 "owner": "no_project",
                 "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project",
                 "qualifiedName": "/no_site/no_project/holding_bin",
-                "read": "2015-02-13T17:18:17.708-0800",
+                "read": "2015-02-18T14:09:07.796-0800",
                 "specialization": {"type": "Package"},
                 "sysmlid": "holding_bin_no_site_no_project"
             },
@@ -17,12 +17,12 @@
                 "creator": "admin",
                 "documentation": "something",
                 "editable": true,
-                "modified": "2015-02-13T17:17:59.721-0800",
+                "modified": "2015-02-18T14:07:09.497-0800",
                 "name": "300",
                 "owner": "holding_bin_no_site_no_project",
                 "qualifiedId": "/no_site/no_project/holding_bin_no_site_no_project/x",
                 "qualifiedName": "/no_site/no_project/holding_bin/300",
-                "read": "2015-02-13T17:18:04.719-0800",
+                "read": "2015-02-18T14:07:12.549-0800",
                 "specialization": {
                     "isDerived": false,
                     "isSlot": false,
@@ -37,25 +37,25 @@
                 "sysmlid": "x"
             }
         ],
-        "id": "f9209d20-5ace-43fa-8391-ce94667315a1",
+        "id": "dd81a77d-740f-44e6-a26a-32dcff686574",
         "name": "wsA",
-        "qualifiedId": "master/f9209d20-5ace-43fa-8391-ce94667315a1",
+        "qualifiedId": "master/dd81a77d-740f-44e6-a26a-32dcff686574",
         "qualifiedName": "master/wsA"
     },
     "workspace2": {
         "addedElements": [],
         "conflictedElements": [],
         "deletedElements": [],
-        "id": "e8847c77-db56-446f-806e-641fe0440353",
+        "id": "2d68482d-66af-4a0a-8b95-8ebdd3a69db7",
         "movedElements": [],
         "name": "wsB",
-        "qualifiedId": "master/f9209d20-5ace-43fa-8391-ce94667315a1/e8847c77-db56-446f-806e-641fe0440353",
+        "qualifiedId": "master/dd81a77d-740f-44e6-a26a-32dcff686574/2d68482d-66af-4a0a-8b95-8ebdd3a69db7",
         "qualifiedName": "master/wsA/wsB",
         "updatedElements": [{
             "creator": "admin",
             "documentation": "x is x",
-            "modified": "2015-02-13T17:18:14.858-0800",
-            "read": "2015-02-13T17:18:17.359-0800",
+            "modified": "2015-02-18T14:09:03.120-0800",
+            "read": "2015-02-18T14:09:04.291-0800",
             "specialization": {"value": [{
                 "string": "the x value",
                 "type": "LiteralString",

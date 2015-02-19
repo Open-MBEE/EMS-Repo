@@ -55,6 +55,17 @@ common_filters,
 ],
         
 [
+21,
+"PostElementsBadOwners",
+"Post elements to the master branch that have owners that cant be found",
+create_curl_cmd(type="POST",data="badOwners.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+[
 30,
 "PostViews",
 "Post views",
@@ -1090,7 +1101,7 @@ create_curl_cmd(type="POST",
                 base_url=SERVICE_URL,
                 post_type="",branch="api/people",project_post=True),
 False, 
-common_filters+['MMS_'],
+common_filters+['MMS_', '"url"'],
 ["test","workspaces","develop", "develop2"]
 ],
  
@@ -1103,7 +1114,7 @@ create_curl_cmd(type="POST",
                 base_url=SERVICE_URL,
                 post_type="",branch="api/people",project_post=True),
 False, 
-common_filters+['MMS_'],
+common_filters+['MMS_', '"url"'],
 ["test","workspaces","develop", "develop2"]
 ],
  
@@ -1116,7 +1127,7 @@ create_curl_cmd(type="POST",
                 base_url=SERVICE_URL,
                 post_type="",branch="api/people",project_post=True),
 False, 
-common_filters+['MMS_'],
+common_filters+['MMS_', '"url"'],
 ["test","workspaces","develop", "develop2"]
 ],
  
@@ -1129,7 +1140,7 @@ create_curl_cmd(type="POST",
                 base_url=SERVICE_URL,
                 post_type="",branch="api/people",project_post=True),
 False, 
-common_filters+['MMS_'],
+common_filters+['MMS_', '"url"'],
 ["test","workspaces","develop", "develop2"]
 ],
          
@@ -1142,7 +1153,7 @@ create_curl_cmd(type="POST",
                 base_url=SERVICE_URL,
                 post_type="",branch="api/people",project_post=True),
 False, 
-common_filters+['MMS_'],
+common_filters+['MMS_', '"url"'],
 ["test","workspaces","develop", "develop2"]
 ],
 
@@ -1156,7 +1167,7 @@ common_filters+['MMS_'],
 # common_filters,
 # ["test","workspaces","develop", "develop2"]
 # ],
-#   
+#    
 # [
 # 621,
 # "NoneDelete",
@@ -1166,7 +1177,7 @@ common_filters+['MMS_'],
 # common_filters+['"timestamp"', '"id"'],
 # ["test","workspaces","develop", "develop2"]
 # ],
-#   
+#    
 # [
 # 622,
 # "NoneUpdate",
@@ -1176,7 +1187,7 @@ common_filters+['MMS_'],
 # common_filters,
 # ["test","workspaces","develop", "develop2"]
 # ],
-#   
+#    
 # [
 # 623,
 # "NoneCreate",
@@ -1186,46 +1197,46 @@ common_filters+['MMS_'],
 # common_filters,
 # ["test","workspaces","develop", "develop2"]
 # ],
-# 
-# [
-# 624,
-# "CollaboratorRead",
-# "Read element with user Collaborator",
-# "curl -w '\\n%{http_code}\\n' -u Collaborator:password -X GET http://localhost:8080/alfresco/service/workspaces/master/elements/y",
-# True,
-# common_filters,
-# ["test","workspaces","develop", "develop2"]
-# ],
-#   
-# [
-# 625,
-# "CollaboratorUpdate",
-# "Update element with user Collaborator",
-# "curl -w '\\n%{http_code}\\n' -u Collaborator:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by Collaborator\"}]}'",
-# True,
-# common_filters,
-# ["test","workspaces","develop", "develop2"]
-# ],
-#   
-# [
-# 626,
-# "CollaboratorCreate",
-# "Create element with user Collaborator",
-# "curl -w '\\n%{http_code}\\n' -u Collaborator:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"ychild\",\"documentation\":\"y child\",\"owner\":\"y\"}]}'",
-# True,
-# common_filters,
-# ["test","workspaces","develop", "develop2"]
-# ],
-# 
-# [
-# 627,
-# "CollaboratorDelete",
-# "Delete element with user Collaborator",
-# "curl -w '\\n%{http_code}\\n' -u Collaborator:password -X DELETE http://localhost:8080/alfresco/service/workspaces/master/elements/y",
-# True,
-# common_filters+['"timestamp"', '"id"'],
-# ["test","workspaces","develop", "develop2"]
-# ],
+ 
+[
+624,
+"CollaboratorRead",
+"Read element with user Collaborator",
+"curl -w '\\n%{http_code}\\n' -u Collaborator:password -X GET http://localhost:8080/alfresco/service/workspaces/master/elements/y",
+True,
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+   
+[
+625,
+"CollaboratorUpdate",
+"Update element with user Collaborator",
+"curl -w '\\n%{http_code}\\n' -u Collaborator:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"y\",\"documentation\":\"y is modified by Collaborator\"}]}'",
+True,
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+   
+[
+626,
+"CollaboratorCreate",
+"Create element with user Collaborator",
+"curl -w '\\n%{http_code}\\n' -u Collaborator:password -H Content-Type:application/json http://localhost:8080/alfresco/service/workspaces/master/elements -d '{\"elements\":[{\"sysmlid\":\"ychild\",\"documentation\":\"y child\",\"owner\":\"y\"}]}'",
+True,
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+ 
+[
+627,
+"CollaboratorDelete",
+"Delete element with user Collaborator",
+"curl -w '\\n%{http_code}\\n' -u Collaborator:password -X DELETE http://localhost:8080/alfresco/service/workspaces/master/elements/y",
+True,
+common_filters+['"timestamp"', '"id"'],
+["test","workspaces","develop", "develop2"]
+],
   
 
 # NULL PROPERTIES =====================================================
@@ -1283,6 +1294,42 @@ common_filters,
 "TestJsonCache4",
 "Post elements for json cache testing.",
 create_curl_cmd(type="POST",data="jsonCache4.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+# RESURRECTION TESTING (CMED-430): ==========================    
+
+[
+660,
+"TestResurrection1",
+"Post elements for resurrection of parents testing.  Has two parents that will be resurrected.",
+create_curl_cmd(type="POST",data="resurrectParents.json",base_url=BASE_URL_WS,
+                post_type="elements",branch="master/"),
+True, 
+common_filters,
+["test","workspaces","develop", "develop2"]
+],
+        
+# This test depends on the previous one:
+[
+661,
+"DeleteParents",
+"Delete parents",
+create_curl_cmd(type="DELETE",data="elements/parentToDelete1",base_url=BASE_URL_WS,
+                branch="master/"),
+True, 
+common_filters+['"timestamp"','"MMS_','"id"','"qualifiedId"','"version"', '"modified"'],
+["test","workspaces","develop", "develop2"]
+],
+        
+[
+662,
+"TestResurrection2",
+"Post elements for resurrection of parents testing.  Has two parents that will be resurrected.",
+create_curl_cmd(type="POST",data="resurrectParentsChild.json",base_url=BASE_URL_WS,
                 post_type="elements",branch="master/"),
 True, 
 common_filters,

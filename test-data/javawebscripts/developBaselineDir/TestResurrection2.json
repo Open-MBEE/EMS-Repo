@@ -1,0 +1,25 @@
+{
+    "elements": [{
+        "creator": "admin",
+        "documentation": "Child",
+        "editable": true,
+        "name": "childOfParentToDelete2",
+        "owner": "parentToDelete2",
+        "qualifiedId": "/europa/123456/parentToDelete1/parentToDelete2/childOfParentToDelete2",
+        "qualifiedName": "/europa/JW_TEST2/parentToDelete1/parentToDelete2/childOfParentToDelete2",
+        "specialization": {
+            "isDerived": false,
+            "isSlot": false,
+            "propertyType": null,
+            "type": "Property",
+            "value": [{
+                "string": "gg_string3",
+                "type": "LiteralString",
+                "valueExpression": null
+            }]
+        },
+        "sysmlid": "childOfParentToDelete2"
+    }],
+    "message": "[WARNING]: Owner with name: parentToDelete2 was deleted.  Will resurrect it, and put childOfParentToDelete2 into it.\n[WARNING]: Owner with name: parentToDelete2 was deleted.  Will resurrect it\n[WARNING]: Owner with name: parentToDelete1 was deleted.  Will resurrect it\n"
+}
+200

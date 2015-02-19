@@ -1,25 +1,25 @@
 {"workspaces": [
     {
-        "qualifiedId": "master/249e192c-1e22-41f8-ad9e-83311029c3c0",
-        "id": "249e192c-1e22-41f8-ad9e-83311029c3c0",
-        "created": "2015-02-11T14:19:07.112-0800",
+        "created": "2015-02-18T14:10:41.214-0800",
+        "creator": "admin",
         "description": "",
-        "qualifiedName": "master/AA",
+        "id": "7ddf3709-4fd7-4518-a927-92bdc9dbbddb",
+        "modified": "2015-02-18T14:10:41.985-0800",
         "name": "AA",
         "parent": "master",
-        "modified": "2015-02-11T14:19:07.917-0800",
-        "creator": "admin"
+        "qualifiedId": "master/7ddf3709-4fd7-4518-a927-92bdc9dbbddb",
+        "qualifiedName": "master/AA"
     },
     {
-        "qualifiedId": "master/249e192c-1e22-41f8-ad9e-83311029c3c0/47461a1c-4b21-4069-a2f0-17ca808dd7e7",
-        "id": "47461a1c-4b21-4069-a2f0-17ca808dd7e7",
-        "created": "2015-02-11T14:19:07.476-0800",
+        "created": "2015-02-18T14:10:41.553-0800",
+        "creator": "admin",
         "description": "",
-        "qualifiedName": "master/AA/BB",
+        "id": "ea9974eb-bdd7-4626-a2d4-82296ba62b5c",
+        "modified": "2015-02-18T14:10:41.987-0800",
         "name": "BB",
-        "parent": "249e192c-1e22-41f8-ad9e-83311029c3c0",
-        "modified": "2015-02-11T14:19:07.919-0800",
-        "creator": "admin"
+        "parent": "7ddf3709-4fd7-4518-a927-92bdc9dbbddb",
+        "qualifiedId": "master/7ddf3709-4fd7-4518-a927-92bdc9dbbddb/ea9974eb-bdd7-4626-a2d4-82296ba62b5c",
+        "qualifiedName": "master/AA/BB"
     }
 ]}
 200

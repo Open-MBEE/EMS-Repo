@@ -19,8 +19,8 @@ CURL_POST_FLAGS = '-X POST -H "Content-Type:application/json" --data'
 CURL_PUT_FLAGS = "-X PUT"
 CURL_GET_FLAGS = "-X GET"
 CURL_DELETE_FLAGS = "-X DELETE"
-CURL_USER = " -u admin:admin"
-CURL_FLAGS = CURL_STATUS+CURL_USER
+CURL_USER = " -u admin:admin"  # Can be modified using set_curl_user()
+CURL_FLAGS = CURL_STATUS+CURL_USER  # Can be modified using set_curl_user()
 HOST = "localhost:8080" 
 SERVICE_URL = "http://%s/alfresco/service/"%HOST
 BASE_URL_WS_NOBS = SERVICE_URL+"workspaces"
@@ -605,27 +605,39 @@ def create_curl_cmd(type, data="", base_url=BASE_URL_WS, post_type="elements", b
 def kill_server():
     (status,output) = commands.getstatusoutput("pkill -fn 'integration-test'")
 
+
+
 def startup_server():
     
     print "KILLING SERVER IF ONE IS RUNNING"
     kill_server()
     time.sleep(1)
-    
     print "STARTING UP SERVER"
     #subprocess.call("./runserver_regression.sh")
     # Is this inheriting the correct environment variables?
     #p = subprocess.Popen("./runserver_regression.sh", shell=True) # still not working, eventually hangs and server doesn't come up
     commands.getstatusoutput("./runserver_regression.sh")
     #time.sleep(30)
+
+    fnd_line = wait_on_server()
     
+    if fnd_line:
+        print "SERVER CONNECTED"
+    else:
+        print "ERROR: SERVER TIME-OUT"
+        kill_server()
+        sys.exit(1)
+
+
+def wait_on_server(filename="runserver.log", lineToCheck="Starting ProtocolHandler"):    
     print "POLLING SERVER"
-    server_log = open("runserver.log","r")
+    server_log = open(filename,"r")
     seek = 0
     fnd_line = False
     for timeout in range(0,600):
         server_log.seek(seek)
         for line in server_log:
-            if "Starting ProtocolHandler" in line:
+            if lineToCheck in line:
                 fnd_line = True
                 break
             
@@ -638,18 +650,14 @@ def startup_server():
         if timeout%10 == 0:
             print ".."
 
-    if fnd_line:
-        print "SERVER CONNECTED"
-        
-    else:
-        print "ERROR: SERVER TIME-OUT"
-        kill_server()
-        sys.exit(1)
+    return fnd_line
+
         
 def set_curl_user(user):
     
     global CURL_USER, CURL_FLAGS
-    CURL_USER = user
+    print "Using the user/password: %s\n"%user
+    CURL_USER = " "+user
     CURL_FLAGS = CURL_STATUS+CURL_USER
     
 def run(tests):

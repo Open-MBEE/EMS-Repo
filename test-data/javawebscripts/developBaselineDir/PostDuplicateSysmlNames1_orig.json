@@ -1,12 +1,12 @@
 {"elements": [{
     "creator": "admin",
     "editable": true,
-    "modified": "2015-02-13T17:19:15.450-0800",
+    "modified": "2015-02-18T14:10:49.855-0800",
     "name": "testName",
     "owner": "123456",
     "qualifiedId": "/europa/123456/testCmed416",
     "qualifiedName": "/europa/JW_TEST2/testName",
-    "read": "2015-02-13T17:19:17.356-0800",
+    "read": "2015-02-18T14:10:50.180-0800",
     "specialization": {
         "isDerived": false,
         "isSlot": false,
